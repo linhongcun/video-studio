@@ -1,0 +1,36 @@
+---
+import Base from '../layouts/Base.astro';
+import {getEpisodes, fmtTime} from '../lib/episodes';
+const eps = getEpisodes();
+const base = import.meta.env.BASE_URL;
+---
+<Base>
+<main class="wrap">
+  <h1>Video Studio 技术科普</h1>
+  <p class="lead">用代码生成的半分钟技术科普短视频 + 图文讲解</p>
+  <div class="grid">
+    {eps.map((e) => (
+      <a class="card" href={`${base}episodes/${e.slug}/`}>
+        <img src={`${base}episodes/${e.slug}/${e.poster}`} alt={e.title} loading="lazy" />
+        <div class="body">
+          <h2>{e.title}</h2>
+          <p>{e.summary}</p>
+          <div class="meta"><span>{fmtTime(e.durationSec)}</span>{e.tags?.map((t) => <span class="tag">{t}</span>)}</div>
+        </div>
+      </a>
+    ))}
+  </div>
+</main>
+</Base>
+<style>
+h1{margin:40px 0 4px;font-size:clamp(26px,5vw,40px)}
+.lead{color:var(--m);margin:0 0 28px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
+.card{background:var(--panel);border:1px solid #1F2A44;border-radius:14px;overflow:hidden;text-decoration:none;color:inherit}
+.card:hover{border-color:var(--p)}
+.card img{display:block;width:100%;aspect-ratio:16/9;object-fit:cover}
+.body{padding:14px 16px 18px}h2{margin:0 0 6px;font-size:19px}
+.body p{margin:0 0 10px;color:var(--m);font-size:14px}
+.meta{display:flex;gap:8px;font-size:13px;color:var(--m)}
+.tag{color:var(--p)}
+</style>

@@ -1,0 +1,26 @@
+---
+import {fmtTime} from '../lib/episodes';
+const {src, poster, chapters} = Astro.props;
+---
+<div class="player">
+  <video controls playsinline preload="metadata" poster={poster}><source src={src} type="video/mp4" /></video>
+  <div class="chapters">
+    {chapters.map((c) => (
+      <button type="button" data-start={c.start}><span>{fmtTime(c.start)}</span>{c.title}</button>
+    ))}
+  </div>
+</div>
+<script>
+  document.querySelectorAll('.player').forEach((p) => {
+    const v = p.querySelector('video');
+    p.querySelectorAll('button[data-start]').forEach((b) =>
+      b.addEventListener('click', () => { v.currentTime = Number(b.dataset.start); v.play(); }));
+  });
+</script>
+<style>
+video{display:block;width:100%;aspect-ratio:16/9;background:#000;border-radius:12px}
+.chapters{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button{background:var(--panel);color:var(--t);border:1px solid #1F2A44;border-radius:999px;padding:6px 14px;font:inherit;font-size:14px;cursor:pointer}
+button:hover{border-color:var(--p)}
+button span{color:var(--p);margin-right:6px;font-family:monospace}
+</style>

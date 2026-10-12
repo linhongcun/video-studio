@@ -1,0 +1,38 @@
+---
+import Base from '../../layouts/Base.astro';
+import VideoPlayer from '../../components/VideoPlayer.astro';
+import {getEpisodes, REPO} from '../../lib/episodes';
+export function getStaticPaths() {
+  return getEpisodes().map((e) => ({params: {slug: e.slug}, props: {e}}));
+}
+const {e} = Astro.props;
+const base = import.meta.env.BASE_URL;
+const tree = `${REPO}/blob/main/episodes/${e.slug}`;
+const Content = e.Content;
+---
+<Base title={e.title}>
+<main class="wrap">
+  <h1>{e.title}</h1>
+  <p class="lead">{e.summary}</p>
+  <VideoPlayer src={`${base}episodes/${e.slug}/${e.video}`} poster={`${base}episodes/${e.slug}/${e.poster}`} chapters={e.chapters} />
+  <article class="prose">{Content && <Content />}</article>
+  <section class="bts">
+    <h2>幕后</h2>
+    <ul>
+      <li><a href={`${tree}/script.md`}>脚本 script.md</a></li>
+      <li><a href={`${tree}/storyboard.json`}>分镜 storyboard.json</a></li>
+      <li><a href={`${REPO}/tree/main/episodes/${e.slug}/remotion`}>Remotion 源码</a></li>
+    </ul>
+  </section>
+</main>
+</Base>
+<style>
+main{max-width:760px}
+h1{margin:36px 0 4px;font-size:clamp(24px,5vw,34px)}
+.lead{color:var(--m);margin:0 0 20px}
+.prose :global(pre){background:#0F172A !important;border:1px solid #1F2A44;border-radius:10px;padding:14px 16px;overflow-x:auto;font-size:14px}
+.prose :global(:not(pre)>code){background:#1F2937;padding:1px 6px;border-radius:4px;font-size:.9em}
+.prose :global(blockquote){margin:16px 0;padding:4px 16px;border-left:3px solid var(--s);color:var(--m);background:#111827}
+.prose :global(h2){margin-top:40px;scroll-margin-top:16px}
+.bts{margin-top:48px;padding-top:16px;border-top:1px solid #1F2A44}
+</style>
