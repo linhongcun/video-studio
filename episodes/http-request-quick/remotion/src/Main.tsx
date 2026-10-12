@@ -10,7 +10,8 @@ const shots: any[] = sb.scenes.flatMap((s: any) => s.shots);
 let acc = 0;
 const plan = shots.map((sh) => {
   const t = (timing as any)[sh.id];
-  const p = {sh, from: acc, dur: t.duration, audioFrames: t.audioFrames};
+  // scale = 新时长/分镜原时长：动画关键帧与音效按它等比压缩，画面始终跟上配音
+  const p = {sh, from: acc, dur: t.duration, audioFrames: t.audioFrames, scale: t.duration / sh.durationInFrames};
   acc += t.duration;
   return p;
 });
@@ -171,7 +172,8 @@ function subtitleTimes(sh: any, audioFrames: number) {
 const Shot: React.FC<{p: any}> = ({p}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const {sh, dur, audioFrames} = p;
+  const {sh, dur, audioFrames, scale} = p;
+  const anims = sh.animations.map((a: any) => ({...a, keyframes: a.keyframes.map((k: any) => ({...k, frame: Math.round(k.frame * scale)}))}));
   const tr = sh.transition ?? {type: 'none', durationInFrames: 0};
   const td = tr.durationInFrames || 0;
   const out = td ? interpolate(frame, [dur - td, dur], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) : 0;
@@ -185,7 +187,7 @@ const Shot: React.FC<{p: any}> = ({p}) => {
   return (
     <AbsoluteFill>
       <AbsoluteFill style={{...style, opacity: (style.opacity ?? 1) * (p.from === 0 ? 1 : inFade)}}>
-        {sh.elements.filter((e: any) => e.role !== 'subtitle').map((e: any) => <Element key={e.id} e={e} anims={sh.animations} frame={frame} fps={fps} />)}
+        {sh.elements.filter((e: any) => e.role !== 'subtitle').map((e: any) => <Element key={e.id} e={e} anims={anims} frame={frame} fps={fps} />)}
       </AbsoluteFill>
       {cur && (
         <div style={{position: 'absolute', left: 160, width: 1600, top: 930, textAlign: 'center'}}>
@@ -194,7 +196,7 @@ const Shot: React.FC<{p: any}> = ({p}) => {
       )}
       <Audio src={staticFile(`audio/${sh.id}.wav`)} />
       {(SFX[sh.id] ?? []).map((s, i) => (
-        <Sequence key={i} from={s.f} layout="none"><Audio src={staticFile(`sfx/${s.src}`)} volume={s.v} /></Sequence>
+        <Sequence key={i} from={Math.round(s.f * scale)} layout="none"><Audio src={staticFile(`sfx/${s.src}`)} volume={s.v} /></Sequence>
       ))}
     </AbsoluteFill>
   );

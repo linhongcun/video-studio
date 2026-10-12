@@ -11,7 +11,7 @@ def E(i,ty,x,y,w,h,c,reuse=False,**k): return dict(id=i,type=ty,x=x,y=y,w=w,h=h,
 BROWSER=lambda x=120,y=200,w=640,h=420: R("browser",x,y,w,h,P['panel'],True,stroke=P['secondary'],radius=16,label="浏览器窗口（第一期）")
 SERVER=lambda x=1400,y=260: E("server","icon",x,y,300,380,P['secondary'],True,label="服务器（第一期）")
 ids=["intro","url","cache","dns","connect","request","server","response","render","recap"]
-titles=["开场","URL 解析","缓存检查","DNS 解析","建立连接","发送请求","服务器处理","返回响应","浏览器渲染","口述版"]
+titles=["开场","URL 解析","缓存检查","DNS 解析","建立连接","发送请求","服务器处理","返回响应","浏览器渲染","最后，串起来看一遍"]
 steps=["URL 解析","缓存检查","DNS 解析","TCP/TLS 握手","发送请求","服务器处理","返回响应","浏览器渲染"]
 def fade(i,a=0,b=12): return dict(elementId=i,property="opacity",keyframes=[dict(frame=a,value=0),dict(frame=b,value=1)],easing="easeOut")
 def mv(i,prop,a,b,va,vb,e="easeInOut"): return dict(elementId=i,property=prop,keyframes=[dict(frame=a,value=va),dict(frame=b,value=vb)],easing=e)
@@ -30,7 +30,7 @@ def shots_for(si,L):
         q=T("question",900,300,120,200,"?",180,P['primary'],True,align="center")
         return [([BROWSER(560,180,800,500),T("url",620,220,680,44,"https://example.com",32,reuse=True,font="monospace"),q],
                  [fade("browser"),mv("url","charsVisible",8,40,0,19,"linear"),mv("question","scale",40,60,0,1,"spring")]),
-                ([T("tag",760,140,400,64,"高频面试题",40,P['accent'],align="center",stroke=P['accent'],radius=32),q]+stepbar(),
+                ([T("tag",700,140,520,64,"8 步看懂一次访问",40,P['accent'],align="center",stroke=P['accent'],radius=32),q]+stepbar(),
                  [fade("tag",0,10),mv("question","opacity",0,15,1,0)]+[mv(f"step{k+1}","opacity",10+k*6,20+k*6,0,1) for k in range(8)])]
     if si==1:
         parts=[("https",P['primary'],"协议"),("example.com",P['secondary'],"域名"),(":443",P['accent'],"端口"),("/index.html",P['success'],"路径")]
@@ -78,9 +78,10 @@ def shots_for(si,L):
         tls=[E(f"tls{k}","arrow",450,500+k*70,1020,50,P['accent'],label=l,direction=d) for k,(l,d) in enumerate([("ClientHello","r"),("ServerHello + 证书","l"),("密钥交换 / Finished","r")])]
         lock=[E("lock","icon",880,730,160,100,P['success'],label="🔒"),T("lockNote",1060,750,400,50,"证书校验、密钥协商",32,P['success'])]
         q=T("quic",1300,830,540,40,"HTTP/3 = QUIC over UDP",28,P['muted'],font="monospace")
-        a2=[mv(f"tls{k}","drawProgress",10+k*35,40+k*35,0,1) for k in range(3)]+[mv("lock","scale",120,140,0,1,"spring"),fade("lockNote",135,150),fade("quic",L[1]-90,L[1]-70)]
+        tls13=T("tls13note",1380,820,460,40,"TLS 1.3 只需 1 个往返（1-RTT）",24,"#9CA3AF")
+        a2=[mv(f"tls{k}","drawProgress",10+k*35,40+k*35,0,1) for k in range(3)]+[mv("lock","scale",120,140,0,1,"spring"),fade("lockNote",135,150),fade("quic",L[1]-90,L[1]-70),fade("tls13note",200,220)]
         # keep base & tcp visible
-        return [(base+arr,a1),(base+arr+tls+lock+[q],a2)]
+        return [(base+arr,a1),(base+arr+tls+lock+[q,tls13],a2)]
     if si==5:
         env=E("packet","packet",500,300,560,340,P['secondary'],True,label="信封数据包（第一期）")
         lines=[T(f"hdr{k}",540,330+k*70,500,52,t,30,c,font="monospace") for k,(t,c) in enumerate([("GET /index.html HTTP/1.1",P['primary']),("Host: example.com",P['text']),("Cookie: sid=abc123",P['accent']),('If-None-Match: "v1"',P['success'])])]
@@ -127,7 +128,7 @@ def shots_for(si,L):
         return [(pipe+src,a1),(pipe+[sc,df],a2),(pipe+[sub]+fin,a3)]
     if si==9:
         bar=stepbar(True)
-        title=T("finalTitle",900,380,880,140,"满分回答",110,P['success'],align="center")
+        title=T("finalTitle",760,380,1080,140,"一次访问，八步完成",96,P['success'],align="center")
         n=len(L);out=[]
         bounds=[[0,1],[2],[3],[4,5,6],[7]]
         for j in range(n):
@@ -144,7 +145,7 @@ def shots_for(si,L):
 # shot narration splits: groups of sentences (or clause splits for recap)
 def split_narr(si,s):
     if si==9:
-        return ["面试可以这样答：浏览器解析网址、检查缓存；","未命中就做 DNS 解析拿到 IP；","TCP 三次握手，HTTPS 再做 TLS 握手；","然后发送 HTTP 请求，服务器处理后返回 200 或 304 等响应；","最后构建 DOM 和 CSSOM，经过布局、绘制、合成，展示页面。"]
+        return ["最后，串起来看一遍：浏览器解析网址、检查缓存；","未命中就做 DNS 解析拿到 IP；","TCP 三次握手，HTTPS 再做 TLS 握手；","然后发送 HTTP 请求，服务器处理后返回 200 或 304 等响应；","浏览器再构建 DOM 和 CSSOM，经过布局、绘制、合成，展示页面。"]
     S=sentences(s)
     g={0:[2,1],1:[1,1],2:[2],3:[2,1],4:[2,2],5:[1,1],6:[1,1],7:[2,1,1],8:[2,1,1]}[si]
     out=[];i=0
@@ -156,7 +157,7 @@ def subs(t,L):
     # merge tiny clauses
     m=[]
     for c in cl:
-        if m and cnt(m[-1])<8: m[-1]+=c
+        if m and cnt(m[-1])<8 and m[-1][-1] not in "。？": m[-1]+=c
         else: m.append(c)
     talk=int(L*sum(cnt(x) for x in m)/max(1,cnt(t)))
     tot=sum(cnt(x) for x in m);res=[];f=0
@@ -187,14 +188,14 @@ for si,s in enumerate(narr):
         f+=l;nshot+=1
     scenes.append(dict(id=f"s{si}",chapterId=ids[si],title=titles[si],**{"from":g},durationInFrames=D,narrationChars=CNT[si],narrationCharsRecount=cnt(s),shots=shots))
     g+=D
-meta=dict(title="从输入 URL 到页面展示，发生了什么？（面试满分版）",width=1920,height=1080,fps=30,durationInFrames=g,style="深色背景+蓝青高光扁平2D（沿用第一期）",palette=P,font="Noto Sans SC",
+meta=dict(title="《从输入 URL 到页面展示，发生了什么？》（完整版）",width=1920,height=1080,fps=30,durationInFrames=g,style="深色背景+蓝青高光扁平2D（沿用第一期）",palette=P,font="Noto Sans SC",
   safeArea=dict(margin=80,subtitleBand=[900,980],contentMaxY=860),
   notes="帧数按脚本估算：每段 round((字数/4.2+2)×30)，段内按镜头旁白字数分配，每段约 2 秒停顿平均摊到各镜头；以配音实测 timing.json 为准，届时按段等比缩放镜头与相对帧。from 为全局帧，subtitles 与 keyframes 帧相对镜头；transition 作用于镜头出场。章节 chapterId 与 article.mdx 锚点一致（intro/recap 为自定）。示例 IP 203.0.113.10 为 RFC 5737 文档地址。")
 assets=dict(reuse=[dict(id="browser",desc="第一期浏览器窗口（rect，panel 底 + secondary 描边，圆角 16）",usedIn=["intro","cache","request","server"]),
  dict(id="url/addressbar",desc="第一期地址栏打字机文本",usedIn=["intro"]),dict(id="question",desc="第一期开场大问号",usedIn=["intro"]),
  dict(id="server",desc="第一期服务器图标（含源站）",usedIn=["request","server"]),dict(id="packet",desc="第一期信封数据包（请求）",usedIn=["request","server"]),
  dict(id="respPacket",desc="第一期响应包",usedIn=["response"]),dict(id="folder/gear",desc="第一期文件夹、齿轮图标",usedIn=["server"]),dict(id="subtitle",desc="字幕层")],
- new=[dict(id="stepbar",desc="1–8 步骤条（横排用于开场，竖排用于口述版，可逐格点亮/变绿）"),
+ new=[dict(id="stepbar",desc="1–8 步骤条（横排用于开场，竖排用于结尾总结，可逐格点亮/变绿）"),
  dict(id="urlSegments",desc="URL 四段切分块（协议/域名/端口/路径，各自配色+下方标签）"),dict(id="hsts",desc="HSTS 盾牌图标，http→https 翻转"),
  dict(id="drawer",desc="缓存抽屉 + 带 max-age 倒计时的文件 + 绿色对勾（第 2、7 章共用）"),
  dict(id="dnsLocal",desc="三层本地缓存条（浏览器缓存/系统缓存/hosts）+ 未命中标签"),dict(id="dnsTree",desc="DNS 树：根 . → com → example.com 权威，递归解析器问询箭头，结果 203.0.113.10 + RFC 5737 注释"),
