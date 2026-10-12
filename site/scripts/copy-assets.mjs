@@ -20,10 +20,10 @@ for (const slug of fs.readdirSync(root)) {
 
 // 旧链接兼容（构建时生成，不在仓库里重复存二进制）：
 // - v0.1.x 的 /videos/http-request/video.mp4 → 完整版视频；/videos/http-request/ → 完整版页面
-// - v0.5.3 下线的速览版 /episodes/http-request-quick/ → 完整版页面
+// - v0.5.3 下线的旧短版 /episodes/http-request-quick/ → 完整版页面
 const FULL = 'http-request';
 const to = `/video-studio/episodes/${FULL}/`;
-const redirectHtml = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>已迁移</title><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${to}"><meta name="robots" content="noindex"></head><body><p>此页已迁移到 <a href="${to}">${to}</a></p><script>location.replace(${JSON.stringify(to)})</script></body></html>\n`;
+const redirectHtml = `<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><title>页面已迁移</title><meta http-equiv="refresh" content="0; url=${to}"><link rel="canonical" href="${to}"><meta name="robots" content="noindex"></head><body><p>此页已迁移到 <a href="${to}">${to}</a></p><script>location.replace(${JSON.stringify(to)})</script></body></html>\n`;
 const legacy = path.resolve(import.meta.dirname, '../public/videos/http-request');
 fs.rmSync(path.resolve(import.meta.dirname, '../public/videos'), {recursive: true, force: true});
 fs.mkdirSync(legacy, {recursive: true});
