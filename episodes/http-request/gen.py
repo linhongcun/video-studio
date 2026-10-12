@@ -204,3 +204,17 @@ assets=dict(reuse=[dict(id="browser",desc="第一期浏览器窗口（rect，pan
  dict(id="statusCards",desc="状态码翻牌卡 200/301/404/500 + 放大 304"),dict(id="pipeline",desc="渲染流水线五格 DOM→CSSOM→渲染树→布局→绘制/合成"),dict(id="scriptBlock",desc="<script> 阻塞方块 + defer/async 标签")])
 json.dump(dict(meta=meta,assets=assets,scenes=scenes),open("storyboard.json","w"),ensure_ascii=False,indent=1)
 print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames'],s['narrationChars']) for s in scenes])
+
+# --- align to measured timing
+# After estimated frames, align to measured voiceover if timing.json is present.
+# Re-run: python3 gen.py && python3 align.py
+# Or: TIMING_JSON=/path/to/timing.json python3 gen.py
+import os
+from pathlib import Path as _P
+_timing = os.environ.get("TIMING_JSON") or str(_P(__file__).resolve().parent / "timing.json")
+if _P(_timing).is_file():
+    from align import align as _align
+    _r = _align(_P(_timing), _P(__file__).resolve().parent / "storyboard.json")
+    print("aligned", _r["total"], _r["scenes"])
+else:
+    print("skip align: no timing.json at", _timing)
