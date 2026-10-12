@@ -1,0 +1,54 @@
+---
+import {BASE, REPO} from '../lib/episodes';
+const {current} = Astro.props;
+const nav = [
+  {id: 'home', label: '期数', href: BASE},
+  {id: 'tags', label: '专题', href: `${BASE}tags/`},
+  {id: 'about', label: '关于', href: `${BASE}about/`},
+];
+---
+<header class="hdr">
+  <div class="container in">
+    <a class="logo" href={BASE}><span aria-hidden="true">▣</span> Video Studio</a>
+    <nav class="nav" aria-label="主导航">
+      {nav.map((n) => <a href={n.href} aria-current={current === n.id ? 'page' : undefined}>{n.label}</a>)}
+      <a href={REPO} rel="noopener" target="_blank">GitHub ↗</a>
+    </nav>
+    <button class="burger" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="drawer">☰</button>
+  </div>
+  <div id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="菜单" hidden>
+    <button class="close" type="button" aria-label="关闭菜单">×</button>
+    {nav.map((n) => <a href={n.href} aria-current={current === n.id ? 'page' : undefined}>{n.label}</a>)}
+    <a href={REPO} rel="noopener" target="_blank">GitHub ↗</a>
+  </div>
+</header>
+<script>
+  const burger = document.querySelector<HTMLButtonElement>('.burger')!;
+  const drawer = document.getElementById('drawer')!;
+  const links = () => [...drawer.querySelectorAll<HTMLElement>('a,button')];
+  const open = () => { drawer.hidden = false; burger.setAttribute('aria-expanded', 'true'); links()[0].focus(); document.body.style.overflow = 'hidden'; };
+  const close = () => { drawer.hidden = true; burger.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; burger.focus(); };
+  burger.addEventListener('click', open);
+  drawer.querySelector('.close')!.addEventListener('click', close);
+  drawer.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') close();
+    if (e.key === 'Tab') { const l = links(); const i = l.indexOf(document.activeElement as HTMLElement);
+      if (e.shiftKey && i <= 0) { e.preventDefault(); l[l.length - 1].focus(); }
+      else if (!e.shiftKey && i === l.length - 1) { e.preventDefault(); l[0].focus(); } }
+  });
+</script>
+<style>
+.hdr{position:sticky;top:0;z-index:50;height:var(--header-h);background:rgba(17,24,39,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--c-border)}
+.in{height:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4)}
+.logo{color:var(--c-text);font-weight:700;text-decoration:none}
+.logo span{color:var(--c-primary)}
+.nav{display:flex;gap:var(--sp-5)}
+.nav a,.drawer a{color:var(--c-text-2);text-decoration:none;padding:8px 0;border-bottom:2px solid transparent}
+.nav a:hover{color:var(--c-text)}
+.nav a[aria-current="page"],.drawer a[aria-current="page"]{color:var(--c-primary);border-bottom-color:var(--c-primary)}
+.burger,.close{display:none;width:44px;height:44px;background:none;border:0;color:var(--c-text);font-size:22px;cursor:pointer}
+.drawer{position:fixed;inset:0;z-index:60;background:var(--c-bg);padding:72px var(--gutter);display:flex;flex-direction:column;gap:var(--sp-4);font-size:20px}
+.drawer[hidden]{display:none}
+.close{display:block;position:absolute;top:6px;right:var(--gutter)}
+@media (max-width:767px){.nav{display:none}.burger{display:block}}
+</style>

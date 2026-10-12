@@ -1,0 +1,29 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import {getEpisodes, getTags, tagHref, asset, BASE} from '../../lib/episodes';
+const eps = getEpisodes();
+---
+<BaseLayout title="专题" current="tags">
+  <div class="container">
+    <Breadcrumb items={[{label: '首页', href: BASE}, {label: '专题'}]} />
+    <h1>专题</h1>
+    <ul class="list" role="list">
+      {getTags().map((t) => (
+        <li><a class="wide" href={tagHref(t.name)}>
+          <div><h2>#{t.name} <span class="num">共 {t.count} 期</span></h2><p>{t.description}</p></div>
+          <div class="thumbs">{eps.filter((e) => e.tags.includes(t.name)).slice(0, 3).map((e) => <img src={asset(e.slug, e.poster)} alt="" width="160" height="90" loading="lazy" />)}</div>
+        </a></li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>
+<style>
+h1{font-size:var(--fs-h1);margin:0 0 var(--sp-5)}
+.list{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-4)}
+.wide{display:flex;justify-content:space-between;gap:var(--sp-4);align-items:center;flex-wrap:wrap;padding:var(--sp-5);background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-lg);color:inherit;text-decoration:none}
+.wide:hover{border-color:rgba(34,211,238,.4)}
+h2{margin:0;font-size:var(--fs-h3)}h2 span{font-size:var(--fs-small);color:var(--c-text-2);font-weight:400}
+p{margin:var(--sp-1) 0 0;color:var(--c-text-2);font-size:var(--fs-small)}
+.thumbs{display:flex;gap:var(--sp-2)}.thumbs img{width:120px;border-radius:var(--r-sm)}
+</style>

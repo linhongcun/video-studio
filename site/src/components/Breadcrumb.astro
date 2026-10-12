@@ -1,0 +1,11 @@
+---
+const {items} = Astro.props;
+---
+<nav aria-label="面包屑" class="bc"><ol>
+  {items.map((it, i) => <li>{it.href && i < items.length - 1 ? <a href={it.href}>{it.label}</a> : <span aria-current="page">{it.label}</span>}</li>)}
+</ol></nav>
+<style>
+.bc ol{list-style:none;display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-5) 0 var(--sp-3);padding:0;font-size:var(--fs-small);color:var(--c-text-2)}
+.bc li+li::before{content:'/';margin-right:var(--sp-2);color:var(--c-muted)}
+.bc a{color:var(--c-text-2)}
+</style>

@@ -1,0 +1,24 @@
+---
+const {headings} = Astro.props;
+---
+<nav class="toc" aria-label="本页目录">
+  <p>本页目录</p>
+  <ol>{headings.map((h) => <li><a href={`#${h.id}`} data-toc={h.id}>{h.title}</a></li>)}</ol>
+</nav>
+<script>
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')];
+  if (links.length && 'IntersectionObserver' in window) {
+    const io = new IntersectionObserver((es) => es.forEach((e) => {
+      if (e.isIntersecting) links.forEach((l) => l.toggleAttribute('aria-current', l.dataset.toc === e.target.id));
+    }), {rootMargin: '-20% 0px -70% 0px'});
+    links.forEach((l) => { const h = document.getElementById(l.dataset.toc!); if (h) io.observe(h); });
+  }
+</script>
+<style>
+.toc{position:sticky;top:calc(var(--header-h) + 24px);font-size:var(--fs-small)}
+p{margin:0 0 var(--sp-2);color:var(--c-text-2);font-weight:600}
+ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--c-border)}
+a{display:block;padding:6px 12px;color:var(--c-text-2);text-decoration:none;border-left:2px solid transparent;margin-left:-1px}
+a:hover{color:var(--c-text)}
+a[aria-current]{color:var(--c-primary);border-left-color:var(--c-primary);font-weight:600}
+</style>

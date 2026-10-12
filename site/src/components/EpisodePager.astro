@@ -1,0 +1,16 @@
+---
+import {epHref} from '../lib/episodes';
+const {prev, next} = Astro.props;
+---
+<nav class="pager" aria-label="上一期 / 下一期">
+  {prev ? <a class="p" href={epHref(prev.slug)}><small>← 上一期</small><span>{prev.title}</span></a> : <span class="p empty" aria-hidden="true"><small>← 上一期</small><span>已经是第一期</span></span>}
+  {next ? <a class="p r" href={epHref(next.slug)}><small>下一期 →</small><span>{next.title}</span></a> : <span class="p r empty" aria-hidden="true"><small>下一期 →</small><span>敬请期待</span></span>}
+</nav>
+<style>
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-top:var(--sp-7)}
+@media (max-width:767px){.pager{grid-template-columns:1fr}}
+.p{display:flex;flex-direction:column;padding:var(--sp-4);background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);color:var(--c-text);text-decoration:none;min-height:72px}
+a.p:hover{border-color:rgba(34,211,238,.4);filter:none}
+.r{text-align:right}small{color:var(--c-text-2);font-size:var(--fs-small)}
+.empty{opacity:.6}.empty span{color:var(--c-text-2)}
+</style>

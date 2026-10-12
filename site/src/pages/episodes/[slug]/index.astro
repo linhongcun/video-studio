@@ -1,0 +1,110 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../../components/Breadcrumb.astro';
+import VideoPlayer from '../../../components/VideoPlayer.astro';
+import ChapterHeading from '../../../components/ChapterHeading.astro';
+import CodeBlock from '../../../components/CodeBlock.astro';
+import Callout from '../../../components/Callout.astro';
+import Figure from '../../../components/Figure.astro';
+import Steps from '../../../components/Steps.astro';
+import Summary from '../../../components/Summary.astro';
+import BehindTheScenes from '../../../components/BehindTheScenes.astro';
+import EpisodePager from '../../../components/EpisodePager.astro';
+import Toc from '../../../components/Toc.astro';
+import {getEpisodes, REPO, BASE, asset, fmtTime, epLabel, tagHref} from '../../../lib/episodes';
+export function getStaticPaths() {
+  const eps = getEpisodes();
+  return eps.map((e, i) => ({params: {slug: e.slug}, props: {e, prev: eps[i + 1], next: eps[i - 1]}}));
+}
+const {e, prev, next} = Astro.props;
+const Content = e.Content;
+const tree = `${REPO}/blob/main/episodes/${e.slug}`;
+// Markdown → 组件自动映射：Sorkin 的稿件无需改写
+const components = {h2: ChapterHeading, pre: CodeBlock, blockquote: Callout, Figure, Callout, Steps, Summary, CodeBlock};
+---
+<BaseLayout title={e.title} description={e.summary} ogImage={asset(e.slug, e.poster)}>
+  <div class="container">
+    <Breadcrumb items={[{label: '首页', href: BASE}, ...(e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: epLabel(e.ep)}]} />
+    <header class="eh">
+      <h1>{e.title}</h1>
+      <p class="meta num"><time datetime={e.date}>{e.date}</time> · {fmtTime(e.duration)} · {e.tags.map((t) => <a href={tagHref(t)}>#{t}</a>)}</p>
+    </header>
+    <VideoPlayer src={asset(e.slug, e.video)} poster={asset(e.slug, e.poster)} captions={`${BASE}episodes/${e.slug}/captions.vtt`} chapters={e.chapters} title={e.title} />
+  </div>
+  <div class="container art-grid">
+    <article class="prose">
+      {Content && <Content components={components} />}
+      <BehindTheScenes script={`${tree}/script.md`} storyboard={`${tree}/storyboard.json`} source={`${REPO}/tree/main/episodes/${e.slug}/remotion`} />
+      <EpisodePager prev={prev} next={next} />
+    </article>
+    <aside class="toc-col"><Toc headings={e.chapters} /></aside>
+  </div>
+</BaseLayout>
+<script>
+  // 正文“▶ 从这里看”→ 播放器；播放器当前章节 → 按钮文案“▶ 正在播放”
+  document.querySelectorAll<HTMLAnchorElement>('[data-seek]').forEach((a) => a.addEventListener('click', (ev) => {
+    ev.preventDefault(); window.dispatchEvent(new CustomEvent('vs:seek', {detail: {id: a.dataset.seek}}));
+  }));
+  window.addEventListener('vs:chapter', (ev: any) => {
+    document.querySelectorAll<HTMLAnchorElement>('.chh [data-seek]').forEach((a) => {
+      const on = ev.detail.playing && a.dataset.seek === ev.detail.id;
+      a.textContent = on ? '▶ 正在播放' : '▶ 从这里看'; a.classList.toggle('playing', on);
+    });
+  });
+  // 复制按钮
+  document.querySelectorAll<HTMLButtonElement>('.cb-copy').forEach((b) => b.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(b.dataset.code!); } catch { const t = document.createElement('textarea'); t.value = b.dataset.code!; document.body.append(t); t.select(); document.execCommand('copy'); t.remove(); }
+    const live = b.nextElementSibling as HTMLElement; b.textContent = '已复制 ✓'; live.textContent = '已复制到剪贴板';
+    setTimeout(() => { b.textContent = '复制'; live.textContent = ''; }, 2000);
+  }));
+</script>
+<style>
+.eh h1{font-size:var(--fs-h1);line-height:1.25;margin:0 0 var(--sp-2)}
+.meta{color:var(--c-text-2);font-size:var(--fs-small);margin:0 0 var(--sp-5);display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.meta a{color:#93C5FD}
+.art-grid{display:grid;grid-template-columns:minmax(0,var(--measure));justify-content:center;margin-top:var(--sp-7)}
+.toc-col{display:none}
+@media (min-width:1440px){.art-grid{grid-template-columns:1fr minmax(0,var(--measure)) 1fr;gap:var(--sp-6)}.prose{grid-column:2}.toc-col{display:block;grid-column:3;max-width:240px}}
+</style>
+<style is:global>
+.prose{min-width:0}
+.prose>p,.prose li{line-height:1.8}
+.prose p{margin:0 0 var(--sp-4)}
+.prose h2{font-size:var(--fs-h2);line-height:1.35;margin:var(--sp-8) 0 var(--sp-4);scroll-margin-top:calc(var(--header-h) + 16px + var(--sticky-h,0px))}
+.prose h3{font-size:var(--fs-h3)}
+.prose :not(pre)>code{background:var(--c-surface-2);color:var(--c-primary);padding:1px 6px;border-radius:var(--r-sm);font-size:.9em}
+.prose strong{color:#fff;font-weight:600}
+.prose ul,.prose ol{padding-left:1.4em;margin:0 0 var(--sp-4)}
+.chh{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
+.chh .t{position:relative}
+.chh .anchor{margin-left:8px;color:var(--c-muted);text-decoration:none;opacity:0;font-weight:400}
+.chh:hover .anchor,.chh .anchor:focus-visible{opacity:1}
+.chh .from{font-size:var(--fs-small);font-weight:600;min-height:36px;padding:0 12px;flex:none}
+.chh .from.playing{background:rgba(34,211,238,.2)}
+@media (max-width:767px){.chh{flex-direction:column;align-items:flex-start;gap:var(--sp-2)}.chh .from{min-height:44px}}
+.cb{margin:0 0 var(--sp-5);background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);overflow:hidden}
+.cb-request{border-left:3px solid var(--c-secondary)}.cb-response{border-left:3px solid var(--c-success)}
+.cb-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 8px 6px 16px;border-bottom:1px solid var(--c-border);font-size:var(--fs-xs);color:var(--c-text-2)}
+.cb-copy{min-height:32px;padding:0 12px;border-radius:var(--r-sm);border:1px solid var(--c-border);background:transparent;color:var(--c-text-2);font:inherit;cursor:pointer}
+.cb-copy:hover{color:var(--c-text);border-color:var(--c-primary)}
+.cb pre{margin:0;padding:var(--sp-4);overflow-x:auto;white-space:pre;font-size:var(--fs-code);line-height:1.65;color:var(--c-text)}
+.h-method{color:#60A5FA;font-weight:600}.h-path{color:var(--c-text)}.h-ver{color:var(--c-text-2)}
+.h-ok{color:var(--c-success);font-weight:600}.h-redir{color:#60A5FA;font-weight:600}.h-err{color:var(--c-danger);font-weight:600}
+.h-name{color:var(--c-primary)}.h-val{color:var(--c-text)}.h-nl{color:var(--c-muted)}
+.callout{display:flex;gap:var(--sp-3);margin:0 0 var(--sp-5);padding:var(--sp-3) var(--sp-4);border-left:3px solid var(--cc);background:color-mix(in srgb,var(--cc) 10%,transparent);border-radius:var(--r-md);color:var(--c-text)}
+.callout-info{--cc:var(--c-secondary)}.callout-tip{--cc:var(--c-success)}.callout-warn{--cc:var(--c-accent)}.callout-danger{--cc:var(--c-danger)}
+.callout .ci{color:var(--cc);font-weight:700;line-height:1.8}
+.callout .cbody>:last-child{margin-bottom:0}.ctitle{font-weight:600;margin:0 0 var(--sp-1)}
+.fig{margin:0 0 var(--sp-5)}.fig img{display:block;width:100%;border:1px solid var(--c-border);border-radius:var(--r-md);background:var(--c-surface)}
+.fig.wide{margin-inline:calc((var(--measure) - min(960px,100vw - 2*var(--gutter)))/2)}
+.fig figcaption{color:var(--c-text-2);font-size:var(--fs-small);text-align:center;margin-top:var(--sp-2)}
+.steps{list-style:none;counter-reset:s;padding:0!important}
+.steps>li{counter-increment:s;position:relative;padding-left:40px;margin-bottom:var(--sp-3)}
+.steps>li::before{content:counter(s);position:absolute;left:0;top:2px;width:26px;height:26px;border-radius:50%;background:var(--c-surface-2);border:1px solid var(--c-primary);color:var(--c-primary);font-size:var(--fs-xs);display:grid;place-items:center}
+.summary{margin-top:var(--sp-8);padding:var(--sp-5);background:var(--c-surface);border:1px solid var(--c-border);border-top:2px solid var(--c-primary);border-radius:var(--r-lg)}
+.summary h2{margin:0 0 var(--sp-3)!important;font-size:var(--fs-h3)!important}
+.summary ul{list-style:none;padding-left:0!important}
+.summary ul>li{position:relative;padding-left:28px}
+.summary ul>li::before{content:'✓';position:absolute;left:0;color:var(--c-success);font-weight:700}
+.summary .callout{margin-top:var(--sp-4)}
+</style>
