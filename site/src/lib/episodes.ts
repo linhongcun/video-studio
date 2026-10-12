@@ -13,7 +13,24 @@ export type Chapter = {id: string; title: string; start: number; frame: number; 
 export type Episode = {
   slug: string; ep: number; title: string; summary: string; duration: number; tags: string[];
   date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
+  draft: boolean; related: {slug: string; label?: string}[];
 };
+
+/** draft: true 的期数默认不发布；本地预览可用 SHOW_DRAFTS=1 npm run build 查看 */
+export const SHOW_DRAFTS = process.env.SHOW_DRAFTS === '1';
+const readMeta = (slug: string) => JSON.parse(fs.readFileSync(path.join(EP_DIR, slug, 'meta.json'), 'utf8'));
+export function getAllMeta() {
+  return fs.readdirSync(EP_DIR).filter((s) => fs.existsSync(path.join(EP_DIR, s, 'meta.json'))).map((s) => ({slug: s, ...readMeta(s)}));
+}
+/** 相关期数（速览版 ↔ 完整版）：已发布的给链接，草稿只显示“制作中” */
+export function getRelated(e: Episode) {
+  const all = new Map(getAllMeta().map((m) => [m.slug, m]));
+  return (e.related ?? []).map((r) => {
+    const m = all.get(r.slug);
+    if (!m) return null;
+    return {slug: r.slug, label: r.label ?? '', title: m.title, summary: m.summary, published: !m.draft || SHOW_DRAFTS};
+  }).filter(Boolean) as {slug: string; label: string; title: string; summary: string; published: boolean}[];
+}
 
 const readJson = (p: string) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
@@ -40,6 +57,10 @@ function shotPlan(slug: string) {
 
 /** 章节：起点按实际帧数计算；id/标题以 article.mdx frontmatter 为准（按顺序与 storyboard scene 一一对应） */
 export function computeChapters(slug: string, fm: any[] = []) {
+  if (!fs.existsSync(path.join(EP_DIR, slug, 'storyboard.json'))) {
+    // 草稿期还没有分镜：章节起点暂为 0，仅供 SHOW_DRAFTS 预览
+    return {chapters: fm.map((f: any) => ({id: f.id, title: f.title, start: 0, frame: 0})), duration: 0, fps: 30};
+  }
   const {fps, scenes, total} = shotPlan(slug);
   if (fm.length && fm.length !== scenes.length)
     console.warn(`[chapters] ${slug}: frontmatter ${fm.length} 章 vs storyboard ${scenes.length} scene，按顺序对齐`);
@@ -55,6 +76,7 @@ export function computeChapters(slug: string, fm: any[] = []) {
 
 /** WebVTT 字幕：与 Remotion Main.tsx 相同的分配规则（按字数比例铺满真实音频时长） */
 export function buildVtt(slug: string) {
+  if (!fs.existsSync(path.join(EP_DIR, slug, 'storyboard.json'))) return 'WEBVTT\n';
   const {fps, scenes} = shotPlan(slug);
   const ts = (f: number) => {
     const s = f / fps;
@@ -82,6 +104,7 @@ export function getEpisodes(): Episode[] {
   if (cache) return cache;
   cache = fs.readdirSync(EP_DIR)
     .filter((slug) => fs.existsSync(path.join(EP_DIR, slug, 'meta.json')))
+    .filter((slug) => SHOW_DRAFTS || !readMeta(slug).draft)
     .map((slug) => {
       const meta = readJson(path.join(EP_DIR, slug, 'meta.json'));
       const mod = articles[`../../../episodes/${slug}/article.mdx`];
@@ -90,7 +113,7 @@ export function getEpisodes(): Episode[] {
       return {
         slug, ep: meta.ep ?? 0, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
         tags: meta.tags ?? [], date: meta.publishedAt, poster: meta.poster, video: meta.video,
-        duration, chapters, fps, Content: mod?.default,
+        duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, related: meta.related ?? [],
       };
     })
     .sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.ep - a.ep);

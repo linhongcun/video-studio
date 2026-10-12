@@ -11,12 +11,17 @@ import Summary from '../../../components/Summary.astro';
 import BehindTheScenes from '../../../components/BehindTheScenes.astro';
 import EpisodePager from '../../../components/EpisodePager.astro';
 import Toc from '../../../components/Toc.astro';
-import {getEpisodes, REPO, BASE, asset, fmtTime, epLabel, tagHref} from '../../../lib/episodes';
+import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
+import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes();
-  return eps.map((e, i) => ({params: {slug: e.slug}, props: {e, prev: eps[i + 1], next: eps[i - 1]}}));
+  const pages = eps.map((e, i) => ({params: {slug: e.slug}, props: {e, prev: eps[i + 1], next: eps[i - 1]}}));
+  // 未发布草稿：若有速览版，旧链接临时跳转过去（避免 v0.3.0 已分享的 /episodes/http-request/ 404）
+  const drafts = SHOW_DRAFTS ? [] : getAllMeta().filter((m) => m.draft && m.quickVersion);
+  return [...pages, ...drafts.map((m) => ({params: {slug: m.slug}, props: {redirectTo: m.quickVersion}}))];
 }
-const {e, prev, next} = Astro.props;
+const {e, prev, next, redirectTo} = Astro.props;
+if (redirectTo) return Astro.redirect(`${BASE}episodes/${redirectTo}/`);
 const Content = e.Content;
 const tree = `${REPO}/blob/main/episodes/${e.slug}`;
 // Markdown → 组件自动映射：Sorkin 的稿件无需改写
@@ -30,6 +35,7 @@ const components = {h2: ChapterHeading, pre: CodeBlock, blockquote: Callout, Fig
       <p class="meta num"><time datetime={e.date}>{e.date}</time> · {fmtTime(e.duration)} · {e.tags.map((t) => <a href={tagHref(t)}>#{t}</a>)}</p>
     </header>
     <VideoPlayer src={asset(e.slug, e.video)} poster={asset(e.slug, e.poster)} captions={`${BASE}episodes/${e.slug}/captions.vtt`} chapters={e.chapters} title={e.title} />
+    <RelatedEpisodes items={getRelated(e)} />
   </div>
   <div class="container art-grid">
     <article class="prose">
