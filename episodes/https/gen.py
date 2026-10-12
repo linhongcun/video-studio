@@ -52,10 +52,10 @@ def shots_for(si,L):
         a1=[fade("pairT"),fade("pubL",10,25),fade("pubT",20,32),fade("priL",L[0]//2,L[0]//2+15),fade("priT",L[0]//2+10,L[0]//2+22),mv("priL","opacity",L[0]-40,L[0]-20,1,0.7)]
         n=L[1]; sp=n-60; _s=subs(PARTS[1],n); st=_s[1]["from"]; st2=_s[2]["from"]  # 状态切点=字幕分句起点；旁白后金钥匙停 60 帧
         e2=[A("ecdheA","ecdhe-step4",226,80,1468,780,fit="contain",state="交换公开值"),A("ecdheB","ecdhe-combine",226,80,1468,780,fit="contain",state="各自把收到的公开值与自己的私有值合成"),
-            A("ecdheC","ecdhe-step6",226,80,1468,780,fit="contain",state="得到同一把金色钥匙"),A("keyGold","key-symmetric",810,250,300,300),
+            A("ecdheC","ecdhe-step6",226,80,1468,780,fit="contain",state="得到同一把金色钥匙"),A("keyL","key-symmetric",411,566,160,160),A("keyR","key-symmetric",1347,566,160,160),
             T("stA",660,100,600,50,"① 交换公开值",36,P['primary'],align="center"),T("stB",660,100,600,50,"② 各自合成",36,P['primary'],align="center"),T("stC",660,100,600,50,"③ 同一把钥匙",36,P['accent'],align="center")]
         a2=[fade("ecdheA",0,10),fade("stA",0,10),out("stA",st-6,st),fade("ecdheB",st,st+10),fade("stB",st,st+10),out("stB",st2-6,st2),
-            fade("ecdheC",st2,st2+10),fade("stC",st2,st2+10),mv("keyGold","scale",sp-20,sp,0,1,"spring"),mv("keyGold","rotate",sp,n-1,0,8)]
+            fade("ecdheC",st2,st2+10),fade("stC",st2,st2+10),mv("keyL","scale",sp-20,sp,0,1,"spring"),mv("keyR","scale",sp-20,sp,0,1,"spring"),mv("keyL","rotate",sp,n-1,0,8),mv("keyR","rotate",sp,n-1,0,8)]
         e3=[A("keyGold","key-symmetric",200,300,260,260),T("hyb1",520,300,1200,56,"非对称方式：协商出会话密钥（慢，只做一次）",40,P['primary']),A("box","envelope-sealed",520,420,240,240),T("hyb2",820,500,900,56,"对称加密：传输真正的数据（快）",40,P['success'])]
         a3=[fade("keyGold"),fade("hyb1",L[2]//4,L[2]//4+15),fade("box",L[2]//2,L[2]//2+12),fade("hyb2",L[2]//2+10,L[2]//2+25),mv("box","x",L[2]//2+30,L[2]-30,520,1440)]
         return [(e1,a1),(e2,a2),(e3,a3)]
@@ -138,7 +138,7 @@ for si,s in enumerate(narr):
     g+=D
 meta=dict(title="《HTTPS 为什么安全？》",episode=2,width=1920,height=1080,fps=30,durationInFrames=g,style="深色背景+蓝青高光扁平2D（沿用第一期）",palette=P,font="Noto Sans SC",
   safeArea=dict(margin=80,subtitleBand=[900,980],contentMaxY=860),
-  notes=f"帧数已按第一期 +19% 实测校准：timing.json 24 镜头合计 5.53 字/秒（公式 字数/4.2 的估算在 +19% 下偏长约 30%），每镜头 = round(字数/5.53×30)+30 帧停顿；scene.estimateFormulaFrames 保留原公式值供对照。配音实测后用 align.py 对齐。from 为全局帧，subtitles 与 keyframes 帧相对镜头；transition 作用于镜头出场。image 元素 asset 路径相对 episodes/https/。密钥交换按 ECDHE（ECDHE 镜头合并为 3 个关键状态 step4 / ecdhe-combine / step6，各约 1/3 旁白，旁白后金钥匙停 60 帧；step1–6 文件保留），双方交换公开参数各自算出会话密钥。画面文字为中文，英文仅 CA/TLS/HTTP/HTTPS；字幕随旁白保留 Wi-Fi、ClientHello、ServerHello、ECDHE、AEAD 原词。")
+  notes=f"帧数已按第一期 +19% 实测校准：timing.json 24 镜头合计 5.53 字/秒（公式 字数/4.2 的估算在 +19% 下偏长约 30%），每镜头 = round(字数/5.53×30)+30 帧停顿；scene.estimateFormulaFrames 保留原公式值供对照。配音实测后用 align.py 对齐。from 为全局帧，subtitles 与 keyframes 帧相对镜头；transition 作用于镜头出场。image 元素 asset 路径相对 episodes/https/。密钥交换按 ECDHE（ECDHE 镜头合并为 3 个关键状态 step4 / ecdhe-combine / step6，状态切点跟随字幕分句（约 76/70/88 帧），旁白后金钥匙停 60 帧；两把相同金钥匙 keyL(411,566) / keyR(1347,566) 各 160×160，紧贴 step6 底部两个橙色圆正上方（金色钥匙放进同色圆内看不清），呼应“= 同一把会话密钥 =”，含 8° 慢转不压文字；step1–6 文件保留），双方交换公开参数各自算出会话密钥。画面文字为中文，英文仅 CA/TLS/HTTP/HTTPS；字幕随旁白保留 Wi-Fi、ClientHello、ServerHello、ECDHE、AEAD 原词。")
 assets=dict(reuse=[dict(id="browser",desc="第一期浏览器窗口",usedIn=["plaintext","symmetric"]),dict(id="server",desc="第一期服务器图标",usedIn=["plaintext","symmetric"]),dict(id="seqDiagram",desc="第一期握手时序图样式",usedIn=["handshake"]),dict(id="subtitle",desc="字幕层")],
  new=[dict(id=f.stem,file=f"assets/{f.name}") for f in sorted((HERE/"assets").glob("*.svg")) if f.stem!="ecdhe-mix"])
 json.dump(dict(meta=meta,assets=assets,scenes=scenes),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)

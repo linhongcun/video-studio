@@ -37,4 +37,41 @@
 5. `eve` 偷听者算不出
 6. `left-derive` / `right-derive` + “= 同一把会话密钥 =”
 
-字号（实测）：节点标签 38 单位，“只交换公开值”“偷听者算不出”“算出会话密钥”40，“浏览器/服务器”与结论 48，“+”64。分镜中按 1468×780 contain 放置，缩放 = min(1468/1600, 780/900) = 0.8667，屏幕最小字号 38×0.8667 ≈ 32.9px（≥28px）。第3章 ECDHE 镜头只用 3 个关键状态：step4（交换公开值）→ ecdhe-combine（各自合成）→ step6（同一把金钥匙，含偷听者算不出），切点跟随字幕分句；step1–3、5 保留备用。
+字号（实测）：节点标签 38 单位，“只交换公开值”“偷听者算不出”“算出会话密钥”40，“浏览器/服务器”与结论 48，“+”64。分镜中按 1468×780 contain 放置，缩放 = min(1468/1600, 780/900) = 0.8667，屏幕最小字号 38×0.8667 ≈ 32.9px（≥28px）。第3章 ECDHE 镜头只用 3 个关键状态：step4（交换公开值）→ ecdhe-combine（各自合成）→ step6（同一把金钥匙，含偷听者算不出；两把相同 key-symmetric 金钥匙 160×160 放在屏幕 (411,566) 与 (1347,566)，紧贴底部两个橙色圆正上方，同时弹出并慢转 8°；step6 下落箭头已缩短为 560→600 让位），切点跟随字幕分句；step1–3、5 保留备用。
+
+## storyboard.json 用到的动画属性与元素字段（按 storyboard.json 实际 grep 整理）
+
+关键帧 `frame` 相对镜头；`value` 按下表解释。
+
+| 属性 | 用于 | 含义 / 实现建议 |
+|---|---|---|
+| opacity | 全片 | 0→1 淡入 / 1→0 淡出 |
+| scale | 全片 | 缩放，以元素中心为原点；spring 用于弹出 |
+| x / y | 全片 | 元素左上角绝对坐标（px，1920×1080） |
+| rotate | keyL、keyR（asymmetric-2）、keyFly | 角度（°），中心旋转；ECDHE 状态③ 两把金钥匙各自 0→8° 慢转 |
+| charsVisible | intro-1 login | 打字机，显示前 N 个字符 |
+| drawProgress | handshake 箭头 ch / sh / data | 箭头描线 0→1（stroke-dashoffset） |
+| tamperStrip | envelope-sealed（integrity-1、recap-1 box） | `#tamper-strip` 宽度 0→100%（0→1） |
+| tamperAlarm | envelope-sealed（integrity-1 box） | 0→1：封条改 danger #F87171 并左右抖动 ±6px 约 10 帧 |
+| drawCheck | ca-badge（certificate-3 rootOk/midOk/leafOk） | `#check` 描线 stroke-dashoffset 0→1 |
+| badgeDanger | hash-check（integrity-1 hash） | 0→1：`#badge` 颜色 success → danger，勾可隐去 |
+| glowPlaintext | postcard（plaintext-2） | 0→1：`#plaintext` 外发光 danger 色并轻闪，强调明文可见 |
+
+| 元素字段 | 含义 |
+|---|---|
+| type | text / rect / image / icon / arrow / line |
+| asset | image 的 SVG 路径（相对 episodes/https/） |
+| fit | image 缩放方式；`contain` = 等比放入 w×h 并居中 |
+| tint | 给 SVG 主色整体换色（certificate-1 `fake` 公钥用 danger #F87171 表示假钥匙） |
+| state | ECDHE 状态说明（仅注释） |
+| label / note | rect、icon、arrow 上的显示文字 / 实现备注（note 不上屏） |
+| direction | arrow 方向：r 向右、l 向左、lr 双向 |
+| role=subtitle | 字幕层，固定 y 900–980 |
+| stroke / radius / align / font / fontSize | 描边色 / 圆角 / 对齐 / 字体 / 字号（px） |
+
+| icon id | 镜头 | 画法建议（无对应 SVG，Knoll 用简单矢量绘制，颜色取 color） |
+|---|---|---|
+| eye | plaintext-2 | 窃听：眼睛轮廓 + 瞳孔，danger 色 |
+| pencil | plaintext-2、integrity-1 | 篡改：斜放铅笔，danger 色；integrity-1 中向信箱移动 |
+| mask | plaintext-2 | 伪装：半脸面具，danger 色 |
+| server | plaintext-1、symmetric-2 | 复用第一期服务器图标 |

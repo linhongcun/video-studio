@@ -1,8 +1,10 @@
 import os
 T=dict(bg="#0B1020",surface="#111827",s2="#1F2937",border="#243045",text="#E5E7EB",text2="#9CA3AF",muted="#6B7280",primary="#22D3EE",secondary="#3B82F6",success="#22C55E",accent="#F59E0B",danger="#F87171")
 F='font-family="system-ui, -apple-system, \'PingFang SC\', \'Noto Sans CJK SC\', sans-serif"'
+OUT=os.path.join(os.path.dirname(os.path.abspath(__file__)),"assets")
+os.makedirs(OUT,exist_ok=True)
 def svg(name,vb,body):
-    open(name,"w").write(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}" width="{vb.split()[2]}" height="{vb.split()[3]}">\n{body}\n</svg>\n')
+    open(os.path.join(OUT,name),"w").write(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}" width="{vb.split()[2]}" height="{vb.split()[3]}">\n{body}\n</svg>\n')
 def key(c,stroke,x=0,y=0,id="key",teeth=True):
     return f'''<g id="{id}" transform="translate({x} {y})">
  <circle cx="140" cy="256" r="84" fill="{c}"/><circle cx="140" cy="256" r="34" fill="{T['bg']}"/>
@@ -57,11 +59,11 @@ def ecdhe(step):
     parts=[f'<defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="{T['text2']}"/></marker></defs>',
       L(260,70,"浏览器",T['text'],48)+L(1340,70,"服务器",T['text'],48)]
     if step>=1: parts.append(f'<g id="shared-param">{blob(800,170,70,T["primary"],"param")}{L(800,285,"公开参数",T["text2"])}</g>')
-    if step>=2: parts.append(f'<g id="left-secret">{blob(130,400,60,T["danger"],"a-secret")}{L(130,505,"浏览器私有",T["text2"])}</g><g id="right-secret">{blob(1470,400,60,T["success"],"b-secret")}{L(1470,505,"服务器私有",T["text2"])}</g>')
-    if step>=3: parts.append(f'<g id="mix" stroke="{T["muted"]}" stroke-width="4" stroke-dasharray="8 8" fill="none"><path d="M740 200 L430 350"/><path d="M860 200 L1170 350"/></g><g id="left-public">{blob(370,400,64,T["secondary"],"a-pub")}<circle cx="370" cy="400" r="64" fill="{T["danger"]}" opacity="0.45"/>{L(370,510,"浏览器公开值",T["text2"])}</g><g id="right-public">{blob(1230,400,64,T["secondary"],"b-pub")}<circle cx="1230" cy="400" r="64" fill="{T["success"]}" opacity="0.45"/>{L(1230,510,"服务器公开值",T["text2"])}</g>')
-    if step>=4: parts.append(f'<g id="exchange" stroke-dasharray="14 12">{arrow(450,390,1140,390,T["text2"])}{arrow(1150,440,460,440,T["text2"])}</g>'+L(800,370,"只交换公开值",T["text2"],40))
+    if step>=2: parts.append(f'<g id="left-secret">{blob(110,400,60,T["danger"],"a-secret")}{L(110,505,"浏览器私有",T["text2"])}</g><g id="right-secret">{blob(1490,400,60,T["success"],"b-secret")}{L(1490,505,"服务器私有",T["text2"])}</g>')
+    if step>=3: parts.append(f'<g id="mix" stroke="{T["muted"]}" stroke-width="4" stroke-dasharray="8 8" fill="none"><path d="M740 200 L450 350"/><path d="M860 200 L1150 350"/></g><g id="left-public">{blob(390,400,64,T["secondary"],"a-pub")}<circle cx="390" cy="400" r="64" fill="{T["danger"]}" opacity="0.45"/>{L(390,510,"浏览器公开值",T["text2"])}</g><g id="right-public">{blob(1210,400,64,T["secondary"],"b-pub")}<circle cx="1210" cy="400" r="64" fill="{T["success"]}" opacity="0.45"/>{L(1210,510,"服务器公开值",T["text2"])}</g>')
+    if step>=4: parts.append(f'<g id="exchange" stroke-dasharray="14 12">{arrow(470,390,1120,390,T["text2"])}{arrow(1130,440,480,440,T["text2"])}</g>'+L(800,370,"只交换公开值",T["text2"],40))
     if step>=5: parts.append(f'<g id="eve"><circle cx="800" cy="540" r="36" fill="{T["muted"]}"/><path d="M745 630 C745 588 855 588 855 630Z" fill="{T["muted"]}"/>{L(800,690,"偷听者算不出",T["danger"],40)}</g>')
-    if step>=6: parts.append(f'<g id="left-derive">{arrow(260,570,260,660,T["text2"])}{blob(260,770,80,T["accent"],"left-key")}</g><g id="right-derive">{arrow(1340,570,1340,660,T["text2"])}{blob(1340,770,80,T["accent"],"right-key")}</g>'+L(800,785,"= 同一把会话密钥 =",T["accent"],48))
+    if step>=6: parts.append(f'<g id="left-derive">{arrow(260,560,260,600,T["text2"])}{blob(260,770,80,T["accent"],"left-key")}</g><g id="right-derive">{arrow(1340,560,1340,600,T["text2"])}{blob(1340,770,80,T["accent"],"right-key")}</g>'+L(800,785,"= 同一把会话密钥 =",T["accent"],48))
     return "\n".join(parts)
 svg("ecdhe-mix.svg","0 0 1600 900",ecdhe(6))
 for n in range(1,7): svg(f"ecdhe-step{n}.svg","0 0 1600 900",f'<rect width="1600" height="900" fill="{T["bg"]}"/>'+ecdhe(n))
