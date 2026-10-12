@@ -20,7 +20,7 @@ BG=d['meta']['palette']['bg'];minc=99;assets=set()
 assert [s['chapterId'] for s in d['scenes']]==SEG
 m=d['meta']
 if (m['width'],m['height'],m['fps'])!=(1920,1080,30): err.append('format')
-if m['provisionalTiming']!=any(v.get('provisional') for v in TM.values()): err.append('provisional flag')
+if m['provisionalTiming']!=any(v.get('provisional') or v.get('voPending') for v in TM.values()): err.append('provisional flag')
 exp_keys=[f"{c}-{k+1}" for c in SEG for k in range(len(SPLIT[c]))]
 if list(TM)!=exp_keys: err.append(('timing keys',list(TM)))
 for i,s in enumerate(d['scenes']):
@@ -83,7 +83,8 @@ for a in assets:
 dnsSh=[x for sc in d['scenes'] if sc['chapterId']=='dns' for x in sc['shots']]
 if not any(e.get('label')=='查号台' for x in dnsSh for e in x['elements']) or not any(e.get('asset')=='assets/phonebook.svg' for x in dnsSh for e in x['elements']): err.append('ch4 查号台 reuse')
 first=d['scenes'][0]['shots'][0]['narration'];lastn=d['scenes'][-1]['shots'][-1]['narration']
-if not first.startswith('我是 IT小村') or 'IT小村，下期见' not in lastn: err.append('IT小村 open/close')
+if '我是' in json.dumps(d['scenes'],ensure_ascii=False): err.append('v0.9.1: 我是 IT小村 still present')
+if any('我是IT小村' in re.sub(r'\s','',q['text']) for v in TM.values() for q in v['sentences']): err.append('v0.9.1: timing still has 我是 IT小村 sentence')
 P=d['meta'].get('poster') or {}
 if not P or not any(x['id']==P.get('shotId') and x['from']+P['localFrame']==P['frame'] and P['localFrame']<x['durationInFrames'] for sc in d['scenes'] for x in sc['shots']): err.append('poster')
 print(err or 'ALL OK','frames',g,'shots',sum(len(s['shots']) for s in d['scenes']),'min contrast',round(minc,2),'assets used',len(assets),'provisionalTiming',d['meta']['provisionalTiming'])

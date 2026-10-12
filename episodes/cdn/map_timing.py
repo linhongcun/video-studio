@@ -1,6 +1,6 @@
 # 把 Knoll 的 MiMo 实测 timing（每章一个镜头，键 <chapter>-1，如 why-1 … recap-1）映射到本分镜 13 个镜头；章节起点、总帧数与 Knoll 一致，scale=1
 # 用法：cp <Knoll 的 cdn timing.json> timing.mimo.json && python3 map_timing.py && python3 gen.py && python3 validate.py
-import json
+import json,re
 from pathlib import Path
 from common_split import ids,SPLIT,apply_holds
 H=Path(__file__).resolve().parent
@@ -9,7 +9,11 @@ SHOTS=[f"{c}-{k+1}" for c in ids for k in range(len(SPLIT[c]))]
 PER_SHOT=list(K)==SHOTS   # Knoll 已按 13 个镜头切好（EP.05 实测即此格式）：直接用，scale 1
 if PER_SHOT:
     for sid in SHOTS:
-        v=dict(K[sid]); n=SPLIT[v.get("chapter",sid.rsplit("-",1)[0])][int(sid.rsplit("-",1)[1])-1]
+        v=dict(K[sid])
+        # v0.9.1 删掉开头/结尾「我是 IT小村」。旧配音（v0.9.0）的 timing 里还有这两句：过渡期先丢掉这两条句子，其余句子时间不动、镜头时长不动，标 voPending；Knoll 新 timing 到后不会触发
+        keep=[q for q in v["sentences"] if "我是IT小村" not in re.sub(r"\s","",q["text"])]
+        if len(keep)!=len(v["sentences"]): v["sentences"]=keep; v["voPending"]=True; v["droppedLines"]="我是 IT小村（v0.9.1 删除，等新配音）"
+        n=SPLIT[v.get("chapter",sid.rsplit("-",1)[0])][int(sid.rsplit("-",1)[1])-1]
         assert len(v["sentences"])==n,(sid,len(v["sentences"]),n); assert v.get("scale",1)==1 and not v.get("provisional")
         v["source"]=f"/workspace/share/ep5-timing.json:{sid}"; out[sid]=v
 for ch in ([] if PER_SHOT else ids):

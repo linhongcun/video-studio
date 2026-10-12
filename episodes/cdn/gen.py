@@ -42,11 +42,10 @@ def shots_for(si,L):
     at=lambda k,p:AT(si,k,p)
     if si==0:  # 为什么秒开：片名卡 → 地图上海 ↔ 美国西海岸 → 140 ms → 好多趟 → 秒开？
         MAP=lambda:A("map","map",160,260,1600,560)
-        e1=[T("brand",160,150,1600,60,"我是 IT小村",48,P['primary'],align="center"),
-            T("title",160,150,1600,80,"网站离你那么远，为什么还这么快？",60,P['text'],align="center"),
+        e1=[T("title",160,150,1600,80,"网站离你那么远，为什么还这么快？",60,P['text'],align="center"),
             MAP(),dot("sh",420,470),T("shT",300,520,280,50,"上海（你）",40,P['primary'],align="center"),
             dot("us",1500,470,P['accent']),server("srv",1380,600,280,140,"服务器"),T("usT",1360,400,320,50,"美国西海岸",40,P['accent'],align="center")]
-        a1=[F("brand",0),out("brand",at(0,"你在上海")-14,at(0,"你在上海")),F("title",at(0,"你在上海")),F("map",at(0,"你在上海")),F("sh",at(0,"上海")),F("shT",at(0,"上海")),
+        a1=[F("title",0),F("map",at(0,"你在上海")),F("sh",at(0,"上海")),F("shT",at(0,"上海")),
             F("us",at(0,"服务器")),F("usT",at(0,"美国")),F("srv",at(0,"服务器")),pop("srv",at(0,"服务器"))]
         e2=[A("map","map",160,140,1600,460),dot("sh",420,340),T("shT",300,430,280,50,"上海",40,P['primary'],align="center"),
             dot("us",1500,340,P['accent']),T("usT",1360,430,320,50,"美国西海岸",40,P['accent'],align="center"),
@@ -163,10 +162,9 @@ def shots_for(si,L):
         e2=[store("store",160,180,300),wh("wh",1460,180,300),
             R("dyn",520,160,880,90,stroke=P['danger'],radius=16,label="订单 / 余额：每个人都不一样",fontSize=40),
             E("direct","arrow",480,330,960,50,P['accent'],label="门店里没有，回总仓拿",direction="r",fontSize=36),
-            T("final",160,560,1600,70,"网站离你再远，也能很快打开",56,P['primary'],align="center"),
-            T("sign",160,680,1600,64,"我是 IT小村，下期见",48,P['accent'],align="center")]
+            T("final",160,560,1600,70,"网站离你再远，也能很快打开",56,P['primary'],align="center")]
         te=AEND(5,1)
-        a2=[F("store",0),F("wh",0),F("dyn",at(0,"订单")),pop("dyn",at(0,"订单")),draw("direct",at(0,"还是要回"),20),F("final",at(1,"所以")),F("sign",at(2,"我是"))]
+        a2=[F("store",0),F("wh",0),F("dyn",at(0,"订单")),pop("dyn",at(0,"订单")),draw("direct",at(0,"还是要回"),20),F("final",at(1,"所以"))]
         return [(e1,a1),(e2,a2)]
 def subs(t,L,si,k):
     S=sentences(t);q=TM[KEY(si,k)]["sentences"];res=[]
@@ -197,12 +195,12 @@ for si,s in enumerate(narr):
         shots.append(dict(id=KEY(si,k),chapterId=ids[si],**{"from":f},durationInFrames=l,narration=p,subtitles=subs(p,l,si,k),elements=els,animations=an,transition=dict(type="fade" if last else "crossfade",durationInFrames=12 if last else 8)))
         f+=l;nshot+=1
     D=sum(L);scenes.append(dict(id=f"s{si}",chapterId=ids[si],title=titles[si],**{"from":g},durationInFrames=D,narrationChars=CNT[si],narrationCharsRecount=cnt(s),shots=shots));g+=D
-PROV=any(v.get('provisional') for v in TM.values())
-meta=dict(title="《网站离你那么远，为什么还这么快？》",episode=5,slug="cdn",release="v0.9.0",width=1920,height=1080,fps=30,durationInFrames=g,provisionalTiming=PROV,style="深色背景+蓝青高光扁平2D（沿用前几期）",palette=P,font="Noto Sans SC",
+PROV=any(v.get('provisional') or v.get('voPending') for v in TM.values())
+meta=dict(title="《网站离你那么远，为什么还这么快？》",episode=5,slug="cdn",release="v0.9.1",width=1920,height=1080,fps=30,durationInFrames=g,provisionalTiming=PROV,style="深色背景+蓝青高光扁平2D（沿用前几期）",palette=P,font="Noto Sans SC",
   safeArea=dict(margin=80,subtitleBand=[900,980],contentMaxY=880,watermarkClearZone=[1700,80,1840,130]),
-  branding=dict(spec="episodes/_shared/branding/spec.json v1.2.0",endCard="由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾"),
-  notes=("时长=暂定（make_timing.py：第三期 MiMo 冰糖实测校准 557 字/3937 帧，句内 4.842 字/秒，句间 0.28 秒，每章尾留 60 帧）。配音到后：Knoll 的 cdn timing（键 why-1…recap-1）存为 timing.mimo.json → map_timing.py（scale 1）→ gen.py → validate.py。" if PROV else "时长=Knoll MiMo 实测，map_timing.py scale 1。")+"extraHold：miss-2 末尾 +30 帧纯画面停留（配音不动，后续镜头顺延；common_split.HOLDS，暂定与实测 timing 都自动加上）。"+
-   "from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/cdn/。第四章沿用第三期「查号台」画法（浏览器卡片+打电话箭头+查号台服务器卡片+电话簿 phonebook.svg 复用自 dns/assets）。新图标 warehouse/store/store-empty/map/truck 自绘无文字。英文白名单：CDN、DNS、IT、ms。片尾卡与两种水印由全局组件处理。")
+  branding=dict(spec="episodes/_shared/branding/spec.json v1.3.0",cornerWatermark="右上「IT小村」40%，留空区 x1700–1840 y80–130",centerWatermark=None,endCard="由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾"),
+  notes="v0.9.1：已删开头「我是 IT小村」和结尾「我是 IT小村，下期见」（旁白、字幕、画面文字）。"+("【等 Knoll 新 timing】why-1/recap-2 暂用 v0.9.0 实测时长、只去掉那两句的条目（voPending）。" if any(v.get("voPending") for v in TM.values()) else "")+("时长=暂定（make_timing.py：第三期 MiMo 冰糖实测校准 557 字/3937 帧，句内 4.842 字/秒，句间 0.28 秒，每章尾留 60 帧）。配音到后：Knoll 的 cdn timing 存为 timing.mimo.json → map_timing.py（scale 1）→ gen.py → validate.py。" if any(v.get("provisional") for v in TM.values()) else "时长=Knoll MiMo 实测，map_timing.py scale 1。")+"extraHold：miss-2 末尾 +30 帧纯画面停留（配音不动，后续镜头顺延；common_split.HOLDS，暂定与实测 timing 都自动加上）。"+
+   "from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/cdn/。第四章沿用第三期「查号台」画法（浏览器卡片+打电话箭头+查号台服务器卡片+电话簿 phonebook.svg 复用自 dns/assets）。新图标 warehouse/store/store-empty/map/truck 自绘无文字。英文白名单：CDN、DNS、IT、ms。右上水印与片尾卡由全局组件处理（branding v1.3.0：中央淡水印已取消，本期无中央水印选位/隐藏字段）。")
 assets=dict(reuse=[dict(id="browser",desc="浏览器卡片"),dict(id="server",desc="统一服务器卡片（查号台、源站）"),dict(id="routeArrow",desc="路线箭头 drawProgress"),dict(id="subtitle",desc="字幕层"),
   dict(id="phonebook",file="assets/phonebook.svg",from_="dns/assets/phonebook.svg"),dict(id="globe",file="assets/globe.svg",from_="dns/assets/globe.svg",used=False)],
  new=[dict(id=n,file=f"assets/{n}.svg") for n in ("warehouse","store","store-empty","map","truck")])
