@@ -1,0 +1,4273 @@
+{
+ "meta": {
+  "title": "《为什么一家店忙不过来，还要开好几家一起干？》",
+  "episode": 6,
+  "slug": "load-balancing",
+  "release": "v0.10.0",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 3824,
+  "provisionalTiming": false,
+  "style": "深色背景+蓝青高光扁平2D（沿用前几期）",
+  "palette": {
+   "bg": "#0B1020",
+   "panel": "#111827",
+   "primary": "#22D3EE",
+   "secondary": "#3B82F6",
+   "text": "#E5E7EB",
+   "text2": "#9CA3AF",
+   "muted": "#6B7280",
+   "success": "#22C55E",
+   "accent": "#F59E0B",
+   "danger": "#F87171"
+  },
+  "font": "Noto Sans SC",
+  "safeArea": {
+   "margin": 80,
+   "subtitleBand": [
+    900,
+    980
+   ],
+   "contentMaxY": 880,
+   "watermarkClearZone": [
+    1700,
+    80,
+    1840,
+    130
+   ]
+  },
+  "branding": {
+   "spec": "episodes/_shared/branding/spec.json v1.3.0",
+   "cornerWatermark": "右上「IT小村」40%，留空区 x1700–1840 y80–130",
+   "centerWatermark": null,
+   "endCard": "由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾"
+  },
+  "notes": "时长=Knoll MiMo 实测，map_timing.py scale 1。extraHold：spof-1 末尾 +30 帧纯画面停留（common_split.HOLDS；Knoll timing 已含则不重复加）。脚本：修订版（第四章两种分法 + 过渡「前提是柜台得开着」），script.md mtime 1791816334。贯穿比喻接第五期连锁店：导购 = 负载均衡器，柜台 = 后端服务器。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/load-balancing/。新图标 greeter/counter-idle/counter-busy/counter-closed/person/queue/health 自绘无文字；复用第五期 store/map。英文白名单：CDN。branding v1.3.0：只有右上水印（留空区 x1700–1840 y80–130）+ 60 帧片尾卡（全局组件），无中央水印，全片无「我是 IT小村」。",
+  "poster": {
+   "shotId": "solution-2",
+   "localFrame": 299,
+   "frame": 1905,
+   "desc": "排队的客人经导购走到三家空闲柜台 + 「还是同一家店，地址没变」",
+   "file": "poster.jpg"
+  }
+ },
+ "assets": {
+  "reuse": [
+   {
+    "id": "server",
+    "desc": "统一服务器卡片"
+   },
+   {
+    "id": "routeArrow",
+    "desc": "路线箭头 drawProgress"
+   },
+   {
+    "id": "subtitle",
+    "desc": "字幕层"
+   },
+   {
+    "id": "store",
+    "file": "assets/store.svg",
+    "from_": "cdn/assets/store.svg"
+   },
+   {
+    "id": "map",
+    "file": "assets/map.svg",
+    "from_": "cdn/assets/map.svg"
+   }
+  ],
+  "new": [
+   {
+    "id": "greeter",
+    "file": "assets/greeter.svg"
+   },
+   {
+    "id": "counter-idle",
+    "file": "assets/counter-idle.svg"
+   },
+   {
+    "id": "counter-busy",
+    "file": "assets/counter-busy.svg"
+   },
+   {
+    "id": "counter-closed",
+    "file": "assets/counter-closed.svg"
+   },
+   {
+    "id": "person",
+    "file": "assets/person.svg"
+   },
+   {
+    "id": "queue",
+    "file": "assets/queue.svg"
+   },
+   {
+    "id": "health",
+    "file": "assets/health.svg"
+   }
+  ]
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "queue",
+   "title": "一家柜台排长队",
+   "from": 0,
+   "durationInFrames": 646,
+   "narrationChars": 94,
+   "narrationCharsRecount": 94,
+   "shots": [
+    {
+     "id": "queue-1",
+     "chapterId": "queue",
+     "from": 0,
+     "durationInFrames": 370,
+     "narration": "上一期说到，CDN 会把你带到最近的门店。可就算门店就在你家门口，里面如果只有一个柜台，人一多照样排长队，点单越来越慢。",
+     "subtitles": [
+      {
+       "text": "上一期说到，CDN 会把你带到最近的门店",
+       "from": 0,
+       "to": 114
+      },
+      {
+       "text": "可就算门店就在你家门口",
+       "from": 115,
+       "to": 191
+      },
+      {
+       "text": "里面如果只有一个柜台",
+       "from": 192,
+       "to": 262
+      },
+      {
+       "text": "人一多照样排长队",
+       "from": 263,
+       "to": 318
+      },
+      {
+       "text": "点单越来越慢",
+       "from": 319,
+       "to": 369
+      }
+     ],
+     "elements": [
+      {
+       "id": "prev",
+       "type": "text",
+       "x": 160,
+       "y": 140,
+       "w": 800,
+       "h": 50,
+       "text": "上一期：CDN 带你到最近的门店",
+       "fontSize": 36,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "store",
+       "type": "image",
+       "asset": "assets/store.svg",
+       "x": 160,
+       "y": 220,
+       "w": 340,
+       "h": 340,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "storeT",
+       "type": "text",
+       "x": 160,
+       "y": 580,
+       "w": 340,
+       "h": 50,
+       "text": "家门口的门店",
+       "fontSize": 40,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "queue",
+       "type": "image",
+       "asset": "assets/queue.svg",
+       "x": 560,
+       "y": 380,
+       "w": 760,
+       "h": 198,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "counter",
+       "type": "image",
+       "asset": "assets/counter-busy.svg",
+       "x": 1380,
+       "y": 260,
+       "w": 380,
+       "h": 380,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "counterT",
+       "type": "text",
+       "x": 1380,
+       "y": 660,
+       "w": 380,
+       "h": 50,
+       "text": "只有一个柜台",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "slow",
+       "type": "text",
+       "x": 160,
+       "y": 760,
+       "w": 1600,
+       "h": 60,
+       "text": "人一多，排长队，点单越来越慢",
+       "fontSize": 48,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "prev",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "store",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "storeT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "counter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 220,
+         "value": 0
+        },
+        {
+         "frame": 232,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "counterT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 220,
+         "value": 0
+        },
+        {
+         "frame": 232,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "queue",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 263,
+         "value": 0
+        },
+        {
+         "frame": 275,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "queue",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 263,
+         "value": 300
+        },
+        {
+         "frame": 298,
+         "value": 560
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "slow",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 319,
+         "value": 0
+        },
+        {
+         "frame": 331,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "queue-2",
+     "chapterId": "queue",
+     "from": 370,
+     "durationInFrames": 276,
+     "narration": "网站也一样：所有请求都挤到同一台服务器上，它就会忙不过来，页面开始转圈、超时。这是怎么解决的？",
+     "subtitles": [
+      {
+       "text": "网站也一样：所有请求都挤到同一台服务器上",
+       "from": 0,
+       "to": 122
+      },
+      {
+       "text": "它就会忙不过来，页面开始转圈、超时",
+       "from": 123,
+       "to": 228
+      },
+      {
+       "text": "这是怎么解决的",
+       "from": 229,
+       "to": 275
+      }
+     ],
+     "elements": [
+      {
+       "id": "spin",
+       "type": "rect",
+       "x": 160,
+       "y": 600,
+       "w": 400,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 16,
+       "label": "页面转圈",
+       "fontSize": 40
+      },
+      {
+       "id": "srv",
+       "type": "rect",
+       "x": 1160,
+       "y": 240,
+       "w": 440,
+       "h": 300,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "服务器",
+       "note": "统一服务器卡片（同浏览器样式，无窗口圆点，标签 36px）"
+      },
+      {
+       "id": "timeout",
+       "type": "rect",
+       "x": 1160,
+       "y": 600,
+       "w": 440,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 16,
+       "label": "超时",
+       "fontSize": 40
+      },
+      {
+       "id": "q",
+       "type": "text",
+       "x": 600,
+       "y": 620,
+       "w": 480,
+       "h": 110,
+       "text": "？",
+       "fontSize": 96,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "r0",
+       "type": "arrow",
+       "x": 160,
+       "y": 220,
+       "w": 980,
+       "h": 40,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "r1",
+       "type": "arrow",
+       "x": 160,
+       "y": 290,
+       "w": 980,
+       "h": 40,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "r2",
+       "type": "arrow",
+       "x": 160,
+       "y": 360,
+       "w": 980,
+       "h": 40,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "r3",
+       "type": "arrow",
+       "x": 160,
+       "y": 430,
+       "w": 980,
+       "h": 40,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "r4",
+       "type": "arrow",
+       "x": 160,
+       "y": 500,
+       "w": 980,
+       "h": 40,
+       "color": "#F87171",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "srv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r0",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 32,
+         "value": 0
+        },
+        {
+         "frame": 46,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0
+        },
+        {
+         "frame": 51,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 42,
+         "value": 0
+        },
+        {
+         "frame": 56,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r3",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 47,
+         "value": 0
+        },
+        {
+         "frame": 61,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r4",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 52,
+         "value": 0
+        },
+        {
+         "frame": 66,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "spin",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 194,
+         "value": 0
+        },
+        {
+         "frame": 206,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "timeout",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 207,
+         "value": 0
+        },
+        {
+         "frame": 219,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "timeout",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 207,
+         "value": 0
+        },
+        {
+         "frame": 219,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 239,
+         "value": 0
+        },
+        {
+         "frame": 251,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 239,
+         "value": 0
+        },
+        {
+         "frame": 251,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "spof",
+   "title": "单点忙不过来",
+   "from": 646,
+   "durationInFrames": 663,
+   "narrationChars": 89,
+   "narrationCharsRecount": 89,
+   "shots": [
+    {
+     "id": "spof-1",
+     "chapterId": "spof",
+     "from": 646,
+     "durationInFrames": 202,
+     "narration": "这叫单点故障：整家店只靠一个柜台，它一休息，店就得关门。",
+     "subtitles": [
+      {
+       "text": "这叫单点故障：整家店只靠一个柜台",
+       "from": 0,
+       "to": 101
+      },
+      {
+       "text": "它一休息，店就得关门",
+       "from": 102,
+       "to": 201
+      }
+     ],
+     "elements": [
+      {
+       "id": "store",
+       "type": "image",
+       "asset": "assets/store.svg",
+       "x": 160,
+       "y": 220,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "shut",
+       "type": "rect",
+       "x": 160,
+       "y": 560,
+       "w": 300,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 16,
+       "label": "整家店关门",
+       "fontSize": 36
+      },
+      {
+       "id": "open",
+       "type": "image",
+       "asset": "assets/counter-busy.svg",
+       "x": 760,
+       "y": 180,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "closed",
+       "type": "image",
+       "asset": "assets/counter-closed.svg",
+       "x": 760,
+       "y": 180,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "spof",
+       "type": "rect",
+       "x": 660,
+       "y": 640,
+       "w": 600,
+       "h": 100,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 50,
+       "label": "单点故障",
+       "fontSize": 56
+      },
+      {
+       "id": "only",
+       "type": "text",
+       "x": 1220,
+       "y": 320,
+       "w": 540,
+       "h": 50,
+       "text": "只靠一个柜台",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "store",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "open",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "only",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 61,
+         "value": 0
+        },
+        {
+         "frame": 73,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "spof",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "spof",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "open",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 102,
+         "value": 1
+        },
+        {
+         "frame": 114,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "closed",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 102,
+         "value": 0
+        },
+        {
+         "frame": 114,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "shut",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 150,
+         "value": 0
+        },
+        {
+         "frame": 162,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "spof-2",
+     "chapterId": "spof",
+     "from": 848,
+     "durationInFrames": 461,
+     "narration": "远的人慢，是 CDN 管的事；人一多挤垮柜台，是另一件事。一台机器的中央处理器、内存和网口都有限，再快也接不住所有人同时来点单，高峰一到就容易扛不住。",
+     "subtitles": [
+      {
+       "text": "远的人慢，是 CDN 管的事",
+       "from": 0,
+       "to": 84
+      },
+      {
+       "text": "人一多挤垮柜台，是另一件事",
+       "from": 85,
+       "to": 185
+      },
+      {
+       "text": "一台机器的中央处理器、内存和网口都有限",
+       "from": 186,
+       "to": 299
+      },
+      {
+       "text": "再快也接不住所有人同时来点单",
+       "from": 300,
+       "to": 387
+      },
+      {
+       "text": "高峰一到就容易扛不住",
+       "from": 388,
+       "to": 460
+      }
+     ],
+     "elements": [
+      {
+       "id": "far",
+       "type": "rect",
+       "x": 160,
+       "y": 160,
+       "w": 760,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "label": "远 → CDN 管",
+       "fontSize": 40
+      },
+      {
+       "id": "many",
+       "type": "rect",
+       "x": 1000,
+       "y": 160,
+       "w": 760,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 16,
+       "label": "人多挤垮 → 另一件事",
+       "fontSize": 40
+      },
+      {
+       "id": "srv",
+       "type": "rect",
+       "x": 160,
+       "y": 320,
+       "w": 520,
+       "h": 420,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "",
+       "note": "统一服务器卡片（同浏览器样式，无窗口圆点，标签 36px）"
+      },
+      {
+       "id": "one",
+       "type": "image",
+       "asset": "assets/counter-busy.svg",
+       "x": 260,
+       "y": 330,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "oneT",
+       "type": "text",
+       "x": 160,
+       "y": 670,
+       "w": 520,
+       "h": 50,
+       "text": "一台机器",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "g0",
+       "type": "text",
+       "x": 740,
+       "y": 340,
+       "w": 300,
+       "h": 50,
+       "text": "中央处理器",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "right"
+      },
+      {
+       "id": "tr0",
+       "type": "rect",
+       "x": 1080,
+       "y": 340,
+       "w": 680,
+       "h": 56,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 28
+      },
+      {
+       "id": "fill0",
+       "type": "rect",
+       "x": 1080,
+       "y": 340,
+       "w": 680,
+       "h": 56,
+       "color": "#F87171",
+       "reuse": false,
+       "radius": 28,
+       "note": "仪表顶红：opacity 渐显（整条满格）"
+      },
+      {
+       "id": "g1",
+       "type": "text",
+       "x": 740,
+       "y": 470,
+       "w": 300,
+       "h": 50,
+       "text": "内存",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "right"
+      },
+      {
+       "id": "tr1",
+       "type": "rect",
+       "x": 1080,
+       "y": 470,
+       "w": 680,
+       "h": 56,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 28
+      },
+      {
+       "id": "fill1",
+       "type": "rect",
+       "x": 1080,
+       "y": 470,
+       "w": 680,
+       "h": 56,
+       "color": "#F87171",
+       "reuse": false,
+       "radius": 28,
+       "note": "仪表顶红：opacity 渐显（整条满格）"
+      },
+      {
+       "id": "g2",
+       "type": "text",
+       "x": 740,
+       "y": 600,
+       "w": 300,
+       "h": 50,
+       "text": "网口",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "right"
+      },
+      {
+       "id": "tr2",
+       "type": "rect",
+       "x": 1080,
+       "y": 600,
+       "w": 680,
+       "h": 56,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 28
+      },
+      {
+       "id": "fill2",
+       "type": "rect",
+       "x": 1080,
+       "y": 600,
+       "w": 680,
+       "h": 56,
+       "color": "#F87171",
+       "reuse": false,
+       "radius": 28,
+       "note": "仪表顶红：opacity 渐显（整条满格）"
+      },
+      {
+       "id": "peak",
+       "type": "text",
+       "x": 740,
+       "y": 760,
+       "w": 1020,
+       "h": 56,
+       "text": "高峰一到就扛不住",
+       "fontSize": 44,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "far",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "many",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 85,
+         "value": 0
+        },
+        {
+         "frame": 97,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "srv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "one",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "oneT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 218,
+         "value": 0
+        },
+        {
+         "frame": 230,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tr0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 218,
+         "value": 0
+        },
+        {
+         "frame": 230,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fill0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 388,
+         "value": 0
+        },
+        {
+         "frame": 400,
+         "value": 0.9
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "g1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 249,
+         "value": 0
+        },
+        {
+         "frame": 261,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tr1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 249,
+         "value": 0
+        },
+        {
+         "frame": 261,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fill1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 394,
+         "value": 0
+        },
+        {
+         "frame": 406,
+         "value": 0.9
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "g2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 268,
+         "value": 0
+        },
+        {
+         "frame": 280,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tr2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 268,
+         "value": 0
+        },
+        {
+         "frame": 280,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fill2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 400,
+         "value": 0
+        },
+        {
+         "frame": 412,
+         "value": 0.9
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "peak",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 432,
+         "value": 0
+        },
+        {
+         "frame": 444,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "solution",
+   "title": "多开柜台加导购",
+   "from": 1309,
+   "durationInFrames": 624,
+   "narrationChars": 88,
+   "narrationCharsRecount": 88,
+   "shots": [
+    {
+     "id": "solution-1",
+     "chapterId": "solution",
+     "from": 1309,
+     "durationInFrames": 297,
+     "narration": "办法很简单：多开几家柜台，也就是多台后端服务器一起干活；门口再站一个导购，叫负载均衡器。",
+     "subtitles": [
+      {
+       "text": "办法很简单：多开几家柜台",
+       "from": 0,
+       "to": 80
+      },
+      {
+       "text": "也就是多台后端服务器一起干活",
+       "from": 81,
+       "to": 184
+      },
+      {
+       "text": "门口再站一个导购",
+       "from": 185,
+       "to": 243
+      },
+      {
+       "text": "叫负载均衡器",
+       "from": 244,
+       "to": 296
+      }
+     ],
+     "elements": [
+      {
+       "id": "multi",
+       "type": "text",
+       "x": 160,
+       "y": 140,
+       "w": 1600,
+       "h": 56,
+       "text": "多开几家柜台 + 门口站个导购",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "greeter",
+       "type": "image",
+       "asset": "assets/greeter.svg",
+       "x": 400,
+       "y": 260,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lbT",
+       "type": "text",
+       "x": 340,
+       "y": 580,
+       "w": 420,
+       "h": 50,
+       "text": "导购 = 负载均衡器",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "c0",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1000,
+       "y": 260,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1260,
+       "y": 260,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1520,
+       "y": 260,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "backT",
+       "type": "text",
+       "x": 1000,
+       "y": 520,
+       "w": 760,
+       "h": 50,
+       "text": "后端服务器：多台一起干活",
+       "fontSize": 36,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "multi",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0
+        },
+        {
+         "frame": 49,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0
+        },
+        {
+         "frame": 49,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 45,
+         "value": 0
+        },
+        {
+         "frame": 57,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 45,
+         "value": 0
+        },
+        {
+         "frame": 57,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 0
+        },
+        {
+         "frame": 65,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 0
+        },
+        {
+         "frame": 65,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "backT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 118,
+         "value": 0
+        },
+        {
+         "frame": 130,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "greeter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 185,
+         "value": 0
+        },
+        {
+         "frame": 197,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lbT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 252,
+         "value": 0
+        },
+        {
+         "frame": 264,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "solution-2",
+     "chapterId": "solution",
+     "from": 1606,
+     "durationInFrames": 327,
+     "narration": "客人进门先找导购，导购把人分到空闲的柜台。你还是进同一家店，地址也没变，背后其实好几家柜台在接单，队伍就短了。",
+     "subtitles": [
+      {
+       "text": "客人进门先找导购",
+       "from": 0,
+       "to": 54
+      },
+      {
+       "text": "导购把人分到空闲的柜台",
+       "from": 55,
+       "to": 138
+      },
+      {
+       "text": "你还是进同一家店",
+       "from": 139,
+       "to": 185
+      },
+      {
+       "text": "地址也没变，背后其实好几家柜台在接单",
+       "from": 186,
+       "to": 286
+      },
+      {
+       "text": "队伍就短了",
+       "from": 287,
+       "to": 326
+      }
+     ],
+     "elements": [
+      {
+       "id": "sign",
+       "type": "rect",
+       "x": 160,
+       "y": 140,
+       "w": 1600,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "label": "还是同一家店，地址没变",
+       "fontSize": 40
+      },
+      {
+       "id": "greeter",
+       "type": "image",
+       "asset": "assets/greeter.svg",
+       "x": 600,
+       "y": 330,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c0",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1400,
+       "y": 250,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1400,
+       "y": 470,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1400,
+       "y": 690,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "to0",
+       "type": "arrow",
+       "x": 860,
+       "y": 315,
+       "w": 520,
+       "h": 50,
+       "color": "#22C55E",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "to1",
+       "type": "arrow",
+       "x": 860,
+       "y": 535,
+       "w": 520,
+       "h": 50,
+       "color": "#22C55E",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "to2",
+       "type": "arrow",
+       "x": 860,
+       "y": 755,
+       "w": 520,
+       "h": 50,
+       "color": "#22C55E",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "p0",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 440,
+       "y": 400,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "p1",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 345,
+       "y": 400,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "p2",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 250,
+       "y": 400,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "p3",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 155,
+       "y": 400,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "greeter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "to0",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 82,
+         "value": 0
+        },
+        {
+         "frame": 97,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "to1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 90,
+         "value": 0
+        },
+        {
+         "frame": 105,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "to2",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 113,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 82,
+         "value": 440
+        },
+        {
+         "frame": 112,
+         "value": 1260
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p0",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 82,
+         "value": 400
+        },
+        {
+         "frame": 112,
+         "value": 275
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 345
+        },
+        {
+         "frame": 126,
+         "value": 1260
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 400
+        },
+        {
+         "frame": 126,
+         "value": 495
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 110,
+         "value": 250
+        },
+        {
+         "frame": 140,
+         "value": 1260
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 110,
+         "value": 400
+        },
+        {
+         "frame": 140,
+         "value": 715
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p3",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 134,
+         "value": 155
+        },
+        {
+         "frame": 154,
+         "value": 440
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sign",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 163,
+         "value": 0
+        },
+        {
+         "frame": 175,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "methods",
+   "title": "怎么分人",
+   "from": 1933,
+   "durationInFrames": 566,
+   "narrationChars": 72,
+   "narrationCharsRecount": 72,
+   "shots": [
+    {
+     "id": "methods-1",
+     "chapterId": "methods",
+     "from": 1933,
+     "durationInFrames": 239,
+     "narration": "导购怎么分人？常见有两种。第一种叫轮询：一人一家柜台，轮着来叫号。",
+     "subtitles": [
+      {
+       "text": "导购怎么分人",
+       "from": 0,
+       "to": 54
+      },
+      {
+       "text": "常见有两种",
+       "from": 55,
+       "to": 98
+      },
+      {
+       "text": "第一种叫轮询：一人一家柜台",
+       "from": 99,
+       "to": 191
+      },
+      {
+       "text": "轮着来叫号",
+       "from": 192,
+       "to": 238
+      }
+     ],
+     "elements": [
+      {
+       "id": "greeter",
+       "type": "image",
+       "asset": "assets/greeter.svg",
+       "x": 160,
+       "y": 330,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "how",
+       "type": "text",
+       "x": 160,
+       "y": 140,
+       "w": 1000,
+       "h": 64,
+       "text": "导购怎么分人？",
+       "fontSize": 52,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "rr",
+       "type": "rect",
+       "x": 160,
+       "y": 620,
+       "w": 860,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 16,
+       "label": "① 轮询：一人一家，轮着来",
+       "fontSize": 40
+      },
+      {
+       "id": "c0",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1300,
+       "y": 200,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1300,
+       "y": 420,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1300,
+       "y": 640,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "to0",
+       "type": "arrow",
+       "x": 420,
+       "y": 275,
+       "w": 860,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "n0",
+       "type": "rect",
+       "x": 1540,
+       "y": 260,
+       "w": 120,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 40,
+       "label": "1",
+       "fontSize": 48
+      },
+      {
+       "id": "to1",
+       "type": "arrow",
+       "x": 420,
+       "y": 495,
+       "w": 860,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "n1",
+       "type": "rect",
+       "x": 1540,
+       "y": 480,
+       "w": 120,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 40,
+       "label": "2",
+       "fontSize": 48
+      },
+      {
+       "id": "to2",
+       "type": "arrow",
+       "x": 420,
+       "y": 715,
+       "w": 860,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "n2",
+       "type": "rect",
+       "x": 1540,
+       "y": 700,
+       "w": 120,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 40,
+       "label": "3",
+       "fontSize": 48
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "greeter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "how",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 130,
+         "value": 0
+        },
+        {
+         "frame": 142,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rr",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 130,
+         "value": 0
+        },
+        {
+         "frame": 142,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "to0",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 146,
+         "value": 0
+        },
+        {
+         "frame": 158,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 152,
+         "value": 0
+        },
+        {
+         "frame": 164,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "to1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 160,
+         "value": 0
+        },
+        {
+         "frame": 172,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 166,
+         "value": 0
+        },
+        {
+         "frame": 178,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "to2",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 0
+        },
+        {
+         "frame": 186,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 180,
+         "value": 0
+        },
+        {
+         "frame": 192,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "methods-2",
+     "chapterId": "methods",
+     "from": 2172,
+     "durationInFrames": 327,
+     "narration": "第二种叫最少连接：哪家柜台手里单子少，就往哪指，忙的时候更公平。不过，不管哪种分法，前提是柜台得开着。",
+     "subtitles": [
+      {
+       "text": "第二种叫最少连接",
+       "from": 0,
+       "to": 59
+      },
+      {
+       "text": "哪家柜台手里单子少",
+       "from": 60,
+       "to": 125
+      },
+      {
+       "text": "就往哪指，忙的时候更公平",
+       "from": 126,
+       "to": 215
+      },
+      {
+       "text": "不过，不管哪种分法",
+       "from": 216,
+       "to": 265
+      },
+      {
+       "text": "前提是柜台得开着",
+       "from": 266,
+       "to": 326
+      }
+     ],
+     "elements": [
+      {
+       "id": "greeter",
+       "type": "image",
+       "asset": "assets/greeter.svg",
+       "x": 160,
+       "y": 330,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lc",
+       "type": "rect",
+       "x": 160,
+       "y": 140,
+       "w": 1000,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "② 最少连接：谁手里单子少，就指向谁",
+       "fontSize": 36
+      },
+      {
+       "id": "c0",
+       "type": "image",
+       "asset": "assets/counter-busy.svg",
+       "x": 1300,
+       "y": 200,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1300,
+       "y": 420,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "image",
+       "asset": "assets/counter-busy.svg",
+       "x": 1300,
+       "y": 640,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "load0",
+       "type": "rect",
+       "x": 1540,
+       "y": 260,
+       "w": 200,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 40,
+       "label": "3 单",
+       "fontSize": 40
+      },
+      {
+       "id": "load1",
+       "type": "rect",
+       "x": 1540,
+       "y": 480,
+       "w": 200,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 40,
+       "label": "1 单",
+       "fontSize": 40
+      },
+      {
+       "id": "load2",
+       "type": "rect",
+       "x": 1540,
+       "y": 700,
+       "w": 200,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 40,
+       "label": "5 单",
+       "fontSize": 40
+      },
+      {
+       "id": "pick",
+       "type": "arrow",
+       "x": 420,
+       "y": 495,
+       "w": 860,
+       "h": 50,
+       "color": "#22C55E",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "fair",
+       "type": "text",
+       "x": 160,
+       "y": 620,
+       "w": 860,
+       "h": 50,
+       "text": "忙的时候更公平",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "lamp",
+       "type": "rect",
+       "x": 1330,
+       "y": 697,
+       "w": 34,
+       "h": 34,
+       "color": "#6B7280",
+       "reuse": false,
+       "radius": 17,
+       "note": "灯闪：灰圆盖住状态灯（灭）→ 亮 → 灭，最后保持熄灭"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "greeter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 42,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lc",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 42,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "load0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 104,
+         "value": 0
+        },
+        {
+         "frame": 116,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "load1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 104,
+         "value": 0
+        },
+        {
+         "frame": 116,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "load2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 104,
+         "value": 0
+        },
+        {
+         "frame": 116,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pick",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 126,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fair",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lamp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 286,
+         "value": 0
+        }
+       ],
+       "easing": "linear"
+      },
+      {
+       "elementId": "lamp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 286,
+         "value": 0
+        },
+        {
+         "frame": 289,
+         "value": 1
+        }
+       ],
+       "easing": "linear"
+      },
+      {
+       "elementId": "lamp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 292,
+         "value": 1
+        },
+        {
+         "frame": 295,
+         "value": 0
+        }
+       ],
+       "easing": "linear"
+      },
+      {
+       "elementId": "lamp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 298,
+         "value": 0
+        },
+        {
+         "frame": 301,
+         "value": 1
+        }
+       ],
+       "easing": "linear"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "chapterId": "health",
+   "title": "健康检查",
+   "from": 2499,
+   "durationInFrames": 628,
+   "narrationChars": 87,
+   "narrationCharsRecount": 87,
+   "shots": [
+    {
+     "id": "health-1",
+     "chapterId": "health",
+     "from": 2499,
+     "durationInFrames": 205,
+     "narration": "柜台休息了怎么办？导购会定时问问：还开着吗？这叫健康检查。",
+     "subtitles": [
+      {
+       "text": "柜台休息了怎么办",
+       "from": 0,
+       "to": 60
+      },
+      {
+       "text": "导购会定时问问：还开着吗",
+       "from": 61,
+       "to": 145
+      },
+      {
+       "text": "这叫健康检查",
+       "from": 146,
+       "to": 204
+      }
+     ],
+     "elements": [
+      {
+       "id": "greeter",
+       "type": "image",
+       "asset": "assets/greeter.svg",
+       "x": 160,
+       "y": 330,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "hcT",
+       "type": "rect",
+       "x": 160,
+       "y": 140,
+       "w": 860,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "健康检查：定时问一声",
+       "fontSize": 40
+      },
+      {
+       "id": "heart",
+       "type": "image",
+       "asset": "assets/health.svg",
+       "x": 200,
+       "y": 620,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c0",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1300,
+       "y": 200,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/counter-closed.svg",
+       "x": 1300,
+       "y": 420,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1300,
+       "y": 640,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ask0",
+       "type": "arrow",
+       "x": 420,
+       "y": 275,
+       "w": 860,
+       "h": 50,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "label": "还开着吗？",
+       "direction": "r",
+       "fontSize": 32,
+       "dash": true
+      },
+      {
+       "id": "ask1",
+       "type": "arrow",
+       "x": 420,
+       "y": 495,
+       "w": 860,
+       "h": 50,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "label": "",
+       "direction": "r",
+       "fontSize": 32,
+       "dash": true
+      },
+      {
+       "id": "ask2",
+       "type": "arrow",
+       "x": 420,
+       "y": 715,
+       "w": 860,
+       "h": 50,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "label": "",
+       "direction": "r",
+       "fontSize": 32,
+       "dash": true
+      },
+      {
+       "id": "no",
+       "type": "rect",
+       "x": 1540,
+       "y": 480,
+       "w": 200,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 40,
+       "label": "不回",
+       "fontSize": 40
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "greeter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ask0",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 82,
+         "value": 0
+        },
+        {
+         "frame": 97,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ask1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 90,
+         "value": 0
+        },
+        {
+         "frame": 105,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ask2",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 113,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 130,
+         "value": 0
+        },
+        {
+         "frame": 142,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hcT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 163,
+         "value": 0
+        },
+        {
+         "frame": 175,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "heart",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 163,
+         "value": 0
+        },
+        {
+         "frame": 175,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "heart",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 163,
+         "value": 0
+        },
+        {
+         "frame": 175,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "health-2",
+     "chapterId": "health",
+     "from": 2704,
+     "durationInFrames": 423,
+     "narration": "柜台不回、或者回得不对，就先不派单，等它恢复了再排回来。新开的柜台也能马上加入：导购发现它健康，立刻开始分人过去，店就跟着变大，这叫弹性扩展。",
+     "subtitles": [
+      {
+       "text": "柜台不回、或者回得不对",
+       "from": 0,
+       "to": 62
+      },
+      {
+       "text": "就先不派单，等它恢复了再排回来",
+       "from": 63,
+       "to": 159
+      },
+      {
+       "text": "新开的柜台也能马上加入",
+       "from": 160,
+       "to": 232
+      },
+      {
+       "text": "导购发现它健康，立刻开始分人过去",
+       "from": 233,
+       "to": 332
+      },
+      {
+       "text": "店就跟着变大，这叫弹性扩展",
+       "from": 333,
+       "to": 422
+      }
+     ],
+     "elements": [
+      {
+       "id": "greeter",
+       "type": "image",
+       "asset": "assets/greeter.svg",
+       "x": 160,
+       "y": 300,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c0",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 700,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "cX",
+       "type": "image",
+       "asset": "assets/counter-closed.svg",
+       "x": 940,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 940,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1180,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "cNew",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1420,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pause",
+       "type": "rect",
+       "x": 700,
+       "y": 560,
+       "w": 440,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 16,
+       "label": "不回：先不派单",
+       "fontSize": 36
+      },
+      {
+       "id": "back",
+       "type": "rect",
+       "x": 700,
+       "y": 670,
+       "w": 440,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "恢复：再排回来",
+       "fontSize": 36
+      },
+      {
+       "id": "elastic",
+       "type": "rect",
+       "x": 1180,
+       "y": 600,
+       "w": 560,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 55,
+       "label": "弹性扩展",
+       "fontSize": 56
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "greeter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cX",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pause",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 70,
+         "value": 0
+        },
+        {
+         "frame": 82,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 95,
+         "value": 0
+        }
+       ],
+       "easing": "linear"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 95,
+         "value": 0
+        },
+        {
+         "frame": 107,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cX",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 95,
+         "value": 1
+        },
+        {
+         "frame": 107,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "back",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 95,
+         "value": 0
+        },
+        {
+         "frame": 107,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cNew",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 160,
+         "value": 0
+        },
+        {
+         "frame": 172,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cNew",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 160,
+         "value": 1560
+        },
+        {
+         "frame": 175,
+         "value": 1420
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "elastic",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 386,
+         "value": 0
+        },
+        {
+         "frame": 398,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "elastic",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 386,
+         "value": 0
+        },
+        {
+         "frame": 398,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "chapterId": "recap",
+   "title": "回顾",
+   "from": 3127,
+   "durationInFrames": 697,
+   "narrationChars": 92,
+   "narrationCharsRecount": 92,
+   "shots": [
+    {
+     "id": "recap-1",
+     "chapterId": "recap",
+     "from": 3127,
+     "durationInFrames": 365,
+     "narration": "放在一起看：CDN 管的是去哪座城的店，解决的是路太远；负载均衡管的是进店后去哪个柜台，解决的是人太多。",
+     "subtitles": [
+      {
+       "text": "放在一起看：CDN 管的是去哪座城的店",
+       "from": 0,
+       "to": 131
+      },
+      {
+       "text": "解决的是路太远；负载均衡管的是进店后去哪个柜台",
+       "from": 132,
+       "to": 301
+      },
+      {
+       "text": "解决的是人太多",
+       "from": 302,
+       "to": 364
+      }
+     ],
+     "elements": [
+      {
+       "id": "cdnH",
+       "type": "text",
+       "x": 160,
+       "y": 160,
+       "w": 760,
+       "h": 56,
+       "text": "CDN：去哪座城的店",
+       "fontSize": 44,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "map",
+       "type": "image",
+       "asset": "assets/map.svg",
+       "x": 160,
+       "y": 250,
+       "w": 760,
+       "h": 266,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "cdnS",
+       "type": "text",
+       "x": 160,
+       "y": 560,
+       "w": 760,
+       "h": 50,
+       "text": "解决：路太远",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "lbH",
+       "type": "text",
+       "x": 1000,
+       "y": 160,
+       "w": 760,
+       "h": 56,
+       "text": "负载均衡：进店后去哪个柜台",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "greeter",
+       "type": "image",
+       "asset": "assets/greeter.svg",
+       "x": 1000,
+       "y": 280,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c0",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1240,
+       "y": 300,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1410,
+       "y": 300,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1580,
+       "y": 300,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lbS",
+       "type": "text",
+       "x": 1000,
+       "y": 560,
+       "w": 760,
+       "h": 50,
+       "text": "解决：人太多",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "cdnH",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "map",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cdnS",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 163,
+         "value": 0
+        },
+        {
+         "frame": 175,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lbH",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "greeter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 190,
+         "value": 0
+        },
+        {
+         "frame": 202,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 194,
+         "value": 0
+        },
+        {
+         "frame": 206,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lbS",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 333,
+         "value": 0
+        },
+        {
+         "frame": 345,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "recap-2",
+     "chapterId": "recap",
+     "from": 3492,
+     "durationInFrames": 332,
+     "narration": "两套一起用：路近了更快，多柜台一起接单也更扛得住。所以网站人再多，也不容易被一家柜台拖垮，高峰也能稳住。",
+     "subtitles": [
+      {
+       "text": "两套一起用：路近了更快",
+       "from": 0,
+       "to": 67
+      },
+      {
+       "text": "多柜台一起接单也更扛得住",
+       "from": 68,
+       "to": 157
+      },
+      {
+       "text": "所以网站人再多，也不容易被一家柜台拖垮",
+       "from": 158,
+       "to": 280
+      },
+      {
+       "text": "高峰也能稳住",
+       "from": 281,
+       "to": 331
+      }
+     ],
+     "elements": [
+      {
+       "id": "both",
+       "type": "text",
+       "x": 160,
+       "y": 160,
+       "w": 1600,
+       "h": 60,
+       "text": "两套一起用：路近更快，多柜台更扛得住",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "queue",
+       "type": "image",
+       "asset": "assets/queue.svg",
+       "x": 160,
+       "y": 330,
+       "w": 560,
+       "h": 146,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "greeter",
+       "type": "image",
+       "asset": "assets/greeter.svg",
+       "x": 780,
+       "y": 300,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c0",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1100,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1320,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "image",
+       "asset": "assets/counter-idle.svg",
+       "x": 1540,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "final",
+       "type": "text",
+       "x": 160,
+       "y": 620,
+       "w": 1600,
+       "h": 70,
+       "text": "人再多，高峰也能稳住",
+       "fontSize": 56,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "both",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "queue",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "queue",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 120
+        },
+        {
+         "frame": 40,
+         "value": 160
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "greeter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "final",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 158,
+         "value": 0
+        },
+        {
+         "frame": 170,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  }
+ ]
+}
