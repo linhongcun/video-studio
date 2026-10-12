@@ -3,6 +3,7 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../../components/Breadcrumb.astro';
 import VideoPlayer from '../../../components/VideoPlayer.astro';
 import ChapterHeading from '../../../components/ChapterHeading.astro';
+import ChapterHeading3 from '../../../components/ChapterHeading3.astro';
 import CodeBlock from '../../../components/CodeBlock.astro';
 import Callout from '../../../components/Callout.astro';
 import Figure from '../../../components/Figure.astro';
@@ -25,7 +26,7 @@ if (redirectTo) return Astro.redirect(`${BASE}episodes/${redirectTo}/`);
 const Content = e.Content;
 const tree = `${REPO}/blob/main/episodes/${e.slug}`;
 // Markdown → 组件自动映射：Sorkin 的稿件无需改写
-const components = {h2: ChapterHeading, pre: CodeBlock, blockquote: Callout, Figure, Callout, Steps, Summary, CodeBlock};
+const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blockquote: Callout, Figure, Callout, Steps, Summary, CodeBlock};
 ---
 <BaseLayout title={e.title} description={e.summary} ogImage={asset(e.slug, e.poster)}>
   <div class="container">
@@ -43,7 +44,7 @@ const components = {h2: ChapterHeading, pre: CodeBlock, blockquote: Callout, Fig
       <BehindTheScenes script={`${tree}/script.md`} storyboard={`${tree}/storyboard.json`} source={`${REPO}/tree/main/episodes/${e.slug}/remotion`} />
       <EpisodePager prev={prev} next={next} />
     </article>
-    <aside class="toc-col"><Toc headings={e.chapters} /></aside>
+    <aside class="toc-col"><Toc headings={e.chapters.filter((c) => c.inArticle)} /></aside>
   </div>
 </BaseLayout>
 <script>
