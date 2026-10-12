@@ -1,4 +1,4 @@
-import os
+import os,re
 T=dict(bg="#0B1020",surface="#111827",s2="#1F2937",border="#243045",text="#E5E7EB",text2="#9CA3AF",muted="#6B7280",primary="#22D3EE",secondary="#3B82F6",success="#22C55E",accent="#F59E0B",danger="#F87171")
 F='font-family="system-ui, -apple-system, \'PingFang SC\', \'Noto Sans CJK SC\', sans-serif"'
 OUT=os.path.join(os.path.dirname(os.path.abspath(__file__)),"assets")
@@ -20,8 +20,8 @@ def lock(open_):
 svg("padlock-open.svg","0 0 512 512",lock(True))
 svg("padlock-closed.svg","0 0 512 512",lock(False))
 svg("key-symmetric.svg","0 0 512 512",key(T['accent'],"#FCD34D".replace("#FCD34D",T['accent'])) )
-svg("keypair-public.svg","0 0 512 512",key(T['primary'],T['primary'],id="public-key")+f'<g id="tag"><circle cx="140" cy="256" r="18" fill="{T["primary"]}"/></g><text x="325" y="200" text-anchor="middle" {F} font-size="44" font-weight="700" fill="{T["primary"]}">公钥</text>')
-svg("keypair-private.svg","0 0 512 512",key(T['s2'],T['secondary'],id="private-key")+f'<g fill="none" stroke="{T["secondary"]}" stroke-width="6"><rect x="210" y="232" width="230" height="48" rx="10"/><rect x="350" y="276" width="30" height="56" rx="6"/><rect x="400" y="276" width="30" height="40" rx="6"/></g><g id="shield"><path d="M140 222 l30 12 v20 c0 22 -14 36 -30 42 c-16 -6 -30 -20 -30 -42 v-20z" fill="{T["secondary"]}"/></g><text x="325" y="200" text-anchor="middle" {F} font-size="44" font-weight="700" fill="{T["secondary"]}">私钥</text>')
+svg("keypair-public.svg","0 0 512 512",key(T['primary'],T['primary'],id="public-key")+f'<g id="tag"><circle cx="140" cy="256" r="18" fill="{T["primary"]}"/></g><text x="325" y="200" text-anchor="middle" {F} font-size="54" font-weight="700" fill="{T["primary"]}">公钥</text>')
+svg("keypair-private.svg","0 0 512 512",key(T['s2'],T['secondary'],id="private-key")+f'<g fill="none" stroke="{T["secondary"]}" stroke-width="6"><rect x="210" y="232" width="230" height="48" rx="10"/><rect x="350" y="276" width="30" height="56" rx="6"/><rect x="400" y="276" width="30" height="40" rx="6"/></g><g id="shield"><path d="M140 222 l30 12 v20 c0 22 -14 36 -30 42 c-16 -6 -30 -20 -30 -42 v-20z" fill="{T["secondary"]}"/></g><text x="325" y="200" text-anchor="middle" {F} font-size="54" font-weight="700" fill="{T["secondary"]}">私钥</text>')
 env_base=f'<rect id="paper" x="56" y="136" width="400" height="260" rx="20" fill="{T["surface"]}" stroke="{T["text2"]}" stroke-width="8"/>'
 svg("envelope.svg","0 0 512 512",f'''<g id="letter"><rect x="116" y="56" width="280" height="250" rx="14" fill="{T['text']}"/>
 <rect x="150" y="100" width="212" height="16" rx="8" fill="{T['muted']}"/><rect x="150" y="140" width="180" height="16" rx="8" fill="{T['muted']}"/><rect x="150" y="180" width="200" height="16" rx="8" fill="{T['muted']}"/></g>
@@ -46,8 +46,8 @@ svg("certificate.svg","0 0 720 512",f'''<rect id="paper" x="40" y="40" width="64
 <text x="560" y="344" text-anchor="middle" {F} font-size="40" font-weight="800" fill="{T['bg']}">CA</text></g>''')
 svg("ca-badge.svg","0 0 512 512",f'''<g id="badge"><path d="M256 40 L430 104 V250 C430 360 352 432 256 472 C160 432 82 360 82 250 V104 Z" fill="{T['surface']}" stroke="{T['accent']}" stroke-width="14" stroke-linejoin="round"/>
 <path d="M256 92 L384 140 V250 C384 330 328 386 256 418 C184 386 128 330 128 250 V140 Z" fill="{T['accent']}"/></g>
-<text x="256" y="250" text-anchor="middle" {F} font-size="96" font-weight="800" fill="{T['bg']}">CA</text>
-<path id="check" d="M196 310 l40 40 l84 -84" fill="none" stroke="{T['bg']}" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>''')
+<text x="256" y="248" text-anchor="middle" {F} font-size="132" font-weight="800" fill="{T['bg']}">CA</text>
+<path id="check" d="M196 334 l40 40 l84 -84" fill="none" stroke="{T['bg']}" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>''')
 svg("eavesdropper.svg","0 0 512 512",f'''<g id="figure" fill="{T['muted']}"><circle cx="256" cy="170" r="88"/><path d="M96 470 C96 340 170 284 256 284 C342 284 416 340 416 470 Z"/>
 <path d="M150 150 C160 80 352 80 362 150 L400 160 L112 160 Z" fill="{T['s2']}"/></g>
 <g id="eyes"><ellipse cx="222" cy="190" rx="18" ry="10" fill="{T['danger']}"/><ellipse cx="290" cy="190" rx="18" ry="10" fill="{T['danger']}"/></g>''')
@@ -93,3 +93,26 @@ svg("hash-check.svg","0 0 512 512",f'''<g id="fingerprint" fill="none" stroke="{
 <path d="M150 330 C130 200 200 130 256 130 C330 130 380 190 370 300"/><path d="M190 360 C170 250 210 180 256 180 C300 180 330 220 324 300"/>
 <path d="M236 380 C214 300 228 230 256 230 C284 230 288 280 282 320"/><path d="M256 280 C258 320 270 360 290 390"/></g>
 <g id="badge"><circle cx="380" cy="380" r="80" fill="{T['success']}"/><path id="check" d="M342 382 l26 26 l52 -56" fill="none" stroke="{T['bg']}" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/></g>''')
+
+# 无文字的小明信片：飞行/缩小镜头里用（文字 <28px 时不显示文字，只留卡片、明文框、邮票、地址线的形状）
+_pc=open(os.path.join(OUT,"postcard.svg")).read()
+open(os.path.join(OUT,"postcard-mini.svg"),"w").write(re.sub(r'<text[^>]*>.*?</text>','',_pc,flags=re.S))
+
+# 自绘扁平图标（无文字，商用安全）：咖啡杯 / 眼睛（窃听）/ 铅笔（篡改）/ 面具（伪装）
+svg("coffee-cup.svg","0 0 512 512",f'''<g id="steam" fill="none" stroke="{T['text2']}" stroke-width="14" stroke-linecap="round">
+<path d="M190 150 C160 120 220 90 190 50"/><path d="M256 150 C226 120 286 90 256 50"/><path d="M322 150 C292 120 352 90 322 50"/></g>
+<path id="handle" d="M372 230 h28 a56 56 0 0 1 0 112 h-36" fill="none" stroke="{T['accent']}" stroke-width="28" stroke-linecap="round"/>
+<path id="cup" d="M112 190 H392 L366 400 a40 40 0 0 1 -40 34 H178 a40 40 0 0 1 -40 -34 Z" fill="{T['accent']}"/>
+<rect x="112" y="190" width="280" height="30" rx="10" fill="#FCD34D"/>
+<rect id="saucer" x="72" y="440" width="368" height="28" rx="14" fill="{T['text2']}"/>''')
+svg("eye.svg","0 0 512 512",f'''<path id="outline" d="M40 256 C120 130 392 130 472 256 C392 382 120 382 40 256 Z" fill="{T['s2']}" stroke="{T['danger']}" stroke-width="24" stroke-linejoin="round"/>
+<circle id="iris" cx="256" cy="256" r="84" fill="{T['danger']}"/><circle id="pupil" cx="256" cy="256" r="38" fill="{T['bg']}"/>
+<circle cx="282" cy="228" r="14" fill="{T['text']}"/>''')
+svg("pencil.svg","0 0 512 512",f'''<g id="pencil" transform="rotate(-45 256 256)">
+<rect x="96" y="214" width="250" height="84" fill="{T['danger']}"/><rect x="96" y="214" width="250" height="28" fill="#FCA5A5"/>
+<path d="M346 214 L446 256 L346 298 Z" fill="#FDE68A"/><path d="M412 242 L446 256 L412 270 Z" fill="{T['bg']}"/>
+<rect x="66" y="214" width="34" height="84" fill="{T['text2']}"/><rect x="30" y="214" width="40" height="84" rx="16" fill="#FCA5A5"/></g>
+<path id="scribble" d="M80 440 C130 410 170 470 220 440 S300 420 330 440" fill="none" stroke="{T['danger']}" stroke-width="12" stroke-linecap="round"/>''')
+svg("mask.svg","0 0 512 512",f'''<path id="mask" d="M48 210 C48 150 170 150 256 190 C342 150 464 150 464 210 C464 320 380 350 330 330 C300 318 280 290 256 290 C232 290 212 318 182 330 C132 350 48 320 48 210 Z" fill="{T['danger']}"/>
+<ellipse cx="170" cy="240" rx="54" ry="34" fill="{T['bg']}"/><ellipse cx="342" cy="240" rx="54" ry="34" fill="{T['bg']}"/>
+<path id="strap" d="M48 214 L10 196 M464 214 L502 196" stroke="{T['text2']}" stroke-width="14" stroke-linecap="round"/>''')
