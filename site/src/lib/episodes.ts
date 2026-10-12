@@ -62,7 +62,7 @@ export function computeChapters(slug: string, fm: any[] = []) {
     return {chapters: fm.map((f: any) => ({id: f.id, title: f.title, start: 0, frame: 0, inArticle: true})), duration: 0, fps: 30};
   }
   const {fps, scenes, total} = shotPlan(slug);
-  // 优先按 scene.chapterId 与 frontmatter id 显式对应（v2：开场/口述版不在正文里，用 scene 标题）；否则按顺序对齐（速览版）
+  // 优先按 scene.chapterId 与 frontmatter id 显式对应（v2：开场/回顾不在正文里，用 scene 标题）；否则按顺序对齐（速览版）
   const byId = scenes.some((s: any) => s.chapterId);
   const fmById = new Map(fm.map((f: any) => [f.id, f]));
   const chapters: Chapter[] = scenes.map((s: any, i: number) => {

@@ -1,4 +1,4 @@
-// v2 面试满分版：由 ../storyboard.json 驱动的通用渲染器（元素/动画/字幕/配音）。
+// v2 完整版：由 ../storyboard.json 驱动的通用渲染器（元素/动画/字幕/配音）。
 // 复用第一期（速览版）的浏览器、地址栏、服务器机柜、信封、响应包、文件夹、齿轮；新增步骤条、URL 切分、HSTS 盾牌、缓存抽屉、
 // DNS 树、握手时序图、CDN/负载均衡/反向代理、状态码翻牌、渲染流水线、<script> 方块等。
 import React from 'react';
@@ -17,7 +17,7 @@ const OVERRIDES: Record<string, Record<string, any>> = {
   'response-2:etag': {text: 'If-None-Match: "v1" = ETag: "v1"  一致 → 304'},
 };
 // 这些动画按导演要求固定在镜头原始帧，不随配音缩放
-const PINNED: Record<string, boolean> = {'connect-2:tls13note': true};
+const PINNED: Record<string, boolean> = {}; // v0.5.0：+44% 配音后所有动画等比压缩，tls13note 不再固定在 200 帧
 // 动画覆盖（帧为原分镜帧，仍随配音缩放）：dns-2 的解析结果原定 190 帧才出现、只停留约 10 帧就随转场淡出 → 提前到 ask2 到达后
 const ANIM_OVERRIDES: Record<string, any[]> = {
   'dns-2': [
