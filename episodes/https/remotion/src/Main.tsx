@@ -142,16 +142,21 @@ const SvgImage: React.FC<{e: any; scope: string; v: (p: string, d: any) => any; 
   );
 };
 
-// —— 复用第一期 ——
-const ServerRack: React.FC<{color?: string}> = ({color = P.secondary}) => (
-  <div style={{width: '100%', height: '100%', background: P.panel, border: `4px solid ${color}`, borderRadius: 18, padding: 24, boxSizing: 'border-box', display: 'flex', flexDirection: 'column', gap: 18}}>
-    {[0, 1, 2, 3].map((i) => (
-      <div key={i} style={{flex: 1, background: P.panel2, borderRadius: 8, display: 'flex', alignItems: 'center', padding: '0 20px', gap: 12}}>
-        <div style={{width: 16, height: 16, borderRadius: 8, background: P.success, boxShadow: `0 0 10px ${P.success}`, opacity: 0.8}} />
+// —— 服务器卡片：与浏览器窗口同一套样式（深色面板、4px 描边、16 圆角、同色外发光）——
+const ServerCard: React.FC<{color?: string; label?: string; fontSize?: number}> = ({color = P.primary, label = '服务器', fontSize = 36}) => (
+  <div style={{width: '100%', height: '100%', background: '#111827', border: `4px solid ${color}`, borderRadius: 16, boxSizing: 'border-box', boxShadow: `0 0 24px ${color}33`,
+    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '44px 28px 24px', gap: 14}}>
+    <div style={{position: 'absolute', top: 14, left: 18, display: 'flex', gap: 10}}>
+      {['#EF4444', '#F59E0B', '#22C55E'].map((c) => <div key={c} style={{width: 14, height: 14, borderRadius: 7, background: c, opacity: 0.8}} />)}
+    </div>
+    {[0, 1, 2].map((i) => (
+      <div key={i} style={{width: '100%', height: 38, background: `${color}1f`, border: `2px solid ${color}66`, borderRadius: 8, boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: '0 14px', gap: 10}}>
+        <div style={{width: 12, height: 12, borderRadius: 6, background: P.success, boxShadow: `0 0 8px ${P.success}`, opacity: 0.85}} />
         <div style={{flex: 1}} />
-        {[0, 1, 2].map((j) => <div key={j} style={{width: 22, height: 6, background: '#374151', borderRadius: 3}} />)}
+        {[0, 1, 2].map((j) => <div key={j} style={{width: 20, height: 5, background: `${color}88`, borderRadius: 3}} />)}
       </div>
     ))}
+    <div style={{marginTop: 10, color: P.text, fontFamily: FONT, fontSize, fontWeight: 700, lineHeight: 1.2, whiteSpace: 'nowrap'}}>{label}</div>
   </div>
 );
 // —— 第二期威胁图标（窃听 / 篡改 / 伪装）——
@@ -164,7 +169,7 @@ const Pencil: React.FC<{color: string}> = ({color}) => (
 const Mask: React.FC<{color: string}> = ({color}) => (
   <svg viewBox="0 0 100 100" width="100%" height="100%"><path d="M8 34 Q50 22 92 34 Q92 72 62 74 Q50 60 38 74 Q8 72 8 34Z" fill={`${color}22`} stroke={color} strokeWidth={6} strokeLinejoin="round" /><ellipse cx={32} cy={46} rx={10} ry={7} fill={color} /><ellipse cx={68} cy={46} rx={10} ry={7} fill={color} /></svg>
 );
-const ICONS: Record<string, React.FC<{color: string}>> = {server: ServerRack, eye: Eye, pencil: Pencil, mask: Mask};
+const ICONS: Record<string, React.FC<{color: string}>> = {eye: Eye, pencil: Pencil, mask: Mask};
 
 const Arrow: React.FC<{e: any; progress: number}> = ({e, progress}) => {
   const c = color(e.color);
@@ -228,8 +233,9 @@ const Element: React.FC<{e: any; anims: any[]; frame: number; fps: number; scope
     );
   }
   if (e.type === 'icon') {
+    if (e.id === 'server') return <div style={base}><ServerCard color={stroke ?? fill ?? P.primary} label={clean(e.label) || '服务器'} fontSize={e.fontSize ?? 36} /></div>;
     const I = ICONS[e.id];
-    const caption = e.id === 'server' ? clean(e.label) : null;
+    const caption = null;
     return (
       <div style={base}>
         {I ? <I color={fill ?? P.primary} /> : <div style={{width: '100%', height: '100%', border: `3px dashed ${P.muted}`, borderRadius: 12, color: P.text2, fontFamily: FONT, fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>{clean(e.label)}</div>}
