@@ -1,0 +1,84 @@
+{
+ "meta": {
+  "title": "《网站怎么记住你已经登录？》",
+  "episode": 4,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "notes": "配音用占位分镜：每章一个镜头，仅供 tts_timing.py 合成；正式 storyboard.json 由 Miyazaki 交付后覆盖"
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "stateless",
+   "title": "HTTP 记不住人",
+   "shots": [
+    {
+     "id": "stateless-1",
+     "durationInFrames": 788,
+     "narration": "你刚登录完一个网站，点开下一页，它照样知道你是谁。可 HTTP 本身是无状态的：每一次请求，对服务器来说都像第一次见面，它记不住上一次是谁来过。要是每点一页都得重新输一次密码，谁也受不了。那网站是怎么认出你的？答案就在存包处。"
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "set-cookie",
+   "title": "登录后发手牌",
+   "shots": [
+    {
+     "id": "set-cookie-1",
+     "durationInFrames": 712,
+     "narration": "在存包处寄存东西，柜台会给你一张手牌。登录也一样：密码验证通过后，服务器在响应里加一行 Set-Cookie，交给浏览器一张手牌。手牌上只写着一串编号，叫会话 ID，浏览器把它收好，这就是 Cookie。"
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "send",
+   "title": "每次都带上",
+   "shots": [
+    {
+     "id": "send-1",
+     "durationInFrames": 684,
+     "narration": "之后再访问这个网站，浏览器会自动在每个请求里带上这张手牌，不用你动手。服务器看一眼编号，就知道是你。关掉页面再回来，只要手牌还在、没过期，它也还认得你。手牌只会交给发它的那个网站，别的网站拿不到。"
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "session",
+   "title": "柜台里存什么",
+   "shots": [
+    {
+     "id": "session-1",
+     "durationInFrames": 628,
+     "narration": "真正的东西存在柜台里，也就是服务器那边的 Session。它按编号记着：这是谁，登录到什么时候。手牌本身只是一串编号，不装你的密码。可柜台只认手牌不认人，谁拿着它，谁就能取走东西。"
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "chapterId": "protect",
+   "title": "手牌被偷怎么办",
+   "shots": [
+    {
+     "id": "protect-1",
+     "durationInFrames": 816,
+     "narration": "所以要护好手牌。加上 HttpOnly，网页里的脚本就读不到它；加上 Secure，它只走 HTTPS，路上看不见；SameSite 限制别的网站发起的请求带上它。再给手牌定好有效期，退出登录时柜台作废这个编号，偷到的手牌也就没用了。"
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "chapterId": "recap",
+   "title": "回顾",
+   "shots": [
+    {
+     "id": "recap-1",
+     "durationInFrames": 649,
+     "narration": "串起来看：登录成功，服务器发一张手牌；浏览器收好，每次请求自动带上；服务器凭编号，在柜台里找到你。有些网站用 Token 代替 Session，思路是一样的：凭证带在身上，网站凭它认人。"
+    }
+   ]
+  }
+ ]
+}
