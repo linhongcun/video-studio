@@ -108,7 +108,7 @@ def main():
         fin = os.path.join(td, 'f.wav')
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', pm, '-af', ln + ',aresample=48000,alimiter=limit=0.79:attack=2:release=50:level=false', '-c:a', 'pcm_s16le', fin], check=True)
         if a.wav: subprocess.run(['cp', fin, a.wav], check=True)
-        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', a.inp, '-i', fin, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-shortest', a.out], check=True)
+        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', a.inp, '-i', fin, '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', a.out], check=True)
         tp = subprocess.run(['ffmpeg', '-hide_banner', '-nostats', '-i', a.out, '-af', 'ebur128=peak=true', '-f', 'null', '-'], capture_output=True, text=True).stderr
         tpk = float(re.findall(r'Peak:\s+(-?[0-9.]+) dBFS', tp)[-1])
         rep = {'out': a.out, 'bgm': a.bgm, 'final_LUFS': loudness(a.out), 'voice_LUFS_premix': Lv, 'bgm_LUFS_premix': Lb,
