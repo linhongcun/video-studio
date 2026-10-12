@@ -2,7 +2,7 @@
 
 v2 = 完整版（科普向），约 2 分 32 秒（+19% 配音），10 段：开场 + 8 章 + 回顾。分镜（storyboard.json）还在画，本目录先不放 remotion/ 和 video.mp4，meta.json 标记 `draft: true`，站点构建时隐藏，旧链接 `/episodes/http-request/` 临时跳转到速览版。
 
-## 与速览版共享
+## 与速览版共享（历史记录：速览版已于 v0.5.3 下线，工程已删除）
 速览版工程在 `episodes/http-request-quick/remotion/`，渲染器是“读 storyboard.json 驱动”的通用实现（rect/text/icon/packet/arrow/code 元素 + keyframes 动画 + 字幕层 + 每镜头一条配音）。v2 计划：
 
 1. 抽出共享包 `packages/remotion-kit/`（npm workspaces）：`Element`、`animValue`、`Shot`、`subtitleTimes`、图标（server-rack / gear / folder-html）、音效常量、调色板。

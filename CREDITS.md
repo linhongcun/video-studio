@@ -2,7 +2,7 @@
 
 ## 背景音乐
 
-两期视频（完整版、30 秒速览）均使用：
+视频（完整版）使用：
 
 "Wallpaper" Kevin MacLeod (incompetech.com)
 Licensed under Creative Commons: By Attribution 4.0 License
