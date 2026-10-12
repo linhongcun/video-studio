@@ -1,0 +1,3767 @@
+{
+ "meta": {
+  "title": "《网站怎么记住你已经登录？》",
+  "episode": 4,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 3615,
+  "provisionalTiming": false,
+  "style": "深色背景+蓝青高光扁平2D（沿用前两期）",
+  "palette": {
+   "bg": "#0B1020",
+   "panel": "#111827",
+   "primary": "#22D3EE",
+   "secondary": "#3B82F6",
+   "text": "#E5E7EB",
+   "text2": "#9CA3AF",
+   "muted": "#6B7280",
+   "success": "#22C55E",
+   "accent": "#F59E0B",
+   "danger": "#F87171"
+  },
+  "font": "Noto Sans SC",
+  "safeArea": {
+   "margin": 80,
+   "subtitleBand": [
+    900,
+    980
+   ],
+   "contentMaxY": 880
+  },
+  "notes": "时长=Knoll MiMo 冰糖实测（/workspace/share/ep4-timing.json → timing.mimo.json → map_timing.py，scale 1）+ extraHold 共 180 帧（set-cookie-1 第 341 帧插 45，session-2/protect-2/recap-2 末尾各 45；纯画面停留，配音不动，后续镜头顺延）。set-cookie 合并为一个镜头 set-cookie-1（原 set-cookie-1 并入原 set-cookie-2），手牌最终飞进浏览器框内，Cookie 标在框内；同一元素有多段 opacity 动画（先淡入后淡出）按时间先后生效。recap-2 含第一期 connect-1@220 画面占位（placeholder，待 Knoll 提供）。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/cookie-session/。浏览器/服务器卡片统一样式（无窗口圆点，标签 36px）。新图标 tag/locker/thief 无文字。手牌随请求箭头移动用 x 关键帧。编号 0417 为示意。会话 ID、Set-Cookie 等英文均在白名单。",
+  "poster": {
+   "shotId": "set-cookie-1",
+   "localFrame": 526,
+   "frame": 1181,
+   "desc": "服务器经 Set-Cookie 把手牌递给浏览器，手牌编号特写 + Cookie 标签",
+   "file": "poster.jpg"
+  }
+ },
+ "assets": {
+  "reuse": [
+   {
+    "id": "browser",
+    "desc": "浏览器卡片（标签 浏览器 36px）"
+   },
+   {
+    "id": "server",
+    "desc": "统一服务器卡片（无窗口圆点，标签 36px）"
+   },
+   {
+    "id": "routeArrow",
+    "desc": "第二期路线箭头 drawProgress"
+   },
+   {
+    "id": "subtitle",
+    "desc": "字幕层"
+   }
+  ],
+  "new": [
+   {
+    "id": "locker",
+    "file": "assets/locker.svg"
+   },
+   {
+    "id": "tag",
+    "file": "assets/tag.svg"
+   },
+   {
+    "id": "thief",
+    "file": "assets/thief.svg"
+   }
+  ]
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "stateless",
+   "title": "HTTP 记不住人",
+   "from": 0,
+   "durationInFrames": 655,
+   "narrationChars": 100,
+   "narrationCharsRecount": 100,
+   "shots": [
+    {
+     "id": "stateless-1",
+     "from": 0,
+     "durationInFrames": 510,
+     "narration": "你刚登录完一个网站，点开下一页，它照样知道你是谁。可 HTTP 本身是无状态的：每一次请求，对服务器来说都像第一次见面，它记不住上一次是谁来过。要是每点一页都得重新输一次密码，谁也受不了。",
+     "subtitles": [
+      {
+       "text": "你刚登录完一个网站",
+       "from": 0,
+       "to": 52
+      },
+      {
+       "text": "点开下一页，它照样知道你是谁",
+       "from": 53,
+       "to": 138
+      },
+      {
+       "text": "可 HTTP 本身是无状态的",
+       "from": 139,
+       "to": 208
+      },
+      {
+       "text": "每一次请求，对服务器来说都像第一次见面",
+       "from": 209,
+       "to": 315
+      },
+      {
+       "text": "它记不住上一次是谁来过",
+       "from": 316,
+       "to": 388
+      },
+      {
+       "text": "要是每点一页都得重新输一次密码",
+       "from": 389,
+       "to": 473
+      },
+      {
+       "text": "谁也受不了",
+       "from": 474,
+       "to": 509
+      }
+     ],
+     "elements": [
+      {
+       "id": "browser",
+       "type": "rect",
+       "x": 160,
+       "y": 320,
+       "w": 400,
+       "h": 240,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "浏览器"
+      },
+      {
+       "id": "login",
+       "type": "text",
+       "x": 160,
+       "y": 580,
+       "w": 400,
+       "h": 50,
+       "text": "已登录 ✓",
+       "fontSize": 40,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "server",
+       "type": "rect",
+       "x": 1360,
+       "y": 320,
+       "w": 400,
+       "h": 240,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "服务器",
+       "note": "统一服务器卡片（同浏览器样式，无窗口圆点，标签 36px）"
+      },
+      {
+       "id": "req0",
+       "type": "arrow",
+       "x": 560,
+       "y": 260,
+       "w": 800,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "label": "请求",
+       "direction": "r",
+       "fontSize": 32
+      },
+      {
+       "id": "q0",
+       "type": "text",
+       "x": 1360,
+       "y": 180,
+       "w": 120,
+       "h": 90,
+       "text": "？",
+       "fontSize": 72,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "req1",
+       "type": "arrow",
+       "x": 560,
+       "y": 390,
+       "w": 800,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "label": "请求",
+       "direction": "r",
+       "fontSize": 32
+      },
+      {
+       "id": "q1",
+       "type": "text",
+       "x": 1500,
+       "y": 180,
+       "w": 120,
+       "h": 90,
+       "text": "？",
+       "fontSize": 72,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "req2",
+       "type": "arrow",
+       "x": 560,
+       "y": 520,
+       "w": 800,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "label": "请求",
+       "direction": "r",
+       "fontSize": 32
+      },
+      {
+       "id": "q2",
+       "type": "text",
+       "x": 1640,
+       "y": 180,
+       "w": 120,
+       "h": 90,
+       "text": "？",
+       "fontSize": 72,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "http",
+       "type": "text",
+       "x": 560,
+       "y": 140,
+       "w": 800,
+       "h": 56,
+       "text": "HTTP：无状态",
+       "fontSize": 44,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "who",
+       "type": "text",
+       "x": 1360,
+       "y": 600,
+       "w": 400,
+       "h": 50,
+       "text": "你是谁？",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "first",
+       "type": "text",
+       "x": 160,
+       "y": 700,
+       "w": 1600,
+       "h": 56,
+       "text": "每次请求，都像第一次见面",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "pw",
+       "type": "text",
+       "x": 160,
+       "y": 790,
+       "w": 1600,
+       "h": 56,
+       "text": "每点一页都输一次密码？",
+       "fontSize": 40,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "browser",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "server",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "login",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "req0",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 0
+        },
+        {
+         "frame": 68,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 65,
+         "value": 0
+        },
+        {
+         "frame": 77,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "req1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 209,
+         "value": 0
+        },
+        {
+         "frame": 224,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 221,
+         "value": 0
+        },
+        {
+         "frame": 233,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "req2",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 280,
+         "value": 0
+        },
+        {
+         "frame": 295,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 292,
+         "value": 0
+        },
+        {
+         "frame": 304,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "http",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 139,
+         "value": 0
+        },
+        {
+         "frame": 151,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "who",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 292,
+         "value": 0
+        },
+        {
+         "frame": 304,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "first",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 280,
+         "value": 0
+        },
+        {
+         "frame": 292,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pw",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 389,
+         "value": 0
+        },
+        {
+         "frame": 401,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "stateless-2",
+     "from": 510,
+     "durationInFrames": 145,
+     "narration": "那网站是怎么认出你的？答案就在存包处。",
+     "subtitles": [
+      {
+       "text": "那网站是怎么认出你的",
+       "from": 0,
+       "to": 75
+      },
+      {
+       "text": "答案就在存包处",
+       "from": 76,
+       "to": 144
+      }
+     ],
+     "elements": [
+      {
+       "id": "ask",
+       "type": "text",
+       "x": 160,
+       "y": 160,
+       "w": 1600,
+       "h": 80,
+       "text": "网站是怎么认出你的？",
+       "fontSize": 64,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "locker",
+       "type": "image",
+       "asset": "assets/locker.svg",
+       "x": 710,
+       "y": 300,
+       "w": 500,
+       "h": 500,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ans",
+       "type": "text",
+       "x": 1260,
+       "y": 500,
+       "w": 500,
+       "h": 60,
+       "text": "答案：存包处",
+       "fontSize": 48,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ask",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.9
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ask",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "locker",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 0
+        },
+        {
+         "frame": 88,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "locker",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 0
+        },
+        {
+         "frame": 88,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ans",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 110,
+         "value": 0
+        },
+        {
+         "frame": 122,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "set-cookie",
+   "title": "登录后发手牌",
+   "from": 655,
+   "durationInFrames": 567,
+   "narrationChars": 88,
+   "narrationCharsRecount": 88,
+   "shots": [
+    {
+     "id": "set-cookie-1",
+     "from": 655,
+     "durationInFrames": 567,
+     "narration": "在存包处寄存东西，柜台会给你一张手牌。登录也一样：密码验证通过后，服务器在响应里加一行 Set-Cookie，交给浏览器一张手牌。手牌上只写着一串编号，叫会话 ID，浏览器把它收好，这就是 Cookie。",
+     "subtitles": [
+      {
+       "text": "在存包处寄存东西",
+       "from": 0,
+       "to": 54
+      },
+      {
+       "text": "柜台会给你一张手牌",
+       "from": 55,
+       "to": 124
+      },
+      {
+       "text": "登录也一样：密码验证通过后",
+       "from": 125,
+       "to": 188
+      },
+      {
+       "text": "服务器在响应里加一行 Set-Cookie",
+       "from": 189,
+       "to": 288
+      },
+      {
+       "text": "交给浏览器一张手牌",
+       "from": 289,
+       "to": 390
+      },
+      {
+       "text": "手牌上只写着一串编号",
+       "from": 391,
+       "to": 443
+      },
+      {
+       "text": "叫会话 ID，浏览器把它收好",
+       "from": 444,
+       "to": 507
+      },
+      {
+       "text": "这就是 Cookie",
+       "from": 508,
+       "to": 566
+      }
+     ],
+     "elements": [
+      {
+       "id": "locker",
+       "type": "image",
+       "asset": "assets/locker.svg",
+       "x": 1160,
+       "y": 200,
+       "w": 500,
+       "h": 500,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "counter",
+       "type": "text",
+       "x": 1160,
+       "y": 720,
+       "w": 500,
+       "h": 56,
+       "text": "柜台",
+       "fontSize": 44,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "tagA",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 1340,
+       "y": 380,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tagT",
+       "type": "text",
+       "x": 260,
+       "y": 640,
+       "w": 520,
+       "h": 56,
+       "text": "手牌",
+       "fontSize": 48,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "browser",
+       "type": "rect",
+       "x": 160,
+       "y": 200,
+       "w": 400,
+       "h": 240,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "浏览器"
+      },
+      {
+       "id": "server",
+       "type": "rect",
+       "x": 1360,
+       "y": 200,
+       "w": 400,
+       "h": 240,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "服务器",
+       "note": "统一服务器卡片（同浏览器样式，无窗口圆点，标签 36px）"
+      },
+      {
+       "id": "login",
+       "type": "arrow",
+       "x": 560,
+       "y": 260,
+       "w": 800,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "label": "登录：账号 + 密码",
+       "direction": "r",
+       "fontSize": 32
+      },
+      {
+       "id": "ok",
+       "type": "text",
+       "x": 1360,
+       "y": 460,
+       "w": 400,
+       "h": 50,
+       "text": "密码正确 ✓",
+       "fontSize": 40,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "resp",
+       "type": "arrow",
+       "x": 560,
+       "y": 380,
+       "w": 800,
+       "h": 50,
+       "color": "#F59E0B",
+       "reuse": false,
+       "label": "响应：Set-Cookie",
+       "direction": "l",
+       "fontSize": 36
+      },
+      {
+       "id": "tag",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 1240,
+       "y": 470,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "num",
+       "type": "rect",
+       "x": 660,
+       "y": 620,
+       "w": 600,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 16,
+       "label": "会话 ID：0417",
+       "fontSize": 40,
+       "note": "手牌特写：只有一串编号（示意）"
+      },
+      {
+       "id": "cookie",
+       "type": "text",
+       "x": 320,
+       "y": 340,
+       "w": 220,
+       "h": 56,
+       "text": "Cookie",
+       "fontSize": 44,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center",
+       "note": "标在浏览器框内（框 160–560 × 200–440）"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "locker",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "counter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tagA",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 55,
+         "value": 0
+        },
+        {
+         "frame": 67,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tagA",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 55,
+         "value": 1340
+        },
+        {
+         "frame": 85,
+         "value": 450
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "tagT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 75,
+         "value": 0
+        },
+        {
+         "frame": 87,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "locker",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 111,
+         "value": 1
+        },
+        {
+         "frame": 125,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "counter",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 111,
+         "value": 1
+        },
+        {
+         "frame": 125,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "tagA",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 111,
+         "value": 1
+        },
+        {
+         "frame": 125,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "tagT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 111,
+         "value": 1
+        },
+        {
+         "frame": 125,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "browser",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 125,
+         "value": 0
+        },
+        {
+         "frame": 137,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "server",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 125,
+         "value": 0
+        },
+        {
+         "frame": 137,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "login",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 0
+        },
+        {
+         "frame": 146,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ok",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 162,
+         "value": 0
+        },
+        {
+         "frame": 174,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "resp",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 205,
+         "value": 0
+        },
+        {
+         "frame": 225,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tag",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 205,
+         "value": 0
+        },
+        {
+         "frame": 217,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tag",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 205,
+         "value": 1240
+        },
+        {
+         "frame": 245,
+         "value": 190
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "tag",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 205,
+         "value": 470
+        },
+        {
+         "frame": 245,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "num",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 423,
+         "value": 0
+        },
+        {
+         "frame": 435,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "num",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 423,
+         "value": 0
+        },
+        {
+         "frame": 435,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cookie",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 508,
+         "value": 0
+        },
+        {
+         "frame": 520,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "send",
+   "title": "每次都带上",
+   "from": 1222,
+   "durationInFrames": 571,
+   "narrationChars": 87,
+   "narrationCharsRecount": 87,
+   "shots": [
+    {
+     "id": "send-1",
+     "from": 1222,
+     "durationInFrames": 282,
+     "narration": "之后再访问这个网站，浏览器会自动在每个请求里带上这张手牌，不用你动手。服务器看一眼编号，就知道是你。",
+     "subtitles": [
+      {
+       "text": "之后再访问这个网站",
+       "from": 0,
+       "to": 53
+      },
+      {
+       "text": "浏览器会自动在每个请求里带上这张手牌",
+       "from": 54,
+       "to": 161
+      },
+      {
+       "text": "不用你动手",
+       "from": 162,
+       "to": 199
+      },
+      {
+       "text": "服务器看一眼编号",
+       "from": 200,
+       "to": 244
+      },
+      {
+       "text": "就知道是你",
+       "from": 245,
+       "to": 281
+      }
+     ],
+     "elements": [
+      {
+       "id": "browser",
+       "type": "rect",
+       "x": 160,
+       "y": 300,
+       "w": 400,
+       "h": 240,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "浏览器"
+      },
+      {
+       "id": "server",
+       "type": "rect",
+       "x": 1360,
+       "y": 300,
+       "w": 400,
+       "h": 240,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "example.com",
+       "note": "统一服务器卡片（同浏览器样式，无窗口圆点，标签 36px）"
+      },
+      {
+       "id": "auto",
+       "type": "text",
+       "x": 160,
+       "y": 160,
+       "w": 1600,
+       "h": 56,
+       "text": "浏览器自动带上，不用你动手",
+       "fontSize": 44,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "hi",
+       "type": "text",
+       "x": 1360,
+       "y": 580,
+       "w": 400,
+       "h": 50,
+       "text": "认出你了 ✓",
+       "fontSize": 40,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "req0",
+       "type": "arrow",
+       "x": 560,
+       "y": 300,
+       "w": 800,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "t0",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 560,
+       "y": 270,
+       "w": 72,
+       "h": 72,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "req1",
+       "type": "arrow",
+       "x": 560,
+       "y": 390,
+       "w": 800,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "t1",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 560,
+       "y": 360,
+       "w": 72,
+       "h": 72,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "req2",
+       "type": "arrow",
+       "x": 560,
+       "y": 480,
+       "w": 800,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "t2",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 560,
+       "y": 450,
+       "w": 72,
+       "h": 72,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "browser",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "server",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "auto",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 78,
+         "value": 0
+        },
+        {
+         "frame": 90,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "req0",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 0
+        },
+        {
+         "frame": 116,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 0
+        },
+        {
+         "frame": 102,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 560
+        },
+        {
+         "frame": 116,
+         "value": 1270
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "req1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 0
+        },
+        {
+         "frame": 151,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 0
+        },
+        {
+         "frame": 137,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 560
+        },
+        {
+         "frame": 151,
+         "value": 1270
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "req2",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 166,
+         "value": 0
+        },
+        {
+         "frame": 186,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 166,
+         "value": 0
+        },
+        {
+         "frame": 172,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 166,
+         "value": 560
+        },
+        {
+         "frame": 186,
+         "value": 1270
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "hi",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 245,
+         "value": 0
+        },
+        {
+         "frame": 257,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "send-2",
+     "from": 1504,
+     "durationInFrames": 289,
+     "narration": "关掉页面再回来，只要手牌还在、没过期，它也还认得你。手牌只会交给发它的那个网站，别的网站拿不到。",
+     "subtitles": [
+      {
+       "text": "关掉页面再回来，只要手牌还在、没过期",
+       "from": 0,
+       "to": 110
+      },
+      {
+       "text": "它也还认得你",
+       "from": 111,
+       "to": 161
+      },
+      {
+       "text": "手牌只会交给发它的那个网站",
+       "from": 162,
+       "to": 237
+      },
+      {
+       "text": "别的网站拿不到",
+       "from": 238,
+       "to": 288
+      }
+     ],
+     "elements": [
+      {
+       "id": "browser",
+       "type": "rect",
+       "x": 160,
+       "y": 300,
+       "w": 400,
+       "h": 240,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "浏览器"
+      },
+      {
+       "id": "mine",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 300,
+       "y": 560,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "server",
+       "type": "rect",
+       "x": 1360,
+       "y": 140,
+       "w": 400,
+       "h": 200,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "example.com",
+       "note": "统一服务器卡片（同浏览器样式，无窗口圆点，标签 36px）"
+      },
+      {
+       "id": "other",
+       "type": "rect",
+       "x": 1360,
+       "y": 520,
+       "w": 400,
+       "h": 200,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "别的网站",
+       "note": "统一服务器卡片（同浏览器样式，无窗口圆点，标签 36px）"
+      },
+      {
+       "id": "ok",
+       "type": "arrow",
+       "x": 560,
+       "y": 220,
+       "w": 800,
+       "h": 50,
+       "color": "#22C55E",
+       "reuse": false,
+       "label": "照样认得你",
+       "direction": "r",
+       "fontSize": 32
+      },
+      {
+       "id": "tOk",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 580,
+       "y": 180,
+       "w": 72,
+       "h": 72,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "no",
+       "type": "arrow",
+       "x": 560,
+       "y": 600,
+       "w": 800,
+       "h": 50,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "label": "不会带过去",
+       "direction": "r",
+       "fontSize": 32,
+       "dash": true
+      },
+      {
+       "id": "x",
+       "type": "text",
+       "x": 860,
+       "y": 660,
+       "w": 200,
+       "h": 56,
+       "text": "拿不到",
+       "fontSize": 40,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "back",
+       "type": "text",
+       "x": 160,
+       "y": 760,
+       "w": 1600,
+       "h": 56,
+       "text": "关掉再回来：手牌还在、没过期，就还认得",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "only",
+       "type": "text",
+       "x": 1360,
+       "y": 740,
+       "w": 400,
+       "h": 50,
+       "text": "只交给发它的网站",
+       "fontSize": 32,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "browser",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "server",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "other",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "mine",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "back",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ok",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 49,
+         "value": 0
+        },
+        {
+         "frame": 67,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tOk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 49,
+         "value": 0
+        },
+        {
+         "frame": 55,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tOk",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 49,
+         "value": 580
+        },
+        {
+         "frame": 69,
+         "value": 1270
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "no",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 162,
+         "value": 0
+        },
+        {
+         "frame": 180,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "x",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 238,
+         "value": 0
+        },
+        {
+         "frame": 250,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "only",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 162,
+         "value": 0
+        },
+        {
+         "frame": 174,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "session",
+   "title": "柜台里存什么",
+   "from": 1793,
+   "durationInFrames": 569,
+   "narrationChars": 79,
+   "narrationCharsRecount": 79,
+   "shots": [
+    {
+     "id": "session-1",
+     "from": 1793,
+     "durationInFrames": 254,
+     "narration": "真正的东西存在柜台里，也就是服务器那边的 Session。它按编号记着：这是谁，登录到什么时候。",
+     "subtitles": [
+      {
+       "text": "真正的东西存在柜台里",
+       "from": 0,
+       "to": 49
+      },
+      {
+       "text": "也就是服务器那边的 Session",
+       "from": 50,
+       "to": 137
+      },
+      {
+       "text": "它按编号记着：这是谁",
+       "from": 138,
+       "to": 197
+      },
+      {
+       "text": "登录到什么时候",
+       "from": 198,
+       "to": 253
+      }
+     ],
+     "elements": [
+      {
+       "id": "locker",
+       "type": "image",
+       "asset": "assets/locker.svg",
+       "x": 160,
+       "y": 200,
+       "w": 480,
+       "h": 480,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lockT",
+       "type": "text",
+       "x": 160,
+       "y": 700,
+       "w": 480,
+       "h": 56,
+       "text": "柜台 = 服务器",
+       "fontSize": 40,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "sess",
+       "type": "rect",
+       "x": 760,
+       "y": 200,
+       "w": 1000,
+       "h": 480,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "",
+       "note": "统一服务器卡片（同浏览器样式，无窗口圆点，标签 36px）"
+      },
+      {
+       "id": "sessT",
+       "type": "text",
+       "x": 800,
+       "y": 230,
+       "w": 920,
+       "h": 64,
+       "text": "Session（存在服务器那边）",
+       "fontSize": 48,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "row",
+       "type": "rect",
+       "x": 820,
+       "y": 340,
+       "w": 880,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 12,
+       "label": "编号：0417",
+       "fontSize": 40
+      },
+      {
+       "id": "who",
+       "type": "text",
+       "x": 860,
+       "y": 460,
+       "w": 800,
+       "h": 56,
+       "text": "用户：小明",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": false
+      },
+      {
+       "id": "till",
+       "type": "text",
+       "x": 860,
+       "y": 540,
+       "w": 800,
+       "h": 56,
+       "text": "登录到：今晚 12 点",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "locker",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lockT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sess",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 85,
+         "value": 0
+        },
+        {
+         "frame": 97,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sessT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 95,
+         "value": 0
+        },
+        {
+         "frame": 107,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "row",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 145,
+         "value": 0
+        },
+        {
+         "frame": 157,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "who",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 178,
+         "value": 0
+        },
+        {
+         "frame": 190,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "till",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 198,
+         "value": 0
+        },
+        {
+         "frame": 210,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "session-2",
+     "from": 2047,
+     "durationInFrames": 315,
+     "narration": "手牌本身只是一串编号，不装你的密码。可柜台只认手牌不认人，谁拿着它，谁就能取走东西。",
+     "subtitles": [
+      {
+       "text": "手牌本身只是一串编号",
+       "from": 0,
+       "to": 66
+      },
+      {
+       "text": "不装你的密码",
+       "from": 67,
+       "to": 115
+      },
+      {
+       "text": "可柜台只认手牌不认人",
+       "from": 116,
+       "to": 183
+      },
+      {
+       "text": "谁拿着它，谁就能取走东西",
+       "from": 184,
+       "to": 314
+      }
+     ],
+     "elements": [
+      {
+       "id": "tag",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 200,
+       "y": 180,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "num",
+       "type": "text",
+       "x": 160,
+       "y": 500,
+       "w": 380,
+       "h": 50,
+       "text": "会话 ID：0417",
+       "fontSize": 36,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nopw",
+       "type": "text",
+       "x": 160,
+       "y": 570,
+       "w": 380,
+       "h": 56,
+       "text": "没有密码",
+       "fontSize": 44,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "thief",
+       "type": "image",
+       "asset": "assets/thief.svg",
+       "x": 700,
+       "y": 300,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tTh",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 960,
+       "y": 330,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "use",
+       "type": "arrow",
+       "x": 1020,
+       "y": 420,
+       "w": 340,
+       "h": 50,
+       "color": "#F87171",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "server",
+       "type": "rect",
+       "x": 1360,
+       "y": 300,
+       "w": 400,
+       "h": 240,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 36,
+       "label": "柜台",
+       "note": "统一服务器卡片（同浏览器样式，无窗口圆点，标签 36px）"
+      },
+      {
+       "id": "pass",
+       "type": "text",
+       "x": 1360,
+       "y": 560,
+       "w": 400,
+       "h": 50,
+       "text": "只认手牌 ✓",
+       "fontSize": 40,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "anyone",
+       "type": "text",
+       "x": 160,
+       "y": 760,
+       "w": 1600,
+       "h": 60,
+       "text": "谁拿着手牌，谁就能冒充你",
+       "fontSize": 48,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "tag",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "num",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 40,
+         "value": 0
+        },
+        {
+         "frame": 52,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "nopw",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 67,
+         "value": 0
+        },
+        {
+         "frame": 79,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "server",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 116,
+         "value": 0
+        },
+        {
+         "frame": 128,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "thief",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 116,
+         "value": 0
+        },
+        {
+         "frame": 128,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tTh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 116,
+         "value": 0
+        },
+        {
+         "frame": 128,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "use",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 184,
+         "value": 0
+        },
+        {
+         "frame": 199,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pass",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 196,
+         "value": 0
+        },
+        {
+         "frame": 208,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "anyone",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 212,
+         "value": 0
+        },
+        {
+         "frame": 224,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "chapterId": "protect",
+   "title": "手牌被偷怎么办",
+   "from": 2362,
+   "durationInFrames": 693,
+   "narrationChars": 103,
+   "narrationCharsRecount": 103,
+   "shots": [
+    {
+     "id": "protect-1",
+     "from": 2362,
+     "durationInFrames": 427,
+     "narration": "所以要护好手牌。加上 HttpOnly，网页里的脚本就读不到它；加上 Secure，它只走 HTTPS，路上看不见；SameSite 限制别的网站发起的请求带上它。",
+     "subtitles": [
+      {
+       "text": "所以要护好手牌",
+       "from": 0,
+       "to": 70
+      },
+      {
+       "text": "加上 HttpOnly",
+       "from": 71,
+       "to": 124
+      },
+      {
+       "text": "网页里的脚本就读不到它",
+       "from": 125,
+       "to": 184
+      },
+      {
+       "text": "加上 Secure",
+       "from": 185,
+       "to": 227
+      },
+      {
+       "text": "它只走 HTTPS",
+       "from": 228,
+       "to": 271
+      },
+      {
+       "text": "路上看不见；SameSite 限制别的网站发起的请求带上它",
+       "from": 272,
+       "to": 426
+      }
+     ],
+     "elements": [
+      {
+       "id": "thief",
+       "type": "image",
+       "asset": "assets/thief.svg",
+       "x": 160,
+       "y": 260,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tag",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 520,
+       "y": 260,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "grab",
+       "type": "arrow",
+       "x": 420,
+       "y": 380,
+       "w": 120,
+       "h": 50,
+       "color": "#F87171",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "sH",
+       "type": "rect",
+       "x": 900,
+       "y": 160,
+       "w": 860,
+       "h": 100,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "HttpOnly：网页脚本读不到",
+       "fontSize": 36,
+       "note": "护盾标签：scale 弹出"
+      },
+      {
+       "id": "sS",
+       "type": "rect",
+       "x": 900,
+       "y": 290,
+       "w": 860,
+       "h": 100,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "Secure：只走 HTTPS",
+       "fontSize": 36,
+       "note": "护盾标签：scale 弹出"
+      },
+      {
+       "id": "sM",
+       "type": "rect",
+       "x": 900,
+       "y": 420,
+       "w": 860,
+       "h": 100,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "SameSite：限制别的网站带上它",
+       "fontSize": 36,
+       "note": "护盾标签：scale 弹出"
+      },
+      {
+       "id": "guard",
+       "type": "text",
+       "x": 160,
+       "y": 620,
+       "w": 700,
+       "h": 56,
+       "text": "护好手牌",
+       "fontSize": 44,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "thief",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tag",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "grab",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 15,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "guard",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 27,
+         "value": 0
+        },
+        {
+         "frame": 39,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sH",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 71,
+         "value": 0
+        },
+        {
+         "frame": 83,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sH",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 71,
+         "value": 0
+        },
+        {
+         "frame": 83,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sS",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 185,
+         "value": 0
+        },
+        {
+         "frame": 197,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sS",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 185,
+         "value": 0
+        },
+        {
+         "frame": 197,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sM",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 299,
+         "value": 0
+        },
+        {
+         "frame": 311,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sM",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 299,
+         "value": 0
+        },
+        {
+         "frame": 311,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "grab",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 299,
+         "value": 1
+        },
+        {
+         "frame": 309,
+         "value": 0.2
+        }
+       ],
+       "easing": "easeIn"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "protect-2",
+     "from": 2789,
+     "durationInFrames": 266,
+     "narration": "再给手牌定好有效期，退出登录时柜台作废这个编号，偷到的手牌也就没用了。",
+     "subtitles": [
+      {
+       "text": "再给手牌定好有效期",
+       "from": 0,
+       "to": 59
+      },
+      {
+       "text": "退出登录时柜台作废这个编号",
+       "from": 60,
+       "to": 144
+      },
+      {
+       "text": "偷到的手牌也就没用了",
+       "from": 145,
+       "to": 265
+      }
+     ],
+     "elements": [
+      {
+       "id": "thief",
+       "type": "image",
+       "asset": "assets/thief.svg",
+       "x": 160,
+       "y": 260,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tag",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 520,
+       "y": 260,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "grab",
+       "type": "arrow",
+       "x": 420,
+       "y": 380,
+       "w": 120,
+       "h": 50,
+       "color": "#F87171",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "sH",
+       "type": "rect",
+       "x": 900,
+       "y": 160,
+       "w": 860,
+       "h": 100,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "HttpOnly：网页脚本读不到",
+       "fontSize": 36,
+       "note": "护盾标签：scale 弹出"
+      },
+      {
+       "id": "sS",
+       "type": "rect",
+       "x": 900,
+       "y": 290,
+       "w": 860,
+       "h": 100,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "Secure：只走 HTTPS",
+       "fontSize": 36,
+       "note": "护盾标签：scale 弹出"
+      },
+      {
+       "id": "sM",
+       "type": "rect",
+       "x": 900,
+       "y": 420,
+       "w": 860,
+       "h": 100,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "SameSite：限制别的网站带上它",
+       "fontSize": 36,
+       "note": "护盾标签：scale 弹出"
+      },
+      {
+       "id": "sE",
+       "type": "rect",
+       "x": 900,
+       "y": 550,
+       "w": 860,
+       "h": 100,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "过期：到点作废",
+       "fontSize": 36
+      },
+      {
+       "id": "void",
+       "type": "rect",
+       "x": 520,
+       "y": 600,
+       "w": 300,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 12,
+       "label": "已作废",
+       "fontSize": 40,
+       "note": "盖章：scale 1.3→1 spring"
+      },
+      {
+       "id": "logout",
+       "type": "text",
+       "x": 160,
+       "y": 740,
+       "w": 1600,
+       "h": 56,
+       "text": "退出登录：柜台作废这个编号，偷到的手牌也没用了",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "grab",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 1
+        },
+        {
+         "frame": 1,
+         "value": 0.2
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "sE",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 40,
+         "value": 0
+        },
+        {
+         "frame": 52,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sE",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 40,
+         "value": 0
+        },
+        {
+         "frame": 52,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "logout",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 60,
+         "value": 0
+        },
+        {
+         "frame": 72,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "void",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 106,
+         "value": 1.3
+        },
+        {
+         "frame": 116,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "void",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 106,
+         "value": 0
+        },
+        {
+         "frame": 112,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tag",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 145,
+         "value": 1
+        },
+        {
+         "frame": 157,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "chapterId": "recap",
+   "title": "回顾",
+   "from": 3055,
+   "durationInFrames": 560,
+   "narrationChars": 79,
+   "narrationCharsRecount": 79,
+   "shots": [
+    {
+     "id": "recap-1",
+     "from": 3055,
+     "durationInFrames": 302,
+     "narration": "串起来看：登录成功，服务器发一张手牌；浏览器收好，每次请求自动带上；服务器凭编号，在柜台里找到你。",
+     "subtitles": [
+      {
+       "text": "串起来看：登录成功",
+       "from": 0,
+       "to": 55
+      },
+      {
+       "text": "服务器发一张手牌",
+       "from": 56,
+       "to": 111
+      },
+      {
+       "text": "浏览器收好，每次请求自动带上",
+       "from": 112,
+       "to": 202
+      },
+      {
+       "text": "服务器凭编号，在柜台里找到你",
+       "from": 203,
+       "to": 301
+      }
+     ],
+     "elements": [
+      {
+       "id": "ti",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 220,
+       "y": 160,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "li",
+       "type": "image",
+       "asset": "assets/locker.svg",
+       "x": 1540,
+       "y": 160,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "n1",
+       "type": "rect",
+       "x": 160,
+       "y": 320,
+       "w": 320,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 32,
+       "label": "登录成功"
+      },
+      {
+       "id": "ar0",
+       "type": "arrow",
+       "x": 480,
+       "y": 345,
+       "w": 107,
+       "h": 60,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "n2",
+       "type": "rect",
+       "x": 587,
+       "y": 320,
+       "w": 320,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 32,
+       "label": "Set-Cookie 发手牌"
+      },
+      {
+       "id": "ar1",
+       "type": "arrow",
+       "x": 907,
+       "y": 345,
+       "w": 107,
+       "h": 60,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "n3",
+       "type": "rect",
+       "x": 1014,
+       "y": 320,
+       "w": 320,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "fontSize": 32,
+       "label": "请求带上手牌"
+      },
+      {
+       "id": "ar2",
+       "type": "arrow",
+       "x": 1334,
+       "y": 345,
+       "w": 107,
+       "h": 60,
+       "color": "#22D3EE",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "n4",
+       "type": "rect",
+       "x": 1441,
+       "y": 320,
+       "w": 320,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 16,
+       "fontSize": 32,
+       "label": "柜台按编号认人"
+      },
+      {
+       "id": "line",
+       "type": "text",
+       "x": 160,
+       "y": 560,
+       "w": 1600,
+       "h": 60,
+       "text": "手牌在浏览器，东西在柜台",
+       "fontSize": 48,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "n1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 24,
+         "value": 0
+        },
+        {
+         "frame": 36,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 28,
+         "value": 1.08
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ar0",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 44,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 73,
+         "value": 0
+        },
+        {
+         "frame": 85,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 77,
+         "value": 1.08
+        },
+        {
+         "frame": 87,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ar1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 85,
+         "value": 0
+        },
+        {
+         "frame": 93,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 143,
+         "value": 0
+        },
+        {
+         "frame": 155,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n3",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 147,
+         "value": 1.08
+        },
+        {
+         "frame": 157,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ar2",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 155,
+         "value": 0
+        },
+        {
+         "frame": 163,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 220,
+         "value": 0
+        },
+        {
+         "frame": 232,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n4",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 224,
+         "value": 1.08
+        },
+        {
+         "frame": 234,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ti",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 77,
+         "value": 0
+        },
+        {
+         "frame": 89,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "li",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 224,
+         "value": 0
+        },
+        {
+         "frame": 236,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "line",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 273,
+         "value": 0
+        },
+        {
+         "frame": 285,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "recap-2",
+     "from": 3357,
+     "durationInFrames": 258,
+     "narration": "有些网站用 Token 代替 Session，思路是一样的：凭证带在身上，网站凭它认人。",
+     "subtitles": [
+      {
+       "text": "有些网站用 Token 代替 Session",
+       "from": 0,
+       "to": 103
+      },
+      {
+       "text": "思路是一样的：凭证带在身上",
+       "from": 104,
+       "to": 169
+      },
+      {
+       "text": "网站凭它认人",
+       "from": 170,
+       "to": 257
+      }
+     ],
+     "elements": [
+      {
+       "id": "tag",
+       "type": "image",
+       "asset": "assets/tag.svg",
+       "x": 160,
+       "y": 180,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "to",
+       "type": "arrow",
+       "x": 400,
+       "y": 265,
+       "w": 280,
+       "h": 50,
+       "color": "#22D3EE",
+       "reuse": false,
+       "label": "思路一样",
+       "direction": "r",
+       "fontSize": 36
+      },
+      {
+       "id": "token",
+       "type": "rect",
+       "x": 700,
+       "y": 200,
+       "w": 400,
+       "h": 160,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 24,
+       "label": "Token",
+       "fontSize": 64
+      },
+      {
+       "id": "ep1Frame",
+       "type": "image",
+       "src": "ep01:http-request/connect-1@220",
+       "asset": null,
+       "placeholder": true,
+       "x": 1240,
+       "y": 150,
+       "w": 520,
+       "h": 293,
+       "color": null,
+       "reuse": true,
+       "stroke": "#9CA3AF",
+       "note": "【待 Knoll 提供】做法同第三期 recap-2：复用第一期 http-request 的 connect-1 镜头第 220 帧（全局 1660），16:9 缩放到 520×293，2px text2 描边。"
+      },
+      {
+       "id": "ep1Cap",
+       "type": "text",
+       "x": 1240,
+       "y": 460,
+       "w": 520,
+       "h": 44,
+       "text": "第一期：建立连接",
+       "fontSize": 32,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "carry",
+       "type": "text",
+       "x": 160,
+       "y": 520,
+       "w": 1600,
+       "h": 60,
+       "text": "凭证带在身上，网站凭它认人",
+       "fontSize": 48,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ep1",
+       "type": "text",
+       "x": 160,
+       "y": 600,
+       "w": 1600,
+       "h": 50,
+       "text": "接第一期：从输入 URL 到页面展示，发生了什么？",
+       "fontSize": 36,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "title",
+       "type": "text",
+       "x": 160,
+       "y": 680,
+       "w": 1600,
+       "h": 80,
+       "text": "网站怎么记住你已经登录？",
+       "fontSize": 56,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "tag",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "token",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 28,
+         "value": 0
+        },
+        {
+         "frame": 40,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "token",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 28,
+         "value": 0
+        },
+        {
+         "frame": 40,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "to",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 28,
+         "value": 0
+        },
+        {
+         "frame": 46,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "carry",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 137,
+         "value": 0
+        },
+        {
+         "frame": 149,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ep1Frame",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 170,
+         "value": 0
+        },
+        {
+         "frame": 182,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ep1Cap",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 176,
+         "value": 0
+        },
+        {
+         "frame": 188,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ep1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 180,
+         "value": 0
+        },
+        {
+         "frame": 192,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "title",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 190,
+         "value": 0
+        },
+        {
+         "frame": 202,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  }
+ ]
+}

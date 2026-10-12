@@ -1,0 +1,93 @@
+---
+title: 网站怎么记住你已经登录？
+summary: 用“存包处的手牌”讲清 Cookie 和 Session：HTTP 无状态、Set-Cookie 发手牌、请求自动带上、服务器端的 Session、HttpOnly / Secure / SameSite 与过期，附常见疑问和易错点。
+chapters:
+  - { id: stateless, title: HTTP 记不住人 }
+  - { id: set-cookie, title: 登录后发手牌 }
+  - { id: send,      title: 每次都带上 }
+  - { id: session,   title: 柜台里存什么 }
+  - { id: protect,   title: 手牌被偷怎么办 }
+  - { id: recap,     title: 回顾 }
+---
+
+登录一个网站之后，点开别的页面，它依然知道你是谁。可 HTTP 本身记不住人，网站靠的是一对搭档：存在浏览器里的 **Cookie**，和存在服务器那边的 **Session**。它们的关系就像存包处：你手里拿着一张**手牌**，东西存在**柜台**里。下面分 6 步讲清楚。
+
+## 6 步看懂 Cookie 和 Session
+
+### 1. HTTP 记不住人 {#stateless}
+
+{/* 配图：连续几次请求，服务器头顶都是“你是谁？” */}
+
+- HTTP 是**无状态**的：每个请求都是独立的，服务器不会自动记得上一个请求是谁发的。[^rfc9110]
+- 这让协议简单、好扩展，但“保持登录”“购物车”这类功能，需要额外的机制把多个请求串起来，这就是 Cookie 的用处。[^mdn-cookies]
+
+### 2. 登录后发手牌 {#set-cookie}
+
+{/* 配图：响应箭头挂着一张写着 Set-Cookie 的手牌，手牌上只有一串编号 */}
+
+- 密码验证通过后，服务器在响应里加上 **`Set-Cookie`** 响应头，例如 `Set-Cookie: sid=7f3a9c…; HttpOnly; Secure; SameSite=Lax`。[^rfc6265]
+- 浏览器收到后，把这条 Cookie 按域名保存下来。里面的 `sid` 通常是一串随机生成、很难猜到的**会话 ID**，就是那张手牌上的编号。[^owasp-session]
+- Cookie 是**服务器设置、浏览器保管**的，不是网站跑到你电脑里随便读文件。
+
+### 3. 每次都带上 {#send}
+
+{/* 配图：每支请求箭头都带着同一张手牌；另一个网站伸手，手牌没过去 */}
+
+- 之后浏览器访问同一个网站，会自动在请求头里带上 **`Cookie: sid=7f3a9c…`**，不需要网页代码手动处理。[^rfc6265]
+- 浏览器按 Cookie 的 **`Domain`** 和 **`Path`** 判断该不该带：手牌只交给发它的那个网站（以及它允许的子域名和路径），别的网站拿不到。
+- 没有设置 `Expires` 或 `Max-Age` 的 Cookie 叫**会话 Cookie**，浏览器关闭后通常会被清掉；设置了的就会保存到过期为止。[^mdn-set-cookie]
+
+### 4. 柜台里存什么 {#session}
+
+{/* 配图：存包柜按编号打开，里面是“用户 / 登录到几点”的卡片 */}
+
+- **Session** 是服务器那边按会话 ID 保存的一份记录，比如“这是哪个用户、登录到什么时候”。它可以放在内存、数据库或 Redis 这类缓存里，取决于网站怎么实现。[^owasp-session]
+- 手牌本身只是一串编号，**不含你的密码**。
+- 但服务器只认手牌：谁拿着有效的会话 ID，谁就会被当成你。所以会话 ID 被偷，后果和密码被偷差不多，这叫**会话劫持**。[^owasp-session]
+
+### 5. 手牌被偷怎么办 {#protect}
+
+{/* 配图：小偷伸手，手牌依次套上 HttpOnly、Secure、SameSite 三层防护，最后柜台盖“已作废”章 */}
+
+- **`HttpOnly`**：网页里的 JavaScript 读不到这条 Cookie，就算页面被注入了恶意脚本，也偷不走它。[^mdn-set-cookie]
+- **`Secure`**：只在 HTTPS 连接里发送，路上的人看不到它，接回第二期讲的加密。[^mdn-set-cookie]
+- **`SameSite`**：限制从**别的网站**发起的请求带上这条 Cookie，用来防范跨站请求伪造（CSRF）。取值有 `Strict`、`Lax`、`None`；`None` 必须同时设置 `Secure`。没写这个属性时，有的浏览器默认按 `Lax` 处理，但不是所有浏览器都这样，所以最好显式写明。[^mdn-set-cookie][^rfc6265bis]
+- **过期和退出登录**：给会话设一个合理的有效期；用户点“退出登录”时，服务器要把这个会话 ID 作废，而不只是让浏览器删掉 Cookie。登录成功后也应该换一个新的会话 ID。[^owasp-session]
+
+### 6. 回顾 {#recap}
+
+- 登录成功 → 服务器用 `Set-Cookie` 发手牌（会话 ID）→ 浏览器保存，之后每次请求自动带上 → 服务器按编号在 Session 里找到“你是谁”。
+- 有些网站不在服务器存 Session，而是发一个 **Token**（比如 JWT），里面带着签名过的用户信息。思路一样：凭证带在身上，网站凭它认人。
+
+## 深入一问
+
+**Cookie 和 Session 到底是什么关系？**
+Cookie 是浏览器里存的一小段数据，Session 是服务器上存的一份记录。最常见的做法是：Cookie 里只放会话 ID，Session 里放真正的登录信息，两者靠这个 ID 对上。
+
+**能不能直接把用户名放在 Cookie 里？**
+不行。Cookie 在浏览器里，用户可以随意改。如果服务器直接相信 Cookie 里写的“我是管理员”，谁都能冒充。要么只放随机的会话 ID，要么像 Token 那样带上服务器的签名，改了就能被发现。
+
+**为什么换了浏览器就得重新登录？**
+手牌只存在当前这个浏览器里。换一个浏览器、开无痕窗口，或者清除了 Cookie，就没有手牌可带，服务器自然认不出你。
+
+**Token 比 Session 更好吗？**
+各有取舍。Session 方便随时作废，服务器说了算；Token 不需要服务器查表，适合多个服务之间传递，但要提前作废就麻烦一些。很多网站会把两种思路结合起来用。
+
+**Cookie 能存多少东西？**
+很少。标准只要求浏览器每条至少支持 4096 字节，所以 Cookie 适合放编号，不适合放大量数据；而且它每次请求都会带上，放多了还会拖慢请求。[^rfc6265]
+
+## 易错点
+
+- ❌ “网站通过 Cookie 读取你电脑里的文件” → ✅ Cookie 是服务器用 `Set-Cookie` 设置的，浏览器只把同一网站的 Cookie 带回给它。
+- ❌ “Cookie 里没有密码，被偷了也没关系” → ✅ 拿着有效的会话 ID 就能冒充你，和丢了密码一样危险。
+- ❌ “所有浏览器都默认 SameSite=Lax” → ✅ 只是部分浏览器的默认行为，应该显式写明 `SameSite`。
+- ❌ “退出登录就是删掉 Cookie” → ✅ 服务器那边也要作废这个会话，否则被偷的手牌还能用。
+
+## 参考资料
+
+[^rfc9110]: IETF, [RFC 9110: HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110), 2022-06（现行标准）。
+[^rfc6265]: IETF, [RFC 6265: HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265), 2011-04（现行标准）。
+[^rfc6265bis]: IETF HTTP 工作组, [Cookies: HTTP State Management Mechanism（rfc6265bis 草案）](https://datatracker.ietf.org/doc/draft-ietf-httpbis-rfc6265bis/)，访问于 2026-10-12（草案，尚未成为正式标准）。
+[^mdn-cookies]: MDN, [Using HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)，访问于 2026-10-12。
+[^mdn-set-cookie]: MDN, [Set-Cookie header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie)，访问于 2026-10-12。
+[^owasp-session]: OWASP, [Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)，访问于 2026-10-12。
