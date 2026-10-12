@@ -18,7 +18,7 @@ import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmt
 export function getStaticPaths() {
   const eps = getEpisodes();
   const pages = eps.map((e, i) => ({params: {slug: e.slug}, props: {e, prev: eps[i + 1], next: eps[i - 1]}}));
-  // 未发布草稿：若有速览版，旧链接临时跳转过去（避免 v0.3.0 已分享的 /episodes/http-request/ 404）
+  // 未发布草稿：若有短版，旧链接临时跳转过去（避免 v0.3.0 已分享的 /episodes/http-request/ 404）
   const drafts = SHOW_DRAFTS ? [] : getAllMeta().filter((m) => m.draft && m.quickVersion);
   return [...pages, ...drafts.map((m) => ({params: {slug: m.slug}, props: {redirectTo: m.quickVersion}}))];
 }

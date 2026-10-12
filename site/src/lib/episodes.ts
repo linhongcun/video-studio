@@ -22,7 +22,7 @@ const readMeta = (slug: string) => JSON.parse(fs.readFileSync(path.join(EP_DIR, 
 export function getAllMeta() {
   return fs.readdirSync(EP_DIR).filter((s) => fs.existsSync(path.join(EP_DIR, s, 'meta.json'))).map((s) => ({slug: s, ...readMeta(s)}));
 }
-/** 相关期数（速览版 ↔ 完整版）：已发布的给链接，草稿只显示“制作中” */
+/** 相关期数：已发布的给链接，草稿只显示“制作中” */
 export function getRelated(e: Episode) {
   const all = new Map(getAllMeta().map((m) => [m.slug, m]));
   return (e.related ?? []).map((r) => {
@@ -62,7 +62,7 @@ export function computeChapters(slug: string, fm: any[] = []) {
     return {chapters: fm.map((f: any) => ({id: f.id, title: f.title, start: 0, frame: 0, inArticle: true})), duration: 0, fps: 30};
   }
   const {fps, scenes, total} = shotPlan(slug);
-  // 优先按 scene.chapterId 与 frontmatter id 显式对应（v2：开场/回顾不在正文里，用 scene 标题）；否则按顺序对齐（速览版）
+  // 优先按 scene.chapterId 与 frontmatter id 显式对应（v2：开场/回顾不在正文里，用 scene 标题）；否则按顺序对齐
   const byId = scenes.some((s: any) => s.chapterId);
   const fmById = new Map(fm.map((f: any) => [f.id, f]));
   const chapters: Chapter[] = scenes.map((s: any, i: number) => {
