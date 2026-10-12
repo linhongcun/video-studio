@@ -1,4 +1,4 @@
-# v2 面试满分版 · Remotion
+# v2 完整版 · Remotion
 
 - 渲染：`npm ci && npx remotion render src/index.ts Main ../video.mp4 --codec=h264 --crf=26`
 - 数据：`../storyboard.json`（分镜，原样未改）驱动通用渲染器 `src/Main.tsx`；复用速览版的浏览器/服务器机柜/信封/响应包/文件夹/齿轮组件。

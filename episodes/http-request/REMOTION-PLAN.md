@@ -1,6 +1,6 @@
 # v2 Remotion 工程计划（尚未渲染）
 
-v2 = 面试满分版，约 3 分 15 秒，10 段：开场 + 8 章 + 30 秒口述版。分镜（storyboard.json）还在画，本目录先不放 remotion/ 和 video.mp4，meta.json 标记 `draft: true`，站点构建时隐藏，旧链接 `/episodes/http-request/` 临时跳转到速览版。
+v2 = 完整版（科普向），约 3 分 15 秒，10 段：开场 + 8 章 + 30 秒口述版。分镜（storyboard.json）还在画，本目录先不放 remotion/ 和 video.mp4，meta.json 标记 `draft: true`，站点构建时隐藏，旧链接 `/episodes/http-request/` 临时跳转到速览版。
 
 ## 与速览版共享
 速览版工程在 `episodes/http-request-quick/remotion/`，渲染器是“读 storyboard.json 驱动”的通用实现（rect/text/icon/packet/arrow/code 元素 + keyframes 动画 + 字幕层 + 每镜头一条配音）。v2 计划：
