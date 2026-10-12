@@ -142,13 +142,10 @@ const SvgImage: React.FC<{e: any; scope: string; v: (p: string, d: any) => any; 
   );
 };
 
-// —— 服务器卡片：与浏览器窗口同一套样式（深色面板、4px 描边、16 圆角、同色外发光）——
+// —— 服务器卡片：与浏览器卡片同一套样式（深色面板、4px 描边、16 圆角、同色外发光），不带窗口圆点（Nolan）——
 const ServerCard: React.FC<{color?: string; label?: string; fontSize?: number}> = ({color = P.primary, label = '服务器', fontSize = 36}) => (
   <div style={{width: '100%', height: '100%', background: '#111827', border: `4px solid ${color}`, borderRadius: 16, boxSizing: 'border-box', boxShadow: `0 0 24px ${color}33`,
-    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '44px 28px 24px', gap: 14}}>
-    <div style={{position: 'absolute', top: 14, left: 18, display: 'flex', gap: 10}}>
-      {['#EF4444', '#F59E0B', '#22C55E'].map((c) => <div key={c} style={{width: 14, height: 14, borderRadius: 7, background: c, opacity: 0.8}} />)}
-    </div>
+    position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '28px 28px 24px', gap: 14}}>
     {[0, 1, 2].map((i) => (
       <div key={i} style={{width: '100%', height: 38, background: `${color}1f`, border: `2px solid ${color}66`, borderRadius: 8, boxSizing: 'border-box', display: 'flex', alignItems: 'center', padding: '0 14px', gap: 10}}>
         <div style={{width: 12, height: 12, borderRadius: 6, background: P.success, boxShadow: `0 0 8px ${P.success}`, opacity: 0.85}} />
@@ -207,12 +204,14 @@ const Element: React.FC<{e: any; anims: any[]; frame: number; fps: number; scope
     return <div style={{position: 'absolute', left: x - 2, top: y, width: Math.max(4, e.w), height: Math.max(4, e.h), background: fill, opacity: opacity * 0.9, borderRadius: 2}} />;
   const base: React.CSSProperties = {position: 'absolute', left: x, top: y, width: e.w, height: e.h, opacity, transform: `scale(${scale}) rotate(${rotate}deg)`};
   if (e.type === 'image') return <div style={base}><SvgImage e={e} scope={scope} v={v} has={has} frame={frame} /></div>;
+  if (e.type === 'rect' && e.id === 'server')
+    return <div style={base}><ServerCard color={stroke ?? fill ?? P.primary} label={clean(e.label) || '服务器'} fontSize={e.fontSize ?? 36} /></div>;
   if (e.type === 'rect') {
-    const isBrowser = /浏览器窗口/.test(e.label ?? '');
+    const isBrowser = /浏览器窗口/.test(`${e.label ?? ''}${e.note ?? ''}`);
     let label = clean(e.label);
     if (has('charsVisible')) label = label.slice(0, Math.round(v('charsVisible', label.length)));
     const lines = label.split('\n');
-    const fs = e.fontSize ?? 32;
+    const fs = e.fontSize ?? 36;
     const solid = fill && fill !== P.panel && !e.stroke;
     return (
       <div style={{...base, background: fill, border: stroke ? `4px solid ${stroke}` : undefined, borderRadius: e.radius ?? 8, boxSizing: 'border-box',
@@ -222,7 +221,7 @@ const Element: React.FC<{e: any; anims: any[]; frame: number; fps: number; scope
             <div style={{position: 'absolute', top: 14, left: 18, display: 'flex', gap: 10}}>
               {['#EF4444', '#F59E0B', '#22C55E'].map((c) => <div key={c} style={{width: 14, height: 14, borderRadius: 7, background: c, opacity: 0.8}} />)}
             </div>
-            <div style={{position: 'absolute', bottom: -44, width: '100%', textAlign: 'center', color: P.text2, fontFamily: FONT, fontSize: 26}}>{label}</div>
+            {label && <div style={{position: 'absolute', bottom: -(fs + 18), width: '100%', textAlign: 'center', color: P.text2, fontFamily: FONT, fontSize: fs}}>{label}</div>}
           </>
         )}
         {!isBrowser && lines.map((l, i) => (
