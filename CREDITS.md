@@ -17,10 +17,10 @@ http://creativecommons.org/licenses/by/4.0/
 
 ## 配音（第二期《HTTPS 为什么安全？》）
 
-仅第二期旁白使用本地开源语音合成，音色 `zm_yunxi`：
+仅第二期旁白使用 **Xiaomi MiMo TTS**（云端 API，模型 `mimo-v2.5-tts`，预置音色「冰糖」），北京小米移动软件有限公司提供：
 
-- **Kokoro-82M v1.0**（hexgrad）— 权重 Apache License 2.0：https://huggingface.co/hexgrad/Kokoro-82M （v1.0 发布于 2025-01-27）
-  - 说明：据其模型卡，训练数据为宽松许可/无版权音频，**其中包括由大型厂商的闭源 TTS 模型生成的合成音频**；另含 CC BY 数据 Koniwa `tnc`（CC BY 3.0）与 SIWIS（CC BY 4.0）。我们知悉并接受这一数据来源上的不确定性。
-- **sherpa-onnx**（k2-fsa）— Apache License 2.0：https://github.com/k2-fsa/sherpa-onnx ，用于在 CPU 上运行 Kokoro（打包模型 `kokoro-multi-lang-v1_0`）
-- 获取方式：`bash episodes/_shared/tts/fetch_kokoro.sh`（下载模型并校验 SHA-256，模型文件不进仓库）；合成：`python3 episodes/tts_timing.py episodes/https --engine=kokoro --speed=1.0 --gap=0.28`
+- 接口文档：https://mimo.mi.com/docs/zh-CN/api/audio/tts （页面更新于 2026-07-17）；计费：语音合成使用指南标注「**限时免费**」：https://mimo.mi.com/docs/zh-CN/quick-start/usage-guide/audio/speech-synthesis-v2.5 （页面更新于 2026-07-15），即非永久免费，以平台公示为准。
+- 适用条款：《Xiaomi MiMo 服务协议》https://mimo.xiaomi.com/legal/terms-zh （生效日期 2026-06-15；官方页面需 JS 渲染，条文经第三方存档 https://termshub.cn/public/version/6675 核对，当前版本记为 2026-06-26），2026-10-12 查阅。
+  - 说明：该协议**没有明确授予生成音频的商业使用权，也没有明确禁止**；第 5.1 条仅约定模型及其参数、算法等知识产权归小米，第 3.13 条约定计费与免费额度以平台公示为准、小米可调整。（另：《Xiaomi MiMo 桌面版服务协议》https://mimo.xiaomi.com/legal/service-agreement-zh 第 3.1 条限定桌面版"为非商业目的"使用，但该协议针对桌面软件，不是 API。）**我们于 2026-10-12 知悉并接受这一灰区。**
+- 合成：`python3 episodes/tts_timing.py episodes/https --engine=mimo --gap=0.28`（`episodes/_shared/tts/mimo_say.py`，API 密钥只从环境变量或仓库外文件读取，不进仓库）
 - 动画：Remotion，代码生成；音效为代码合成
