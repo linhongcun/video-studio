@@ -12,8 +12,30 @@ const og = ogImage ? new URL(ogImage, Astro.site).href : undefined;
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="color-scheme" content="dark" />
-  <meta name="theme-color" content="#0B1020" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="theme-color" content="#0B1020" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#F8FAFC" media="(prefers-color-scheme: light)" />
+  <!-- 首屏前写入 data-theme，防止主题闪烁（必须在样式之前、同步执行） -->
+  <script is:inline>
+    (function () {
+      var d = document.documentElement, pref = 'system';
+      try { pref = localStorage.getItem('vs:theme') || 'system'; } catch (e) {}
+      if (pref !== 'light' && pref !== 'dark') pref = 'system';
+      var mq = window.matchMedia('(prefers-color-scheme: light)');
+      var apply = function () {
+        var t = pref === 'system' ? (mq.matches ? 'light' : 'dark') : pref;
+        d.setAttribute('data-theme', t); d.setAttribute('data-theme-pref', pref);
+        var m = document.querySelectorAll('meta[name="theme-color"]');
+        for (var i = 0; i < m.length; i++) m[i].setAttribute('content', t === 'light' ? '#F8FAFC' : '#0B1020');
+      };
+      window.__vsTheme = {
+        get: function () { return pref; },
+        set: function (p) { pref = p; try { p === 'system' ? localStorage.removeItem('vs:theme') : localStorage.setItem('vs:theme', p); } catch (e) {} apply(); },
+      };
+      mq.addEventListener && mq.addEventListener('change', function () { if (pref === 'system') apply(); });
+      apply();
+    })();
+  </script>
   <title>{full}</title>
   <meta name="description" content={description} />
   <meta property="og:title" content={full} />
