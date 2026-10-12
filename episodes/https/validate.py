@@ -56,3 +56,36 @@ for ch in ('plaintext','recap'):
     sc=[s for s in d['scenes'] if s['chapterId']==ch][0]
     if 'assets/postcard.svg' not in json.dumps(sc): err.append(('postcard missing',ch))
 print(err or 'ALL OK', 'frames',g,'shots',sum(len(s['shots']) for s in d['scenes']),'min contrast',round(minc,2),'assets used',len(assets))
+# --- 屏幕字号检查：storyboard 文本与 SVG 内文字按放置缩放计算，≥28px（字幕除外）
+import xml.etree.ElementTree as ET
+def svg_sizes(path):
+    r=ET.parse(path).getroot();vb=[float(x) for x in r.get('viewBox').split()]
+    out=[]
+    for t in r.iter('{http://www.w3.org/2000/svg}text'):
+        out.append((float(t.get('font-size')),''.join(t.itertext())))
+    return vb,out
+px=[];perr=[]
+for sc in d['scenes']:
+    for sh in sc['shots']:
+        for e in sh['elements']:
+            if e.get('role')=='subtitle': continue
+            if e['type']=='text' or e.get('label'):
+                fs=e.get('fontSize',40 if e['type']!='text' else None)
+                if e['type']=='text' or 'fontSize' in e:
+                    px.append(fs)
+                    if fs<28: perr.append((sh['id'],e['id'],fs))
+            if e['type']=='image':
+                vb,ts=svg_sizes(e['asset']);s=min(e['w']/vb[2],e['h']/vb[3])*e.get('scaleMax',1)
+                for fs,txt in ts:
+                    v=fs*s;px.append(v)
+                    if v<28-1e-6: perr.append((sh['id'],e['id'],txt,round(v,1)))
+for sc in d['scenes']:
+    for sh in sc['shots']:
+        tx={e['id'] for e in sh['elements'] if e['type']=='text' and e.get('role')!='subtitle'}
+        for a in sh['animations']:
+            k=a['keyframes']
+            if a['elementId'] in tx and a['property']=='opacity' and k[0]['value']==0 and k[-1]['value']==1 and k[-1]['frame']-k[0]['frame']>15:
+                perr.append(('slow fade',sh['id'],a['elementId']))
+if perr: print('FONT PX <28:',perr)
+print('min on-screen px',round(min(px),1))
+if perr: raise SystemExit(1)

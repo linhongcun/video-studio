@@ -1,12 +1,26 @@
 """配音 + 时间轴：edge-tts 逐镜头生成 → 去尾部静音 → ffprobe 实测 → 写 remotion/src/timing.json。
 用法：python3 episodes/tts_timing.py <episode_dir> --rate=+44% --pause=<每段停顿帧> [--skip=sceneId,...]
 镜头时长 = 配音帧 + 段停顿均摊（≥10 帧）；scale = 新时长/分镜原时长，Main.tsx 按 scale 等比压缩动画与字幕相对帧（动画同步变快，不只是砍停留）。
---skip 的段落沿用已有音频与 timing（标记 pending），用于等待新分镜。"""
+--skip 的段落沿用已有音频与 timing（标记 pending），用于等待新分镜。
+--engine=kokoro：改用本地 Kokoro-82M v1.0（sherpa-onnx，zm_yunxi，见 _shared/tts/，先跑 fetch_kokoro.sh），逐句合成；--rate 换成 --speed，--gap 为句间停顿秒数。
+--engine=mimo：改用 Xiaomi MiMo TTS（mimo-v2.5-tts，--mimo-voice 默认 冰糖，见 _shared/tts/mimo_say.py；密钥读 MIMO_API_KEY 或仓库外 .mimo.env），逐句合成，--gap 为句间停顿秒数。
+若 <episode_dir>/extra_hold.json 存在（{shotId: 帧}），该镜头时长再加额外停顿帧。
+若 <episode_dir>/tts_lexicon.json 存在（[[原文, 念法], ...]，按顺序替换），只替换送进 TTS 的文本，不改脚本/分镜/字幕。"""
 import json, subprocess, re, os, sys, argparse
 ap = argparse.ArgumentParser(); ap.add_argument('ep'); ap.add_argument('--rate', default='+44%'); ap.add_argument('--pause', type=int, default=60)
-ap.add_argument('--skip', default=''); ap.add_argument('--voice', default='zh-CN-YunxiNeural'); a = ap.parse_args()
+ap.add_argument('--skip', default=''); ap.add_argument('--voice', default='zh-CN-YunxiNeural')
+ap.add_argument('--engine', default='edge', choices=['edge', 'kokoro', 'mimo']); ap.add_argument('--speed', type=float, default=1.15); ap.add_argument('--sid', type=int, default=50); ap.add_argument('--gap', type=float, default=0.12)
+ap.add_argument('--mimo-voice', default='冰糖')
+a = ap.parse_args()
+SENT = a.engine in ('kokoro', 'mimo')
+TTSD = os.path.join(os.path.dirname(os.path.abspath(__file__)), '_shared', 'tts')
 ep = os.path.abspath(a.ep); sb = json.load(open(f'{ep}/storyboard.json')); FPS = sb['meta'].get('fps', 30)
 tpath = f'{ep}/remotion/src/timing.json'; old = json.load(open(tpath)) if os.path.exists(tpath) else {}
+lexp = f'{ep}/tts_lexicon.json'; LEX = json.load(open(lexp)) if os.path.exists(lexp) else []
+def say(t):
+    for k, v in LEX: t = t.replace(k, v)
+    return t
+HOLD = {k: v for k, v in (json.load(open(f'{ep}/extra_hold.json')) if os.path.exists(f'{ep}/extra_hold.json') else {}).items() if not k.startswith('_')}
 skip = set(filter(None, a.skip.split(','))); out = {}; tmp = '/tmp/tts_' + os.path.basename(ep); os.makedirs(tmp, exist_ok=True)
 probe = lambda f: float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', f]))
 for s in sb['scenes']:
@@ -17,21 +31,29 @@ for s in sb['scenes']:
             out[i] = {**old[i], 'pending': True}; continue
         mp3 = f'{tmp}/{i}.mp3'
         for attempt in range(5):
-            r = subprocess.run(['python3', '-m', 'edge_tts', '-v', a.voice, f'--rate={a.rate}', '-t', sh['narration'], '--write-media', mp3], capture_output=True, text=True)
+            if a.engine == 'kokoro':
+                mp3 = f'{tmp}/{i}.wav'
+                r = subprocess.run([f'{TTSD}/.venv/bin/python', f'{TTSD}/kokoro_say.py', '--text', say(sh['narration']), '--out', mp3, '--speed', str(a.speed), '--sid', str(a.sid), '--gap', str(a.gap), '--segments', f'{tmp}/{i}.segments.json'], capture_output=True, text=True)
+            elif a.engine == 'mimo':
+                mp3 = f'{tmp}/{i}.wav'
+                r = subprocess.run([f'{TTSD}/.venv/bin/python', f'{TTSD}/mimo_say.py', '--text', say(sh['narration']), '--out', mp3, '--voice', a.mimo_voice, '--gap', str(a.gap), '--segments', f'{tmp}/{i}.segments.json'], capture_output=True, text=True)
+            else:
+                r = subprocess.run(['python3', '-m', 'edge_tts', '-v', a.voice, f'--rate={a.rate}', '-t', say(sh['narration']), '--write-media', mp3], capture_output=True, text=True)
             # 防截断：edge-tts 偶尔返回几乎空的音频（实测 response-3 只有 0.36s），按字数估算下限重试
             if r.returncode == 0 and probe(mp3) >= len(sh['narration']) / 12: break
             print(f'retry {i}: rc={r.returncode} dur={probe(mp3) if r.returncode == 0 else None}', file=sys.stderr)
         else: sys.exit(f'TTS ERROR {i}: {r.stderr[-800:]}')
         log = subprocess.run(['ffmpeg', '-hide_banner', '-i', mp3, '-af', 'silencedetect=n=-40dB:d=0.2', '-f', 'null', '-'], capture_output=True, text=True).stderr
         st = [float(x) for x in re.findall(r'silence_start: ([0-9.]+)', log)]; full = probe(mp3)
-        end = (st[-1] if st and st[-1] > full - 1.2 else full) + 0.15
+        # Kokoro 输出已逐句去掉首尾静音；此处若再按“最后一段静音”裁尾，会把句中逗号停顿当成结尾、截掉最后几个字
+        end = full if SENT else (st[-1] if st and st[-1] > full - 1.2 else full) + 0.15
         # 去掉 edge-tts 约 0.18s 的句首静音，只留 0.05s，让人声紧跟镜头起点
         lg = subprocess.run(['ffmpeg', '-hide_banner', '-i', mp3, '-af', 'silencedetect=n=-45dB:d=0.05', '-f', 'null', '-'], capture_output=True, text=True).stderr
         m = re.search(r'silence_start: (-?[0-9.]+)[\s\S]*?silence_end: ([0-9.]+)', lg)
         lead = max(0.0, float(m.group(2)) - 0.05) if m and float(m.group(1)) <= 0.01 and float(m.group(2)) < 1.0 else 0.0
         subprocess.run(['ffmpeg', '-y', '-v', 'error', '-ss', f'{lead:.3f}', '-i', mp3, '-t', f'{end - lead:.3f}', '-ar', '48000', wav], check=True)
-        sec = probe(wav); af = round(sec * FPS); dur = af + max(10, round(a.pause / n))
+        sec = probe(wav); af = round(sec * FPS); dur = af + max(10, round(a.pause / n)) + HOLD.get(i, 0)
         out[i] = {'audioSec': round(sec, 3), 'audioFrames': af, 'duration': dur, 'origDuration': sh['durationInFrames'],
-                  'scale': round(dur / sh['durationInFrames'], 4), 'rate': a.rate, 'leadTrimSec': round(lead, 3), 'oldAudioSec': old.get(i, {}).get('audioSec')}
+                  'scale': round(dur / sh['durationInFrames'], 4), **({'engine': 'kokoro', 'voice': f'zm_yunxi(sid {a.sid})', 'speed': a.speed, 'gap': a.gap} if a.engine == 'kokoro' else {'engine': 'mimo', 'model': 'mimo-v2.5-tts', 'voice': a.mimo_voice, 'gap': a.gap} if a.engine == 'mimo' else {'rate': a.rate}), **({'extraHold': HOLD[i]} if i in HOLD else {}), 'leadTrimSec': round(lead, 3), 'oldAudioSec': old.get(i, {}).get('audioSec'), **({'sentences': [{**g, 'start': round(max(0.0, g['start'] - lead), 3)} for g in json.load(open(f'{tmp}/{i}.segments.json'))]} if SENT else {}), **({'ttsText': say(sh['narration'])} if say(sh['narration']) != sh['narration'] else {})}
 json.dump(out, open(tpath, 'w'), indent=1, ensure_ascii=False)
 tot = sum(v['duration'] for v in out.values()); print('total', tot, f'{tot / FPS:.2f}s')

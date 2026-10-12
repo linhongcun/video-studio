@@ -13,6 +13,7 @@
 | padlock-closed.svg | 0 0 512 512 | 第2章、第5章（加密通信）、结尾、地址栏锁 | primary #22D3EE 锁体、text #E5E7EB 锁梁 | `shackle`、`body`；上锁瞬间 scale 1→1.08→1 弹一下 |
 | key-symmetric.svg | 0 0 512 512 | 第2章（同一把钥匙）、第3/5章（金色会话密钥） | accent #F59E0B | `key`；两端各一把（复制）；飞行路径 + 旋转；被抓时晃动；第3章“合成”后 scale 0→1 出现 |
 | postcard.svg | 0 0 960 600 | 第1章（HTTP 像明信片）、结尾（明信片→信箱→盖章→封条的起点） | surface 卡面、text-2 描边、surface-2 明文框、text 明文、danger 高亮 `password=123456`、accent 邮票、primary 收件地址 | `card` 飞行（浏览器→中转站→服务器）、`plaintext` 被眼睛图标扫过时闪烁、`stamp` 盖下、`address`；结尾整体缩小并装入 envelope-sealed |
+| postcard-mini.svg | 0 0 960 600 | 第1章飞行、第2章装箱（小尺寸） | 同 postcard，去掉全部文字 | 小于 960 宽显示时文字会 <28px，所以只留形状；960×600 全尺寸时用 postcard.svg（缩放 1.0，最小 28px） |
 | keypair-public.svg | 0 0 512 512 | 第3章、第4章（被调包的亮色钥匙）、第5章 | primary #22D3EE，标签“公钥” | `public-key`、`tag`；沿线交换移动；调包时可换 danger 色描边 |
 | keypair-private.svg | 0 0 512 512 | 第3章 | 暗色体 surface-2 #1F2937 + secondary #3B82F6 描边/盾牌，标签“私钥” | `private-key`、`shield`；始终留在本端，只做轻微呼吸 opacity |
 | envelope.svg | 0 0 512 512 | 第1章（明信片/明文信）、结尾起点 | surface #111827、text-2 描边、text 信纸、muted 文字条 | `letter` 从信封抽出/插入 translateY；`flap-open` 默认 opacity 0 备用 |
@@ -69,9 +70,15 @@
 | role=subtitle | 字幕层，固定 y 900–980 |
 | stroke / radius / align / font / fontSize | 描边色 / 圆角 / 对齐 / 字体 / 字号（px） |
 
-| icon id | 镜头 | 画法建议（无对应 SVG，Knoll 用简单矢量绘制，颜色取 color） |
+| 已替换的占位 icon | 现用资产 | 镜头 |
 |---|---|---|
-| eye | plaintext-2 | 窃听：眼睛轮廓 + 瞳孔，danger 色 |
-| pencil | plaintext-2、integrity-1 | 篡改：斜放铅笔，danger 色；integrity-1 中向信箱移动 |
-| mask | plaintext-2 | 伪装：半脸面具，danger 色 |
-| server | plaintext-1、symmetric-2 | 复用第一期服务器图标 |
+| cup（原 icon） | coffee-cup.svg：琥珀色杯身、热气、托盘，无文字 | intro-1 |
+| eye（原 icon） | eye.svg：danger 色眼睛轮廓 + 虹膜/瞳孔 | plaintext-2 |
+| pencil（原 icon） | pencil.svg：斜放铅笔 + 涂改线，danger 色 | plaintext-2、integrity-1（向信箱移动） |
+| mask（原 icon） | mask.svg：danger 色半脸面具 | plaintext-2 |
+
+| server | plaintext-1、symmetric-2 | type=rect 卡片，与浏览器同一套样式（panel 底、secondary 描边、圆角 16），标签「服务器」36px，由 Knoll 实现 |
+
+storyboard 中已无 type=icon 元素；所有图标均为自绘 SVG（商用安全）。
+
+字号规则：所有画面文字（含 SVG 内文字 × 放置缩放）屏幕上 ≥28px，validate.py 自动检查（字幕除外）。公钥/私钥标签 54 单位（280 宽显示时 29.5px）；ca-badge “CA” 132 单位（110 宽显示时 28.4px）。
