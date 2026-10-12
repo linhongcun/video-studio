@@ -1,0 +1,101 @@
+---
+title: 输入网址后，怎么找到服务器？
+summary: 用“查电话簿”讲清 DNS：本地缓存和 hosts、递归解析器、从根到权威服务器的逐级查询、TTL 与缓存，附常见疑问和易错点。
+chapters:
+  - { id: phonebook, title: 需要一本电话簿 }
+  - { id: cache,     title: 先翻自己的小本子 }
+  - { id: resolver,  title: 请教查号台 }
+  - { id: iterative, title: 一层层往上问 }
+  - { id: ttl,       title: 记下来，下次更快 }
+  - { id: recap,     title: 回顾 }
+---
+
+在浏览器里输入 `example.com`，网页就打开了。可网络上的机器之间只认 **IP 地址**，不认名字。把名字翻译成 IP 地址的系统叫 **DNS**（域名系统），它就像一本分布在全世界的电话簿。下面分 6 步讲清楚这次“查号”是怎么完成的。
+
+## 6 步看懂 DNS
+
+### 1. 需要一本电话簿 {#phonebook}
+
+{/* 配图：地址栏输入 example.com，电话簿左列名字、右列号码 */}
+
+- 域名（如 `example.com`）是给人记的名字，IP 地址（如 IPv4 的 `203.0.113.10`、IPv6 的 `2001:db8::1`，都是文档专用的示例地址）是给机器用的号码。[^rfc5737]
+- DNS 里存着各种**记录**：`A` 记录对应 IPv4 地址，`AAAA` 记录对应 IPv6 地址，`CNAME` 表示“这个名字是另一个名字的别名”。[^rfc9499]
+- 浏览器拿到 IP 地址之后，才能建立连接、发出 HTTP 请求，这就是第一期讲的第一步。
+
+### 2. 先翻自己的小本子 {#cache}
+
+{/* 配图：浏览器和系统各一本小本子，加一张 hosts 便签，命中时直接返回 */}
+
+- 浏览器会先查自己的 **DNS 缓存**，里面是最近查过的记录。
+- 没有的话交给操作系统。系统有自己的缓存，还会读本地的 **hosts 文件**（Windows 在 `C:\Windows\System32\drivers\etc\hosts`，macOS 和 Linux 在 `/etc/hosts`），里面手写的“名字 → 地址”优先使用。
+- 任何一处命中，就不用联网查询，这是最快的情况。
+
+### 3. 请教查号台 {#resolver}
+
+{/* 配图：浏览器拨号给“查号台”卡片，下方列出运营商 DNS、1.1.1.1、8.8.8.8 */}
+
+- 本地都没有，系统会把问题发给**递归解析器**，它就是“查号台”。默认通常是运营商提供的，也可以手动改成 Cloudflare 的 `1.1.1.1`、Google 的 `8.8.8.8` 这类公共 DNS。[^cf-1111][^google-dns]
+- 你的设备只问一句“`example.com` 的地址是多少”，等它给出最终答案。这叫**递归查询**。
+- 递归解析器自己也有缓存，很多热门域名它早就查过，可以直接回答。
+
+### 4. 一层层往上问 {#iterative}
+
+{/* 配图：查号台 → 根 → .com → 权威服务器的往返路线，最后根服务器展开成 a 到 m */}
+
+DNS 的名字是分层管理的，像一棵倒过来的树：最顶上是根，往下是 `.com`、`.cn` 这样的顶级域，再往下才是 `example.com`。递归解析器从顶层一级级往下问，每一级只回答“下一步该去问谁”，这叫**迭代查询**。[^rfc9499]
+
+1. 问**根服务器**：它不知道 `example.com` 的地址，但会告诉你 `.com` 由哪些服务器负责。
+2. 问 **`.com` 的顶级域服务器**：它告诉你 `example.com` 由哪几台**权威服务器**负责。
+3. 问**权威服务器**：它保存着这个域名的真实记录，给出最终的 IP 地址。
+
+关于根服务器：一共有 **13 个名字**（`a.root-servers.net` 到 `m.root-servers.net`），由十几家不同的机构运营。但每个名字背后不是一台机器，而是通过**任播**（anycast）部署在全世界的大量节点，查询会被就近送到其中一个。所以“全世界只有 13 台根服务器”是误解。[^root-servers]
+
+DNS 查询通常走 **UDP 53 端口**，回应太大或被截断时改用 TCP。[^rfc7766]
+
+### 5. 记下来，下次更快 {#ttl}
+
+{/* 配图：号码沿原路返回，每一级盖“已记录”章，旁边是标着 TTL 的沙漏 */}
+
+- 查到的结果会被递归解析器、操作系统和浏览器分别**缓存**，下次直接用。
+- 每条记录都带有 **TTL**（生存时间，单位是秒），由域名的管理者设置。到期后缓存作废，需要重新查询。[^rfc9499]
+- 所以修改 DNS 记录后，各处缓存里的旧记录要等 TTL 到期才会被替换。生效有快有慢，取决于原来的 TTL 设了多长。
+
+### 6. 回顾 {#recap}
+
+- 浏览器缓存 → 系统缓存和 hosts → 递归解析器 → 根服务器 → 顶级域服务器 → 权威服务器 → 拿到 IP 并沿途缓存。
+- 拿到 IP 地址后，浏览器才开始建立连接、发出请求，回到第一期的流程。
+
+## 深入一问
+
+**为什么不用一台超大的服务器存下所有域名？**
+域名数量极多，变化又频繁，放在一处既扛不住全世界的查询，也难以维护。分层之后，每一级只管自己那一层，`example.com` 的记录由它自己的权威服务器维护，改起来不需要通知根服务器。
+
+**根服务器出问题，互联网会瘫痪吗？**
+很难。13 个名字由不同机构独立运营，每个名字背后又有大量任播节点；再加上递归解析器会缓存顶级域的信息，日常查询其实很少需要真的问到根服务器。
+
+**改了 hosts 文件为什么能“屏蔽”网站？**
+系统查询时会优先使用 hosts 里的记录。把某个域名写成指向 `127.0.0.1`（本机），浏览器就连不到真正的服务器。开发时也常用它把域名临时指向测试机器。
+
+**DNS 查询会被别人看到吗？**
+传统 DNS 查询是明文的，同一网络里的人或运营商能看到你查了哪些域名，甚至可以伪造回应。加密 DNS（DoH，DNS over HTTPS；DoT，DNS over TLS）可以把查询加密，现在主流浏览器和系统都已支持。[^rfc8484][^rfc7858]
+
+**`nslookup` 和 `dig` 是干什么的？**
+它们是命令行里的查号工具。比如运行 `dig example.com`，就能看到返回的 IP 地址和剩余的 TTL；加上 `+trace` 参数，还能看到从根服务器一路问下来的过程。
+
+## 易错点
+
+- ❌ “全世界只有 13 台根服务器” → ✅ 只有 13 个名字，每个名字背后都是遍布全球的大量任播节点。
+- ❌ “每次打开网页都要从根服务器问起” → ✅ 大多数查询在浏览器、系统或递归解析器的缓存里就命中了。
+- ❌ “改了 DNS 一定要等 48 小时” → ✅ 等多久取决于旧记录的 TTL。改 A 记录这类普通记录，TTL 短的话很快就会更新；改 NS 记录（比如换 DNS 服务商）时，要看顶级域那边委派记录的 TTL，它往往设得较长，“48 小时”的说法就是从这里来的。另外，个别解析器不一定严格遵守 TTL。
+- ❌ “DNS 只走 UDP” → ✅ 通常用 UDP 53，回应过大时会改用 TCP，加密 DNS 则走 HTTPS 或 TLS。
+
+## 参考资料
+
+[^rfc9499]: IETF, [RFC 9499: DNS Terminology](https://www.rfc-editor.org/rfc/rfc9499), 2024-03（现行标准，BCP 219）。
+[^root-servers]: Root Server Technical Operations Association, [root-servers.org](https://root-servers.org/)，访问于 2026-10-12。
+[^rfc7766]: IETF, [RFC 7766: DNS Transport over TCP - Implementation Requirements](https://www.rfc-editor.org/rfc/rfc7766), 2016-03（现行标准）。
+[^rfc8484]: IETF, [RFC 8484: DNS Queries over HTTPS (DoH)](https://www.rfc-editor.org/rfc/rfc8484), 2018-10（现行标准）。
+[^rfc7858]: IETF, [RFC 7858: Specification for DNS over Transport Layer Security (TLS)](https://www.rfc-editor.org/rfc/rfc7858), 2016-05（现行标准）。
+[^rfc5737]: IETF, [RFC 5737: IPv4 Address Blocks Reserved for Documentation](https://www.rfc-editor.org/rfc/rfc5737), 2010-01（现行标准，仅用于说明示例地址）。
+[^cf-1111]: Cloudflare, [1.1.1.1 — The free app that makes your Internet faster](https://one.one.one.one/)，访问于 2026-10-12。
+[^google-dns]: Google, [Google Public DNS](https://developers.google.com/speed/public-dns)，访问于 2026-10-12。
