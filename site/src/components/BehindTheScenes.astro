@@ -1,0 +1,22 @@
+---
+const {script, storyboard, source} = Astro.props;
+const items = [['📄', '脚本', 'script.md', script], ['🎞', '分镜', 'storyboard.json', storyboard], ['</>', '源码', 'remotion/', source]];
+---
+<section class="bts" aria-labelledby="bts-h">
+  <h2 id="bts-h">幕后</h2>
+  <p class="note">这部片子完全由代码生成。</p>
+  <div class="row">{items.map(([i, l, f, href]) => (
+    <a class="b" href={href} rel="noopener" target="_blank"><span class="i" aria-hidden="true">{i}</span><span><strong>{l}</strong><small>{f} ↗</small></span></a>
+  ))}</div>
+</section>
+<style>
+.bts{margin-top:var(--sp-8)}h2{font-size:var(--fs-h2);margin:0 0 var(--sp-2)}
+.note{color:var(--c-text-2);font-size:var(--fs-small);margin:0 0 var(--sp-4)}
+.row{display:grid;gap:var(--sp-3);grid-template-columns:1fr}
+@media (min-width:768px){.row{grid-template-columns:repeat(3,1fr)}}
+.b{display:flex;gap:var(--sp-3);align-items:center;min-height:64px;padding:var(--sp-3) var(--sp-4);background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);color:var(--c-text);text-decoration:none}
+.b:hover{border-color:rgba(34,211,238,.4);filter:none}
+.i{font-family:var(--font-mono);color:var(--c-primary);width:28px;text-align:center}
+.b span:last-child{display:flex;flex-direction:column;line-height:1.4}
+small{color:var(--c-text-2);font-family:var(--font-mono);font-size:var(--fs-xs)}
+</style>

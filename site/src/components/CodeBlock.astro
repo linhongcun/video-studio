@@ -1,0 +1,32 @@
+---
+// MDX 映射 pre：构建期着色（HTTP 报文规则见 design.md §3.4），零运行时；带复制按钮
+const {title, variant} = Astro.props;
+const raw = await Astro.slots.render('default');
+const lang = (raw.match(/class="[^"]*language-([\w-]+)/) ?? [])[1] ?? '';
+const dec = (s: string) => s.replace(/<[^>]+>/g, '').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#x27;/g, "'").replace(/&amp;/g, '&');
+const text = dec(raw).replace(/\n$/, '');
+const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const sp = (cls: string, s: string) => `<span class="${cls}">${esc(s)}</span>`;
+let kind = variant;
+function http(src: string) {
+  let inBody = false;
+  return src.split('\n').map((line, i) => {
+    if (inBody) return esc(line);
+    if (line === '') { inBody = true; return sp('h-nl', '↵'); }
+    if (i === 0) {
+      let m = line.match(/^(HTTP\/[\d.]+)(\s+)(\d{3})(.*)$/);
+      if (m) { kind ??= 'response'; const c = m[3][0] === '2' ? 'h-ok' : m[3][0] === '3' ? 'h-redir' : 'h-err'; return sp('h-ver', m[1]) + m[2] + sp(c, m[3] + m[4]); }
+      m = line.match(/^([A-Z]+)(\s+)(\S+)(\s+)(HTTP\/[\d.]+)$/);
+      if (m) { kind ??= 'request'; return sp('h-method', m[1]) + m[2] + sp('h-path', m[3]) + m[4] + sp('h-ver', m[5]); }
+    }
+    const h = line.match(/^([\w-]+)(:)(.*)$/);
+    return h ? sp('h-name', h[1]) + h[2] + sp('h-val', h[3]) : esc(line);
+  }).join('\n');
+}
+const html = lang === 'http' ? http(text) : esc(text);
+const label = title ?? (lang === 'http' ? `HTTP · ${kind === 'response' ? '响应' : kind === 'request' ? '请求' : '报文'}` : lang.toUpperCase() || '代码');
+---
+<div class:list={['cb', kind && `cb-${kind}`]}>
+  <div class="cb-bar"><span>{label}</span><button type="button" class="cb-copy" data-code={text} aria-label="复制代码">复制</button><span class="sr-only" aria-live="polite"></span></div>
+  <pre tabindex="0"><code set:html={html} /></pre>
+</div>

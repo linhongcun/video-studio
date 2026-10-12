@@ -1,0 +1,30 @@
+---
+import '../styles/global.css';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import {VERSION} from '../lib/episodes';
+const {title, description = '用代码拍科普：半分钟技术短视频 + 图文讲解', ogImage, current = 'home'} = Astro.props;
+const full = title ? `${title} · Video Studio` : 'Video Studio 技术科普';
+const og = ogImage ? new URL(ogImage, Astro.site).href : undefined;
+---
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0B1020" />
+  <title>{full}</title>
+  <meta name="description" content={description} />
+  <meta property="og:title" content={full} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  {og && <meta property="og:image" content={og} />}
+</head>
+<body>
+  <a class="skip" href="#main">跳到正文</a>
+  <SiteHeader current={current} />
+  <main id="main" tabindex="-1"><slot /></main>
+  <SiteFooter version={VERSION} />
+</body>
+</html>

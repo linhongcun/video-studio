@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {REPO} from '../lib/episodes';
+const team = [
+  ['Christopher Nolan', '导演', '定选题与制作方案，审核每一环交付'],
+  ['Aaron Sorkin', '编剧', '研究资料、写脚本与图文稿'],
+  ['Hayao Miyazaki', '分镜 / UI', '把脚本拆成镜头，设计站点 UI'],
+  ['John Knoll', '制作', '用 React + Remotion 写代码生成视频，搭建本站'],
+];
+---
+<BaseLayout title="关于" current="about">
+  <div class="container prose">
+    <h1>关于 Video Studio</h1>
+    <p>这里的每一部短片都由代码生成：脚本 → 分镜 JSON → React + Remotion 渲染 → 配音与字幕对齐。视频是入口，图文是主体。</p>
+    <h2>团队</h2>
+    <ul>{team.map(([n, r, d]) => <li><strong>{n}</strong>（{r}）：{d}</li>)}</ul>
+    <h2>制作流程</h2>
+    <ol><li>plan.md：目标、受众、时长、风格</li><li>script.md：旁白与画面提示</li><li>storyboard.json：镜头、动画、时间轴</li><li>remotion/：代码实现并渲染 video.mp4</li><li>article.mdx：与视频章节一一对应的图文</li></ol>
+    <p>源码与素材全部公开：<a href={REPO} rel="noopener" target="_blank">GitHub ↗</a></p>
+  </div>
+</BaseLayout>
+<style>.prose{max-width:var(--measure)}h1{font-size:var(--fs-h1);margin:var(--sp-7) 0 var(--sp-4)}h2{font-size:var(--fs-h2);margin-top:var(--sp-7)}</style>

@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import TagFilter from '../components/TagFilter.astro';
+import EpisodeGrid from '../components/EpisodeGrid.astro';
+import EmptyState from '../components/EmptyState.astro';
+import {getEpisodes, getTags, asset} from '../lib/episodes';
+const eps = getEpisodes();
+const latest = eps[0];
+---
+<BaseLayout current="home" ogImage={latest && asset(latest.slug, latest.poster)}>
+  <div class="container">
+    {latest && <Hero e={latest} />}
+    <section class="all" aria-labelledby="all-title">
+      <h2 id="all-title">全部期数</h2>
+      <TagFilter tags={getTags()} />
+      <div id="all-grid"><EpisodeGrid episodes={eps} /></div>
+      <div id="tf-empty" hidden><EmptyState message="这个标签还没有片子" /></div>
+    </section>
+  </div>
+</BaseLayout>
+<style>
+.all{margin-top:var(--sp-9)}
+@media (max-width:767px){.all{margin-top:var(--sp-7)}}
+h2{font-size:var(--fs-h2);line-height:1.35;margin:0 0 var(--sp-4)}
+</style>

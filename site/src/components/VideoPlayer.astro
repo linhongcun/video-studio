@@ -1,0 +1,176 @@
+---
+// 原生 <video> + 章节（桌面右侧列表 / 平板 2 列 / 手机 chips）。无 JS 时章节为正文锚点链接。
+import {fmtTime} from '../lib/episodes';
+const {src, poster, captions, chapters, stickyOnMobile = true, title = ''} = Astro.props;
+---
+<section class="vp" id="player" aria-label="视频与章节" data-chapters={JSON.stringify(chapters.map(({id, title, start}) => ({id, title, start})))} data-sticky={stickyOnMobile ? '1' : '0'}>
+  <div class="stage">
+    <div class="ph"></div>
+    <div class="vwrap">
+      <video controls playsinline preload="metadata" poster={poster} aria-label={title}>
+        <source src={src} type="video/mp4" />
+        {captions && <track kind="captions" srclang="zh" label="中文" src={captions} />}
+        你的浏览器不支持视频播放，<a href={src}>下载 mp4</a>。
+      </video>
+      <button class="unstick" type="button" aria-label="取消视频吸顶" hidden>×</button>
+      <p class="err" hidden>视频加载失败，<a href={src} download>下载 mp4</a></p>
+    </div>
+  </div>
+  <div class="side">
+    <h2 class="side-h">章节</h2>
+    <ol class="list">
+      {chapters.map((c, i) => (
+        <li><a class="ch" href={`#${c.id}`} data-id={c.id} data-start={c.start} data-index={i}>
+          <span class="ts num">{fmtTime(c.start)}</span><span class="tt">{c.title}</span><span class="bar" aria-hidden="true"><i></i></span>
+        </a></li>
+      ))}
+    </ol>
+    <p class="keys">快捷键：<kbd>K</kbd>/<kbd>空格</kbd> 播放暂停 · <kbd>J</kbd>/<kbd>L</kbd> 上/下一章 · <kbd>↑</kbd>/<kbd>↓</kbd> 切换章节</p>
+  </div>
+  <div class="chips-wrap"><div class="chips" role="list" aria-label="章节">
+    {chapters.map((c, i) => (
+      <a class="chip" role="listitem" href={`#${c.id}`} data-id={c.id} data-start={c.start} data-index={i}><span class="num">{fmtTime(c.start)}</span> {c.title}</a>
+    ))}
+  </div></div>
+  <p class="sr-only" aria-live="polite" data-live></p>
+</section>
+
+<script>
+  const fmt = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+  const root = document.querySelector<HTMLElement>('.vp');
+  if (root) {
+    const chapters: {id: string; title: string; start: number}[] = JSON.parse(root.dataset.chapters!);
+    const video = root.querySelector('video')!;
+    const vwrap = root.querySelector<HTMLElement>('.vwrap')!;
+    const ph = root.querySelector<HTMLElement>('.ph')!;
+    const live = root.querySelector<HTMLElement>('[data-live]')!;
+    const items = [...root.querySelectorAll<HTMLAnchorElement>('[data-start]')];
+    const listItems = items.filter((a) => a.classList.contains('ch'));
+    const unstickBtn = root.querySelector<HTMLButtonElement>('.unstick')!;
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)');
+    const mobile = matchMedia('(max-width: 767px)');
+    const portrait = matchMedia('(orientation: portrait)');
+    let cur = -1;
+
+    const idxAt = (t: number) => { let k = 0; chapters.forEach((c, i) => { if (c.start <= t + 0.05) k = i; }); return k; };
+    const setCurrent = (i: number) => {
+      const t = video.currentTime;
+      items.forEach((a) => {
+        const k = Number(a.dataset.index);
+        const on = k === i;
+        a.toggleAttribute('aria-current', on); if (on) a.setAttribute('aria-current', 'true');
+        if (a.classList.contains('ch')) {
+          const end = chapters[k + 1]?.start ?? (video.duration || chapters[k].start + 1);
+          const p = on ? Math.min(1, Math.max(0, (t - chapters[k].start) / (end - chapters[k].start))) : 0;
+          a.querySelector<HTMLElement>('.bar i')!.style.width = `${p * 100}%`;
+        }
+      });
+      if (i !== cur) {
+        cur = i;
+        const chip = root.querySelector<HTMLElement>(`.chip[data-index="${i}"]`);
+        if (chip && mobile.matches) {
+          const box = chip.parentElement!;
+          box.scrollTo({left: chip.offsetLeft - box.clientWidth / 2 + chip.clientWidth / 2, behavior: reduce.matches ? 'auto' : 'smooth'});
+        }
+        window.dispatchEvent(new CustomEvent('vs:chapter', {detail: {id: chapters[i].id, playing: !video.paused}}));
+      }
+    };
+    const seek = (i: number, play = true, announce = true) => {
+      const c = chapters[i]; if (!c) return;
+      video.currentTime = c.start;
+      if (play) video.play().catch(() => {});
+      const u = new URL(location.href); u.searchParams.delete('t'); u.hash = `t=${c.start}`;
+      history.replaceState(null, '', u);
+      if (announce) live.textContent = `已跳转到 第 ${i + 1} 章 ${c.title}`;
+      setCurrent(i);
+    };
+    items.forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); seek(Number(a.dataset.index)); }));
+    listItems.forEach((a, i) => a.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); listItems[(i + (e.key === 'ArrowDown' ? 1 : -1) + listItems.length) % listItems.length].focus(); }
+      if (e.key === ' ') { e.preventDefault(); seek(i); }
+    }));
+    video.addEventListener('timeupdate', () => setCurrent(idxAt(video.currentTime)));
+    video.addEventListener('play', () => window.dispatchEvent(new CustomEvent('vs:chapter', {detail: {id: chapters[idxAt(video.currentTime)].id, playing: true}})));
+    video.addEventListener('pause', () => window.dispatchEvent(new CustomEvent('vs:chapter', {detail: {id: chapters[idxAt(video.currentTime)].id, playing: false}})));
+    window.addEventListener('vs:seek', (e: any) => {
+      const i = chapters.findIndex((c) => c.id === e.detail.id); if (i < 0) return;
+      if (!vwrap.classList.contains('stuck')) root.scrollIntoView({block: 'start', behavior: reduce.matches ? 'auto' : 'smooth'});
+      seek(i);
+    });
+    // 深链 ?t=17 或 #t=17
+    const u = new URL(location.href);
+    const t0 = Number(u.searchParams.get('t') ?? (u.hash.match(/^#t=([\d.]+)/)?.[1] ?? NaN));
+    if (!Number.isNaN(t0)) {
+      const go = () => { video.currentTime = t0; setCurrent(idxAt(t0)); };
+      video.readyState >= 1 ? go() : video.addEventListener('loadedmetadata', go, {once: true});
+      root.scrollIntoView({block: 'start'});
+    } else setCurrent(0);
+    // 快捷键
+    document.addEventListener('keydown', (e) => {
+      const el = e.target as HTMLElement;
+      if (e.metaKey || e.ctrlKey || e.altKey || /INPUT|TEXTAREA|SELECT/.test(el.tagName) || el.isContentEditable) return;
+      const k = e.key.toLowerCase();
+      if (k === 'k' || (k === ' ' && (el === document.body || el === video))) { e.preventDefault(); video.paused ? video.play().catch(() => {}) : video.pause(); }
+      else if (k === 'j') seek(Math.max(0, idxAt(video.currentTime) - 1));
+      else if (k === 'l') seek(Math.min(chapters.length - 1, idxAt(video.currentTime) + 1));
+    });
+    // 错误态
+    const fail = () => root.querySelector<HTMLElement>('.err')!.hidden = false;
+    video.addEventListener('error', fail); video.querySelector('source')?.addEventListener('error', fail);
+    // 手机吸顶：仅播放中、竖屏、未被用户关闭；暂停 3s 后恢复
+    const KEY = 'vs:sticky-off';
+    let pauseTimer: number | undefined;
+    const canStick = () => root.dataset.sticky === '1' && mobile.matches && portrait.matches && localStorage.getItem(KEY) !== '1';
+    const stick = (on: boolean) => {
+      if (on && !canStick()) on = false;
+      if (on === vwrap.classList.contains('stuck')) return;
+      ph.style.height = on ? `${vwrap.offsetHeight}px` : '';
+      vwrap.classList.toggle('stuck', on); unstickBtn.hidden = !on;
+      document.documentElement.style.setProperty('--sticky-h', on ? `${vwrap.offsetHeight}px` : '0px');
+    };
+    const onScroll = () => { if (!video.paused) stick(ph.getBoundingClientRect().bottom < 0 || vwrap.classList.contains('stuck') ? root.getBoundingClientRect().top < 0 : false); };
+    video.addEventListener('play', () => { clearTimeout(pauseTimer); onScroll(); });
+    video.addEventListener('pause', () => { pauseTimer = window.setTimeout(() => stick(false), 3000); });
+    video.addEventListener('ended', () => stick(false));
+    addEventListener('scroll', onScroll, {passive: true});
+    portrait.addEventListener('change', () => { if (!portrait.matches) stick(false); else onScroll(); });
+    mobile.addEventListener('change', () => { if (!mobile.matches) stick(false); });
+    unstickBtn.addEventListener('click', () => { localStorage.setItem(KEY, '1'); stick(false); });
+  }
+</script>
+
+<style>
+.vp{display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp-4);scroll-margin-top:calc(var(--header-h) + 8px)}
+@media (min-width:1280px){.vp{grid-template-columns:minmax(0,8fr) minmax(0,4fr);gap:var(--sp-5)}}
+.vwrap{position:relative;border-radius:var(--r-lg);overflow:hidden;background:var(--c-surface);border:1px solid var(--c-border);aspect-ratio:16/9}
+video{position:relative;z-index:1;display:block;width:100%;height:100%;background:var(--c-surface)}
+.err{z-index:3;position:absolute;inset:auto 0 0 0;margin:0;padding:var(--sp-3);background:rgba(11,16,32,.9);text-align:center;font-size:var(--fs-small)}
+.unstick{position:absolute;top:6px;right:6px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(11,16,32,.75);color:var(--c-text);font-size:22px;cursor:pointer;z-index:3}
+.vwrap.stuck{position:fixed;top:0;left:0;right:0;z-index:70;border-radius:0;border:0;border-bottom:1px solid var(--c-border)}
+.side{display:none}
+.side-h{font-size:var(--fs-small);color:var(--c-text-2);font-weight:600;margin:0 0 var(--sp-2);letter-spacing:.05em}
+.list{list-style:none;margin:0;padding:0;display:grid;gap:var(--sp-1)}
+.ch{position:relative;display:flex;gap:var(--sp-3);align-items:center;min-height:44px;padding:var(--sp-2) var(--sp-3);border-left:3px solid transparent;border-radius:var(--r-sm);color:var(--c-text);text-decoration:none;overflow:hidden}
+.ch:hover{background:var(--c-surface-2);filter:none}
+.ch[aria-current]{border-left-color:var(--c-primary);background:var(--c-surface-2);font-weight:600}
+.ts{font-family:var(--font-mono);color:var(--c-text-2);font-size:var(--fs-small)}
+.ch[aria-current] .ts{color:var(--c-primary)}
+.bar{position:absolute;left:0;right:0;bottom:0;height:2px}.bar i{display:block;height:100%;width:0;background:var(--c-primary)}
+.keys{margin:var(--sp-3) 0 0;font-size:var(--fs-xs);color:var(--c-text-2)}
+kbd{font-size:11px;border:1px solid var(--c-border);border-radius:4px;padding:0 4px;background:var(--c-surface-2)}
+.chips-wrap{position:relative;display:none}
+.chips{display:flex;gap:var(--sp-2);overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px var(--sp-1);scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,transparent,#000 16px,#000 calc(100% - 24px),transparent)}
+.chips::-webkit-scrollbar{display:none}
+.chip{scroll-snap-align:center;flex:none;display:inline-flex;align-items:center;gap:6px;height:36px;min-height:36px;padding:0 14px;border-radius:var(--r-full);background:var(--c-surface);border:1px solid var(--c-border);color:var(--c-text);font-size:var(--fs-small);text-decoration:none;white-space:nowrap}
+.chip .num{color:var(--c-text-2);font-family:var(--font-mono)}
+.chip[aria-current]{background:var(--c-primary);color:var(--c-on-primary);border-color:var(--c-primary);font-weight:600}
+.chip[aria-current] .num{color:var(--c-on-primary)}
+/* 平板：下方 2 列网格；桌面：右侧与视频等高、内部滚动 */
+@media (min-width:768px){.side{display:block}.list{grid-template-columns:repeat(2,1fr)}.keys{display:none}}
+@media (min-width:1280px){
+  .side{position:relative;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-lg);padding:var(--sp-4);overflow-y:auto;aspect-ratio:auto;max-height:100%}
+  .stage{align-self:start}.vp{align-items:stretch}.side{height:0;min-height:100%}
+  .list{grid-template-columns:1fr}.keys{display:block}
+}
+@media (max-width:767px){.chips-wrap{display:block}.vwrap{border-radius:var(--r-md)}}
+</style>
