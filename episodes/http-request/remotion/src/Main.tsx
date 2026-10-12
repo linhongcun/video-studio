@@ -2,6 +2,7 @@
 // 复用第一期（速览版）的浏览器、地址栏、服务器机柜、信封、响应包、文件夹、齿轮；新增步骤条、URL 切分、HSTS 盾牌、缓存抽屉、
 // DNS 树、握手时序图、CDN/负载均衡/反向代理、状态码翻牌、渲染流水线、<script> 方块等。
 import React from 'react';
+import {CenterMark, ChannelBranding} from '../../../_shared/branding/ChannelBranding';
 import {AbsoluteFill, Audio, Easing, Sequence, interpolate, interpolateColors, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import sb from '../../storyboard.json';
 import timing from './timing.json';
@@ -341,10 +342,12 @@ const Grid = () => <AbsoluteFill style={{backgroundImage: 'radial-gradient(#1E29
 export const Main: React.FC = () => (
   <AbsoluteFill style={{background: P.bg}}>
     <Grid />
+    <CenterMark episode="EP.01" plan={plan} />
     {plan.map((p, i) => (
       <Sequence key={p.sh.id} from={p.from} durationInFrames={p.dur} name={p.sh.id}>
         <Shot p={p} prevType={i ? plan[i - 1].sh.transition?.type : 'none'} />
       </Sequence>
     ))}
+    <ChannelBranding mainFrames={totalFrames} />
   </AbsoluteFill>
 );
