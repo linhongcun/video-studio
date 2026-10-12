@@ -35,7 +35,7 @@ function rehypeSummary() {
   return (tree, file) => {
     // 标记与 frontmatter chapters 对应的 h2，ChapterHeading 只给这些标题加“▶ 从这里看”
     const ids = new Set((file.data?.astro?.frontmatter?.chapters ?? []).map((c) => c.id));
-    for (const n of tree.children) if (n.type === 'element' && n.tagName === 'h2' && ids.has(n.properties?.id)) n.properties.dataChapter = '';
+    for (const n of tree.children) if (n.type === 'element' && /^h[23]$/.test(n.tagName) && ids.has(n.properties?.id)) n.properties.dataChapter = '';
     const kids = tree.children;
     const i = kids.findIndex((n) => n.type === 'element' && n.tagName === 'h2' && text(n).trim() === '小结');
     if (i < 0) return;

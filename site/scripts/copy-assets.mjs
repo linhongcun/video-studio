@@ -8,10 +8,11 @@ for (const slug of fs.readdirSync(root)) {
   const metaPath = path.join(root, slug, 'meta.json');
   if (!fs.existsSync(metaPath)) continue;
   const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+  if (meta.draft && process.env.SHOW_DRAFTS !== '1') { console.log(`[copy-assets] ${slug}: draft，跳过`); continue; }
   fs.mkdirSync(path.join(out, slug), {recursive: true});
   for (const f of [meta.video, meta.poster].filter(Boolean)) {
     const src = path.join(root, slug, f);
-    if (!fs.existsSync(src)) throw new Error(`[copy-assets] 缺少文件: ${src}`);
+    if (!fs.existsSync(src)) { if (meta.draft) { console.warn(`[copy-assets] ${slug}: draft 缺少 ${f}`); continue; } throw new Error(`[copy-assets] 缺少文件: ${src}`); }
     fs.copyFileSync(src, path.join(out, slug, f));
     console.log(`[copy-assets] ${slug}/${f}`);
   }

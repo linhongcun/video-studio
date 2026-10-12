@@ -1,10 +1,11 @@
 ---
-// MDX 映射 h2：带 id 的章节标题旁显示“▶ 从这里看”，点击派发 vs:seek；无 id 的 h2 原样输出
-const {id, 'data-chapter': isChapter, 'data-summary': _s, ...rest} = Astro.props;
+// MDX 映射 h2/h3（level 属性）：带 id 的章节标题旁显示“▶ 从这里看”，点击派发 vs:seek；无 id 的 h2 原样输出
+const {id, level = 2, 'data-chapter': isChapter, 'data-summary': _s, ...rest} = Astro.props;
+const Tag = level === 3 ? 'h3' : 'h2';
 ---
 {id && isChapter !== undefined ? (
-  <h2 id={id} class="chh" {...rest}>
+  <Tag id={id} class="chh" {...rest}>
     <span class="t"><slot /><a class="anchor" href={`#${id}`} aria-label="本节链接">#</a></span>
     <a class="btn btn-ghost from" href="#player" data-seek={id}>▶ 从这里看</a>
-  </h2>
-) : <h2 id={id} {...rest}><slot /></h2>}
+  </Tag>
+) : <Tag id={id} {...rest}><slot /></Tag>}

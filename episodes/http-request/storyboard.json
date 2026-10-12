@@ -1,11 +1,11 @@
 {
   "meta": {
-    "title": "一次 HTTP 请求是如何完成的？",
+    "title": "从输入 URL 到页面展示，发生了什么？（面试满分版）",
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "durationInFrames": 995,
-    "style": "深色背景+蓝青高光扁平2D",
+    "durationInFrames": 5830,
+    "style": "深色背景+蓝青高光扁平2D（沿用第一期）",
     "palette": {
       "bg": "#0B1020",
       "panel": "#111827",
@@ -14,32 +14,161 @@
       "text": "#E5E7EB",
       "muted": "#6B7280",
       "success": "#22C55E",
-      "accent": "#F59E0B"
+      "accent": "#F59E0B",
+      "danger": "#EF4444"
     },
     "font": "Noto Sans SC",
-    "notes": "from 为全局帧，keyframes 与 subtitles 帧相对镜头；transition 作用于镜头出场，与下一镜头首帧交叠（可用 @remotion/transitions TransitionSeries 或在镜头末尾做出场动画）；subtitle 元素文本由 subtitles 驱动。"
+    "safeArea": {
+      "margin": 80,
+      "subtitleBand": [
+        900,
+        980
+      ],
+      "contentMaxY": 860
+    },
+    "notes": "帧数按脚本估算：每段 round((字数/4.2+2)×30)，段内按镜头旁白字数分配，每段约 2 秒停顿平均摊到各镜头；以配音实测 timing.json 为准，届时按段等比缩放镜头与相对帧。from 为全局帧，subtitles 与 keyframes 帧相对镜头；transition 作用于镜头出场。章节 chapterId 与 article.mdx 锚点一致（intro/recap 为自定）。示例 IP 203.0.113.10 为 RFC 5737 文档地址。"
+  },
+  "assets": {
+    "reuse": [
+      {
+        "id": "browser",
+        "desc": "第一期浏览器窗口（rect，panel 底 + secondary 描边，圆角 16）",
+        "usedIn": [
+          "intro",
+          "cache",
+          "request",
+          "server"
+        ]
+      },
+      {
+        "id": "url/addressbar",
+        "desc": "第一期地址栏打字机文本",
+        "usedIn": [
+          "intro"
+        ]
+      },
+      {
+        "id": "question",
+        "desc": "第一期开场大问号",
+        "usedIn": [
+          "intro"
+        ]
+      },
+      {
+        "id": "server",
+        "desc": "第一期服务器图标（含源站）",
+        "usedIn": [
+          "request",
+          "server"
+        ]
+      },
+      {
+        "id": "packet",
+        "desc": "第一期信封数据包（请求）",
+        "usedIn": [
+          "request",
+          "server"
+        ]
+      },
+      {
+        "id": "respPacket",
+        "desc": "第一期响应包",
+        "usedIn": [
+          "response"
+        ]
+      },
+      {
+        "id": "folder/gear",
+        "desc": "第一期文件夹、齿轮图标",
+        "usedIn": [
+          "server"
+        ]
+      },
+      {
+        "id": "subtitle",
+        "desc": "字幕层"
+      }
+    ],
+    "new": [
+      {
+        "id": "stepbar",
+        "desc": "1–8 步骤条（横排用于开场，竖排用于口述版，可逐格点亮/变绿）"
+      },
+      {
+        "id": "urlSegments",
+        "desc": "URL 四段切分块（协议/域名/端口/路径，各自配色+下方标签）"
+      },
+      {
+        "id": "hsts",
+        "desc": "HSTS 盾牌图标，http→https 翻转"
+      },
+      {
+        "id": "drawer",
+        "desc": "缓存抽屉 + 带 max-age 倒计时的文件 + 绿色对勾（第 2、7 章共用）"
+      },
+      {
+        "id": "dnsLocal",
+        "desc": "三层本地缓存条（浏览器缓存/系统缓存/hosts）+ 未命中标签"
+      },
+      {
+        "id": "dnsTree",
+        "desc": "DNS 树：根 . → com → example.com 权威，递归解析器问询箭头，结果 203.0.113.10 + RFC 5737 注释"
+      },
+      {
+        "id": "seqDiagram",
+        "desc": "握手时序图：两条竖线 + 带标签箭头（SYN/SYN+ACK/ACK，TLS ClientHello 等，第 8 章复用做四次挥手）"
+      },
+      {
+        "id": "lock",
+        "desc": "TLS 锁图标"
+      },
+      {
+        "id": "cdn",
+        "desc": "CDN 边缘节点图标 + CNAME 文本 + 命中折返路径"
+      },
+      {
+        "id": "lb/rp",
+        "desc": "负载均衡、反向代理两道门"
+      },
+      {
+        "id": "statusCards",
+        "desc": "状态码翻牌卡 200/301/404/500 + 放大 304"
+      },
+      {
+        "id": "pipeline",
+        "desc": "渲染流水线五格 DOM→CSSOM→渲染树→布局→绘制/合成"
+      },
+      {
+        "id": "scriptBlock",
+        "desc": "<script> 阻塞方块 + defer/async 标签"
+      }
+    ]
   },
   "scenes": [
     {
-      "id": "s1",
-      "title": "开场提问",
+      "id": "s0",
+      "chapterId": "intro",
+      "title": "开场",
       "from": 0,
-      "durationInFrames": 120,
+      "durationInFrames": 346,
+      "narrationChars": 40,
+      "narrationCharsRecount": 40,
       "shots": [
         {
-          "id": "s1-1",
-          "durationInFrames": 120,
-          "narration": "输入网址，按下回车，背后发生了什么？",
+          "id": "intro-1",
+          "from": 0,
+          "durationInFrames": 223,
+          "narration": "从输入网址到页面出现，中间发生了什么？这是校招面试的高频题。",
           "subtitles": [
             {
-              "text": "输入网址，按下回车，",
+              "text": "从输入网址到页面出现",
               "from": 0,
-              "to": 55
+              "to": 76
             },
             {
-              "text": "背后发生了什么？",
-              "from": 56,
-              "to": 119
+              "text": "中间发生了什么？这是校招面试的高频题",
+              "from": 77,
+              "to": 222
             }
           ],
           "elements": [
@@ -47,69 +176,52 @@
               "id": "browser",
               "type": "rect",
               "x": 560,
-              "y": 240,
-              "width": 800,
-              "height": 500,
+              "y": 180,
+              "w": 800,
+              "h": 500,
               "color": "#111827",
+              "reuse": true,
               "stroke": "#3B82F6",
               "radius": 16,
-              "label": "浏览器窗口"
-            },
-            {
-              "id": "addressbar",
-              "type": "rect",
-              "x": 600,
-              "y": 280,
-              "width": 720,
-              "height": 60,
-              "color": "#1F2937",
-              "radius": 30
+              "label": "浏览器窗口（第一期）"
             },
             {
               "id": "url",
               "type": "text",
-              "x": 630,
-              "y": 288,
-              "width": 660,
-              "height": 44,
+              "x": 620,
+              "y": 220,
+              "w": 680,
+              "h": 44,
               "text": "https://example.com",
               "fontSize": 32,
               "color": "#E5E7EB",
-              "typewriter": true,
+              "reuse": true,
               "font": "monospace"
-            },
-            {
-              "id": "enterFlash",
-              "type": "rect",
-              "x": 560,
-              "y": 240,
-              "width": 800,
-              "height": 500,
-              "color": "#22D3EE",
-              "radius": 16
             },
             {
               "id": "question",
               "type": "text",
               "x": 900,
-              "y": 420,
-              "width": 120,
-              "height": 200,
+              "y": 300,
+              "w": 120,
+              "h": 200,
               "text": "?",
               "fontSize": 180,
               "color": "#22D3EE",
+              "reuse": true,
               "align": "center"
             },
             {
               "id": "subtitle",
               "type": "text",
               "x": 160,
-              "y": 940,
-              "width": 1600,
-              "height": 80,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
               "text": "(字幕层)",
               "fontSize": 44,
               "color": "#E5E7EB",
+              "reuse": true,
               "align": "center",
               "role": "subtitle"
             }
@@ -124,7 +236,7 @@
                   "value": 0
                 },
                 {
-                  "frame": 10,
+                  "frame": 12,
                   "value": 1
                 }
               ],
@@ -135,18 +247,683 @@
               "property": "charsVisible",
               "keyframes": [
                 {
-                  "frame": 10,
+                  "frame": 8,
                   "value": 0
                 },
                 {
-                  "frame": 45,
+                  "frame": 40,
                   "value": 19
                 }
               ],
               "easing": "linear"
             },
             {
-              "elementId": "enterFlash",
+              "elementId": "question",
+              "property": "scale",
+              "keyframes": [
+                {
+                  "frame": 40,
+                  "value": 0
+                },
+                {
+                  "frame": 60,
+                  "value": 1
+                }
+              ],
+              "easing": "spring"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "intro-2",
+          "from": 223,
+          "durationInFrames": 123,
+          "narration": "我们分八步，讲出一份满分答案。",
+          "subtitles": [
+            {
+              "text": "我们分八步，讲出一份满分答案",
+              "from": 0,
+              "to": 122
+            }
+          ],
+          "elements": [
+            {
+              "id": "tag",
+              "type": "text",
+              "x": 760,
+              "y": 140,
+              "w": 400,
+              "h": 64,
+              "text": "高频面试题",
+              "fontSize": 40,
+              "color": "#F59E0B",
+              "reuse": false,
+              "align": "center",
+              "stroke": "#F59E0B",
+              "radius": 32
+            },
+            {
+              "id": "question",
+              "type": "text",
+              "x": 900,
+              "y": 300,
+              "w": 120,
+              "h": 200,
+              "text": "?",
+              "fontSize": 180,
+              "color": "#22D3EE",
+              "reuse": true,
+              "align": "center"
+            },
+            {
+              "id": "step1",
+              "type": "rect",
+              "x": 120,
+              "y": 560,
+              "w": 196,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 12,
+              "label": "1\nURL 解析",
+              "fontSize": 28
+            },
+            {
+              "id": "step2",
+              "type": "rect",
+              "x": 332,
+              "y": 560,
+              "w": 196,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 12,
+              "label": "2\n缓存检查",
+              "fontSize": 28
+            },
+            {
+              "id": "step3",
+              "type": "rect",
+              "x": 544,
+              "y": 560,
+              "w": 196,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 12,
+              "label": "3\nDNS 解析",
+              "fontSize": 28
+            },
+            {
+              "id": "step4",
+              "type": "rect",
+              "x": 756,
+              "y": 560,
+              "w": 196,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 12,
+              "label": "4\nTCP/TLS 握手",
+              "fontSize": 28
+            },
+            {
+              "id": "step5",
+              "type": "rect",
+              "x": 968,
+              "y": 560,
+              "w": 196,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 12,
+              "label": "5\n发送请求",
+              "fontSize": 28
+            },
+            {
+              "id": "step6",
+              "type": "rect",
+              "x": 1180,
+              "y": 560,
+              "w": 196,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 12,
+              "label": "6\n服务器处理",
+              "fontSize": 28
+            },
+            {
+              "id": "step7",
+              "type": "rect",
+              "x": 1392,
+              "y": 560,
+              "w": 196,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 12,
+              "label": "7\n返回响应",
+              "fontSize": 28
+            },
+            {
+              "id": "step8",
+              "type": "rect",
+              "x": 1604,
+              "y": 560,
+              "w": 196,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 12,
+              "label": "8\n浏览器渲染",
+              "fontSize": 28
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "tag",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 10,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "question",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 1
+                },
+                {
+                  "frame": 15,
+                  "value": 0
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step1",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": 0
+                },
+                {
+                  "frame": 20,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step2",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 16,
+                  "value": 0
+                },
+                {
+                  "frame": 26,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step3",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 22,
+                  "value": 0
+                },
+                {
+                  "frame": 32,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step4",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 28,
+                  "value": 0
+                },
+                {
+                  "frame": 38,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step5",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 34,
+                  "value": 0
+                },
+                {
+                  "frame": 44,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step6",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 40,
+                  "value": 0
+                },
+                {
+                  "frame": 50,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step7",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 46,
+                  "value": 0
+                },
+                {
+                  "frame": 56,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step8",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 52,
+                  "value": 0
+                },
+                {
+                  "frame": 62,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            }
+          ],
+          "transition": {
+            "type": "fade",
+            "durationInFrames": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "s1",
+      "chapterId": "url",
+      "title": "URL 解析",
+      "from": 346,
+      "durationInFrames": 453,
+      "narrationChars": 55,
+      "narrationCharsRecount": 55,
+      "shots": [
+        {
+          "id": "url-1",
+          "from": 346,
+          "durationInFrames": 237,
+          "narration": "第一步，解析网址：拆出协议、域名、端口和路径；不是网址就交给搜索引擎。",
+          "subtitles": [
+            {
+              "text": "第一步，解析网址：拆出协议、域名、端口和路径",
+              "from": 0,
+              "to": 137
+            },
+            {
+              "text": "不是网址就交给搜索引擎",
+              "from": 138,
+              "to": 236
+            }
+          ],
+          "elements": [
+            {
+              "id": "urlFull",
+              "type": "text",
+              "x": 260,
+              "y": 200,
+              "w": 1400,
+              "h": 80,
+              "text": "https://example.com:443/index.html",
+              "fontSize": 56,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "font": "monospace",
+              "align": "center"
+            },
+            {
+              "id": "seg0",
+              "type": "rect",
+              "x": 200,
+              "y": 340,
+              "w": 260,
+              "h": 90,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#22D3EE",
+              "radius": 10,
+              "label": "https",
+              "font": "monospace",
+              "fontSize": 40
+            },
+            {
+              "id": "segL0",
+              "type": "text",
+              "x": 200,
+              "y": 450,
+              "w": 260,
+              "h": 50,
+              "text": "协议",
+              "fontSize": 32,
+              "color": "#22D3EE",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "seg1",
+              "type": "rect",
+              "x": 500,
+              "y": 340,
+              "w": 480,
+              "h": 90,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 10,
+              "label": "example.com",
+              "font": "monospace",
+              "fontSize": 40
+            },
+            {
+              "id": "segL1",
+              "type": "text",
+              "x": 500,
+              "y": 450,
+              "w": 480,
+              "h": 50,
+              "text": "域名",
+              "fontSize": 32,
+              "color": "#3B82F6",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "seg2",
+              "type": "rect",
+              "x": 1020,
+              "y": 340,
+              "w": 220,
+              "h": 90,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#F59E0B",
+              "radius": 10,
+              "label": ":443",
+              "font": "monospace",
+              "fontSize": 40
+            },
+            {
+              "id": "segL2",
+              "type": "text",
+              "x": 1020,
+              "y": 450,
+              "w": 220,
+              "h": 50,
+              "text": "端口",
+              "fontSize": 32,
+              "color": "#F59E0B",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "seg3",
+              "type": "rect",
+              "x": 1280,
+              "y": 340,
+              "w": 420,
+              "h": 90,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#22C55E",
+              "radius": 10,
+              "label": "/index.html",
+              "font": "monospace",
+              "fontSize": 40
+            },
+            {
+              "id": "segL3",
+              "type": "text",
+              "x": 1280,
+              "y": 450,
+              "w": 420,
+              "h": 50,
+              "text": "路径",
+              "fontSize": 32,
+              "color": "#22C55E",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "search",
+              "type": "text",
+              "x": 200,
+              "y": 600,
+              "w": 1520,
+              "h": 50,
+              "text": "不是网址 → 交给搜索引擎",
+              "fontSize": 34,
+              "color": "#6B7280",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "urlFull",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 10,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "seg0",
+              "property": "y",
+              "keyframes": [
+                {
+                  "frame": 20,
+                  "value": 200
+                },
+                {
+                  "frame": 32,
+                  "value": 340
+                }
+              ],
+              "easing": "spring"
+            },
+            {
+              "elementId": "seg0",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 20,
+                  "value": 0
+                },
+                {
+                  "frame": 30,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "segL0",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 30,
+                  "value": 0
+                },
+                {
+                  "frame": 40,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "seg1",
+              "property": "y",
+              "keyframes": [
+                {
+                  "frame": 30,
+                  "value": 200
+                },
+                {
+                  "frame": 42,
+                  "value": 340
+                }
+              ],
+              "easing": "spring"
+            },
+            {
+              "elementId": "seg1",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 30,
+                  "value": 0
+                },
+                {
+                  "frame": 40,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "segL1",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 40,
+                  "value": 0
+                },
+                {
+                  "frame": 50,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "seg2",
+              "property": "y",
+              "keyframes": [
+                {
+                  "frame": 40,
+                  "value": 200
+                },
+                {
+                  "frame": 52,
+                  "value": 340
+                }
+              ],
+              "easing": "spring"
+            },
+            {
+              "elementId": "seg2",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 40,
+                  "value": 0
+                },
+                {
+                  "frame": 50,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "segL2",
               "property": "opacity",
               "keyframes": [
                 {
@@ -154,37 +931,44 @@
                   "value": 0
                 },
                 {
-                  "frame": 54,
-                  "value": 0.35
-                },
-                {
-                  "frame": 64,
-                  "value": 0
+                  "frame": 60,
+                  "value": 1
                 }
               ],
               "easing": "easeOut"
             },
             {
-              "elementId": "question",
-              "property": "scale",
+              "elementId": "seg3",
+              "property": "y",
               "keyframes": [
                 {
-                  "frame": 60,
-                  "value": 0
+                  "frame": 50,
+                  "value": 200
                 },
                 {
-                  "frame": 75,
-                  "value": 1.15
-                },
-                {
-                  "frame": 85,
-                  "value": 1
+                  "frame": 62,
+                  "value": 340
                 }
               ],
               "easing": "spring"
             },
             {
-              "elementId": "question",
+              "elementId": "seg3",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 50,
+                  "value": 0
+                },
+                {
+                  "frame": 60,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "segL3",
               "property": "opacity",
               "keyframes": [
                 {
@@ -197,129 +981,357 @@
                 }
               ],
               "easing": "easeOut"
+            },
+            {
+              "elementId": "search",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 157,
+                  "value": 0
+                },
+                {
+                  "frame": 177,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
             }
           ],
           "transition": {
-            "type": "fade",
-            "durationInFrames": 10
-          },
-          "from": 0
-        }
-      ]
-    },
-    {
-      "id": "s2",
-      "title": "浏览器发送请求",
-      "from": 120,
-      "durationInFrames": 275,
-      "shots": [
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
         {
-          "id": "s2-1",
-          "durationInFrames": 165,
-          "narration": "浏览器发出一个 HTTP 请求：用 GET 方法，带上路径和请求头，",
+          "id": "url-2",
+          "from": 583,
+          "durationInFrames": 216,
+          "narration": "域名在 HSTS 名单里，HTTP 会被直接升级成 HTTPS。",
           "subtitles": [
             {
-              "text": "浏览器发出一个 HTTP 请求：",
+              "text": "域名在 HSTS 名单里",
               "from": 0,
-              "to": 74
+              "to": 76
             },
             {
-              "text": "用 GET 方法，带上路径和请求头，",
-              "from": 75,
-              "to": 164
+              "text": "HTTP 会被直接升级成 HTTPS",
+              "from": 77,
+              "to": 215
             }
           ],
           "elements": [
             {
-              "id": "browser",
-              "type": "rect",
-              "x": 160,
-              "y": 340,
-              "width": 560,
-              "height": 400,
-              "color": "#111827",
-              "stroke": "#3B82F6",
-              "radius": 16,
-              "label": "浏览器窗口"
-            },
-            {
-              "id": "server",
-              "type": "icon",
-              "x": 1360,
+              "id": "httpWord",
+              "type": "text",
+              "x": 560,
               "y": 320,
-              "width": 360,
-              "height": 440,
-              "color": "#111827",
-              "icon": "server-rack",
-              "stroke": "#3B82F6"
-            },
-            {
-              "id": "packet",
-              "type": "packet",
-              "x": 340,
-              "y": 440,
-              "width": 200,
-              "height": 140,
-              "color": "#3B82F6",
-              "shape": "envelope"
-            },
-            {
-              "id": "tagGet",
-              "type": "text",
-              "x": 360,
-              "y": 600,
-              "width": 160,
-              "height": 40,
-              "text": "GET",
-              "fontSize": 32,
-              "color": "#22D3EE",
+              "w": 300,
+              "h": 90,
+              "text": "http://",
+              "fontSize": 64,
+              "color": "#EF4444",
+              "reuse": false,
               "font": "monospace"
             },
             {
-              "id": "tagPath",
+              "id": "hsts",
+              "type": "icon",
+              "x": 900,
+              "y": 260,
+              "w": 220,
+              "h": 240,
+              "color": "#22C55E",
+              "reuse": false,
+              "label": "HSTS 盾牌"
+            },
+            {
+              "id": "httpsWord",
+              "type": "text",
+              "x": 1160,
+              "y": 320,
+              "w": 340,
+              "h": 90,
+              "text": "https://",
+              "fontSize": 64,
+              "color": "#22C55E",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "hstsNote",
               "type": "text",
               "x": 360,
-              "y": 645,
-              "width": 200,
-              "height": 40,
-              "text": "/index.html",
-              "fontSize": 28,
+              "y": 620,
+              "w": 1200,
+              "h": 50,
+              "text": "命中 HSTS 名单：HTTP 直接升级为 HTTPS（不发明文请求）",
+              "fontSize": 34,
               "color": "#E5E7EB",
-              "font": "monospace"
-            },
-            {
-              "id": "tagHeaders",
-              "type": "text",
-              "x": 360,
-              "y": 690,
-              "width": 200,
-              "height": 40,
-              "text": "Headers",
-              "fontSize": 28,
-              "color": "#6B7280",
-              "font": "monospace"
+              "reuse": false,
+              "align": "center"
             },
             {
               "id": "subtitle",
               "type": "text",
               "x": 160,
-              "y": 940,
-              "width": 1600,
-              "height": 80,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
               "text": "(字幕层)",
               "fontSize": 44,
               "color": "#E5E7EB",
+              "reuse": true,
               "align": "center",
               "role": "subtitle"
             }
           ],
           "animations": [
             {
-              "elementId": "server",
+              "elementId": "httpWord",
               "property": "opacity",
               "keyframes": [
                 {
                   "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "hsts",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 15,
+                  "value": 0
+                },
+                {
+                  "frame": 30,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "httpWord",
+              "property": "x",
+              "keyframes": [
+                {
+                  "frame": 30,
+                  "value": 560
+                },
+                {
+                  "frame": 60,
+                  "value": 900
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "httpWord",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 50,
+                  "value": 1
+                },
+                {
+                  "frame": 60,
+                  "value": 0
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "httpsWord",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 55,
+                  "value": 0
+                },
+                {
+                  "frame": 70,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "hstsNote",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 70,
+                  "value": 0
+                },
+                {
+                  "frame": 90,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            }
+          ],
+          "transition": {
+            "type": "fade",
+            "durationInFrames": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "s2",
+      "chapterId": "cache",
+      "title": "缓存检查",
+      "from": 799,
+      "durationInFrames": 396,
+      "narrationChars": 47,
+      "narrationCharsRecount": 46,
+      "shots": [
+        {
+          "id": "cache-1",
+          "from": 799,
+          "durationInFrames": 396,
+          "narration": "第二步，查缓存。资源存过，且 Cache-Control 规定的有效期没过，就是命中强缓存，直接使用，不发请求。",
+          "subtitles": [
+            {
+              "text": "第二步，查缓存。资源存过",
+              "from": 0,
+              "to": 82
+            },
+            {
+              "text": "且 Cache-Control 规定的有效期没过",
+              "from": 83,
+              "to": 256
+            },
+            {
+              "text": "就是命中强缓存，直接使用",
+              "from": 257,
+              "to": 347
+            },
+            {
+              "text": "不发请求",
+              "from": 348,
+              "to": 395
+            }
+          ],
+          "elements": [
+            {
+              "id": "browser",
+              "type": "rect",
+              "x": 120,
+              "y": 200,
+              "w": 640,
+              "h": 420,
+              "color": "#111827",
+              "reuse": true,
+              "stroke": "#3B82F6",
+              "radius": 16,
+              "label": "浏览器窗口（第一期）"
+            },
+            {
+              "id": "drawer",
+              "type": "icon",
+              "x": 900,
+              "y": 300,
+              "w": 420,
+              "h": 300,
+              "color": "#3B82F6",
+              "reuse": false,
+              "label": "缓存抽屉（新）"
+            },
+            {
+              "id": "cacheFile",
+              "type": "icon",
+              "x": 1000,
+              "y": 200,
+              "w": 220,
+              "h": 160,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "label": "index.html",
+              "timer": "max-age 倒计时"
+            },
+            {
+              "id": "check",
+              "type": "icon",
+              "x": 1300,
+              "y": 180,
+              "w": 120,
+              "h": 120,
+              "color": "#22C55E",
+              "reuse": false,
+              "label": "✓"
+            },
+            {
+              "id": "hitLabel",
+              "type": "text",
+              "x": 800,
+              "y": 680,
+              "w": 800,
+              "h": 60,
+              "text": "强缓存命中，不发请求",
+              "fontSize": 44,
+              "color": "#22C55E",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "ccTag",
+              "type": "text",
+              "x": 1000,
+              "y": 140,
+              "w": 400,
+              "h": 44,
+              "text": "Cache-Control: max-age=3600",
+              "fontSize": 28,
+              "color": "#F59E0B",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "browser",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "drawer",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 10,
                   "value": 0
                 },
                 {
@@ -330,60 +1342,60 @@
               "easing": "easeOut"
             },
             {
-              "elementId": "packet",
-              "property": "scale",
+              "elementId": "cacheFile",
+              "property": "y",
               "keyframes": [
                 {
-                  "frame": 16,
+                  "frame": 30,
+                  "value": 360
+                },
+                {
+                  "frame": 60,
+                  "value": 200
+                }
+              ],
+              "easing": "spring"
+            },
+            {
+              "elementId": "ccTag",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 60,
                   "value": 0
                 },
                 {
-                  "frame": 41,
+                  "frame": 75,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "check",
+              "property": "scale",
+              "keyframes": [
+                {
+                  "frame": 198,
+                  "value": 0
+                },
+                {
+                  "frame": 213,
                   "value": 1
                 }
               ],
               "easing": "spring"
             },
             {
-              "elementId": "tagGet",
+              "elementId": "hitLabel",
               "property": "opacity",
               "keyframes": [
                 {
-                  "frame": 74,
+                  "frame": 208,
                   "value": 0
                 },
                 {
-                  "frame": 91,
-                  "value": 1
-                }
-              ],
-              "easing": "easeOut"
-            },
-            {
-              "elementId": "tagPath",
-              "property": "opacity",
-              "keyframes": [
-                {
-                  "frame": 102,
-                  "value": 0
-                },
-                {
-                  "frame": 119,
-                  "value": 1
-                }
-              ],
-              "easing": "easeOut"
-            },
-            {
-              "elementId": "tagHeaders",
-              "property": "opacity",
-              "keyframes": [
-                {
-                  "frame": 132,
-                  "value": 0
-                },
-                {
-                  "frame": 148,
+                  "frame": 223,
                   "value": 1
                 }
               ],
@@ -391,84 +1403,433 @@
             }
           ],
           "transition": {
-            "type": "none",
-            "durationInFrames": 0
-          },
-          "from": 120
-        },
+            "type": "fade",
+            "durationInFrames": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "s3",
+      "chapterId": "dns",
+      "title": "DNS 解析",
+      "from": 1195,
+      "durationInFrames": 560,
+      "narrationChars": 70,
+      "narrationCharsRecount": 70,
+      "shots": [
         {
-          "id": "s2-2",
-          "durationInFrames": 110,
-          "narration": "像一封信飞向服务器。",
+          "id": "dns-1",
+          "from": 1195,
+          "durationInFrames": 359,
+          "narration": "第三步，DNS 解析，把域名换成 IP。先查浏览器缓存，再查系统缓存和 hosts 文件，都没有就问递归解析器。",
           "subtitles": [
             {
-              "text": "像一封信飞向服务器。",
+              "text": "第三步，DNS 解析",
               "from": 0,
-              "to": 109
+              "to": 59
+            },
+            {
+              "text": "把域名换成 IP。先查浏览器缓存",
+              "from": 60,
+              "to": 164
+            },
+            {
+              "text": "再查系统缓存和 hosts 文件",
+              "from": 165,
+              "to": 269
+            },
+            {
+              "text": "都没有就问递归解析器",
+              "from": 270,
+              "to": 358
             }
           ],
           "elements": [
             {
-              "id": "browser",
+              "id": "local0",
               "type": "rect",
-              "x": 160,
-              "y": 340,
-              "width": 560,
-              "height": 400,
+              "x": 120,
+              "y": 200,
+              "w": 520,
+              "h": 100,
               "color": "#111827",
-              "stroke": "#3B82F6",
-              "radius": 16,
-              "label": "浏览器窗口"
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "浏览器缓存"
             },
             {
-              "id": "server",
-              "type": "icon",
-              "x": 1360,
-              "y": 320,
-              "width": 360,
-              "height": 440,
+              "id": "local1",
+              "type": "rect",
+              "x": 120,
+              "y": 330,
+              "w": 520,
+              "h": 100,
               "color": "#111827",
-              "icon": "server-rack",
-              "stroke": "#3B82F6"
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "系统缓存"
             },
             {
-              "id": "pathReq",
-              "type": "arrow",
-              "x": 720,
-              "y": 510,
-              "width": 640,
-              "height": 4,
-              "color": "#3B82F6",
-              "dashed": true,
-              "direction": "right"
+              "id": "local2",
+              "type": "rect",
+              "x": 120,
+              "y": 460,
+              "w": 520,
+              "h": 100,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "hosts 文件"
             },
             {
-              "id": "packet",
-              "type": "packet",
-              "x": 340,
-              "y": 440,
-              "width": 200,
-              "height": 140,
-              "color": "#3B82F6",
-              "shape": "envelope"
+              "id": "miss0",
+              "type": "text",
+              "x": 660,
+              "y": 225,
+              "w": 200,
+              "h": 50,
+              "text": "未命中",
+              "fontSize": 32,
+              "color": "#EF4444",
+              "reuse": false
+            },
+            {
+              "id": "miss1",
+              "type": "text",
+              "x": 660,
+              "y": 355,
+              "w": 200,
+              "h": 50,
+              "text": "未命中",
+              "fontSize": 32,
+              "color": "#EF4444",
+              "reuse": false
+            },
+            {
+              "id": "miss2",
+              "type": "text",
+              "x": 660,
+              "y": 485,
+              "w": 200,
+              "h": 50,
+              "text": "未命中",
+              "fontSize": 32,
+              "color": "#EF4444",
+              "reuse": false
+            },
+            {
+              "id": "resolver",
+              "type": "rect",
+              "x": 120,
+              "y": 620,
+              "w": 520,
+              "h": 100,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#22D3EE",
+              "radius": 12,
+              "label": "递归解析器"
             },
             {
               "id": "subtitle",
               "type": "text",
               "x": 160,
-              "y": 940,
-              "width": 1600,
-              "height": 80,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
               "text": "(字幕层)",
               "fontSize": 44,
               "color": "#E5E7EB",
+              "reuse": true,
               "align": "center",
               "role": "subtitle"
             }
           ],
           "animations": [
             {
-              "elementId": "pathReq",
+              "elementId": "local0",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": 0
+                },
+                {
+                  "frame": 20,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "miss0",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 30,
+                  "value": 0
+                },
+                {
+                  "frame": 40,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "local1",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 50,
+                  "value": 0
+                },
+                {
+                  "frame": 60,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "miss1",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 70,
+                  "value": 0
+                },
+                {
+                  "frame": 80,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "local2",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 90,
+                  "value": 0
+                },
+                {
+                  "frame": 100,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "miss2",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 110,
+                  "value": 0
+                },
+                {
+                  "frame": 120,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "resolver",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 319,
+                  "value": 0
+                },
+                {
+                  "frame": 339,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "dns-2",
+          "from": 1554,
+          "durationInFrames": 201,
+          "narration": "它依次询问根、顶级域和权威服务器，拿到 IP 返回并缓存。",
+          "subtitles": [
+            {
+              "text": "它依次询问根、顶级域和权威服务器",
+              "from": 0,
+              "to": 115
+            },
+            {
+              "text": "拿到 IP 返回并缓存",
+              "from": 116,
+              "to": 200
+            }
+          ],
+          "elements": [
+            {
+              "id": "resolver",
+              "type": "rect",
+              "x": 120,
+              "y": 620,
+              "w": 520,
+              "h": 100,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#22D3EE",
+              "radius": 12,
+              "label": "递归解析器"
+            },
+            {
+              "id": "root",
+              "type": "rect",
+              "x": 1180,
+              "y": 120,
+              "w": 320,
+              "h": 90,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#22D3EE",
+              "radius": 45,
+              "label": "根 .",
+              "font": "monospace"
+            },
+            {
+              "id": "tld",
+              "type": "rect",
+              "x": 1180,
+              "y": 330,
+              "w": 320,
+              "h": 90,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 45,
+              "label": "com（顶级域）",
+              "font": "monospace"
+            },
+            {
+              "id": "auth",
+              "type": "rect",
+              "x": 1120,
+              "y": 540,
+              "w": 440,
+              "h": 90,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#22C55E",
+              "radius": 45,
+              "label": "example.com（权威）",
+              "font": "monospace"
+            },
+            {
+              "id": "edge1",
+              "type": "line",
+              "x": 1340,
+              "y": 210,
+              "w": 0,
+              "h": 120,
+              "color": "#6B7280",
+              "reuse": false
+            },
+            {
+              "id": "edge2",
+              "type": "line",
+              "x": 1340,
+              "y": 420,
+              "w": 0,
+              "h": 120,
+              "color": "#6B7280",
+              "reuse": false
+            },
+            {
+              "id": "ask0",
+              "type": "arrow",
+              "x": 640,
+              "y": 670,
+              "w": 480,
+              "h": 0,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "问根"
+            },
+            {
+              "id": "ask1",
+              "type": "arrow",
+              "x": 640,
+              "y": 670,
+              "w": 480,
+              "h": 0,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "问 .com"
+            },
+            {
+              "id": "ask2",
+              "type": "arrow",
+              "x": 640,
+              "y": 670,
+              "w": 480,
+              "h": 0,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "问权威"
+            },
+            {
+              "id": "ip",
+              "type": "text",
+              "x": 120,
+              "y": 750,
+              "w": 800,
+              "h": 64,
+              "text": "example.com → 203.0.113.10",
+              "fontSize": 44,
+              "color": "#22C55E",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "ipNote",
+              "type": "text",
+              "x": 120,
+              "y": 816,
+              "w": 800,
+              "h": 36,
+              "text": "示例 IP：RFC 5737 文档专用地址，非真实服务器",
+              "fontSize": 26,
+              "color": "#6B7280",
+              "reuse": false
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "root",
               "property": "opacity",
               "keyframes": [
                 {
@@ -476,6 +1837,21 @@
                   "value": 0
                 },
                 {
+                  "frame": 10,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "edge1",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": 0
+                },
+                {
                   "frame": 15,
                   "value": 1
                 }
@@ -483,225 +1859,1055 @@
               "easing": "easeOut"
             },
             {
-              "elementId": "packet",
-              "property": "x",
+              "elementId": "tld",
+              "property": "opacity",
               "keyframes": [
                 {
                   "frame": 15,
-                  "value": 340
+                  "value": 0
                 },
                 {
-                  "frame": 90,
-                  "value": 1440
+                  "frame": 25,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "edge2",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 25,
+                  "value": 0
+                },
+                {
+                  "frame": 30,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "auth",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 30,
+                  "value": 0
+                },
+                {
+                  "frame": 40,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "ask0",
+              "property": "y",
+              "keyframes": [
+                {
+                  "frame": 45,
+                  "value": 670
+                },
+                {
+                  "frame": 60,
+                  "value": 165
                 }
               ],
               "easing": "easeInOut"
             },
             {
-              "elementId": "packet",
-              "property": "y",
+              "elementId": "ask0",
+              "property": "opacity",
               "keyframes": [
                 {
-                  "frame": 15,
-                  "value": 440
+                  "frame": 45,
+                  "value": 0
                 },
                 {
-                  "frame": 52,
-                  "value": 380
+                  "frame": 55,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "ask0",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 80,
+                  "value": 1
                 },
                 {
                   "frame": 90,
-                  "value": 470
+                  "value": 0
                 }
               ],
               "easing": "easeInOut"
+            },
+            {
+              "elementId": "ask1",
+              "property": "y",
+              "keyframes": [
+                {
+                  "frame": 90,
+                  "value": 670
+                },
+                {
+                  "frame": 105,
+                  "value": 375
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "ask1",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 90,
+                  "value": 0
+                },
+                {
+                  "frame": 100,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "ask1",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 125,
+                  "value": 1
+                },
+                {
+                  "frame": 135,
+                  "value": 0
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "ask2",
+              "property": "y",
+              "keyframes": [
+                {
+                  "frame": 135,
+                  "value": 670
+                },
+                {
+                  "frame": 150,
+                  "value": 585
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "ask2",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 135,
+                  "value": 0
+                },
+                {
+                  "frame": 145,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "ask2",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 170,
+                  "value": 1
+                },
+                {
+                  "frame": 180,
+                  "value": 0
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "ip",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 190,
+                  "value": 0
+                },
+                {
+                  "frame": 200,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "ipNote",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 200,
+                  "value": 0
+                },
+                {
+                  "frame": 200,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
             }
           ],
           "transition": {
             "type": "fade",
-            "durationInFrames": 10
-          },
-          "from": 285
+            "durationInFrames": 12
+          }
         }
       ]
     },
     {
-      "id": "s3",
-      "title": "服务器处理",
-      "from": 395,
-      "durationInFrames": 180,
+      "id": "s4",
+      "chapterId": "connect",
+      "title": "建立连接",
+      "from": 1755,
+      "durationInFrames": 653,
+      "narrationChars": 83,
+      "narrationCharsRecount": 82,
       "shots": [
         {
-          "id": "s3-1",
-          "durationInFrames": 180,
-          "narration": "服务器收到请求，按路径找到页面，或者现场生成内容。",
+          "id": "connect-1",
+          "from": 1755,
+          "durationInFrames": 319,
+          "narration": "第四步，建立连接。TCP 三次握手：客户端发 SYN，服务器回 SYN 加 ACK，客户端再回 ACK。",
           "subtitles": [
             {
-              "text": "服务器收到请求，",
+              "text": "第四步，建立连接。TCP 三次握手",
               "from": 0,
-              "to": 50
+              "to": 105
             },
             {
-              "text": "按路径找到页面，",
-              "from": 51,
-              "to": 110
+              "text": "客户端发 SYN，服务器回 SYN 加 ACK",
+              "from": 106,
+              "to": 242
             },
             {
-              "text": "或者现场生成内容。",
-              "from": 111,
-              "to": 179
+              "text": "客户端再回 ACK",
+              "from": 243,
+              "to": 318
             }
           ],
           "elements": [
             {
-              "id": "server",
-              "type": "icon",
-              "x": 1360,
-              "y": 320,
-              "width": 360,
-              "height": 440,
-              "color": "#111827",
-              "icon": "server-rack",
-              "stroke": "#3B82F6"
+              "id": "cliL",
+              "type": "text",
+              "x": 300,
+              "y": 110,
+              "w": 300,
+              "h": 50,
+              "text": "浏览器",
+              "fontSize": 36,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "align": "center"
             },
             {
-              "id": "led1",
-              "type": "rect",
-              "x": 1420,
-              "y": 378,
-              "width": 24,
-              "height": 24,
-              "color": "#22D3EE",
-              "radius": 12
+              "id": "srvL",
+              "type": "text",
+              "x": 1320,
+              "y": 110,
+              "w": 300,
+              "h": 50,
+              "text": "服务器",
+              "fontSize": 36,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "align": "center"
             },
             {
-              "id": "led2",
-              "type": "rect",
-              "x": 1420,
-              "y": 478,
-              "width": 24,
-              "height": 24,
-              "color": "#22D3EE",
-              "radius": 12
-            },
-            {
-              "id": "led3",
-              "type": "rect",
-              "x": 1420,
-              "y": 578,
-              "width": 24,
-              "height": 24,
-              "color": "#22D3EE",
-              "radius": 12
-            },
-            {
-              "id": "folder",
-              "type": "icon",
-              "x": 620,
-              "y": 300,
-              "width": 200,
-              "height": 180,
+              "id": "lifeL",
+              "type": "line",
+              "x": 450,
+              "y": 170,
+              "w": 0,
+              "h": 660,
               "color": "#3B82F6",
-              "icon": "folder-html"
+              "reuse": false
             },
             {
-              "id": "gear",
-              "type": "icon",
-              "x": 1000,
-              "y": 300,
-              "width": 200,
-              "height": 180,
-              "color": "#22D3EE",
-              "icon": "gear"
+              "id": "lifeR",
+              "type": "line",
+              "x": 1470,
+              "y": 170,
+              "w": 0,
+              "h": 660,
+              "color": "#3B82F6",
+              "reuse": false
             },
             {
-              "id": "respPacket",
-              "type": "packet",
-              "x": 810,
-              "y": 620,
-              "width": 220,
-              "height": 150,
+              "id": "tcp0",
+              "type": "arrow",
+              "x": 450,
+              "y": 220,
+              "w": 1020,
+              "h": 60,
               "color": "#22D3EE",
-              "shape": "box"
+              "reuse": false,
+              "label": "SYN",
+              "direction": "r"
+            },
+            {
+              "id": "tcp1",
+              "type": "arrow",
+              "x": 450,
+              "y": 310,
+              "w": 1020,
+              "h": 60,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "SYN+ACK",
+              "direction": "l"
+            },
+            {
+              "id": "tcp2",
+              "type": "arrow",
+              "x": 450,
+              "y": 400,
+              "w": 1020,
+              "h": 60,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "ACK",
+              "direction": "r"
             },
             {
               "id": "subtitle",
               "type": "text",
               "x": 160,
-              "y": 940,
-              "width": 1600,
-              "height": 80,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
               "text": "(字幕层)",
               "fontSize": 44,
               "color": "#E5E7EB",
+              "reuse": true,
               "align": "center",
               "role": "subtitle"
             }
           ],
           "animations": [
             {
-              "elementId": "led1",
+              "elementId": "cliL",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "srvL",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "lifeL",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "lifeR",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "tcp0",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 30,
+                  "value": 0
+                },
+                {
+                  "frame": 111,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "tcp1",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 116,
+                  "value": 0
+                },
+                {
+                  "frame": 197,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "tcp2",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 202,
+                  "value": 0
+                },
+                {
+                  "frame": 283,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "connect-2",
+          "from": 2074,
+          "durationInFrames": 334,
+          "narration": "HTTPS 还要做 TLS 握手，校验证书、协商出会话密钥。而 HTTP/3 改用基于 UDP 的 QUIC。",
+          "subtitles": [
+            {
+              "text": "HTTPS 还要做 TLS 握手",
+              "from": 0,
+              "to": 98
+            },
+            {
+              "text": "校验证书、协商出会话密钥",
+              "from": 99,
+              "to": 182
+            },
+            {
+              "text": "而 HTTP/3 改用基于 UDP 的 QUIC",
+              "from": 183,
+              "to": 333
+            }
+          ],
+          "elements": [
+            {
+              "id": "cliL",
+              "type": "text",
+              "x": 300,
+              "y": 110,
+              "w": 300,
+              "h": 50,
+              "text": "浏览器",
+              "fontSize": 36,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "srvL",
+              "type": "text",
+              "x": 1320,
+              "y": 110,
+              "w": 300,
+              "h": 50,
+              "text": "服务器",
+              "fontSize": 36,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "lifeL",
+              "type": "line",
+              "x": 450,
+              "y": 170,
+              "w": 0,
+              "h": 660,
+              "color": "#3B82F6",
+              "reuse": false
+            },
+            {
+              "id": "lifeR",
+              "type": "line",
+              "x": 1470,
+              "y": 170,
+              "w": 0,
+              "h": 660,
+              "color": "#3B82F6",
+              "reuse": false
+            },
+            {
+              "id": "tcp0",
+              "type": "arrow",
+              "x": 450,
+              "y": 220,
+              "w": 1020,
+              "h": 60,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "SYN",
+              "direction": "r"
+            },
+            {
+              "id": "tcp1",
+              "type": "arrow",
+              "x": 450,
+              "y": 310,
+              "w": 1020,
+              "h": 60,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "SYN+ACK",
+              "direction": "l"
+            },
+            {
+              "id": "tcp2",
+              "type": "arrow",
+              "x": 450,
+              "y": 400,
+              "w": 1020,
+              "h": 60,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "ACK",
+              "direction": "r"
+            },
+            {
+              "id": "tls0",
+              "type": "arrow",
+              "x": 450,
+              "y": 500,
+              "w": 1020,
+              "h": 50,
+              "color": "#F59E0B",
+              "reuse": false,
+              "label": "ClientHello",
+              "direction": "r"
+            },
+            {
+              "id": "tls1",
+              "type": "arrow",
+              "x": 450,
+              "y": 570,
+              "w": 1020,
+              "h": 50,
+              "color": "#F59E0B",
+              "reuse": false,
+              "label": "ServerHello + 证书",
+              "direction": "l"
+            },
+            {
+              "id": "tls2",
+              "type": "arrow",
+              "x": 450,
+              "y": 640,
+              "w": 1020,
+              "h": 50,
+              "color": "#F59E0B",
+              "reuse": false,
+              "label": "密钥交换 / Finished",
+              "direction": "r"
+            },
+            {
+              "id": "lock",
+              "type": "icon",
+              "x": 880,
+              "y": 730,
+              "w": 160,
+              "h": 100,
+              "color": "#22C55E",
+              "reuse": false,
+              "label": "🔒"
+            },
+            {
+              "id": "lockNote",
+              "type": "text",
+              "x": 1060,
+              "y": 750,
+              "w": 400,
+              "h": 50,
+              "text": "证书校验、密钥协商",
+              "fontSize": 32,
+              "color": "#22C55E",
+              "reuse": false
+            },
+            {
+              "id": "quic",
+              "type": "text",
+              "x": 1300,
+              "y": 830,
+              "w": 540,
+              "h": 40,
+              "text": "HTTP/3 = QUIC over UDP",
+              "fontSize": 28,
+              "color": "#6B7280",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            },
+            {
+              "id": "tls13note",
+              "type": "text",
+              "x": 1380,
+              "y": 820,
+              "w": 460,
+              "h": 40,
+              "color": "#9CA3AF",
+              "fontSize": 24,
+              "reuse": false,
+              "text": "TLS 1.3 只需 1 个往返（1-RTT）"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "tls0",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": 0
+                },
+                {
+                  "frame": 40,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "tls1",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 45,
+                  "value": 0
+                },
+                {
+                  "frame": 75,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "tls2",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 80,
+                  "value": 0
+                },
+                {
+                  "frame": 110,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "lock",
+              "property": "scale",
+              "keyframes": [
+                {
+                  "frame": 120,
+                  "value": 0
+                },
+                {
+                  "frame": 140,
+                  "value": 1
+                }
+              ],
+              "easing": "spring"
+            },
+            {
+              "elementId": "lockNote",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 135,
+                  "value": 0
+                },
+                {
+                  "frame": 150,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "quic",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 244,
+                  "value": 0
+                },
+                {
+                  "frame": 264,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "tls13note",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 200,
+                  "value": 0
+                },
+                {
+                  "frame": 220,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            }
+          ],
+          "transition": {
+            "type": "fade",
+            "durationInFrames": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "s5",
+      "chapterId": "request",
+      "title": "发送请求",
+      "from": 2408,
+      "durationInFrames": 553,
+      "narrationChars": 69,
+      "narrationCharsRecount": 67,
+      "shots": [
+        {
+          "id": "request-1",
+          "from": 2408,
+          "durationInFrames": 111,
+          "narration": "第五步，发送 HTTP 请求。",
+          "subtitles": [
+            {
+              "text": "第五步，发送 HTTP 请求",
+              "from": 0,
+              "to": 110
+            }
+          ],
+          "elements": [
+            {
+              "id": "browser",
+              "type": "rect",
+              "x": 80,
+              "y": 300,
+              "w": 380,
+              "h": 300,
+              "color": "#111827",
+              "reuse": true,
+              "stroke": "#3B82F6",
+              "radius": 16,
+              "label": "浏览器窗口（第一期）"
+            },
+            {
+              "id": "packet",
+              "type": "packet",
+              "x": 500,
+              "y": 300,
+              "w": 560,
+              "h": 340,
+              "color": "#3B82F6",
+              "reuse": true,
+              "label": "信封数据包（第一期）"
+            },
+            {
+              "id": "hdr0",
+              "type": "text",
+              "x": 540,
+              "y": 330,
+              "w": 500,
+              "h": 52,
+              "text": "GET /index.html HTTP/1.1",
+              "fontSize": 30,
+              "color": "#22D3EE",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "browser",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "packet",
               "property": "opacity",
               "keyframes": [
                 {
                   "frame": 10,
-                  "value": 0.2
+                  "value": 0
                 },
                 {
-                  "frame": 18,
+                  "frame": 25,
                   "value": 1
-                },
-                {
-                  "frame": 26,
-                  "value": 0.2
                 }
               ],
-              "easing": "linear"
+              "easing": "easeOut"
             },
             {
-              "elementId": "led2",
-              "property": "opacity",
-              "keyframes": [
-                {
-                  "frame": 20,
-                  "value": 0.2
-                },
-                {
-                  "frame": 28,
-                  "value": 1
-                },
-                {
-                  "frame": 36,
-                  "value": 0.2
-                }
-              ],
-              "easing": "linear"
-            },
-            {
-              "elementId": "led3",
+              "elementId": "hdr0",
               "property": "opacity",
               "keyframes": [
                 {
                   "frame": 30,
-                  "value": 0.2
+                  "value": 0
                 },
                 {
-                  "frame": 38,
+                  "frame": 45,
                   "value": 1
-                },
-                {
-                  "frame": 46,
-                  "value": 0.2
                 }
               ],
-              "easing": "linear"
+              "easing": "easeOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "request-2",
+          "from": 2519,
+          "durationInFrames": 442,
+          "narration": "请求行写着方法、路径和协议版本，比如 GET 首页；请求头带上 Host、Cookie，以及用于协商缓存的 If-None-Match。",
+          "subtitles": [
+            {
+              "text": "请求行写着方法、路径和协议版本",
+              "from": 0,
+              "to": 106
             },
             {
-              "elementId": "folder",
+              "text": "比如 GET 首页；请求头带上 Host、Cookie",
+              "from": 107,
+              "to": 274
+            },
+            {
+              "text": "以及用于协商缓存的 If-None-Match",
+              "from": 275,
+              "to": 441
+            }
+          ],
+          "elements": [
+            {
+              "id": "browser",
+              "type": "rect",
+              "x": 80,
+              "y": 300,
+              "w": 380,
+              "h": 300,
+              "color": "#111827",
+              "reuse": true,
+              "stroke": "#3B82F6",
+              "radius": 16,
+              "label": "浏览器窗口（第一期）"
+            },
+            {
+              "id": "server",
+              "type": "icon",
+              "x": 1500,
+              "y": 260,
+              "w": 300,
+              "h": 380,
+              "color": "#3B82F6",
+              "reuse": true,
+              "label": "服务器（第一期）"
+            },
+            {
+              "id": "packet",
+              "type": "packet",
+              "x": 500,
+              "y": 300,
+              "w": 560,
+              "h": 340,
+              "color": "#3B82F6",
+              "reuse": true,
+              "label": "信封数据包（第一期）"
+            },
+            {
+              "id": "hdr0",
+              "type": "text",
+              "x": 540,
+              "y": 330,
+              "w": 500,
+              "h": 52,
+              "text": "GET /index.html HTTP/1.1",
+              "fontSize": 30,
+              "color": "#22D3EE",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "hdr1",
+              "type": "text",
+              "x": 540,
+              "y": 400,
+              "w": 500,
+              "h": 52,
+              "text": "Host: example.com",
+              "fontSize": 30,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "hdr2",
+              "type": "text",
+              "x": 540,
+              "y": 470,
+              "w": 500,
+              "h": 52,
+              "text": "Cookie: sid=abc123",
+              "fontSize": 30,
+              "color": "#F59E0B",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "hdr3",
+              "type": "text",
+              "x": 540,
+              "y": 540,
+              "w": 500,
+              "h": 52,
+              "text": "If-None-Match: \"v1\"",
+              "fontSize": 30,
+              "color": "#22C55E",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "hdr1",
               "property": "opacity",
               "keyframes": [
                 {
-                  "frame": 51,
+                  "frame": 10,
+                  "value": 0
+                },
+                {
+                  "frame": 25,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "hdr2",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 50,
                   "value": 0
                 },
                 {
@@ -712,15 +2918,448 @@
               "easing": "easeOut"
             },
             {
+              "elementId": "hdr3",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 90,
+                  "value": 0
+                },
+                {
+                  "frame": 105,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "packet",
+              "property": "x",
+              "keyframes": [
+                {
+                  "frame": 382,
+                  "value": 500
+                },
+                {
+                  "frame": 432,
+                  "value": 1000
+                }
+              ],
+              "easing": "easeIn"
+            }
+          ],
+          "transition": {
+            "type": "fade",
+            "durationInFrames": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "s6",
+      "chapterId": "server",
+      "title": "服务器处理",
+      "from": 2961,
+      "durationInFrames": 596,
+      "narrationChars": 75,
+      "narrationCharsRecount": 75,
+      "shots": [
+        {
+          "id": "server-1",
+          "from": 2961,
+          "durationInFrames": 87,
+          "narration": "第六步，服务器处理。",
+          "subtitles": [
+            {
+              "text": "第六步，服务器处理",
+              "from": 0,
+              "to": 86
+            }
+          ],
+          "elements": [
+            {
+              "id": "browser",
+              "type": "rect",
+              "x": 100,
+              "y": 200,
+              "w": 300,
+              "h": 200,
+              "color": "#111827",
+              "reuse": true,
+              "stroke": "#3B82F6",
+              "radius": 16,
+              "label": "浏览器窗口（第一期）"
+            },
+            {
+              "id": "cdn",
+              "type": "icon",
+              "x": 760,
+              "y": 180,
+              "w": 320,
+              "h": 200,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "CDN 边缘节点（新）",
+              "note": "DNS 阶段经 CNAME 指向"
+            },
+            {
+              "id": "cname",
+              "type": "text",
+              "x": 640,
+              "y": 100,
+              "w": 700,
+              "h": 44,
+              "text": "example.com CNAME → edge.cdn.example.net",
+              "fontSize": 28,
+              "color": "#6B7280",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "packet",
+              "type": "packet",
+              "x": 200,
+              "y": 240,
+              "w": 200,
+              "h": 130,
+              "color": "#3B82F6",
+              "reuse": true,
+              "label": "信封"
+            },
+            {
+              "id": "hit",
+              "type": "text",
+              "x": 760,
+              "y": 400,
+              "w": 320,
+              "h": 44,
+              "text": "命中 → 直接返回",
+              "fontSize": 32,
+              "color": "#22C55E",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "cdn",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "cname",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 15,
+                  "value": 0
+                },
+                {
+                  "frame": 30,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "packet",
+              "property": "x",
+              "keyframes": [
+                {
+                  "frame": 30,
+                  "value": 200
+                },
+                {
+                  "frame": 70,
+                  "value": 700
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "packet",
+              "property": "x",
+              "keyframes": [
+                {
+                  "frame": 80,
+                  "value": 700
+                },
+                {
+                  "frame": 86,
+                  "value": 200
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "hit",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 75,
+                  "value": 0
+                },
+                {
+                  "frame": 86,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "server-2",
+          "from": 3048,
+          "durationInFrames": 509,
+          "narration": "如果用了 CDN，DNS 阶段就已把你指向就近的边缘节点，命中缓存直接返回；否则请求经负载均衡和反向代理到达应用服务器，读取静态文件或动态生成页面。",
+          "subtitles": [
+            {
+              "text": "如果用了 CDN，DNS 阶段就已把你指向就近的边缘节点",
+              "from": 0,
+              "to": 183
+            },
+            {
+              "text": "命中缓存直接返回",
+              "from": 184,
+              "to": 242
+            },
+            {
+              "text": "否则请求经负载均衡和反向代理到达应用服务器",
+              "from": 243,
+              "to": 397
+            },
+            {
+              "text": "读取静态文件或动态生成页面",
+              "from": 398,
+              "to": 508
+            }
+          ],
+          "elements": [
+            {
+              "id": "cdn",
+              "type": "icon",
+              "x": 760,
+              "y": 180,
+              "w": 320,
+              "h": 200,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "CDN 边缘节点（新）",
+              "note": "DNS 阶段经 CNAME 指向"
+            },
+            {
+              "id": "missT",
+              "type": "text",
+              "x": 560,
+              "y": 440,
+              "w": 560,
+              "h": 44,
+              "text": "未命中 → 回源",
+              "fontSize": 32,
+              "color": "#EF4444",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "lb",
+              "type": "rect",
+              "x": 560,
+              "y": 520,
+              "w": 240,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#F59E0B",
+              "radius": 12,
+              "label": "负载均衡（新）"
+            },
+            {
+              "id": "rp",
+              "type": "rect",
+              "x": 880,
+              "y": 520,
+              "w": 240,
+              "h": 110,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#F59E0B",
+              "radius": 12,
+              "label": "反向代理（新）"
+            },
+            {
+              "id": "server",
+              "type": "icon",
+              "x": 1380,
+              "y": 420,
+              "w": 300,
+              "h": 320,
+              "color": "#3B82F6",
+              "reuse": true,
+              "label": "源站服务器（第一期）"
+            },
+            {
+              "id": "packet",
+              "type": "packet",
+              "x": 200,
+              "y": 520,
+              "w": 200,
+              "h": 130,
+              "color": "#3B82F6",
+              "reuse": true,
+              "label": "信封"
+            },
+            {
+              "id": "folder",
+              "type": "icon",
+              "x": 1440,
+              "y": 780,
+              "w": 80,
+              "h": 70,
+              "color": "#F59E0B",
+              "reuse": true,
+              "label": "静态文件"
+            },
+            {
+              "id": "gear",
+              "type": "icon",
+              "x": 1560,
+              "y": 780,
+              "w": 80,
+              "h": 70,
+              "color": "#22D3EE",
+              "reuse": true,
+              "label": "动态生成"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "missT",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "lb",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": 0
+                },
+                {
+                  "frame": 20,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "rp",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 20,
+                  "value": 0
+                },
+                {
+                  "frame": 30,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "packet",
+              "property": "x",
+              "keyframes": [
+                {
+                  "frame": 20,
+                  "value": 700
+                },
+                {
+                  "frame": 140,
+                  "value": 1380
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "folder",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 150,
+                  "value": 0
+                },
+                {
+                  "frame": 165,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
               "elementId": "gear",
               "property": "opacity",
               "keyframes": [
                 {
-                  "frame": 111,
+                  "frame": 165,
                   "value": 0
                 },
                 {
-                  "frame": 125,
+                  "frame": 180,
                   "value": 1
                 }
               ],
@@ -731,97 +3370,423 @@
               "property": "rotate",
               "keyframes": [
                 {
-                  "frame": 111,
+                  "frame": 165,
                   "value": 0
                 },
                 {
-                  "frame": 179,
+                  "frame": 508,
                   "value": 360
                 }
               ],
               "easing": "linear"
-            },
-            {
-              "elementId": "respPacket",
-              "property": "scale",
-              "keyframes": [
-                {
-                  "frame": 140,
-                  "value": 0
-                },
-                {
-                  "frame": 160,
-                  "value": 1
-                }
-              ],
-              "easing": "spring"
             }
           ],
           "transition": {
-            "type": "slide",
-            "direction": "left",
+            "type": "fade",
             "durationInFrames": 12
-          },
-          "from": 395
+          }
         }
       ]
     },
     {
-      "id": "s4",
+      "id": "s7",
+      "chapterId": "response",
       "title": "返回响应",
-      "from": 575,
-      "durationInFrames": 240,
+      "from": 3557,
+      "durationInFrames": 810,
+      "narrationChars": 105,
+      "narrationCharsRecount": 102,
       "shots": [
         {
-          "id": "s4-1",
-          "durationInFrames": 140,
-          "narration": "接着服务器返回响应：状态码 200 OK 表示成功，",
+          "id": "response-1",
+          "from": 3557,
+          "durationInFrames": 307,
+          "narration": "第七步，返回响应。200 表示成功，301 是永久重定向，404 是找不到，500 是服务器出错。",
           "subtitles": [
             {
-              "text": "接着服务器返回响应：",
+              "text": "第七步，返回响应。200 表示成功",
               "from": 0,
-              "to": 57
+              "to": 104
             },
             {
-              "text": "状态码 200 OK 表示成功，",
-              "from": 58,
-              "to": 139
+              "text": "301 是永久重定向",
+              "from": 105,
+              "to": 171
+            },
+            {
+              "text": "404 是找不到，500 是服务器出错",
+              "from": 172,
+              "to": 306
             }
           ],
           "elements": [
             {
-              "id": "respPacket",
-              "type": "packet",
-              "x": 760,
-              "y": 300,
-              "width": 400,
-              "height": 300,
-              "color": "#22D3EE",
-              "shape": "box"
+              "id": "code200",
+              "type": "rect",
+              "x": 200,
+              "y": 220,
+              "w": 340,
+              "h": 200,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#22C55E",
+              "radius": 16,
+              "label": "200\n成功",
+              "fontSize": 56
             },
             {
-              "id": "status",
+              "id": "code301",
+              "type": "rect",
+              "x": 600,
+              "y": 220,
+              "w": 340,
+              "h": 200,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#3B82F6",
+              "radius": 16,
+              "label": "301\n永久重定向",
+              "fontSize": 56
+            },
+            {
+              "id": "code404",
+              "type": "rect",
+              "x": 1000,
+              "y": 220,
+              "w": 340,
+              "h": 200,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#F59E0B",
+              "radius": 16,
+              "label": "404\n找不到",
+              "fontSize": 56
+            },
+            {
+              "id": "code500",
+              "type": "rect",
+              "x": 1400,
+              "y": 220,
+              "w": 340,
+              "h": 200,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#EF4444",
+              "radius": 16,
+              "label": "500\n服务器出错",
+              "fontSize": 56
+            },
+            {
+              "id": "subtitle",
               "type": "text",
-              "x": 780,
-              "y": 330,
-              "width": 360,
-              "height": 100,
-              "text": "200 OK",
-              "fontSize": 88,
-              "color": "#22C55E",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
               "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "code200",
+              "property": "rotateY",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": 90
+                },
+                {
+                  "frame": 25,
+                  "value": 0
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "code301",
+              "property": "rotateY",
+              "keyframes": [
+                {
+                  "frame": 78,
+                  "value": 90
+                },
+                {
+                  "frame": 93,
+                  "value": 0
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "code404",
+              "property": "rotateY",
+              "keyframes": [
+                {
+                  "frame": 146,
+                  "value": 90
+                },
+                {
+                  "frame": 161,
+                  "value": 0
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "code500",
+              "property": "rotateY",
+              "keyframes": [
+                {
+                  "frame": 214,
+                  "value": 90
+                },
+                {
+                  "frame": 229,
+                  "value": 0
+                }
+              ],
+              "easing": "easeOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "response-2",
+          "from": 3864,
+          "durationInFrames": 196,
+          "narration": "资源没变就返回 304，浏览器用本地缓存，这是协商缓存。",
+          "subtitles": [
+            {
+              "text": "资源没变就返回 304",
+              "from": 0,
+              "to": 74
+            },
+            {
+              "text": "浏览器用本地缓存",
+              "from": 75,
+              "to": 134
+            },
+            {
+              "text": "这是协商缓存",
+              "from": 135,
+              "to": 195
+            }
+          ],
+          "elements": [
+            {
+              "id": "code304",
+              "type": "rect",
+              "x": 660,
+              "y": 180,
+              "w": 600,
+              "h": 300,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#22D3EE",
+              "radius": 20,
+              "label": "304 Not Modified",
+              "fontSize": 64
+            },
+            {
+              "id": "drawer",
+              "type": "icon",
+              "x": 160,
+              "y": 520,
+              "w": 360,
+              "h": 240,
+              "color": "#3B82F6",
+              "reuse": false,
+              "label": "缓存抽屉"
+            },
+            {
+              "id": "back",
+              "type": "arrow",
+              "x": 660,
+              "y": 480,
+              "w": 0,
+              "h": 140,
+              "color": "#22D3EE",
+              "reuse": false,
+              "label": "用本地缓存",
+              "curve": -0.4
+            },
+            {
+              "id": "etag",
+              "type": "text",
+              "x": 700,
+              "y": 560,
+              "w": 1080,
+              "h": 100,
+              "text": "If-None-Match: \"v1\"  ⇄  ETag: \"v1\" → 协商缓存",
+              "fontSize": 36,
+              "color": "#F59E0B",
+              "reuse": false,
               "font": "monospace"
             },
             {
               "id": "subtitle",
               "type": "text",
               "x": 160,
-              "y": 940,
-              "width": 1600,
-              "height": 80,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
               "text": "(字幕层)",
               "fontSize": 44,
               "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "code304",
+              "property": "scale",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 20,
+                  "value": 1
+                }
+              ],
+              "easing": "spring"
+            },
+            {
+              "elementId": "drawer",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 20,
+                  "value": 0
+                },
+                {
+                  "frame": 35,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "back",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 35,
+                  "value": 0
+                },
+                {
+                  "frame": 60,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "etag",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 60,
+                  "value": 0
+                },
+                {
+                  "frame": 80,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "response-3",
+          "from": 4060,
+          "durationInFrames": 307,
+          "narration": "响应头还会带 Content-Type、Cache-Control 和 Set-Cookie。",
+          "subtitles": [
+            {
+              "text": "响应头还会带 Content-Type、Cache-Control 和 Set-Cookie",
+              "from": 0,
+              "to": 306
+            }
+          ],
+          "elements": [
+            {
+              "id": "respPacket",
+              "type": "packet",
+              "x": 160,
+              "y": 240,
+              "w": 160,
+              "h": 340,
+              "color": "#22C55E",
+              "reuse": true,
+              "label": "响应包（第一期）"
+            },
+            {
+              "id": "rh0",
+              "type": "text",
+              "x": 360,
+              "y": 260,
+              "w": 1200,
+              "h": 80,
+              "text": "Content-Type: text/html",
+              "fontSize": 48,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "rh1",
+              "type": "text",
+              "x": 360,
+              "y": 380,
+              "w": 1200,
+              "h": 80,
+              "text": "Cache-Control: max-age=3600",
+              "fontSize": 48,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "rh2",
+              "type": "text",
+              "x": 360,
+              "y": 500,
+              "w": 1200,
+              "h": 80,
+              "text": "Set-Cookie: sid=abc123",
+              "fontSize": 48,
+              "color": "#E5E7EB",
+              "reuse": false,
+              "font": "monospace"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
               "align": "center",
               "role": "subtitle"
             }
@@ -836,165 +3801,14 @@
                   "value": 0
                 },
                 {
-                  "frame": 15,
+                  "frame": 12,
                   "value": 1
                 }
               ],
               "easing": "easeOut"
             },
             {
-              "elementId": "status",
-              "property": "scale",
-              "keyframes": [
-                {
-                  "frame": 59,
-                  "value": 0.6
-                },
-                {
-                  "frame": 76,
-                  "value": 1.1
-                },
-                {
-                  "frame": 89,
-                  "value": 1
-                }
-              ],
-              "easing": "spring"
-            },
-            {
-              "elementId": "status",
-              "property": "opacity",
-              "keyframes": [
-                {
-                  "frame": 59,
-                  "value": 0
-                },
-                {
-                  "frame": 71,
-                  "value": 1
-                }
-              ],
-              "easing": "easeOut"
-            }
-          ],
-          "transition": {
-            "type": "none",
-            "durationInFrames": 0
-          },
-          "from": 575
-        },
-        {
-          "id": "s4-2",
-          "durationInFrames": 100,
-          "narration": "后面跟着网页的 HTML。",
-          "subtitles": [
-            {
-              "text": "后面跟着网页的 HTML。",
-              "from": 0,
-              "to": 99
-            }
-          ],
-          "elements": [
-            {
-              "id": "browser",
-              "type": "rect",
-              "x": 160,
-              "y": 340,
-              "width": 560,
-              "height": 400,
-              "color": "#111827",
-              "stroke": "#3B82F6",
-              "radius": 16,
-              "label": "浏览器窗口"
-            },
-            {
-              "id": "server",
-              "type": "icon",
-              "x": 1360,
-              "y": 320,
-              "width": 360,
-              "height": 440,
-              "color": "#111827",
-              "icon": "server-rack",
-              "stroke": "#3B82F6"
-            },
-            {
-              "id": "pathResp",
-              "type": "arrow",
-              "x": 720,
-              "y": 570,
-              "width": 640,
-              "height": 4,
-              "color": "#22D3EE",
-              "dashed": true,
-              "direction": "left"
-            },
-            {
-              "id": "respPacket",
-              "type": "packet",
-              "x": 1400,
-              "y": 420,
-              "width": 260,
-              "height": 200,
-              "color": "#22D3EE",
-              "shape": "box"
-            },
-            {
-              "id": "status2",
-              "type": "text",
-              "x": 1410,
-              "y": 430,
-              "width": 240,
-              "height": 50,
-              "text": "200 OK",
-              "fontSize": 40,
-              "color": "#22C55E",
-              "font": "monospace"
-            },
-            {
-              "id": "htmlCode",
-              "type": "code",
-              "x": 1410,
-              "y": 490,
-              "width": 240,
-              "height": 110,
-              "color": "#0F172A",
-              "text": "<html>\n  …\n</html>",
-              "fontSize": 22,
-              "textColor": "#22D3EE"
-            },
-            {
-              "id": "subtitle",
-              "type": "text",
-              "x": 160,
-              "y": 940,
-              "width": 1600,
-              "height": 80,
-              "text": "(字幕层)",
-              "fontSize": 44,
-              "color": "#E5E7EB",
-              "align": "center",
-              "role": "subtitle"
-            }
-          ],
-          "animations": [
-            {
-              "elementId": "htmlCode",
-              "property": "opacity",
-              "keyframes": [
-                {
-                  "frame": 0,
-                  "value": 0
-                },
-                {
-                  "frame": 15,
-                  "value": 1
-                }
-              ],
-              "easing": "easeOut"
-            },
-            {
-              "elementId": "pathResp",
+              "elementId": "rh0",
               "property": "opacity",
               "keyframes": [
                 {
@@ -1009,155 +3823,277 @@
               "easing": "easeOut"
             },
             {
-              "elementId": "respPacket",
-              "property": "x",
+              "elementId": "rh1",
+              "property": "opacity",
               "keyframes": [
                 {
-                  "frame": 30,
-                  "value": 1400
+                  "frame": 35,
+                  "value": 0
                 },
                 {
-                  "frame": 90,
-                  "value": 330
+                  "frame": 50,
+                  "value": 1
                 }
               ],
-              "easing": "easeInOut"
+              "easing": "easeOut"
             },
             {
-              "elementId": "status2",
-              "property": "x",
+              "elementId": "rh2",
+              "property": "opacity",
               "keyframes": [
                 {
-                  "frame": 30,
-                  "value": 1410
+                  "frame": 60,
+                  "value": 0
                 },
                 {
-                  "frame": 90,
-                  "value": 340
+                  "frame": 75,
+                  "value": 1
                 }
               ],
-              "easing": "easeInOut"
-            },
-            {
-              "elementId": "htmlCode",
-              "property": "x",
-              "keyframes": [
-                {
-                  "frame": 30,
-                  "value": 1410
-                },
-                {
-                  "frame": 90,
-                  "value": 340
-                }
-              ],
-              "easing": "easeInOut"
+              "easing": "easeOut"
             }
           ],
           "transition": {
-            "type": "wipe",
-            "direction": "right",
+            "type": "fade",
             "durationInFrames": 12
-          },
-          "from": 715
+          }
         }
       ]
     },
     {
-      "id": "s5",
-      "title": "展示与收尾",
-      "from": 815,
-      "durationInFrames": 180,
+      "id": "s8",
+      "chapterId": "render",
+      "title": "浏览器渲染",
+      "from": 4367,
+      "durationInFrames": 660,
+      "narrationChars": 84,
+      "narrationCharsRecount": 84,
       "shots": [
         {
-          "id": "s5-1",
-          "durationInFrames": 90,
-          "narration": "浏览器解析 HTML，画出页面。",
+          "id": "render-1",
+          "from": 4367,
+          "durationInFrames": 313,
+          "narration": "第八步，渲染。HTML 解析成 DOM，CSS 解析成 CSSOM，合成渲染树，再经过布局、绘制和合成。",
           "subtitles": [
             {
-              "text": "浏览器解析 HTML，画出页面。",
+              "text": "第八步，渲染。HTML 解析成 DOM",
               "from": 0,
-              "to": 89
+              "to": 108
+            },
+            {
+              "text": "CSS 解析成 CSSOM",
+              "from": 109,
+              "to": 188
+            },
+            {
+              "text": "合成渲染树，再经过布局、绘制和合成",
+              "from": 189,
+              "to": 312
             }
           ],
           "elements": [
             {
-              "id": "browser",
+              "id": "pipe0",
               "type": "rect",
-              "x": 460,
-              "y": 160,
-              "width": 1000,
-              "height": 640,
-              "color": "#111827",
-              "stroke": "#3B82F6",
-              "radius": 16,
-              "label": "浏览器窗口"
-            },
-            {
-              "id": "pageTitle",
-              "type": "rect",
-              "x": 520,
+              "x": 120,
               "y": 240,
-              "width": 880,
-              "height": 80,
-              "color": "#3B82F6",
-              "radius": 8
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "DOM",
+              "fontSize": 40
             },
             {
-              "id": "pageImage",
+              "id": "pipe1",
               "type": "rect",
-              "x": 520,
-              "y": 350,
-              "width": 540,
-              "height": 300,
-              "color": "#1E293B",
-              "icon": "image"
+              "x": 464,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "CSSOM",
+              "fontSize": 40
             },
             {
-              "id": "pageButton",
+              "id": "pipe2",
               "type": "rect",
-              "x": 1100,
-              "y": 560,
-              "width": 300,
-              "height": 90,
-              "color": "#22D3EE",
-              "radius": 45,
-              "text": "按钮",
+              "x": 808,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "渲染树",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe3",
+              "type": "rect",
+              "x": 1152,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "布局",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe4",
+              "type": "rect",
+              "x": 1496,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "绘制/合成",
+              "fontSize": 40
+            },
+            {
+              "id": "htmlSrc",
+              "type": "text",
+              "x": 120,
+              "y": 440,
+              "w": 600,
+              "h": 50,
+              "text": "HTML → DOM",
               "fontSize": 32,
-              "textColor": "#0B1020"
+              "color": "#3B82F6",
+              "reuse": false
+            },
+            {
+              "id": "cssSrc",
+              "type": "text",
+              "x": 800,
+              "y": 440,
+              "w": 600,
+              "h": 50,
+              "text": "CSS → CSSOM",
+              "fontSize": 32,
+              "color": "#F59E0B",
+              "reuse": false
             },
             {
               "id": "subtitle",
               "type": "text",
               "x": 160,
-              "y": 940,
-              "width": 1600,
-              "height": 80,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
               "text": "(字幕层)",
               "fontSize": 44,
               "color": "#E5E7EB",
+              "reuse": true,
               "align": "center",
               "role": "subtitle"
             }
           ],
           "animations": [
             {
-              "elementId": "pageTitle",
-              "property": "opacity",
+              "elementId": "pipe0",
+              "property": "strokeColor",
               "keyframes": [
                 {
                   "frame": 15,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 25,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "pipe1",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 69,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 79,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "pipe2",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 123,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 133,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "pipe3",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 177,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 187,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "pipe4",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 231,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 241,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "htmlSrc",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 10,
                   "value": 0
                 },
                 {
-                  "frame": 30,
+                  "frame": 20,
                   "value": 1
                 }
               ],
               "easing": "easeOut"
             },
             {
-              "elementId": "pageImage",
+              "elementId": "cssSrc",
               "property": "opacity",
               "keyframes": [
                 {
@@ -1165,22 +4101,1422 @@
                   "value": 0
                 },
                 {
-                  "frame": 45,
+                  "frame": 40,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "render-2",
+          "from": 4680,
+          "durationInFrames": 177,
+          "narration": "普通脚本会阻塞解析，可用 defer 或 async。",
+          "subtitles": [
+            {
+              "text": "普通脚本会阻塞解析",
+              "from": 0,
+              "to": 65
+            },
+            {
+              "text": "可用 defer 或 async",
+              "from": 66,
+              "to": 176
+            }
+          ],
+          "elements": [
+            {
+              "id": "pipe0",
+              "type": "rect",
+              "x": 120,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "DOM",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe1",
+              "type": "rect",
+              "x": 464,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "CSSOM",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe2",
+              "type": "rect",
+              "x": 808,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "渲染树",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe3",
+              "type": "rect",
+              "x": 1152,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "布局",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe4",
+              "type": "rect",
+              "x": 1496,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "绘制/合成",
+              "fontSize": 40
+            },
+            {
+              "id": "script",
+              "type": "rect",
+              "x": 560,
+              "y": 220,
+              "w": 300,
+              "h": 180,
+              "color": "#EF4444",
+              "reuse": false,
+              "label": "<script>",
+              "font": "monospace"
+            },
+            {
+              "id": "defer",
+              "type": "text",
+              "x": 560,
+              "y": 420,
+              "w": 300,
+              "h": 50,
+              "text": "defer / async",
+              "fontSize": 34,
+              "color": "#22C55E",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "script",
+              "property": "scale",
+              "keyframes": [
+                {
+                  "frame": 0,
+                  "value": 0
+                },
+                {
+                  "frame": 15,
+                  "value": 1
+                }
+              ],
+              "easing": "spring"
+            },
+            {
+              "elementId": "defer",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 50,
+                  "value": 0
+                },
+                {
+                  "frame": 65,
                   "value": 1
                 }
               ],
               "easing": "easeOut"
             },
             {
-              "elementId": "pageButton",
-              "property": "scale",
+              "elementId": "script",
+              "property": "y",
               "keyframes": [
                 {
-                  "frame": 45,
+                  "frame": 70,
+                  "value": 220
+                },
+                {
+                  "frame": 100,
+                  "value": 520
+                }
+              ],
+              "easing": "easeInOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "render-3",
+          "from": 4857,
+          "durationInFrames": 170,
+          "narration": "子资源会再发请求，连接可复用，最终四次挥手关闭。",
+          "subtitles": [
+            {
+              "text": "子资源会再发请求",
+              "from": 0,
+              "to": 58
+            },
+            {
+              "text": "连接可复用，最终四次挥手关闭",
+              "from": 59,
+              "to": 169
+            }
+          ],
+          "elements": [
+            {
+              "id": "pipe0",
+              "type": "rect",
+              "x": 120,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "DOM",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe1",
+              "type": "rect",
+              "x": 464,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "CSSOM",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe2",
+              "type": "rect",
+              "x": 808,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "渲染树",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe3",
+              "type": "rect",
+              "x": 1152,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "布局",
+              "fontSize": 40
+            },
+            {
+              "id": "pipe4",
+              "type": "rect",
+              "x": 1496,
+              "y": 240,
+              "w": 312,
+              "h": 140,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 14,
+              "label": "绘制/合成",
+              "fontSize": 40
+            },
+            {
+              "id": "sub",
+              "type": "text",
+              "x": 120,
+              "y": 620,
+              "w": 1680,
+              "h": 50,
+              "text": "子资源再发请求 · keep-alive 复用连接",
+              "fontSize": 32,
+              "color": "#6B7280",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "fin0",
+              "type": "arrow",
+              "x": 560,
+              "y": 700,
+              "w": 800,
+              "h": 30,
+              "color": "#6B7280",
+              "reuse": false,
+              "label": "FIN",
+              "direction": "r"
+            },
+            {
+              "id": "fin1",
+              "type": "arrow",
+              "x": 560,
+              "y": 736,
+              "w": 800,
+              "h": 30,
+              "color": "#6B7280",
+              "reuse": false,
+              "label": "ACK",
+              "direction": "l"
+            },
+            {
+              "id": "fin2",
+              "type": "arrow",
+              "x": 560,
+              "y": 772,
+              "w": 800,
+              "h": 30,
+              "color": "#6B7280",
+              "reuse": false,
+              "label": "FIN",
+              "direction": "l"
+            },
+            {
+              "id": "fin3",
+              "type": "arrow",
+              "x": 560,
+              "y": 808,
+              "w": 800,
+              "h": 30,
+              "color": "#6B7280",
+              "reuse": false,
+              "label": "ACK",
+              "direction": "r"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "sub",
+              "property": "opacity",
+              "keyframes": [
+                {
+                  "frame": 0,
                   "value": 0
                 },
                 {
-                  "frame": 60,
+                  "frame": 12,
+                  "value": 1
+                }
+              ],
+              "easing": "easeOut"
+            },
+            {
+              "elementId": "fin0",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 30,
+                  "value": 0
+                },
+                {
+                  "frame": 42,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "fin1",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 42,
+                  "value": 0
+                },
+                {
+                  "frame": 54,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "fin2",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 54,
+                  "value": 0
+                },
+                {
+                  "frame": 66,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "fin3",
+              "property": "drawProgress",
+              "keyframes": [
+                {
+                  "frame": 66,
+                  "value": 0
+                },
+                {
+                  "frame": 78,
+                  "value": 1
+                }
+              ],
+              "easing": "easeInOut"
+            }
+          ],
+          "transition": {
+            "type": "fade",
+            "durationInFrames": 12
+          }
+        }
+      ]
+    },
+    {
+      "id": "s9",
+      "chapterId": "recap",
+      "title": "口述版",
+      "from": 5027,
+      "durationInFrames": 803,
+      "narrationChars": 104,
+      "narrationCharsRecount": 104,
+      "shots": [
+        {
+          "id": "recap-1",
+          "from": 5027,
+          "durationInFrames": 141,
+          "narration": "面试可以这样答：浏览器解析网址、检查缓存；",
+          "subtitles": [
+            {
+              "text": "面试可以这样答：浏览器解析网址、检查缓存",
+              "from": 0,
+              "to": 140
+            }
+          ],
+          "elements": [
+            {
+              "id": "step1",
+              "type": "rect",
+              "x": 120,
+              "y": 110,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "1 URL 解析"
+            },
+            {
+              "id": "step2",
+              "type": "rect",
+              "x": 120,
+              "y": 202,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "2 缓存检查"
+            },
+            {
+              "id": "step3",
+              "type": "rect",
+              "x": 120,
+              "y": 294,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "3 DNS 解析"
+            },
+            {
+              "id": "step4",
+              "type": "rect",
+              "x": 120,
+              "y": 386,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "4 TCP/TLS 握手"
+            },
+            {
+              "id": "step5",
+              "type": "rect",
+              "x": 120,
+              "y": 478,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "5 发送请求"
+            },
+            {
+              "id": "step6",
+              "type": "rect",
+              "x": 120,
+              "y": 570,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "6 服务器处理"
+            },
+            {
+              "id": "step7",
+              "type": "rect",
+              "x": 120,
+              "y": 662,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "7 返回响应"
+            },
+            {
+              "id": "step8",
+              "type": "rect",
+              "x": 120,
+              "y": 754,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "8 浏览器渲染"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "step1",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 20,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step2",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 80,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 90,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "recap-2",
+          "from": 5168,
+          "durationInFrames": 112,
+          "narration": "未命中就做 DNS 解析拿到 IP；",
+          "subtitles": [
+            {
+              "text": "未命中就做 DNS 解析拿到 IP",
+              "from": 0,
+              "to": 111
+            }
+          ],
+          "elements": [
+            {
+              "id": "step1",
+              "type": "rect",
+              "x": 120,
+              "y": 110,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "1 URL 解析"
+            },
+            {
+              "id": "step2",
+              "type": "rect",
+              "x": 120,
+              "y": 202,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "2 缓存检查"
+            },
+            {
+              "id": "step3",
+              "type": "rect",
+              "x": 120,
+              "y": 294,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "3 DNS 解析"
+            },
+            {
+              "id": "step4",
+              "type": "rect",
+              "x": 120,
+              "y": 386,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "4 TCP/TLS 握手"
+            },
+            {
+              "id": "step5",
+              "type": "rect",
+              "x": 120,
+              "y": 478,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "5 发送请求"
+            },
+            {
+              "id": "step6",
+              "type": "rect",
+              "x": 120,
+              "y": 570,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "6 服务器处理"
+            },
+            {
+              "id": "step7",
+              "type": "rect",
+              "x": 120,
+              "y": 662,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "7 返回响应"
+            },
+            {
+              "id": "step8",
+              "type": "rect",
+              "x": 120,
+              "y": 754,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "8 浏览器渲染"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "step3",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 20,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "recap-3",
+          "from": 5280,
+          "durationInFrames": 148,
+          "narration": "TCP 三次握手，HTTPS 再做 TLS 握手；",
+          "subtitles": [
+            {
+              "text": "TCP 三次握手，HTTPS 再做 TLS 握手",
+              "from": 0,
+              "to": 147
+            }
+          ],
+          "elements": [
+            {
+              "id": "step1",
+              "type": "rect",
+              "x": 120,
+              "y": 110,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "1 URL 解析"
+            },
+            {
+              "id": "step2",
+              "type": "rect",
+              "x": 120,
+              "y": 202,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "2 缓存检查"
+            },
+            {
+              "id": "step3",
+              "type": "rect",
+              "x": 120,
+              "y": 294,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "3 DNS 解析"
+            },
+            {
+              "id": "step4",
+              "type": "rect",
+              "x": 120,
+              "y": 386,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "4 TCP/TLS 握手"
+            },
+            {
+              "id": "step5",
+              "type": "rect",
+              "x": 120,
+              "y": 478,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "5 发送请求"
+            },
+            {
+              "id": "step6",
+              "type": "rect",
+              "x": 120,
+              "y": 570,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "6 服务器处理"
+            },
+            {
+              "id": "step7",
+              "type": "rect",
+              "x": 120,
+              "y": 662,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "7 返回响应"
+            },
+            {
+              "id": "step8",
+              "type": "rect",
+              "x": 120,
+              "y": 754,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "8 浏览器渲染"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "step4",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 20,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "recap-4",
+          "from": 5428,
+          "durationInFrames": 212,
+          "narration": "然后发送 HTTP 请求，服务器处理后返回 200 或 304 等响应；",
+          "subtitles": [
+            {
+              "text": "然后发送 HTTP 请求",
+              "from": 0,
+              "to": 69
+            },
+            {
+              "text": "服务器处理后返回 200 或 304 等响应",
+              "from": 70,
+              "to": 211
+            }
+          ],
+          "elements": [
+            {
+              "id": "step1",
+              "type": "rect",
+              "x": 120,
+              "y": 110,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "1 URL 解析"
+            },
+            {
+              "id": "step2",
+              "type": "rect",
+              "x": 120,
+              "y": 202,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "2 缓存检查"
+            },
+            {
+              "id": "step3",
+              "type": "rect",
+              "x": 120,
+              "y": 294,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "3 DNS 解析"
+            },
+            {
+              "id": "step4",
+              "type": "rect",
+              "x": 120,
+              "y": 386,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "4 TCP/TLS 握手"
+            },
+            {
+              "id": "step5",
+              "type": "rect",
+              "x": 120,
+              "y": 478,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "5 发送请求"
+            },
+            {
+              "id": "step6",
+              "type": "rect",
+              "x": 120,
+              "y": 570,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "6 服务器处理"
+            },
+            {
+              "id": "step7",
+              "type": "rect",
+              "x": 120,
+              "y": 662,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "7 返回响应"
+            },
+            {
+              "id": "step8",
+              "type": "rect",
+              "x": 120,
+              "y": 754,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "8 浏览器渲染"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "step5",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 20,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step6",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 80,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 90,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step7",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 150,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 160,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            }
+          ],
+          "transition": {
+            "type": "crossfade",
+            "durationInFrames": 8
+          }
+        },
+        {
+          "id": "recap-5",
+          "from": 5640,
+          "durationInFrames": 190,
+          "narration": "最后构建 DOM 和 CSSOM，经过布局、绘制、合成，展示页面。",
+          "subtitles": [
+            {
+              "text": "最后构建 DOM 和 CSSOM",
+              "from": 0,
+              "to": 90
+            },
+            {
+              "text": "经过布局、绘制、合成",
+              "from": 91,
+              "to": 146
+            },
+            {
+              "text": "展示页面",
+              "from": 147,
+              "to": 189
+            }
+          ],
+          "elements": [
+            {
+              "id": "step1",
+              "type": "rect",
+              "x": 120,
+              "y": 110,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "1 URL 解析"
+            },
+            {
+              "id": "step2",
+              "type": "rect",
+              "x": 120,
+              "y": 202,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "2 缓存检查"
+            },
+            {
+              "id": "step3",
+              "type": "rect",
+              "x": 120,
+              "y": 294,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "3 DNS 解析"
+            },
+            {
+              "id": "step4",
+              "type": "rect",
+              "x": 120,
+              "y": 386,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "4 TCP/TLS 握手"
+            },
+            {
+              "id": "step5",
+              "type": "rect",
+              "x": 120,
+              "y": 478,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "5 发送请求"
+            },
+            {
+              "id": "step6",
+              "type": "rect",
+              "x": 120,
+              "y": 570,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "6 服务器处理"
+            },
+            {
+              "id": "step7",
+              "type": "rect",
+              "x": 120,
+              "y": 662,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "7 返回响应"
+            },
+            {
+              "id": "step8",
+              "type": "rect",
+              "x": 120,
+              "y": 754,
+              "w": 560,
+              "h": 76,
+              "color": "#111827",
+              "reuse": false,
+              "stroke": "#6B7280",
+              "radius": 12,
+              "label": "8 浏览器渲染"
+            },
+            {
+              "id": "finalTitle",
+              "type": "text",
+              "x": 900,
+              "y": 380,
+              "w": 880,
+              "h": 140,
+              "text": "满分回答",
+              "fontSize": 110,
+              "color": "#22C55E",
+              "reuse": false,
+              "align": "center"
+            },
+            {
+              "id": "subtitle",
+              "type": "text",
+              "x": 160,
+              "y": 900,
+              "w": 1600,
+              "h": 80,
+              "text": "(字幕层)",
+              "fontSize": 44,
+              "color": "#E5E7EB",
+              "reuse": true,
+              "align": "center",
+              "role": "subtitle"
+            }
+          ],
+          "animations": [
+            {
+              "elementId": "step8",
+              "property": "strokeColor",
+              "keyframes": [
+                {
+                  "frame": 10,
+                  "value": "#6B7280"
+                },
+                {
+                  "frame": 20,
+                  "value": "#22D3EE"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step1",
+              "property": "fillColor",
+              "keyframes": [
+                {
+                  "frame": 110,
+                  "value": "#111827"
+                },
+                {
+                  "frame": 130,
+                  "value": "#22C55E"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step2",
+              "property": "fillColor",
+              "keyframes": [
+                {
+                  "frame": 110,
+                  "value": "#111827"
+                },
+                {
+                  "frame": 130,
+                  "value": "#22C55E"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step3",
+              "property": "fillColor",
+              "keyframes": [
+                {
+                  "frame": 110,
+                  "value": "#111827"
+                },
+                {
+                  "frame": 130,
+                  "value": "#22C55E"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step4",
+              "property": "fillColor",
+              "keyframes": [
+                {
+                  "frame": 110,
+                  "value": "#111827"
+                },
+                {
+                  "frame": 130,
+                  "value": "#22C55E"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step5",
+              "property": "fillColor",
+              "keyframes": [
+                {
+                  "frame": 110,
+                  "value": "#111827"
+                },
+                {
+                  "frame": 130,
+                  "value": "#22C55E"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step6",
+              "property": "fillColor",
+              "keyframes": [
+                {
+                  "frame": 110,
+                  "value": "#111827"
+                },
+                {
+                  "frame": 130,
+                  "value": "#22C55E"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step7",
+              "property": "fillColor",
+              "keyframes": [
+                {
+                  "frame": 110,
+                  "value": "#111827"
+                },
+                {
+                  "frame": 130,
+                  "value": "#22C55E"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "step8",
+              "property": "fillColor",
+              "keyframes": [
+                {
+                  "frame": 110,
+                  "value": "#111827"
+                },
+                {
+                  "frame": 130,
+                  "value": "#22C55E"
+                }
+              ],
+              "easing": "easeInOut"
+            },
+            {
+              "elementId": "finalTitle",
+              "property": "scale",
+              "keyframes": [
+                {
+                  "frame": 130,
+                  "value": 0
+                },
+                {
+                  "frame": 150,
                   "value": 1
                 }
               ],
@@ -1189,165 +5525,8 @@
           ],
           "transition": {
             "type": "fade",
-            "durationInFrames": 10
-          },
-          "from": 815
-        },
-        {
-          "id": "s5-2",
-          "durationInFrames": 90,
-          "narration": "一来一回，这就是请求与响应。",
-          "subtitles": [
-            {
-              "text": "一来一回，",
-              "from": 0,
-              "to": 35
-            },
-            {
-              "text": "这就是请求与响应。",
-              "from": 36,
-              "to": 89
-            }
-          ],
-          "elements": [
-            {
-              "id": "browser",
-              "type": "rect",
-              "x": 260,
-              "y": 300,
-              "width": 420,
-              "height": 300,
-              "color": "#111827",
-              "stroke": "#3B82F6",
-              "radius": 16,
-              "label": "浏览器窗口"
-            },
-            {
-              "id": "server",
-              "type": "icon",
-              "x": 1260,
-              "y": 280,
-              "width": 300,
-              "height": 360,
-              "color": "#111827",
-              "icon": "server-rack",
-              "stroke": "#3B82F6"
-            },
-            {
-              "id": "arrowReq",
-              "type": "arrow",
-              "x": 700,
-              "y": 410,
-              "width": 540,
-              "height": 6,
-              "color": "#3B82F6",
-              "direction": "right"
-            },
-            {
-              "id": "arrowResp",
-              "type": "arrow",
-              "x": 700,
-              "y": 510,
-              "width": 540,
-              "height": 6,
-              "color": "#22D3EE",
-              "direction": "left"
-            },
-            {
-              "id": "title",
-              "type": "text",
-              "x": 560,
-              "y": 700,
-              "width": 800,
-              "height": 110,
-              "text": "请求 — 响应",
-              "fontSize": 80,
-              "color": "#E5E7EB",
-              "align": "center",
-              "fontWeight": 700
-            },
-            {
-              "id": "subtitle",
-              "type": "text",
-              "x": 160,
-              "y": 940,
-              "width": 1600,
-              "height": 80,
-              "text": "(字幕层)",
-              "fontSize": 44,
-              "color": "#E5E7EB",
-              "align": "center",
-              "role": "subtitle"
-            }
-          ],
-          "animations": [
-            {
-              "elementId": "arrowReq",
-              "property": "progress",
-              "keyframes": [
-                {
-                  "frame": 0,
-                  "value": 0
-                },
-                {
-                  "frame": 30,
-                  "value": 1
-                }
-              ],
-              "easing": "easeInOut"
-            },
-            {
-              "elementId": "arrowResp",
-              "property": "progress",
-              "keyframes": [
-                {
-                  "frame": 30,
-                  "value": 0
-                },
-                {
-                  "frame": 60,
-                  "value": 1
-                }
-              ],
-              "easing": "easeInOut"
-            },
-            {
-              "elementId": "title",
-              "property": "opacity",
-              "keyframes": [
-                {
-                  "frame": 40,
-                  "value": 0
-                },
-                {
-                  "frame": 55,
-                  "value": 1
-                }
-              ],
-              "easing": "easeOut"
-            },
-            {
-              "elementId": "title",
-              "property": "y",
-              "keyframes": [
-                {
-                  "frame": 40,
-                  "value": 730
-                },
-                {
-                  "frame": 55,
-                  "value": 700
-                }
-              ],
-              "easing": "easeOut"
-            }
-          ],
-          "transition": {
-            "type": "fade",
-            "durationInFrames": 15,
-            "note": "结尾淡出到黑"
-          },
-          "from": 905
+            "durationInFrames": 12
+          }
         }
       ]
     }
