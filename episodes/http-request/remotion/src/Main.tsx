@@ -11,7 +11,11 @@ const FONT = '"Noto Sans CJK SC","Noto Sans SC",sans-serif';
 const MONO = '"DejaVu Sans Mono","Noto Sans Mono CJK SC",monospace';
 
 // 制作侧覆盖（记录在 README）：connect-2 的 quic 与 tls13note 同在右下角重叠 → quic 移到左下
-const OVERRIDES: Record<string, Record<string, any>> = {'connect-2:quic': {x: 120}};
+const OVERRIDES: Record<string, Record<string, any>> = {
+  'connect-2:quic': {x: 120},
+  // 导演验收修订：⇄ 改为 =，并补「一致 → 304」
+  'response-2:etag': {text: 'If-None-Match: "v1" = ETag: "v1"  一致 → 304'},
+};
 // 这些动画按导演要求固定在镜头原始帧，不随配音缩放
 const PINNED: Record<string, boolean> = {'connect-2:tls13note': true};
 // 动画覆盖（帧为原分镜帧，仍随配音缩放）：dns-2 的解析结果原定 190 帧才出现、只停留约 10 帧就随转场淡出 → 提前到 ask2 到达后

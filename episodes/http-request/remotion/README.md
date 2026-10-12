@@ -6,5 +6,6 @@
 - 制作侧覆盖（Main.tsx 内 OVERRIDES / ANIM_OVERRIDES / PINNED）：
   - connect-2 `quic` 与 `tls13note` 同在右下角重叠 → `quic` x 1300→120；`tls13note` 固定在镜头第 200 帧淡入（不缩放）。
   - dns-2 `ip`/`ipNote` 原定 190/200 帧出现、仅停留约 10 帧就淡出 → 提前到 150/158 帧。
+  - response-2 `etag` 文案改为 `If-None-Match: "v1" = ETag: "v1"  一致 → 304`（导演验收修订）。
   - server-2 信封到达源站后淡出，避免盖住机柜。
 - 关键帧检查图：`../frames/`（每章 1 张）。
