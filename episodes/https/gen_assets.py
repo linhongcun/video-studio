@@ -1,8 +1,10 @@
 import os
 T=dict(bg="#0B1020",surface="#111827",s2="#1F2937",border="#243045",text="#E5E7EB",text2="#9CA3AF",muted="#6B7280",primary="#22D3EE",secondary="#3B82F6",success="#22C55E",accent="#F59E0B",danger="#F87171")
 F='font-family="system-ui, -apple-system, \'PingFang SC\', \'Noto Sans CJK SC\', sans-serif"'
+OUT=os.path.join(os.path.dirname(os.path.abspath(__file__)),"assets")
+os.makedirs(OUT,exist_ok=True)
 def svg(name,vb,body):
-    open(name,"w").write(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}" width="{vb.split()[2]}" height="{vb.split()[3]}">\n{body}\n</svg>\n')
+    open(os.path.join(OUT,name),"w").write(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}" width="{vb.split()[2]}" height="{vb.split()[3]}">\n{body}\n</svg>\n')
 def key(c,stroke,x=0,y=0,id="key",teeth=True):
     return f'''<g id="{id}" transform="translate({x} {y})">
  <circle cx="140" cy="256" r="84" fill="{c}"/><circle cx="140" cy="256" r="34" fill="{T['bg']}"/>
@@ -34,10 +36,10 @@ svg("envelope-sealed.svg","0 0 512 512",f'''{env_base}
 svg("certificate.svg","0 0 720 512",f'''<rect id="paper" x="40" y="40" width="640" height="400" rx="20" fill="{T['surface']}" stroke="{T['primary']}" stroke-width="6"/>
 <rect x="64" y="64" width="592" height="352" rx="12" fill="none" stroke="{T['border']}" stroke-width="4"/>
 <text x="100" y="130" {F} font-size="34" font-weight="700" fill="{T['text']}">TLS 证书</text>
-<text x="100" y="180" {F} font-size="22" fill="{T['text2']}">颁发给</text>
+<text x="100" y="176" {F} font-size="30" fill="{T['text2']}">颁发给</text>
 <text id="domain" x="100" y="226" {F} font-size="40" font-weight="700" fill="{T['primary']}">example.com</text>
-<text x="100" y="282" {F} font-size="22" fill="{T['text2']}">公钥</text>
-<g id="pubkey-chip"><rect x="160" y="258" width="200" height="34" rx="17" fill="{T['s2']}"/><circle cx="182" cy="275" r="9" fill="{T['primary']}"/><rect x="198" y="270" width="140" height="10" rx="5" fill="{T['primary']}"/></g>
+<text x="100" y="286" {F} font-size="30" fill="{T['text2']}">公钥</text>
+<g id="pubkey-chip"><rect x="180" y="258" width="200" height="34" rx="17" fill="{T['s2']}"/><circle cx="202" cy="275" r="9" fill="{T['primary']}"/><rect x="218" y="270" width="140" height="10" rx="5" fill="{T['primary']}"/></g>
 <rect x="100" y="330" width="260" height="10" rx="5" fill="{T['muted']}"/><rect x="100" y="356" width="200" height="10" rx="5" fill="{T['muted']}"/>
 <g id="ribbon"><path d="M520 370 l-30 110 l34 -20 l20 34 l24 -110z M600 370 l30 110 l-34 -20 l-20 34 l-24 -110z" fill="{T['accent']}"/></g>
 <g id="seal"><circle cx="560" cy="330" r="70" fill="{T['accent']}"/><circle cx="560" cy="330" r="52" fill="none" stroke="{T['bg']}" stroke-width="5" stroke-dasharray="6 6"/>
@@ -53,18 +55,29 @@ def blob(cx,cy,r,c,id): return f'<circle id="{id}" cx="{cx}" cy="{cy}" r="{r}" f
 lbl=lambda x,y,s,c,sz=26: f'<text x="{x}" y="{y}" text-anchor="middle" {F} font-size="{sz}" font-weight="600" fill="{c}">{s}</text>'
 arrow=lambda x1,y1,x2,y2,c: f'<path d="M{x1} {y1} L{x2} {y2}" stroke="{c}" stroke-width="6" stroke-linecap="round" marker-end="url(#ah)"/>'
 def ecdhe(step):
-    L=lambda x,y,t,c,sz=30: lbl(x,y,t,c,sz)
+    L=lambda x,y,t,c,sz=38: lbl(x,y,t,c,max(sz,38))
     parts=[f'<defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="{T['text2']}"/></marker></defs>',
-      L(260,70,"浏览器",T['text'],44)+L(1340,70,"服务器",T['text'],44)]
+      L(260,70,"浏览器",T['text'],48)+L(1340,70,"服务器",T['text'],48)]
     if step>=1: parts.append(f'<g id="shared-param">{blob(800,170,70,T["primary"],"param")}{L(800,285,"公开参数",T["text2"])}</g>')
-    if step>=2: parts.append(f'<g id="left-secret">{blob(130,400,60,T["danger"],"a-secret")}{L(130,505,"浏览器私有",T["text2"])}</g><g id="right-secret">{blob(1470,400,60,T["success"],"b-secret")}{L(1470,505,"服务器私有",T["text2"])}</g>')
-    if step>=3: parts.append(f'<g id="mix" stroke="{T["muted"]}" stroke-width="4" stroke-dasharray="8 8" fill="none"><path d="M740 200 L430 350"/><path d="M860 200 L1170 350"/></g><g id="left-public">{blob(370,400,64,T["secondary"],"a-pub")}<circle cx="370" cy="400" r="64" fill="{T["danger"]}" opacity="0.45"/>{L(370,510,"浏览器公开值",T["text2"])}</g><g id="right-public">{blob(1230,400,64,T["secondary"],"b-pub")}<circle cx="1230" cy="400" r="64" fill="{T["success"]}" opacity="0.45"/>{L(1230,510,"服务器公开值",T["text2"])}</g>')
-    if step>=4: parts.append(f'<g id="exchange" stroke-dasharray="14 12">{arrow(450,390,1140,390,T["text2"])}{arrow(1150,440,460,440,T["text2"])}</g>'+L(800,370,"只交换公开值",T["text2"],32))
-    if step>=5: parts.append(f'<g id="eve"><circle cx="800" cy="540" r="36" fill="{T["muted"]}"/><path d="M745 630 C745 588 855 588 855 630Z" fill="{T["muted"]}"/>{L(800,680,"偷听者算不出",T["danger"],32)}</g>')
-    if step>=6: parts.append(f'<g id="left-derive">{arrow(260,570,260,660,T["text2"])}{blob(260,770,80,T["accent"],"left-key")}</g><g id="right-derive">{arrow(1340,570,1340,660,T["text2"])}{blob(1340,770,80,T["accent"],"right-key")}</g>'+L(800,785,"= 同一把会话密钥 =",T["accent"],44))
+    if step>=2: parts.append(f'<g id="left-secret">{blob(110,400,60,T["danger"],"a-secret")}{L(110,505,"浏览器私有",T["text2"])}</g><g id="right-secret">{blob(1490,400,60,T["success"],"b-secret")}{L(1490,505,"服务器私有",T["text2"])}</g>')
+    if step>=3: parts.append(f'<g id="mix" stroke="{T["muted"]}" stroke-width="4" stroke-dasharray="8 8" fill="none"><path d="M740 200 L450 350"/><path d="M860 200 L1150 350"/></g><g id="left-public">{blob(390,400,64,T["secondary"],"a-pub")}<circle cx="390" cy="400" r="64" fill="{T["danger"]}" opacity="0.45"/>{L(390,510,"浏览器公开值",T["text2"])}</g><g id="right-public">{blob(1210,400,64,T["secondary"],"b-pub")}<circle cx="1210" cy="400" r="64" fill="{T["success"]}" opacity="0.45"/>{L(1210,510,"服务器公开值",T["text2"])}</g>')
+    if step>=4: parts.append(f'<g id="exchange" stroke-dasharray="14 12">{arrow(470,390,1120,390,T["text2"])}{arrow(1130,440,480,440,T["text2"])}</g>'+L(800,370,"只交换公开值",T["text2"],40))
+    if step>=5: parts.append(f'<g id="eve"><circle cx="800" cy="540" r="36" fill="{T["muted"]}"/><path d="M745 630 C745 588 855 588 855 630Z" fill="{T["muted"]}"/>{L(800,690,"偷听者算不出",T["danger"],40)}</g>')
+    if step>=6: parts.append(f'<g id="left-derive">{arrow(260,560,260,600,T["text2"])}{blob(260,770,80,T["accent"],"left-key")}</g><g id="right-derive">{arrow(1340,560,1340,600,T["text2"])}{blob(1340,770,80,T["accent"],"right-key")}</g>'+L(800,785,"= 同一把会话密钥 =",T["accent"],48))
     return "\n".join(parts)
 svg("ecdhe-mix.svg","0 0 1600 900",ecdhe(6))
 for n in range(1,7): svg(f"ecdhe-step{n}.svg","0 0 1600 900",f'<rect width="1600" height="900" fill="{T["bg"]}"/>'+ecdhe(n))
+def combine():
+    L=lambda x,y,t,c,sz=38: lbl(x,y,t,c,sz)
+    def side(cx,recv,own,rl,ol):
+        return (f'{blob(cx-180,330,64,T["secondary"],"r")}<circle cx="{cx-180}" cy="330" r="64" fill="{recv}" opacity="0.45"/>'+L(cx-180,450,rl,T["text2"])
+          +L(cx,345,"+",T["text"],64)+blob(cx+180,330,60,own,"o")+L(cx+180,450,ol,T["text2"])
+          +arrow(cx,500,cx,600,T["text2"])+blob(cx,700,80,T["accent"],"k")+L(cx,830,"算出会话密钥",T["accent"],40))
+    return (f'<defs><marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="{T['text2']}"/></marker></defs><rect width="1600" height="900" fill="{T["bg"]}"/>'
+      +L(400,90,"浏览器",T['text'],48)+L(1200,90,"服务器",T['text'],48)+f'<path d="M800 140 V840" stroke="{T["border"]}" stroke-width="4" stroke-dasharray="10 10"/>'
+      +f'<g id="left-combine">{side(400,T["success"],T["danger"],"收到的公开值","自己的私有")}</g><g id="right-combine">{side(1200,T["danger"],T["success"],"收到的公开值","自己的私有")}</g>'
+      )
+svg("ecdhe-combine.svg","0 0 1600 900",combine())
 svg("postcard.svg","0 0 960 600",f'''<rect id="card" x="30" y="30" width="900" height="540" rx="20" fill="{T['surface']}" stroke="{T['text2']}" stroke-width="6"/>
 <path d="M560 80 V520" stroke="{T['border']}" stroke-width="4"/>
 <text x="70" y="110" {F} font-size="34" font-weight="700" fill="{T['text']}">明信片 · HTTP</text>
