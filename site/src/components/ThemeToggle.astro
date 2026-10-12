@@ -1,0 +1,34 @@
+---
+// 三档主题切换：跟随系统 / 浅色 / 深色（radiogroup，←/→ 切换，存 localStorage）
+const opts = [['system', '跟随系统', '◐'], ['light', '浅色', '☀'], ['dark', '深色', '☾']];
+---
+<div class="tt" role="radiogroup" aria-label="主题">
+  {opts.map(([v, l, i]) => (
+    <button type="button" role="radio" data-theme-opt={v} aria-checked="false" aria-label={l} title={l} tabindex="-1"><span aria-hidden="true">{i}</span></button>
+  ))}
+</div>
+<script>
+  const groups = document.querySelectorAll<HTMLElement>('.tt');
+  const T = (window as any).__vsTheme;
+  const sync = () => groups.forEach((g) => g.querySelectorAll<HTMLButtonElement>('[data-theme-opt]').forEach((b) => {
+    const on = b.dataset.themeOpt === T.get(); b.setAttribute('aria-checked', String(on)); b.tabIndex = on ? 0 : -1;
+  }));
+  groups.forEach((g) => {
+    const bs = [...g.querySelectorAll<HTMLButtonElement>('[data-theme-opt]')];
+    bs.forEach((b, i) => {
+      b.addEventListener('click', () => { T.set(b.dataset.themeOpt); sync(); });
+      b.addEventListener('keydown', (e) => {
+        const d = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+        if (!d) return; e.preventDefault(); const n = bs[(i + d + bs.length) % bs.length]; T.set(n.dataset.themeOpt); sync(); n.focus();
+      });
+    });
+  });
+  if (T) sync();
+</script>
+<style>
+.tt{display:inline-flex;border:1px solid var(--c-border);border-radius:var(--r-full);padding:2px;background:var(--c-surface)}
+.tt button{width:40px;height:40px;border:0;border-radius:var(--r-full);background:transparent;color:var(--c-text-2);font-size:17px;cursor:pointer;display:grid;place-items:center}
+.tt button:hover{color:var(--c-text);background:var(--c-surface-2)}
+.tt button[aria-checked="true"]{background:var(--c-primary);color:var(--c-on-primary)}
+@media (max-width:767px){.tt button{width:36px;height:36px;font-size:15px}}
+</style>

@@ -1,5 +1,6 @@
 ---
 import {BASE, REPO} from '../lib/episodes';
+import ThemeToggle from './ThemeToggle.astro';
 const {current} = Astro.props;
 const nav = [
   {id: 'home', label: '期数', href: BASE},
@@ -14,7 +15,8 @@ const nav = [
       {nav.map((n) => <a href={n.href} aria-current={current === n.id ? 'page' : undefined}>{n.label}</a>)}
       <a href={REPO} rel="noopener" target="_blank">GitHub ↗</a>
     </nav>
-    <button class="burger" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="drawer">☰</button>
+    <div class="right"><ThemeToggle />
+    <button class="burger" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="drawer">☰</button></div>
   </div>
   <div id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="菜单" hidden>
     <button class="close" type="button" aria-label="关闭菜单">×</button>
@@ -38,11 +40,12 @@ const nav = [
   });
 </script>
 <style>
-.hdr{position:sticky;top:0;z-index:50;height:var(--header-h);background:rgba(17,24,39,.85);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--c-border)}
+.hdr{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--c-header-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--c-border)}
 .in{height:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4)}
 .logo{color:var(--c-text);font-weight:700;text-decoration:none}
 .logo span{color:var(--c-primary)}
-.nav{display:flex;gap:var(--sp-5)}
+.nav{display:flex;gap:var(--sp-5);margin-left:auto}
+.right{display:flex;align-items:center;gap:var(--sp-2)}
 .nav a,.drawer a{color:var(--c-text-2);text-decoration:none;padding:8px 0;border-bottom:2px solid transparent}
 .nav a:hover{color:var(--c-text)}
 .nav a[aria-current="page"],.drawer a[aria-current="page"]{color:var(--c-primary);border-bottom-color:var(--c-primary)}
