@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""给 Remotion 渲染出的成片（人声+音效）混入曲库 BGM，并做闪避与响度归一。
+"""给 Remotion 渲染出的成片（人声+音效）混入曲库 BGM，默认固定音量（--mode constant），可选闪避（--mode duck），并做响度归一。
 
-用法：python3 mix_bgm.py --in voice.mp4 --bgm track.mp3 --out video.mp4 [--offset 0] [--below 11] [--bridge 2.5] [--lufs -16]
+用法：python3 mix_bgm.py --in voice.mp4 --bgm track.mp3 --out video.mp4 [--offset 0] [--mode constant|duck] [--below 12] [--bridge 2.5] [--lufs -16]
 - BGM 电平按“人声说话时的 RMS”定标：说话时 BGM 比人声低 --below dB（默认 11）
 - 桥段：≥ --min-pause 秒（默认 0.5）的停顿（镜头/章节末约 1.2s 的停顿）里 BGM 升到比人声低 --bridge dB（默认 2.5），
   字间小空隙不抬（避免抽吸）；人声恢复前 --lookahead 秒（默认 0.3）先压下；两级一阶平滑（压低约 150ms、上抬约 220ms 的 S 形过渡）
@@ -31,7 +31,8 @@ def loudness(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--in', dest='inp', required=True); ap.add_argument('--bgm', required=True); ap.add_argument('--out', required=True)
-    ap.add_argument('--offset', type=float, default=0.0); ap.add_argument('--below', type=float, default=11.0)
+    ap.add_argument('--offset', type=float, default=0.0); ap.add_argument('--below', type=float, default=12.0)
+    ap.add_argument('--mode', choices=['constant', 'duck'], default='constant', help='constant：BGM 全程固定音量（默认）；duck：说话压低 + 停顿抬升')
     ap.add_argument('--bridge', type=float, default=2.5); ap.add_argument('--min-pause', type=float, default=0.5)
     ap.add_argument('--lookahead', type=float, default=0.15); ap.add_argument('--lufs', type=float, default=-16.0)
     ap.add_argument('--wav', help='另存混音 wav'); ap.add_argument('--report', help='写 JSON 测量结果')
@@ -69,6 +70,7 @@ def main():
             i = j
         else: i += 1
     base = voice_db - a.below - bgm_db
+    if a.mode == 'constant': bridge[:] = False
     target = np.where(bridge, voice_db - a.bridge - bgm_db, base)
     g = target.copy()
     ka, kr = 1 - np.exp(-1 / (0.06 * 50)), 1 - np.exp(-1 / (0.09 * 50))  # 两级串联后约 150ms / 220ms 的平滑 S 形
@@ -114,7 +116,7 @@ def main():
         rep = {'out': a.out, 'bgm': a.bgm, 'final_LUFS': loudness(a.out), 'voice_LUFS_premix': Lv, 'bgm_LUFS_premix': Lb,
                'voice_minus_bgm_LUFS': round(Lv - Lb, 1), 'voice_minus_bgm_rms_speech_dB': round(diff_speech, 1),
                'voice_minus_bgm_bridge_dB': round(diff_pause, 1) if diff_pause is not None else None,
-               'duck_depth_dB': round(a.below - a.bridge, 1), 'bridges_s': segs, 'true_peak_dBTP': tpk}
+               'mode': a.mode, 'duck_depth_dB': round(a.below - a.bridge, 1) if a.mode == 'duck' else 0.0, 'bridges_s': segs, 'true_peak_dBTP': tpk}
     print(json.dumps(rep, ensure_ascii=False))
     if a.report: json.dump(rep, open(a.report, 'w'), ensure_ascii=False, indent=1)
 
