@@ -9,6 +9,9 @@
 | Wallpaper | Kevin MacLeod | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100843 | https://creativecommons.org/licenses/by/4.0/ |
 | Inspired | Kevin MacLeod | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1600022 | https://creativecommons.org/licenses/by/4.0/ |
 | Digital Lemonade | Kevin MacLeod | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1700010 | https://creativecommons.org/licenses/by/4.0/ |
+| Overcast | Kevin MacLeod | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1200002 | https://creativecommons.org/licenses/by/4.0/ |
+| Newer Wave | Kevin MacLeod | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN2000024 | https://creativecommons.org/licenses/by/4.0/ |
+| Cold Funk | Kevin MacLeod | https://incompetech.com/music/royalty-free/index.html?isrc=USUAN1100499 | https://creativecommons.org/licenses/by/4.0/ |
 
 署名格式（视频简介 / 站点页脚）：
 
