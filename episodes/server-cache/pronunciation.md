@@ -12,4 +12,10 @@
 - 长队：cháng duì
 - 一趟：yí tàng
 - 负载均衡：fù zài jūn héng
-- Redis、Cache Hit、Cache Miss、TTL、EXPIRE：只上屏，旁白里没有，不要读
+- Cache Hit、Cache Miss、EXPIRE：只上屏，不要读
+
+## v0.12.1 新增（旁白里念出术语）
+- 命中 / 没命中：mìng zhòng（「中」读四声）；风险高时只改前后说法，词保留
+- Redis：读作「瑞迪斯」（ˈrɛdɪs）
+- TTL：按字母逐个读 T-T-L
+- CDN：按字母逐个读 C-D-N

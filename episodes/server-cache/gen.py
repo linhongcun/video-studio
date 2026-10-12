@@ -69,14 +69,18 @@ def shots_for(si,L):
         tg=at(1,"伸手就拿")
         a1=[F("chef",0),F("prep",at(0,"备菜台")),F("lbl",at(0,"备菜台")),F("wh",0),mv("wh","opacity",0,1,0.35,0.35,"linear"),F("dish",at(1,"热门")),
             mv("dish","x",tg,tg+20,820,380),F("grab",tg),F("noRun",at(1,"不用跑"))]
-        e2=[prep("prep",160,240,560),R("cacheL",160,560,560,80,stroke=P['accent'],radius=16,label="服务端缓存",fontSize=44),T("redis",160,660,560,44,"常见实现：Redis（放在内存里）",32,P['text2'],align="center"),
-            R("hit",800,200,960,100,stroke=P['success'],radius=16,label="台上有 → 命中（Cache Hit）",fontSize=40),
-            R("miss",800,340,960,100,stroke=P['accent'],radius=16,label="台上没有 → 没命中（Cache Miss）",fontSize=40),
+        # hit-miss-2（v0.12.1 拆分）：第 1 句——服务端缓存 + Redis，画面用备菜台
+        e2=[prep("prep",460,220,1000),R("cacheL",460,640,1000,90,stroke=P['accent'],radius=16,label="服务端缓存",fontSize=48),
+            T("redis",460,750,1000,50,"Redis：放内存",40,P['primary'],align="center")]
+        a2=[F("prep",0),F("cacheL",at(0,"服务端缓存")),pop("cacheL",at(0,"服务端缓存")),F("redis",at(0,"Redis"))]
+        # hit-miss-3（新）：第 2 句——缓存命中 / 缓存没命中对比 + 跑仓库箭头
+        e3=[prep("prep",160,240,560),T("tag",160,560,560,50,"服务端缓存",40,P['accent'],align="center"),
+            R("hit",800,200,960,100,stroke=P['success'],radius=16,label="台上有 → 缓存命中（Cache Hit）",fontSize=40),
+            R("miss",800,340,960,100,stroke=P['accent'],radius=16,label="台上没有 → 缓存没命中（Cache Miss）",fontSize=40),
             E("fetch","arrow",800,520,960,50,P['accent'],label="跑一次仓库，回来摆上台",direction="r",fontSize=36),
             R("next",800,640,960,90,stroke=P['success'],radius=16,label="第二单：秒拿",fontSize=40)]
-        a2=[F("prep",0),F("cacheL",at(0,"服务端缓存")),pop("cacheL",at(0,"服务端缓存")),F("redis",at(0,"内存")),F("hit",at(1,"台上有")),F("miss",at(1,"台上没有")),
-            draw("fetch",at(1,"去仓库拿"),18),F("next",at(1,"下一单"))]
-        return [(e1,a1),(e2,a2)]
+        a3=[F("prep",0),F("tag",0),F("hit",at(0,"缓存命中")),pop("hit",at(0,"缓存命中")),F("miss",at(0,"台上没有")),draw("fetch",at(0,"去仓库拿"),18),F("next",at(0,"下一单"))]
+        return [(e1,a1),(e2,a2),(e3,a3)]
     if si==3:  # 放多久
         e1=[prep("prep",160,300,760),R("hot",1000,260,760,90,stroke=P['success'],radius=16,label="热门菜：上台",fontSize=40),R("cold",1000,400,760,90,stroke=P['text2'],radius=16,label="冷门菜：不上台",fontSize=40),
             T("small",160,700,760,50,"台面有限",40,P['text2'],align="center")]
@@ -109,7 +113,11 @@ def shots_for(si,L):
         # recap-1：只留三层缓存（由近到远），不画柜台/仓库，无底部标签
         e1=[I("fridge","fridge",330,300,200,280),I("store","store",760,290,300),prep("prep",1240,360,440),
             T("l0",280,640,300,50,"浏览器缓存",40,P['primary'],align="center"),T("l1",760,640,300,50,"CDN",40,P['accent'],align="center"),T("l3",1240,640,440,50,"服务端缓存",40,P['success'],align="center")]
-        a1=[F("fridge",at(0,"冰箱")),F("l0",at(0,"冰箱")),F("store",at(0,"门店")),F("l1",at(0,"门店")),F("prep",at(0,"备菜台")),F("l3",at(0,"备菜台"))]
+        # 开头不空：三组先以 35% 亮度出现，念到「冰箱」「门店」「备菜台」时逐个点亮
+        a1=[]
+        for ids_,ph in ((("fridge","l0"),"冰箱"),(("store","l1"),"门店"),(("prep","l3"),"备菜台")):
+            c=at(0,ph)
+            for i in ids_: a1+=[mv(i,"opacity",0,12,0,0.35,"easeOut"),mv(i,"opacity",c,c+12,0.35,1,"easeOut")]
         e2=[R("stack",160,160,1600,80,stroke=P['secondary'],radius=16,label="缓存 + 柜台",fontSize=44)]+row()+LB()+[R("fast",660,720,600,90,stroke=P['success'],radius=45,label="网页秒开",fontSize=48)]
         a2=[F("stack",0)]+[F(i,0) for i in ("fridge","store","prep","wh","l0","l1","l3","l4")]+[F("counter",at(0,"柜台")),F("l2",at(0,"柜台")),pop("counter",at(0,"柜台")),F("fast",at(1,"下次")),pop("fast",at(1,"下次"))]
         return [(e1,a1),(e2,a2)]
@@ -154,7 +162,7 @@ assets=dict(reuse=[dict(id="routeArrow",desc="路线箭头 drawProgress"),dict(i
  new=[dict(id=n,file=f"assets/{n}.svg") for n in ("chef","prep-table","dish-green","dish-amber","ticket","timer","db")])
 PS="hit-miss-1"; sh=[x for sc in scenes for x in sc['shots'] if x['id']==PS][0]
 TG=[a for a in sh["animations"] if a["elementId"]=="dish" and a["property"]=="x"][0]["keyframes"]
-pl=212  # 写死：hit-miss-1 局部 212（正式 ep8 timing，全局 1370）
+pl=227  # 写死：hit-miss-1 局部 227（v0.12.1 正式 timing，全局 1505；菜到手边、「伸手就拿」完整）
 meta['poster']=dict(shotId=PS,localFrame=pl,frame=sh['from']+pl,desc="备菜台上伸手就拿：菜盘从台上滑到厨师手边，「备菜台」「伸手就拿」",file="poster.jpg")
 json.dump(dict(meta=meta,assets=assets,scenes=scenes),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
 print('clamped keyframes:',CLAMP or 'none');print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames']) for s in scenes])

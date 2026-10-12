@@ -1,8 +1,8 @@
-# EP8：章节 MiMo timing → 12 镜头（Miyazaki 句数），切镜头音频，无 extraHold
+# EP8：章节 MiMo timing → 13 镜头（Miyazaki 句数），切镜头音频，无 extraHold
 import json,subprocess
 from pathlib import Path
 H=Path(__file__).resolve().parent;A=H/"remotion/public/audio";K=json.load(open(H/"timing.mimo.json"))
-MAP=[("hook","hook",[2,2]),("warehouse","no-cache",[2,2]),("prep","hit-miss",[2,2]),("ttl","ttl",[1,2]),("invalidate","invalidate",[2,2]),("recap","recap",[1,2])]
+MAP=[("hook","hook",[2,2]),("warehouse","no-cache",[2,2]),("prep","hit-miss",[2,1,2]),("ttl","ttl",[1,2]),("invalidate","invalidate",[2,2]),("recap","recap",[1,2])]
 out={};g=0
 for ch,sh,n in MAP:
     k=K[f"{ch}-1"];S=k["sentences"];assert len(S)==sum(n),ch
@@ -18,8 +18,8 @@ for ch,sh,n in MAP:
         subprocess.run(["ffmpeg","-y","-v","error","-i",str(A/f"ch/{ch}.wav"),"-af",f"atrim={a/30:.4f}:{b/30:.4f},asetpts=N/SR/TB,apad,atrim=0:{(b-a)/30:.4f}","-ar","48000",str(A/f"{sid}.wav")],check=True)
         g+=b-a
 json.dump(out,open(H/"timing.json","w"),ensure_ascii=False,indent=1)
-json.dump(dict(fps=30,total=g,shots=out),open("/workspace/share/ep8-timing.json","w"),ensure_ascii=False,indent=1)
+json.dump(dict(fps=30,total=g,shots=out),open("/workspace/share/ep8v121-timing.json","w"),ensure_ascii=False,indent=1)
 L=A/"list.txt";L.write_text("".join(f"file '{A}/{s}.wav'\n" for s in out))
-subprocess.run(["ffmpeg","-y","-v","error","-f","concat","-safe","0","-i",str(L),"-c:a","libmp3lame","-b:a","192k","/workspace/share/ep8-voice.mp3"],check=True);L.unlink()
+subprocess.run(["ffmpeg","-y","-v","error","-f","concat","-safe","0","-i",str(L),"-c:a","libmp3lame","-b:a","192k","/workspace/share/ep8v121-voice.mp3"],check=True);L.unlink()
 for s,v in out.items(): print(s,v["start"],v["duration"],v["audioFrames"],v["chapterOffsetFrames"],len(v["sentences"]))
 print("total",g)

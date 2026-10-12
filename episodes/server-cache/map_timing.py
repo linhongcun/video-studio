@@ -1,4 +1,4 @@
-# 把 Knoll 的 MiMo 实测 timing（每章一个镜头，键 <chapter>-1，如 why-1 … recap-1）映射到本分镜 13 个镜头；章节起点、总帧数与 Knoll 一致，scale=1
+# 把 Knoll 的 MiMo 实测 timing（每章一个镜头，键 <chapter>-1，如 why-1 … recap-1）映射到本分镜镜头（v0.12.1：13 个，hit-miss 拆成 1/2/3）；章节起点、总帧数与 Knoll 一致，scale=1
 # 用法：cp <Knoll 的 ep8 timing.json> timing.mimo.json && python3 map_timing.py && python3 gen.py && python3 validate.py
 import json,re
 from pathlib import Path
@@ -7,7 +7,7 @@ H=Path(__file__).resolve().parent
 K=json.load(open(H/"timing.mimo.json")); out={}
 if "shots" in K and isinstance(K["shots"],dict): K=K["shots"]   # EP.08 格式：{fps,total,shots:{...}}
 SHOTS=[f"{c}-{k+1}" for c in ids for k in range(len(SPLIT[c]))]
-PER_SHOT=list(K)==SHOTS   # Knoll 已按 13 个镜头切好（EP.05 实测即此格式）：直接用，scale 1
+PER_SHOT=set(K)==set(SHOTS)   # Knoll 已按 13 个镜头切好（EP.05 实测即此格式）：直接用，scale 1
 if PER_SHOT:
     for sid in SHOTS:
         v=dict(K[sid])
@@ -17,6 +17,8 @@ if PER_SHOT:
         n=SPLIT[sid.rsplit("-",1)[0]][int(sid.rsplit("-",1)[1])-1]   # Knoll 的 chapter 名（warehouse/prep）与本分镜 id 不同，按镜头 id 前缀[int(sid.rsplit("-",1)[1])-1]
         assert len(v["sentences"])==n,(sid,len(v["sentences"]),n); assert v.get("scale",1)==1 and not v.get("provisional")
         v["source"]=f"/workspace/share/ep8-timing.json:{sid}"; out[sid]=v
+if not PER_SHOT and any(k.endswith("-2") for k in K):   # v0.12.1：按镜头的 timing 但镜头不齐（如还是旧的 12 镜头，没有 hit-miss-3）→ 直接报出来
+    raise SystemExit(f"timing 镜头与分镜不一致：缺 {sorted(set(SHOTS)-set(K))}，多 {sorted(set(K)-set(SHOTS))}")
 for ch in ([] if PER_SHOT else ids):
     n=SPLIT[ch]; k=K[f"{ch}-1"]; S=k["sentences"]; assert len(S)==sum(n),(ch,len(S))
     starts=[];j=0

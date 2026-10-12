@@ -97,20 +97,25 @@ def LSEQ(a,b):
         for j,y in enumerate(b): q.append(p[j]+1 if x==y else max(p[j+1],q[j]))
         p=q
     return p[-1]
+TERMS=["服务端缓存","浏览器缓存","缓存没命中","缓存命中","没命中","命中","Redis","TTL","CDN","Cache","Hit","Miss","EXPIRE"]
+def STRIP(t):
+    for w in TERMS: t=t.replace(w,'')
+    return NORM(t)
 def OVL(t,n):  # 改严：最长公共子串 ≥ 画面文字 60%，或字符二元组重合率 > 60%
     l=LCS(t,n)/len(t); bg=[t[i:i+2] for i in range(len(t)-1)]; b=sum(g in n for g in bg)/len(bg)
     sq=LSEQ(t,n)/len(t)  # 补充：按顺序的字符覆盖（可跳字的公共子序列）≥75%，抓「改几个字的复述」
     return f'lcs {l:.0%} bigram {b:.0%} seq {sq:.0%}' if l>=0.6 or b>0.6 or sq>=0.75 else None
-for t in ("Redis","Cache Hit","Cache Miss","Cache","TTL","EXPIRE"):
-    if any(t in n for n in narr): err.append(('english in narration',t))
+# v0.12.1：旁白要念术语（Redis、TTL、CDN 按字母读），「英文只上屏」作废；Cache Hit / Cache Miss / EXPIRE 仍只上屏（script.md 第 8 行）
+for t in ("Cache Hit","Cache Miss","Cache","EXPIRE"):
+    if any(t in n for n in narr): err.append(('screen-only english in narration',t))
 for sc in d['scenes']:
     for sh in sc['shots']:
         nn=NORM(sh['narration'])
         for e in sh['elements']:
             if e.get('role')=='subtitle': continue
             for t in (e.get('text'),e.get('label')):
-                if t and len(NORM(t))>=6:
-                    r=OVL(NORM(t),nn)
+                if t and len(STRIP(t))>=6:   # v0.12.1：术语白名单词不计（术语标签和旁白重复算强调），只查剩下的长句
+                    r=OVL(STRIP(t),STRIP(sh['narration']))
                     if r: err.append(('screen repeats subtitle',sh['id'],e['id'],t,r))
 first=d['scenes'][0]['shots'][0]['narration'];lastn=d['scenes'][-1]['shots'][-1]['narration']
 if '我是' in json.dumps(d['scenes'],ensure_ascii=False): err.append('「我是」 present (branding: 不出现我是 IT小村)')
