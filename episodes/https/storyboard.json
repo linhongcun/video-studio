@@ -1,10 +1,11 @@
 {
  "meta": {
   "title": "《HTTPS 为什么安全？》",
+  "episode": 2,
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "durationInFrames": 0,
+  "durationInFrames": 4039,
   "style": "深色背景+蓝青高光扁平2D（沿用第一期）",
   "palette": {
    "bg": "#0B1020",
@@ -12,10 +13,11 @@
    "primary": "#22D3EE",
    "secondary": "#3B82F6",
    "text": "#E5E7EB",
+   "text2": "#9CA3AF",
    "muted": "#6B7280",
    "success": "#22C55E",
    "accent": "#F59E0B",
-   "danger": "#EF4444"
+   "danger": "#F87171"
   },
   "font": "Noto Sans SC",
   "safeArea": {
@@ -26,7 +28,4437 @@
    ],
    "contentMaxY": 860
   },
-  "notes": "v0.5.0：语速 +19%（相对完整版原配音 -5%），镜头时长已按 remotion/src/timing.json 配音实测对齐（本目录 timing.json 为快照）；字幕 from/to 与动画关键帧按新旧时长比例缩放取整。 from 为全局帧，keyframes 与 subtitles 帧相对镜头；transition 作用于镜头出场。章节 chapterId 与 article.mdx 锚点一致（intro/recap 为自定）。示例 IP 203.0.113.10 为 RFC 5737 文档地址。connect-2 含 tls13note（TLS 1.3 只需 1 个往返）。"
+  "notes": "帧数已按第一期 +19% 实测校准：timing.json 24 镜头合计 5.53 字/秒（公式 字数/4.2 的估算在 +19% 下偏长约 30%），每镜头 = round(字数/5.53×30)+30 帧停顿；scene.estimateFormulaFrames 保留原公式值供对照。配音实测后用 align.py 对齐。from 为全局帧，subtitles 与 keyframes 帧相对镜头；transition 作用于镜头出场。image 元素 asset 路径相对 episodes/https/。密钥交换按 ECDHE（ECDHE 镜头合并为 3 个关键状态 step4 / ecdhe-combine / step6，各约 1/3 旁白，旁白后金钥匙停 60 帧；step1–6 文件保留），双方交换公开参数各自算出会话密钥。画面文字为中文，英文仅 CA/TLS/HTTP/HTTPS；字幕随旁白保留 Wi-Fi、ClientHello、ServerHello、ECDHE、AEAD 原词。"
  },
- "scenes": []
+ "assets": {
+  "reuse": [
+   {
+    "id": "browser",
+    "desc": "第一期浏览器窗口",
+    "usedIn": [
+     "plaintext",
+     "symmetric"
+    ]
+   },
+   {
+    "id": "server",
+    "desc": "第一期服务器图标",
+    "usedIn": [
+     "plaintext",
+     "symmetric"
+    ]
+   },
+   {
+    "id": "seqDiagram",
+    "desc": "第一期握手时序图样式",
+    "usedIn": [
+     "handshake"
+    ]
+   },
+   {
+    "id": "subtitle",
+    "desc": "字幕层"
+   }
+  ],
+  "new": [
+   {
+    "id": "ca-badge",
+    "file": "assets/ca-badge.svg"
+   },
+   {
+    "id": "certificate",
+    "file": "assets/certificate.svg"
+   },
+   {
+    "id": "eavesdropper",
+    "file": "assets/eavesdropper.svg"
+   },
+   {
+    "id": "ecdhe-combine",
+    "file": "assets/ecdhe-combine.svg"
+   },
+   {
+    "id": "ecdhe-step1",
+    "file": "assets/ecdhe-step1.svg"
+   },
+   {
+    "id": "ecdhe-step2",
+    "file": "assets/ecdhe-step2.svg"
+   },
+   {
+    "id": "ecdhe-step3",
+    "file": "assets/ecdhe-step3.svg"
+   },
+   {
+    "id": "ecdhe-step4",
+    "file": "assets/ecdhe-step4.svg"
+   },
+   {
+    "id": "ecdhe-step5",
+    "file": "assets/ecdhe-step5.svg"
+   },
+   {
+    "id": "ecdhe-step6",
+    "file": "assets/ecdhe-step6.svg"
+   },
+   {
+    "id": "envelope-sealed",
+    "file": "assets/envelope-sealed.svg"
+   },
+   {
+    "id": "envelope",
+    "file": "assets/envelope.svg"
+   },
+   {
+    "id": "hash-check",
+    "file": "assets/hash-check.svg"
+   },
+   {
+    "id": "key-symmetric",
+    "file": "assets/key-symmetric.svg"
+   },
+   {
+    "id": "keypair-private",
+    "file": "assets/keypair-private.svg"
+   },
+   {
+    "id": "keypair-public",
+    "file": "assets/keypair-public.svg"
+   },
+   {
+    "id": "padlock-closed",
+    "file": "assets/padlock-closed.svg"
+   },
+   {
+    "id": "padlock-open",
+    "file": "assets/padlock-open.svg"
+   },
+   {
+    "id": "postcard",
+    "file": "assets/postcard.svg"
+   }
+  ]
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "intro",
+   "title": "开场",
+   "from": 0,
+   "durationInFrames": 412,
+   "narrationChars": 65,
+   "narrationCharsRecount": 65,
+   "estimateFormulaFrames": 524,
+   "shots": [
+    {
+     "id": "intro-1",
+     "from": 0,
+     "durationInFrames": 225,
+     "narration": "在咖啡店连上公共 Wi-Fi，登录网站、输入密码。同一个网络里的人，能看到你的密码吗？",
+     "subtitles": [
+      {
+       "text": "在咖啡店连上公共 Wi-Fi",
+       "from": 0,
+       "to": 64
+      },
+      {
+       "text": "登录网站、输入密码",
+       "from": 65,
+       "to": 107
+      },
+      {
+       "text": "同一个网络里的人",
+       "from": 108,
+       "to": 150
+      },
+      {
+       "text": "能看到你的密码吗",
+       "from": 151,
+       "to": 224
+      }
+     ],
+     "elements": [
+      {
+       "id": "laptop",
+       "type": "rect",
+       "x": 560,
+       "y": 200,
+       "w": 800,
+       "h": 480,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "label": "咖啡店笔记本（复用第一期浏览器窗口）"
+      },
+      {
+       "id": "wifiTag",
+       "type": "text",
+       "x": 600,
+       "y": 230,
+       "w": 300,
+       "h": 44,
+       "text": "公共无线网络",
+       "fontSize": 32,
+       "color": "#22D3EE",
+       "reuse": false
+      },
+      {
+       "id": "login",
+       "type": "rect",
+       "x": 760,
+       "y": 380,
+       "w": 400,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 10,
+       "label": "••••••",
+       "fontSize": 40
+      },
+      {
+       "id": "eve",
+       "type": "image",
+       "asset": "assets/eavesdropper.svg",
+       "x": 1440,
+       "y": 300,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "laptop",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "wifiTag",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 22,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "login",
+       "property": "charsVisible",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 60,
+         "value": 6
+        }
+       ],
+       "easing": "linear"
+      },
+      {
+       "elementId": "eve",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 112,
+         "value": 0
+        },
+        {
+         "frame": 132,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "eve",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 112,
+         "value": 1500
+        },
+        {
+         "frame": 195,
+         "value": 1440
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "intro-2",
+     "from": 225,
+     "durationInFrames": 187,
+     "narration": "如果网站用的是 HTTPS，看不到。它凭什么做到？我们分六步讲清楚。",
+     "subtitles": [
+      {
+       "text": "如果网站用的是 HTTPS",
+       "from": 0,
+       "to": 64
+      },
+      {
+       "text": "看不到",
+       "from": 65,
+       "to": 80
+      },
+      {
+       "text": "它凭什么做到",
+       "from": 81,
+       "to": 112
+      },
+      {
+       "text": "我们分六步讲清楚",
+       "from": 113,
+       "to": 186
+      }
+     ],
+     "elements": [
+      {
+       "id": "lockOpen",
+       "type": "image",
+       "asset": "assets/padlock-open.svg",
+       "x": 560,
+       "y": 240,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lockClosed",
+       "type": "image",
+       "asset": "assets/padlock-closed.svg",
+       "x": 560,
+       "y": 240,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "q",
+       "type": "text",
+       "x": 1000,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "text": "？",
+       "fontSize": 160,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "six",
+       "type": "text",
+       "x": 900,
+       "y": 600,
+       "w": 700,
+       "h": 64,
+       "text": "六步讲清楚",
+       "fontSize": 48,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "lockOpen",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lockOpen",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 1
+        },
+        {
+         "frame": 74,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "lockClosed",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lockClosed",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 74,
+         "value": 1
+        },
+        {
+         "frame": 86,
+         "value": 1.08
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 93,
+         "value": 0
+        },
+        {
+         "frame": 113,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "six",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 97,
+         "value": 0
+        },
+        {
+         "frame": 117,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "plaintext",
+   "title": "明文的风险",
+   "from": 412,
+   "durationInFrames": 413,
+   "narrationChars": 65,
+   "narrationCharsRecount": 65,
+   "estimateFormulaFrames": 524,
+   "shots": [
+    {
+     "id": "plaintext-1",
+     "from": 412,
+     "durationInFrames": 204,
+     "narration": "先看 HTTP。它传数据就像寄明信片，内容全是明文，路上经手的人都看得到。",
+     "subtitles": [
+      {
+       "text": "先看 HTTP",
+       "from": 0,
+       "to": 32
+      },
+      {
+       "text": "它传数据就像寄明信片",
+       "from": 33,
+       "to": 86
+      },
+      {
+       "text": "内容全是明文，路上经手的人都看得到",
+       "from": 87,
+       "to": 203
+      }
+     ],
+     "elements": [
+      {
+       "id": "browser",
+       "type": "rect",
+       "x": 120,
+       "y": 360,
+       "w": 360,
+       "h": 260,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "label": "浏览器"
+      },
+      {
+       "id": "server",
+       "type": "icon",
+       "x": 1560,
+       "y": 320,
+       "w": 240,
+       "h": 300,
+       "color": "#3B82F6",
+       "reuse": true,
+       "label": "服务器（第一期）"
+      },
+      {
+       "id": "postcard",
+       "type": "image",
+       "asset": "assets/postcard.svg",
+       "x": 200,
+       "y": 140,
+       "w": 480,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "hop0",
+       "type": "rect",
+       "x": 660,
+       "y": 440,
+       "w": 140,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#6B7280",
+       "radius": 12,
+       "label": "中转站 1",
+       "fontSize": 28
+      },
+      {
+       "id": "hop1",
+       "type": "rect",
+       "x": 880,
+       "y": 440,
+       "w": 140,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#6B7280",
+       "radius": 12,
+       "label": "中转站 2",
+       "fontSize": 28
+      },
+      {
+       "id": "hop2",
+       "type": "rect",
+       "x": 1100,
+       "y": 440,
+       "w": 140,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#6B7280",
+       "radius": 12,
+       "label": "中转站 3",
+       "fontSize": 28
+      },
+      {
+       "id": "httpTag",
+       "type": "text",
+       "x": 120,
+       "y": 660,
+       "w": 360,
+       "h": 50,
+       "text": "HTTP = 明信片",
+       "fontSize": 36,
+       "color": "#22D3EE",
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "browser",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "server",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "postcard",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 24,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hop0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 20,
+         "value": 0
+        },
+        {
+         "frame": 32,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hop1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 28,
+         "value": 0
+        },
+        {
+         "frame": 40,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hop2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "postcard",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 40,
+         "value": 200
+        },
+        {
+         "frame": 164,
+         "value": 1240
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "httpTag",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 45,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "plaintext-2",
+     "from": 616,
+     "durationInFrames": 209,
+     "narration": "别人可以偷看，可以偷改，还可以冒充网站本身。这就是窃听、篡改和伪装三种风险。",
+     "subtitles": [
+      {
+       "text": "别人可以偷看，可以偷改",
+       "from": 0,
+       "to": 53
+      },
+      {
+       "text": "还可以冒充网站本身",
+       "from": 54,
+       "to": 102
+      },
+      {
+       "text": "这就是窃听、篡改和伪装三种风险",
+       "from": 103,
+       "to": 208
+      }
+     ],
+     "elements": [
+      {
+       "id": "postcard",
+       "type": "image",
+       "asset": "assets/postcard.svg",
+       "x": 660,
+       "y": 120,
+       "w": 600,
+       "h": 375,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "eye",
+       "type": "icon",
+       "x": 340,
+       "y": 540,
+       "w": 160,
+       "h": 160,
+       "color": "#F87171",
+       "reuse": false,
+       "label": "窃听图标"
+      },
+      {
+       "id": "eyeL",
+       "type": "text",
+       "x": 280,
+       "y": 710,
+       "w": 280,
+       "h": 56,
+       "text": "窃听",
+       "fontSize": 44,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "eyeD",
+       "type": "text",
+       "x": 280,
+       "y": 776,
+       "w": 280,
+       "h": 40,
+       "text": "偷看内容",
+       "fontSize": 30,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "pencil",
+       "type": "icon",
+       "x": 780,
+       "y": 540,
+       "w": 160,
+       "h": 160,
+       "color": "#F87171",
+       "reuse": false,
+       "label": "篡改图标"
+      },
+      {
+       "id": "pencilL",
+       "type": "text",
+       "x": 720,
+       "y": 710,
+       "w": 280,
+       "h": 56,
+       "text": "篡改",
+       "fontSize": 44,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "pencilD",
+       "type": "text",
+       "x": 720,
+       "y": 776,
+       "w": 280,
+       "h": 40,
+       "text": "偷改内容",
+       "fontSize": 30,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "mask",
+       "type": "icon",
+       "x": 1220,
+       "y": 540,
+       "w": 160,
+       "h": 160,
+       "color": "#F87171",
+       "reuse": false,
+       "label": "伪装图标"
+      },
+      {
+       "id": "maskL",
+       "type": "text",
+       "x": 1160,
+       "y": 710,
+       "w": 280,
+       "h": 56,
+       "text": "伪装",
+       "fontSize": 44,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "maskD",
+       "type": "text",
+       "x": 1160,
+       "y": 776,
+       "w": 280,
+       "h": 40,
+       "text": "冒充网站",
+       "fontSize": 30,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "postcard",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "eye",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 20,
+         "value": 0
+        },
+        {
+         "frame": 35,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "eyeL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 25,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "eyeD",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 42,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pencil",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 69,
+         "value": 0
+        },
+        {
+         "frame": 84,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "pencilL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 74,
+         "value": 0
+        },
+        {
+         "frame": 87,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pencilD",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 79,
+         "value": 0
+        },
+        {
+         "frame": 91,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "mask",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 118,
+         "value": 0
+        },
+        {
+         "frame": 133,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "maskL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 123,
+         "value": 0
+        },
+        {
+         "frame": 136,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "maskD",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 128,
+         "value": 0
+        },
+        {
+         "frame": 140,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "postcard",
+       "property": "glowPlaintext",
+       "keyframes": [
+        {
+         "frame": 20,
+         "value": 0
+        },
+        {
+         "frame": 40,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "symmetric",
+   "title": "对称加密",
+   "from": 825,
+   "durationInFrames": 342,
+   "narrationChars": 52,
+   "narrationCharsRecount": 52,
+   "estimateFormulaFrames": 431,
+   "shots": [
+    {
+     "id": "symmetric-1",
+     "from": 825,
+     "durationInFrames": 176,
+     "narration": "第一个办法是加密。对称加密用同一把钥匙上锁和开锁，速度很快。",
+     "subtitles": [
+      {
+       "text": "第一个办法是加密",
+       "from": 0,
+       "to": 42
+      },
+      {
+       "text": "对称加密用同一把钥匙上锁和开锁",
+       "from": 43,
+       "to": 123
+      },
+      {
+       "text": "速度很快",
+       "from": 124,
+       "to": 175
+      }
+     ],
+     "elements": [
+      {
+       "id": "postcard",
+       "type": "image",
+       "asset": "assets/postcard.svg",
+       "x": 200,
+       "y": 320,
+       "w": 320,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "box",
+       "type": "image",
+       "asset": "assets/envelope-sealed.svg",
+       "x": 800,
+       "y": 260,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lock",
+       "type": "image",
+       "asset": "assets/padlock-closed.svg",
+       "x": 900,
+       "y": 180,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "keyL",
+       "type": "image",
+       "asset": "assets/key-symmetric.svg",
+       "x": 200,
+       "y": 620,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "keyR",
+       "type": "image",
+       "asset": "assets/key-symmetric.svg",
+       "x": 1520,
+       "y": 620,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "same",
+       "type": "text",
+       "x": 700,
+       "y": 640,
+       "w": 520,
+       "h": 56,
+       "text": "同一把钥匙，上锁也开锁",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "fast",
+       "type": "text",
+       "x": 700,
+       "y": 720,
+       "w": 520,
+       "h": 44,
+       "text": "速度很快",
+       "fontSize": 34,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "postcard",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "postcard",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 20,
+         "value": 200
+        },
+        {
+         "frame": 60,
+         "value": 820
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "postcard",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 55,
+         "value": 1
+        },
+        {
+         "frame": 65,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "box",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 50,
+         "value": 0
+        },
+        {
+         "frame": 65,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lock",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 70,
+         "value": 120
+        },
+        {
+         "frame": 90,
+         "value": 180
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "keyL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 90,
+         "value": 0
+        },
+        {
+         "frame": 100,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "keyR",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 95,
+         "value": 0
+        },
+        {
+         "frame": 105,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "same",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 105,
+         "value": 0
+        },
+        {
+         "frame": 120,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fast",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 116,
+         "value": 0
+        },
+        {
+         "frame": 131,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "symmetric-2",
+     "from": 1001,
+     "durationInFrames": 166,
+     "narration": "难题在钥匙本身：得先把钥匙交给对方，可路上同样有人盯着。",
+     "subtitles": [
+      {
+       "text": "难题在钥匙本身：得先把钥匙交给对方",
+       "from": 0,
+       "to": 86
+      },
+      {
+       "text": "可路上同样有人盯着",
+       "from": 87,
+       "to": 165
+      }
+     ],
+     "elements": [
+      {
+       "id": "browser",
+       "type": "rect",
+       "x": 120,
+       "y": 320,
+       "w": 360,
+       "h": 260,
+       "color": "#111827",
+       "reuse": true,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "label": "浏览器"
+      },
+      {
+       "id": "server",
+       "type": "icon",
+       "x": 1560,
+       "y": 300,
+       "w": 240,
+       "h": 300,
+       "color": "#3B82F6",
+       "reuse": true,
+       "label": "服务器（第一期）"
+      },
+      {
+       "id": "keyFly",
+       "type": "image",
+       "asset": "assets/key-symmetric.svg",
+       "x": 560,
+       "y": 380,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "eve",
+       "type": "image",
+       "asset": "assets/eavesdropper.svg",
+       "x": 820,
+       "y": 560,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "q",
+       "type": "text",
+       "x": 880,
+       "y": 160,
+       "w": 160,
+       "h": 160,
+       "text": "？",
+       "fontSize": 140,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "browser",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "server",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "keyFly",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 560
+        },
+        {
+         "frame": 116,
+         "value": 880
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "eve",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 20,
+         "value": 0
+        },
+        {
+         "frame": 35,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "eve",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 560
+        },
+        {
+         "frame": 116,
+         "value": 480
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "keyFly",
+       "property": "rotate",
+       "keyframes": [
+        {
+         "frame": 111,
+         "value": 0
+        },
+        {
+         "frame": 131,
+         "value": 15
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 126,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "asymmetric",
+   "title": "非对称加密",
+   "from": 1167,
+   "durationInFrames": 674,
+   "narrationChars": 102,
+   "narrationCharsRecount": 102,
+   "estimateFormulaFrames": 789,
+   "shots": [
+    {
+     "id": "asymmetric-1",
+     "from": 1167,
+     "durationInFrames": 171,
+     "narration": "非对称密码用的是一对密钥：公钥可以公开，私钥只有自己保管。",
+     "subtitles": [
+      {
+       "text": "非对称密码用的是一对密钥",
+       "from": 0,
+       "to": 64
+      },
+      {
+       "text": "公钥可以公开，私钥只有自己保管",
+       "from": 65,
+       "to": 170
+      }
+     ],
+     "elements": [
+      {
+       "id": "pubL",
+       "type": "image",
+       "asset": "assets/keypair-public.svg",
+       "x": 360,
+       "y": 260,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "priL",
+       "type": "image",
+       "asset": "assets/keypair-private.svg",
+       "x": 760,
+       "y": 260,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pubT",
+       "type": "text",
+       "x": 360,
+       "y": 620,
+       "w": 320,
+       "h": 50,
+       "text": "可以公开",
+       "fontSize": 36,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "priT",
+       "type": "text",
+       "x": 760,
+       "y": 620,
+       "w": 320,
+       "h": 50,
+       "text": "只有自己保管",
+       "fontSize": 36,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "pairT",
+       "type": "text",
+       "x": 1180,
+       "y": 360,
+       "w": 600,
+       "h": 64,
+       "text": "一对密钥",
+       "fontSize": 56,
+       "color": "#E5E7EB",
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "pairT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pubL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pubT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 20,
+         "value": 0
+        },
+        {
+         "frame": 32,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "priL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 85,
+         "value": 0
+        },
+        {
+         "frame": 100,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "priT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 95,
+         "value": 0
+        },
+        {
+         "frame": 107,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "priL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 1
+        },
+        {
+         "frame": 151,
+         "value": 0.7
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "asymmetric-2",
+     "from": 1338,
+     "durationInFrames": 234,
+     "narration": "双方交换各自公开的那一半，就能各自算出同一把钥匙，偷听的人却算不出来。",
+     "subtitles": [
+      {
+       "text": "双方交换各自公开的那一半",
+       "from": 0,
+       "to": 75
+      },
+      {
+       "text": "就能各自算出同一把钥匙",
+       "from": 76,
+       "to": 145
+      },
+      {
+       "text": "偷听的人却算不出来",
+       "from": 146,
+       "to": 233
+      }
+     ],
+     "elements": [
+      {
+       "id": "ecdheA",
+       "type": "image",
+       "asset": "assets/ecdhe-step4.svg",
+       "x": 226,
+       "y": 80,
+       "w": 1468,
+       "h": 780,
+       "color": null,
+       "reuse": false,
+       "fit": "contain",
+       "state": "交换公开值"
+      },
+      {
+       "id": "ecdheB",
+       "type": "image",
+       "asset": "assets/ecdhe-combine.svg",
+       "x": 226,
+       "y": 80,
+       "w": 1468,
+       "h": 780,
+       "color": null,
+       "reuse": false,
+       "fit": "contain",
+       "state": "各自把收到的公开值与自己的私有值合成"
+      },
+      {
+       "id": "ecdheC",
+       "type": "image",
+       "asset": "assets/ecdhe-step6.svg",
+       "x": 226,
+       "y": 80,
+       "w": 1468,
+       "h": 780,
+       "color": null,
+       "reuse": false,
+       "fit": "contain",
+       "state": "得到同一把金色钥匙"
+      },
+      {
+       "id": "keyGold",
+       "type": "image",
+       "asset": "assets/key-symmetric.svg",
+       "x": 810,
+       "y": 250,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "stA",
+       "type": "text",
+       "x": 660,
+       "y": 100,
+       "w": 600,
+       "h": 50,
+       "text": "① 交换公开值",
+       "fontSize": 36,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "stB",
+       "type": "text",
+       "x": 660,
+       "y": 100,
+       "w": 600,
+       "h": 50,
+       "text": "② 各自合成",
+       "fontSize": 36,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "stC",
+       "type": "text",
+       "x": 660,
+       "y": 100,
+       "w": 600,
+       "h": 50,
+       "text": "③ 同一把钥匙",
+       "fontSize": 36,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ecdheA",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 10,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "stA",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 10,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "stA",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 70,
+         "value": 1
+        },
+        {
+         "frame": 76,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "ecdheB",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 0
+        },
+        {
+         "frame": 86,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "stB",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 0
+        },
+        {
+         "frame": 86,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "stB",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 140,
+         "value": 1
+        },
+        {
+         "frame": 146,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "ecdheC",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 146,
+         "value": 0
+        },
+        {
+         "frame": 156,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "stC",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 146,
+         "value": 0
+        },
+        {
+         "frame": 156,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "keyGold",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 154,
+         "value": 0
+        },
+        {
+         "frame": 174,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "keyGold",
+       "property": "rotate",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 0
+        },
+        {
+         "frame": 233,
+         "value": 8
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "asymmetric-3",
+     "from": 1572,
+     "durationInFrames": 269,
+     "narration": "不过这类运算慢，所以 HTTPS 两种都用：先用非对称方式协商出会话密钥，再用它对称加密真正的数据。",
+     "subtitles": [
+      {
+       "text": "不过这类运算慢，所以 HTTPS 两种都用",
+       "from": 0,
+       "to": 97
+      },
+      {
+       "text": "先用非对称方式协商出会话密钥",
+       "from": 98,
+       "to": 173
+      },
+      {
+       "text": "再用它对称加密真正的数据",
+       "from": 174,
+       "to": 268
+      }
+     ],
+     "elements": [
+      {
+       "id": "keyGold",
+       "type": "image",
+       "asset": "assets/key-symmetric.svg",
+       "x": 200,
+       "y": 300,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "hyb1",
+       "type": "text",
+       "x": 520,
+       "y": 300,
+       "w": 1200,
+       "h": 56,
+       "text": "非对称方式：协商出会话密钥（慢，只做一次）",
+       "fontSize": 40,
+       "color": "#22D3EE",
+       "reuse": false
+      },
+      {
+       "id": "box",
+       "type": "image",
+       "asset": "assets/envelope-sealed.svg",
+       "x": 520,
+       "y": 420,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "hyb2",
+       "type": "text",
+       "x": 820,
+       "y": 500,
+       "w": 900,
+       "h": 56,
+       "text": "对称加密：传输真正的数据（快）",
+       "fontSize": 40,
+       "color": "#22C55E",
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "keyGold",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hyb1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 67,
+         "value": 0
+        },
+        {
+         "frame": 82,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "box",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 134,
+         "value": 0
+        },
+        {
+         "frame": 146,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hyb2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 144,
+         "value": 0
+        },
+        {
+         "frame": 159,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "box",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 164,
+         "value": 520
+        },
+        {
+         "frame": 239,
+         "value": 1440
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "chapterId": "certificate",
+   "title": "证书与 CA",
+   "from": 1841,
+   "durationInFrames": 540,
+   "narrationChars": 83,
+   "narrationCharsRecount": 83,
+   "estimateFormulaFrames": 653,
+   "shots": [
+    {
+     "id": "certificate-1",
+     "from": 1841,
+     "durationInFrames": 171,
+     "narration": "还有个漏洞：你收到的公钥，可能被中间人调了包。于是有了证书。",
+     "subtitles": [
+      {
+       "text": "还有个漏洞：你收到的公钥",
+       "from": 0,
+       "to": 59
+      },
+      {
+       "text": "可能被中间人调了包",
+       "from": 60,
+       "to": 108
+      },
+      {
+       "text": "于是有了证书",
+       "from": 109,
+       "to": 170
+      }
+     ],
+     "elements": [
+      {
+       "id": "pub",
+       "type": "image",
+       "asset": "assets/keypair-public.svg",
+       "x": 400,
+       "y": 300,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "eve",
+       "type": "image",
+       "asset": "assets/eavesdropper.svg",
+       "x": 820,
+       "y": 300,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "fake",
+       "type": "image",
+       "asset": "assets/keypair-public.svg",
+       "x": 1240,
+       "y": 300,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "tint": "#F87171"
+      },
+      {
+       "id": "swap",
+       "type": "text",
+       "x": 560,
+       "y": 660,
+       "w": 800,
+       "h": 56,
+       "text": "中间人调包了公钥",
+       "fontSize": 44,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "pub",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "eve",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 15,
+         "value": 0
+        },
+        {
+         "frame": 30,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pub",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 40,
+         "value": 400
+        },
+        {
+         "frame": 85,
+         "value": 820
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pub",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 85,
+         "value": 1
+        },
+        {
+         "frame": 93,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "fake",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 85,
+         "value": 0
+        },
+        {
+         "frame": 95,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "swap",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 95,
+         "value": 0
+        },
+        {
+         "frame": 110,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "certificate-2",
+     "from": 2012,
+     "durationInFrames": 144,
+     "narration": "证书由 CA 签发，证明这个公钥确实属于这个网站。",
+     "subtitles": [
+      {
+       "text": "证书由 CA 签发，证明这个公钥确实属于这个网站",
+       "from": 0,
+       "to": 143
+      }
+     ],
+     "elements": [
+      {
+       "id": "cert",
+       "type": "image",
+       "asset": "assets/certificate.svg",
+       "x": 420,
+       "y": 140,
+       "w": 720,
+       "h": 512,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ca",
+       "type": "image",
+       "asset": "assets/ca-badge.svg",
+       "x": 1300,
+       "y": 200,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "caT",
+       "type": "text",
+       "x": 1240,
+       "y": 540,
+       "w": 440,
+       "h": 56,
+       "text": "CA 签发",
+       "fontSize": 44,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "certT",
+       "type": "text",
+       "x": 420,
+       "y": 690,
+       "w": 720,
+       "h": 50,
+       "text": "证明：这个公钥属于这个网站",
+       "fontSize": 38,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "cert",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ca",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 51,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ca",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 1300
+        },
+        {
+         "frame": 72,
+         "value": 980
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "ca",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 72,
+         "value": 1.4
+        },
+        {
+         "frame": 84,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "caT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 46,
+         "value": 0
+        },
+        {
+         "frame": 61,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "certT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 82,
+         "value": 0
+        },
+        {
+         "frame": 97,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "certificate-3",
+     "from": 2156,
+     "durationInFrames": 225,
+     "narration": "浏览器沿着证书链，一路校验到系统内置的根证书，全部通过，才确认对方就是这个网站。",
+     "subtitles": [
+      {
+       "text": "浏览器沿着证书链",
+       "from": 0,
+       "to": 42
+      },
+      {
+       "text": "一路校验到系统内置的根证书",
+       "from": 43,
+       "to": 112
+      },
+      {
+       "text": "全部通过，才确认对方就是这个网站",
+       "from": 113,
+       "to": 224
+      }
+     ],
+     "elements": [
+      {
+       "id": "root",
+       "type": "rect",
+       "x": 560,
+       "y": 140,
+       "w": 800,
+       "h": 130,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 16,
+       "label": "根证书（系统内置）",
+       "fontSize": 40
+      },
+      {
+       "id": "rootOk",
+       "type": "image",
+       "asset": "assets/ca-badge.svg",
+       "x": 1400,
+       "y": 150,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "mid",
+       "type": "rect",
+       "x": 560,
+       "y": 340,
+       "w": 800,
+       "h": 130,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 16,
+       "label": "中间证书",
+       "fontSize": 40
+      },
+      {
+       "id": "midOk",
+       "type": "image",
+       "asset": "assets/ca-badge.svg",
+       "x": 1400,
+       "y": 350,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "leaf",
+       "type": "rect",
+       "x": 560,
+       "y": 540,
+       "w": 800,
+       "h": 130,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 16,
+       "label": "网站证书",
+       "fontSize": 40
+      },
+      {
+       "id": "leafOk",
+       "type": "image",
+       "asset": "assets/ca-badge.svg",
+       "x": 1400,
+       "y": 550,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bar",
+       "type": "image",
+       "asset": "assets/padlock-closed.svg",
+       "x": 160,
+       "y": 700,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "barT",
+       "type": "text",
+       "x": 320,
+       "y": 740,
+       "w": 500,
+       "h": 56,
+       "text": "地址栏：安全连接",
+       "fontSize": 40,
+       "color": "#22C55E",
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "root",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 12,
+         "value": 0
+        },
+        {
+         "frame": 24,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rootOk",
+       "property": "drawCheck",
+       "keyframes": [
+        {
+         "frame": 100,
+         "value": 0
+        },
+        {
+         "frame": 120,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "mid",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 6,
+         "value": 0
+        },
+        {
+         "frame": 18,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "midOk",
+       "property": "drawCheck",
+       "keyframes": [
+        {
+         "frame": 65,
+         "value": 0
+        },
+        {
+         "frame": 85,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "leaf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "leafOk",
+       "property": "drawCheck",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 50,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bar",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 155,
+         "value": 0
+        },
+        {
+         "frame": 170,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "barT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 165,
+         "value": 0
+        },
+        {
+         "frame": 180,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "chapterId": "handshake",
+   "title": "TLS 1.3 握手",
+   "from": 2381,
+   "durationInFrames": 779,
+   "narrationChars": 127,
+   "narrationCharsRecount": 127,
+   "estimateFormulaFrames": 967,
+   "shots": [
+    {
+     "id": "handshake-1",
+     "from": 2381,
+     "durationInFrames": 334,
+     "narration": "这些步骤在 TLS 握手里一起完成。以 TLS 1.3 为例：浏览器发出 ClientHello，带上支持的算法和自己的密钥交换参数。",
+     "subtitles": [
+      {
+       "text": "这些步骤在 TLS 握手里一起完成",
+       "from": 0,
+       "to": 80
+      },
+      {
+       "text": "以 TLS 1.3 为例",
+       "from": 81,
+       "to": 123
+      },
+      {
+       "text": "浏览器发出 ClientHello",
+       "from": 124,
+       "to": 210
+      },
+      {
+       "text": "带上支持的算法和自己的密钥交换参数",
+       "from": 211,
+       "to": 333
+      }
+     ],
+     "elements": [
+      {
+       "id": "cliL",
+       "type": "text",
+       "x": 250,
+       "y": 100,
+       "w": 400,
+       "h": 50,
+       "text": "浏览器",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "srvL",
+       "type": "text",
+       "x": 1270,
+       "y": 100,
+       "w": 400,
+       "h": 50,
+       "text": "服务器",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "lifeL",
+       "type": "line",
+       "x": 450,
+       "y": 170,
+       "w": 0,
+       "h": 600,
+       "color": "#3B82F6",
+       "reuse": false
+      },
+      {
+       "id": "lifeR",
+       "type": "line",
+       "x": 1470,
+       "y": 170,
+       "w": 0,
+       "h": 600,
+       "color": "#3B82F6",
+       "reuse": false
+      },
+      {
+       "id": "tls13",
+       "type": "text",
+       "x": 760,
+       "y": 100,
+       "w": 400,
+       "h": 50,
+       "text": "以 TLS 1.3 为例",
+       "fontSize": 36,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ch",
+       "type": "arrow",
+       "x": 450,
+       "y": 220,
+       "w": 1020,
+       "h": 60,
+       "color": "#22D3EE",
+       "reuse": false,
+       "label": "ClientHello（浏览器问候）",
+       "note": "支持的算法 + 密钥交换参数",
+       "direction": "r",
+       "fontSize": 32
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "cliL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "srvL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lifeL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lifeR",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tls13",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 22,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ch",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 167,
+         "value": 0
+        },
+        {
+         "frame": 314,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "handshake-2",
+     "from": 2715,
+     "durationInFrames": 176,
+     "narration": "服务器回 ServerHello，附上自己的参数、证书和签名。",
+     "subtitles": [
+      {
+       "text": "服务器回 ServerHello",
+       "from": 0,
+       "to": 80
+      },
+      {
+       "text": "附上自己的参数、证书和签名",
+       "from": 81,
+       "to": 175
+      }
+     ],
+     "elements": [
+      {
+       "id": "cliL",
+       "type": "text",
+       "x": 250,
+       "y": 100,
+       "w": 400,
+       "h": 50,
+       "text": "浏览器",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "srvL",
+       "type": "text",
+       "x": 1270,
+       "y": 100,
+       "w": 400,
+       "h": 50,
+       "text": "服务器",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "lifeL",
+       "type": "line",
+       "x": 450,
+       "y": 170,
+       "w": 0,
+       "h": 600,
+       "color": "#3B82F6",
+       "reuse": false
+      },
+      {
+       "id": "lifeR",
+       "type": "line",
+       "x": 1470,
+       "y": 170,
+       "w": 0,
+       "h": 600,
+       "color": "#3B82F6",
+       "reuse": false
+      },
+      {
+       "id": "tls13",
+       "type": "text",
+       "x": 760,
+       "y": 100,
+       "w": 400,
+       "h": 50,
+       "text": "以 TLS 1.3 为例",
+       "fontSize": 36,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ch",
+       "type": "arrow",
+       "x": 450,
+       "y": 220,
+       "w": 1020,
+       "h": 60,
+       "color": "#22D3EE",
+       "reuse": false,
+       "label": "ClientHello（浏览器问候）",
+       "note": "支持的算法 + 密钥交换参数",
+       "direction": "r",
+       "fontSize": 32
+      },
+      {
+       "id": "sh",
+       "type": "arrow",
+       "x": 450,
+       "y": 360,
+       "w": 1020,
+       "h": 60,
+       "color": "#F59E0B",
+       "reuse": false,
+       "label": "ServerHello（服务器回应）",
+       "note": "自己的参数 + 证书 + 签名",
+       "direction": "l",
+       "fontSize": 32
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "sh",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 146,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "handshake-3",
+     "from": 2891,
+     "durationInFrames": 269,
+     "narration": "双方用 ECDHE 各自算出同一把会话密钥，之后的通信全部加密。TLS 1.2 要两个来回，1.3 只要一个。",
+     "subtitles": [
+      {
+       "text": "双方用 ECDHE 各自算出同一把会话密钥",
+       "from": 0,
+       "to": 102
+      },
+      {
+       "text": "之后的通信全部加密",
+       "from": 103,
+       "to": 151
+      },
+      {
+       "text": "TLS 1.2 要两个来回",
+       "from": 152,
+       "to": 205
+      },
+      {
+       "text": "1.3 只要一个",
+       "from": 206,
+       "to": 268
+      }
+     ],
+     "elements": [
+      {
+       "id": "cliL",
+       "type": "text",
+       "x": 250,
+       "y": 100,
+       "w": 400,
+       "h": 50,
+       "text": "浏览器",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "srvL",
+       "type": "text",
+       "x": 1270,
+       "y": 100,
+       "w": 400,
+       "h": 50,
+       "text": "服务器",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "lifeL",
+       "type": "line",
+       "x": 450,
+       "y": 170,
+       "w": 0,
+       "h": 600,
+       "color": "#3B82F6",
+       "reuse": false
+      },
+      {
+       "id": "lifeR",
+       "type": "line",
+       "x": 1470,
+       "y": 170,
+       "w": 0,
+       "h": 600,
+       "color": "#3B82F6",
+       "reuse": false
+      },
+      {
+       "id": "ch",
+       "type": "arrow",
+       "x": 450,
+       "y": 220,
+       "w": 1020,
+       "h": 60,
+       "color": "#22D3EE",
+       "reuse": false,
+       "label": "ClientHello（浏览器问候）",
+       "note": "支持的算法 + 密钥交换参数",
+       "direction": "r",
+       "fontSize": 32
+      },
+      {
+       "id": "sh",
+       "type": "arrow",
+       "x": 450,
+       "y": 360,
+       "w": 1020,
+       "h": 60,
+       "color": "#F59E0B",
+       "reuse": false,
+       "label": "ServerHello（服务器回应）",
+       "note": "自己的参数 + 证书 + 签名",
+       "direction": "l",
+       "fontSize": 32
+      },
+      {
+       "id": "kL",
+       "type": "image",
+       "asset": "assets/key-symmetric.svg",
+       "x": 310,
+       "y": 480,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "kR",
+       "type": "image",
+       "asset": "assets/key-symmetric.svg",
+       "x": 1380,
+       "y": 480,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "same",
+       "type": "text",
+       "x": 660,
+       "y": 520,
+       "w": 600,
+       "h": 56,
+       "text": "各自算出同一把会话密钥",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "data",
+       "type": "arrow",
+       "x": 450,
+       "y": 690,
+       "w": 1020,
+       "h": 40,
+       "color": "#22C55E",
+       "reuse": false,
+       "label": "之后全部加密",
+       "direction": "lr",
+       "fontSize": 30
+      },
+      {
+       "id": "rtt12",
+       "type": "rect",
+       "x": 1180,
+       "y": 770,
+       "w": 600,
+       "h": 40,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 8,
+       "label": "TLS 1.2：2 个往返",
+       "fontSize": 28
+      },
+      {
+       "id": "rtt13",
+       "type": "rect",
+       "x": 1180,
+       "y": 820,
+       "w": 600,
+       "h": 40,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 8,
+       "label": "TLS 1.3：1 个往返",
+       "fontSize": 28
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "kL",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "kR",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "same",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 25,
+         "value": 0
+        },
+        {
+         "frame": 40,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "data",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 89,
+         "value": 0
+        },
+        {
+         "frame": 119,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rtt12",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 149,
+         "value": 0
+        },
+        {
+         "frame": 164,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rtt13",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 0
+        },
+        {
+         "frame": 184,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rtt13",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 189,
+         "value": 1
+        },
+        {
+         "frame": 204,
+         "value": 1.06
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "chapterId": "integrity",
+   "title": "完整性与误区",
+   "from": 3160,
+   "durationInFrames": 494,
+   "narrationChars": 80,
+   "narrationCharsRecount": 80,
+   "estimateFormulaFrames": 631,
+   "shots": [
+    {
+     "id": "integrity-1",
+     "from": 3160,
+     "durationInFrames": 263,
+     "narration": "最后是完整性。TLS 1.3 用 AEAD 加密，每条消息都带校验标签，路上哪怕改动一个字节，也会被发现。",
+     "subtitles": [
+      {
+       "text": "最后是完整性",
+       "from": 0,
+       "to": 32
+      },
+      {
+       "text": "TLS 1.3 用 AEAD 加密",
+       "from": 33,
+       "to": 97
+      },
+      {
+       "text": "每条消息都带校验标签",
+       "from": 98,
+       "to": 151
+      },
+      {
+       "text": "路上哪怕改动一个字节",
+       "from": 152,
+       "to": 205
+      },
+      {
+       "text": "也会被发现",
+       "from": 206,
+       "to": 262
+      }
+     ],
+     "elements": [
+      {
+       "id": "box",
+       "type": "image",
+       "asset": "assets/envelope-sealed.svg",
+       "x": 360,
+       "y": 220,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "hash",
+       "type": "image",
+       "asset": "assets/hash-check.svg",
+       "x": 1100,
+       "y": 240,
+       "w": 380,
+       "h": 380,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tagT",
+       "type": "text",
+       "x": 1000,
+       "y": 660,
+       "w": 600,
+       "h": 50,
+       "text": "每条消息带校验标签",
+       "fontSize": 38,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "pencil",
+       "type": "icon",
+       "x": 760,
+       "y": 180,
+       "w": 120,
+       "h": 120,
+       "color": "#F87171",
+       "reuse": false,
+       "label": "铅笔"
+      },
+      {
+       "id": "alarm",
+       "type": "text",
+       "x": 300,
+       "y": 700,
+       "w": 600,
+       "h": 56,
+       "text": "改动一个字节，也会被发现",
+       "fontSize": 40,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "box",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "box",
+       "property": "tamperStrip",
+       "keyframes": [
+        {
+         "frame": 15,
+         "value": 0
+        },
+        {
+         "frame": 40,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "hash",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 45,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tagT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 40,
+         "value": 0
+        },
+        {
+         "frame": 55,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pencil",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pencil",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 141,
+         "value": 760
+        },
+        {
+         "frame": 171,
+         "value": 560
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "box",
+       "property": "tamperAlarm",
+       "keyframes": [
+        {
+         "frame": 171,
+         "value": 0
+        },
+        {
+         "frame": 181,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "hash",
+       "property": "badgeDanger",
+       "keyframes": [
+        {
+         "frame": 171,
+         "value": 0
+        },
+        {
+         "frame": 181,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "alarm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 176,
+         "value": 0
+        },
+        {
+         "frame": 191,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "integrity-2",
+     "from": 3423,
+     "durationInFrames": 231,
+     "narration": "但要注意，HTTPS 只保护传输过程：它不保证网站本身可信，也不保护你设备上的数据。",
+     "subtitles": [
+      {
+       "text": "但要注意，HTTPS 只保护传输过程",
+       "from": 0,
+       "to": 86
+      },
+      {
+       "text": "它不保证网站本身可信",
+       "from": 87,
+       "to": 140
+      },
+      {
+       "text": "也不保护你设备上的数据",
+       "from": 141,
+       "to": 230
+      }
+     ],
+     "elements": [
+      {
+       "id": "scope",
+       "type": "text",
+       "x": 360,
+       "y": 140,
+       "w": 1200,
+       "h": 64,
+       "text": "HTTPS 只保护传输过程",
+       "fontSize": 52,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "c1",
+       "type": "rect",
+       "x": 260,
+       "y": 300,
+       "w": 620,
+       "h": 320,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "钓鱼网站也能有证书",
+       "fontSize": 44
+      },
+      {
+       "id": "c2",
+       "type": "rect",
+       "x": 1040,
+       "y": 300,
+       "w": 620,
+       "h": 320,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "设备中毒，HTTPS 管不了",
+       "fontSize": 44
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "scope",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 77,
+         "value": 360
+        },
+        {
+         "frame": 97,
+         "value": 300
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 77,
+         "value": 0
+        },
+        {
+         "frame": 92,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 124,
+         "value": 360
+        },
+        {
+         "frame": 144,
+         "value": 300
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 124,
+         "value": 0
+        },
+        {
+         "frame": 139,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s7",
+   "chapterId": "recap",
+   "title": "回到那张明信片",
+   "from": 3654,
+   "durationInFrames": 385,
+   "narrationChars": 60,
+   "narrationCharsRecount": 60,
+   "estimateFormulaFrames": 489,
+   "shots": [
+    {
+     "id": "recap-1",
+     "from": 3654,
+     "durationInFrames": 187,
+     "narration": "回到那张明信片：现在它被锁进信箱，盖了邮局的章，还贴上了防拆封条。",
+     "subtitles": [
+      {
+       "text": "回到那张明信片：现在它被锁进信箱",
+       "from": 0,
+       "to": 80
+      },
+      {
+       "text": "盖了邮局的章，还贴上了防拆封条",
+       "from": 81,
+       "to": 186
+      }
+     ],
+     "elements": [
+      {
+       "id": "postcard",
+       "type": "image",
+       "asset": "assets/postcard.svg",
+       "x": 660,
+       "y": 200,
+       "w": 600,
+       "h": 375,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "box",
+       "type": "image",
+       "asset": "assets/envelope-sealed.svg",
+       "x": 760,
+       "y": 180,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lock",
+       "type": "image",
+       "asset": "assets/padlock-closed.svg",
+       "x": 880,
+       "y": 120,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "stamp",
+       "type": "image",
+       "asset": "assets/ca-badge.svg",
+       "x": 1080,
+       "y": 420,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "back",
+       "type": "text",
+       "x": 560,
+       "y": 640,
+       "w": 800,
+       "h": 56,
+       "text": "同一张明信片",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "postcard",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "back",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 5,
+         "value": 0
+        },
+        {
+         "frame": 15,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "postcard",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 1
+        },
+        {
+         "frame": 57,
+         "value": 0.4
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "postcard",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 52,
+         "value": 1
+        },
+        {
+         "frame": 62,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "box",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 52,
+         "value": 0
+        },
+        {
+         "frame": 67,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lock",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 67,
+         "value": 60
+        },
+        {
+         "frame": 82,
+         "value": 120
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lock",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 67,
+         "value": 0
+        },
+        {
+         "frame": 77,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "stamp",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 93,
+         "value": 1.4
+        },
+        {
+         "frame": 105,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "stamp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 93,
+         "value": 0
+        },
+        {
+         "frame": 101,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "box",
+       "property": "tamperStrip",
+       "keyframes": [
+        {
+         "frame": 140,
+         "value": 0
+        },
+        {
+         "frame": 160,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "recap-2",
+     "from": 3841,
+     "durationInFrames": 198,
+     "narration": "加密防偷看，证书防冒充，完整性校验防篡改，这就是 HTTPS 安全的原因。",
+     "subtitles": [
+      {
+       "text": "加密防偷看，证书防冒充",
+       "from": 0,
+       "to": 53
+      },
+      {
+       "text": "完整性校验防篡改",
+       "from": 54,
+       "to": 96
+      },
+      {
+       "text": "这就是 HTTPS 安全的原因",
+       "from": 97,
+       "to": 197
+      }
+     ],
+     "elements": [
+      {
+       "id": "lockI",
+       "type": "image",
+       "asset": "assets/padlock-closed.svg",
+       "x": 320,
+       "y": 180,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lockIT",
+       "type": "text",
+       "x": 220,
+       "y": 490,
+       "w": 480,
+       "h": 56,
+       "text": "加密防偷看",
+       "fontSize": 40,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "caI",
+       "type": "image",
+       "asset": "assets/ca-badge.svg",
+       "x": 820,
+       "y": 180,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "caIT",
+       "type": "text",
+       "x": 720,
+       "y": 490,
+       "w": 480,
+       "h": 56,
+       "text": "证书防冒充",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "hashI",
+       "type": "image",
+       "asset": "assets/hash-check.svg",
+       "x": 1320,
+       "y": 180,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "hashIT",
+       "type": "text",
+       "x": 1220,
+       "y": 490,
+       "w": 480,
+       "h": 56,
+       "text": "完整性校验防篡改",
+       "fontSize": 40,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "title",
+       "type": "text",
+       "x": 260,
+       "y": 640,
+       "w": 1400,
+       "h": 96,
+       "text": "HTTPS 为什么安全",
+       "fontSize": 72,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "lockI",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lockIT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 18,
+         "value": 0
+        },
+        {
+         "frame": 30,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "caI",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 51,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "caIT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 44,
+         "value": 0
+        },
+        {
+         "frame": 56,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hashI",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 77,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "hashIT",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 70,
+         "value": 0
+        },
+        {
+         "frame": 82,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "title",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 128,
+         "value": 0
+        },
+        {
+         "frame": 148,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  }
+ ]
 }

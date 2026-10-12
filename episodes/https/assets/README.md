@@ -21,6 +21,7 @@
 | ca-badge.svg | 0 0 512 512 | 第4章（证书链/根证书）、结尾“印章”图标 | accent 盾、surface 外环、bg 文字与勾 | `badge`、`check`；证书链逐层打勾：check stroke-dashoffset 描线动画 |
 | eavesdropper.svg | 0 0 512 512 | 开场、第1/2/4章、第3章“算不出” | muted 剪影、surface-2 帽子、danger 眼睛 | `figure`、`eyes`；淡入、眼睛闪烁（ry 缩放）、伸手动作用整体平移；中性剪影无真人特征 |
 | ecdhe-mix.svg | 0 0 1600 900 | 第3章、第5章 | primary 公开参数、danger 浏览器私有、success 服务器私有、secondary+半透明叠色表示“混合后公开值”、accent 会话密钥、text-2 箭头文字 | 顺序：`shared-param` → `left-secret`/`right-secret` → 合成 `left-public`/`right-public`（scale 弹出）→ `exchange` 虚线 dashoffset 流动 → `eve` 淡入 → `left-derive`/`right-derive` 同时出现金色圆 |
+| ecdhe-combine.svg | 0 0 1600 900 | 第3章状态② | secondary+对方私有色叠色＝收到的公开值、danger/success 自己的私有、accent 会话密钥、text-2 标签 | `left-combine` / `right-combine`；两侧同时“+”合成，箭头下落后金色圆 scale 0→1 |
 | hash-check.svg | 0 0 512 512 | 第6章（AEAD 校验）、结尾“封条”图标 | primary 指纹线、success 勾章 | `fingerprint` 描线（dashoffset）、`badge` scale 弹出、`check` 描线；校验失败时 badge 换 danger |
 
 注意：ecdhe-mix 中“公开值”的紫/青色是 secondary 与私有色半透明叠加得到的，属混色效果而非新令牌。
@@ -36,4 +37,4 @@
 5. `eve` 偷听者算不出
 6. `left-derive` / `right-derive` + “= 同一把会话密钥 =”
 
-字号：节点标签 30 单位，“只交换公开值”“偷听者算不出”32，标题与结论 44；按 1920 宽渲染（×1.2）最小为 36px，满足 ≥28px。建议每步约 4 秒，可直接切帧，也可用 mix 内联后对新增层做淡入。
+字号（实测）：节点标签 38 单位，“只交换公开值”“偷听者算不出”“算出会话密钥”40，“浏览器/服务器”与结论 48，“+”64。分镜中按 1468×780 contain 放置，缩放 = min(1468/1600, 780/900) = 0.8667，屏幕最小字号 38×0.8667 ≈ 32.9px（≥28px）。第3章 ECDHE 镜头只用 3 个关键状态：step4（交换公开值）→ ecdhe-combine（各自合成）→ step6（同一把金钥匙，含偷听者算不出），切点跟随字幕分句；step1–3、5 保留备用。
