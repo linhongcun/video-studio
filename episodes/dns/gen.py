@@ -82,7 +82,8 @@ def shots_for(si,L):
         cols=[("cRes","查号台",280),("cRoot","根服务器",760),("cCom",".com 服务器",1220),("cAuth","权威服务器",1640)]
         e1=[];a1=[]
         for j,(i,l,cx) in enumerate(cols):
-            e1+=[dict(server(i,cx-170,110,340,100,l),fontSize=40,note="时序图列标题：统一卡片样式，列标题 40px"),E(i+"Life","line",cx,210,0,640,P['muted'])]
+            dy=30 if i=="cAuth" else 0  # 权威服务器卡片下移 30px，避开频道水印留空区（x1700–1840, y80–130）；生命线起点跟着下移、底端仍在 850
+            e1+=[dict(server(i,cx-170,110+dy,340,100,l),fontSize=40,note="时序图列标题：统一卡片样式，列标题 40px"),E(i+"Life","line",cx,210+dy,0,640-dy,P['muted'])]
             a1+=[fade(i,j*6,j*6+12),fade(i+"Life",j*6+6,j*6+18)]
         e1+=[A("globe","globe",604,125,70,70)]  # 根服务器卡片旁的地球小图标
         a1+=[fade("globe",at(0,"它先问根"),at(0,"它先问根")+12)]
@@ -141,7 +142,7 @@ def shots_for(si,L):
         e1+=[A("nbIcon","notebook",160,160,120,120),A("globeIcon","globe",740,160,120,120),
              E("back","arrow",160,520,1600,60,P['success'],label="号码返回，顺手记下来",direction="l",fontSize=40),T("title",160,680,1600,60,"先近后远，一层层问",44,P['text'],align="center")]
         t=at(0,"顺手"); a1+=[fade("nbIcon",at(0,"先翻"),at(0,"先翻")+12),fade("globeIcon",at(0,"从根"),at(0,"从根")+12),draw("back",at(0,"拿到号码"),t-at(0,"拿到号码")+10),fade("title",AEND(5,0)-30,AEND(5,0)-18)]
-        EP1=dict(id="ep1Frame",type="image",src="ep01:http-request/connect-1@200",asset=None,placeholder=True,x=1240,y=150,w=520,h=293,color=None,reuse=True,stroke=P['text2'],
+        EP1=dict(id="ep1Frame",type="image",src="ep01:http-request/connect-1@220",asset=None,placeholder=True,x=1240,y=150,w=520,h=293,color=None,reuse=True,stroke=P['text2'],
             note="【待 Knoll 确认/提供】复用第一期 http-request 的连接镜头 connect-1（storyboard 全局 from=1440，243 帧；s4「建立连接」TCP 三次握手）。建议取镜头内第 200 帧（全局 1640，三支握手箭头都已画完），从 /workspace/video-studio/episodes/http-request/video.mp4 抽帧，或在 remotion 里直接渲染该帧；静帧参考 /workspace/video-studio/episodes/http-request/frames/04-connect.png。16:9 缩放到 520×293，2px text2 描边。")
         e2=[browser(160,180,340,200),server("server",820,180,340,200,"服务器"),R("ipChip",160,420,340,60,stroke=P['accent'],radius=30,label=IP,fontSize=32),
             E("conn","arrow",500,220,320,60,P['primary'],label="建立连接",direction="r",fontSize=36),E("req","arrow",500,330,320,60,P['success'],label="发出请求",direction="r",fontSize=36),

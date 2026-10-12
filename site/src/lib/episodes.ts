@@ -74,7 +74,10 @@ export function computeChapters(slug: string, fm: any[] = []) {
   });
   if (!byId && fm.length && fm.length !== scenes.length)
     console.warn(`[chapters] ${slug}: frontmatter ${fm.length} 章 vs storyboard ${scenes.length} scene，按顺序对齐`);
-  return {chapters, duration: Math.round((total / fps) * 10) / 10, fps};
+  // 成片 = 正片 + 「IT小村 · 原创」片尾卡（episodes/_shared/branding，Remotion Root 同样追加）
+  const brandPath = path.join(EP_DIR, '_shared/branding/spec.json');
+  const endCard = fs.existsSync(brandPath) ? readJson(brandPath).endCard?.frames ?? 0 : 0;
+  return {chapters, duration: Math.round(((total + endCard) / fps) * 10) / 10, fps};
 }
 
 /** WebVTT 字幕：与 Remotion Main.tsx 相同的分配规则（v2 的标点集合更全，两套都兼容）（按字数比例铺满真实音频时长） */

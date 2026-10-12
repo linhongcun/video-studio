@@ -10,6 +10,7 @@
 //   glowPlaintext 0→1 #plaintext 发出危险色光晕（明文暴露）
 // 元素属性 tint="danger"|"#RRGGBB"：把 SVG 里所有亮色填充/描边换成该色并加同色光晕（如第 4 章被调包的假公钥）。
 import React from 'react';
+import {CenterMark, ChannelBranding} from '../../../_shared/branding/ChannelBranding';
 import {AbsoluteFill, Audio, Img, Easing, Sequence, interpolate, interpolateColors, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import sb from '../../storyboard.json';
 import timing from './timing.json';
@@ -324,10 +325,12 @@ export const shotStart: Record<string, number> = Object.fromEntries(plan.map((p)
 export const Main: React.FC = () => (
   <AbsoluteFill style={{background: P.bg}}>
     <Grid />
+    <CenterMark episode="EP.03" plan={plan} />
     {plan.map((p, i) => (
       <Sequence key={p.sh.id} from={p.from} durationInFrames={p.dur} name={p.sh.id}>
         <Shot p={p} prevTr={i ? plan[i - 1].sh.transition : null} />
       </Sequence>
     ))}
+    <ChannelBranding mainFrames={totalFrames} />
   </AbsoluteFill>
 );
