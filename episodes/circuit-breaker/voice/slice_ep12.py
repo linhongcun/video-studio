@@ -1,5 +1,5 @@
 import json,subprocess,soundfile as sf
-MAP=[("hook",[3,2]),("avalanche",[2,2]),("breaker",[2,2]),("half-open",[2,2]),("degrade",[2,2]),("recap",[2,1])]
+MAP=[("hook",[3,2]),("avalanche",[2,2]),("breaker",[2,2]),("half-open",[2,2]),("degrade",[2,3]),("recap",[2,1])]
 out={};g=0;subprocess.run(['mkdir','-p','shots']);chap={}
 for ch,n in MAP:
     S=json.load(open(f'{ch}-final.json'));wav=f'{ch}-final.wav';assert len(S)==sum(n),ch
