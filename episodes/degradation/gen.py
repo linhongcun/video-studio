@@ -151,7 +151,7 @@ assets=dict(reuse=[dict(id="routeArrow",desc="路线箭头 drawProgress"),dict(i
  new=[dict(id=n,file=f"assets/{n}.svg") for n in ("aircon","meter")])
 PS="hook-1"; sh=[x for sc in scenes for x in sc['shots'] if x['id']==PS][0]
 PARTS[:]=[x['narration'] for x in scenes[0]['shots']]
-pl=AT(0,0,"这是")-4  # 暂定（估算 timing）：两张价格卡全显、「红包抵扣」已弹出、「bug？」还没出——与专用封面主图一致；正式 timing 到后写死
+pl=300  # 写死（Knoll v4 timing 21:43 + HOLDS）：hook-1 两张卡 186 全显、「红包抵扣」254 弹出完毕、「bug？」314 才开始淡入；hook 从 0 起，全局 = 300
 meta['poster']=dict(shotId=PS,localFrame=pl,frame=sh['from']+pl,desc="两张价格卡并排：搜索页到手价长条 vs 结算页更短长条 +「红包抵扣」行（无具体金额）",file="poster.jpg")
 _CS=Path("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=json.load(open(_CS)).get(meta["slug"]) if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
 json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
