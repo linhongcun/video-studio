@@ -1,0 +1,5206 @@
+{
+ "meta": {
+  "title": "《一个服务出故障，为什么整个网站没跟着崩？》",
+  "episode": 13,
+  "slug": "circuit-breaker",
+  "release": "v0.18.0",
+  "series": "扛住高峰 05",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 3653,
+  "provisionalTiming": false,
+  "style": "深色背景+蓝青高光扁平2D（沿用前几期）",
+  "palette": {
+   "bg": "#0B1020",
+   "panel": "#111827",
+   "primary": "#22D3EE",
+   "secondary": "#3B82F6",
+   "text": "#E5E7EB",
+   "text2": "#9CA3AF",
+   "muted": "#6B7280",
+   "success": "#22C55E",
+   "accent": "#F59E0B",
+   "danger": "#F87171"
+  },
+  "font": "Noto Sans SC",
+  "safeArea": {
+   "margin": 80,
+   "subtitleBand": [
+    900,
+    980
+   ],
+   "contentMaxY": 880,
+   "watermarkClearZone": [
+    1700,
+    80,
+    1840,
+    130
+   ]
+  },
+  "branding": {
+   "spec": "episodes/_shared/branding/spec.json v1.3.0",
+   "cornerWatermark": "右上「IT小村」40%，留空区 x1700–1840 y80–130",
+   "centerWatermark": null,
+   "endCard": "由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾"
+  },
+  "shotSentences": {
+   "hook-1": 2,
+   "hook-2": 2,
+   "cascade-1": 2,
+   "cascade-2": 2,
+   "breaker-1": 2,
+   "breaker-2": 1,
+   "breaker-3": 3,
+   "states-1": 3,
+   "half-open-1": 2,
+   "half-open-2": 1,
+   "recap-1": 1,
+   "recap-2": 2
+  },
+  "tts": {
+   "note": "第十三期：送 TTS 文字 = 字幕原文（读音表无替换）",
+   "replace": {}
+  },
+  "notes": "时长=Knoll MiMo 实测，map_timing.py scale 1。第十三期（熔断，v0.18.0）：主线 下单 → 订单服务同步调用库存服务，库存服务持续故障；不出现红包 / 到手价 / 优惠券（validate 禁用词）。雪崩（级联故障）→ 超时（仍要等满）→ 家里电闸跳闸 → 熔断（示例：最近 100 次失败 50% 跳闸，快速失败返回「系统繁忙，请稍后重试」）+「熔断不能代替超时」→ 三种状态（关闭 = 电闸合上通电 = 正常调用；打开 = 跳闸 = 拒绝请求；反直觉）→ 半开（示例：断开 30 秒，放少量试探；成功回到关闭 / 失败回到打开）→ 回顾（库存校验始终在；限流管流量 / 熔断隔离故障 / 降级保核心；第五招）。示例参数上屏都标「示例」。旁白术语：雪崩、级联故障、超时、熔断、关闭、打开、半开，念到时上屏术语标签（锚在点名的那句）。画面不重复字幕句子（validate：术语白名单 + LABEL_OK 除外）。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/circuit-breaker/。复用 EP.12 第 3 版电闸箱 / 跳闸 / 开关 / 火花 / 灯 / 插座 / 计时器；新图标 lock / tv / shield 自绘无文字（第十三期家里电闸各路标 客厅 / 卧室 / 厨房 / 插座，电器用台灯和电视）；复用 phone/ticket（第十一期）、gate（第十期）、queue/guest（第九期）、hourglass（第三期）。branding v1.3.0：只有右上水印 + 60 帧片尾卡（全局组件），无中央水印，无自我介绍。",
+  "poster": {
+   "shotId": "breaker-2",
+   "localFrame": 190,
+   "frame": 1690,
+   "desc": "家里电闸：插座那一路跳闸，其余各路照常（电视、台灯照常亮）",
+   "file": "poster.jpg"
+  }
+ },
+ "assets": {
+  "reuse": [
+   {
+    "id": "routeArrow",
+    "desc": "路线箭头 drawProgress"
+   },
+   {
+    "id": "subtitle",
+    "desc": "字幕层"
+   },
+   {
+    "id": "phone",
+    "file": "assets/phone.svg",
+    "from_": "idempotency/assets/phone.svg"
+   },
+   {
+    "id": "ticket",
+    "file": "assets/ticket.svg",
+    "from_": "idempotency/assets/ticket.svg"
+   },
+   {
+    "id": "gate",
+    "file": "assets/gate.svg",
+    "from_": "rate-limit/assets/gate.svg"
+   },
+   {
+    "id": "queue",
+    "file": "assets/queue.svg",
+    "from_": "message-queue/assets/queue.svg"
+   },
+   {
+    "id": "guest",
+    "file": "assets/guest.svg",
+    "from_": "message-queue/assets/guest.svg"
+   },
+   {
+    "id": "timer",
+    "file": "assets/timer.svg",
+    "from_": "server-cache/assets/timer.svg"
+   },
+   {
+    "id": "hourglass",
+    "file": "assets/hourglass.svg",
+    "from_": "dns/assets/hourglass.svg"
+   },
+   {
+    "id": "breaker-box",
+    "file": "assets/breaker-box.svg",
+    "from_": "circuit-breaker/ep12-old（EP.12 第 3 版）"
+   },
+   {
+    "id": "breaker-tripped",
+    "file": "assets/breaker-tripped.svg",
+    "from_": "circuit-breaker/ep12-old（EP.12 第 3 版）"
+   },
+   {
+    "id": "switch-on",
+    "file": "assets/switch-on.svg",
+    "from_": "circuit-breaker/ep12-old（EP.12 第 3 版）"
+   },
+   {
+    "id": "switch-off",
+    "file": "assets/switch-off.svg",
+    "from_": "circuit-breaker/ep12-old（EP.12 第 3 版）"
+   },
+   {
+    "id": "spark",
+    "file": "assets/spark.svg",
+    "from_": "circuit-breaker/ep12-old（EP.12 第 3 版）"
+   },
+   {
+    "id": "lamp",
+    "file": "assets/lamp.svg",
+    "from_": "circuit-breaker/ep12-old（EP.12 第 3 版）"
+   },
+   {
+    "id": "socket",
+    "file": "assets/socket.svg",
+    "from_": "circuit-breaker/ep12-old（EP.12 第 3 版）"
+   }
+  ],
+  "new": [
+   {
+    "id": "lock",
+    "file": "assets/lock.svg"
+   },
+   {
+    "id": "tv",
+    "file": "assets/tv.svg"
+   },
+   {
+    "id": "shield",
+    "file": "assets/shield.svg"
+   }
+  ]
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "hook",
+   "title": "没跟着崩",
+   "from": 0,
+   "durationInFrames": 510,
+   "narrationChars": 71,
+   "narrationCharsRecount": 71,
+   "shots": [
+    {
+     "id": "hook-1",
+     "chapterId": "hook",
+     "from": 0,
+     "durationInFrames": 342,
+     "narration": "大促下单时，后台的库存服务突然出了故障。可你会发现，商品页照常能逛，别的功能也基本正常，整个网站没跟着崩。",
+     "subtitles": [
+      {
+       "text": "大促下单时，后台的库存服务突然出了故障",
+       "from": 0,
+       "to": 133
+      },
+      {
+       "text": "可你会发现，商品页照常能逛",
+       "from": 134,
+       "to": 216
+      },
+      {
+       "text": "别的功能也基本正常",
+       "from": 217,
+       "to": 278
+      },
+      {
+       "text": "整个网站没跟着崩",
+       "from": 279,
+       "to": 341
+      }
+     ],
+     "elements": [
+      {
+       "id": "ph",
+       "type": "image",
+       "asset": "assets/phone.svg",
+       "x": 200,
+       "y": 140,
+       "w": 520,
+       "h": 520,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "s00",
+       "type": "rect",
+       "x": 1000,
+       "y": 200,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "商品服务",
+       "fontSize": 44
+      },
+      {
+       "id": "s01",
+       "type": "rect",
+       "x": 1400,
+       "y": 200,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "订单服务",
+       "fontSize": 44
+      },
+      {
+       "id": "s10",
+       "type": "rect",
+       "x": 1000,
+       "y": 380,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "s11",
+       "type": "rect",
+       "x": 1400,
+       "y": 380,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "支付服务",
+       "fontSize": 44
+      },
+      {
+       "id": "bad",
+       "type": "rect",
+       "x": 1000,
+       "y": 380,
+       "w": 360,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "sp",
+       "type": "image",
+       "asset": "assets/spark.svg",
+       "x": 1300,
+       "y": 450,
+       "w": 90,
+       "h": 90,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ok",
+       "type": "rect",
+       "x": 1000,
+       "y": 600,
+       "w": 760,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "其余服务：照常",
+       "fontSize": 40
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ph",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s00",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 0
+        },
+        {
+         "frame": 68,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s01",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 0
+        },
+        {
+         "frame": 68,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s10",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 0
+        },
+        {
+         "frame": 68,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s11",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 0
+        },
+        {
+         "frame": 68,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bad",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 110,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bad",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 110,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 110,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ok",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 217,
+         "value": 0
+        },
+        {
+         "frame": 229,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "hook-2",
+     "chapterId": "hook",
+     "from": 342,
+     "durationInFrames": 168,
+     "narration": "这是怎么做到的？我们先看看，要是什么都不做，会发生什么。",
+     "subtitles": [
+      {
+       "text": "这是怎么做到的",
+       "from": 0,
+       "to": 60
+      },
+      {
+       "text": "我们先看看，要是什么都不做",
+       "from": 61,
+       "to": 120
+      },
+      {
+       "text": "会发生什么",
+       "from": 121,
+       "to": 167
+      }
+     ],
+     "elements": [
+      {
+       "id": "s00",
+       "type": "rect",
+       "x": 1000,
+       "y": 200,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "商品服务",
+       "fontSize": 44
+      },
+      {
+       "id": "s01",
+       "type": "rect",
+       "x": 1400,
+       "y": 200,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "订单服务",
+       "fontSize": 44
+      },
+      {
+       "id": "s10",
+       "type": "rect",
+       "x": 1000,
+       "y": 380,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "s11",
+       "type": "rect",
+       "x": 1400,
+       "y": 380,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "支付服务",
+       "fontSize": 44
+      },
+      {
+       "id": "bad",
+       "type": "rect",
+       "x": 1000,
+       "y": 380,
+       "w": 360,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "why",
+       "type": "text",
+       "x": 160,
+       "y": 300,
+       "w": 760,
+       "h": 120,
+       "text": "为什么没崩？",
+       "fontSize": 80,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ask",
+       "type": "text",
+       "x": 1180,
+       "y": 620,
+       "w": 400,
+       "h": 140,
+       "text": "？",
+       "fontSize": 120,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "s00",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s01",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s10",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s11",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bad",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "why",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "why",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ask",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 0
+        },
+        {
+         "frame": 108,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ask",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 0
+        },
+        {
+         "frame": 108,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "cascade",
+   "title": "雪崩",
+   "from": 510,
+   "durationInFrames": 709,
+   "narrationChars": 99,
+   "narrationCharsRecount": 99,
+   "shots": [
+    {
+     "id": "cascade-1",
+     "chapterId": "cascade",
+     "from": 510,
+     "durationInFrames": 298,
+     "narration": "你点下单，订单服务要先去问库存服务：还有货吗？大促时库存服务出了故障，迟迟不回话，订单服务就一直等。",
+     "subtitles": [
+      {
+       "text": "你点下单，订单服务要先去问库存服务",
+       "from": 0,
+       "to": 109
+      },
+      {
+       "text": "还有货吗",
+       "from": 110,
+       "to": 145
+      },
+      {
+       "text": "大促时库存服务出了故障",
+       "from": 146,
+       "to": 211
+      },
+      {
+       "text": "迟迟不回话，订单服务就一直等",
+       "from": 212,
+       "to": 297
+      }
+     ],
+     "elements": [
+      {
+       "id": "od",
+       "type": "rect",
+       "x": 200,
+       "y": 300,
+       "w": 400,
+       "h": 130,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "订单服务",
+       "fontSize": 48
+      },
+      {
+       "id": "ln",
+       "type": "line",
+       "x": 600,
+       "y": 365,
+       "w": 560,
+       "h": 0,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "iv",
+       "type": "rect",
+       "x": 1160,
+       "y": 300,
+       "w": 400,
+       "h": 130,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 48
+      },
+      {
+       "id": "bub",
+       "type": "rect",
+       "x": 700,
+       "y": 170,
+       "w": 320,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 45,
+       "label": "有货吗？",
+       "fontSize": 44
+      },
+      {
+       "id": "ivr",
+       "type": "rect",
+       "x": 1160,
+       "y": 300,
+       "w": 400,
+       "h": 130,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 48
+      },
+      {
+       "id": "tm",
+       "type": "image",
+       "asset": "assets/timer.svg",
+       "x": 420,
+       "y": 500,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "od",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ln",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "iv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bub",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 110,
+         "value": 0
+        },
+        {
+         "frame": 122,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bub",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 110,
+         "value": 0
+        },
+        {
+         "frame": 122,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ivr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 188,
+         "value": 0
+        },
+        {
+         "frame": 200,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bub",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 212,
+         "value": 1
+        },
+        {
+         "frame": 222,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "tm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 272,
+         "value": 0
+        },
+        {
+         "frame": 284,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "cascade-2",
+     "chapterId": "cascade",
+     "from": 808,
+     "durationInFrames": 411,
+     "narration": "等的请求越积越多，订单服务自己也被拖垮，连支付这些服务都跟着出问题。一个服务出故障，一层层往外传，这就叫雪崩，也叫级联故障。",
+     "subtitles": [
+      {
+       "text": "等的请求越积越多",
+       "from": 0,
+       "to": 51
+      },
+      {
+       "text": "订单服务自己也被拖垮",
+       "from": 52,
+       "to": 116
+      },
+      {
+       "text": "连支付这些服务都跟着出问题",
+       "from": 117,
+       "to": 209
+      },
+      {
+       "text": "一个服务出故障，一层层往外传",
+       "from": 210,
+       "to": 302
+      },
+      {
+       "text": "这就叫雪崩，也叫级联故障",
+       "from": 303,
+       "to": 410
+      }
+     ],
+     "elements": [
+      {
+       "id": "iv",
+       "type": "rect",
+       "x": 1160,
+       "y": 140,
+       "w": 400,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "od",
+       "type": "rect",
+       "x": 640,
+       "y": 140,
+       "w": 400,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "订单服务",
+       "fontSize": 44
+      },
+      {
+       "id": "pay",
+       "type": "rect",
+       "x": 640,
+       "y": 400,
+       "w": 400,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "支付服务",
+       "fontSize": 44
+      },
+      {
+       "id": "odr",
+       "type": "rect",
+       "x": 640,
+       "y": 140,
+       "w": 400,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "订单服务",
+       "fontSize": 44
+      },
+      {
+       "id": "payr",
+       "type": "rect",
+       "x": 640,
+       "y": 400,
+       "w": 400,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "支付服务",
+       "fontSize": 44
+      },
+      {
+       "id": "g0",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 160,
+       "y": 160,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g1",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 250,
+       "y": 160,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g2",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 340,
+       "y": 160,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g3",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 430,
+       "y": 160,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g4",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 160,
+       "y": 260,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g5",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 250,
+       "y": 260,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g6",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 340,
+       "y": 260,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g7",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 430,
+       "y": 260,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g8",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 160,
+       "y": 360,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g9",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 250,
+       "y": 360,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g10",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 340,
+       "y": 360,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g11",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 430,
+       "y": 360,
+       "w": 76,
+       "h": 76,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "av",
+       "type": "rect",
+       "x": 1160,
+       "y": 600,
+       "w": 400,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 48,
+       "label": "雪崩",
+       "fontSize": 64
+      },
+      {
+       "id": "cf",
+       "type": "rect",
+       "x": 1160,
+       "y": 730,
+       "w": 400,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 48,
+       "label": "级联故障",
+       "fontSize": 48
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "iv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "od",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pay",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 8,
+         "value": 0
+        },
+        {
+         "frame": 20,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 16,
+         "value": 0
+        },
+        {
+         "frame": 28,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 24,
+         "value": 0
+        },
+        {
+         "frame": 36,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 32,
+         "value": 0
+        },
+        {
+         "frame": 44,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g5",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 40,
+         "value": 0
+        },
+        {
+         "frame": 52,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g6",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 48,
+         "value": 0
+        },
+        {
+         "frame": 60,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g7",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 0
+        },
+        {
+         "frame": 68,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g8",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 64,
+         "value": 0
+        },
+        {
+         "frame": 76,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g9",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 72,
+         "value": 0
+        },
+        {
+         "frame": 84,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g10",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 80,
+         "value": 0
+        },
+        {
+         "frame": 92,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g11",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 88,
+         "value": 0
+        },
+        {
+         "frame": 100,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "odr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 104,
+         "value": 0
+        },
+        {
+         "frame": 116,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "payr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 123,
+         "value": 0
+        },
+        {
+         "frame": 135,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "av",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 303,
+         "value": 0
+        },
+        {
+         "frame": 315,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "av",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 303,
+         "value": 0
+        },
+        {
+         "frame": 315,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 339,
+         "value": 0
+        },
+        {
+         "frame": 351,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 339,
+         "value": 0
+        },
+        {
+         "frame": 351,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "breaker",
+   "title": "电闸跳闸",
+   "from": 1219,
+   "durationInFrames": 947,
+   "narrationChars": 134,
+   "narrationCharsRecount": 134,
+   "shots": [
+    {
+     "id": "breaker-1",
+     "chapterId": "breaker",
+     "from": 1219,
+     "durationInFrames": 281,
+     "narration": "给每次调用设个等待上限，到点就放弃，这叫超时。超时要有，但高峰时每个请求还是要白等一次。",
+     "subtitles": [
+      {
+       "text": "给每次调用设个等待上限",
+       "from": 0,
+       "to": 78
+      },
+      {
+       "text": "到点就放弃，这叫超时",
+       "from": 79,
+       "to": 150
+      },
+      {
+       "text": "超时要有，但高峰时每个请求还是要白等一次",
+       "from": 151,
+       "to": 280
+      }
+     ],
+     "elements": [
+      {
+       "id": "g0",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 220,
+       "y": 380,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g1",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 420,
+       "y": 380,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g2",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 620,
+       "y": 380,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g3",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 820,
+       "y": 380,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "h0",
+       "type": "image",
+       "asset": "assets/hourglass.svg",
+       "x": 235,
+       "y": 240,
+       "w": 80,
+       "h": 80,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "h1",
+       "type": "image",
+       "asset": "assets/hourglass.svg",
+       "x": 435,
+       "y": 240,
+       "w": 80,
+       "h": 80,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "h2",
+       "type": "image",
+       "asset": "assets/hourglass.svg",
+       "x": 635,
+       "y": 240,
+       "w": 80,
+       "h": 80,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "h3",
+       "type": "image",
+       "asset": "assets/hourglass.svg",
+       "x": 835,
+       "y": 240,
+       "w": 80,
+       "h": 80,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "iv",
+       "type": "rect",
+       "x": 1300,
+       "y": 380,
+       "w": 400,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "to",
+       "type": "rect",
+       "x": 220,
+       "y": 620,
+       "w": 360,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "超时",
+       "fontSize": 64
+      },
+      {
+       "id": "wait",
+       "type": "rect",
+       "x": 660,
+       "y": 630,
+       "w": 360,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 16,
+       "label": "仍要等满",
+       "fontSize": 40
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "g0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "iv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "h0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 50,
+         "value": 0
+        },
+        {
+         "frame": 62,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "h1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 0
+        },
+        {
+         "frame": 68,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "h2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "h3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 68,
+         "value": 0
+        },
+        {
+         "frame": 80,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "to",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 114,
+         "value": 0
+        },
+        {
+         "frame": 126,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "to",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 114,
+         "value": 0
+        },
+        {
+         "frame": 126,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "wait",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 151,
+         "value": 0
+        },
+        {
+         "frame": 163,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "breaker-2",
+     "chapterId": "breaker",
+     "from": 1500,
+     "durationInFrames": 195,
+     "narration": "所以还需要像家里电闸那样的开关：哪一路短路了，那一路就「啪」地跳下来。",
+     "subtitles": [
+      {
+       "text": "所以还需要像家里电闸那样的开关",
+       "from": 0,
+       "to": 93
+      },
+      {
+       "text": "哪一路短路了，那一路就「啪」地跳下来",
+       "from": 94,
+       "to": 194
+      }
+     ],
+     "elements": [
+      {
+       "id": "box",
+       "type": "image",
+       "asset": "assets/breaker-box.svg",
+       "x": 200,
+       "y": 140,
+       "w": 560,
+       "h": 560,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "trip",
+       "type": "image",
+       "asset": "assets/breaker-tripped.svg",
+       "x": 200,
+       "y": 140,
+       "w": 560,
+       "h": 560,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "so",
+       "type": "image",
+       "asset": "assets/socket.svg",
+       "x": 800,
+       "y": 440,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "sp",
+       "type": "image",
+       "asset": "assets/spark.svg",
+       "x": 860,
+       "y": 360,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "l0",
+       "type": "rect",
+       "x": 260,
+       "y": 708,
+       "w": 100,
+       "h": 64,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 14,
+       "label": "客厅",
+       "fontSize": 32
+      },
+      {
+       "id": "l1",
+       "type": "rect",
+       "x": 372,
+       "y": 708,
+       "w": 100,
+       "h": 64,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 14,
+       "label": "卧室",
+       "fontSize": 32
+      },
+      {
+       "id": "l2",
+       "type": "rect",
+       "x": 483,
+       "y": 708,
+       "w": 100,
+       "h": 64,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 14,
+       "label": "厨房",
+       "fontSize": 32
+      },
+      {
+       "id": "l3",
+       "type": "rect",
+       "x": 595,
+       "y": 708,
+       "w": 100,
+       "h": 64,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 14,
+       "label": "插座",
+       "fontSize": 32
+      },
+      {
+       "id": "fr",
+       "type": "image",
+       "asset": "assets/tv.svg",
+       "x": 1060,
+       "y": 200,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lp",
+       "type": "image",
+       "asset": "assets/lamp.svg",
+       "x": 1440,
+       "y": 300,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ok",
+       "type": "rect",
+       "x": 1120,
+       "y": 620,
+       "w": 560,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "其余各路：照常",
+       "fontSize": 40
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "box",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "so",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "l0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "l1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "l2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "l3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 112,
+         "value": 0
+        },
+        {
+         "frame": 124,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sp",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 112,
+         "value": 0
+        },
+        {
+         "frame": 124,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "trip",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 168,
+         "value": 0
+        },
+        {
+         "frame": 180,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "box",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 168,
+         "value": 1
+        },
+        {
+         "frame": 176,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "sp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 176,
+         "value": 1
+        },
+        {
+         "frame": 184,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "ok",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 112,
+         "value": 0
+        },
+        {
+         "frame": 124,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "breaker-3",
+     "chapterId": "breaker",
+     "from": 1695,
+     "durationInFrames": 471,
+     "narration": "网站也一样：比如最近一百次调用里一半都失败了，就跳闸，后面的请求不再去问库存服务，直接返回「系统繁忙」。这叫熔断。记住，熔断不能代替超时，两个要一起用。",
+     "subtitles": [
+      {
+       "text": "网站也一样：比如最近一百次调用里一半都失败了",
+       "from": 0,
+       "to": 139
+      },
+      {
+       "text": "就跳闸，后面的请求不再去问库存服务",
+       "from": 140,
+       "to": 245
+      },
+      {
+       "text": "直接返回「系统繁忙」",
+       "from": 246,
+       "to": 307
+      },
+      {
+       "text": "这叫熔断",
+       "from": 308,
+       "to": 347
+      },
+      {
+       "text": "记住，熔断不能代替超时",
+       "from": 348,
+       "to": 418
+      },
+      {
+       "text": "两个要一起用",
+       "from": 419,
+       "to": 470
+      }
+     ],
+     "elements": [
+      {
+       "id": "od",
+       "type": "rect",
+       "x": 160,
+       "y": 240,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "订单服务",
+       "fontSize": 44
+      },
+      {
+       "id": "lna",
+       "type": "line",
+       "x": 520,
+       "y": 300,
+       "w": 120,
+       "h": 0,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "son",
+       "type": "image",
+       "asset": "assets/switch-on.svg",
+       "x": 640,
+       "y": 190,
+       "w": 100,
+       "h": 190,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "soff",
+       "type": "image",
+       "asset": "assets/switch-off.svg",
+       "x": 640,
+       "y": 190,
+       "w": 100,
+       "h": 190,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lnb",
+       "type": "line",
+       "x": 740,
+       "y": 300,
+       "w": 140,
+       "h": 0,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "iv",
+       "type": "rect",
+       "x": 880,
+       "y": 240,
+       "w": 360,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "cnt",
+       "type": "rect",
+       "x": 1300,
+       "y": 200,
+       "w": 460,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 20
+      },
+      {
+       "id": "c1",
+       "type": "text",
+       "x": 1300,
+       "y": 225,
+       "w": 460,
+       "h": 60,
+       "text": "最近 100 次（示例）",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "c2",
+       "type": "text",
+       "x": 1300,
+       "y": 305,
+       "w": 460,
+       "h": 60,
+       "text": "失败 50%（示例）",
+       "fontSize": 40,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "back",
+       "type": "arrow",
+       "x": 520,
+       "y": 430,
+       "w": 360,
+       "h": 50,
+       "color": "#F59E0B",
+       "reuse": false,
+       "direction": "l"
+      },
+      {
+       "id": "busy",
+       "type": "rect",
+       "x": 160,
+       "y": 500,
+       "w": 620,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "系统繁忙，请稍后重试",
+       "fontSize": 40
+      },
+      {
+       "id": "cb",
+       "type": "rect",
+       "x": 880,
+       "y": 520,
+       "w": 360,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 48,
+       "label": "熔断",
+       "fontSize": 64
+      },
+      {
+       "id": "both",
+       "type": "rect",
+       "x": 500,
+       "y": 720,
+       "w": 920,
+       "h": 100,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 50,
+       "label": "熔断不能代替超时",
+       "fontSize": 52
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "od",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lna",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "son",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lnb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "iv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cnt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 47,
+         "value": 0
+        },
+        {
+         "frame": 59,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 47,
+         "value": 0
+        },
+        {
+         "frame": 59,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 100,
+         "value": 0
+        },
+        {
+         "frame": 112,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "soff",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 140,
+         "value": 0
+        },
+        {
+         "frame": 152,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "son",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 140,
+         "value": 1
+        },
+        {
+         "frame": 148,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "lnb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 140,
+         "value": 1
+        },
+        {
+         "frame": 148,
+         "value": 0.2
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "back",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 246,
+         "value": 0
+        },
+        {
+         "frame": 261,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "busy",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 254,
+         "value": 0
+        },
+        {
+         "frame": 266,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "busy",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 254,
+         "value": 0
+        },
+        {
+         "frame": 266,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 308,
+         "value": 0
+        },
+        {
+         "frame": 320,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 308,
+         "value": 0
+        },
+        {
+         "frame": 320,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "both",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 362,
+         "value": 0
+        },
+        {
+         "frame": 374,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "both",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 362,
+         "value": 0
+        },
+        {
+         "frame": 374,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "states",
+   "title": "关闭是通，打开是断",
+   "from": 2166,
+   "durationInFrames": 418,
+   "narrationChars": 55,
+   "narrationCharsRecount": 55,
+   "shots": [
+    {
+     "id": "states-1",
+     "chapterId": "states",
+     "from": 2166,
+     "durationInFrames": 418,
+     "narration": "这里有个反直觉的地方。熔断器有三种状态，名字跟电闸一样：电闸合上才通电。所以熔断器「关闭」，是正常调用；「打开」，是已经跳闸，拒绝请求。",
+     "subtitles": [
+      {
+       "text": "这里有个反直觉的地方",
+       "from": 0,
+       "to": 69
+      },
+      {
+       "text": "熔断器有三种状态",
+       "from": 70,
+       "to": 122
+      },
+      {
+       "text": "名字跟电闸一样：电闸合上才通电",
+       "from": 123,
+       "to": 225
+      },
+      {
+       "text": "所以熔断器「关闭」，是正常调用",
+       "from": 226,
+       "to": 320
+      },
+      {
+       "text": "「打开」，是已经跳闸，拒绝请求",
+       "from": 321,
+       "to": 417
+      }
+     ],
+     "elements": [
+      {
+       "id": "hd",
+       "type": "text",
+       "x": 160,
+       "y": 120,
+       "w": 1600,
+       "h": 80,
+       "text": "熔断器 · 反直觉",
+       "fontSize": 60,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "c0",
+       "type": "rect",
+       "x": 160,
+       "y": 230,
+       "w": 500,
+       "h": 420,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 28
+      },
+      {
+       "id": "son",
+       "type": "image",
+       "asset": "assets/switch-on.svg",
+       "x": 230,
+       "y": 280,
+       "w": 120,
+       "h": 230,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lp1",
+       "type": "image",
+       "asset": "assets/lamp.svg",
+       "x": 420,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "rect",
+       "x": 710,
+       "y": 230,
+       "w": 500,
+       "h": 420,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 28
+      },
+      {
+       "id": "soff",
+       "type": "image",
+       "asset": "assets/switch-off.svg",
+       "x": 780,
+       "y": 280,
+       "w": 120,
+       "h": 230,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lp2",
+       "type": "image",
+       "asset": "assets/lamp.svg",
+       "x": 970,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "rect",
+       "x": 1260,
+       "y": 230,
+       "w": 500,
+       "h": 420,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#6B7280",
+       "radius": 28
+      },
+      {
+       "id": "q3",
+       "type": "text",
+       "x": 1260,
+       "y": 360,
+       "w": 500,
+       "h": 160,
+       "text": "？",
+       "fontSize": 120,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "t0",
+       "type": "rect",
+       "x": 160,
+       "y": 690,
+       "w": 500,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 48,
+       "label": "关闭 · 正常调用",
+       "fontSize": 44
+      },
+      {
+       "id": "t1",
+       "type": "rect",
+       "x": 710,
+       "y": 690,
+       "w": 500,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 48,
+       "label": "打开 · 拒绝请求",
+       "fontSize": 44
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "hd",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hd",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 0
+        },
+        {
+         "frame": 108,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 0
+        },
+        {
+         "frame": 108,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 0
+        },
+        {
+         "frame": 108,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 96,
+         "value": 0
+        },
+        {
+         "frame": 108,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "son",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 170,
+         "value": 0
+        },
+        {
+         "frame": 182,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lp1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 197,
+         "value": 0
+        },
+        {
+         "frame": 209,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "soff",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 321,
+         "value": 0
+        },
+        {
+         "frame": 333,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lp2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 321,
+         "value": 0
+        },
+        {
+         "frame": 333,
+         "value": 0.3
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "t0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 266,
+         "value": 0
+        },
+        {
+         "frame": 278,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t0",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 266,
+         "value": 0
+        },
+        {
+         "frame": 278,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "t1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 321,
+         "value": 0
+        },
+        {
+         "frame": 333,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 321,
+         "value": 0
+        },
+        {
+         "frame": 333,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "chapterId": "half-open",
+   "title": "试着合闸",
+   "from": 2584,
+   "durationInFrames": 463,
+   "narrationChars": 62,
+   "narrationCharsRecount": 62,
+   "shots": [
+    {
+     "id": "half-open-1",
+     "chapterId": "half-open",
+     "from": 2584,
+     "durationInFrames": 271,
+     "narration": "跳闸以后，也不能一直断着。比如断开三十秒，再放少量请求过去试一试，这个状态叫半开。",
+     "subtitles": [
+      {
+       "text": "跳闸以后，也不能一直断着",
+       "from": 0,
+       "to": 81
+      },
+      {
+       "text": "比如断开三十秒，再放少量请求过去试一试",
+       "from": 82,
+       "to": 198
+      },
+      {
+       "text": "这个状态叫半开",
+       "from": 199,
+       "to": 270
+      }
+     ],
+     "elements": [
+      {
+       "id": "soff",
+       "type": "image",
+       "asset": "assets/switch-off.svg",
+       "x": 200,
+       "y": 200,
+       "w": 130,
+       "h": 250,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tm",
+       "type": "image",
+       "asset": "assets/timer.svg",
+       "x": 420,
+       "y": 220,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ts",
+       "type": "text",
+       "x": 380,
+       "y": 440,
+       "w": 300,
+       "h": 60,
+       "text": "30 秒（示例）",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "iv",
+       "type": "rect",
+       "x": 1360,
+       "y": 260,
+       "w": 360,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "pr0",
+       "type": "rect",
+       "x": 760,
+       "y": 250,
+       "w": 90,
+       "h": 36,
+       "color": "#22D3EE",
+       "reuse": false,
+       "radius": 18
+      },
+      {
+       "id": "pr1",
+       "type": "rect",
+       "x": 760,
+       "y": 300,
+       "w": 90,
+       "h": 36,
+       "color": "#22D3EE",
+       "reuse": false,
+       "radius": 18
+      },
+      {
+       "id": "ho",
+       "type": "rect",
+       "x": 760,
+       "y": 620,
+       "w": 520,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 48,
+       "label": "半开 · 少量试探",
+       "fontSize": 48
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "soff",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "iv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 95,
+         "value": 0
+        },
+        {
+         "frame": 107,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ts",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 95,
+         "value": 0
+        },
+        {
+         "frame": 107,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pr0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 127,
+         "value": 0
+        },
+        {
+         "frame": 139,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pr0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 127,
+         "value": 760
+        },
+        {
+         "frame": 167,
+         "value": 1240
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pr1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 137,
+         "value": 0
+        },
+        {
+         "frame": 149,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pr1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 137,
+         "value": 760
+        },
+        {
+         "frame": 177,
+         "value": 1240
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "ho",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 199,
+         "value": 0
+        },
+        {
+         "frame": 211,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ho",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 199,
+         "value": 0
+        },
+        {
+         "frame": 211,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "half-open-2",
+     "chapterId": "half-open",
+     "from": 2855,
+     "durationInFrames": 192,
+     "narration": "试成功了，就合上闸恢复调用；还是失败，就继续断开，过一阵再试。",
+     "subtitles": [
+      {
+       "text": "试成功了，就合上闸恢复调用",
+       "from": 0,
+       "to": 83
+      },
+      {
+       "text": "还是失败，就继续断开",
+       "from": 84,
+       "to": 146
+      },
+      {
+       "text": "过一阵再试",
+       "from": 147,
+       "to": 191
+      }
+     ],
+     "elements": [
+      {
+       "id": "okc",
+       "type": "rect",
+       "x": 160,
+       "y": 160,
+       "w": 760,
+       "h": 420,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 24
+      },
+      {
+       "id": "son",
+       "type": "image",
+       "asset": "assets/switch-on.svg",
+       "x": 220,
+       "y": 220,
+       "w": 130,
+       "h": 250,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "okt",
+       "type": "text",
+       "x": 400,
+       "y": 300,
+       "w": 500,
+       "h": 60,
+       "text": "成功：回到关闭",
+       "fontSize": 44,
+       "color": "#22C55E",
+       "reuse": false
+      },
+      {
+       "id": "bdc",
+       "type": "rect",
+       "x": 1000,
+       "y": 160,
+       "w": 760,
+       "h": 420,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 24
+      },
+      {
+       "id": "soff",
+       "type": "image",
+       "asset": "assets/switch-off.svg",
+       "x": 1060,
+       "y": 220,
+       "w": 130,
+       "h": 250,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bdt",
+       "type": "text",
+       "x": 1240,
+       "y": 260,
+       "w": 500,
+       "h": 60,
+       "text": "失败：回到打开",
+       "fontSize": 44,
+       "color": "#F87171",
+       "reuse": false
+      },
+      {
+       "id": "tm",
+       "type": "image",
+       "asset": "assets/timer.svg",
+       "x": 1420,
+       "y": 360,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ho",
+       "type": "rect",
+       "x": 660,
+       "y": 660,
+       "w": 600,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 48,
+       "label": "半开 · 两种结果",
+       "fontSize": 44
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ho",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "okc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "son",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "okt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bdc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 84,
+         "value": 0
+        },
+        {
+         "frame": 96,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "soff",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 84,
+         "value": 0
+        },
+        {
+         "frame": 96,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bdt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 84,
+         "value": 0
+        },
+        {
+         "frame": 96,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 147,
+         "value": 0
+        },
+        {
+         "frame": 159,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "chapterId": "recap",
+   "title": "回顾",
+   "from": 3047,
+   "durationInFrames": 606,
+   "narrationChars": 89,
+   "narrationCharsRecount": 89,
+   "shots": [
+    {
+     "id": "recap-1",
+     "chapterId": "recap",
+     "from": 3047,
+     "durationInFrames": 210,
+     "narration": "注意，熔断只是暂时不去问，库存校验一步也没跳过，所以不会卖出没货的东西。",
+     "subtitles": [
+      {
+       "text": "注意，熔断只是暂时不去问",
+       "from": 0,
+       "to": 68
+      },
+      {
+       "text": "库存校验一步也没跳过",
+       "from": 69,
+       "to": 131
+      },
+      {
+       "text": "所以不会卖出没货的东西",
+       "from": 132,
+       "to": 209
+      }
+     ],
+     "elements": [
+      {
+       "id": "pg",
+       "type": "rect",
+       "x": 160,
+       "y": 140,
+       "w": 760,
+       "h": 640,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 36
+      },
+      {
+       "id": "pgt",
+       "type": "text",
+       "x": 160,
+       "y": 170,
+       "w": 760,
+       "h": 60,
+       "text": "订单页",
+       "fontSize": 44,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "r1",
+       "type": "rect",
+       "x": 220,
+       "y": 280,
+       "w": 640,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "库存校验",
+       "fontSize": 44
+      },
+      {
+       "id": "lk",
+       "type": "image",
+       "asset": "assets/lock.svg",
+       "x": 740,
+       "y": 290,
+       "w": 90,
+       "h": 90,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r2",
+       "type": "rect",
+       "x": 220,
+       "y": 430,
+       "w": 640,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 20,
+       "label": "支付",
+       "fontSize": 44
+      },
+      {
+       "id": "soff",
+       "type": "image",
+       "asset": "assets/switch-off.svg",
+       "x": 1120,
+       "y": 240,
+       "w": 120,
+       "h": 230,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "iv",
+       "type": "rect",
+       "x": 1360,
+       "y": 300,
+       "w": 360,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "keep",
+       "type": "rect",
+       "x": 1100,
+       "y": 560,
+       "w": 640,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "校验：始终在",
+       "fontSize": 40
+      },
+      {
+       "id": "st",
+       "type": "rect",
+       "x": 1100,
+       "y": 700,
+       "w": 640,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 48,
+       "label": "熔断：暂停调用",
+       "fontSize": 44
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "pg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pgt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "soff",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "iv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 69,
+         "value": 0
+        },
+        {
+         "frame": 81,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 69,
+         "value": 0
+        },
+        {
+         "frame": 81,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "keep",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 69,
+         "value": 0
+        },
+        {
+         "frame": 81,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 13,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 13,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "recap-2",
+     "chapterId": "recap",
+     "from": 3257,
+     "durationInFrames": 396,
+     "narration": "扛住高峰第五招就是熔断：限流管进来的流量，熔断隔离出故障的服务，降级保住核心功能。一个服务挂了，网站还能稳住，靠的就是及时跳闸。",
+     "subtitles": [
+      {
+       "text": "扛住高峰第五招就是熔断",
+       "from": 0,
+       "to": 72
+      },
+      {
+       "text": "限流管进来的流量",
+       "from": 73,
+       "to": 125
+      },
+      {
+       "text": "熔断隔离出故障的服务",
+       "from": 126,
+       "to": 192
+      },
+      {
+       "text": "降级保住核心功能",
+       "from": 193,
+       "to": 254
+      },
+      {
+       "text": "一个服务挂了，网站还能稳住",
+       "from": 255,
+       "to": 333
+      },
+      {
+       "text": "靠的就是及时跳闸",
+       "from": 334,
+       "to": 395
+      }
+     ],
+     "elements": [
+      {
+       "id": "k0",
+       "type": "rect",
+       "x": 160,
+       "y": 140,
+       "w": 500,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 48,
+       "label": "限流：管流量",
+       "fontSize": 44
+      },
+      {
+       "id": "k1",
+       "type": "rect",
+       "x": 710,
+       "y": 140,
+       "w": 500,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 48,
+       "label": "熔断：隔离故障",
+       "fontSize": 44
+      },
+      {
+       "id": "k2",
+       "type": "rect",
+       "x": 1260,
+       "y": 140,
+       "w": 500,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "降级：保核心",
+       "fontSize": 44
+      },
+      {
+       "id": "q",
+       "type": "image",
+       "asset": "assets/queue.svg",
+       "x": 160,
+       "y": 340,
+       "w": 300,
+       "h": 114,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lq",
+       "type": "text",
+       "x": 160,
+       "y": 500,
+       "w": 300,
+       "h": 50,
+       "text": "消息队列",
+       "fontSize": 40,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "gate",
+       "type": "image",
+       "asset": "assets/gate.svg",
+       "x": 540,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lg",
+       "type": "text",
+       "x": 500,
+       "y": 520,
+       "w": 280,
+       "h": 50,
+       "text": "限流",
+       "fontSize": 40,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "tk",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 880,
+       "y": 310,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lt",
+       "type": "text",
+       "x": 830,
+       "y": 520,
+       "w": 280,
+       "h": 50,
+       "text": "幂等",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "fz",
+       "type": "image",
+       "asset": "assets/shield.svg",
+       "x": 1200,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lf",
+       "type": "text",
+       "x": 1160,
+       "y": 520,
+       "w": 280,
+       "h": 50,
+       "text": "降级",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "bx",
+       "type": "image",
+       "asset": "assets/breaker-tripped.svg",
+       "x": 1500,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lb",
+       "type": "text",
+       "x": 1460,
+       "y": 520,
+       "w": 280,
+       "h": 50,
+       "text": "熔断",
+       "fontSize": 40,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "five",
+       "type": "rect",
+       "x": 560,
+       "y": 640,
+       "w": 800,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "第五招：熔断",
+       "fontSize": 52
+      },
+      {
+       "id": "s00",
+       "type": "rect",
+       "x": 1000,
+       "y": 200,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "商品服务",
+       "fontSize": 44
+      },
+      {
+       "id": "s01",
+       "type": "rect",
+       "x": 1400,
+       "y": 200,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "订单服务",
+       "fontSize": 44
+      },
+      {
+       "id": "s10",
+       "type": "rect",
+       "x": 1000,
+       "y": 380,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "s11",
+       "type": "rect",
+       "x": 1400,
+       "y": 380,
+       "w": 360,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "支付服务",
+       "fontSize": 44
+      },
+      {
+       "id": "bad",
+       "type": "rect",
+       "x": 1000,
+       "y": 380,
+       "w": 360,
+       "h": 120,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "库存服务",
+       "fontSize": 44
+      },
+      {
+       "id": "cut",
+       "type": "image",
+       "asset": "assets/switch-off.svg",
+       "x": 880,
+       "y": 330,
+       "w": 90,
+       "h": 170,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "k0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 73,
+         "value": 0
+        },
+        {
+         "frame": 85,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 81,
+         "value": 0
+        },
+        {
+         "frame": 93,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 89,
+         "value": 0
+        },
+        {
+         "frame": 101,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lq",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "gate",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fz",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "five",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "five",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "k0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "k1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "k2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "lq",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "gate",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "tk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "lt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "fz",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "lf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "bx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "lb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "five",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 1
+        },
+        {
+         "frame": 265,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "s00",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 265,
+         "value": 0
+        },
+        {
+         "frame": 277,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s01",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 265,
+         "value": 0
+        },
+        {
+         "frame": 277,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s10",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 265,
+         "value": 0
+        },
+        {
+         "frame": 277,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s11",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 265,
+         "value": 0
+        },
+        {
+         "frame": 277,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bad",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 265,
+         "value": 0
+        },
+        {
+         "frame": 277,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cut",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 265,
+         "value": 0
+        },
+        {
+         "frame": 277,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  }
+ ],
+ "cover": {
+  "kind": "dedicated",
+  "note": "专用封面（非截帧）；Remotion <Cover> 合成用。坐标 px，左上原点；文字 anchor 见 align。字体 Noto Sans CJK SC Bold",
+  "font": "Noto Sans CJK SC Bold",
+  "palette": {
+   "bg": "#0B1020",
+   "title1": "#FFFFFF",
+   "title2": "#F59E0B",
+   "badgeFill": "#22D3EE",
+   "badgeText": "#0B1020",
+   "series": "#9CA3AF",
+   "watermark": "#E5E7EB"
+  },
+  "title": {
+   "lines": [
+    "一个挂了，",
+    "全站都崩？"
+   ]
+  },
+  "badge": {
+   "text": "熔断"
+  },
+  "series": {
+   "text": "扛住高峰 05"
+  },
+  "watermark": {
+   "text": "IT小村"
+  },
+  "subject": [
+   {
+    "asset": "assets/breaker-tripped.svg",
+    "box": [
+     0,
+     0,
+     1,
+     1
+    ],
+    "align": "bottom",
+    "desc": "电闸箱：三路合着，最右一路（库存）跳闸（红），其余照常"
+   }
+  ],
+  "subject16": [
+   {
+    "asset": "assets/breaker-tripped.svg",
+    "px": [
+     960,
+     170,
+     680,
+     620
+    ],
+    "align": "br",
+    "tag": "库存",
+    "desc": "电闸箱放大（同 EP.12 第 3 版封面），底部留出跳闸那一路下方的「库存」标签"
+   }
+  ],
+  "subject34": [
+   {
+    "asset": "assets/breaker-tripped.svg",
+    "px": [
+     254,
+     684,
+     572,
+     572
+    ],
+    "align": "bc",
+    "tag": "库存",
+    "tagInside": true,
+    "desc": "电闸箱放大约 1.3 倍（440→572，顶贴徽标行留白下沿 y684）；「库存」标签下移到箱内跳闸那一路正下方（y1224 以上）；箱体底边到 y1256，在底部 15% 不放字区内只有图形、无文字"
+   }
+  ],
+  "sizes": {
+   "16x9": {
+    "width": 1920,
+    "height": 1080,
+    "platforms": [
+     "B站",
+     "头条",
+     "快手"
+    ],
+    "title": {
+     "x": 280,
+     "y": 120,
+     "fs": 130,
+     "lh": 165,
+     "align": "left",
+     "maxW": 780,
+     "titleBlockHeight": 330
+    },
+    "badge": {
+     "x": 360,
+     "y": 480,
+     "h": 110,
+     "fs": 72,
+     "w": 254
+    },
+    "series": {
+     "x": 360,
+     "gap": 36,
+     "y": 618,
+     "fs": 52,
+     "w": 281
+    },
+    "safe": {
+     "crop": [
+      240,
+      1680
+     ],
+     "contentX": [
+      280,
+      1640
+     ],
+     "inset": [
+      360,
+      1560
+     ],
+     "noTextBelowY": 900
+    },
+    "subject": {
+     "x": 1080,
+     "y": 200,
+     "w": 560,
+     "h": 680
+    },
+    "watermark": {
+     "x": 1640,
+     "y": 80,
+     "fs": 40,
+     "align": "right"
+    },
+    "noTextBelowY": 900,
+    "preview": "covers/ep13-16x9.png"
+   },
+   "3x4": {
+    "width": 1080,
+    "height": 1440,
+    "platforms": [
+     "小红书",
+     "抖音"
+    ],
+    "title": {
+     "x": 540,
+     "y": 190,
+     "fs": 140,
+     "lh": 170,
+     "align": "center",
+     "maxW": 960,
+     "titleBlockHeight": 340
+    },
+    "badge": {
+     "x": 90,
+     "y": 560,
+     "h": 100,
+     "fs": 64,
+     "w": 228
+    },
+    "series": {
+     "x": 354,
+     "gap": 36,
+     "y": 580,
+     "fs": 52,
+     "w": 281
+    },
+    "safe": {
+     "noTextBelowY": 1224,
+     "noTextAboveY": 144
+    },
+    "subject": {
+     "x": 120,
+     "y": 690,
+     "w": 840,
+     "h": 520
+    },
+    "watermark": {
+     "x": 1000,
+     "y": 144,
+     "fs": 40,
+     "align": "right"
+    },
+    "noTextBelowY": 1224,
+    "preview": "covers/ep13-3x4.png"
+   },
+   "4x3": {
+    "width": 1440,
+    "height": 1080,
+    "platforms": [
+     "B站 4:3 预览"
+    ],
+    "from_": "16x9",
+    "crop": [
+     240,
+     0,
+     1680,
+     1080
+    ],
+    "note": "4:3 = 16:9 居中裁切 x240–1680（B站 4:3 预览区，1440×1080）",
+    "preview": "covers/ep13-4x3.png"
+   }
+  },
+  "episode": 13,
+  "layoutOverride": null,
+  "approved": null
+ }
+}

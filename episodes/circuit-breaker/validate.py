@@ -1,4 +1,4 @@
-# EP.12 第 4 版（degradation，只讲降级）分镜校验（沿用 circuit-breaker v3c）；EP.12 分镜校验（沿用 EP.11）；EP.11 分镜校验（沿用 EP.10）；EP.10 分镜校验（沿用 EP.09）；EP.05 分镜校验（沿用 EP.04 validate.py，去掉 extraHold，加水印留空区 / 片尾 / 暂定 timing 键校验）
+# EP.13 熔断分镜校验（沿用 EP.12 第 3 版）；EP.12 分镜校验（沿用 EP.11）；EP.11 分镜校验（沿用 EP.10）；EP.10 分镜校验（沿用 EP.09）；EP.05 分镜校验（沿用 EP.04 validate.py，去掉 extraHold，加水印留空区 / 片尾 / 暂定 timing 键校验）
 import json,re,os,sys
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 from common_split import ids as SEG,SPLIT,SCRIPT
@@ -8,11 +8,11 @@ BANNED=["面试","八股","满分","考点","阿里云","腾讯云","华为云",
 ALLOW_PHR=[]
 ALLOW={"bug"}
 WM=(1700,80,1840,130)
-AP="/workspace/sorkin-backup/degradation/article.mdx"  # EP.10：文章还没出，有了再校验锚点
+AP="/workspace/sorkin-backup/circuit-breaker/article.mdx"  # EP.10：文章还没出，有了再校验锚点
 if os.path.isfile(AP):
-    art=open(AP).read();miss=[x for x in SEG if "{#"+x+"}" not in art]
-    if miss and "{#breaker}" in art: print('WARN article.mdx 还是旧版（第 3 版锚点），第 4 版锚点未校验：',miss)  # 第 4 版：Sorkin 文章未更新前只提示
-    elif miss: err.append(('article id',miss))
+    art=open(AP).read()
+    for x in SEG:
+        if "{#"+x+"}" not in art: err.append(('article id',x))
 def lum(h):
     c=[int(h[i:i+2],16)/255 for i in (1,3,5)];c=[x/12.92 if x<=0.03928 else ((x+0.055)/1.055)**2.4 for x in c]
     return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2]
@@ -78,7 +78,7 @@ if g!=d['meta']['durationInFrames'] or g!=sum(v['duration'] for v in TM.values()
 raw=json.dumps(d['scenes'],ensure_ascii=False)  # 只查镜头内容（meta 说明里会提到片尾）
 for b in BANNED:
     if b in raw: err.append(('banned/endcard',b))
-for a in ('aircon','meter','fridge','ticket','gate','queue','guest','timer'):
+for a in ('breaker-box','breaker-tripped','switch-on','switch-off','spark','lamp','socket','tv','shield','phone','ticket','gate','queue','guest','timer','hourglass','lock'):
     if f'assets/{a}.svg' not in assets: err.append(('new icon unused',a))
 for a in assets:
     if re.search(r'<text',open(a).read()): err.append(('text inside icon',a))
@@ -99,8 +99,8 @@ def LSEQ(a,b):
         for j,y in enumerate(b): q.append(p[j]+1 if x==y else max(p[j+1],q[j]))
         p=q
     return p[-1]
-TERMS=["自动降级","主动降级","核心链路","消息队列","雪崩","降级","幂等","限流"]
-LABEL_OK={"搜索推荐页红包"}  # v3b：Nolan 批准的名称标签（场景名，同术语标签处理），只此一个
+TERMS=["级联故障","消息队列","熔断器","雪崩","熔断","降级","半开","超时","关闭","打开","幂等","限流"]
+LABEL_OK={"熔断不能代替超时"}  # 第十三期：Nolan 要求必须上屏的原句（与字幕相同），同术语标签处理，只此一个
 def STRIP(t):
     for w in sorted(TERMS,key=len,reverse=True): t=t.replace(w,'')  # 长词先删（RabbitMQ 先于 MQ）
     return NORM(t)
@@ -142,29 +142,24 @@ for sc in d['scenes']:
             if a['elementId'] in tx and a['property']=='opacity' and k[0]['value']==0 and k[-1]['value']==1 and k[-1]['frame']-k[0]['frame']>15: perr.append(('slow fade',sh['id'],a['elementId']))
 if perr: print('FONT/FADE:',perr)
 print('min on-screen px',round(min(px),1))
-# EP.09：一万单 / 一千单是示意数字，画面上出现必须带「示意」
+# 第十三期：示例参数（100 次 / 50% / 30 秒）上屏必须带「示例」
 for sc in d['scenes']:
     for sh in sc['shots']:
         for e in sh['elements']:
             t=e.get('text') or e.get('label') or ''
-            if e.get('role')!='subtitle' and any(n in t for n in tuple('0123456789')+('一万','一千','一百','三次','两次')) and '示意' not in t: err.append(('示意 missing',sh['id'],e['id'],t))
+            if e.get('role')!='subtitle' and any(n in t for n in tuple('0123456789')+('一万','一千','一百','三次','两次')) and '示例' not in t: err.append(('示例 missing',sh['id'],e['id'],t))
 # 术语念到时上屏
-TERMSHOW={"自动降级":"自动降级","主动降级":"主动降级","核心链路":"核心链路","雪崩":"雪崩","降级":"降级"}
+TERMSHOW={"雪崩":"雪崩","级联故障":"级联故障","超时":"超时","熔断":"熔断","关闭":"关闭","打开":"打开","半开":"半开","限流":"限流","降级":"降级"}
 for k,v_ in TERMSHOW.items():
     for sc in d['scenes']:
         for sh in sc['shots']:
             if k in sh['narration']:
                 if not any(v_ in (e.get('text') or e.get('label') or '') for e in sh['elements'] if e.get('role')!='subtitle'): err.append(('term not on screen',sh['id'],k))
-for k in ("雪崩",):  # 第 4 版：雪崩一句带过
+for k,n0 in (("雪崩",1),("级联故障",1),("半开",1)):
     n=sum(x.count(k) for x in narr)
-    if n!=1: err.append(('tool named times',k,n))
-# EP.12：Nolan——TTS 文字「出故障了吗」，字幕保留「bug」
-h1=[x for sc in d['scenes'] for x in sc['shots'] if x['id']=='hook-1'][0]
-if '出故障了吗' not in h1.get('ttsText','') or 'bug' in h1.get('ttsText',''): err.append('hook-1 ttsText')
-if not any('bug' in s['text'] for s in h1['subtitles']): err.append('hook-1 subtitle bug')
-if any('故障' in s['text'] for sc in d['scenes'] for x in sc['shots'] for s in x['subtitles']): err.append('subtitle has 故障')
+    if n!=n0: err.append(('term named times',k,n))
 # EP.12 第 2 版：画面不出现「猜你喜欢 / 推荐 / 热销」
-BAN=("猜你喜欢","热销","积分","配送","评价","作废","失效","过期","用掉","扣不了","熔断","半开","超时","跳闸","合闸","电闸","空气开关","试探")  # 第 3 版：不出现积分/配送/猜你喜欢/评价；不暗示红包作废/失效；第 4 版：熔断相关全部拿掉
+BAN=("空调","冰箱","红包","到手价","优惠券","猜你喜欢","热销","积分","配送","评价")  # 第十三期：主线只有订单 → 库存，不出现上期红包 / 到手价 / 优惠券
 for sc in d['scenes']:
     for sh in sc['shots']:
         for e in sh['elements']:
@@ -188,7 +183,7 @@ for sc in d['scenes']:
     for sh in sc['shots']:
         for e in sh['elements']:
             t=e.get('text') or e.get('label') or ''
-            if e.get('role')=='subtitle' or not t or e.get('dimmed'): continue  # dimmed：有意变灰的元素（第 4 版 auto-degrade-2 的红包格）
+            if e.get('role')=='subtitle' or not t: continue
             if len(re.sub(r'[\s·：？]','',t))<6 or any(w in t for w in TERMS):
                 run=best=0
                 for f in range(sh['durationInFrames']):
@@ -197,12 +192,13 @@ for sc in d['scenes']:
                 if best<60: err.append(('label shown <60f',sh['id'],t,best))
 print('labels <80f:',sorted([x for x in SHOWN if x[2]<80],key=lambda x:x[2]))
 print('short/term labels full-show frames (min):',min(SHOWN,key=lambda x:x[2]))
-# 第 4 版：熔断类素材不许出现；旁白也不该出现熔断类词
+# 第十三期：旁白也不该出现上期主线
+for w in ("红包","到手价","优惠券"):
+    if any(w in x for x in narr): err.append(('ep12 word in narration',w))
 for sc in d['scenes']:
     for sh in sc['shots']:
         for e in sh['elements']:
-            if any(k in (e.get('asset') or '') for k in ('breaker','switch','spark','socket','lamp','hourglass')): err.append(('breaker visual',sh['id'],e['id'],e['asset']))
-for w in ("熔断","半开","超时","跳闸","电闸"):
-    if any(w in x for x in narr): err.append(('breaker word in narration',w))
-if err: print('EP12 checks:',err)
+            if any(k in (e.get('asset') or '') for k in ('fridge','aircon')): err.append(('banned asset',sh['id'],e['id'],e['asset']))
+if any(k in json.dumps(d.get('cover',{}),ensure_ascii=False) for k in ('fridge','aircon','空调','冰箱')): err.append('cover has 空调/冰箱')
+if err: print('EP13 checks:',err)
 if err or perr: sys.exit(1)

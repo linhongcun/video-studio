@@ -12,7 +12,7 @@ dns=re.findall(r'- 旁白：(.+)',open(REF+'script.md').read())
 C=sum(cnt(s) for s in dns); D=sum(x['dur'] for v in K.values() for x in v['sentences'])
 TOT=sum(v['duration'] for v in K.values())
 RATE=C/D; GAP=0.28; PAD=60
-narr=re.findall(r'- 旁白：(.+)',open(SCRIPT).read()); assert len(narr)==4
+narr=re.findall(r'- 旁白：(.+)',open(SCRIPT).read()); assert len(narr)==6
 out={}
 for ch,s in zip(ids,narr):
     S=sentences(tts(s)); assert len(S)==sum(SPLIT[ch]),(ch,len(S)); t=0; allq=[]

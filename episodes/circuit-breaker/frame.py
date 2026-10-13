@@ -1,6 +1,6 @@
 import json,subprocess,sys
 from PIL import Image,ImageDraw,ImageFont
-import os;H=os.environ.get("SB","/workspace/miyazaki-backup/degradation/");d=json.load(open(H+"storyboard.json"))
+import os;H=os.environ.get("SB","/workspace/miyazaki-backup/circuit-breaker/");d=json.load(open(H+"storyboard.json"))
 import cairosvg,io
 FT=lambda s:ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',int(s))
 def val(sh,eid,prop,f,dflt):
