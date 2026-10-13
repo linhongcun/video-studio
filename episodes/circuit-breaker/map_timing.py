@@ -7,7 +7,13 @@ H=Path(__file__).resolve().parent
 K=json.load(open(H/"timing.mimo.json")); out={}
 if "shots" in K and isinstance(K["shots"],dict): K=K["shots"]   # EP.08 格式：{fps,total,shots:{...}}
 SHOTS=[f"{c}-{k+1}" for c in ids for k in range(len(SPLIT[c]))]
-PER_SHOT=set(K)==set(SHOTS)   # Knoll 已按 13 个镜头切好（EP.05 实测即此格式）：直接用，scale 1
+PER_SHOT=set(K)==set(SHOTS)
+# EP.12 第 2 版：防止误用旧（第 1 版脚本）timing——逐句对比 timing 文字与当前脚本（送 TTS 文字）
+from common_split import SCRIPT,tts
+_N=lambda t:re.sub(r'[^\u4e00-\u9fffA-Za-z0-9]','',t)
+_S=[_N(x) for s in re.findall(r'- 旁白：(.+)',open(SCRIPT).read()) for x in re.findall(r'[^。？]+[。？]',tts(s))]
+_K=[_N(tts(q["text"])) for v in (K.values() if isinstance(K,dict) else []) for q in v.get("sentences",[])]
+if _K and _K!=_S: raise SystemExit(f"timing 与当前脚本不一致（旧版 timing？）：第一处不同 {next((i,a,b) for i,(a,b) in enumerate(zip(_K+['']*99,_S)) if a!=b)}")   # Knoll 已按 13 个镜头切好（EP.05 实测即此格式）：直接用，scale 1
 if PER_SHOT:
     for sid in SHOTS:
         v=dict(K[sid])

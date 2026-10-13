@@ -42,10 +42,13 @@ def render(sid,f,out):
         elif e['type']=='line':
             dr.line([x,y,x+e['w'],y+e['h']],fill=e['color'],width=4)
         elif e['type']=='arrow':
-            p=val(sh,e['id'],'drawProgress',f,1);cy=y+e['h']/2
-            if e.get('direction')=='l': x0,x1=x+e['w'],x+e['w']-e['w']*p
-            else: x0,x1=x,x+e['w']*p
-            dr.line([x0,cy,x1,cy],fill=e['color'],width=6)
+            # v2b：照 video-studio Main.tsx <Arrow> 几何：线在 y+h-10，线宽 h<=30 ? 3 : 5，箭头三角 18×20（progress>0.02 才画），lr 两端
+            p=val(sh,e['id'],'drawProgress',f,1);cy=y+e['h']-10;dd=e.get('direction')
+            x0,x2=(x+e['w'],x) if dd=='l' else (x,x+e['w']);x1=x0+(x2-x0)*p;s=-1 if dd=='l' else 1
+            dr.line([x0,cy,x1,cy],fill=e['color'],width=3 if e['h']<=30 else 5)
+            hd=lambda X,s:dr.polygon([(X,cy),(X-s*18,cy-10),(X-s*18,cy+10)],fill=e['color'])
+            if p>0.02: hd(x1,s)
+            if dd=='lr' and p>0.98: hd(x0,-1)
             if p>0: dr.text((x+e['w']/2,y-4),e.get('label',''),font=FT(e.get('fontSize',32)),fill=e['color'],anchor='md')
         elif e['type']=='icon':
             dr.ellipse([x,y,x+e['w'],y+e['h']],outline=e['color'],width=6);dr.text((x+e['w']/2,y+e['h']/2),e['id'],font=FT(24),fill=e['color'],anchor='mm')

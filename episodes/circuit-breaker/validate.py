@@ -161,5 +161,39 @@ h1=[x for sc in d['scenes'] for x in sc['shots'] if x['id']=='hook-1'][0]
 if '出故障了吗' not in h1.get('ttsText','') or 'bug' in h1.get('ttsText',''): err.append('hook-1 ttsText')
 if not any('bug' in s['text'] for s in h1['subtitles']): err.append('hook-1 subtitle bug')
 if any('故障' in s['text'] for sc in d['scenes'] for x in sc['shots'] for s in x['subtitles']): err.append('subtitle has 故障')
+# EP.12 第 2 版：画面不出现「猜你喜欢 / 推荐 / 热销」
+BAN=("猜你喜欢","推荐","热销")
+for sc in d['scenes']:
+    for sh in sc['shots']:
+        for e in sh['elements']:
+            t=(e.get('text') or '')+(e.get('label') or '')
+            if e.get('role')!='subtitle' and any(b in t for b in BAN): err.append(('banned word on screen',sh['id'],e['id'],t))
+# EP.12 第 2 版：短标签（去空格 <6 字）与术语标签完全显示（opacity=1，且不在动画中）≥60 帧
+def OPA(sh,eid,f):
+    v=None
+    for a in sh['animations']:
+        if a['elementId']!=eid or a['property'] not in('opacity','scale'): continue
+        k=a['keyframes']
+        if k[0]['frame']<=f<k[-1]['frame']: return -1   # 淡入/弹出动画中不算完全显示
+        w=k[0]['value'] if f<k[0]['frame'] else k[-1]['value']   # v2c 修：动画开始前取首帧值（之前误当 1）
+        if a['property']=='opacity': v=w if v is None else min(v,w)
+        continue
+        if f>=k[-1]['frame']: v=k[-1]['value']; continue
+        return -1
+    return 1 if v is None else v
+SHOWN=[]
+for sc in d['scenes']:
+    for sh in sc['shots']:
+        for e in sh['elements']:
+            t=e.get('text') or e.get('label') or ''
+            if e.get('role')=='subtitle' or not t: continue
+            if len(re.sub(r'[\s·：？]','',t))<6 or any(w in t for w in TERMS):
+                run=best=0
+                for f in range(sh['durationInFrames']):
+                    run=run+1 if OPA(sh,e['id'],f)==1 else 0; best=max(best,run)
+                SHOWN.append((sh['id'],t,best))
+                if best<60: err.append(('label shown <60f',sh['id'],t,best))
+print('labels <80f:',sorted([x for x in SHOWN if x[2]<80],key=lambda x:x[2]))
+print('short/term labels full-show frames (min):',min(SHOWN,key=lambda x:x[2]))
 if err: print('EP12 checks:',err)
 if err or perr: sys.exit(1)
