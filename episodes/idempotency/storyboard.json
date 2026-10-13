@@ -1,0 +1,3772 @@
+{
+ "meta": {
+  "title": "《手一抖点了两次支付，为什么只扣一次钱？》",
+  "episode": 11,
+  "slug": "idempotency",
+  "release": "v0.15.0",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 3698,
+  "provisionalTiming": false,
+  "style": "深色背景+蓝青高光扁平2D（沿用前几期）",
+  "palette": {
+   "bg": "#0B1020",
+   "panel": "#111827",
+   "primary": "#22D3EE",
+   "secondary": "#3B82F6",
+   "text": "#E5E7EB",
+   "text2": "#9CA3AF",
+   "muted": "#6B7280",
+   "success": "#22C55E",
+   "accent": "#F59E0B",
+   "danger": "#F87171"
+  },
+  "font": "Noto Sans SC",
+  "safeArea": {
+   "margin": 80,
+   "subtitleBand": [
+    900,
+    980
+   ],
+   "contentMaxY": 880,
+   "watermarkClearZone": [
+    1700,
+    80,
+    1840,
+    130
+   ]
+  },
+  "branding": {
+   "spec": "episodes/_shared/branding/spec.json v1.3.0",
+   "cornerWatermark": "右上「IT小村」40%，留空区 x1700–1840 y80–130",
+   "centerWatermark": null,
+   "endCard": "由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾"
+  },
+  "shotSentences": {
+   "hook-1": 3,
+   "hook-2": 2,
+   "duplicate-1": 3,
+   "duplicate-2": 2,
+   "ticket-1": 2,
+   "ticket-2": 2,
+   "unique-id-1": 3,
+   "unique-id-2": 2,
+   "retry-1": 2,
+   "retry-2": 2,
+   "recap-1": 2,
+   "recap-2": 1
+  },
+  "notes": "时长=Knoll MiMo 实测，map_timing.py scale 1。贯穿比喻：取餐号，同一张号只能领一次餐，再来只亮「已领取」。旁白术语：重试、幂等、唯一 ID（主讲）、防重复提交（一句），念到时上屏术语标签。画面不重复字幕句子（validate：术语白名单除外）。不出现具体数字。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/idempotency/。新图标 phone-pending/ticket/window/meal/tap/signal/request/ledger/coin 自绘无文字；复用 phone/phone-busy/server/gate（第十期）、queue/guest（第九期），hook-1「待支付」→ 点支付后转圈，recap-2 翻牌「支付成功 · 只扣一次」沿用第十期样式。branding v1.3.0：只有右上水印 + 60 帧片尾卡（全局组件），无中央水印，无自我介绍。",
+  "poster": {
+   "shotId": "ticket-2",
+   "localFrame": 416,
+   "frame": 1766,
+   "desc": "取餐号：同一张号再来窗口亮「已领取」，旁边「幂等」",
+   "file": "poster.jpg"
+  }
+ },
+ "assets": {
+  "reuse": [
+   {
+    "id": "routeArrow",
+    "desc": "路线箭头 drawProgress"
+   },
+   {
+    "id": "subtitle",
+    "desc": "字幕层"
+   },
+   {
+    "id": "phone",
+    "file": "assets/phone.svg",
+    "from_": "rate-limit/assets/phone.svg"
+   },
+   {
+    "id": "phone-busy",
+    "file": "assets/phone-busy.svg",
+    "from_": "rate-limit/assets/phone-busy.svg"
+   },
+   {
+    "id": "server",
+    "file": "assets/server.svg",
+    "from_": "rate-limit/assets/server.svg"
+   },
+   {
+    "id": "gate",
+    "file": "assets/gate.svg",
+    "from_": "rate-limit/assets/gate.svg"
+   },
+   {
+    "id": "queue",
+    "file": "assets/queue.svg",
+    "from_": "rate-limit/assets/queue.svg"
+   },
+   {
+    "id": "guest",
+    "file": "assets/guest.svg",
+    "from_": "rate-limit/assets/guest.svg"
+   }
+  ],
+  "new": [
+   {
+    "id": "ticket",
+    "file": "assets/ticket.svg"
+   },
+   {
+    "id": "window",
+    "file": "assets/window.svg"
+   },
+   {
+    "id": "meal",
+    "file": "assets/meal.svg"
+   },
+   {
+    "id": "tap",
+    "file": "assets/tap.svg"
+   },
+   {
+    "id": "signal",
+    "file": "assets/signal.svg"
+   },
+   {
+    "id": "request",
+    "file": "assets/request.svg"
+   },
+   {
+    "id": "ledger",
+    "file": "assets/ledger.svg"
+   },
+   {
+    "id": "coin",
+    "file": "assets/coin.svg"
+   },
+   {
+    "id": "phone-pending",
+    "file": "assets/phone-pending.svg"
+   }
+  ]
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "hook",
+   "title": "手一抖",
+   "from": 0,
+   "durationInFrames": 539,
+   "narrationChars": 76,
+   "narrationCharsRecount": 76,
+   "shots": [
+    {
+     "id": "hook-1",
+     "chapterId": "hook",
+     "from": 0,
+     "durationInFrames": 295,
+     "narration": "抢到票了，你赶紧点下支付，屏幕却一直在转圈。等不及，手一抖，又点了一次。这下会不会扣两次钱？",
+     "subtitles": [
+      {
+       "text": "抢到票了，你赶紧点下支付",
+       "from": 0,
+       "to": 81
+      },
+      {
+       "text": "屏幕却一直在转圈",
+       "from": 82,
+       "to": 149
+      },
+      {
+       "text": "等不及，手一抖，又点了一次",
+       "from": 150,
+       "to": 230
+      },
+      {
+       "text": "这下会不会扣两次钱",
+       "from": 231,
+       "to": 294
+      }
+     ],
+     "elements": [
+      {
+       "id": "phone",
+       "type": "image",
+       "asset": "assets/phone-pending.svg",
+       "x": 660,
+       "y": 120,
+       "w": 560,
+       "h": 560,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "busy",
+       "type": "image",
+       "asset": "assets/phone-busy.svg",
+       "x": 660,
+       "y": 120,
+       "w": 560,
+       "h": 560,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ok",
+       "type": "rect",
+       "x": 760,
+       "y": 590,
+       "w": 360,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 40,
+       "label": "待支付",
+       "fontSize": 40
+      },
+      {
+       "id": "pay",
+       "type": "rect",
+       "x": 800,
+       "y": 700,
+       "w": 280,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 42,
+       "label": "支付",
+       "fontSize": 44
+      },
+      {
+       "id": "tap1",
+       "type": "image",
+       "asset": "assets/tap.svg",
+       "x": 1240,
+       "y": 520,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tap2",
+       "type": "image",
+       "asset": "assets/tap.svg",
+       "x": 1400,
+       "y": 420,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "q",
+       "type": "text",
+       "x": 160,
+       "y": 320,
+       "w": 420,
+       "h": 80,
+       "text": "重复扣款？",
+       "fontSize": 56,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "phone",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ok",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ok",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ok",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 52,
+         "value": 1
+        },
+        {
+         "frame": 62,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "pay",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 52,
+         "value": 0
+        },
+        {
+         "frame": 64,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tap1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 52,
+         "value": 0
+        },
+        {
+         "frame": 64,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tap1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 72,
+         "value": 1
+        },
+        {
+         "frame": 82,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "busy",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 126,
+         "value": 0
+        },
+        {
+         "frame": 138,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "phone",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 126,
+         "value": 1
+        },
+        {
+         "frame": 136,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "tap2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 189,
+         "value": 0
+        },
+        {
+         "frame": 201,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tap2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 189,
+         "value": 0
+        },
+        {
+         "frame": 201,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 243,
+         "value": 0
+        },
+        {
+         "frame": 255,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 243,
+         "value": 0
+        },
+        {
+         "frame": 255,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "hook-2",
+     "chapterId": "hook",
+     "from": 295,
+     "durationInFrames": 244,
+     "narration": "大多数时候不会，钱只会扣一次。背后有一个专门防重复的办法，我们先去取餐窗口看一看。",
+     "subtitles": [
+      {
+       "text": "大多数时候不会，钱只会扣一次",
+       "from": 0,
+       "to": 104
+      },
+      {
+       "text": "背后有一个专门防重复的办法",
+       "from": 105,
+       "to": 174
+      },
+      {
+       "text": "我们先去取餐窗口看一看",
+       "from": 175,
+       "to": 243
+      }
+     ],
+     "elements": [
+      {
+       "id": "phone",
+       "type": "image",
+       "asset": "assets/phone-busy.svg",
+       "x": 160,
+       "y": 160,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "coin",
+       "type": "image",
+       "asset": "assets/coin.svg",
+       "x": 700,
+       "y": 260,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "once",
+       "type": "rect",
+       "x": 620,
+       "y": 500,
+       "w": 360,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "扣款：仅一笔",
+       "fontSize": 40
+      },
+      {
+       "id": "win",
+       "type": "image",
+       "asset": "assets/window.svg",
+       "x": 1180,
+       "y": 200,
+       "w": 520,
+       "h": 520,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tk",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 1080,
+       "y": 520,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "phone",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 0
+        },
+        {
+         "frame": 71,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 0
+        },
+        {
+         "frame": 71,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "once",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 0
+        },
+        {
+         "frame": 71,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "win",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 196,
+         "value": 0
+        },
+        {
+         "frame": 208,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 196,
+         "value": 0
+        },
+        {
+         "frame": 208,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 196,
+         "value": 1080
+        },
+        {
+         "frame": 220,
+         "value": 1350
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "duplicate",
+   "title": "为什么会重复",
+   "from": 539,
+   "durationInFrames": 628,
+   "narrationChars": 86,
+   "narrationCharsRecount": 86,
+   "shots": [
+    {
+     "id": "duplicate-1",
+     "chapterId": "duplicate",
+     "from": 539,
+     "durationInFrames": 359,
+     "narration": "先说说为什么会重复。手一抖多点一下，是一种。网络卡了，请求发出去迟迟没回音，App 会自己再发一次，这叫重试。",
+     "subtitles": [
+      {
+       "text": "先说说为什么会重复",
+       "from": 0,
+       "to": 78
+      },
+      {
+       "text": "手一抖多点一下，是一种",
+       "from": 79,
+       "to": 165
+      },
+      {
+       "text": "网络卡了，请求发出去迟迟没回音",
+       "from": 166,
+       "to": 258
+      },
+      {
+       "text": "App 会自己再发一次",
+       "from": 259,
+       "to": 324
+      },
+      {
+       "text": "这叫重试",
+       "from": 325,
+       "to": 358
+      }
+     ],
+     "elements": [
+      {
+       "id": "tap",
+       "type": "image",
+       "asset": "assets/tap.svg",
+       "x": 220,
+       "y": 200,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "t1",
+       "type": "rect",
+       "x": 160,
+       "y": 520,
+       "w": 380,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 16,
+       "label": "原因一：手滑",
+       "fontSize": 40
+      },
+      {
+       "id": "sig",
+       "type": "image",
+       "asset": "assets/signal.svg",
+       "x": 820,
+       "y": 200,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "t2",
+       "type": "rect",
+       "x": 740,
+       "y": 520,
+       "w": 420,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 16,
+       "label": "原因二：网卡",
+       "fontSize": 40
+      },
+      {
+       "id": "r1",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 1260,
+       "y": 240,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r2",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 1260,
+       "y": 420,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "rt",
+       "type": "rect",
+       "x": 1280,
+       "y": 620,
+       "w": 420,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "重试",
+       "fontSize": 52
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "tap",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 79,
+         "value": 0
+        },
+        {
+         "frame": 91,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 79,
+         "value": 0
+        },
+        {
+         "frame": 91,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sig",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 166,
+         "value": 0
+        },
+        {
+         "frame": 178,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 166,
+         "value": 0
+        },
+        {
+         "frame": 178,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 206,
+         "value": 0
+        },
+        {
+         "frame": 212,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 206,
+         "value": 1100
+        },
+        {
+         "frame": 230,
+         "value": 1500
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 285,
+         "value": 0
+        },
+        {
+         "frame": 291,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 285,
+         "value": 1100
+        },
+        {
+         "frame": 309,
+         "value": 1500
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 338,
+         "value": 0
+        },
+        {
+         "frame": 350,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 338,
+         "value": 0
+        },
+        {
+         "frame": 350,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "duplicate-2",
+     "chapterId": "duplicate",
+     "from": 898,
+     "durationInFrames": 269,
+     "narration": "所以同一个请求被发了两次、三次，在网上其实很常见。真正要紧的，是后台别把它当成新的一笔。",
+     "subtitles": [
+      {
+       "text": "所以同一个请求被发了两次、三次",
+       "from": 0,
+       "to": 95
+      },
+      {
+       "text": "在网上其实很常见",
+       "from": 96,
+       "to": 158
+      },
+      {
+       "text": "真正要紧的，是后台别把它当成新的一笔",
+       "from": 159,
+       "to": 268
+      }
+     ],
+     "elements": [
+      {
+       "id": "r0",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 160,
+       "y": 180,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r1",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 160,
+       "y": 370,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r2",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 160,
+       "y": 560,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "srv",
+       "type": "image",
+       "asset": "assets/server.svg",
+       "x": 1300,
+       "y": 180,
+       "w": 360,
+       "h": 360,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "same",
+       "type": "rect",
+       "x": 160,
+       "y": 760,
+       "w": 520,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 16,
+       "label": "内容完全相同",
+       "fontSize": 40
+      },
+      {
+       "id": "sign",
+       "type": "rect",
+       "x": 1180,
+       "y": 600,
+       "w": 600,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "不算新单",
+       "fontSize": 48
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "same",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 14,
+         "value": 0
+        },
+        {
+         "frame": 26,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 69,
+         "value": 0
+        },
+        {
+         "frame": 75,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 69,
+         "value": 160
+        },
+        {
+         "frame": 93,
+         "value": 820
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 79,
+         "value": 0
+        },
+        {
+         "frame": 85,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 79,
+         "value": 160
+        },
+        {
+         "frame": 103,
+         "value": 820
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 89,
+         "value": 0
+        },
+        {
+         "frame": 95,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 89,
+         "value": 160
+        },
+        {
+         "frame": 113,
+         "value": 820
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "srv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sign",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 235,
+         "value": 0
+        },
+        {
+         "frame": 247,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sign",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 235,
+         "value": 0
+        },
+        {
+         "frame": 247,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "ticket",
+   "title": "取餐号",
+   "from": 1167,
+   "durationInFrames": 619,
+   "narrationChars": 89,
+   "narrationCharsRecount": 89,
+   "shots": [
+    {
+     "id": "ticket-1",
+     "chapterId": "ticket",
+     "from": 1167,
+     "durationInFrames": 183,
+     "narration": "想象你在餐厅拿到一张取餐号。第一次拿着号去窗口，领到了餐。",
+     "subtitles": [
+      {
+       "text": "想象你在餐厅拿到一张取餐号",
+       "from": 0,
+       "to": 92
+      },
+      {
+       "text": "第一次拿着号去窗口",
+       "from": 93,
+       "to": 148
+      },
+      {
+       "text": "领到了餐",
+       "from": 149,
+       "to": 182
+      }
+     ],
+     "elements": [
+      {
+       "id": "g",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 160,
+       "y": 360,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tk",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 400,
+       "y": 380,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "win",
+       "type": "image",
+       "asset": "assets/window.svg",
+       "x": 1100,
+       "y": 160,
+       "w": 560,
+       "h": 560,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "meal",
+       "type": "image",
+       "asset": "assets/meal.svg",
+       "x": 1260,
+       "y": 560,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "first",
+       "type": "rect",
+       "x": 1100,
+       "y": 700,
+       "w": 520,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "第一次：出餐",
+       "fontSize": 40
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "g",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 65,
+         "value": 0
+        },
+        {
+         "frame": 77,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 65,
+         "value": 0
+        },
+        {
+         "frame": 77,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "win",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 93,
+         "value": 160
+        },
+        {
+         "frame": 123,
+         "value": 860
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 93,
+         "value": 400
+        },
+        {
+         "frame": 123,
+         "value": 1000
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "meal",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 149,
+         "value": 0
+        },
+        {
+         "frame": 161,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "meal",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 149,
+         "value": 0
+        },
+        {
+         "frame": 161,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "first",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 149,
+         "value": 0
+        },
+        {
+         "frame": 161,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "ticket-2",
+     "chapterId": "ticket",
+     "from": 1350,
+     "durationInFrames": 436,
+     "narration": "过一会儿你忘了，又拿着同一张号去领，窗口不会再给你一份，只会说一句：这张号已经领过了。同一件事，做一次和做很多次，结果都一样，这种性质，就叫幂等。",
+     "subtitles": [
+      {
+       "text": "过一会儿你忘了，又拿着同一张号去领",
+       "from": 0,
+       "to": 95
+      },
+      {
+       "text": "窗口不会再给你一份",
+       "from": 96,
+       "to": 149
+      },
+      {
+       "text": "只会说一句：这张号已经领过了",
+       "from": 150,
+       "to": 235
+      },
+      {
+       "text": "同一件事，做一次和做很多次",
+       "from": 236,
+       "to": 319
+      },
+      {
+       "text": "结果都一样，这种性质",
+       "from": 320,
+       "to": 383
+      },
+      {
+       "text": "就叫幂等",
+       "from": 384,
+       "to": 435
+      }
+     ],
+     "elements": [
+      {
+       "id": "g",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 860,
+       "y": 360,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tk",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 1000,
+       "y": 380,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "win",
+       "type": "image",
+       "asset": "assets/window.svg",
+       "x": 1100,
+       "y": 160,
+       "w": 560,
+       "h": 560,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "done",
+       "type": "rect",
+       "x": 1180,
+       "y": 370,
+       "w": 400,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 20,
+       "label": "已领取",
+       "fontSize": 52
+      },
+      {
+       "id": "mi",
+       "type": "rect",
+       "x": 160,
+       "y": 300,
+       "w": 440,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 48,
+       "label": "幂等",
+       "fontSize": 64
+      },
+      {
+       "id": "same",
+       "type": "rect",
+       "x": 160,
+       "y": 460,
+       "w": 440,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 16,
+       "label": "结果不变",
+       "fontSize": 44
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "g",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "win",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "done",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 198,
+         "value": 0
+        },
+        {
+         "frame": 210,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "done",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 198,
+         "value": 0
+        },
+        {
+         "frame": 210,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "mi",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 398,
+         "value": 0
+        },
+        {
+         "frame": 410,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "mi",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 398,
+         "value": 0
+        },
+        {
+         "frame": 410,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "same",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 320,
+         "value": 0
+        },
+        {
+         "frame": 332,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "unique-id",
+   "title": "唯一 ID",
+   "from": 1786,
+   "durationInFrames": 650,
+   "narrationChars": 92,
+   "narrationCharsRecount": 92,
+   "shots": [
+    {
+     "id": "unique-id-1",
+     "chapterId": "unique-id",
+     "from": 1786,
+     "durationInFrames": 325,
+     "narration": "后台是怎么认出重复的？靠的是一张专属的号。每笔支付在发出去之前，都会带上一个只属于它的编号，叫唯一 ID。",
+     "subtitles": [
+      {
+       "text": "后台是怎么认出重复的",
+       "from": 0,
+       "to": 70
+      },
+      {
+       "text": "靠的是一张专属的号",
+       "from": 71,
+       "to": 130
+      },
+      {
+       "text": "每笔支付在发出去之前",
+       "from": 131,
+       "to": 196
+      },
+      {
+       "text": "都会带上一个只属于它的编号",
+       "from": 197,
+       "to": 283
+      },
+      {
+       "text": "叫唯一 ID",
+       "from": 284,
+       "to": 324
+      }
+     ],
+     "elements": [
+      {
+       "id": "srv",
+       "type": "image",
+       "asset": "assets/server.svg",
+       "x": 1340,
+       "y": 200,
+       "w": 360,
+       "h": 360,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ask",
+       "type": "text",
+       "x": 1380,
+       "y": 600,
+       "w": 280,
+       "h": 120,
+       "text": "？",
+       "fontSize": 110,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "r0",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 160,
+       "y": 180,
+       "w": 170,
+       "h": 170,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r1",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 160,
+       "y": 400,
+       "w": 170,
+       "h": 170,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r2",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 160,
+       "y": 620,
+       "w": 170,
+       "h": 170,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "k0",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 340,
+       "y": 200,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "k1",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 340,
+       "y": 420,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "k2",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 340,
+       "y": 640,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "id",
+       "type": "rect",
+       "x": 640,
+       "y": 400,
+       "w": 520,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "唯一 ID",
+       "fontSize": 56
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "srv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ask",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ask",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ask",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 1
+        },
+        {
+         "frame": 141,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "r0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 0
+        },
+        {
+         "frame": 143,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 137,
+         "value": 0
+        },
+        {
+         "frame": 149,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 143,
+         "value": 0
+        },
+        {
+         "frame": 155,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 270,
+         "value": 0
+        },
+        {
+         "frame": 282,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k0",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 270,
+         "value": 0
+        },
+        {
+         "frame": 282,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "k1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 278,
+         "value": 0
+        },
+        {
+         "frame": 290,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 278,
+         "value": 0
+        },
+        {
+         "frame": 290,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "k2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 286,
+         "value": 0
+        },
+        {
+         "frame": 298,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 286,
+         "value": 0
+        },
+        {
+         "frame": 298,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "id",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 290,
+         "value": 0
+        },
+        {
+         "frame": 302,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "id",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 290,
+         "value": 0
+        },
+        {
+         "frame": 302,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "unique-id-2",
+     "chapterId": "unique-id",
+     "from": 2111,
+     "durationInFrames": 325,
+     "narration": "后台收到请求，先查这个号办过没有。没办过，就扣钱、记下来；办过了，就不再扣，直接把上次的结果再告诉你一遍。",
+     "subtitles": [
+      {
+       "text": "后台收到请求，先查这个号办过没有",
+       "from": 0,
+       "to": 93
+      },
+      {
+       "text": "没办过，就扣钱、记下来",
+       "from": 94,
+       "to": 159
+      },
+      {
+       "text": "办过了，就不再扣，直接把上次的结果再告诉你一遍",
+       "from": 160,
+       "to": 324
+      }
+     ],
+     "elements": [
+      {
+       "id": "r",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 160,
+       "y": 300,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "k",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 300,
+       "y": 280,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "led",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 760,
+       "y": 200,
+       "w": 360,
+       "h": 360,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "look",
+       "type": "rect",
+       "x": 700,
+       "y": 600,
+       "w": 480,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 16,
+       "label": "翻账本对号",
+       "fontSize": 40
+      },
+      {
+       "id": "new",
+       "type": "rect",
+       "x": 1260,
+       "y": 200,
+       "w": 500,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "新号：扣款并登记",
+       "fontSize": 40
+      },
+      {
+       "id": "old",
+       "type": "rect",
+       "x": 1260,
+       "y": 420,
+       "w": 500,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 20,
+       "label": "旧号：回「已支付」",
+       "fontSize": 40
+      },
+      {
+       "id": "coin",
+       "type": "image",
+       "asset": "assets/coin.svg",
+       "x": 1450,
+       "y": 640,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "r",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "led",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 34,
+         "value": 0
+        },
+        {
+         "frame": 46,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "look",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 34,
+         "value": 0
+        },
+        {
+         "frame": 46,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "new",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 0
+        },
+        {
+         "frame": 106,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 123,
+         "value": 0
+        },
+        {
+         "frame": 135,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 123,
+         "value": 0
+        },
+        {
+         "frame": 135,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "coin",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 160,
+         "value": 1
+        },
+        {
+         "frame": 170,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "old",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 160,
+         "value": 0
+        },
+        {
+         "frame": 172,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "old",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 160,
+         "value": 0
+        },
+        {
+         "frame": 172,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "chapterId": "retry",
+   "title": "重试和幂等",
+   "from": 2436,
+   "durationInFrames": 605,
+   "narrationChars": 86,
+   "narrationCharsRecount": 86,
+   "shots": [
+    {
+     "id": "retry-1",
+     "chapterId": "retry",
+     "from": 2436,
+     "durationInFrames": 237,
+     "narration": "有了幂等，重试才敢放心用。网络一卡，App 大胆再发，多发几次也只扣一次钱。",
+     "subtitles": [
+      {
+       "text": "有了幂等，重试才敢放心用",
+       "from": 0,
+       "to": 82
+      },
+      {
+       "text": "网络一卡，App 大胆再发",
+       "from": 83,
+       "to": 158
+      },
+      {
+       "text": "多发几次也只扣一次钱",
+       "from": 159,
+       "to": 236
+      }
+     ],
+     "elements": [
+      {
+       "id": "mi",
+       "type": "rect",
+       "x": 160,
+       "y": 200,
+       "w": 420,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 48,
+       "label": "幂等",
+       "fontSize": 56
+      },
+      {
+       "id": "plus",
+       "type": "text",
+       "x": 620,
+       "y": 200,
+       "w": 120,
+       "h": 96,
+       "text": "+",
+       "fontSize": 72,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "rt",
+       "type": "rect",
+       "x": 780,
+       "y": 200,
+       "w": 420,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "重试",
+       "fontSize": 56
+      },
+      {
+       "id": "sig",
+       "type": "image",
+       "asset": "assets/signal.svg",
+       "x": 160,
+       "y": 440,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r0",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 420,
+       "y": 440,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r1",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 420,
+       "y": 440,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r2",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 420,
+       "y": 440,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "led",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 1300,
+       "y": 360,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "one",
+       "type": "rect",
+       "x": 1260,
+       "y": 700,
+       "w": 400,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "账上：仅一笔",
+       "fontSize": 40
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "mi",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 27,
+         "value": 0
+        },
+        {
+         "frame": 39,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 27,
+         "value": 0
+        },
+        {
+         "frame": 39,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "plus",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 27,
+         "value": 0
+        },
+        {
+         "frame": 39,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sig",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 83,
+         "value": 0
+        },
+        {
+         "frame": 95,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "led",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 0
+        },
+        {
+         "frame": 137,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 420
+        },
+        {
+         "frame": 155,
+         "value": 1140
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 143,
+         "value": 0
+        },
+        {
+         "frame": 149,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 143,
+         "value": 420
+        },
+        {
+         "frame": 167,
+         "value": 1140
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 155,
+         "value": 0
+        },
+        {
+         "frame": 161,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 155,
+         "value": 420
+        },
+        {
+         "frame": 179,
+         "value": 1140
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 155,
+         "value": 1
+        },
+        {
+         "frame": 161,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 167,
+         "value": 1
+        },
+        {
+         "frame": 173,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 179,
+         "value": 1
+        },
+        {
+         "frame": 185,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "one",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 194,
+         "value": 0
+        },
+        {
+         "frame": 206,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "retry-2",
+     "chapterId": "retry",
+     "from": 2673,
+     "durationInFrames": 368,
+     "narration": "你可能还见过，支付按钮点完就变灰，这叫防重复提交，是挡在前面的第一道门。可按钮挡不住网络重发，真正兜底的，还是后台的幂等。",
+     "subtitles": [
+      {
+       "text": "你可能还见过，支付按钮点完就变灰",
+       "from": 0,
+       "to": 93
+      },
+      {
+       "text": "这叫防重复提交，是挡在前面的第一道门",
+       "from": 94,
+       "to": 208
+      },
+      {
+       "text": "可按钮挡不住网络重发",
+       "from": 209,
+       "to": 275
+      },
+      {
+       "text": "真正兜底的，还是后台的幂等",
+       "from": 276,
+       "to": 367
+      }
+     ],
+     "elements": [
+      {
+       "id": "phone",
+       "type": "image",
+       "asset": "assets/phone.svg",
+       "x": 160,
+       "y": 140,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "btn",
+       "type": "rect",
+       "x": 250,
+       "y": 560,
+       "w": 240,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 40,
+       "label": "支付",
+       "fontSize": 40
+      },
+      {
+       "id": "gray",
+       "type": "rect",
+       "x": 250,
+       "y": 560,
+       "w": 240,
+       "h": 80,
+       "color": "#374151",
+       "reuse": false,
+       "stroke": "#6B7280",
+       "radius": 40,
+       "label": "支付",
+       "fontSize": 40
+      },
+      {
+       "id": "fc",
+       "type": "rect",
+       "x": 640,
+       "y": 180,
+       "w": 500,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "防重复提交",
+       "fontSize": 48
+      },
+      {
+       "id": "gate1",
+       "type": "text",
+       "x": 640,
+       "y": 300,
+       "w": 500,
+       "h": 50,
+       "text": "第一道门",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "r",
+       "type": "image",
+       "asset": "assets/request.svg",
+       "x": 640,
+       "y": 560,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "byp",
+       "type": "arrow",
+       "x": 800,
+       "y": 500,
+       "w": 500,
+       "h": 50,
+       "color": "#F87171",
+       "reuse": false,
+       "direction": "r",
+       "label": "绕过按钮",
+       "fontSize": 36
+      },
+      {
+       "id": "led",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 1380,
+       "y": 300,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bd",
+       "type": "rect",
+       "x": 1340,
+       "y": 700,
+       "w": 420,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 48,
+       "label": "兜底：幂等",
+       "fontSize": 44
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "phone",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "btn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "gray",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 82,
+         "value": 0
+        },
+        {
+         "frame": 94,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "btn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 82,
+         "value": 1
+        },
+        {
+         "frame": 90,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "fc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 107,
+         "value": 0
+        },
+        {
+         "frame": 119,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fc",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 107,
+         "value": 0
+        },
+        {
+         "frame": 119,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "gate1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 175,
+         "value": 0
+        },
+        {
+         "frame": 187,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "led",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 229,
+         "value": 0
+        },
+        {
+         "frame": 241,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "byp",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 229,
+         "value": 0
+        },
+        {
+         "frame": 244,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 244,
+         "value": 640
+        },
+        {
+         "frame": 269,
+         "value": 1200
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bd",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 290,
+         "value": 0
+        },
+        {
+         "frame": 302,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bd",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 290,
+         "value": 0
+        },
+        {
+         "frame": 302,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "chapterId": "recap",
+   "title": "回顾",
+   "from": 3041,
+   "durationInFrames": 657,
+   "narrationChars": 92,
+   "narrationCharsRecount": 92,
+   "shots": [
+    {
+     "id": "recap-1",
+     "chapterId": "recap",
+     "from": 3041,
+     "durationInFrames": 487,
+     "narration": "放在一起看：消息队列让订单排好队、一个不丢；限流守住门口，分批放人；幂等保证同一笔钱，只扣一次。这三招合起来，网站才扛得住高峰，你的钱和订单也都稳稳当当。",
+     "subtitles": [
+      {
+       "text": "放在一起看：消息队列让订单排好队、一个不丢",
+       "from": 0,
+       "to": 141
+      },
+      {
+       "text": "限流守住门口，分批放人",
+       "from": 142,
+       "to": 216
+      },
+      {
+       "text": "幂等保证同一笔钱",
+       "from": 217,
+       "to": 275
+      },
+      {
+       "text": "只扣一次",
+       "from": 276,
+       "to": 314
+      },
+      {
+       "text": "这三招合起来，网站才扛得住高峰",
+       "from": 315,
+       "to": 402
+      },
+      {
+       "text": "你的钱和订单也都稳稳当当",
+       "from": 403,
+       "to": 486
+      }
+     ],
+     "elements": [
+      {
+       "id": "q",
+       "type": "image",
+       "asset": "assets/queue.svg",
+       "x": 160,
+       "y": 300,
+       "w": 480,
+       "h": 182,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lq",
+       "type": "text",
+       "x": 160,
+       "y": 540,
+       "w": 480,
+       "h": 50,
+       "text": "消息队列",
+       "fontSize": 44,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "gate",
+       "type": "image",
+       "asset": "assets/gate.svg",
+       "x": 820,
+       "y": 240,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lg",
+       "type": "text",
+       "x": 720,
+       "y": 580,
+       "w": 500,
+       "h": 50,
+       "text": "限流",
+       "fontSize": 44,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "tk",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 1400,
+       "y": 250,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lt",
+       "type": "text",
+       "x": 1300,
+       "y": 580,
+       "w": 480,
+       "h": 50,
+       "text": "幂等",
+       "fontSize": 44,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "title",
+       "type": "rect",
+       "x": 560,
+       "y": 700,
+       "w": 800,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "三重防线",
+       "fontSize": 52
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0.35
+        },
+        {
+         "frame": 49,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lq",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0
+        },
+        {
+         "frame": 49,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "gate",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "gate",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 142,
+         "value": 0.35
+        },
+        {
+         "frame": 154,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 142,
+         "value": 0
+        },
+        {
+         "frame": 154,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 217,
+         "value": 0.35
+        },
+        {
+         "frame": 229,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 217,
+         "value": 0
+        },
+        {
+         "frame": 229,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "title",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 333,
+         "value": 0
+        },
+        {
+         "frame": 345,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "title",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 333,
+         "value": 0
+        },
+        {
+         "frame": 345,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "recap-2",
+     "chapterId": "recap",
+     "from": 3528,
+     "durationInFrames": 170,
+     "narration": "下次手一抖点了两次支付，先别慌，后台那张号，记得清清楚楚。",
+     "subtitles": [
+      {
+       "text": "下次手一抖点了两次支付",
+       "from": 0,
+       "to": 69
+      },
+      {
+       "text": "先别慌，后台那张号",
+       "from": 70,
+       "to": 120
+      },
+      {
+       "text": "记得清清楚楚",
+       "from": 121,
+       "to": 169
+      }
+     ],
+     "elements": [
+      {
+       "id": "busy",
+       "type": "image",
+       "asset": "assets/phone-busy.svg",
+       "x": 160,
+       "y": 140,
+       "w": 480,
+       "h": 480,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ok",
+       "type": "image",
+       "asset": "assets/phone.svg",
+       "x": 160,
+       "y": 140,
+       "w": 480,
+       "h": 480,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "done",
+       "type": "rect",
+       "x": 140,
+       "y": 600,
+       "w": 560,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 48,
+       "label": "支付成功 · 只扣一次",
+       "fontSize": 40
+      },
+      {
+       "id": "led",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 1000,
+       "y": 200,
+       "w": 360,
+       "h": 360,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tk",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 1380,
+       "y": 240,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "busy",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ok",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 0
+        },
+        {
+         "frame": 106,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "busy",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 1
+        },
+        {
+         "frame": 104,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "done",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 0
+        },
+        {
+         "frame": 106,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "done",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 0
+        },
+        {
+         "frame": 106,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "led",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 89,
+         "value": 0
+        },
+        {
+         "frame": 101,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 102,
+         "value": 0
+        },
+        {
+         "frame": 114,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 102,
+         "value": 0
+        },
+        {
+         "frame": 114,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  }
+ ]
+}
