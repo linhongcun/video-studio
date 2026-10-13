@@ -22,8 +22,30 @@ const Text: React.FC<{x: number; y: number; fs: number; color: string; align?: '
     ...(stroke ? {WebkitTextStroke: `8px ${stroke}`, paintOrder: 'stroke fill'} : {})}}>{children}</div>
 );
 
-function Subject({spec, s, assets, P}: {spec: any; s: any; assets: Record<string, Asset>; P: any}) {
+const Browser: React.FC<{x: number; y: number; w: number; h: number}> = ({x, y, w, h}) => { // 第一期画法：标题栏三点 + 地址栏 + 页面行（无字）
+  const r = Math.floor(Math.min(w, h) * 0.05), bar = Math.floor(h * 0.16), x0 = Math.floor(x), y0 = Math.floor(y), W = Math.floor(x + w) - x0, H = Math.floor(y + h) - y0;
+  const box = (l: number, t: number, ww: number, hh: number, rr: number, bg: string, extra: React.CSSProperties = {}) => <div style={{position: 'absolute', left: l, top: t, width: ww, height: hh, borderRadius: rr, background: bg, boxSizing: 'border-box', ...extra}} />;
+  return <>
+    {box(x0, y0, W + 1, H + 1, r, '#111827', {border: '10px solid #22D3EE'})}
+    {box(x0, y0, W + 1, bar + 1, r, '#1F2937', {border: '10px solid #22D3EE'})}
+    {['#F87171', '#F59E0B', '#22C55E'].map((c, j) => { const cx = x0 + Math.floor(bar * 0.6) + j * Math.floor(bar * 0.55); return <div key={c} style={{position: 'absolute', left: cx - bar * 0.18, top: y0 + bar * 0.32, width: bar * 0.36, height: bar * 0.36, borderRadius: '50%', background: c}} />; })}
+    {box(x0 + Math.floor(bar * 2.4), y0 + Math.floor(bar * 0.25), W - Math.floor(bar * 0.4) - Math.floor(bar * 2.4), Math.floor(bar * 0.75) - Math.floor(bar * 0.25), Math.floor(bar * 0.25), '#0B1020')}
+    {([[0.8, '#6B7280'], [0.6, '#6B7280'], [0.7, '#374151'], [0.45, '#374151']] as const).map(([ww, c], j) => { const yy = y0 + bar + Math.floor(h * 0.12) + j * Math.floor(h * 0.13);
+      return <React.Fragment key={j}>{box(x0 + Math.floor(w * 0.08), yy, Math.floor(w * (0.08 + ww * 0.84)) - Math.floor(w * 0.08), Math.floor(h * 0.06), Math.floor(h * 0.03), c)}</React.Fragment>; })}
+  </>;
+};
+
+function Subject({spec, s, assets, P, size}: {spec: any; s: any; assets: Record<string, Asset>; P: any; size: string}) {
   const subj: any[] = spec.subject ?? [];
+  // 16:9 专用像素图层（subject16）：px=[x,y,w,h]，align 第二个字母 l/c/r 水平对齐、底对齐；flip 镜像
+  if (size === '16x9' && spec.subject16?.length) return <>{spec.subject16.map((ly: any, i: number) => { const a = assets[ly.asset]; const [bx, by, bw, bh] = ly.px; const g = fit(a, bw, bh);
+    const al = (ly.align ?? 'br')[1]; const x = al === 'r' ? bx + bw - g.w : al === 'l' ? bx : bx + Math.floor((bw - g.w) / 2);
+    return <div key={i} style={{position: 'absolute', left: 0, top: 0, transformOrigin: `${Math.floor(x) + g.w / 2}px 0`, transform: ly.flip ? 'scaleX(-1)' : undefined}}><Svg a={a} x={Math.floor(x)} y={Math.floor(by + bh - g.h)} w={g.w} h={g.h} /></div>; })}</>;
+  // 比例图层：box=[x,y,w,h] 为主体框内比例；align top/bottom/center 垂直对齐，水平居中；draw:"browser" 为内置画法
+  if (subj.some((x) => x.box)) return <>{subj.map((ly, i) => { const [fx, fy, fw, fh] = ly.box; const bx = s.x + fx * s.w, by = s.y + fy * s.h, bw = fw * s.w, bh = fh * s.h;
+    if (ly.draw === 'browser') return <Browser key={i} x={bx} y={by} w={bw} h={bh} />;
+    const a = assets[ly.asset]; const g = fit(a, bw, bh); const al = ly.align ?? 'center'; const yy = al === 'top' ? by : al === 'bottom' ? by + bh - g.h : by + (bh - g.h) / 2;
+    return <Svg key={i} a={a} x={Math.floor(bx + (bw - g.w) / 2)} y={Math.floor(yy)} w={g.w} h={g.h} />; })}</>;
   const A = (name: string) => assets[subj.find((x) => x.asset.endsWith(name))?.asset ?? ''];
   const els: React.ReactNode[] = [];
   if (spec.overlay?.type === 'sign') { // 窗口 + 屏内状态牌 + 前景小票（第十一期）
@@ -48,24 +70,24 @@ function Subject({spec, s, assets, P}: {spec: any; s: any; assets: Record<string
     for (let j = 0; j < n; j++) { const g = fit(a, sw * 0.86, s.h * 0.8); const x0 = Math.floor(s.x + j * sw + (sw - g.w) / 2);
       els.push(<div key={`h${j}`} style={{position: 'absolute', left: x0 + Math.floor(g.w / 2) - 5, top: ry + 24, width: 11, height: 27, background: '#9CA3AF'}} />);
       els.push(<Svg key={`s${j}`} a={a} x={x0} y={ry + 50} w={g.w} h={g.h} />); }
-  } else { const a = assets[subj[0].asset]; const g = fit(a, s.w, s.h);
+  } else if (subj.length) { /* 默认：单张主图居中 */ const a = assets[subj[0].asset]; const g = fit(a, s.w, s.h);
     els.push(<Svg key="m" a={a} x={s.x + Math.floor((s.w - g.w) / 2)} y={s.y + Math.floor((s.h - g.h) / 2)} w={g.w} h={g.h} />); }
   return <>{els}</>;
 }
 
 export const Cover: React.FC<CoverProps> = ({spec, size, offsetX = 0, assets}) => {
   const L = spec.sizes[size]; const P = spec.palette;
-  const t = L.title, b = L.badge, r = L.series, w = L.watermark;
+  const t = L.title, b = L.badge, r = L.series, w = L.watermark; // series 可省略（无系列的期数）
   return (
     <AbsoluteFill style={{background: P.bg, overflow: 'hidden'}}>
       <div style={{position: 'absolute', left: -offsetX, top: 0, width: L.width, height: L.height}}>
-        <Subject spec={spec} s={L.subject} assets={assets} P={P} />
+        <Subject spec={spec} s={L.subject} assets={assets} P={P} size={size} />
         {spec.title.lines.map((line: string, i: number) => (
           <Text key={i} x={t.x} y={t.y + i * t.lh} fs={t.fs} color={i ? P.title2 : P.title1} align={t.align === 'center' ? 'center' : 'left'} stroke={P.bg}>{line}</Text>
         ))}
-        <div style={{position: 'absolute', left: b.x, top: b.y, width: b.w + 1, height: b.h + 1, borderRadius: b.h / 2, background: P.badgeFill, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: FONT, fontWeight: 700, fontSize: b.fs, lineHeight: LH, color: P.badgeText}}>{spec.badge.text}</div>
-        <Text x={r.x} y={r.y} fs={r.fs} color={P.series}>{spec.series.text}</Text>
+        {spec.badge?.text && <div style={{position: 'absolute', left: b.x, top: b.y, width: b.w + 1, height: b.h + 1, borderRadius: b.h / 2, background: P.badgeFill, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: FONT, fontWeight: 700, fontSize: b.fs, lineHeight: LH, color: P.badgeText}}>{spec.badge.text}</div>}
+        {spec.series?.text && r && <Text x={r.x} y={r.y} fs={r.fs} color={P.series}>{spec.series.text}</Text>}
         <Text x={w.x} y={w.y} fs={w.fs} color={P.watermark} align="right">{spec.watermark?.text ?? 'IT小村'}</Text>
       </div>
     </AbsoluteFill>
