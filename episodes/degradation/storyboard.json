@@ -1,0 +1,4187 @@
+{
+ "meta": {
+  "title": "《两个价不一样，为什么不是 bug？》",
+  "episode": 12,
+  "slug": "degradation",
+  "release": "v0.17.0",
+  "series": "扛住高峰 04",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 3259,
+  "provisionalTiming": false,
+  "style": "深色背景+蓝青高光扁平2D（沿用前几期）",
+  "palette": {
+   "bg": "#0B1020",
+   "panel": "#111827",
+   "primary": "#22D3EE",
+   "secondary": "#3B82F6",
+   "text": "#E5E7EB",
+   "text2": "#9CA3AF",
+   "muted": "#6B7280",
+   "success": "#22C55E",
+   "accent": "#F59E0B",
+   "danger": "#F87171"
+  },
+  "font": "Noto Sans SC",
+  "safeArea": {
+   "margin": 80,
+   "subtitleBand": [
+    900,
+    980
+   ],
+   "contentMaxY": 880,
+   "watermarkClearZone": [
+    1700,
+    80,
+    1840,
+    130
+   ]
+  },
+  "branding": {
+   "spec": "episodes/_shared/branding/spec.json v1.3.0",
+   "cornerWatermark": "右上「IT小村」40%，留空区 x1700–1840 y80–130",
+   "centerWatermark": null,
+   "endCard": "由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾"
+  },
+  "shotSentences": {
+   "hook-1": 3,
+   "hook-2": 2,
+   "problem-1": 3,
+   "problem-2": 2,
+   "auto-degrade-1": 3,
+   "auto-degrade-2": 3,
+   "active-degrade-1": 2,
+   "active-degrade-2": 2,
+   "active-degrade-3": 2
+  },
+  "tts": {
+   "note": "Nolan：送 TTS 的旁白把「这是出 bug 了吗？」读成「这是出故障了吗？」；字幕保留「bug」原句。镜头 ttsText = 送 TTS 文字，narration/subtitles = 字幕原文",
+   "replace": {
+    "这是出 bug 了吗？": "这是出故障了吗？"
+   }
+  },
+  "notes": "时长=Knoll MiMo 实测，map_timing.py scale 1。脚本第 4 版：只讲降级（熔断、半开、超时、电闸跳闸全部拿掉，validate 禁用词）。主线「到手价计算」父方块 → 商品价格 / 优惠券 / 红包（肘形连线），红包卡住拖住购物车 → 结算页（核心链路），雪崩一句带过；自动降级：红包先不算进去，到手价照算，「红包：还在」；主动降级只在第 4 章用比喻「关空调，保冰箱」（购物车、结算页 = 冰箱，「搜索推荐页红包」= 空调，Nolan 批准此标签）。价格卡不写具体金额，只用长短条示意。画面不暗示红包作废 / 失效，不出现积分 / 配送 / 猜你喜欢 / 评价。旁白术语：降级（主讲）、核心链路、自动降级、主动降级，雪崩一次；念到时上屏术语标签（锚在点名的那句 / 分句起点）。画面不重复字幕句子（validate：术语白名单 + LABEL_OK 除外）。不出现具体数字。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/degradation/。新图标 aircon/meter 自绘无文字；复用 ticket（第十一期）、gate（第十期）、queue/guest（第九期）、fridge（第七期）、timer（第八期）。branding v1.3.0：只有右上水印 + 60 帧片尾卡（全局组件），无中央水印，无自我介绍。",
+  "poster": {
+   "shotId": "hook-1",
+   "localFrame": 300,
+   "frame": 300,
+   "desc": "两张价格卡并排：搜索页到手价长条 vs 结算页更短长条 +「红包抵扣」行（无具体金额）",
+   "file": "poster.jpg"
+  }
+ },
+ "assets": {
+  "reuse": [
+   {
+    "id": "routeArrow",
+    "desc": "路线箭头 drawProgress"
+   },
+   {
+    "id": "subtitle",
+    "desc": "字幕层"
+   },
+   {
+    "id": "ticket",
+    "file": "assets/ticket.svg",
+    "from_": "idempotency/assets/ticket.svg"
+   },
+   {
+    "id": "gate",
+    "file": "assets/gate.svg",
+    "from_": "rate-limit/assets/gate.svg"
+   },
+   {
+    "id": "queue",
+    "file": "assets/queue.svg",
+    "from_": "message-queue/assets/queue.svg"
+   },
+   {
+    "id": "guest",
+    "file": "assets/guest.svg",
+    "from_": "message-queue/assets/guest.svg"
+   },
+   {
+    "id": "fridge",
+    "file": "assets/fridge.svg",
+    "from_": "browser-cache/assets/fridge.svg"
+   },
+   {
+    "id": "timer",
+    "file": "assets/timer.svg",
+    "from_": "server-cache/assets/timer.svg"
+   }
+  ],
+  "new": [
+   {
+    "id": "aircon",
+    "file": "assets/aircon.svg"
+   },
+   {
+    "id": "meter",
+    "file": "assets/meter.svg"
+   }
+  ]
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "hook",
+   "title": "两个价不一样",
+   "from": 0,
+   "durationInFrames": 598,
+   "narrationChars": 81,
+   "narrationCharsRecount": 81,
+   "shots": [
+    {
+     "id": "hook-1",
+     "chapterId": "hook",
+     "from": 0,
+     "durationInFrames": 386,
+     "narration": "大促时，你在搜索结果里看到一件衣服，标着一个到手价。加购去结算，价格反而更低，红包抵扣这时才算上。这是出 bug 了吗？",
+     "ttsText": "大促时，你在搜索结果里看到一件衣服，标着一个到手价。加购去结算，价格反而更低，红包抵扣这时才算上。这是出故障了吗？",
+     "subtitles": [
+      {
+       "text": "大促时，你在搜索结果里看到一件衣服",
+       "from": 0,
+       "to": 107
+      },
+      {
+       "text": "标着一个到手价",
+       "from": 108,
+       "to": 163
+      },
+      {
+       "text": "加购去结算，价格反而更低",
+       "from": 164,
+       "to": 241
+      },
+      {
+       "text": "红包抵扣这时才算上",
+       "from": 242,
+       "to": 313
+      },
+      {
+       "text": "这是出 bug 了吗",
+       "from": 314,
+       "to": 385
+      }
+     ],
+     "elements": [
+      {
+       "id": "ca",
+       "type": "rect",
+       "x": 260,
+       "y": 120,
+       "w": 440,
+       "h": 640,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 36
+      },
+      {
+       "id": "ha",
+       "type": "text",
+       "x": 260,
+       "y": 150,
+       "w": 440,
+       "h": 56,
+       "text": "搜索页",
+       "fontSize": 44,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "pa",
+       "type": "text",
+       "x": 300,
+       "y": 260,
+       "w": 360,
+       "h": 50,
+       "text": "到手价",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ba",
+       "type": "rect",
+       "x": 300,
+       "y": 340,
+       "w": 360,
+       "h": 44,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 22
+      },
+      {
+       "id": "cb_",
+       "type": "rect",
+       "x": 1220,
+       "y": 120,
+       "w": 440,
+       "h": 640,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 36
+      },
+      {
+       "id": "hb",
+       "type": "text",
+       "x": 1220,
+       "y": 150,
+       "w": 440,
+       "h": 56,
+       "text": "结算页",
+       "fontSize": 44,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "pb",
+       "type": "text",
+       "x": 1260,
+       "y": 260,
+       "w": 360,
+       "h": 50,
+       "text": "到手价",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "bb",
+       "type": "rect",
+       "x": 1260,
+       "y": 340,
+       "w": 220,
+       "h": 44,
+       "color": "#22C55E",
+       "reuse": false,
+       "radius": 22
+      },
+      {
+       "id": "rb",
+       "type": "rect",
+       "x": 1260,
+       "y": 440,
+       "w": 360,
+       "h": 72,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 16,
+       "label": "红包抵扣",
+       "fontSize": 40
+      },
+      {
+       "id": "go",
+       "type": "arrow",
+       "x": 740,
+       "y": 380,
+       "w": 440,
+       "h": 50,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "q",
+       "type": "text",
+       "x": 760,
+       "y": 560,
+       "w": 400,
+       "h": 100,
+       "text": "bug？",
+       "fontSize": 72,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ca",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ha",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pa",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ba",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "go",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 164,
+         "value": 0
+        },
+        {
+         "frame": 184,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cb_",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 0
+        },
+        {
+         "frame": 186,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 0
+        },
+        {
+         "frame": 186,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 0
+        },
+        {
+         "frame": 186,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 0
+        },
+        {
+         "frame": 186,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 242,
+         "value": 0
+        },
+        {
+         "frame": 254,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 242,
+         "value": 0
+        },
+        {
+         "frame": 254,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 314,
+         "value": 0
+        },
+        {
+         "frame": 326,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 314,
+         "value": 0
+        },
+        {
+         "frame": 326,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "hook-2",
+     "chapterId": "hook",
+     "from": 386,
+     "durationInFrames": 212,
+     "narration": "其实不是，是网站故意这么做的。要弄明白，先看看到手价是怎么算出来的。",
+     "subtitles": [
+      {
+       "text": "其实不是，是网站故意这么做的",
+       "from": 0,
+       "to": 91
+      },
+      {
+       "text": "要弄明白，先看看到手价是怎么算出来的",
+       "from": 92,
+       "to": 211
+      }
+     ],
+     "elements": [
+      {
+       "id": "q",
+       "type": "text",
+       "x": 260,
+       "y": 300,
+       "w": 400,
+       "h": 100,
+       "text": "bug？",
+       "fontSize": 72,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "strike",
+       "type": "line",
+       "x": 280,
+       "y": 350,
+       "w": 360,
+       "h": 0,
+       "color": "#F87171",
+       "reuse": false
+      },
+      {
+       "id": "why",
+       "type": "rect",
+       "x": 260,
+       "y": 480,
+       "w": 400,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "故意的",
+       "fontSize": 44
+      },
+      {
+       "id": "p",
+       "type": "rect",
+       "x": 1060,
+       "y": 300,
+       "w": 600,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "到手价计算",
+       "fontSize": 48
+      },
+      {
+       "id": "ask",
+       "type": "text",
+       "x": 1060,
+       "y": 460,
+       "w": 600,
+       "h": 160,
+       "text": "？",
+       "fontSize": 120,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "strike",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "strike",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 10,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "why",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 45,
+         "value": 0
+        },
+        {
+         "frame": 57,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "why",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 45,
+         "value": 0
+        },
+        {
+         "frame": 57,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "p",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 134,
+         "value": 0
+        },
+        {
+         "frame": 146,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 134,
+         "value": 0
+        },
+        {
+         "frame": 146,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ask",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 140,
+         "value": 0
+        },
+        {
+         "frame": 152,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "problem",
+   "title": "一个卡住，全都在等",
+   "from": 598,
+   "durationInFrames": 936,
+   "narrationChars": 129,
+   "narrationCharsRecount": 129,
+   "shots": [
+    {
+     "id": "problem-1",
+     "chapterId": "problem",
+     "from": 598,
+     "durationInFrames": 586,
+     "narration": "算一个到手价，后台要同时去问商品价格、优惠券和红包几个服务，全回来才能算。大促时红包服务卡住了，到手价计算就一直等着它，等的请求越积越多。很快，连购物车和结算页的价格都算不出来。",
+     "subtitles": [
+      {
+       "text": "算一个到手价，后台要同时去问商品价格、优惠券和红包几个服务",
+       "from": 0,
+       "to": 186
+      },
+      {
+       "text": "全回来才能算",
+       "from": 187,
+       "to": 235
+      },
+      {
+       "text": "大促时红包服务卡住了",
+       "from": 236,
+       "to": 311
+      },
+      {
+       "text": "到手价计算就一直等着它",
+       "from": 312,
+       "to": 395
+      },
+      {
+       "text": "等的请求越积越多",
+       "from": 396,
+       "to": 464
+      },
+      {
+       "text": "很快，连购物车和结算页的价格都算不出来",
+       "from": 465,
+       "to": 585
+      }
+     ],
+     "elements": [
+      {
+       "id": "p",
+       "type": "rect",
+       "x": 660,
+       "y": 130,
+       "w": 600,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "到手价计算",
+       "fontSize": 48
+      },
+      {
+       "id": "ln0",
+       "type": "line",
+       "x": 960,
+       "y": 240,
+       "w": 0,
+       "h": 90,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lnh",
+       "type": "line",
+       "x": 350,
+       "y": 330,
+       "w": 1220,
+       "h": 0,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lk0",
+       "type": "line",
+       "x": 350,
+       "y": 330,
+       "w": 0,
+       "h": 190,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lk1",
+       "type": "line",
+       "x": 960,
+       "y": 330,
+       "w": 0,
+       "h": 190,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lk2",
+       "type": "line",
+       "x": 1570,
+       "y": 330,
+       "w": 0,
+       "h": 190,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "k0",
+       "type": "rect",
+       "x": 160,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "商品价格",
+       "fontSize": 44
+      },
+      {
+       "id": "k1",
+       "type": "rect",
+       "x": 770,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "优惠券",
+       "fontSize": 44
+      },
+      {
+       "id": "k2",
+       "type": "rect",
+       "x": 1380,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "红包",
+       "fontSize": 44
+      },
+      {
+       "id": "r2",
+       "type": "rect",
+       "x": 1380,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "红包",
+       "fontSize": 44
+      },
+      {
+       "id": "tm",
+       "type": "image",
+       "asset": "assets/timer.svg",
+       "x": 1660,
+       "y": 420,
+       "w": 90,
+       "h": 90,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "rp",
+       "type": "rect",
+       "x": 660,
+       "y": 130,
+       "w": 600,
+       "h": 110,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "到手价计算",
+       "fontSize": 44
+      },
+      {
+       "id": "g0",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 160,
+       "y": 690,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g1",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 240,
+       "y": 690,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g2",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 320,
+       "y": 690,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g3",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 400,
+       "y": 690,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g4",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 480,
+       "y": 690,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g5",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 160,
+       "y": 780,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g6",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 240,
+       "y": 780,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g7",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 320,
+       "y": 780,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g8",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 400,
+       "y": 780,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "g9",
+       "type": "image",
+       "asset": "assets/guest.svg",
+       "x": 480,
+       "y": 780,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "cart",
+       "type": "rect",
+       "x": 1080,
+       "y": 690,
+       "w": 260,
+       "h": 110,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "购物车",
+       "fontSize": 44
+      },
+      {
+       "id": "chk",
+       "type": "rect",
+       "x": 1400,
+       "y": 690,
+       "w": 260,
+       "h": 110,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "结算页",
+       "fontSize": 44
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "p",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ln0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lnh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 90,
+         "value": 0
+        },
+        {
+         "frame": 102,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 90,
+         "value": 0
+        },
+        {
+         "frame": 102,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 118,
+         "value": 0
+        },
+        {
+         "frame": 130,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 118,
+         "value": 0
+        },
+        {
+         "frame": 130,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 145,
+         "value": 0
+        },
+        {
+         "frame": 157,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 145,
+         "value": 0
+        },
+        {
+         "frame": 157,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 290,
+         "value": 0
+        },
+        {
+         "frame": 302,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 290,
+         "value": 0
+        },
+        {
+         "frame": 302,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "tm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 290,
+         "value": 0
+        },
+        {
+         "frame": 302,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 358,
+         "value": 0
+        },
+        {
+         "frame": 370,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 364,
+         "value": 0
+        },
+        {
+         "frame": 376,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 370,
+         "value": 0
+        },
+        {
+         "frame": 382,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 376,
+         "value": 0
+        },
+        {
+         "frame": 388,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 382,
+         "value": 0
+        },
+        {
+         "frame": 394,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g5",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 388,
+         "value": 0
+        },
+        {
+         "frame": 400,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g6",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 394,
+         "value": 0
+        },
+        {
+         "frame": 406,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g7",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 400,
+         "value": 0
+        },
+        {
+         "frame": 412,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g8",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 406,
+         "value": 0
+        },
+        {
+         "frame": 418,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "g9",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 412,
+         "value": 0
+        },
+        {
+         "frame": 424,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 465,
+         "value": 0
+        },
+        {
+         "frame": 477,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cart",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 484,
+         "value": 0
+        },
+        {
+         "frame": 496,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "chk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 509,
+         "value": 0
+        },
+        {
+         "frame": 521,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "problem-2",
+     "chapterId": "problem",
+     "from": 1184,
+     "durationInFrames": 350,
+     "narration": "购物车到结算这条算价格的路，是整个网站最要紧的一段，叫核心链路。一个服务卡住，拖垮整条链路，这就是常说的雪崩。",
+     "subtitles": [
+      {
+       "text": "购物车到结算这条算价格的路",
+       "from": 0,
+       "to": 82
+      },
+      {
+       "text": "是整个网站最要紧的一段",
+       "from": 83,
+       "to": 152
+      },
+      {
+       "text": "叫核心链路",
+       "from": 153,
+       "to": 192
+      },
+      {
+       "text": "一个服务卡住，拖垮整条链路",
+       "from": 193,
+       "to": 277
+      },
+      {
+       "text": "这就是常说的雪崩",
+       "from": 278,
+       "to": 349
+      }
+     ],
+     "elements": [
+      {
+       "id": "cart",
+       "type": "rect",
+       "x": 260,
+       "y": 360,
+       "w": 440,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 24,
+       "label": "购物车",
+       "fontSize": 48
+      },
+      {
+       "id": "chk",
+       "type": "rect",
+       "x": 1220,
+       "y": 360,
+       "w": 440,
+       "h": 120,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 24,
+       "label": "结算页",
+       "fontSize": 48
+      },
+      {
+       "id": "link",
+       "type": "rect",
+       "x": 700,
+       "y": 410,
+       "w": 520,
+       "h": 20,
+       "color": "#22D3EE",
+       "reuse": false,
+       "radius": 10
+      },
+      {
+       "id": "rc",
+       "type": "rect",
+       "x": 260,
+       "y": 365,
+       "w": 440,
+       "h": 110,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "购物车",
+       "fontSize": 44
+      },
+      {
+       "id": "rk",
+       "type": "rect",
+       "x": 1220,
+       "y": 365,
+       "w": 440,
+       "h": 110,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "结算页",
+       "fontSize": 44
+      },
+      {
+       "id": "rl",
+       "type": "rect",
+       "x": 700,
+       "y": 410,
+       "w": 520,
+       "h": 20,
+       "color": "#F87171",
+       "reuse": false,
+       "radius": 10
+      },
+      {
+       "id": "r2",
+       "type": "rect",
+       "x": 1460,
+       "y": 140,
+       "w": 200,
+       "h": 110,
+       "color": "#3F1D24",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 20,
+       "label": "红包",
+       "fontSize": 44
+      },
+      {
+       "id": "core",
+       "type": "rect",
+       "x": 660,
+       "y": 560,
+       "w": 600,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 48,
+       "label": "核心链路",
+       "fontSize": 64
+      },
+      {
+       "id": "av",
+       "type": "rect",
+       "x": 760,
+       "y": 720,
+       "w": 400,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 48,
+       "label": "雪崩",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "cart",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "chk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "link",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "link",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 20,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "core",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 153,
+         "value": 0
+        },
+        {
+         "frame": 165,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "core",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 153,
+         "value": 0
+        },
+        {
+         "frame": 165,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 193,
+         "value": 0
+        },
+        {
+         "frame": 205,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 235,
+         "value": 0
+        },
+        {
+         "frame": 247,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rl",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 241,
+         "value": 0
+        },
+        {
+         "frame": 253,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 247,
+         "value": 0
+        },
+        {
+         "frame": 259,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "av",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 278,
+         "value": 0
+        },
+        {
+         "frame": 290,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "av",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 278,
+         "value": 0
+        },
+        {
+         "frame": 290,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "auto-degrade",
+   "title": "先不算红包",
+   "from": 1534,
+   "durationInFrames": 762,
+   "narrationChars": 102,
+   "narrationCharsRecount": 102,
+   "shots": [
+    {
+     "id": "auto-degrade-1",
+     "chapterId": "auto-degrade",
+     "from": 1534,
+     "durationInFrames": 312,
+     "narration": "怎么办？网站的做法是：红包服务出了异常，就先不把红包算进去，照样给出到手价。红包本身没被用掉，还在你账户里。",
+     "subtitles": [
+      {
+       "text": "怎么办",
+       "from": 0,
+       "to": 30
+      },
+      {
+       "text": "网站的做法是：红包服务出了异常",
+       "from": 31,
+       "to": 115
+      },
+      {
+       "text": "就先不把红包算进去",
+       "from": 116,
+       "to": 169
+      },
+      {
+       "text": "照样给出到手价",
+       "from": 170,
+       "to": 220
+      },
+      {
+       "text": "红包本身没被用掉",
+       "from": 221,
+       "to": 267
+      },
+      {
+       "text": "还在你账户里",
+       "from": 268,
+       "to": 311
+      }
+     ],
+     "elements": [
+      {
+       "id": "p",
+       "type": "rect",
+       "x": 660,
+       "y": 130,
+       "w": 600,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "到手价计算",
+       "fontSize": 48
+      },
+      {
+       "id": "ln0",
+       "type": "line",
+       "x": 960,
+       "y": 240,
+       "w": 0,
+       "h": 90,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lnh",
+       "type": "line",
+       "x": 350,
+       "y": 330,
+       "w": 1220,
+       "h": 0,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lk0",
+       "type": "line",
+       "x": 350,
+       "y": 330,
+       "w": 0,
+       "h": 190,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lk1",
+       "type": "line",
+       "x": 960,
+       "y": 330,
+       "w": 0,
+       "h": 190,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lk2",
+       "type": "line",
+       "x": 1570,
+       "y": 330,
+       "w": 0,
+       "h": 190,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "k0",
+       "type": "rect",
+       "x": 160,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "商品价格",
+       "fontSize": 44
+      },
+      {
+       "id": "k1",
+       "type": "rect",
+       "x": 770,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "优惠券",
+       "fontSize": 44
+      },
+      {
+       "id": "k2",
+       "type": "rect",
+       "x": 1380,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "红包",
+       "fontSize": 44
+      },
+      {
+       "id": "res",
+       "type": "rect",
+       "x": 160,
+       "y": 700,
+       "w": 440,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 48,
+       "label": "到手价：照算",
+       "fontSize": 44
+      },
+      {
+       "id": "wal",
+       "type": "rect",
+       "x": 680,
+       "y": 700,
+       "w": 380,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "红包：还在",
+       "fontSize": 44
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "p",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ln0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lnh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 122,
+         "value": 1
+        },
+        {
+         "frame": 134,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lk2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 122,
+         "value": 1
+        },
+        {
+         "frame": 134,
+         "value": 0.2
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "res",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 170,
+         "value": 0
+        },
+        {
+         "frame": 182,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "res",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 170,
+         "value": 0
+        },
+        {
+         "frame": 182,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "wal",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 221,
+         "value": 0
+        },
+        {
+         "frame": 233,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "wal",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 221,
+         "value": 0
+        },
+        {
+         "frame": 233,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "auto-degrade-2",
+     "chapterId": "auto-degrade",
+     "from": 1846,
+     "durationInFrames": 450,
+     "narration": "少了一项优惠，但价格算出来了，订单能往下走。这种舍掉次要部分、保住核心的做法，叫降级。像这样出了异常自动切过去的，叫自动降级。",
+     "subtitles": [
+      {
+       "text": "少了一项优惠，但价格算出来了",
+       "from": 0,
+       "to": 81
+      },
+      {
+       "text": "订单能往下走",
+       "from": 82,
+       "to": 127
+      },
+      {
+       "text": "这种舍掉次要部分、保住核心的做法",
+       "from": 128,
+       "to": 251
+      },
+      {
+       "text": "叫降级",
+       "from": 252,
+       "to": 284
+      },
+      {
+       "text": "像这样出了异常自动切过去的",
+       "from": 285,
+       "to": 377
+      },
+      {
+       "text": "叫自动降级",
+       "from": 378,
+       "to": 449
+      }
+     ],
+     "elements": [
+      {
+       "id": "p",
+       "type": "rect",
+       "x": 660,
+       "y": 130,
+       "w": 600,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "到手价计算",
+       "fontSize": 48
+      },
+      {
+       "id": "ln0",
+       "type": "line",
+       "x": 960,
+       "y": 240,
+       "w": 0,
+       "h": 90,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lnh",
+       "type": "line",
+       "x": 350,
+       "y": 330,
+       "w": 1220,
+       "h": 0,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lk0",
+       "type": "line",
+       "x": 350,
+       "y": 330,
+       "w": 0,
+       "h": 190,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lk1",
+       "type": "line",
+       "x": 960,
+       "y": 330,
+       "w": 0,
+       "h": 190,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "lk2",
+       "type": "line",
+       "x": 1570,
+       "y": 330,
+       "w": 0,
+       "h": 190,
+       "color": "#9CA3AF",
+       "reuse": false
+      },
+      {
+       "id": "k0",
+       "type": "rect",
+       "x": 160,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "商品价格",
+       "fontSize": 44
+      },
+      {
+       "id": "k1",
+       "type": "rect",
+       "x": 770,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "优惠券",
+       "fontSize": 44
+      },
+      {
+       "id": "k2",
+       "type": "rect",
+       "x": 1380,
+       "y": 520,
+       "w": 380,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 20,
+       "label": "红包",
+       "fontSize": 44,
+       "dimmed": true
+      },
+      {
+       "id": "res",
+       "type": "rect",
+       "x": 160,
+       "y": 700,
+       "w": 300,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 48,
+       "label": "到手价",
+       "fontSize": 44
+      },
+      {
+       "id": "go",
+       "type": "arrow",
+       "x": 480,
+       "y": 700,
+       "w": 320,
+       "h": 60,
+       "color": "#22C55E",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "chk",
+       "type": "rect",
+       "x": 820,
+       "y": 700,
+       "w": 300,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 48,
+       "label": "结算页",
+       "fontSize": 44
+      },
+      {
+       "id": "dg",
+       "type": "rect",
+       "x": 1240,
+       "y": 660,
+       "w": 300,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "降级",
+       "fontSize": 64
+      },
+      {
+       "id": "ad",
+       "type": "rect",
+       "x": 1240,
+       "y": 770,
+       "w": 440,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "自动降级",
+       "fontSize": 56
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "p",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ln0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lnh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lk1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lk2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 0.2
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "res",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "go",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 82,
+         "value": 0
+        },
+        {
+         "frame": 102,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "chk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 0
+        },
+        {
+         "frame": 106,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "dg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 252,
+         "value": 0
+        },
+        {
+         "frame": 264,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "dg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 252,
+         "value": 0
+        },
+        {
+         "frame": 264,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ad",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 378,
+         "value": 0
+        },
+        {
+         "frame": 390,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ad",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 378,
+         "value": 0
+        },
+        {
+         "frame": 390,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "active-degrade",
+   "title": "关空调，保冰箱",
+   "from": 2296,
+   "durationInFrames": 963,
+   "narrationChars": 129,
+   "narrationCharsRecount": 129,
+   "shots": [
+    {
+     "id": "active-degrade-1",
+     "chapterId": "active-degrade",
+     "from": 2296,
+     "durationInFrames": 203,
+     "narration": "还有一种是提前动手。夏天用电紧张，你会先关掉空调，保住冰箱。",
+     "subtitles": [
+      {
+       "text": "还有一种是提前动手",
+       "from": 0,
+       "to": 67
+      },
+      {
+       "text": "夏天用电紧张，你会先关掉空调",
+       "from": 68,
+       "to": 164
+      },
+      {
+       "text": "保住冰箱",
+       "from": 165,
+       "to": 202
+      }
+     ],
+     "elements": [
+      {
+       "id": "mt",
+       "type": "image",
+       "asset": "assets/meter.svg",
+       "x": 200,
+       "y": 160,
+       "w": 360,
+       "h": 360,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ac0",
+       "type": "image",
+       "asset": "assets/aircon.svg",
+       "x": 700,
+       "y": 200,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "fr0",
+       "type": "image",
+       "asset": "assets/fridge.svg",
+       "x": 1200,
+       "y": 160,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "act",
+       "type": "rect",
+       "x": 700,
+       "y": 600,
+       "w": 360,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 16,
+       "label": "空调：已关",
+       "fontSize": 40
+      },
+      {
+       "id": "frt",
+       "type": "rect",
+       "x": 1170,
+       "y": 600,
+       "w": 360,
+       "h": 84,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 16,
+       "label": "冰箱：照常",
+       "fontSize": 40
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "mt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 68,
+         "value": 0
+        },
+        {
+         "frame": 80,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ac0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fr0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ac0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 128,
+         "value": 1
+        },
+        {
+         "frame": 140,
+         "value": 0.3
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "act",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 128,
+         "value": 0
+        },
+        {
+         "frame": 140,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "frt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 128,
+         "value": 0
+        },
+        {
+         "frame": 140,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "active-degrade-2",
+     "chapterId": "active-degrade",
+     "from": 2499,
+     "durationInFrames": 401,
+     "narration": "大促时，购物车和结算页就是冰箱，搜索推荐页里的红包计算就是空调。提前关掉它，把红包服务的资源留给结算页，这叫主动降级。",
+     "subtitles": [
+      {
+       "text": "大促时，购物车和结算页就是冰箱",
+       "from": 0,
+       "to": 93
+      },
+      {
+       "text": "搜索推荐页里的红包计算就是空调",
+       "from": 94,
+       "to": 203
+      },
+      {
+       "text": "提前关掉它，把红包服务的资源留给结算页",
+       "from": 204,
+       "to": 328
+      },
+      {
+       "text": "这叫主动降级",
+       "from": 329,
+       "to": 400
+      }
+     ],
+     "elements": [
+      {
+       "id": "f1",
+       "type": "image",
+       "asset": "assets/fridge.svg",
+       "x": 260,
+       "y": 220,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "f2",
+       "type": "image",
+       "asset": "assets/fridge.svg",
+       "x": 720,
+       "y": 220,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ac",
+       "type": "image",
+       "asset": "assets/aircon.svg",
+       "x": 1450,
+       "y": 220,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "cart",
+       "type": "rect",
+       "x": 160,
+       "y": 400,
+       "w": 360,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "购物车",
+       "fontSize": 44
+      },
+      {
+       "id": "chk",
+       "type": "rect",
+       "x": 620,
+       "y": 400,
+       "w": 360,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 20,
+       "label": "结算页",
+       "fontSize": 44
+      },
+      {
+       "id": "sr",
+       "type": "rect",
+       "x": 1300,
+       "y": 400,
+       "w": 460,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 20,
+       "label": "搜索推荐页红包",
+       "fontSize": 44
+      },
+      {
+       "id": "res",
+       "type": "arrow",
+       "x": 1000,
+       "y": 410,
+       "w": 280,
+       "h": 50,
+       "color": "#22C55E",
+       "reuse": false,
+       "direction": "l"
+      },
+      {
+       "id": "md",
+       "type": "rect",
+       "x": 660,
+       "y": 700,
+       "w": 600,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "主动降级",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "cart",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "chk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "f1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 67,
+         "value": 0
+        },
+        {
+         "frame": 79,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "f2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 67,
+         "value": 0
+        },
+        {
+         "frame": 79,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 0
+        },
+        {
+         "frame": 106,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ac",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 168,
+         "value": 0
+        },
+        {
+         "frame": 180,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 204,
+         "value": 1
+        },
+        {
+         "frame": 216,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "ac",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 204,
+         "value": 1
+        },
+        {
+         "frame": 216,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "res",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 280,
+         "value": 0
+        },
+        {
+         "frame": 300,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "md",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 329,
+         "value": 0
+        },
+        {
+         "frame": 341,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "md",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 329,
+         "value": 0
+        },
+        {
+         "frame": 341,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "active-degrade-3",
+     "chapterId": "active-degrade",
+     "from": 2900,
+     "durationInFrames": 359,
+     "narration": "所以你在搜索页看到的到手价没算红包，到了结算页才算上。扛住高峰第四招，降级：不求样样都在，先保住最要紧的那一段。",
+     "subtitles": [
+      {
+       "text": "所以你在搜索页看到的到手价没算红包",
+       "from": 0,
+       "to": 108
+      },
+      {
+       "text": "到了结算页才算上",
+       "from": 109,
+       "to": 168
+      },
+      {
+       "text": "扛住高峰第四招，降级",
+       "from": 169,
+       "to": 233
+      },
+      {
+       "text": "不求样样都在，先保住最要紧的那一段",
+       "from": 234,
+       "to": 358
+      }
+     ],
+     "elements": [
+      {
+       "id": "ca",
+       "type": "rect",
+       "x": 260,
+       "y": 120,
+       "w": 440,
+       "h": 640,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 36
+      },
+      {
+       "id": "ha",
+       "type": "text",
+       "x": 260,
+       "y": 150,
+       "w": 440,
+       "h": 56,
+       "text": "搜索页",
+       "fontSize": 44,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "pa",
+       "type": "text",
+       "x": 300,
+       "y": 260,
+       "w": 360,
+       "h": 50,
+       "text": "到手价",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ba",
+       "type": "rect",
+       "x": 300,
+       "y": 340,
+       "w": 360,
+       "h": 44,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 22
+      },
+      {
+       "id": "cb_",
+       "type": "rect",
+       "x": 1220,
+       "y": 120,
+       "w": 440,
+       "h": 640,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 36
+      },
+      {
+       "id": "hb",
+       "type": "text",
+       "x": 1220,
+       "y": 150,
+       "w": 440,
+       "h": 56,
+       "text": "结算页",
+       "fontSize": 44,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "pb",
+       "type": "text",
+       "x": 1260,
+       "y": 260,
+       "w": 360,
+       "h": 50,
+       "text": "到手价",
+       "fontSize": 40,
+       "color": "#E5E7EB",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "bb",
+       "type": "rect",
+       "x": 1260,
+       "y": 340,
+       "w": 220,
+       "h": 44,
+       "color": "#22C55E",
+       "reuse": false,
+       "radius": 22
+      },
+      {
+       "id": "rb",
+       "type": "rect",
+       "x": 1260,
+       "y": 440,
+       "w": 360,
+       "h": 72,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 16,
+       "label": "红包抵扣",
+       "fontSize": 40
+      },
+      {
+       "id": "q",
+       "type": "image",
+       "asset": "assets/queue.svg",
+       "x": 160,
+       "y": 300,
+       "w": 360,
+       "h": 137,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lq",
+       "type": "text",
+       "x": 160,
+       "y": 480,
+       "w": 360,
+       "h": 50,
+       "text": "消息队列",
+       "fontSize": 40,
+       "color": "#22D3EE",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "gate",
+       "type": "image",
+       "asset": "assets/gate.svg",
+       "x": 640,
+       "y": 260,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lg",
+       "type": "text",
+       "x": 560,
+       "y": 500,
+       "w": 380,
+       "h": 50,
+       "text": "限流",
+       "fontSize": 40,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "tk",
+       "type": "image",
+       "asset": "assets/ticket.svg",
+       "x": 1040,
+       "y": 270,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "lt",
+       "type": "text",
+       "x": 960,
+       "y": 500,
+       "w": 360,
+       "h": 50,
+       "text": "幂等",
+       "fontSize": 40,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "fz",
+       "type": "image",
+       "asset": "assets/fridge.svg",
+       "x": 1440,
+       "y": 250,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "dg",
+       "type": "rect",
+       "x": 1340,
+       "y": 500,
+       "w": 420,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "降级",
+       "fontSize": 56
+      },
+      {
+       "id": "title",
+       "type": "rect",
+       "x": 560,
+       "y": 680,
+       "w": 800,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "四重防线",
+       "fontSize": 52
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ca",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ha",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pa",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ba",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cb_",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 141,
+         "value": 1.15
+        },
+        {
+         "frame": 153,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ca",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 1
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "ha",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 1
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "pa",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 1
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "ba",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 1
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "cb_",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 1
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "hb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 1
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "pb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 1
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "bb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 1
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "rb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 1
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 179,
+         "value": 0
+        },
+        {
+         "frame": 191,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lq",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 179,
+         "value": 0
+        },
+        {
+         "frame": 191,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "gate",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 185,
+         "value": 0
+        },
+        {
+         "frame": 197,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 185,
+         "value": 0
+        },
+        {
+         "frame": 197,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 191,
+         "value": 0
+        },
+        {
+         "frame": 203,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 191,
+         "value": 0
+        },
+        {
+         "frame": 203,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fz",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 197,
+         "value": 0
+        },
+        {
+         "frame": 209,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "dg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 197,
+         "value": 0
+        },
+        {
+         "frame": 209,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "dg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 197,
+         "value": 0
+        },
+        {
+         "frame": 209,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "title",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 217,
+         "value": 0
+        },
+        {
+         "frame": 229,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "title",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 217,
+         "value": 0
+        },
+        {
+         "frame": 229,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  }
+ ],
+ "cover": {
+  "kind": "dedicated",
+  "note": "专用封面（非截帧）；Remotion <Cover> 合成用。坐标 px，左上原点；文字 anchor 见 align。字体 Noto Sans CJK SC Bold",
+  "font": "Noto Sans CJK SC Bold",
+  "palette": {
+   "bg": "#0B1020",
+   "title1": "#FFFFFF",
+   "title2": "#F59E0B",
+   "badgeFill": "#22D3EE",
+   "badgeText": "#0B1020",
+   "series": "#9CA3AF",
+   "watermark": "#E5E7EB"
+  },
+  "title": {
+   "lines": [
+    "两个价，",
+    "不一样？"
+   ]
+  },
+  "badge": {
+   "text": "降级"
+  },
+  "series": {
+   "text": "扛住高峰 04"
+  },
+  "watermark": {
+   "text": "IT小村"
+  },
+  "subject": [
+   {
+    "draw": "price-cards",
+    "box": [
+     0,
+     0,
+     1,
+     1
+    ],
+    "desc": "两张手机价格卡并排：左「搜索页」到手价长条（长），右「结算页」到手价长条（短）+ 多一行「红包抵扣」；无具体金额，无 ¥"
+   }
+  ],
+  "subject16": [
+   {
+    "draw": "price-cards",
+    "px": [
+     900,
+     190,
+     740,
+     690
+    ],
+    "desc": "价格卡组：标题右侧，右下贴 x1640/y880"
+   }
+  ],
+  "subject34": [
+   {
+    "draw": "price-cards",
+    "px": [
+     150,
+     690,
+     780,
+     534
+    ],
+    "desc": "价格卡组：居中，底到 y1224"
+   }
+  ],
+  "sizes": {
+   "16x9": {
+    "width": 1920,
+    "height": 1080,
+    "platforms": [
+     "B站",
+     "头条",
+     "快手"
+    ],
+    "title": {
+     "x": 280,
+     "y": 120,
+     "fs": 130,
+     "lh": 165,
+     "align": "left",
+     "maxW": 780,
+     "titleBlockHeight": 330
+    },
+    "badge": {
+     "x": 360,
+     "y": 480,
+     "h": 110,
+     "fs": 72,
+     "w": 254
+    },
+    "series": {
+     "x": 360,
+     "gap": 36,
+     "y": 618,
+     "fs": 52,
+     "w": 281
+    },
+    "safe": {
+     "crop": [
+      240,
+      1680
+     ],
+     "contentX": [
+      280,
+      1640
+     ],
+     "inset": [
+      360,
+      1560
+     ],
+     "noTextBelowY": 900
+    },
+    "subject": {
+     "x": 1080,
+     "y": 200,
+     "w": 560,
+     "h": 680
+    },
+    "watermark": {
+     "x": 1640,
+     "y": 80,
+     "fs": 40,
+     "align": "right"
+    },
+    "noTextBelowY": 900,
+    "preview": "covers/ep12-16x9.png"
+   },
+   "3x4": {
+    "width": 1080,
+    "height": 1440,
+    "platforms": [
+     "小红书",
+     "抖音"
+    ],
+    "title": {
+     "x": 540,
+     "y": 190,
+     "fs": 140,
+     "lh": 170,
+     "align": "center",
+     "maxW": 960,
+     "titleBlockHeight": 340
+    },
+    "badge": {
+     "x": 90,
+     "y": 560,
+     "h": 100,
+     "fs": 64,
+     "w": 228
+    },
+    "series": {
+     "x": 354,
+     "gap": 36,
+     "y": 580,
+     "fs": 52,
+     "w": 281
+    },
+    "safe": {
+     "noTextBelowY": 1224,
+     "noTextAboveY": 144
+    },
+    "subject": {
+     "x": 120,
+     "y": 690,
+     "w": 840,
+     "h": 520
+    },
+    "watermark": {
+     "x": 1000,
+     "y": 144,
+     "fs": 40,
+     "align": "right"
+    },
+    "noTextBelowY": 1224,
+    "preview": "covers/ep12-3x4.png"
+   },
+   "4x3": {
+    "width": 1440,
+    "height": 1080,
+    "platforms": [
+     "B站 4:3 预览"
+    ],
+    "from_": "16x9",
+    "crop": [
+     240,
+     0,
+     1680,
+     1080
+    ],
+    "note": "4:3 = 16:9 居中裁切 x240–1680（B站 4:3 预览区，同 /workspace/share/covers/ep12-4x3.jpg 规格 1440×1080）",
+    "preview": "covers/ep12-4x3.png"
+   }
+  },
+  "episode": 12,
+  "layoutOverride": null,
+  "approved": null
+ }
+}
