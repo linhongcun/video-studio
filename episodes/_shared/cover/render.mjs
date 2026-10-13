@@ -11,7 +11,7 @@ const readJson = (p) => (fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8'
 const ep = path.join(repo, 'episodes', slug);
 const spec = readJson(path.join(ep, 'storyboard.json'))?.cover ?? readJson(path.join(repo, 'covers', 'cover-spec.json'))?.[slug];
 if (!spec?.sizes) { console.error(`没有 ${slug} 的 cover 节点`); process.exit(1); }
-const files = [...new Set((spec.subject ?? []).map((s) => s.asset))];
+const files = [...new Set([...(spec.subject ?? []), ...(spec.subject16 ?? [])].map((s) => s.asset).filter(Boolean))];
 const bb = JSON.parse(execFileSync('python3', [path.join(here, 'bbox.py'), ...files.map((f) => path.join(ep, f))], {encoding: 'utf8'}));
 const assets = Object.fromEntries(files.map((f) => [f, {svg: fs.readFileSync(path.join(ep, f), 'utf8'), bbox: bb[path.join(ep, f)]}]));
 const out = opt('--out') ? path.resolve(opt('--out')) : ep; fs.mkdirSync(out, {recursive: true});
