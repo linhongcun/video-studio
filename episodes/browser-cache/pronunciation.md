@@ -8,4 +8,11 @@
 - 还是原来那份吗：hái shì
 - 一张张：yì zhāng zhāng
 - 负载均衡：fù zài jūn héng
-- Cache-Control、max-age、ETag、304 Not Modified：只上屏，旁白里没有，不要读
+- 304 Not Modified 的英文部分只上屏，不读
+
+## v0.12.2 新增（旁白里念出术语）
+- Cache-Control：读英文 cache control（「凯什 康特肉」），中间的横线不读
+- max-age：读英文 max age（「麦克斯 诶吉」），横线不读
+- ETag：读 E-Tag（「一 泰格」），E 按字母读
+- 304：读「三零四」，不读「三百零四」
+- 强缓存：qiáng huǎn cún；协商缓存：xié shāng huǎn cún
