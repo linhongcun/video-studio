@@ -1,0 +1,21 @@
+# 第九期新图标（自绘、可商用、无文字）：时钟、手机、叫号队列、订单尖峰曲线、削峰后曲线、掉落的号单
+# 复用（自绘）：chef / prep-table / ticket / dish-green（第八期）、counter-idle（第六期）、store（第五期）、fridge / spinner（第七期）
+import os
+T=dict(bg="#0B1020",surface="#111827",s2="#1F2937",border="#243045",text="#E5E7EB",text2="#9CA3AF",muted="#6B7280",primary="#22D3EE",secondary="#3B82F6",success="#22C55E",accent="#F59E0B",danger="#F87171")
+OUT=os.path.join(os.path.dirname(os.path.abspath(__file__)),"assets");os.makedirs(OUT,exist_ok=True)
+def svg(name,body,vb="0 0 512 512"):
+    open(os.path.join(OUT,name),"w").write(f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="{vb}" width="{vb.split()[2]}" height="{vb.split()[3]}">\n{body}\n</svg>\n')
+def slip(x,y,w=70,h=100,c=None):
+    c=c or T['text']
+    return f'<g><rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{c}"/><rect x="{x+12}" y="{y+18}" width="{w-24}" height="12" rx="6" fill="{T["muted"]}"/><rect x="{x+12}" y="{y+42}" width="{w-34}" height="12" rx="6" fill="{T["muted"]}"/><circle cx="{x+w/2}" cy="{y+h-22}" r="10" fill="{T["accent"]}"/></g>'
+svg("clock.svg",f'<circle cx="256" cy="256" r="220" fill="{T["s2"]}" stroke="{T["primary"]}" stroke-width="24"/>'+"".join(f'<rect x="248" y="52" width="16" height="40" rx="8" fill="{T["text2"]}" transform="rotate({a} 256 256)"/>' for a in range(0,360,30))+f'<path d="M256 256 V96" stroke="{T["accent"]}" stroke-width="22" stroke-linecap="round"/><path d="M256 256 V140" stroke="{T["text"]}" stroke-width="30" stroke-linecap="round"/><circle cx="256" cy="256" r="22" fill="{T["accent"]}"/>')
+svg("phone.svg",f'<rect x="136" y="24" width="240" height="464" rx="40" fill="{T["s2"]}" stroke="{T["primary"]}" stroke-width="16"/><rect x="160" y="80" width="192" height="340" rx="12" fill="{T["surface"]}"/><circle cx="256" cy="200" r="60" fill="{T["success"]}"/><path d="M226 200 L248 224 L290 176" stroke="{T["bg"]}" stroke-width="18" fill="none" stroke-linecap="round" stroke-linejoin="round"/><rect x="190" y="300" width="132" height="16" rx="8" fill="{T["muted"]}"/><rect x="210" y="336" width="92" height="16" rx="8" fill="{T["muted"]}"/><rect x="226" y="446" width="60" height="12" rx="6" fill="{T["text2"]}"/>')
+svg("queue.svg",f'<rect x="20" y="180" width="960" height="24" rx="12" fill="{T["text2"]}"/>'+"".join(f'<rect x="{80+i*180}" y="200" width="6" height="30" fill="{T["text2"]}"/>'+slip(48+i*180,230,80,120) for i in range(5))+f'<path d="M940 120 L990 192 L940 264" fill="none" stroke="{T["primary"]}" stroke-width="18" stroke-linecap="round"/>',vb="0 0 1000 380")
+AX=f'<path d="M60 40 V340 H780" stroke="{T["text2"]}" stroke-width="8" fill="none"/>'
+svg("peak-curve.svg",AX+f'<path d="M60 300 C200 300 260 290 320 250 C360 60 400 40 420 40 C450 40 470 220 520 280 C600 310 700 310 780 310" stroke="{T["danger"]}" stroke-width="14" fill="none" stroke-linecap="round"/><path d="M60 230 H780" stroke="{T["success"]}" stroke-width="8" stroke-dasharray="24 16"/>',vb="0 0 800 380")
+svg("flat-curve.svg",AX+f'<path d="M60 300 C200 300 260 290 320 250 C360 60 400 40 420 40 C450 40 470 220 520 280 C600 310 700 310 780 310" stroke="{T["muted"]}" stroke-width="8" fill="none" stroke-dasharray="16 14"/><path d="M60 300 C160 300 240 240 300 232 H700 C730 232 750 300 780 300" stroke="{T["primary"]}" stroke-width="14" fill="none" stroke-linecap="round"/><path d="M60 230 H780" stroke="{T["success"]}" stroke-width="8" stroke-dasharray="24 16"/>',vb="0 0 800 380")
+svg("slip-fallen.svg",f'<g transform="rotate(-24 256 256)">{slip(150,120,212,290)}</g><path d="M120 120 L392 392 M392 120 L120 392" stroke="{T["danger"]}" stroke-width="30" stroke-linecap="round"/>')
+svg("slip.svg",slip(146,60,220,392))
+print(sorted(os.listdir(OUT)))
+svg("guest.svg",f'<circle cx="256" cy="150" r="80" fill="{T["primary"]}"/><path d="M110 470 V360 C110 260 402 260 402 360 V470Z" fill="{T["secondary"]}"/>')
+svg("pot.svg",f'<rect x="96" y="200" width="320" height="200" rx="40" fill="{T["text2"]}"/><rect x="72" y="180" width="368" height="40" rx="20" fill="{T["muted"]}"/><rect x="416" y="250" width="80" height="28" rx="14" fill="{T["muted"]}"/><rect x="16" y="250" width="80" height="28" rx="14" fill="{T["muted"]}"/><g fill="{T["accent"]}"><circle cx="200" cy="140" r="22"/><circle cx="270" cy="110" r="16"/><circle cx="320" cy="150" r="20"/></g>')
