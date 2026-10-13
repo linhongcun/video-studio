@@ -78,7 +78,7 @@ if g!=d['meta']['durationInFrames'] or g!=sum(v['duration'] for v in TM.values()
 raw=json.dumps(d['scenes'],ensure_ascii=False)  # 只查镜头内容（meta 说明里会提到片尾）
 for b in BANNED:
     if b in raw: err.append(('banned/endcard',b))
-for a in ('breaker-box','breaker-tripped','switch-on','switch-off','spark','aircon','lamp','socket','meter','fridge','phone','ticket','gate','queue','guest','timer','hourglass'):
+for a in ('breaker-box','breaker-tripped','switch-on','switch-off','spark','aircon','lamp','socket','meter','fridge','ticket','gate','queue','guest','timer','hourglass'):
     if f'assets/{a}.svg' not in assets: err.append(('new icon unused',a))
 for a in assets:
     if re.search(r'<text',open(a).read()): err.append(('text inside icon',a))
@@ -99,7 +99,8 @@ def LSEQ(a,b):
         for j,y in enumerate(b): q.append(p[j]+1 if x==y else max(p[j+1],q[j]))
         p=q
     return p[-1]
-TERMS=["熔断降级","消息队列","雪崩","熔断","降级","半开","超时","幂等","限流"]
+TERMS=["熔断降级","自动降级","主动降级","消息队列","雪崩","熔断","降级","半开","超时","幂等","限流"]
+LABEL_OK={"搜索推荐页红包"}  # v3b：Nolan 批准的名称标签（场景名，同术语标签处理），只此一个
 def STRIP(t):
     for w in sorted(TERMS,key=len,reverse=True): t=t.replace(w,'')  # 长词先删（RabbitMQ 先于 MQ）
     return NORM(t)
@@ -116,6 +117,7 @@ for sc in d['scenes']:
         for e in sh['elements']:
             if e.get('role')=='subtitle': continue
             for t in (e.get('text'),e.get('label')):
+                if t in LABEL_OK: continue
                 if t and len(STRIP(t))>=6:   # v0.12.1：术语白名单词不计（术语标签和旁白重复算强调），只查剩下的长句
                     r=OVL(STRIP(t),STRIP(sh['narration']))
                     if r: err.append(('screen repeats subtitle',sh['id'],e['id'],t,r))
@@ -147,7 +149,7 @@ for sc in d['scenes']:
             t=e.get('text') or e.get('label') or ''
             if e.get('role')!='subtitle' and any(n in t for n in tuple('0123456789')+('一万','一千','一百','三次','两次')) and '示意' not in t: err.append(('示意 missing',sh['id'],e['id'],t))
 # 术语念到时上屏
-TERMSHOW={"雪崩":"雪崩","熔断":"熔断","降级":"降级","半开":"半开","超时":"超时","消息队列":"消息队列","限流":"限流","幂等":"幂等"}
+TERMSHOW={"自动降级":"自动降级","主动降级":"主动降级","雪崩":"雪崩","熔断":"熔断","降级":"降级","半开":"半开","超时":"超时","消息队列":"消息队列","限流":"限流","幂等":"幂等"}
 for k,v_ in TERMSHOW.items():
     for sc in d['scenes']:
         for sh in sc['shots']:
@@ -162,7 +164,7 @@ if '出故障了吗' not in h1.get('ttsText','') or 'bug' in h1.get('ttsText',''
 if not any('bug' in s['text'] for s in h1['subtitles']): err.append('hook-1 subtitle bug')
 if any('故障' in s['text'] for sc in d['scenes'] for x in sc['shots'] for s in x['subtitles']): err.append('subtitle has 故障')
 # EP.12 第 2 版：画面不出现「猜你喜欢 / 推荐 / 热销」
-BAN=("猜你喜欢","推荐","热销")
+BAN=("猜你喜欢","热销","积分","配送","评价","作废","失效","过期","用掉","扣不了")  # 第 3 版：不出现积分/配送/猜你喜欢/评价；不暗示红包作废/失效
 for sc in d['scenes']:
     for sh in sc['shots']:
         for e in sh['elements']:
