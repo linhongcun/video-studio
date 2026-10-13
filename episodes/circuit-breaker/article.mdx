@@ -1,0 +1,69 @@
+---
+title: 一个服务挂了，为什么整个 App 没崩？
+summary: 用家里的电闸讲清熔断和降级：一个服务卡住怎么引发雪崩，熔断怎么跳闸、半开怎么试探、超时为什么要设，以及高峰时主动关掉非核心功能的降级。
+chapters:
+  - { id: hook,      title: 双十一的空白 }
+  - { id: avalanche, title: 雪崩 }
+  - { id: breaker,   title: 电闸跳闸 }
+  - { id: half-open, title: 试着合闸 }
+  - { id: degrade,   title: 主动关空调 }
+  - { id: recap,     title: 回顾 }
+related: ["message-queue", "rate-limit", "idempotency"]
+---
+
+双十一时「猜你喜欢」一片空白，订单却照样付成功，这不是 bug。网站用了两招：**熔断**（circuit breaker）和**降级**（degradation）。它们像家里的电闸：哪一路短路就只跳哪一路；用电紧张时先关空调，保住冰箱。下面分 6 步讲清楚。
+
+## 6 步看懂熔断降级
+
+### 1. 双十一的空白 {#hook}
+
+{/* 配图：商品页「猜你喜欢」空白，但支付成功 */}
+
+- 大型网站由很多服务组成：商品、推荐、评论、下单、支付……它们互相调用。
+- 非核心功能暂时消失，往往是系统在主动保护核心流程。
+
+### 2. 雪崩 {#avalanche}
+
+{/* 配图：推荐服务卡住，等待一层层往上堆积 */}
+
+- 调用方在等一个变慢的服务时，会一直占着线程、连接等资源。等的请求越多，调用方自己也耗尽资源变慢。
+- 故障就这样沿调用链一层层传上去，叫**雪崩**（级联故障，cascading failure）。[^azure-cb]
+
+### 3. 电闸跳闸 {#breaker}
+
+{/* 配图：电闸箱一路跳闸，其他照常；网站服务间的同款开关 */}
+
+- **熔断器**监控对某个服务的调用：失败比例或慢调用比例超过阈值，就「打开」（跳闸），之后的调用不再发出，直接快速失败或返回默认结果。[^r4j-cb]
+- 好处：不再浪费资源去等一个已经不行的服务，也给它喘口气恢复。
+
+### 4. 试着合闸 {#half-open}
+
+{/* 配图：计时器走完放一个请求试探；请求头顶的沙漏 */}
+
+- 熔断器有三个状态：**关闭**（正常调用）、**打开**（跳闸）、**半开**（等一段时间后放少量请求试探）。试探成功就回到关闭，失败就重新打开。[^r4j-cb][^azure-cb]
+- **超时**：每次调用设等待上限，到点就放弃。没有超时，熔断器也很难及时发现「慢」。[^aws-timeout]
+
+### 5. 主动关空调 {#degrade}
+
+{/* 配图：关空调保冰箱；推荐、评论熄灭，换成固定榜单 */}
+
+- **降级**：在压力大或依赖出问题时，主动关掉或简化非核心功能，比如个性化推荐换成固定榜单、评论暂不显示，把资源留给下单和支付。
+- 熔断触发后返回的「默认结果」，也是一种降级处理（常叫兜底、fallback）。
+
+### 6. 回顾 {#recap}
+
+- **熔断**：被动跳闸，出了问题才断开。
+- **降级**：主动取舍，提前关掉非核心功能。
+- 「扛住高峰」四招：**消息队列**排队不丢、**限流**守住门口、**幂等**只扣一次钱、**熔断降级**防止一个挂了全站都崩。
+
+## 深入一问
+
+**熔断和限流有什么区别？**  
+限流管的是「进来的请求太多」，在门口按数量放人；熔断管的是「我依赖的服务不行了」，在调用别人时主动断开。一个保护自己不被挤爆，一个保护自己不被别人拖垮，两者常常一起用。
+
+## 参考资料
+
+[^azure-cb]: Microsoft Learn，《Circuit Breaker pattern》，Azure Architecture Center（持续更新，2020 年后维护，访问于 2026-10-13）：https://learn.microsoft.com/azure/architecture/patterns/circuit-breaker
+[^r4j-cb]: Resilience4j 官方文档，《CircuitBreaker》（持续更新，访问于 2026-10-13）：https://resilience4j.readme.io/docs/circuitbreaker
+[^aws-timeout]: AWS Builders' Library，《Timeouts, retries, and backoff with jitter》（2019 年首发，持续维护，访问于 2026-10-13）：https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
+- 仅参考：Martin Fowler，《CircuitBreaker》（2014-03-06），熔断器模式的经典介绍：https://martinfowler.com/bliki/CircuitBreaker.html
