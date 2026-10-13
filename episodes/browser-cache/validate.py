@@ -82,15 +82,41 @@ for a in assets:
     if re.search(r'<text',open(a).read()): err.append(('text inside icon',a))
 # EP.07：英文术语只上屏不进旁白；画面文字不重复字幕句子（≥6 字的画面文字不能是本镜头旁白的子串）
 NORM=lambda t:re.sub(r'[^\u4e00-\u9fffA-Za-z0-9]','',t)
-for t in ("Cache-Control","max-age","ETag","304","Not Modified"):
-    if any(t in n for n in narr): err.append(('english in narration',t))
+def LCS(a,b):
+    m=0;p=[0]*(len(b)+1)
+    for x in a:
+        q=[0]*(len(b)+1)
+        for j,y in enumerate(b):
+            if x==y: q[j+1]=p[j]+1; m=max(m,q[j+1])
+        p=q
+    return m
+def LSEQ(a,b):
+    p=[0]*(len(b)+1)
+    for x in a:
+        q=[0]
+        for j,y in enumerate(b): q.append(p[j]+1 if x==y else max(p[j+1],q[j]))
+        p=q
+    return p[-1]
+TERMS=["Cache-Control","max-age","Not Modified","浏览器缓存","协商缓存","强缓存","ETag","304","CDN"]  # v0.12.2 术语白名单（术语标签与旁白重复算强调）
+def STRIP(t):
+    for w in TERMS: t=t.replace(w,'')
+    return NORM(t)
+def OVL(t,n):  # 改严：最长公共子串 ≥ 画面文字 60%，或字符二元组重合率 > 60%
+    l=LCS(t,n)/len(t); bg=[t[i:i+2] for i in range(len(t)-1)]; b=sum(g in n for g in bg)/len(bg)
+    sq=LSEQ(t,n)/len(t)  # 补充：按顺序的字符覆盖（可跳字的公共子序列）≥75%，抓「改几个字的复述」
+    return f'lcs {l:.0%} bigram {b:.0%} seq {sq:.0%}' if l>=0.6 or b>0.6 or sq>=0.75 else None
+# v0.12.2：旁白要念术语（Cache-Control、max-age、ETag、304 等按字母/数字读），「英文只上屏」作废；Not Modified 仍只上屏
+for t in ("Not Modified",):
+    if any(t in n for n in narr): err.append(('screen-only english in narration',t))
 for sc in d['scenes']:
     for sh in sc['shots']:
         nn=NORM(sh['narration'])
         for e in sh['elements']:
             if e.get('role')=='subtitle': continue
             for t in (e.get('text'),e.get('label')):
-                if t and len(NORM(t))>=6 and NORM(t) in nn: err.append(('screen repeats subtitle',sh['id'],e['id'],t))
+                if t and len(STRIP(t))>=6:   # v0.12.2（移植自第八期）：去掉术语白名单词后 ≥6 字才查；LCS≥60% / 二元组>60% / 按序覆盖≥75%
+                    r=OVL(STRIP(t),STRIP(sh['narration']))
+                    if r: err.append(('screen repeats subtitle',sh['id'],e['id'],t,r))
 first=d['scenes'][0]['shots'][0]['narration'];lastn=d['scenes'][-1]['shots'][-1]['narration']
 if '我是' in json.dumps(d['scenes'],ensure_ascii=False): err.append('「我是」 present (branding: 不出现我是 IT小村)')
 if any('我是IT小村' in re.sub(r'\s','',q['text']) for v in TM.values() for q in v['sentences']): err.append('timing has 我是 IT小村 sentence')

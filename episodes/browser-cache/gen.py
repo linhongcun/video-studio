@@ -91,31 +91,40 @@ def shots_for(si,L):
         a1=[F("fridge",0),F("no",at(0,"不行")),pop("no",at(0,"不行"))]
         for j,c in enumerate(["cyan","blue","green"]):
             e1+=[bx(f"p{j}",c,700+j*360,470,150),A(f"tag{j}","tag",820+j*360,560,130,86)]; a1+=[F(f"p{j}",0),F(f"tag{j}",at(0,"保质期标签")+j*6),pop(f"tag{j}",at(0,"保质期标签")+j*6)]
-        a1+=[F("code",at(0,"写着")),F("zh",at(0,"能放多久"))]
+        a1+=[F("code",at(0,"写着")),F("zh",at(0,"能放多少秒"))]
         e2=[R("track",160,220,1600,40,P['panel'],stroke=P['text2'],radius=20),R("ok",160,220,960,40,P['success'],radius=20),R("late",1120,220,640,40,P['accent'],radius=20),
-            R("okL",160,300,760,90,stroke=P['success'],radius=16,label="没过期：放心直接用",fontSize=40),R("lateL",1000,300,760,90,stroke=P['accent'],radius=16,label="过期了：先别直接拿",fontSize=40),
-            R("short",160,560,760,100,stroke=P['text2'],radius=16,label="常换的：放得短",fontSize=40),R("long",1000,560,760,100,stroke=P['text2'],radius=16,label="几乎不变的图标：放很久",fontSize=40)]
+            R("okL",160,300,760,90,stroke=P['success'],radius=16,label="没过期 → 强缓存",fontSize=40),R("lateL",1000,300,760,90,stroke=P['accent'],radius=16,label="过期了：要先问",fontSize=40),
+            R("short",160,560,760,100,stroke=P['text2'],radius=16,label="常换：短",fontSize=40),R("long",1000,560,760,100,stroke=P['text2'],radius=16,label="图标：很久",fontSize=40)]
         t=at(0,"没过保质期"); t2=at(0,"过了保质期")
         a2=[F("track",0),F("ok",t),F("okL",t),F("late",t2),F("lateL",t2),F("short",at(1,"常换")),F("long",at(1,"几乎不变"))]
         return [(e1,a1),(e2,a2)]
-    if si==4:  # 过期了先问一句
-        e1=[BROWSER(160,240),bx("old","amber",260,500,120),bx("fresh","green",260,500,120),R("etag",160,660,420,80,stroke=P['accent'],radius=16,label="ETag：编号 37",fontSize=40),
+    if si==4:  # 过期了先问一句（v0.12.2：拆 3 镜头）
+        # revalidate-1：过期不一定重买 + 带 ETag 去问
+        e1=[BROWSER(160,240),bx("old","amber",260,500,120),R("etag",160,660,420,80,stroke=P['accent'],radius=16,label="ETag：编号 37",fontSize=40),
             ctr("counter",1360,220,360),E("ask","arrow",580,320,760,50,P['primary'],label="这份还新鲜吗？",direction="r",fontSize=36),
-            E("reply","arrow",580,460,760,50,P['success'],label="304 Not Modified",direction="l",fontSize=40),R("same",1360,620,360,90,stroke=P['success'],radius=45,label="没变",fontSize=48)]
+            R("exp",640,620,620,90,stroke=P['accent'],radius=16,label="过期 ≠ 重新买",fontSize=40)]
+        a1=[F("browser",0),F("old",0),F("counter",0),F("exp",at(0,"不一定")),F("etag",at(0,"ETag")),pop("etag",at(0,"ETag")),draw("ask",at(0,"去问店里"),18)]
+        # revalidate-2：304 没变 + 一问一答 = 协商缓存
+        e2=[BROWSER(160,240),bx("old","amber",260,500,120),bx("fresh","green",260,500,120),R("etag",160,660,420,80,stroke=P['accent'],radius=16,label="ETag：编号 37",fontSize=40),
+            ctr("counter",1360,220,360),E("ask","arrow",580,320,760,50,P['primary'],label="这份还新鲜吗？",direction="r",fontSize=36),
+            E("reply","arrow",580,460,760,50,P['success'],label="304 Not Modified",direction="l",fontSize=40),R("same",1360,620,360,90,stroke=P['success'],radius=45,label="没变",fontSize=48),
+            R("neg",640,640,640,90,stroke=P['secondary'],radius=16,label="一问一答 = 协商缓存",fontSize=40)]
         tr=at(0,"店里只回")
-        a1=[F("browser",0),F("old",0),F("etag",at(0,"先问店里")),F("counter",0),draw("ask",at(0,"先问店里"),18),draw("reply",tr,18),F("same",tr+10),pop("same",tr+10),
-            mv("fresh","opacity",0,tr+20,0,0,"linear"),F("fresh",tr+20),out("old",tr+20,tr+32)]
-        e2=[fridge("fridge",160,200,360,500,opened=True),ctr("counter",1400,200,320),
+        a2=[F("browser",0),F("old",0),F("etag",0),F("counter",0),F("ask",0),draw("reply",tr,18),F("same",tr+10),pop("same",tr+10),
+            mv("fresh","opacity",0,tr+20,0,0,"linear"),F("fresh",tr+20),out("old",tr+20,tr+32),F("neg",at(0,"这一问一答")),pop("neg",at(0,"这一问一答"))]  # 句首即出：句子短，给标签留足时间
+        # revalidate-3：变了才重新下载 + 换文件名（画面不写「旧货」）
+        e3=[fridge("fridge",160,200,360,500,opened=True),ctr("counter",1400,200,320),
             E("newA","arrow",560,300,820,50,P['accent'],label="变了：给新货",direction="l",fontSize=36),bx("newBox","cyan",1240,380,110),
             R("old",600,500,460,90,stroke=P['text2'],radius=16,label="logo.v1.png",fontSize=40),R("new",1100,500,520,90,stroke=P['accent'],radius=16,label="logo.v2.png",fontSize=40),
-            T("rename",560,640,1200,56,"换文件名 → 旧货自然淘汰",44,P['text'],align="center")]
-        tn=at(0,"要是变了"); tf=at(1,"网站更新")
-        a2=[F("fridge",0),F("counter",0),draw("newA",tn,18),F("newBox",tn+6),mv("newBox","x",tn+6,tn+36,1240,600),F("old",tf),F("new",tf+10),pop("new",tf+10),mv("old","opacity",at(1,"旧货"),at(1,"旧货")+12,1,0.35),F("rename",at(1,"旧货"))]
-        return [(e1,a1),(e2,a2)]
+            T("rename",560,640,1200,56,"改名 = 新货",44,P['text'],align="center")]
+        tn=at(0,"要是变了"); tf=at(0,"文件名")
+        a3=[F("fridge",0),F("counter",0),draw("newA",tn,18),F("newBox",tn+6),mv("newBox","x",tn+6,tn+36,1240,600),F("old",tf),F("new",tf+10),pop("new",tf+10),
+            mv("old","opacity",tf+24,tf+36,1,0.35),F("rename",tf+24)]
+        return [(e1,a1),(e2,a2),(e3,a3)]
     if si==5:  # 回顾：冰箱 → 门店 → 柜台 三层
         e1=[fridge("fridge",200,240,260,360),T("l1",160,640,400,50,"浏览器缓存：最近",36,P['primary'],align="center"),
             E("a1","arrow",500,400,240,50,P['text2'],direction="r"),store("store",780,260,320),T("l2",740,640,400,50,"CDN：离你近",36,P['accent'],align="center"),
-            E("a2","arrow",1120,400,200,50,P['text2'],direction="r")]+[ctr(f"c{j}",1340+j*140,330,130) for j in range(3)]+[T("l3",1320,640,440,50,"负载均衡：人多不慌",36,P['success'],align="center")]
+            E("a2","arrow",1120,400,200,50,P['text2'],direction="r")]+[ctr(f"c{j}",1340+j*140,330,130) for j in range(3)]+[T("l3",1320,640,440,50,"负载均衡：抗高峰",36,P['success'],align="center")]
         a1=[F("fridge",at(0,"浏览器缓存")),F("l1",at(0,"浏览器缓存")),draw("a1",at(0,"CDN"),12),F("store",at(0,"CDN")),F("l2",at(0,"CDN")),draw("a2",at(0,"负载均衡"),12)]+[F(f"c{j}",at(0,"负载均衡")+4*j) for j in range(3)]+[F("l3",at(0,"负载均衡"))]
         e2=[R("stack",160,160,1600,90,stroke=P['secondary'],radius=16,label="冰箱 + 门店 + 柜台",fontSize=44),fridge("fridge",200,320,260,360),
             R("page",640,300,1120,500,stroke=P['primary'],radius=16)]+tiles("t",680,340,500,200,20,20)+[R("instant",160,720,400,80,stroke=P['success'],radius=40,label="秒出图",fontSize=44)]
