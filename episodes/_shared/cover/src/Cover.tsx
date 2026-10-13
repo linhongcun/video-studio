@@ -48,14 +48,14 @@ function Subject({spec, s, assets, P}: {spec: any; s: any; assets: Record<string
     for (let j = 0; j < n; j++) { const g = fit(a, sw * 0.86, s.h * 0.8); const x0 = Math.floor(s.x + j * sw + (sw - g.w) / 2);
       els.push(<div key={`h${j}`} style={{position: 'absolute', left: x0 + Math.floor(g.w / 2) - 5, top: ry + 24, width: 11, height: 27, background: '#9CA3AF'}} />);
       els.push(<Svg key={`s${j}`} a={a} x={x0} y={ry + 50} w={g.w} h={g.h} />); }
-  } else { const a = assets[subj[0].asset]; const g = fit(a, s.w, s.h);
+  } else if (subj.length) { /* 默认：单张主图居中 */ const a = assets[subj[0].asset]; const g = fit(a, s.w, s.h);
     els.push(<Svg key="m" a={a} x={s.x + Math.floor((s.w - g.w) / 2)} y={s.y + Math.floor((s.h - g.h) / 2)} w={g.w} h={g.h} />); }
   return <>{els}</>;
 }
 
 export const Cover: React.FC<CoverProps> = ({spec, size, offsetX = 0, assets}) => {
   const L = spec.sizes[size]; const P = spec.palette;
-  const t = L.title, b = L.badge, r = L.series, w = L.watermark;
+  const t = L.title, b = L.badge, r = L.series, w = L.watermark; // series 可省略（无系列的期数）
   return (
     <AbsoluteFill style={{background: P.bg, overflow: 'hidden'}}>
       <div style={{position: 'absolute', left: -offsetX, top: 0, width: L.width, height: L.height}}>
@@ -63,9 +63,9 @@ export const Cover: React.FC<CoverProps> = ({spec, size, offsetX = 0, assets}) =
         {spec.title.lines.map((line: string, i: number) => (
           <Text key={i} x={t.x} y={t.y + i * t.lh} fs={t.fs} color={i ? P.title2 : P.title1} align={t.align === 'center' ? 'center' : 'left'} stroke={P.bg}>{line}</Text>
         ))}
-        <div style={{position: 'absolute', left: b.x, top: b.y, width: b.w + 1, height: b.h + 1, borderRadius: b.h / 2, background: P.badgeFill, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: FONT, fontWeight: 700, fontSize: b.fs, lineHeight: LH, color: P.badgeText}}>{spec.badge.text}</div>
-        <Text x={r.x} y={r.y} fs={r.fs} color={P.series}>{spec.series.text}</Text>
+        {spec.badge?.text && <div style={{position: 'absolute', left: b.x, top: b.y, width: b.w + 1, height: b.h + 1, borderRadius: b.h / 2, background: P.badgeFill, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontFamily: FONT, fontWeight: 700, fontSize: b.fs, lineHeight: LH, color: P.badgeText}}>{spec.badge.text}</div>}
+        {spec.series?.text && r && <Text x={r.x} y={r.y} fs={r.fs} color={P.series}>{spec.series.text}</Text>}
         <Text x={w.x} y={w.y} fs={w.fs} color={P.watermark} align="right">{spec.watermark?.text ?? 'IT小村'}</Text>
       </div>
     </AbsoluteFill>
