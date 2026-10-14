@@ -30,6 +30,7 @@ const ANIM_OVERRIDES: Record<string, any[]> = {};
 const SFX: Record<string, {f: number; src: string; v: number}[]> = {};
 
 const FPS = 30;
+const OBJ_ASSETS = new Set(['tshirt', 'tshirt-orange', 'book', 'mug', 'snack'].flatMap((n) => [`assets/${n}.svg`, `assets/${n}.png`]));
 const shots: any[] = ((sb as any).scenes ?? []).flatMap((s: any) => s.shots.map((sh: any) => ({...sh, sceneId: s.id})));
 let acc = 0;
 const plan = shots.map((sh) => {
@@ -211,11 +212,15 @@ const Element: React.FC<{e: any; anims: any[]; frame: number; fps: number; scope
   const fill = color(v('fillColor', e.color));
   if (opacity <= 0.001) return null;
   if (e.type === 'arrow') return <div style={{position: 'absolute', inset: 0, opacity}}><Arrow e={e} progress={Math.max(0, has('drawProgress') ? v('drawProgress', 1) : 1)} /></div>;
+  if (e.type === 'line' && e.dash)
+    return <div style={{position: 'absolute', left: x, top: y, width: Math.max(4, e.w), height: Math.max(4, e.h), borderTop: e.h <= 4 ? `4px dashed ${fill ?? P.text2}` : undefined, borderLeft: e.h > 4 ? `4px dashed ${fill ?? P.text2}` : undefined, opacity: opacity * 0.9}} />;
   if (e.type === 'line')
     return <div style={{position: 'absolute', left: x - 2, top: y, width: Math.max(4, e.w), height: Math.max(4, e.h), background: fill, opacity: opacity * 0.9, borderRadius: 2}} />;
   const base: React.CSSProperties = {position: 'absolute', left: x, top: y, width: e.w, height: e.h, opacity, transform: `scale(${scale}) rotate(${rotate}deg)`};
   if (e.type === 'image' && e.id === 'ep1Frame')
     return <div style={{...base, border: `2px solid ${color(e.stroke) ?? P.text2}`, boxSizing: 'border-box', overflow: 'hidden', borderRadius: 8}}><Img src={staticFile('img/ep1-connect.png')} style={{width: '100%', height: '100%', objectFit: 'cover'}} /></div>;
+  // EP.16 实物图（public/assets 下的透明 SVG）：staticFile 直出；tagText 只是分镜备注，不渲染（标签另有 rect 节点）
+  if (e.type === 'image' && OBJ_ASSETS.has(e.asset)) return <div style={base}><Img src={staticFile(e.asset)} style={{width: '100%', height: '100%', objectFit: 'contain'}} /></div>;
   if (e.type === 'image') return <div style={base}><SvgImage e={e} scope={scope} v={v} has={has} frame={frame} /></div>;
   if (e.type === 'rect' && e.id === 'server')
     return <div style={base}><ServerCard color={stroke ?? fill ?? P.primary} label={clean(e.label) || '服务器'} fontSize={e.fontSize ?? 36} /></div>;
@@ -294,7 +299,12 @@ const Shot: React.FC<{p: any; prevTr: any}> = ({p, prevTr}) => {
   const ov = ANIM_OVERRIDES[sh.id] ?? [];
   const src = [...sh.animations.filter((a: any) => !ov.some((o) => o.elementId === a.elementId && o.property === a.property)), ...ov];
   const anims = src.map((a: any) => PINNED[`${sh.id}:${a.elementId}`] ? a : {...a, keyframes: a.keyframes.map((k: any) => ({...k, frame: Math.round(k.frame * scale)}))});
-  const elements = sh.elements.filter((e: any) => e.role !== 'subtitle').map((e: any) => ({...e, dash: e.dash ?? e.dashed, ...(OVERRIDES[`${sh.id}:${e.id}`] ?? {})}));
+  // EP.16 统一 z 排序：有 z 用 z；没有 z 的节点继承文档顺序里前一个节点的 z（+0.5，同值按原顺序稳定），所以 box 之后的标签仍在 box 之上
+  let lastZ = -1;
+  const elements = sh.elements.filter((e: any) => e.role !== 'subtitle')
+    .map((e: any, i: number) => { const z = typeof e.z === 'number' ? e.z : lastZ + 0.5; if (typeof e.z === 'number') lastZ = e.z; return {...e, _z: z, _i: i, dash: e.dash ?? e.dashed, ...(OVERRIDES[`${sh.id}:${e.id}`] ?? {})}; })
+    .filter((e: any) => (e.appearFrame == null || frame >= e.appearFrame) && (e.disappearFrame == null || frame < e.disappearFrame))
+    .sort((a: any, b: any) => a._z - b._z || a._i - b._i);
   const tr = sh.transition ?? {type: 'none', durationInFrames: 0};
   const td = isFade(tr.type) ? tr.durationInFrames : 0;
   const out = td ? interpolate(frame, [dur - td, dur], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) : 1;
