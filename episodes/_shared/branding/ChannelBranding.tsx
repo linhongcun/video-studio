@@ -28,10 +28,10 @@ const useBrandFont = () => {
 
 const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 
-const Watermark: React.FC<{mainFrames: number}> = ({mainFrames}) => {
+const Watermark: React.FC<{mainFrames: number; fadeIn?: boolean}> = ({mainFrames, fadeIn = true}) => {
   const frame = useCurrentFrame();
   if (frame >= mainFrames) return null;
-  const o = Math.min(interpolate(frame, W.fadeInFrames, [0, 1], clamp), interpolate(frame, [mainFrames - W.fadeOutFrames, mainFrames], [1, 0], clamp));
+  const o = Math.min(fadeIn ? interpolate(frame, W.fadeInFrames, [0, 1], clamp) : 1, interpolate(frame, [mainFrames - W.fadeOutFrames, mainFrames], [1, 0], clamp));
   return (
     <div style={{position: 'absolute', right: spec.width - W.anchorX, top: W.anchorY, fontFamily: BRAND_FONT, fontWeight: 700, fontSize: W.fontSize,
       color: W.color, opacity: W.opacity * o, whiteSpace: 'nowrap', lineHeight: 1.4, textAlign: 'right', pointerEvents: 'none'}}>{W.text}</div>
@@ -57,8 +57,9 @@ const EndCard: React.FC<{mainFrames: number}> = ({mainFrames}) => {
   );
 };
 
-/** 右上常驻水印（正片全程，无例外）+ 片尾卡（正片之后 60 帧）。放在 Main 的最上层。 */
-export const ChannelBranding: React.FC<{mainFrames: number}> = ({mainFrames}) => {
+/** 右上常驻水印（正片全程，无例外）+ 片尾卡（正片之后 60 帧）。放在 Main 的最上层。
+ *  watermarkFadeIn（默认 true，旧期不变）：false = 第 0 帧水印即完整可见（EP.15 起，第 0 帧满屏封面画面也带水印）。 */
+export const ChannelBranding: React.FC<{mainFrames: number; watermarkFadeIn?: boolean}> = ({mainFrames, watermarkFadeIn = true}) => {
   useBrandFont();
-  return (<><Watermark mainFrames={mainFrames} /><EndCard mainFrames={mainFrames} /></>);
+  return (<><Watermark mainFrames={mainFrames} fadeIn={watermarkFadeIn} /><EndCard mainFrames={mainFrames} /></>);
 };
