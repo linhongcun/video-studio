@@ -1,6 +1,6 @@
 ---
 title: 双十一下单那么多，为什么不丢单？
-summary: 用「后厨取号叫号」讲清消息队列：同步为什么会堵、异步怎么先回「已收到」、队列怎么削峰、生产者和消费者是谁，以及做完才划掉为什么能不丢单。
+summary: 用「后厨取号叫号」讲清消息队列：同步为什么会堵、异步怎么先回「已收到」、队列怎么削峰、生产者和消费者是谁，以及做完才确认为什么能不丢单。
 chapters:
   - { id: hook,     title: 双十一零点 }
   - { id: sync,     title: 不排队会怎样 }
@@ -48,6 +48,9 @@ related: ["server-cache", "load-balancing", "cdn"]
 
 - 往队里放单的叫**生产者**，从队里取单去做的叫**消费者**。[^azure-cc]
 - 不丢单的关键：消费者做完要回一个确认（ack），队列收到确认才删掉这条消息；中途出错没确认，消息还在，会交给别的消费者重做。[^rabbitmq-ack]
+- 代价是可能重复：没确认的消息会被重新投递，同一单偶尔会被处理两次，所以消费者要能认出重复（见第十一期「幂等」）。[^rabbitmq-ack]
+- 不同工具的「记号」不一样：RabbitMQ 是确认后删掉消息；Kafka 不删消息，而是记下消费到哪个位置（提交 offset），重启后从记下的位置接着读。[^kafka-consumer]
+- 「不丢」也有前提：消息要持久化，生产者要等队列回「已存好」的发布确认；队列节点在写盘前挂掉，仍可能丢。[^rabbitmq-ack]
 - 常用的工具，一个叫 Kafka[^kafka]，一个叫 RabbitMQ[^rabbitmq-ack]。
 
 ### 6. 回顾 {#recap}
@@ -56,7 +59,7 @@ related: ["server-cache", "load-balancing", "cdn"]
 - **CDN**：附近门店。
 - **负载均衡**：多开的柜台。
 - **服务端缓存**：后厨备菜台，帮网站省一趟路。
-- **消息队列**：叫号队伍，帮网站扛住高峰，订单也一个不丢。
+- **消息队列**：叫号队伍，帮网站扛住高峰，配好确认和持久化后，订单也不容易丢。
 
 ## 深入一问
 
@@ -69,6 +72,7 @@ related: ["server-cache", "load-balancing", "cdn"]
 ## 易错点
 
 - ❌ 「有了消息队列就是马上处理」→ ✅ 它是先收下、再按顺序处理，换来的是不崩、不丢，代价是要稍等。
+- ❌ 「用了消息队列就绝对不丢、不重」→ ✅ 要配好持久化和确认才不容易丢；重新投递还可能重复，消费者要做幂等。
 - ❌ 「消息被取走就算处理完了」→ ✅ 要等消费者确认做完，消息才会被删掉。
 - ❌ 「削峰能让后厨变快」→ ✅ 后厨速度没变，只是把高峰摊到后面的时间里慢慢做。
 
@@ -76,5 +80,6 @@ related: ["server-cache", "load-balancing", "cdn"]
 
 [^azure-qbll]: Microsoft Azure 架构中心，《Queue-Based Load Leveling pattern》（通用设计模式说明，更新于 2026-06-09；旁白未点名厂商）。https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling
 [^azure-cc]: Microsoft Azure 架构中心，《Competing Consumers pattern》（现行文档，访问于 2026-10-13）。https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers
-[^rabbitmq-ack]: RabbitMQ 官方文档，《Consumer Acknowledgements and Publisher Confirms》（现行文档，访问于 2026-10-13）。https://www.rabbitmq.com/docs/confirms
+[^rabbitmq-ack]: RabbitMQ 官方文档，《Consumer Acknowledgements and Publisher Confirms》（页面未显示日期，访问于 2026-10-14）。https://www.rabbitmq.com/docs/confirms
 [^kafka]: Apache Kafka 官方文档，《Introduction》（现行文档，访问于 2026-10-13）。https://kafka.apache.org/documentation/#introduction
+[^kafka-consumer]: Apache Kafka 4.3.1 文档，《KafkaConsumer》Javadoc「Offsets and Consumer Position」（页面未显示日期，访问于 2026-10-14）。https://kafka.apache.org/43/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html

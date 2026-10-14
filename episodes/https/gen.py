@@ -21,7 +21,9 @@ SPLIT={0:[2,3],1:[2,2],2:[2,1],3:[1,1,1],4:[2,1,1],5:[2,1,2],6:[2,1],7:[1,1]}
 def sentences(s): return re.findall(r'[^。？]+[。？]',s)
 def browser(x,y,w=360,h=260): return R("browser",x,y,w,h,stroke=P['secondary'],radius=16,label="浏览器",fontSize=36,reuse=True)
 def server(x,y): return R("server",x,y,240,300,stroke=P['secondary'],radius=16,label="服务器",fontSize=36,reuse=True,note="服务器卡片：与浏览器同一套样式（panel 底、secondary 描边、圆角 16），无窗口圆点，标签「服务器」36px；Knoll 实现")
-EXTRA_HOLD={"asymmetric-2":40}  # 导演决定：ECDHE 金钥匙完整停留 ≥60 帧；timing.json duration + 额外停顿（Knoll 时间线同样加）
+LABEL_HOLDS=json.load(open(HERE/"label_holds.json")) if (HERE/"label_holds.json").is_file() else {}
+EXTRA_HOLD={"asymmetric-2":40}  # 2026-10-14：handshake-3 +25 已撤回（导演定不加 hold）
+#  # 导演决定：ECDHE 金钥匙完整停留 ≥60 帧；timing.json duration + 额外停顿（Knoll 时间线同样加）
 TM=json.load(open(HERE/"timing.json")) if (HERE/"timing.json").is_file() else None
 def AT(si,k,phrase,L=None):
     """镜头内某短语的起始帧：timing.json 的句子 start/dur + 句内按字数比例；无 timing 时按字数估算"""
@@ -64,12 +66,13 @@ def shots_for(si,L):
     if si==3:
         e1=[A("pubL","keypair-public",360,260,320,320),A("priL","keypair-private",760,260,320,320),T("pubT",360,620,320,50,"可以公开",36,P['primary'],align="center"),T("priT",760,620,320,50,"只有自己保管",36,P['text2'],align="center"),T("pairT",1180,360,600,64,"一对密钥",56,P['text'])]
         a1=[fade("pairT"),fade("pubL",10,25),fade("pubT",20,32),fade("priL",AT(3,0,"私钥只有"),AT(3,0,"私钥只有")+15),fade("priT",AT(3,0,"私钥只有")+10,AT(3,0,"私钥只有")+22),mv("priL","opacity",L[0]-40,L[0]-20,1,0.7)]
-        n=L[1]; st=AT(3,1,"就能各自"); st2=AT(3,1,"偷听的人"); kp=min(st2+12,AEND(3,1)-20)  # 状态切点=实测句内短语起点；金钥匙在状态③开头弹出，停到镜头结束
+        n=L[1]; st=AT(3,1,"就能算出"); st2=AT(3,1,"偷听的人"); kp=min(st2+12,AEND(3,1)-20)  # 状态切点=实测句内短语起点；金钥匙在状态③开头弹出，停到镜头结束
         e2=[A("ecdheA","ecdhe-step4",226,80,1468,780,fit="contain",state="交换公开值"),A("ecdheB","ecdhe-combine",226,80,1468,780,fit="contain",state="各自把收到的公开值与自己的私有值合成"),
             A("ecdheC","ecdhe-step6",226,80,1468,780,fit="contain",state="得到同一把金色钥匙"),A("keyL","key-symmetric",411,566,160,160),A("keyR","key-symmetric",1347,566,160,160),
-            T("stA",660,100,600,50,"① 交换公开值",36,P['primary'],align="center"),T("stB",660,100,600,50,"② 各自合成",36,P['primary'],align="center"),T("stC",660,100,600,50,"③ 同一把钥匙",36,P['accent'],align="center")]
+            T("stA",660,100,600,50,"① 临时生成，交换公开值",36,P['primary'],align="center"),T("stB",660,100,600,50,"② 各自合成",36,P['primary'],align="center"),T("stC",660,100,600,50,"③ 同一把钥匙",36,P['accent'],align="center"),
+            R("sig",160,90,460,64,stroke=P['text2'],radius=32,label="证书私钥 ≠ 会话密钥",fontSize=32)]  # 2026-10-14 内容核对：会话密钥由双方临时密钥算出，证书私钥只签名（不当会话密钥用）
         a2=[fade("ecdheA",0,10),fade("stA",0,10),out("stA",st-6,st),fade("ecdheB",st,st+10),fade("stB",st,st+10),out("stB",st2-6,st2),
-            fade("ecdheC",st2,st2+10),fade("stC",st2,st2+10),mv("keyL","scale",kp,kp+15,0,1,"spring"),mv("keyR","scale",kp,kp+15,0,1,"spring"),mv("keyL","rotate",kp+15,n-1,0,8),mv("keyR","rotate",kp+15,n-1,0,8)]
+            fade("ecdheC",st2,st2+10),fade("stC",st2,st2+10),mv("keyL","scale",kp,kp+15,0,1,"spring"),mv("keyR","scale",kp,kp+15,0,1,"spring"),mv("keyL","rotate",kp+15,n-1,0,8),mv("keyR","rotate",kp+15,n-1,0,8),fade("sig",AT(3,1,"证书里的私钥"),AT(3,1,"证书里的私钥")+12)]
         e3=[A("keyGold","key-symmetric",200,300,260,260),T("hyb1",520,300,1200,56,"非对称方式：协商出会话密钥（慢，只做一次）",40,P['primary']),A("box","envelope-sealed",520,420,240,240),T("hyb2",820,500,900,56,"对称加密：传输真正的数据（快）",40,P['success'])]
         a3=[fade("keyGold"),fade("hyb1",AT(3,2,"先用非对称"),AT(3,2,"先用非对称")+15),fade("box",AT(3,2,"再用它"),AT(3,2,"再用它")+12),fade("hyb2",AT(3,2,"再用它")+10,AT(3,2,"再用它")+25),mv("box","x",AT(3,2,"再用它")+30,L[2]-10,520,1440)]
         return [(e1,a1),(e2,a2),(e3,a3)]
@@ -78,7 +81,7 @@ def shots_for(si,L):
         a1=[fade("pub"),fade("eve",15,30),mv("pub","x",AT(4,0,"可能被"),AT(4,0,"调了包"),400,820),out("pub",AT(4,0,"调了包"),AT(4,0,"调了包")+8),fade("fake",AT(4,0,"调了包"),AT(4,0,"调了包")+10),fade("swap",AT(4,0,"调了包"),AT(4,0,"调了包")+8)]
         e2=[A("cert","certificate",420,140,720,512),A("ca","ca-badge",1300,200,320,320),T("caT",1240,540,440,56,"CA 签发",44,P['accent'],align="center"),T("certT",420,690,720,50,"证明：这个公钥属于这个网站",38,P['text'],align="center")]
         a2=[fade("cert"),fade("ca",8,20),fade("caT",14,28),mv("ca","x",22,AT(4,1,"证明这个")-2,1300,980),mv("ca","scale",AT(4,1,"证明这个")-2,AT(4,1,"证明这个")+10,1.4,1,"spring"),fade("certT",AT(4,1,"证明这个"),AT(4,1,"证明这个")+15)]
-        chain=[("root","根证书（系统内置）"),("mid","中间证书"),("leaf","网站证书")]
+        chain=[("root","根证书（受信任）"),("mid","中间证书"),("leaf","网站证书")]
         e3=[]; a3=[]
         for k,(i,t) in enumerate(chain):
             e3+=[R(i,560,140+k*200,800,130,stroke=P['accent'],radius=16,label=t,fontSize=40),A(i+"Ok","ca-badge",1400,150+k*200,110,110)]
@@ -95,7 +98,7 @@ def shots_for(si,L):
         a2=[mv("sh","drawProgress",AT(5,1,"服务器回"),AT(5,1,"附上"),0,1),fade("shN",AT(5,1,"附上"),AT(5,1,"附上")+10)]
         shN=T("shN",450,430,1020,48,"+ 参数 + 证书 + 签名",34,P["accent"],align="center")
         e3=base+[h1,h2,A("kL","key-symmetric",310,480,180,180),A("kR","key-symmetric",1380,480,180,180),T("same",660,520,600,56,"各自算出同一把会话密钥",40,P['accent'],align="center"),
-            E("data","arrow",450,690,1020,40,P['success'],label="之后全部加密",direction="lr",fontSize=30),R("rtt12",1180,790,600,40,stroke=P['text2'],radius=8,label="TLS 1.2：2 个往返",fontSize=28),R("rtt13",1180,840,600,40,stroke=P['success'],radius=8,label="TLS 1.3：1 个往返",fontSize=28)]
+            E("data","arrow",450,690,1020,40,P['success'],label="之后全部加密",direction="lr",fontSize=30),R("rtt12",1180,790,600,40,stroke=P['text2'],radius=8,label="完整握手 · TLS 1.2：2 个往返",fontSize=28),R("rtt13",1180,840,600,40,stroke=P['success'],radius=8,label="完整握手 · TLS 1.3：1 个往返",fontSize=28)]
         e3=[e for e in e3]
         for e in e3:
             if e['id'] in("rtt12",): e['y']=770
@@ -151,7 +154,8 @@ for si,s in enumerate(narr):
     parts=[p if k==0 else ' '*0+p for k,p in enumerate(parts)]
     L=[round(cnt(p)/RATE*30)+PAD for p in parts]
     if si==3: L[1]=round(cnt(parts[1])/RATE*30)+60  # ECDHE：旁白后金钥匙停 2 秒，不加旁白
-    if TM: L=[TM[f"{ids[si]}-{k+1}"]["duration"]+(0 if "extraHold" in TM[f"{ids[si]}-{k+1}"] else EXTRA_HOLD.get(f"{ids[si]}-{k+1}",0)) for k in range(len(parts))]  # 实测配音：镜头时长=timing.json duration（Knoll 缩放比=1）；MiMo 版 timing.json 条目自带 extraHold 字段，duration 已含 40 帧，此时不再叠加 EXTRA_HOLD，避免重复计算
+    if TM: L=[TM[f"{ids[si]}-{k+1}"]["duration"]+(0 if "extraHold" in TM[f"{ids[si]}-{k+1}"] else EXTRA_HOLD.get(f"{ids[si]}-{k+1}",0)) for k in range(len(parts))]
+    if TM: L=[x+LABEL_HOLDS.get(f"{ids[si]}-{k+1}",0) for k,x in enumerate(L)]  # 2026-10-14 Nolan：术语标签最短 hold（_audit/labelfix.py → label_holds.json），镜头末尾静音  # 实测配音：镜头时长=timing.json duration（Knoll 缩放比=1）；MiMo 版 timing.json 条目自带 extraHold 字段，duration 已含 40 帧，此时不再叠加 EXTRA_HOLD，避免重复计算
     D=sum(L); est=round((CNT[si]/4.2+2)*30)
     PARTS[:]=parts
     designs=shots_for(si,L); shots=[];f=g
@@ -170,7 +174,8 @@ meta=dict(title="《HTTPS 为什么安全？》",episode=2,width=1920,height=108
   notes=f"镜头时长 = 实测配音 timing.json（MiMo「冰糖」，句间停顿 0.28 秒）各镜头 duration，Knoll 缩放比为 1；无 timing.json 时按第一期 +19% 实测 5.53 字/秒估算。动画与字幕按 timing.json 句子 start/dur 定位，句内短语按字数比例插值。from 为全局帧，subtitles 与 keyframes 帧相对镜头；transition 作用于镜头出场。image 元素 asset 路径相对 episodes/https/。密钥交换按 ECDHE：asymmetric-2 三个关键状态 step4 / ecdhe-combine / step6，切点为“就能各自”“偷听的人”的实测起点；两把相同金钥匙 keyL(411,566) / keyR(1347,566) 各 160×160，紧贴 step6 底部两个橙色圆正上方，在状态③开头弹出并慢转 8° 到镜头结束；该镜头 = timing 243 帧（已含 extraHold 40，gen.py 不再重复叠加），旁白音频 183 帧结束后金钥匙完整停留，8° 慢转铺满到镜头结束；总帧 = timing.json 合计 4809。画面文字为中文，英文仅 CA/TLS/HTTP/HTTPS/ClientHello/ServerHello；字幕随旁白保留 Wi-Fi、ECDHE、AEAD 原词。")
 assets=dict(reuse=[dict(id="browser",desc="浏览器卡片（标签 浏览器 36px）",usedIn=["plaintext","symmetric"]),dict(id="server",desc="服务器卡片（同浏览器样式，无窗口圆点，标签 服务器 36px）",usedIn=["plaintext","symmetric"]),dict(id="seqDiagram",desc="第一期握手时序图样式",usedIn=["handshake"]),dict(id="subtitle",desc="字幕层")],
  new=[dict(id=f.stem,file=f"assets/{f.name}") for f in sorted((HERE/"assets").glob("*.svg")) if f.stem!="ecdhe-mix"])
-json.dump(dict(meta=meta,assets=assets,scenes=scenes),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
+import json as _j;from pathlib import Path as _Pc;_CS=_Pc("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=_j.load(open(_CS)).get("https") if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
+json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
 print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames'],s['estimateFormulaFrames']) for s in scenes])
 # 有 timing.json 时 gen.py 已直接按 duration(+EXTRA_HOLD) 生成，不再调用 align.py（它会把额外停顿缩回去）
 if not TM: print("no timing.json: 按 5.53 字/秒估算")

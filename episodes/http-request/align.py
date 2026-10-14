@@ -74,6 +74,10 @@ def scale_animations(anims: list, old: int, new: int) -> list:
     return out
 
 
+_LHP = Path(__file__).resolve().parent / "label_holds.json"
+_LH = json.loads(_LHP.read_text()) if _LHP.is_file() else {}
+
+
 def align(timing_path: Path, sb_path: Path) -> dict:
     timing = json.loads(timing_path.read_text())
     sb = json.loads(sb_path.read_text())
@@ -95,6 +99,9 @@ def align(timing_path: Path, sb_path: Path) -> dict:
             if old != new:
                 sh["subtitles"] = scale_subtitles(sh.get("subtitles", []), old, new)
                 sh["animations"] = scale_animations(sh.get("animations", []), old, new)
+            hold = _LH.get(sid, 0)  # 标签 hold（label_holds.json）：镜头末尾静音，字幕/关键帧不动
+            if hold: sh["labelHold"] = hold
+            new += hold
             sh["durationInFrames"] = new
             f += new
         sc["durationInFrames"] = f - g

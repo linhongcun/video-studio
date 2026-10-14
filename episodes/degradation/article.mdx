@@ -9,7 +9,7 @@ chapters:
 related: ["message-queue", "rate-limit", "idempotency"]
 ---
 
-大促时，搜索页的到手价和结算页的价格对不上，这不是 bug，而是网站在**降级**（graceful degradation）：舍掉次要部分，保住最要紧的那一段。下面分 4 步讲清楚。
+大促时，搜索页的到手价和结算页的价格对不上，这不一定是 bug（也可能是 bug，或者某些优惠本来就只在结算时才算），很常见的一种原因是网站在**降级**（graceful degradation）：舍掉次要部分，保住最要紧的那一段。下面分 4 步讲清楚。
 
 ## 4 步看懂降级
 
@@ -38,7 +38,7 @@ related: ["message-queue", "rate-limit", "idempotency"]
 
 {/* 配图：关空调保冰箱；搜索推荐页红包计算变灰，资源流向结算页 */}
 
-- **主动降级**：大促前，为了把资源留给购物车、结算页这条核心链路，提前关掉搜索推荐页里的红包计算，避免红包服务资源不够用。结算页照常算红包。
+- **主动降级**：大促前，为了把资源留给购物车、结算页这条核心链路，提前关掉搜索推荐页里的红包计算，避免红包服务资源不够用。结算页照常算红包。这种「大促前按预案提前关掉非核心功能」的做法，在厂商文档和技术社区里都有描述。[^aliyun-ahas][^javaguide]
 - 这也解释了开头：搜索页的到手价没算红包，到了结算页才算上。
 - 「扛住高峰」四招：**消息队列**排队不丢、**限流**守住门口、**幂等**只扣一次钱、**降级**先保核心。
 
@@ -51,3 +51,5 @@ related: ["message-queue", "rate-limit", "idempotency"]
 
 [^aws-gd]: AWS Well-Architected Framework 可靠性支柱，《REL05-BP01 Implement graceful degradation to transform applicable hard dependencies into soft dependencies》（持续更新的官方文档，访问于 2026-10-13）：https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_graceful_degradation.html
 [^azure-gd]: Microsoft Azure Well-Architected Framework，《Self-preservation / graceful degradation》（持续更新的官方文档，访问于 2026-10-13）：https://learn.microsoft.com/en-us/azure/well-architected/reliability/self-preservation
+[^aliyun-ahas]: 阿里云 AHAS 文档，《主动降级业务功能》（lastModifiedTime 2022-05-25，访问于 2026-10-14；该功能模块据公告已于 2025-03-31 停止服务，这里只引用它对「主动降级」概念的说明）：https://help.aliyun.com/zh/ahas/use-feature-switches-to-implement-active-degradation-for-business
+[^javaguide]: JavaGuide，《服务降级与熔断详解》（社区技术文档，非厂商官方；页面未显示日期，访问于 2026-10-14）：https://javaguide.cn/high-availability/fallback-and-circuit-breaker.html

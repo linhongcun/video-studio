@@ -1,6 +1,6 @@
 ---
 title: 抢票那一刻，为什么总提示系统繁忙？
-summary: 用「景区门口限量放人」讲清限流：不限流为什么会挤垮、限流和 QPS、令牌桶怎么发票又允许一小波突发，以及熔断和降级各管什么。
+summary: 用「景区门口限量放人」讲清限流：不限流为什么会挤垮、QPS 和并发数两种限流维度、令牌桶怎么发票又允许一小波突发，以及熔断和降级各管什么。
 chapters:
   - { id: hook,         title: 系统繁忙 }
   - { id: no-limit,     title: 不限流会怎样 }
@@ -11,7 +11,7 @@ chapters:
 related: ["message-queue", "load-balancing", "server-cache"]
 ---
 
-抢票时弹出「系统繁忙，请稍后再试」，大多数时候不是网站坏了，而是它故意拦了你一下。这种做法叫**限流**（rate limiting）。它像景区门口限量放人：里面装得下多少，门口就放多少。下面分 6 步讲清楚。
+抢票时弹出「系统繁忙，请稍后再试」，很多时候不是网站坏了，而是它故意拦了你一下。这种做法叫**限流**（rate limiting）。它像景区门口限量放人：里面每秒接待得了多少，门口就每秒放多少。下面分 6 步讲清楚。
 
 ## 6 步看懂限流
 
@@ -32,26 +32,30 @@ related: ["message-queue", "load-balancing", "server-cache"]
 {/* 配图：闸机限量放人，超出的人在门外等 */}
 
 - 主动控制单位时间里放进来多少请求，超出的先拒绝或稍后再试，这就是**限流**。[^azure-rl]
-- 常用的衡量单位是每秒请求数，简称 **QPS**（Queries Per Second）。
-- 被限流时，接口通常返回 HTTP 429（Too Many Requests），页面上就显示成「系统繁忙」。[^mdn-429]
+- 限流常按两种维度来算，别混在一起：[^sentinel-flow][^mse-guide]
+  - **每秒请求数**，简称 **QPS**（Queries Per Second）：每秒放进来多少个请求，管的是速度。
+  - **并发数**：此刻已经开始处理、还没处理完的请求有多少（在途请求数），管的是「里面同时有多少人」。
+- 被限流时，接口通常返回 HTTP 429（Too Many Requests），页面上就显示成「系统繁忙」。[^mdn-429] 不过「繁忙」类提示也可能是服务真的不可用（常见为 HTTP 503），不一定都是限流。[^azure-cb]
 
 ### 4. 令牌桶 {#token-bucket}
 
 {/* 配图：桶按固定节奏掉出门票（令牌），拿票进闸；空闲时票攒满，一小波人一次放进 */}
 
 - **令牌桶**：桶按固定速度放入令牌，每个请求要拿到一个令牌才能通过，桶空了就拒绝。
-- 桶有容量上限，空闲时令牌会攒起来，所以能放过一小波突发流量，长期平均速度仍受控制。[^envoy-rl]
+- 桶有容量上限，空闲时令牌会攒起来，所以能放过一小波突发流量，长期平均速度仍受控制。[^envoy-rl][^aliyun-tb][^redis-tb]
+- 拿不到令牌时，有的实现直接返回 429，有的让请求排队等一等。[^aliyun-apigw]
 
 ### 5. 熔断和降级 {#breaker}
 
-{/* 配图：故障景点的通道先关上、过会再试；拍照打卡点熄灯，主路照常 */}
+{/* 配图：往故障景点带路的导游举「暂停开放」牌（大门照常放人），过会先带几人试探；拍照打卡点熄灯，主路照常 */}
 
-- **熔断**：后面的服务出了故障，先暂停调用它，过一段时间再试探，恢复了再放行，避免故障一路拖垮上游。[^azure-cb]
+- **熔断**：它不在门口管放多少人，而是装在「调用别的服务」的那一侧。调用方统计对某个下游服务的失败率或慢调用比例，超过阈值就「跳闸」，之后对它的调用直接快速失败；过一段时间进入半开状态，只放少量请求去试探，成功了再恢复。这样能避免故障一路拖垮上游。[^azure-cb][^r4j-cb][^mse-guide]
+- 一句话分工：限流管入口，熔断管下游，降级管结果。[^javaguide]
 - **降级**：压力太大时，先关掉不重要的功能，保住最核心的那一条（比如下单）。
 
 ### 6. 回顾 {#recap}
 
-- **消息队列**：让订单排好队、一个不丢。
+- **消息队列**：让订单排好队、不容易丢。
 - **限流**：让门口不被挤爆，分批放人进来。
 - 两期合起来，就是网站「扛住高峰」的两招。
 
@@ -60,6 +64,9 @@ related: ["message-queue", "load-balancing", "server-cache"]
 **限流和消息队列有什么区别？**  
 消息队列是先全部收下、排队慢慢处理；限流是门口直接控制放多少，超出的当场请你稍后。两者经常一起用：先限流挡掉超出能力的部分，放进来的再排队。
 
+**每秒请求数和并发数，哪个更好？**  
+各管一头：请求都很快时按 QPS 限够用；有些请求处理特别久时，按并发数限更能防止里面被塞满。很多系统两种一起配。[^sentinel-flow]
+
 **被限流了，一直狂点刷新有用吗？**  
 通常没用，还可能被当成异常请求拦得更久。按提示稍等再试更好。
 
@@ -67,11 +74,20 @@ related: ["message-queue", "load-balancing", "server-cache"]
 
 - ❌ 「系统繁忙就是服务器挂了」→ ✅ 很多时候是限流在主动保护系统。
 - ❌ 「令牌桶就是严格匀速」→ ✅ 攒下的令牌允许一小波突发，长期平均速度才是固定的。
-- ❌ 「熔断就是限流」→ ✅ 限流管进来多少；熔断是发现后面坏了，先停掉对它的调用。
+- ❌ 「熔断就是限流」→ ✅ 限流管进来多少；熔断是调用方发现某个下游老出错，先停掉对它的调用、直接快速失败。
+- ❌ 「熔断就是门口少放点人」→ ✅ 熔断不控制入口放多少，也不限制并发；限制同时在途的请求数要靠并发限流或舱壁隔离（Bulkhead）。[^r4j-cb]
+- ❌ 「QPS 就是同时在线多少人」→ ✅ QPS 是每秒请求数；同时在处理多少个请求叫并发数。
 
 ## 参考资料
 
 [^azure-rl]: Microsoft Azure 架构中心，《Rate Limiting pattern》（通用设计模式说明，现行文档，访问于 2026-10-13；旁白未点名厂商）。https://learn.microsoft.com/en-us/azure/architecture/patterns/rate-limiting-pattern
 [^mdn-429]: MDN Web Docs，《429 Too Many Requests》（现行文档，访问于 2026-10-13）。https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429
 [^envoy-rl]: Envoy 官方文档，《Local rate limiting》（令牌桶实现说明，现行文档，访问于 2026-10-13）。https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/local_rate_limit_filter
-[^azure-cb]: Microsoft Azure 架构中心，《Circuit Breaker pattern》（现行文档，访问于 2026-10-13）。https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker
+[^azure-cb]: Microsoft Azure 架构中心，《Circuit Breaker pattern》（ms.date 2025-02-05，更新于 2026-09-26，访问于 2026-10-14）。https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker
+[^r4j-cb]: Resilience4j 官方文档，《CircuitBreaker》（CLOSED/OPEN/HALF_OPEN 状态、按失败率跳闸；并明确熔断不限制并发，限并发用 Bulkhead；页面未显示日期，访问于 2026-10-14）。https://resilience4j.readme.io/docs/circuitbreaker
+[^sentinel-flow]: Sentinel 文档，《流量控制》（按线程数/并发数与按 QPS 两种统计类型；页面未显示日期，访问于 2026-10-14）。https://sentinelguard.io/zh-cn/docs/flow-control.html
+[^mse-guide]: 阿里云 MSE 文档，《MSE 流量防护使用指南》（「并发」指在途请求数；熔断是客户端防护、针对依赖的下游接口；页面未显示日期，访问于 2026-10-14）。https://help.aliyun.com/zh/mse/use-cases/mse-traffic-protection-usage-guide
+[^aliyun-tb]: 阿里云 SOFAStack 文档，《限流算法选择》（令牌桶按恒定速度放令牌、存量令牌应对突发；更新于 2024-03-22，访问于 2026-10-14）。https://help.aliyun.com/zh/document_detail/149952.html
+[^redis-tb]: Redis 文档，《Token bucket rate limiter with Redis and Node.js》（页面未显示日期，访问于 2026-10-14）。https://redis.io/docs/latest/develop/use-cases/rate-limiter/nodejs/
+[^aliyun-apigw]: 阿里云 API 网关文档，《流量控制插件》（拿不到令牌时可排队或直接返回 429；更新于 2026-08-10，访问于 2026-10-14）。https://help.aliyun.com/zh/api-gateway/traditional-api-gateway/user-guide/throttling-2
+[^javaguide]: JavaGuide，《服务降级与熔断详解》（社区技术文档，非厂商官方；页面未显示日期，访问于 2026-10-14）。https://javaguide.cn/high-availability/fallback-and-circuit-breaker.html

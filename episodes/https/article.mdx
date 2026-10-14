@@ -34,10 +34,11 @@ chapters:
 {/* 配图：双方只交换亮色的公开钥匙，各自合成出同一把金色钥匙 */}
 
 - 非对称密码用的是一对密钥：**公钥**可以公开，**私钥**只由自己保管。
-- TLS 1.3 用 **ECDHE**（椭圆曲线迪菲-赫尔曼密钥交换）来协商密钥：双方各生成一对临时密钥，只交换公开的那一半，就能各自算出同一个共享秘密；窃听者只看到公开部分，算不出来。[^rfc8446]
+- TLS 1.3 用 **ECDHE**（椭圆曲线迪菲-赫尔曼密钥交换）来协商密钥：双方各生成一对临时密钥，只交换公开的那一半，就能各自算出同一个共享秘密；窃听者只看到公开部分，算不出来。[^rfc9846]
+- 注意别和证书那对密钥混在一起：用来交换的是每次握手**临时生成**的那一半；证书里的私钥不参与交换，只用来对整个握手签名（CertificateVerify），证明这些参数确实是网站发的。[^rfc9846]
 - 非对称运算比对称加密慢得多，所以 HTTPS **混合使用**：先用 ECDHE 协商出**会话密钥**，再用对称加密传输真正的数据。
 - 因为每次连接都用临时密钥，即使服务器私钥日后泄露，过去录下的流量也无法解密，这叫**前向保密**。
-- 历史做法：TLS 1.2 及更早版本允许“客户端用服务器的 RSA 公钥加密预主密钥”，这种 RSA 密钥交换没有前向保密，已在 TLS 1.3 中**移除**。[^rfc8446]
+- 历史做法：TLS 1.2 及更早版本允许“客户端用服务器的 RSA 公钥加密预主密钥”，这种 RSA 密钥交换没有前向保密，已在 TLS 1.3 中**移除**。[^rfc9846]
 
 ### 4. 证书与 CA {#cert}
 
@@ -45,8 +46,8 @@ chapters:
 
 - 光有密钥交换还不够：中间人可以把自己的公钥冒充成网站的。**证书**就是为了解决“这个公钥到底是谁的”。
 - 证书由 **CA**（证书颁发机构）签发，写明域名、公钥、有效期，并带有 CA 的数字签名。[^le-chain]
-- 浏览器沿**证书链**校验：网站证书 → 中间证书 → 操作系统或浏览器内置的**根证书**。任何一环签名不对、域名不匹配或已过期，都会报警。
-- 在 TLS 1.3 握手中，服务器还会用私钥对握手内容签名（CertificateVerify），证明自己确实持有证书对应的私钥。[^rfc8446]
+- 浏览器沿**证书链**校验：网站证书 → 中间证书 → 受信任的**根证书**。根证书清单（Root Store）由浏览器或操作系统维护，例如 Chrome 用的是自己的 Chrome Root Store，不一定是系统那份。[^chrome-root]任何一环签名不对、域名不匹配或已过期，都会报警。
+- 在 TLS 1.3 握手中，服务器还会用私钥对握手内容签名（CertificateVerify），证明自己确实持有证书对应的私钥。[^rfc9846]
 
 ### 5. TLS 握手 {#handshake}
 
@@ -55,13 +56,13 @@ chapters:
 - **ClientHello**：浏览器发出支持的 TLS 版本、加密套件，以及自己的 ECDHE 公开参数（key_share）。
 - **ServerHello**：服务器选定算法，回传自己的 key_share。此后双方已能算出握手密钥，证书、CertificateVerify 签名和 Finished 都加密发送。
 - 浏览器校验证书和签名，发出自己的 Finished，之后的 HTTP 数据全部用会话密钥加密。
-- TLS 1.2 完整握手需要 **2 个往返**（2-RTT），TLS 1.3 只要 **1 个往返**（1-RTT）；恢复会话时还可用 0-RTT，但 0-RTT 数据存在被重放的风险。[^rfc8446]
+- TLS 1.2 完整握手需要 **2 个往返**（2-RTT）[^rfc5246]，TLS 1.3 只要 **1 个往返**（1-RTT）；恢复会话时还可用 0-RTT，但 0-RTT 数据存在被重放的风险。[^rfc9846]
 
 ### 6. 完整性与误区 {#integrity}
 
 {/* 配图：信箱贴上防拆封条，铅笔试图改动时封条变红 */}
 
-- TLS 1.3 只允许 **AEAD** 加密算法：加密的同时为每条记录生成认证标签，路上改动哪怕一个字节，校验都会失败，连接直接中断。[^rfc8446]
+- TLS 1.3 只允许 **AEAD** 加密算法：加密的同时为每条记录生成认证标签，路上改动哪怕一个字节，校验都会失败，连接直接中断。[^rfc9846]
 - 回到明信片：现在它锁进了信箱（加密），盖了邮局的章（证书），贴上了防拆封条（完整性）。
 
 ## 深入一问
@@ -73,7 +74,7 @@ chapters:
 浏览器会显示全屏警告，阻止你继续访问，因为过期证书无法证明当前的公钥仍然可信。证书有效期目前多为 90 天，并且还在缩短：按 CA/浏览器论坛的行业要求，Let's Encrypt 计划在 2027 年把默认有效期缩短到 64 天，2028 年再缩短到 45 天。有效期越短，私钥泄露后被滥用的时间窗口就越小，也逼着网站把续期做成自动化。[^le-45]
 
 **自签名证书为什么会报警？**
-自签名证书没有经过受信任的 CA 签发，证书链连不到浏览器内置的根证书，浏览器无法确认它不是中间人伪造的。
+自签名证书没有经过受信任的 CA 签发，证书链连不到受信任的根证书，浏览器无法确认它不是中间人伪造的。
 
 **HTTPS 能防钓鱼网站吗？**
 不能。钓鱼网站也可以申请到合法证书。HTTPS 只证明你连上的是证书上写的那个域名，并且通信没被偷看或篡改，不证明这个域名背后的网站值得信任。
@@ -93,7 +94,9 @@ TLS 是 SSL 的后继者。SSL 2.0 和 3.0 都已被正式废弃，今天说的�
 
 ## 参考资料
 
-[^rfc8446]: IETF, [RFC 8446: The Transport Layer Security (TLS) Protocol Version 1.3](https://www.rfc-editor.org/rfc/rfc8446), 2018-08（现行标准）。
+[^rfc9846]: IETF, [RFC 9846: The Transport Layer Security (TLS) Protocol Version 1.3](https://www.rfc-editor.org/rfc/rfc9846), 2026-07（取代 RFC 8446，访问于 2026-10-14）。
+[^rfc5246]: IETF, [RFC 5246: The Transport Layer Security (TLS) Protocol Version 1.2](https://www.rfc-editor.org/rfc/rfc5246), 2008-08（§7.3 握手流程图；「仅参考」，访问于 2026-10-14）。
+[^chrome-root]: Google, [Chrome Root Program Policy v1.8](https://googlechrome.github.io/chromerootprogram/crp/policy/), Last updated 2026-02-05（访问于 2026-10-14）。
 [^http-sec]: MDN, [Transport Layer Security](https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security)，访问于 2026-10-12。
 [^le-chain]: Let's Encrypt, [Chain of Trust](https://letsencrypt.org/certificates/)，访问于 2026-10-12。
 [^le-45]: Let's Encrypt, [Decreasing Certificate Lifetimes to 45 Days](https://letsencrypt.org/2025/12/02/from-90-to-45), 2025-12-02。

@@ -173,5 +173,6 @@ PS="second-1"; sh=[x for sc in scenes for x in sc['shots'] if x['id']==PS][0]
 AT_TG=[a for a in sh["animations"] if a["elementId"]=="t0"][0]["keyframes"][0]["frame"]
 pl=152  # 定稿：second-1 局部 152（冰箱打开、货包飞向页面、图片瞬间全出）
 meta['poster']=dict(shotId=PS,localFrame=pl,frame=sh['from']+pl,desc="冰箱打开那一刻：三个货包飞向页面，图片瞬间全出",file="poster.jpg")
-json.dump(dict(meta=meta,assets=assets,scenes=scenes),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
+import json as _j;from pathlib import Path as _Pc;_CS=_Pc("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=_j.load(open(_CS)).get("browser-cache") if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
+json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
 print('clamped keyframes:',CLAMP or 'none');print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames']) for s in scenes])

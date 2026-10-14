@@ -71,12 +71,12 @@ for sid,v in TM.items():
     for q in v['sentences']: mine.append((sid,GS[sid]*1/30+q['start'],q['text']))
 order=list(TM)
 for (co,kq),(sid,st,tx) in zip(ksent,mine):
-    v=TM[sid]; before=sum(TM[x].get('extraHold',0) for x in order[:order.index(sid)])
+    v=TM[sid]; before=sum(TM[x].get('extraHold',0)+TM[x].get('labelHold',0) for x in order[:order.index(sid)])  # labelHold：2026-10-14 标签 hold（镜头末尾）
     lk=round(30*kq['start'])-v['knollChapterOffsetFrames']  # Knoll 句子在本镜头内的帧（knollChapterOffsetFrames=镜头在章内的偏移）
     inner=v.get('extraHold',0) if 'holdAt' in v and v['holdAt']<v['origDuration'] and lk>=v['holdAt'] else 0
     exp=co/30+kq['start']+(before+inner)/30
     if kq['text']!=tx or abs(st-exp)>0.02: err.append(('sent start',sid,tx[:8],round(st,3),round(exp,3)))
-if g!=sum(v['duration'] for v in K.values())+sum(v.get('extraHold',0) for v in TM.values()): err.append('hold total')
+if g!=sum(v['duration'] for v in K.values())+sum(v.get('extraHold',0)+v.get('labelHold',0) for v in TM.values()): err.append('hold total')
 raw=open('storyboard.json').read()
 for b in BANNED:
     if b in raw: err.append(('banned',b))

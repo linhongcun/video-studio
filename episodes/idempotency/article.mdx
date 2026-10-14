@@ -39,8 +39,8 @@ related: ["message-queue", "rate-limit"]
 
 {/* 配图：每笔请求贴号签，后台翻账本查号 */}
 
-- 客户端为每笔操作生成一个**唯一 ID**（常叫幂等键，Idempotency Key），随请求一起发。
-- 后台先查这个 ID：没处理过就执行并记下结果；处理过就不再执行，直接返回上次的结果。[^stripe-idem]
+- 客户端为每笔操作生成一个**唯一 ID**（常叫幂等键，Idempotency Key），随请求一起发。关键是：重试、连点时要**复用同一个 ID**；每发一次就换个新 ID，后台只会当成两笔。别的操作也不能借用这个 ID。[^aws-ec2-idem][^stripe-idem]
+- 后台先把这个 ID 登记上（例如靠数据库唯一约束「抢占」），登记成功才执行并记下结果；已经登记过就不再执行，直接返回上次的结果。不能简单「先查一下、没有再办」：两个相同请求同时到达时，可能都查到「没办过」，结果扣两次。[^stripe-idem]
 
 ### 5. 重试和幂等 {#retry}
 
@@ -51,7 +51,7 @@ related: ["message-queue", "rate-limit"]
 
 ### 6. 回顾 {#recap}
 
-- **消息队列**：让订单排好队、一个不丢。
+- **消息队列**：让订单排好队、不容易丢。
 - **限流**：守住门口，分批放人。
 - **幂等**：同一笔钱只扣一次。
 - 三招合起来，就是「扛住高峰」。
@@ -74,5 +74,6 @@ related: ["message-queue", "rate-limit"]
 
 [^mdn-idem]: MDN Web Docs，《Idempotent》术语表（现行文档，访问于 2026-10-13）。https://developer.mozilla.org/en-US/docs/Glossary/Idempotent
 [^rfc9110]: IETF RFC 9110《HTTP Semantics》第 9.2.2 节 Idempotent Methods，2022-06 发布。https://www.rfc-editor.org/rfc/rfc9110#section-9.2.2
-[^stripe-idem]: Stripe API 文档，《Idempotent requests》（行业通用做法示例，现行文档，访问于 2026-10-13；旁白未点名任何平台）。https://docs.stripe.com/api/idempotent_requests
+[^stripe-idem]: Stripe API 文档，《Idempotent requests》（行业通用做法示例，页面未显示日期，访问于 2026-10-14；文中写明会检测同一个 key 的并发请求；旁白未点名任何平台）。https://docs.stripe.com/api/idempotent_requests
 [^aws-retry]: AWS Builders' Library，《Making retries safe with idempotent APIs》（现行文章，访问于 2026-10-13）。https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/
+[^aws-ec2-idem]: AWS 文档，《Ensuring idempotency in Amazon EC2 API requests》（重试用同一个 client token 不会重复执行；不同请求不要复用同一个 token；页面未显示日期，访问于 2026-10-14；旁白未点名厂商）。https://docs.aws.amazon.com/ec2/latest/devguide/ec2-api-idempotency.html

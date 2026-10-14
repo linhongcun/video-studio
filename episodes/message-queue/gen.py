@@ -89,21 +89,21 @@ def shots_for(si,L):
         return [(e1,a1),(e2,a2)]
     if si==4:  # 生产者和消费者
         e1=[ctr("counter",160,280,300),term("prod",160,560,300,"生产者",P['accent'],44),queue("q",520,260,860),I("chef","chef",1480,260,220),term("cons",1440,560,300,"消费者",P['success'],44),
-            I("dish","dish-green",1520,460,140),R("done",560,700,800,90,stroke=P['primary'],radius=16,label="做完 → 才划掉",fontSize=44),
-            R("ring",1166,444,97,131,None,stroke=P['accent'],radius=12),E("strike","arrow",1150,486,128,24,P['danger'],headless=True,note="划线：无箭头的线段，drawProgress"),
-            R("gone",1172,452,85,115,P['bg'])]  # 队首号单（queue.svg 第 5 张）：高亮框 → 红线划过 → 盖掉移除
-        tc=at(1,"划掉")
+            I("dish","dish-green",1520,460,140),R("done",560,700,800,90,stroke=P['primary'],radius=16,label="做完 → 打记号",fontSize=44),
+            R("ring",1166,444,97,131,None,stroke=P['accent'],radius=12),R("mark",1150,590,130,60,P['bg'],stroke=P['success'],radius=30,label="已办",fontSize=34)]
+        # 2026-10-14 内容核对：做完不再「划掉/移除」，而是给队首号单打个「已办」记号，号单留在队里（旧版：红线划过 + 盖掉）
+        tc=at(1,"记号")
         a1=[F("counter",0),F("q",0),F("chef",0),F("prod",at(0,"生产者")),pop("prod",at(0,"生产者")),F("cons",at(0,"消费者")),pop("cons",at(0,"消费者")),
             F("dish",at(1,"做完")),F("done",tc),pop("done",tc),
-            F("ring",at(1,"做完")),draw("strike",tc,10),mv("gone","opacity",0,1,0,0,"linear"),F("gone",tc+14),out("ring",tc+14,tc+26),out("strike",tc+14,tc+26)]
+            F("ring",at(1,"做完")),F("mark",tc),pop("mark",tc)]
         e2=[queue("q",160,240,760),I("c1","chef",1000,240,200),tag("err",960,520,280,"出错",P['danger'],44),I("c2","chef",1460,240,200),I("pot","pot",1170,300,110),
-            R("gone",738,410,72,101,P['bg']),R("ring",730,402,89,117,None,stroke=P['accent'],radius=12),I("slip","slip",714,400,120),R("still",160,560,560,84,stroke=P['accent'],radius=16,label="号单：还在",fontSize=40),R("safe",960,640,780,90,stroke=P['success'],radius=45,label="接手重做 → 不丢",fontSize=40),
+            R("ring",730,402,89,117,None,stroke=P['accent'],radius=12),I("slip","slip",714,400,120),R("still",160,560,560,84,stroke=P['accent'],radius=16,label="没记号：还在",fontSize=40),R("safe",960,640,780,90,stroke=P['success'],radius=45,label="换人接手重做",fontSize=40),
             R("kafka",160,700,240,80,stroke=P['text2'],radius=40,label="Kafka",fontSize=40),R("rabbit",440,700,320,80,stroke=P['text2'],radius=40,label="RabbitMQ",fontSize=40)]
         te=at(0,"出了错"); th=at(0,"换个厨师")
-        # 对比 producer-1：厨师 1 出错（锅掉下），队首号单不划掉、保持高亮，厨师 2 再把它取走
+        # 对比 producer-1：厨师 1 出错（锅掉下），队首号单没有记号、保持高亮，厨师 2 接手重做（号单仍留在队里，直到做完打记号）
         a2=[F("q",0),F("c1",0),F("pot",0),F("err",te),pop("err",te),mv("pot","y",te,te+18,300,430,"easeIn"),mv("c1","opacity",te+12,te+24,1,0.35),
-            F("slip",te),F("ring",te),pop("ring",te),F("still",at(0,"号单还在")),
-            F("c2",th),mv("slip","x",th,th+24,714,1660),mv("slip","y",th,th+24,400,300),out("ring",th,th+12),mv("gone","opacity",0,1,0,0,"linear"),F("gone",th),F("safe",at(0,"不会丢")),F("kafka",at(1,"Kafka")),pop("kafka",at(1,"Kafka")),F("rabbit",at(1,"RabbitMQ")),pop("rabbit",at(1,"RabbitMQ"))]  # 各在念到时单独弹出
+            F("slip",te),F("ring",te),pop("ring",te),F("still",at(0,"单子还在")),
+            F("c2",th),mv("slip","x",th,th+24,714,1660),mv("slip","y",th,th+24,400,300),out("ring",th,th+12),F("safe",at(0,"不容易丢")),F("kafka",at(1,"Kafka")),pop("kafka",at(1,"Kafka")),F("rabbit",at(1,"RabbitMQ")),pop("rabbit",at(1,"RabbitMQ"))]  # 各在念到时单独弹出
         return [(e1,a1),(e2,a2)]
     if si==5:  # 回顾
         row=[I("fridge","fridge",170,300,160,230),I("store","store",440,290,240),ctr("counter",780,330,240),prep("prep",1110,350,300),queue("q",1480,340,300)]
@@ -161,5 +161,6 @@ assets=dict(reuse=[dict(id="routeArrow",desc="路线箭头 drawProgress"),dict(i
 PS="peak-2"; sh=[x for sc in scenes for x in sc['shots'] if x['id']==PS][0]
 pl=330  # 写死：peak-2 局部 330（ep9 正式 timing，全局 2612）——「削峰」刚弹出（312–324）、平缓曲线 + 队列 + 后厨都在
 meta['poster']=dict(shotId=PS,localFrame=pl,frame=sh['from']+pl,desc="削峰：虚线尖峰被队列压成平缓曲线，「削峰」标签、叫号队列与后厨",file="poster.jpg")
-json.dump(dict(meta=meta,assets=assets,scenes=scenes),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
+_CS=Path("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=json.load(open(_CS)).get(meta["slug"]) if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
+json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
 print('clamped keyframes:',CLAMP or 'none');print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames']) for s in scenes])

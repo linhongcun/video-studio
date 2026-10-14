@@ -110,7 +110,7 @@ Set-Cookie: session=abc123; HttpOnly; Secure
 - **CSS 不阻塞 DOM 解析，但会阻塞渲染**：CSSOM 没建好，浏览器不会绘制页面；CSS 还会**阻塞后面 JS 的执行**，因为脚本可能读取样式。所以 CSS 放 `<head>`，尽早加载。[^render]
 - 遇到普通 `<script>`，HTML 解析会**暂停**，等脚本下载并执行完再继续；用 `defer` 或 `async` 可以避免阻塞（区别见下面的“深入一问”）。[^script]
 - 图片、CSS、JS 等**子资源**会各自再走一遍请求流程（多数能命中缓存或复用连接）。
-- 连接在空闲后关闭，TCP 通过**四次挥手**断开。
+- 连接不是页面一展示完就断：HTTP/1.1 默认长连接，后续请求复用同一条连接，空闲一段时间后才关闭，TCP 通过**四次挥手**断开。[^http]
 
 ## 深入一问
 
@@ -161,7 +161,7 @@ TCP 是全双工的，两个方向要分别关闭。服务器收到客户端的 
 
 以下标准文档是现行规范，部分发布年份较早，但仍是有效标准；MDN 页面为持续更新文档，标注访问日期。
 
-[^http]: RFC 9110《HTTP Semantics》，IETF，2022-06；RFC 9112《HTTP/1.1》，IETF，2022-06。
+[^http]: RFC 9110《HTTP Semantics》，IETF，2022-06；RFC 9112《HTTP/1.1》，IETF，2022-06（§9.3 持久连接、§9.5 空闲连接的关闭；访问于 2026-10-14）。
 [^cache]: RFC 9111《HTTP Caching》，IETF，2022-06；MDN《HTTP caching》，访问于 2026-10-12。
 [^status]: RFC 9110 第 15 节“Status Codes”，2022-06；MDN《HTTP response status codes》，访问于 2026-10-12。
 [^tcp]: RFC 9293《Transmission Control Protocol (TCP)》，IETF，2022-08（第 3.5 节说明了三次握手用于防止旧的重复连接请求）。
