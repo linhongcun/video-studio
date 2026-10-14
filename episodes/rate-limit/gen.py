@@ -48,7 +48,7 @@ def shots_for(si,L):
             T("q",160,320,420,80,"崩了？",56,P['text2'],align="center"),R("block",1340,320,420,96,stroke=P['accent'],radius=48,label="有意为之",fontSize=44)]
         tb=at(0,"弹出")
         a1=[F("phone",0),F("buy",0),pop("buy",at(0,"点下购买")),out("buy",tb,tb+10),F("busy",tb),pop("busy",tb),F("q",at(1,"坏了")),
-            mv("q","opacity",at(2,"没坏"),at(2,"没坏")+12,1,0.35),F("block",at(2,"故意拦")),pop("block",at(2,"故意拦"))]
+            mv("q","opacity",at(2,"没坏")+8,at(2,"没坏")+20,1,0.35),F("block",at(2,"故意拦")),pop("block",at(2,"故意拦"))]
         e2=crowd("g",160,520,6,3,110,90)+[I("gate","gate",640,180,520),queue("q",1220,440,560),T("ask",160,260,400,120,"？",110,P['accent'],align="center")]
         a2=[F("gate",0)]+[F(f"g{j}",j*6) for j in range(6)]+[F("ask",0),pop("ask",0),F("q",at(1,"景区门口")),mv("q","x",at(1,"景区门口"),at(1,"景区门口")+24,1300,1220)]
         return [(e1,a1),(e2,a2)]
@@ -90,17 +90,23 @@ def shots_for(si,L):
         a2+=[out("full",tbst+20,tbst+32,0.6),F("burst",tbst)]
         return [(e1,a1),(e2,a2)]
     if si==4:  # 熔断和降级
-        e1=[I("gate","gate",160,240,360),T("rlT",160,180,360,50,"限流",40,P['primary'],align="center"),E("path","arrow",560,420,620,50,P['text2'],direction="r"),I("spot","spot",1240,200,400),I("smoke","smoke",1400,120,220),
-            R("stop",780,380,180,130,P['bg'],stroke=P['danger'],radius=16,label="暂停",fontSize=44),I("tm","timer",800,560,140),tag("retry",960,580,420,"定时重试",P['accent'],40),
+        # 2026-10-14 内容核对：熔断改成「导游不往那边带人、举『暂停开放』牌，大门照常放人；过一会先带少量游客试，没问题再恢复」（旧版：路上『暂停』牌 +『定时重试』+ 派人看看）
+        e1=[I("gate","gate-open",160,240,360),T("rlT",160,180,360,50,"限流",40,P['primary'],align="center"),tag("gateT",160,600,360,"大门：照常",P['success'],40),
+            E("path","arrow",560,420,620,50,P['text2'],direction="r"),I("spot","spot",1240,200,400),I("smoke","smoke",1400,120,220),
+            I("guide","guide",600,250,170),R("stop",790,250,300,110,P['bg'],stroke=P['danger'],radius=16,label="暂停开放",fontSize=44),
+            I("tm","timer",800,520,120),tag("few",940,540,320,"少量游客",P['accent'],40),I("t0","guest",660,345,80),I("t1","guest",720,345,80),
+            R("ok",1240,620,400,84,P['bg'],stroke=P['success'],radius=16,label="恢复",fontSize=40),
             term("cb",160,700,440,"熔断",P['danger'],52),I("fuse","fuse",620,700,100)]
-        a1=[F("gate",0),F("rlT",at(0,"限流")),F("spot",0),F("path",0),F("smoke",at(1,"故障")),F("stop",at(1,"暂停")),pop("stop",at(1,"暂停")),F("tm",at(1,"过一会")),F("retry",at(1,"过一会")),
-            out("smoke",at(1,"好了再放"),at(1,"好了再放")+12),out("stop",at(1,"好了再放"),at(1,"好了再放")+12),F("cb",at(1,"熔断")),pop("cb",at(1,"熔断")),F("fuse",at(1,"熔断"))]
+        tp=at(1,"暂停开放"); tt=at(1,"带几个人"); tk=at(1,"没问题")
+        a1=[F("gate",0),F("rlT",at(0,"限流")),F("gateT",at(0,"限流")),F("spot",0),F("path",0),F("smoke",at(1,"故障")),F("guide",at(1,"导游")),pop("guide",at(1,"导游")),F("stop",tp),pop("stop",tp),
+            F("tm",at(1,"过一会")),F("few",tt),F("t0",tt),F("t1",tt+4),mv("t0","x",tt+6,tt+40,660,1330),mv("t1","x",tt+10,tt+44,720,1410),
+            out("smoke",tk,tk+12),out("stop",tk,tk+12),F("ok",tk),pop("ok",tk),F("cb",at(1,"熔断")),pop("cb",at(1,"熔断")),F("fuse",at(1,"熔断"))]
         e2=[I("main","spot",160,180,400),tag("mainT",160,600,400,"主路：照常",P['success'],40),I("cam","camera",900,220,300),tag("camT",860,600,380,"打卡：先关",P['text2'],40),
             term("dg",1300,700,440,"降级",P['accent'],52),I("dgi","downgrade",1300,560,120)]
         a2=[F("main",0),F("cam",0),F("mainT",at(0,"保住")),F("camT",at(0,"关掉")),mv("cam","opacity",at(0,"关掉"),at(0,"关掉")+12,1,0.25),F("dgi",at(0,"降级")),F("dg",at(0,"降级")),pop("dg",at(0,"降级"))]
         return [(e1,a1),(e2,a2)]
     if si==5:  # 回顾
-        e1=[R("title",460,140,1000,96,stroke=P['accent'],radius=48,label="两招：排队 + 限流",fontSize=48),queue("q",160,320,700),T("lq",160,620,700,50,"消息队列：排队不丢",40,P['primary'],align="center"),
+        e1=[R("title",460,140,1000,96,stroke=P['accent'],radius=48,label="两招：排队 + 限流",fontSize=48),queue("q",160,320,700),T("lq",160,620,700,50,"消息队列：排好队",40,P['primary'],align="center"),
             I("gate","gate",1240,260,340),T("lg",1060,620,700,50,"限流：分批进门",40,P['success'],align="center"),T("plus",880,380,140,80,"+",80,P['text'],align="center")]
         a1=[mv("q","opacity",0,12,0,0.35),mv("q","opacity",at(0,"消息队列"),at(0,"消息队列")+12,0.35,1),F("lq",at(0,"消息队列")),
             mv("gate","opacity",0,12,0,0.35),mv("gate","opacity",at(0,"限流"),at(0,"限流")+12,0.35,1),F("lg",at(0,"限流")),F("plus",at(1,"合起来")),F("title",at(1,"两招")),pop("title",at(1,"两招"))]
@@ -150,9 +156,10 @@ meta=dict(title="《抢票那一刻，为什么总提示系统繁忙？》",epis
    "贯穿比喻：景区门口限量放人，接第九期叫号队伍（门口先限量，进来的人再排队）。旁白点出术语：限流、令牌桶（主讲）、熔断、降级（各一句，配小图标）、QPS（一次），念到时上屏术语标签；一千人/一万人为示意数字，画面标「示意」。画面不重复字幕句子（validate：术语白名单除外）。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/rate-limit/。新图标 gate/gate-open/bucket/bucket-empty/bucket-full/token/server/server-down/spot/smoke/camera/fuse/downgrade 自绘无文字；复用 phone/guest/queue/slip/spinner（第九期）、timer（第八期）。branding v1.3.0：只有右上水印（留空区 x1700–1840 y80–130）+ 60 帧片尾卡（全局组件），无中央水印，无自我介绍。")
 assets=dict(reuse=[dict(id="routeArrow",desc="路线箭头 drawProgress"),dict(id="subtitle",desc="字幕层")]+
   [dict(id=n,file=f"assets/{n}.svg",from_=f"message-queue/assets/{n}.svg") for n in ("phone","guest","queue","slip")]+[dict(id="timer",file="assets/timer.svg",from_="server-cache/assets/timer.svg")],
- new=[dict(id=n,file=f"assets/{n}.svg") for n in ("phone-busy","gate","gate-open","bucket","bucket-empty","bucket-full","token","server","server-down","spot","smoke","camera","fuse","downgrade")])
+ new=[dict(id=n,file=f"assets/{n}.svg") for n in ("phone-busy","gate","gate-open","guide","bucket","bucket-empty","bucket-full","token","server","server-down","spot","smoke","camera","fuse","downgrade")])
 PS="token-bucket-1"; sh=[x for sc in scenes for x in sc['shots'] if x['id']==PS][0]
 pl=195  # 写死：token-bucket-1 局部 195（ep10 正式 timing，全局 2082）——「令牌桶」「匀速发票」已全显、第二张令牌正落进桶
 meta['poster']=dict(shotId=PS,localFrame=pl,frame=sh['from']+pl,desc="令牌桶：门口的桶按固定速度掉进令牌，「令牌桶」「令牌」「固定速度」",file="poster.jpg")
-json.dump(dict(meta=meta,assets=assets,scenes=scenes),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
+_CS=Path("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=json.load(open(_CS)).get(meta["slug"]) if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
+json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
 print('clamped keyframes:',CLAMP or 'none');print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames']) for s in scenes])

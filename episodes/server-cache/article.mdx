@@ -50,6 +50,7 @@ related: ["browser-cache", "cdn", "load-balancing"]
 {/* 配图：仓库价签改了；厨师撤掉台上旧盘；下一单去仓库拿新的 */}
 
 - 数据库里的数据改了，缓存里那份就旧了。常见做法是：**先更新数据库，再删掉对应的缓存**，下一次读取没命中，自然会从数据库拿到新数据并回填。[^cache-aside]
+- 但这不是「一改就立刻全对」：从改完数据库到删掉缓存之间，仍可能有请求读到旧数据，只是时间很短。[^cache-aside]
 - 忘了删，或者删失败，用户就会在过期之前一直看到旧数据。过期时间也是一道兜底。
 
 ### 6. 回顾 {#recap}
@@ -78,4 +79,4 @@ related: ["browser-cache", "cdn", "load-balancing"]
 
 [^redis-expire]: Redis 官方文档，《EXPIRE》（设置过期时间）。https://redis.io/docs/latest/commands/expire/
 [^redis-evict]: Redis 官方文档，《Key eviction》（内存满时的淘汰策略）。https://redis.io/docs/latest/develop/reference/eviction/
-[^cache-aside]: Microsoft Azure 架构中心，《Cache-Aside pattern》（通用设计模式说明，现行文档；旁白未点名厂商）。https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside
+[^cache-aside]: Microsoft Azure 架构中心，《Cache-Aside pattern》（通用设计模式说明，ms.date 2025-09-11，更新于 2025-12-09，访问于 2026-10-14；旁白未点名厂商）。https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside

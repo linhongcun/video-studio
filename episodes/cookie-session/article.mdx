@@ -34,7 +34,7 @@ chapters:
 {/* 配图：每支请求箭头都带着同一张手牌；另一个网站伸手，手牌没过去 */}
 
 - 之后浏览器访问同一个网站，会自动在请求头里带上 **`Cookie: sid=7f3a9c…`**，不需要网页代码手动处理。[^rfc6265]
-- 浏览器按 Cookie 的 **`Domain`** 和 **`Path`** 判断该不该带：手牌只交给发它的那个网站（以及它允许的子域名和路径），别的网站拿不到。
+- 浏览器按 Cookie 的 **`Domain`** 和 **`Path`** 判断该不该带：手牌只交给发它的那个网站（以及它允许的子域名和路径），别的网站读不到。注意「读不到」不等于「不会被带上」：设成 `SameSite=None` 的 Cookie，在别的网站发起的跨站请求里也会被带上，所以才需要 SameSite 来限制。[^mdn-cookies]
 - 没有设置 `Expires` 或 `Max-Age` 的 Cookie 叫**会话 Cookie**，浏览器关闭后通常会被清掉；设置了的就会保存到过期为止。[^mdn-set-cookie]
 
 ### 4. 柜台里存什么 {#session}
@@ -88,6 +88,6 @@ Cookie 是浏览器里存的一小段数据，Session 是服务器上存的一�
 [^rfc9110]: IETF, [RFC 9110: HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110), 2022-06（现行标准）。
 [^rfc6265]: IETF, [RFC 6265: HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265), 2011-04（现行标准）。
 [^rfc6265bis]: IETF HTTP 工作组, [Cookies: HTTP State Management Mechanism（rfc6265bis 草案）](https://datatracker.ietf.org/doc/draft-ietf-httpbis-rfc6265bis/)，访问于 2026-10-12（草案，尚未成为正式标准）。
-[^mdn-cookies]: MDN, [Using HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)，访问于 2026-10-12。
+[^mdn-cookies]: MDN, [Using HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)，last modified 2026-09-17，访问于 2026-10-14。
 [^mdn-set-cookie]: MDN, [Set-Cookie header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie)，访问于 2026-10-12。
 [^owasp-session]: OWASP, [Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)，访问于 2026-10-12。

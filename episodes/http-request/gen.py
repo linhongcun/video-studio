@@ -19,7 +19,7 @@ def stepbar(vertical=False):
     els=[]
     for k,s in enumerate(steps):
         if vertical: els.append(R(f"step{k+1}",120,110+k*92,560,76,P['panel'],False,stroke=P['muted'],radius=12,label=f"{k+1} {s}"))
-        else: els.append(R(f"step{k+1}",120+k*212,560,196,110,P['panel'],False,stroke=P['secondary'],radius=12,label=f"{k+1}\n{s}",fontSize=28))
+        else: els.append(R(f"step{k+1}",83+k*220,560,214,110,P['panel'],False,stroke=P['secondary'],radius=12,label=f"{k+1}\n{s}",fontSize=33))
     return els
 # split points: list of sentence-index groups per scene (by '。')
 def sentences(s): return [x for x in re.findall(r'[^。？]+[。？]',s)]
@@ -63,7 +63,7 @@ def shots_for(si,L):
               R("auth",1120,540,440,90,P['panel'],stroke=P['success'],radius=45,label="example.com（权威）",font="monospace"),
               E("edge1","line",1340,210,0,120,P['muted']),E("edge2","line",1340,420,0,120,P['muted'])]
         q=[E(f"ask{k}","arrow",640,670,480,0,P['primary'],label=l) for k,l in enumerate(["问根","问 .com","问权威"])]
-        ip=[T("ip",120,750,800,64,"example.com → 203.0.113.10",44,P['success'],font="monospace"),T("ipNote",120,816,800,36,"示例 IP：RFC 5737 文档专用地址，非真实服务器",26,P['muted'])]
+        ip=[T("ip",120,750,800,64,"example.com → 203.0.113.10",44,P['success'],font="monospace"),T("ipNote",120,816,800,36,"示例 IP：RFC 5737 文档专用地址，非真实服务器",28,P['muted'])]
         e2=[res]+tree+q+ip
         a2=[fade("root",0,10),fade("edge1",10,15),fade("tld",15,25),fade("edge2",25,30),fade("auth",30,40)]
         for k,yy in enumerate([165,375,585]): a2+=[mv(f"ask{k}","y",45+k*45,60+k*45,670,yy),fade(f"ask{k}",45+k*45,55+k*45),mv(f"ask{k}","opacity",80+k*45,90+k*45,1,0)]
@@ -78,7 +78,7 @@ def shots_for(si,L):
         tls=[E(f"tls{k}","arrow",450,500+k*70,1020,50,P['accent'],label=l,direction=d) for k,(l,d) in enumerate([("ClientHello","r"),("ServerHello + 证书","l"),("密钥交换 / Finished","r")])]
         lock=[E("lock","icon",880,730,160,100,P['success'],label="🔒"),T("lockNote",1060,750,400,50,"证书校验、密钥协商",32,P['success'])]
         q=T("quic",1300,830,540,40,"HTTP/3 = QUIC over UDP",28,P['muted'],font="monospace")
-        tls13=T("tls13note",1380,820,460,40,"TLS 1.3 只需 1 个往返（1-RTT）",24,"#9CA3AF")
+        tls13=T("tls13note",990,688,460,40,"TLS 1.3 只需 1 个往返（1-RTT）",28,"#9CA3AF")
         a2=[mv(f"tls{k}","drawProgress",10+k*35,40+k*35,0,1) for k in range(3)]+[mv("lock","scale",120,140,0,1,"spring"),fade("lockNote",135,150),fade("quic",L[1]-90,L[1]-70),fade("tls13note",200,220)]
         # keep base & tcp visible
         return [(base+arr,a1),(base+arr+tls+lock+[q,tls13],a2)]
@@ -124,8 +124,11 @@ def shots_for(si,L):
         a2=[mv("script","scale",0,15,0,1,"spring"),fade("defer",50,65),mv("script","y",70,100,220,520)]
         sub=T("sub",120,620,1680,50,"子资源再发请求 · keep-alive 复用连接",32,P['muted'],align="center")
         fin=[E(f"fin{k}","arrow",560,700+k*36,800,30,P['muted'],label=l,direction=d) for k,(l,d) in enumerate([("FIN","r"),("ACK","l"),("FIN","l"),("ACK","r")])]
-        a3=[fade("sub")]+[mv(f"fin{k}","drawProgress",30+k*12,42+k*12,0,1) for k in range(4)]
-        return [(pipe+src,a1),(pipe+[sc,df],a2),(pipe+[sub]+fin,a3)]
+        # 2026-10-14 内容核对：「空闲一段时间后才四次挥手」——先亮「连接空闲中」，四次挥手推后到镜头后段（旧版：念到即挥手）
+        idle=R("idle",760,470,400,56,P['bg'],stroke=P['muted'],radius=28,label="连接空闲中",fontSize=32)
+        n3=L[2]; ti=int(n3*0.5); tf=int(n3*0.66)
+        a3=[fade("sub"),fade("idle",ti,ti+10)]+[mv(f"fin{k}","drawProgress",tf+k*int(n3*0.05),tf+k*int(n3*0.05)+int(n3*0.07),0,1) for k in range(4)]
+        return [(pipe+src,a1),(pipe+[sc,df],a2),(pipe+[sub,idle]+fin,a3)]
     if si==9:
         bar=stepbar(True)
         title=T("finalTitle",760,380,1080,140,"一次访问，八步完成",96,P['success'],align="center")
@@ -202,7 +205,8 @@ assets=dict(reuse=[dict(id="browser",desc="第一期浏览器窗口（rect，pan
  dict(id="seqDiagram",desc="握手时序图：两条竖线 + 带标签箭头（SYN/SYN+ACK/ACK，TLS ClientHello 等，第 8 章复用做四次挥手）"),dict(id="lock",desc="TLS 锁图标"),
  dict(id="cdn",desc="CDN 边缘节点图标 + CNAME 文本 + 命中折返路径"),dict(id="lb/rp",desc="负载均衡、反向代理两道门"),
  dict(id="statusCards",desc="状态码翻牌卡 200/301/404/500 + 放大 304"),dict(id="pipeline",desc="渲染流水线五格 DOM→CSSOM→渲染树→布局→绘制/合成"),dict(id="scriptBlock",desc="<script> 阻塞方块 + defer/async 标签")])
-json.dump(dict(meta=meta,assets=assets,scenes=scenes),open("storyboard.json","w"),ensure_ascii=False,indent=1)
+import json as _j;from pathlib import Path as _Pc;_CS=_Pc("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=_j.load(open(_CS)).get("http-request-v2") if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
+json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open("storyboard.json","w"),ensure_ascii=False,indent=1)
 print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames'],s['narrationChars']) for s in scenes])
 
 # --- align to measured timing

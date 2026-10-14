@@ -63,10 +63,10 @@ def shots_for(si,L):
         e1=cards()+[E("go","arrow",740,380,440,50,P['text2'],direction="r"),T("q",760,560,400,100,"bug？",72,P['danger'],align="center")]
         tg=at(0,"加购")
         a1=[F(x,0) for x in ("ca","ha","pa","ba")]+[draw("go",tg,20)]+[F(x,tg+10) for x in ("cb_","hb","pb","bb")]+[F("rb",at(0,"红包抵扣")),pop("rb",at(0,"红包抵扣")),F("q",at(0,"这是")),pop("q",at(0,"这是"))]
-        e2=[T("q",260,300,400,100,"bug？",72,P['danger'],align="center"),E("strike","line",280,350,360,0,P['danger']),tag("why",260,480,400,"故意的",P['success'],44),
+        e2=[dict(T("q",260,300,400,100,"bug？",72,P['danger'],align="center"),dimmed=True),tag("why",260,480,400,"多半是有意的",P['success'],44),  # 2026-10-14 内容核对：「其实不是，是故意」→「不一定，很可能有意为之」：去掉划线，bug？只变暗不否定；「故意的」→「多半是有意的」
             R("p",1060,300,600,110,P['panel'],stroke=P['secondary'],radius=20,label="到手价计算",fontSize=48),T("ask",1060,460,600,160,"？",120,P['accent'],align="center")]
         tp=at(1,"到手价是怎么")
-        a2=[F("q",0),F("strike",at(0,"其实不是")),draw("strike",at(0,"其实不是"),10),F("why",at(0,"故意")),pop("why",at(0,"故意")),F("p",tp),pop("p",tp),F("ask",tp+6)]
+        a2=[F("q",0),mv("q","opacity",at(0,"不一定"),at(0,"不一定")+12,1,0.5),F("why",at(0,"很可能")),pop("why",at(0,"很可能")),F("p",tp),pop("p",tp),F("ask",tp+6)]
         return [(e1,a1),(e2,a2)]
     if si==1:  # 一个卡住，全都在等
         e1=tree()+[red("r2",KX[2],KY,"红包",KW),I("tm","timer",KX[2]+KW-100,KY-100,90),red("rp",660,130,"到手价计算",600)]+[I(f"g{j}","guest",160+(j%5)*80,690+(j//5)*90,70) for j in range(10)]+[
@@ -139,7 +139,7 @@ for si,s in enumerate(narr):
         f+=l;nshot+=1
     D=sum(L);scenes.append(dict(id=f"s{si}",chapterId=ids[si],title=titles[si],**{"from":g},durationInFrames=D,narrationChars=CNT[si],narrationCharsRecount=cnt(s),shots=shots));g+=D
 PROV=any(v.get('provisional') for v in TM.values())
-meta=dict(title="《两个价不一样，为什么不是 bug？》",episode=12,slug="degradation",release="v0.17.0",series="扛住高峰 04",width=1920,height=1080,fps=30,durationInFrames=g,provisionalTiming=PROV,style="深色背景+蓝青高光扁平2D（沿用前几期）",palette=P,font="Noto Sans SC",
+meta=dict(title="《搜索页和结算页，为什么两个价不一样？》",episode=12,slug="degradation",release="v0.17.0",series="扛住高峰 04",width=1920,height=1080,fps=30,durationInFrames=g,provisionalTiming=PROV,style="深色背景+蓝青高光扁平2D（沿用前几期）",palette=P,font="Noto Sans SC",
   safeArea=dict(margin=80,subtitleBand=[900,980],contentMaxY=880,watermarkClearZone=[1700,80,1840,130]),
   branding=dict(spec="episodes/_shared/branding/spec.json v1.3.0",cornerWatermark="右上「IT小村」40%，留空区 x1700–1840 y80–130",centerWatermark=None,endCard="由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾"),
   shotSentences={k:n for c in ids for k,n in zip([f"{c}-{j+1}" for j in range(len(_SP[c]))],_SP[c])},

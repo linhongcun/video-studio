@@ -103,7 +103,6 @@ const Folder: React.FC<{color: string}> = ({color}) => (
   <svg viewBox="0 0 200 180" width="100%" height="100%">
     <path d="M10 40 h60 l15 15 h105 v115 h-180z" fill={color} opacity={0.9} />
     <rect x={60} y={10} width={80} height={100} rx={6} fill="#E5E7EB" />
-    <text x={100} y={70} textAnchor="middle" fontSize={22} fontFamily={MONO} fill="#0B1020" fontWeight="bold">HTML</text>
   </svg>
 );
 const Envelope: React.FC<{color: string; big?: boolean}> = ({color, big}) => (
@@ -123,7 +122,7 @@ const Shield: React.FC<{color: string}> = ({color}) => (
   <svg viewBox="0 0 100 110" width="100%" height="100%">
     <path d="M50 4 L92 20 V52 C92 80 72 98 50 106 C28 98 8 80 8 52 V20 Z" fill={`${color}22`} stroke={color} strokeWidth={5} />
     <path d="M30 56 L45 71 L72 40" fill="none" stroke={color} strokeWidth={8} strokeLinecap="round" strokeLinejoin="round" />
-    <text x={50} y={96} textAnchor="middle" fontFamily={MONO} fontSize={11} fontWeight="bold" fill={color}>HSTS</text>
+    <text x={50} y={96} textAnchor="middle" fontFamily={MONO} fontSize={13} fontWeight="bold" fill={color}>HSTS</text>
   </svg>
 );
 const Drawer: React.FC<{color: string}> = ({color}) => (
@@ -133,15 +132,15 @@ const Drawer: React.FC<{color: string}> = ({color}) => (
         <div style={{width: 70, height: 12, borderRadius: 6, background: color}} />
       </div>
     ))}
-    <div style={{textAlign: 'center', fontFamily: FONT, fontSize: 26, color: P.text2}}>本地缓存</div>
+    <div style={{textAlign: 'center', fontFamily: FONT, fontSize: 28, color: P.text2}}>本地缓存</div>
   </div>
 );
 const CacheFile: React.FC<{e: any; frame: number}> = ({e, frame}) => {
   const left = Math.max(0, 3600 - Math.floor(frame * 2));
   return (
-    <div style={{width: '100%', height: '100%', background: '#E5E7EB', borderRadius: 10, boxSizing: 'border-box', padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 8px 24px rgba(0,0,0,.4)'}}>
+    <div style={{width: 'max-content', minWidth: '100%', height: '100%', background: '#E5E7EB', borderRadius: 10, boxSizing: 'border-box', padding: '14px 18px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', boxShadow: '0 8px 24px rgba(0,0,0,.4)'}}>
       <div style={{fontFamily: MONO, fontSize: 28, fontWeight: 700, color: P.bg}}>{clean(e.label)}</div>
-      <div style={{fontFamily: MONO, fontSize: 19, color: '#047857', whiteSpace: 'nowrap'}}>⏱ max-age {left}s</div>
+      <div style={{fontFamily: MONO, fontSize: 28, color: '#047857', whiteSpace: 'nowrap'}}>⏱ max-age {left}s</div>
     </div>
   );
 };
@@ -158,7 +157,7 @@ const Cdn: React.FC<{color: string}> = ({color}) => (
       {[[120, 110], [170, 90], [215, 120]].map(([x, y], i) => <circle key={i} cx={x} cy={y} r={9} fill={color} />)}
       <path d="M120 110 L170 90 L215 120" stroke={color} strokeWidth={3} fill="none" />
     </svg>
-    <div style={{position: 'absolute', left: 0, right: 0, bottom: 4, textAlign: 'center', fontFamily: FONT, fontSize: 26, fontWeight: 700, color}}>CDN 边缘节点</div>
+    <div style={{position: 'absolute', left: 0, right: 0, bottom: 4, textAlign: 'center', fontFamily: FONT, fontSize: 28, fontWeight: 700, color}}>CDN 边缘节点</div>
   </div>
 );
 
@@ -243,7 +242,7 @@ const Element: React.FC<{e: any; all: any[]; anims: any[]; frame: number; fps: n
             <div style={{position: 'absolute', top: 14, left: 18, display: 'flex', gap: 10}}>
               {['#EF4444', '#F59E0B', '#22C55E'].map((c) => <div key={c} style={{width: 14, height: 14, borderRadius: 7, background: c, opacity: 0.8}} />)}
             </div>
-            <div style={{position: 'absolute', bottom: -44, width: '100%', textAlign: 'center', color: P.text2, fontFamily: FONT, fontSize: 26}}>浏览器</div>
+            <div style={{position: 'absolute', bottom: -44, width: '100%', textAlign: 'center', color: P.text2, fontFamily: FONT, fontSize: 28}}>浏览器</div>
           </>
         )}
         {lines.map((l, i) => (
@@ -269,7 +268,7 @@ const Element: React.FC<{e: any; all: any[]; anims: any[]; frame: number; fps: n
     return (
       <div style={{...base}}>
         <div style={{width: '100%', height: '100%', transform: e.id === 'gear' ? `rotate(${rotate}deg)` : undefined}}>{inner}</div>
-        {caption && <div style={{position: 'absolute', top: e.h + (capSmall ? 2 : 4), left: -40, right: -40, textAlign: 'center', color: P.text2, fontFamily: FONT, fontSize: capSmall ? 20 : 22}}>{caption}</div>}
+        {caption && <div style={{position: 'absolute', top: e.h + (capSmall ? 2 : 4), left: -40, right: -40, textAlign: 'center', color: P.text2, fontFamily: FONT, fontSize: 28}}>{caption}</div>}
       </div>
     );
   }

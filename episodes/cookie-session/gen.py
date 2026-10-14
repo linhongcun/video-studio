@@ -79,12 +79,13 @@ def shots_for(si,L):
         a1+=[F("hi",at(0,"就知道"))]
         e2=[browser(160,300),tag("mine",300,560,120),server("server",1360,140,400,200,"example.com"),server("other",1360,520,400,200,"别的网站"),
             E("ok","arrow",560,220,800,50,P['success'],label="照样认得你",direction="r",fontSize=32),tag("tOk",580,180,72),
-            E("no","arrow",560,600,800,50,P['text2'],label="不会带过去",direction="r",fontSize=32,dash=True),T("x",860,660,200,56,"拿不到",40,P["danger"],align="center"),
+            E("no","arrow",560,600,800,50,P['text2'],label="不会带过去",direction="r",fontSize=32,dash=True),T("x",860,660,200,56,"读不到",40,P["danger"],align="center"),  # 2026-10-14 内容核对：拿不到 → 读不到
+           
             T("back",160,760,1600,56,"关掉再回来：手牌还在、没过期，就还认得",40,P['text'],align="center"),
             T("only",1360,740,400,50,"只交给发它的网站",32,P['text2'],align="center")]
         t=at(1,"只要手牌")
         a2=[F("browser",0),F("server",0),F("other",0),F("mine",0),F("back",at(1,"关掉页面")),draw("ok",t,18),F("tOk",t,6),ride("tOk",t,t+20,580,1270),
-            draw("no",at(1,"手牌只会"),18),F("x",at(1,"别的网站拿")),F("only",at(1,"手牌只会"))]
+            draw("no",at(1,"手牌只会"),18),F("x",at(1,"别的网站读")),F("only",at(1,"手牌只会"))]
         return [(e1,a1),(e2,a2)]
     if si==3:  # 柜台里存什么
         e1=[A("locker","locker",160,200,480,480),T("lockT",160,700,480,56,"柜台 = 服务器",40,P['primary'],align="center"),
@@ -171,5 +172,6 @@ assets=dict(reuse=[dict(id="browser",desc="浏览器卡片（标签 浏览器 36
 sh2=[x for sc in scenes for x in sc['shots'] if x['id']=="set-cookie-1"][0]
 pl=max(k['frame'] for a in sh2['animations'] for k in a['keyframes'])+6
 meta['poster']=dict(shotId="set-cookie-1",localFrame=pl,frame=sh2['from']+pl,desc="服务器经 Set-Cookie 把手牌递给浏览器，手牌编号特写 + Cookie 标签",file="poster.jpg")
-json.dump(dict(meta=meta,assets=assets,scenes=scenes),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
+import json as _j;from pathlib import Path as _Pc;_CS=_Pc("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=_j.load(open(_CS)).get("cookie-session") if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
+json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
 print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames']) for s in scenes])

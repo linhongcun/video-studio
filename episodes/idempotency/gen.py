@@ -74,13 +74,13 @@ def shots_for(si,L):
         return [(e1,a1),(e2,a2)]
     if si==3:  # 唯一 ID
         e1=[I("srv","server",1340,200,360),T("ask",1380,600,280,120,"？",110,P['accent'],align="center")]+[I(f"r{j}","request",160,180+j*220,170) for j in range(3)]+[
-            I(f"k{j}","ticket",340,200+j*220,110) for j in range(3)]+[term("id",640,400,520,"唯一 ID",P['accent'],56)]
+            I(f"k{j}","ticket",340,200+j*220,110) for j in range(3)]+[term("id",640,400,520,"唯一 ID",P['accent'],56),tag("same",640,560,520,"重发：号不变",P['text2'],40)]  # 2026-10-14 内容核对：加「重发：号不变」
         tk=at(1,"编号"); ti=at(2,"唯一")
-        a1=[F("srv",0),F("ask",0),pop("ask",0),out("ask",at(1,"每笔"),at(1,"每笔")+10)]+[F(f"r{j}",at(1,"每笔")+j*6) for j in range(3)]+[x for j in range(3) for x in (F(f"k{j}",tk+j*8),pop(f"k{j}",tk+j*8))]+[F("id",ti),pop("id",ti)]
-        e2=[I("r","request",160,300,200),I("k","ticket",300,280,110),I("led","ledger",760,200,360),tag("look",700,600,480,"翻账本对号",P['text2'],40),
-            R("new",1260,200,500,96,stroke=P['success'],radius=20,label="新号：扣款并登记",fontSize=40),R("old",1260,420,500,96,stroke=P['accent'],radius=20,label="旧号：回「已支付」",fontSize=40),
+        a1=[F("srv",0),F("ask",0),pop("ask",0),out("ask",at(1,"每笔"),at(1,"每笔")+10)]+[F(f"r{j}",at(1,"每笔")+j*6) for j in range(3)]+[x for j in range(3) for x in (F(f"k{j}",tk+j*8),pop(f"k{j}",tk+j*8))]+[F("id",ti),pop("id",ti),F("same",at(2,"重发")),pop("same",at(2,"重发"))]
+        e2=[I("r","request",160,300,200),I("k","ticket",300,280,110),I("led","ledger",760,200,360),tag("look",700,600,480,"号先登记",P['text2'],40),
+            R("new",1260,200,500,96,stroke=P['success'],radius=20,label="首次登记 → 扣款",fontSize=40),R("old",1260,420,500,96,stroke=P['accent'],radius=20,label="登记过：回「已支付」",fontSize=40),
             I("coin","coin",1450,640,140)]
-        a2=[F("r",0),F("k",0),F("led",at(0,"先查")),F("look",at(0,"先查")),F("new",at(1,"没办过")),F("coin",at(1,"扣钱")),pop("coin",at(1,"扣钱")),out("coin",at(1,"办过了"),at(1,"办过了")+10),F("old",at(1,"办过了")),pop("old",at(1,"办过了"))]
+        a2=[F("r",0),F("k",0),F("led",at(0,"登记")),F("look",at(0,"登记")),F("new",at(1,"登记成功")),F("coin",at(1,"扣钱")),pop("coin",at(1,"扣钱")),out("coin",at(1,"登记过了"),at(1,"登记过了")+10),F("old",at(1,"登记过了")),pop("old",at(1,"登记过了"))]  # 2026-10-14 内容核对：先查再办 → 先登记、登记成功才扣（旧版：翻账本对号 / 新号：扣款并登记）
         return [(e1,a1),(e2,a2)]
     if si==4:  # 重试和幂等
         e1=[term("mi",160,200,420,"幂等",P['primary'],56),T("plus",620,200,120,96,"+",72,P['text'],align="center"),term("rt",780,200,420,"重试",P['accent'],56),I("sig","signal",160,440,200)]+[
@@ -148,5 +148,6 @@ PS="ticket-2"; sh=[x for sc in scenes for x in sc['shots'] if x['id']==PS][0]
 PARTS[:]=[x['narration'] for x in [s for s in scenes if s['chapterId']=='ticket'][0]['shots']]
 pl=416  # 写死：ticket-2 局部 416（ep11 正式 timing，ticket-2 起点 1366 → 全局 1782）——「已领取」已亮、「幂等」398–410 弹出后已全显
 meta['poster']=dict(shotId=PS,localFrame=pl,frame=sh['from']+pl,desc="取餐号：同一张号再来窗口亮「已领取」，旁边「幂等」",file="poster.jpg")
-json.dump(dict(meta=meta,assets=assets,scenes=scenes),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
+_CS=Path("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=json.load(open(_CS)).get(meta["slug"]) if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
+json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
 print('clamped keyframes:',CLAMP or 'none');print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames']) for s in scenes]);print('poster',PS,pl,meta['poster']['frame'])

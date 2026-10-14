@@ -132,14 +132,20 @@ def shots_for(si,L):
             y=VC[j]+75; e1.append(E(f"ask{j}","arrow",420,y,860,50,P['text2'],label="还开着吗？" if j==0 else "",direction="r",fontSize=32,dash=True)); a1.append(draw(f"ask{j}",t+j*8,15))
         e1+=[R("no",1540,VC[1]+60,200,80,stroke=P['danger'],radius=40,label="不回",fontSize=40)]
         a1+=[F("no",at(0,"还开着吗")+20),F("hcT",at(0,"健康检查")),F("heart",at(0,"健康检查")),pop("heart",at(0,"健康检查"))]
-        HX=[700,940,1180]
-        e2=[gre("greeter",160,300,240)]+[ctr(f"c{j}",x,300,200,"idle") for j,x in enumerate(HX)]+[ctr("cX",HX[1],300,200,"closed"),ctr("cNew",1420,300,200,"idle"),
-            R("pause",700,560,440,80,stroke=P['danger'],radius=16,label="不回：先不派单",fontSize=36),R("back",700,670,440,80,stroke=P['success'],radius=16,label="恢复：再排回来",fontSize=36),
-            R("elastic",1180,600,560,110,stroke=P['accent'],radius=55,label="弹性扩展",fontSize=56)]
-        o={e['id']:e for e in e2}; e2=[o[k] for k in ("greeter","c0","cX","c1","c2","cNew","pause","back","elastic")]  # cX（休息）在 c1（恢复）下层
-        r=at(0,"等它恢复")
+        HX=[620,840,1060]
+        # 2026-10-14 内容核对：弹性扩展和健康检查分开讲——人多时自动多开两家（cNew/cNew2 滑入），人少时关掉一家（cNew2 淡出）→「弹性扩展」；
+        # 新柜台先被问一声「还开着吗？」，灯由灰转绿，导购才往那边分人（person 走过去）。旧版：念到「新开的柜台」只滑入一家
+        e2=[gre("greeter",160,300,240)]+[ctr(f"c{j}",x,300,200,"idle") for j,x in enumerate(HX)]+[ctr("cX",HX[1],300,200,"closed"),ctr("cOff",1300,300,200,"closed"),ctr("cNew",1300,300,200,"idle"),ctr("cNew2",1520,300,200,"closed"),
+            R("pause",620,560,440,80,stroke=P['danger'],radius=16,label="不回：先不派单",fontSize=36),R("back",620,670,440,80,stroke=P['success'],radius=16,label="恢复：再排回来",fontSize=36),
+            R("elastic",1160,600,560,110,stroke=P['accent'],radius=55,label="弹性扩展",fontSize=56),
+            R("chk",1280,220,240,64,P['bg'],stroke=P['text2'],radius=32,label="还开着吗？",fontSize=32,dash=True),A("guest","person",420,470,80,80)]
+        o={e['id']:e for e in e2}; e2=[o[k] for k in ("greeter","c0","cX","c1","c2","cOff","cNew","cNew2","pause","back","elastic","chk","guest")]  # cX（休息）在 c1（恢复）下层；cOff（灰灯）在 cNew（绿灯）下层
+        r=at(0,"等它恢复"); tm=at(1,"人多时"); tc=at(1,"再关掉"); tk=at(1,"新柜台"); tp=at(1,"通过检查"); tg=at(1,"分人")
         a2=[F("greeter",0),F("c0",0),F("c2",0),F("cX",0),F("pause",at(0,"先不派单")),mv("c1","opacity",0,r,0,0,"linear"),F("c1",r),out("cX",r,r+12),F("back",r),
-            F("cNew",at(1,"新开的柜台")),mv("cNew","x",at(1,"新开的柜台"),at(1,"新开的柜台")+15,1560,1420),F("elastic",at(1,"弹性扩展")),pop("elastic",at(1,"弹性扩展"))]
+            F("cOff",tm),mv("cOff","x",tm,tm+15,1440,1300),F("cNew2",tm+8),mv("cNew2","x",tm+8,tm+23,1660,1520),out("cNew2",tc,tc+12),
+            F("elastic",at(1,"弹性扩展")),pop("elastic",at(1,"弹性扩展")),
+            F("chk",tk),pop("chk",tk),mv("cNew","opacity",0,tp,0,0,"linear"),F("cNew",tp),
+            F("guest",tg),mv("guest","x",tg,tg+24,420,1360),out("chk",tg,tg+10)]
         return [(e1,a1),(e2,a2)]
     if si==5:  # 回顾
         e1=[T("cdnH",160,160,760,56,"CDN：去哪座城的店",44,P['primary'],align="center"),A("map","map",160,250,760,266),T("cdnS",160,560,760,50,"解决：路太远",40,P['text'],align="center"),
@@ -192,5 +198,6 @@ assets=dict(reuse=[dict(id="server",desc="统一服务器卡片"),dict(id="route
 PS="solution-2"; sh=[x for sc in scenes for x in sc['shots'] if x['id']==PS][0]
 pl=299  # Nolan 定：solution-2 局部 299
 meta['poster']=dict(shotId=PS,localFrame=pl,frame=sh['from']+pl,desc="排队的客人经导购走到三家空闲柜台 + 「还是同一家店，地址没变」",file="poster.jpg")
-json.dump(dict(meta=meta,assets=assets,scenes=scenes),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
+import json as _j;from pathlib import Path as _Pc;_CS=_Pc("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=_j.load(open(_CS)).get("load-balancing") if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
+json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)
 print('clamped keyframes:',CLAMP or 'none');print(g,nshot,[(s['chapterId'],s['from'],s['durationInFrames']) for s in scenes])

@@ -53,11 +53,12 @@ related: ["cdn"]
 
 ### 5. 健康检查 {#health}
 
-{/* 配图：导购定时发问「还开着吗？」；不回的柜台变灰；新柜台加入后立刻分人 */}
+{/* 配图：导购定时发问「还开着吗？」；不回的柜台变灰；人多时自动多开柜台，新柜台通过检查后才分人 */}
 
 - **健康检查**（health check）：导购定时问柜台「还开着吗？」。常见做法是发一个 HTTP 请求，看是否在时限内返回约定的成功状态（例如 `200`）。[^gcloud-hc]
 - 柜台不回、或回得不对，就先从名单里拿掉，不派单；恢复后再加回来。
-- 新柜台开张后，一旦通过健康检查，就能马上接客——店跟着变大，这叫**弹性扩展**（elasticity）：按流量加减机器，而不是只靠把一台机器越配越强。
+- **弹性扩展**（auto scaling，也叫自动伸缩）是另一件事：人多时自动多开几家柜台，人少时再关掉，按负载自动增减机器数量，而不是只靠把一台机器越配越强。[^aws-asg][^azure-autoscale]
+- 两者怎么配合：弹性扩展负责「开几家柜台」；新柜台开出来后会被登记到负载均衡器的名单里，通过健康检查后，导购才开始往那边分人。健康检查本身不会多开柜台。[^aws-asg]
 
 ### 6. 回顾 {#recap}
 
@@ -80,11 +81,14 @@ related: ["cdn"]
 
 - ❌ 「负载均衡就是 CDN」→ ✅ CDN 管「去哪座城」；负载均衡管「进店后去哪个柜台」，两者常一起用。
 - ❌ 「多开几台机器，不用导购也行」→ ✅ 访客总得有一个统一入口；没有导购，你很难把流量自动、均匀地分出去，也很难在某台挂掉时自动躲开。
+- ❌ 「健康检查通过、导购开始分人，就叫弹性扩展」→ ✅ 健康检查只决定「往哪些柜台分人」；弹性扩展是按负载自动增减柜台数量，是另一套机制。
 - ❌ 「健康检查就是偶尔手动看一眼」→ ✅ 是导购按固定间隔自动探测，失败就停派单。
 - ❌ 「轮询一定最公平」→ ✅ 请求耗时差很多时，最少连接往往更均匀。
 
 ## 参考资料
 
 [^mdn-proxy]: MDN Web Docs，《Proxy servers and tunneling》（反向代理与负载均衡用途）。https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Proxy_servers_and_tunneling
-[^nginx-lb]: nginx 文档，《Using nginx as HTTP load balancer》（轮询、最少连接、被动健康检查）。https://nginx.org/en/docs/http/load_balancing.html （开源实现说明，非厂商推销）
+[^nginx-lb]: nginx 文档，《Using nginx as HTTP load balancer》（轮询、最少连接、被动健康检查；页面未显示日期，访问于 2026-10-14）。https://nginx.org/en/docs/http/load_balancing.html （开源实现说明，非厂商推销）
 [^gcloud-hc]: Google Cloud 文档，《Health checks overview》（HTTP 健康检查成功条件等，2020+ 现行文档）。https://docs.cloud.google.com/load-balancing/docs/health-check-concepts （概念说明，旁白未点名厂商）
+[^aws-asg]: AWS 文档，《What is Amazon EC2 Auto Scaling?》（按扩缩策略随需求启动或终止实例，并自动在负载均衡器上注册/注销实例；页面未显示日期，访问于 2026-10-14；旁白未点名厂商）。https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html
+[^azure-autoscale]: Microsoft Azure 架构中心，《Autoscaling guidance》（自动伸缩按指标增减资源；新实例先初始化再导入流量；页面未显示日期，访问于 2026-10-14；旁白未点名厂商）。https://learn.microsoft.com/en-us/azure/architecture/best-practices/auto-scaling
