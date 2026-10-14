@@ -7,10 +7,11 @@
 - 跳闸：tiào zhá；合闸：hé zhá；电闸：diàn zhá
 - 半开：bàn kāi
 - 调用：diào yòng（不读 tiáo）
-- 库存：kù cún
+- 运费险：yùn fèi xiǎn
 - 降级：jiàng jí（不读 xiáng）
 - 限流：xiàn liú
 - 幂等：mì děng
+- 运费险服务：yùn fèi xiǎn fú wù
 - 一百次 / 一半 / 三十秒：口播用中文读，画面写 100 次 / 50% / 30 秒
 
 ## 备用

@@ -6,7 +6,7 @@ P='以下是普通话的句子。'
 def clip(f,a,d): return np.frombuffer(subprocess.run(['ffmpeg','-v','error','-ss',str(max(0,a)),'-t',str(d),'-i',f,'-ac','1','-ar','16000','-f','f32le','-'],capture_output=True,check=True).stdout,np.float32)
 pad=lambda y:np.concatenate([np.zeros(8000,np.float32),y,np.zeros(8000,np.float32)])
 def tr(x,**k): return ''.join(g.text for g in m.transcribe(pad(x),language='zh',beam_size=5,initial_prompt=P,condition_on_previous_text=False,**k)[0]).strip()
-T={'熔断':'[熔融容荣溶][断段锻]','雪崩':'[雪血][崩蹦绷]','级联故障':'[级及急集即][联连廉][故固][障章张]','关闭':'[关官][闭必毕]','打开':'打[开凯]','半开':'[半伴办][开凯]','超时':'[超抄][时十实是]','跳闸':'[跳条][闸扎炸札铡]','合闸':'[合和何]上?[闸扎炸札铡]','库存服务':'[库酷裤][存村][服福][务物]','限流':'[限线现][流留]','降级':'[降将奖][级及急集即]','系统繁忙':'[系细][统通][繁凡烦][忙盲]'}
+T={'运费险':'[运云][费飞废][险线现显]','故障':'[故固][障章张]','雪崩':'[雪血][崩蹦绷]','级联故障':'[级及急集即吉][联连廉莲][故固][障章张]','超时':'[超抄][时十实是]','熔断':'[熔融容荣溶红][断段锻]','半开':'[半伴办搬][开凯]','降级':'[降将奖][级及急集即]'}
 KEY={'合闸':'合上闸'}
 for f in sys.argv[2:]:
   for i,s in enumerate(json.load(open(f+'.json'))):
