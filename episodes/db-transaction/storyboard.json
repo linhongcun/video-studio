@@ -1,0 +1,3569 @@
+{
+ "meta": {
+  "title": "《扣了钱，对方没到账？》",
+  "hook": "扣了钱对方没到账",
+  "episode": 15,
+  "slug": "db-transaction",
+  "release": "v0.20.0",
+  "provisional": true,
+  "provisionalReason": "脚本待村长定稿；配音为 Knoll 第 1 轮",
+  "series": null,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 2201,
+  "provisionalTiming": false,
+  "style": "深色背景+蓝青高光扁平2D（沿用 EP.14）",
+  "palette": {
+   "bg": "#0B1020",
+   "panel": "#111827",
+   "primary": "#22D3EE",
+   "secondary": "#3B82F6",
+   "text": "#E5E7EB",
+   "text2": "#9CA3AF",
+   "muted": "#6B7280",
+   "success": "#22C55E",
+   "accent": "#F59E0B",
+   "danger": "#F87171"
+  },
+  "font": "Noto Sans SC",
+  "safeArea": {
+   "margin": 80,
+   "subtitleBand": [
+    900,
+    980
+   ],
+   "contentMaxY": 880,
+   "watermarkClearZone": [
+    1700,
+    80,
+    1840,
+    130
+   ]
+  },
+  "branding": {
+   "spec": "episodes/_shared/branding/spec.json v1.3.0",
+   "cornerWatermark": "右上「IT小村」40%，留空区 x1700–1840 y80–130",
+   "centerWatermark": null,
+   "endCard": "由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾"
+  },
+  "shotSentences": {
+   "hook-1": 3,
+   "split-1": 1,
+   "split-2": 1,
+   "txn-1": 1,
+   "txn-2": 1,
+   "commit-1": 2,
+   "commit-2": 1,
+   "rollback-1": 1,
+   "rollback-2": 1,
+   "atomic-1": 2,
+   "atomic-2": 1,
+   "recap-1": 1
+  },
+  "notes": "时长=Knoll 实测（map_timing.py，章 = 首句起 → 末句止 + 60 帧）。术语标签（事务 / 提交 / 回滚 / 原子性，只用中文）按 words.json 词级时间（asr_words.json，句首不早于句子起点，再 +0.1 s，宁晚勿早）由 _audit/labelfix.py 对齐；画面不复述字幕；余额为示例；不出现 COMMIT/ROLLBACK/ACID。素材全部自绘（assets/*.svg）。",
+  "poster": {
+   "shotId": "split-2",
+   "localFrame": 136,
+   "frame": 570,
+   "desc": "封面候选：两步卡片——第 1 步 ✓（你 500→400），第 2 步被闪电劈中 ✗，朋友 200 未到账（红框）",
+   "file": "poster.jpg"
+  }
+ },
+ "assets": {
+  "reuse": [
+   {
+    "id": "subtitle",
+    "desc": "字幕层"
+   },
+   {
+    "id": "person",
+    "file": "assets/person.svg",
+    "desc": "小人（EP.14 自绘）"
+   }
+  ],
+  "new": [
+   {
+    "id": "coin",
+    "file": "assets/coin.svg",
+    "desc": "硬币 ¥"
+   },
+   {
+    "id": "fault",
+    "file": "assets/fault.svg",
+    "desc": "故障闪电"
+   },
+   {
+    "id": "box-open",
+    "file": "assets/box-open.svg",
+    "desc": "打开的包裹=事务"
+   },
+   {
+    "id": "box-sealed",
+    "file": "assets/box-sealed.svg",
+    "desc": "封箱（青胶带+✓）=提交"
+   },
+   {
+    "id": "rewind",
+    "file": "assets/rewind.svg",
+    "desc": "倒放=回滚"
+   },
+   {
+    "id": "box-half",
+    "file": "assets/box-half.svg",
+    "desc": "拆成两半+✗=不能寄一半"
+   },
+   {
+    "id": "account",
+    "file": "assets/account.svg",
+    "desc": "账户卡（备用，未上画面）"
+   }
+  ]
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "hook",
+   "title": "扣了没到",
+   "from": 0,
+   "durationInFrames": 237,
+   "narrationCharsRecount": 26,
+   "shots": [
+    {
+     "id": "hook-1",
+     "chapterId": "hook",
+     "from": 0,
+     "durationInFrames": 237,
+     "narration": "你给朋友转 100 块。你这边扣了，他那边却没收到。钱去哪儿了？",
+     "subtitles": [
+      {
+       "text": "你给朋友转 100 块",
+       "from": 0,
+       "to": 51
+      },
+      {
+       "text": "你这边扣了，他那边却没收到",
+       "from": 52,
+       "to": 140
+      },
+      {
+       "text": "钱去哪儿了",
+       "from": 141,
+       "to": 236
+      }
+     ],
+     "elements": [
+      {
+       "id": "t1",
+       "type": "text",
+       "x": 280,
+       "y": 80,
+       "w": 900,
+       "h": 150,
+       "text": "扣了钱，",
+       "fontSize": 128,
+       "color": "#E5E7EB",
+       "reuse": false
+      },
+      {
+       "id": "t2",
+       "type": "text",
+       "x": 280,
+       "y": 236,
+       "w": 1100,
+       "h": 150,
+       "text": "对方没到账？",
+       "fontSize": 128,
+       "color": "#F59E0B",
+       "reuse": false
+      },
+      {
+       "id": "bL",
+       "type": "rect",
+       "x": 270,
+       "y": 420,
+       "w": 400,
+       "h": 320,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 36,
+       "label": "400",
+       "fontSize": 150
+      },
+      {
+       "id": "old",
+       "type": "text",
+       "x": 270,
+       "y": 440,
+       "w": 400,
+       "h": 70,
+       "text": "500",
+       "fontSize": 56,
+       "color": "#6B7280",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "strike",
+       "type": "line",
+       "x": 410,
+       "y": 478,
+       "w": 120,
+       "h": 0,
+       "color": "#F87171",
+       "reuse": false
+      },
+      {
+       "id": "bR",
+       "type": "rect",
+       "x": 1250,
+       "y": 420,
+       "w": 400,
+       "h": 320,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F87171",
+       "radius": 36,
+       "label": "200",
+       "fontSize": 150
+      },
+      {
+       "id": "nL",
+       "type": "text",
+       "x": 270,
+       "y": 754,
+       "w": 400,
+       "h": 60,
+       "text": "你",
+       "fontSize": 48,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nR",
+       "type": "text",
+       "x": 1250,
+       "y": 754,
+       "w": 400,
+       "h": 60,
+       "text": "朋友",
+       "fontSize": 48,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ex",
+       "type": "text",
+       "x": 670,
+       "y": 760,
+       "w": 580,
+       "h": 50,
+       "text": "（余额为示例）",
+       "fontSize": 36,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "path",
+       "type": "line",
+       "x": 700,
+       "y": 606,
+       "w": 280,
+       "h": 0,
+       "color": "#F59E0B",
+       "reuse": false,
+       "dashed": true
+      },
+      {
+       "id": "coin",
+       "type": "image",
+       "asset": "assets/coin.svg",
+       "x": 760,
+       "y": 546,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bolt",
+       "type": "image",
+       "asset": "assets/fault.svg",
+       "x": 1010,
+       "y": 476,
+       "w": 170,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "q",
+       "type": "text",
+       "x": 1100,
+       "y": 300,
+       "w": 140,
+       "h": 160,
+       "text": "？",
+       "fontSize": 128,
+       "color": "#F59E0B",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "bolt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 113,
+         "value": 1
+        },
+        {
+         "frame": 119,
+         "value": 1.15
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bolt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 119,
+         "value": 1.15
+        },
+        {
+         "frame": 127,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 141,
+         "value": 1
+        },
+        {
+         "frame": 147,
+         "value": 1.2
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 147,
+         "value": 1.2
+        },
+        {
+         "frame": 155,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "split",
+   "title": "拆成两步",
+   "from": 237,
+   "durationInFrames": 412,
+   "narrationCharsRecount": 54,
+   "shots": [
+    {
+     "id": "split-1",
+     "chapterId": "split",
+     "from": 237,
+     "durationInFrames": 197,
+     "narration": "转账在数据库里其实是两步：先从你账上减 100，再往他账上加 100。",
+     "subtitles": [
+      {
+       "text": "转账在数据库里其实是两步",
+       "from": 0,
+       "to": 74
+      },
+      {
+       "text": "先从你账上减 100",
+       "from": 75,
+       "to": 131
+      },
+      {
+       "text": "再往他账上加 100",
+       "from": 132,
+       "to": 196
+      }
+     ],
+     "elements": [
+      {
+       "id": "pL",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 310,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pR",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1470,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bL",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "500",
+       "fontSize": 88
+      },
+      {
+       "id": "bR",
+       "type": "rect",
+       "x": 1320,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "200",
+       "fontSize": 88
+      },
+      {
+       "id": "nL",
+       "type": "text",
+       "x": 160,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "你",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nR",
+       "type": "text",
+       "x": 1320,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "朋友",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ex",
+       "type": "text",
+       "x": 160,
+       "y": 656,
+       "w": 440,
+       "h": 40,
+       "text": "（示例）",
+       "fontSize": 28,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "s1",
+       "type": "rect",
+       "x": 680,
+       "y": 200,
+       "w": 560,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 18,
+       "label": "第 1 步  −100",
+       "fontSize": 44
+      },
+      {
+       "id": "s2",
+       "type": "rect",
+       "x": 680,
+       "y": 560,
+       "w": 560,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 18,
+       "label": "第 2 步  +100",
+       "fontSize": 44
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "s1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 75,
+         "value": 0
+        },
+        {
+         "frame": 87,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 75,
+         "value": 0
+        },
+        {
+         "frame": 87,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "s2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 125,
+         "value": 0
+        },
+        {
+         "frame": 137,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 125,
+         "value": 0
+        },
+        {
+         "frame": 137,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "split-2",
+     "chapterId": "split",
+     "from": 434,
+     "durationInFrames": 215,
+     "narration": "要是第一步做完，第二步出了故障，就会出现扣了钱、没到账。",
+     "subtitles": [
+      {
+       "text": "要是第一步做完，第二步出了故障",
+       "from": 0,
+       "to": 89
+      },
+      {
+       "text": "就会出现扣了钱、没到账",
+       "from": 90,
+       "to": 214
+      }
+     ],
+     "elements": [
+      {
+       "id": "pL",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 310,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pR",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1470,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bL",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "500",
+       "fontSize": 88
+      },
+      {
+       "id": "bR",
+       "type": "rect",
+       "x": 1320,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "200",
+       "fontSize": 88
+      },
+      {
+       "id": "nL",
+       "type": "text",
+       "x": 160,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "你",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nR",
+       "type": "text",
+       "x": 1320,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "朋友",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ex",
+       "type": "text",
+       "x": 160,
+       "y": 656,
+       "w": 440,
+       "h": 40,
+       "text": "（示例）",
+       "fontSize": 28,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "bL2",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "400",
+       "fontSize": 88
+      },
+      {
+       "id": "s1",
+       "type": "rect",
+       "x": 680,
+       "y": 200,
+       "w": 560,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 18,
+       "label": "第 1 步  −100",
+       "fontSize": 44
+      },
+      {
+       "id": "s2",
+       "type": "rect",
+       "x": 680,
+       "y": 560,
+       "w": 560,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 18,
+       "label": "第 2 步  +100",
+       "fontSize": 44
+      },
+      {
+       "id": "k1",
+       "type": "text",
+       "x": 1110,
+       "y": 195,
+       "w": 120,
+       "h": 120,
+       "text": "✓",
+       "fontSize": 80,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "bolt",
+       "type": "image",
+       "asset": "assets/fault.svg",
+       "x": 890,
+       "y": 360,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "x2",
+       "type": "text",
+       "x": 1110,
+       "y": 555,
+       "w": 120,
+       "h": 120,
+       "text": "×",
+       "fontSize": 96,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "s1",
+       "property": "strokeColor",
+       "keyframes": [
+        {
+         "frame": 13,
+         "value": "#3B82F6"
+        },
+        {
+         "frame": 23,
+         "value": "#22C55E"
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 1
+        },
+        {
+         "frame": 69,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bL2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 13,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 13,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 13,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "bolt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 45,
+         "value": 0
+        },
+        {
+         "frame": 57,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bolt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 45,
+         "value": 0
+        },
+        {
+         "frame": 57,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "s2",
+       "property": "strokeColor",
+       "keyframes": [
+        {
+         "frame": 51,
+         "value": "#3B82F6"
+        },
+        {
+         "frame": 61,
+         "value": "#F87171"
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "x2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 0
+        },
+        {
+         "frame": 65,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "x2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 0
+        },
+        {
+         "frame": 65,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "bR",
+       "property": "strokeColor",
+       "keyframes": [
+        {
+         "frame": 116,
+         "value": "#3B82F6"
+        },
+        {
+         "frame": 126,
+         "value": "#F87171"
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "txn",
+   "title": "同一个包裹",
+   "from": 649,
+   "durationInFrames": 368,
+   "narrationCharsRecount": 43,
+   "shots": [
+    {
+     "id": "txn-1",
+     "chapterId": "txn",
+     "from": 649,
+     "durationInFrames": 201,
+     "narration": "办法是，把这两步装进同一个包裹，要做就一起做完，要不做就都不做。",
+     "subtitles": [
+      {
+       "text": "办法是，把这两步装进同一个包裹",
+       "from": 0,
+       "to": 95
+      },
+      {
+       "text": "要做就一起做完，要不做就都不做",
+       "from": 96,
+       "to": 200
+      }
+     ],
+     "elements": [
+      {
+       "id": "pL",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 310,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pR",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1470,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bL",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "500",
+       "fontSize": 88
+      },
+      {
+       "id": "bR",
+       "type": "rect",
+       "x": 1320,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "200",
+       "fontSize": 88
+      },
+      {
+       "id": "nL",
+       "type": "text",
+       "x": 160,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "你",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nR",
+       "type": "text",
+       "x": 1320,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "朋友",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ex",
+       "type": "text",
+       "x": 160,
+       "y": 656,
+       "w": 440,
+       "h": 40,
+       "text": "（示例）",
+       "fontSize": 28,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "box",
+       "type": "image",
+       "asset": "assets/box-open.svg",
+       "x": 760,
+       "y": 300,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "s1",
+       "type": "rect",
+       "x": 680,
+       "y": 140,
+       "w": 270,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "label": "第 1 步",
+       "fontSize": 40
+      },
+      {
+       "id": "s2",
+       "type": "rect",
+       "x": 970,
+       "y": 140,
+       "w": 270,
+       "h": 90,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 16,
+       "label": "第 2 步",
+       "fontSize": 40
+      },
+      {
+       "id": "yy",
+       "type": "text",
+       "x": 700,
+       "y": 720,
+       "w": 240,
+       "h": 100,
+       "text": "✓ ✓",
+       "fontSize": 72,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nn",
+       "type": "text",
+       "x": 980,
+       "y": 720,
+       "w": 240,
+       "h": 100,
+       "text": "× ×",
+       "fontSize": 72,
+       "color": "#F87171",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "s1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "box",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "box",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "s1",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 52,
+         "value": 140
+        },
+        {
+         "frame": 76,
+         "value": 380
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "s2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 58,
+         "value": 140
+        },
+        {
+         "frame": 82,
+         "value": 380
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "s1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 1
+        },
+        {
+         "frame": 84,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "s2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 82,
+         "value": 1
+        },
+        {
+         "frame": 90,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "yy",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 117,
+         "value": 0
+        },
+        {
+         "frame": 129,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "nn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 129,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "txn-2",
+     "chapterId": "txn",
+     "from": 850,
+     "durationInFrames": 167,
+     "narration": "这样打包的一组操作，就叫一笔事务。",
+     "subtitles": [
+      {
+       "text": "这样打包的一组操作",
+       "from": 0,
+       "to": 64
+      },
+      {
+       "text": "就叫一笔事务",
+       "from": 65,
+       "to": 166
+      }
+     ],
+     "elements": [
+      {
+       "id": "pL",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 310,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pR",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1470,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bL",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "500",
+       "fontSize": 88
+      },
+      {
+       "id": "bR",
+       "type": "rect",
+       "x": 1320,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "200",
+       "fontSize": 88
+      },
+      {
+       "id": "nL",
+       "type": "text",
+       "x": 160,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "你",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nR",
+       "type": "text",
+       "x": 1320,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "朋友",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ex",
+       "type": "text",
+       "x": 160,
+       "y": 656,
+       "w": 440,
+       "h": 40,
+       "text": "（示例）",
+       "fontSize": 28,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "box",
+       "type": "image",
+       "asset": "assets/box-open.svg",
+       "x": 760,
+       "y": 250,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "tx",
+       "type": "rect",
+       "x": 760,
+       "y": 720,
+       "w": 400,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "事务",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "box",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 300
+        },
+        {
+         "frame": 16,
+         "value": 250
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "tx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 90,
+         "value": 0
+        },
+        {
+         "frame": 102,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tx",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 90,
+         "value": 0
+        },
+        {
+         "frame": 102,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "commit",
+   "title": "封箱",
+   "from": 1017,
+   "durationInFrames": 279,
+   "narrationCharsRecount": 28,
+   "shots": [
+    {
+     "id": "commit-1",
+     "chapterId": "commit",
+     "from": 1017,
+     "durationInFrames": 170,
+     "narration": "两步都做成了，再封箱寄出。封好箱，改动才算真正生效。",
+     "subtitles": [
+      {
+       "text": "两步都做成了，再封箱寄出",
+       "from": 0,
+       "to": 82
+      },
+      {
+       "text": "封好箱，改动才算真正生效",
+       "from": 83,
+       "to": 169
+      }
+     ],
+     "elements": [
+      {
+       "id": "pL",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 310,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pR",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1470,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bL",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "500",
+       "fontSize": 88
+      },
+      {
+       "id": "bR",
+       "type": "rect",
+       "x": 1320,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "200",
+       "fontSize": 88
+      },
+      {
+       "id": "nL",
+       "type": "text",
+       "x": 160,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "你",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nR",
+       "type": "text",
+       "x": 1320,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "朋友",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ex",
+       "type": "text",
+       "x": 160,
+       "y": 656,
+       "w": 440,
+       "h": 40,
+       "text": "（示例）",
+       "fontSize": 28,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "bL2",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "400",
+       "fontSize": 88
+      },
+      {
+       "id": "bR2",
+       "type": "rect",
+       "x": 1320,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "300",
+       "fontSize": 88
+      },
+      {
+       "id": "box",
+       "type": "image",
+       "asset": "assets/box-open.svg",
+       "x": 760,
+       "y": 300,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "sealed",
+       "type": "image",
+       "asset": "assets/box-sealed.svg",
+       "x": 760,
+       "y": 300,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "box",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 47,
+         "value": 1
+        },
+        {
+         "frame": 55,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sealed",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 47,
+         "value": 0
+        },
+        {
+         "frame": 55,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sealed",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 47,
+         "value": 0
+        },
+        {
+         "frame": 59,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sealed",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 73,
+         "value": 760
+        },
+        {
+         "frame": 101,
+         "value": 880
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sealed",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 101,
+         "value": 880
+        },
+        {
+         "frame": 117,
+         "value": 760
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 133,
+         "value": 1
+        },
+        {
+         "frame": 143,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bL2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 110,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bR",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 133,
+         "value": 1
+        },
+        {
+         "frame": 143,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bR2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 110,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bL2",
+       "property": "strokeColor",
+       "keyframes": [
+        {
+         "frame": 141,
+         "value": "#3B82F6"
+        },
+        {
+         "frame": 151,
+         "value": "#22C55E"
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bR2",
+       "property": "strokeColor",
+       "keyframes": [
+        {
+         "frame": 141,
+         "value": "#3B82F6"
+        },
+        {
+         "frame": 151,
+         "value": "#22C55E"
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "commit-2",
+     "chapterId": "commit",
+     "from": 1187,
+     "durationInFrames": 109,
+     "narration": "这一步叫提交。",
+     "subtitles": [
+      {
+       "text": "这一步叫提交",
+       "from": 0,
+       "to": 108
+      }
+     ],
+     "elements": [
+      {
+       "id": "pL",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 310,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pR",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1470,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bL",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "400",
+       "fontSize": 88
+      },
+      {
+       "id": "bR",
+       "type": "rect",
+       "x": 1320,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "300",
+       "fontSize": 88
+      },
+      {
+       "id": "nL",
+       "type": "text",
+       "x": 160,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "你",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nR",
+       "type": "text",
+       "x": 1320,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "朋友",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ex",
+       "type": "text",
+       "x": 160,
+       "y": 656,
+       "w": 440,
+       "h": 40,
+       "text": "（示例）",
+       "fontSize": 28,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "sealed",
+       "type": "image",
+       "asset": "assets/box-sealed.svg",
+       "x": 760,
+       "y": 250,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "cm",
+       "type": "rect",
+       "x": 760,
+       "y": 720,
+       "w": 400,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "提交",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "cm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 27,
+         "value": 0
+        },
+        {
+         "frame": 39,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cm",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 27,
+         "value": 0
+        },
+        {
+         "frame": 39,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "chapterId": "rollback",
+   "title": "倒着撤回",
+   "from": 1296,
+   "durationInFrames": 347,
+   "narrationCharsRecount": 41,
+   "shots": [
+    {
+     "id": "rollback-1",
+     "chapterId": "rollback",
+     "from": 1296,
+     "durationInFrames": 226,
+     "narration": "要是半路出了问题，就把已经做的改动一步步倒着撤回，钱原路回到你账上，就像倒放。",
+     "subtitles": [
+      {
+       "text": "要是半路出了问题",
+       "from": 0,
+       "to": 49
+      },
+      {
+       "text": "就把已经做的改动一步步倒着撤回",
+       "from": 50,
+       "to": 142
+      },
+      {
+       "text": "钱原路回到你账上",
+       "from": 143,
+       "to": 191
+      },
+      {
+       "text": "就像倒放",
+       "from": 192,
+       "to": 225
+      }
+     ],
+     "elements": [
+      {
+       "id": "pL",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 310,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pR",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1470,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bL",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "400",
+       "fontSize": 88
+      },
+      {
+       "id": "bR",
+       "type": "rect",
+       "x": 1320,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "200",
+       "fontSize": 88
+      },
+      {
+       "id": "nL",
+       "type": "text",
+       "x": 160,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "你",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nR",
+       "type": "text",
+       "x": 1320,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "朋友",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ex",
+       "type": "text",
+       "x": 160,
+       "y": 656,
+       "w": 440,
+       "h": 40,
+       "text": "（示例）",
+       "fontSize": 28,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "bL2",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "500",
+       "fontSize": 88
+      },
+      {
+       "id": "box",
+       "type": "image",
+       "asset": "assets/box-open.svg",
+       "x": 760,
+       "y": 300,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bolt",
+       "type": "image",
+       "asset": "assets/fault.svg",
+       "x": 1080,
+       "y": 260,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "rw",
+       "type": "image",
+       "asset": "assets/rewind.svg",
+       "x": 890,
+       "y": 150,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "path",
+       "type": "line",
+       "x": 620,
+       "y": 480,
+       "w": 120,
+       "h": 0,
+       "color": "#22D3EE",
+       "reuse": false,
+       "dashed": true
+      },
+      {
+       "id": "coin",
+       "type": "image",
+       "asset": "assets/coin.svg",
+       "x": 910,
+       "y": 420,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "box",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bolt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 25,
+         "value": 0
+        },
+        {
+         "frame": 37,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bolt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 25,
+         "value": 0
+        },
+        {
+         "frame": 37,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "rw",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 118,
+         "value": 0
+        },
+        {
+         "frame": 130,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rw",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 118,
+         "value": 0
+        },
+        {
+         "frame": 130,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "path",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 124,
+         "value": 0
+        },
+        {
+         "frame": 144,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 128,
+         "value": 0
+        },
+        {
+         "frame": 136,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 143,
+         "value": 910
+        },
+        {
+         "frame": 153,
+         "value": 818
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 155,
+         "value": 818
+        },
+        {
+         "frame": 165,
+         "value": 725
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 167,
+         "value": 725
+        },
+        {
+         "frame": 177,
+         "value": 632
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 179,
+         "value": 632
+        },
+        {
+         "frame": 189,
+         "value": 540
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bL",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 191,
+         "value": 1
+        },
+        {
+         "frame": 201,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bL2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 154,
+         "value": 0
+        },
+        {
+         "frame": 166,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coin",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 191,
+         "value": 1
+        },
+        {
+         "frame": 197,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rw",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 192,
+         "value": 0
+        },
+        {
+         "frame": 204,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "rollback-2",
+     "chapterId": "rollback",
+     "from": 1522,
+     "durationInFrames": 121,
+     "narration": "这一步叫回滚。",
+     "subtitles": [
+      {
+       "text": "这一步叫回滚",
+       "from": 0,
+       "to": 120
+      }
+     ],
+     "elements": [
+      {
+       "id": "pL",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 310,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pR",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1470,
+       "y": 170,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bL",
+       "type": "rect",
+       "x": 160,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "500",
+       "fontSize": 88
+      },
+      {
+       "id": "bR",
+       "type": "rect",
+       "x": 1320,
+       "y": 380,
+       "w": 440,
+       "h": 200,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 24,
+       "label": "200",
+       "fontSize": 88
+      },
+      {
+       "id": "nL",
+       "type": "text",
+       "x": 160,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "你",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "nR",
+       "type": "text",
+       "x": 1320,
+       "y": 596,
+       "w": 440,
+       "h": 50,
+       "text": "朋友",
+       "fontSize": 40,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "ex",
+       "type": "text",
+       "x": 160,
+       "y": 656,
+       "w": 440,
+       "h": 40,
+       "text": "（示例）",
+       "fontSize": 28,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "rw",
+       "type": "image",
+       "asset": "assets/rewind.svg",
+       "x": 840,
+       "y": 250,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "rb",
+       "type": "rect",
+       "x": 760,
+       "y": 720,
+       "w": 400,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "回滚",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "rb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 22,
+         "value": 0
+        },
+        {
+         "frame": 34,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 22,
+         "value": 0
+        },
+        {
+         "frame": 34,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "chapterId": "atomic",
+   "title": "不能拆一半",
+   "from": 1643,
+   "durationInFrames": 322,
+   "narrationCharsRecount": 33,
+   "shots": [
+    {
+     "id": "atomic-1",
+     "chapterId": "atomic",
+     "from": 1643,
+     "durationInFrames": 183,
+     "narration": "包裹不能拆开只寄一半。要么整个寄到，要么原样退回。",
+     "subtitles": [
+      {
+       "text": "包裹不能拆开只寄一半",
+       "from": 0,
+       "to": 77
+      },
+      {
+       "text": "要么整个寄到，要么原样退回",
+       "from": 78,
+       "to": 182
+      }
+     ],
+     "elements": [
+      {
+       "id": "half",
+       "type": "image",
+       "asset": "assets/box-half.svg",
+       "x": 200,
+       "y": 260,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bs",
+       "type": "image",
+       "asset": "assets/box-sealed.svg",
+       "x": 820,
+       "y": 180,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ar1",
+       "type": "arrow",
+       "x": 1050,
+       "y": 255,
+       "w": 220,
+       "h": 50,
+       "color": "#22C55E",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "pr",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1300,
+       "y": 170,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "k1",
+       "type": "text",
+       "x": 1520,
+       "y": 200,
+       "w": 120,
+       "h": 120,
+       "text": "✓",
+       "fontSize": 96,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "bo",
+       "type": "image",
+       "asset": "assets/box-open.svg",
+       "x": 820,
+       "y": 500,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "rw",
+       "type": "image",
+       "asset": "assets/rewind.svg",
+       "x": 1080,
+       "y": 520,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pl",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1300,
+       "y": 490,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "k2",
+       "type": "text",
+       "x": 1520,
+       "y": 520,
+       "w": 120,
+       "h": 120,
+       "text": "✓",
+       "fontSize": 96,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "half",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "half",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "bs",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 0
+        },
+        {
+         "frame": 106,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 0
+        },
+        {
+         "frame": 106,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 94,
+         "value": 0
+        },
+        {
+         "frame": 106,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ar1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 113,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bo",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 142,
+         "value": 0
+        },
+        {
+         "frame": 154,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rw",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 142,
+         "value": 0
+        },
+        {
+         "frame": 154,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pl",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 142,
+         "value": 0
+        },
+        {
+         "frame": 154,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 101,
+         "value": 0
+        },
+        {
+         "frame": 113,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "k1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 104,
+         "value": 0
+        },
+        {
+         "frame": 116,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "k2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 111,
+         "value": 0
+        },
+        {
+         "frame": 123,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "atomic-2",
+     "chapterId": "atomic",
+     "from": 1826,
+     "durationInFrames": 139,
+     "narration": "事务的这个特点，叫原子性。",
+     "subtitles": [
+      {
+       "text": "事务的这个特点，叫原子性",
+       "from": 0,
+       "to": 138
+      }
+     ],
+     "elements": [
+      {
+       "id": "whole",
+       "type": "image",
+       "asset": "assets/box-sealed.svg",
+       "x": 200,
+       "y": 240,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "bs",
+       "type": "image",
+       "asset": "assets/box-sealed.svg",
+       "x": 820,
+       "y": 180,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "ar1",
+       "type": "arrow",
+       "x": 1050,
+       "y": 255,
+       "w": 220,
+       "h": 50,
+       "color": "#22C55E",
+       "reuse": false,
+       "direction": "r"
+      },
+      {
+       "id": "pr",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1300,
+       "y": 170,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "k1",
+       "type": "text",
+       "x": 1520,
+       "y": 200,
+       "w": 120,
+       "h": 120,
+       "text": "✓",
+       "fontSize": 96,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "bo",
+       "type": "image",
+       "asset": "assets/box-open.svg",
+       "x": 820,
+       "y": 500,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "rw",
+       "type": "image",
+       "asset": "assets/rewind.svg",
+       "x": 1080,
+       "y": 520,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "pl",
+       "type": "image",
+       "asset": "assets/person.svg",
+       "x": 1300,
+       "y": 490,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "k2",
+       "type": "text",
+       "x": 1520,
+       "y": 520,
+       "w": 120,
+       "h": 120,
+       "text": "✓",
+       "fontSize": 96,
+       "color": "#22C55E",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "at",
+       "type": "rect",
+       "x": 190,
+       "y": 720,
+       "w": 440,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "原子性",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "whole",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "at",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 46,
+         "value": 0
+        },
+        {
+         "frame": 58,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "at",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 46,
+         "value": 0
+        },
+        {
+         "frame": 58,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "chapterId": "recap",
+   "title": "回顾",
+   "from": 1965,
+   "durationInFrames": 236,
+   "narrationCharsRecount": 25,
+   "shots": [
+    {
+     "id": "recap-1",
+     "chapterId": "recap",
+     "from": 1965,
+     "durationInFrames": 236,
+     "narration": "一笔事务：装进包裹，做完就提交，出错就回滚，全程保证原子性。",
+     "subtitles": [
+      {
+       "text": "一笔事务：装进包裹",
+       "from": 0,
+       "to": 55
+      },
+      {
+       "text": "做完就提交，出错就回滚",
+       "from": 56,
+       "to": 126
+      },
+      {
+       "text": "全程保证原子性",
+       "from": 127,
+       "to": 235
+      }
+     ],
+     "elements": [
+      {
+       "id": "frame",
+       "type": "rect",
+       "x": 120,
+       "y": 200,
+       "w": 1680,
+       "h": 560,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 28
+      },
+      {
+       "id": "c0",
+       "type": "image",
+       "asset": "assets/box-open.svg",
+       "x": 230,
+       "y": 260,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/box-sealed.svg",
+       "x": 650,
+       "y": 260,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c2",
+       "type": "image",
+       "asset": "assets/rewind.svg",
+       "x": 1080,
+       "y": 270,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "c3",
+       "type": "image",
+       "asset": "assets/box-half.svg",
+       "x": 1490,
+       "y": 260,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false
+      },
+      {
+       "id": "r0",
+       "type": "rect",
+       "x": 150,
+       "y": 580,
+       "w": 360,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "事务",
+       "fontSize": 48
+      },
+      {
+       "id": "r1",
+       "type": "rect",
+       "x": 570,
+       "y": 580,
+       "w": 360,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 55,
+       "label": "提交",
+       "fontSize": 48
+      },
+      {
+       "id": "r2",
+       "type": "rect",
+       "x": 990,
+       "y": 580,
+       "w": 360,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 55,
+       "label": "回滚",
+       "fontSize": 48
+      },
+      {
+       "id": "r3",
+       "type": "rect",
+       "x": 1410,
+       "y": 580,
+       "w": 360,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "原子性",
+       "fontSize": 48
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "frame",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 50,
+         "value": 0
+        },
+        {
+         "frame": 62,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 86,
+         "value": 0
+        },
+        {
+         "frame": 98,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 121,
+         "value": 0
+        },
+        {
+         "frame": 133,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 22,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 0
+        },
+        {
+         "frame": 88,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 114,
+         "value": 0
+        },
+        {
+         "frame": 126,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 157,
+         "value": 0
+        },
+        {
+         "frame": 169,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  }
+ ],
+ "cover": {
+  "kind": "designed",
+  "approved": true,
+  "episode": 15,
+  "source": {
+   "16x9": "cover/ep15-16x9.png",
+   "4x3": "cover/ep15-4x3.png",
+   "3x4": "cover/ep15-3x4.png"
+  },
+  "generator": "cover/make_cover.py",
+  "note": "Miyazaki 定稿设计封面（PNG 源在 cover/，Knoll 转 JPG q95）"
+ }
+}
