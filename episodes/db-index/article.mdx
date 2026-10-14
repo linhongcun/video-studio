@@ -1,0 +1,93 @@
+---
+title: 加个索引，为啥就快了？
+summary: 用「一本厚书」讲清数据库索引：没有目录只能一页页翻（全表扫描），有了目录直接翻到那一页（索引），目录做成多层就是 B+ 树，以及为什么索引不是越多越好。
+chapters:
+  - { id: hook,  title: 一下子就搜到 }
+  - { id: scan,  title: 一页一页翻 }
+  - { id: index, title: 先查目录 }
+  - { id: btree, title: 多层目录 }
+  - { id: more,  title: 目录不是越多越好 }
+  - { id: recap, title: 回顾 }
+related: ["server-cache", "browser-cache"]
+---
+
+在成千上万条记录里搜一个订单号，结果一下子就出来，靠的是数据库的**索引**。它跟查一本厚书的目录是一个道理。下面分 6 步讲清楚。
+
+## 6 步看懂数据库索引
+
+### 1. 一下子就搜到 {#hook}
+
+{/* 配图：搜索框输入订单号，结果立刻弹出；背后是一排书架 */}
+
+- 前几期讲缓存时常说「查数据库慢」。这一期讲它为什么会慢，以及怎么变快。
+
+### 2. 一页一页翻 {#scan}
+
+{/* 配图：小人在没有目录的书前从第一页翻起 */}
+
+- 没有索引时，MySQL 只能从第一行开始，把整张表读一遍来找要的行；表越大，代价越大。这叫**全表扫描**。[^mysql-idx]
+- 用 `EXPLAIN` 查看执行计划时，`type` 列显示 `ALL` 就是全表扫描。[^mysql-explain][^mysql-scan]
+- 全表扫描不一定是坏事：行数很少的小表（手册举的例子是不到 10 行、行很短），或者要读出大部分行的查询，直接扫一遍反而更快。[^mysql-scan]
+
+### 3. 先查目录 {#index}
+
+{/* 配图：同一本书有了目录，查到页码直接翻过去；左右对比 */}
+
+- 有了**索引**，MySQL 能直接算出要跳到数据文件的哪个位置，不用看完所有数据，比一行一行顺序读快得多。[^mysql-idx]
+- 索引条目就像指向表中行的指针，相当于目录里的页码。[^mysql-opt]
+- 官方只说「快得多」，没给倍数。快多少取决于表的大小和查询条件，本文不给具体数字。
+
+### 4. 多层目录 {#btree}
+
+{/* 配图：总目录 → 分目录 → 具体位置，高亮路径一路往下 */}
+
+- MySQL 的大多数索引（PRIMARY KEY、UNIQUE、INDEX、FULLTEXT）都存在 B-tree 里；InnoDB 除了空间索引，都是 B-tree 结构，索引记录放在叶子页里，默认一页 16KB。[^mysql-idx][^innodb-phys]
+- B-tree 一直保持有序，每个节点可以有很多个子节点，等值查找和范围查找都快。[^mysql-glossary]
+- **说明**：中文社区一般把 InnoDB 的索引叫 **B+ 树**（数据只放在叶子节点，叶子之间连成链表），视频里也这么叫；MySQL 官方文档的写法是 **B-tree**。
+- 多层目录的直观讲法：根节点指向分支节点，分支节点再指向叶子节点，一层层往下就找到了。[^luke-tree]
+
+### 5. 目录不是越多越好 {#more}
+
+{/* 配图：改一页书，好几本目录都要跟着改 */}
+
+官方原文一段话讲了三个代价：[^mysql-opt]
+
+- **拖慢写入**：每次插入、更新、删除，每个索引都要跟着更新。
+- **占空间**：用不上的索引白白占地方。
+- **要挑选**：索引太多，MySQL 要花时间决定用哪一个。
+
+另外，InnoDB 的每个二级索引都存了一份主键值，所以主键越短，二级索引越省空间。[^innodb-types]
+
+### 6. 回顾 {#recap}
+
+- 没有目录：**全表扫描**，大表很慢。
+- 建了**索引**：先查目录，直接跳到那一行。
+- 多层目录（**B+ 树**）：表很大也能很快找到。
+- **索引不是越多越好**：够用就好。
+
+## 延伸：两个视频里没讲的概念
+
+### 回表
+
+- 每张 InnoDB 表都有一个**聚簇索引**，整行数据就存在里面，通常就是主键。没有主键时，InnoDB 会用第一个所有列都 NOT NULL 的 UNIQUE 索引；再没有，就自动生成一个隐藏的 `GEN_CLUST_INDEX`（6 字节的行 ID）。[^innodb-types]
+- 其他索引都叫**二级索引**，每条记录里存着这一行的主键值。通过二级索引查数据，要先查到主键，再拿主键去聚簇索引里取整行。[^innodb-types]
+- 中文社区把这一步叫**回表**，这是社区的叫法，官方手册里没有这个词。
+- 如果查询要的列都在某个索引里，就只读索引、不用回表，这叫**覆盖索引**，`EXPLAIN` 的 Extra 列会显示 `Using index`。[^mysql-explain]
+
+### 最左前缀
+
+- 一个索引可以包含多列（最多 16 列）。对 `(col1, col2, col3)` 这个索引，能用来查找的是 `(col1)`、`(col1, col2)`、`(col1, col2, col3)`。[^mysql-multi]
+- 只给 `col2`，或者只给 `col2` 和 `col3`，一般用不上这个索引，因为不是从最左边那列开始的。好比字典先按姓排、再按名排，只知道名、不知道姓，目录就帮不上忙。[^mysql-multi]
+- MySQL 8.0 起有 Skip Scan，某些情况下不满足最左前缀也能用上索引的一部分（`Using index for skip scan`），入门阶段记住「一般情况」就够了。[^mysql-explain]
+
+## 参考资料
+
+[^mysql-idx]: MySQL 8.4 参考手册，10.3.1 How MySQL Uses Indexes（文档生成于 2026-10-01）：https://dev.mysql.com/doc/refman/8.4/en/mysql-indexes.html
+[^mysql-opt]: MySQL 8.4 参考手册，10.3 Optimization and Indexes（文档生成于 2026-10-01）：https://dev.mysql.com/doc/refman/8.4/en/optimization-indexes.html
+[^innodb-types]: MySQL 8.4 参考手册，17.6.2.1 Clustered and Secondary Indexes（文档生成于 2026-10-01）：https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html
+[^innodb-phys]: MySQL 8.4 参考手册，17.6.2.2 Physical Structure of an InnoDB Index（文档生成于 2026-10-01）：https://dev.mysql.com/doc/refman/8.4/en/innodb-physical-structure.html
+[^mysql-multi]: MySQL 8.4 参考手册，10.3.6 Multiple-Column Indexes（文档生成于 2026-10-01）：https://dev.mysql.com/doc/refman/8.4/en/multiple-column-indexes.html
+[^mysql-explain]: MySQL 8.4 参考手册，10.8.2 EXPLAIN Output Format（文档生成于 2026-10-01）：https://dev.mysql.com/doc/refman/8.4/en/explain-output.html
+[^mysql-scan]: MySQL 8.4 参考手册，10.2.1.23 Avoiding Full Table Scans（文档生成于 2026-10-01）：https://dev.mysql.com/doc/refman/8.4/en/table-scan-avoidance.html
+[^mysql-glossary]: MySQL 8.4 参考手册，Glossary「B-tree」词条（文档生成于 2026-10-01）：https://dev.mysql.com/doc/refman/8.4/en/glossary.html
+[^luke-tree]: Markus Winand，《Use The Index, Luke》The B-Tree（原书 2012 年，仅参考）：https://use-the-index-luke.com/sql/anatomy/the-tree
