@@ -331,6 +331,6 @@ export const Main: React.FC = () => (
         <Shot p={p} prevTr={i ? plan[i - 1].sh.transition : null} />
       </Sequence>
     ))}
-    <ChannelBranding mainFrames={totalFrames} />
+    <ChannelBranding mainFrames={totalFrames} watermarkFadeIn={false} />
   </AbsoluteFill>
 );
