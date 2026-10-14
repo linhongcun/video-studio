@@ -1,0 +1,67 @@
+---
+title: 一个服务出故障，为什么整个网站没跟着崩？
+summary: 用家里的电闸讲清熔断：结算页同步调用运费险服务（举例），它故障会引发雪崩（级联故障）；超时为什么不够；熔断怎么跳闸、快速失败；关闭、打开、半开三种状态；以及熔断、限流、降级的区别。
+chapters:
+  - { id: hook,      title: 没跟着崩 }
+  - { id: cascade,   title: 雪崩 }
+  - { id: breaker,   title: 电闸跳闸 }
+  - { id: states,    title: 关闭是通，打开是断 }
+  - { id: half-open, title: 试着合闸 }
+  - { id: recap,     title: 回顾 }
+related: ["degradation", "rate-limit", "idempotency"]
+---
+
+大促时某个后台服务出了故障，整个网站却没跟着崩，靠的是**熔断**（circuit breaker）：发现某个依赖持续出错，就暂时不再调用它，避免故障扩散。它的思路和家里的电闸一样。下面分 6 步讲清楚。
+
+## 6 步看懂熔断
+
+### 1. 没跟着崩 {#hook}
+
+{/* 配图：后台一排服务，运费险服务变红，其余亮绿 */}
+
+- 一个网站背后是很多服务互相调用。某个服务出故障很常见，关键是别让它把别的服务一起拖下水。
+
+### 2. 雪崩 {#cascade}
+
+{/* 配图：结算页等运费险服务，请求堆积，红色蔓延到支付 */}
+
+- 打开结算页时，系统要**同步**调用运费险服务（这里只是举例），看这一单能不能加运费险。运费险服务故障、迟迟不响应，结算页的线程和连接就被一直占着。
+- 等待的请求越积越多，订单服务也不可用，再影响支付。这叫**雪崩**，也叫**级联故障**（cascading failure）。[^azure-cb]
+
+### 3. 电闸跳闸 {#breaker}
+
+{/* 配图：沙漏超时；电闸一路跳闸；结算页与运费险服务之间的开关，计数板（示例） */}
+
+- **超时**：每次调用设等待上限，到点放弃。必须有，但高峰时每个请求仍要白等一次。[^aws-tr]
+- **熔断**：熔断器统计最近的调用结果，失败率超过阈值就跳闸，之后的请求不再调用运费险服务，直接**快速失败**、马上返回。这既保护了结算和下单，也给运费险服务恢复的时间。[^r4j-cb]
+- 示例参数（仅示例，需按流量和业务调整）：最近 100 次调用失败率达到 50% 就打开，断开 30 秒（Resilience4j 默认是 60 秒）。
+- 熔断不能代替超时，两者要一起用。
+
+### 4. 关闭是通，打开是断 {#states}
+
+{/* 配图：电闸合上灯亮=关闭；跳开灯灭=打开 */}
+
+- **关闭**（Closed）：正常调用，同时统计失败率。
+- **打开**（Open）：已跳闸，直接拒绝调用。
+- 反直觉之处：和电闸一样，「合上（关闭）」才通电，「跳开（打开）」才断电。
+
+### 5. 试着合闸 {#half-open}
+
+{/* 配图：计时器走完（示例 30 秒），放少量试探请求 */}
+
+- **半开**（Half-Open）：打开一段时间后，放少量请求去试探。成功就回到关闭，恢复正常调用；失败就重新打开，过一阵再试。[^r4j-cb][^azure-cb]
+
+### 6. 回顾 {#recap}
+
+- 熔断后结算页少显示运费险这一项、下单照常，这一步是**降级**（见上期）。
+- 熔断适合**弱依赖**（挂了不影响主流程，如运费险）；库存这类**强依赖**不能熔断，下单必须校验库存。[^jd-dep][^sentinel]
+- 三者区别：**限流**管进来的流量；**熔断**隔离出故障的依赖；**降级**牺牲次要功能、保住核心功能。
+- 「扛住高峰」五招：消息队列、限流、幂等、降级、熔断。
+
+## 参考资料
+
+[^azure-cb]: Microsoft Azure Architecture Center，《Circuit Breaker pattern》（持续更新的官方文档，访问于 2026-10-13）：https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker
+[^r4j-cb]: Resilience4j 官方文档，《CircuitBreaker》（持续更新，访问于 2026-10-13）：https://resilience4j.readme.io/docs/circuitbreaker
+[^jd-dep]: 京东云开发者社区，《【稳定性】稳定性建设之依赖设计》（2024-02-23）：https://developer.jdcloud.com/article/3670
+[^sentinel]: Sentinel 官方文档《熔断降级》（持续更新，访问于 2026-10-14）：https://sentinelguard.io/zh-cn/docs/circuit-breaking.html
+[^aws-tr]: AWS Builders' Library，《Timeouts, retries, and backoff with jitter》（2019，仅参考）：https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
