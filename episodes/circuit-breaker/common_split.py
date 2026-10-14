@@ -7,7 +7,7 @@ TTS={}
 def tts(s):
     for a,b in TTS.items(): s=s.replace(a,b)
     return s
-HOLDS={"hook-2":12,"cascade-2":19,"half-open-1":19}  # 第十三期：估算 timing 下按「术语/短标签完全淡入（opacity 与 scale 动画结束）后到镜头末 ≥60 帧」按需填；镜头尾单侧停留，Knoll timing 不含；已有 extraHold/origDuration/holdIncluded 则不重复加
+HOLDS={"hook-2":9,"cascade-2":14,"half-open-1":13}  # 第十三期：估算 timing 下按「术语/短标签完全淡入（opacity 与 scale 动画结束）后到镜头末 ≥60 帧」按需填；镜头尾单侧停留，Knoll timing 不含；已有 extraHold/origDuration/holdIncluded 则不重复加
 def apply_holds(out):
     for sid,h in HOLDS.items():
         v=out[sid]

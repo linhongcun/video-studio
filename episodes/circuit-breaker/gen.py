@@ -44,32 +44,40 @@ def shots_for(si,L):
     at=lambda k,p:AT(si,k,p)
     def red(i,x,y,label,w=340,h=120,fs=44): return R(i,x,y,w,h,"#3F1D24",stroke=P['danger'],radius=20,label=label,fontSize=fs)
     def svc(i,x,y,label,w=340,h=120,c=None,fs=44): return R(i,x,y,w,h,P['panel'],stroke=c or P['success'],radius=20,label=label,fontSize=fs)
-    GX=[1000,1400];GY=[200,380];GN=[["商品服务","订单服务"],["库存服务","支付服务"]]
+    GX=[1000,1400];GY=[200,380];GN=[["商品服务","订单服务"],["运费险服务","支付服务"]]
     def grid(): return [svc(f"s{r}{c}",GX[c],GY[r],GN[r][c],360) for r in range(2) for c in range(2)]
     GRID=["s00","s01","s10","s11"]
     def labels(px,py,w):
         k=w/512; return [R(f"l{j}",int(px+k*(101+j*102)-50),py+w+8,100,64,stroke=P['text2'],radius=14,label=n,fontSize=32) for j,n in enumerate(("客厅","卧室","厨房","插座"))]
+    def checkout(x,y,w=560,h=620,p="co"):  # 结算页：商品 / 运费险 / 「提交订单」按钮（无金额）
+        return [R(p,x,y,w,h,P['panel'],stroke=P['secondary'],radius=36),T(p+"h",x,y+30,w,56,"结算页",44,P['text2'],align="center"),
+                R(p+"r1",x+50,y+120,w-100,96,stroke=P['text2'],radius=18,label="商品",fontSize=40),R(p+"fx",x+50,y+240,w-100,96,stroke=P['accent'],radius=18,label="运费险",fontSize=40),
+                R(p+"btn",x+50,y+h-150,w-100,100,"#14532D",stroke=P['success'],radius=50,label="提交订单",fontSize=44)]
+    def CO(p="co"): return [p,p+"h",p+"r1",p+"fx",p+"btn"]
+    def gap(x,y,w=560,p="co"):  # 运费险一行消失后的灰色虚线空框（同位置同尺寸，无文字），提示「这里原来有一项」
+        return R(p+"gap",x+50,y+240,w-100,96,P['panel'],stroke=P['muted'],radius=18,dash=True,note="dashed outline, no text")
     if si==0:  # 没跟着崩
-        e1=[I("ph","phone",200,140,520)]+grid()+[red("bad",GX[0],GY[1],"库存服务",360),I("sp","spark",GX[0]+300,GY[1]+70,90),
+        e1=checkout(200,140)+[gap(200,140)]+grid()+[red("bad",GX[0],GY[1],"运费险服务",360),I("sp","spark",GX[0]+300,GY[1]+70,90),
             tag("ok",1000,600,760,"其余服务：照常",P['success'],40)]
         tb=at(0,"出了故障")
-        a1=[F("ph",0)]+[F(x,at(0,"库存服务")) for x in GRID]+[
-            F("bad",tb),pop("bad",tb),F("sp",tb),F("ok",at(1,"别的功能"))]
-        e2=grid()+[red("bad",GX[0],GY[1],"库存服务",360),T("why",160,300,760,120,"为什么没崩？",80,P['accent'],align="center"),T("ask",1180,620,400,140,"？",120,P['accent'],align="center")]
+        tk=at(1,"照样能下单")
+        a1=[F(x,0) for x in CO()]+[F(x,at(0,"运费险服务")) for x in GRID]+[
+            F("bad",tb),pop("bad",tb),F("sp",tb),out("cofx",tk,tk+12),F("cogap",tk,12),mv("cobtn","scale",tk+6,tk+18,1.12,1,"spring"),F("ok",tk)]
+        e2=grid()+[red("bad",GX[0],GY[1],"运费险服务",360),T("why",160,300,760,120,"为什么没崩？",80,P['accent'],align="center"),T("ask",1180,620,400,140,"？",120,P['accent'],align="center")]
         a2=[F(x,0) for x in GRID]+[F("bad",0),F("why",0),pop("why",0),F("ask",at(1,"什么都不做")),pop("ask",at(1,"什么都不做"))]
         return [(e1,a1),(e2,a2)]
     if si==1:  # 雪崩 / 级联故障
-        e1=[svc("od",200,300,"订单服务",400,130,P['secondary'],48),E("ln","line",600,365,560,0,P['text2']),svc("iv",1160,300,"库存服务",400,130,P['secondary'],48),
-            R("bub",700,170,320,90,stroke=P['text2'],radius=45,label="有货吗？",fontSize=44),red("ivr",1160,300,"库存服务",400,130,48),I("tm","timer",420,500,140)]
-        a1=[F("od",0),F("ln",at(0,"先去问")),F("iv",at(0,"先去问")),F("bub",at(0,"还有货吗")),pop("bub",at(0,"还有货吗")),F("ivr",at(1,"出了故障")),out("bub",at(1,"迟迟"),at(1,"迟迟")+10),F("tm",at(1,"一直等"))]
-        e2=[red("iv",1160,140,"库存服务",400,120),svc("od",640,140,"订单服务",400,120,P['secondary']),svc("pay",640,400,"支付服务",400,120,P['secondary']),red("odr",640,140,"订单服务",400,120),red("payr",640,400,"支付服务",400,120)]+[
+        e1=[svc("od",200,300,"结算页",400,130,P['secondary'],48),E("ln","line",600,365,560,0,P['text2']),svc("iv",1160,300,"运费险服务",400,130,P['secondary'],48),
+            R("bub",680,170,360,90,stroke=P['text2'],radius=45,label="加运费险吗？",fontSize=44),red("ivr",1160,300,"运费险服务",400,130,48),I("tm","timer",420,500,140)]
+        a1=[F("od",0),F("ln",at(0,"顺带去问")),F("iv",at(0,"顺带去问")),F("bub",at(0,"这一单")),pop("bub",at(0,"这一单")),F("ivr",at(1,"出了故障")),out("bub",at(1,"迟迟"),at(1,"迟迟")+10),F("tm",at(1,"一直等"))]
+        e2=[red("iv",1160,140,"运费险服务",400,120),svc("od",640,140,"订单服务",400,120,P['secondary']),svc("pay",640,400,"支付服务",400,120,P['secondary']),red("odr",640,140,"订单服务",400,120),red("payr",640,400,"支付服务",400,120)]+[
             I(f"g{j}","guest",160+(j%4)*90,160+(j//4)*100,76) for j in range(12)]+[term("av",1160,600,400,"雪崩",P['danger'],64),term("cf",1160,730,400,"级联故障",P['danger'],48)]
         tq=at(0,"越积越多");ta=at(1,"这就叫雪崩");tc=at(1,"也叫级联故障")
         a2=[F("iv",0),F("od",0),F("pay",0)]+[F(f"g{j}",j*8) for j in range(12)]+[F("odr",at(0,"拖垮")),F("payr",at(0,"支付")),F("av",ta),pop("av",ta),F("cf",tc),pop("cf",tc)]
         return [(e1,a1),(e2,a2)]
     if si==2:  # 超时 → 电闸 → 熔断
         e1=[I(f"g{j}","guest",220+j*200,380,110) for j in range(4)]+[I(f"h{j}","hourglass",235+j*200,240,80) for j in range(4)]+[
-            red("iv",1300,380,"库存服务",400,120),term("to",220,620,360,"超时",P['accent'],64),tag("wait",660,630,360,"仍要等满",P['text2'],40)]
+            red("iv",1300,380,"运费险服务",400,120),term("to",220,620,360,"超时",P['accent'],64),tag("wait",660,630,360,"仍要等满",P['text2'],40)]
         tt=at(0,"这叫超时")
         a1=[F(f"g{j}",0) for j in range(4)]+[F("iv",0)]+[F(f"h{j}",at(0,"等待上限")+j*6) for j in range(4)]+[F("to",tt),pop("to",tt),F("wait",at(1,"超时要有"))]
         bx,by,bw=200,140,560
@@ -77,14 +85,14 @@ def shots_for(si,L):
             I("fr","tv",1060,200,320),I("lp","lamp",1440,300,240),tag("ok",1120,620,560,"其余各路：照常",P['success'],40)]
         tz=at(0,"跳下来")
         a2=[F("box",0),F("so",0)]+[F(f"l{j}",0) for j in range(4)]+[F("fr",0),F("lp",0),F("sp",at(0,"短路")),pop("sp",at(0,"短路")),F("trip",tz),out("box",tz,tz+8),out("sp",tz+8,tz+16),F("ok",at(0,"短路"))]
-        e3=[svc("od",160,240,"订单服务",360,120,P['secondary']),E("lna","line",520,300,120,0,P['text2']),I("son","switch-on",640,190,100,190),I("soff","switch-off",640,190,100,190),
-            E("lnb","line",740,300,140,0,P['text2']),red("iv",880,240,"库存服务",360,120),
+        e3=[svc("od",160,240,"结算页",360,120,P['secondary']),E("lna","line",520,300,120,0,P['text2']),I("son","switch-on",640,190,100,190),I("soff","switch-off",640,190,100,190),
+            E("lnb","line",740,300,140,0,P['text2']),red("iv",880,240,"运费险服务",360,120),
             R("cnt",1300,200,460,200,stroke=P['accent'],radius=20),T("c1",1300,225,460,60,"最近 100 次（示例）",40,P['text'],align="center"),T("c2",1300,305,460,60,"失败 50%（示例）",40,P['danger'],align="center"),
-            E("back","arrow",520,430,360,50,P['accent'],direction="l"),R("busy",160,500,620,96,stroke=P['accent'],radius=48,label="系统繁忙，请稍后重试",fontSize=40),
+            E("back","arrow",520,430,360,50,P['accent'],direction="l"),R("ret",160,500,300,96,stroke=P['accent'],radius=48,label="马上返回",fontSize=40),R("btn",480,500,300,96,"#14532D",stroke=P['success'],radius=48,label="提交订单",fontSize=40),
             term("cb",880,520,360,"熔断",P['danger'],64),R("both",500,720,920,100,stroke=P['primary'],radius=50,label="熔断不能代替超时",fontSize=52)]
         tj=at(0,"就跳闸");tr=at(0,"直接返回");tc=at(1,"这叫熔断");tm=at(2,"熔断不能代替超时")
         a3=[F("od",0),F("lna",0),F("son",0),F("lnb",0),F("iv",0),F("cnt",at(0,"最近")),F("c1",at(0,"最近")),F("c2",at(0,"一半")),
-            F("soff",tj),out("son",tj,tj+8),out("lnb",tj,tj+8,0.2),draw("back",tr,15),F("busy",tr+8),pop("busy",tr+8),F("cb",tc),pop("cb",tc),F("both",tm),pop("both",tm)]
+            F("soff",tj),out("son",tj,tj+8),out("lnb",tj,tj+8,0.2),draw("back",tr,15),F("ret",tr+8),pop("ret",tr+8),F("btn",tr+20),pop("btn",tr+20),F("cb",tc),pop("cb",tc),F("both",tm),pop("both",tm)]
         return [(e1,a1),(e2,a2),(e3,a3)]
     if si==3:  # 关闭是通，打开是断
         e=[T("hd",160,120,1600,80,"熔断器 · 反直觉",60,P['accent'],align="center"),
@@ -99,7 +107,7 @@ def shots_for(si,L):
         return [(e,a)]
     if si==4:  # 半开
         e1=[I("soff","switch-off",200,200,130,250),I("tm","timer",420,220,200),T("ts",380,440,300,60,"30 秒（示例）",40,P['accent'],align="center"),
-            red("iv",1360,260,"库存服务",360,120)]+[R(f"pr{j}",760,250+j*50,90,36,P['primary'],radius=18) for j in range(2)]+[term("ho",760,620,520,"半开 · 少量试探",P['primary'],48)]
+            red("iv",1360,260,"运费险服务",360,120)]+[R(f"pr{j}",760,250+j*50,90,36,P['primary'],radius=18) for j in range(2)]+[term("ho",760,620,520,"半开 · 少量试探",P['primary'],48)]
         tp=at(1,"再放少量");th=at(1,"这个状态叫半开")
         a1=[F("soff",0),F("iv",0),F("tm",at(1,"断开三十秒")),F("ts",at(1,"断开三十秒"))]+[x for j in range(2) for x in (F(f"pr{j}",tp+j*10),mv(f"pr{j}","x",tp+j*10,tp+j*10+40,760,1240))]+[F("ho",th),pop("ho",th)]
         e2=[R("okc",160,160,760,420,stroke=P['success'],radius=24),I("son","switch-on",220,220,130,250),T("okt",400,300,500,60,"成功：回到关闭",44,P['success']),
@@ -108,14 +116,14 @@ def shots_for(si,L):
         a2=[F("ho",0),F("okc",0),F("son",at(0,"试成功")),F("okt",at(0,"试成功")),F("bdc",at(0,"还是失败")),F("soff",at(0,"还是失败")),F("bdt",at(0,"还是失败")),F("tm",at(0,"过一阵"))]
         return [(e1,a1),(e2,a2)]
     if si==5:  # 回顾
-        e1=[R("pg",160,140,760,640,stroke=P['secondary'],radius=36),T("pgt",160,170,760,60,"订单页",44,P['text2'],align="center"),
-            R("r1",220,280,640,110,stroke=P['success'],radius=20,label="库存校验",fontSize=44),I("lk","lock",740,290,90),R("r2",220,430,640,110,stroke=P['text2'],radius=20,label="支付",fontSize=44),
-            I("soff","switch-off",1120,240,120,230),red("iv",1360,300,"库存服务",360,120),tag("keep",1100,560,640,"校验：始终在",P['success'],40),term("st",1100,700,640,"熔断：暂停调用",P['danger'],44)]
-        a1=[F("pg",0),F("pgt",0),F("r1",0),F("r2",0),F("soff",0),F("iv",0),F("lk",at(0,"库存校验")),pop("lk",at(0,"库存校验")),F("keep",at(0,"库存校验")),F("st",at(0,"熔断只是")),pop("st",at(0,"熔断只是"))]
+        e1=checkout(200,140)+[gap(200,140),I("soff","switch-off",1000,200,120,230),red("iv",1200,250,"运费险服务",400,120),
+            term("st",1000,480,600,"熔断：暂停调用",P['danger'],44),R("dgl",1000,620,600,96,stroke=P['accent'],radius=48,label="降级 · 上期",fontSize=44)]
+        tl=at(0,"少显示");tp=at(0,"下单付款照常")
+        a1=[F(x,0) for x in CO()]+[F("soff",0),F("iv",0),F("st",0),pop("st",0),out("cofx",tl,tl+12),F("cogap",tl,12),F("dgl",at(0,"上期讲的降级")),pop("dgl",at(0,"上期讲的降级")),mv("cobtn","scale",tp,tp+12,1.12,1,"spring")]
         e2=[term("k0",160,140,500,"限流：管流量",P['success'],44),term("k1",710,140,500,"熔断：隔离故障",P['danger'],44),term("k2",1260,140,500,"降级：保核心",P['accent'],44),
             queue("q",160,340,300),T("lq",160,500,300,50,"消息队列",40,P['primary'],align="center"),I("gate","gate",540,300,200),T("lg",500,520,280,50,"限流",40,P['success'],align="center"),
             I("tk","ticket",880,310,180),T("lt",830,520,280,50,"幂等",40,P['accent'],align="center"),I("fz","shield",1200,300,200),T("lf",1160,520,280,50,"降级",40,P['accent'],align="center"),
-            I("bx","breaker-tripped",1500,300,200),T("lb",1460,520,280,50,"熔断",40,P['danger'],align="center"),R("five",560,640,800,96,stroke=P['accent'],radius=48,label="第五招：熔断",fontSize=52)]+grid()+[red("bad",GX[0],GY[1],"库存服务",360),I("cut","switch-off",880,330,90,170)]
+            I("bx","breaker-tripped",1500,300,200),T("lb",1460,520,280,50,"熔断",40,P['danger'],align="center"),R("five",560,640,800,96,stroke=P['accent'],radius=48,label="第五招：熔断",fontSize=52)]+grid()+[red("bad",GX[0],GY[1],"运费险服务",360),I("cut","switch-off",880,330,90,170)]
         t2=at(1,"一个服务挂了")
         PH=["k0","k1","k2","q","lq","gate","lg","tk","lt","fz","lf","bx","lb","five"]
         a2=[F("k0",at(0,"限流管")),F("k1",at(0,"限流管")+8),F("k2",at(0,"限流管")+16)]+[F(x,at(0,"第五招")) for x in ("q","lq","gate","lg","tk","lt","fz","lf")]+[F("bx",at(0,"第五招")+10),F("lb",at(0,"第五招")+10),F("five",at(0,"第五招")+10),pop("five",at(0,"第五招")+10)]+[
@@ -157,13 +165,13 @@ meta=dict(title="《一个服务出故障，为什么整个网站没跟着崩？
   shotSentences={k:n for c in ids for k,n in zip([f"{c}-{j+1}" for j in range(len(_SP[c]))],_SP[c])},
   tts=dict(note="第十三期：送 TTS 文字 = 字幕原文（读音表无替换）",replace={}),
   notes=("时长=暂定（make_timing.py：第三期 MiMo 冰糖实测校准，句间 0.28 秒，每章尾留 60 帧；按 TTS 文字计字）。配音到后：sh run.sh（默认 /workspace/share/ep13-timing.json）→ map_timing.py（scale 1）→ gen.py → validate.py。" if PROV else "时长=Knoll MiMo 实测，map_timing.py scale 1。")+
-   "第十三期（熔断，v0.18.0）：主线 下单 → 订单服务同步调用库存服务，库存服务持续故障；不出现红包 / 到手价 / 优惠券（validate 禁用词）。雪崩（级联故障）→ 超时（仍要等满）→ 家里电闸跳闸 → 熔断（示例：最近 100 次失败 50% 跳闸，快速失败返回「系统繁忙，请稍后重试」）+「熔断不能代替超时」→ 三种状态（关闭 = 电闸合上通电 = 正常调用；打开 = 跳闸 = 拒绝请求；反直觉）→ 半开（示例：断开 30 秒，放少量试探；成功回到关闭 / 失败回到打开）→ 回顾（库存校验始终在；限流管流量 / 熔断隔离故障 / 降级保核心；第五招）。示例参数上屏都标「示例」。旁白术语：雪崩、级联故障、超时、熔断、关闭、打开、半开，念到时上屏术语标签（锚在点名的那句）。画面不重复字幕句子（validate：术语白名单 + LABEL_OK 除外）。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/circuit-breaker/。复用 EP.12 第 3 版电闸箱 / 跳闸 / 开关 / 火花 / 灯 / 插座 / 计时器；新图标 lock / tv / shield 自绘无文字（第十三期家里电闸各路标 客厅 / 卧室 / 厨房 / 插座，电器用台灯和电视）；复用 phone/ticket（第十一期）、gate（第十期）、queue/guest（第九期）、hourglass（第三期）。branding v1.3.0：只有右上水印 + 60 帧片尾卡（全局组件），无中央水印，无自我介绍。")
+   "第十三期（熔断，v0.18.0，脚本 v2 运费险）：主线 结算页同步调用运费险服务（弱依赖），运费险服务持续故障；结算页卡片：商品 / 运费险 /「提交订单」，熔断后「运费险」一行消失、「提交订单」照常（上期降级一句带过）。画面禁用词见 validate BAN（上期主线词、旧稿快速失败提示语、旧稿服务名）。⚠ timing 为估算（按 Knoll EP.13 旧稿实测校准），Knoll 新配音到后必须 sh run.sh <新 timing> 重对、重算停留和封面帧。雪崩（级联故障）→ 超时（仍要等满）→ 家里电闸跳闸 → 熔断（示例：最近 100 次失败 50% 跳闸，快速失败：马上返回，结算页「提交订单」照常）+「熔断不能代替超时」→ 三种状态（关闭 = 电闸合上通电 = 正常调用；打开 = 跳闸 = 拒绝请求；反直觉）→ 半开（示例：断开 30 秒，放少量试探；成功回到关闭 / 失败回到打开）→ 回顾（熔断后结算页少显示「运费险」一项 = 上期降级，下单付款照常；限流管流量 / 熔断隔离故障 / 降级保核心；第五招）。示例参数上屏都标「示例」。旁白术语：雪崩、级联故障、超时、熔断、关闭、打开、半开，念到时上屏术语标签（锚在点名的那句）。画面不重复字幕句子（validate：术语白名单 + LABEL_OK 除外）。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/circuit-breaker/。复用 EP.12 第 3 版电闸箱 / 跳闸 / 开关 / 火花 / 灯 / 插座 / 计时器；新图标 tv / shield 自绘无文字（第十三期家里电闸各路标 客厅 / 卧室 / 厨房 / 插座，电器用台灯和电视）；复用 phone/ticket（第十一期）、gate（第十期）、queue/guest（第九期）、hourglass（第三期）。branding v1.3.0：只有右上水印 + 60 帧片尾卡（全局组件），无中央水印，无自我介绍。")
 assets=dict(reuse=[dict(id="routeArrow",desc="路线箭头 drawProgress"),dict(id="subtitle",desc="字幕层")]+
-  [dict(id=n,file=f"assets/{n}.svg",from_=f) for n,f in (("phone","idempotency/assets/phone.svg"),("ticket","idempotency/assets/ticket.svg"),("gate","rate-limit/assets/gate.svg"),("queue","message-queue/assets/queue.svg"),("guest","message-queue/assets/guest.svg"),("timer","server-cache/assets/timer.svg"),("hourglass","dns/assets/hourglass.svg"))+tuple((n,"circuit-breaker/ep12-old（EP.12 第 3 版）") for n in ("breaker-box","breaker-tripped","switch-on","switch-off","spark","lamp","socket"))],
- new=[dict(id=n,file=f"assets/{n}.svg") for n in ("lock","tv","shield")])
+  [dict(id=n,file=f"assets/{n}.svg",from_=f) for n,f in (("ticket","idempotency/assets/ticket.svg"),("gate","rate-limit/assets/gate.svg"),("queue","message-queue/assets/queue.svg"),("guest","message-queue/assets/guest.svg"),("timer","server-cache/assets/timer.svg"),("hourglass","dns/assets/hourglass.svg"))+tuple((n,"circuit-breaker/ep12-old（EP.12 第 3 版）") for n in ("breaker-box","breaker-tripped","switch-on","switch-off","spark","lamp","socket"))],
+ new=[dict(id=n,file=f"assets/{n}.svg") for n in ("tv","shield")])
 PS="breaker-2"; sh=[x for sc in scenes for x in sc['shots'] if x['id']==PS][0]
 PARTS[:]=[x['narration'] for x in scenes[2]['shots']]
-pl=190  # 写死（Knoll EP13 timing 23:3x + HOLDS）：breaker-2 动画全部在 184 结束——插座那路已跳闸、火花消失、电视/台灯/「其余各路：照常」全显；全局 1500+190=1690
+pl=196  # 写死（Knoll EP13 新稿 timing 08:0x + HOLDS）：breaker-2 共 204 帧，跳闸 176–188、火花 192 消失，之后插座那路已跳、其余各路 / 电视 / 台灯 /「其余各路：照常」（129 起全显）都在；全局 1541+196=1737
 meta['poster']=dict(shotId=PS,localFrame=pl,frame=sh['from']+pl,desc="家里电闸：插座那一路跳闸，其余各路照常（电视、台灯照常亮）",file="poster.jpg")
 _CS=Path("/workspace/miyazaki-backup/covers/cover-spec.json");_cov=json.load(open(_CS)).get(meta["slug"]) if _CS.exists() else None  # 专用封面规格（covers/make_covers.py）
 json.dump(dict(meta=meta,assets=assets,scenes=scenes,**({"cover":_cov} if _cov else {})),open(HERE/"storyboard.json","w"),ensure_ascii=False,indent=1)

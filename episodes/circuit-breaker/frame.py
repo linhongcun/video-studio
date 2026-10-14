@@ -36,6 +36,12 @@ def render(sid,f,out):
         elif e['type']=='text':
             ax={'center':'ma','right':'ra'}.get(e.get('align'),'la');xx={'ma':x+e['w']/2,'ra':x+e['w'],'la':x}[ax]
             dr.text((xx,y),e['text'],font=FT(e['fontSize']),fill=e['color'],anchor=ax)
+        elif e['type']=='rect' and e.get('dash'):  # 虚线框（同 Remotion border dashed）：直边按 16 实 / 12 空画，圆角处留空
+            dr.rounded_rectangle([x,y,x+e['w'],y+e['h']],e.get('radius',0),fill=e['color']);r=e.get('radius',0);c=e.get('stroke')
+            for a0,a1,fix,hor in ((x+r,x+e['w']-r,y,1),(x+r,x+e['w']-r,y+e['h'],1),(y+r,y+e['h']-r,x,0),(y+r,y+e['h']-r,x+e['w'],0)):
+                t=a0
+                while t<a1:
+                    t2=min(t+16,a1);dr.line([t,fix,t2,fix] if hor else [fix,t,fix,t2],fill=c,width=3);t+=28
         elif e['type']=='rect':
             dr.rounded_rectangle([x,y,x+e['w'],y+e['h']],e.get('radius',0),fill=e['color'],outline=e.get('stroke'),width=3)
             dr.text((x+e['w']/2,y+e['h']/2),e.get('label',''),font=FT(e.get('fontSize',40)),fill='#E5E7EB',anchor='mm')

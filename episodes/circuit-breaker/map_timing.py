@@ -1,5 +1,5 @@
 # 把 Knoll 的 MiMo 实测 timing（每章一个镜头，键 <chapter>-1，如 why-1 … recap-1）映射到本分镜镜头（v0.12.1：12 个，按句数拆）；章节起点、总帧数与 Knoll 一致，scale=1
-# 用法：cp <Knoll 的 ep12 timing.json> timing.mimo.json && python3 map_timing.py && python3 gen.py && python3 validate.py
+# 用法：cp <Knoll 的 ep13 timing.json> timing.mimo.json && python3 map_timing.py && python3 gen.py && python3 validate.py
 import json,re
 from pathlib import Path
 from common_split import ids,SPLIT,apply_holds

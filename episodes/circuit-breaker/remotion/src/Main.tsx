@@ -226,7 +226,7 @@ const Element: React.FC<{e: any; anims: any[]; frame: number; fps: number; scope
     const fs = e.fontSize ?? 36;
     const solid = fill && fill !== P.panel && !e.stroke;
     return (
-      <div style={{...base, background: fill, border: stroke ? `4px solid ${stroke}` : undefined, borderRadius: e.radius ?? 8, boxSizing: 'border-box',
+      <div style={{...base, background: fill, border: stroke ? `4px ${e.dash ? 'dashed' : 'solid'} ${stroke}` : undefined, borderRadius: e.radius ?? 8, boxSizing: 'border-box',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, boxShadow: stroke && stroke !== P.muted ? `0 0 24px ${stroke}33` : undefined}}>
         {isBrowser && (
           <>

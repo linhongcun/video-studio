@@ -78,7 +78,7 @@ if g!=d['meta']['durationInFrames'] or g!=sum(v['duration'] for v in TM.values()
 raw=json.dumps(d['scenes'],ensure_ascii=False)  # 只查镜头内容（meta 说明里会提到片尾）
 for b in BANNED:
     if b in raw: err.append(('banned/endcard',b))
-for a in ('breaker-box','breaker-tripped','switch-on','switch-off','spark','lamp','socket','tv','shield','phone','ticket','gate','queue','guest','timer','hourglass','lock'):
+for a in ('breaker-box','breaker-tripped','switch-on','switch-off','spark','lamp','socket','tv','shield','ticket','gate','queue','guest','timer','hourglass'):
     if f'assets/{a}.svg' not in assets: err.append(('new icon unused',a))
 for a in assets:
     if re.search(r'<text',open(a).read()): err.append(('text inside icon',a))
@@ -149,7 +149,7 @@ for sc in d['scenes']:
             t=e.get('text') or e.get('label') or ''
             if e.get('role')!='subtitle' and any(n in t for n in tuple('0123456789')+('一万','一千','一百','三次','两次')) and '示例' not in t: err.append(('示例 missing',sh['id'],e['id'],t))
 # 术语念到时上屏
-TERMSHOW={"雪崩":"雪崩","级联故障":"级联故障","超时":"超时","熔断":"熔断","关闭":"关闭","打开":"打开","半开":"半开","限流":"限流","降级":"降级"}
+TERMSHOW={"雪崩":"雪崩","级联故障":"级联故障","超时":"超时","熔断":"熔断","「关闭」":"关闭","「打开」":"打开","半开":"半开","限流":"限流","降级":"降级"}  # 第十三期 v2：「打开结算页」里的「打开」不是术语，只认带引号的状态名
 for k,v_ in TERMSHOW.items():
     for sc in d['scenes']:
         for sh in sc['shots']:
@@ -159,7 +159,7 @@ for k,n0 in (("雪崩",1),("级联故障",1),("半开",1)):
     n=sum(x.count(k) for x in narr)
     if n!=n0: err.append(('term named times',k,n))
 # EP.12 第 2 版：画面不出现「猜你喜欢 / 推荐 / 热销」
-BAN=("空调","冰箱","红包","到手价","优惠券","猜你喜欢","热销","积分","配送","评价")  # 第十三期：主线只有订单 → 库存，不出现上期红包 / 到手价 / 优惠券
+BAN=("系统繁忙","库存","空调","冰箱","红包","到手价","优惠券","猜你喜欢","热销","积分","配送","评价")  # 第十三期：主线只有订单 → 库存，不出现上期红包 / 到手价 / 优惠券
 for sc in d['scenes']:
     for sh in sc['shots']:
         for e in sh['elements']:
@@ -193,7 +193,7 @@ for sc in d['scenes']:
 print('labels <80f:',sorted([x for x in SHOWN if x[2]<80],key=lambda x:x[2]))
 print('short/term labels full-show frames (min):',min(SHOWN,key=lambda x:x[2]))
 # 第十三期：旁白也不该出现上期主线
-for w in ("红包","到手价","优惠券"):
+for w in ("红包","到手价","优惠券","系统繁忙"):
     if any(w in x for x in narr): err.append(('ep12 word in narration',w))
 for sc in d['scenes']:
     for sh in sc['shots']:

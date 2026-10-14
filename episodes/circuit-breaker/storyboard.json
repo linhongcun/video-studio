@@ -8,7 +8,7 @@
   "width": 1920,
   "height": 1080,
   "fps": 30,
-  "durationInFrames": 3653,
+  "durationInFrames": 3811,
   "provisionalTiming": false,
   "style": "深色背景+蓝青高光扁平2D（沿用前几期）",
   "palette": {
@@ -62,11 +62,11 @@
    "note": "第十三期：送 TTS 文字 = 字幕原文（读音表无替换）",
    "replace": {}
   },
-  "notes": "时长=Knoll MiMo 实测，map_timing.py scale 1。第十三期（熔断，v0.18.0）：主线 下单 → 订单服务同步调用库存服务，库存服务持续故障；不出现红包 / 到手价 / 优惠券（validate 禁用词）。雪崩（级联故障）→ 超时（仍要等满）→ 家里电闸跳闸 → 熔断（示例：最近 100 次失败 50% 跳闸，快速失败返回「系统繁忙，请稍后重试」）+「熔断不能代替超时」→ 三种状态（关闭 = 电闸合上通电 = 正常调用；打开 = 跳闸 = 拒绝请求；反直觉）→ 半开（示例：断开 30 秒，放少量试探；成功回到关闭 / 失败回到打开）→ 回顾（库存校验始终在；限流管流量 / 熔断隔离故障 / 降级保核心；第五招）。示例参数上屏都标「示例」。旁白术语：雪崩、级联故障、超时、熔断、关闭、打开、半开，念到时上屏术语标签（锚在点名的那句）。画面不重复字幕句子（validate：术语白名单 + LABEL_OK 除外）。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/circuit-breaker/。复用 EP.12 第 3 版电闸箱 / 跳闸 / 开关 / 火花 / 灯 / 插座 / 计时器；新图标 lock / tv / shield 自绘无文字（第十三期家里电闸各路标 客厅 / 卧室 / 厨房 / 插座，电器用台灯和电视）；复用 phone/ticket（第十一期）、gate（第十期）、queue/guest（第九期）、hourglass（第三期）。branding v1.3.0：只有右上水印 + 60 帧片尾卡（全局组件），无中央水印，无自我介绍。",
+  "notes": "时长=Knoll MiMo 实测，map_timing.py scale 1。第十三期（熔断，v0.18.0，脚本 v2 运费险）：主线 结算页同步调用运费险服务（弱依赖），运费险服务持续故障；结算页卡片：商品 / 运费险 /「提交订单」，熔断后「运费险」一行消失、「提交订单」照常（上期降级一句带过）。画面禁用词见 validate BAN（上期主线词、旧稿快速失败提示语、旧稿服务名）。⚠ timing 为估算（按 Knoll EP.13 旧稿实测校准），Knoll 新配音到后必须 sh run.sh <新 timing> 重对、重算停留和封面帧。雪崩（级联故障）→ 超时（仍要等满）→ 家里电闸跳闸 → 熔断（示例：最近 100 次失败 50% 跳闸，快速失败：马上返回，结算页「提交订单」照常）+「熔断不能代替超时」→ 三种状态（关闭 = 电闸合上通电 = 正常调用；打开 = 跳闸 = 拒绝请求；反直觉）→ 半开（示例：断开 30 秒，放少量试探；成功回到关闭 / 失败回到打开）→ 回顾（熔断后结算页少显示「运费险」一项 = 上期降级，下单付款照常；限流管流量 / 熔断隔离故障 / 降级保核心；第五招）。示例参数上屏都标「示例」。旁白术语：雪崩、级联故障、超时、熔断、关闭、打开、半开，念到时上屏术语标签（锚在点名的那句）。画面不重复字幕句子（validate：术语白名单 + LABEL_OK 除外）。from 为全局帧，subtitles 与 keyframes 帧相对镜头。image 的 asset 路径相对 episodes/circuit-breaker/。复用 EP.12 第 3 版电闸箱 / 跳闸 / 开关 / 火花 / 灯 / 插座 / 计时器；新图标 tv / shield 自绘无文字（第十三期家里电闸各路标 客厅 / 卧室 / 厨房 / 插座，电器用台灯和电视）；复用 phone/ticket（第十一期）、gate（第十期）、queue/guest（第九期）、hourglass（第三期）。branding v1.3.0：只有右上水印 + 60 帧片尾卡（全局组件），无中央水印，无自我介绍。",
   "poster": {
    "shotId": "breaker-2",
-   "localFrame": 190,
-   "frame": 1690,
+   "localFrame": 196,
+   "frame": 1737,
    "desc": "家里电闸：插座那一路跳闸，其余各路照常（电视、台灯照常亮）",
    "file": "poster.jpg"
   }
@@ -80,11 +80,6 @@
    {
     "id": "subtitle",
     "desc": "字幕层"
-   },
-   {
-    "id": "phone",
-    "file": "assets/phone.svg",
-    "from_": "idempotency/assets/phone.svg"
    },
    {
     "id": "ticket",
@@ -154,10 +149,6 @@
   ],
   "new": [
    {
-    "id": "lock",
-    "file": "assets/lock.svg"
-   },
-   {
     "id": "tv",
     "file": "assets/tv.svg"
    },
@@ -173,7 +164,7 @@
    "chapterId": "hook",
    "title": "没跟着崩",
    "from": 0,
-   "durationInFrames": 510,
+   "durationInFrames": 468,
    "narrationChars": 71,
    "narrationCharsRecount": 71,
    "shots": [
@@ -181,41 +172,111 @@
      "id": "hook-1",
      "chapterId": "hook",
      "from": 0,
-     "durationInFrames": 342,
-     "narration": "大促下单时，后台的库存服务突然出了故障。可你会发现，商品页照常能逛，别的功能也基本正常，整个网站没跟着崩。",
+     "durationInFrames": 310,
+     "narration": "大促时，你在结算页准备付款，后台有个运费险服务突然出了故障。可你会发现，照样能下单付款，整个网站没跟着崩。",
      "subtitles": [
       {
-       "text": "大促下单时，后台的库存服务突然出了故障",
+       "text": "大促时，你在结算页准备付款",
        "from": 0,
-       "to": 133
+       "to": 71
       },
       {
-       "text": "可你会发现，商品页照常能逛",
-       "from": 134,
-       "to": 216
+       "text": "后台有个运费险服务突然出了故障",
+       "from": 72,
+       "to": 170
       },
       {
-       "text": "别的功能也基本正常",
-       "from": 217,
-       "to": 278
+       "text": "可你会发现，照样能下单付款",
+       "from": 171,
+       "to": 248
       },
       {
        "text": "整个网站没跟着崩",
-       "from": 279,
-       "to": 341
+       "from": 249,
+       "to": 309
       }
      ],
      "elements": [
       {
-       "id": "ph",
-       "type": "image",
-       "asset": "assets/phone.svg",
+       "id": "co",
+       "type": "rect",
        "x": 200,
        "y": 140,
-       "w": 520,
-       "h": 520,
-       "color": null,
-       "reuse": false
+       "w": 560,
+       "h": 620,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#3B82F6",
+       "radius": 36
+      },
+      {
+       "id": "coh",
+       "type": "text",
+       "x": 200,
+       "y": 170,
+       "w": 560,
+       "h": 56,
+       "text": "结算页",
+       "fontSize": 44,
+       "color": "#9CA3AF",
+       "reuse": false,
+       "align": "center"
+      },
+      {
+       "id": "cor1",
+       "type": "rect",
+       "x": 250,
+       "y": 260,
+       "w": 460,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 18,
+       "label": "商品",
+       "fontSize": 40
+      },
+      {
+       "id": "cofx",
+       "type": "rect",
+       "x": 250,
+       "y": 380,
+       "w": 460,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 18,
+       "label": "运费险",
+       "fontSize": 40
+      },
+      {
+       "id": "cobtn",
+       "type": "rect",
+       "x": 250,
+       "y": 610,
+       "w": 460,
+       "h": 100,
+       "color": "#14532D",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 50,
+       "label": "提交订单",
+       "fontSize": 44
+      },
+      {
+       "id": "cogap",
+       "type": "rect",
+       "x": 250,
+       "y": 380,
+       "w": 460,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#6B7280",
+       "radius": 18,
+       "dash": true,
+       "note": "dashed outline, no text"
       },
       {
        "id": "s00",
@@ -256,7 +317,7 @@
        "reuse": false,
        "stroke": "#22C55E",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -284,7 +345,7 @@
        "reuse": false,
        "stroke": "#F87171",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -329,7 +390,67 @@
      ],
      "animations": [
       {
-       "elementId": "ph",
+       "elementId": "co",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "coh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cor1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cofx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cobtn",
        "property": "opacity",
        "keyframes": [
         {
@@ -348,11 +469,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 56,
+         "frame": 96,
          "value": 0
         },
         {
-         "frame": 68,
+         "frame": 108,
          "value": 1
         }
        ],
@@ -363,11 +484,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 56,
+         "frame": 96,
          "value": 0
         },
         {
-         "frame": 68,
+         "frame": 108,
          "value": 1
         }
        ],
@@ -378,11 +499,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 56,
+         "frame": 96,
          "value": 0
         },
         {
-         "frame": 68,
+         "frame": 108,
          "value": 1
         }
        ],
@@ -393,11 +514,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 56,
+         "frame": 96,
          "value": 0
         },
         {
-         "frame": 68,
+         "frame": 108,
          "value": 1
         }
        ],
@@ -408,11 +529,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 98,
+         "frame": 138,
          "value": 0
         },
         {
-         "frame": 110,
+         "frame": 150,
          "value": 1
         }
        ],
@@ -423,11 +544,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 98,
+         "frame": 138,
          "value": 0
         },
         {
-         "frame": 110,
+         "frame": 150,
          "value": 1
         }
        ],
@@ -438,26 +559,71 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 98,
+         "frame": 138,
          "value": 0
         },
         {
-         "frame": 110,
+         "frame": 150,
          "value": 1
         }
        ],
        "easing": "easeOut"
       },
       {
+       "elementId": "cofx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 203,
+         "value": 1
+        },
+        {
+         "frame": 215,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "cogap",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 203,
+         "value": 0
+        },
+        {
+         "frame": 215,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cobtn",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 209,
+         "value": 1.12
+        },
+        {
+         "frame": 221,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
        "elementId": "ok",
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 217,
+         "frame": 203,
          "value": 0
         },
         {
-         "frame": 229,
+         "frame": 215,
          "value": 1
         }
        ],
@@ -472,24 +638,24 @@
     {
      "id": "hook-2",
      "chapterId": "hook",
-     "from": 342,
-     "durationInFrames": 168,
+     "from": 310,
+     "durationInFrames": 158,
      "narration": "这是怎么做到的？我们先看看，要是什么都不做，会发生什么。",
      "subtitles": [
       {
        "text": "这是怎么做到的",
        "from": 0,
-       "to": 60
+       "to": 48
       },
       {
        "text": "我们先看看，要是什么都不做",
-       "from": 61,
-       "to": 120
+       "from": 49,
+       "to": 112
       },
       {
        "text": "会发生什么",
-       "from": 121,
-       "to": 167
+       "from": 113,
+       "to": 157
       }
      ],
      "elements": [
@@ -532,7 +698,7 @@
        "reuse": false,
        "stroke": "#22C55E",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -560,7 +726,7 @@
        "reuse": false,
        "stroke": "#F87171",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -715,11 +881,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 96,
+         "frame": 86,
          "value": 0
         },
         {
-         "frame": 108,
+         "frame": 98,
          "value": 1
         }
        ],
@@ -730,11 +896,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 96,
+         "frame": 86,
          "value": 0
         },
         {
-         "frame": 108,
+         "frame": 98,
          "value": 1
         }
        ],
@@ -752,37 +918,37 @@
    "id": "s1",
    "chapterId": "cascade",
    "title": "雪崩",
-   "from": 510,
-   "durationInFrames": 709,
-   "narrationChars": 99,
-   "narrationCharsRecount": 99,
+   "from": 468,
+   "durationInFrames": 771,
+   "narrationChars": 103,
+   "narrationCharsRecount": 103,
    "shots": [
     {
      "id": "cascade-1",
      "chapterId": "cascade",
-     "from": 510,
-     "durationInFrames": 298,
-     "narration": "你点下单，订单服务要先去问库存服务：还有货吗？大促时库存服务出了故障，迟迟不回话，订单服务就一直等。",
+     "from": 468,
+     "durationInFrames": 385,
+     "narration": "打开结算页时，系统要顺带去问运费险服务：这一单能不能加运费险？比如大促时运费险服务出了故障，迟迟不回话，结算页就一直等。",
      "subtitles": [
       {
-       "text": "你点下单，订单服务要先去问库存服务",
+       "text": "打开结算页时，系统要顺带去问运费险服务",
        "from": 0,
-       "to": 109
+       "to": 129
       },
       {
-       "text": "还有货吗",
-       "from": 110,
-       "to": 145
+       "text": "这一单能不能加运费险",
+       "from": 130,
+       "to": 209
       },
       {
-       "text": "大促时库存服务出了故障",
-       "from": 146,
-       "to": 211
+       "text": "比如大促时运费险服务出了故障",
+       "from": 210,
+       "to": 299
       },
       {
-       "text": "迟迟不回话，订单服务就一直等",
-       "from": 212,
-       "to": 297
+       "text": "迟迟不回话，结算页就一直等",
+       "from": 300,
+       "to": 384
       }
      ],
      "elements": [
@@ -797,7 +963,7 @@
        "reuse": false,
        "stroke": "#3B82F6",
        "radius": 20,
-       "label": "订单服务",
+       "label": "结算页",
        "fontSize": 48
       },
       {
@@ -821,21 +987,21 @@
        "reuse": false,
        "stroke": "#3B82F6",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 48
       },
       {
        "id": "bub",
        "type": "rect",
-       "x": 700,
+       "x": 680,
        "y": 170,
-       "w": 320,
+       "w": 360,
        "h": 90,
        "color": "#111827",
        "reuse": false,
        "stroke": "#9CA3AF",
        "radius": 45,
-       "label": "有货吗？",
+       "label": "加运费险吗？",
        "fontSize": 44
       },
       {
@@ -849,7 +1015,7 @@
        "reuse": false,
        "stroke": "#F87171",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 48
       },
       {
@@ -899,11 +1065,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 62,
+         "frame": 65,
          "value": 0
         },
         {
-         "frame": 74,
+         "frame": 77,
          "value": 1
         }
        ],
@@ -914,11 +1080,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 62,
+         "frame": 65,
          "value": 0
         },
         {
-         "frame": 74,
+         "frame": 77,
          "value": 1
         }
        ],
@@ -929,11 +1095,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 110,
+         "frame": 130,
          "value": 0
         },
         {
-         "frame": 122,
+         "frame": 142,
          "value": 1
         }
        ],
@@ -944,11 +1110,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 110,
+         "frame": 130,
          "value": 0
         },
         {
-         "frame": 122,
+         "frame": 142,
          "value": 1
         }
        ],
@@ -959,11 +1125,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 188,
+         "frame": 274,
          "value": 0
         },
         {
-         "frame": 200,
+         "frame": 286,
          "value": 1
         }
        ],
@@ -974,11 +1140,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 212,
+         "frame": 300,
          "value": 1
         },
         {
-         "frame": 222,
+         "frame": 310,
          "value": 0
         }
        ],
@@ -989,11 +1155,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 272,
+         "frame": 357,
          "value": 0
         },
         {
-         "frame": 284,
+         "frame": 369,
          "value": 1
         }
        ],
@@ -1008,34 +1174,34 @@
     {
      "id": "cascade-2",
      "chapterId": "cascade",
-     "from": 808,
-     "durationInFrames": 411,
-     "narration": "等的请求越积越多，订单服务自己也被拖垮，连支付这些服务都跟着出问题。一个服务出故障，一层层往外传，这就叫雪崩，也叫级联故障。",
+     "from": 853,
+     "durationInFrames": 386,
+     "narration": "等的请求越积越多，订单服务也被拖垮，连支付都跟着出问题。一个服务出故障，一层层往外传，这就叫雪崩，也叫级联故障。",
      "subtitles": [
       {
        "text": "等的请求越积越多",
        "from": 0,
-       "to": 51
+       "to": 50
       },
       {
-       "text": "订单服务自己也被拖垮",
-       "from": 52,
-       "to": 116
+       "text": "订单服务也被拖垮",
+       "from": 51,
+       "to": 102
       },
       {
-       "text": "连支付这些服务都跟着出问题",
-       "from": 117,
-       "to": 209
+       "text": "连支付都跟着出问题",
+       "from": 103,
+       "to": 168
       },
       {
        "text": "一个服务出故障，一层层往外传",
-       "from": 210,
-       "to": 302
+       "from": 169,
+       "to": 273
       },
       {
        "text": "这就叫雪崩，也叫级联故障",
-       "from": 303,
-       "to": 410
+       "from": 274,
+       "to": 385
       }
      ],
      "elements": [
@@ -1050,7 +1216,7 @@
        "reuse": false,
        "stroke": "#F87171",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -1515,11 +1681,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 104,
+         "frame": 90,
          "value": 0
         },
         {
-         "frame": 116,
+         "frame": 102,
          "value": 1
         }
        ],
@@ -1530,11 +1696,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 123,
+         "frame": 109,
          "value": 0
         },
         {
-         "frame": 135,
+         "frame": 121,
          "value": 1
         }
        ],
@@ -1545,11 +1711,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 303,
+         "frame": 274,
          "value": 0
         },
         {
-         "frame": 315,
+         "frame": 286,
          "value": 1
         }
        ],
@@ -1560,11 +1726,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 303,
+         "frame": 274,
          "value": 0
         },
         {
-         "frame": 315,
+         "frame": 286,
          "value": 1
         }
        ],
@@ -1575,11 +1741,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 339,
+         "frame": 314,
          "value": 0
         },
         {
-         "frame": 351,
+         "frame": 326,
          "value": 1
         }
        ],
@@ -1590,11 +1756,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 339,
+         "frame": 314,
          "value": 0
         },
         {
-         "frame": 351,
+         "frame": 326,
          "value": 1
         }
        ],
@@ -1612,32 +1778,32 @@
    "id": "s2",
    "chapterId": "breaker",
    "title": "电闸跳闸",
-   "from": 1219,
-   "durationInFrames": 947,
-   "narrationChars": 134,
-   "narrationCharsRecount": 134,
+   "from": 1239,
+   "durationInFrames": 980,
+   "narrationChars": 136,
+   "narrationCharsRecount": 136,
    "shots": [
     {
      "id": "breaker-1",
      "chapterId": "breaker",
-     "from": 1219,
-     "durationInFrames": 281,
+     "from": 1239,
+     "durationInFrames": 302,
      "narration": "给每次调用设个等待上限，到点就放弃，这叫超时。超时要有，但高峰时每个请求还是要白等一次。",
      "subtitles": [
       {
        "text": "给每次调用设个等待上限",
        "from": 0,
-       "to": 78
+       "to": 79
       },
       {
        "text": "到点就放弃，这叫超时",
-       "from": 79,
-       "to": 150
+       "from": 80,
+       "to": 154
       },
       {
        "text": "超时要有，但高峰时每个请求还是要白等一次",
-       "from": 151,
-       "to": 280
+       "from": 155,
+       "to": 301
       }
      ],
      "elements": [
@@ -1740,7 +1906,7 @@
        "reuse": false,
        "stroke": "#F87171",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -1867,11 +2033,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 50,
+         "frame": 51,
          "value": 0
         },
         {
-         "frame": 62,
+         "frame": 63,
          "value": 1
         }
        ],
@@ -1882,11 +2048,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 56,
+         "frame": 57,
          "value": 0
         },
         {
-         "frame": 68,
+         "frame": 69,
          "value": 1
         }
        ],
@@ -1897,11 +2063,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 62,
+         "frame": 63,
          "value": 0
         },
         {
-         "frame": 74,
+         "frame": 75,
          "value": 1
         }
        ],
@@ -1912,11 +2078,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 68,
+         "frame": 69,
          "value": 0
         },
         {
-         "frame": 80,
+         "frame": 81,
          "value": 1
         }
        ],
@@ -1927,11 +2093,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 114,
+         "frame": 117,
          "value": 0
         },
         {
-         "frame": 126,
+         "frame": 129,
          "value": 1
         }
        ],
@@ -1942,11 +2108,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 114,
+         "frame": 117,
          "value": 0
         },
         {
-         "frame": 126,
+         "frame": 129,
          "value": 1
         }
        ],
@@ -1957,11 +2123,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 151,
+         "frame": 155,
          "value": 0
         },
         {
-         "frame": 163,
+         "frame": 167,
          "value": 1
         }
        ],
@@ -1976,19 +2142,19 @@
     {
      "id": "breaker-2",
      "chapterId": "breaker",
-     "from": 1500,
-     "durationInFrames": 195,
+     "from": 1541,
+     "durationInFrames": 204,
      "narration": "所以还需要像家里电闸那样的开关：哪一路短路了，那一路就「啪」地跳下来。",
      "subtitles": [
       {
        "text": "所以还需要像家里电闸那样的开关",
        "from": 0,
-       "to": 93
+       "to": 97
       },
       {
        "text": "哪一路短路了，那一路就「啪」地跳下来",
-       "from": 94,
-       "to": 194
+       "from": 98,
+       "to": 203
       }
      ],
      "elements": [
@@ -2269,11 +2435,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 112,
+         "frame": 117,
          "value": 0
         },
         {
-         "frame": 124,
+         "frame": 129,
          "value": 1
         }
        ],
@@ -2284,11 +2450,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 112,
+         "frame": 117,
          "value": 0
         },
         {
-         "frame": 124,
+         "frame": 129,
          "value": 1
         }
        ],
@@ -2299,11 +2465,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 168,
+         "frame": 176,
          "value": 0
         },
         {
-         "frame": 180,
+         "frame": 188,
          "value": 1
         }
        ],
@@ -2311,21 +2477,6 @@
       },
       {
        "elementId": "box",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 168,
-         "value": 1
-        },
-        {
-         "frame": 176,
-         "value": 0
-        }
-       ],
-       "easing": "easeIn"
-      },
-      {
-       "elementId": "sp",
        "property": "opacity",
        "keyframes": [
         {
@@ -2340,15 +2491,30 @@
        "easing": "easeIn"
       },
       {
+       "elementId": "sp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 184,
+         "value": 1
+        },
+        {
+         "frame": 192,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
        "elementId": "ok",
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 112,
+         "frame": 117,
          "value": 0
         },
         {
-         "frame": 124,
+         "frame": 129,
          "value": 1
         }
        ],
@@ -2363,39 +2529,39 @@
     {
      "id": "breaker-3",
      "chapterId": "breaker",
-     "from": 1695,
-     "durationInFrames": 471,
-     "narration": "网站也一样：比如最近一百次调用里一半都失败了，就跳闸，后面的请求不再去问库存服务，直接返回「系统繁忙」。这叫熔断。记住，熔断不能代替超时，两个要一起用。",
+     "from": 1745,
+     "durationInFrames": 474,
+     "narration": "网站也一样：比如最近一百次调用里一半都失败了，就跳闸，后面的请求不再去问运费险服务，直接返回，不再去等它。这叫熔断。记住，熔断不能代替超时，两个要一起用。",
      "subtitles": [
       {
        "text": "网站也一样：比如最近一百次调用里一半都失败了",
        "from": 0,
-       "to": 139
+       "to": 130
       },
       {
-       "text": "就跳闸，后面的请求不再去问库存服务",
-       "from": 140,
-       "to": 245
+       "text": "就跳闸，后面的请求不再去问运费险服务",
+       "from": 131,
+       "to": 236
       },
       {
-       "text": "直接返回「系统繁忙」",
-       "from": 246,
-       "to": 307
+       "text": "直接返回，不再去等它",
+       "from": 237,
+       "to": 301
       },
       {
        "text": "这叫熔断",
-       "from": 308,
-       "to": 347
+       "from": 302,
+       "to": 340
       },
       {
        "text": "记住，熔断不能代替超时",
-       "from": 348,
-       "to": 418
+       "from": 341,
+       "to": 417
       },
       {
        "text": "两个要一起用",
-       "from": 419,
-       "to": 470
+       "from": 418,
+       "to": 473
       }
      ],
      "elements": [
@@ -2410,7 +2576,7 @@
        "reuse": false,
        "stroke": "#3B82F6",
        "radius": 20,
-       "label": "订单服务",
+       "label": "结算页",
        "fontSize": 44
       },
       {
@@ -2466,7 +2632,7 @@
        "reuse": false,
        "stroke": "#F87171",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -2519,17 +2685,31 @@
        "direction": "l"
       },
       {
-       "id": "busy",
+       "id": "ret",
        "type": "rect",
        "x": 160,
        "y": 500,
-       "w": 620,
+       "w": 300,
        "h": 96,
        "color": "#111827",
        "reuse": false,
        "stroke": "#F59E0B",
        "radius": 48,
-       "label": "系统繁忙，请稍后重试",
+       "label": "马上返回",
+       "fontSize": 40
+      },
+      {
+       "id": "btn",
+       "type": "rect",
+       "x": 480,
+       "y": 500,
+       "w": 300,
+       "h": 96,
+       "color": "#14532D",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 48,
+       "label": "提交订单",
        "fontSize": 40
       },
       {
@@ -2656,11 +2836,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 47,
+         "frame": 44,
          "value": 0
         },
         {
-         "frame": 59,
+         "frame": 56,
          "value": 1
         }
        ],
@@ -2671,11 +2851,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 47,
+         "frame": 44,
          "value": 0
         },
         {
-         "frame": 59,
+         "frame": 56,
          "value": 1
         }
        ],
@@ -2686,11 +2866,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 100,
+         "frame": 94,
          "value": 0
         },
         {
-         "frame": 112,
+         "frame": 106,
          "value": 1
         }
        ],
@@ -2701,11 +2881,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 140,
+         "frame": 131,
          "value": 0
         },
         {
-         "frame": 152,
+         "frame": 143,
          "value": 1
         }
        ],
@@ -2716,11 +2896,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 140,
+         "frame": 131,
          "value": 1
         },
         {
-         "frame": 148,
+         "frame": 139,
          "value": 0
         }
        ],
@@ -2731,11 +2911,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 140,
+         "frame": 131,
          "value": 1
         },
         {
-         "frame": 148,
+         "frame": 139,
          "value": 0.2
         }
        ],
@@ -2746,41 +2926,71 @@
        "property": "drawProgress",
        "keyframes": [
         {
-         "frame": 246,
+         "frame": 237,
          "value": 0
         },
         {
-         "frame": 261,
+         "frame": 252,
          "value": 1
         }
        ],
        "easing": "easeOut"
       },
       {
-       "elementId": "busy",
+       "elementId": "ret",
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 254,
+         "frame": 245,
          "value": 0
         },
         {
-         "frame": 266,
+         "frame": 257,
          "value": 1
         }
        ],
        "easing": "easeOut"
       },
       {
-       "elementId": "busy",
+       "elementId": "ret",
        "property": "scale",
        "keyframes": [
         {
-         "frame": 254,
+         "frame": 245,
          "value": 0
         },
         {
-         "frame": 266,
+         "frame": 257,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "btn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 257,
+         "value": 0
+        },
+        {
+         "frame": 269,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "btn",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 257,
+         "value": 0
+        },
+        {
+         "frame": 269,
          "value": 1
         }
        ],
@@ -2791,11 +3001,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 308,
+         "frame": 302,
          "value": 0
         },
         {
-         "frame": 320,
+         "frame": 314,
          "value": 1
         }
        ],
@@ -2806,11 +3016,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 308,
+         "frame": 302,
          "value": 0
         },
         {
-         "frame": 320,
+         "frame": 314,
          "value": 1
         }
        ],
@@ -2821,11 +3031,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 362,
+         "frame": 357,
          "value": 0
         },
         {
-         "frame": 374,
+         "frame": 369,
          "value": 1
         }
        ],
@@ -2836,11 +3046,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 362,
+         "frame": 357,
          "value": 0
         },
         {
-         "frame": 374,
+         "frame": 369,
          "value": 1
         }
        ],
@@ -2858,42 +3068,42 @@
    "id": "s3",
    "chapterId": "states",
    "title": "关闭是通，打开是断",
-   "from": 2166,
-   "durationInFrames": 418,
+   "from": 2219,
+   "durationInFrames": 432,
    "narrationChars": 55,
    "narrationCharsRecount": 55,
    "shots": [
     {
      "id": "states-1",
      "chapterId": "states",
-     "from": 2166,
-     "durationInFrames": 418,
+     "from": 2219,
+     "durationInFrames": 432,
      "narration": "这里有个反直觉的地方。熔断器有三种状态，名字跟电闸一样：电闸合上才通电。所以熔断器「关闭」，是正常调用；「打开」，是已经跳闸，拒绝请求。",
      "subtitles": [
       {
        "text": "这里有个反直觉的地方",
        "from": 0,
-       "to": 69
+       "to": 62
       },
       {
        "text": "熔断器有三种状态",
-       "from": 70,
-       "to": 122
+       "from": 63,
+       "to": 121
       },
       {
        "text": "名字跟电闸一样：电闸合上才通电",
-       "from": 123,
-       "to": 225
+       "from": 122,
+       "to": 233
       },
       {
        "text": "所以熔断器「关闭」，是正常调用",
-       "from": 226,
-       "to": 320
+       "from": 234,
+       "to": 331
       },
       {
        "text": "「打开」，是已经跳闸，拒绝请求",
-       "from": 321,
-       "to": 417
+       "from": 332,
+       "to": 431
       }
      ],
      "elements": [
@@ -3082,11 +3292,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 96,
+         "frame": 93,
          "value": 0
         },
         {
-         "frame": 108,
+         "frame": 105,
          "value": 1
         }
        ],
@@ -3097,11 +3307,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 96,
+         "frame": 93,
          "value": 0
         },
         {
-         "frame": 108,
+         "frame": 105,
          "value": 1
         }
        ],
@@ -3112,11 +3322,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 96,
+         "frame": 93,
          "value": 0
         },
         {
-         "frame": 108,
+         "frame": 105,
          "value": 1
         }
        ],
@@ -3127,11 +3337,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 96,
+         "frame": 93,
          "value": 0
         },
         {
-         "frame": 108,
+         "frame": 105,
          "value": 1
         }
        ],
@@ -3142,11 +3352,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 170,
+         "frame": 174,
          "value": 0
         },
         {
-         "frame": 182,
+         "frame": 186,
          "value": 1
         }
        ],
@@ -3157,11 +3367,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 197,
+         "frame": 204,
          "value": 0
         },
         {
-         "frame": 209,
+         "frame": 216,
          "value": 1
         }
        ],
@@ -3172,11 +3382,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 321,
+         "frame": 332,
          "value": 0
         },
         {
-         "frame": 333,
+         "frame": 344,
          "value": 1
         }
        ],
@@ -3187,11 +3397,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 321,
+         "frame": 332,
          "value": 0
         },
         {
-         "frame": 333,
+         "frame": 344,
          "value": 0.3
         }
        ],
@@ -3202,11 +3412,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 266,
+         "frame": 275,
          "value": 0
         },
         {
-         "frame": 278,
+         "frame": 287,
          "value": 1
         }
        ],
@@ -3217,11 +3427,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 266,
+         "frame": 275,
          "value": 0
         },
         {
-         "frame": 278,
+         "frame": 287,
          "value": 1
         }
        ],
@@ -3232,11 +3442,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 321,
+         "frame": 332,
          "value": 0
         },
         {
-         "frame": 333,
+         "frame": 344,
          "value": 1
         }
        ],
@@ -3247,11 +3457,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 321,
+         "frame": 332,
          "value": 0
         },
         {
-         "frame": 333,
+         "frame": 344,
          "value": 1
         }
        ],
@@ -3269,16 +3479,16 @@
    "id": "s4",
    "chapterId": "half-open",
    "title": "试着合闸",
-   "from": 2584,
-   "durationInFrames": 463,
+   "from": 2651,
+   "durationInFrames": 471,
    "narrationChars": 62,
    "narrationCharsRecount": 62,
    "shots": [
     {
      "id": "half-open-1",
      "chapterId": "half-open",
-     "from": 2584,
-     "durationInFrames": 271,
+     "from": 2651,
+     "durationInFrames": 284,
      "narration": "跳闸以后，也不能一直断着。比如断开三十秒，再放少量请求过去试一试，这个状态叫半开。",
      "subtitles": [
       {
@@ -3289,12 +3499,12 @@
       {
        "text": "比如断开三十秒，再放少量请求过去试一试",
        "from": 82,
-       "to": 198
+       "to": 211
       },
       {
        "text": "这个状态叫半开",
-       "from": 199,
-       "to": 270
+       "from": 212,
+       "to": 283
       }
      ],
      "elements": [
@@ -3344,7 +3554,7 @@
        "reuse": false,
        "stroke": "#F87171",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -3434,11 +3644,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 95,
+         "frame": 97,
          "value": 0
         },
         {
-         "frame": 107,
+         "frame": 109,
          "value": 1
         }
        ],
@@ -3449,11 +3659,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 95,
+         "frame": 97,
          "value": 0
         },
         {
-         "frame": 107,
+         "frame": 109,
          "value": 1
         }
        ],
@@ -3464,11 +3674,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 127,
+         "frame": 133,
          "value": 0
         },
         {
-         "frame": 139,
+         "frame": 145,
          "value": 1
         }
        ],
@@ -3479,11 +3689,11 @@
        "property": "x",
        "keyframes": [
         {
-         "frame": 127,
+         "frame": 133,
          "value": 760
         },
         {
-         "frame": 167,
+         "frame": 173,
          "value": 1240
         }
        ],
@@ -3494,11 +3704,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 137,
+         "frame": 143,
          "value": 0
         },
         {
-         "frame": 149,
+         "frame": 155,
          "value": 1
         }
        ],
@@ -3509,11 +3719,11 @@
        "property": "x",
        "keyframes": [
         {
-         "frame": 137,
+         "frame": 143,
          "value": 760
         },
         {
-         "frame": 177,
+         "frame": 183,
          "value": 1240
         }
        ],
@@ -3524,11 +3734,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 199,
+         "frame": 212,
          "value": 0
         },
         {
-         "frame": 211,
+         "frame": 224,
          "value": 1
         }
        ],
@@ -3539,11 +3749,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 199,
+         "frame": 212,
          "value": 0
         },
         {
-         "frame": 211,
+         "frame": 224,
          "value": 1
         }
        ],
@@ -3558,24 +3768,24 @@
     {
      "id": "half-open-2",
      "chapterId": "half-open",
-     "from": 2855,
-     "durationInFrames": 192,
+     "from": 2935,
+     "durationInFrames": 187,
      "narration": "试成功了，就合上闸恢复调用；还是失败，就继续断开，过一阵再试。",
      "subtitles": [
       {
        "text": "试成功了，就合上闸恢复调用",
        "from": 0,
-       "to": 83
+       "to": 81
       },
       {
        "text": "还是失败，就继续断开",
-       "from": 84,
-       "to": 146
+       "from": 82,
+       "to": 142
       },
       {
        "text": "过一阵再试",
-       "from": 147,
-       "to": 191
+       "from": 143,
+       "to": 186
       }
      ],
      "elements": [
@@ -3755,11 +3965,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 84,
+         "frame": 82,
          "value": 0
         },
         {
-         "frame": 96,
+         "frame": 94,
          "value": 1
         }
        ],
@@ -3770,11 +3980,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 84,
+         "frame": 82,
          "value": 0
         },
         {
-         "frame": 96,
+         "frame": 94,
          "value": 1
         }
        ],
@@ -3785,11 +3995,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 84,
+         "frame": 82,
          "value": 0
         },
         {
-         "frame": 96,
+         "frame": 94,
          "value": 1
         }
        ],
@@ -3800,11 +4010,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 147,
+         "frame": 143,
          "value": 0
         },
         {
-         "frame": 159,
+         "frame": 155,
          "value": 1
         }
        ],
@@ -3822,105 +4032,127 @@
    "id": "s5",
    "chapterId": "recap",
    "title": "回顾",
-   "from": 3047,
-   "durationInFrames": 606,
-   "narrationChars": 89,
-   "narrationCharsRecount": 89,
+   "from": 3122,
+   "durationInFrames": 689,
+   "narrationChars": 99,
+   "narrationCharsRecount": 99,
    "shots": [
     {
      "id": "recap-1",
      "chapterId": "recap",
-     "from": 3047,
-     "durationInFrames": 210,
-     "narration": "注意，熔断只是暂时不去问，库存校验一步也没跳过，所以不会卖出没货的东西。",
+     "from": 3122,
+     "durationInFrames": 283,
+     "narration": "熔断以后，系统暂时不去问运费险服务，结算页少显示这一项，这一步就是上期讲的降级，下单付款照常。",
      "subtitles": [
       {
-       "text": "注意，熔断只是暂时不去问",
+       "text": "熔断以后，系统暂时不去问运费险服务",
        "from": 0,
-       "to": 68
+       "to": 104
       },
       {
-       "text": "库存校验一步也没跳过",
-       "from": 69,
-       "to": 131
+       "text": "结算页少显示这一项",
+       "from": 105,
+       "to": 162
       },
       {
-       "text": "所以不会卖出没货的东西",
-       "from": 132,
-       "to": 209
+       "text": "这一步就是上期讲的降级",
+       "from": 163,
+       "to": 234
+      },
+      {
+       "text": "下单付款照常",
+       "from": 235,
+       "to": 282
       }
      ],
      "elements": [
       {
-       "id": "pg",
+       "id": "co",
        "type": "rect",
-       "x": 160,
+       "x": 200,
        "y": 140,
-       "w": 760,
-       "h": 640,
+       "w": 560,
+       "h": 620,
        "color": "#111827",
        "reuse": false,
        "stroke": "#3B82F6",
        "radius": 36
       },
       {
-       "id": "pgt",
+       "id": "coh",
        "type": "text",
-       "x": 160,
+       "x": 200,
        "y": 170,
-       "w": 760,
-       "h": 60,
-       "text": "订单页",
+       "w": 560,
+       "h": 56,
+       "text": "结算页",
        "fontSize": 44,
        "color": "#9CA3AF",
        "reuse": false,
        "align": "center"
       },
       {
-       "id": "r1",
+       "id": "cor1",
        "type": "rect",
-       "x": 220,
-       "y": 280,
-       "w": 640,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22C55E",
-       "radius": 20,
-       "label": "库存校验",
-       "fontSize": 44
-      },
-      {
-       "id": "lk",
-       "type": "image",
-       "asset": "assets/lock.svg",
-       "x": 740,
-       "y": 290,
-       "w": 90,
-       "h": 90,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "r2",
-       "type": "rect",
-       "x": 220,
-       "y": 430,
-       "w": 640,
-       "h": 110,
+       "x": 250,
+       "y": 260,
+       "w": 460,
+       "h": 96,
        "color": "#111827",
        "reuse": false,
        "stroke": "#9CA3AF",
-       "radius": 20,
-       "label": "支付",
+       "radius": 18,
+       "label": "商品",
+       "fontSize": 40
+      },
+      {
+       "id": "cofx",
+       "type": "rect",
+       "x": 250,
+       "y": 380,
+       "w": 460,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 18,
+       "label": "运费险",
+       "fontSize": 40
+      },
+      {
+       "id": "cobtn",
+       "type": "rect",
+       "x": 250,
+       "y": 610,
+       "w": 460,
+       "h": 100,
+       "color": "#14532D",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 50,
+       "label": "提交订单",
        "fontSize": 44
+      },
+      {
+       "id": "cogap",
+       "type": "rect",
+       "x": 250,
+       "y": 380,
+       "w": 460,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#6B7280",
+       "radius": 18,
+       "dash": true,
+       "note": "dashed outline, no text"
       },
       {
        "id": "soff",
        "type": "image",
        "asset": "assets/switch-off.svg",
-       "x": 1120,
-       "y": 240,
+       "x": 1000,
+       "y": 200,
        "w": 120,
        "h": 230,
        "color": null,
@@ -3929,43 +4161,43 @@
       {
        "id": "iv",
        "type": "rect",
-       "x": 1360,
-       "y": 300,
-       "w": 360,
+       "x": 1200,
+       "y": 250,
+       "w": 400,
        "h": 120,
        "color": "#3F1D24",
        "reuse": false,
        "stroke": "#F87171",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
-      },
-      {
-       "id": "keep",
-       "type": "rect",
-       "x": 1100,
-       "y": 560,
-       "w": 640,
-       "h": 84,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22C55E",
-       "radius": 16,
-       "label": "校验：始终在",
-       "fontSize": 40
       },
       {
        "id": "st",
        "type": "rect",
-       "x": 1100,
-       "y": 700,
-       "w": 640,
+       "x": 1000,
+       "y": 480,
+       "w": 600,
        "h": 96,
        "color": "#111827",
        "reuse": false,
        "stroke": "#F87171",
        "radius": 48,
        "label": "熔断：暂停调用",
+       "fontSize": 44
+      },
+      {
+       "id": "dgl",
+       "type": "rect",
+       "x": 1000,
+       "y": 620,
+       "w": 600,
+       "h": 96,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 48,
+       "label": "降级 · 上期",
        "fontSize": 44
       },
       {
@@ -3985,7 +4217,7 @@
      ],
      "animations": [
       {
-       "elementId": "pg",
+       "elementId": "co",
        "property": "opacity",
        "keyframes": [
         {
@@ -4000,7 +4232,7 @@
        "easing": "easeOut"
       },
       {
-       "elementId": "pgt",
+       "elementId": "coh",
        "property": "opacity",
        "keyframes": [
         {
@@ -4015,7 +4247,7 @@
        "easing": "easeOut"
       },
       {
-       "elementId": "r1",
+       "elementId": "cor1",
        "property": "opacity",
        "keyframes": [
         {
@@ -4030,7 +4262,22 @@
        "easing": "easeOut"
       },
       {
-       "elementId": "r2",
+       "elementId": "cofx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cobtn",
        "property": "opacity",
        "keyframes": [
         {
@@ -4075,75 +4322,105 @@
        "easing": "easeOut"
       },
       {
-       "elementId": "lk",
+       "elementId": "st",
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 69,
+         "frame": 0,
          "value": 0
         },
         {
-         "frame": 81,
+         "frame": 12,
          "value": 1
         }
        ],
        "easing": "easeOut"
       },
       {
-       "elementId": "lk",
+       "elementId": "st",
        "property": "scale",
        "keyframes": [
         {
-         "frame": 69,
+         "frame": 0,
          "value": 0
         },
         {
-         "frame": 81,
+         "frame": 12,
          "value": 1
         }
        ],
        "easing": "spring"
       },
       {
-       "elementId": "keep",
+       "elementId": "cofx",
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 69,
+         "frame": 124,
+         "value": 1
+        },
+        {
+         "frame": 136,
+         "value": 0
+        }
+       ],
+       "easing": "easeIn"
+      },
+      {
+       "elementId": "cogap",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 124,
          "value": 0
         },
         {
-         "frame": 81,
+         "frame": 136,
          "value": 1
         }
        ],
        "easing": "easeOut"
       },
       {
-       "elementId": "st",
+       "elementId": "dgl",
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 13,
+         "frame": 196,
          "value": 0
         },
         {
-         "frame": 25,
+         "frame": 208,
          "value": 1
         }
        ],
        "easing": "easeOut"
       },
       {
-       "elementId": "st",
+       "elementId": "dgl",
        "property": "scale",
        "keyframes": [
         {
-         "frame": 13,
+         "frame": 196,
          "value": 0
         },
         {
-         "frame": 25,
+         "frame": 208,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cobtn",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 235,
+         "value": 1.12
+        },
+        {
+         "frame": 247,
          "value": 1
         }
        ],
@@ -4158,39 +4435,39 @@
     {
      "id": "recap-2",
      "chapterId": "recap",
-     "from": 3257,
-     "durationInFrames": 396,
+     "from": 3405,
+     "durationInFrames": 406,
      "narration": "扛住高峰第五招就是熔断：限流管进来的流量，熔断隔离出故障的服务，降级保住核心功能。一个服务挂了，网站还能稳住，靠的就是及时跳闸。",
      "subtitles": [
       {
        "text": "扛住高峰第五招就是熔断",
        "from": 0,
-       "to": 72
+       "to": 79
       },
       {
        "text": "限流管进来的流量",
-       "from": 73,
-       "to": 125
+       "from": 80,
+       "to": 138
       },
       {
        "text": "熔断隔离出故障的服务",
-       "from": 126,
-       "to": 192
+       "from": 139,
+       "to": 211
       },
       {
        "text": "降级保住核心功能",
-       "from": 193,
-       "to": 254
+       "from": 212,
+       "to": 278
       },
       {
        "text": "一个服务挂了，网站还能稳住",
-       "from": 255,
-       "to": 333
+       "from": 279,
+       "to": 349
       },
       {
        "text": "靠的就是及时跳闸",
-       "from": 334,
-       "to": 395
+       "from": 350,
+       "to": 405
       }
      ],
      "elements": [
@@ -4409,7 +4686,7 @@
        "reuse": false,
        "stroke": "#22C55E",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -4437,7 +4714,7 @@
        "reuse": false,
        "stroke": "#F87171",
        "radius": 20,
-       "label": "库存服务",
+       "label": "运费险服务",
        "fontSize": 44
       },
       {
@@ -4472,11 +4749,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 73,
+         "frame": 80,
          "value": 0
         },
         {
-         "frame": 85,
+         "frame": 92,
          "value": 1
         }
        ],
@@ -4487,11 +4764,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 81,
+         "frame": 88,
          "value": 0
         },
         {
-         "frame": 93,
+         "frame": 100,
          "value": 1
         }
        ],
@@ -4502,11 +4779,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 89,
+         "frame": 96,
          "value": 0
         },
         {
-         "frame": 101,
+         "frame": 108,
          "value": 1
         }
        ],
@@ -4517,11 +4794,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 26,
+         "frame": 29,
          "value": 0
         },
         {
-         "frame": 38,
+         "frame": 41,
          "value": 1
         }
        ],
@@ -4532,11 +4809,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 26,
+         "frame": 29,
          "value": 0
         },
         {
-         "frame": 38,
+         "frame": 41,
          "value": 1
         }
        ],
@@ -4547,11 +4824,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 26,
+         "frame": 29,
          "value": 0
         },
         {
-         "frame": 38,
+         "frame": 41,
          "value": 1
         }
        ],
@@ -4562,11 +4839,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 26,
+         "frame": 29,
          "value": 0
         },
         {
-         "frame": 38,
+         "frame": 41,
          "value": 1
         }
        ],
@@ -4577,11 +4854,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 26,
+         "frame": 29,
          "value": 0
         },
         {
-         "frame": 38,
+         "frame": 41,
          "value": 1
         }
        ],
@@ -4592,11 +4869,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 26,
+         "frame": 29,
          "value": 0
         },
         {
-         "frame": 38,
+         "frame": 41,
          "value": 1
         }
        ],
@@ -4607,11 +4884,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 26,
+         "frame": 29,
          "value": 0
         },
         {
-         "frame": 38,
+         "frame": 41,
          "value": 1
         }
        ],
@@ -4622,11 +4899,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 26,
+         "frame": 29,
          "value": 0
         },
         {
-         "frame": 38,
+         "frame": 41,
          "value": 1
         }
        ],
@@ -4637,11 +4914,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 36,
+         "frame": 39,
          "value": 0
         },
         {
-         "frame": 48,
+         "frame": 51,
          "value": 1
         }
        ],
@@ -4652,11 +4929,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 36,
+         "frame": 39,
          "value": 0
         },
         {
-         "frame": 48,
+         "frame": 51,
          "value": 1
         }
        ],
@@ -4667,11 +4944,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 36,
+         "frame": 39,
          "value": 0
         },
         {
-         "frame": 48,
+         "frame": 51,
          "value": 1
         }
        ],
@@ -4682,11 +4959,11 @@
        "property": "scale",
        "keyframes": [
         {
-         "frame": 36,
+         "frame": 39,
          "value": 0
         },
         {
-         "frame": 48,
+         "frame": 51,
          "value": 1
         }
        ],
@@ -4697,11 +4974,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4712,11 +4989,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4727,11 +5004,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4742,11 +5019,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4757,11 +5034,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4772,11 +5049,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4787,11 +5064,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4802,11 +5079,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4817,11 +5094,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4832,11 +5109,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4847,11 +5124,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4862,11 +5139,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4877,11 +5154,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4892,11 +5169,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 255,
+         "frame": 279,
          "value": 1
         },
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         }
        ],
@@ -4907,11 +5184,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         },
         {
-         "frame": 277,
+         "frame": 301,
          "value": 1
         }
        ],
@@ -4922,11 +5199,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         },
         {
-         "frame": 277,
+         "frame": 301,
          "value": 1
         }
        ],
@@ -4937,11 +5214,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         },
         {
-         "frame": 277,
+         "frame": 301,
          "value": 1
         }
        ],
@@ -4952,11 +5229,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         },
         {
-         "frame": 277,
+         "frame": 301,
          "value": 1
         }
        ],
@@ -4967,11 +5244,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         },
         {
-         "frame": 277,
+         "frame": 301,
          "value": 1
         }
        ],
@@ -4982,11 +5259,11 @@
        "property": "opacity",
        "keyframes": [
         {
-         "frame": 265,
+         "frame": 289,
          "value": 0
         },
         {
-         "frame": 277,
+         "frame": 301,
          "value": 1
         }
        ],
@@ -5039,7 +5316,7 @@
      1
     ],
     "align": "bottom",
-    "desc": "电闸箱：三路合着，最右一路（库存）跳闸（红），其余照常"
+    "desc": "电闸箱：三路合着，最右一路（运费险）跳闸（红），其余照常"
    }
   ],
   "subject16": [
@@ -5052,8 +5329,8 @@
      620
     ],
     "align": "br",
-    "tag": "库存",
-    "desc": "电闸箱放大（同 EP.12 第 3 版封面），底部留出跳闸那一路下方的「库存」标签"
+    "tag": "运费险",
+    "desc": "电闸箱放大（同 EP.12 第 3 版封面），底部留出跳闸那一路下方的「运费险」标签"
    }
   ],
   "subject34": [
@@ -5066,9 +5343,9 @@
      572
     ],
     "align": "bc",
-    "tag": "库存",
+    "tag": "运费险",
     "tagInside": true,
-    "desc": "电闸箱放大约 1.3 倍（440→572，顶贴徽标行留白下沿 y684）；「库存」标签下移到箱内跳闸那一路正下方（y1224 以上）；箱体底边到 y1256，在底部 15% 不放字区内只有图形、无文字"
+    "desc": "电闸箱放大约 1.3 倍（440→572，顶贴徽标行留白下沿 y684）；「运费险」标签下移到箱内跳闸那一路正下方（y1224 以上）；箱体底边到 y1256，在底部 15% 不放字区内只有图形、无文字"
    }
   ],
   "sizes": {
