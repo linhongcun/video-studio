@@ -1,0 +1,10072 @@
+{
+ "meta": {
+  "title": "《大促一到，下单怎么就卡住了？》",
+  "hook": "大促一到下单怎么就卡住了",
+  "episode": 19,
+  "slug": "db-sharding",
+  "release": "v0.24.0",
+  "draft": true,
+  "provisional": false,
+  "provisionalReason": null,
+  "pendingAudio": false,
+  "series": null,
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 3915,
+  "provisionalTiming": false,
+  "style": "深色背景+蓝青高光扁平2D（沿用 EP.15–18）",
+  "palette": {
+   "bg": "#0B1020",
+   "panel": "#111827",
+   "primary": "#22D3EE",
+   "secondary": "#3B82F6",
+   "text": "#E5E7EB",
+   "text2": "#9CA3AF",
+   "muted": "#6B7280",
+   "success": "#22C55E",
+   "accent": "#F59E0B",
+   "danger": "#F87171"
+  },
+  "font": "Noto Sans SC",
+  "safeArea": {
+   "margin": 80,
+   "subtitleBand": [
+    900,
+    980
+   ],
+   "contentMaxY": 880,
+   "watermarkClearZone": [
+    1700,
+    80,
+    1840,
+    130
+   ]
+  },
+  "branding": {
+   "spec": "episodes/_shared/branding/spec.json v1.3.0",
+   "cornerWatermark": "右上「IT小村」40%，从第 0 帧起常显（开场即封面），留空区 x1700–1840 y80–130",
+   "centerWatermark": null,
+   "endCard": "由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾卡（只含全片结尾 60 帧留白）"
+  },
+  "shotSentences": {
+   "hook-1": 1,
+   "hook-2": 1,
+   "bridge-1": 1,
+   "bridge-2": 1,
+   "station-1": 1,
+   "station-2": 1,
+   "table-1": 1,
+   "table-2": 1,
+   "database-1": 1,
+   "database-2": 1,
+   "database-3": 1,
+   "key-1": 1,
+   "key-2": 2,
+   "strategy-1": 2,
+   "vertical-1": 2,
+   "xquery-1": 1,
+   "xquery-2": 1,
+   "xtx-1": 1,
+   "xtx-2": 2,
+   "id-1": 1,
+   "reshard-1": 1,
+   "reshard-2": 1,
+   "recap-1": 2
+  },
+  "notes": "时长=Knoll timeline.json（map_timing.py：章 = 本章首句起 → 下一章首句起；只在全片结尾补 60 帧）。术语标签（9 个，只用中文）念到时淡入（0..+4 帧，宁晚勿早），完整显示（pop-in 完成 → 转场淡出开始）≥63 帧（按 66 留余量，不够在镜头末尾加 hold）；开场第 0 帧即封面画面（大字 + 手机下单在转圈）；驿站 = 库（只按颜色区分）、同款货架 = 同结构的表、贴纸颜色 = 分片键、记账员 = 写入能力；信号线与圆点由 Knoll 画（knollDraw）；静止段 camera.pushIn 轻推镜；画面无数字 / 英文 / logo。素材全部自绘。",
+  "timingSource": "/workspace/share/ep19/timeline.json（Knoll）→ map_timing.py → timing.json",
+  "poster": {
+   "shotId": "hook-1",
+   "localFrame": 0,
+   "frame": 0,
+   "desc": "开场即封面画面（正式封面用 cover/ep19-*.png 定制设计，不取视频帧）",
+   "file": "poster.jpg"
+  }
+ },
+ "assets": {
+  "new": [
+   {
+    "id": "calendar",
+    "file": "assets/calendar.svg",
+    "png": "assets/calendar.png"
+   },
+   {
+    "id": "cart",
+    "file": "assets/cart.svg",
+    "png": "assets/cart.png"
+   },
+   {
+    "id": "clerk",
+    "file": "assets/clerk.svg",
+    "png": "assets/clerk.png"
+   },
+   {
+    "id": "clerk-busy",
+    "file": "assets/clerk-busy.svg",
+    "png": "assets/clerk-busy.png"
+   },
+   {
+    "id": "clipboard",
+    "file": "assets/clipboard.svg",
+    "png": "assets/clipboard.png"
+   },
+   {
+    "id": "idtag",
+    "file": "assets/idtag.svg",
+    "png": "assets/idtag.png"
+   },
+   {
+    "id": "ledger",
+    "file": "assets/ledger.svg",
+    "png": "assets/ledger.png"
+   },
+   {
+    "id": "ledger-bad",
+    "file": "assets/ledger-bad.svg",
+    "png": "assets/ledger-bad.png"
+   },
+   {
+    "id": "ledger-ok",
+    "file": "assets/ledger-ok.svg",
+    "png": "assets/ledger-ok.png"
+   },
+   {
+    "id": "order",
+    "file": "assets/order.svg",
+    "png": "assets/order.png"
+   },
+   {
+    "id": "parcel",
+    "file": "assets/parcel.svg",
+    "png": "assets/parcel.png"
+   },
+   {
+    "id": "parcel-big",
+    "file": "assets/parcel-big.svg",
+    "png": "assets/parcel-big.png"
+   },
+   {
+    "id": "parcel-blue",
+    "file": "assets/parcel-blue.svg",
+    "png": "assets/parcel-blue.png"
+   },
+   {
+    "id": "parcel-fresh",
+    "file": "assets/parcel-fresh.svg",
+    "png": "assets/parcel-fresh.png"
+   },
+   {
+    "id": "parcel-green",
+    "file": "assets/parcel-green.svg",
+    "png": "assets/parcel-green.png"
+   },
+   {
+    "id": "parcel-pile",
+    "file": "assets/parcel-pile.svg",
+    "png": "assets/parcel-pile.png"
+   },
+   {
+    "id": "parcel-red",
+    "file": "assets/parcel-red.svg",
+    "png": "assets/parcel-red.png"
+   },
+   {
+    "id": "parcel-yellow",
+    "file": "assets/parcel-yellow.svg",
+    "png": "assets/parcel-yellow.png"
+   },
+   {
+    "id": "person-blue",
+    "file": "assets/person-blue.svg",
+    "png": "assets/person-blue.png"
+   },
+   {
+    "id": "person-green",
+    "file": "assets/person-green.svg",
+    "png": "assets/person-green.png"
+   },
+   {
+    "id": "person-red",
+    "file": "assets/person-red.svg",
+    "png": "assets/person-red.png"
+   },
+   {
+    "id": "person-yellow",
+    "file": "assets/person-yellow.svg",
+    "png": "assets/person-yellow.png"
+   },
+   {
+    "id": "phone-order",
+    "file": "assets/phone-order.svg",
+    "png": "assets/phone-order.png"
+   },
+   {
+    "id": "runner",
+    "file": "assets/runner.svg",
+    "png": "assets/runner.png"
+   },
+   {
+    "id": "scale",
+    "file": "assets/scale.svg",
+    "png": "assets/scale.png"
+   },
+   {
+    "id": "server",
+    "file": "assets/server.svg",
+    "png": "assets/server.png"
+   },
+   {
+    "id": "shelf",
+    "file": "assets/shelf.svg",
+    "png": "assets/shelf.png"
+   },
+   {
+    "id": "shelf-blue",
+    "file": "assets/shelf-blue.svg",
+    "png": "assets/shelf-blue.png"
+   },
+   {
+    "id": "shelf-full",
+    "file": "assets/shelf-full.svg",
+    "png": "assets/shelf-full.png"
+   },
+   {
+    "id": "shelf-green",
+    "file": "assets/shelf-green.svg",
+    "png": "assets/shelf-green.png"
+   },
+   {
+    "id": "shelf-red",
+    "file": "assets/shelf-red.svg",
+    "png": "assets/shelf-red.png"
+   },
+   {
+    "id": "shelf-yellow",
+    "file": "assets/shelf-yellow.svg",
+    "png": "assets/shelf-yellow.png"
+   },
+   {
+    "id": "shuffle",
+    "file": "assets/shuffle.svg",
+    "png": "assets/shuffle.png"
+   },
+   {
+    "id": "spark",
+    "file": "assets/spark.svg",
+    "png": "assets/spark.png"
+   },
+   {
+    "id": "spinner",
+    "file": "assets/spinner.svg",
+    "png": "assets/spinner.png"
+   },
+   {
+    "id": "station",
+    "file": "assets/station.svg",
+    "png": "assets/station.png"
+   },
+   {
+    "id": "station-blue",
+    "file": "assets/station-blue.svg",
+    "png": "assets/station-blue.png"
+   },
+   {
+    "id": "station-green",
+    "file": "assets/station-green.svg",
+    "png": "assets/station-green.png"
+   },
+   {
+    "id": "station-red",
+    "file": "assets/station-red.svg",
+    "png": "assets/station-red.png"
+   },
+   {
+    "id": "station-yellow",
+    "file": "assets/station-yellow.svg",
+    "png": "assets/station-yellow.png"
+   },
+   {
+    "id": "table-sheet",
+    "file": "assets/table-sheet.svg",
+    "png": "assets/table-sheet.png"
+   }
+  ],
+  "reuse": [
+   {
+    "id": "clock",
+    "file": "assets/clock.svg",
+    "png": "assets/clock.png",
+    "desc": "EP.16–18 自绘，复用"
+   },
+   {
+    "id": "crash",
+    "file": "assets/crash.svg",
+    "png": "assets/crash.png",
+    "desc": "EP.16–18 自绘，复用"
+   },
+   {
+    "id": "stadium",
+    "file": "assets/stadium.svg",
+    "png": "assets/stadium.png",
+    "desc": "EP.16–18 自绘，复用"
+   },
+   {
+    "id": "tv-frame",
+    "file": "assets/tv-frame.svg",
+    "png": "assets/tv-frame.png",
+    "desc": "EP.16–18 自绘，复用"
+   },
+   {
+    "id": "viewer",
+    "file": "assets/viewer.svg",
+    "png": "assets/viewer.png",
+    "desc": "EP.16–18 自绘，复用"
+   }
+  ]
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "hook",
+   "title": "转圈",
+   "from": 0,
+   "durationInFrames": 343,
+   "narrationCharsRecount": 45,
+   "shots": [
+    {
+     "id": "hook-1",
+     "chapterId": "hook",
+     "from": 0,
+     "durationInFrames": 112,
+     "narration": "大促零点一过，下单按钮转了半天圈。",
+     "subtitles": [
+      {
+       "text": "",
+       "from": 0,
+       "blank": true,
+       "note": "开场封面大字期间不出字幕",
+       "to": 44
+      },
+      {
+       "text": "大促零点一过，下单按钮转了半天圈",
+       "from": 45,
+       "src": "ch1-1",
+       "voiceFrom": 0,
+       "to": 111
+      }
+     ],
+     "elements": [
+      {
+       "id": "t1",
+       "type": "text",
+       "x": 160,
+       "y": 200,
+       "w": 1100,
+       "h": 150,
+       "text": "大促一到",
+       "fontSize": 120,
+       "color": "#E5E7EB",
+       "reuse": false
+      },
+      {
+       "id": "t2",
+       "type": "text",
+       "x": 160,
+       "y": 370,
+       "w": 1100,
+       "h": 150,
+       "text": "下单怎么就卡住了？",
+       "fontSize": 110,
+       "color": "#F59E0B",
+       "reuse": false
+      },
+      {
+       "id": "ph",
+       "type": "image",
+       "asset": "assets/phone-order.svg",
+       "x": 1180,
+       "y": 170,
+       "w": 620,
+       "h": 620,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "btn",
+       "type": "rect",
+       "x": 1393,
+       "y": 556,
+       "w": 194,
+       "h": 80,
+       "color": "#3B82F6",
+       "reuse": false,
+       "radius": 40,
+       "label": "下单",
+       "fontSize": 40
+      },
+      {
+       "id": "sp",
+       "type": "image",
+       "asset": "assets/spinner.svg",
+       "x": 1445,
+       "y": 644,
+       "w": 90,
+       "h": 90,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 31,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "t1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 1
+        },
+        {
+         "frame": 45,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "t2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 1
+        },
+        {
+         "frame": 45,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 30,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 36,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sp",
+       "property": "rotate",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 111,
+         "value": 900
+        }
+       ],
+       "easing": "linear"
+      },
+      {
+       "elementId": "btn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 1
+        },
+        {
+         "frame": 67,
+         "value": 0.5
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "hook-2",
+     "chapterId": "hook",
+     "from": 112,
+     "durationInFrames": 231,
+     "narration": "原因可能有很多，今天说其中一个：所有订单都挤在一台数据库、一张表里。",
+     "subtitles": [
+      {
+       "text": "原因可能有很多，今天说其中一个",
+       "from": 0,
+       "src": "ch1-2",
+       "voiceFrom": 0,
+       "to": 103
+      },
+      {
+       "text": "所有订单都挤在一台数据库、一张表里",
+       "from": 104,
+       "src": "ch1-2",
+       "voiceFrom": 104,
+       "to": 230
+      }
+     ],
+     "elements": [
+      {
+       "id": "db",
+       "type": "image",
+       "asset": "assets/server.svg",
+       "x": 820,
+       "y": 160,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "tb",
+       "type": "image",
+       "asset": "assets/table-sheet.svg",
+       "x": 1180,
+       "y": 220,
+       "w": 380,
+       "h": 380,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 185,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "o0",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 120,
+       "y": 180,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 100,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "o1",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 260,
+       "y": 330,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 103,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "o2",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 400,
+       "y": 480,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 106,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "o3",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 180,
+       "y": 620,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 109,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "o4",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 330,
+       "y": 700,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 112,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "o5",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 470,
+       "y": 250,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 115,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "db",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 184,
+         "value": 0
+        },
+        {
+         "frame": 192,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 184,
+         "value": 0
+        },
+        {
+         "frame": 196,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "o0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 99,
+         "value": 0
+        },
+        {
+         "frame": 105,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 107,
+         "value": 120
+        },
+        {
+         "frame": 129,
+         "value": 1250
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o0",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 107,
+         "value": 180
+        },
+        {
+         "frame": 129,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 102,
+         "value": 0
+        },
+        {
+         "frame": 108,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 111,
+         "value": 260
+        },
+        {
+         "frame": 133,
+         "value": 1330
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o1",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 111,
+         "value": 330
+        },
+        {
+         "frame": 133,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 105,
+         "value": 0
+        },
+        {
+         "frame": 111,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 115,
+         "value": 400
+        },
+        {
+         "frame": 137,
+         "value": 1410
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 115,
+         "value": 480
+        },
+        {
+         "frame": 137,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 108,
+         "value": 0
+        },
+        {
+         "frame": 114,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o3",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 119,
+         "value": 180
+        },
+        {
+         "frame": 141,
+         "value": 1250
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o3",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 119,
+         "value": 620
+        },
+        {
+         "frame": 141,
+         "value": 390
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 111,
+         "value": 0
+        },
+        {
+         "frame": 117,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o4",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 123,
+         "value": 330
+        },
+        {
+         "frame": 145,
+         "value": 1330
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o4",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 123,
+         "value": 700
+        },
+        {
+         "frame": 145,
+         "value": 390
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o5",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 114,
+         "value": 0
+        },
+        {
+         "frame": 120,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o5",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 127,
+         "value": 470
+        },
+        {
+         "frame": 149,
+         "value": 1410
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o5",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 127,
+         "value": 250
+        },
+        {
+         "frame": 149,
+         "value": 390
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "bridge",
+   "title": "写没分出去",
+   "from": 343,
+   "durationInFrames": 173,
+   "narrationCharsRecount": 20,
+   "shots": [
+    {
+     "id": "bridge-1",
+     "chapterId": "bridge",
+     "from": 343,
+     "durationInFrames": 75,
+     "narration": "上期加从库，分走了读。",
+     "subtitles": [
+      {
+       "text": "上期加从库，分走了读",
+       "from": 0,
+       "src": "ch2-1",
+       "voiceFrom": 16,
+       "to": 74
+      }
+     ],
+     "elements": [
+      {
+       "id": "st",
+       "type": "image",
+       "asset": "assets/stadium.svg",
+       "x": 160,
+       "y": 240,
+       "w": 640,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "stT",
+       "type": "rect",
+       "x": 380,
+       "y": 580,
+       "w": 148,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 40,
+       "label": "主库",
+       "fontSize": 40
+      },
+      {
+       "id": "tv0",
+       "type": "image",
+       "asset": "assets/tv-frame.svg",
+       "x": 1080,
+       "y": 180,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "vw0",
+       "type": "image",
+       "asset": "assets/viewer.svg",
+       "x": 1150,
+       "y": 470,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 38,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "sg0",
+       "type": "line",
+       "x": 800,
+       "y": 400,
+       "w": 300,
+       "h": -100,
+       "color": "#22D3EE",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         800,
+         400
+        ],
+        "toXY": [
+         1100,
+         300
+        ],
+        "dotStart": 19,
+        "dotFrames": 20,
+        "dotStopAt": null,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sg0d",
+       "type": "rect",
+       "x": 788,
+       "y": 388,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg0"
+      },
+      {
+       "id": "tv1",
+       "type": "image",
+       "asset": "assets/tv-frame.svg",
+       "x": 1420,
+       "y": 180,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "vw1",
+       "type": "image",
+       "asset": "assets/viewer.svg",
+       "x": 1490,
+       "y": 470,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 38,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "sg1",
+       "type": "line",
+       "x": 800,
+       "y": 400,
+       "w": 640,
+       "h": -100,
+       "color": "#22D3EE",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         800,
+         400
+        ],
+        "toXY": [
+         1440,
+         300
+        ],
+        "dotStart": 23,
+        "dotFrames": 20,
+        "dotStopAt": null,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sg1d",
+       "type": "rect",
+       "x": 788,
+       "y": 388,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg1"
+      },
+      {
+       "id": "ckT",
+       "type": "rect",
+       "x": 1240,
+       "y": 640,
+       "w": 148,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 40,
+       "label": "从库",
+       "fontSize": 40
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "sg0",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tv0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "vw0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0
+        },
+        {
+         "frame": 45,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "vw0",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0
+        },
+        {
+         "frame": 49,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sg1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tv1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "vw1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0
+        },
+        {
+         "frame": 45,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "vw1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0
+        },
+        {
+         "frame": 49,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "bridge-2",
+     "chapterId": "bridge",
+     "from": 418,
+     "durationInFrames": 98,
+     "narration": "可下单是写，还得挤进主库。",
+     "subtitles": [
+      {
+       "text": "可下单是写，还得挤进主库",
+       "from": 0,
+       "src": "ch2-2",
+       "voiceFrom": 0,
+       "to": 97
+      }
+     ],
+     "elements": [
+      {
+       "id": "st",
+       "type": "image",
+       "asset": "assets/stadium.svg",
+       "x": 160,
+       "y": 240,
+       "w": 640,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "stT",
+       "type": "rect",
+       "x": 380,
+       "y": 580,
+       "w": 148,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 40,
+       "label": "主库",
+       "fontSize": 40
+      },
+      {
+       "id": "tv0",
+       "type": "image",
+       "asset": "assets/tv-frame.svg",
+       "x": 1080,
+       "y": 300,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "tv1",
+       "type": "image",
+       "asset": "assets/tv-frame.svg",
+       "x": 1420,
+       "y": 300,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "o0",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 1180,
+       "y": 120,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 8,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "o1",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 1320,
+       "y": 140,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 11,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "o2",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 1460,
+       "y": 120,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 14,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "o3",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 1600,
+       "y": 150,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 17,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "o4",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 1250,
+       "y": 700,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 20,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "o5",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 1530,
+       "y": 690,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 23,
+       "disappearFrame": null,
+       "z": 9
+      },
+      {
+       "id": "clk",
+       "type": "image",
+       "asset": "assets/clock.svg",
+       "x": 820,
+       "y": 150,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 37,
+       "disappearFrame": null,
+       "z": 10
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "tv0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.4
+        },
+        {
+         "frame": 1,
+         "value": 0.4
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "tv1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.4
+        },
+        {
+         "frame": 1,
+         "value": 0.4
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "clk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 44,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "clk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 36,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "o0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 7,
+         "value": 0
+        },
+        {
+         "frame": 13,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 17,
+         "value": 1180
+        },
+        {
+         "frame": 41,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o0",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 17,
+         "value": 120
+        },
+        {
+         "frame": 41,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 10,
+         "value": 0
+        },
+        {
+         "frame": 16,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 21,
+         "value": 1320
+        },
+        {
+         "frame": 45,
+         "value": 440
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o1",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 21,
+         "value": 140
+        },
+        {
+         "frame": 45,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 13,
+         "value": 0
+        },
+        {
+         "frame": 19,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 25,
+         "value": 1460
+        },
+        {
+         "frame": 49,
+         "value": 580
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 25,
+         "value": 120
+        },
+        {
+         "frame": 49,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 16,
+         "value": 0
+        },
+        {
+         "frame": 22,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o3",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 29,
+         "value": 1600
+        },
+        {
+         "frame": 53,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o3",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 29,
+         "value": 150
+        },
+        {
+         "frame": 53,
+         "value": 390
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 19,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o4",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 33,
+         "value": 1250
+        },
+        {
+         "frame": 57,
+         "value": 440
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o4",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 33,
+         "value": 700
+        },
+        {
+         "frame": 57,
+         "value": 390
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o5",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 22,
+         "value": 0
+        },
+        {
+         "frame": 28,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "o5",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 1530
+        },
+        {
+         "frame": 61,
+         "value": 580
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "o5",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 690
+        },
+        {
+         "frame": 61,
+         "value": 390
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "station",
+   "title": "驿站扛不住",
+   "from": 516,
+   "durationInFrames": 234,
+   "narrationCharsRecount": 30,
+   "shots": [
+    {
+     "id": "station-1",
+     "chapterId": "station",
+     "from": 516,
+     "durationInFrames": 53,
+     "narration": "想象一个快递驿站。",
+     "subtitles": [
+      {
+       "text": "想象一个快递驿站",
+       "from": 0,
+       "src": "ch3-1",
+       "voiceFrom": 0,
+       "to": 52
+      }
+     ],
+     "elements": [
+      {
+       "id": "stn",
+       "type": "image",
+       "asset": "assets/station.svg",
+       "x": 620,
+       "y": 140,
+       "w": 680,
+       "h": 680,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "stn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 10,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "stn",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "station-2",
+     "chapterId": "station",
+     "from": 569,
+     "durationInFrames": 181,
+     "narration": "大促一来，包裹堆成山，货架塞满，记账员也登记不过来。",
+     "subtitles": [
+      {
+       "text": "大促一来，包裹堆成山",
+       "from": 0,
+       "src": "ch3-2",
+       "voiceFrom": 0,
+       "to": 80
+      },
+      {
+       "text": "货架塞满，记账员也登记不过来",
+       "from": 81,
+       "src": "ch3-2",
+       "voiceFrom": 81,
+       "to": 180
+      }
+     ],
+     "elements": [
+      {
+       "id": "pile",
+       "type": "image",
+       "asset": "assets/parcel-pile.svg",
+       "x": 160,
+       "y": 300,
+       "w": 440,
+       "h": 440,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 31,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "sf",
+       "type": "image",
+       "asset": "assets/shelf-full.svg",
+       "x": 760,
+       "y": 220,
+       "w": 460,
+       "h": 460,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 68,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "ck",
+       "type": "image",
+       "asset": "assets/clerk-busy.svg",
+       "x": 1320,
+       "y": 280,
+       "w": 440,
+       "h": 440,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 98,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "pile",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pile",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 30,
+         "value": 0.4
+        },
+        {
+         "frame": 44,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 67,
+         "value": 0
+        },
+        {
+         "frame": 75,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sf",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 67,
+         "value": 0
+        },
+        {
+         "frame": 79,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ck",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 97,
+         "value": 0
+        },
+        {
+         "frame": 105,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 97,
+         "value": 0
+        },
+        {
+         "frame": 109,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 109,
+       "endFrame": 180,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "table",
+   "title": "同款货架",
+   "from": 750,
+   "durationInFrames": 422,
+   "narrationCharsRecount": 59,
+   "shots": [
+    {
+     "id": "table-1",
+     "chapterId": "table",
+     "from": 750,
+     "durationInFrames": 260,
+     "narration": "先在站里多摆几排一模一样的货架，包裹按收件人的贴纸颜色，分到不同的货架上，每个只放一处。",
+     "subtitles": [
+      {
+       "text": "先在站里多摆几排一模一样的货架",
+       "from": 0,
+       "src": "ch4-1",
+       "voiceFrom": 0,
+       "to": 109
+      },
+      {
+       "text": "包裹按收件人的贴纸颜色",
+       "from": 110,
+       "src": "ch4-1",
+       "voiceFrom": 110,
+       "to": 166
+      },
+      {
+       "text": "分到不同的货架上",
+       "from": 167,
+       "src": "ch4-1",
+       "voiceFrom": 167,
+       "to": 215
+      },
+      {
+       "text": "每个只放一处",
+       "from": 216,
+       "src": "ch4-1",
+       "voiceFrom": 216,
+       "to": 259
+      }
+     ],
+     "elements": [
+      {
+       "id": "in",
+       "type": "rect",
+       "x": 120,
+       "y": 140,
+       "w": 1560,
+       "h": 620,
+       "color": "#00000000",
+       "reuse": false,
+       "stroke": "#6B7280",
+       "radius": 30
+      },
+      {
+       "id": "sh0",
+       "type": "image",
+       "asset": "assets/shelf.svg",
+       "x": 200,
+       "y": 300,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 26,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "sc0",
+       "type": "image",
+       "asset": "assets/shelf-red.svg",
+       "x": 200,
+       "y": 300,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 194,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "sh1",
+       "type": "image",
+       "asset": "assets/shelf.svg",
+       "x": 600,
+       "y": 300,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 32,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "sc1",
+       "type": "image",
+       "asset": "assets/shelf-blue.svg",
+       "x": 600,
+       "y": 300,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 198,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "sh2",
+       "type": "image",
+       "asset": "assets/shelf.svg",
+       "x": 1000,
+       "y": 300,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 38,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "sc2",
+       "type": "image",
+       "asset": "assets/shelf-green.svg",
+       "x": 1000,
+       "y": 300,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 202,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "sh3",
+       "type": "image",
+       "asset": "assets/shelf.svg",
+       "x": 1400,
+       "y": 300,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 44,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "sc3",
+       "type": "image",
+       "asset": "assets/shelf-yellow.svg",
+       "x": 1400,
+       "y": 300,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 206,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "p0",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 760,
+       "y": 150,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 139,
+       "disappearFrame": 199,
+       "z": 9
+      },
+      {
+       "id": "p1",
+       "type": "image",
+       "asset": "assets/parcel-blue.svg",
+       "x": 880,
+       "y": 150,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 139,
+       "disappearFrame": 203,
+       "z": 10
+      },
+      {
+       "id": "p2",
+       "type": "image",
+       "asset": "assets/parcel-green.svg",
+       "x": 1000,
+       "y": 150,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 139,
+       "disappearFrame": 207,
+       "z": 11
+      },
+      {
+       "id": "p3",
+       "type": "image",
+       "asset": "assets/parcel-yellow.svg",
+       "x": 1120,
+       "y": 150,
+       "w": 100,
+       "h": 100,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 139,
+       "disappearFrame": 211,
+       "z": 12
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "in",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sh0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 25,
+         "value": 0
+        },
+        {
+         "frame": 33,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sh1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 31,
+         "value": 0
+        },
+        {
+         "frame": 39,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sh2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 37,
+         "value": 0
+        },
+        {
+         "frame": 45,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sh3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 43,
+         "value": 0
+        },
+        {
+         "frame": 51,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sc0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 193,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sc1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 193,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sc2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 193,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sc3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 193,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sc0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 193,
+         "value": 0
+        },
+        {
+         "frame": 201,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sc1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 197,
+         "value": 0
+        },
+        {
+         "frame": 205,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sc2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 201,
+         "value": 0
+        },
+        {
+         "frame": 209,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sc3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 205,
+         "value": 0
+        },
+        {
+         "frame": 213,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 138,
+         "value": 0
+        },
+        {
+         "frame": 146,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 163,
+         "value": 760
+        },
+        {
+         "frame": 189,
+         "value": 310
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p0",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 163,
+         "value": 150
+        },
+        {
+         "frame": 189,
+         "value": 330
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 193,
+         "value": 1
+        },
+        {
+         "frame": 199,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 138,
+         "value": 0
+        },
+        {
+         "frame": 146,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 167,
+         "value": 880
+        },
+        {
+         "frame": 193,
+         "value": 710
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 167,
+         "value": 150
+        },
+        {
+         "frame": 193,
+         "value": 330
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 197,
+         "value": 1
+        },
+        {
+         "frame": 203,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 138,
+         "value": 0
+        },
+        {
+         "frame": 146,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 171,
+         "value": 1000
+        },
+        {
+         "frame": 197,
+         "value": 1110
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 171,
+         "value": 150
+        },
+        {
+         "frame": 197,
+         "value": 330
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 201,
+         "value": 1
+        },
+        {
+         "frame": 207,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 138,
+         "value": 0
+        },
+        {
+         "frame": 146,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p3",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 175,
+         "value": 1120
+        },
+        {
+         "frame": 201,
+         "value": 1510
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p3",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 175,
+         "value": 150
+        },
+        {
+         "frame": 201,
+         "value": 330
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 205,
+         "value": 1
+        },
+        {
+         "frame": 211,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "table-2",
+     "chapterId": "table",
+     "from": 1010,
+     "durationInFrames": 162,
+     "narration": "这叫分表：同一个库里，拆成结构相同的多张表。",
+     "subtitles": [
+      {
+       "text": "这叫分表：同一个库里",
+       "from": 0,
+       "src": "ch4-2",
+       "voiceFrom": 0,
+       "to": 71
+      },
+      {
+       "text": "拆成结构相同的多张表",
+       "from": 72,
+       "src": "ch4-2",
+       "voiceFrom": 72,
+       "to": 161
+      }
+     ],
+     "elements": [
+      {
+       "id": "db",
+       "type": "rect",
+       "x": 140,
+       "y": 140,
+       "w": 1640,
+       "h": 560,
+       "color": "#00000000",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 30
+      },
+      {
+       "id": "tb0",
+       "type": "image",
+       "asset": "assets/table-sheet.svg",
+       "x": 210,
+       "y": 220,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "cb0",
+       "type": "rect",
+       "x": 240,
+       "y": 530,
+       "w": 240,
+       "h": 24,
+       "color": "#F87171",
+       "reuse": false,
+       "radius": 12
+      },
+      {
+       "id": "tb1",
+       "type": "image",
+       "asset": "assets/table-sheet.svg",
+       "x": 610,
+       "y": 220,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "cb1",
+       "type": "rect",
+       "x": 640,
+       "y": 530,
+       "w": 240,
+       "h": 24,
+       "color": "#3B82F6",
+       "reuse": false,
+       "radius": 12
+      },
+      {
+       "id": "tb2",
+       "type": "image",
+       "asset": "assets/table-sheet.svg",
+       "x": 1010,
+       "y": 220,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "cb2",
+       "type": "rect",
+       "x": 1040,
+       "y": 530,
+       "w": 240,
+       "h": 24,
+       "color": "#22C55E",
+       "reuse": false,
+       "radius": 12
+      },
+      {
+       "id": "tb3",
+       "type": "image",
+       "asset": "assets/table-sheet.svg",
+       "x": 1410,
+       "y": 220,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "cb3",
+       "type": "rect",
+       "x": 1440,
+       "y": 530,
+       "w": 240,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12
+      },
+      {
+       "id": "fb",
+       "type": "rect",
+       "x": 810,
+       "y": 740,
+       "w": 300,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "分表",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "db",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tb0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tb1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tb2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tb3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cb0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 122,
+         "value": 0
+        },
+        {
+         "frame": 128,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cb1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 125,
+         "value": 0
+        },
+        {
+         "frame": 131,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cb2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 128,
+         "value": 0
+        },
+        {
+         "frame": 134,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cb3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 131,
+         "value": 0
+        },
+        {
+         "frame": 137,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 15,
+         "value": 0
+        },
+        {
+         "frame": 27,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 15,
+         "value": 0
+        },
+        {
+         "frame": 27,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "chapterId": "database",
+   "title": "开分站",
+   "from": 1172,
+   "durationInFrames": 339,
+   "narrationCharsRecount": 47,
+   "shots": [
+    {
+     "id": "database-1",
+     "chapterId": "database",
+     "from": 1172,
+     "durationInFrames": 72,
+     "narration": "可记账员还是只有一个。",
+     "subtitles": [
+      {
+       "text": "可记账员还是只有一个",
+       "from": 0,
+       "src": "ch5-1",
+       "voiceFrom": 0,
+       "to": 71
+      }
+     ],
+     "elements": [
+      {
+       "id": "sh0",
+       "type": "image",
+       "asset": "assets/shelf-red.svg",
+       "x": 160,
+       "y": 260,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "sh1",
+       "type": "image",
+       "asset": "assets/shelf-blue.svg",
+       "x": 460,
+       "y": 260,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "sh2",
+       "type": "image",
+       "asset": "assets/shelf-green.svg",
+       "x": 760,
+       "y": 260,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "sh3",
+       "type": "image",
+       "asset": "assets/shelf-yellow.svg",
+       "x": 1060,
+       "y": 260,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "ck",
+       "type": "image",
+       "asset": "assets/clerk-busy.svg",
+       "x": 1380,
+       "y": 300,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ck",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 38,
+         "value": 1
+        },
+        {
+         "frame": 50,
+         "value": 1.08
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "database-2",
+     "chapterId": "database",
+     "from": 1244,
+     "durationInFrames": 115,
+     "narration": "那就再开几个分站，各有货架，各有记账员。",
+     "subtitles": [
+      {
+       "text": "那就再开几个分站",
+       "from": 0,
+       "src": "ch5-2",
+       "voiceFrom": 0,
+       "to": 56
+      },
+      {
+       "text": "各有货架，各有记账员",
+       "from": 57,
+       "src": "ch5-2",
+       "voiceFrom": 57,
+       "to": 114
+      }
+     ],
+     "elements": [
+      {
+       "id": "st0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 150,
+       "y": 160,
+       "w": 330,
+       "h": 330,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 14,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "sh0",
+       "type": "image",
+       "asset": "assets/shelf-red.svg",
+       "x": 160,
+       "y": 500,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 51,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "ck0",
+       "type": "image",
+       "asset": "assets/clerk.svg",
+       "x": 320,
+       "y": 500,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 76,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "st1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 580,
+       "y": 160,
+       "w": 330,
+       "h": 330,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 19,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "sh1",
+       "type": "image",
+       "asset": "assets/shelf-blue.svg",
+       "x": 590,
+       "y": 500,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 54,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "ck1",
+       "type": "image",
+       "asset": "assets/clerk.svg",
+       "x": 750,
+       "y": 500,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 79,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "st2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 1010,
+       "y": 160,
+       "w": 330,
+       "h": 330,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 24,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "sh2",
+       "type": "image",
+       "asset": "assets/shelf-green.svg",
+       "x": 1020,
+       "y": 500,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 57,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "ck2",
+       "type": "image",
+       "asset": "assets/clerk.svg",
+       "x": 1180,
+       "y": 500,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 82,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "st3",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 1440,
+       "y": 160,
+       "w": 330,
+       "h": 330,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 29,
+       "disappearFrame": null,
+       "z": 9
+      },
+      {
+       "id": "sh3",
+       "type": "image",
+       "asset": "assets/shelf-yellow.svg",
+       "x": 1450,
+       "y": 500,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 60,
+       "disappearFrame": null,
+       "z": 10
+      },
+      {
+       "id": "ck3",
+       "type": "image",
+       "asset": "assets/clerk.svg",
+       "x": 1610,
+       "y": 500,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 85,
+       "disappearFrame": null,
+       "z": 11
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "st0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 13,
+         "value": 0
+        },
+        {
+         "frame": 21,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st0",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 13,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sh0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 50,
+         "value": 0
+        },
+        {
+         "frame": 58,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 75,
+         "value": 0
+        },
+        {
+         "frame": 83,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck0",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 75,
+         "value": 0
+        },
+        {
+         "frame": 87,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "st1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 18,
+         "value": 0
+        },
+        {
+         "frame": 26,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 18,
+         "value": 0
+        },
+        {
+         "frame": 30,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sh1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 0
+        },
+        {
+         "frame": 61,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 78,
+         "value": 0
+        },
+        {
+         "frame": 86,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 78,
+         "value": 0
+        },
+        {
+         "frame": 90,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "st2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 23,
+         "value": 0
+        },
+        {
+         "frame": 31,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 23,
+         "value": 0
+        },
+        {
+         "frame": 35,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sh2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 0
+        },
+        {
+         "frame": 64,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 81,
+         "value": 0
+        },
+        {
+         "frame": 89,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 81,
+         "value": 0
+        },
+        {
+         "frame": 93,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "st3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 28,
+         "value": 0
+        },
+        {
+         "frame": 36,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st3",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 28,
+         "value": 0
+        },
+        {
+         "frame": 40,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sh3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 0
+        },
+        {
+         "frame": 67,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 84,
+         "value": 0
+        },
+        {
+         "frame": 92,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck3",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 84,
+         "value": 0
+        },
+        {
+         "frame": 96,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "database-3",
+     "chapterId": "database",
+     "from": 1359,
+     "durationInFrames": 152,
+     "narration": "这叫分库：数据分到多台机器，写的压力也分开了。",
+     "subtitles": [
+      {
+       "text": "这叫分库：数据分到多台机器",
+       "from": 0,
+       "src": "ch5-3",
+       "voiceFrom": 0,
+       "to": 93
+      },
+      {
+       "text": "写的压力也分开了",
+       "from": 94,
+       "src": "ch5-3",
+       "voiceFrom": 94,
+       "to": 151
+      }
+     ],
+     "elements": [
+      {
+       "id": "st0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 150,
+       "y": 140,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "sv0",
+       "type": "image",
+       "asset": "assets/server.svg",
+       "x": 240,
+       "y": 450,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 54,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "sg0",
+       "type": "line",
+       "x": 960,
+       "y": 700,
+       "w": -645,
+       "h": -100,
+       "color": "#F87171",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         960,
+         700
+        ],
+        "toXY": [
+         315,
+         600
+        ],
+        "dotStart": 80,
+        "dotFrames": 16,
+        "dotStopAt": null,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sg0d",
+       "type": "rect",
+       "x": 948,
+       "y": 688,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg0"
+      },
+      {
+       "id": "st1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 580,
+       "y": 140,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "sv1",
+       "type": "image",
+       "asset": "assets/server.svg",
+       "x": 670,
+       "y": 450,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 57,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "sg1",
+       "type": "line",
+       "x": 960,
+       "y": 700,
+       "w": -215,
+       "h": -100,
+       "color": "#3B82F6",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         960,
+         700
+        ],
+        "toXY": [
+         745,
+         600
+        ],
+        "dotStart": 83,
+        "dotFrames": 16,
+        "dotStopAt": null,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sg1d",
+       "type": "rect",
+       "x": 948,
+       "y": 688,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg1"
+      },
+      {
+       "id": "st2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 1010,
+       "y": 140,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "sv2",
+       "type": "image",
+       "asset": "assets/server.svg",
+       "x": 1100,
+       "y": 450,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 60,
+       "disappearFrame": null,
+       "z": 9
+      },
+      {
+       "id": "sg2",
+       "type": "line",
+       "x": 960,
+       "y": 700,
+       "w": 215,
+       "h": -100,
+       "color": "#22C55E",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         960,
+         700
+        ],
+        "toXY": [
+         1175,
+         600
+        ],
+        "dotStart": 86,
+        "dotFrames": 16,
+        "dotStopAt": null,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sg2d",
+       "type": "rect",
+       "x": 948,
+       "y": 688,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg2"
+      },
+      {
+       "id": "st3",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 1440,
+       "y": 140,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 12
+      },
+      {
+       "id": "sv3",
+       "type": "image",
+       "asset": "assets/server.svg",
+       "x": 1530,
+       "y": 450,
+       "w": 150,
+       "h": 150,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 63,
+       "disappearFrame": null,
+       "z": 13
+      },
+      {
+       "id": "sg3",
+       "type": "line",
+       "x": 960,
+       "y": 700,
+       "w": 645,
+       "h": -100,
+       "color": "#F59E0B",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         960,
+         700
+        ],
+        "toXY": [
+         1605,
+         600
+        ],
+        "dotStart": 89,
+        "dotFrames": 16,
+        "dotStopAt": null,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sg3d",
+       "type": "rect",
+       "x": 948,
+       "y": 688,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg3"
+      },
+      {
+       "id": "od",
+       "type": "image",
+       "asset": "assets/order.svg",
+       "x": 900,
+       "y": 620,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 75,
+       "disappearFrame": 104,
+       "z": 16
+      },
+      {
+       "id": "fk",
+       "type": "rect",
+       "x": 810,
+       "y": 740,
+       "w": 300,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "分库",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "sg0",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sv0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 0
+        },
+        {
+         "frame": 61,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sv0",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 0
+        },
+        {
+         "frame": 65,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sg1",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sv1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 0
+        },
+        {
+         "frame": 64,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sv1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 0
+        },
+        {
+         "frame": 68,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sg2",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sv2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 0
+        },
+        {
+         "frame": 67,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sv2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 0
+        },
+        {
+         "frame": 71,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sg3",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sv3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 70,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sv3",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "od",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 74,
+         "value": 0
+        },
+        {
+         "frame": 80,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "od",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 1
+        },
+        {
+         "frame": 104,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "fk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 16,
+         "value": 0
+        },
+        {
+         "frame": 28,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 16,
+         "value": 0
+        },
+        {
+         "frame": 28,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "chapterId": "key",
+   "title": "看颜色",
+   "from": 1511,
+   "durationInFrames": 331,
+   "narrationCharsRecount": 36,
+   "shots": [
+    {
+     "id": "key-1",
+     "chapterId": "key",
+     "from": 1511,
+     "durationInFrames": 72,
+     "narration": "去哪个站，看贴纸颜色。",
+     "subtitles": [
+      {
+       "text": "去哪个站，看贴纸颜色",
+       "from": 0,
+       "src": "ch6-1",
+       "voiceFrom": 0,
+       "to": 71
+      }
+     ],
+     "elements": [
+      {
+       "id": "st0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 200,
+       "y": 150,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "st1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 620,
+       "y": 150,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "st2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 1040,
+       "y": 150,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "st3",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 1460,
+       "y": 150,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "pk",
+       "type": "image",
+       "asset": "assets/parcel-blue.svg",
+       "x": 820,
+       "y": 470,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "ring",
+       "type": "rect",
+       "x": 828,
+       "y": 480,
+       "w": 90,
+       "h": 80,
+       "color": "#00000000",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 16
+      },
+      {
+       "id": "sg",
+       "type": "line",
+       "x": 940,
+       "y": 470,
+       "w": -180,
+       "h": -50,
+       "color": "#3B82F6",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         940,
+         470
+        ],
+        "toXY": [
+         760,
+         420
+        ],
+        "dotStart": 38,
+        "dotFrames": 16,
+        "dotStopAt": null,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sgd",
+       "type": "rect",
+       "x": 928,
+       "y": 458,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "pk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ring",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 28,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "ring",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 28,
+         "value": 0
+        },
+        {
+         "frame": 34,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ring",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 28,
+         "value": 1.3
+        },
+        {
+         "frame": 38,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sg",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 38,
+         "value": 1
+        },
+        {
+         "frame": 48,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "st2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 38,
+         "value": 1
+        },
+        {
+         "frame": 48,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "st3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 38,
+         "value": 1
+        },
+        {
+         "frame": 48,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "key-2",
+     "chapterId": "key",
+     "from": 1583,
+     "durationInFrames": 259,
+     "narration": "颜色由收件人决定，同一个人永远去同一个站。这个依据，叫分片键。",
+     "subtitles": [
+      {
+       "text": "颜色由收件人决定",
+       "from": 0,
+       "src": "ch6-2",
+       "voiceFrom": 0,
+       "to": 65
+      },
+      {
+       "text": "同一个人永远去同一个站",
+       "from": 66,
+       "src": "ch6-2",
+       "voiceFrom": 66,
+       "to": 132
+      },
+      {
+       "text": "这个依据，叫分片键",
+       "from": 133,
+       "src": "ch6-3",
+       "voiceFrom": 133,
+       "to": 258
+      }
+     ],
+     "elements": [
+      {
+       "id": "pb",
+       "type": "image",
+       "asset": "assets/person-blue.svg",
+       "x": 160,
+       "y": 240,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "sb",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 1300,
+       "y": 160,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "p0",
+       "type": "image",
+       "asset": "assets/parcel-blue.svg",
+       "x": 520,
+       "y": 420,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 27,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "p1",
+       "type": "image",
+       "asset": "assets/parcel-blue.svg",
+       "x": 520,
+       "y": 420,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 64,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "p2",
+       "type": "image",
+       "asset": "assets/parcel-blue.svg",
+       "x": 520,
+       "y": 420,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 74,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "fp",
+       "type": "rect",
+       "x": 760,
+       "y": 740,
+       "w": 400,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "分片键",
+       "fontSize": 64
+      },
+      {
+       "id": "sg",
+       "type": "line",
+       "x": 480,
+       "y": 480,
+       "w": 840,
+       "h": -60,
+       "color": "#3B82F6",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         480,
+         480
+        ],
+        "toXY": [
+         1320,
+         420
+        ],
+        "dotStart": 53,
+        "dotFrames": 40,
+        "dotStopAt": null,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sgd",
+       "type": "rect",
+       "x": 468,
+       "y": 468,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "pb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 20,
+         "value": 0
+        },
+        {
+         "frame": 32,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "p0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 0
+        },
+        {
+         "frame": 32,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 520
+        },
+        {
+         "frame": 77,
+         "value": 1330
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p0",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 53,
+         "value": 420
+        },
+        {
+         "frame": 77,
+         "value": 600
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 63,
+         "value": 0
+        },
+        {
+         "frame": 69,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 63,
+         "value": 520
+        },
+        {
+         "frame": 87,
+         "value": 1480
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 63,
+         "value": 420
+        },
+        {
+         "frame": 87,
+         "value": 600
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 73,
+         "value": 0
+        },
+        {
+         "frame": 79,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 73,
+         "value": 520
+        },
+        {
+         "frame": 97,
+         "value": 1630
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 73,
+         "value": 420
+        },
+        {
+         "frame": 97,
+         "value": 600
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sg",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 0
+        },
+        {
+         "frame": 181,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fp",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 0
+        },
+        {
+         "frame": 181,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 184,
+       "endFrame": 258,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "chapterId": "strategy",
+   "title": "按日子还是打散",
+   "from": 1842,
+   "durationInFrames": 324,
+   "narrationCharsRecount": 42,
+   "shots": [
+    {
+     "id": "strategy-1",
+     "chapterId": "strategy",
+     "from": 1842,
+     "durationInFrames": 324,
+     "narration": "按到货日子分站，叫按范围，今天到的全挤进同一个站。把收件人打散算颜色，叫按哈希，各站忙得差不多。",
+     "subtitles": [
+      {
+       "text": "按到货日子分站，叫按范围",
+       "from": 0,
+       "src": "ch7-1",
+       "voiceFrom": 0,
+       "to": 92
+      },
+      {
+       "text": "今天到的全挤进同一个站",
+       "from": 93,
+       "src": "ch7-1",
+       "voiceFrom": 93,
+       "to": 160
+      },
+      {
+       "text": "把收件人打散算颜色",
+       "from": 161,
+       "src": "ch7-2",
+       "voiceFrom": 161,
+       "to": 228
+      },
+      {
+       "text": "叫按哈希，各站忙得差不多",
+       "from": 229,
+       "src": "ch7-2",
+       "voiceFrom": 229,
+       "to": 323
+      }
+     ],
+     "elements": [
+      {
+       "id": "div",
+       "type": "line",
+       "x": 960,
+       "y": 140,
+       "w": 0,
+       "h": 560,
+       "color": "#6B7280",
+       "reuse": false
+      },
+      {
+       "id": "cal",
+       "type": "image",
+       "asset": "assets/calendar.svg",
+       "x": 340,
+       "y": 120,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "shf",
+       "type": "image",
+       "asset": "assets/shuffle.svg",
+       "x": 1260,
+       "y": 120,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 163,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "l0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 120,
+       "y": 340,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "l1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 320,
+       "y": 340,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "l2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 520,
+       "y": 340,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "l3",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 720,
+       "y": 340,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "r0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 1040,
+       "y": 340,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "r1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 1240,
+       "y": 340,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "r2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 1440,
+       "y": 340,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 9
+      },
+      {
+       "id": "r3",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 1640,
+       "y": 340,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 10
+      },
+      {
+       "id": "lp0",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 440,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 78,
+       "disappearFrame": null,
+       "z": 11
+      },
+      {
+       "id": "lp1",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 440,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 81,
+       "disappearFrame": null,
+       "z": 12
+      },
+      {
+       "id": "lp2",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 440,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 84,
+       "disappearFrame": null,
+       "z": 13
+      },
+      {
+       "id": "lp3",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 440,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 87,
+       "disappearFrame": null,
+       "z": 14
+      },
+      {
+       "id": "lp4",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 440,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 90,
+       "disappearFrame": null,
+       "z": 15
+      },
+      {
+       "id": "lp5",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 440,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 93,
+       "disappearFrame": null,
+       "z": 16
+      },
+      {
+       "id": "rp0",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 1340,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 175,
+       "disappearFrame": null,
+       "z": 17
+      },
+      {
+       "id": "rp1",
+       "type": "image",
+       "asset": "assets/parcel-blue.svg",
+       "x": 1340,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 178,
+       "disappearFrame": null,
+       "z": 18
+      },
+      {
+       "id": "rp2",
+       "type": "image",
+       "asset": "assets/parcel-green.svg",
+       "x": 1340,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 181,
+       "disappearFrame": null,
+       "z": 19
+      },
+      {
+       "id": "rp3",
+       "type": "image",
+       "asset": "assets/parcel-yellow.svg",
+       "x": 1340,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 184,
+       "disappearFrame": null,
+       "z": 20
+      },
+      {
+       "id": "rp4",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 1340,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 187,
+       "disappearFrame": null,
+       "z": 21
+      },
+      {
+       "id": "rp5",
+       "type": "image",
+       "asset": "assets/parcel-blue.svg",
+       "x": 1340,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 190,
+       "disappearFrame": null,
+       "z": 22
+      },
+      {
+       "id": "rp6",
+       "type": "image",
+       "asset": "assets/parcel-green.svg",
+       "x": 1340,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 193,
+       "disappearFrame": null,
+       "z": 23
+      },
+      {
+       "id": "rp7",
+       "type": "image",
+       "asset": "assets/parcel-yellow.svg",
+       "x": 1340,
+       "y": 330,
+       "w": 70,
+       "h": 70,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 196,
+       "disappearFrame": null,
+       "z": 24
+      },
+      {
+       "id": "fr",
+       "type": "rect",
+       "x": 230,
+       "y": 740,
+       "w": 400,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "按范围",
+       "fontSize": 64
+      },
+      {
+       "id": "fh",
+       "type": "rect",
+       "x": 1290,
+       "y": 740,
+       "w": 400,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "按哈希",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "div",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cal",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cal",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "shf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 162,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "shf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 162,
+         "value": 0
+        },
+        {
+         "frame": 170,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "shf",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 162,
+         "value": 0
+        },
+        {
+         "frame": 174,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "r0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.35
+        },
+        {
+         "frame": 162,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.35
+        },
+        {
+         "frame": 162,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.35
+        },
+        {
+         "frame": 162,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.35
+        },
+        {
+         "frame": 162,
+         "value": 0.35
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 162,
+         "value": 0.35
+        },
+        {
+         "frame": 172,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 162,
+         "value": 0.35
+        },
+        {
+         "frame": 172,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 162,
+         "value": 0.35
+        },
+        {
+         "frame": 172,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 162,
+         "value": 0.35
+        },
+        {
+         "frame": 172,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 77,
+         "value": 0
+        },
+        {
+         "frame": 83,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lp0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 77,
+         "value": 440
+        },
+        {
+         "frame": 97,
+         "value": 140
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp0",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 77,
+         "value": 250
+        },
+        {
+         "frame": 97,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 80,
+         "value": 0
+        },
+        {
+         "frame": 86,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lp1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 80,
+         "value": 440
+        },
+        {
+         "frame": 100,
+         "value": 190
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp1",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 80,
+         "value": 250
+        },
+        {
+         "frame": 100,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 83,
+         "value": 0
+        },
+        {
+         "frame": 89,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lp2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 83,
+         "value": 440
+        },
+        {
+         "frame": 103,
+         "value": 240
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 83,
+         "value": 250
+        },
+        {
+         "frame": 103,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 86,
+         "value": 0
+        },
+        {
+         "frame": 92,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lp3",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 86,
+         "value": 440
+        },
+        {
+         "frame": 106,
+         "value": 140
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp3",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 86,
+         "value": 250
+        },
+        {
+         "frame": 106,
+         "value": 600
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 89,
+         "value": 0
+        },
+        {
+         "frame": 95,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lp4",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 89,
+         "value": 440
+        },
+        {
+         "frame": 109,
+         "value": 190
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp4",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 89,
+         "value": 250
+        },
+        {
+         "frame": 109,
+         "value": 600
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp5",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 92,
+         "value": 0
+        },
+        {
+         "frame": 98,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lp5",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 92,
+         "value": 440
+        },
+        {
+         "frame": 112,
+         "value": 240
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lp5",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 92,
+         "value": 250
+        },
+        {
+         "frame": 112,
+         "value": 600
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 0
+        },
+        {
+         "frame": 180,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rp0",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 1340
+        },
+        {
+         "frame": 194,
+         "value": 1070
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp0",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 250
+        },
+        {
+         "frame": 194,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 177,
+         "value": 0
+        },
+        {
+         "frame": 183,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rp1",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 177,
+         "value": 1340
+        },
+        {
+         "frame": 197,
+         "value": 1270
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp1",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 177,
+         "value": 250
+        },
+        {
+         "frame": 197,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 180,
+         "value": 0
+        },
+        {
+         "frame": 186,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rp2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 180,
+         "value": 1340
+        },
+        {
+         "frame": 200,
+         "value": 1470
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 180,
+         "value": 250
+        },
+        {
+         "frame": 200,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 183,
+         "value": 0
+        },
+        {
+         "frame": 189,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rp3",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 183,
+         "value": 1340
+        },
+        {
+         "frame": 203,
+         "value": 1670
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp3",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 183,
+         "value": 250
+        },
+        {
+         "frame": 203,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 0
+        },
+        {
+         "frame": 192,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rp4",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 1340
+        },
+        {
+         "frame": 206,
+         "value": 1130
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp4",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 186,
+         "value": 250
+        },
+        {
+         "frame": 206,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp5",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 189,
+         "value": 0
+        },
+        {
+         "frame": 195,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rp5",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 189,
+         "value": 1340
+        },
+        {
+         "frame": 209,
+         "value": 1330
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp5",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 189,
+         "value": 250
+        },
+        {
+         "frame": 209,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp6",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 192,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rp6",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 192,
+         "value": 1340
+        },
+        {
+         "frame": 212,
+         "value": 1530
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp6",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 192,
+         "value": 250
+        },
+        {
+         "frame": 212,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp7",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 195,
+         "value": 0
+        },
+        {
+         "frame": 201,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rp7",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 195,
+         "value": 1340
+        },
+        {
+         "frame": 215,
+         "value": 1730
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rp7",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 195,
+         "value": 250
+        },
+        {
+         "frame": 215,
+         "value": 540
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "fr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fr",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 62,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "fh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 234,
+         "value": 0
+        },
+        {
+         "frame": 246,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fh",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 234,
+         "value": 0
+        },
+        {
+         "frame": 246,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 244,
+       "endFrame": 323,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  },
+  {
+   "id": "s7",
+   "chapterId": "vertical",
+   "title": "另一种拆法",
+   "from": 2166,
+   "durationInFrames": 344,
+   "narrationCharsRecount": 37,
+   "shots": [
+    {
+     "id": "vertical-1",
+     "chapterId": "vertical",
+     "from": 2166,
+     "durationInFrames": 344,
+     "narration": "按包裹拆，每站货架都一样，叫水平拆分。按业务拆，生鲜放这个站，大件放那个站，叫垂直拆分。",
+     "subtitles": [
+      {
+       "text": "按包裹拆，每站货架都一样",
+       "from": 0,
+       "src": "ch8-1",
+       "voiceFrom": 0,
+       "to": 82
+      },
+      {
+       "text": "叫水平拆分",
+       "from": 83,
+       "src": "ch8-1",
+       "voiceFrom": 83,
+       "to": 131
+      },
+      {
+       "text": "按业务拆，生鲜放这个站",
+       "from": 132,
+       "src": "ch8-2",
+       "voiceFrom": 132,
+       "to": 210
+      },
+      {
+       "text": "大件放那个站，叫垂直拆分",
+       "from": 211,
+       "src": "ch8-2",
+       "voiceFrom": 211,
+       "to": 343
+      }
+     ],
+     "elements": [
+      {
+       "id": "div",
+       "type": "line",
+       "x": 960,
+       "y": 140,
+       "w": 0,
+       "h": 560,
+       "color": "#6B7280",
+       "reuse": false
+      },
+      {
+       "id": "l0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 120,
+       "y": 170,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "ls0",
+       "type": "image",
+       "asset": "assets/shelf-red.svg",
+       "x": 150,
+       "y": 440,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 32,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "l1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 400,
+       "y": 170,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 5,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "ls1",
+       "type": "image",
+       "asset": "assets/shelf-blue.svg",
+       "x": 430,
+       "y": 440,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 36,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "l2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 680,
+       "y": 170,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 9,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "ls2",
+       "type": "image",
+       "asset": "assets/shelf-green.svg",
+       "x": 710,
+       "y": 440,
+       "w": 180,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 40,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "rg",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 1060,
+       "y": 170,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 134,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "ry",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 1460,
+       "y": 170,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 138,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "fr1",
+       "type": "image",
+       "asset": "assets/parcel-fresh.svg",
+       "x": 1100,
+       "y": 480,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 162,
+       "disappearFrame": null,
+       "z": 9
+      },
+      {
+       "id": "fr2",
+       "type": "image",
+       "asset": "assets/parcel-fresh.svg",
+       "x": 1230,
+       "y": 480,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 166,
+       "disappearFrame": null,
+       "z": 10
+      },
+      {
+       "id": "bg",
+       "type": "image",
+       "asset": "assets/parcel-big.svg",
+       "x": 1470,
+       "y": 470,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 205,
+       "disappearFrame": null,
+       "z": 11
+      },
+      {
+       "id": "sp",
+       "type": "rect",
+       "x": 210,
+       "y": 740,
+       "w": 500,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "水平拆分",
+       "fontSize": 64
+      },
+      {
+       "id": "cz",
+       "type": "rect",
+       "x": 1210,
+       "y": 740,
+       "w": 500,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "垂直拆分",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "l0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "l1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 4,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "l2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 8,
+         "value": 0
+        },
+        {
+         "frame": 16,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ls0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 31,
+         "value": 0
+        },
+        {
+         "frame": 39,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ls1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 35,
+         "value": 0
+        },
+        {
+         "frame": 43,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ls2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 39,
+         "value": 0
+        },
+        {
+         "frame": 47,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 133,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "ry",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 133,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 133,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ry",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 137,
+         "value": 0
+        },
+        {
+         "frame": 145,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fr1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 161,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "fr2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 161,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "fr1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 161,
+         "value": 0
+        },
+        {
+         "frame": 167,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fr1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 161,
+         "value": 0
+        },
+        {
+         "frame": 173,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "fr2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 165,
+         "value": 0
+        },
+        {
+         "frame": 171,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 204,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 204,
+         "value": 0
+        },
+        {
+         "frame": 210,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 204,
+         "value": 0
+        },
+        {
+         "frame": 216,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 93,
+         "value": 0
+        },
+        {
+         "frame": 105,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sp",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 93,
+         "value": 0
+        },
+        {
+         "frame": 105,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cz",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 254,
+         "value": 0
+        },
+        {
+         "frame": 266,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cz",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 254,
+         "value": 0
+        },
+        {
+         "frame": 266,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 266,
+       "endFrame": 343,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  },
+  {
+   "id": "s8",
+   "chapterId": "xquery",
+   "title": "跑遍每个站",
+   "from": 2510,
+   "durationInFrames": 298,
+   "narrationCharsRecount": 33,
+   "shots": [
+    {
+     "id": "xquery-1",
+     "chapterId": "xquery",
+     "from": 2510,
+     "durationInFrames": 70,
+     "narration": "拆开之后，麻烦也来了。",
+     "subtitles": [
+      {
+       "text": "拆开之后，麻烦也来了",
+       "from": 0,
+       "src": "ch9-1",
+       "voiceFrom": 0,
+       "to": 69
+      }
+     ],
+     "elements": [
+      {
+       "id": "st0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 160,
+       "y": 200,
+       "w": 330,
+       "h": 330,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "st1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 560,
+       "y": 200,
+       "w": 330,
+       "h": 330,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 5,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "st2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 960,
+       "y": 200,
+       "w": 330,
+       "h": 330,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 9,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "st3",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 1360,
+       "y": 200,
+       "w": 330,
+       "h": 330,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 13,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "clk",
+       "type": "image",
+       "asset": "assets/clock.svg",
+       "x": 860,
+       "y": 560,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 28,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "st0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 4,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 8,
+         "value": 0
+        },
+        {
+         "frame": 16,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "st3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 12,
+         "value": 0
+        },
+        {
+         "frame": 20,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "clk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 27,
+         "value": 0
+        },
+        {
+         "frame": 35,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "clk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 27,
+         "value": 0
+        },
+        {
+         "frame": 39,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "xquery-2",
+     "chapterId": "xquery",
+     "from": 2580,
+     "durationInFrames": 228,
+     "narration": "想找今天最重的包裹，得跑遍每个站再汇总，这叫跨片查询。",
+     "subtitles": [
+      {
+       "text": "想找今天最重的包裹",
+       "from": 0,
+       "src": "ch9-2",
+       "voiceFrom": 0,
+       "to": 61
+      },
+      {
+       "text": "得跑遍每个站再汇总",
+       "from": 62,
+       "src": "ch9-2",
+       "voiceFrom": 62,
+       "to": 121
+      },
+      {
+       "text": "这叫跨片查询",
+       "from": 122,
+       "src": "ch9-2",
+       "voiceFrom": 122,
+       "to": 227
+      }
+     ],
+     "elements": [
+      {
+       "id": "st0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 200,
+       "y": 150,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "st1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 600,
+       "y": 150,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "st2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 1000,
+       "y": 150,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "st3",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 1400,
+       "y": 150,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "sc",
+       "type": "image",
+       "asset": "assets/scale.svg",
+       "x": 120,
+       "y": 450,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 30,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "rn",
+       "type": "image",
+       "asset": "assets/runner.svg",
+       "x": 380,
+       "y": 430,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 73,
+       "disappearFrame": 119,
+       "z": 5
+      },
+      {
+       "id": "cb",
+       "type": "image",
+       "asset": "assets/clipboard.svg",
+       "x": 1500,
+       "y": 430,
+       "w": 230,
+       "h": 230,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 110,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "mk0",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 290,
+       "y": 420,
+       "w": 80,
+       "h": 80,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 82,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "mk1",
+       "type": "image",
+       "asset": "assets/parcel-blue.svg",
+       "x": 690,
+       "y": 420,
+       "w": 80,
+       "h": 80,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 91,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "mk2",
+       "type": "image",
+       "asset": "assets/parcel-green.svg",
+       "x": 1090,
+       "y": 420,
+       "w": 80,
+       "h": 80,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 100,
+       "disappearFrame": null,
+       "z": 9
+      },
+      {
+       "id": "mk3",
+       "type": "image",
+       "asset": "assets/parcel-yellow.svg",
+       "x": 1490,
+       "y": 420,
+       "w": 80,
+       "h": 80,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 109,
+       "disappearFrame": null,
+       "z": 10
+      },
+      {
+       "id": "kc",
+       "type": "rect",
+       "x": 710,
+       "y": 740,
+       "w": 500,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "跨片查询",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "sc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 29,
+         "value": 0
+        },
+        {
+         "frame": 37,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sc",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 29,
+         "value": 0
+        },
+        {
+         "frame": 41,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "rn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 72,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 72,
+         "value": 0
+        },
+        {
+         "frame": 78,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rn",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 72,
+         "value": 380
+        },
+        {
+         "frame": 81,
+         "value": 220
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "mk0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 81,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "mk0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 81,
+         "value": 0
+        },
+        {
+         "frame": 85,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rn",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 81,
+         "value": 220
+        },
+        {
+         "frame": 90,
+         "value": 620
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "mk1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 90,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "mk1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 90,
+         "value": 0
+        },
+        {
+         "frame": 94,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rn",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 90,
+         "value": 620
+        },
+        {
+         "frame": 99,
+         "value": 1020
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "mk2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 99,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "mk2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 99,
+         "value": 0
+        },
+        {
+         "frame": 103,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rn",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 99,
+         "value": 1020
+        },
+        {
+         "frame": 108,
+         "value": 1420
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "mk3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 108,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "mk3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 108,
+         "value": 0
+        },
+        {
+         "frame": 112,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 113,
+         "value": 1
+        },
+        {
+         "frame": 119,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 109,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 109,
+         "value": 0
+        },
+        {
+         "frame": 117,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 109,
+         "value": 0
+        },
+        {
+         "frame": 121,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "kc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 138,
+         "value": 0
+        },
+        {
+         "frame": 150,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "kc",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 138,
+         "value": 0
+        },
+        {
+         "frame": 150,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 157,
+       "endFrame": 227,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  },
+  {
+   "id": "s9",
+   "chapterId": "xtx",
+   "title": "转件记账",
+   "from": 2808,
+   "durationInFrames": 468,
+   "narrationCharsRecount": 56,
+   "shots": [
+    {
+     "id": "xtx-1",
+     "chapterId": "xtx",
+     "from": 2808,
+     "durationInFrames": 142,
+     "narration": "红站把包裹转给蓝站，这头记转出，那头记转入。",
+     "subtitles": [
+      {
+       "text": "红站把包裹转给蓝站",
+       "from": 0,
+       "src": "ch10-1",
+       "voiceFrom": 0,
+       "to": 73
+      },
+      {
+       "text": "这头记转出，那头记转入",
+       "from": 74,
+       "src": "ch10-1",
+       "voiceFrom": 74,
+       "to": 141
+      }
+     ],
+     "elements": [
+      {
+       "id": "rs",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 160,
+       "y": 150,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "bs",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 1360,
+       "y": 150,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "rl",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 210,
+       "y": 500,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "bl",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 1410,
+       "y": 500,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "rk",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 210,
+       "y": 500,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 64,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "bk",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 1410,
+       "y": 500,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 99,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "sg",
+       "type": "line",
+       "x": 570,
+       "y": 380,
+       "w": 790,
+       "h": 0,
+       "color": "#F87171",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         570,
+         380
+        ],
+        "toXY": [
+         1360,
+         380
+        ],
+        "dotStart": 35,
+        "dotFrames": 30,
+        "dotStopAt": null,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sgd",
+       "type": "rect",
+       "x": 558,
+       "y": 368,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg"
+      },
+      {
+       "id": "pp",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 600,
+       "y": 300,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "sg",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pp",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 35,
+         "value": 600
+        },
+        {
+         "frame": 65,
+         "value": 1240
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pp",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 35,
+         "value": 300
+        },
+        {
+         "frame": 65,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 63,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 63,
+         "value": 0
+        },
+        {
+         "frame": 69,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 63,
+         "value": 0
+        },
+        {
+         "frame": 75,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "bk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 98,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 104,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 98,
+         "value": 0
+        },
+        {
+         "frame": 110,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "xtx-2",
+     "chapterId": "xtx",
+     "from": 2950,
+     "durationInFrames": 326,
+     "narration": "要么红站蓝站都记上，要么都不记；中途断了，账就对不上，所以又慢又麻烦。这叫分布式事务。",
+     "subtitles": [
+      {
+       "text": "要么红站蓝站都记上",
+       "from": 0,
+       "src": "ch10-2",
+       "voiceFrom": 0,
+       "to": 61
+      },
+      {
+       "text": "要么都不记；中途断了",
+       "from": 62,
+       "src": "ch10-2",
+       "voiceFrom": 62,
+       "to": 122
+      },
+      {
+       "text": "账就对不上，所以又慢又麻烦",
+       "from": 123,
+       "src": "ch10-2",
+       "voiceFrom": 123,
+       "to": 215
+      },
+      {
+       "text": "这叫分布式事务",
+       "from": 216,
+       "src": "ch10-3",
+       "voiceFrom": 216,
+       "to": 325
+      }
+     ],
+     "elements": [
+      {
+       "id": "rs",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 160,
+       "y": 150,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "bs",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 1360,
+       "y": 150,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "rl",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 210,
+       "y": 500,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "bl",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 1410,
+       "y": 500,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "rk",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 210,
+       "y": 500,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 43,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "bk",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 1410,
+       "y": 500,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 43,
+       "disappearFrame": 82,
+       "z": 5
+      },
+      {
+       "id": "rx",
+       "type": "image",
+       "asset": "assets/ledger-bad.svg",
+       "x": 1410,
+       "y": 500,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 126,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "sg",
+       "type": "line",
+       "x": 570,
+       "y": 380,
+       "w": 790,
+       "h": 0,
+       "color": "#F87171",
+       "reuse": false,
+       "dashed": true,
+       "knollDraw": "signalLine",
+       "signal": {
+        "fromXY": [
+         570,
+         380
+        ],
+        "toXY": [
+         1360,
+         380
+        ],
+        "dotStart": 86,
+        "dotFrames": 40,
+        "dotStopAt": 0.5,
+        "dotKeep": false,
+        "note": "Knoll：画信号线，圆点从 from 沿线移到 to；dotStopAt≠null 时圆点停在该比例处并熄灭"
+       }
+      },
+      {
+       "id": "sgd",
+       "type": "rect",
+       "x": 558,
+       "y": 368,
+       "w": 24,
+       "h": 24,
+       "color": "#F59E0B",
+       "reuse": false,
+       "radius": 12,
+       "knollDraw": "signalDot",
+       "signalOf": "sg"
+      },
+      {
+       "id": "pp",
+       "type": "image",
+       "asset": "assets/parcel-red.svg",
+       "x": 600,
+       "y": 300,
+       "w": 110,
+       "h": 110,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 9
+      },
+      {
+       "id": "cr",
+       "type": "image",
+       "asset": "assets/crash.svg",
+       "x": 900,
+       "y": 320,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 98,
+       "disappearFrame": null,
+       "z": 10
+      },
+      {
+       "id": "clk",
+       "type": "image",
+       "asset": "assets/clock.svg",
+       "x": 880,
+       "y": 560,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 174,
+       "disappearFrame": null,
+       "z": 11
+      },
+      {
+       "id": "fs",
+       "type": "rect",
+       "x": 710,
+       "y": 740,
+       "w": 500,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "分布式事务",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "sg",
+       "property": "drawProgress",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 1,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 42,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 42,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 42,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 42,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 1
+        },
+        {
+         "frame": 82,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "bk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 1
+        },
+        {
+         "frame": 82,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pp",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 86,
+         "value": 600
+        },
+        {
+         "frame": 97,
+         "value": 860
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pp",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 86,
+         "value": 300
+        },
+        {
+         "frame": 97,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 97,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 97,
+         "value": 0
+        },
+        {
+         "frame": 101,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cr",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 97,
+         "value": 0
+        },
+        {
+         "frame": 109,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "rx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 125,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 125,
+         "value": 0
+        },
+        {
+         "frame": 131,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rx",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 125,
+         "value": 0
+        },
+        {
+         "frame": 137,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "clk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 173,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "clk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 173,
+         "value": 0
+        },
+        {
+         "frame": 179,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "clk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 173,
+         "value": 0
+        },
+        {
+         "frame": 185,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "fs",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 236,
+         "value": 0
+        },
+        {
+         "frame": 248,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fs",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 236,
+         "value": 0
+        },
+        {
+         "frame": 248,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "rk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 125,
+         "value": 0
+        },
+        {
+         "frame": 131,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 244,
+       "endFrame": 325,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  },
+  {
+   "id": "s10",
+   "chapterId": "id",
+   "title": "撞号",
+   "from": 3276,
+   "durationInFrames": 126,
+   "narrationCharsRecount": 13,
+   "shots": [
+    {
+     "id": "id-1",
+     "chapterId": "id",
+     "from": 3276,
+     "durationInFrames": 126,
+     "narration": "而且各站自己编号，很容易撞号。",
+     "subtitles": [
+      {
+       "text": "而且各站自己编号",
+       "from": 0,
+       "src": "ch11-1",
+       "voiceFrom": 0,
+       "to": 76
+      },
+      {
+       "text": "很容易撞号",
+       "from": 77,
+       "src": "ch11-1",
+       "voiceFrom": 77,
+       "to": 125
+      }
+     ],
+     "elements": [
+      {
+       "id": "rs",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 160,
+       "y": 180,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "bs",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 1340,
+       "y": 180,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "ta",
+       "type": "image",
+       "asset": "assets/idtag.svg",
+       "x": 560,
+       "y": 280,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 34,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "tb",
+       "type": "image",
+       "asset": "assets/idtag.svg",
+       "x": 1120,
+       "y": 280,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 40,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "spk",
+       "type": "image",
+       "asset": "assets/spark.svg",
+       "x": 820,
+       "y": 240,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 100,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ta",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 33,
+         "value": 0
+        },
+        {
+         "frame": 41,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ta",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 33,
+         "value": 0
+        },
+        {
+         "frame": 45,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "tb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 39,
+         "value": 0
+        },
+        {
+         "frame": 47,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 39,
+         "value": 0
+        },
+        {
+         "frame": 51,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ta",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 91,
+         "value": 560
+        },
+        {
+         "frame": 101,
+         "value": 700
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "ta",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 91,
+         "value": 280
+        },
+        {
+         "frame": 101,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "tb",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 91,
+         "value": 1120
+        },
+        {
+         "frame": 101,
+         "value": 980
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "tb",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 91,
+         "value": 280
+        },
+        {
+         "frame": 101,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "spk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 99,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "spk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 99,
+         "value": 0
+        },
+        {
+         "frame": 103,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "spk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 99,
+         "value": 0
+        },
+        {
+         "frame": 111,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s11",
+   "chapterId": "reshard",
+   "title": "先别拆",
+   "from": 3402,
+   "durationInFrames": 187,
+   "narrationCharsRecount": 24,
+   "shots": [
+    {
+     "id": "reshard-1",
+     "chapterId": "reshard",
+     "from": 3402,
+     "durationInFrames": 89,
+     "narration": "再开新站，不少包裹还得搬家。",
+     "subtitles": [
+      {
+       "text": "再开新站，不少包裹还得搬家",
+       "from": 0,
+       "src": "ch12-1",
+       "voiceFrom": 0,
+       "to": 88
+      }
+     ],
+     "elements": [
+      {
+       "id": "st0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 160,
+       "y": 180,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "st1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 560,
+       "y": 180,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "st2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 960,
+       "y": 180,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "ny",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 1400,
+       "y": 180,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 13,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "cart",
+       "type": "image",
+       "asset": "assets/cart.svg",
+       "x": 300,
+       "y": 500,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 23,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ny",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "ny",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 12,
+         "value": 0
+        },
+        {
+         "frame": 20,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ny",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 12,
+         "value": 0
+        },
+        {
+         "frame": 24,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cart",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 22,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cart",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 22,
+         "value": 0
+        },
+        {
+         "frame": 28,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cart",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 26,
+         "value": 300
+        },
+        {
+         "frame": 70,
+         "value": 1440
+        }
+       ],
+       "easing": "easeInOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "reshard-2",
+     "chapterId": "reshard",
+     "from": 3491,
+     "durationInFrames": 98,
+     "narration": "所以单台机器够用，就先别拆。",
+     "subtitles": [
+      {
+       "text": "所以单台机器够用",
+       "from": 0,
+       "src": "ch12-2",
+       "voiceFrom": 0,
+       "to": 54
+      },
+      {
+       "text": "就先别拆",
+       "from": 55,
+       "src": "ch12-2",
+       "voiceFrom": 55,
+       "to": 97
+      }
+     ],
+     "elements": [
+      {
+       "id": "sv",
+       "type": "image",
+       "asset": "assets/server.svg",
+       "x": 520,
+       "y": 180,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "stn",
+       "type": "image",
+       "asset": "assets/station.svg",
+       "x": 1000,
+       "y": 180,
+       "w": 440,
+       "h": 440,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 55,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "ck",
+       "type": "image",
+       "asset": "assets/clerk.svg",
+       "x": 1100,
+       "y": 520,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 61,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "sv",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "stn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 54,
+         "value": 0
+        },
+        {
+         "frame": 62,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ck",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 60,
+         "value": 0
+        },
+        {
+         "frame": 68,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 0,
+       "endFrame": 97,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  },
+  {
+   "id": "s12",
+   "chapterId": "recap",
+   "title": "回顾",
+   "from": 3589,
+   "durationInFrames": 326,
+   "narrationCharsRecount": 34,
+   "shots": [
+    {
+     "id": "recap-1",
+     "chapterId": "recap",
+     "from": 3589,
+     "durationInFrames": 326,
+     "narration": "同一个库里拆表，叫分表；拆到不同机器，叫分库。拆之前选好分片键，拆之后都有代价。",
+     "subtitles": [
+      {
+       "text": "同一个库里拆表，叫分表",
+       "from": 0,
+       "src": "ch13-1",
+       "voiceFrom": 0,
+       "to": 82
+      },
+      {
+       "text": "拆到不同机器，叫分库",
+       "from": 83,
+       "src": "ch13-1",
+       "voiceFrom": 83,
+       "to": 150
+      },
+      {
+       "text": "拆之前选好分片键",
+       "from": 151,
+       "src": "ch13-2",
+       "voiceFrom": 151,
+       "to": 216
+      },
+      {
+       "text": "拆之后都有代价",
+       "from": 217,
+       "src": "ch13-2",
+       "voiceFrom": 217,
+       "to": 325
+      }
+     ],
+     "elements": [
+      {
+       "id": "db",
+       "type": "rect",
+       "x": 120,
+       "y": 150,
+       "w": 540,
+       "h": 500,
+       "color": "#00000000",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 30
+      },
+      {
+       "id": "tb0",
+       "type": "image",
+       "asset": "assets/table-sheet.svg",
+       "x": 150,
+       "y": 190,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "tb1",
+       "type": "image",
+       "asset": "assets/table-sheet.svg",
+       "x": 400,
+       "y": 190,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "tb2",
+       "type": "image",
+       "asset": "assets/table-sheet.svg",
+       "x": 150,
+       "y": 410,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "tb3",
+       "type": "image",
+       "asset": "assets/table-sheet.svg",
+       "x": 400,
+       "y": 410,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "st0",
+       "type": "image",
+       "asset": "assets/station-red.svg",
+       "x": 740,
+       "y": 160,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "st1",
+       "type": "image",
+       "asset": "assets/station-blue.svg",
+       "x": 970,
+       "y": 160,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "st2",
+       "type": "image",
+       "asset": "assets/station-green.svg",
+       "x": 740,
+       "y": 410,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "st3",
+       "type": "image",
+       "asset": "assets/station-yellow.svg",
+       "x": 970,
+       "y": 410,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "pb",
+       "type": "image",
+       "asset": "assets/person-blue.svg",
+       "x": 1260,
+       "y": 180,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 9
+      },
+      {
+       "id": "pk",
+       "type": "image",
+       "asset": "assets/parcel-blue.svg",
+       "x": 1500,
+       "y": 240,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 10
+      },
+      {
+       "id": "cr",
+       "type": "image",
+       "asset": "assets/crash.svg",
+       "x": 1240,
+       "y": 470,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 214,
+       "disappearFrame": null,
+       "z": 11
+      },
+      {
+       "id": "clk",
+       "type": "image",
+       "asset": "assets/clock.svg",
+       "x": 1560,
+       "y": 470,
+       "w": 130,
+       "h": 130,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 218,
+       "disappearFrame": null,
+       "z": 12
+      },
+      {
+       "id": "fb",
+       "type": "rect",
+       "x": 210,
+       "y": 740,
+       "w": 360,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "分表",
+       "fontSize": 64
+      },
+      {
+       "id": "fk",
+       "type": "rect",
+       "x": 780,
+       "y": 740,
+       "w": 360,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "分库",
+       "fontSize": 64
+      },
+      {
+       "id": "fp",
+       "type": "rect",
+       "x": 1300,
+       "y": 740,
+       "w": 420,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "分片键",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "fb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 57,
+         "value": 0
+        },
+        {
+         "frame": 69,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 57,
+         "value": 0
+        },
+        {
+         "frame": 69,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "fk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 129,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 129,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "fp",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 191,
+         "value": 0
+        },
+        {
+         "frame": 203,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fp",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 191,
+         "value": 0
+        },
+        {
+         "frame": 203,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "st0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.3
+        },
+        {
+         "frame": 76,
+         "value": 0.3
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "st1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.3
+        },
+        {
+         "frame": 76,
+         "value": 0.3
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "st2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.3
+        },
+        {
+         "frame": 76,
+         "value": 0.3
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "st3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.3
+        },
+        {
+         "frame": 76,
+         "value": 0.3
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "st0",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 0.3
+        },
+        {
+         "frame": 86,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "st1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 0.3
+        },
+        {
+         "frame": 86,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "st2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 0.3
+        },
+        {
+         "frame": 86,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "st3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 76,
+         "value": 0.3
+        },
+        {
+         "frame": 86,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.3
+        },
+        {
+         "frame": 152,
+         "value": 0.3
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0.3
+        },
+        {
+         "frame": 152,
+         "value": 0.3
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 152,
+         "value": 0.3
+        },
+        {
+         "frame": 162,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 152,
+         "value": 0.3
+        },
+        {
+         "frame": 162,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 213,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "clk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 213,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cr",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 213,
+         "value": 0
+        },
+        {
+         "frame": 219,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cr",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 213,
+         "value": 0
+        },
+        {
+         "frame": 225,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "clk",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 217,
+         "value": 0
+        },
+        {
+         "frame": 223,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "clk",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 217,
+         "value": 0
+        },
+        {
+         "frame": 229,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 0,
+       "endFrame": 325,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  }
+ ]
+}
