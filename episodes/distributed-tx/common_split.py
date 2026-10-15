@@ -1,7 +1,7 @@
-# EP.21 分布式事务（脚本 v0.26.0）镜头拆分：按句数，句子不拆开。章节 id = script.md「## n. id｜」
+# EP.21 分布式事务（脚本 v0.26.0 返工版：四种实现）镜头拆分：按句数，句子不拆开。章节 id = script.md「## n. id｜」
 import re,os
-ids=["hook","signal","local","prepare","commit","stuck","message","eventual","recap"]
-SPLIT={"hook":[1,1],"signal":[2,1],"local":[1,1],"prepare":[1,2],"commit":[1,1],"stuck":[1],"message":[1,1,2],"eventual":[1],"recap":[2]}
+ids=["hook","signal","local","prepare","commit","stuck","tcc","tcccost","saga","sagacost","message","eventual","recap"]
+SPLIT={"hook":[1,1],"signal":[2,1],"local":[1,1],"prepare":[1,2],"commit":[1,1],"stuck":[2],"tcc":[1,1,3,1],"tcccost":[1],"saga":[2,1,2],"sagacost":[2],"message":[1,1,3],"eventual":[1],"recap":[2]}
 SCRIPT=os.path.join(os.path.dirname(os.path.abspath(__file__)),"script.md")
 TTS={}
 def tts(s):

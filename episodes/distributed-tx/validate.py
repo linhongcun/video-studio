@@ -5,11 +5,11 @@ from common_split import ids,SPLIT,SCRIPT,tts,narration
 H=os.path.dirname(os.path.abspath(__file__));_p=os.path.join(H,'storyboard.json')
 if not os.path.isfile(_p): sys.exit('预备阶段：还没有 storyboard.json')
 d=json.load(open(_p));err=[];M=80
-TERMS=['两阶段提交','可靠消息','最终一致','分布式事务']
-BANNED=['下期','上期','我是','一号站','二号站','拆库','全村','窗口','TCC','Saga','XA']
+TERMS=['两阶段提交','预留确认取消','补偿事务','可靠消息','最终一致','分布式事务']
+BANNED=['下期','上期','我是','一号站','二号站','拆库','全村','窗口','XA','二阶段']
 _EN=re.compile(r'[A-Za-z0-9０-９]')
 class _L:   # 画面：不许字母数字；字幕照念旁白，放行「MySQL」「Redis」「ID」（字母专名，版本用汉字「八点四」）
-    def search(self,t): return _EN.search(t.replace('MySQL','').replace('Redis','').replace('ID',''))
+    def search(self,t): return _EN.search(t.replace('MySQL','').replace('Redis','').replace('ID','').replace('TCC','').replace('Saga',''))
 LVL=_L()
 N=lambda t:re.sub(r'[\s，。：；？！、,.:;?!]','',t)
 def lines_px(e):   # 真实 Main.tsx：rect 标签首行 fs（默认 32），其余行 round(fs×(fs>40?0.5:0.85))；text 用 fontSize
@@ -18,7 +18,7 @@ def lines_px(e):   # 真实 Main.tsx：rect 标签首行 fs（默认 32），其
         return [(l,fs if i==0 or len(L)==1 else round(fs*(0.5 if fs>40 else 0.85))) for i,l in enumerate(L) if l.strip()]
     if e['type']=='text': return [(e['text'],e['fontSize'])]
     return []
-narr=narration(); assert len(narr)==9
+narr=narration(); assert len(narr)==13
 g=0;nsh=0;subsAll=[]
 for sc in d['scenes']:
     assert sc['from']==g,('scene from',sc['id']);f=g
@@ -40,6 +40,7 @@ for sc in d['scenes']:
                 if px<28: err.append(('font<28',sh['id'],e['id'],l,px))
                 if any(b in l for b in BANNED) or (LVL.search(l) and l not in TERMS): err.append(('banned',sh['id'],e['id'],l))
                 if re.search(r'[0-9０-９]',l): err.append(('digit on screen',sh['id'],e['id'],l))
+                if re.search(r'[A-Za-z]',l): err.append(('latin on screen',sh['id'],e['id'],l))
             if e['type']=='image' and not os.path.isfile(os.path.join(H,e['asset'])): err.append(('asset',e['asset']))
             if e['type'] in('icon',): err.append(('icon type not used this ep',e['id']))
         for a in sh['animations']:

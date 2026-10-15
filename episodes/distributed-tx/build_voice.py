@@ -1,10 +1,10 @@
-# EP.21：narration.wav（sha 8d663d45…）按分镜停顿插静音 → remotion/public/audio/voice.wav；插点 = 下一句开口前 0.1 s
+# EP.21：narration.wav（sha 0a9baec4…）按分镜停顿插静音 → remotion/public/audio/voice.wav；插点 = 下一句开口前 0.1 s
 import json,subprocess,numpy as np,wave,hashlib
 SR=48000;NAR='/workspace/share/ep21/narration.wav'
-assert hashlib.sha256(open(NAR,'rb').read()).hexdigest().startswith('8d663d45')
+assert hashlib.sha256(open(NAR,'rb').read()).hexdigest().startswith('0a9baec4')
 x=np.frombuffer(subprocess.run(['ffmpeg','-v','error','-i',NAR,'-f','s16le','-ac','1','-ar',str(SR),'-'],capture_output=True,check=True).stdout,np.int16)
 tl=json.load(open('/workspace/share/ep21/timeline.json'))['sentences']
-INS=[(66.63,36,'commit-2'),(94.37,50,'message-3'),(101.47,49,'eventual-1')]
+INS=[(63.10,41,'commit-2'),(107.83,52,'tcc-4'),(144.53,61,'saga-3'),(178.00,50,'message-3'),(186.27,41,'eventual-1')]
 pts=[]
 for t,n,sh in INS:
   s=min(tl,key=lambda q:abs(q['start']-t));assert abs(s['start']-t)<0.02,(t,s['id'])
@@ -14,7 +14,7 @@ for t,n,sh in INS:
   pts.append((p,n,sh,s['id']));print(sh,'insert',n,'f before',s['id'],'at %.3fs (原音)'%(p/SR),'prev end',prev['end'],'peak',pk)
 out=[];pr=0
 for p,n,_,_ in pts:out+=[x[pr:p],np.zeros(n*SR//30,np.int16)];pr=p
-out+=[x[pr:],np.zeros(1*SR//30,np.int16)]  # recap-1 末尾 1 帧
+out+=[x[pr:],np.zeros(2*SR//30,np.int16)]  # recap-1 末尾 2 帧
 y=np.concatenate(out)
 w=wave.open('remotion/public/audio/voice.wav','wb');w.setnchannels(1);w.setsampwidth(2);w.setframerate(SR);w.writeframes(y.tobytes());w.close()
 print('voice frames',len(y)/SR*30)

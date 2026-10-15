@@ -1,12 +1,12 @@
 # EP.21《两个库，怎么一起成功或一起失败？》分布式事务（脚本 v0.26.0）分镜（Miyazaki）。工具链沿用 EP.20；配音未到时按字数估时长
 # 比喻：驿站 + 拿对讲机的调度员。红站=订单账本，蓝站=货架；铅笔单/待出库格子=准备；绿红牌=能否提交；盖章/擦掉=统一生效/撤回；对讲机没声=干等；条子+跑腿员+签收=可靠消息
-# 术语：两阶段提交 / 可靠消息 / 最终一致 / 分布式事务；只有右上「IT小村」；画面无数字/英文/logo
+# 术语：两阶段提交 / 预留确认取消（TCC）/ 补偿事务（Saga）/ 可靠消息 / 最终一致 / 分布式事务；只有右上「IT小村」；画面无数字/英文/logo
 import json,re,math,sys,os
 sys.path.insert(0,os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','_audit'));import asrcue
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 from common_split import ids,SPLIT as _SP,SCRIPT,tts,subtext,narration
-narr=narration(); assert len(narr)==9
+narr=narration(); assert len(narr)==13
 def cnt(s): return len(re.findall(r'[\u4e00-\u9fffA-Za-z0-9]',s))
 P=dict(bg="#0B1020",panel="#111827",primary="#22D3EE",secondary="#3B82F6",text="#E5E7EB",text2="#9CA3AF",muted="#6B7280",success="#22C55E",accent="#F59E0B",danger="#F87171")
 def R(i,x,y,w,h,c=P['panel'],**k): return dict(id=i,type="rect",x=x,y=y,w=w,h=h,**{"color":c,"reuse":False,**k})
@@ -21,7 +21,7 @@ def out(i,a,n=10): return mv(i,"opacity",a,a+n,1,0)
 def pop(i,a): return mv(i,"scale",a,a+12,0,1,"spring")
 def hl(i,a,c=P['success'],c0=P['secondary']): return mv(i,"strokeColor",a,a+10,c0,c)
 
-titles=["下单没扣","驿站","各管各的","先问准备好","两阶段提交","对讲机断了","可靠消息","最终一致","回顾"]
+titles=["下单没扣","驿站","各管各的","先问准备好","两阶段提交","对讲机断了","贴封条","三套动作","先做后补","补偿的代价","可靠消息","最终一致","回顾"]
 SPLIT={i:_SP[c] for i,c in enumerate(ids)}
 def KEY(si,k): return f"{ids[si]}-{k+1}"
 def sentences(s): return re.findall(r'[^。？]+[。？]',s)
@@ -102,24 +102,60 @@ def shots_for(si,L):
         e=[I("dp","dispatcher",780,100,360),I("df","dispatcher-off",780,100,360),I("np","note-pencil",200,420,300),I("sl","slot-locked",1380,420,340),I("hg","hourglass",820,500,280)]
         a=[F("dp",0,6),mv("df","opacity",0,tn,0,0),F("df",tn,6),out("dp",tn,6)]+show("hg",at(0,"干等"))
         return [(e,a)]
-    if si==6:  # message：①调度员淡去 ②红站同一页账写订单+条子 → 跑腿员拿条子跑到蓝站 → 签收 ③重复条子打叉；术语「可靠消息」
+    if si==6:  # tcc：①锁着的格子淡去 → 业务自己贴封条 ②蓝站货架 + 「已预留」小标签 + 买家被挡 ③对讲机调度员出场喊确认 / 取消 → 成了：撕封条、货出库；没成：撕封条、货留在架上 ④预留/确认/取消色块 + 术语「预留确认取消」（念 TCC 时淡入）
+        if True:
+            e=[I("sb","station-blue",160,160,360),I("sl","slot-locked",700,240,360),I("bs","box-sealed",1240,240,360)]
+            a=[F("sl",0,6),out("sl",at(0,"一直锁着"),10)]+show("bs",at(0,"贴封条"))
+            e2=[I("sb","station-blue",120,160,340),I("sh","shelf",560,160,420),I("bs","box-sealed",680,300,160),tag("yl",560,620,"已预留",P['accent']),
+                I("pb","person-blue",1280,240,280),I("no","nope",1300,240,240)]
+            a2=[F("sh",0,6)]+show("bs",at(0,"封条"))+show("yl",at(0,"已预留"))+show("pb",at(0,"别人买不走"))+show("no",at(0,"别人买不走")+6,6)
+            e3=[I("dp","dispatcher",1440,160,300),I("ok","ledger-ok",120,120,240),I("t1","seal-torn",480,140,220),I("pr","parcel-red",800,140,220),
+                I("bad","ledger-bad",120,500,240),I("t2","seal-torn",480,500,220),I("sh","shelf",820,440,320),tag("ws",1200,560,"照常卖",P['success'])]
+            a3=show("dp",at(0,"调度员"),10)+show("ok",at(1,"订单成了"))+show("t1",at(1,"撕掉封条"))+show("pr",at(1,"真正出库"))+moveto("pr",at(1,"真正出库")+8,at(1,"真正出库")+40,800,140,1120,140)
+            a3+=show("bad",at(2,"订单没成"))+show("t2",at(2,"就取消"))+show("sh",at(2,"货留在架上"))+show("ws",at(2,"照常卖"))
+            e4=[I("bs","box-sealed",240,180,280),I("pr","parcel-red",820,180,280),I("sh","shelf",1360,160,320),
+                tag("s1",240,500,"预留",P['accent']),tag("s2",840,500,"确认",P['success']),tag("s3",1380,500,"取消",P['danger']),term("tc",600,740,720,"预留确认取消")]
+            a4=[F("bs",0,6)]+show("s1",at(0,"预留"))+show("pr",at(0,"确认"))+show("s2",at(0,"确认"))+show("sh",at(0,"取消"))+show("s3",at(0,"取消"))+TERM("tc",at(0,"TCC"))
+            return [(e,a),(e2,a2),(e3,a3),(e4,a4)]
+    if si==7:  # tcccost：锁的时间短（锁格子一闪即灭）；三套动作（三张色单）；同一指令重复送来（重复条子打叉）
+        e=[I("sl","slot-locked",160,200,320),I("ts","three-sheets",720,160,420),I("dup","slip-dup",1340,240,320)]
+        a=show("sl",at(0,"锁的时间短"))+[out("sl",at(0,"干等数据库")+6,10)]+show("ts",at(0,"三套动作"))+show("dup",at(0,"重复送来"))
+        return [(e,a)]
+    if si==8:  # saga：①红站蓝站各自盖章，蓝站真出库（货滑出），红站记订单 ②红站失败 → 蓝站反向：货重新上架 ③不是倒带（倒拨的钟打叉）+ 术语「补偿事务」（念 Saga 时淡入）
+        to=at(1,"出了库")
+        e=[I("sr","station-red",160,140,340),I("sb","station-blue",1420,140,340),I("s1","stamp",1460,500,180),I("s2","stamp",200,500,180),
+           I("sh","shelf",1000,420,300),I("sg","shelf-gap",1000,420,300),I("pr","parcel-red",1110,520,90),I("lg","ledger",440,460,240)]
+        a=show("s1",at(0,"直接盖章"))+show("s2",at(0,"直接盖章")+6)+[F("sh",0,6),mv("sg","opacity",0,to,0,0),F("sg",to,4),out("sh",to,4),mv("pr","opacity",0,to,0,0),F("pr",to,4)]+moveto("pr",to,to+30,1110,520,760,600)+[out("pr",to+24,8)]+show("lg",at(1,"记订单"))
+        tf=at(0,"失败了");tr=at(0,"重新上架")
+        e2=[I("sr","station-red",160,140,340),I("bad","ledger-bad",200,500,260),I("sb","station-blue",1420,140,340),I("sg","shelf-gap",900,300,420),I("bx","box",820,640,110)]
+        a2=[F("sg",0,6)]+show("bad",tf)+show("bx",at(0,"反向"))+moveto("bx",tr,tr+30,820,640,1062,436)
+        e3=[I("rw","rewind-no",240,200,360),I("pr","parcel-red",820,240,240),I("sh","shelf",1300,180,360),term("bc",660,740,600,"补偿事务")]
+        a3=show("rw",at(0,"时光倒流"))+show("pr",at(0,"出过库"))+show("sh",at(0,"补了回来"))+TERM("bc",at(1,"Saga"))
+        return [(e,a),(e2,a2),(e3,a3)]
+    if si==9:  # sagacost：不锁也不等（锁格子打叉）；别人看见货架空了（眼睛 + 空格货架）；补回来也可能失败 → 盯着重试（红叉账本 + 重试箭头）
+        e=[I("sl","slot-locked",140,160,260),I("n0","nope",140,160,260),I("ey","eye",560,200,260),I("sg","shelf-gap",880,140,360),I("bad","ledger-bad",1340,140,220),I("rt","retry",1340,460,240)]
+        a=show("sl",0)+show("n0",at(0,"不锁货")+6,6)+show("ey",at(0,"看见"))+show("sg",at(0,"货架空了"))+show("bad",at(1,"也可能失败"))+show("rt",at(1,"重试"))
+        return [(e,a)]
+    if si==10:  # message：①调度员淡去 ②红站同一页账写订单+条子 → 跑腿员拿条子跑到蓝站 → 签收 ③重复条子打叉；术语「可靠消息」
         e=[I("sr","station-red",160,140,360),I("sb","station-blue",1400,140,360),I("dp","dispatcher",780,200,360)]
-        a=[mv("dp","opacity",0,at(0,"不找"),1,1),mv("dp","opacity",at(0,"不找"),at(0,"不找")+12,1,0.15)]
+        a=[mv("dp","opacity",0,at(0,"都不要"),1,1),mv("dp","opacity",at(0,"都不要"),at(0,"都不要")+12,1,0.15)]
         tr=at(0,"跑腿员")
         e2=[I("sr","station-red",120,120,360),I("sb","station-blue",1440,140,360),I("lg","ledger",160,500,280),I("sp","slip",460,520,220),
             I("rn","runner",500,300,260),I("sg","signed",1460,520,260)]
         a2=show("lg",at(0,"同一页账"))+show("sp",at(0,"条子"))+show("rn",tr)+moveto("rn",tr+10,at(0,"签收"),500,300,1160,300)+show("sg",at(0,"签收"))+[out("sp",tr+10,8)]
         e3=[I("sb","station-blue",200,140,380),I("bc","barcode-red",660,200,300),I("sg","signed",660,500,280),I("dup","slip-dup",1120,360,320),term("kk",660,740,600,"可靠消息")]
-        a3=show("bc",at(0,"认单号"))+[F("sg",0,8)]+show("dup",at(0,"重复送来"))+TERM("kk",at(1,"可靠消息"))
+        e3+=[I("ne","note-erased",1460,140,200),I("n1","nope",1460,140,200),I("rw","retry",1460,420,200),I("n2","nope",1460,420,200)]
+        a3=show("bc",at(0,"认单号"))+[F("sg",0,8)]+show("dup",at(0,"重复送来"))+show("ne",at(1,"不撤回"))+show("n1",at(1,"不撤回")+6)+show("rw",at(1,"不补偿"))+show("n2",at(1,"不补偿")+6)+[out(x,at(2,"可靠消息")-14,10) for x in ("ne","n1","rw","n2")]+TERM("kk",at(2,"可靠消息"))
         return [(e,a),(e2,a2),(e3,a3)]
-    if si==7:  # eventual：订单记上（绿勾账本）+ 货架还满（黄灯）→ 「最后一定对上」时中间那箱货被搬走（滑出 + 淡出，留下空格）→ 绿勾；术语「最终一致」
+    if si==11:  # eventual：订单记上（绿勾账本）+ 货架还满（黄灯）→ 「最后一定对上」时中间那箱货被搬走（滑出 + 淡出，留下空格）→ 绿勾；术语「最终一致」
         tf=at(0,"最后一定对上")
         e=[I("lg","ledger-ok",200,200,340),I("sh","shelf-gap",1300,160,400),I("bx","box",1460,326,80),I("lp","lamp-yellow",820,180,240),I("ok","ledger-ok",820,440,240),term("zz",660,740,600,"最终一致")]
         a=[F("lg",0,8),F("sh",0,8),F("bx",0,8)]+show("lp",at(0,"对不上"))+[out("lp",tf,8)]+moveto("bx",tf,tf+20,1460,326,1560,560)+[mv("bx","opacity",tf+8,tf+22,1,0)]+show("ok",tf+14)+TERM("zz",at(0,"最终一致"))
         return [(e,a)]
-    if si==8:  # recap：天平：左 调度员+沙漏（稳但慢），右 跑腿员（快）+ 黄灯（短暂对不上）；术语「分布式事务」
+    if si==12:  # recap：天平：左 调度员+沙漏（稳但慢），右 跑腿员（快）+ 黄灯（短暂对不上）；术语「分布式事务」
         e=[I("bl","balance",760,120,400),I("dp","dispatcher",160,160,320),I("hg","hourglass",460,300,200),I("rn","runner",1420,160,320),I("lp","lamp-yellow",1260,320,160),term("fb",660,740,600,"分布式事务")]
-        a=[F("bl",0,10)]+show("dp",at(0,"都说好"))+show("hg",at(0,"稳但慢"))+show("rn",at(0,"先记下来"))+show("lp",at(0,"短暂对不上"))+TERM("fb",at(1,"分布式事务"))
+        e+=[I("bs","box-sealed",1140,120,160),I("bx","box",1140,320,140)]
+        a=[F("bl",0,10)]+show("dp",at(0,"都说好"))+show("hg",at(0,"稳但慢"))+show("bs",at(0,"先预留"))+show("bx",at(0,"先做后补"))+show("rn",at(0,"先记下来"))+show("lp",at(0,"短暂对不上"))+TERM("fb",at(1,"分布式事务"))
         return [(e,a)]
 
 def subs(t,L,si,k):
@@ -197,13 +233,13 @@ for sh in allsh:
         sh['camera']=dict(pushIn=dict(fromScale=1.0,toScale=1.04,startFrame=max(0,s0),endFrame=n-1,origin=[960,470],easing="easeInOut"),note="静止段轻推镜：整层（不含字幕 / 水印）缓慢放大")
 PROV=any(v.get('provisional') for v in TM.values())
 PROV=any(v.get('provisional') for v in TM.values())
-meta=dict(title="《两个库，怎么一起成功或一起失败？》",hook="你下单付了钱，页面显示成功，仓库却根本没扣库存",episode=21,slug="distributed-tx",release="v0.26.0",draft=True,provisional=PROV,provisionalReason=("Knoll 配音未到：按字数估时长" if PROV else None),
+meta=dict(title="《两个库，怎么一起成功或一起失败？》",hook="你下单付了钱，页面显示成功，仓库却根本没扣库存",episode=21,slug="distributed-tx",release="v0.26.0-rework",draft=True,provisional=PROV,provisionalReason=("Knoll 配音未到：按字数估时长" if PROV else None),
   pendingAudio=PROV,series="数据库入门",width=1920,height=1080,fps=30,durationInFrames=g,provisionalTiming=PROV,style="深色背景+蓝青高光扁平2D（沿用 EP.15–20）",palette=P,font="Noto Sans SC",
   safeArea=dict(margin=80,subtitleBand=[900,980],contentMaxY=880,watermarkClearZone=[1700,80,1840,130]),
   branding=dict(spec="episodes/_shared/branding/spec.json v1.3.0",cornerWatermark="右上「IT小村」40%，从第 0 帧起常显（开场即封面），留空区 x1700–1840 y80–130",centerWatermark=None,endCard="由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾卡（只含全片结尾 60 帧留白）"),
   shotSentences={k:n for c in ids for k,n in zip([f"{c}-{j+1}" for j in range(len(_SP[c]))],_SP[c])},
   notes=("时长=暂定（make_timing.py，4.3 字/秒估）；Knoll /workspace/share/ep21/timeline.json + words.json 到后 sh realign.sh 直接重跑。" if PROV else "时长=Knoll timeline.json。")+
-    "术语标签（两阶段提交 / 可靠消息 / 最终一致 / 分布式事务）念到时淡入（0..+4），完整显示 ≥66；开场第 0 帧即封面；驿站 + 对讲机调度员比喻；素材自绘 + 复用 EP.19/20。")
+    "术语标签（两阶段提交 / 预留确认取消〔念 TCC〕/ 补偿事务〔念 Saga〕/ 可靠消息 / 最终一致 / 分布式事务；画面无英文）念到时淡入（0..+4），完整显示 ≥66；开场第 0 帧即封面；驿站 + 对讲机调度员比喻；素材自绘 + 复用 EP.19/20。")
 import json as _j
 REUSE=("station-red","station-blue","ledger","ledger-ok","ledger-bad","spark","parcel-red","person-blue","db","barcode-red","barcode-blue","badge-red","lamp-yellow")
 NEW=tuple(sorted(f[:-4] for f in os.listdir(HERE/"assets") if f.endswith('.svg') and f[:-4] not in REUSE))
