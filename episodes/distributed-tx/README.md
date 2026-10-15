@@ -5,4 +5,4 @@
 - 渲染器沿用 EP.20（camera.pushIn + 单条整轨 voice.wav），5 个推镜
 - 字幕严格按 storyboard 数字 from/to；空字幕不画框；水印第 0 帧常显（watermarkFadeIn={false}）
 - 制作：`cd remotion && npm ci && npm run render`（--bundle-cache=false，mix_bgm.py constant --below 12，Wallpaper，−16 LUFS，TP −2.0 dBTP）；成片 sha a74bb4ff…
-- 封面：待 Miyazaki 设计稿 cover/ep21-*.png → cover-*.jpg（不取视频帧）；发版前补齐，meta draft 保持 true
+- 封面：Miyazaki 设计稿 cover/ep21-*.png → cover-*.jpg（ffmpeg -q:v 2，同 EP.20；不取视频帧）
