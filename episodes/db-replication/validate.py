@@ -1,0 +1,77 @@
+# EP.18 db-replication 分镜自检（Miyazaki）。python3 -B validate.py → 全过打印 ALL OK
+import json,re,os,sys
+sys.path.insert(0,os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','_audit'));from labelcore import full
+from common_split import ids,SPLIT,SCRIPT,tts,narration
+H=os.path.dirname(os.path.abspath(__file__));_p=os.path.join(H,'storyboard.json')
+if not os.path.isfile(_p): sys.exit('预备阶段：还没有 storyboard.json')
+d=json.load(open(_p));err=[];M=80
+TERMS=['主库','从库','主从复制','读写分离','复制延迟','异步复制','半同步复制']
+BANNED=['中继日志','会话粘滞','直播慢几秒','就不会读到旧的','下期见','我是','比分','亚运会第']
+_EN=re.compile(r'[A-Za-z0-9０-９]')
+class _L:   # 画面：不许任何英文字母和数字（含比分）；字幕照念旁白，只放行脚本里唯一的「MySQL 8.4」（村长 2026-10-15 指定）
+    def search(self,t): return _EN.search(t.replace('MySQL 8.4',''))
+LVL=_L()
+N=lambda t:re.sub(r'[\s，。：；？！、,.:;?!]','',t)
+def lines_px(e):   # 真实 Main.tsx：rect 标签首行 fs（默认 32），其余行 round(fs×(fs>40?0.5:0.85))；text 用 fontSize
+    if e['type']=='rect':
+        L=(e.get('label') or '').split('\n');fs=e.get('fontSize') or 32
+        return [(l,fs if i==0 or len(L)==1 else round(fs*(0.5 if fs>40 else 0.85))) for i,l in enumerate(L) if l.strip()]
+    if e['type']=='text': return [(e['text'],e['fontSize'])]
+    return []
+narr=narration(); assert len(narr)==10
+g=0;nsh=0;subsAll=[]
+for sc in d['scenes']:
+    assert sc['from']==g,('scene from',sc['id']);f=g
+    for sh in sc['shots']:
+        nsh+=1;L=sh['durationInFrames']
+        if sh['from']!=f: err.append(('shot from',sh['id']))
+        f+=L;S=sh['subtitles']
+        if S[0]['from']!=0 or S[-1]['to']!=L-1 or any(a['to']+1!=b['from'] for a,b in zip(S,S[1:])): err.append(('subs cover',sh['id']))
+        subsAll+= [N(x['text']) for x in S if x['text']]
+        for x in S:
+            if len(x['text'])>24: err.append(('sub long',sh['id'],x['text']))
+        ids_=[e['id'] for e in sh['elements']]
+        if len(set(ids_))!=len(ids_): err.append(('dup id',sh['id']))
+        for e in sh['elements']:
+            if e.get('role')=='subtitle': continue
+            if e['x']<M or e['y']<M or e['x']+e['w']>1920-M or e['y']+e['h']>880: err.append(('safe',sh['id'],e['id']))
+            if e['x']<1840 and e['x']+e['w']>1700 and e['y']<130 and e['y']+e['h']>80: err.append(('watermark zone',sh['id'],e['id']))
+            for l,px in lines_px(e):
+                if px<28: err.append(('font<28',sh['id'],e['id'],l,px))
+                if any(b in l for b in BANNED) or LVL.search(l): err.append(('banned',sh['id'],e['id'],l))
+                if re.search(r'[0-9０-９]',l): err.append(('digit on screen',sh['id'],e['id'],l))
+            if e['type']=='image' and not os.path.isfile(os.path.join(H,e['asset'])): err.append(('asset',e['asset']))
+            if e['type']=='image' and e['asset'].endswith('/phone.svg') and e['w']<480: err.append(('phone <480 wide',sh['id'],e['id'],e['w']))
+            if e['type'] in('icon',): err.append(('icon type not used this ep',e['id']))
+        for a in sh['animations']:
+            if a['elementId'] not in ids_: err.append(('anim target',sh['id'],a['elementId']))
+            if any(not 0<=k['frame']<L for k in a['keyframes']): err.append(('kf range',sh['id'],a['elementId']))
+        for x in S:
+            if any(b in x['text'] for b in BANNED) or LVL.search(x['text']): err.append(('banned sub',sh['id'],x['text']))
+    g=f
+    if sc['durationInFrames']!=g-sc['from']: err.append(('scene dur',sc['id']))
+if d['meta']['durationInFrames']!=g: err.append('total')
+# 画面文字不重复字幕（术语除外）：标签文字 == 某条字幕（去标点）或是 ≥8 字的字幕子串 → 报
+for sc in d['scenes']:
+    for sh in sc['shots']:
+        for e in sh['elements']:
+            if e.get('role')=='subtitle': continue
+            for l,_ in lines_px(e):
+                n=N(l)
+                if not n or l in TERMS: continue
+                # 2026-10-14（Nolan 审 EP.16）：删掉开场封面大字例外。≥6 字子串改为按时间查——标签可见（完整显示）期间同镜头正在显示的字幕含它才报；与任何字幕完全相同仍全片报
+                vis=[f for f in range(sh['durationInFrames']) if full(sh,e['id'],f)]
+                live=[N(x['text']) for x in sh['subtitles'] if vis and x['from']<=vis[-1] and x['to']>=vis[0] and any(x['from']<=f<=x['to'] for f in vis)]
+                if n in subsAll or (len(n)>=6 and any(n in s for s in live)): err.append(('repeats subtitle',sh['id'],l))
+# 2026-10-15（Nolan / Knoll）：直接读 storyboard 节点 fontSize（不经检查渲染器）——数字小标签（「+100」「100」「200」等）≥40 且框高 ≥2×字号；行号角标（「1」…「4」「3 号」）≥32；「（示例）」≥32
+for sc in d['scenes']:
+    for sh in sc['shots']:
+        for e in sh['elements']:
+            t=(e.get('label') or e.get('text') or '').strip();fs=e.get('fontSize') or (32 if e['type']=='rect' else 0)
+            if e['type']=='rect' and re.fullmatch(r'[+−-]?\d{2,}',t) and (fs<40 or e['h']<2*fs): err.append(('num tag font',sh['id'],e['id'],t,fs,e['h']))
+            if e['type']=='rect' and re.fullmatch(r'\d( 号)?',t) and fs<32: err.append(('row tag font',sh['id'],e['id'],t,fs))
+            if '示例' in t and fs<32: err.append(('示例 font',sh['id'],e['id'],fs))
+P=d['meta'].get('poster') or {}
+if not P or not any(x['id']==P.get('shotId') and x['from']+P['localFrame']==P['frame'] and P['localFrame']<x['durationInFrames'] for sc in d['scenes'] for x in sc['shots']): err.append('poster')
+print(err if err else 'ALL OK',g,nsh,'provisionalTiming',d['meta']['provisionalTiming'])
+sys.exit(1 if err else 0)
