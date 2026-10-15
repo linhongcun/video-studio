@@ -1,5 +1,5 @@
-# EP.20：整轨 narration.wav（/workspace/share/ep20，sha 457d3369…）按分镜停顿插静音 → remotion/public/audio/voice.wav
-# 插点 = snowflake-3 hold：原音帧 1989 ≈ ch7-1 起点；落在下一句开口前 0.1 s（句间静音），不切到字
+# EP.20：整轨 narration.wav（/workspace/share/ep20，sha 9db4978f…）按分镜停顿插静音 → remotion/public/audio/voice.wav
+# 插点 = autoinc-2 停顿（原音帧 1292 = ch5-1 起点，7 帧）、snowflake-3 停顿（原音帧 2105 = ch7-1 起点，39 帧）；落在下一句开口前 0.1 s（句间静音），不切到字
 import json,subprocess,numpy as np,wave
 SR=48000;NAR='/workspace/share/ep20/narration.wav'
 x=np.frombuffer(subprocess.run(['ffmpeg','-v','error','-i',NAR,'-f','s16le','-ac','1','-ar',str(SR),'-'],capture_output=True,check=True).stdout,np.int16)
@@ -7,8 +7,8 @@ tl=json.load(open('/workspace/share/ep20/timeline.json'))['sentences']
 # verify sha prefix
 import hashlib
 sha=hashlib.sha256(open(NAR,'rb').read()).hexdigest()
-assert sha.startswith('457d3369'), sha
-INS=[(1989,40)]  # original-audio frame → hold frames
+assert sha.startswith('9db4978f'), sha
+INS=[(1292,7),(2105,39)]  # 原音帧 → 停顿帧：ch5-1 前（autoinc-2 末）、ch7-1 前（snowflake-3 末）
 pts=[]
 for f,n in INS:
   s=min(tl,key=lambda q:abs(q['start']*30-f)); print('nearest',s['id'],s['start']*30,'target',f)

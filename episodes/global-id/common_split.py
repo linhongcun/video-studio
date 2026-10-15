@@ -1,7 +1,7 @@
 # EP.20 全局唯一 ID（脚本 v0.25.0 定稿）镜头拆分：按句数，句子不拆开。章节 id = script.md「## n. id｜」
 import re
-ids=["hook","signal","bridge","autoinc","need","snowflake","clock","counter","recap"]
-SPLIT={"hook":[1,1],"signal":[1],"bridge":[1,1],"autoinc":[1,1,1],"need":[1],"snowflake":[1,1,1],"clock":[1],"counter":[1],"recap":[2]}
+ids=["hook","signal","clash","autoinc","need","snowflake","clock","counter","recap"]
+SPLIT={"hook":[1,1],"signal":[1,1],"clash":[1],"autoinc":[1,1],"need":[1],"snowflake":[1,1,1],"clock":[1],"counter":[1],"recap":[2]}
 SCRIPT="/workspace/sorkin-backup/global-id/script.md"
 TTS={}
 def tts(s):

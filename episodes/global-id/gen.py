@@ -21,7 +21,7 @@ def out(i,a,n=10): return mv(i,"opacity",a,a+n,1,0)
 def pop(i,a): return mv(i,"scale",a,a+12,0,1,"spring")
 def hl(i,a,c=P['success'],c0=P['secondary']): return mv(i,"strokeColor",a,a+10,c0,c)
 
-titles=["撞号","小本子","写散了号没散","本机自增","全村不撞","雪花算法","停打","公共计数器","回顾"]
+titles=["撞号","驿站打印机","一模一样的条码","本机自增","所有站不撞","雪花算法","停打","公共计数器","回顾"]
 SPLIT={i:_SP[c] for i,c in enumerate(ids)}
 def KEY(si,k): return f"{ids[si]}-{k+1}"
 def sentences(s): return re.findall(r'[^。？]+[。？]',s)
@@ -57,42 +57,43 @@ def moveto(i,a,b,x0,y0,x1,y1,e="easeInOut"): return [mv(i,"x",a,b,x0,x1,e),mv(i,
 def appear(i,t,n=10): return [F(i,t,n),pop(i,t)]
 def shots_for(si,L):
     at=lambda k,p:AT(si,k,p)
-    if si==0:  # hook：开场封面大字 + 红蓝站各打出一模一样的条码 → 撞号火花
+    if si==0:  # hook（v2 开场 A）：①封面大字 → 自己的订单页里混进别人的订单 ②拉远：好几个数据库各自盖条码 → 撞号火花
+        tk=max(SUB0+6,at(0,"客服"));ts=max(SUB0+20,at(0,"别人的订单"))
         e=[T("t1",140,200,1000,150,"两个订单",120,P['text']),T("t2",140,370,1200,150,"怎么撞成同一个号了？",100,P['accent']),
-           I("sr","station-red",1180,160,360),I("sb","station-blue",1480,160,360)]
-        a=[out("t1",TOUT,SUB0-TOUT),out("t2",TOUT,SUB0-TOUT)]
+           I("sr","barcode-same",1200,180,300),I("sb","barcode-same",1500,180,300),I("cs","spark",1400,120,200),
+           I("pg","order-page",660,100,600),I("ck","clerk",1340,300,320),I("os","order-stranger",710,330,500,98),I("av","avatar-stranger",160,300,320)]
+        a=[out("t1",TOUT,SUB0-TOUT),out("t2",TOUT,SUB0-TOUT),out("sr",TOUT,SUB0-TOUT),out("sb",TOUT,SUB0-TOUT),out("cs",TOUT,SUB0-TOUT),
+           mv("pg","opacity",0,SUB0,0,0),F("pg",SUB0,10),mv("ck","opacity",0,tk,0,0),F("ck",tk,8),pop("ck",tk),
+           mv("os","opacity",0,ts,0,0),F("os",ts,6),pop("os",ts),mv("av","opacity",0,ts+4,0,0),F("av",ts+4,8),pop("av",ts+4)]
+        td=at(1,"拆成");tn=at(1,"自己编号");tc=at(1,"就撞了")
+        DX=[160,620,1080,1540]
+        e2=[I("pg","order-page",660,100,600)]+[I(f"d{j}","db",DX[j],180,240) for j in range(4)]+[I(f"b{j}","barcode-same",DX[j]+40,460,160) for j in range(4)]+[I("spk","spark",820,520,280)]
+        a2=[mv("pg","scale",0,18,1,0.4),out("pg",10,10)]+[x for j in range(4) for x in (mv(f"d{j}","opacity",0,td+j*4,0,0),F(f"d{j}",td+j*4,8),pop(f"d{j}",td+j*4))]
+        a2+=[x for j in range(4) for x in (mv(f"b{j}","opacity",0,tn+j*5,0,0),F(f"b{j}",tn+j*5,6),pop(f"b{j}",tn+j*5))]+[mv("spk","opacity",0,tc,0,0),F("spk",tc,4),pop("spk",tc)]
+        return [(e,a),(e2,a2)]
+    if si==1:  # signal：①怎么撞、怎么防（库在、问号气泡）②把库想成驿站 → 红蓝站 + 打印机 + 小本子（驿站只在此后出现）
+        e=[I("d0","db",360,200,300),I("d1","db",1260,200,300),bub("q1",700,300,"怎么撞",P['danger']),bub("q2",760,460,"怎么防",P['success'])]
+        a=[F("q1",at(0,"怎么撞"),8),pop("q1",at(0,"怎么撞")),mv("q2","opacity",0,at(0,"怎么防"),0,0),F("q2",at(0,"怎么防"),8),pop("q2",at(0,"怎么防"))]
+        ty=at(1,"驿站");tp=at(1,"条码打印机");tn=at(1,"小本子")
+        e2=[I("d0","db",200,200,300),I("d1","db",1420,200,300),I("sr","station-red",180,160,380),I("sb","station-blue",1360,160,380),
+            I("pr","printer",640,300,240),I("pb","printer",1040,300,240),I("nr","notebook",280,540,200),I("nb","notebook",1460,540,200)]
+        a2=[out("d0",ty,10),out("d1",ty,10),mv("sr","opacity",0,ty,0,0),F("sr",ty,10),pop("sr",ty),mv("sb","opacity",0,ty+6,0,0),F("sb",ty+6,10),pop("sb",ty+6),
+            mv("pr","opacity",0,tp,0,0),F("pr",tp,8),pop("pr",tp),mv("pb","opacity",0,tp+4,0,0),F("pb",tp+4,8),pop("pb",tp+4),
+            mv("nr","opacity",0,tn,0,0),F("nr",tn,8),pop("nr",tn),mv("nb","opacity",0,tn+4,0,0),F("nb",tn+4,8),pop("nb",tn+4)]
+        return [(e,a),(e2,a2)]
+    if si==2:  # clash：互不知道 → 各打出一模一样的条码 → 火花
         tp=at(0,"各打出");tc=at(0,"一模一样")
-        e2=[I("sr","station-red",200,160,400),I("sb","station-blue",1320,160,400),
-            I("br","barcode-same",280,520,280),I("bb","barcode-same",1360,520,280),I("spk","spark",820,400,280)]
-        a2=[F("br",tp,8),pop("br",tp),F("bb",tp+6,8),pop("bb",tp+6),mv("spk","opacity",0,tc,0,0),F("spk",tc,4),pop("spk",tc)]
-        return [(e,a),(e2,a2)]
-    if si==1:  # 拆库之后各站用自己的小本子编号
-        e=[I("sr","station-red",180,160,380),I("sb","station-blue",1360,160,380),
-           I("nr","notebook",280,500,220),I("nb","notebook",1460,500,220),
-           I("pr","printer",700,280,240),I("pb","printer",980,280,240)]
-        a=[F("nr",at(0,"小本子"),8),pop("nr",at(0,"小本子")),F("nb",at(0,"小本子")+4,8),pop("nb",at(0,"小本子")+4)]
+        e=[I("sr","station-red",160,140,380),I("sb","station-blue",1380,140,380),I("nr","notebook",280,500,180),I("nb","notebook",1500,500,180),
+           I("br","barcode-same",520,500,260),I("bb","barcode-same",1140,500,260),I("spk","spark",820,380,280)]
+        a=[mv("br","opacity",0,tp,0,0),F("br",tp,8),pop("br",tp),mv("bb","opacity",0,tp+6,0,0),F("bb",tp+6,8),pop("bb",tp+6),mv("spk","opacity",0,tc,0,0),F("spk",tc,4),pop("spk",tc)]
         return [(e,a)]
-    if si==2:  # 写散了号没散：多站 + 各自撕小本子
-        SX=[160,560,960,1360]
-        e=[I(f"st{j}",f"station-{c}",SX[j],140,300) for j,c in enumerate(("red","blue","green","yellow"))]
-        a=[F(f"st{j}",j*4,8) for j in range(4)]
-        tt=at(0,"撕");e2=[I("sr","station-red",200,140,400),I("sb","station-blue",1320,140,400),
-            I("nr","notebook-torn",280,480,240),I("nb","notebook-torn",1400,480,240),
-            I("br","barcode-red",520,520,160),I("bb","barcode-blue",1240,520,160)]
-        a2=[F("nr",0,8),F("nb",0,8),F("br",tt,8),pop("br",tt),F("bb",tt+6,8),pop("bb",tt+6)]
-        return [(e,a),(e2,a2)]
-    if si==3:  # 自增：本机只管自己 → 两站各自往上加 → 打出同一个号；标签「自增」
+    if si==3:  # 自增：①本机只管自己这台 ②标签「自增」
         e=[I("sv","server",200,180,320),I("nb","notebook",560,280,260),I("pr","printer",1000,240,300),tag("ms",1400,300,"本机",P['primary'],200)]
         a=[F("sv",0,8),F("nb",at(0,"本机自增"),8),pop("nb",at(0,"本机自增")),F("ms",at(0,"这一台"),8)]
-        tg=at(0,"各自往上加");tc=at(0,"同一个号")
-        e2=[I("sr","station-red",160,140,380),I("sb","station-blue",1380,140,380),
-            I("nr","notebook",280,480,200),I("nb2","notebook",1500,480,200),
-            I("br","barcode-same",560,520,220),I("bb","barcode-same",1140,520,220),I("spk","spark",820,380,260)]
-        a2=[F("br",tg,8),F("bb",tg+8,8),mv("spk","opacity",0,tc,0,0),F("spk",tc,4),pop("spk",tc)]
-        e3=[I("sr","station-red",400,160,500),I("nb","notebook",1100,280,300),term("zz",760,740,300,"自增")]
-        a3=[F("zz",at(0,"自增")),pop("zz",at(0,"自增"))]
-        return [(e,a),(e2,a2),(e3,a3)]
-    if si==4:  # 全村不撞，又不能挤回一台发号机
+        e2=[I("sr","station-red",400,160,500),I("nb","notebook",1100,280,300),term("zz",760,740,300,"自增")]
+        a2=[F("zz",at(1,"自增本来")),pop("zz",at(1,"自增本来"))]
+        return [(e,a),(e2,a2)]
+    if si==4:  # 所有站都不撞，又不能挤回一台发号机
         e=[I("sr","station-red",120,200,300),I("sb","station-blue",440,200,300),I("sg","station-green",760,200,300),
            I("hub","hub",1200,160,420),I("clk","clock",1500,520,160)]+[I(f"p{j}","person-blue",200+j*160,560,120) for j in range(4)]
         a=[mv("hub","opacity",0,at(0,"发号机"),0.35,0.35),mv("hub","opacity",at(0,"发号机"),at(0,"发号机")+10,0.35,1),
@@ -122,14 +123,14 @@ def shots_for(si,L):
            mv("lp","opacity",0,ts,0,0),F("lp",ts,8),pop("lp",ts),
            mv("bc","opacity",0,1,0.3,0.3),F("sb",at(0,"拨回去")),pop("sb",at(0,"拨回去"))]
         return [(e,a)]
-    if si==7:  # Redis 公共计数器 → 又挤回窗口
-        e=[I("win","window",660,120,600),I("hub","hub",200,200,360)]+[I(f"p{j}","person-red" if j%2 else "person-blue",160+j*200,560,140) for j in range(5)]
-        e+=[tag("rd",1400,300,"公共计数器",P['accent'],320)]
-        a=[F("win",at(0,"公共计数器"),8),pop("win",at(0,"公共计数器"))]+[F(f"p{j}",at(0,"挤回")+j*3,6) for j in range(5)]+[F("rd",at(0,"公共计数器"),8)]
+    if si==7:  # Redis 公共计数器 → 大家又都挤回一台发号机（人群向中央发号机聚拢）
+        tc=at(0,"公共计数器");tj=at(0,"挤回")
+        e=[I("hub","hub",760,140,400),tag("rd",1360,240,"公共计数器",P['accent'],320)]+[I(f"p{j}","person-red" if j%2 else "person-blue",160+j*340,600,140) for j in range(5)]
+        a=[F("hub",tc,8),pop("hub",tc),F("rd",tc,8)]+[x for j in range(5) for x in moveto(f"p{j}",tj+j*2,tj+j*2+24,160+j*340,600,700+j*90,560)]
         return [(e,a)]
-    if si==8:  # 回顾：分库分表后订单号按全局不撞 → 全局唯一 ID
-        e=[I("sr","station-red",160,140,300),I("sb","station-blue",500,140,300),
-           I("br","barcode-red",200,480,220),I("bb","barcode-blue",520,480,220),
+    if si==8:  # 回顾：数据库拆开之后，订单号按全局不撞 → 全局唯一 ID
+        e=[I("d0","db",120,160,200),I("d1","db",360,160,200),I("d2","db",600,160,200),
+           I("br","barcode-red",160,440,220),I("bb","barcode-blue",480,440,220),
            I("ok","ledger-ok",900,280,260),term("qy",1180,700,560,"全局唯一 ID",fs=56)]
         a=[F("qy",at(0,"全局唯一 ID")),pop("qy",at(0,"全局唯一 ID")),F("ok",at(0,"全局不撞"),8),pop("ok",at(0,"全局不撞"))]
         return [(e,a)]
@@ -208,14 +209,14 @@ for sh in allsh:
         s0=0 if sh is allsh[-1] else min(la,n-60)
         sh['camera']=dict(pushIn=dict(fromScale=1.0,toScale=1.04,startFrame=max(0,s0),endFrame=n-1,origin=[960,470],easing="easeInOut"),note="静止段轻推镜：整层（不含字幕 / 水印）缓慢放大")
 PROV=any(v.get('provisional') for v in TM.values())
-meta=dict(title="《两个订单，怎么撞成同一个号了？》",hook="两个订单怎么撞成同一个号了",episode=20,slug="global-id",release="v0.25.0",draft=True,provisional=PROV,provisionalReason=("Knoll 配音未到：按字数估时长" if PROV else None),
+meta=dict(title="《两个订单，怎么撞成同一个号了？》",hook="两个订单怎么撞成同一个号了",episode=20,slug="global-id",release="v0.25.0-A",draft=True,provisional=PROV,provisionalReason=("Knoll 配音未到：按字数估时长" if PROV else None),
   pendingAudio=PROV,series=None,width=1920,height=1080,fps=30,durationInFrames=g,provisionalTiming=PROV,style="深色背景+蓝青高光扁平2D（沿用 EP.15–19）",palette=P,font="Noto Sans SC",
   safeArea=dict(margin=80,subtitleBand=[900,980],contentMaxY=880,watermarkClearZone=[1700,80,1840,130]),
   branding=dict(spec="episodes/_shared/branding/spec.json v1.3.0",cornerWatermark="右上「IT小村」40%，从第 0 帧起常显（开场即封面），留空区 x1700–1840 y80–130",centerWatermark=None,endCard="由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾卡（只含全片结尾 60 帧留白）"),
   shotSentences={k:n for c in ids for k,n in zip([f"{c}-{j+1}" for j in range(len(_SP[c]))],_SP[c])},
   notes=("时长=暂定（make_timing.py，4.3 字/秒估）；Knoll /workspace/share/ep20/timeline.json + words.json 到后 sh realign.sh 直接重跑。" if PROV else "时长=Knoll timeline.json。")+
     "术语标签（自增 / 雪花算法 / 时钟回拨 / 全局唯一 ID）念到时淡入（0..+4），完整显示 ≥66；开场第 0 帧即封面；驿站条码打印机比喻（色带 / 徽章 / 流水戳，画面无数字刻度）；素材自绘 + 复用 EP.19。")
-NEW=("badge-blue","badge-green","badge-red","badge-yellow","barcode-blue","barcode-green","barcode-red","barcode-same","hub","lamp-green","lamp-red","lamp-yellow","notebook","notebook-torn","printer","ribbon","ribbon-early","ribbon-late","stamp-dense","stamp-mid","stamp-sparse","wallclock","wallclock-back","window")
+NEW=("order-page","order-stranger","avatar-stranger","db","badge-blue","badge-green","badge-red","badge-yellow","barcode-blue","barcode-green","barcode-red","barcode-same","hub","lamp-green","lamp-red","lamp-yellow","notebook","notebook-torn","printer","ribbon","ribbon-early","ribbon-late","stamp-dense","stamp-mid","stamp-sparse","wallclock","wallclock-back","window")
 REUSE=("clerk","clerk-busy","clock","crash","idtag","ledger","ledger-bad","ledger-ok","order","parcel-blue","parcel-red","person-blue","person-red","server","spark","station","station-blue","station-green","station-red","station-yellow")
 assets=dict(new=[dict(id=n,file=f"assets/{n}.svg",png=f"assets/{n}.png") for n in NEW],
   reuse=[dict(id=n,file=f"assets/{n}.svg",png=f"assets/{n}.png",desc="EP.19 自绘，复用") for n in REUSE])
