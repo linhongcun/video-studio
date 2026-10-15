@@ -1,0 +1,64 @@
+---
+title: 两个人抢同一件货，听谁的？
+episode: 17
+version: v0.22.0
+---
+
+# 两个人抢同一件货，听谁的？
+
+上期讲了隔离级别，结尾说「撞车了只能整单重来」。这期讲撞车之前，数据库怎么让大家排队：锁。
+
+## 1. 为什么需要锁：丢失更新
+两个事务读了同一行，再按各自读到的旧值去更新它。谁也不知道对方的存在，后写的覆盖了先写的，前一个人的改动就丢了。[^s10]
+
+## 2. 读锁和写锁
+InnoDB 的行级锁有两种：共享锁（S，读锁）允许持有者读这一行；排他锁（X，写锁）允许持有者修改或删除这一行。[^s1]
+- 一个事务持有读锁时，别人再要读锁可以马上拿到；要写锁就得等。[^s1]
+- 一个事务持有写锁时，别人要哪种锁都得等它释放。[^s1]
+
+注意：InnoDB 的普通 `SELECT` 读的是快照，不加锁（见 EP.16），所以写锁并不会挡住普通查询。要加锁读，得显式写：
+- `SELECT ... FOR SHARE`：给读到的行加读锁，别人能读，但在你提交前不能改。[^s2]
+- `SELECT ... FOR UPDATE`：像 `UPDATE` 一样把行锁住。[^s2]
+
+## 3. 行锁和表锁
+- InnoDB 用行级锁，多个会话可以同时写同一张表的不同行；不同会话访问不同的行时，锁冲突更少。[^s6]
+- MyISAM、MEMORY、MERGE 表用表级锁，同一时间只允许一个会话更新整张表。[^s6]
+- InnoDB 还有表级的意向锁，用来标明一个事务稍后要在表里的某行上加哪种锁。[^s1]
+
+## 4. 等锁和超时
+拿不到锁的事务会一直等，直到对方释放。[^s1] 但它不会无限等下去：
+- `innodb_lock_wait_timeout` 默认是 50 秒，超时会报 `ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction`。[^s5]
+- **超时默认只回滚当前这一条语句，不是整个事务。** 想让整个事务回滚，需要用 `--innodb-rollback-on-timeout` 启动服务器。[^s5]
+
+## 5. 死锁
+多个事务各自持有对方需要的锁，谁都在等，谁也不释放，这就是死锁。[^s3]
+- 死锁检测默认是开着的（`innodb_deadlock_detect` 默认 ON）。InnoDB 发现死锁后，会回滚其中一个事务。[^s3][^s5]
+- 它会尽量挑「小」的事务回滚，大小按插入、更新、删除的行数算。[^s4]
+- 关掉死锁检测后，就只能靠锁等待超时来回滚了。[^s3]
+- 即使应用逻辑没错，也要处理事务被回滚、需要重试的情况。[^s3]
+- PostgreSQL 也会自动发现死锁并中止其中一个事务，但具体中止哪一个很难预测。[^s8] 它等多久才开始检查死锁由 `deadlock_timeout` 决定，默认 1 秒。[^s9]
+- 最好的办法是避免死锁：所有程序都按同样的顺序给多个对象加锁。[^s8]
+
+## 延伸：悲观锁和乐观锁
+- **悲观锁**：牺牲一些性能或并发，换取安全。[^s7] InnoDB 用的就是悲观锁策略。[^s7] 做法是先在数据源上锁住行，不让别人改。[^s11]
+- **乐观锁**：不先上锁，而是在更新时检查值有没有在你读之后被别人改过。[^s11] 一种做法是用时间戳列，每次更新都刷新时间戳。[^s11]
+
+下面是一种常见的通用写法（用版本号列，思路和时间戳列相同）。这是业界常用做法的示例，不是官方定义；乐观锁这一节的出处目前只有一份 2017 年的资料，仅作参考：
+
+```sql
+UPDATE tshirt SET price = ?, version = version + 1
+WHERE id = ? AND version = ?;
+-- 影响 0 行，说明别人先改了，重新读一遍再试
+```
+
+[^s1]: MySQL 8.4 手册 17.7.1 InnoDB Locking（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-locking.html
+[^s2]: MySQL 8.4 手册 Locking Reads（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html
+[^s3]: MySQL 8.4 手册 17.7.5 Deadlocks in InnoDB（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-deadlocks.html
+[^s4]: MySQL 8.4 手册 17.7.5.2 Deadlock Detection（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-deadlock-detection.html
+[^s5]: MySQL 8.4 手册 InnoDB Startup Options and System Variables（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-parameters.html
+[^s6]: MySQL 8.4 手册 Internal Locking Methods（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/internal-locking.html
+[^s7]: MySQL 8.4 手册 Glossary（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/glossary.html
+[^s8]: PostgreSQL 18 文档 13.3 Explicit Locking https://www.postgresql.org/docs/current/explicit-locking.html
+[^s9]: PostgreSQL 18 文档 Lock Management https://www.postgresql.org/docs/current/runtime-config-locks.html
+[^s10]: Microsoft Learn：Transaction locking and row versioning guide（2026-04-22）https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
+[^s11]: Microsoft ADO.NET：Optimistic Concurrency（2017-03-30，仅参考）https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/optimistic-concurrency
