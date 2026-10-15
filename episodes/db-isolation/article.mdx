@@ -1,0 +1,56 @@
+---
+title: 没封箱的包裹，别人看得见吗？
+episode: 16
+version: v0.21.0
+---
+
+# 没封箱的包裹，别人看得见吗？
+
+上期讲了事务：把几步操作装进一个包裹，封好箱（提交）才算数。这期讲同一时间有很多笔事务在跑时，彼此能看到对方多少。
+
+## 1. 三种「读到不该读的」问题
+
+- **脏读**：读到了别的事务还没提交的数据。[^s6]
+- **不可重复读**：同一事务里把同一行读两遍，结果不一样，因为中间被别的事务修改并提交了。[^s6]
+- **幻读**：同一事务里把同一个条件查询跑两遍，符合条件的行变多或变少了，因为中间别的事务刚提交了新数据。[^s6]
+
+## 2. 隔离级别：标准定义的四档
+
+SQL 标准定义了四个隔离级别。[^s6]
+
+| 级别 | 脏读 | 不可重复读 | 幻读 |
+|---|---|---|---|
+| 读未提交（READ UNCOMMITTED） | 可能 | 可能 | 可能 |
+| 读已提交（READ COMMITTED） | 不会 | 可能 | 可能 |
+| 可重复读（REPEATABLE READ） | 不会 | 不会 | 可能 |
+| 可串行化（SERIALIZABLE） | 不会 | 不会 | 不会 |
+
+
+## 3. 各家默认不一样
+
+- MySQL 的 InnoDB 默认**可重复读**。[^s1]
+- PostgreSQL 默认**读已提交**。[^s6] PostgreSQL 里的「读未提交」实际表现和读已提交一样，也就是不会脏读。[^s6]
+- SQL Server 默认**读已提交**。[^s7]
+
+## 4. MySQL 的可重复读到底有没有幻读？
+
+这个问题不能用一句话回答，要分情况看手册原文：
+
+- 普通 `SELECT` 读的是事务里第一次读时建立的快照，同一事务里重复读看到的结果一致。[^s1]
+- 加锁读、`UPDATE`、`DELETE` 时，InnoDB 用 next-key 锁（行锁加间隙锁）防止幻读："To prevent phantoms, InnoDB uses an algorithm called next-key locking that combines index-row locking with gap locking."[^s4]
+- 但快照只管 `SELECT`，不一定管修改语句：别的事务刚提交的行，你查不到，你的 `UPDATE` 或 `DELETE` 却可能改到它。[^s2]
+
+PostgreSQL 的可重复读则明确不允许幻读。[^s6]
+
+## 5. 代价
+
+- 用加锁的方式实现时，别的事务有时得**排队等**对方结束。[^s8]
+- 在较高的级别下，事务可能因为冲突而失败，应用程序要准备好**重试**，相当于整单重来。[^s6]
+- 微软的文档还说，级别越高，并发问题越少，但要消耗更多资源，事务之间也更容易互相阻塞。[^s8] 这一说法目前只找到微软一家来源。
+
+[^s1]: MySQL 8.4 手册 17.7.2.1 Transaction Isolation Levels（2026-10 生成）https://dev.mysql.com/doc/refman/8.4/en/innodb-transaction-isolation-levels.html
+[^s2]: MySQL 8.4 手册 17.7.2.3 Consistent Nonlocking Reads（2026-10 生成）https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html
+[^s4]: MySQL 8.4 手册 17.7.4 Phantom Rows（2026-10 生成）https://dev.mysql.com/doc/refman/8.4/en/innodb-next-key-locking.html
+[^s6]: PostgreSQL 18 文档 13.2 Transaction Isolation https://www.postgresql.org/docs/18/transaction-iso.html
+[^s7]: Microsoft Learn：SET TRANSACTION ISOLATION LEVEL（2025-09-26）https://learn.microsoft.com/en-us/sql/t-sql/statements/set-transaction-isolation-level-transact-sql?view=sql-server-ver17
+[^s8]: Microsoft Learn：Transaction Locking and Row Versioning Guide（2026-04-22）https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide?view=sql-server-ver17
