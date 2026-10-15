@@ -1,0 +1,89 @@
+---
+title: 大促一到，下单怎么就卡住了？
+episode: 19
+version: v0.24.0
+series: 数据库入门
+---
+
+大促零点一过，下单按钮转了半天圈。原因可能有很多（网络、应用、锁竞争、热点行……），今天说其中一个：所有订单都挤在一台数据库、一张表里。这一期讲分库分表。
+
+> 说明：性能问题不一定由某一个原因造成，可能是多种因素叠加。[^S10] 本文资料核查于 2026-10-15。
+
+## 1. 为什么要拆：从库只分读，写还在主库
+
+上一期讲过，读多了可以加从库。但每一笔下单都是写。单台机器的存储、计算和网络带宽都有上限；当写入量也很高时，只靠只读从库解决不了瓶颈。[^S4] Vitess 的建议是：读压力可以加从库或拆分片，写压力只能拆分片。[^S6]
+
+在此之前可以先纵向扩容（加盘、加内存、换 CPU），但这只能推迟问题。[^S4]
+
+**能不拆就不拆**：如果数据量和吞吐（含预期增长）放得进单个实例，纵向扩容能保住查询的简单和事务的完整。[^S4]
+
+## 2. 分表和分库
+
+| | 数据放在哪 | 谁负责找数据 |
+|---|---|---|
+| 分表 | 同一个库里多张结构相同的物理表（如 `order_0`、`order_1`），由中间件或代码拼成一张逻辑表 | 应用 / 中间件 [^S9] |
+| 分库 | 多个数据库，通常在多台服务器 | 应用 / 中间件 [^S4][^S6] |
+
+水平拆分时，每个分片结构（schema）相同，但各自存一部分不重复的数据；同一条数据只在一个分片里。[^S4][^S5][^S6] 分片和主从复制是两回事，可以叠加：一个 Vitess 分片通常就是一个主库加若干从库。[^S6]
+
+## 3. 水平拆分和垂直拆分
+
+- **水平拆分（按行）**：同结构、不同行。被视为解决单机问题的标准方案。[^S9]
+- **垂直拆分**，有两种说法：
+  - 按**业务 / 表**拆到不同库（垂直分库）：ShardingSphere 称 vertical sharding，Azure 称 functional partitioning，Vitess 称 vertical split。[^S9][^S5][^S6] 它分开了压力，但不能真正解决单节点问题。[^S9]
+  - 按**列**拆（垂直分表）：常访问的字段放一份，不常访问的放另一份。[^S5]
+
+## 4. 分片键和路由
+
+分片键是分片系统里最关键的设计决定；选定后再改，通常要把全部数据迁到新布局，在线上系统里代价高、风险大。[^S4]
+
+好的分片键：不可变、基数高、能让数据和负载均匀分布，并且贴合主要查询，让多数请求只落到一个分片。要避开单调递增的值（自增整数、顺序时间戳）和低基数属性。[^S4] Vitess 要求主 Vindex 对同一输入只产生一个 keyspace ID，分片键插入后也不能改。[^S7]
+
+中间件按分片键把查询路由到对应分片。[^S6] SQL 里不带分片键，就只能全路由（扫所有分片），性能差。[^S9][^S7]
+
+### 分片策略
+
+| 策略 | 怎么分 | 好处 | 代价 |
+|---|---|---|---|
+| 范围（range） | 按连续区间，如月份 | 范围查询在一个分片拿完 | 最新数据最活跃时，集中在少数分片形成热点 [^S4] |
+| 哈希（hash） | 对分片键算哈希 | 降低热点概率，无需映射表 | 没有一致性哈希时再平衡困难；范围查询要跨片 [^S4] |
+| 查表（lookup） | 维护「键 → 分片」映射表 | 控制更灵活，配合虚拟分片便于迁移 | 查映射有额外开销，映射表需高度可缓存 [^S4] |
+
+## 5. 拆了之后的代价
+
+1. **跨片查询**：跨多个分区的查询或事务，延迟和复杂度通常高于单分区操作。[^S5] 分页、排序、聚合分组在分片后容易处理出错。[^S9]
+2. **分布式事务**：跨分片事务有挑战；两阶段提交等协调协议会增加延迟、引入新的失败方式。[^S4]
+3. **扩容 / 重新分片**：再平衡要在分片间搬数据，常导致停机或吞吐下降；朴素取模在增减分片时会让大部分键换位置，一致性哈希能减小影响。[^S4] Vitess 能在旧分片继续服务读写时，复制、校验并同步新分片。[^S8]
+4. **热点**：数据倾斜会随时间累积，要定期再平衡。[^S4] TiDB 文档也指出自增主键会形成写热点。[^S10]
+5. **全局唯一 ID**：分片后，各处自己编号会撞号，给不同数据节点生成全局唯一主键很棘手。[^S9]
+6. **备份恢复**：对单个分片做时间点恢复，可能和其他分片不一致。[^S4]
+
+## 6. 和 MySQL 原生分区的区别
+
+MySQL 原生分区（partitioning）把一张表的不同部分存成独立的物理部分，规则可以是取模、范围、值列表、内部哈希或线性哈希。[^S1] 但它仍在**一台服务器**里，应用看到的还是一张表；MySQL 8.4 只支持水平分区，不支持垂直分区，也没有计划支持；只有 InnoDB 和 NDB 支持分区。[^S1] 所以分区不分担这台机器的 CPU、网络和写入能力，不等于分库。
+
+- 分区表达式里用到的所有列，必须属于表上每一个唯一键。[^S3]
+- 一张表最多 8192 个分区（含子分区，非 NDB）。这是分区上限，和「该不该拆」无关。[^S2]
+
+## 7. 「单表两千万行就要拆」？
+
+这是中文社区流传的经验说法，**不是官方数字**。MySQL 8.4 手册、Azure、Vitess、ShardingSphere 都没有给出「多少行该拆」的阈值；实际取决于硬件、索引和访问方式。
+
+## 8. 现成方案（不做推荐）
+
+- **Apache ShardingSphere**：以 JDBC 驱动或 Proxy 方式，让多个分片库用起来像一个库；概念有逻辑表、真实表、分片列。[^S9]
+- **Vitess**：VTGate 路由、Vindex、在线重新分片。[^S6][^S7][^S8]
+- **TiDB**：数据按 Region 自动拆分调度，应用不用自己分库分表，但仍需注意写热点。[^S10]
+
+---
+
+[^S1]: MySQL 8.4 参考手册，26.1 Overview of Partitioning，https://dev.mysql.com/doc/refman/8.4/en/partitioning-overview.html ，2026-10-15 抓取
+[^S2]: MySQL 8.4 参考手册，26.6 Restrictions and Limitations on Partitioning，https://dev.mysql.com/doc/refman/8.4/en/partitioning-limitations.html ，2026-10-15 抓取
+[^S3]: MySQL 8.4 参考手册，26.6.1 Partitioning Keys, Primary Keys, and Unique Keys，https://dev.mysql.com/doc/refman/8.4/en/partitioning-limitations-partitioning-keys-unique-keys.html ，2026-10-15 抓取
+[^S4]: Azure 架构中心，Sharding pattern，https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding ，2026-04-02
+[^S5]: Azure 架构中心，Data partitioning guidance，https://learn.microsoft.com/en-us/azure/architecture/best-practices/data-partitioning ，2023-11-15
+[^S6]: Vitess 文档，Sharding，https://vitess.io/docs/reference/features/sharding/ ，2026-04-14（v24.0）
+[^S7]: Vitess 文档，Vindexes，https://vitess.io/docs/reference/features/vindexes/ ，2026-07-15
+[^S8]: Vitess 文档，Resharding，https://vitess.io/docs/user-guides/configuration-advanced/resharding/ ，2025-10-29
+[^S9]: Apache ShardingSphere 文档，Sharding / Concept，https://shardingsphere.apache.org/document/current/en/features/sharding/ ，current 版（5.5.3），页面无日期，**仅参考**（村长决定降为辅助来源）
+[^S10]: TiDB 文档，Troubleshoot Hotspot Issues，https://docs.pingcap.com/tidb/stable/troubleshoot-hot-spot-issues/ ，stable（v8.5 系），2026-10-15 抓取
