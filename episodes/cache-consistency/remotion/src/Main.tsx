@@ -1,37 +1,8 @@
-// 第二十一期 v4：shot.background 整屏底色（每段一种底色）；章节卡为带 label 的 rect。
-// 第二十期《两个订单，怎么撞成同一个号了？》：沿用 EP.19 渲染器（camera.pushIn + 单条整轨 voice.wav）。
-//   camera.pushIn{fromScale,toScale,startFrame,endFrame,origin,easing}：镜头元素层（不含字幕、水印）在 startFrame..endFrame 内从 fromScale 推到 toScale，origin 为缩放中心。
-//   配音改为单条整轨 public/audio/voice.wav（build_voice.py 按分镜停顿插好静音），第 0 帧起播；不再按镜头切音频。
-//   实物图不再走 public/assets 的 staticFile，全部用本期 ../assets/*.svg 内联（OBJ_ASSETS 清空）。
-// 第十八期《刚改的昵称，怎么又变回去了？》：沿用 EP.17 渲染器，新增（字段名照 storyboard.json；EP.13–17 分镜里都没有这些字段，旧期渲染不变）：
-//   dbRole="replica" + replicaOf=<主库 layerGroup> + delayFrames=N：从库图层。若本镜头没有给从库节点单独写动画（未预烘焙），
-//     （按整组判断）就按 asset 对上主库同组节点，把主库的全部关键帧和 appear/disappearFrame 整体推后 N 帧，并把 x/y/w/h 按两节点外框比例映射；
-//     若分镜已给从库节点写了动画（Miyazaki 的 gen.py 目前就是预烘焙好的），原样使用，不再重复推后。
-//     可选 clipTo=<元素 id>：把该节点裁进那个元素（tv-frame 时裁进屏幕内框 64,116,384×238 / 512）。
-//   knollDraw="signalLine" + signal{fromXY,toXY,dotStart,dotFrames,dotStopAt,dotKeep}：两端点之间的信号线（dashed=虚线，drawProgress 描出）。
-//   knollDraw="signalDot" + signalOf=<信号线 id>：圆点在 dotStart 起 dotFrames 帧内沿线走完；dotStopAt（0–1 比例或 [x,y] 坐标）非空时
-//     走到该处停住并 8 帧淡出（信号断了）；dotKeep=false 时到达终点 4 帧淡出。圆点上分镜写的 x/y/opacity 动画被忽略，以 signal 为准。
-//   nickname=true 的文字节点：手机昵称框内水平垂直居中，思源黑体（无则回退 Noto Sans CJK SC，同一字形），字号不小于 28px。
-//   动画属性新增 w / h（如球飞远变小），只在分镜写了时生效。
-// 第十七期《两个人抢同一件货，听谁的？》：沿用 EP.16 渲染器；实物图全部 staticFile 直出；动画属性 rotation 与 rotate 同义（dead-2 时钟旋转）。
-// 第十六期《没封箱的包裹，别人看得见吗？》：沿用 EP.15 渲染器；字幕严格按 storyboard 数字 from/to（不按字数重分）；空字幕不画框；水印第 0 帧常显。
-// 第九期《双十一下单那么多，为什么不丢单？》新增 arrow.headless（只画线段、不画箭头，用于划掉号单）。
-// 第三期《输入网址后，怎么找到服务器？》：沿用第二期 storyboard 驱动渲染器（元素 / 动画 / 字幕 / 配音）。
-// 第三期新增：drain（沙漏流沙）、strike（矩形划掉）、arrow.dash（虚线箭头）、PNG 图片（recap-2 第一期画面 ep1Frame）、
-//   字幕直接用 storyboard 的 from/to（Miyazaki 已按 MiMo 真实句子起点对齐），箭头标签在开始描绘时才出现（与检查帧一致）。
-// 第一期的逐镜头修正表（OVERRIDES / PINNED / ANIM_OVERRIDES / SFX / ARROW_TARGET）已清空；如需按镜头修正，填下方空表并在 README 记录原因。
-// image 元素把 ../assets/*.svg 内联渲染（见 sync_assets.mjs），以支持对 SVG 内 <g id> 的局部动画：
-//   tamperStrip  0→1  #tamper-strip 从左向右展开（封条贴上）
-//   tamperAlarm  0→1  #tamper-strip 变危险色并抖动（封条被破坏）
-//   drawCheck    0→1  #check 描线画出，#badge 由暗变亮（逐层验证通过）
-//   badgeDanger  0→1  #badge 内亮色转危险色、勾淡出、抖动（校验失败）
-//   glowPlaintext 0→1 #plaintext 发出危险色光晕（明文暴露）
-// 元素属性 tint="danger"|"#RRGGBB"：把 SVG 里所有亮色填充/描边换成该色并加同色光晕（如第 4 章被调包的假公钥）。
+// EP.22 v9: storyboard owns shot timing, chapter cards, labels, and animations.
 import React from 'react';
 import {ChannelBranding} from '../../../_shared/branding/ChannelBranding';
 import {AbsoluteFill, Audio, Img, Easing, Sequence, interpolate, interpolateColors, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import sb from '../../storyboard.json';
-import timing from './timing.json';
 import ASSETS from './assets.gen';
 
 const P: Record<string, string> = {bg: '#0B1020', panel: '#111827', panel2: '#1F2937', primary: '#22D3EE', secondary: '#3B82F6', text: '#E5E7EB', text2: '#9CA3AF', muted: '#6B7280', success: '#22C55E', accent: '#F59E0B', danger: '#F87171',
@@ -47,22 +18,15 @@ const ANIM_OVERRIDES: Record<string, any[]> = {};
 const SFX: Record<string, {f: number; src: string; v: number}[]> = {};
 
 const FPS = 30;
-// EP.22 新片尾：取消全局 60 帧品牌片尾卡；片尾 = 分镜 ending-1（讨论问题卡）+ ending-2（关注提醒卡 + 关注·点赞·收藏图标行），
-// 长度跟随结尾旁白；ending-2 在「…点赞收藏。」念完后停留 TAIL_HOLD 帧（动画不缩放，配音末尾补同长静音，见 build_voice.py）。
-const TAIL_HOLD: Record<string, number> = {'ending-2': 30};
+// The ending is already included in storyboard duration; build_voice.py pads audio to it.
 const ICON_ROW_SHOT = 'ending-2';
 const OBJ_ASSETS = new Set<string>();
 const shots: any[] = ((sb as any).scenes ?? []).flatMap((s: any) => s.shots.map((sh: any) => ({...sh, sceneId: s.id})));
-let acc = 0;
-const plan = shots.map((sh) => {
-  // 没有配音实测（timing.json 为空）时按分镜原时长排，便于出静帧预览
-  const t = (timing as any)[sh.id] ?? {duration: sh.durationInFrames, audioFrames: sh.durationInFrames - 30, noAudio: true};
-  const tail = TAIL_HOLD[sh.id] ?? 0;
-  const p = {sh, from: acc, dur: t.duration + tail, audioFrames: t.audioFrames, scale: t.duration / sh.durationInFrames, noAudio: !!t.noAudio};
-  acc += t.duration + tail;
-  return p;
-});
-export const totalFrames = Math.max(1, acc);
+// Final video = storyboard + end hold (meta.finalVideoFrames, 30 frames on ending-2; animation not scaled, audio silent).
+const TAIL_HOLD = Math.max(0, ((sb as any).meta.finalVideoFrames ?? sb.meta.durationInFrames) - sb.meta.durationInFrames);
+const plan = shots.map((sh, i) => ({sh, from: sh.from, dur: sh.durationInFrames + (i === shots.length - 1 ? TAIL_HOLD : 0),
+  audioFrames: sh.durationInFrames, scale: 1}));
+export const totalFrames = sb.meta.durationInFrames + TAIL_HOLD;
 
 const ease = (n: string) => (n === 'linear' ? Easing.linear : n === 'easeInOut' ? Easing.inOut(Easing.cubic) : n === 'easeIn' ? Easing.in(Easing.cubic) : Easing.out(Easing.cubic));
 
@@ -123,7 +87,7 @@ const ANIM_PROPS_UNUSED = ['tamperStrip', 'tamperAlarm', 'drawCheck', 'badgeDang
 
 const SvgImage: React.FC<{e: any; scope: string; v: (p: string, d: any) => any; has: (p: string) => boolean; frame: number}> = ({e, scope, v, has, frame}) => {
   const raw = ASSETS[e.asset];
-  if (!raw) return <div style={{width: '100%', height: '100%', border: `3px dashed ${P.muted}`, borderRadius: 12, color: P.text2, fontFamily: MONO, fontSize: 20, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>{e.asset}</div>;
+  if (!raw) throw new Error(`Missing storyboard asset: ${e.asset}`);
   let svg = prepSvg(raw);
   const par = e.fit === 'cover' ? 'xMidYMid slice' : e.fit === 'fill' ? 'none' : 'xMidYMid meet';
   svg = svg.replace('<svg', `<svg preserveAspectRatio="${par}" style="overflow:visible"`);
@@ -411,15 +375,33 @@ function subtitleTimes(sh: any, audioFrames: number) {
 
 const isFade = (t?: string) => t === 'fade' || t === 'crossfade';
 
+// Titles/subtitles and progress dots are authored as elements in v9. Gray cards
+// contain only the two text panels. Corner labels (including ending) remain data-driven.
+function shotElements(sh: any) {
+  if (!sh.chapterCard) return sh.elements;
+  const card = sh.chapterCard;
+  return sh.elements
+    .filter((e: any) => !card.gray || e.chapterCard || e.id === 'ns')
+    .map((e: any) => {
+      if (e.chapterCard) return {...e, label: card.name ?? e.label};
+      if (e.id === 'ns') return {...e, label: card.subtitle ?? sh.subtitle ?? e.label,
+        stroke: card.color ?? card.colour ?? e.stroke};
+      // An active dot can share the full-screen background color; outline it
+      // so every authored progress dot remains visible.
+      if (/^pi\d+$/.test(e.id)) return {...e, stroke: e.stroke ?? '#F8FAFC'};
+      return e;
+    });
+}
+
 const Shot: React.FC<{p: any; prevTr: any}> = ({p, prevTr}) => {
   const frame = useCurrentFrame();
   const {fps} = useVideoConfig();
-  const {sh, dur, audioFrames, scale, noAudio} = p;
+  const {sh, dur, audioFrames, scale} = p;
   const ov = ANIM_OVERRIDES[sh.id] ?? [];
   const src = [...sh.animations.filter((a: any) => !ov.some((o) => o.elementId === a.elementId && o.property === a.property)), ...ov];
   const anims = src.map((a: any) => PINNED[`${sh.id}:${a.elementId}`] ? a : {...a, keyframes: a.keyframes.map((k: any) => ({...k, frame: Math.round(k.frame * scale)}))});
   // EP.16 统一 z 排序：有 z 用 z；没有 z 的节点继承文档顺序里前一个节点的 z（+0.5，同值按原顺序稳定），所以 box 之后的标签仍在 box 之上
-  const ex = expandShot({...sh, elements: sh.elements.map((e: any) => e.signal ? {...e, signal: {...e.signal, _dotStart: Math.round((e.signal.dotStart ?? 0) * scale), _dotFrames: Math.round((e.signal.dotFrames ?? 1) * scale)}} : e)}, anims);
+  const ex = expandShot({...sh, elements: shotElements(sh).map((e: any) => e.signal ? {...e, signal: {...e.signal, _dotStart: Math.round((e.signal.dotStart ?? 0) * scale), _dotFrames: Math.round((e.signal.dotFrames ?? 1) * scale)}} : e)}, anims);
   let lastZ = -1;
   const elements = ex.elements.filter((e: any) => e.role !== 'subtitle')
     .map((e: any, i: number) => { const z = typeof e.z === 'number' ? e.z : lastZ + 0.5; if (typeof e.z === 'number') lastZ = e.z; return {...e, _z: z, _i: i, dash: e.dash ?? e.dashed, ...(OVERRIDES[`${sh.id}:${e.id}`] ?? {})}; })
@@ -436,7 +418,7 @@ const Shot: React.FC<{p: any; prevTr: any}> = ({p, prevTr}) => {
   const cur = subs.find((s: any) => frame >= s.from && frame <= s.to && (s.text ?? '').trim() !== '');
   return (
     <AbsoluteFill>
-      {sh.background ? <AbsoluteFill style={{background: sh.background, opacity: out * inn}} /> : null}
+      {sh.background ? <AbsoluteFill style={{background: color(sh.chapterCard?.color ?? sh.chapterCard?.colour ?? sh.background), opacity: out * inn}} /> : null}
       <AbsoluteFill style={{opacity: out * inn, transform: camScale !== 1 ? `scale(${camScale})` : undefined, transformOrigin: cam ? `${cam.origin[0]}px ${cam.origin[1]}px` : undefined}}>
         {elements.map((e: any) => e._clip
           ? <div key={e.id} style={{position: 'absolute', inset: 0, clipPath: `inset(${e._clip.y}px ${1920 - e._clip.x - e._clip.w}px ${1080 - e._clip.y - e._clip.h}px ${e._clip.x}px)`}}><Element e={e} anims={ex.anims} frame={frame} fps={fps} scope={`${sh.id}-${e.id}`} /></div>
