@@ -1,151 +1,117 @@
-# EP.22 封面（Miyazaki 素材）：照 EP.21 distributed-tx/cover/make_cover.py（版式 / 配色 / 字体，源自 EP.14 起的做法；16:9 1920×1080，4:3 = 16:9 裁 x240–1680 后整组缩 90% 居中，3:4 单独排 1080×1440）
-# 大字「改了价」白 /「页面怎么还是旧的？」橙；青底角标「缓存一致性」；右上「IT小村」。底部 15% 无字；3:4 顶部 144px 无字。
-# 主图：仓库（新绿价签）+ 备菜台（旧黄菜 + 旧黄价签）+ 手机仍显示旧价 + 厨师，对比「改了价 / 页面还是旧的」。自绘 SVG，无数字 / 英文。不取视频帧。
-import io
+# EP.22 封面 v0.29.1：Codex(gpt-6-astra) 版式 codex-cover-raw.md 实现。
+# 叙事：数据库=绿块新价 --(断开虚线+红叉)--> 缓存=黄块旧价 --(黄箭头)--> 手机屏=黄块旧价。
+# 无价签形状、无门店/总部比喻、无数字。phone-page.svg 含价签形，改为自绘手机。
+import io, os
 from PIL import Image, ImageDraw, ImageFont, ImageChops
 import cairosvg
-
 A = '/workspace/miyazaki-backup/cache-consistency/assets/'
-OUT = '/workspace/miyazaki-backup/cache-consistency/cover/'
-SHARE = '/workspace/share/covers/'
+B = '/workspace/miyazaki-backup/cache-consistency/'
+OUT = B + 'cover/'; JPG = B + 'covers/'; REP = B + 'replacements/'
 FONT = '/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc'
 FT = lambda s: ImageFont.truetype(FONT, int(s), index=2)
-P = dict(
-    bg="#0B1020", panel="#111827", primary="#22D3EE", secondary="#3B82F6",
-    accent="#F59E0B", success="#22C55E", danger="#F87171",
-    text="#FFFFFF", text2="#9CA3AF", muted="#6B7280",
-)
-TITLE = ["改了价", "页面怎么还是旧的？"]
-BADGE = "缓存一致性"
-
+BG = '#0B1020'
+TITLE = ["后台改了价格", "页面怎么还是旧的？"]; BADGE = "缓存一致性"
 
 def svg(n, w, h):
     im = Image.open(io.BytesIO(cairosvg.svg2png(url=A + n + '.svg', output_width=1600))).convert('RGBA')
-    im = im.crop(im.getbbox())
-    k = min(w / im.width, h / im.height)
+    im = im.crop(im.getbbox()); k = min(w / im.width, h / im.height)
     return im.resize((int(im.width * k), int(im.height * k)), Image.LANCZOS)
 
+def box(F, n, x, y, w, h):
+    im = svg(n, w, h); px, py = int(x + (w - im.width) / 2), int(y + (h - im.height) / 2)
+    F.alpha_composite(im, (px, py)); return (px, py, px + im.width, py + im.height)
 
-def place(F, im, cx, cy):
-    x, y = int(cx - im.width / 2), int(cy - im.height / 2)
-    F.alpha_composite(im, (x, y))
-    return (x, y, x + im.width, y + im.height)
+def phone(d, x, y, w, h):
+    d.rounded_rectangle([x, y, x + w, y + h], 36, fill='#111827', outline='#E5E7EB', width=6)
+    d.rounded_rectangle([x + 16, y + 44, x + w - 16, y + h - 22], 22, fill=BG)
+    d.rounded_rectangle([x + w / 2 - 28, y + 18, x + w / 2 + 28, y + 24], 3, fill='#6B7280')
+    return (x, y, x + w, y + h)
 
+def dash(d, p, q):
+    (x0, y0), (x1, y1) = p, q; L = max(abs(x1 - x0), abs(y1 - y0)); t = 0
+    while t < L:
+        e = min(t + 12, L)
+        d.line([(x0 + (x1 - x0) * t / L, y0 + (y1 - y0) * t / L), (x0 + (x1 - x0) * e / L, y0 + (y1 - y0) * e / L)], fill='#6B7280', width=5)
+        t += 22
 
-def txt(d, xy, t, fs, col, anchor='mm'):
-    d.text(xy, t, font=FT(fs), fill=col, anchor=anchor)
-    return d.textbbox(xy, t, font=FT(fs), anchor=anchor)
+def cross(d, cx, cy):
+    for s in (1, -1): d.line([(cx - 12, cy - 12 * s), (cx + 12, cy + 12 * s)], fill='#F87171', width=6)
 
+def arrow(d, pts):
+    d.line(pts, fill='#F59E0B', width=8, joint='curve')
+    (x0, y0), (x1, y1) = pts[-2], pts[-1]
+    if y0 == y1: d.polygon([(x1, y1), (x1 - 18, y1 - 10), (x1 - 18, y1 + 10)], fill='#F59E0B')
+    else: d.polygon([(x1, y1), (x1 - 10, y1 - 18), (x1 + 10, y1 - 18)], fill='#F59E0B')
 
-def main(F, d, x, y, w, h, vertical=False):
-    """主图：左仓库+新绿价签，中备菜台+旧黄菜/旧黄价签，右手机旧价页，厨师站台边。无数字/英文。"""
-    if not vertical:
-        wh = place(F, svg('warehouse', h * 0.72, h * 0.72), x + w * 0.18, y + h * 0.38)
-        pn = place(F, svg('price-new', h * 0.28, h * 0.28), x + w * 0.30, y + h * 0.18)
-        tb = place(F, svg('prep-table', w * 0.42, h * 0.42), x + w * 0.52, y + h * 0.72)
-        da = place(F, svg('dish-amber', h * 0.22, h * 0.22), x + w * 0.48, y + h * 0.52)
-        po = place(F, svg('price-old', h * 0.26, h * 0.26), x + w * 0.58, y + h * 0.38)
-        ch = place(F, svg('chef', h * 0.55, h * 0.55), x + w * 0.40, y + h * 0.28)
-        ph = place(F, svg('phone-page', h * 0.70, h * 0.70), x + w * 0.84, y + h * 0.42)
-    else:
-        wh = place(F, svg('warehouse', w * 0.38, w * 0.38), x + w * 0.22, y + h * 0.18)
-        pn = place(F, svg('price-new', w * 0.18, w * 0.18), x + w * 0.38, y + h * 0.06)
-        ch = place(F, svg('chef', w * 0.32, w * 0.32), x + w * 0.55, y + h * 0.22)
-        tb = place(F, svg('prep-table', w * 0.70, w * 0.28), x + w * 0.50, y + h * 0.55)
-        da = place(F, svg('dish-amber', w * 0.16, w * 0.16), x + w * 0.42, y + h * 0.42)
-        po = place(F, svg('price-old', w * 0.18, w * 0.18), x + w * 0.60, y + h * 0.38)
-        ph = place(F, svg('phone-page', w * 0.36, w * 0.36), x + w * 0.78, y + h * 0.78)
-    G = [wh, pn, tb, da, po, ch, ph]
-    return [(min(b[0] for b in G), min(b[1] for b in G), max(b[2] for b in G), max(b[3] for b in G))], []
-
-
-def head(d, tx, ty, tfs, tlh, align, bx, by, bh, bfs, wx, wy, tfs2=None):
+def head(d, lines, badge, wx, wy):
     R = []
-    for i, l in enumerate(TITLE):
-        a = 'la' if align == 'left' else 'ma'
-        fs = tfs if i == 0 else (tfs2 or tfs)
-        d.text(
-            (tx, ty + i * tlh), l, font=FT(fs),
-            fill=P['text'] if i == 0 else P['accent'],
-            anchor=a, stroke_width=4, stroke_fill=P['bg'],
-        )
-        R.append(d.textbbox((tx, ty + i * tlh), l, font=FT(fs), anchor=a))
-    bw = int(d.textlength(BADGE, font=FT(bfs))) + bh
-    if bx == 'c':
-        bx = int(tx - bw / 2)
-    d.rounded_rectangle([bx, by, bx + bw, by + bh], bh // 2, fill=P['primary'])
-    d.text((bx + bw / 2, by + bh / 2), BADGE, font=FT(bfs), fill=P['bg'], anchor='mm')
-    R.append((bx, by, bx + bw, by + bh))
-    R.append(txt(d, (wx, wy), "IT小村", 40, "#E5E7EB", 'ra'))
+    for (x, y, fs, anc), t, c in zip(lines, TITLE, ('#FFFFFF', '#F59E0B')):
+        d.text((x, y), t, font=FT(fs), fill=c, anchor=anc, stroke_width=4, stroke_fill=BG)
+        R.append(d.textbbox((x, y), t, font=FT(fs), anchor=anc))
+    bx, by, cx = badge; bw = int(d.textlength(BADGE, font=FT(44))) + 80
+    if cx: bx = int(bx - bw / 2)
+    d.rounded_rectangle([bx, by, bx + bw, by + 80], 40, fill='#22D3EE')
+    d.text((bx + bw / 2, by + 40), BADGE, font=FT(44), fill=BG, anchor='mm'); R.append((bx, by, bx + bw, by + 80))
+    d.text((wx, wy), "IT小村", font=FT(40), fill='#E5E7EB', anchor='ra'); R.append(d.textbbox((wx, wy), "IT小村", font=FT(40), anchor='ra'))
     return R
 
+def scene(F, d, db, g, ca, y_, ph, yb, dashes, xc, arr):
+    for p, q in dashes: dash(d, p, q)
+    cross(d, *xc); arrow(d, arr)
+    G = [box(F, 'db', *db), box(F, 'cache', *ca), phone(d, *ph)]
+    for n, b, t in (('data-new', g, '新价'), ('data-old', y_, '旧价'), ('data-old', yb, '旧价')): tag(F, d, n, b, t)
+    return G
 
-def overl(R):
-    return [
-        (a, b) for i, a in enumerate(R) for b in R[i + 1:]
-        if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]
-    ]
+def tag(F, d, n, b, t):
+    # v0.29.1-r2：块内标注（Nolan 要求每个数据块都带「新价/旧价」），用块底色盖掉示意横线后写深色字
+    x0, y0, x1, y1 = box(F, n, *b); w, h = x1 - x0, y1 - y0; i = max(7, h * .09)
+    fill, ink = ('#22C55E', '#052E16') if n == 'data-new' else ('#F59E0B', '#1C1306')
+    d.rounded_rectangle([x0 + i, y0 + i, x1 - i, y1 - i], int(h * .16), fill=fill)
+    fs = int(min(h * .58, (w - 2 * i) * .80 / 2)); f = FT(fs); cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
+    d.text((cx, cy), t, font=f, fill=ink, anchor='mm'); tb = d.textbbox((cx, cy), t, font=f, anchor='mm')
+    ok = tb[0] > x0 + i and tb[2] < x1 - i and tb[1] > y0 + i and tb[3] < y1 - i
+    print('  label', t, 'fs', fs, 'block', (w, h), 'inside' if ok else 'OUTSIDE')
 
+def check(tag, W, H, T, G, top=0):
+    U = lambda b: (min(x[0] for x in b), min(x[1] for x in b), max(x[2] for x in b), max(x[3] for x in b))
+    err = [('bottom15%', t) for t in T if t[3] > H * 0.85] + [('top', t) for t in T if t[1] < top]
+    err += [('edge', b) for b in T + G if b[0] < 0 or b[1] < 0 or b[2] > W or b[3] > H]
+    err += [('overlap', a, b) for i, a in enumerate(T) for b in T[i + 1:] + G if a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3]]
+    print(tag, 'ERR' if err else 'OK', err, 'subject', U(G))
 
-def check(tag, W, H, Hd, G, TX, top=0, crop=None):
-    T = Hd + TX
-    bot = int(H * 0.85)
-    err = (
-        overl(Hd + G + TX)
-        + [('bottom15%', t) for t in T if t[3] > bot]
-        + [('top', t) for t in T if t[1] < top]
-        + [('edge', b) for b in Hd + G + TX if b[0] < 0 or b[1] < 0 or b[2] > W or b[3] > H]
-    )
-    if crop:
-        err += [('4:3 crop', b) for b in Hd + G + TX if b[0] < crop[0] or b[2] > crop[1]]
-    print(
-        tag, 'ERR' if err else 'OK', err,
-        'subject', min(b[0] for b in G), min(b[1] for b in G),
-        max(b[2] for b in G), max(b[3] for b in G),
-    )
+L = {}
+def mk(tag, W, H, lines, badge, wx, wy, sc, top=0):
+    F = Image.new('RGBA', (W, H), BG); d = ImageDraw.Draw(F)
+    T = head(d, lines, badge, wx, wy); G = scene(F, d, **sc)
+    check(tag, W, H, T, G, top); im = F.convert('RGB'); im.save(OUT + f'ep22-{tag}.png'); L[tag] = im
 
+mk('16x9', 1920, 1080, [(280, 72, 96, 'la'), (280, 200, 96, 'la')], (280, 342, 0), 1660, 72, dict(
+    db=(280, 550, 320, 300), g=(358, 664, 164, 96), ca=(790, 550, 350, 300), y_=(879, 660, 172, 100),
+    ph=(1380, 476, 280, 440), yb=(1430, 646, 180, 108), dashes=[((600, 700), (666, 700)), ((724, 700), (790, 700))],
+    xc=(695, 700), arr=[(1140, 700), (1378, 700)]))
+mk('4x3', 1440, 1080, [(100, 72, 96, 'la'), (100, 200, 96, 'la')], (100, 342, 0), 1340, 72, dict(
+    db=(100, 570, 280, 270), g=(168, 672, 144, 88), ca=(560, 560, 300, 280), y_=(632, 662, 156, 96),
+    ph=(1090, 506, 240, 400), yb=(1130, 660, 160, 96), dashes=[((380, 700), (440, 700)), ((500, 700), (560, 700))],
+    xc=(470, 700), arr=[(860, 700), (1088, 700)]))
+mk('3x4', 1080, 1440, [(540, 254, 110, 'ma'), (540, 398, 96, 'ma')], (540, 552, 1), 1020, 168, dict(
+    db=(60, 820, 240, 250), g=(116, 914, 128, 80), ca=(400, 820, 270, 250), y_=(463, 910, 144, 88),
+    ph=(780, 740, 240, 440), yb=(820, 906, 160, 96), dashes=[((300, 954), (324, 954)), ((376, 954), (400, 954))],
+    xc=(350, 954), arr=[(670, 954), (778, 954)]), top=144)
+mk('9x16', 1080, 1920, [(540, 288, 110, 'ma'), (540, 432, 96, 'ma')], (540, 588, 1), 1020, 168, dict(
+    db=(60, 760, 260, 260), g=(118, 858, 144, 88), ca=(400, 1000, 280, 260), y_=(464, 1094, 152, 92),
+    ph=(760, 1180, 260, 440), yb=(805, 1346, 170, 102), dashes=[((320, 890), (388, 890)), ((448, 890), (540, 890)), ((540, 890), (540, 1000))],
+    xc=(418, 890), arr=[(680, 1130), (890, 1130), (890, 1178)]), top=144)
 
-def margins(p):
-    im = Image.open(p).convert('RGB')
-    bg = Image.new('RGB', im.size, P['bg'])
-    df = ImageChops.difference(im, bg).convert('L').point(lambda v: 255 if v > 24 else 0)
-    x0, y0, x1, y1 = df.getbbox()
-    return dict(left=x0, top=y0, right=im.width - x1, bottom=im.height - y1)
-
-
-# ---- 16:9 ----
-F = Image.new('RGBA', (1920, 1080), P['bg'])
-d = ImageDraw.Draw(F)
-Hd = head(d, 280, 70, 96, 120, 'left', 280, 340, 80, 44, 1640, 70)
-G, TX = main(F, d, 200, 430, 1520, 520)
-check('16x9', 1920, 1080, Hd, G, TX, crop=(240, 1680))
-F.convert('RGB').save(OUT + 'ep22-16x9.png')
-
-# ---- 4:3 from 16:9 crop ----
-C = F.crop((240, 0, 1680, 1080))
-k = 0.9
-C = C.resize((round(1440 * k), round(1080 * k)), Image.LANCZOS)
-G4 = Image.new('RGBA', (1440, 1080), P['bg'])
-G4.alpha_composite(C, ((1440 - C.width) // 2, (1080 - C.height) // 2))
-G4.convert('RGB').save(OUT + 'ep22-4x3.png')
-
-# ---- 3:4 ----
-F = Image.new('RGBA', (1080, 1440), P['bg'])
-d = ImageDraw.Draw(F)
-Hd = head(d, 540, 180, 110, 130, 'center', 'c', 450, 80, 44, 1000, 140, tfs2=78)
-G, TX = main(F, d, 60, 620, 960, 680, vertical=True)
-check('3x4', 1080, 1440, Hd, G, TX, top=144)
-F.convert('RGB').save(OUT + 'ep22-3x4.png')
-
-for n, req in (('16x9', 0), ('4x3', 60), ('3x4', 0)):
-    m = margins(OUT + f'ep22-{n}.png')
-    print(n, 'margins', m, ('OK' if min(m.values()) >= req else 'FAIL(<%d)' % req) if req else '')
-
-# also write JPG into share/covers (same naming as ep21)
-import os
-os.makedirs(SHARE, exist_ok=True)
-for n in ('16x9', '4x3', '3x4'):
-    im = Image.open(OUT + f'ep22-{n}.png').convert('RGB')
-    path = SHARE + f'ep22-{n}.jpg'
-    im.save(path, 'JPEG', quality=92, optimize=True)
-    print('share', path, os.path.getsize(path), im.size)
+os.makedirs(JPG, exist_ok=True)
+R = 'episodes/cache-consistency/'
+rep = {R + 'cover-16x9.jpg': '16x9', R + 'cover-4x3.jpg': '4x3', R + 'cover-3x4.jpg': '3x4',
+       'site/public/' + R + 'cover-16x9.jpg': '16x9',
+       R + 'cover/ep22-16x9.png': '16x9', R + 'cover/ep22-4x3.png': '4x3', R + 'cover/ep22-3x4.png': '3x4'}
+for t, im in L.items(): im.save(JPG + f'ep22-{t}.jpg', 'JPEG', quality=92, optimize=True)
+for p, t in rep.items():
+    os.makedirs(os.path.dirname(REP + p), exist_ok=True)
+    L[t].save(REP + p, 'JPEG', quality=92, optimize=True) if p.endswith('.jpg') else L[t].save(REP + p)
+S = Image.new('RGB', (3000, 1000), '#1F2937'); x = 20
+for t in ('16x9', '4x3', '3x4', '9x16'):
+    im = L[t].copy(); im.thumbnail((900, 640) if t in ('16x9', '4x3') else (520, 960)); S.paste(im, (x, 20)); x += im.width + 20
+S.crop((0, 0, x, 1000)).save(OUT + 'ep22-covers-sheet.png'); print('sheet', x)
