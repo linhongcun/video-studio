@@ -18,7 +18,7 @@ def lines_px(e):   # 真实 Main.tsx：rect 标签首行 fs（默认 32），其
         return [(l,fs if i==0 or len(L)==1 else round(fs*(0.5 if fs>40 else 0.85))) for i,l in enumerate(L) if l.strip()]
     if e['type']=='text': return [(e['text'],e['fontSize'])]
     return []
-narr=narration(); assert len(narr)==13
+narr=narration(); assert len(narr)==26
 g=0;nsh=0;subsAll=[]
 for sc in d['scenes']:
     assert sc['from']==g,('scene from',sc['id']);f=g
@@ -55,7 +55,7 @@ if d['meta']['durationInFrames']!=g: err.append('total')
 for sc in d['scenes']:
     for sh in sc['shots']:
         for e in sh['elements']:
-            if e.get('role')=='subtitle': continue
+            if e.get('role')=='subtitle' or e.get('quote'): continue   # v4 四格对比：每格是旁白原句（Nolan 定），不算重复字幕
             for l,_ in lines_px(e):
                 n=N(l)
                 if not n or l in TERMS: continue
@@ -80,5 +80,36 @@ for sc in d['scenes']:
         if N(''.join(x['text'] for x in sh['subtitles']))!=N(sh['narration']): err.append(('subs != narration',sh['id']))
 P=d['meta'].get('poster') or {}
 if not P or not any(x['id']==P.get('shotId') and x['from']+P['localFrame']==P['frame'] and P['localFrame']<x['durationInFrames'] for sc in d['scenes'] for x in sc['shots']): err.append('poster')
+# v4 分界检查：底色、道具不跨段、章节卡、开场第 0 帧
+SEGC={"intro":"#0B1020","pc":"#E8B53A","tcc":"#2FA38A","saga":"#8E6BBF","msg":"#C9733A","end":"#D9D6CF"}
+CARDN={"card-1":("第一种 · 两阶段提交","pc"),"card-2":("第二种 · 预留确认取消","tcc"),"card-3":("第三种 · 补偿事务","saga"),"card-4":("第四种 · 可靠消息","msg")}
+EXC={"pc":{"dispatcher","dispatcher-off","note-pencil","note-stamped","note-erased","slot-locked","sign-green","sign-red","stamp","hourglass"},
+     "tcc":{"dispatcher-teal","box-sealed","seal-torn","three-sheets","cmd-dup"},"saga":{"done-mark","restock","rewind-no","eye","retry","shelf-gap"},
+     "msg":{"post-office","slip","slip-void","slip-dup","signed","runner","badge-red"}}
+INTRO_OK={"note-erased"}   # 第 3 章「同一个库能全部撤回」先于第一种出现，属开场生活场景
+ENDTHUMB={"shelf-gap","restock","post-office","slip"}   # 第 25 章：紫段 / 橙棕段各取一格缩略（plan 规定）
+for sc in d['scenes']:
+    for sh in sc['shots']:
+        cid=sh['id']
+        if cid in CARDN:
+            nm,sg=CARDN[cid];labs=[e.get('label') for e in sh['elements'] if e.get('role')!='subtitle']
+            if labs!=[nm] or sh.get('background')!=SEGC[sg]: err.append(('card',cid,labs,sh.get('background')))
+            run=max((sum(1 for _ in g_) for k_,g_ in __import__('itertools').groupby(full(sh,'nm',f) for f in range(sh['durationInFrames'])) if k_),default=0)-sh['transition']['durationInFrames']
+            if run<69: err.append(('card full<69',cid,run))
+            if sh['narration'] or not sh.get('chapterCard',{}).get('insertBeforeSentence'): err.append(('card hold meta',cid))
+            continue
+        c=sh['chapterId'];sg="intro" if c in("hook","signal","local") else ("end" if c in("eventual","recap") else c.split('-')[0])
+        if sh.get('background')!=SEGC[sg]: err.append(('bg',cid,sh.get('background')))
+        A={os.path.basename(e['asset'])[:-4] for e in sh['elements'] if e['type']=='image'}
+        for s2,X in EXC.items():
+            bad=A&X
+            if s2==sg or not bad: continue
+            if sg=="intro" and bad<=INTRO_OK: continue
+            if c=="eventual" and bad<=ENDTHUMB: continue
+            err.append(('prop leak',cid,s2,sorted(bad)))
+h1=d['scenes'][0]['shots'][0]
+if h1['id']!='hook-1' or h1['durationInFrames']<144: err.append('hook len')
+labs0={e.get('label') for e in h1['elements'] if e['type']=='rect' and full(h1,e['id'],0)}
+if not {'订单','库存','成功'}<=labs0 or labs0&{'红站','蓝站'}: err.append(('hook frame0',labs0))
 print(err if err else 'ALL OK',g,nsh,'provisionalTiming',d['meta']['provisionalTiming'])
 sys.exit(1 if err else 0)

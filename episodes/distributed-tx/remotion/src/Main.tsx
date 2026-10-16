@@ -1,3 +1,4 @@
+// 第二十一期 v4：shot.background 整屏底色（每段一种底色）；章节卡为带 label 的 rect。
 // 第二十期《两个订单，怎么撞成同一个号了？》：沿用 EP.19 渲染器（camera.pushIn + 单条整轨 voice.wav）。
 //   camera.pushIn{fromScale,toScale,startFrame,endFrame,origin,easing}：镜头元素层（不含字幕、水印）在 startFrame..endFrame 内从 fromScale 推到 toScale，origin 为缩放中心。
 //   配音改为单条整轨 public/audio/voice.wav（build_voice.py 按分镜停顿插好静音），第 0 帧起播；不再按镜头切音频。
@@ -427,6 +428,7 @@ const Shot: React.FC<{p: any; prevTr: any}> = ({p, prevTr}) => {
   const cur = subs.find((s: any) => frame >= s.from && frame <= s.to && (s.text ?? '').trim() !== '');
   return (
     <AbsoluteFill>
+      {sh.background ? <AbsoluteFill style={{background: sh.background, opacity: out * inn}} /> : null}
       <AbsoluteFill style={{opacity: out * inn, transform: camScale !== 1 ? `scale(${camScale})` : undefined, transformOrigin: cam ? `${cam.origin[0]}px ${cam.origin[1]}px` : undefined}}>
         {elements.map((e: any) => e._clip
           ? <div key={e.id} style={{position: 'absolute', inset: 0, clipPath: `inset(${e._clip.y}px ${1920 - e._clip.x - e._clip.w}px ${1080 - e._clip.y - e._clip.h}px ${e._clip.x}px)`}}><Element e={e} anims={ex.anims} frame={frame} fps={fps} scope={`${sh.id}-${e.id}`} /></div>

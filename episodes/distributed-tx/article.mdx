@@ -7,7 +7,7 @@ series: 数据库入门
 
 你下单付了钱，页面显示成功，仓库却根本没扣库存。如果订单和库存记在不同的数据库里、各记各的，就可能出现这种「一个成了，另一个没成」的情况。这一期讲：数据分在不同的库里以后，怎么还能一起成功或一起失败——也就是分布式事务。
 
-> 说明：本文资料核查于 2026-10-15（23:4x 返工时 S1–S4、S7–S10 重新抓取）。返工版旁白讲全四种实现：两阶段提交、TCC（预留 / 确认 / 取消）、Saga（先做、失败了反向补偿）、可靠消息；XA 语句、各软件版本、编排 / 编舞、空回滚 / 悬挂只写在这里。本期不引用任何性能数字（吞吐、延迟、锁持有时间）。没有日期的页面只作机制描述，版本以 Releases 页为准；microservices.io 页面无日期，标「仅参考」。
+> 说明：本文资料核查于 2026-10-15；2026-10-16 分界返工时 S1、S2、S3、S5、S7 重新抓取并逐句核对旁白。返工版旁白讲全四种实现：两阶段提交、TCC（预留 / 确认 / 取消）、Saga（先做、失败了反向补偿）、可靠消息；XA 语句、各软件版本、编排 / 编舞、空回滚 / 悬挂只写在这里。本期不引用任何性能数字（吞吐、延迟、锁持有时间）。没有日期的页面只作机制描述，版本以 Releases 页为准；microservices.io 页面无日期，标「仅参考」。
 
 ## 1. 为什么本地事务不够用了
 
@@ -15,7 +15,7 @@ series: 数据库入门
 
 Azure 架构中心的说法是：单个服务在一个数据库里能遵守 ACID，跨多个服务时就复杂得多，传统的 ACID 保证「aren't directly applicable to multiple independently managed data stores」[^S7]。RocketMQ 文档也用电商下单举过反例：订单执行了，消息却没发出去；超时错误又没法可靠判断要不要回滚订单[^S5]。
 
-## 2. 两阶段提交（2PC / XA）：先问准备好，再统一生效
+## 2. 第一种，两阶段提交（2PC / XA）：先准备、再统一生效
 
 以 MySQL 8.4 为例（旁白「八点四」；MySQL 按一个单词读），XA 事务让多个独立的事务资源参与同一个全局事务，「either all components must commit, or all components must roll back」[^S1]。
 
@@ -27,15 +27,15 @@ MySQL 里的语句大致是 `XA START` → 执行 SQL → `XA END` → `XA PREPA
 
 **代价**：进入 PREPARED 状态的 XA 事务会一直保留，直到显式执行 `XA COMMIT` 或 `XA ROLLBACK`[^S2]，可以用 `XA RECOVER` 查出还悬着的事务。也就是说，投了「准备好」以后，参与者自己不能决定，只能等协调者；协调者挂了，它就悬着，相关数据一直被占着（旁白里的「对讲机没声了，只能干等」）。RocketMQ 文档也定性地指出 XA 要锁住大量资源，并发低[^S5]。另外 MySQL 对 XA 还有复制过滤、binlog 分段写等限制，见手册[^S2]。
 
-## 3. TCC：业务代码自己做两阶段（旁白：贴「已预留」封条）
+## 3. 第二种，TCC：先预留，再确认或取消（旁白：贴「已预留」封条）
 
-Seata 文档：Try 负责检查并**预留**资源，是第一阶段；Confirm 是第二阶段提交；Cancel 是第二阶段回滚，释放预留、恢复原状[^S3]。它不依赖数据库的 prepare，能缩短锁资源的时间，但要业务系统自己实现 Try / Confirm / Cancel 三个动作，设计相对复杂[^S3]，还要处理幂等、空回滚、悬挂。
+Seata 文档：TCC 是两阶段提交里资源管理器的一种「面向服务」的实现；Try 负责检查并**预留**资源，是第一阶段；Confirm 是第二阶段提交；Cancel 是第二阶段回滚，释放预留、恢复原状[^S3]。它不依赖底层数据库，能缩短资源锁定的时间（reduces resource lock holding time），但要业务系统自己实现 Try / Confirm / Cancel 三个动作，设计相对复杂[^S3]，还要处理幂等、空回滚、悬挂。
 
-用驿站说：不让数据库一直锁着，改成业务自己贴封条——蓝站先在货上贴「已预留」封条，货还在架上但别人买不走（Try）；之后还是由调度员（协调者，Seata 里是 TC 和 TM）喊确认或取消：订单成了就撕封条真出库（Confirm），没成就撕封条、货照常卖（Cancel）[^S3]。这一点和可靠消息不同：可靠消息没有全局协调者。旁白说的「防着同一个指令重复送来」对应 Seata 说的幂等问题[^S3]。Pat Helland 把这种做法叫 tentative operation（暂定操作）：对方先接受不确定，之后收到确认或取消[^S10]。
+用驿站说：不让数据库一直锁着，改成业务自己贴封条——蓝站先在货上贴「已预留」封条，货还在架上但别人买不走（Try）；之后还是由调度员（协调者，Seata 文档里由 TM 分两阶段协调）喊确认或取消：订单成了就撕封条真出库（Confirm），没成就撕封条、货照常卖（Cancel）[^S3]。一致性怎么说：Seata 的原话是由 TM 分两阶段协调，保证所有资源的最终状态一致——要么都提交，要么都回滚（旁白：「最后要么都确认，要么都取消」）[^S3]。本文不把 TCC 称为「强一致」：Try 之后、Confirm 之前，预留是业务层的，不是数据库锁。旁白说的「防着同一个指令重复送来」对应 Seata 说的幂等问题[^S3]。Pat Helland 把这种做法叫 tentative operation（暂定操作）：对方先接受不确定，之后收到确认或取消[^S10]。
 
 版本：Apache Seata（孵化项目）最新正式版 **2.6.0**（2026-01-28）；2.7.0 目前还是 RC 预发布版，不是正式版[^S4]。
 
-## 4. Saga：先各做各的，出错就补偿（旁白：先出库、失败了重新上架）
+## 4. 第三种，Saga：先做，失败了再补偿（旁白：先出库、失败了重新上架）
 
 Saga 把一个事务拆成一串本地事务；某一步失败，就执行一系列补偿事务，抵消前面已经做过的改动[^S7]。组织方式有两种：编舞（choreography，各方发事件，没有中心）和编排（orchestration，有一个编排器，但它本身会成为故障点）[^S7]。
 
@@ -46,44 +46,53 @@ Saga 把一个事务拆成一串本地事务；某一步失败，就执行一系
 - 补偿也可能失败；
 - 各步骤要幂等。
 
-用驿站说：蓝站先真把货出了库，后面红站失败，就把货「重新上架」——这是一个反向动作，不是时光倒流：已提交的改动不能回滚[^S7]。中间那段时间别人能看见货架空了（没有隔离）；补偿本身也可能失败，要能重试且幂等[^S7]。Seata 2.x 也提供 Saga 模式[^S4]。另见 microservices.io 的总结：缺少自动回滚、缺少隔离[^S8]。
+用驿站说：蓝站先真把货出了库，后面红站失败，就把货「重新上架」——这是一个反向动作，不是时光倒流：已提交的改动不能回滚[^S7]。中间那段时间别人能看见货架空了（没有隔离）；补偿本身也可能失败，要能重试且幂等[^S7]。Azure 还指出，可重试的步骤让 saga「eventually achieve a consistent state」，即最终一致[^S7]。Seata 2.x 也提供 Saga 模式[^S4]。另见 microservices.io 的总结：缺少自动回滚、缺少隔离[^S8]。
 
-## 5. 可靠消息：条子跑到签收为止（不撤回，也不补偿）
+## 5. 第四种，可靠消息：先记下来，再保证送到（不撤回订单）
 
-### 5.1 本地消息表（Transactional outbox）
+### 5.1 本地消息表（Transactional outbox，仅参考；旁白不按这个讲）
 
 订单库在**同一个本地事务**里，同时写「订单」和「一条待发送的通知」；之后后台反复把通知投递给库存服务，直到对方确认[^S9]。这样就避免了「数据库改了、消息没发」的一半状态。下游要按订单号去重（幂等），因为通知可能重复送达。
 
-### 5.2 RocketMQ 事务消息（半消息）
+### 5.2 RocketMQ 事务消息（半消息；旁白按这个讲）
 
-流程[^S5]：先发一条「半消息」（暂不投递）→ 生产者执行本地事务 → 提交 Commit 或 Rollback；broker 没收到结果时，会主动回查生产者这条半消息的状态。超时未决默认回滚半消息（具体时长见官方参数说明，本文不引数字）。
+流程[^S5]：先发一条「半消息」（暂不投递）→ 生产者执行本地事务 → 提交 Commit 或 Rollback；broker 没收到结果时，会主动回查生产者这条半消息的状态。超时未决默认回滚半消息（具体时长见官方参数说明，本文不引数字）[^S5]。旁白对照：条子交邮局暂存不送 = 半消息；「可以送了 / 作废」= Commit / Rollback；邮局回头问 = 回查；蓝站没处理好就再送 = 消费重试[^S5]。v4 删掉了旧旁白「同一页账上同时写订单和条子」「连调度员都不要」：前者是本地消息表的说法，只有 microservices.io（仅参考）支撑；后者与 RocketMQ 自述「在普通消息上支持两阶段提交」不符。
 
 一致性边界：它「ensures only final consistency」，也不保证下游消费结果和上游执行结果一致，下游业务必须自己保证正确处理[^S5]。版本：RocketMQ 最新 **5.5.1**（2026-08-20），文档按 5.x[^S6]。
 
-## 6. 最终一致是什么意思
+## 6. 最终一致：Saga 和可靠消息都是
 
-最终一致不是「不一致」：中间会有一小段时间订单和库存对不上，但只要条子一直重试到签收、下游按单号去重，最后一定对上[^S5]。
+最终一致不是 Saga 或可靠消息独有的说法，这两种都是：中间会有一段时间订单和库存对不上，等补偿（Saga）或重送（可靠消息）做成了，最后再对上[^S5][^S7]。旁白不说「最后一定对上」：Azure 明确写了补偿事务可能失败，系统会停在不一致状态，要靠监控和重试[^S7]。
 
 ## 7. 方案怎么选（对照）
 
 | 方案 | 一致性 | 协调者 | 失败怎么办 | 代价 | 旁白 | 本文 |
 |---|---|---|---|---|---|---|
-| 两阶段提交（XA） | 强一致 | 要（TM） | 统一回滚 | 锁多、并发低；协调者挂了会卡住 | 讲（调度员、干等） | 语句、PREPARED、限制 |
-| TCC | 接近强一致 | 要（如 Seata） | Cancel 释放预留 | 业务三套动作，复杂；要防重复 | 讲（封条） | §3 |
+| 两阶段提交（XA） | 全局事务也具备 ACID（MySQL 手册原话 “extends ACID properties up a level”） | 要（TM） | 统一回滚 | 锁多、并发低；协调者挂了会卡住 | 讲（调度员、干等） | 语句、PREPARED、限制 |
+| TCC | 最终状态要么都确认、要么都取消（Seata 原话；不称强一致） | 要（如 Seata） | Cancel 释放预留 | 业务三套动作，复杂；要防重复 | 讲（封条） | §3 |
 | Saga | 最终一致，无隔离 | 编排有 / 编舞无 | 反向补偿（可能失败） | 中间态可见、要幂等 | 讲（重新上架） | §4 |
 | 本地消息表 / 事务消息 | 最终一致 | 不需要全局协调者 | 重试 + 回查 | 有延迟、下游要幂等 | 讲（条子、签收、认单号） | §5 |
 
-一句话：要么等大家都说好再一起生效，稳但慢；要么先预留、先做后补，或者先记下来再保证送到，快，但要多写几套动作，中间也可能短暂对不上。注意区分：可靠消息不撤回也不补偿，只重试送到；补偿是 Saga（以及 TCC 的取消）的事。Helland 也指出：多数分布式事务系统里，一个节点故障会让提交卡住[^S10]。没有哪一种「最好」，看业务能不能接受短暂对不上。
+### 四格对比（同视频结尾，均为旁白原句）
+
+| 方案 | 怎么做 | 代价 |
+|---|---|---|
+| 两阶段提交 | 先准备、再统一生效 | 货一直锁着，别人也买不走 |
+| TCC（预留确认取消） | 先预留，再确认或取消 | 每个业务都得自己写预留、确认、取消这三套动作 |
+| Saga（补偿事务） | 先做，失败了再补偿 | 中间那段时间，别人能看见货架空了 |
+| 可靠消息 | 先记下来，再保证送到 | 蓝站没处理好，只能重送，不能撤回订单 |
+
+注意区分：可靠消息不撤回订单，只重送；补偿是 Saga 的事。Helland 也指出：多数分布式事务系统里，一个节点故障会让提交卡住[^S10]。没有哪一种「最好」，看业务能不能接受短暂对不上。
 
 ---
 
-[^S1]: MySQL 8.4 Reference Manual, 15.3.8 XA Transactions，https://dev.mysql.com/doc/refman/8.4/en/xa.html ，2026-10-15 抓取
-[^S2]: MySQL 8.4 Reference Manual, 15.3.8.3 Restrictions on XA Transactions，https://dev.mysql.com/doc/refman/8.4/en/xa-restrictions.html ，2026-10-15 抓取
-[^S3]: Apache Seata 文档：TCC 模式，https://seata.apache.org/docs/user/mode/tcc/ ，页面无日期，2026-10-15 抓取（机制描述；版本以 S4 为准）
+[^S1]: MySQL 8.4 Reference Manual, 15.3.8 XA Transactions，https://dev.mysql.com/doc/refman/8.4/en/xa.html ，2026-10-15 抓取，2026-10-16 复核
+[^S2]: MySQL 8.4 Reference Manual, 15.3.8.3 Restrictions on XA Transactions，https://dev.mysql.com/doc/refman/8.4/en/xa-restrictions.html ，2026-10-15 抓取，2026-10-16 复核
+[^S3]: Apache Seata 文档：TCC 模式，https://seata.apache.org/docs/user/mode/tcc/ ，页面无日期，2026-10-15 抓取，2026-10-16 复核（机制描述；版本以 S4 为准）
 [^S4]: Apache Seata GitHub Releases，https://github.com/apache/incubator-seata/releases ，2026-10-15 抓取（v2.6.0 发布于 2026-01-28；v2.7.0 为 RC）
-[^S5]: Apache RocketMQ 文档：Transaction Message，https://rocketmq.apache.org/docs/featureBehavior/04transactionmessage/ ，页面无日期，2026-10-15 抓取（机制描述；版本以 S6 为准）
+[^S5]: Apache RocketMQ 文档：Transaction Message，https://rocketmq.apache.org/docs/featureBehavior/04transactionmessage/ ，页面无日期，2026-10-15 抓取，2026-10-16 复核（机制描述；版本以 S6 为准）
 [^S6]: Apache RocketMQ GitHub Releases，https://github.com/apache/rocketmq/releases ，2026-10-15 抓取（rocketmq-all-5.5.1，2026-08-20）
-[^S7]: Azure Architecture Center：Saga design pattern，https://learn.microsoft.com/en-us/azure/architecture/patterns/saga ，2026-10-15 抓取
+[^S7]: Azure Architecture Center：Saga design pattern，https://learn.microsoft.com/en-us/azure/architecture/patterns/saga ，2026-10-15 抓取，2026-10-16 复核
 [^S8]: microservices.io：Pattern: Saga（Chris Richardson），https://microservices.io/patterns/data/saga.html ，页面无日期，2026-10-15 抓取 → **仅参考**
 [^S9]: microservices.io：Pattern: Transactional outbox（Chris Richardson），https://microservices.io/patterns/data/transactional-outbox.html ，页面无日期，2026-10-15 抓取 → **仅参考**（机制与 S5 交叉）
 [^S10]: Pat Helland, "Life Beyond Distributed Transactions: An apostate's opinion", ACM Queue 14(5), 2016-12-12，https://queue.acm.org/detail.cfm?id=3025012 ，2026-10-15 抓取 → 2020 年以前 **仅参考**

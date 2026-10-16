@@ -8,12 +8,12 @@ if [ -f "$T" ] && [ -z "$FORCE_ESTIMATE" ]; then echo "timing: $T"; MAP="python3
 # fullshow / labelfix：distributed-tx 用新定义（完整显示 = 可见 − 12 帧 pop-in − 转场淡出），由 _audit/terms.json fullShowExcludesFadeOut 打开
 # 标签修正可能加 hold（label_holds.json）→ 退出码 3 时重跑，最多 4 轮
 for i in 1 2 3 4; do
-  $MAP >/dev/null && python3 -B asr_words.py >/dev/null && python3 -B gen.py >/dev/null
+  $MAP >/dev/null && python3 -B asr_words.py /dev/null/none >/dev/null && python3 -B gen.py >/dev/null && python3 -B cue_words.py >/dev/null
   rc=0; python3 -B ../_audit/labelfix.py . || rc=$?
   [ $rc = 3 ] || break
 done
 [ $rc = 0 ] || [ $rc = 3 ] || exit $rc
-python3 -B gen.py | tail -1 && python3 -B ../_audit/labelfix.py . >/dev/null; python3 -B validate.py && python3 -B ../_audit/fullshow.py . && (cd .. && python3 -B _audit/cuecheck.py distributed-tx)
+python3 -B gen.py | tail -1 && python3 -B cue_words.py && python3 -B ../_audit/labelfix.py . >/dev/null; python3 -B validate.py && python3 -B ../_audit/fullshow.py . && (cd .. && python3 -B _audit/cuecheck.py distributed-tx)
 # 配音状态：没有 Knoll timeline → pendingAudio（暂定，不是定稿）；有 → 核对 narration.wav 在不在、打印 sha256
 python3 -B -c "
 import json,os,hashlib

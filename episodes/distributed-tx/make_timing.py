@@ -9,7 +9,12 @@ def cnt(s):
     s=s.replace("MySQL","麦麦麦麦麦").replace("Redis","雷雷雷雷雷").replace("ID","艾地").replace("八点四","八点四")
     return len(re.findall(r'[\u4e00-\u9fff]',s))+1.5*len(re.findall(r'[A-Za-z0-9]+',s))
 t=0;S=[]
+# 开场定死（Knoll 实测 19 字版压停顿 4.80 s = 144 帧，冰糖 b 版）：三小句 1.93 / 1.65 / 0.82 s，句间 0.2 s；第 2 章从 4.80 s 起
+HOOK=[(0.0,1.93),(2.13,1.65),(3.98,0.82)]
 for ci,s in enumerate(narration()):
+    if ci==0:
+        for j,(x,(a,d)) in enumerate(zip(SENT(s),HOOK)): S.append(dict(id=f"ch1-{j+1}",chapter=1,text=x.strip(),tts_text=x.strip(),start=a,end=round(a+d,3),fixed="Knoll 实测"))
+        t=4.80;continue
     for j,x in enumerate(SENT(s)):
         d=round(cnt(x)/RATE,3);S.append(dict(id=f"ch{ci+1}-{j+1}",chapter=ci+1,text=x.strip(),tts_text=x.strip(),start=round(t,3),end=round(t+d,3)));t+=d+GAP
     t+=CGAP-GAP

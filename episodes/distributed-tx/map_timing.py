@@ -3,7 +3,7 @@
 # ③逐句列表 [{id:"ch1-1",start,dur,...}] 或 {sentences:[...]}，start 为全片秒（章节边界 = 下一章第一句开始，最后一章到 total/末句+60 帧）
 import json,re,sys
 from pathlib import Path
-from common_split import ids,SPLIT,apply_holds,SCRIPT,tts,narration,SENT
+from common_split import ids,SPLIT,apply_holds,SCRIPT,tts,narration,SENT,add_cards
 H=Path(__file__).resolve().parent
 K=json.load(open(sys.argv[1] if len(sys.argv)>1 else H/"timing.knoll.json"))
 if isinstance(K,dict) and isinstance(K.get("shots"),dict): K=K["shots"]
@@ -28,13 +28,22 @@ elif isinstance(K,dict) and all(any(k in K for k in (f"{c}-1",f"ch{i+1}-1",f"ch{
 else:
     # ③ Knoll timeline.json（2026-10-14）：{duration, sentences:[{id:"ch1-1",chapter,text,tts_text,start,end}]}，start/end 为 narration.wav 全片秒
     #    章 = 该章第一句开始 → 最后一句结束 + 章尾留白 PAD 帧（同 make_timing 规则；Knoll 按此在章尾插静音，章间原有间隔不用）
-    PAD=60
+    PAD=0   # v4r2：片尾 60 帧由 ChannelBranding 自动追加，分镜不再留 60 帧（Nolan 审 2026-10-16）
     L=K["sentences"] if isinstance(K,dict) else K
     # 改名待重配机制（EP.18 留下，本期 RENAME 为空）
     PEND=[]
     for q in L:
         for a,b in RENAME.items():
             if a in q["text"]: q["text"]=q["text"].replace(a,b);q["tts_text"]=(q.get("tts_text") or "").replace(a,b);PEND.append(q["id"])
+    # v4：Knoll 把开场三小句配成一条 ch1-1（op2-b，0.2 s 停顿）→ 按 Knoll 实测小句比例 1.93/1.65/0.82（停顿 0.2）拆成 ch1-1a/b/c，供镜头内对位
+    L2=[]
+    for q in L:
+        P_=SENT(q["text"])
+        if len(P_)>1:
+            W_=[1.93,1.65,0.82] if len(P_)==3 else [len(x) for x in P_];tot=q["end"]-q["start"];g_=0.2*(len(P_)-1);k_=(tot-g_)/sum(W_);t_=q["start"]
+            for j,(x,w_) in enumerate(zip(P_,W_)): L2.append(dict(q,id=q["id"]+"abc"[j],text=x,tts_text=x,start=round(t_,3),end=round(t_+w_*k_,3),splitFrom=q["id"]));t_+=w_*k_+0.2
+        else: L2.append(q)
+    L=L2
     by={i:[] for i in range(len(ids))}
     for q in L:
         ci=int(q.get("chapter") or re.match(r'ch(\d+)',q["id"]).group(1))-1; by[ci].append(q)
@@ -53,5 +62,6 @@ if PEND:
 KT=[N(tts(q["text"])) for s in SHOTS for q in out[s]["sentences"]]
 if KT!=SS: raise SystemExit(f"timing 与当前脚本不一致：{next((i,a,b) for i,(a,b) in enumerate(zip(KT+['']*99,SS)) if a!=b)}")
 apply_holds(out)
+out=add_cards(out)
 json.dump(out,open(H/"timing.json","w"),ensure_ascii=False,indent=1)
 print('knoll',sum(v['duration'] for v in out.values()),{s:v['duration'] for s,v in out.items()})
