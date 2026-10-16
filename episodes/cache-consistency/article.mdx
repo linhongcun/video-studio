@@ -1,7 +1,7 @@
 ---
 title: 后台改了价格，页面怎么还是旧的？
 episode: 22
-version: v0.29.0
+version: v0.29.1
 series: 缓存
 ---
 
@@ -146,11 +146,17 @@ Azure 架构中心明确要求「Update the data store before removing the item 
 
 | 坑 | 怎么做 | 代价 | 适合 |
 |---|---|---|---|
-| 改缓存还是删缓存 | 改完库就删缓存 | 下次读要回库 | 一般：读多写少（推论；例外见 S1、S21） |
-| 先删还是先改库 | 先改库，再删缓存 | 仍有小回填空档 | 大多数旁路缓存场景（S1） |
-| 删失败怎么办 | 消息队列重试，或订阅变更日志 | 多一套组件要维护；订阅端仍可能早于数据可见、消费可能换序 | 一般：入口少用队列，入口多用订阅（队列推论；订阅 S21、S24） |
-| 主从延迟读到旧值 | 回填读主库 | 主库压力大 | 刚改完就要看到的数据，如价格、库存（S22、S23） |
-| 兜底：过期时间 | 写回缓存时带上过期时间 | 太短老回库，太长旧得久 | 按能容忍旧多久来定（S1） |
+| 改缓存还是删缓存 | 改完库就删缓存 | 下次读要回库 | 一般：读多写少（推论；例外见[^S1][^S21]） |
+| 先删还是先改库 | 先改库，再删缓存 | 仍有小回填空档 | 大多数旁路缓存场景[^S1] |
+| 删失败怎么办 | 消息队列重试，或订阅变更日志 | 多一套组件要维护；订阅端仍可能早于数据可见、消费可能换序 | 一般：入口少用队列，入口多用订阅（队列推论；订阅[^S21][^S24]） |
+| 主从延迟读到旧值 | 回填读主库 | 主库压力大 | 刚改完就要看到的数据，如价格、库存[^S22][^S23] |
+| 兜底：过期时间 | 写回缓存时带上过期时间 | 太短老回库，太长旧得久 | 按能容忍旧多久来定[^S1] |
+
+## 结尾
+
+你有没有遇到过：明明改了，刷新还是旧的？评论区说说是哪个网站或 App。
+
+点个关注不迷路，觉得有用就点赞收藏。
 
 ## 延伸阅读
 
@@ -180,3 +186,4 @@ Azure 架构中心明确要求「Update the data store before removing the item 
 [^S22]: AWS Database Blog，Rajeev Sakhuja，10 Amazon Aurora tips for application developers – Part 1，https://aws.amazon.com/blogs/database/part-1-10-amazon-aurora-tips-for-application-developers/ ，2023-03-29
 [^S23]: Amazon Aurora 用户指南，Using local write forwarding in an Aurora MySQL DB cluster，https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-mysql-write-forwarding.html ，官方当前文档（访问于 2026-10-16）；Aurora 产品文档，用到「回填读主库」是本文引申
 [^S24]: Red Hat Developer，Hugo Guerrero，Capture database changes with Debezium Apache Kafka connectors，https://developers.redhat.com/blog/2020/04/14/capture-database-changes-with-debezium-apache-kafka-connectors ，2020-04-14（最后更新 2023-11-08）
+[^S25]: AWS Prescriptive Guidance，Cloud design patterns · Transactional outbox pattern，https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html ，2023-07-28 首发（2024-02-23 更新示例代码；访问于 2026-10-17）
