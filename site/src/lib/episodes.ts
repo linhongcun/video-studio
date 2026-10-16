@@ -94,10 +94,15 @@ export function computeChapters(slug: string, fm: any[] = []) {
   });
   if (!byId && fm.length && fm.length !== scenes.length)
     console.warn(`[chapters] ${slug}: frontmatter ${fm.length} 章 vs storyboard ${scenes.length} scene，按顺序对齐`);
-  // 成片 = 正片 + 「IT小村 · 原创」片尾卡（episodes/_shared/branding，Remotion Root 同样追加）
+  // 成片帧数：storyboard meta.finalVideoFrames 优先（EP.21 起写入；EP.22 起取消全局 60 帧片尾卡，
+  // 成片 = 分镜 durationInFrames + 片尾停留 30 帧，见各期 Main.tsx TAIL_HOLD）；
+  // 未写 finalVideoFrames 的旧期 = 正片 + 「IT小村 · 原创」片尾卡（episodes/_shared/branding，Remotion Root 同样追加）
+  const sbMeta = readJson(path.join(EP_DIR, slug, 'storyboard.json')).meta ?? {};
   const brandPath = path.join(EP_DIR, '_shared/branding/spec.json');
   const endCard = fs.existsSync(brandPath) ? readJson(brandPath).endCard?.frames ?? 0 : 0;
-  return {chapters, duration: Math.round(((total + endCard) / fps) * 10) / 10, fps};
+  const finalFrames = Number.isFinite(sbMeta.finalVideoFrames) ? sbMeta.finalVideoFrames : total + endCard;
+  if (finalFrames < total) console.warn(`[duration] ${slug}: finalVideoFrames=${finalFrames} < 正片 ${total} 帧`);
+  return {chapters, duration: Math.round((finalFrames / fps) * 10) / 10, fps};
 }
 
 /** WebVTT 字幕：与 Remotion Main.tsx 相同的分配规则（v2 的标点集合更全，两套都兼容）（按字数比例铺满真实音频时长） */
