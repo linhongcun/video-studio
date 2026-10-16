@@ -41,7 +41,7 @@ related: ["server-cache", "browser-cache"]
 
 {/* 配图：总目录 → 分目录 → 具体位置，高亮路径一路往下 */}
 
-- MySQL 的大多数索引（PRIMARY KEY、UNIQUE、INDEX、FULLTEXT）都存在 B-tree 里；InnoDB 除了空间索引，都是 B-tree 结构，索引记录放在叶子页里，默认一页 16KB。[^mysql-idx][^innodb-phys]
+- InnoDB 的大多数索引（主键、普通索引、唯一索引）都存在 B-tree 里；FULLTEXT 例外，用的是倒排表。这里的 B-tree 实际是 B+ 树；空间索引用 R-tree。B+ 树的索引记录放在叶子页里，默认一页 16KB。[^mysql-idx][^innodb-phys]
 - B-tree 一直保持有序，每个节点可以有很多个子节点，等值查找和范围查找都快。[^mysql-glossary]
 - **说明**：中文社区一般把 InnoDB 的索引叫 **B+ 树**（数据只放在叶子节点，叶子之间连成链表），视频里也这么叫；MySQL 官方文档的写法是 **B-tree**。
 - 多层目录的直观讲法：根节点指向分支节点，分支节点再指向叶子节点，一层层往下就找到了。[^luke-tree]
@@ -52,7 +52,7 @@ related: ["server-cache", "browser-cache"]
 
 官方原文一段话讲了三个代价：[^mysql-opt]
 
-- **拖慢写入**：每次插入、更新、删除，每个索引都要跟着更新。
+- **拖慢写入**：插入和删除要更新所有索引；更新时，只有改到的列所在的索引需要跟着改。
 - **占空间**：用不上的索引白白占地方。
 - **要挑选**：索引太多，MySQL 要花时间决定用哪一个。
 

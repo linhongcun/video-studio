@@ -16,7 +16,7 @@ InnoDB 的行级锁有两种：共享锁（S，读锁）允许持有者读这一
 - 一个事务持有读锁时，别人再要读锁可以马上拿到；要写锁就得等。[^s1]
 - 一个事务持有写锁时，别人要哪种锁都得等它释放。[^s1]
 
-注意：InnoDB 的普通 `SELECT` 读的是快照，不加锁（见 EP.16），所以写锁并不会挡住普通查询。要加锁读，得显式写：
+注意：在默认的可重复读或读已提交级别下，InnoDB 的普通 `SELECT` 读快照、不加锁（见 EP.16），所以写锁并不会挡住普通查询；在 SERIALIZABLE 级别并关掉自动提交时，普通 `SELECT` 会自动加共享锁。要加锁读，得显式写：
 - `SELECT ... FOR SHARE`：给读到的行加读锁，别人能读，但在你提交前不能改。[^s2]
 - `SELECT ... FOR UPDATE`：像 `UPDATE` 一样把行锁住。[^s2]
 
@@ -26,8 +26,8 @@ InnoDB 的行级锁有两种：共享锁（S，读锁）允许持有者读这一
 - InnoDB 还有表级的意向锁，用来标明一个事务稍后要在表里的某行上加哪种锁。[^s1]
 
 ## 4. 等锁和超时
-拿不到锁的事务会一直等，直到对方释放。[^s1] 但它不会无限等下去：
-- `innodb_lock_wait_timeout` 默认是 50 秒，超时会报 `ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction`。[^s5]
+拿不到锁的事务会一直等，直到对方释放。[^s1] 但等 InnoDB 行锁不会无限等下去：
+- `innodb_lock_wait_timeout` 默认 50 秒（这个参数不管表锁），超时会报 `ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction`。[^s5]
 - **超时默认只回滚当前这一条语句，不是整个事务。** 想让整个事务回滚，需要用 `--innodb-rollback-on-timeout` 启动服务器。[^s5]
 
 ## 5. 死锁

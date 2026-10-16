@@ -36,7 +36,7 @@ SQL 标准定义了四个隔离级别。[^s6]
 
 这个问题不能用一句话回答，要分情况看手册原文：
 
-- 普通 `SELECT` 读的是事务里第一次读时建立的快照，同一事务里重复读看到的结果一致。[^s1]
+- 普通 `SELECT` 读的是事务里第一次读时建立的快照，同一事务里重复读，看不到别人后来提交的改动；但自己在这个事务里改过的数据，会看到改后的样子。[^s1]
 - 加锁读、`UPDATE`、`DELETE` 时，InnoDB 用 next-key 锁（行锁加间隙锁）防止幻读："To prevent phantoms, InnoDB uses an algorithm called next-key locking that combines index-row locking with gap locking."[^s4]
 - 但快照只管 `SELECT`，不一定管修改语句：别的事务刚提交的行，你查不到，你的 `UPDATE` 或 `DELETE` 却可能改到它。[^s2]
 

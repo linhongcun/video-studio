@@ -8,7 +8,7 @@ BANNED=["面试","八股","满分","考点","阿里云","腾讯云","Cloudflare"
 ALLOW_PHR=[]
 ALLOW={"CDN","DNS","IT","ms"}
 WM=(1700,80,1840,130)
-art=open("/workspace/sorkin-backup/cdn/article.mdx").read()
+art=open("article.mdx").read()
 for x in ["why-fast","origin","edge","dns","miss","recap"]:
     if "{#"+x+"}" not in art: err.append(('article id',x))
 def lum(h):

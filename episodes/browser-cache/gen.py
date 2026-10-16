@@ -64,9 +64,9 @@ def shots_for(si,L):
             e1+=[bx(f"p{j}",c,1060+j*240,680,90),T(f"pT{j}",1160+j*240,700,120,50,lab,36,P['text'])]
             a1+=[F(f"p{j}",at(0,ph)),F(f"pT{j}",at(0,ph))]
         e2=[BROWSER(160,260),fridge("fridge",1300,180,380,520,opened=True),R("cacheL",1260,720,460,90,stroke=P['accent'],radius=16,label="浏览器缓存",fontSize=48),
-            T("disk",160,620,1000,56,"本质：本地硬盘里的一块空间",44,P['text'],align="center")]
+            T("disk",160,620,1000,56,"本质：浏览器在本机保存的资源副本",44,P['text'],align="center"),T("disk2",160,686,1000,46,"（可能在内存，也可能在硬盘）",36,P['text2'],align="center",note="stock-qa 2026-10-16：第二行小一号")]
         t=at(0,"顺手放进")
-        a2=[F("browser",0),F("fridge",t-10),F("cacheL",at(0,"就叫浏览器缓存")),pop("cacheL",at(0,"就叫浏览器缓存")),F("disk",at(1,"它其实"))]
+        a2=[F("browser",0),F("fridge",t-10),F("cacheL",at(0,"就叫浏览器缓存")),pop("cacheL",at(0,"就叫浏览器缓存")),F("disk",at(1,"它其实")),F("disk2",at(1,"它其实")+6)]
         for j,c in enumerate(["cyan","blue","green"]):
             e2.append(bx(f"p{j}",c,560,300+j*0,90)); s0=t+j*12; a2+=[F(f"p{j}",max(0,s0-10)),mv(f"p{j}","x",s0,s0+30,560+j*110,1390),mv(f"p{j}","y",s0,s0+30,300,280+j*125)]
         return [(e1,a1),(e2,a2)]
