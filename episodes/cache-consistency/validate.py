@@ -5,12 +5,12 @@ from common_split import ids,SPLIT,SCRIPT,tts,narration
 H=os.path.dirname(os.path.abspath(__file__));_p=os.path.join(H,'storyboard.json')
 if not os.path.isfile(_p): sys.exit('预备阶段：还没有 storyboard.json')
 d=json.load(open(_p));err=[];M=80
-TERMS=['缓存','一致性','更新缓存','删缓存','延迟双删','消息队列','变更日志','主从延迟','过期时间','最终一致']
+TERMS=['缓存','一致性','旁路缓存','更新缓存','删缓存','延迟双删','消息队列','变更日志','主从延迟','过期时间','最终一致']
 Q1='你有没有遇到过：明明改了，刷新还是旧的？';Q2='评论区说说是哪个网站或 App。';RM='点个关注不迷路，觉得有用就点赞收藏。'
 BANNED=['下期','上期','我是','拆库','全村','窗口','官方推荐','复制延迟','下次见','EP']
 _EN=re.compile(r'[A-Za-z0-9０-９]')
 class _L:   # 画面：不许字母数字；字幕照念旁白，放行「MySQL」「Redis」「ID」（字母专名，版本用汉字「八点四」）
-    def search(self,t): return _EN.search(t.replace('MySQL','').replace('Redis','').replace('TTL','').replace('App',''))
+    def search(self,t): return _EN.search(t.replace('MySQL','').replace('Redis','').replace('TTL','').replace('App','').replace('Cache-Aside','').replace('binlog',''))
 LVL=_L()
 N=lambda t:re.sub(r'[\s，。：；？！、,.:;?!]','',t)
 def lines_px(e):   # 真实 Main.tsx：rect 标签首行 fs（默认 32），其余行 round(fs×(fs>40?0.5:0.85))；text 用 fontSize
@@ -19,7 +19,7 @@ def lines_px(e):   # 真实 Main.tsx：rect 标签首行 fs（默认 32），其
         return [(l,fs if i==0 or len(L)==1 else round(fs*(0.5 if fs>40 else 0.85))) for i,l in enumerate(L) if l.strip()]
     if e['type']=='text': return [(e['text'],e['fontSize'])]
     return []
-narr=narration(); assert len(narr)==8
+narr=narration(); assert len(narr)==11
 g=0;nsh=0;subsAll=[]
 for sc in d['scenes']:
     assert sc['from']==g,('scene from',sc['id']);f=g
@@ -83,7 +83,7 @@ for sc in d['scenes']:
 P=d['meta'].get('poster') or {}
 if not P or not any(x['id']==P.get('shotId') and x['from']+P['localFrame']==P['frame'] and P['localFrame']<x['durationInFrames'] for sc in d['scenes'] for x in sc['shots']): err.append('poster')
 # EP.22：章节卡、开场第 0 帧、片尾原句、旁白禁用说法
-CARDN={"card-1":"直接改价签行不行","card-2":"先撤盘还是先改账本","card-3":"撤不干净怎么办","card-4":"分仓库慢半拍","card-5":"兜底与取舍"}
+CARDN={"card-1":"第一层 · 删而不改","card-2":"第二层 · 先改库再删","card-3":"第三层 · 删失败了怎么办","card-4":"第四层 · 主从延迟","card-5":"兜底 · 过期时间"}
 import itertools
 for sc in d['scenes']:
     for sh in sc['shots']:
@@ -100,7 +100,7 @@ if not h1['subtitles'][0]['text'].startswith('老板'): err.append('hook first w
 allnarr=''.join(narr)
 if '答案马上来' not in narr[0]: err.append('答案马上来')
 if Q1+Q2+RM not in narr[-1] or not narr[-1].endswith(RM): err.append('ending order/text')
-for b_ in ('上期','EP.8','官方推荐','下期','提交之后','天然','最多活到','写库比读库慢'):
+for b_ in ('上期','EP.8','官方推荐','下期','提交之后','天然','最多活到','写库比读库慢','乱序','后厨','备菜台','厨师','分仓库','master','slave'):
     if b_ in allnarr: err.append(('narration banned',b_))
 if re.search(r'[0-9]',allnarr): err.append('digit in narration')
 EL=[e.get('label') for sc in d['scenes'] for sh in sc['shots'] for e in sh['elements'] if e.get('quote') and not e.get('dimmed')]

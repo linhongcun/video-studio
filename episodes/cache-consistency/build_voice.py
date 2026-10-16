@@ -1,7 +1,7 @@
-# EP.22：narration.wav（sha 0badc4af…）按分镜插章节卡静音 → remotion/public/audio/voice.wav；插点 = 下一句开口前 0.1 s；末尾补片尾停留 TAIL 帧
+# EP.22：narration.wav（sha 2b543b5f…）按分镜插章节卡静音 → remotion/public/audio/voice.wav；插点 = 下一句开口前 0.1 s；末尾补片尾停留 TAIL 帧
 import json,subprocess,numpy as np,wave,hashlib,sys
 SR=48000;NAR='/workspace/share/ep22/narration.wav';TAIL=int(sys.argv[1]) if len(sys.argv)>1 else 0
-assert hashlib.sha256(open(NAR,'rb').read()).hexdigest().startswith('0badc4af')
+assert hashlib.sha256(open(NAR,'rb').read()).hexdigest().startswith('2b543b5f')
 x=np.frombuffer(subprocess.run(['ffmpeg','-v','error','-i',NAR,'-f','s16le','-ac','1','-ar',str(SR),'-'],capture_output=True,check=True).stdout,np.int16)
 tl=json.load(open('/workspace/share/ep22/timeline.json'))['sentences'];byid={s['id']:s for s in tl}
 sb=json.load(open('storyboard.json'));cards=[sh for sc in sb['scenes'] for sh in sc['shots'] if sh.get('chapterCard')]

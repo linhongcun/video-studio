@@ -1,7 +1,7 @@
-# EP.22 缓存和数据库一致性（v0.28.0）镜头拆分：按句数，句子不拆开。章节 id = script.md「## n. id｜」（工具链沿用 EP.21）
+# EP.22 缓存和数据库一致性（v0.28.0 返工，11 章）镜头拆分：按句数，句子不拆开。章节 id = script.md「## n. id｜」（工具链沿用 EP.21）
 import re,os
-ids=["hook","signal","update","order","patch","replica","ttl","ending"]
-SPLIT={"hook":[3],"signal":[2,2],"update":[2,2],"order":[2,2],"patch":[2,1,1],"replica":[2,1],"ttl":[1,1,2],"ending":[2,1]}
+ids=["hook","copies","read","del","order","retry","replica","ttl","eventual","recap","ending"]
+SPLIT={"hook":[3],"copies":[1,1,2,1,1],"read":[1,1,1,3],"del":[2,1,1,1,1,1,1,1,1],"order":[2,1,1,1,1,1,1,1,1],"retry":[1,1,1,1,1,1,1,1,1,1,1],"replica":[1,1,1,1,1,1,1,1],"ttl":[1,1,1,1,1,1],"eventual":[1,1,1],"recap":[2,1,1,1,1],"ending":[2,1]}
 SCRIPT=os.path.join(os.path.dirname(os.path.abspath(__file__)),"script.md")
 TTS={}
 def tts(s):
@@ -30,7 +30,7 @@ if __name__=="__main__":
 
 # 章节卡：第 3–7 章前各一张独立章节卡（无旁白，Knoll 在配音里插同长静音）。卡长 CARD 帧：名字 0→4 帧淡入，完整显示到转场（crossfade 4）开始 = 70 帧 ≥69
 CARD=78
-CARDS={"update":("card-1","直接改价签行不行","#1E293B"),"order":("card-2","先撤盘还是先改账本","#1E293B"),"patch":("card-3","撤不干净怎么办","#1E293B"),"replica":("card-4","分仓库慢半拍","#1E293B"),"ttl":("card-5","兜底与取舍","#1E293B")}
+CARDS={"del":("card-1","第一层 · 删而不改","#1E293B"),"order":("card-2","第二层 · 先改库再删","#1E293B"),"retry":("card-3","第三层 · 删失败了怎么办","#1E293B"),"replica":("card-4","第四层 · 主从延迟","#1E293B"),"ttl":("card-5","兜底 · 过期时间","#1E293B")}
 def add_cards(out):
     res={}
     for k,v in out.items():

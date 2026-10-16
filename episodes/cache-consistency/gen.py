@@ -6,7 +6,7 @@ sys.path.insert(0,os.path.join(os.path.dirname(os.path.abspath(__file__)),'_audi
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
 from common_split import ids,SPLIT as _SP,SCRIPT,tts,subtext,narration,CARDS,CARD
-narr=narration(); assert len(narr)==8
+narr=narration(); assert len(narr)==11
 def cnt(s): return len(re.findall(r'[\u4e00-\u9fffA-Za-z0-9]',s))
 P=dict(bg="#0B1020",panel="#111827",primary="#22D3EE",secondary="#3B82F6",text="#E5E7EB",text2="#9CA3AF",muted="#6B7280",success="#22C55E",accent="#F59E0B",danger="#F87171")
 def R(i,x,y,w,h,c=P['panel'],**k): return dict(id=i,type="rect",x=x,y=y,w=w,h=h,**{"color":c,"reuse":False,**k})
@@ -21,7 +21,7 @@ def out(i,a,n=10): return mv(i,"opacity",a,a+n,1,0)
 def pop(i,a): return mv(i,"scale",a,a+12,0,1,"spring")
 def hl(i,a,c=P['success'],c0=P['secondary']): return mv(i,"strokeColor",a,a+10,c0,c)
 
-titles=["还是旧价","两份数据","直接改台上的价签行不行","先撤盘还是先改账本","撤不干净怎么办","分仓库慢半拍","兜底与取舍","结尾"]
+titles=["还是旧价","两份数据","读的规矩","第一层：删，而不是改","第二层：先改库，再删缓存","第三层：删失败了怎么办","第四层：主从延迟","兜底：过期时间","最终一致","四格对比","结尾"]
 SPLIT={i:_SP[c] for i,c in enumerate(ids)}
 def KEY(si,k): return f"{ids[si]}-{k+1}"
 def sentences(s): return re.findall(r'[^。？]+[。？]',s)
@@ -146,22 +146,22 @@ for sh in allsh:
 PROV=any(v.get('provisional') for v in TM.values())
 PROV=any(v.get('provisional') for v in TM.values())
 meta=dict(title="《后台改了价格，页面怎么还是旧的？》",hook="老板刚在后台把价格改低，刷新页面，怎么还是旧价？顾客到底该信哪个？答案马上来。",episode=22,slug="cache-consistency",release="v0.28.0",draft=True,provisional=PROV,provisionalReason=("冰糖配音未到：按字数估时长" if PROV else None),
-  pendingAudio=PROV,series="缓存",width=1920,height=1080,fps=30,durationInFrames=g,provisionalTiming=PROV,style="扁平2D（沿用服务端缓存那期后厨素材）；正片深色底 #0B1020，章节卡 #1E293B；旧价黄价签、新价绿价签，不写数值",palette=P,font="Noto Sans SC",
+  pendingAudio=PROV,series="缓存",width=1920,height=1080,fps=30,durationInFrames=g,provisionalTiming=PROV,style="扁平2D（门店价签对总部价目表，本期新设；竞态 / 变更日志用泳道技术图）；正片深色底 #0B1020，章节卡 #1E293B；旧价黄价签、新价绿价签，不写数值",palette=P,font="Noto Sans SC",
   safeArea=dict(margin=80,subtitleBand=[900,980],contentMaxY=880,watermarkClearZone=[1700,80,1840,130]),
   branding=dict(spec="episodes/_shared/branding/spec.json v1.3.0",cornerWatermark="右上「IT小村」40%，从第 0 帧起常显（开场即封面），留空区 x1700–1840 y80–130",centerWatermark=None,endCard="由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames = 正片 + hold，不含片尾卡，也不再留 60 帧留白；成片总长 = durationInFrames + 60"),
   shotSentences={k:n for c in ids for k,n in zip([f"{c}-{j+1}" for j in range(len(_SP[c]))],_SP[c])},
   notes=("时长=暂定（make_timing.py，4.3 字/秒估）；Knoll /workspace/share/ep22/timeline.json + words.json 到后 sh realign.sh 直接重跑。" if PROV else "时长=Knoll timeline.json。")+
-    "术语标签念到时淡入（0..+4），完整显示 ≥69；开场第 0 帧即主体（老板改价 + 页面旧价签）；后厨备菜台比喻。")
+    "术语标签念到时淡入（0..+4），完整显示 ≥69；开场第 0 帧即主体（老板改价 + 页面旧价签）；门店价签对总部价目表比喻。")
 import json as _j
-REUSE=("chef","prep-table","warehouse","dish-amber","dish-green","timer","ticket","ledger","ledger-ok","ledger-bad","runner","retry","nope","hourglass","eye","person-blue","ask","slip","db")
+REUSE=("ledger","ledger-ok","todo","db","slip","timer","cashier","person-blue","retry","price-old","price-new","wrong","phone-page","hourglass","eye","ask","boss")
 NEW=tuple(sorted(f[:-4] for f in os.listdir(HERE/"assets") if f.endswith('.svg') and f[:-4] not in REUSE))
-assets=dict(new=[dict(id=n,file=f"assets/{n}.svg",png=f"assets/{n}.png") for n in NEW],reuse=[dict(id=n,file=f"assets/{n}.svg",png=f"assets/{n}.png",desc="服务端缓存期 / EP.19–21 自绘，复用") for n in REUSE])
+assets=dict(new=[dict(id=n,file=f"assets/{n}.svg",png=f"assets/{n}.png") for n in NEW],reuse=[dict(id=n,file=f"assets/{n}.svg",png=f"assets/{n}.png",desc="EP.19–22 自绘通用图标，复用（不含后厨素材）") for n in REUSE])
 import hashlib as _h
 _W="/workspace/share/ep22/narration.wav"
 CC=[dict(shotId=s["id"],name=s["chapterCard"]["name"],holdFrames=s["durationInFrames"],startFrame=s["from"],startSec=round(s["from"]/30,2),insertBeforeSentence=s["chapterCard"]["insertBeforeSentence"],insertBeforeText=s["chapterCard"]["insertBeforeText"]) for sc in scenes for s in sc["shots"] if s.get("chapterCard")]
 meta["chapterCards"]=CC
 meta["endCard"]=dict(question=Q1+Q2,reminder=RM,order="先问题后提醒，不预告下期",file="endcard.txt")
-meta["finalVideoFrames"]=g+60;meta["totalsNote"]="storyboard durationInFrames = 正片 + 章节卡 hold + 术语 hold；成片 = 它 + 品牌片尾 60 帧（片尾问题卡与关注提醒卡在正片内，长度按旁白，可超过 60 帧）"
+meta["finalVideoFrames"]=g+30;meta["totalsNote"]="storyboard durationInFrames = 正片 + 章节卡 hold + 术语 hold；成片 = 它 + 30 尾帧（Knoll r6 实测）（片尾问题卡与关注提醒卡在正片内，长度按旁白，可超过 60 帧）"
 meta["chapterCardNote"]=f"五张章节卡各 {CARD} 帧静音 hold（名字 0→4 帧淡入，完整显示 70 帧 ≥69，转场 crossfade 4）。Knoll：在 insertBeforeSentence 那句开口前（上一章章间停顿之后）插同长静音；startSec 为成片秒，交 Tim 做 B 站分段章节"
 if not PROV: meta["narration"]=dict(file=_W,sha256=_h.sha256(open(_W,"rb").read()).hexdigest(),bodyFrames=sum(v.get("origDuration",v["duration"]) for v in TM.values() if not v.get("card")))
 meta["notes"]=("时长=Knoll /workspace/share/ep22/timeline.json（narration.wav 实测）。" if not PROV else "时长=暂定字数估算。")+"术语标签念到时 0..+4 淡入，完整显示 ≥69；章节卡见 chapterCards；片尾两卡为旁白原句（endcard.txt）。"

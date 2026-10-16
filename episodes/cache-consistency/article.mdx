@@ -5,139 +5,174 @@ version: v0.28.0
 series: 缓存
 ---
 
-老板刚在后台把价格改低，刷新页面，怎么还是旧价？这一期讲**缓存和数据库一致性**：页面上的价格多半读的是缓存里另存的一份，改价要动数据库和缓存两个地方，两处没法在同一瞬间一起变，中间的空隙就会让人看到旧值。
+老板刚在后台把价格改低，刷新页面，怎么还是旧价？这一期讲**缓存和数据库一致性**：页面上的价格多半读的是缓存里另存的一份，改价要动数据库和缓存两个地方，两处没法在同一瞬间一起变。改数据时有四层要处理——删而不改、先改库再删、删失败了怎么办、主从延迟——最后还有过期时间兜底。
 
-> 说明：本文资料核查于 2026-10-16。Redis 以 8.x 官方当前文档为准（核查时最新正式版 8.10.2，2026-09-17 发布），MySQL 以 MySQL 8.0 参考手册为准。服务端缓存那期已经讲过「先改数据库、再删缓存」以及先删缓存的竞态；本期展开并发回填、删除失败和主从延迟。官方当前文档没有发布日期，标「官方当前文档（访问于 2026-10-16）」；2020 年以前的资料标 **仅参考**。没有来源的数字一律不写。
+> 说明：本文资料核查于 2026-10-16。Redis 以 8.10.2 为准（核查时最新正式版，2026-09-17 发布；命令行为按官方当前文档）；MySQL 以 **MySQL 8.4.11**（8.4 LTS 线最近一次完整服务端版本，2026-07-28）[^S19]为准，手册用 8.4 版参考手册（MySQL 8.0 随 8.0.46（2026-04-21）进入 EoL[^S16]）。官方在线文档持续更新、不标发布日期，标「官方当前文档（访问于 2026-10-16）」；2020 年以前的资料标「仅参考」。复制相关名称一律用 source / replica（主库 / 从库）。
 
-## 1. 为什么会不一致
+## 1. 两份数据：价目表和价签
 
-- 数据存了两份：数据库是唯一真相，缓存只是副本。比喻里，仓库的价目账本是数据库，备菜台上的价签是缓存。
-- 改价要动两处，而这两步不在同一个事务里：Redis 和 MySQL 是两个独立系统，没法在一个本地事务里一起提交（分布式事务那期讲过这个难处）。
-- 只要第一步做完、第二步还没做，就有人可能读到旧值；读和写同时发生时，读的人还可能把旧值重新塞回缓存。
-- 微软架构中心明确写到：Cache-Aside 模式**不保证**数据存储和缓存之间的一致性，写入到下一次读取之间，读者可能没命中，也可能短暂看到旧数据[^S1]。
+把网站想成一家连锁店：**总部价目表**才算数，对应数据库（以 MySQL 8.4.11 为例[^S19]）；**门店货架上的价签**是照着价目表抄来的一份，对应缓存（常用 Redis）。缓存的意义是快：查价不用每次都跑总部。
 
-下面记号：价格旧值 99、新值 79（示例，不是数据）。读请求都按 Cache-Aside 读：先查缓存，没命中就查库，再写回缓存[^S1]。
+但数据存了两份，改价时要动两个地方，而 Redis 和 MySQL 是两个独立系统，不能在一个本地事务里同时提交，所以两份没法在同一瞬间一起变。**一致性**说的就是让这两份对得上；Cache-Aside 本身「doesn't guarantee consistency between the data store and the cache」，写之后到下一次读之间，读者可能没命中，也可能「briefly see stale data」[^S1]。
 
-## 2. 直接改缓存行不行（更新缓存）
+## 2. 读的规矩：旁路缓存（Cache-Aside）
 
-先改库，再把新值写进缓存。两个写请求并发时会乱序：
+1. 先查缓存，有就直接返回；
+2. 没有（没命中），才去数据库读；
+3. 读完写回缓存，下次就能命中[^S1]。
 
-| 时刻 | 写 A（改成 79） | 写 B（改成 69） |
+价签比喻：货架上有价签就直接看；没有，店员去查总部价目表，再抄一张贴回去。**往缓存里放东西的唯一入口就是「没命中 → 读库 → 写回」**，后面所有竞态都发生在这条路上。
+
+**适合**：旁路缓存适合读多写少、能容忍短暂旧值的数据，比如商品价格。Azure 架构中心说缓存能提升「read-heavy data that changes infrequently and tolerates some staleness」的性能，并且「Caching works best for relatively static data or data that applications read frequently」[^S1]。
+
+## 3. 第一层：删，而不是改
+
+**问题**：更新缓存（改库之后顺手把缓存改成新值）在两个写请求交错时会乱：
+
+| 时刻 | 请求甲（改成黄价） | 请求乙（改成绿价） |
 |---|---|---|
-| t1 | 库 = 79 | |
-| t2 | | 库 = 69 |
-| t3 | | 缓存 = 69 |
-| t4 | 缓存 = 79（A 慢了一步，后到） | |
-| 结果 | 库 69，缓存 79，一直错到下次修改或过期 | |
+| t1 | 价目表 = 黄 | |
+| t2 | | 价目表 = 绿 |
+| t3 | | 价签 = 绿 |
+| t4 | 价签 = 黄（甲慢了一步，后到） | |
+| 结果 | 价目表绿，价签黄，一直错到下次改价或过期 | |
 
-另一个代价：没人读的冷门数据也被写进缓存，白占空间[^S2]。所以更常用的是**删缓存**（撤盘）：
+**原因**：改库和改缓存是两步，两个请求的两步一交错，后到的旧值就盖掉了新值。另外，冷门数据也会被写进缓存白占空间[^S2]。（更新缓存类似 Write-Through，它本身是合法方案；这里只说在应用自己维护两份的写法里，并发写会乱序。）
 
-- 删除不会出现「旧值盖新值」，删两次、删晚了结果都是「没有」；
-- 只有真有人读才重新放进缓存（懒加载）[^S2]；
-- 缓存值如果要拼装计算，删掉比每次写都重算省事；
-- 代价是删掉后下一次读会没命中、多查一次库[^S2]。
+**方案**：删缓存（Redis `DEL`[^S5]）。改完数据库，直接删掉缓存，不写新值；下次有人读，再按旁路缓存回填。删除是幂等的：两个改价请求谁先谁后、删几次，最后都只剩空位（缓存里「没有」）；读回填旧值的空隙留到第二层讲。
 
-说明：Write-Through（写库时同步更新缓存）本身是合法方案[^S2]，这里只说在应用自己维护两份数据时，并发写会乱序。
+**代价**：删掉后的下一次读会没命中，多读一次数据库[^S2]。热点数据被删的瞬间可能有大量请求同时回库（常说的「击穿」，本期不展开）。
 
-## 3. 先删缓存，还是先改库
+**适合**：删缓存一般适合大多数场景——旁路缓存的标准写法本身就是「写库后让缓存失效」[^S1]，按需加载也不会让冷门数据占地方[^S2][^S20]。只有缓存值计算很贵，或者读多的路径要求写后立刻读到新值（Azure：「If read-heavy paths need read-after-write freshness, consider write-through caching instead」[^S1]；另见[^S21]），而且写请求能串行（不会出现上面的交错）时，才考虑直接更新缓存。（「大多数场景」是**推论**。）
 
-### 3.1 先删缓存，再改库
+## 4. 第二层：先改库，再删缓存
 
-| 时刻 | 写请求 | 读请求 |
+**先删缓存再改库的问题**：
+
+| 时刻 | 改价请求 | 查价请求 |
 |---|---|---|
 | t1 | 删缓存 | |
-| t2 | | 查缓存，没命中 |
-| t3 | | 查库，读到旧值 99 |
-| t4 | 库 = 79 | |
-| t5 | | 把 99 写回缓存 |
-| 结果 | 库 79，缓存 99 | |
+| t2 | | 没命中 |
+| t3 | | 读库，读到旧价 |
+| t4 | 库 = 新价 | |
+| t5 | | 把旧价写回缓存 |
+| 结果 | 库新、缓存旧，直到下次删除或过期 | |
 
-微软文档明确建议先更新数据存储、再删缓存，并指出先删会留下这段空隙[^S1]。经验上写库往往比读库慢（要加锁、写日志），读请求有时间插进来——这是经验说法，没有来源给出数字。
+Azure 架构中心明确要求「Update the data store before removing the item from the cache」，否则「there's a small window of time when a client might fetch the item before the data store is updated」[^S1]。
 
-### 3.2 先改库，再删缓存（标准写法）
+**方案**：先改数据库，再删缓存——旁路缓存的标准写法[^S1]，读到旧值的空隙小得多。
 
-正常情况下，改库后删缓存，下一次读没命中，从库里读到新值补进缓存。它也会出错，但很少。出错的事件顺序是：
+**它也会出错，只是很少**。事件顺序是：**没命中 → 读到旧值 → 新值提交 → 删缓存 → 旧值回填**。
 
-**没命中 → 读到旧值 → 新值提交 → 删缓存 → 旧值回填**
-
-| 时刻 | 读请求 | 写请求 |
+| 时刻 | 查价请求 | 改价请求 |
 |---|---|---|
-| t1 | 查缓存，没命中（过期或被淘汰） | |
-| t2 | 查库，读到旧值 99（写请求可能还没开始，也可能已开始但未提交：InnoDB 一致性读看不到未提交的改动） | |
-| t3 | | 新值 79 提交 |
+| t1 | 查缓存，没命中 | |
+| t2 | 读库，读到旧价（改价请求可能还没开始，也可能已开始但没提交：InnoDB 一致性读看不到未提交的改动[^S13]，默认隔离级别 REPEATABLE READ[^S14]） | |
+| t3 | | 新价提交 |
 | t4 | | 删缓存（本来就空） |
-| t5 | 把 99 回填进缓存 | |
-| 结果 | 缓存 99，直到下次删除或过期 | |
+| t5 | 把旧价回填进缓存 | |
 
-关键只有一点：**旧值回填晚于删除**。回填一般紧跟读库之后，删除要等提交之后，所以这种顺序概率低，但不为零。
+关键只有一点：旧值回填晚于删除。概率低，但不为零。
 
-## 4. 撤不干净怎么办
+**延迟双删**（旁白一句带过）：先删缓存 → 改库 → 等一会儿 → 再删一次。第二次删除用来清掉竞态里回填的旧值。等多久没有权威的通用数字，要按自己系统实测的「读库 + 写回」耗时和主从延迟来定；它只能降低出错机会，第二次删除本身也可能失败。这是社区常见的经验做法，上面的资料都没有直接命名它。
 
-### 4.1 延迟双删
-做法：先删缓存 → 更新库 → 等一小会儿 → 再删一次。第二次删除用来清掉竞态里被读请求塞回去的旧值，也能清掉主从延迟带回的旧值。
+**代价**：并发读仍可能回填旧值，得靠后面几层来补。
 
-- **等多久**：要大于「一次读库 + 写回缓存」的耗时；如果读走从库，还要大于主从延迟。没有权威的通用数字，请按自己系统实测的读耗时和主从延迟来定。
-- **局限**：这是中文社区常见的经验做法，本文引用的官方资料里没有直接命名它；它只降低概率，不是保证。等待期间仍可能读到旧值，第二次删除本身也可能失败，所以仍需要 4.2 的重试。
+**适合**：先改库再删缓存是默认写法，资料明确要求先更新数据存储、再删除缓存项[^S1]。
 
-### 4.2 删除失败：消息队列重试
-删缓存失败 → 把要删的 key 发进消息队列 → 消费者反复删，直到成功；超过重试次数进入死信队列，人工处理[^S9]。缺点是业务代码要自己发消息。重试间隔等参数以所用消息队列的默认值和配置为准，本文不写具体数字。
+## 5. 第三层：删失败了怎么办
 
-### 4.3 订阅变更日志（binlog）
-MySQL 8.0 把每个事务的数据改动写进二进制日志 binlog，8.0 默认开启[^S6]。Canal 这类工具伪装成 MySQL 从库读取 binlog[^S8]，看到「价格变了」就去删缓存，失败再丢进消息队列重试。
+删缓存也会失败：网络抖动、Redis 一时连不上，旧值就一直留着。处理不当时，旧值可能「indefinitely」留在缓存里[^S3]。
 
-- 好处：**业务代码不用管删缓存**，也不容易漏删。
-- 仍要注意：这条路**仍然需要重试**（删除照样可能失败），也**仍可能有旧值回填**（3.2 和第 5 节的竞态不会因此消失）。
-- 版本：canal 最新正式版 canal-1.1.8（2025-01-16）[^S8]。
+**方案 A：消息队列重试**。删除失败就把要删的 key 发进消息队列，消费者反复删，直到成功；超过重试次数进死信队列，转人工处理[^S9]。代价：业务代码要自己发消息。
 
-## 5. 主从延迟叠在一起
+**方案 B：订阅变更日志（binlog）**。MySQL 8.4.11 默认开启 binlog，每个事务的改动整笔写入 binlog，并且按提交顺序写入[^S6][^S11]。Canal、Debezium 这类工具伪装成一个从库来读 binlog[^S8][^S17]，看到价格变了就去删缓存，失败再丢进消息队列重试。好处是业务代码不用管删缓存，也不怕漏删。
 
-写走主库、读走从库时（主从复制那期讲过读写分离）：
+但它不等于「顺序全对、没有空隙」，空隙来自两处时间差，而不是 binlog 本身：
 
-| 时刻 | 写请求 | 读请求 |
+1. **事件可能早于数据可见**：binlog 本身按提交顺序记录，但 MySQL 在 COMMIT 执行之前就整笔写入并同步 binlog，再在 InnoDB 提交[^S6]，所以订阅程序**可能**先收到改动、删了缓存，这时新价还读不到；恰好有查价请求读库，读到的仍是旧值并回填，删除就白做了。（**推论**：由写入与提交的先后推出的时间窗口，手册没有直接写「订阅端会先收到」。）
+2. **消费端可能打乱先后**：binlog 本身有序，但投进消息队列后，多分区只能保证表级或同一主键级顺序[^S18]；故障恢复时事件可能重复投递（at least once[^S17]）。由此**推论**：多线程并行消费、失败重试可能让删除被延后或换序，和读回填的先后错开（资料没有直接给出这一结论）。
+
+所以这条路**照样需要重试，也照样需要过期时间兜底**。代价：多一套组件要维护。
+
+**适合**：
+
+- 消息队列重试：一般更适合本来就有消息队列、改价（写入）的地方又不多的系统——每个写入点都要自己发消息，写入点少时代码改动最小。（**推论**：资料只描述重试机制[^S9]，没有给出适用范围。）
+- 订阅 binlog：适合写入入口多、改动也可能来自应用之外、不想改业务代码，而且有人维护 Canal / Debezium 的团队。Redis 的说法是：「Data changes outside your app … add event-driven invalidation」，并提醒「the ordering, dedup, and replay logic is where the engineering hours go」[^S21]；Red Hat 也把 cache invalidation 列为 CDC 的典型用途[^S24]。
+
+## 6. 第四层：主从延迟
+
+很多网站读写分离：写走主库（source），读走从库（replica）。从库是**只读副本**，只照着主库应用改动，自己不产生新数据，但总比主库慢半拍——这就是**主从延迟**。
+
+| 时刻 | 改价请求 | 查价请求 |
 |---|---|---|
-| t1 | 主库 = 79 | |
+| t1 | 主库 = 新价 | |
 | t2 | 删缓存 | |
-| t3 | | 没命中，去从库读；从库还没同步，读到 99 |
-| t4 | | 99 写回缓存 |
-| t5 | 从库收到 79 | |
-| 结果 | 缓存 99，即使写请求顺序完全正确 | |
+| t3 | | 没命中，去从库读，从库还没收到，读到旧价 |
+| t4 | | 旧价写回缓存 |
+| t5 | 从库收到新价 | |
+| 结果 | 写请求顺序全对，缓存仍是旧价 | |
 
-对策：
+**对策**：
 
-1. 补缓存时读主库，或者刚写过的 key 一段时间内读主库（写完读主库）；
-2. 延迟双删的等待时间要大于主从延迟。从库落后多少可以看 `SHOW REPLICA STATUS` 的 `Seconds_Behind_Source`（MySQL 8.0.22 起的名称），但手册也提醒这个值有时不准[^S7]；
-3. 订阅**从库**的 binlog，等从库收到这条改动再删，比订阅主库更不容易被从库旧值回填（binlog 在提交完成前写入，仍可能有很短的空隙，所以重试和过期时间照样要有；需要从库开启 `log_replica_updates`，MySQL 8.0.26 起用这个名称，8.0 默认开启）[^S6]。
+1. 回填缓存时直接读主库（或刚写过的 key 在一段时间内读主库）。
+2. 订阅从库的变更日志再删：订阅**从库**的 binlog（需从库开启 `log_replica_updates`，MySQL 8.4.11 在开启 binlog 时默认开启[^S6][^S12]），可以减小主从延迟带来的空隙；但收到事件不代表改动已经能读到，仍需重试，也仍可能有旧值回填，最后靠 TTL 兜底。
+3. 延迟双删的等待要大于主从延迟。可以用 `SHOW REPLICA STATUS` 的 `Seconds_Behind_Source` 观察延迟，但手册也说明这个值为 0 不一定真追上[^S7]；MySQL 8.4.11 里复制相关语句统一用 SOURCE / REPLICA 命名[^S15]。
 
-比喻里的「分仓库」就是从库，对应主从复制那期的「转播电视」：只抄不改，可能慢半拍。Meta 披露的一次真实缓存不一致问题，也涉及数据库复制和跨地域通信[^S3]。
+**代价**：读主库会加重主库压力；订阅从库要多等一会儿，旧价也会多留一会儿。Meta 的真实一致性问题也和复制有关[^S3]。
 
-## 6. 兜底：过期时间（TTL）
+**适合**：读主库回填适合刚改完就要马上看到的数据，比如价格、库存。需要读己之写的读请求应走主库：AWS 写道「if you have a transaction that needs read after write consistency, then use the cluster endpoint for that transaction」[^S22]，Aurora 用户指南也说这类读要「on the writer DB instance」[^S23]。（用到缓存回填上是本文的引申。）
 
-- 每个缓存都设过期时间，时间到自动删除[^S4]。比喻里是计时牌：**到点就撤**，只看时间，不看价钱有没有变。
-- 计时牌保证这一盘旧菜不会永远摆着。⚠ 它不是「最多错多久」的承诺：过期后如果又从落后的从库回填，旧值可能再上台一轮。
-- 取舍：TTL 太短，没命中多、数据库压力大；太长，旧数据留得久[^S1]。
-- Redis 版本细节：用 `SET` 覆盖一个 key 会清掉它原来的 TTL[^S4]，所以写回缓存时要用带过期时间的写法（如 `SET key value EX 秒数`），否则这份缓存永不过期，安全网就漏了。Redis 2.6 起过期误差在 0–1 毫秒[^S4]。删除用 `DEL`[^S5]。
+## 7. 兜底：过期时间（TTL）
 
-## 7. 强一致很贵，最终一致是常态
+给每份缓存设过期时间，时间到 Redis 自动删除[^S4]。它只看时间，不看数据变没变；作用是保证一份旧值**不会永远留着**——但这不是「最多旧多久」的保证：过期之后如果又从落后的从库回填，旧值可能再出现一轮。AWS 的说法是加 TTL「doesn't guarantee that a value isn't stale. However, it keeps data from getting too stale」[^S20]。
 
-- 想让缓存和数据库任何时刻都一样，得把「改库 + 改缓存」放进一次分布式事务或加锁串行，读写都会变慢，缓存的意义就打了折扣。比喻里就是「改价时全店停单」。
-- 常见做法是**最终一致**：允许短时间旧，保证最后一定变新（删除 + 重试 + 过期时间）。Cache-Aside 本身不保证一致[^S1]。
-- **靠谱的系统结账按仓库账本算**：钱、库存扣减这类操作以数据库为准，下单时按数据库里的价格和库存算，缓存只负责展示。这是通用设计原则，没有单一权威出处，也不是所有网站都保证。
+- 取舍：设得太短，没命中多、数据库压力大；设得太长，旧值留得久[^S1]。
+- **写回缓存要带过期时间**：用 `SET` 覆盖一个 key 会清掉它原来的 TTL[^S4]，所以回填时要用 `SET key value EX 秒数` 这类带过期时间的写法，否则这份缓存永不过期，安全网就漏了。
+
+**适合**：过期时间设多长，按业务能容忍旧值多久来定，不给通用数字。Azure 示例代码的注释是「a custom expiration time that depends on how critical it is to have stale data」，并提醒过期策略要和访问模式匹配[^S1]。
+
+## 8. 最终一致
+
+想让缓存和数据库每一刻都一样，就得在写的时候挡住读，或者加锁排队、把「改库 + 改缓存」包进一次分布式事务——读写都会变慢，缓存的意义就打折了。所以常见做法是**最终一致**：允许短时间读到旧值，靠删除、重试和过期时间保证最后一定变新。这很正常，不是故障。
+
+靠谱的系统结账时只按数据库里的价格和库存算，缓存只负责展示（通用设计原则，不是某份文档的原话；并非所有网站都保证）。
+
+## 9. 四格对比
+
+| 层 | 怎么做 | 代价 | 适合 |
+|---|---|---|---|
+| 第一层：删缓存 | 只撕不改，改完库直接删 | 下一次查价要多读一次数据库 | 大多数场景（推论；例外见 S1、S21） |
+| 第二层：先改库再删缓存 | 空隙最小，但不是零 | 并发读仍可能回填旧值，得靠后面几层（重试、订阅、过期时间）来补 | 默认写法（S1） |
+| 第三层：重试和订阅 | 删不掉就再删，或者交给订阅程序去删（消息队列 / 订阅 binlog） | 多一套组件要维护；订阅端仍可能早于数据可见、消费可能换序 | 改价地方少用队列，入口多用订阅（队列推论；订阅 S21、S24） |
+| 第四层：主从延迟 | 回填读主库，或订阅从库的变更日志再删 | 读主库会加重主库的压力 | 刚改完就要马上看到的数据，如价格、库存（S22、S23） |
+| 兜底：过期时间 | 写回缓存时带上过期时间 | 太短回库多，太长旧值留得久 | 按能容忍旧多久来定（S1） |
 
 ## 延伸阅读
-- Meta Engineering《Cache made consistent》：缓存失效处理不当，可能让不一致的值一直留在缓存里[^S3]。
-- Scaling Memcache at Facebook（NSDI 2013）：「删除而不是更新」与 lease 思路的经典出处[^S10]。
 
----
-
-你有没有遇到过：明明改了，刷新还是旧的？评论区说说是哪个网站或 App。点个关注不迷路，觉得有用就点赞收藏。
+- 「删而不更新」和 lease 的经典出处：Scaling Memcache at Facebook[^S10]（仅参考）。
 
 [^S1]: Microsoft Azure 架构中心，Cache-Aside pattern，https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside ，Learn 当前版，2026-10-16 抓取
-[^S2]: AWS 白皮书 Database Caching Strategies Using Redis · Caching patterns，https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html ，发布 2021-03-08（页面标注历史参考，不作唯一依据），2026-10-16 抓取
+[^S2]: AWS 白皮书 Database Caching Strategies Using Redis · Caching patterns，https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html ，2021-03-08（页面标 historical reference，不作唯一依据）
 [^S3]: Meta Engineering，Cache made consistent，https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/ ，2022-06-08
-[^S4]: Redis 文档 EXPIRE，https://redis.io/docs/latest/commands/expire/ ，官方当前文档（访问于 2026-10-16），Redis 8.x（核查时最新正式版 8.10.2）
+[^S4]: Redis 文档 EXPIRE，https://redis.io/docs/latest/commands/expire/ ，官方当前文档（访问于 2026-10-16），Redis 8.10.2
 [^S5]: Redis 文档 DEL，https://redis.io/docs/latest/commands/del/ ，官方当前文档（访问于 2026-10-16）
-[^S6]: MySQL 8.0 参考手册 7.4.4 The Binary Log，https://dev.mysql.com/doc/refman/8.0/en/binary-log.html ，官方当前文档（访问于 2026-10-16）
-[^S7]: MySQL 8.0 参考手册 19.1.7.1 Checking Replication Status，https://dev.mysql.com/doc/refman/8.0/en/replication-administration-status.html ，官方当前文档（访问于 2026-10-16）
+[^S6]: MySQL 8.4 参考手册 7.4.4 The Binary Log，https://dev.mysql.com/doc/refman/8.4/en/binary-log.html ，官方当前文档（访问于 2026-10-16）
+[^S7]: MySQL 8.4 参考手册 19.1.7.1 Checking Replication Status，https://dev.mysql.com/doc/refman/8.4/en/replication-administration-status.html ，官方当前文档（访问于 2026-10-16）
 [^S8]: alibaba/canal README 与 Releases，https://github.com/alibaba/canal ，canal-1.1.8 发布于 2025-01-16，2026-10-16 抓取
 [^S9]: Apache RocketMQ 5.x Consumption Retry，https://rocketmq.apache.org/docs/featureBehavior/10consumerretrypolicy/ ，官方当前文档（访问于 2026-10-16）
-[^S10]: Nishtala et al., Scaling Memcache at Facebook, NSDI 2013，https://www.usenix.org/conference/nsdi13/technical-sessions/presentation/nishtala ，2013 → **仅参考**
+[^S10]: Nishtala et al., Scaling Memcache at Facebook, NSDI 2013，https://www.usenix.org/conference/nsdi13/technical-sessions/presentation/nishtala ，2013，**仅参考**
+[^S11]: MySQL 8.4 参考手册 19.1.6.4 Binary Logging Options and Variables，https://dev.mysql.com/doc/refman/8.4/en/replication-options-binary-log.html ，官方当前文档（访问于 2026-10-16）
+[^S12]: MySQL 8.4 参考手册 19.1.6.3 Replica Server Options and Variables，https://dev.mysql.com/doc/refman/8.4/en/replication-options-replica.html ，官方当前文档（访问于 2026-10-16）
+[^S13]: MySQL 8.4 参考手册 17.7.2.3 Consistent Nonlocking Reads，https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html ，官方当前文档（访问于 2026-10-16）
+[^S14]: MySQL 8.4 参考手册 17.7.2.1 Transaction Isolation Levels，https://dev.mysql.com/doc/refman/8.4/en/innodb-transaction-isolation-levels.html ，官方当前文档（访问于 2026-10-16）
+[^S15]: MySQL 8.4 参考手册 1.4 What Is New in MySQL 8.4 since MySQL 8.0，https://dev.mysql.com/doc/refman/8.4/en/mysql-nutshell.html ，官方当前文档（访问于 2026-10-16）
+[^S16]: Oracle，MySQL Product Support EOL Announcements，https://www.mysql.com/support/eol-notice.html ，2026-04-21；MySQL 8.0 Release Notes，https://dev.mysql.com/doc/relnotes/mysql/8.0/en/ （「with version 8.0.46, MySQL 8.0 reaches End of Life (EoL)」，访问于 2026-10-16）
+[^S17]: Debezium FAQ 与 MySQL connector 文档，https://debezium.io/documentation/faq/ ；https://debezium.io/documentation/reference/stable/connectors/mysql.html ，官方当前文档（访问于 2026-10-16）
+[^S18]: alibaba/canal Wiki，Canal Kafka RocketMQ QuickStart「mq顺序性问题」，https://github.com/alibaba/canal/wiki/Canal-Kafka-RocketMQ-QuickStart ，页面最后编辑 2022-05-17
+[^S19]: MySQL 8.4 Release Notes，https://dev.mysql.com/doc/relnotes/mysql/8.4/en/news-8-4-11.html （索引 https://dev.mysql.com/doc/relnotes/mysql/8.4/en/ ），官方 Release Notes（访问于 2026-10-16）
+[^S20]: Amazon ElastiCache 用户指南，Caching strategies for Memcached，https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html ，官方当前文档（无发布日期；访问于 2026-10-16）
+[^S21]: Redis 博客（厂商博客，含产品推广，只作旁证），Jeff Mills，Cache consistency: strategies to keep data fresh，https://redis.io/blog/cache-consistency-strategies/ ，2026-07-20（2026-07-22 更新）
+[^S22]: AWS Database Blog，Rajeev Sakhuja，10 Amazon Aurora tips for application developers – Part 1，https://aws.amazon.com/blogs/database/part-1-10-amazon-aurora-tips-for-application-developers/ ，2023-03-29
+[^S23]: Amazon Aurora 用户指南，Using local write forwarding in an Aurora MySQL DB cluster，https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-mysql-write-forwarding.html ，官方当前文档（访问于 2026-10-16）；Aurora 产品文档，用到「回填读主库」是本文引申
+[^S24]: Red Hat Developer，Hugo Guerrero，Capture database changes with Debezium Apache Kafka connectors，https://developers.redhat.com/blog/2020/04/14/capture-database-changes-with-debezium-apache-kafka-connectors ，2020-04-14（最后更新 2023-11-08）

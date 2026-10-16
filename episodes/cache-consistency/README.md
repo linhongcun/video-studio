@@ -1,9 +1,11 @@
-# EP.22 缓存与数据库一致性（cache-consistency）
-- storyboard.json（sha a329e86e…）：8 章 13 段 22 镜头，6698 帧 @30fps（含 5 张章节卡 card-1～5 各 78 帧停顿，第 3–7 章各一张；开头钩子、第 2 章、结尾不放卡）；meta.finalVideoFrames = 6728
-- 成片 = 分镜 6698 + ending-2 片尾停留 30 帧 = 6728 帧（约 3 分 44 秒）。**EP.22 起不再追加全局 60 帧「IT小村 · 原创」片尾卡**：片尾 = ending-1（讨论问题卡）+ ending-2（关注提醒卡 + 关注·点赞·收藏图标行），长度跟随结尾旁白，文字见 endcard.txt；改动只在本期 remotion/src/Main.tsx（TAIL_HOLD）和 Root.tsx，episodes/_shared 未改
-- 停顿：holds_applied.json；build_voice.py 在下一句开口前 0.1 s 的句间静音里插章节卡静音，末尾补 30 帧，整轨 voice.wav = 6728 帧
-- 配音：MiMo 冰糖（/workspace/share/ep22，整轨 narration.wav sha 0badc4af…，6309 帧；「看｜台上空了」看后 0.2 s 停顿，用自然停顿底噪填充）；voice.wav sha 4cd976b0…
-- 术语标签 10 个，完整显示均 ≥69 帧（最短 删缓存）
-- 制作：`cd remotion && npm ci && npm run render`；mix_bgm.py（Wallpaper，−16 LUFS）；成片 sha 506d7dd1…（r3）
+# EP.22 缓存与数据库一致性（cache-consistency）——返工版（门店价签对总部价目表）
+- storyboard.json（sha 6523dd58…，冻结副本 Miyazaki storyboard.6523dd58.json）：68 镜，14671 帧 @30fps（含 5 张章节卡各 78 帧）；meta.finalVideoFrames = 14701
+- 成片 video.mp4 = 分镜 14671 + 片尾停留 30 帧 = 14701 帧（8:10），sha 32b330d5…9284（r7；ttl-3 图标移到中线以下，标签跟旁白淡入后不再被挡）
+- 配音：/workspace/share/ep22 narration.wav sha 2b543b5f…（r6）；build_voice.py 按 holds_applied.json 插章节卡静音并补 30 尾帧 → remotion/public/audio/voice.wav
+- timing.json / remotion/src/timing.json：Miyazaki 按 r6 真实配音 realign（sha 46ac20a9…）
+- 片尾 = ending-1 问题卡 + ending-2 关注卡（endcard.txt），不追加全局 60 帧片尾卡；渲染器 remotion/src 与 r7 构建一致，未改
+- 例外：read-4（456 帧）、recap-4（343 帧）超 330 帧上限，Nolan 批准
+- 素材 assets/：门店版（hq、hq-new、store、shelf、torn、tag-clock、logtape、lock、replica-old、replica-new 等）；后厨素材已移除
+- 封面：Miyazaki covers/ep22-*.jpg（门店价签版）→ cover-*.jpg
+- 制作：`cd remotion && npm ci && npm run render`；mix_bgm.py
 - 检查：`node site/scripts/check-frames.mjs cache-consistency`
-- 封面：Miyazaki 设计稿 cover/ep22-*.png → cover-*.jpg（同 EP.21；不取视频帧）

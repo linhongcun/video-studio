@@ -6,7 +6,7 @@ from pathlib import Path
 from common_split import ids,narration,SENT
 H=Path(__file__).resolve().parent;RATE=4.3;GAP=0.28;CGAP=0.6
 def cnt(s):
-    s=s.replace("MySQL","麦麦麦麦麦").replace("Redis","雷雷雷").replace("TTL","踢踢艾").replace("App","诶屁").replace("ID","艾地").replace("八点四","八点四")
+    s=s.replace("Cache-Aside","凯西阿赛德").replace("binlog","饼漏格").replace("MySQL","麦麦麦麦麦").replace("Redis","雷雷雷").replace("TTL","踢踢艾").replace("App","诶屁").replace("ID","艾地").replace("八点四","八点四")
     return len(re.findall(r'[\u4e00-\u9fff]',s))+1.5*len(re.findall(r'[A-Za-z0-9]+',s))
 t=0;S=[]
 # 开场定死（Knoll 实测 19 字版压停顿 4.80 s = 144 帧，冰糖 b 版）：三小句 1.93 / 1.65 / 0.82 s，句间 0.2 s；第 2 章从 4.80 s 起
