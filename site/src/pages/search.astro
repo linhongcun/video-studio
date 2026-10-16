@@ -1,0 +1,35 @@
+---
+// 站内搜索：Pagefind 在 astro build 之后生成静态索引（dist/pagefind/），只索引期数页标题、简介和正文
+import BaseLayout from '../layouts/BaseLayout.astro';
+import {BASE} from '../lib/episodes';
+---
+<BaseLayout title="搜索" current="search" description="搜索全部期数的标题、简介和图文正文">
+  <div class="container wrap">
+    <h1>搜索</h1>
+    <div id="search" data-bundle={`${BASE}pagefind/`}></div>
+    <noscript><p>搜索需要开启 JavaScript。也可以 <a href={`${BASE}tags/`}>按系列和标签浏览</a>。</p></noscript>
+    <p class="hint" data-fail hidden>搜索索引暂不可用（本地 dev 模式不生成索引，请用 npm run build 后预览）。可以先 <a href={`${BASE}tags/`}>按系列和标签浏览</a>。</p>
+  </div>
+</BaseLayout>
+<script>
+  const el = document.getElementById('search')!;
+  const bundle = el.dataset.bundle!;
+  const css = document.createElement('link'); css.rel = 'stylesheet'; css.href = `${bundle}pagefind-ui.css`; document.head.append(css);
+  const s = document.createElement('script'); s.src = `${bundle}pagefind-ui.js`;
+  s.onload = () => {
+    // @ts-ignore
+    new window.PagefindUI({element: '#search', bundlePath: bundle, showSubResults: true, showImages: true, resetStyles: false,
+      translations: {placeholder: '搜标题、简介、正文，例如：索引、限流、HTTPS', zero_results: '没有找到 “[SEARCH_TERM]” 相关的内容', clear_search: '清除', load_more: '加载更多', many_results: '找到 [COUNT] 条结果', one_result: '找到 1 条结果'}});
+    const q = new URL(location.href).searchParams.get('q');
+    const input = el.querySelector<HTMLInputElement>('input');
+    if (input) { input.focus(); if (q) { input.value = q; input.dispatchEvent(new Event('input', {bubbles: true})); } }
+  };
+  s.onerror = () => { document.querySelector<HTMLElement>('[data-fail]')!.hidden = false; };
+  document.body.append(s);
+</script>
+<style>
+.wrap{max-width:var(--measure)}
+h1{font-size:var(--fs-h1);margin:var(--sp-7) 0 var(--sp-4)}
+.hint{color:var(--c-text-2)}
+#search{--pagefind-ui-primary:var(--c-primary);--pagefind-ui-text:var(--c-text);--pagefind-ui-background:var(--c-surface);--pagefind-ui-border:var(--c-border);--pagefind-ui-tag:var(--c-surface-2);--pagefind-ui-font:inherit;--pagefind-ui-border-radius:12px}
+</style>

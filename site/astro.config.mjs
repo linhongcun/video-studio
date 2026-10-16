@@ -1,5 +1,6 @@
 import {defineConfig} from 'astro/config';
 import mdx from '@astrojs/mdx';
+import sitemap from '@astrojs/sitemap';
 import {fileURLToPath} from 'node:url';
 
 // 编剧稿使用 `## 标题 {#id}` 写法；MDX 会把 {…} 当表达式解析，
@@ -58,7 +59,7 @@ export default defineConfig({
   site: 'https://linhongcun.github.io',
   base: '/video-studio/',
   trailingSlash: 'always',
-  integrations: [mdx({remarkPlugins: [remarkHeadingId], rehypePlugins: [rehypeSummary], syntaxHighlight: false})],
+  integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick/.test(p)}), mdx({remarkPlugins: [remarkHeadingId], rehypePlugins: [rehypeSummary], syntaxHighlight: false})],
   vite: {
     plugins: [headingIdPre()],
     server: {fs: {allow: [fileURLToPath(new URL('..', import.meta.url))]}},

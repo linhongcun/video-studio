@@ -4,6 +4,8 @@ IT小村工作室的互联网开发技术科普短视频项目：用生活里的
 
 - 线上站点：https://linhongcun.github.io/video-studio/
 - 发布平台：抖音、B站、快手（小红书暂停）
+- 站点功能：按系列浏览（请求链路 / 扛住高峰 / 数据库 / 分布式）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
+- 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
 ## 已上线剧集
@@ -48,7 +50,7 @@ IT小村工作室的互联网开发技术科普短视频项目：用生活里的
 ```
 episodes/
   <slug>/                 每期一个目录
-    meta.json             期号、标题、简介、标签、上线日期、draft
+    meta.json             期号、标题、简介、标签、上线日期 publishedAt、系列 series（site/src/content/series.json）、更新日期 updatedAt（可选）、平台链接 platforms（B站/抖音/快手，未知留空）、draft
     script.md             旁白稿
     article.mdx           站点文章
     pronunciation.md      读音表
