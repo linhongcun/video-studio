@@ -8,7 +8,7 @@ BANNED=["面试","八股","满分","考点","阿里云","腾讯云","华为云",
 ALLOW_PHR=[]
 ALLOW={"CDN","Cache-Control","max-age","ETag","Not","Modified","logo.v1.png","logo.v2.png"}
 WM=(1700,80,1840,130)
-art=open("/workspace/sorkin-backup/browser-cache/article.mdx").read()
+art=open("article.mdx").read()
 for x in SEG:
     if "{#"+x+"}" not in art: err.append(('article id',x))
 def lum(h):

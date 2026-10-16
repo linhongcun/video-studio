@@ -1,7 +1,7 @@
 # EP.14 数据库索引（脚本 v0.19.0）镜头拆分（按句数，句子不拆开）——make_timing / map_timing / gen / validate 共用；章节 id = article.mdx 锚点
 ids=["hook","scan","index","btree","more","recap"]
 SPLIT={"hook":[2,2],"scan":[2,2],"index":[2,2],"btree":[2,2],"more":[3,2],"recap":[1,1]}
-SCRIPT='/workspace/sorkin-backup/db-index/script.md'
+import os as _os;SCRIPT=_os.path.join(_os.path.dirname(_os.path.abspath(__file__)),'script.md')
 # pronunciation.md：配音文本「B+树」写「B 加树」（只改送 TTS 的文字；字幕/标签写「B+ 树」）
 TTS={"B+树":"B 加树"}
 SUB={"B+树":"B+ 树"}   # 字幕显示写法

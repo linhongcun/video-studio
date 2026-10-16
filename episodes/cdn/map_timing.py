@@ -25,7 +25,7 @@ for ch in ([] if PER_SHOT else ids):
         q=[dict(text=s["text"],start=round(s["start"]-a/30,3),dur=s["dur"]) for s in S[i:i+m]];i+=m
         af=round(30*(q[-1]["start"]+q[-1]["dur"]))
         out[f"{ch}-{x+1}"]=dict(audioSec=round(af/30,3),audioFrames=af,duration=b-a,chapterOffsetFrames=a,chapter=ch,provisional=False,engine=k.get("engine","mimo"),voice=k.get("voice","冰糖"),scale=1,source=f"timing.mimo.json:{ch}-1",sentences=q)
-if any('extraHold' in v for v in out.values()): print('extraHold 已在实测 timing 内，不重复加')
+if any('extraHold' in v for v in out.values()): print('extraHold 已在实测 timing 内，不重复加；只加术语标签 hold'); apply_holds(out,label_only=True)
 else: apply_holds(out)
 json.dump(out,open(H/"timing.json","w"),ensure_ascii=False,indent=1)
 print(sum(v['duration'] for v in out.values()),{s:v['duration'] for s,v in out.items()})

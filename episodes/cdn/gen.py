@@ -18,7 +18,7 @@ def mv(i,p,a,b,va,vb,e="easeInOut"): return dict(elementId=i,property=p,keyframe
 def draw(i,a,n=15): return mv(i,"drawProgress",a,a+n,0,1,"easeOut")
 def F(i,a,n=12): return fade(i,a,a+n)
 def pop(i,a): return mv(i,"scale",a,a+12,0,1,"spring")
-titles=["为什么秒开","都去总仓又远又挤","各地开门店","DNS 指到最近的店","门店没货就回源","回顾"]
+titles=["为什么秒开","都去总仓又远又挤","各地开门店","DNS 指到就近的店","门店没货就回源","回顾"]
 SPLIT={i:_SP[c] for i,c in enumerate(ids)}
 def KEY(si,k): return f"{ids[si]}-{k+1}"
 def sentences(s): return re.findall(r'[^。？]+[。？]',s)
@@ -111,7 +111,7 @@ def shots_for(si,L):
             A("map","map",640,140,1120,392),
             store("sBusy",1500,190,140),R("busy",1500,340,140,60,stroke=P['danger'],radius=30,label="忙",fontSize=36),
             store("sFar",860,400,110),store("sNear",860,200,140),
-            R("ring",840,180,180,180,"#0B1020",stroke=P['success'],radius=90,note="圈出最近的门店（描边环，画在门店下层）"),
+            R("ring",840,180,180,180,"#0B1020",stroke=P['success'],radius=90,note="圈出就近的门店（描边环，画在门店下层）"),
             R("you",690,300,120,64,stroke=P['primary'],radius=32,label="你",fontSize=36),
             R("addr",160,520,400,80,stroke=P['success'],radius=16,label="答：附近门店的地址",fontSize=32),
             E("go","arrow",640,600,1120,50,P['success'],label="被带到附近的店",direction="r",fontSize=36),
@@ -141,16 +141,19 @@ def shots_for(si,L):
             R("goods",580,200,440,90,stroke=P['accent'],radius=16,label="保质期：能放多久",fontSize=40),
             R("exp",580,320,440,80,stroke=P['text2'],radius=16,label="到期变灰",fontSize=36),
             wh("wh",1420,180,340),T("whT",1420,530,340,50,"总仓",40,P['primary'],align="center"),
-            E("renew","arrow",1040,240,360,50,P['primary'],label="换新的",direction="r",fontSize=36),
-            E("notice","arrow",540,460,860,50,P['accent'],label="网站更新：通知门店",direction="l",fontSize=36),
-            R("off",580,560,440,80,stroke=P['danger'],radius=16,label="旧货提前下架",fontSize=36),
-            T("rule",160,720,1600,60,"过期就回总仓换新，更新可以提前下架",44,P['text'],align="center")]
+            E("renew","arrow",1040,240,360,50,P['primary'],label="问一声：变了没？",direction="r",fontSize=32,note="stock-qa 2026-10-16 第一拍：过期后再有人来取，门店先回总仓问一声"),
+            R("same",1040,320,360,70,stroke=P['success'],radius=16,label="没变：接着用",fontSize=32,note="第二拍·情况一"),
+            R("changed",1040,400,360,70,stroke=P['accent'],radius=16,label="变了：换新的",fontSize=32,note="第二拍·情况二"),
+            E("notice","arrow",540,540,860,50,P['accent'],label="网站更新：通知门店",direction="l",fontSize=36),
+            R("off",580,620,440,80,stroke=P['danger'],radius=16,label="旧货提前下架",fontSize=36),
+            T("rule",160,740,1600,60,"过期先问一声：没变接着用，变了才换新；更新可以提前下架",44,P['text'],align="center")]
         a3=[F("store",0),F("storeT",0),F("wh",0),F("whT",0),F("goods",at(0,"保质期")),pop("goods",at(0,"保质期")),F("exp",at(0,"过期了")),
-            mv("goods","opacity",at(0,"过期了")+12,at(0,"过期了")+24,1,0.35),draw("renew",at(0,"回总仓"),15),
+            mv("goods","opacity",at(0,"过期了")+12,at(0,"过期了")+24,1,0.35),draw("renew",at(0,"回总仓问"),15),
+            F("same",at(0,"没变就")),pop("same",at(0,"没变就")),mv("goods","opacity",at(0,"没变就"),at(0,"没变就")+12,0.35,1),F("changed",at(0,"变了才")),pop("changed",at(0,"变了才")),
             draw("notice",at(1,"通知门店"),20),F("off",at(1,"下架")),pop("off",at(1,"下架")),F("rule",at(1,"网站更新"))]
         return [(e1,a1),(e2,a2),(e3,a3)]
     if si==5:  # 回顾
-        nodes=[("n1","DNS 指路","DNS 把你"),("n2","最近的门店","最近的门店"),("n3","有货：直接给","有货就"),("n4","没货：回源","没货就")]
+        nodes=[("n1","DNS 指路","DNS 把你"),("n2","近、接待快的门店","离你近"),("n3","有货：直接给","有货就"),("n4","没货：回源","没货就")]
         e1=[];a1=[]
         for j,(i,l,ph) in enumerate(nodes):
             x=160+j*427; e1.append(card(i,x,240,320,110,l,fontSize=36,stroke=P['accent'] if j==3 else P['secondary']))

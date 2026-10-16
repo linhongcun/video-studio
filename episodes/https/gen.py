@@ -1,7 +1,7 @@
 import json,re,os
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
-src=open('/workspace/sorkin-backup/https/script.md').read()
+src=open(''+str(HERE/'script.md')+'').read()
 narr=re.findall(r'- 旁白：(.+)',src); assert len(narr)==8
 CNT=[int(x) for x in re.findall(r'- 字数：(\d+)',src)]
 def cnt(s): return len(re.findall(r'[\u4e00-\u9fffA-Za-z0-9]',s))
@@ -92,18 +92,19 @@ def shots_for(si,L):
     if si==5:
         base=[T("cliL",250,100,400,50,"浏览器",40,align="center"),T("srvL",1270,100,400,50,"服务器",40,align="center"),E("lifeL","line",450,170,0,600,P['secondary']),E("lifeR","line",1470,170,0,600,P['secondary'])]
         h1=E("ch","arrow",450,220,1020,60,P['primary'],label="ClientHello（浏览器问候）",note="支持的算法 + 密钥交换参数",direction="r",fontSize=32)
-        h2=E("sh","arrow",450,360,1020,60,P['accent'],label="ServerHello（服务器回应）",note="自己的参数 + 证书 + 签名",direction="l",fontSize=32)
+        h2=E("sh","arrow",450,360,1020,60,P['accent'],label="ServerHello（服务器回应）",note="只带自己的参数（证书和签名不在 ServerHello 里，见 handshake-3 带锁箭头）",direction="l",fontSize=32)
         t1=T("tls13",760,100,400,50,"以 TLS 1.3 为例",36,P["accent"],align="center")
         a1=[fade(i) for i in ["cliL","srvL","lifeL","lifeR"]]+[fade("tls13",AT(5,0,"以 TLS"),AT(5,0,"以 TLS")+12),mv("ch","drawProgress",AT(5,0,"浏览器发出"),AEND(5,0),0,1)]
-        a2=[mv("sh","drawProgress",AT(5,1,"服务器回"),AT(5,1,"附上"),0,1),fade("shN",AT(5,1,"附上"),AT(5,1,"附上")+10)]
-        shN=T("shN",450,430,1020,48,"+ 参数 + 证书 + 签名",34,P["accent"],align="center")
-        e3=base+[h1,h2,A("kL","key-symmetric",310,480,180,180),A("kR","key-symmetric",1380,480,180,180),T("same",660,520,600,56,"各自算出同一把会话密钥",40,P['accent'],align="center"),
-            E("data","arrow",450,690,1020,40,P['success'],label="之后全部加密",direction="lr",fontSize=30),R("rtt12",1180,790,600,40,stroke=P['text2'],radius=8,label="完整握手 · TLS 1.2：2 个往返",fontSize=28),R("rtt13",1180,840,600,40,stroke=P['success'],radius=8,label="完整握手 · TLS 1.3：1 个往返",fontSize=28)]
+        a2=[mv("sh","drawProgress",AT(5,1,"服务器回"),AT(5,1,"带上"),0,1),fade("shN",AT(5,1,"带上"),AT(5,1,"带上")+10)]
+        shN=T("shN",450,430,1020,48,"+ 自己的参数",34,P["accent"],align="center")
+        e3=base+[h1,h2,A("kL","key-symmetric",320,490,140,140),A("kR","key-symmetric",1400,490,140,140),T("same",660,510,600,56,"各自算出同一把会话密钥",40,P['accent'],align="center"),
+            E("cert","arrow",450,628,1020,50,P['accent'],label="证书 + 签名",note="stock-qa 2026-10-16（Nolan 定稿第 5 条）：证书和签名在双方算出会话密钥之后单独加密发送，箭头带锁，方向服务器→浏览器",direction="l",fontSize=30),A("certLock","padlock-closed",1490,618,64,64,note="带锁箭头的锁"),
+            E("data","arrow",450,735,1020,40,P['success'],label="之后全部加密",direction="lr",fontSize=30),R("rtt12",1180,790,600,40,stroke=P['text2'],radius=8,label="完整握手 · TLS 1.2：2 个往返",fontSize=28),R("rtt13",1180,840,600,40,stroke=P['success'],radius=8,label="完整握手 · TLS 1.3：1 个往返",fontSize=28)]
         e3=[e for e in e3]
         for e in e3:
-            if e['id'] in("rtt12",): e['y']=770
-            if e['id']=="rtt13": e['y']=820
-        a3=[mv("kL","scale",10,25,0,1,"spring"),mv("kR","scale",10,25,0,1,"spring"),fade("same",AT(5,2,"各自算出"),AT(5,2,"各自算出")+15),mv("data","drawProgress",AT(5,2,"之后的通信"),AT(5,2,"之后的通信")+30,0,1),fade("rtt12",AT(5,2,"TLS 1.2"),AT(5,2,"TLS 1.2")+15),fade("rtt13",AT(5,2,"1.3 只要"),AT(5,2,"1.3 只要")+15),mv("rtt13","scale",AT(5,2,"1.3 只要")+15,AT(5,2,"1.3 只要")+30,1,1.06,"spring")]
+            if e["id"] in("rtt12",): e["y"]=785
+            if e["id"]=="rtt13": e["y"]=832
+        a3=[mv("kL","scale",AT(5,2,"双方用"),AT(5,2,"双方用")+15,0,1,"spring"),mv("kR","scale",AT(5,2,"双方用"),AT(5,2,"双方用")+15,0,1,"spring"),mv("cert","drawProgress",AT(5,2,"服务器再把"),AT(5,2,"加密发过来"),0,1),fade("certLock",AT(5,2,"服务器再把"),AT(5,2,"服务器再把")+12),fade("same",AT(5,2,"各自算出"),AT(5,2,"各自算出")+15),mv("data","drawProgress",AT(5,2,"之后的通信"),AT(5,2,"之后的通信")+30,0,1),fade("rtt12",AT(5,2,"TLS 1.2"),AT(5,2,"TLS 1.2")+15),fade("rtt13",AT(5,2,"1.3 只要"),AT(5,2,"1.3 只要")+15),mv("rtt13","scale",AT(5,2,"1.3 只要")+15,AT(5,2,"1.3 只要")+30,1,1.06,"spring")]
         return [(base+[t1,h1],a1),(base+[t1,h1,h2,shN],a2),(e3+[shN],a3)]
     if si==6:
         e1=[A("box","envelope-sealed",360,220,420,420),A("hash","hash-check",1100,240,380,380),T("tagT",1000,660,600,50,"每条消息带校验标签",38,P['primary'],align="center"),A("pencil","pencil",760,180,120,120),T("alarm",300,700,600,56,"改动一个字节，也会被发现",40,P['danger'],align="center")]

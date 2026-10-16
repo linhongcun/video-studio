@@ -1,12 +1,12 @@
 import json,re,os,sys
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
-d=json.load(open('storyboard.json'));src=open('/workspace/sorkin-backup/cookie-session/script.md').read();TM=json.load(open('timing.json'))
+d=json.load(open('storyboard.json'));src=open('script.md').read();TM=json.load(open('timing.json'))
 narr=re.findall(r'- 旁白：(.+)',src);err=[];g=0;M=80
 BANNED=["面试","八股","校招","满分","求职","考点","背诵","高频题","所有浏览器默认","默认 Lax","第三方","读你电脑","读取你电脑","电脑里的文件"]
 ALLOW_PHR=["example.com","Set-Cookie"]
 ALLOW={"Cookie","Session","HTTP","HTTPS","HttpOnly","Secure","SameSite","Lax","Token","ID","JS","URL"}
 SEG=["stateless","set-cookie","send","session","protect","recap"]
-art=open("/workspace/sorkin-backup/cookie-session/article.mdx").read()
+art=open("article.mdx").read()
 for x in SEG:
     if not re.search(r"id=[\"']"+re.escape(x)+r"[\"']|#\s*.*\{#"+re.escape(x)+r"\}|"+re.escape(x),art): err.append(("article id",x))
 def lum(h):

@@ -284,7 +284,7 @@ const Shot: React.FC<{p: any; prevTr: any}> = ({p, prevTr}) => {
   const td = isFade(tr.type) ? tr.durationInFrames : 0;
   const out = td ? interpolate(frame, [dur - td, dur], [1, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}) : 1;
   const inn = isFade(prevTr?.type) ? interpolate(frame, [0, prevTr.durationInFrames || 8], [0, 1], {extrapolateRight: 'clamp'}) : 1;
-  const subs = subtitleTimes(sh, audioFrames);
+  const subs = sh.subtitles?.length && typeof sh.subtitles[0].from === 'number' ? sh.subtitles : subtitleTimes(sh, audioFrames);
   const cur = subs.find((s: any) => frame >= s.from && frame <= s.to);
   return (
     <AbsoluteFill>

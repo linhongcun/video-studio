@@ -1,7 +1,7 @@
 import json,re
 from pathlib import Path
 HERE=Path(__file__).resolve().parent
-src=open('/workspace/sorkin-backup/cookie-session/script.md').read()
+src=open(''+str(HERE/'script.md')+'').read()
 narr=re.findall(r'- 旁白：(.+)',src); assert len(narr)==6
 CNT=[int(x) for x in re.findall(r'- 字数：(\d+)',src)]
 def cnt(s): return len(re.findall(r'[\u4e00-\u9fffA-Za-z0-9]',s))
@@ -81,7 +81,7 @@ def shots_for(si,L):
             E("ok","arrow",560,220,800,50,P['success'],label="照样认得你",direction="r",fontSize=32),tag("tOk",580,180,72),
             E("no","arrow",560,600,800,50,P['text2'],label="不会带过去",direction="r",fontSize=32,dash=True),T("x",860,660,200,56,"读不到",40,P["danger"],align="center"),  # 2026-10-14 内容核对：拿不到 → 读不到
            
-            T("back",160,760,1600,56,"关掉再回来：手牌还在、没过期，就还认得",40,P['text'],align="center"),
+            T("back",160,760,1600,56,"关掉再回来：手牌还在、登记也有效，就还认得",40,P['text'],align="center"),
             T("only",1360,740,400,50,"只交给发它的网站",32,P['text2'],align="center")]
         t=at(1,"只要手牌")
         a2=[F("browser",0),F("server",0),F("other",0),F("mine",0),F("back",at(1,"关掉页面")),draw("ok",t,18),F("tOk",t,6),ride("tOk",t,t+20,580,1270),

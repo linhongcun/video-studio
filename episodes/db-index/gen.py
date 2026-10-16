@@ -103,15 +103,18 @@ def shots_for(si,L):
         return [(e1,a1),(e2,a2)]
     if si==4:  # 目录不是越多越好
         TC=[(220,130),(220,520),(1500,130),(1500,520)]
-        tq=at(0,"是不是越多越好");tg=at(0,"书每改一页");tm=at(0,"都得跟着改");tz=at(0,"占纸");tx=at(0,"光挑用哪一本")
-        e1=[I("book","book",760,160,400,400),T("q",860,560,200,160,"？",120,P['accent'],align="center"),R("edit",1000,260,90,90,"#7F1D1D",stroke=P['danger'],radius=45,label="改",fontSize=44)]+[
+        tq=at(0,"是不是越多越好");tg=at(0,"书里加一页");tm=at(0,"都得跟着改");tb=at(0,"只改某页");tn=at(0,"只有按这部分");tz=at(0,"占纸");tx=at(0,"光挑用哪一本")  # stock-qa 2026-10-16：两拍（加/撕页→全部目录动；只改内容→只有对应目录动）
+        e1=[I("book","book",760,160,400,400),T("q",860,560,200,160,"？",120,P['accent'],align="center"),R("edit",960,250,170,90,"#7F1D1D",stroke=P['danger'],radius=45,label="加/撕",fontSize=40,note="第一拍：加一页或撕一页"),R("edit2",960,250,170,90,"#7F1D1D",stroke=P['accent'],radius=45,label="改内容",fontSize=36,note="第二拍：只改某页上的内容"),E("aOnly","arrow",440,205,320,50,P['accent'],direction="l",note="第二拍：只有对应的那本目录（左上）跟着改")]+[
             I(f"t{j}","toc",x,y,200,200) for j,(x,y) in enumerate(TC)]+[
             E("aL0","arrow",440,205,320,50,P['danger'],direction="l"),E("aL1","arrow",440,595,320,50,P['danger'],direction="l"),
             E("aR0","arrow",1160,205,330,50,P['danger'],direction="r"),E("aR1","arrow",1160,595,330,50,P['danger'],direction="r"),I("run","person",900,620,200)]+[
             I(f"pile{j}","toc",760+j*14,140+j*40,260,260) for j in range(5)]+[I("pick","person",1180,560,220),T("q2",1400,560,200,160,"？",120,P['accent'],align="center")]
-        BK=["book","edit","run"]+[f"t{j}" for j in range(4)]+["aL0","aL1","aR0","aR1"]
+        BK=["book","edit2","run","t0","aOnly"]; OTH=["t1","t2","t3","aL1","aR0","aR1"]
         a1=[F("book",0)]+[F(f"t{j}",0) for j in range(4)]+[F("q",tq),pop("q",tq),dim("q",tg,0),F("edit",tg),pop("edit",tg)]+[draw(x,tm+j*5,15) for j,x in enumerate(("aL0","aR0","aL1","aR1"))]+[
-            F("run",tm),mv("run","x",tm,tm+40,900,560),mv("run","x",tm+40,max(tm+41,tz-12),560,1240)]+[dim(x,tz-6,0) for x in BK]+[F(f"pile{j}",tz+j*5,8) for j in range(5)]+[
+            mv(f"t{j}","scale",tm+j*5,tm+j*5+12,1.1,1,"spring") for j in range(4)]+[
+            F("run",tg),mv("run","x",tg,(tg+tb)//2,900,560),mv("run","x",(tg+tb)//2,tb-4,560,1240),
+            dim("edit",tb,0),F("edit2",tb),pop("edit2",tb),dim("aL0",tb,0)]+[dim(x,tb,0.25) for x in OTH]+[
+            draw("aOnly",tn,15),mv("t0","scale",tn,tn+12,1.15,1,"spring"),mv("run","x",tn,tn+25,1240,560)]+[dim(x,tz-6,0) for x in BK]+[mv(x,"opacity",tz-6,tz+6,0.25,0) for x in OTH]+[F(f"pile{j}",tz+j*5,8) for j in range(5)]+[
             dim(f"pile{j}",tx-2,0.6) for j in range(5)]+[F("pick",tx),F("q2",tx+6),pop("q2",tx+6)]
         e2=[tag("w",160,200,480,"写入变慢",P['danger'],48,h=110),tag("s",720,200,480,"占空间",P['accent'],48,h=110),tag("c",1280,200,480,"要挑选",P['secondary'],48,h=110),
             I("i0","book",300,350,200),I("i1","toc",860,350,200),I("i2","person",1420,350,200),term("nm",560,650,800,"索引不是越多越好",P['danger'],56)]

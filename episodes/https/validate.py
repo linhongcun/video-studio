@@ -1,5 +1,5 @@
 import json,re,os
-d=json.load(open('storyboard.json'));src=open('/workspace/sorkin-backup/https/script.md').read()
+d=json.load(open('storyboard.json'));src=open('script.md').read()
 narr=re.findall(r'- 旁白：(.+)',src);err=[];g=0;M=80
 BANNED=["面试","八股","校招","满分","求职","面试官","考点","背诵","高频题","公钥加密会话密钥","用公钥加密","SSL 是","PUBLIC","PRIVATE"]
 ALLOW={"CA","TLS","HTTP","HTTPS","ClientHello","ServerHello"}
