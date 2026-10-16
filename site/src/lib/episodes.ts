@@ -75,29 +75,54 @@ function shotPlan(slug: string) {
   return {fps, scenes, total: acc};
 }
 
-/** 章节：起点按实际帧数计算；id/标题以 article.mdx frontmatter 为准（按顺序与 storyboard scene 一一对应） */
+/** 章节：chapters.txt 优先；否则合并连续同章的分镜，起点按实际帧数计算。 */
 export function computeChapters(slug: string, fm: any[] = []) {
-  if (!fs.existsSync(path.join(EP_DIR, slug, 'storyboard.json'))) {
+  const storyboardPath = path.join(EP_DIR, slug, 'storyboard.json');
+  const chaptersPath = path.join(EP_DIR, slug, 'chapters.txt');
+  const hasStoryboard = fs.existsSync(storyboardPath);
+  const hasChapters = fs.existsSync(chaptersPath);
+  if (!hasStoryboard && !hasChapters) {
     // 草稿期还没有分镜：章节起点暂为 0，仅供 SHOW_DRAFTS 预览
     return {chapters: fm.map((f: any) => ({id: f.id, title: f.title, start: 0, frame: 0, inArticle: true})), duration: 0, fps: 30};
   }
-  const {fps, scenes, total} = shotPlan(slug);
+  const {fps, scenes, total} = hasStoryboard ? shotPlan(slug) : {fps: 30, scenes: [], total: 0};
   // 优先按 scene.chapterId 与 frontmatter id 显式对应（v2：开场/回顾不在正文里，用 scene 标题）；否则按顺序对齐
   const byId = scenes.some((s: any) => s.chapterId);
   const fmById = new Map(fm.map((f: any) => [f.id, f]));
-  const chapters: Chapter[] = scenes.map((s: any, i: number) => {
-    const f: any = byId ? fmById.get(s.chapterId) ?? {} : fm[i] ?? {};
+  const groups: any[][] = [];
+  scenes.forEach((s: any, i: number) => {
+    const prev = scenes[i - 1];
+    if (prev && ((s.chapterId && s.chapterId === prev.chapterId) || (s.title && s.title === prev.title)))
+      groups[groups.length - 1].push(s);
+    else groups.push([s]);
+  });
+  let chapters: Chapter[] = groups.map((group, i) => {
+    const s = group[0];
+    // 章卡可能有独立 id；正文锚点取同组中能匹配 frontmatter 的分镜。
+    const f: any = byId ? group.map((s) => fmById.get(s.chapterId)).find(Boolean) ?? {} : fm[i] ?? {};
     const start = Math.round((s.from / fps) * 10) / 10;
-    if (f.start !== undefined && Math.abs(f.start - start) > 0.5)
+    if (!hasChapters && f.start !== undefined && Math.abs(f.start - start) > 0.5)
       console.warn(`[chapters] ${slug}#${f.id}: frontmatter start=${f.start}s → 实际 ${start}s（frame ${s.from}）`);
     return {id: f.id ?? s.chapterId ?? s.id, title: f.title ?? s.title, start, frame: s.from, fmStart: f.start, inArticle: !!f.id};
   });
-  if (!byId && fm.length && fm.length !== scenes.length)
-    console.warn(`[chapters] ${slug}: frontmatter ${fm.length} 章 vs storyboard ${scenes.length} scene，按顺序对齐`);
+  if (hasChapters) {
+    chapters = fs.readFileSync(chaptersPath, 'utf8').split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line, i) => {
+      const match = /^(\d{2,}):([0-5]\d)\s+(.+)$/.exec(line);
+      if (!match) throw new Error(`[chapters] ${slug}: 无效章节行 ${JSON.stringify(line)}，应为 MM:SS title`);
+      const start = Number(match[1]) * 60 + Number(match[2]);
+      const title = match[3];
+      const chapter = chapters.find((c, j) => c.title === title || groups[j].some((s) => s.title === title));
+      const f = fm.find((f) => f.title === title);
+      return {id: f?.id ?? chapter?.id ?? `chapter-${i + 1}`, title, start, frame: Math.round(start * fps),
+        fmStart: f?.start ?? chapter?.fmStart, inArticle: !!f?.id || !!chapter?.inArticle};
+    });
+  } else if (!byId && fm.length && fm.length !== groups.length)
+    console.warn(`[chapters] ${slug}: frontmatter ${fm.length} 章 vs storyboard ${groups.length} chapter，按顺序对齐`);
   // 成片帧数：storyboard meta.finalVideoFrames 优先（EP.21 起写入；EP.22 起取消全局 60 帧片尾卡，
   // 成片 = 分镜 durationInFrames + 片尾停留 30 帧，见各期 Main.tsx TAIL_HOLD）；
   // 未写 finalVideoFrames 的旧期 = 正片 + 「IT小村 · 原创」片尾卡（episodes/_shared/branding，Remotion Root 同样追加）
-  const sbMeta = readJson(path.join(EP_DIR, slug, 'storyboard.json')).meta ?? {};
+  if (!hasStoryboard) return {chapters, duration: 0, fps};
+  const sbMeta = readJson(storyboardPath).meta ?? {};
   const brandPath = path.join(EP_DIR, '_shared/branding/spec.json');
   const endCard = fs.existsSync(brandPath) ? readJson(brandPath).endCard?.frames ?? 0 : 0;
   const finalFrames = Number.isFinite(sbMeta.finalVideoFrames) ? sbMeta.finalVideoFrames : total + endCard;
