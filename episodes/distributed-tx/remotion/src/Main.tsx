@@ -451,6 +451,10 @@ const Grid = () => <AbsoluteFill style={{backgroundImage: 'radial-gradient(#1E29
 // 供静帧/调试定位：镜头 id → 全局起始帧
 export const shotStart: Record<string, number> = Object.fromEntries(plan.map((p) => [p.sh.id, p.from]));
 
+// EP.21 v4：水印字色按当前镜头底色亮度自动选——浅底（相对亮度 > 0.5，如琥珀黄 / 浅灰）用 #333，深底仍用 spec 白字；在镜头切换帧同帧切换。
+const bgLum = (hex: string) => { const h = hex.replace('#', ''); const c = [0, 2, 4].map((i) => parseInt(h.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; };
+const wmColorAt = (f: number): string | undefined => { const p = plan.find((q) => f >= q.from && f < q.from + q.dur); const bg = p?.sh.background; return bg && bgLum(bg) > 0.5 ? '#333333' : undefined; };
+
 export const Main: React.FC = () => (
   <AbsoluteFill style={{background: P.bg}}>
     <Grid />
@@ -460,6 +464,6 @@ export const Main: React.FC = () => (
       </Sequence>
     ))}
     <Audio src={staticFile('audio/voice.wav')} />
-    <ChannelBranding mainFrames={totalFrames} watermarkFadeIn={false} />
+    <ChannelBranding mainFrames={totalFrames} watermarkFadeIn={false} watermarkColorAt={wmColorAt} />
   </AbsoluteFill>
 );

@@ -4,5 +4,5 @@
 - 配音：MiMo 冰糖第二次返工定稿（/workspace/share/ep21，整轨 narration.wav sha c3f65e55…，7326 帧；开场 op2-b 停顿 0.2 s；MySQL 整词、TCC 逐字母、Saga 整词）
 - 渲染器沿用 EP.20（camera.pushIn + 单条整轨 voice.wav），10 个推镜
 - 字幕严格按 storyboard 数字 from/to；空字幕不画框；水印第 0 帧常显（watermarkFadeIn={false}）
-- 制作：`cd remotion && npm ci && npm run render`（--bundle-cache=false，mix_bgm.py constant --below 12，Wallpaper，−16 LUFS，TP −1.9 dBTP）；成片 sha 260f4103…；渲染器新增 shot.background 整屏底色
+- 制作：`cd remotion && npm ci && npm run render`（--bundle-cache=false，mix_bgm.py constant --below 12，Wallpaper，−16 LUFS，TP −1.9 dBTP）；成片 sha e67c4472…；渲染器新增 shot.background 整屏底色；水印字色按底色亮度自动选（浅底 #333、深底白字，均 40%，ChannelBranding watermarkColorAt）
 - 封面：Miyazaki 设计稿 cover/ep21-*.png → cover-*.jpg（ffmpeg -q:v 2，同 EP.20；不取视频帧）
