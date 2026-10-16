@@ -1,7 +1,7 @@
 # EP.22《后台改了价格，页面怎么还是旧的？》缓存和数据库一致性 · 镜头表（v0.28.0）
 
 - 脚本：script.md（v0.28.0，按村长 5 点 + Deming QA）；plan：storyboard-plan.md；规则：/workspace/share/RULES.md
-- 时间：**实测** Knoll /workspace/share/ep22/timeline.json，narration.wav sha256 90c3378284c88d288a0c008d8e2103a648092c2e8becb26b8bb9daa802219b71
+- 时间：**实测** Knoll /workspace/share/ep22/timeline.json，narration.wav sha256 0badc4afdad2a9ad783b13e5bf6c2b1085924cc2a1fd19b221927541fac47e3f
 - 8 章 → **22 镜头**（含 5 张章节卡）；**总 6698 帧 = 正片 6308 + 章节卡 hold 390 + 术语标签 hold 0**；**成片 6758 帧 = 分镜 6698 + 品牌片尾 60**（ChannelBranding 自动追加，分镜里不再留 60 帧；B 站章节时间按分镜帧算，片尾在最后不影响）
 - 底色：正片 #0B1020，章节卡 #1E293B；旧价黄价签 / 新价绿价签，不写数值
 - 开场 hook-1：第 0 帧左「后台」老板 + 绿新价签，右「页面」手机 + 黄旧价签；念「还是旧价」旧价签放大一下
