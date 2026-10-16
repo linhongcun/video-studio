@@ -1,92 +1,118 @@
-"""Insert v9 chapter-card silences and pad the voice track to the storyboard."""
-import argparse
+"""Place v9 sentence audio at storyboard voice offsets, preserving all holds."""
 import hashlib
 import json
 from pathlib import Path
 import wave
 
 HERE = Path(__file__).resolve().parent
-NARRATION = Path('/workspace/share/ep22-v9/narration.wav')
-TIMELINE = Path('/workspace/share/ep22-v9/timeline.json')
+SOURCE = Path('/workspace/share/ep22-v9')
+NARRATION = SOURCE / 'narration.wav'
+TIMELINE = SOURCE / 'timeline.json'
 SHA_PREFIX = '0e3138f7'
+SAMPLE_RATE = 48000
+SAMPLE_WIDTH = 2
+SENTENCE_COUNT = 50
 
 
-def read_narration():
-    digest = hashlib.sha256(NARRATION.read_bytes()).hexdigest()
-    assert digest.startswith(SHA_PREFIX), f'Unexpected narration SHA256: {digest}'
-    with wave.open(str(NARRATION), 'rb') as source:
+def read_sentence(sid):
+    path = SOURCE / 'sentences' / f'{sid}.wav'
+    with wave.open(str(path), 'rb') as source:
         params = source.getparams()
-        assert params.comptype == 'NONE' and params.sampwidth == 2, params
+        if (params.framerate != SAMPLE_RATE or params.nchannels != 1
+                or params.sampwidth != SAMPLE_WIDTH or params.comptype != 'NONE'):
+            raise SystemExit(f'{path}: expected 48 kHz mono s16 PCM, got {params}')
         pcm = source.readframes(params.nframes)
-    return params, pcm, digest
+    if len(pcm) != params.nframes * SAMPLE_WIDTH:
+        raise SystemExit(f'{path}: truncated audio data')
+    # Drop trailing digital silence (exact zero samples) so padding in the
+    # sentence file is not counted as speech for overlap/end checks.
+    end = len(pcm)
+    while end >= SAMPLE_WIDTH and pcm[end - SAMPLE_WIDTH:end] == bytes(SAMPLE_WIDTH):
+        end -= SAMPLE_WIDTH
+    return pcm[:end]
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('tail_frames', type=float, nargs='?', help='Optional tail in video frames; default: compute from storyboard')
-    args = parser.parse_args()
     storyboard = json.loads((HERE / 'storyboard.json').read_text())
     fps = storyboard['meta']['fps']
-    shots = [shot for scene in storyboard['scenes'] for shot in scene['shots']]
     total = storyboard['meta']['durationInFrames']
-    assert total == sum(shot['durationInFrames'] for shot in shots)
-    params, pcm, digest = read_narration()
-    sr = params.framerate
-    stride = params.nchannels * params.sampwidth
+    shots = [shot for scene in storyboard['scenes'] for shot in scene['shots']]
+    assert total == sum(shot['durationInFrames'] for shot in shots), (
+        'Storyboard duration does not equal the sum of shot durations'
+    )
+
+    digest = hashlib.sha256(NARRATION.read_bytes()).hexdigest()
+    if not digest.startswith(SHA_PREFIX):
+        raise SystemExit(f'Unexpected narration SHA256: {digest}')
     timeline = json.loads(TIMELINE.read_text())
-    assert timeline['sample_rate'] == sr
-    sentences = timeline['sentences']
-    by_id = {sentence['id']: (i, sentence) for i, sentence in enumerate(sentences)}
-    assert len(by_id) == len(sentences), 'Duplicate sentence IDs'
-    assert abs(timeline['duration'] - params.nframes / sr) * fps <= 1
-    holds = []
+    timeline_ids = [sentence['id'] for sentence in timeline['sentences']]
+    if len(timeline_ids) != SENTENCE_COUNT or len(set(timeline_ids)) != SENTENCE_COUNT:
+        raise SystemExit(f'Timeline must contain exactly {SENTENCE_COUNT} unique sentence IDs')
+
+    placements = {}
     for shot in shots:
-        if not shot.get('chapterCard'):
-            continue
-        card = shot['chapterCard']
-        sid = card['insertBeforeSentence']
-        index, sentence = by_id[sid]
-        # The source timeline uses start/end seconds, not startSec/endSec.
-        insertion = sentence['start'] - 0.1
-        assert index == 0 or sentences[index - 1]['end'] <= insertion, sid
-        position = round(insertion * sr)
-        assert 0 <= position < params.nframes, sid
-        assert not holds or position >= holds[-1]['orig_sample'], sid
-        frames = card['holdFrames']
-        assert frames == shot['durationInFrames'], shot['id']
-        samples = round(frames * sr / fps)
-        holds.append(dict(shot=shot['id'], before=sid, orig_sec=position / sr,
-                          orig_sample=position, frames=frames, samples=samples))
-        print(f"{shot['id']}: insert {frames} frames before {sid} at {position / sr:.3f}s")
-    target_samples = round(total * sr / fps)
-    hold_samples = sum(hold['samples'] for hold in holds)
-    remaining = target_samples - params.nframes - hold_samples
-    tail_samples = remaining if args.tail_frames is None else round(args.tail_frames * sr / fps)
-    assert tail_samples >= 0, 'Narration and holds exceed storyboard, or tail is negative'
-    output_samples = params.nframes + hold_samples + tail_samples
-    assert abs(output_samples - target_samples) * fps / sr <= 1, 'Explicit tail does not match storyboard (±1 frame)'
-    print(f'Tail: {tail_samples * fps / sr:.6f} frames ({tail_samples} samples, {tail_samples / sr:.6f}s)')
+        offsets = {}
+        for subtitle in shot.get('subtitles', []):
+            if 'src' not in subtitle:
+                continue
+            sid = subtitle['src']
+            offset = subtitle['voiceFrom']
+            offsets[sid] = min(offsets.get(sid, offset), offset)
+        for sid, offset in offsets.items():
+            if sid in placements:
+                raise SystemExit(
+                    f"Sentence {sid} appears in two shots: "
+                    f"{placements[sid]['shot']} and {shot['id']}"
+                )
+            placements[sid] = dict(id=sid, shot=shot['id'], startFrame=shot['from'] + offset)
+
+    if len(placements) != SENTENCE_COUNT or set(placements) != set(timeline_ids):
+        missing = sorted(set(timeline_ids) - set(placements))
+        extra = sorted(set(placements) - set(timeline_ids))
+        raise SystemExit(
+            f'Storyboard must match all {SENTENCE_COUNT} timeline sentences; '
+            f'found {len(placements)}, missing={missing}, extra={extra}'
+        )
+
+    target_samples = round(total * SAMPLE_RATE / fps)
+    holds = sorted(placements.values(), key=lambda item: item['startFrame'])
+    clips = []
+    for entry in holds:
+        pcm = read_sentence(entry['id'])
+        samples = len(pcm) // SAMPLE_WIDTH
+        entry['startSample'] = round(entry['startFrame'] * SAMPLE_RATE / fps)
+        entry['endSample'] = entry['startSample'] + samples
+        entry['durFrames'] = samples * fps / SAMPLE_RATE
+        if entry['startSample'] < 0 or entry['endSample'] > target_samples:
+            raise SystemExit(
+                f"Sentence {entry['id']} spans samples {entry['startSample']}.."
+                f"{entry['endSample']}, outside output 0..{target_samples}"
+            )
+        clips.append(pcm)
+
+    for current, following in zip(holds, holds[1:]):
+        if current['endSample'] > following['startSample']:
+            raise SystemExit(
+                f"Sentence {current['id']} ends at sample {current['endSample']} "
+                f"and overlaps {following['id']} starting at {following['startSample']}"
+            )
+
+    audio = bytearray(target_samples * SAMPLE_WIDTH)
+    for entry, pcm in zip(holds, clips):
+        audio[entry['startSample'] * SAMPLE_WIDTH:entry['endSample'] * SAMPLE_WIDTH] = pcm
     output = HERE / 'remotion/public/audio/voice.wav'
     output.parent.mkdir(parents=True, exist_ok=True)
     with wave.open(str(output), 'wb') as voice:
-        voice.setparams(params._replace(nframes=output_samples))
-        previous = 0
-        inserted = 0
-        for hold in holds:
-            position = hold['orig_sample']
-            voice.writeframesraw(pcm[previous * stride:position * stride])
-            hold['output_sample'] = position + inserted
-            voice.writeframesraw(bytes(hold['samples'] * stride))
-            previous = position
-            inserted += hold['samples']
-        voice.writeframesraw(pcm[previous * stride:])
-        voice.writeframesraw(bytes(tail_samples * stride))
-    holds.append(dict(shot=shots[-1]['id'], before='end', frames=tail_samples * fps / sr,
-                      samples=tail_samples, output_sample=params.nframes + hold_samples,
-                      narration_samples=params.nframes, narration_sha256=digest,
-                      sample_rate=sr, fps=fps))
-    (HERE / 'holds_applied.json').write_text(json.dumps(holds, ensure_ascii=False, indent=2) + '\n')
-    print(f'Voice: {output_samples * fps / sr:.6f} frames; storyboard: {total} frames')
+        voice.setnchannels(1)
+        voice.setsampwidth(SAMPLE_WIDTH)
+        voice.setframerate(SAMPLE_RATE)
+        voice.writeframes(audio)
+    (HERE / 'holds_applied.json').write_text(
+        json.dumps(holds, ensure_ascii=False, indent=2) + '\n'
+    )
+    print(f'Placed {len(holds)} sentences; narration SHA256 verified ({SHA_PREFIX}).')
+    print(f'Voice: {total} frames at {fps} fps, {target_samples} samples '
+          f'({target_samples / SAMPLE_RATE:.3f}s): {output}')
 
 
 if __name__ == '__main__':

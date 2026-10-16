@@ -4,7 +4,7 @@ from pathlib import Path
 import sys
 import wave
 
-from build_voice import read_narration
+from build_voice import read_sentence
 
 HERE = Path(__file__).resolve().parent
 
@@ -61,37 +61,30 @@ def check():
     for shot in shots:
         assert timing[shot['id']]['from'] == shot['from'] and timing[shot['id']]['duration'] == shot['durationInFrames'], f"Stale timing: {shot['id']}"
     holds = json.loads((HERE / 'holds_applied.json').read_text())
-    assert len(holds) == len(cards) + 1, 'Expected seven card holds and one tail'
-    params, narration, digest = read_narration()
-    sr = params.framerate
-    stride = params.nchannels * params.sampwidth
+    assert len(holds) == 50, f'Expected 50 placed sentences, got {len(holds)}'
+    sr = 48000
     with wave.open(str(HERE / 'remotion/public/audio/voice.wav'), 'rb') as voice:
-        assert (voice.getframerate(), voice.getnchannels(), voice.getsampwidth()) == (sr, params.nchannels, params.sampwidth)
+        assert (voice.getframerate(), voice.getnchannels(), voice.getsampwidth()) == (sr, 1, 2)
         voice_samples = voice.getnframes()
         pcm = voice.readframes(voice_samples)
-    previous = 0
-    inserted = 0
-    for shot, hold in zip(cards, holds[:-1]):
-        assert (hold['shot'], hold['before'], hold['frames']) == (shot['id'], shot['chapterCard']['insertBeforeSentence'], shot['durationInFrames'])
-        position = hold['orig_sample']
-        assert previous <= position <= params.nframes
-        assert hold['samples'] == round(hold['frames'] * sr / fps)
-        assert hold['output_sample'] == position + inserted
-        assert pcm[(previous + inserted) * stride:(position + inserted) * stride] == narration[previous * stride:position * stride], 'Narration altered'
-        assert not any(pcm[(position + inserted) * stride:(position + inserted + hold['samples']) * stride]), 'Card hold is not silent'
-        inserted += hold['samples']
-        previous = position
-    tail = holds[-1]
-    assert tail['before'] == 'end' and tail['samples'] >= 0
-    assert tail['narration_sha256'] == digest and tail['narration_samples'] == params.nframes
-    assert tail['output_sample'] == params.nframes + inserted
-    assert abs(tail['frames'] - tail['samples'] * fps / sr) < 1e-6
-    assert pcm[(previous + inserted) * stride:(params.nframes + inserted) * stride] == narration[previous * stride:], 'Narration ending altered'
-    assert not any(pcm[(params.nframes + inserted) * stride:]), 'Tail is not silent'
-    assert voice_samples == params.nframes + inserted + tail['samples'], 'Narration + holds + tail != voice samples'
+    assert voice_samples == round(total * sr / fps), 'Voice length != storyboard'
+    starts = {}
+    for shot in shots:
+        for sub in shot.get('subtitles', []):
+            if 'src' in sub:
+                starts.setdefault((shot['id'], sub['src']), shot['from'] + sub['voiceFrom'])
+                starts[(shot['id'], sub['src'])] = min(starts[(shot['id'], sub['src'])], shot['from'] + sub['voiceFrom'])
+    prev_end = 0
+    for h in holds:
+        assert h['startFrame'] == starts[(h['shot'], h['id'])], f"Stale placement: {h['id']}"
+        assert h['startSample'] == round(h['startFrame'] * sr / fps) and h['startSample'] >= prev_end, h['id']
+        sent = read_sentence(h['id'])
+        assert pcm[h['startSample'] * 2:h['endSample'] * 2] == sent, f"Sentence audio mismatch: {h['id']}"
+        assert not any(pcm[prev_end * 2:h['startSample'] * 2]), f"Gap before {h['id']} not silent"
+        prev_end = h['endSample']
+    assert not any(pcm[prev_end * 2:]), 'Tail not silent'
     voice_frames = voice_samples * fps / sr
-    assert abs(total - voice_frames) <= 1, f'Storyboard {total} != voice {voice_frames:.6f} frames'
-    print(f'PASS: {len(shots)} contiguous shots, {total} frames, voice {voice_frames:.6f} frames, 5×78 + 2×45 cards, {len(references)} asset files')
+    print(f'PASS: {len(shots)} contiguous shots, {total} frames, voice {voice_frames:.6f} frames, 50 sentences at voiceFrom, 5×78 + 2×45 cards, {len(references)} asset files')
 
 
 if __name__ == '__main__':
