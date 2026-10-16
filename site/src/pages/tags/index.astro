@@ -1,13 +1,22 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
-import {getEpisodes, getTags, tagHref, asset, BASE} from '../../lib/episodes';
+import {getEpisodes, getTags, getSeries, seriesHref, tagHref, asset, BASE} from '../../lib/episodes';
 const eps = getEpisodes();
 ---
 <BaseLayout title="专题" current="tags">
   <div class="container">
     <Breadcrumb items={[{label: '首页', href: BASE}, {label: '专题'}]} />
     <h1>专题</h1>
+    <h2 class="sec">按系列</h2>
+    <ul class="list series" role="list">
+      {getSeries().map((s) => (
+        <li><a class="wide" href={seriesHref(s.id)}>
+          <div><h2>{s.title} <span class="num">共 {s.episodes.length} 期 · EP.{s.episodes[0].ep}–{s.episodes[s.episodes.length - 1].ep}</span></h2><p>{s.description}</p></div>
+        </a></li>
+      ))}
+    </ul>
+    <h2 class="sec">按标签</h2>
     <ul class="list" role="list">
       {getTags().map((t) => (
         <li><a class="wide" href={tagHref(t.name)}>
@@ -20,10 +29,12 @@ const eps = getEpisodes();
 </BaseLayout>
 <style>
 h1{font-size:var(--fs-h1);margin:0 0 var(--sp-5)}
+.sec{font-size:var(--fs-h3);color:var(--c-text-2);margin:var(--sp-6) 0 var(--sp-3)}
+.series{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
 .list{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-4)}
 .wide{display:flex;justify-content:space-between;gap:var(--sp-4);align-items:center;flex-wrap:wrap;padding:var(--sp-5);background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-lg);color:inherit;text-decoration:none}
 .wide:hover{border-color:var(--c-primary-a40)}
 h2{margin:0;font-size:var(--fs-h3)}h2 span{font-size:var(--fs-small);color:var(--c-text-2);font-weight:400}
 p{margin:var(--sp-1) 0 0;color:var(--c-text-2);font-size:var(--fs-small)}
-.thumbs{display:flex;gap:var(--sp-2)}.thumbs img{width:120px;border-radius:var(--r-sm)}
+.thumbs{display:flex;gap:var(--sp-2);max-width:100%;min-width:0}.thumbs img{width:120px;min-width:0;flex:0 1 120px;height:auto;border-radius:var(--r-sm)}
 </style>

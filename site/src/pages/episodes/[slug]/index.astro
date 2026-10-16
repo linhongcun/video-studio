@@ -14,7 +14,8 @@ import MusicCredit from '../../../components/MusicCredit.astro';
 import EpisodePager from '../../../components/EpisodePager.astro';
 import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
-import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref} from '../../../lib/episodes';
+import PlatformLinks from '../../../components/PlatformLinks.astro';
+import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, isNew, isoDuration, seriesNav, seriesHref} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes();
   const pages = eps.map((e, i) => ({params: {slug: e.slug}, props: {e, prev: eps[i + 1], next: eps[i - 1]}}));
@@ -27,24 +28,41 @@ if (redirectTo) return Astro.redirect(`${BASE}episodes/${redirectTo}/`);
 const Content = e.Content;
 const tree = `${REPO}/blob/main/episodes/${e.slug}`;
 // Markdown → 组件自动映射：Sorkin 的稿件无需改写
+const sNav = seriesNav(e);
+const pageUrl = new URL(`${BASE}episodes/${e.slug}/`, Astro.site).href;
+const abs = (u: string) => new URL(u, Astro.site).href;
+const jsonLd = {
+  '@context': 'https://schema.org', '@type': 'VideoObject', name: e.title, description: e.description ?? e.summary,
+  thumbnailUrl: [abs(asset(e.slug, e.poster))], uploadDate: `${e.date}T00:00:00+08:00`, duration: isoDuration(e.duration),
+  contentUrl: abs(asset(e.slug, e.video)), embedUrl: pageUrl, inLanguage: 'zh-CN',
+  ...(e.updated ? {dateModified: `${e.updated}T00:00:00+08:00`} : {}),
+  publisher: {'@type': 'Organization', name: 'IT小村工作室', url: abs(BASE)},
+};
 const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blockquote: Callout, Figure, Callout, Steps, Summary, CodeBlock};
 ---
-<BaseLayout title={e.title} description={(e as any).description ?? e.summary} ogImage={asset(e.slug, e.poster)}>
+<BaseLayout title={e.title} description={(e as any).description ?? e.summary} ogImage={asset(e.slug, e.poster)} ogType="video.other" jsonLd={jsonLd}>
   <div class="container">
-    <Breadcrumb items={[{label: '首页', href: BASE}, ...(e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: epLabel(e.ep)}]} />
-    <header class="eh">
-      <h1>{e.title}</h1>
-      <p class="meta num"><time datetime={e.date}>{e.date}</time> · {fmtTime(e.duration)} · {e.tags.map((t) => <a href={tagHref(t)}>#{t}</a>)}</p>
+    <Breadcrumb items={[{label: '首页', href: BASE}, ...(sNav ? [{label: sNav.series.title, href: seriesHref(sNav.series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `${epLabel(e.ep)} · 第 ${sNav.index}/${sNav.total} 期` : epLabel(e.ep)}]} />
+    <header class="eh" data-pagefind-body>
+      <h1 data-pagefind-meta={`image:${asset(e.slug, e.poster)}`}>{e.title}</h1>
+      <p class="meta num">
+        <span><time datetime={e.date}>{fmtDate(e.date)}</time> 发布{isNew(e.date, e.slug) && <span class="new">NEW</span>}</span>
+        {e.updated && <span>· 更新于 <time datetime={e.updated}>{fmtDate(e.updated)}</time></span>}
+        <span>· 视频 {fmtTime(e.duration)}</span>
+        {e.readMin > 0 && <span>· 约 {e.readMin} 分钟读完</span>}
+        <span class="tags">· {e.tags.map((t) => <a href={tagHref(t)}>#{t}</a>)}</span>
+      </p>
     </header>
+    <PlatformLinks platforms={e.platforms} />
     <VideoPlayer src={asset(e.slug, e.video)} poster={asset(e.slug, e.poster)} captions={`${BASE}episodes/${e.slug}/captions.vtt`} chapters={e.chapters} title={e.title} />
     <RelatedEpisodes items={getRelated(e)} />
   </div>
   <div class="container art-grid">
-    <article class="prose">
+    <article class="prose" data-pagefind-body>
       {Content && <Content components={components} />}
-      <MusicCredit />
+      <div data-pagefind-ignore><MusicCredit />
       <BehindTheScenes script={`${tree}/script.md`} storyboard={`${tree}/storyboard.json`} source={`${REPO}/tree/main/episodes/${e.slug}/remotion`} />
-      <EpisodePager prev={prev} next={next} />
+      <EpisodePager nav={sNav ?? {prev, next}} /></div>
     </article>
     <aside class="toc-col"><Toc headings={e.chapters.filter((c) => c.inArticle)} /></aside>
   </div>
@@ -71,6 +89,8 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 .eh h1{font-size:var(--fs-h1);line-height:1.25;margin:0 0 var(--sp-2)}
 .meta{color:var(--c-text-2);font-size:var(--fs-small);margin:0 0 var(--sp-5);display:flex;gap:var(--sp-2);flex-wrap:wrap}
 .meta a{color:var(--c-tag)}
+.meta .tags{display:inline-flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-2)}
+.new{margin-left:6px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:var(--r-full);background:var(--c-primary);color:var(--c-on-primary);vertical-align:1px}
 .art-grid{display:grid;grid-template-columns:minmax(0,var(--measure));justify-content:center;margin-top:var(--sp-7)}
 .toc-col{display:none}
 @media (min-width:1440px){.art-grid{grid-template-columns:1fr minmax(0,var(--measure)) 1fr;gap:var(--sp-6)}.prose{grid-column:2}.toc-col{display:block;grid-column:3;max-width:240px}}
@@ -83,6 +103,11 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 .prose h3{font-size:var(--fs-h3)}
 .prose :not(pre)>code{background:var(--c-surface-2);color:var(--c-primary);padding:1px 6px;border-radius:var(--r-sm);font-size:.9em}
 .prose strong{color:var(--c-strong);font-weight:600}
+/* 宽表格在自身容器内横向滚动，不撑宽整页（手机 390px 溢出的根因） */
+.prose a,.prose :not(pre)>code{overflow-wrap:anywhere}
+.prose table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-collapse:collapse;margin:0 0 var(--sp-5);font-size:var(--fs-small)}
+.prose th,.prose td{padding:6px 10px;border:1px solid var(--c-border);text-align:left;vertical-align:top}
+.prose th{background:var(--c-surface-2);white-space:nowrap}
 .prose ul,.prose ol{padding-left:1.4em;margin:0 0 var(--sp-4)}
 .chh{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);flex-wrap:wrap}
 .chh .t{position:relative}

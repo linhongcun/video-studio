@@ -2,8 +2,9 @@
 import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
-import {VERSION} from '../lib/episodes';
-const {title, description = '用代码拍科普：技术动画短片 + 图文讲解，把网络与浏览器原理讲清楚', ogImage, current = 'home'} = Astro.props;
+import {VERSION, BASE} from '../lib/episodes';
+const {title, description = '用代码拍科普：技术动画短片 + 图文讲解，把网络与浏览器原理讲清楚', ogImage, current = 'home', ogType = 'website', jsonLd} = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
 const full = title ? `${title} · Video Studio` : 'Video Studio 技术科普';
 const og = ogImage ? new URL(ogImage, Astro.site).href : undefined;
 ---
@@ -40,8 +41,19 @@ const og = ogImage ? new URL(ogImage, Astro.site).href : undefined;
   <meta name="description" content={description} />
   <meta property="og:title" content={full} />
   <meta property="og:description" content={description} />
-  <meta property="og:type" content="website" />
+  <meta property="og:type" content={ogType} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:site_name" content="Video Studio · IT小村" />
+  <meta property="og:locale" content="zh_CN" />
   {og && <meta property="og:image" content={og} />}
+  <meta name="twitter:card" content={og ? 'summary_large_image' : 'summary'} />
+  <meta name="twitter:title" content={full} />
+  <meta name="twitter:description" content={description} />
+  {og && <meta name="twitter:image" content={og} />}
+  <link rel="canonical" href={canonical} />
+  <link rel="alternate" type="application/rss+xml" title="Video Studio · IT小村 新片订阅" href={`${BASE}rss.xml`} />
+  <link rel="sitemap" href={`${BASE}sitemap-index.xml`} />
+  {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 </head>
 <body>
   <a class="skip" href="#main">跳到正文</a>

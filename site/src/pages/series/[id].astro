@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import EpisodeGrid from '../../components/EpisodeGrid.astro';
+import {getSeries, BASE, asset} from '../../lib/episodes';
+export function getStaticPaths() {
+  return getSeries().map((s) => ({params: {id: s.id}, props: {s}}));
+}
+const {s} = Astro.props;
+const first = s.episodes[0];
+---
+<BaseLayout title={`系列：${s.title}`} description={s.description} ogImage={first && asset(first.slug, first.poster)}>
+  <div class="container">
+    <Breadcrumb items={[{label: '首页', href: BASE}, {label: `系列 · ${s.title}`}]} />
+    <h1>{s.title} <span class="num">共 {s.episodes.length} 期</span></h1>
+    <p class="d">{s.description} 建议按顺序看。</p>
+    <EpisodeGrid episodes={s.episodes} />
+  </div>
+</BaseLayout>
+<style>
+h1{font-size:var(--fs-h1);margin:0 0 var(--sp-2)}h1 span{font-size:var(--fs-small);color:var(--c-text-2);font-weight:400}
+.d{color:var(--c-text-2);margin:0 0 var(--sp-6)}
+</style>

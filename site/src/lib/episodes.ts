@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import pkg from '../../package.json';
 import tagsMeta from '../content/tags.json';
+import seriesMeta from '../content/series.json';
 
 export const REPO = 'https://github.com/linhongcun/video-studio';
 export const VERSION = pkg.version;
@@ -14,7 +15,26 @@ export type Episode = {
   slug: string; ep: number; title: string; summary: string; duration: number; tags: string[];
   date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
   draft: boolean; related: {slug: string; label?: string}[];
+  series?: string; description?: string; updated?: string; platforms: Platform[]; readMin: number;
 };
+export type Platform = {id: string; label: string; url: string};
+/** 平台链接：只渲染 meta.json platforms 里写了真实 URL 的平台，没写的不显示（绝不拼猜） */
+const PLATFORMS: [string, string][] = [['bilibili', 'B站'], ['douyin', '抖音'], ['kuaishou', '快手']];
+export const ACCOUNT = 'IT小村';
+const platformsOf = (m: any): Platform[] => PLATFORMS
+  .map(([id, label]) => ({id, label, url: String(m.platforms?.[id] ?? '').trim()}))
+  .filter((p) => /^https:\/\//.test(p.url));
+
+/** 阅读时长：去掉 frontmatter / import / 代码块 / 标签后，中文按字 + 英文按词，约 400 字每分钟 */
+function readingMinutes(slug: string) {
+  const f = path.join(EP_DIR, slug, 'article.mdx');
+  if (!fs.existsSync(f)) return 0;
+  const t = fs.readFileSync(f, 'utf8').replace(/^---[\s\S]*?\n---/, '').replace(/```[\s\S]*?```/g, '')
+    .replace(/^(import|export) .*$/gm, '').replace(/<[^>]+>/g, '').replace(/\{#[\w-]+\}/g, '');
+  const cjk = (t.match(/[\u4e00-\u9fff]/g) ?? []).length;
+  const words = (t.replace(/[\u4e00-\u9fff]/g, ' ').match(/[A-Za-z0-9]+/g) ?? []).length;
+  return Math.max(1, Math.round((cjk + words) / 400));
+}
 
 /** draft: true 的期数默认不发布；本地预览可用 SHOW_DRAFTS=1 npm run build 查看 */
 export const SHOW_DRAFTS = process.env.SHOW_DRAFTS === '1';
@@ -121,6 +141,8 @@ export function getEpisodes(): Episode[] {
         slug, ep: meta.ep ?? 0, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
         tags: meta.tags ?? [], date: meta.publishedAt, poster: meta.poster, video: meta.video,
         duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, related: meta.related ?? [],
+        series: meta.series, description: meta.description, updated: meta.updatedAt && meta.updatedAt > meta.publishedAt ? meta.updatedAt : undefined,
+        platforms: platformsOf(meta), readMin: readingMinutes(slug),
       };
     })
     .sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.ep - a.ep);
@@ -141,3 +163,42 @@ export const epLabel = (n: number) => `EP.${String(n).padStart(2, '0')}`;
 export const tagHref = (t: string) => `${BASE}tags/${encodeURIComponent(t)}/`;
 export const epHref = (slug: string) => `${BASE}episodes/${slug}/`;
 export const asset = (slug: string, f: string) => `${BASE}episodes/${slug}/${f}`;
+
+/** 日期：构建时计算（北京时间）。“10月16日”；7 天内（含发布当天）标 NEW */
+const BUILD_DAY = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
+const dayDiff = (d: string) => Math.round((Date.parse(BUILD_DAY) - Date.parse(String(d).slice(0, 10))) / 864e5);
+export const fmtDate = (d: string) => { const [y, m, dd] = String(d).slice(0, 10).split('-').map(Number); return `${y}年${m}月${dd}日`; };
+export const fmtDateShort = (d: string) => { const [, m, dd] = String(d).slice(0, 10).split('-').map(Number); return `${m}月${dd}日`; };
+/** NEW：7 天内发布，且最多标最近 NEW_MAX 期（目前日更，全站都在 7 天内，不加上限会每张卡都是 NEW） */
+export const NEW_DAYS = 7, NEW_MAX = 3;
+export const isNew = (d: string, slug?: string) => {
+  const n = dayDiff(d); if (n < 0 || n >= NEW_DAYS) return false;
+  if (!slug) return true;
+  return getEpisodes().slice(0, NEW_MAX).some((e) => e.slug === slug);
+};
+/** ISO 8601 时长，供 JSON-LD 使用 */
+export const isoDuration = (s: number) => `PT${Math.floor(s / 60)}M${Math.floor(s % 60)}S`;
+
+/** 系列（篇章）：series.json 定义顺序与简介；每期 meta.json 的 series 指向其 id。系列内按 ep 升序 */
+export type Series = {id: string; title: string; description: string; order: number; episodes: Episode[]};
+export function getSeries(): Series[] {
+  const meta = seriesMeta as Record<string, {title: string; description: string; order: number}>;
+  return Object.entries(meta).map(([id, m]) => ({id, ...m, episodes: getEpisodes().filter((e) => e.series === id).sort((a, b) => a.ep - b.ep)}))
+    .filter((s) => s.episodes.length).sort((a, b) => a.order - b.order);
+}
+/** 某期在系列中的位置与系列内上/下一期；系列末尾的“下一期”接下一个系列的第一期 */
+export function seriesNav(e: Episode) {
+  const all = getSeries();
+  const si = all.findIndex((s) => s.id === e.series);
+  if (si < 0) return null;
+  const s = all[si], i = s.episodes.findIndex((x) => x.slug === e.slug);
+  const prevS = all[si - 1], nextS = all[si + 1];
+  return {
+    series: s, index: i + 1, total: s.episodes.length,
+    prev: s.episodes[i - 1] ?? (prevS ? prevS.episodes[prevS.episodes.length - 1] : undefined),
+    next: s.episodes[i + 1] ?? (nextS ? nextS.episodes[0] : undefined),
+    prevCross: !s.episodes[i - 1] && !!prevS ? prevS : undefined,
+    nextCross: !s.episodes[i + 1] && !!nextS ? nextS : undefined,
+  };
+}
+export const seriesHref = (id: string) => `${BASE}series/${id}/`;

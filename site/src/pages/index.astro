@@ -1,10 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
-import TagFilter from '../components/TagFilter.astro';
+import SeriesFilter from '../components/SeriesFilter.astro';
 import EpisodeGrid from '../components/EpisodeGrid.astro';
 import EmptyState from '../components/EmptyState.astro';
-import {getEpisodes, getTags, asset} from '../lib/episodes';
+import {getEpisodes, getSeries, asset} from '../lib/episodes';
 const eps = getEpisodes();
 const latest = eps[0];
 ---
@@ -13,9 +13,9 @@ const latest = eps[0];
     {latest && <Hero e={latest} />}
     <section class="all" aria-labelledby="all-title">
       <h2 id="all-title">全部期数</h2>
-      <TagFilter tags={getTags()} />
+      <SeriesFilter series={getSeries()} />
       <div id="all-grid"><EpisodeGrid episodes={eps} /></div>
-      <div id="tf-empty" hidden><EmptyState message="这个标签还没有片子" /></div>
+      <div id="tf-empty" hidden><EmptyState message="这个系列还没有片子" /></div>
     </section>
   </div>
 </BaseLayout>

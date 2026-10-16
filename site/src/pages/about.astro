@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import {REPO} from '../lib/episodes';
+import {REPO, BASE, ACCOUNT, getSeries} from '../lib/episodes';
 const team = [
   ['Christopher Nolan', '导演', '定选题与制作方案，审核每一环交付'],
   ['Aaron Sorkin', '编剧', '研究资料、写脚本与图文稿'],
@@ -12,6 +12,13 @@ const team = [
   <div class="container prose">
     <h1>关于 Video Studio</h1>
     <p>这里的每一部短片都由代码生成：脚本 → 分镜 JSON → React + Remotion 渲染 → 配音与字幕对齐。视频是入口，图文是主体：先用视频建立直觉，再用图文把每一步讲透。</p>
+    <h2>怎么看</h2>
+    <ul>
+      <li>按系列从头看：{getSeries().map((s, i) => <>{i > 0 && ' → '}<a href={`${BASE}series/${s.id}/`}>{s.title}</a></>)}</li>
+      <li>想找某个知识点：<a href={`${BASE}search/`}>站内搜索</a>，标题、简介和图文正文都能搜</li>
+      <li>不想错过新片：<a href={`${BASE}rss.xml`}>RSS 订阅</a>；每次发布新增或修正了什么，见 <a href={`${BASE}changelog/`}>更新日志</a></li>
+      <li>也可以在 B站、抖音、快手搜索「{ACCOUNT}」，点赞、评论、关注</li>
+    </ul>
     <h2>团队</h2>
     <ul>{team.map(([n, r, d]) => <li><strong>{n}</strong>（{r}）：{d}</li>)}</ul>
     <h2>制作流程</h2>
