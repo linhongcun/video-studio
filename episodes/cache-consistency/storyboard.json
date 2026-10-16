@@ -1,0 +1,7076 @@
+{
+ "meta": {
+  "title": "《后台改了价格，页面怎么还是旧的？》",
+  "hook": "老板刚在后台把价格改低，刷新页面，怎么还是旧价？顾客到底该信哪个？答案马上来。",
+  "episode": 22,
+  "slug": "cache-consistency",
+  "release": "v0.28.0",
+  "draft": true,
+  "provisional": false,
+  "provisionalReason": null,
+  "pendingAudio": false,
+  "series": "缓存",
+  "width": 1920,
+  "height": 1080,
+  "fps": 30,
+  "durationInFrames": 6698,
+  "provisionalTiming": false,
+  "style": "扁平2D（沿用服务端缓存那期后厨素材）；正片深色底 #0B1020，章节卡 #1E293B；旧价黄价签、新价绿价签，不写数值",
+  "palette": {
+   "bg": "#0B1020",
+   "panel": "#111827",
+   "primary": "#22D3EE",
+   "secondary": "#3B82F6",
+   "text": "#E5E7EB",
+   "text2": "#9CA3AF",
+   "muted": "#6B7280",
+   "success": "#22C55E",
+   "accent": "#F59E0B",
+   "danger": "#F87171"
+  },
+  "font": "Noto Sans SC",
+  "safeArea": {
+   "margin": 80,
+   "subtitleBand": [
+    900,
+    980
+   ],
+   "contentMaxY": 880,
+   "watermarkClearZone": [
+    1700,
+    80,
+    1840,
+    130
+   ]
+  },
+  "branding": {
+   "spec": "episodes/_shared/branding/spec.json v1.3.0",
+   "cornerWatermark": "右上「IT小村」40%，从第 0 帧起常显（开场即封面），留空区 x1700–1840 y80–130",
+   "centerWatermark": null,
+   "endCard": "由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames = 正片 + hold，不含片尾卡，也不再留 60 帧留白；成片总长 = durationInFrames + 60"
+  },
+  "shotSentences": {
+   "hook-1": 3,
+   "signal-1": 2,
+   "signal-2": 2,
+   "update-1": 2,
+   "update-2": 2,
+   "order-1": 2,
+   "order-2": 2,
+   "patch-1": 2,
+   "patch-2": 1,
+   "patch-3": 1,
+   "replica-1": 2,
+   "replica-2": 1,
+   "ttl-1": 1,
+   "ttl-2": 1,
+   "ttl-3": 2,
+   "ending-1": 2,
+   "ending-2": 1
+  },
+  "notes": "时长=Knoll /workspace/share/ep22/timeline.json（narration.wav 实测）。术语标签念到时 0..+4 淡入，完整显示 ≥69；章节卡见 chapterCards；片尾两卡为旁白原句（endcard.txt）。",
+  "chapterCards": [
+   {
+    "shotId": "card-1",
+    "name": "直接改价签行不行",
+    "holdFrames": 78,
+    "startFrame": 1387,
+    "startSec": 46.23,
+    "insertBeforeSentence": "ch3-1",
+    "insertBeforeText": "最直接的想法：改完账本，顺手把台上的价签也改成新价，这叫更新缓存。"
+   },
+   {
+    "shotId": "card-2",
+    "name": "先撤盘还是先改账本",
+    "holdFrames": 78,
+    "startFrame": 2439,
+    "startSec": 81.3,
+    "insertBeforeSentence": "ch4-1",
+    "insertBeforeText": "那先撤盘，还是先改账本？"
+   },
+   {
+    "shotId": "card-3",
+    "name": "撤不干净怎么办",
+    "holdFrames": 78,
+    "startFrame": 3477,
+    "startSec": 115.9,
+    "insertBeforeSentence": "ch5-1",
+    "insertBeforeText": "漏掉的旧盘怎么办？"
+   },
+   {
+    "shotId": "card-4",
+    "name": "分仓库慢半拍",
+    "holdFrames": 78,
+    "startFrame": 4542,
+    "startSec": 151.4,
+    "insertBeforeSentence": "ch6-1",
+    "insertBeforeText": "很多网站还有分仓库，分仓库只照着抄，自己不改账；账本从总仓库抄送过去，这慢半拍就叫主从延迟。"
+   },
+   {
+    "shotId": "card-5",
+    "name": "兜底与取舍",
+    "holdFrames": 78,
+    "startFrame": 5404,
+    "startSec": 180.13,
+    "insertBeforeSentence": "ch7-1",
+    "insertBeforeText": "最后还有一道安全网：每盘都插一个计时牌，到点就撤，这叫过期时间，也就是 TTL，它保证旧菜不会永远摆在台上。"
+   }
+  ],
+  "endCard": {
+   "question": "你有没有遇到过：明明改了，刷新还是旧的？评论区说说是哪个网站或 App。",
+   "reminder": "点个关注不迷路，觉得有用就点赞收藏。",
+   "order": "先问题后提醒，不预告下期",
+   "file": "endcard.txt"
+  },
+  "finalVideoFrames": 6728,
+  "totalsNote": "storyboard durationInFrames = 正片 + 章节卡 hold + 术语 hold；成片 = 它 + 品牌片尾 60 帧（片尾问题卡与关注提醒卡在正片内，长度按旁白，可超过 60 帧）",
+  "chapterCardNote": "五张章节卡各 78 帧静音 hold（名字 0→4 帧淡入，完整显示 70 帧 ≥69，转场 crossfade 4）。Knoll：在 insertBeforeSentence 那句开口前（上一章章间停顿之后）插同长静音；startSec 为成片秒，交 Tim 做 B 站分段章节",
+  "narration": {
+   "file": "/workspace/share/ep22/narration.wav",
+   "sha256": "90c3378284c88d288a0c008d8e2103a648092c2e8becb26b8bb9daa802219b71",
+   "bodyFrames": 6308
+  },
+  "timingSource": "/workspace/share/ep22/timeline.json（Knoll）→ map_timing.py → timing.json",
+  "poster": {
+   "shotId": "hook-1",
+   "localFrame": 0,
+   "frame": 0,
+   "desc": "开场即封面画面（正式封面另做定制 PNG，不取视频帧）",
+   "file": "poster.jpg"
+  }
+ },
+ "assets": {
+  "new": [
+   {
+    "id": "boss",
+    "file": "assets/boss.svg",
+    "png": "assets/boss.png"
+   },
+   {
+    "id": "branch",
+    "file": "assets/branch.svg",
+    "png": "assets/branch.png"
+   },
+   {
+    "id": "cashier",
+    "file": "assets/cashier.svg",
+    "png": "assets/cashier.png"
+   },
+   {
+    "id": "closed",
+    "file": "assets/closed.svg",
+    "png": "assets/closed.png"
+   },
+   {
+    "id": "inspector",
+    "file": "assets/inspector.svg",
+    "png": "assets/inspector.png"
+   },
+   {
+    "id": "phone-page",
+    "file": "assets/phone-page.svg",
+    "png": "assets/phone-page.png"
+   },
+   {
+    "id": "price-new",
+    "file": "assets/price-new.svg",
+    "png": "assets/price-new.png"
+   },
+   {
+    "id": "price-old",
+    "file": "assets/price-old.svg",
+    "png": "assets/price-old.png"
+   },
+   {
+    "id": "todo",
+    "file": "assets/todo.svg",
+    "png": "assets/todo.png"
+   }
+  ],
+  "reuse": [
+   {
+    "id": "chef",
+    "file": "assets/chef.svg",
+    "png": "assets/chef.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "prep-table",
+    "file": "assets/prep-table.svg",
+    "png": "assets/prep-table.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "warehouse",
+    "file": "assets/warehouse.svg",
+    "png": "assets/warehouse.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "dish-amber",
+    "file": "assets/dish-amber.svg",
+    "png": "assets/dish-amber.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "dish-green",
+    "file": "assets/dish-green.svg",
+    "png": "assets/dish-green.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "timer",
+    "file": "assets/timer.svg",
+    "png": "assets/timer.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "ticket",
+    "file": "assets/ticket.svg",
+    "png": "assets/ticket.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "ledger",
+    "file": "assets/ledger.svg",
+    "png": "assets/ledger.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "ledger-ok",
+    "file": "assets/ledger-ok.svg",
+    "png": "assets/ledger-ok.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "ledger-bad",
+    "file": "assets/ledger-bad.svg",
+    "png": "assets/ledger-bad.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "runner",
+    "file": "assets/runner.svg",
+    "png": "assets/runner.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "retry",
+    "file": "assets/retry.svg",
+    "png": "assets/retry.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "nope",
+    "file": "assets/nope.svg",
+    "png": "assets/nope.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "hourglass",
+    "file": "assets/hourglass.svg",
+    "png": "assets/hourglass.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "eye",
+    "file": "assets/eye.svg",
+    "png": "assets/eye.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "person-blue",
+    "file": "assets/person-blue.svg",
+    "png": "assets/person-blue.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "ask",
+    "file": "assets/ask.svg",
+    "png": "assets/ask.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "slip",
+    "file": "assets/slip.svg",
+    "png": "assets/slip.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   },
+   {
+    "id": "db",
+    "file": "assets/db.svg",
+    "png": "assets/db.png",
+    "desc": "服务端缓存期 / EP.19–21 自绘，复用"
+   }
+  ]
+ },
+ "scenes": [
+  {
+   "id": "s0",
+   "chapterId": "hook",
+   "title": "还是旧价",
+   "background": "#0B1020",
+   "segment": "intro",
+   "from": 0,
+   "durationInFrames": 302,
+   "narrationCharsRecount": 34,
+   "shots": [
+    {
+     "id": "hook-1",
+     "chapterId": "hook",
+     "from": 0,
+     "durationInFrames": 302,
+     "narration": "老板刚在后台把价格改低，刷新页面，怎么还是旧价？顾客到底该信哪个？答案马上来。",
+     "subtitles": [
+      {
+       "text": "老板刚在后台把价格改低",
+       "from": 0,
+       "src": "ch1-1",
+       "voiceFrom": 0,
+       "to": 84
+      },
+      {
+       "text": "刷新页面，怎么还是旧价",
+       "from": 85,
+       "src": "ch1-1",
+       "voiceFrom": 85,
+       "to": 170
+      },
+      {
+       "text": "顾客到底该信哪个",
+       "from": 171,
+       "src": "ch1-2",
+       "voiceFrom": 171,
+       "to": 240
+      },
+      {
+       "text": "答案马上来",
+       "from": 241,
+       "src": "ch1-3",
+       "voiceFrom": 241,
+       "to": 301
+      }
+     ],
+     "elements": [
+      {
+       "id": "ta",
+       "type": "rect",
+       "x": 300,
+       "y": 150,
+       "w": 148,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 40,
+       "label": "后台",
+       "fontSize": 40
+      },
+      {
+       "id": "bs",
+       "type": "image",
+       "asset": "assets/boss.svg",
+       "x": 200,
+       "y": 260,
+       "w": 360,
+       "h": 360,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "pn",
+       "type": "image",
+       "asset": "assets/price-new.svg",
+       "x": 620,
+       "y": 380,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "tp",
+       "type": "rect",
+       "x": 1180,
+       "y": 150,
+       "w": 148,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#9CA3AF",
+       "radius": 40,
+       "label": "页面",
+       "fontSize": 40
+      },
+      {
+       "id": "ph",
+       "type": "image",
+       "asset": "assets/phone-page.svg",
+       "x": 1060,
+       "y": 240,
+       "w": 460,
+       "h": 460,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "po",
+       "type": "image",
+       "asset": "assets/price-old.svg",
+       "x": 1180,
+       "y": 420,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "pb",
+       "type": "image",
+       "asset": "assets/person-blue.svg",
+       "x": 1540,
+       "y": 500,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 172,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "q",
+       "type": "image",
+       "asset": "assets/ask.svg",
+       "x": 1560,
+       "y": 260,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 203,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "po",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 1
+        },
+        {
+         "frame": 131,
+         "value": 1
+        },
+        {
+         "frame": 139,
+         "value": 1.15
+        },
+        {
+         "frame": 151,
+         "value": 1
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 171,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 171,
+         "value": 0
+        },
+        {
+         "frame": 179,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 171,
+         "value": 0
+        },
+        {
+         "frame": 183,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 202,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 202,
+         "value": 0
+        },
+        {
+         "frame": 210,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 202,
+         "value": 0
+        },
+        {
+         "frame": 214,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    }
+   ]
+  },
+  {
+   "id": "s1",
+   "chapterId": "signal",
+   "title": "两份数据",
+   "background": "#0B1020",
+   "segment": "intro",
+   "from": 302,
+   "durationInFrames": 1085,
+   "narrationCharsRecount": 166,
+   "shots": [
+    {
+     "id": "signal-1",
+     "chapterId": "signal",
+     "from": 302,
+     "durationInFrames": 464,
+     "narration": "原来你在页面上看到的价格，多半不是每次都去数据库里查的，而是读的另存的一份。把网站想成一家店的后厨：后面的大仓库里放着价目账本，这就是数据库，只有它算数。",
+     "subtitles": [
+      {
+       "text": "原来你在页面上看到的价格",
+       "from": 0,
+       "src": "ch2-1",
+       "voiceFrom": 0,
+       "to": 70
+      },
+      {
+       "text": "多半不是每次都去数据库里查的",
+       "from": 71,
+       "src": "ch2-1",
+       "voiceFrom": 71,
+       "to": 154
+      },
+      {
+       "text": "而是读的另存的一份",
+       "from": 155,
+       "src": "ch2-1",
+       "voiceFrom": 155,
+       "to": 216
+      },
+      {
+       "text": "把网站想成一家店的后厨",
+       "from": 217,
+       "src": "ch2-2",
+       "voiceFrom": 217,
+       "to": 291
+      },
+      {
+       "text": "后面的大仓库里放着价目账本",
+       "from": 292,
+       "src": "ch2-2",
+       "voiceFrom": 292,
+       "to": 379
+      },
+      {
+       "text": "这就是数据库，只有它算数",
+       "from": 380,
+       "src": "ch2-2",
+       "voiceFrom": 380,
+       "to": 463
+      }
+     ],
+     "elements": [
+      {
+       "id": "ph",
+       "type": "image",
+       "asset": "assets/phone-page.svg",
+       "x": 160,
+       "y": 200,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "db",
+       "type": "image",
+       "asset": "assets/db.svg",
+       "x": 760,
+       "y": 200,
+       "w": 400,
+       "h": 400,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 120,
+       "disappearFrame": 288,
+       "z": 1
+      },
+      {
+       "id": "sl",
+       "type": "image",
+       "asset": "assets/slip.svg",
+       "x": 1300,
+       "y": 260,
+       "w": 340,
+       "h": 340,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 180,
+       "disappearFrame": 288,
+       "z": 2
+      },
+      {
+       "id": "wh",
+       "type": "image",
+       "asset": "assets/warehouse.svg",
+       "x": 700,
+       "y": 160,
+       "w": 520,
+       "h": 520,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 279,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "lg",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 1300,
+       "y": 360,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 354,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "zx",
+       "type": "rect",
+       "x": 780,
+       "y": 720,
+       "w": 148,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 40,
+       "label": "真相",
+       "fontSize": 40
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "db",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 119,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "db",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 119,
+         "value": 0
+        },
+        {
+         "frame": 127,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "db",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 119,
+         "value": 0
+        },
+        {
+         "frame": 131,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "sl",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 179,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sl",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 179,
+         "value": 0
+        },
+        {
+         "frame": 187,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sl",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 179,
+         "value": 0
+        },
+        {
+         "frame": 191,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "db",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 278,
+         "value": 1
+        },
+        {
+         "frame": 288,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sl",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 278,
+         "value": 1
+        },
+        {
+         "frame": 288,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "wh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 278,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "wh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 278,
+         "value": 0
+        },
+        {
+         "frame": 288,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "wh",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 278,
+         "value": 0
+        },
+        {
+         "frame": 290,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 353,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 353,
+         "value": 0
+        },
+        {
+         "frame": 361,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 353,
+         "value": 0
+        },
+        {
+         "frame": 365,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "zx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 384,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "zx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 384,
+         "value": 0
+        },
+        {
+         "frame": 392,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "zx",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 384,
+         "value": 0
+        },
+        {
+         "frame": 396,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "signal-2",
+     "chapterId": "signal",
+     "from": 766,
+     "durationInFrames": 621,
+     "narration": "热门菜提前摆在厨师手边的备菜台上，每盘插一张价签，台上这一份就叫缓存，常用的工具是 Redis。缓存和数据库的一致性，说的就是让这两份对得上：改价要动仓库和备菜台两个地方，它们没法在同一瞬间一起变，中间总有空隙。",
+     "subtitles": [
+      {
+       "text": "热门菜提前摆在厨师手边的备菜台上",
+       "from": 0,
+       "src": "ch2-3",
+       "voiceFrom": 0,
+       "to": 97
+      },
+      {
+       "text": "每盘插一张价签，台上这一份就叫缓存",
+       "from": 98,
+       "src": "ch2-3",
+       "voiceFrom": 98,
+       "to": 195
+      },
+      {
+       "text": "常用的工具是 Redis",
+       "from": 196,
+       "src": "ch2-3",
+       "voiceFrom": 196,
+       "to": 270
+      },
+      {
+       "text": "缓存和数据库的一致性",
+       "from": 271,
+       "src": "ch2-4",
+       "voiceFrom": 271,
+       "to": 333
+      },
+      {
+       "text": "说的就是让这两份对得上",
+       "from": 334,
+       "src": "ch2-4",
+       "voiceFrom": 334,
+       "to": 402
+      },
+      {
+       "text": "改价要动仓库和备菜台两个地方",
+       "from": 403,
+       "src": "ch2-4",
+       "voiceFrom": 403,
+       "to": 490
+      },
+      {
+       "text": "它们没法在同一瞬间一起变",
+       "from": 491,
+       "src": "ch2-4",
+       "voiceFrom": 491,
+       "to": 565
+      },
+      {
+       "text": "中间总有空隙",
+       "from": 566,
+       "src": "ch2-4",
+       "voiceFrom": 566,
+       "to": 620
+      }
+     ],
+     "elements": [
+      {
+       "id": "wh",
+       "type": "image",
+       "asset": "assets/warehouse.svg",
+       "x": 120,
+       "y": 160,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "lg",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 200,
+       "y": 520,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "cf",
+       "type": "image",
+       "asset": "assets/chef.svg",
+       "x": 780,
+       "y": 160,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 44,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "pt",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 1060,
+       "y": 300,
+       "w": 640,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 75,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "da",
+       "type": "image",
+       "asset": "assets/dish-amber.svg",
+       "x": 1160,
+       "y": 250,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "po",
+       "type": "image",
+       "asset": "assets/price-old.svg",
+       "x": 1340,
+       "y": 250,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 130,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "hc",
+       "type": "rect",
+       "x": 960,
+       "y": 700,
+       "w": 300,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "缓存",
+       "fontSize": 64
+      },
+      {
+       "id": "hg",
+       "type": "image",
+       "asset": "assets/hourglass.svg",
+       "x": 600,
+       "y": 420,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 592,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "yz",
+       "type": "rect",
+       "x": 120,
+       "y": 740,
+       "w": 400,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "一致性",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 43,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 43,
+         "value": 0
+        },
+        {
+         "frame": 51,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 43,
+         "value": 0
+        },
+        {
+         "frame": 55,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "pt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 74,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 74,
+         "value": 0
+        },
+        {
+         "frame": 82,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 74,
+         "value": 0
+        },
+        {
+         "frame": 86,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "da",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 0,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "da",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "da",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 129,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 129,
+         "value": 0
+        },
+        {
+         "frame": 137,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "po",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 129,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "hc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 182,
+         "value": 0
+        },
+        {
+         "frame": 194,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hc",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 182,
+         "value": 0
+        },
+        {
+         "frame": 194,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "hg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 591,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "hg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 591,
+         "value": 0
+        },
+        {
+         "frame": 599,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 591,
+         "value": 0
+        },
+        {
+         "frame": 603,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "yz",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 315,
+         "value": 0
+        },
+        {
+         "frame": 327,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "yz",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 315,
+         "value": 0
+        },
+        {
+         "frame": 327,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s-card-1",
+   "chapterId": "card-1",
+   "title": "直接改价签行不行",
+   "from": 1387,
+   "durationInFrames": 78,
+   "background": "#1E293B",
+   "chapterCard": true,
+   "narrationCharsRecount": 0,
+   "shots": [
+    {
+     "id": "card-1",
+     "chapterId": "card-1",
+     "from": 1387,
+     "durationInFrames": 78,
+     "narration": "",
+     "background": "#1E293B",
+     "chapterCard": {
+      "name": "直接改价签行不行",
+      "holdFrames": 78,
+      "insertBeforeSentence": "ch3-1",
+      "insertBeforeText": "最直接的想法：改完账本，顺手把台上的价签也改成新价，这叫更新缓存。"
+     },
+     "subtitles": [
+      {
+       "text": "",
+       "from": 0,
+       "to": 77,
+       "blank": true,
+       "note": "章节卡静音，不出字幕"
+      }
+     ],
+     "elements": [
+      {
+       "id": "nm",
+       "type": "rect",
+       "x": 360,
+       "y": 370,
+       "w": 1200,
+       "h": 170,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F8FAFC",
+       "radius": 55,
+       "label": "直接改价签行不行",
+       "fontSize": 72,
+       "chapterCard": true
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "nm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 4,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 4
+     }
+    }
+   ]
+  },
+  {
+   "id": "s2",
+   "chapterId": "update",
+   "title": "直接改台上的价签行不行",
+   "background": "#0B1020",
+   "segment": "intro",
+   "from": 1465,
+   "durationInFrames": 974,
+   "narrationCharsRecount": 142,
+   "shots": [
+    {
+     "id": "update-1",
+     "chapterId": "update",
+     "from": 1465,
+     "durationInFrames": 530,
+     "narration": "最直接的想法：改完账本，顺手把台上的价签也改成新价，这叫更新缓存。可要是有两位改价员前后脚改同一道菜，先改的那位路上慢了一步，最后摆上去的反而是他那张旧价签，台上就一直错下去。",
+     "subtitles": [
+      {
+       "text": "最直接的想法：改完账本",
+       "from": 0,
+       "src": "ch3-1",
+       "voiceFrom": 0,
+       "to": 66
+      },
+      {
+       "text": "顺手把台上的价签也改成新价",
+       "from": 67,
+       "src": "ch3-1",
+       "voiceFrom": 67,
+       "to": 154
+      },
+      {
+       "text": "这叫更新缓存",
+       "from": 155,
+       "src": "ch3-1",
+       "voiceFrom": 155,
+       "to": 202
+      },
+      {
+       "text": "可要是有两位改价员前后脚改同一道菜",
+       "from": 203,
+       "src": "ch3-2",
+       "voiceFrom": 203,
+       "to": 309
+      },
+      {
+       "text": "先改的那位路上慢了一步",
+       "from": 310,
+       "src": "ch3-2",
+       "voiceFrom": 310,
+       "to": 377
+      },
+      {
+       "text": "最后摆上去的反而是他那张旧价签",
+       "from": 378,
+       "src": "ch3-2",
+       "voiceFrom": 378,
+       "to": 471
+      },
+      {
+       "text": "台上就一直错下去",
+       "from": 472,
+       "src": "ch3-2",
+       "voiceFrom": 472,
+       "to": 529
+      }
+     ],
+     "elements": [
+      {
+       "id": "lg",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 140,
+       "y": 160,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "pt",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 560,
+       "y": 240,
+       "w": 640,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "pn",
+       "type": "image",
+       "asset": "assets/price-new.svg",
+       "x": 780,
+       "y": 180,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 129,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "gx",
+       "type": "rect",
+       "x": 500,
+       "y": 580,
+       "w": 560,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "更新缓存",
+       "fontSize": 64
+      },
+      {
+       "id": "r1",
+       "type": "image",
+       "asset": "assets/runner.svg",
+       "x": 1240,
+       "y": 160,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 229,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "r2",
+       "type": "image",
+       "asset": "assets/runner.svg",
+       "x": 1520,
+       "y": 160,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 235,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "po",
+       "type": "image",
+       "asset": "assets/price-old.svg",
+       "x": 1380,
+       "y": 440,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 454,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "no",
+       "type": "image",
+       "asset": "assets/nope.svg",
+       "x": 1380,
+       "y": 620,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 492,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "pn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 128,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 128,
+         "value": 0
+        },
+        {
+         "frame": 136,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pn",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 128,
+         "value": 0
+        },
+        {
+         "frame": 140,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "gx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 168,
+         "value": 0
+        },
+        {
+         "frame": 180,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "gx",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 168,
+         "value": 0
+        },
+        {
+         "frame": 180,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 228,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 228,
+         "value": 0
+        },
+        {
+         "frame": 236,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 228,
+         "value": 0
+        },
+        {
+         "frame": 240,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 234,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 234,
+         "value": 0
+        },
+        {
+         "frame": 242,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "r2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 234,
+         "value": 0
+        },
+        {
+         "frame": 246,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 453,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 453,
+         "value": 0
+        },
+        {
+         "frame": 461,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "po",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 453,
+         "value": 0
+        },
+        {
+         "frame": 465,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 491,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 491,
+         "value": 0
+        },
+        {
+         "frame": 497,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "no",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 491,
+         "value": 0
+        },
+        {
+         "frame": 503,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "update-2",
+     "chapterId": "update",
+     "from": 1995,
+     "durationInFrames": 444,
+     "narration": "没人点的冷门菜，也会被摆上台占地方。所以更常用的办法是撤盘：把那盘连价签一起撤走，不摆新的，这叫删缓存，等下次有人点，再去仓库照账本重新摆。",
+     "subtitles": [
+      {
+       "text": "没人点的冷门菜，也会被摆上台占地方",
+       "from": 0,
+       "src": "ch3-3",
+       "voiceFrom": 0,
+       "to": 106
+      },
+      {
+       "text": "所以更常用的办法是撤盘",
+       "from": 107,
+       "src": "ch3-4",
+       "voiceFrom": 107,
+       "to": 182
+      },
+      {
+       "text": "把那盘连价签一起撤走",
+       "from": 183,
+       "src": "ch3-4",
+       "voiceFrom": 183,
+       "to": 251
+      },
+      {
+       "text": "不摆新的，这叫删缓存",
+       "from": 252,
+       "src": "ch3-4",
+       "voiceFrom": 252,
+       "to": 314
+      },
+      {
+       "text": "等下次有人点，再去仓库照账本重新摆",
+       "from": 315,
+       "src": "ch3-4",
+       "voiceFrom": 315,
+       "to": 443
+      }
+     ],
+     "elements": [
+      {
+       "id": "pt",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 200,
+       "y": 240,
+       "w": 640,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "dg",
+       "type": "image",
+       "asset": "assets/dish-green.svg",
+       "x": 260,
+       "y": 180,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 26,
+       "disappearFrame": 246,
+       "z": 1
+      },
+      {
+       "id": "d2",
+       "type": "image",
+       "asset": "assets/dish-amber.svg",
+       "x": 500,
+       "y": 180,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": 260,
+       "z": 2
+      },
+      {
+       "id": "cf",
+       "type": "image",
+       "asset": "assets/chef.svg",
+       "x": 1000,
+       "y": 160,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 170,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "sc",
+       "type": "rect",
+       "x": 1000,
+       "y": 560,
+       "w": 500,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "删缓存",
+       "fontSize": 64
+      },
+      {
+       "id": "lg",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 1460,
+       "y": 200,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 385,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "dg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 25,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "dg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 25,
+         "value": 0
+        },
+        {
+         "frame": 33,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "dg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 25,
+         "value": 0
+        },
+        {
+         "frame": 37,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 169,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 0
+        },
+        {
+         "frame": 177,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 169,
+         "value": 0
+        },
+        {
+         "frame": 181,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "d2",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 238,
+         "value": 500
+        },
+        {
+         "frame": 258,
+         "value": 1060
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "d2",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 238,
+         "value": 180
+        },
+        {
+         "frame": 258,
+         "value": 700
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "d2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 252,
+         "value": 1
+        },
+        {
+         "frame": 260,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "dg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 238,
+         "value": 1
+        },
+        {
+         "frame": 246,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "sc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 294,
+         "value": 0
+        },
+        {
+         "frame": 306,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "sc",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 294,
+         "value": 0
+        },
+        {
+         "frame": 306,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 384,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 384,
+         "value": 0
+        },
+        {
+         "frame": 392,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 384,
+         "value": 0
+        },
+        {
+         "frame": 396,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s-card-2",
+   "chapterId": "card-2",
+   "title": "先撤盘还是先改账本",
+   "from": 2439,
+   "durationInFrames": 78,
+   "background": "#1E293B",
+   "chapterCard": true,
+   "narrationCharsRecount": 0,
+   "shots": [
+    {
+     "id": "card-2",
+     "chapterId": "card-2",
+     "from": 2439,
+     "durationInFrames": 78,
+     "narration": "",
+     "background": "#1E293B",
+     "chapterCard": {
+      "name": "先撤盘还是先改账本",
+      "holdFrames": 78,
+      "insertBeforeSentence": "ch4-1",
+      "insertBeforeText": "那先撤盘，还是先改账本？"
+     },
+     "subtitles": [
+      {
+       "text": "",
+       "from": 0,
+       "to": 77,
+       "blank": true,
+       "note": "章节卡静音，不出字幕"
+      }
+     ],
+     "elements": [
+      {
+       "id": "nm",
+       "type": "rect",
+       "x": 360,
+       "y": 370,
+       "w": 1200,
+       "h": 170,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F8FAFC",
+       "radius": 55,
+       "label": "先撤盘还是先改账本",
+       "fontSize": 72,
+       "chapterCard": true
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "nm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 4,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 4
+     }
+    }
+   ]
+  },
+  {
+   "id": "s3",
+   "chapterId": "order",
+   "title": "先撤盘还是先改账本",
+   "background": "#0B1020",
+   "segment": "intro",
+   "from": 2517,
+   "durationInFrames": 960,
+   "narrationCharsRecount": 133,
+   "shots": [
+    {
+     "id": "order-1",
+     "chapterId": "order",
+     "from": 2517,
+     "durationInFrames": 365,
+     "narration": "那先撤盘，还是先改账本？先撤盘的话，厨师看台上空了，就跑去仓库，账本还没改，他抄回来的还是旧价，又把旧价那盘摆回了台上。",
+     "subtitles": [
+      {
+       "text": "那先撤盘，还是先改账本",
+       "from": 0,
+       "src": "ch4-1",
+       "voiceFrom": 0,
+       "to": 89
+      },
+      {
+       "text": "先撤盘的话，厨师看台上空了",
+       "from": 90,
+       "src": "ch4-2",
+       "voiceFrom": 90,
+       "to": 165
+      },
+      {
+       "text": "就跑去仓库，账本还没改",
+       "from": 166,
+       "src": "ch4-2",
+       "voiceFrom": 166,
+       "to": 229
+      },
+      {
+       "text": "他抄回来的还是旧价",
+       "from": 230,
+       "src": "ch4-2",
+       "voiceFrom": 230,
+       "to": 286
+      },
+      {
+       "text": "又把旧价那盘摆回了台上",
+       "from": 287,
+       "src": "ch4-2",
+       "voiceFrom": 287,
+       "to": 364
+      }
+     ],
+     "elements": [
+      {
+       "id": "q",
+       "type": "image",
+       "asset": "assets/ask.svg",
+       "x": 820,
+       "y": 120,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 9,
+       "disappearFrame": 124,
+       "z": 0
+      },
+      {
+       "id": "pt",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 160,
+       "y": 380,
+       "w": 600,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "cf",
+       "type": "image",
+       "asset": "assets/chef.svg",
+       "x": 360,
+       "y": 160,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 123,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "wh",
+       "type": "image",
+       "asset": "assets/warehouse.svg",
+       "x": 1260,
+       "y": 200,
+       "w": 460,
+       "h": 460,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "lb",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 1360,
+       "y": 560,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 199,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "po",
+       "type": "image",
+       "asset": "assets/price-old.svg",
+       "x": 1100,
+       "y": 560,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 275,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "no",
+       "type": "image",
+       "asset": "assets/nope.svg",
+       "x": 520,
+       "y": 560,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 346,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 8,
+         "value": 0
+        },
+        {
+         "frame": 16,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 8,
+         "value": 0
+        },
+        {
+         "frame": 20,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 116,
+         "value": 1
+        },
+        {
+         "frame": 124,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 122,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 122,
+         "value": 0
+        },
+        {
+         "frame": 130,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 122,
+         "value": 0
+        },
+        {
+         "frame": 134,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cf",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 173,
+         "value": 360
+        },
+        {
+         "frame": 197,
+         "value": 1000
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 173,
+         "value": 160
+        },
+        {
+         "frame": 197,
+         "value": 160
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lb",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 198,
+         "value": 0
+        },
+        {
+         "frame": 206,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lb",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 198,
+         "value": 0
+        },
+        {
+         "frame": 210,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 274,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 274,
+         "value": 0
+        },
+        {
+         "frame": 282,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "po",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 274,
+         "value": 0
+        },
+        {
+         "frame": 286,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "po",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 325,
+         "value": 1100
+        },
+        {
+         "frame": 345,
+         "value": 400
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "po",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 325,
+         "value": 560
+        },
+        {
+         "frame": 345,
+         "value": 300
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 325,
+         "value": 1000
+        },
+        {
+         "frame": 345,
+         "value": 360
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 325,
+         "value": 160
+        },
+        {
+         "frame": 345,
+         "value": 120
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 345,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 345,
+         "value": 0
+        },
+        {
+         "frame": 351,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "no",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 345,
+         "value": 0
+        },
+        {
+         "frame": 357,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "order-2",
+     "chapterId": "order",
+     "from": 2882,
+     "durationInFrames": 595,
+     "narration": "反过来，先改账本、再撤盘，出错的机会就小多了，这是最常见的做法。但它也会出错，只是很少：台上正好空着，厨师去仓库抄到旧价；这时新价才改进账本，台也撤了一遍；厨师这才回来，把旧价那盘摆上台。",
+     "subtitles": [
+      {
+       "text": "反过来，先改账本、再撤盘",
+       "from": 0,
+       "src": "ch4-3",
+       "voiceFrom": 0,
+       "to": 70
+      },
+      {
+       "text": "出错的机会就小多了",
+       "from": 71,
+       "src": "ch4-3",
+       "voiceFrom": 71,
+       "to": 133
+      },
+      {
+       "text": "这是最常见的做法",
+       "from": 134,
+       "src": "ch4-3",
+       "voiceFrom": 134,
+       "to": 198
+      },
+      {
+       "text": "但它也会出错，只是很少",
+       "from": 199,
+       "src": "ch4-4",
+       "voiceFrom": 199,
+       "to": 268
+      },
+      {
+       "text": "台上正好空着，厨师去仓库抄到旧价",
+       "from": 269,
+       "src": "ch4-4",
+       "voiceFrom": 269,
+       "to": 373
+      },
+      {
+       "text": "这时新价才改进账本",
+       "from": 374,
+       "src": "ch4-4",
+       "voiceFrom": 374,
+       "to": 436
+      },
+      {
+       "text": "台也撤了一遍；厨师这才回来",
+       "from": 437,
+       "src": "ch4-4",
+       "voiceFrom": 437,
+       "to": 520
+      },
+      {
+       "text": "把旧价那盘摆上台",
+       "from": 521,
+       "src": "ch4-4",
+       "voiceFrom": 521,
+       "to": 594
+      }
+     ],
+     "elements": [
+      {
+       "id": "lg",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 160,
+       "y": 160,
+       "w": 260,
+       "h": 260,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 50,
+       "disappearFrame": 271,
+       "z": 0
+      },
+      {
+       "id": "pt",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 500,
+       "y": 200,
+       "w": 520,
+       "h": 260,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 51,
+       "disappearFrame": 271,
+       "z": 1
+      },
+      {
+       "id": "cj",
+       "type": "rect",
+       "x": 1180,
+       "y": 240,
+       "w": 236,
+       "h": 80,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 40,
+       "label": "常见做法",
+       "fontSize": 40
+      },
+      {
+       "id": "c1",
+       "type": "image",
+       "asset": "assets/chef.svg",
+       "x": 160,
+       "y": 460,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 347,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "p1",
+       "type": "image",
+       "asset": "assets/price-old.svg",
+       "x": 310,
+       "y": 640,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 353,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "l2",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 560,
+       "y": 460,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 410,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "t3",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 960,
+       "y": 520,
+       "w": 320,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 438,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "t4",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 1360,
+       "y": 560,
+       "w": 320,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 557,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "p4",
+       "type": "image",
+       "asset": "assets/price-old.svg",
+       "x": 1460,
+       "y": 480,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 561,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "n4",
+       "type": "image",
+       "asset": "assets/nope.svg",
+       "x": 1580,
+       "y": 640,
+       "w": 120,
+       "h": 120,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 567,
+       "disappearFrame": null,
+       "z": 9
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 49,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 49,
+         "value": 0
+        },
+        {
+         "frame": 57,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 49,
+         "value": 0
+        },
+        {
+         "frame": 61,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "pt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 50,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 50,
+         "value": 0
+        },
+        {
+         "frame": 58,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 50,
+         "value": 0
+        },
+        {
+         "frame": 62,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cj",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 148,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cj",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 148,
+         "value": 0
+        },
+        {
+         "frame": 156,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cj",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 148,
+         "value": 0
+        },
+        {
+         "frame": 160,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 263,
+         "value": 1
+        },
+        {
+         "frame": 271,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 263,
+         "value": 1
+        },
+        {
+         "frame": 271,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cj",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 263,
+         "value": 1
+        },
+        {
+         "frame": 271,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 346,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 346,
+         "value": 0
+        },
+        {
+         "frame": 354,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "c1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 346,
+         "value": 0
+        },
+        {
+         "frame": 358,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "p1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 352,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 352,
+         "value": 0
+        },
+        {
+         "frame": 360,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 352,
+         "value": 0
+        },
+        {
+         "frame": 364,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "l2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 409,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "l2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 409,
+         "value": 0
+        },
+        {
+         "frame": 417,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "l2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 409,
+         "value": 0
+        },
+        {
+         "frame": 421,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "t3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 437,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "t3",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 437,
+         "value": 0
+        },
+        {
+         "frame": 445,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t3",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 437,
+         "value": 0
+        },
+        {
+         "frame": 449,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "t4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 556,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "t4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 556,
+         "value": 0
+        },
+        {
+         "frame": 564,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "t4",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 556,
+         "value": 0
+        },
+        {
+         "frame": 568,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "p4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 560,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "p4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 560,
+         "value": 0
+        },
+        {
+         "frame": 568,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "p4",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 560,
+         "value": 0
+        },
+        {
+         "frame": 572,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "n4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 566,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "n4",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 566,
+         "value": 0
+        },
+        {
+         "frame": 572,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "n4",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 566,
+         "value": 0
+        },
+        {
+         "frame": 578,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s-card-3",
+   "chapterId": "card-3",
+   "title": "撤不干净怎么办",
+   "from": 3477,
+   "durationInFrames": 78,
+   "background": "#1E293B",
+   "chapterCard": true,
+   "narrationCharsRecount": 0,
+   "shots": [
+    {
+     "id": "card-3",
+     "chapterId": "card-3",
+     "from": 3477,
+     "durationInFrames": 78,
+     "narration": "",
+     "background": "#1E293B",
+     "chapterCard": {
+      "name": "撤不干净怎么办",
+      "holdFrames": 78,
+      "insertBeforeSentence": "ch5-1",
+      "insertBeforeText": "漏掉的旧盘怎么办？"
+     },
+     "subtitles": [
+      {
+       "text": "",
+       "from": 0,
+       "to": 77,
+       "blank": true,
+       "note": "章节卡静音，不出字幕"
+      }
+     ],
+     "elements": [
+      {
+       "id": "nm",
+       "type": "rect",
+       "x": 360,
+       "y": 370,
+       "w": 1200,
+       "h": 170,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F8FAFC",
+       "radius": 55,
+       "label": "撤不干净怎么办",
+       "fontSize": 72,
+       "chapterCard": true
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "nm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 4,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 4
+     }
+    }
+   ]
+  },
+  {
+   "id": "s4",
+   "chapterId": "patch",
+   "title": "撤不干净怎么办",
+   "background": "#0B1020",
+   "segment": "intro",
+   "from": 3555,
+   "durationInFrames": 987,
+   "narrationCharsRecount": 129,
+   "shots": [
+    {
+     "id": "patch-1",
+     "chapterId": "patch",
+     "from": 3555,
+     "durationInFrames": 287,
+     "narration": "漏掉的旧盘怎么办？有一种补丁叫延迟双删：先撤盘，再改账本，过一会儿回头再撤一次。",
+     "subtitles": [
+      {
+       "text": "漏掉的旧盘怎么办",
+       "from": 0,
+       "src": "ch5-1",
+       "voiceFrom": 0,
+       "to": 59
+      },
+      {
+       "text": "有一种补丁叫延迟双删",
+       "from": 60,
+       "src": "ch5-2",
+       "voiceFrom": 60,
+       "to": 140
+      },
+      {
+       "text": "先撤盘，再改账本，过一会儿回头再撤一次",
+       "from": 141,
+       "src": "ch5-2",
+       "voiceFrom": 141,
+       "to": 286
+      }
+     ],
+     "elements": [
+      {
+       "id": "q",
+       "type": "image",
+       "asset": "assets/ask.svg",
+       "x": 800,
+       "y": 140,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": 64,
+       "z": 0
+      },
+      {
+       "id": "s1",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 160,
+       "y": 300,
+       "w": 360,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 142,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "l1",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 620,
+       "y": 240,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 167,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "hg",
+       "type": "image",
+       "asset": "assets/hourglass.svg",
+       "x": 960,
+       "y": 260,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 199,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "s2",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 1260,
+       "y": 300,
+       "w": 360,
+       "h": 180,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 248,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "ys",
+       "type": "rect",
+       "x": 660,
+       "y": 600,
+       "w": 560,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "延迟双删",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 0,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "q",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "q",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 56,
+         "value": 1
+        },
+        {
+         "frame": 64,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "s1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "s1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 141,
+         "value": 0
+        },
+        {
+         "frame": 149,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 141,
+         "value": 0
+        },
+        {
+         "frame": 153,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "l1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 166,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "l1",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 166,
+         "value": 0
+        },
+        {
+         "frame": 174,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "l1",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 166,
+         "value": 0
+        },
+        {
+         "frame": 178,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "hg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 198,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "hg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 198,
+         "value": 0
+        },
+        {
+         "frame": 206,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 198,
+         "value": 0
+        },
+        {
+         "frame": 210,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "s2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 247,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "s2",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 247,
+         "value": 0
+        },
+        {
+         "frame": 255,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "s2",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 247,
+         "value": 0
+        },
+        {
+         "frame": 259,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ys",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 107,
+         "value": 0
+        },
+        {
+         "frame": 119,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ys",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 107,
+         "value": 0
+        },
+        {
+         "frame": 119,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "patch-2",
+     "chapterId": "patch",
+     "from": 3842,
+     "durationInFrames": 348,
+     "narration": "撤盘那一下也可能手滑没撤成，这时靠消息队列重试：在待撤清单上记一笔，跑腿员照着清单反复去撤，直到撤掉。",
+     "subtitles": [
+      {
+       "text": "撤盘那一下也可能手滑没撤成",
+       "from": 0,
+       "src": "ch5-3",
+       "voiceFrom": 0,
+       "to": 95
+      },
+      {
+       "text": "这时靠消息队列重试",
+       "from": 96,
+       "src": "ch5-3",
+       "voiceFrom": 96,
+       "to": 162
+      },
+      {
+       "text": "在待撤清单上记一笔",
+       "from": 163,
+       "src": "ch5-3",
+       "voiceFrom": 163,
+       "to": 228
+      },
+      {
+       "text": "跑腿员照着清单反复去撤",
+       "from": 229,
+       "src": "ch5-3",
+       "voiceFrom": 229,
+       "to": 309
+      },
+      {
+       "text": "直到撤掉",
+       "from": 310,
+       "src": "ch5-3",
+       "voiceFrom": 310,
+       "to": 347
+      }
+     ],
+     "elements": [
+      {
+       "id": "no",
+       "type": "image",
+       "asset": "assets/nope.svg",
+       "x": 160,
+       "y": 200,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 60,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "td",
+       "type": "image",
+       "asset": "assets/todo.svg",
+       "x": 520,
+       "y": 160,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 171,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "rn",
+       "type": "image",
+       "asset": "assets/runner.svg",
+       "x": 960,
+       "y": 160,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 230,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "rt",
+       "type": "image",
+       "asset": "assets/retry.svg",
+       "x": 1360,
+       "y": 180,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 282,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "xx",
+       "type": "rect",
+       "x": 620,
+       "y": 600,
+       "w": 560,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "消息队列",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 59,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 0
+        },
+        {
+         "frame": 67,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "no",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 59,
+         "value": 0
+        },
+        {
+         "frame": 71,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "td",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 170,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "td",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 170,
+         "value": 0
+        },
+        {
+         "frame": 178,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "td",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 170,
+         "value": 0
+        },
+        {
+         "frame": 182,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "rn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 229,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rn",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 229,
+         "value": 0
+        },
+        {
+         "frame": 237,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rn",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 229,
+         "value": 0
+        },
+        {
+         "frame": 241,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "rt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 281,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 281,
+         "value": 0
+        },
+        {
+         "frame": 289,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 281,
+         "value": 0
+        },
+        {
+         "frame": 293,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "xx",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 117,
+         "value": 0
+        },
+        {
+         "frame": 129,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "xx",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 117,
+         "value": 0
+        },
+        {
+         "frame": 129,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "patch-3",
+     "chapterId": "patch",
+     "from": 4190,
+     "durationInFrames": 352,
+     "narration": "还可以请一位巡视员盯着仓库的进出货流水账，这叫订阅变更日志：看到记了改价就去撤盘，业务代码不用管删缓存。",
+     "subtitles": [
+      {
+       "text": "还可以请一位巡视员盯着仓库的进出货流水账",
+       "from": 0,
+       "src": "ch5-4",
+       "voiceFrom": 0,
+       "to": 139
+      },
+      {
+       "text": "这叫订阅变更日志",
+       "from": 140,
+       "src": "ch5-4",
+       "voiceFrom": 140,
+       "to": 194
+      },
+      {
+       "text": "看到记了改价就去撤盘",
+       "from": 195,
+       "src": "ch5-4",
+       "voiceFrom": 195,
+       "to": 264
+      },
+      {
+       "text": "业务代码不用管删缓存",
+       "from": 265,
+       "src": "ch5-4",
+       "voiceFrom": 265,
+       "to": 351
+      }
+     ],
+     "elements": [
+      {
+       "id": "ip",
+       "type": "image",
+       "asset": "assets/inspector.svg",
+       "x": 160,
+       "y": 160,
+       "w": 360,
+       "h": 360,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 43,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "lg",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 640,
+       "y": 200,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 120,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "pt",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 1080,
+       "y": 260,
+       "w": 600,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 245,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "bg",
+       "type": "rect",
+       "x": 620,
+       "y": 600,
+       "w": 560,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "变更日志",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "ip",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 42,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "ip",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 42,
+         "value": 0
+        },
+        {
+         "frame": 50,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ip",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 42,
+         "value": 0
+        },
+        {
+         "frame": 54,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 119,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 119,
+         "value": 0
+        },
+        {
+         "frame": 127,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 119,
+         "value": 0
+        },
+        {
+         "frame": 131,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "pt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 244,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 244,
+         "value": 0
+        },
+        {
+         "frame": 252,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 244,
+         "value": 0
+        },
+        {
+         "frame": 256,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "bg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 165,
+         "value": 0
+        },
+        {
+         "frame": 177,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "bg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 165,
+         "value": 0
+        },
+        {
+         "frame": 177,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 256,
+       "endFrame": 351,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  },
+  {
+   "id": "s-card-4",
+   "chapterId": "card-4",
+   "title": "分仓库慢半拍",
+   "from": 4542,
+   "durationInFrames": 78,
+   "background": "#1E293B",
+   "chapterCard": true,
+   "narrationCharsRecount": 0,
+   "shots": [
+    {
+     "id": "card-4",
+     "chapterId": "card-4",
+     "from": 4542,
+     "durationInFrames": 78,
+     "narration": "",
+     "background": "#1E293B",
+     "chapterCard": {
+      "name": "分仓库慢半拍",
+      "holdFrames": 78,
+      "insertBeforeSentence": "ch6-1",
+      "insertBeforeText": "很多网站还有分仓库，分仓库只照着抄，自己不改账；账本从总仓库抄送过去，这慢半拍就叫主从延迟。"
+     },
+     "subtitles": [
+      {
+       "text": "",
+       "from": 0,
+       "to": 77,
+       "blank": true,
+       "note": "章节卡静音，不出字幕"
+      }
+     ],
+     "elements": [
+      {
+       "id": "nm",
+       "type": "rect",
+       "x": 360,
+       "y": 370,
+       "w": 1200,
+       "h": 170,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F8FAFC",
+       "radius": 55,
+       "label": "分仓库慢半拍",
+       "fontSize": 72,
+       "chapterCard": true
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "nm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 4,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 4
+     }
+    }
+   ]
+  },
+  {
+   "id": "s5",
+   "chapterId": "replica",
+   "title": "分仓库慢半拍",
+   "background": "#0B1020",
+   "segment": "intro",
+   "from": 4620,
+   "durationInFrames": 784,
+   "narrationCharsRecount": 102,
+   "shots": [
+    {
+     "id": "replica-1",
+     "chapterId": "replica",
+     "from": 4620,
+     "durationInFrames": 598,
+     "narration": "很多网站还有分仓库，分仓库只照着抄，自己不改账；账本从总仓库抄送过去，这慢半拍就叫主从延迟。厨师图近，去分仓库抄价，那边还没收到新价，就算撤盘顺序全对，旧价还是被摆回了台上。",
+     "subtitles": [
+      {
+       "text": "很多网站还有分仓库",
+       "from": 0,
+       "src": "ch6-1",
+       "voiceFrom": 0,
+       "to": 71
+      },
+      {
+       "text": "分仓库只照着抄，自己不改账",
+       "from": 72,
+       "src": "ch6-1",
+       "voiceFrom": 72,
+       "to": 166
+      },
+      {
+       "text": "账本从总仓库抄送过去",
+       "from": 167,
+       "src": "ch6-1",
+       "voiceFrom": 167,
+       "to": 246
+      },
+      {
+       "text": "这慢半拍就叫主从延迟",
+       "from": 247,
+       "src": "ch6-1",
+       "voiceFrom": 247,
+       "to": 334
+      },
+      {
+       "text": "厨师图近，去分仓库抄价",
+       "from": 335,
+       "src": "ch6-2",
+       "voiceFrom": 335,
+       "to": 405
+      },
+      {
+       "text": "那边还没收到新价",
+       "from": 406,
+       "src": "ch6-2",
+       "voiceFrom": 406,
+       "to": 461
+      },
+      {
+       "text": "就算撤盘顺序全对",
+       "from": 462,
+       "src": "ch6-2",
+       "voiceFrom": 462,
+       "to": 518
+      },
+      {
+       "text": "旧价还是被摆回了台上",
+       "from": 519,
+       "src": "ch6-2",
+       "voiceFrom": 519,
+       "to": 597
+      }
+     ],
+     "elements": [
+      {
+       "id": "wh",
+       "type": "image",
+       "asset": "assets/warehouse.svg",
+       "x": 160,
+       "y": 140,
+       "w": 360,
+       "h": 360,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "br",
+       "type": "image",
+       "asset": "assets/branch.svg",
+       "x": 1300,
+       "y": 140,
+       "w": 340,
+       "h": 340,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 49,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "lg",
+       "type": "image",
+       "asset": "assets/ledger.svg",
+       "x": 700,
+       "y": 200,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 216,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "hg",
+       "type": "image",
+       "asset": "assets/hourglass.svg",
+       "x": 760,
+       "y": 420,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 256,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "zc",
+       "type": "rect",
+       "x": 120,
+       "y": 700,
+       "w": 500,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "主从延迟",
+       "fontSize": 64
+      },
+      {
+       "id": "cf",
+       "type": "image",
+       "asset": "assets/chef.svg",
+       "x": 1040,
+       "y": 420,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 336,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "po",
+       "type": "image",
+       "asset": "assets/price-old.svg",
+       "x": 1280,
+       "y": 500,
+       "w": 140,
+       "h": 140,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 421,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "pt",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 1100,
+       "y": 640,
+       "w": 560,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 556,
+       "disappearFrame": null,
+       "z": 7
+      },
+      {
+       "id": "no",
+       "type": "image",
+       "asset": "assets/nope.svg",
+       "x": 1520,
+       "y": 440,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 564,
+       "disappearFrame": null,
+       "z": 8
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "br",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 48,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "br",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 48,
+         "value": 0
+        },
+        {
+         "frame": 56,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "br",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 48,
+         "value": 0
+        },
+        {
+         "frame": 60,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 215,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 215,
+         "value": 0
+        },
+        {
+         "frame": 223,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 215,
+         "value": 0
+        },
+        {
+         "frame": 227,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lg",
+       "property": "x",
+       "keyframes": [
+        {
+         "frame": 215,
+         "value": 700
+        },
+        {
+         "frame": 245,
+         "value": 1000
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "y",
+       "keyframes": [
+        {
+         "frame": 215,
+         "value": 200
+        },
+        {
+         "frame": 245,
+         "value": 200
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "hg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 255,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "hg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 0
+        },
+        {
+         "frame": 263,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 255,
+         "value": 0
+        },
+        {
+         "frame": 267,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "zc",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 296,
+         "value": 0
+        },
+        {
+         "frame": 308,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "zc",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 296,
+         "value": 0
+        },
+        {
+         "frame": 308,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 335,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 335,
+         "value": 0
+        },
+        {
+         "frame": 343,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 335,
+         "value": 0
+        },
+        {
+         "frame": 347,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 420,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 420,
+         "value": 0
+        },
+        {
+         "frame": 428,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "po",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 420,
+         "value": 0
+        },
+        {
+         "frame": 432,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "pt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 555,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "pt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 555,
+         "value": 0
+        },
+        {
+         "frame": 563,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "pt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 555,
+         "value": 0
+        },
+        {
+         "frame": 567,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 563,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 563,
+         "value": 0
+        },
+        {
+         "frame": 569,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "no",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 563,
+         "value": 0
+        },
+        {
+         "frame": 575,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "replica-2",
+     "chapterId": "replica",
+     "from": 5218,
+     "durationInFrames": 186,
+     "narration": "办法是补货时去总仓库抄价，或者等分仓库收到了再撤一次。",
+     "subtitles": [
+      {
+       "text": "办法是补货时去总仓库抄价",
+       "from": 0,
+       "src": "ch6-3",
+       "voiceFrom": 1,
+       "to": 80
+      },
+      {
+       "text": "或者等分仓库收到了再撤一次",
+       "from": 81,
+       "src": "ch6-3",
+       "voiceFrom": 81,
+       "to": 185
+      }
+     ],
+     "elements": [
+      {
+       "id": "wh",
+       "type": "image",
+       "asset": "assets/warehouse.svg",
+       "x": 300,
+       "y": 160,
+       "w": 460,
+       "h": 460,
+       "color": null,
+       "reuse": false,
+       "appearFrame": null,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "cf",
+       "type": "image",
+       "asset": "assets/chef.svg",
+       "x": 900,
+       "y": 200,
+       "w": 280,
+       "h": 280,
+       "color": null,
+       "reuse": false,
+       "appearFrame": null,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "rt",
+       "type": "image",
+       "asset": "assets/retry.svg",
+       "x": 1360,
+       "y": 240,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 142,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "wh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 185,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "wh",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 185,
+         "value": 0
+        },
+        {
+         "frame": 185,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "wh",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 185,
+         "value": 0
+        },
+        {
+         "frame": 185,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 185,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 185,
+         "value": 0
+        },
+        {
+         "frame": 185,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cf",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 185,
+         "value": 0
+        },
+        {
+         "frame": 185,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "rt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 141,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "rt",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 141,
+         "value": 0
+        },
+        {
+         "frame": 149,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "rt",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 141,
+         "value": 0
+        },
+        {
+         "frame": 153,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s-card-5",
+   "chapterId": "card-5",
+   "title": "兜底与取舍",
+   "from": 5404,
+   "durationInFrames": 78,
+   "background": "#1E293B",
+   "chapterCard": true,
+   "narrationCharsRecount": 0,
+   "shots": [
+    {
+     "id": "card-5",
+     "chapterId": "card-5",
+     "from": 5404,
+     "durationInFrames": 78,
+     "narration": "",
+     "background": "#1E293B",
+     "chapterCard": {
+      "name": "兜底与取舍",
+      "holdFrames": 78,
+      "insertBeforeSentence": "ch7-1",
+      "insertBeforeText": "最后还有一道安全网：每盘都插一个计时牌，到点就撤，这叫过期时间，也就是 TTL，它保证旧菜不会永远摆在台上。"
+     },
+     "subtitles": [
+      {
+       "text": "",
+       "from": 0,
+       "to": 77,
+       "blank": true,
+       "note": "章节卡静音，不出字幕"
+      }
+     ],
+     "elements": [
+      {
+       "id": "nm",
+       "type": "rect",
+       "x": 360,
+       "y": 370,
+       "w": 1200,
+       "h": 170,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F8FAFC",
+       "radius": 55,
+       "label": "兜底与取舍",
+       "fontSize": 72,
+       "chapterCard": true
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "nm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 4,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 4
+     }
+    }
+   ]
+  },
+  {
+   "id": "s6",
+   "chapterId": "ttl",
+   "title": "兜底与取舍",
+   "background": "#0B1020",
+   "segment": "intro",
+   "from": 5482,
+   "durationInFrames": 916,
+   "narrationCharsRecount": 130,
+   "shots": [
+    {
+     "id": "ttl-1",
+     "chapterId": "ttl",
+     "from": 5482,
+     "durationInFrames": 328,
+     "narration": "最后还有一道安全网：每盘都插一个计时牌，到点就撤，这叫过期时间，也就是 TTL，它保证旧菜不会永远摆在台上。",
+     "subtitles": [
+      {
+       "text": "最后还有一道安全网",
+       "from": 0,
+       "src": "ch7-1",
+       "voiceFrom": 0,
+       "to": 60
+      },
+      {
+       "text": "每盘都插一个计时牌",
+       "from": 61,
+       "src": "ch7-1",
+       "voiceFrom": 61,
+       "to": 121
+      },
+      {
+       "text": "到点就撤，这叫过期时间",
+       "from": 122,
+       "src": "ch7-1",
+       "voiceFrom": 122,
+       "to": 189
+      },
+      {
+       "text": "也就是 TTL，它保证旧菜不会永远摆在台上",
+       "from": 190,
+       "src": "ch7-1",
+       "voiceFrom": 190,
+       "to": 327
+      }
+     ],
+     "elements": [
+      {
+       "id": "pt",
+       "type": "image",
+       "asset": "assets/prep-table.svg",
+       "x": 160,
+       "y": 300,
+       "w": 800,
+       "h": 400,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "da",
+       "type": "image",
+       "asset": "assets/dish-amber.svg",
+       "x": 380,
+       "y": 220,
+       "w": 200,
+       "h": 200,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 0,
+       "disappearFrame": 132,
+       "z": 1
+      },
+      {
+       "id": "tm",
+       "type": "image",
+       "asset": "assets/timer.svg",
+       "x": 640,
+       "y": 140,
+       "w": 220,
+       "h": 220,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 103,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "gq",
+       "type": "rect",
+       "x": 1180,
+       "y": 300,
+       "w": 500,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "过期时间",
+       "fontSize": 64
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "tm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 102,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "tm",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 102,
+         "value": 0
+        },
+        {
+         "frame": 110,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "tm",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 102,
+         "value": 0
+        },
+        {
+         "frame": 114,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "da",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 122,
+         "value": 1
+        },
+        {
+         "frame": 132,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "gq",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 168,
+         "value": 0
+        },
+        {
+         "frame": 180,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "gq",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 168,
+         "value": 0
+        },
+        {
+         "frame": 180,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 175,
+       "endFrame": 327,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    },
+    {
+     "id": "ttl-2",
+     "chapterId": "ttl",
+     "from": 5810,
+     "durationInFrames": 219,
+     "narration": "想让台上和账本每一秒都一样，就得改价时全店停单，等全部改完再开门，太慢了。",
+     "subtitles": [
+      {
+       "text": "想让台上和账本每一秒都一样",
+       "from": 0,
+       "src": "ch7-2",
+       "voiceFrom": 0,
+       "to": 82
+      },
+      {
+       "text": "就得改价时全店停单",
+       "from": 83,
+       "src": "ch7-2",
+       "voiceFrom": 83,
+       "to": 140
+      },
+      {
+       "text": "等全部改完再开门",
+       "from": 141,
+       "src": "ch7-2",
+       "voiceFrom": 141,
+       "to": 191
+      },
+      {
+       "text": "太慢了",
+       "from": 192,
+       "src": "ch7-2",
+       "voiceFrom": 192,
+       "to": 218
+      }
+     ],
+     "elements": [
+      {
+       "id": "cl",
+       "type": "image",
+       "asset": "assets/closed.svg",
+       "x": 300,
+       "y": 180,
+       "w": 420,
+       "h": 420,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 9,
+       "disappearFrame": null,
+       "z": 0
+      },
+      {
+       "id": "lg",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 860,
+       "y": 220,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 148,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "hg",
+       "type": "image",
+       "asset": "assets/hourglass.svg",
+       "x": 1340,
+       "y": 220,
+       "w": 300,
+       "h": 300,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 193,
+       "disappearFrame": null,
+       "z": 2
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "cl",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "cl",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 8,
+         "value": 0
+        },
+        {
+         "frame": 16,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "cl",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 8,
+         "value": 0
+        },
+        {
+         "frame": 20,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 147,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 147,
+         "value": 0
+        },
+        {
+         "frame": 155,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 147,
+         "value": 0
+        },
+        {
+         "frame": 159,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "hg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 192,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "hg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 192,
+         "value": 0
+        },
+        {
+         "frame": 200,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "hg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 192,
+         "value": 0
+        },
+        {
+         "frame": 204,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     }
+    },
+    {
+     "id": "ttl-3",
+     "chapterId": "ttl",
+     "from": 6029,
+     "durationInFrames": 369,
+     "narration": "所以常见的做法是允许旧一会儿，但保证最后一定变新，这叫最终一致。靠谱的系统结账时只看仓库账本，不看台上的价签。",
+     "subtitles": [
+      {
+       "text": "所以常见的做法是允许旧一会儿",
+       "from": 0,
+       "src": "ch7-3",
+       "voiceFrom": 0,
+       "to": 97
+      },
+      {
+       "text": "但保证最后一定变新",
+       "from": 98,
+       "src": "ch7-3",
+       "voiceFrom": 98,
+       "to": 159
+      },
+      {
+       "text": "这叫最终一致",
+       "from": 160,
+       "src": "ch7-3",
+       "voiceFrom": 160,
+       "to": 210
+      },
+      {
+       "text": "靠谱的系统结账时只看仓库账本",
+       "from": 211,
+       "src": "ch7-4",
+       "voiceFrom": 211,
+       "to": 303
+      },
+      {
+       "text": "不看台上的价签",
+       "from": 304,
+       "src": "ch7-4",
+       "voiceFrom": 304,
+       "to": 368
+      }
+     ],
+     "elements": [
+      {
+       "id": "da",
+       "type": "image",
+       "asset": "assets/dish-amber.svg",
+       "x": 200,
+       "y": 180,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 1,
+       "disappearFrame": 142,
+       "z": 0
+      },
+      {
+       "id": "dg",
+       "type": "image",
+       "asset": "assets/dish-green.svg",
+       "x": 200,
+       "y": 180,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 133,
+       "disappearFrame": null,
+       "z": 1
+      },
+      {
+       "id": "zz",
+       "type": "rect",
+       "x": 600,
+       "y": 200,
+       "w": 500,
+       "h": 110,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22D3EE",
+       "radius": 55,
+       "label": "最终一致",
+       "fontSize": 64
+      },
+      {
+       "id": "ca",
+       "type": "image",
+       "asset": "assets/cashier.svg",
+       "x": 1180,
+       "y": 160,
+       "w": 320,
+       "h": 320,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 245,
+       "disappearFrame": null,
+       "z": 3
+      },
+      {
+       "id": "lg",
+       "type": "image",
+       "asset": "assets/ledger-ok.svg",
+       "x": 1240,
+       "y": 500,
+       "w": 240,
+       "h": 240,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 278,
+       "disappearFrame": null,
+       "z": 4
+      },
+      {
+       "id": "po",
+       "type": "image",
+       "asset": "assets/price-old.svg",
+       "x": 1560,
+       "y": 540,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 318,
+       "disappearFrame": null,
+       "z": 5
+      },
+      {
+       "id": "no",
+       "type": "image",
+       "asset": "assets/nope.svg",
+       "x": 1560,
+       "y": 540,
+       "w": 160,
+       "h": 160,
+       "color": null,
+       "reuse": false,
+       "appearFrame": 313,
+       "disappearFrame": null,
+       "z": 6
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "da",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 6,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "da",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 132,
+         "value": 1
+        },
+        {
+         "frame": 142,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "dg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 132,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "dg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 132,
+         "value": 0
+        },
+        {
+         "frame": 142,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "zz",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 0
+        },
+        {
+         "frame": 186,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "zz",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 174,
+         "value": 0
+        },
+        {
+         "frame": 186,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "ca",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 244,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "ca",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 244,
+         "value": 0
+        },
+        {
+         "frame": 252,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "ca",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 244,
+         "value": 0
+        },
+        {
+         "frame": 256,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 277,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 277,
+         "value": 0
+        },
+        {
+         "frame": 285,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "lg",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 277,
+         "value": 0
+        },
+        {
+         "frame": 289,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 317,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "po",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 317,
+         "value": 0
+        },
+        {
+         "frame": 325,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "po",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 317,
+         "value": 0
+        },
+        {
+         "frame": 329,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 312,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "no",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 312,
+         "value": 0
+        },
+        {
+         "frame": 318,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "no",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 312,
+         "value": 0
+        },
+        {
+         "frame": 324,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     }
+    }
+   ]
+  },
+  {
+   "id": "s7",
+   "chapterId": "ending",
+   "title": "结尾",
+   "background": "#0B1020",
+   "segment": "intro",
+   "from": 6398,
+   "durationInFrames": 300,
+   "narrationCharsRecount": 47,
+   "shots": [
+    {
+     "id": "ending-1",
+     "chapterId": "ending",
+     "from": 6398,
+     "durationInFrames": 205,
+     "narration": "你有没有遇到过：明明改了，刷新还是旧的？评论区说说是哪个网站或 App。",
+     "subtitles": [
+      {
+       "text": "你有没有遇到过：明明改了",
+       "from": 0,
+       "src": "ch8-1",
+       "voiceFrom": 0,
+       "to": 68
+      },
+      {
+       "text": "刷新还是旧的",
+       "from": 69,
+       "src": "ch8-1",
+       "voiceFrom": 69,
+       "to": 114
+      },
+      {
+       "text": "评论区说说是哪个网站或 App",
+       "from": 115,
+       "src": "ch8-2",
+       "voiceFrom": 115,
+       "to": 204
+      }
+     ],
+     "elements": [
+      {
+       "id": "qa",
+       "type": "rect",
+       "x": 210,
+       "y": 250,
+       "w": 1500,
+       "h": 330,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 32,
+       "label": "你有没有遇到过：明明改了，刷新还是旧的？\n评论区说说是哪个网站或 App。",
+       "fontSize": 40,
+       "quote": true,
+       "quoteNote": "片尾讨论问题（村长原句；\\n 只是换行）"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "qa",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 10,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "crossfade",
+      "durationInFrames": 8
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 10,
+       "endFrame": 204,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    },
+    {
+     "id": "ending-2",
+     "chapterId": "ending",
+     "from": 6603,
+     "durationInFrames": 95,
+     "narration": "点个关注不迷路，觉得有用就点赞收藏。",
+     "subtitles": [
+      {
+       "text": "点个关注不迷路，觉得有用就点赞收藏",
+       "from": 0,
+       "src": "ch8-3",
+       "voiceFrom": 0,
+       "to": 94
+      }
+     ],
+     "elements": [
+      {
+       "id": "qa",
+       "type": "rect",
+       "x": 210,
+       "y": 180,
+       "w": 1500,
+       "h": 300,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#F59E0B",
+       "radius": 32,
+       "label": "你有没有遇到过：明明改了，刷新还是旧的？\n评论区说说是哪个网站或 App。",
+       "fontSize": 40,
+       "quote": true,
+       "dimmed": true
+      },
+      {
+       "id": "fo",
+       "type": "rect",
+       "x": 360,
+       "y": 560,
+       "w": 1200,
+       "h": 150,
+       "color": "#111827",
+       "reuse": false,
+       "stroke": "#22C55E",
+       "radius": 55,
+       "label": "点个关注不迷路，觉得有用就点赞收藏。",
+       "fontSize": 56,
+       "quote": true,
+       "quoteNote": "关注提醒（Nolan 定稿原句）",
+       "knollNote": "Knoll：此卡下方可加「关注 · 点赞 · 收藏」三个图标出现动画"
+      },
+      {
+       "id": "subtitle",
+       "type": "text",
+       "x": 160,
+       "y": 900,
+       "w": 1600,
+       "h": 80,
+       "text": "(字幕层)",
+       "fontSize": 44,
+       "color": "#E5E7EB",
+       "reuse": true,
+       "align": "center",
+       "role": "subtitle"
+      }
+     ],
+     "animations": [
+      {
+       "elementId": "qa",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 1
+        },
+        {
+         "frame": 8,
+         "value": 0.5
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "fo",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 0,
+         "value": 0
+        }
+       ],
+       "easing": "easeInOut"
+      },
+      {
+       "elementId": "fo",
+       "property": "opacity",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 8,
+         "value": 1
+        }
+       ],
+       "easing": "easeOut"
+      },
+      {
+       "elementId": "fo",
+       "property": "scale",
+       "keyframes": [
+        {
+         "frame": 0,
+         "value": 0
+        },
+        {
+         "frame": 12,
+         "value": 1
+        }
+       ],
+       "easing": "spring"
+      }
+     ],
+     "background": "#0B1020",
+     "transition": {
+      "type": "fade",
+      "durationInFrames": 12
+     },
+     "camera": {
+      "pushIn": {
+       "fromScale": 1.0,
+       "toScale": 1.04,
+       "startFrame": 0,
+       "endFrame": 94,
+       "origin": [
+        960,
+        470
+       ],
+       "easing": "easeInOut"
+      },
+      "note": "静止段轻推镜：整层（不含字幕 / 水印）缓慢放大"
+     }
+    }
+   ]
+  }
+ ]
+}
