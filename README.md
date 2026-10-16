@@ -4,7 +4,7 @@ IT小村工作室的互联网开发技术科普短视频项目：用生活里的
 
 - 线上站点：https://linhongcun.github.io/video-studio/
 - 发布平台：抖音、B站、快手（小红书暂停）
-- 成片：每期 `episodes/<slug>/video.mp4`，同时附在 [Releases](https://github.com/linhongcun/video-studio/releases)
+- 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
 ## 已上线剧集
 
