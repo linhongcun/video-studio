@@ -35,6 +35,7 @@ IT小村工作室的互联网开发技术科普短视频项目：用生活里的
 | 19 | 大促一到，下单怎么就卡住了？ | [db-sharding](https://linhongcun.github.io/video-studio/episodes/db-sharding/) | 2026-10-15 |
 | 20 | 两个订单，怎么撞成同一个号了？ | [global-id](https://linhongcun.github.io/video-studio/episodes/global-id/) | 2026-10-15 |
 | 21 | 两个库，怎么一起成功或一起失败？ | [distributed-tx](https://linhongcun.github.io/video-studio/episodes/distributed-tx/) | 2026-10-16 |
+| 22 | 后台改了价格，页面怎么还是旧的？ | [cache-consistency](https://linhongcun.github.io/video-studio/episodes/cache-consistency/) | 2026-10-16 |
 
 ## 制作流程
 
