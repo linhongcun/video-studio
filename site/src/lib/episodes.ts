@@ -125,7 +125,11 @@ export function computeChapters(slug: string, fm: any[] = []) {
   const sbMeta = readJson(storyboardPath).meta ?? {};
   const brandPath = path.join(EP_DIR, '_shared/branding/spec.json');
   const endCard = fs.existsSync(brandPath) ? readJson(brandPath).endCard?.frames ?? 0 : 0;
-  const finalFrames = Number.isFinite(sbMeta.finalVideoFrames) ? sbMeta.finalVideoFrames : total + endCard;
+  // episode meta.json finalVideoFrames 优先（分镜冻结后不改 storyboard 哈希，如 EP.01 v6）
+  const metaPath = path.join(EP_DIR, slug, 'meta.json');
+  const epMeta = fs.existsSync(metaPath) ? readJson(metaPath) : {};
+  const finalFrames = Number.isFinite(epMeta.finalVideoFrames) ? epMeta.finalVideoFrames
+    : Number.isFinite(sbMeta.finalVideoFrames) ? sbMeta.finalVideoFrames : total + endCard;
   if (finalFrames < total) console.warn(`[duration] ${slug}: finalVideoFrames=${finalFrames} < 正片 ${total} 帧`);
   return {chapters, duration: Math.round((finalFrames / fps) * 10) / 10, fps};
 }

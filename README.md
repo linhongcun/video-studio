@@ -14,7 +14,7 @@ IT小村工作室的互联网开发技术科普短视频项目：用生活里的
 
 | 期 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|
-| 1 | 从输入 URL 到页面展示，发生了什么？（完整版） | [http-request](https://linhongcun.github.io/video-studio/episodes/http-request/) | 2026-10-12 |
+| 1 | 浏览器输入网址后发生了什么？ | [http-request](https://linhongcun.github.io/video-studio/episodes/http-request/) | 2026-10-12 |
 | 2 | HTTPS 为什么安全？ | [https](https://linhongcun.github.io/video-studio/episodes/https/) | 2026-10-12 |
 | 3 | 输入网址后，怎么找到服务器？ | [dns](https://linhongcun.github.io/video-studio/episodes/dns/) | 2026-10-12 |
 | 4 | 网站怎么记住你已经登录？ | [cookie-session](https://linhongcun.github.io/video-studio/episodes/cookie-session/) | 2026-10-12 |
