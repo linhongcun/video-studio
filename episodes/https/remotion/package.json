@@ -1,13 +1,11 @@
 {
-  "name": "https-video",
+  "name": "http-request-v2-video",
   "private": true,
   "scripts": {
-    "assets": "node sync_assets.mjs",
-    "typecheck": "npm run assets && tsc --noEmit",
-    "still": "npm run assets && remotion still src/index.ts Main",
     "render": "npm run render:voice && npm run render:mix",
-    "render:voice": "npm run assets && remotion render src/index.ts Main out/voice.mp4 --codec=h264 --crf=26",
-    "render:mix": "python3 ../../_shared/music/mix_bgm.py --in out/voice.mp4 --bgm ../../_shared/music/Wallpaper.mp3 --mode constant --below 12 --out ../video.mp4 --report out/mix-report.json"
+    "render:voice": "remotion render src/index.ts Main out/voice.mp4 --codec=h264 --crf=26 --bundle-cache=false",
+    "render:mix": "python3 ../../../episodes/_shared/music/mix_bgm.py --in out/voice.mp4 --bgm ../../../episodes/_shared/music/Wallpaper.mp3 --mode constant --below 12 --out ../video.mp4 --report out/mix-report.json",
+    "verify:storyboard": "node scripts/verify-storyboard.cjs"
   },
   "dependencies": {
     "@remotion/cli": "^4.0.534",

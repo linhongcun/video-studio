@@ -1,0 +1,8 @@
+// EP.01 v6 certificate card: dark panel, green border, large readable fields.
+import React from 'react';
+import {MONO, P} from '../theme';
+import {Copy, UIProps} from './ui';
+export const CertPopup: React.FC<UIProps> = ({e}) => <div data-certificate-state={e.state} style={{width: '100%', height: '100%', boxSizing: 'border-box', padding: Math.min(38, e.w * .035), display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: Math.min(26, e.h * .045), background: P.panel, border: `3px solid ${e.borderColor ?? P.success}`, borderRadius: 16, boxShadow: `0 12px 32px ${P.bg}`, fontFamily: MONO}}>
+  {(e.lines ?? []).map((line: string, i: number) => <div key={i} data-cert-line={i} data-highlighted={e.highlightLine === i || undefined} data-edited={e.editedLine === i || undefined} style={{position: 'relative', boxSizing: 'border-box', padding: '12px 16px', borderRadius: 10, border: `3px solid ${e.highlightLine === i ? e.color ?? P.primary : 'transparent'}`, background: e.highlightLine === i ? `${e.color ?? P.primary}18` : undefined}}><Copy size={e.fontSize ?? 40} width={e.w - Math.min(76, e.w * .07) - 50 - (e.mark && i === e.highlightLine ? 60 : 0)} style={{fontFamily: i > 1 ? MONO : undefined, color: e.editedLine === i || (e.mark && e.highlightLine === i) ? e.color ?? P.danger : P.text, fontWeight: e.highlightLine === i ? 700 : 400}}>{e.editedLine === i ? e.editedText : line}</Copy>{e.mark && e.highlightLine === i && <span data-signature-mark={e.mark} style={{position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', fontSize: 48, color: e.color ?? P.danger}}>{e.mark}</span>}</div>)}
+  {e.badge && <div style={{alignSelf: 'flex-end', fontSize: 48, color: e.borderColor ?? P.success}}>{e.badge}</div>}
+</div>;
