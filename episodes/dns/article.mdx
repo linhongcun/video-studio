@@ -1,101 +1,92 @@
 ---
 title: 输入网址后，怎么找到服务器？
-summary: 用“查电话簿”讲清 DNS：本地缓存和 hosts、递归解析器、从根到权威服务器的逐级查询、TTL 与缓存，附常见疑问和易错点。
+summary: 在地址栏敲下 shop.example，页面为什么还空着？跟着一次查询走一遍：本地缓存、递归解析器、根、.example 顶级域、权威服务器，最后拿到 IP 地址，TTL 决定这条记录能缓存多久。
 chapters:
-  - { id: phonebook, title: 需要一本电话簿 }
-  - { id: cache,     title: 先翻自己的小本子 }
-  - { id: resolver,  title: 请教查号台 }
-  - { id: iterative, title: 一层层往上问 }
-  - { id: ttl,       title: 记下来，下次更快 }
-  - { id: recap,     title: 回顾 }
+  - { id: local,    title: 先翻本地记录 }
+  - { id: resolver, title: 交给递归解析器 }
+  - { id: layers,   title: 一层层往下问 }
+  - { id: answer,   title: 答案回来了 }
+  - { id: load,     title: 页面开始加载 }
 ---
 
-在浏览器里输入 `example.com`，网页就打开了。可网络上的机器之间只认 **IP 地址**，不认名字。把名字翻译成 IP 地址的系统叫 **DNS**（域名系统），它就像一本分布在全世界的电话簿。下面分 6 步讲清楚这次“查号”是怎么完成的。
+你在地址栏敲下 shop.example，按下回车，结果页面还空着。这时浏览器其实还不知道，服务器在哪。
 
-## 6 步看懂 DNS
+这一步通常只要零点几秒。下面把它放慢，跟着这一次访问从头走一遍：浏览器怎么按域名查到服务器的 IP 地址，查到以后页面才开始加载。
 
-### 1. 需要一本电话簿 {#phonebook}
+> 说明：shop.example 是专门留给示例用的域名[^example]，203.0.113.10 是专门留给文档用的示例地址[^docip]。.example 在真实的互联网上没有对应的服务器，所以视频里根、.example 和权威服务器那几步的终端画面都标了「模拟查询」，演示的是一个普通网站会怎么走。
 
-{/* 配图：地址栏输入 example.com，电话簿左列名字、右列号码 */}
+## 跟着一次查询走一遍
 
-- 域名（如 `example.com`）是给人记的名字，IP 地址（如 IPv4 的 `203.0.113.10`、IPv6 的 `2001:db8::1`，都是文档专用的示例地址）是给机器用的号码。[^rfc5737]
-- DNS 里存着各种**记录**：`A` 记录对应 IPv4 地址，`AAAA` 记录对应 IPv6 地址，`CNAME` 表示“这个名字是另一个名字的别名”。[^rfc9499]
-- 浏览器拿到 IP 地址之后，才能建立连接、发出 HTTP 请求，这就是第一期讲的第一步。
+### 1. 先翻本地记录 {#local}
 
-### 2. 先翻自己的小本子 {#cache}
+{/* 配图：原理演示网页，两行字段「域名：shop.example」「IP 地址：尚未获得」；随后是 Firefox 的 about:networking#dns 页面搜不到 shop.example，旁边终端的系统查询日志显示「本地缓存：未命中」 */}
 
-{/* 配图：浏览器和系统各一本小本子，加一张 hosts 便签，命中时直接返回 */}
+**IP 地址**是联网时用来找到对方的数字地址，浏览器要连上服务器，得先有它。人记的是 shop.example 这样的**域名**，**DNS** 负责按域名查出对应的 IP 地址。[^dns][^ip]
 
-- 浏览器会先查自己的 **DNS 缓存**，里面是最近查过的记录。
-- 没有的话交给操作系统。系统有自己的缓存，还会读本地的 **hosts 文件**（Windows 在 `C:\Windows\System32\drivers\etc\hosts`，macOS 和 Linux 在 `/etc/hosts`），里面手写的“名字 → 地址”优先使用。
-- 任何一处命中，就不用联网查询，这是最快的情况。
+第一站在本地。浏览器和操作系统都会把最近查过的结果暂存一段时间，这就是**本地缓存**：浏览器缓存、系统缓存里有还能用的记录，就直接拿来用，不用往外问。
 
-### 3. 请教查号台 {#resolver}
+这一次，两处都没有 shop.example 的记录，只能往外问。
 
-{/* 配图：浏览器拨号给“查号台”卡片，下方列出运营商 DNS、1.1.1.1、8.8.8.8 */}
+### 2. 交给递归解析器 {#resolver}
 
-- 本地都没有，系统会把问题发给**递归解析器**，它就是“查号台”。默认通常是运营商提供的，也可以手动改成 Cloudflare 的 `1.1.1.1`、Google 的 `8.8.8.8` 这类公共 DNS。[^cf-1111][^google-dns]
-- 你的设备只问一句“`example.com` 的地址是多少”，等它给出最终答案。这叫**递归查询**。
-- 递归解析器自己也有缓存，很多热门域名它早就查过，可以直接回答。
+{/* 配图：终端窗口「递归解析器｜原理演示」，逐行显示「收到查询：shop.example 的 A 记录」「已有记录：未命中」「从根开始查」 */}
 
-### 4. 一层层往上问 {#iterative}
+往外问，问的是**递归解析器**：替你跑腿去查的服务。它通常由网络运营商提供，也可以在系统里改成别的公共服务。系统只问它一句「shop.example 的地址是多少」，剩下的路由它去跑。[^rfc1034][^terms]
 
-{/* 配图：查号台 → 根 → .com → 权威服务器的往返路线，最后根服务器展开成 a 到 m */}
+递归解析器自己也有缓存，有还能用的记录就直接回答。这一次它手里也没有，就从最顶层开始问。
 
-DNS 的名字是分层管理的，像一棵倒过来的树：最顶上是根，往下是 `.com`、`.cn` 这样的顶级域，再往下才是 `example.com`。递归解析器自己一级一级去问：前几级告诉它下一步该问谁，最后一级给出答案，这叫**迭代查询**。[^rfc9499]
+### 3. 一层层往下问 {#layers}
 
-1. 问**根服务器**：它不知道 `example.com` 的地址，但会告诉你 `.com` 由哪些服务器负责。
-2. 问 **`.com` 的顶级域服务器**：它告诉你 `example.com` 由哪几台**权威服务器**负责。
-3. 问**权威服务器**：它保存着这个域名的真实记录，给出最终的 IP 地址。
+{/* 配图：终端里的 dig 输出，标题栏标「模拟查询（普通域名会这样走）」：问根的命令和回答「example. IN NS ns.example.」，旁边中文译注「根：我不知道，去问 .example」；接着问 .example 的命令和回答「shop.example. IN NS ns.shop.example.」，译注「顶级域：去问 ns.shop.example」 */}
 
-关于根服务器：一共有 **13 个名字**（`a.root-servers.net` 到 `m.root-servers.net`），由十几家不同的机构运营。但每个名字背后不是一台机器，而是通过**任播**（anycast）部署在全世界的大量节点，查询会被就近送到其中一个。所以“全世界只有 13 台根服务器”是误解。[^root-servers]
+假设 shop.example 是个普通网站。域名是分层的，最顶层叫**根**。根服务器有 13 组名字，背后有很多台机器，分布在世界各地。[^root]
 
-DNS 查询通常走 **UDP 53 端口**，回应太大或被截断时改用 TCP。[^rfc7766]
+根不给最终地址，只告诉解析器下一层该问谁。于是解析器转去问 **.example 顶级域**，也就是域名最右边那一段。顶级域同样不给地址，只指向管这个网站的服务器。[^rfc1034]
 
-### 5. 记下来，下次更快 {#ttl}
+> 实际上，真实的根会告诉你 .example 这个顶级域不存在，因为它只留作示例用。[^example]
 
-{/* 配图：号码沿原路返回，每一级盖“已记录”章，旁边是标着 TTL 的沙漏 */}
+### 4. 答案回来了 {#answer}
 
-- 查到的结果会被递归解析器、操作系统和浏览器分别**缓存**，下次直接用。
-- 每条记录都带有 **TTL**（生存时间，单位是秒），由域名的管理者设置。到期后缓存作废，需要重新查询。[^rfc9499]
-- 所以修改 DNS 记录后，各处缓存里的旧记录要等 TTL 到期才会被替换。生效有快有慢，取决于原来的 TTL 设了多长。
+{/* 配图：终端里问权威服务器的 dig 输出（标「模拟查询」），ANSWER SECTION 高亮「shop.example. 300 IN A 203.0.113.10」，译注「答案：地址是 203.0.113.10」；再高亮 TTL 列 300；最后切到 Firefox 的 about:networking#dns，表里出现 shop.example → 203.0.113.10，标「浏览器按自己的规则暂存」 */}
 
-### 6. 回顾 {#recap}
+**权威服务器**是负责发布这个域名记录的服务器。前面几层只给线索，到了这里，才拿到真正的地址：shop.example 对应 203.0.113.10。[^terms][^rfc1035]
 
-- 浏览器缓存 → 系统缓存和 hosts → 递归解析器 → 根服务器 → 顶级域服务器 → 权威服务器 → 拿到 IP 并沿途缓存。
-- 拿到 IP 地址后，浏览器才开始建立连接、发出请求，回到第一期的流程。
+答案里还带着 **TTL**，就是这条记录允许被缓存多久，单位是秒。到期就重新查，没到期就直接用。[^rfc1035]
 
-## 深入一问
+浏览器自己的缓存按自己的规则保存，about:networking 页面里看到的到期时间，不一定等于 DNS 回答里的 TTL。
 
-**为什么不用一台超大的服务器存下所有域名？**
-域名数量极多，变化又频繁，放在一处既扛不住全世界的查询，也难以维护。分层之后，每一级只管自己那一层，`example.com` 的记录由它自己的权威服务器维护，改起来不需要通知根服务器。
+解析器把地址交回系统，再交给浏览器。浏览器终于知道，该连哪台服务器了。
 
-**根服务器出问题，互联网会瘫痪吗？**
-很难。13 个名字由不同机构独立运营，每个名字背后又有大量任播节点；再加上递归解析器会缓存顶级域的信息，日常查询其实很少需要真的问到根服务器。
+### 5. 页面开始加载 {#load}
 
-**改了 hosts 文件为什么能“屏蔽”网站？**
-系统查询时会优先使用 hosts 里的记录。把某个域名写成指向 `127.0.0.1`（本机），浏览器就连不到真正的服务器。开发时也常用它把域名临时指向测试机器。
+{/* 配图：回到开场的 Firefox 标签页，开发者工具「网络」面板里 shop.example 那一行的远程地址填上 203.0.113.10，状态变 200；演示商店页依次出现标题和两张商品卡 */}
 
-**DNS 查询会被别人看到吗？**
-传统 DNS 查询是明文的，同一网络里的人或运营商能看到你查了哪些域名，甚至可以伪造回应。加密 DNS（DoH，DNS over HTTPS；DoT，DNS over TLS）可以把查询加密，现在主流浏览器和系统都已支持。[^rfc8484][^rfc7858]
+浏览器照着这个地址连上服务器，请求网页，空白页上开始出现标题和商品。在 Firefox 开发者工具的「网络」面板里，可以看到这个请求连的远程地址。[^devtools]
 
-**`nslookup` 和 `dig` 是干什么的？**
-它们是命令行里的查号工具。比如运行 `dig example.com`，就能看到返回的 IP 地址和剩余的 TTL；加上 `+trace` 参数，还能看到从根服务器一路问下来的过程。
+整条路回顾一下：本地没有，就交给解析器，从根问到顶级域，最后由权威服务器给出地址。
 
-## 易错点
+## 想一想
 
-- ❌ “全世界只有 13 台根服务器” → ✅ 只有 13 个名字，每个名字背后都是遍布全球的大量任播节点。
-- ❌ “每次打开网页都要从根服务器问起” → ✅ 大多数查询在浏览器、系统或递归解析器的缓存里就命中了。
-- ❌ “改了 DNS 一定要等 48 小时” → ✅ 等多久取决于旧记录的 TTL。改 A 记录这类普通记录，TTL 短的话很快就会更新；改 NS 记录（比如换 DNS 服务商）时，要看顶级域那边委派记录的 TTL，它往往设得较长，“48 小时”的说法就是从这里来的。另外，个别解析器不一定严格遵守 TTL。
-- ❌ “DNS 只走 UDP” → ✅ 通常用 UDP 53，回应过大时会改用 TCP，加密 DNS 则走 HTTPS 或 TLS。
+马上再打开一次这个网站，还会从根开始查吗？评论区说说理由。
+
+页面打开了，网站又怎么认出你？下期讲 Cookie 和会话。关注我，觉得有用就点赞、收藏
 
 ## 参考资料
 
-[^rfc9499]: IETF, [RFC 9499: DNS Terminology](https://www.rfc-editor.org/rfc/rfc9499), 2024-03（现行标准，BCP 219）。
-[^root-servers]: Root Server Technical Operations Association, [root-servers.org](https://root-servers.org/)，访问于 2026-10-12。
-[^rfc7766]: IETF, [RFC 7766: DNS Transport over TCP - Implementation Requirements](https://www.rfc-editor.org/rfc/rfc7766), 2016-03（现行标准）。
-[^rfc8484]: IETF, [RFC 8484: DNS Queries over HTTPS (DoH)](https://www.rfc-editor.org/rfc/rfc8484), 2018-10（现行标准）。
-[^rfc7858]: IETF, [RFC 7858: Specification for DNS over Transport Layer Security (TLS)](https://www.rfc-editor.org/rfc/rfc7858), 2016-05（现行标准）。
-[^rfc5737]: IETF, [RFC 5737: IPv4 Address Blocks Reserved for Documentation](https://www.rfc-editor.org/rfc/rfc5737), 2010-01（现行标准，仅用于说明示例地址）。
-[^cf-1111]: Cloudflare, [1.1.1.1 — The free app that makes your Internet faster](https://one.one.one.one/)，访问于 2026-10-12。
-[^google-dns]: Google, [Google Public DNS](https://developers.google.com/speed/public-dns)，访问于 2026-10-12。
+[^dns]: [MDN：DNS](https://developer.mozilla.org/en-US/docs/Glossary/DNS)，DNS 把域名转换成 IP 地址。
+
+[^ip]: [MDN：IP Address](https://developer.mozilla.org/en-US/docs/Glossary/IP_Address)，IP 地址是联网设备的数字地址。
+
+[^rfc1034]: [RFC 1034：Domain Names - Concepts and Facilities](https://www.rfc-editor.org/rfc/rfc1034.html)，IETF，1987-11，域名分层、解析器与逐级引用（§4.3.2、§5.3.3）。
+
+[^rfc1035]: [RFC 1035：Domain Names - Implementation and Specification](https://www.rfc-editor.org/rfc/rfc1035.html)，IETF，1987-11，资源记录格式、A 记录与 TTL（§3.2.1、§3.4.1）。
+
+[^terms]: [RFC 9499：DNS Terminology](https://www.rfc-editor.org/rfc/rfc9499.html)，IETF，2024-03，递归解析器、权威服务器等术语（§6–7）。
+
+[^root]: [IANA：Root Servers](https://www.iana.org/domains/root/servers)，13 组根服务器名称及其运营机构。
+
+[^example]: [RFC 2606：Reserved Top Level DNS Names](https://www.rfc-editor.org/rfc/rfc2606.html)，IETF，1999-06，.example 留作示例用（§2）。
+
+[^docip]: [RFC 5737：IPv4 Address Blocks Reserved for Documentation](https://www.rfc-editor.org/rfc/rfc5737.html)，IETF，2010-01，203.0.113.0/24 专供文档示例（§3）。
+
+[^devtools]: [Firefox 开发者工具：Network Monitor](https://firefox-source-docs.mozilla.org/devtools-user/network_monitor/index.html)，网络面板中的请求与远程地址。
