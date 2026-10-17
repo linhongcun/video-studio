@@ -1,93 +1,68 @@
 ---
 title: 网站怎么记住你已经登录？
-summary: 用“存包处的手牌”讲清 Cookie 和 Session：HTTP 无状态、Set-Cookie 发手牌、请求自动带上、服务器端的 Session、HttpOnly / Secure / SameSite 与过期，附常见疑问和易错点。
+summary: 刷新、换页后网站还认得你，可服务器不会自己把前后两次访问连起来。跟着一次登录走一遍：服务器发来一串编号，浏览器存成 Cookie、每次访问自动带上，服务器按编号查到会话认出你；退出时服务器作废会话、浏览器删掉 Cookie。文末补充 HttpOnly、域名范围和过期时间。
 chapters:
-  - { id: stateless, title: HTTP 记不住人 }
-  - { id: set-cookie, title: 登录后发手牌 }
-  - { id: send,      title: 每次都带上 }
-  - { id: session,   title: 柜台里存什么 }
-  - { id: protect,   title: 手牌被偷怎么办 }
-  - { id: recap,     title: 回顾 }
+  - { id: login,   title: 登录后，两边各自保存 }
+  - { id: refresh, title: 刷新与换页 }
+  - { id: logout,  title: 退出登录 }
 ---
 
-登录一个网站之后，点开别的页面，它依然知道你是谁。可 HTTP 本身记不住人，网站靠的是一对搭档：存在浏览器里的 **Cookie**，和存在服务器那边的 **Session**。它们的关系就像存包处：你手里拿着一张**手牌**，东西存在**柜台**里。下面分 6 步讲清楚。
+你在 shop.example 登录后按下刷新，结果网站还认得你。可服务器其实不会自己记住你：刷新前后是两次访问，它不会自动把它们连起来。HTTP 规范把这叫作「无状态」。[^rfc9110]
 
-## 6 步看懂 Cookie 和 Session
+> 说明：shop.example 是专门留给示例用的域名[^example]；账号「小林」、编号 `sid=k3x9q7…` 都是示例数据，视频里出现的地方都标了「示例数据」。
 
-### 1. HTTP 记不住人 {#stateless}
+## 跟着一次登录走一遍
 
-{/* 配图：连续几次请求，服务器头顶都是“你是谁？” */}
+### 1. 登录后，两边各自保存 {#login}
 
-- HTTP 是**无状态**的：每个请求都是独立的，服务器不会自动记得上一个请求是谁发的。[^rfc9110]
-- 这让协议简单、好扩展，但“保持登录”“购物车”这类功能，需要额外的机制把多个请求串起来，这就是 Cookie 的用处。[^mdn-cookies]
+{/* 配图：shop.example 登录页，账号框「小林」；登录后页面下方的开发者工具只显示一行 Set-Cookie: sid=k3x9q7…，旁注「服务器发来登录编号」；随后两张原理演示网页：浏览器保存的「登录编号：k3x9q7… 已保存」，服务器保存的会话记录「登录编号 k3x9q7… ｜ 账号 小林 ｜ 已登录」 */}
 
-### 2. 登录后发手牌 {#set-cookie}
+输入账号密码点登录，服务器核对通过后发回结果。结果里带着一行 `Set-Cookie: sid=k3x9q7…`，意思是请浏览器把这串编号存下来。[^rfc6265]
 
-{/* 配图：响应箭头挂着一张写着 Set-Cookie 的手牌，手牌上只有一串编号 */}
+**Cookie** 就是浏览器保存的一小段数据，这次存的就是这串编号。
 
-- 密码验证通过后，服务器在响应里加上 **`Set-Cookie`** 响应头，例如 `Set-Cookie: sid=7f3a9c…; HttpOnly; Secure; SameSite=Lax`。[^rfc6265]
-- 浏览器收到后，把这条 Cookie 按域名保存下来。里面的 `sid` 通常是一串随机生成、很难猜到的**会话 ID**，就是那张手牌上的编号。[^owasp-session]
-- Cookie 是**服务器设置、浏览器保管**的，不是网站跑到你电脑里随便读文件。
+**会话** 就是服务器保存的登录记录：它记着这串编号对应哪个账号。编号本身是随机生成的，不含密码。
 
-### 3. 每次都带上 {#send}
+### 2. 刷新与换页 {#refresh}
 
-{/* 配图：每支请求箭头都带着同一张手牌；另一个网站伸手，手牌没过去 */}
+{/* 配图：刷新时开发者工具只显示一行 Cookie: sid=k3x9q7…，旁注「浏览器自动带上登录编号」；原理演示网页依次亮起「收到登录编号」「查到会话：小林 ｜ 已登录」「返回小林已登录的页面」；订单页 shop.example/orders 右上角仍是「小林，已登录」 */}
 
-- 之后浏览器访问同一个网站，会自动在请求头里带上 **`Cookie: sid=7f3a9c…`**，不需要网页代码手动处理。[^rfc6265]
-- 浏览器按 Cookie 的 **`Domain`** 和 **`Path`** 判断该不该带：手牌只交给发它的那个网站（以及它允许的子域名和路径），别的网站读不到。注意「读不到」不等于「不会被带上」：设成 `SameSite=None` 的 Cookie，在别的网站发起的跨站请求里也会被带上，所以才需要 SameSite 来限制。[^mdn-cookies]
-- 没有设置 `Expires` 或 `Max-Age` 的 Cookie 叫**会话 Cookie**，浏览器关闭后通常会被清掉；设置了的就会保存到过期为止。[^mdn-set-cookie]
+按刷新，浏览器自动在这次访问里带上 Cookie（`Cookie: sid=k3x9q7…`），里面还是那串编号。服务器按编号查到会话，认出你是谁，再返回已登录的页面。[^rfc6265]
 
-### 4. 柜台里存什么 {#session}
+换到订单页也一样：编号自动带上，服务器照样认出你。
 
-{/* 配图：存包柜按编号打开，里面是“用户 / 登录到几点”的卡片 */}
+### 3. 退出登录 {#logout}
 
-- **Session** 是服务器那边按会话 ID 保存的一份记录，比如“这是哪个用户、登录到什么时候”。它可以放在内存、数据库或 Redis 这类缓存里，取决于网站怎么实现。[^owasp-session]
-- 手牌本身只是一串编号，**不含你的密码**。
-- 但服务器只认手牌：谁拿着有效的会话 ID，谁就会被当成你。所以会话 ID 被偷，后果和密码被偷差不多，这叫**会话劫持**。[^owasp-session]
+{/* 配图：原理演示网页「退出处理」，会话记录从「已登录」变成「已作废」；商店页回到「登录」按钮，标注「浏览器里的这条 Cookie 已删除」，再点「我的订单」提示「请先登录」 */}
 
-### 5. 手牌被偷怎么办 {#protect}
+点退出，服务器先作废这条会话，同一个编号就不能再用来认出你。服务器还让浏览器删掉这条 Cookie，再刷新或换页就不会自动带上它。
 
-{/* 配图：小偷伸手，手牌依次套上 HttpOnly、Secure、SameSite 三层防护，最后柜台盖“已作废”章 */}
+所以刷新后还认得你，靠的是浏览器带编号、服务器查会话，这两步缺一不可。
 
-- **`HttpOnly`**：网页里的 JavaScript 读不到这条 Cookie，就算页面被注入了恶意脚本，也偷不走它。[^mdn-set-cookie]
-- **`Secure`**：只在 HTTPS 连接里发送，路上的人看不到它，接回第二期讲的加密。[^mdn-set-cookie]
-- **`SameSite`**：限制从**别的网站**发起的请求带上这条 Cookie，用来防范跨站请求伪造（CSRF）。取值有 `Strict`、`Lax`、`None`；`None` 必须同时设置 `Secure`。没写这个属性时，有的浏览器默认按 `Lax` 处理，但不是所有浏览器都这样，所以最好显式写明。[^mdn-set-cookie][^rfc6265bis]
-- **过期和退出登录**：给会话设一个合理的有效期；用户点“退出登录”时，服务器要把这个会话 ID 作废，而不只是让浏览器删掉 Cookie。登录成功后也应该换一个新的会话 ID。[^owasp-session]
+## 视频里没讲的三件事
 
-### 6. 回顾 {#recap}
+**HttpOnly**：服务器设置 Cookie 时可以加上 HttpOnly，这样网页里的脚本读不到这条 Cookie，但浏览器访问网站时照样会带上它。它能挡住一部分脚本偷编号的情况，却不能让被偷走的编号失效。[^rfc6265-httponly]
 
-- 登录成功 → 服务器用 `Set-Cookie` 发手牌（会话 ID）→ 浏览器保存，之后每次请求自动带上 → 服务器按编号在 Session 里找到“你是谁”。
-- 有些网站不在服务器存 Session，而是发一个 **Token**（比如 JWT），里面带着签名过的用户信息。思路一样：凭证带在身上，网站凭它认人。
+**域名范围**：Cookie 按域名保存、按域名带回。shop.example 发来的 Cookie，浏览器只在访问 shop.example（以及服务器明确允许的范围）时带上，访问别的网站不会带过去。[^rfc6265-domain]
 
-## 深入一问
+**过期时间**：服务器可以用 Expires 或 Max-Age 指定 Cookie 存到什么时候；不指定的话，它通常在关闭浏览器后就被清掉。服务器那边的会话另有自己的期限，两边各管各的。退出时常见的写法，是让这条 Cookie 立刻过期，浏览器就会删掉它。[^rfc6265-expires]
 
-**Cookie 和 Session 到底是什么关系？**
-Cookie 是浏览器里存的一小段数据，Session 是服务器上存的一份记录。最常见的做法是：Cookie 里只放会话 ID，Session 里放真正的登录信息，两者靠这个 ID 对上。
+## 想一想
 
-**能不能直接把用户名放在 Cookie 里？**
-不行。Cookie 在浏览器里，用户可以随意改。如果服务器直接相信 Cookie 里写的“我是管理员”，谁都能冒充。要么只放随机的会话 ID，要么像 Token 那样带上服务器的签名，改了就能被发现。
+只删浏览器里的 Cookie，服务器的会话还有效。有人拿着旧编号，还能被认出来吗？欢迎在评论区说说你的判断。
 
-**为什么换了浏览器就得重新登录？**
-手牌只存在当前这个浏览器里。换一个浏览器、开无痕窗口，或者清除了 Cookie，就没有手牌可带，服务器自然认不出你。
-
-**Token 比 Session 更好吗？**
-各有取舍。Session 方便随时作废，服务器说了算；像 JWT 这种自带签名的 Token，服务器验一下签名就行，不用查表，适合多个服务之间传递，但要提前作废就麻烦一些；也有 Token 只是个编号，照样要查表。很多网站会把两种思路结合起来用。
-
-**Cookie 能存多少东西？**
-很少。标准只要求浏览器每条至少支持 4096 字节，所以 Cookie 适合放编号，不适合放大量数据；而且它每次请求都会带上，放多了还会拖慢请求。[^rfc6265]
-
-## 易错点
-
-- ❌ “网站通过 Cookie 读取你电脑里的文件” → ✅ Cookie 通常由服务器用 `Set-Cookie` 设置（网页脚本也能用 `document.cookie` 设置普通 Cookie，但设置不了 HttpOnly），浏览器只把同一网站的 Cookie 带回给它。
-- ❌ “Cookie 里没有密码，被偷了也没关系” → ✅ 拿着有效的会话 ID 就能冒充你，和丢了密码一样危险。
-- ❌ “所有浏览器都默认 SameSite=Lax” → ✅ 只是部分浏览器的默认行为，应该显式写明 `SameSite`。
-- ❌ “退出登录就是删掉 Cookie” → ✅ 服务器那边也要作废这个会话，否则被偷的手牌还能用。
+下期：网站离你那么远，为什么还这么快？
 
 ## 参考资料
 
-[^rfc9110]: IETF, [RFC 9110: HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110), 2022-06（现行标准）。
-[^rfc6265]: IETF, [RFC 6265: HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265), 2011-04（现行标准）。
-[^rfc6265bis]: IETF HTTP 工作组, [Cookies: HTTP State Management Mechanism（rfc6265bis 草案）](https://datatracker.ietf.org/doc/draft-ietf-httpbis-rfc6265bis/)，访问于 2026-10-12（草案，尚未成为正式标准）。
-[^mdn-cookies]: MDN, [Using HTTP cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)，last modified 2026-09-17，访问于 2026-10-14。
-[^mdn-set-cookie]: MDN, [Set-Cookie header](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie)，访问于 2026-10-12。
-[^owasp-session]: OWASP, [Session Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)，访问于 2026-10-12。
+[^rfc9110]: [RFC 9110：HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html#section-3.3)，IETF，2022-06，§3.3：HTTP 是无状态的，每个请求可以脱离其他请求来理解。
+
+[^rfc6265]: [RFC 6265：HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265.html)，IETF，2011-04，Set-Cookie（§4.1）、Cookie 请求头（§4.2）。
+
+[^rfc6265-httponly]: [RFC 6265 §4.1.2.6 The HttpOnly Attribute](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.1.2.6)，HttpOnly 限制非 HTTP 方式（如脚本）读取 Cookie。
+
+[^rfc6265-domain]: [RFC 6265 §4.1.2.3 The Domain Attribute](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.1.2.3)，Cookie 按域名带回的范围；另见 §5.4。
+
+[^rfc6265-expires]: [RFC 6265 §4.1.2.1–4.1.2.2 Expires / Max-Age](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.1.2.1)，Cookie 的过期时间；未设置时为会话 Cookie，当前会话结束时清除，何时结束由浏览器决定。
+
+[^example]: [RFC 2606：Reserved Top Level DNS Names](https://www.rfc-editor.org/rfc/rfc2606.html#section-2)，IETF，1999-06，.example 留作示例用（§2）。
