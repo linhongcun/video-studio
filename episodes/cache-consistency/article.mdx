@@ -1,189 +1,85 @@
 ---
 title: 后台改了价格，页面怎么还是旧的？
-episode: 22
-version: v0.29.1
-series: 缓存
+summary: 在后台把价格从 199 改成 169，新开商品页却还是 199。后台改的是数据库，页面先读的是服务端缓存里另存的那一份，没人动它，它就一直是旧价。做法是先改数据库、再删除缓存，下一个人打开时缓存里没有，就去数据库拿新价并存回去；删除这一步也可能没做成，所以每一份缓存数据都要带一个过期时间（TTL），到点自动删掉，旧价最多留到那时。文末补充 Redis 的 EXPIRE / DEL、为什么删而不改、先改库再删缓存仍留的小窗口等视频里没讲的事。
+chapters:
+  - { id: stale-cache,  title: 后台改的是数据库，页面读的是缓存 }
+  - { id: delete-cache, title: 改完数据库，删除缓存 }
+  - { id: ttl,          title: 过期时间兜底 }
 ---
 
-后台改了价格，页面怎么还是旧的？改价时会踩四个坑。这一期讲**缓存和数据库一致性**：页面上的价格多半读的是缓存里另存的一份，改价要动数据库和缓存两个地方，两处没法在同一瞬间一起变。四个坑各自独立——改缓存还是删缓存、先删还是先改库、删失败怎么办、主从延迟读到旧值——最后还有过期时间兜底。
+你在后台 `admin.shop.example/item/1001` 把「示例 T 恤」的价格从 ¥199 改成 ¥169，页面也提示「已保存：价格 ¥169」；可新开一个标签页、在地址栏输入 `shop.example/item/1001` 打开商品页，价格还是 ¥199。后台明明改了，页面怎么还是旧的？
 
-> 说明：本文资料核查于 2026-10-16。Redis 以 8.10.2 为准（核查时最新正式版，2026-09-17 发布；命令行为按官方当前文档）；MySQL 以 **MySQL 8.4.11**（8.4 LTS 线最近一次完整服务端版本，2026-07-28）[^S19]为准，手册用 8.4 版参考手册（MySQL 8.0 随 8.0.46（2026-04-21）进入 EoL[^S16]）。官方在线文档持续更新、不标发布日期，标「官方当前文档（访问于 2026-10-16）」；2020 年以前的资料标「仅参考」。复制相关名称一律用 source / replica（主库 / 从库）。
+> 说明：`shop.example`、`admin.shop.example` 是文档专用的示例域名[^rfc2606]，不是现实中的商店。商品 1001「示例 T 恤」、旧价 ¥199、新价 ¥169、过期时间 10 分钟、倒计时 10:00，都是本例的示例数据，视频里出现的地方都标了「示例数据」或「示例」。这些数字不是任何网站的实测值，也不是推荐的设置。
 
-## 改价时会踩四个坑
+## 跟着同一次改价走一遍
 
-### 两份数据
+### 1. 后台改的是数据库，页面读的是缓存 {#stale-cache}
 
-网站里的价格通常存两份：**数据库**保存算数的那一份（以 MySQL 8.4.11 为例[^S19]）；**缓存**是读得快的副本（常用 Redis）。缓存的意义是快：查价不用每次都打到数据库。
+{/* 配图：左「数据库：¥169」，右「服务端缓存：¥199」暖色；下方流程「先看服务端缓存 → 有 → 直接用 ¥199 → 页面显示：¥199（旧价）」 */}
 
-但数据存了两份，改价时要动两个地方，而 Redis 和 MySQL 是两个独立系统，不能在一个本地事务里同时提交，所以两份没法在同一瞬间一起变。**一致性**说的就是让这两份对得上；Cache-Aside 本身「doesn't guarantee consistency between the data store and the cache」，写之后到下一次读之间，读者可能没命中，也可能「briefly see stale data」[^S1]。
+上期说过，热门商品的数据，网站会在**服务端缓存**里另存一份，页面先从这一份里拿。
 
-### 读的规矩：旁路缓存（Cache-Aside）
+后台改价，改的是数据库：数据库里商品 1001 已经是 ¥169，可服务端缓存里那一份没人动，还是 ¥199。下一次有人打开商品页，服务器照旧先看服务端缓存，里面正好有，就直接拿了这份 ¥199，页面显示的就是旧价。
 
-1. 先查缓存，有就直接返回；
-2. 没有（没命中），才去数据库读；
-3. 读完写回缓存，下次就能命中[^S1]。
+在浏览器里也能看到这一点：先打开开发者工具的「网络 Network」面板，再新开一个标签页、在地址栏输入网址打开商品页，列表里会出现 `item?id=1001` 这一行；点开它的「预览 Preview」，能看到服务器返回的 `"price": 199`。注意这一行只说明服务器这次返回的是 199，它本身看不到服务器内部是从哪里拿的；本例里原因就是上面那一份没人动的缓存。
 
-**往缓存里放东西的唯一入口就是「没命中 → 读库 → 写回」**，后面所有竞态都发生在这条路上。
+要是没人去动它，又没有给它安排到点删除，这份旧价就会一直留着，不管谁再打开，页面都会显示 199。
 
-**适合**：旁路缓存适合读多写少、能容忍短暂旧值的数据，比如商品价格。Azure 架构中心说缓存能提升「read-heavy data that changes infrequently and tolerates some staleness」的性能，并且「Caching works best for relatively static data or data that applications read frequently」[^S1]。
+### 2. 改完数据库，删除缓存 {#delete-cache}
 
-## 改缓存还是删缓存
+{/* 配图：两栏「数据库」「服务端缓存」都是一行「1001｜示例 T 恤｜¥199」；左行变 ¥169，右行淡出只留空行位；左上小角标「同一次改价」 */}
 
-**问题**：更新缓存（改库之后顺手把缓存改成新值）在两个写请求交错时会乱：
+做法是：改完数据库，紧接着把缓存里这件商品的那一份删掉，这一步叫**删除缓存**。注意是删掉，不是把缓存里的值改成新价。
 
-| 时刻 | 请求甲（改成旧价） | 请求乙（改成新价） |
-|---|---|---|
-| t1 | 数据库 = 旧价 | |
-| t2 | | 数据库 = 新价 |
-| t3 | | 缓存 = 新价 |
-| t4 | 缓存 = 旧价（甲慢了一步，后到） | |
-| 结果 | 数据库新、缓存旧，一直错到下次改价或过期 | |
+视频里重演的是同一次改价：在后台点下保存，网站先把数据库里的价格改成 169，再删除这件商品的缓存。下一个人打开商品页，缓存里没有，就去数据库查，拿到新价 169，再顺手存进缓存。这时新开一个标签页、输入网址打开商品页，价格已经是 ¥169，和后台改的一样了。
 
-**原因**：改库和改缓存是两步，两个请求的两步一交错，后到的旧值就盖掉了新值。另外，冷门数据也会被写进缓存白占空间[^S2]。（更新缓存类似 Write-Through，它本身是合法方案；这里只说在应用自己维护两份的写法里，并发写会乱序。）
+AWS 的缓存实践文档写的正是这个做法：“Cache expiration is easily handled by simply deleting the cached object. A new object will be fetched from the database the next time it is requested.”（删除缓存里的那份数据，下次请求时就会从数据库取新的。）[^aws]
 
-**方案**：删缓存（Redis `DEL`[^S5]）。改完数据库，直接删掉缓存，不写新值；下次有人读，再按旁路缓存回填。删除是幂等的：两个改价请求谁先谁后、删几次，最后都只剩空位（缓存里「没有」）；读回填旧值的空隙留到下一章讲。
+开发者工具里也能看到这次取新价：本例的网站在响应头里自己加了一个标记 `X-Cache: MISS`，意思是这次缓存里没有，数据是刚从数据库拿的。视频里这一段是对刚才那次打开的重演，所以画面上标了「刚才那次打开」。
 
-**代价**：删掉后的下一次读会没命中，多读一次数据库[^S2]。热点数据被删的瞬间可能有大量请求同时回库（常说的「击穿」，本期不展开）。
+### 3. 过期时间兜底 {#ttl}
 
-**适合**：删缓存一般适合大多数场景——旁路缓存的标准写法本身就是「写库后让缓存失效」[^S1]，按需加载也不会让冷门数据占地方[^S2][^S20]。只有缓存值计算很贵，或者读多的路径要求写后立刻读到新值（Azure：「If read-heavy paths need read-after-write freshness, consider write-through caching instead」[^S1]；另见[^S21]），而且写请求能串行（不会出现上面的交错）时，才考虑直接更新缓存。（「大多数场景」是**推论**。）
+{/* 配图：左侧「最多还剩 10:00（示例）」与满格计时条，右上「倒计时快进演示」；倒计时与计时条同步滚到「还剩 0:00」，旧行淡出，新行「1001｜示例 T 恤｜¥169」存回原位 */}
 
-## 先删还是先改库
+可删除缓存这一步也可能没做成，比如连接断了一下，缓存里那份 199 就又留下了。
 
-**先删缓存再改库的问题**：
+所以缓存里的每一份数据，都要带一个**过期时间**，叫 **TTL**（time to live），比如 10 分钟，到点就自动删掉。AWS 的建议是：“Always apply a time to live (TTL) to all of your cache keys, except those you are updating by write-through caching.”[^aws] 本文只讲「先改数据库、再删除缓存」这条做法，原句里另一种更新方式这里不展开。它的作用也写得很清楚：“This approach catches application bugs, where you forget to update or delete a given cache key when updating the underlying record. Eventually, the cache key will auto-expire and get refreshed.”[^aws] 原句举的是忘了更新或删除的情况；「连接断了一下」是本文的白话例子。
 
-| 时刻 | 改价请求 | 查价请求 |
-|---|---|---|
-| t1 | 删缓存 | |
-| t2 | | 没命中 |
-| t3 | | 读库，读到旧价 |
-| t4 | 库 = 新价 | |
-| t5 | | 把旧价写回缓存 |
-| 结果 | 库新、缓存旧，直到下次删除或过期 | |
+视频里倒计时写的是「最多还剩 10:00（示例）」：这份旧价可能早就存进缓存了，实际剩下的时间只会更短。画面标了「倒计时快进演示」，十分钟压缩到两秒内演完，倒计时数字和计时条按同一个剩余秒数一起走到 0:00。十分钟一到，这份旧价自己就没了，下一次打开又会去数据库拿新价，存回去的新数据重新带上新的 10 分钟。读取这份数据不会让它的过期时间重新计算。所以就算那次没删成，10 分钟后再新开商品页，价格也会变成数据库里的 ¥169，旧价最多留 10 分钟。
 
-Azure 架构中心明确要求「Update the data store before removing the item from the cache」，否则「there's a small window of time when a client might fetch the item before the data store is updated」[^S1]。
+过期时间怎么定？设得短，旧价留得短，但查数据库的次数会变多；设得长，查得少，旧价可能留得久。这是一个取舍，要看这份数据能容忍旧多久。
 
-**方案**：先改数据库，再删缓存——旁路缓存的标准写法[^S1]，读到旧值的空隙小得多。
+回到开场：后台改了价格，删除缓存后，新开的商品页就是 ¥169，后台和页面对上了。
 
-**它也会出错，只是很少**。事件顺序是：**没命中 → 读到旧值 → 新值提交 → 删缓存 → 旧值回填**。
+记住这一句：**先改数据库，再删除缓存，每一份都要带过期时间（TTL）来兜底。**
 
-| 时刻 | 查价请求 | 改价请求 |
-|---|---|---|
-| t1 | 查缓存，没命中 | |
-| t2 | 读库，读到旧价（改价请求可能还没开始，也可能已开始但没提交：InnoDB 一致性读看不到未提交的改动[^S13]，默认隔离级别 REPEATABLE READ[^S14]） | |
-| t3 | | 新价提交 |
-| t4 | | 删缓存（本来就空） |
-| t5 | 把旧价回填进缓存 | |
+## 视频里没讲的几件事
 
-关键只有一点：旧值回填晚于删除。概率低，但不为零。
+- **Redis 里怎么做。** 很多网站用 Redis 存服务端缓存。设过期时间用 EXPIRE 命令，官方文档原句：“Set a timeout on key. After the timeout has expired, the key will automatically be deleted.”[^expire]；删除用 DEL 命令：“Removes the specified keys. A key is ignored if it does not exist.”[^del]；想看一份数据还剩多久，TTL 命令“Returns the remaining time to live of a key that has a timeout.”[^ttl] 视频里只画剩余时间，不演示命令。
+- **为什么删掉，而不是直接改成新价。** 删除可以重复做，做几次结果都一样；直接改值时，几个请求同时进行，先后顺序一乱，可能把旧值写回去。Facebook 在 NSDI'13 的论文里写：“For write requests, the web server issues SQL statements to the database and then sends a delete request to memcache that invalidates any stale data. We choose to delete cached data instead of updating it because deletes are idempotent.”[^nsdi13]（idempotent，即重复执行结果不变。）这种「先读缓存、没有再查数据库并存回」的用法常被叫作旁路缓存（Cache-Aside）。
+- **先改库再删缓存，也还留一个很小的窗口。** 设想一个读请求在改价之前发现缓存里没有，从数据库读到旧价 199；这时后台把数据库改成 169，并删除缓存；这个读请求之后才把 199 存回缓存，旧价就又留在缓存里，直到过期时间到点。论文把这种情况叫 stale set：“A stale set occurs when a web server sets a value in memcache that does not reflect the latest value that should be cached. This can occur when concurrent updates to memcache get reordered.”[^nsdi13] 论文用租约（lease）来处理这个问题，这里不展开。所以「先改数据库、再删除缓存」只是大大缩小出错的窗口，不能保证缓存和数据库时时相同；过期时间正是兜这种情况的底[^aws]。
+- **删除没成功怎么办、先后顺序怎么排。** 删除失败时可以重试，比如把待删的条目放进消息队列重试，或订阅数据库的 binlog 再去删；先删缓存还是先改数据库，顺序不同，出错的方式也不同，先删缓存时更容易让并发的读请求把旧值又存回去，有人会再加一次延迟双删（这是工程上的常见做法，不是某份标准规定的步骤）。数据库有主从复制时，从库还可能有主从延迟。这些办法都只是缩小出错的窗口，缓存和数据库之间通常是「最终一致」，过一会儿才对上。另外，缓存空间满了时，缓存软件还会按规则淘汰一些数据，这和过期时间是两回事。
+- **X-Cache 不是标准字段。** `X-Cache` 是网站自己加的响应头，名字和取值由各家自己约定。很多 CDN 也用 X-Cache，那里指的是 CDN 缓存，和本文说的服务端缓存不是一回事；看到 `MISS` 或 `HIT`，先弄清楚是谁加的标记。
+- **先打开开发者工具。** 网络面板只记录它打开之后的请求，所以要先打开开发者工具，再新开标签页、输入网址打开页面，否则会漏掉那一行。
 
-**延迟双删**（旁白一句带过）：先删缓存 → 改库 → 等一会儿 → 再删一次。第二次删除用来清掉竞态里回填的旧值。等多久没有权威的通用数字，要按自己系统实测的「读库 + 写回」耗时和主从延迟来定；它只能降低出错机会，第二次删除本身也可能失败。这是社区常见的经验做法，上面的资料都没有直接命名它。
+## 想一想
 
-**代价**：并发读仍可能回填旧值，得靠后面几章来补。
+要是缓存里的价格可能旧上几分钟，下单付款这一步，还能直接用它吗？评论区说说。
 
-**适合**：先改库再删缓存是大多数旁路缓存场景的默认写法，资料明确要求先更新数据存储、再删除缓存项[^S1]。
+**参考答案：**不适合。付款时要读数据库里的权威价格；商品页展示允许旧几分钟。AWS 的原话是：“For example, during online checkout, you need the authoritative price of an item, so caching might not be appropriate. On other pages, however, the price might be a few minutes out of date without a negative impact on users.”[^aws] 这只说明结账需要权威价格，各家付款系统具体怎么实现并不相同。
 
-## 删失败怎么办
+下期：双十一下单那么多，为什么不丢单？
 
-删缓存也会失败：网络抖动、Redis 一时连不上，旧值就一直留着。处理不当时，旧值可能「indefinitely」留在缓存里[^S3]。
+## 参考资料
 
-**方案 A：消息队列重试**。删除失败就把要删的 key 发进消息队列，消费者反复删，直到成功；超过重试次数进死信队列，转人工处理[^S9]。代价：业务代码要自己发消息。
+[^aws]: AWS《Caching Best Practices》：https://aws.amazon.com/caching/best-practices/ （Lazy caching、Time-to-live、How to apply caching 各节）。2026-10-21 访问。
 
-**任务本身也不能丢**：可以在改价的同一个事务里先记下「要删哪些缓存」，提交后再由后台投递到消息队列；失败就重试。这就是事务发件箱（Transactional Outbox）思路，避免「库改了、删缓存的消息却丢了」[^S25]。
+[^expire]: Redis 文档《EXPIRE》：https://redis.io/docs/latest/commands/expire/ 。2026-10-21 访问。
 
-**方案 B：订阅变更日志（binlog）**。MySQL 8.4.11 默认开启 binlog，每个事务的改动整笔写入 binlog，并且按提交顺序写入[^S6][^S11]。Canal、Debezium 这类工具伪装成一个从库来读 binlog[^S8][^S17]，看到价格变了就去删缓存，失败再丢进消息队列重试。好处是业务代码不用管删缓存，也不怕漏删。
+[^del]: Redis 文档《DEL》：https://redis.io/docs/latest/commands/del/ 。2026-10-21 访问。
 
-但它不等于「顺序全对、没有空隙」，空隙来自两处时间差，而不是 binlog 本身：
+[^ttl]: Redis 文档《TTL》：https://redis.io/docs/latest/commands/ttl/ 。2026-10-21 访问。
 
-1. **事件可能早于数据可见**：binlog 本身按提交顺序记录，但 MySQL 在 COMMIT 执行之前就整笔写入并同步 binlog，再在 InnoDB 提交[^S6]，所以订阅程序**可能**先收到改动、删了缓存，这时新价还读不到；恰好有查价请求读库，读到的仍是旧值并回填，删除就白做了。（**推论**：由写入与提交的先后推出的时间窗口，手册没有直接写「订阅端会先收到」。）
-2. **消费端可能打乱先后**：binlog 本身有序，但投进消息队列后，多分区只能保证表级或同一主键级顺序[^S18]；故障恢复时事件可能重复投递（at least once[^S17]）。由此**推论**：多线程并行消费、失败重试可能让删除被延后或换序，和读回填的先后错开（资料没有直接给出这一结论）。
+[^rfc2606]: RFC 2606 §2《Reserved Top Level DNS Names》：https://www.rfc-editor.org/rfc/rfc2606.html#section-2 ，原句 “".example" is recommended for use in documentation or as examples.” 2026-10-21 访问。
 
-所以这条路**照样需要重试，也照样需要过期时间兜底**。代价：多一套组件要维护。
-
-**适合**：
-
-- 消息队列重试：一般更适合本来就有消息队列、改价（写入）的地方又不多的系统——每个写入点都要自己发消息，写入点少时代码改动最小。（**推论**：资料只描述重试机制[^S9]，没有给出适用范围。）
-- 订阅 binlog：适合写入入口多、改动也可能来自应用之外、不想改业务代码，而且有人维护 Canal / Debezium 的团队。Redis 的说法是：「Data changes outside your app … add event-driven invalidation」，并提醒「the ordering, dedup, and replay logic is where the engineering hours go」[^S21]；Red Hat 也把 cache invalidation 列为 CDC 的典型用途[^S24]。
-
-## 主从延迟读到旧值
-
-很多网站读写分离：写走主库（source），读走从库（replica）。从库是**只读副本**，只照着主库应用改动，自己不产生新数据，但总比主库慢半拍——这就是**主从延迟**。
-
-| 时刻 | 改价请求 | 查价请求 |
-|---|---|---|
-| t1 | 主库 = 新价 | |
-| t2 | 删缓存 | |
-| t3 | | 没命中，去从库读，从库还没收到，读到旧价 |
-| t4 | | 旧价写回缓存 |
-| t5 | 从库收到新价 | |
-| 结果 | 写请求顺序全对，缓存仍是旧价 | |
-
-**对策**：
-
-1. 回填缓存时直接读主库（或刚写过的 key 在一段时间内读主库）。回填读主库能避开主从延迟，但挡不住更早读出的旧值晚写回来。
-2. 订阅从库的变更日志再删：订阅**从库**的 binlog（需从库开启 `log_replica_updates`，MySQL 8.4.11 在开启 binlog 时默认开启[^S6][^S12]），可以减小主从延迟带来的空隙；但收到事件不代表改动已经能读到，仍需重试，也仍可能有旧值回填，最后靠 TTL 兜底。（旁白压缩后细节放在这里。）
-3. 延迟双删的等待要大于主从延迟。可以用 `SHOW REPLICA STATUS` 的 `Seconds_Behind_Source` 观察延迟，但手册也说明这个值为 0 不一定真追上[^S7]；MySQL 8.4.11 里复制相关语句统一用 SOURCE / REPLICA 命名[^S15]。
-
-**代价**：读主库会加重主库压力；订阅从库要多等一会儿，旧价也会多留一会儿。Meta 的真实一致性问题也和复制有关[^S3]。
-
-**适合**：读主库回填适合刚改完就要马上看到的数据，比如价格、库存。需要读己之写的读请求应走主库：AWS 写道「if you have a transaction that needs read after write consistency, then use the cluster endpoint for that transaction」[^S22]，Aurora 用户指南也说这类读要「on the writer DB instance」[^S23]。（用到缓存回填上是本文的引申。）
-
-## 兜底：过期时间
-
-给每份缓存设过期时间，时间到 Redis 自动删除[^S4]。它只看时间，不看数据变没变；作用是保证一份旧值**不会永远留着**——但这不是「最多旧多久」的保证：过期之后如果又从落后的从库回填，旧值可能再出现一轮。AWS 的说法是加 TTL「doesn't guarantee that a value isn't stale. However, it keeps data from getting too stale」[^S20]。
-
-- 取舍：设得太短，没命中多、数据库压力大；设得太长，旧值留得久[^S1]。
-- **写回缓存要带过期时间**：用 `SET` 覆盖一个 key 会清掉它原来的 TTL[^S4]，所以回填时要用 `SET key value EX 秒数` 这类带过期时间的写法，否则这份缓存永不过期，安全网就漏了。
-
-**适合**：过期时间设多长，按业务能容忍旧值多久来定，不给通用数字。Azure 示例代码的注释是「a custom expiration time that depends on how critical it is to have stale data」，并提醒过期策略要和访问模式匹配[^S1]。
-
-## 最终一致
-
-想让缓存和数据库每一刻都一样，就得在写的时候挡住读，或者加锁排队、把「改库 + 改缓存」包进一次分布式事务——读写都会变慢，缓存的意义就打折了。所以常见做法是**最终一致**：允许短时间读到旧值，靠删除、重试和过期时间保证最后一定变新；**前提是删除和重试最终完成，再靠过期时间兜底**。这很正常，不是故障。
-
-靠谱的系统结账时只按数据库里的价格和库存算，缓存只负责展示（通用设计原则，不是某份文档的原话；并非所有网站都保证）。
-
-## 四格对比
-
-| 坑 | 怎么做 | 代价 | 适合 |
-|---|---|---|---|
-| 改缓存还是删缓存 | 改完库就删缓存 | 下次读要回库 | 一般：读多写少（推论；例外见[^S1][^S21]） |
-| 先删还是先改库 | 先改库，再删缓存 | 仍有小回填空档 | 大多数旁路缓存场景[^S1] |
-| 删失败怎么办 | 消息队列重试，或订阅变更日志 | 多一套组件要维护；订阅端仍可能早于数据可见、消费可能换序 | 一般：入口少用队列，入口多用订阅（本文推论；订阅机制见[^S21][^S24]） |
-| 主从延迟读到旧值 | 回填读主库 | 主库压力大 | 刚改完就要看到的数据，如价格、库存[^S22][^S23] |
-| 兜底：过期时间 | 写回缓存时带上过期时间 | 太短老回库，太长旧得久 | 按能容忍旧多久来定[^S1] |
-
-## 结尾
-
-你有没有遇到过：明明改了，刷新还是旧的？评论区说说是哪个网站或 App。
-
-点个关注不迷路，觉得有用就点赞收藏。
-
-## 延伸阅读
-
-- 「删而不更新」和 lease 的经典出处：Scaling Memcache at Facebook[^S10]（仅参考）。
-
-[^S1]: Microsoft Azure 架构中心，Cache-Aside pattern，https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside ，Learn 当前版，2026-10-16 抓取
-[^S2]: AWS 白皮书 Database Caching Strategies Using Redis · Caching patterns，https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html ，2021-03-08（页面标 historical reference，不作唯一依据）
-[^S3]: Meta Engineering，Cache made consistent，https://engineering.fb.com/2022/06/08/core-infra/cache-made-consistent/ ，2022-06-08
-[^S4]: Redis 文档 EXPIRE，https://redis.io/docs/latest/commands/expire/ ，官方当前文档（访问于 2026-10-16），Redis 8.10.2
-[^S5]: Redis 文档 DEL，https://redis.io/docs/latest/commands/del/ ，官方当前文档（访问于 2026-10-16）
-[^S6]: MySQL 8.4 参考手册 7.4.4 The Binary Log，https://dev.mysql.com/doc/refman/8.4/en/binary-log.html ，官方当前文档（访问于 2026-10-16）
-[^S7]: MySQL 8.4 参考手册 19.1.7.1 Checking Replication Status，https://dev.mysql.com/doc/refman/8.4/en/replication-administration-status.html ，官方当前文档（访问于 2026-10-16）
-[^S8]: alibaba/canal README 与 Releases，https://github.com/alibaba/canal ，canal-1.1.8 发布于 2025-01-16，2026-10-16 抓取
-[^S9]: Apache RocketMQ 5.x Consumption Retry，https://rocketmq.apache.org/docs/featureBehavior/10consumerretrypolicy/ ，官方当前文档（访问于 2026-10-16）
-[^S10]: Nishtala et al., Scaling Memcache at Facebook, NSDI 2013，https://www.usenix.org/conference/nsdi13/technical-sessions/presentation/nishtala ，2013，**仅参考**
-[^S11]: MySQL 8.4 参考手册 19.1.6.4 Binary Logging Options and Variables，https://dev.mysql.com/doc/refman/8.4/en/replication-options-binary-log.html ，官方当前文档（访问于 2026-10-16）
-[^S12]: MySQL 8.4 参考手册 19.1.6.3 Replica Server Options and Variables，https://dev.mysql.com/doc/refman/8.4/en/replication-options-replica.html ，官方当前文档（访问于 2026-10-16）
-[^S13]: MySQL 8.4 参考手册 17.7.2.3 Consistent Nonlocking Reads，https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html ，官方当前文档（访问于 2026-10-16）
-[^S14]: MySQL 8.4 参考手册 17.7.2.1 Transaction Isolation Levels，https://dev.mysql.com/doc/refman/8.4/en/innodb-transaction-isolation-levels.html ，官方当前文档（访问于 2026-10-16）
-[^S15]: MySQL 8.4 参考手册 1.4 What Is New in MySQL 8.4 since MySQL 8.0，https://dev.mysql.com/doc/refman/8.4/en/mysql-nutshell.html ，官方当前文档（访问于 2026-10-16）
-[^S16]: Oracle，MySQL Product Support EOL Announcements，https://www.mysql.com/support/eol-notice.html ，2026-04-21；MySQL 8.0 Release Notes，https://dev.mysql.com/doc/relnotes/mysql/8.0/en/ （「with version 8.0.46, MySQL 8.0 reaches End of Life (EoL)」，访问于 2026-10-16）
-[^S17]: Debezium FAQ 与 MySQL connector 文档，https://debezium.io/documentation/faq/ ；https://debezium.io/documentation/reference/stable/connectors/mysql.html ，官方当前文档（访问于 2026-10-16）
-[^S18]: alibaba/canal Wiki，Canal Kafka RocketMQ QuickStart「mq顺序性问题」，https://github.com/alibaba/canal/wiki/Canal-Kafka-RocketMQ-QuickStart ，页面最后编辑 2022-05-17
-[^S19]: MySQL 8.4 Release Notes，https://dev.mysql.com/doc/relnotes/mysql/8.4/en/news-8-4-11.html （索引 https://dev.mysql.com/doc/relnotes/mysql/8.4/en/ ），官方 Release Notes（访问于 2026-10-16）
-[^S20]: Amazon ElastiCache 用户指南，Caching strategies for Memcached，https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html ，官方当前文档（无发布日期；访问于 2026-10-16）
-[^S21]: Redis 博客（厂商博客，含产品推广，只作旁证），Jeff Mills，Cache consistency: strategies to keep data fresh，https://redis.io/blog/cache-consistency-strategies/ ，2026-07-20（2026-07-22 更新）
-[^S22]: AWS Database Blog，Rajeev Sakhuja，10 Amazon Aurora tips for application developers – Part 1，https://aws.amazon.com/blogs/database/part-1-10-amazon-aurora-tips-for-application-developers/ ，2023-03-29
-[^S23]: Amazon Aurora 用户指南，Using local write forwarding in an Aurora MySQL DB cluster，https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/aurora-mysql-write-forwarding.html ，官方当前文档（访问于 2026-10-16）；Aurora 产品文档，用到「回填读主库」是本文引申
-[^S24]: Red Hat Developer，Hugo Guerrero，Capture database changes with Debezium Apache Kafka connectors，https://developers.redhat.com/blog/2020/04/14/capture-database-changes-with-debezium-apache-kafka-connectors ，2020-04-14（最后更新 2023-11-08）
-[^S25]: AWS Prescriptive Guidance，Cloud design patterns · Transactional outbox pattern，https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html ，2023-07-28 首发（2024-02-23 更新示例代码；访问于 2026-10-17）
+[^nsdi13]: Nishtala 等《Scaling Memcache at Facebook》，NSDI'13：https://www.usenix.org/system/files/conference/nsdi13/nsdi13-final170_update.pdf （第 2 节 Query cache，PDF 第 2 页；第 3.2.1 节 Leases，PDF 第 4 页）。2026-10-21 访问。

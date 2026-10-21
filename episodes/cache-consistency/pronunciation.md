@@ -1,65 +1,47 @@
-# EP.22 pronunciation.md（v0.29.0，change-list-v9 无比喻版）
+# EP.09 cache-consistency-v1 读音提示（pronunciation.md）
 
-送 TTS 的文本里多音字有风险时换同音字或改周围的词；稿子和字幕保持原字。按 research.md v0.3.4 多音字表执行，并按 11 段 script.md 逐词扫过旁白（Miyazaki 2026-10-16）。Redis、MySQL 按一个单词读；TTL、EoL 逐字母。读音由 Knoll 和 Nolan 自核。配音：冰糖。
+依据：script.md daaa067e「读音提示」一节，原样搬入；voice.wav 2998aa4f（Knoll 配音，5090 帧 / 169.67 秒）已按此配音。只改送 TTS 的文字，字幕、讨论题与片尾原话一字不动。
 
-## 全文多音字与专名
-
-| 词 | 读音 | 位置 / 说明 |
+| 文本 | 读法 | 出现镜号 |
 |---|---|---|
-| 重试 | **chóng shì** | retry / eventual / recap；不能读 zhòng |
-| 更新 | **gēng xīn** | 画面术语「更新缓存」；旁白未念，若补念不能读 gèng |
-| 收藏 | **shōu cáng** | ending；不能读 zàng |
-| 设得 | **shè de（助词）** | ttl；不能读 děi |
-| 一致 | **yí zhì** | eventual；去声前读 yí |
-| 一次 | **yí cì** | del；去声前读 yí |
-| 一份 | **yí fèn** | copies；去声前读 yí |
-| 一会儿 | **yí huìr** | eventual；去声前读 yí |
-| 一套 | **yí tào** | retry；去声前读 yí |
-| 一道 | **yí dào** | ttl；去声前读 yí |
-| 一个 | **yí gè** | hook「一个一个」；去声前读 yí |
-| 一时 | **yì shí** | retry；非去声前读 yì |
-| 一直 | **yì zhí** | retry；非去声前读 yì |
-| 一交错 | **yì jiāo cuò** | del；非去声前读 yì |
-| 还是 | **hái shì** | hook / ending；不能读 huán |
-| 还有 | **hái yǒu** | ttl；不能读 huán |
-| 还没 | **hái méi** | order / replica；不能读 huán |
-| 数据 | **shù jù** | 多章；不能读 shǔ |
-| 从库 | **cóng kù** | replica；不能读 zòng |
-| 主从 | **zhǔ cóng** | replica / recap；不能读 zòng |
-| 空隙 | **kòng xì** | read / order；不能读 kōng |
-| 处理 | **chǔ lǐ** | （文章）；不能读 chù |
-| 转人工 | **zhuǎn rén gōng** | retry；不能读 zhuàn |
-| 降低 | **jiàng dī** | order；不能读 xiáng |
-| 压力 | **yā lì** | replica；— |
-| 了 | **le（改了、失败了）** | hook / retry / ending；不能读 liǎo |
-| MySQL | **按一个单词读** | copies / retry；不逐字母 |
-| Redis | **按一个单词读（近「瑞迪斯」）** | copies / retry；不逐字母 |
-| Cache-Aside | **英文两个词「cache aside」** | read；不逐字母；画面只写「旁路缓存」 |
-| binlog | **英文一个词「bin log」** | retry；不逐字母；画面只写「变更日志」 |
-| TTL | **逐字母 T-T-L** | ttl；— |
-| EoL | **逐字母 E-O-L** | copies；旁白「进入 EoL」；不读成单词 |
-| App | **按一个单词读** | ending；片尾问题句 |
-| 加重 | **jiā zhòng** | （若出现）；不能读 chóng |
-| 觉得 | **jué de** | ending；不能读 jiào |
-| 算数 | **suàn shù** | copies；不能读 shǔ |
-| 得靠 | **děi kào（必须）** | eventual「再靠」读 kào；— |
-| 八点四点十一 | **bā diǎn sì diǎn shí yī** | copies；对应 MySQL 8.4.11 |
-| 八点零 | **bā diǎn líng** | copies；对应 MySQL 8.0 |
-| 八点零点四十六 | **bā diǎn líng diǎn sì shí liù** | copies；对应 8.0.46 |
-| 时间差 | **shí jiān chā** | （文章）；不能读 chà / chāi |
-| 一般 | **yì bān** | del / retry / replica；非去声前读 yì |
-| 适合 | **shì hé** | del / replica；— |
-| 就要 | **jiù yào** | replica；要读 yào |
-| 库存 | **kù cún** | replica；— |
-| 结账 | **jié zhàng** | eventual；不能读 jiē |
-| 设多长 | **shè duō cháng** | ttl；不能读 zhǎng |
-| 换个坑 | **huàn gè kēng** | order / replica 开场；— |
-| 挡不住 | **dǎng bú zhù** | replica；— |
+| TTL | 按英文字母 T、T、L 逐个念，不读成单词，也不读成中文「梯梯」；送配音时单独核听三个字母 | 13；画面另见 18，不额外念 |
+| 过期时间 | guò qī shí jiān，作为一个完整词组 | 13、16、18 |
+| 删除缓存 | shān chú huǎn cún，不拆开重读 | 7、12、17、18；9 读「删除这件商品的缓存」 |
+| 服务端缓存 | fú wù duān huǎn cún，「端」读 duān | 2、4；其他镜的画面标题不额外念 |
+| 数据库 | shù jù kù，连成完整词组 | 3、5、7–9、11、14–16、18 |
+| 199 | 一百九十九，yì bǎi jiǔ shí jiǔ，不逐位念 | 1（两次）、3–6、12 |
+| 169 | 一百六十九，yì bǎi liù shí jiǔ，不逐位念 | 1、3、8–10、15、17 |
+| 十分钟 | shí fēn zhōng；「十」不读成四 | 13、14（两次）、15 |
+| 一份／这一份／每一份／那一份 | yí fèn／zhè yí fèn／měi yí fèn／nà yí fèn；「一份」读 yí fèn | 2（两次）、3、7、13、18 |
+| 还是 | hái shi，「是」轻读 | 1、3、5；封面不另念 |
+| 兜底 | dōu dǐ，第二字读第三声 | 18 |
+| 双十一 | shuāng shí yī，末字「一」读本调 yī，不变调 | 20 |
+| 收藏 | shōu cáng，「藏」读 cáng | 20 |
+| 觉得 | jué de，「得」轻读 | 20 |
+| 下一个人 | xià yí ge rén，「个」轻读 | 8 |
+| 新开一个标签页 | xīn kāi yí ge biāo qiān yè，「一个」按实际连读 | 10 |
+| 缓存里没有／没做成／没删成 | huǎn cún lǐ méi yǒu／méi zuò chéng／méi shān chéng；「没」读 méi | 8、11／12／15 |
+| 连接断了一下 | lián jiē duàn le yí xià，「了」轻读 | 12 |
+| 下单付款／不丢单 | xià dān fù kuǎn／bù diū dān，句尾问句保持自然语调 | 19／20 |
+| 评论区说说／点赞 | píng lùn qū shuō shuo／diǎn zàn，末尾不抢字 | 19／20 |
 
-## 「只」通则
+画面上的 `shop.example`、`admin.shop.example`、`item?id=1001`、`"price": 199`、`X-Cache: MISS`、¥ 符号只显示不读；Network、Preview、商品编号 1001、商品名里的字母 T、10:00、0:00 及任何额外画面数值均不另读。旁白里已经写出的 199、169 依表读成完整数字，不能因「字段只显示」而漏念这些旁白数字。画面价格前不另加「人民币」口播。标题不重复配音；字幕、讨论题、片尾仍保持指定原文。
 
-旁白里的「只」全部是副词 **zhǐ**（只看、只按），不能读 zhī。
+## 配音核听（对 words.json f50bfae3 的 ASR 转写逐句比对）
 
-## 「一」通则
+24 句全部按脚本原文配出，ASR 与脚本的差异只有下面几类，全部是同音字或数字写法，不是读错；字幕一律照脚本，不照 ASR：
 
-单念、序数、末尾读原调 **yī**；去声前读 **yí**（一次、一份、一会儿、一套、一道、一个、一致）；非去声前读 **yì**（一种、一时、一直、一交错、一般）。本期不说「第一层」等序数层名。
+| 脚本 | ASR 转写 | 出现处 | 结论 |
+|---|---|---|---|
+| 商品页 | 商品业 | 镜 1、15 | 同音，读法对 |
+| 改价 | 改架 | 镜 3 | 同音，读法对 |
+| 旧价 | 救驾 | 镜 6、16（两次） | 同音，读法对 |
+| 设得短／留得短／设得长／查得少／留得久（得） | 的 | 镜 16 | 「得」轻读 de，读法对 |
+| 开场 | 开厂（Knoll 转写列表所列；words.json 该处已是「开场」） | 镜 17 | 同音，读法对 |
+| 旧上几分钟 | 就上几分钟 | 镜 19 | 同音，读法对 |
+| 不丢单 | 丟單（Knoll 转写列表所列的繁体字形；words.json 该处已是「丢单」） | 镜 20 | 只是转写字形，读法对 |
+| 十分钟 | 10分钟 | 镜 13、15 | 读作 shí fēn zhōng，转写成阿拉伯数字 |
+
+- TTL：ASR 转写为「TTL」，三个字母逐个念出（镜 13，开口约第 3224 帧，绝对）。
+- 199、169：全部转写为完整数字，按「一百九十九」「一百六十九」念出，没有逐位念。
+- 画面上的 `shop.example`、`admin.shop.example`、`item?id=1001`、`"price": 199`、`X-Cache: MISS`、10:00、0:00 只显示不读，配音里没有这些内容。
