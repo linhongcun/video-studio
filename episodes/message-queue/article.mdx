@@ -1,85 +1,131 @@
 ---
 title: 双十一下单那么多，为什么不丢单？
-summary: 用「后厨取号叫号」讲清消息队列：同步为什么会堵、异步怎么先回「已收到」、队列怎么削峰、生产者和消费者是谁，以及做完才确认为什么能不丢单。
+summary: 双十一零点点下单，页面马上显示「订单已提交」，可后台其实还没开始处理这一单。网站先把订单写进消息队列、马上回你已提交，后台再按自己的速度从最前面一单一单取出来处理；多出来的单先排着，这叫削峰。处理到一半出错、没打勾的单不会从队列里拿掉，过一会儿会再送一次。代价是已提交不等于已处理完。文末补充 RabbitMQ 和 Amazon SQS 两种「再送一次」的具体条件、至少一次与重复、持久化前提和队列容量等视频里没讲的事。
 chapters:
-  - { id: hook,     title: 双十一零点 }
-  - { id: sync,     title: 不排队会怎样 }
-  - { id: async,    title: 取号叫号 }
-  - { id: peak,     title: 削峰 }
-  - { id: producer, title: 生产者和消费者 }
-  - { id: recap,    title: 回顾 }
-related: ["server-cache", "load-balancing", "cdn"]
+  - { id: overload,     title: 下单量远超后台处理能力 }
+  - { id: enqueue,      title: 先写进消息队列，马上回已提交 }
+  - { id: peak-shaving, title: 削峰：后台按自己的速度处理 }
+  - { id: redeliver,    title: 没处理完的会再送一次 }
 ---
 
-双十一零点，成千上万的人同时下单，后厨再快也做不过来，可网站没有崩，订单也没有丢。靠的是一条排好的队：**消息队列**（Message Queue，简称 MQ）。下面分 6 步讲清楚。
+双十一零点你点下单，页面 `shop.example/order/8001` 马上显示「订单已提交」，下面写着「订单号 8001」，再往下是页面自带的小字「订单状态：排队中」。页面说已提交，可这个时候，后台其实还没开始处理这一单。这是怎么回事？订单又为什么不会丢？
 
-## 6 步看懂消息队列
+> 说明：`shop.example` 是文档专用的示例域名[^rfc2606]，不是现实中的商店。订单号 7998–8003、零点一分钟 10000 单、后台每分钟处理 1000 单、干等的 9000 单、差 10 倍、10 分钟排完，以及文末讨论题里的十万单，都是本例的示例数据，视频里出现的地方都标了「示例数据」或「示例」。这些数字不是任何网站的实测值，也不代表真实电商的架构。
 
-### 1. 双十一零点 {#hook}
+## 跟着订单 8001 走一遍
 
-{/* 配图：从第八期备菜台拉出；时钟跳到 00:00，订单涌进门店；网站没倒，一条号单队伍出现 */}
+### 1. 下单量远超后台处理能力 {#overload}
 
-- 上一期的服务端缓存解决的是「读得快」；这一期解决的是「一下子涌来太多要处理的事」。
+{/* 配图：左「进来：10000 单／分钟（示例）」，右「后台处理：1000 单／分钟（示例）」，中间小字「差 10 倍」 */}
 
-### 2. 不排队会怎样 {#sync}
+示例里，零点这一分钟涌进来 10000 单，可后台一分钟只能处理 1000 单，差了整整十倍。
 
-{/* 配图：前台站着等后厨；身后排长龙，单子飘落打红叉 */}
+要是每一单都等后台当场处理完才回你，这一分钟只有 1000 单能当场处理，剩下 9000 单只能干等。等得太久，请求就可能失败。1000 加 9000，正好是那一分钟的 10000 单。
 
-- 前台每收一单就等后厨做完再接下一位，这叫**同步**。
-- 网站也一样：每个请求都等后面处理完才回话，高峰一来，整个系统就卡住，甚至丢单。
+### 2. 先写进消息队列，马上回已提交 {#enqueue}
 
-### 3. 取号叫号 {#async}
+{/* 配图：一列订单行「订单 7998」「订单 7999」「订单 8000」，最下面新加「订单 8001」并轻亮；旁边「消息队列：按顺序排着、等后台来取的订单列表」 */}
 
-{/* 配图：前台把号单插进队伍，客人拿到「已收到」小票，前台立刻接下一位 */}
+所以网站换个做法：下单这一步先只做一件事，把这一单写进一条队列，排在最后面。这条按顺序排着、等后台来取的订单列表，就叫**消息队列**。订单写进去，网站就马上回你「已提交」。AWS 对消息队列的说明里有这样一句：
 
-- 先把单子放进队列，马上回「已收到」，不等做完，这叫**异步**。
-- 装着号单、按顺序排好的这条队，就是**消息队列**。前台和后厨各干各的，谁也不用等谁。[^azure-qbll]
+> "Messages are stored on the queue until they are processed and deleted."
 
-### 4. 削峰 {#peak}
+意思是消息存在队列里，直到被处理并删除为止[^aws]。
 
-{/* 配图：一万单/分钟的尖峰（示意）被队列压成一千单/分钟的平缓线 */}
+在浏览器里能看到「马上回」这一步。先打开开发者工具的「网络 Network」面板，列表是空的；再在结算页 `shop.example/checkout` 按「提交订单」，结果页「订单已提交」很快加载出来，列表里同时出现 `order/submit` 这一行。点开它的「预览 Preview」，能看到服务器返回的 `"status": "submitted"`。这时后台还没处理这一单，它只是排进了队列。注意：这个 `status` 字段是本例页面自己的约定，不是通用电商接口标准；单看这一行，也证明不了服务器内部到底做了什么。
 
-- 假设一分钟涌来一万单、后厨一分钟只能做一千单（数字只是示意）：没有队列，后厨当场被冲垮；有了队列，单子先排着，高峰过去再慢慢消化。
-- 把突然冲上来的尖峰压平，叫**削峰**。[^azure-qbll]
+队列里的订单一行一行往下加：8002、8003 接在后面。后台从最前面的 7998 开始，一单一单取出来处理，按自己的速度来。处理完一单，打一个勾，这一单才从队列里拿掉，再取下一单 7999。
 
-### 5. 生产者和消费者 {#producer}
+### 3. 削峰：后台按自己的速度处理 {#peak-shaving}
 
-{/* 配图：前台标「生产者」、后厨标「消费者」；菜做完号单被划掉；厨师摔锅，号单还亮着交给下一位 */}
+{/* 配图：无外框折线示意，横轴「时间」，纵轴「每分钟订单数」；暖色尖峰在零点冲到 10000（示例），绿色平线 1000（示例）；尖峰高出平线的部分着浅色，标「先在队列里排着」 */}
 
-- 往队里放单的叫**生产者**，从队里取单去做的叫**消费者**。[^azure-cc]
-- 不丢单的关键：消费者做完要回一个确认（ack），记下「这条办完了」；RabbitMQ 收到确认才删消息，Kafka 不删消息、改为提交消费位置（offset）。中途出错没确认，消息还在，之后会重新投递、再处理一次。[^rabbitmq-ack]
-- 代价是可能重复：没确认的消息会被重新投递，同一单偶尔会被处理两次，所以消费者要能认出重复（见第十一期「幂等」）。[^rabbitmq-ack]
-- 不同工具的「记号」不一样：RabbitMQ 是确认后删掉消息；Kafka 不删消息，而是记下消费到哪个位置（提交 offset），重启后从记下的位置接着读。[^kafka-consumer]
-- 「不丢」也有前提：消息要持久化，生产者要等队列回「已存好」的发布确认；队列节点在写盘前挂掉，仍可能丢。[^rabbitmq-ack]
-- 常用的工具，一个叫 Kafka[^kafka]，一个叫 RabbitMQ[^rabbitmq-ack]。
+把进来的单画成折线：零点冲到一万的尖峰，后台处理能力是一千的平线。尖峰高出平线的那一块，就是先在队列里排着的单。
 
-### 6. 回顾 {#recap}
+有了队列，就能把尖峰压平：多出来的单先排着，后台还是每分钟 1000 单，慢慢处理完。这种做法叫**削峰**。AWS 的说明里也写到，消息队列可以用来缓冲工作、平滑尖峰负载[^aws]：
 
-- **浏览器缓存**：你家冰箱。
-- **CDN**：附近门店。
-- **负载均衡**：多开的柜台。
-- **服务端缓存**：后厨备菜台，帮网站省一趟路。
-- **消息队列**：叫号队伍，帮网站扛住高峰，配好确认和持久化后，订单也不容易丢。
+> "Message queues can be used to decouple heavyweight processing, to buffer or batch work, and to smooth spiky workloads."
 
-## 深入一问
+视频里用「时间快进演示」算了一遍：零点那一万单都先写进队列，之后不再有新单加入，后台一分钟少一千，第 1 分钟还剩 9000 单，第 5 分钟还剩 5000 单，10 分钟排完。
 
-**异步了，用户怎么知道订单最后成没成？**  
-前台先回的「已收到」只代表单子进了队列。真正处理完以后，系统再通过订单状态、通知或短信告诉你结果，所以你常会看到「订单处理中」。
+这期间，你新开一个标签页、输入订单页网址 `shop.example/order/8001`，页面显示的是「订单 8001」「订单状态：排队中」：还没轮到这一单。过一会儿，再新开一个标签页，先打开开发者工具，再输入网址打开订单页，列表里出现 `order?id=8001` 这一行，「预览 Preview」里是 `"status": "processed"`，页面上的订单状态已经变成「已处理」。
 
-**队列会不会越排越长？**  
-会。如果消费者长期比生产者慢，队列就会一直堆积。削峰只适合「一阵一阵」的高峰；长期忙不过来，还得加消费者（多开几个厨师）。[^azure-cc]
+### 4. 没处理完的会再送一次 {#redeliver}
 
-## 易错点
+{/* 配图：订单 8002 轻亮，移到右侧「后台处理中」位置，旁边暖色小字「处理到一半出错（示例）」，勾的位置空着，标「没打勾，还在」 */}
 
-- ❌ 「有了消息队列就是马上处理」→ ✅ 它是先收下、再交给消费者处理；能不能严格按顺序，要看工具和配置（比如 Kafka 只保证同一分区内有序）。换来的是不崩、不丢，代价是要稍等。
-- ❌ 「用了消息队列就绝对不丢、不重」→ ✅ 要配好持久化和确认才不容易丢；重新投递还可能重复，消费者要做幂等。
-- ❌ 「消息被取走就算处理完了」→ ✅ 要等消费者回确认：RabbitMQ 收到确认才删消息，Kafka 不删消息、改为提交消费位置（offset）；中途出错没确认，消息还在，之后会重新投递、再处理一次。
-- ❌ 「削峰能让后厨变快」→ ✅ 后厨速度没变，只是把高峰摊到后面的时间里慢慢做。
+那要是后台取出一单，比如排在 8001 后面的订单 8002，处理到一半出错了呢？它还没打勾，就不会从队列里拿掉。过一会儿，这一单会再送一次；第 2 次送来，处理完打上勾，才算真正完成。
+
+所以，订单先写进队列存好，后台按自己的速度处理，不会被压垮；没处理完的还会再送，订单就不容易丢。
+
+代价是：已提交不等于已处理完。高峰的时候，从「已提交」到「已处理」，要等一会儿。
+
+回到开场，你零点点下单，页面马上说已提交，是因为这一单已经排进了队列，等着后台处理，所以页面上的状态是「排队中」。
+
+## 视频里没讲的几件事
+
+**同步和异步。** 等后台当场处理完才回你，叫同步；先写进队列、马上回「已提交」、后台稍后再处理，叫异步。往队列里写订单的一方叫生产者，从队列里取订单处理的一方叫消费者。
+
+**「打勾」在系统里叫确认（ack）。** 视频里「处理完打上勾才拿掉，没打勾就过一会儿再送一次」，是把两种常见机制压成了一句白话，这里分开写全：
+
+1. **RabbitMQ：手动确认，且通道或连接关闭时重新入队。** 使用手动确认时，如果消费者还没确认，承载这次投递的通道或连接就关闭了，这条消息会自动重新入队，之后再投递给消费者。RabbitMQ 文档的原句是[^confirms]：
+
+   > "When manual acknowledgements are used, any delivery (message) that was not acked is automatically requeued when the channel (or connection) on which the delivery happened is closed. This includes TCP connection loss by clients, consumer application (process) failures, and channel-level protocol exceptions (covered below)."
+
+   发现客户端已经不可用也需要一段时间[^confirms]：
+
+   > "Note that it takes a period of time to detect an unavailable client."
+
+2. **Amazon SQS：消息没被删除，可见性超时（visibility timeout）过后重新可见。** 消费者取走一条消息后，这条消息在可见性超时内对其他消费者不可见；如果在超时之前没有处理完并删除它，不论是程序出错、崩溃还是连接出问题，超时一到，消息就重新可见，可以被再次取走。SQS 开发者指南的原句是[^sqs]：
+
+   > "If you don't process and delete a message before the visibility timeout expires—due to application errors, crashes, or connectivity problems—the message becomes visible again in the queue."
+
+   > "If you don't delete it before the timeout expires, the message becomes visible again in the queue and can be retrieved by another consumer."
+
+要注意：这并不是说业务里任何一次出错，队列都会自己发现、自动再送。RabbitMQ 的前提是手动确认，并且通道或连接关闭；SQS 的前提是消息在可见性超时前没有被删除。要是程序出错之后照样打了勾（确认或删除了消息），这一单就不会再送。
+
+**至少一次，会重复。** RabbitMQ 的可靠性指南说，使用确认能保证「至少一次」投递，不用确认则只能保证「至多一次」，发布和消费时都可能丢消息[^reliability]：
+
+> "Use of acknowledgements guarantees at least once delivery. Without acknowledgements, message loss is possible during publish and consume operations and only at most once delivery is guaranteed."
+
+Kafka 的设计文档对 at least once 的说法是[^kafka]：
+
+> "At least once –Messages are never lost but may be redelivered."
+
+会再送，就可能重复：同一单可能被处理两次。怎样让重复处理不出问题，叫幂等，EP.12 再讲。屡次处理都失败的消息通常会转进单独的「死信」队列，留给人去查，这里不展开。
+
+**「先写进队列存好」也有前提。** 队列本身要能扛住重启，需要持久化：RabbitMQ 文档要求队列是持久队列，同时发布者要把消息标记为持久[^queues]：
+
+> "In environments and use cases where durability is important, applications must use durable queues and make sure that publishers mark published messages as persisted."
+
+不是随便写进去，任何配置都能扛住所有故障。
+
+**队列并非无限。** 队列也有容量上限。视频里讲的是后台能持续处理、示例里的积压队列放得下的情形；要是进来的单一直比处理得快，积压只会越来越多，队列也会满。上面 AWS 那句只说明队列能存放消息、平滑尖峰，并没有给出本例的容量数字。
+
+**自己看的时候，先打开开发者工具。** 先打开开发者工具的「网络 Network」面板，再打开网页或按按钮，否则请求可能在你打开面板之前就已经发完，列表里看不到那一行。
+
+## 想一想
+
+要是零点进来的不是一万单，而是十万单，后台还是一分钟一千单，要排多久？评论区说说。
+
+**参考答案：** 一百分钟（示例）。十万 ÷ 一千 = 一百，前提是之后不再有新单加入、后台速度一直保持每分钟一千单。想快一点，可以多加几台机器一起处理；同时，队列本身也要放得下这么多单。
+
+缓存那边的问题，可以回看 EP.09 [《后台改了价格，页面怎么还是旧的？》](/cache-consistency-v1)：后台改了价格，页面读到的还是缓存里的旧价。
+
+下期：抢票那一刻，为什么总提示系统繁忙？
 
 ## 参考资料
 
-[^azure-qbll]: Microsoft Azure 架构中心，《Queue-Based Load Leveling pattern》（通用设计模式说明，更新于 2026-06-09）。https://learn.microsoft.com/en-us/azure/architecture/patterns/queue-based-load-leveling
-[^azure-cc]: Microsoft Azure 架构中心，《Competing Consumers pattern》（现行文档，访问于 2026-10-13）。https://learn.microsoft.com/en-us/azure/architecture/patterns/competing-consumers
-[^rabbitmq-ack]: RabbitMQ 官方文档，《Consumer Acknowledgements and Publisher Confirms》（页面未显示日期，访问于 2026-10-14）。https://www.rabbitmq.com/docs/confirms
-[^kafka]: Apache Kafka 官方文档，《Introduction》（现行文档，访问于 2026-10-13）。https://kafka.apache.org/documentation/#introduction
-[^kafka-consumer]: Apache Kafka 4.3.1 文档，《KafkaConsumer》Javadoc「Offsets and Consumer Position」（页面未显示日期，访问于 2026-10-14）。https://kafka.apache.org/43/javadoc/org/apache/kafka/clients/consumer/KafkaConsumer.html
+[^aws]: AWS《What is a Message Queue?》：https://aws.amazon.com/message-queue/ 。2026-10-21 访问。
+
+[^confirms]: RabbitMQ 文档《Consumer Acknowledgements and Publisher Confirms》：https://www.rabbitmq.com/docs/confirms （When Consumers Fail or Lose Connection: Automatic Requeueing 一节）。2026-10-21 访问。
+
+[^reliability]: RabbitMQ 文档《Reliability Guide》：https://www.rabbitmq.com/docs/reliability 。2026-10-21 访问。
+
+[^queues]: RabbitMQ 文档《Queues》：https://www.rabbitmq.com/docs/queues （Durability 一节）。2026-10-21 访问。
+
+[^kafka]: Apache Kafka 3.9.2《Design》（3.9 系列文档）：https://kafka.apache.org/39/design/design/ （Message Delivery Semantics 一节）。2026-10-21 访问。
+
+[^rfc2606]: RFC 2606 §2《Reserved Top Level DNS Names》：https://www.rfc-editor.org/rfc/rfc2606.html#section-2 ，原句 “".example" is recommended for use in documentation or as examples.” 2026-10-21 访问。
+
+[^sqs]: Amazon SQS Developer Guide《Amazon SQS visibility timeout》：https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-visibility-timeout.html （Handling failures、Setting and adjusting the visibility timeout 两节）。2026-10-21 访问。
