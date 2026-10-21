@@ -1,0 +1,20 @@
+import React from 'react';
+import {BrowserChrome} from './BrowserChrome';
+import {NotepadWindow} from './NotepadWindow';
+import {DevToolsNetwork, NetworkRow, RowHighlight} from './DevToolsNetwork';
+import {StyledPage} from './StyledPage';
+import {CalloutTag, CornerBadge, BlockHighlight} from './Annotations';
+import {stateAt, UIProps} from './ui';
+import {WorldMap, WorldMapPage} from './WorldMap';
+import {SaleDemoPage} from './SaleDemoPage';
+import {StatusTablePage} from './StatusTablePage';
+import {NodeDiagramPage} from './NodeDiagramPage';
+import {CheckTimer} from './CheckTimer';
+import {InfoCard} from './InfoCard';
+import {LineChart} from './LineChart';
+export const COMPONENTS: Record<string, React.FC<UIProps>> = {BrowserChrome, SaleDemoPage, StatusTablePage, NodeDiagramPage, CheckTimer, LineChart, InfoCard, NotepadWindow, DevToolsNetwork, NetworkRow, RowHighlight, StyledPage, CalloutTag, CornerBadge, BlockHighlight, WorldMap, WorldMapPage};
+export const StoryboardComponent: React.FC<UIProps> = ({e, frame, shot, canvas, siblings, browserContentLayout}) => {
+  const Component = COMPONENTS[e.component];
+  if (!Component) throw new Error(`No storyboard component for ${e.component}`);
+  return <Component e={stateAt(e, frame)} frame={frame} shot={shot} canvas={canvas} source={e} siblings={siblings} browserContentLayout={browserContentLayout} />;
+};
