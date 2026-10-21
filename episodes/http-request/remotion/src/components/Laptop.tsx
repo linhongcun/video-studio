@@ -3,7 +3,7 @@ import {BrowserChrome} from './BrowserChrome';
 import {StyledPage} from './StyledPage';
 import {P} from '../theme';
 
-export const Laptop: React.FC<{width?: number; height?: number; loading?: boolean; loaded?: boolean; children?: React.ReactNode}> = ({width = 860, height = 560, loading = false, loaded = false, children}) => {
+export const Laptop: React.FC<{canvas?: boolean; width?: number; height?: number; loading?: boolean; loaded?: boolean; children?: React.ReactNode}> = ({width = 860, height = 560, loading = false, loaded = false, children}) => {
   const u = width / 860;
   return <div style={{width, height, position: 'relative'}}>
     <BrowserChrome width={width} height={height - 84 * u} loading={loading} showPadlock={loaded}>

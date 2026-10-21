@@ -1,7 +1,7 @@
 import React from 'react';
 import {MONO, P} from '../theme';
 import {Copy, colorToken, fitSize, stateAt, UIProps} from './ui';
-export const NotepadWindow: React.FC<UIProps> = ({e: original, frame}) => {
+export const NotepadWindow: React.FC<UIProps> = ({e: original, frame, canvas}) => {
   const e = stateAt(original, frame);
   const compact = e.w < 600, padding = compact ? 20 : 32;
   const titleHeight = compact ? 62 : 86;
@@ -10,8 +10,9 @@ export const NotepadWindow: React.FC<UIProps> = ({e: original, frame}) => {
   const autoHeight = (e.h - titleHeight - padding * 2) / Math.max(1, autoLines);
   const highlights: number[] = e.highlightLines ?? [];
   let autoIndex = 0;
-  return <div data-variant={e.variant} style={{position: 'relative', boxSizing: 'border-box', width: '100%', height: '100%', overflow: 'hidden', border: `3px solid ${P.muted}`, borderRadius: 18, background: e.variant === 'terminal' ? P.bg : P.panel, color: P.text}}>
-    {e.titleBar !== false && <div style={{height: titleHeight, padding: compact ? '8px 16px' : '0 26px', display: 'flex', alignItems: 'center', gap: 18, background: P.panel2, borderBottom: `2px solid ${P.muted}`, boxSizing: 'border-box'}}>
+  return <div data-variant={e.variant} style={{position: 'relative', boxSizing: 'border-box', width: '100%', height: '100%', overflow: 'hidden', border: `3px solid ${canvas ? 'transparent' : P.muted}`, borderRadius: canvas ? 0 : 18, background: canvas ? 'transparent' : e.variant === 'terminal' ? P.bg : P.panel, color: P.text}}>
+    {canvas && <div aria-hidden style={{position: 'absolute', inset: `${e.titleBar === false ? 0 : titleHeight}px 0 0`, borderRadius: 14, background: e.variant === 'terminal' ? P.bg : P.panel}} />}
+    {!canvas && e.titleBar !== false && <div style={{height: titleHeight, padding: compact ? '8px 16px' : '0 26px', display: 'flex', alignItems: 'center', gap: 18, background: P.panel2, borderBottom: `2px solid ${P.muted}`, boxSizing: 'border-box'}}>
       <span style={{fontSize: fitSize(e.title ?? '', e.w - padding * 2, compact ? 32 : 40, false, titleHeight - 16), fontWeight: 700, whiteSpace: 'nowrap', lineHeight: 1.2}}>{e.title}</span>
     </div>}
     {lines.map((line, i) => {

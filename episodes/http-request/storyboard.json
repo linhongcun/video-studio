@@ -505,7 +505,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "02-typing",
@@ -713,7 +714,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         }
       ]
     },
@@ -816,13 +818,29 @@
               "z": 3,
               "appearFrame": 51,
               "cueText": "缓存",
-              "title": "缓存",
               "cueOnset": {
                 "sentence": "03-cache-look-1",
                 "asrFrame": 419.4,
                 "onsetWav": 419,
                 "onsetLocal": 53
-              }
+              },
+              "frame": "canvas"
+            },
+            {
+              "id": "filemgr-heading",
+              "type": "text",
+              "text": "缓存",
+              "x": 288,
+              "y": 390,
+              "w": 87,
+              "h": 50,
+              "z": 4,
+              "fontSize": 32,
+              "fontWeight": 700,
+              "color": "#E5E7EB",
+              "align": "left",
+              "appearFrame": 51,
+              "cueText": "缓存"
             },
             {
               "id": "file-logo",
@@ -1005,12 +1023,43 @@
                   "value": 1
                 }
               ]
+            },
+            {
+              "elementId": "filemgr-heading",
+              "property": "opacity",
+              "easing": "linear",
+              "keyframes": [
+                {
+                  "frame": 51,
+                  "value": 0
+                },
+                {
+                  "frame": 55,
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "elementId": "filemgr-heading",
+              "property": "scale",
+              "easing": "linear",
+              "keyframes": [
+                {
+                  "frame": 51,
+                  "value": 0.9
+                },
+                {
+                  "frame": 55,
+                  "value": 1
+                }
+              ]
             }
           ],
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "04-cache-hit",
@@ -1090,6 +1139,25 @@
               "appearFrame": 0,
               "cueText": "",
               "timingRole": "structural",
+              "timingReason": "画面底座，先于旁白存在",
+              "frame": "canvas"
+            },
+            {
+              "id": "filemgr-heading",
+              "type": "text",
+              "text": "缓存",
+              "x": 188,
+              "y": 430,
+              "w": 87,
+              "h": 50,
+              "z": 3,
+              "fontSize": 32,
+              "fontWeight": 700,
+              "color": "#E5E7EB",
+              "align": "left",
+              "appearFrame": 0,
+              "timingRole": "structural",
+              "cueText": "",
               "timingReason": "画面底座，先于旁白存在"
             },
             {
@@ -1316,7 +1384,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "05-cache-miss",
@@ -1392,7 +1461,8 @@
               "cueText": "",
               "state": "logoOnly",
               "timingRole": "structural",
-              "timingReason": "画面底座，先于旁白存在"
+              "timingReason": "画面底座，先于旁白存在",
+              "disappearFrame": 156
             },
             {
               "id": "qmark",
@@ -1449,7 +1519,18 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": [
+            {
+              "from": 862,
+              "frame": "browser"
+            },
+            {
+              "from": 1018,
+              "frame": "canvas",
+              "switchElement": "qmark"
+            }
+          ]
         }
       ]
     },
@@ -1496,7 +1577,7 @@
           },
           "camera": null,
           "boxShot": false,
-          "direction": "通用样式手机通讯录；搜\"妈妈\"后镜头推近，\"妈妈 → 138 0000 0000\"放大到画面中心（虚构号码）。",
+          "direction": "【画布讲解】不画手机和通讯录 app 外壳。原手机位置是一张「名字 → 号码」两列表（示例联系人、虚构号码）：「名字」处左列亮出「妈妈」，「号码」处右列亮出「138 0000 0000」，同时右侧放大「妈妈 → 138 0000 0000」。",
           "scriptVisual": "手机通讯录真实界面，搜索「妈妈」，出来一串手机号。",
           "elements": [
             {
@@ -1517,25 +1598,29 @@
             {
               "id": "phone",
               "type": "rect",
-              "component": "PhoneContacts",
+              "component": "InfoCard",
               "x": 200,
               "y": 140,
               "w": 480,
-              "h": 720,
+              "h": 340,
               "z": 2,
               "appearFrame": 0,
               "cueText": "",
               "timingRole": "structural",
-              "timingReason": "画面底座，先于旁白存在"
+              "timingReason": "画面底座，先于旁白存在",
+              "title": "示例联系人 · 虚构号码",
+              "titleSize": 28,
+              "color": "muted",
+              "background": "panel"
             },
             {
               "id": "search",
               "type": "rect",
-              "component": "SearchBox",
-              "x": 240,
+              "component": "InfoCard",
+              "x": 224,
               "y": 220,
-              "w": 400,
-              "h": 80,
+              "w": 150,
+              "h": 236,
               "z": 3,
               "appearFrame": 52,
               "cueText": "名字",
@@ -1545,16 +1630,22 @@
                 "asrFrame": 1146.0,
                 "onsetWav": 1146,
                 "onsetLocal": 54
-              }
+              },
+              "title": "名字",
+              "value": "妈妈",
+              "titleSize": 30,
+              "valueSize": 56,
+              "color": "primary",
+              "align": "center"
             },
             {
               "id": "row",
               "type": "rect",
-              "component": "ContactRow",
-              "x": 240,
-              "y": 340,
-              "w": 400,
-              "h": 120,
+              "component": "InfoCard",
+              "x": 390,
+              "y": 220,
+              "w": 266,
+              "h": 236,
               "z": 3,
               "appearFrame": 126,
               "cueText": "号码",
@@ -1566,7 +1657,13 @@
                 "asrFrame": 1220.4,
                 "onsetWav": 1220,
                 "onsetLocal": 128
-              }
+              },
+              "title": "号码",
+              "value": "138 0000 0000",
+              "titleSize": 30,
+              "valueSize": 40,
+              "color": "primary",
+              "align": "center"
             },
             {
               "id": "zoom-row",
@@ -1689,7 +1786,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "07a-dns-ask",
@@ -1841,7 +1939,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "07b-dns-ask",
@@ -2006,7 +2105,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "08-dns-remember",
@@ -2102,7 +2202,6 @@
               "z": 3,
               "appearFrame": 51,
               "cueText": "先记一阵",
-              "title": "刚查到的地址",
               "line": "example.com → 203.0.113.10",
               "titleBar": true,
               "cueOnset": {
@@ -2110,7 +2209,24 @@
                 "asrFrame": 1679.4,
                 "onsetWav": 1679,
                 "onsetLocal": 53
-              }
+              },
+              "frame": "canvas"
+            },
+            {
+              "id": "notepad-heading",
+              "type": "text",
+              "text": "刚查到的地址",
+              "x": 986,
+              "y": 276,
+              "w": 272,
+              "h": 62,
+              "z": 4,
+              "fontSize": 40,
+              "fontWeight": 700,
+              "color": "#E5E7EB",
+              "align": "left",
+              "appearFrame": 51,
+              "cueText": "先记一阵"
             },
             {
               "id": "fade-line",
@@ -2191,12 +2307,43 @@
                   "value": 1
                 }
               ]
+            },
+            {
+              "elementId": "notepad-heading",
+              "property": "opacity",
+              "easing": "linear",
+              "keyframes": [
+                {
+                  "frame": 51,
+                  "value": 0
+                },
+                {
+                  "frame": 55,
+                  "value": 1
+                }
+              ]
+            },
+            {
+              "elementId": "notepad-heading",
+              "property": "scale",
+              "easing": "linear",
+              "keyframes": [
+                {
+                  "frame": 51,
+                  "value": 0.9
+                },
+                {
+                  "frame": 55,
+                  "value": 1
+                }
+              ]
             }
           ],
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         }
       ]
     },
@@ -2291,7 +2438,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "09b-handshake",
@@ -2533,7 +2681,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "10a-lock",
@@ -2734,7 +2883,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "10b-lock",
@@ -2957,7 +3107,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "11-wifi",
@@ -3151,7 +3302,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "12-slow",
@@ -3421,7 +3573,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         }
       ]
     },
@@ -3683,7 +3836,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "13b-devtools-request",
@@ -3828,7 +3982,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "14-server-work",
@@ -4062,7 +4217,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "15-response",
@@ -4342,7 +4498,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "16a-waterfall",
@@ -4525,7 +4682,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "16b-waterfall",
@@ -4669,7 +4827,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         }
       ]
     },
@@ -4901,7 +5060,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "18a-css",
@@ -5028,7 +5188,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "18b-css",
@@ -5120,7 +5281,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "canvas"
         },
         {
           "id": "19a-paint",
@@ -5309,7 +5471,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "19b-paint",
@@ -5452,7 +5615,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         }
       ]
     },
@@ -5607,7 +5771,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "20b-recap",
@@ -5868,7 +6033,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         },
         {
           "id": "20c-recap",
@@ -6064,7 +6230,8 @@
           "transition": {
             "type": "fade",
             "durationInFrames": 10
-          }
+          },
+          "frame": "browser"
         }
       ]
     }

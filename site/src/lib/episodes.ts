@@ -14,7 +14,7 @@ export type Chapter = {id: string; title: string; start: number; frame: number; 
 export type Episode = {
   slug: string; ep: number; title: string; summary: string; duration: number; tags: string[];
   date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
-  draft: boolean; related: {slug: string; label?: string}[];
+  draft: boolean; legacy: boolean; related: {slug: string; label?: string}[];
   series?: string; description?: string; updated?: string; platforms: Platform[]; readMin: number;
 };
 export type Platform = {id: string; label: string; url: string};
@@ -42,15 +42,18 @@ const readMeta = (slug: string) => JSON.parse(fs.readFileSync(path.join(EP_DIR, 
 export function getAllMeta() {
   return fs.readdirSync(EP_DIR).filter((s) => fs.existsSync(path.join(EP_DIR, s, 'meta.json'))).map((s) => ({slug: s, ...readMeta(s)}));
 }
-/** 相关期数：已发布的给链接，草稿只显示“制作中” */
+/** 相关期数：已发布的给链接，草稿只显示“制作中”。meta.json 的 related 可写 slug 字符串或 {slug, label}；按期号升序显示 */
 export function getRelated(e: Episode) {
   const all = new Map(getAllMeta().map((m) => [m.slug, m]));
-  return (e.related ?? []).map((r) => {
+  return ((e.related ?? []) as (string | {slug: string; label?: string})[]).map((raw) => {
+    const r = typeof raw === 'string' ? {slug: raw} : raw;
     const m = all.get(r.slug);
     if (!m) return null;
-    return {slug: r.slug, label: r.label ?? '', title: m.title, summary: m.summary, published: !m.draft || SHOW_DRAFTS};
-  }).filter(Boolean) as {slug: string; label: string; title: string; summary: string; published: boolean}[];
+    return {slug: r.slug, ep: Number(m.ep) || 0, label: r.label ?? '', title: m.title, summary: m.summary, legacy: !!m.legacy, published: !m.draft || SHOW_DRAFTS};
+  }).filter(Boolean).sort((a: any, b: any) => a.ep - b.ep) as {slug: string; ep: number; label: string; title: string; summary: string; legacy: boolean; published: boolean}[];
 }
+/** 旧版标记：EP.08 起尚未重制的旧期 meta.json 写 legacy: true，卡片和详情页显示这句；重制版上线时删掉该字段 */
+export const LEGACY_LABEL = '旧版，重制中';
 
 const readJson = (p: string) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
@@ -174,7 +177,7 @@ export function getEpisodes(): Episode[] {
       return {
         slug, ep: meta.ep ?? 0, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
         tags: meta.tags ?? [], date: meta.publishedAt, poster: meta.poster, video: meta.video,
-        duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, related: meta.related ?? [],
+        duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, related: meta.related ?? [],
         series: meta.series, description: meta.description, updated: meta.updatedAt && meta.updatedAt > meta.publishedAt ? meta.updatedAt : undefined,
         platforms: platformsOf(meta), readMin: readingMinutes(slug),
       };

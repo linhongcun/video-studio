@@ -1,7 +1,7 @@
 import React from 'react';
 import {ShotElement} from '../storyboard';
 import {FONT, MONO, P} from '../theme';
-export type UIProps = {e: ShotElement; frame: number};
+export type UIProps = {e: ShotElement; frame: number; canvas?: boolean};
 export const box: React.CSSProperties = {boxSizing: 'border-box', minWidth: 0, minHeight: 0};
 
 /** Keep cumulative state properties until an authored keyframe replaces them. */

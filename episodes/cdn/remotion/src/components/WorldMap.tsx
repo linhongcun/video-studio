@@ -219,11 +219,11 @@ export const WorldMap: React.FC<UIProps> = ({e: original, frame}) => {
 
 export type WorldMapPageProps = WorldMapProps & {url?: string; title?: string; pageTitle?: string; pageTitleColor?: string; badges?: string[]; showPadlock?: boolean};
 /** Storyboard component: full-screen browser page (same chrome as cookie-v1 BrowserChrome) whose page is a title row + the map. */
-export const WorldMapPage: React.FC<UIProps> = ({e: original, frame}) => {
+export const WorldMapPage: React.FC<UIProps> = ({e: original, frame, canvas}) => {
   const e = stateAt(original, frame), header = browserHeaderHeight(e), titleH = e.pageTitle ? 72 : 0;
   const mapW = e.w - 6, mapH = e.h - header - 6 - titleH;
   return <div data-component="WorldMapPage" style={{position: 'relative', width: '100%', height: '100%'}}>
-    <BrowserChrome e={{...e, page: 'worldMap', pageBlank: false}} frame={frame} source={original} siblings={[]} />
+    <BrowserChrome e={{...e, page: 'worldMap', pageBlank: false}} frame={frame} canvas={canvas} source={original} siblings={[]} />
     <div style={{position: 'absolute', left: 3, top: 3 + header, width: mapW, height: titleH + mapH, fontFamily: FONT}}>
       {titleH > 0 && <div data-map-page-title style={{height: titleH, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 28px', boxSizing: 'border-box', background: P.bg, borderBottom: `1px solid ${P.muted}55`}}>
         <div style={{fontSize: 40, fontWeight: 800, color: tok(e.pageTitleColor, P.text), whiteSpace: 'nowrap'}}>{e.pageTitle}</div>

@@ -17,6 +17,8 @@ function firstReleaseMap(): Map<string, number[]> {
     try {
       const m = JSON.parse(fs.readFileSync(f, 'utf8'));
       const tag = m.firstRelease != null ? String(m.firstRelease) : '';
+      // 已下架 / 未发布的期：这个 tag 仍算「新增」，但不链接（如 v0.37.0 下架的 db-isolation）
+      if (m.draft) { if (tag && !map.has(tag)) map.set(tag, []); continue; }
       const ep = Number(m.ep);
       if (!tag || !ep) continue;
       const list = map.get(tag) ?? [];
@@ -29,11 +31,11 @@ function firstReleaseMap(): Map<string, number[]> {
 }
 
 /** 补丁版 → 「修正」；有期数以本 tag 为首发 → 「新增」；其余 → 「更新」 */
-const kindOf = (tag: string, debut: number[]): Release['kind'] => {
+const kindOf = (tag: string, debut: number[] | undefined): Release['kind'] => {
   const m = tag.match(/^v?(\d+)\.(\d+)\.(\d+)/);
   if (!m) return '更新';
   if (m[3] !== '0') return '修正';
-  return debut.length > 0 ? '新增' : '更新';
+  return debut ? '新增' : '更新';
 };
 
 const CN: Record<string, number> = {零: 0, 〇: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9};
@@ -69,6 +71,19 @@ export const parseEps = (text: string): number[] => {
   return [...out].filter((n) => n > 0 && n < 1000).sort((a, b) => a - b);
 };
 
+/** v0.37.0 重排期号（#91）：之前的 Release 正文按旧期号写，链接前换成新期号；旧 EP.16 隔离级别已下架，不再链接 */
+const RENUMBERED_IN = [0, 37, 0];
+const OLD_TO_NEW: Record<number, number | null> = {9: 10, 10: 11, 11: 12, 12: 14, 14: 15, 15: 16, 16: null, 22: 9};
+const before = (tag: string, v: number[]) => {
+  const m = tag.match(/^v?(\d+)\.(\d+)\.(\d+)/);
+  if (!m) return false;
+  const t = m.slice(1, 4).map(Number);
+  for (let i = 0; i < 3; i++) if (t[i] !== v[i]) return t[i] < v[i];
+  return false;
+};
+export const renumber = (tag: string, eps: number[]): number[] => !before(tag, RENUMBERED_IN) ? eps
+  : [...new Set(eps.map((n) => (n in OLD_TO_NEW ? OLD_TO_NEW[n] : n)).filter((n): n is number => n != null))].sort((a, b) => a - b);
+
 async function load(): Promise<Release[] | null> {
   if (process.env.SKIP_CHANGELOG === '1') return null;
   try {
@@ -82,10 +97,10 @@ async function load(): Promise<Release[] | null> {
     const rels: Release[] = list.filter((r) => !r.draft && !r.prerelease).map((r) => {
       const body = String(r.body ?? '').trim();
       const tag = String(r.tag_name);
-      const debut = debutByTag.get(tag) ?? [];
+      const debut = debutByTag.get(tag);
       const kind = kindOf(tag, debut);
       // 新增：链首发期；修正/更新：链正文提到的期
-      const eps = kind === '新增' ? debut : parseEps(`${r.name ?? ''}\n${body}`);
+      const eps = kind === '新增' ? debut ?? [] : renumber(tag, parseEps(`${r.name ?? ''}\n${body}`));
       return {
         tag, name: r.name || r.tag_name, url: r.html_url, body, kind, eps,
         // 北京时间日期

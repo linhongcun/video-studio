@@ -1,9 +1,10 @@
 import React from 'react';
 import {AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame} from 'remotion';
 import storyboard from '../../storyboard.json';
-import {SHOT_SCENES, SceneProps} from './ShotScenes';
+import {SHOT_SCENES, SceneProps, StoryboardElements} from './ShotScenes';
 import {shots, totalFrames} from './storyboard';
 import {FONT, P} from './theme';
+import {shotFrameMode} from './frameMode';
 
 export {totalFrames};
 export {SHOT_STILL_FRAMES} from './shotFrames';
@@ -17,8 +18,9 @@ export const ShotScene: React.FC<Omit<SceneProps, 'frame'>> = ({shot}) => {
   if (!Scene) throw new Error(`No scene implementation for ${shot.id}`);
   const subtitle = shot.subtitles.find((line) => frame >= line.from && frame <= line.to);
   const subtitleElement = shot.elements.find((e) => e.id === 'subtitle');
-  return <AbsoluteFill data-shot={shot.id} data-direction={shot.direction} style={{background: P.bg, color: P.text, fontFamily: FONT}}>
+  return <AbsoluteFill data-shot={shot.id} data-direction={shot.direction} data-frame-mode={shotFrameMode(shot, frame)} style={{background: P.bg, color: P.text, fontFamily: FONT}}>
     <Scene shot={shot} frame={frame} />
+    <StoryboardElements shot={shot} frame={frame} />
     {subtitleElement && <div data-element="subtitle" style={{position: 'absolute', left: subtitleElement.x, top: subtitleElement.y, width: subtitleElement.w, height: subtitleElement.h, display: 'flex', justifyContent: subtitleElement.align === 'center' ? 'center' : 'flex-start', alignItems: 'center', textAlign: subtitleElement.align, fontSize: subtitleElement.fontSize, lineHeight: 1.4, fontWeight: subtitleElement.fontWeight ?? 500, color: subtitleElement.color, zIndex: subtitleElement.z, background: subtitle ? `${P.bg}EE` : undefined, borderRadius: 12}}>{subtitle?.text}</div>}
   </AbsoluteFill>;
 };

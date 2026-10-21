@@ -1,6 +1,6 @@
 import React from 'react';
 import {Easing, interpolate} from 'remotion';
-import {animatedValue, progress} from './animation';
+import {animatedValue, clamp, progress} from './animation';
 import {Shot, ShotElement, shots} from './storyboard';
 import {MONO, P} from './theme';
 import {BrowserChrome} from './components/BrowserChrome';
@@ -17,6 +17,9 @@ import {CafeScene} from './components/CafeScene';
 import {DevToolsNetwork, NetworkRow} from './components/DevToolsNetwork';
 import {Arrow, Check, Folder, Gear, ServerRack} from './components/Legacy';
 
+import {elementFrameMode, switchFramesOf, XFADE} from './frameMode';
+import {COMPONENTS, StoryboardComponent} from './components/StoryboardComponent';
+
 export type SceneProps = {shot: Shot; frame: number};
 
 const element = (shot: Shot, id: string): ShotElement => {
@@ -27,30 +30,61 @@ const element = (shot: Shot, id: string): ShotElement => {
 const value = (shot: Shot, frame: number, id: string, property: string, fallback: number) => Number(animatedValue(shot, id, property, frame, fallback));
 const at = (shot: Shot, id: string) => element(shot, id).appearFrame ?? 0;
 
+/** Replace only switch entrances, preserving all other authored motion. */
+const switchMotionShot = (shot: Shot, e: ShotElement): Shot => {
+  const entrances = switchFramesOf(shot).filter(s => s.switchElement === e.id);
+  if (!entrances.length) return shot;
+  return {...shot, animations: [
+    ...shot.animations.map(a => a.elementId === e.id && (a.property === 'opacity' || a.property === 'scale')
+      ? {...a, keyframes: a.keyframes.filter(k => !entrances.some(s => k.frame >= s.local && k.frame <= s.local + XFADE))} : a),
+    ...['opacity', 'scale'].map(property => ({elementId: e.id, property, keyframes: entrances.flatMap(s =>
+      [s.local, s.local + XFADE].map(frame => ({frame, value: property === 'opacity' ? e.opacity ?? 1 : 1})))})),
+  ]};
+};
+
+/** Pass the element's mode through layout markup; physical drawings ignore it. */
+const frameChildren = (children: React.ReactNode, canvas: boolean): React.ReactNode => React.Children.map(children, child => {
+  if (!React.isValidElement(child)) return child;
+  const node = child as React.ReactElement<{canvas?: boolean; children?: React.ReactNode}>;
+  return typeof node.type === 'string' || node.type === React.Fragment
+    ? node.props.children === undefined ? node : React.cloneElement(node, {}, frameChildren(node.props.children, canvas))
+    : React.cloneElement(node, {canvas});
+});
+
 /** Used both on positioned layers and on named parts inside composite drawings. */
 const motion = (shot: Shot, frame: number, id: string): React.CSSProperties => {
   const e = element(shot, id);
-  const visible = frame >= (e.appearFrame ?? 0) && (e.disappearFrame === undefined || frame < e.disappearFrame);
+  const switches = switchFramesOf(shot);
+  const outgoing = switches.find(s => s.local === e.disappearFrame);
+  const incoming = switches.filter(s => s.switchElement === id && s.local <= frame).pop();
+  const crossFade = (outgoing ? 1 - clamp((frame - outgoing.local) / XFADE) : 1)
+    * (incoming ? clamp((frame - incoming.local) / XFADE) : 1);
+  const motionShot = switchMotionShot(shot, e);
+  const visible = frame >= (e.appearFrame ?? 0) && (e.disappearFrame === undefined || frame < e.disappearFrame + (outgoing ? XFADE : 0));
   // Item cues replace the group's entrance, avoiding a second fade on item one.
   const perItem = Array.isArray(e.itemAppearFrames);
   return {
-    opacity: visible ? perItem ? e.opacity ?? 1 : value(shot, frame, id, 'opacity', e.opacity ?? 1) : 0,
-    transform: `scale(${perItem ? 1 : value(shot, frame, id, 'scale', 1)}) rotate(${value(shot, frame, id, 'rotate', 0)}deg) rotateY(${value(shot, frame, id, 'rotateY', 0)}deg)`,
+    opacity: visible ? (perItem ? e.opacity ?? 1 : value(motionShot, frame, id, 'opacity', e.opacity ?? 1)) * crossFade : 0,
+    transform: `scale(${perItem ? 1 : value(motionShot, frame, id, 'scale', 1)}) rotate(${value(shot, frame, id, 'rotate', 0)}deg) rotateY(${value(shot, frame, id, 'rotateY', 0)}deg)`,
   };
 };
 
 const Layer: React.FC<SceneProps & {id: string; style?: React.CSSProperties; children?: React.ReactNode}> = ({shot, frame, id, style, children}) => {
   const e = element(shot, id), m = motion(shot, frame, id);
-  return <div data-element={id} data-component={e.component ?? e.type} style={{position: 'absolute', left: value(shot, frame, id, 'x', e.x), top: value(shot, frame, id, 'y', e.y), width: value(shot, frame, id, 'w', e.w), height: value(shot, frame, id, 'h', e.h), zIndex: e.z ?? 2, ...style, opacity: Number(m.opacity) * Number(style?.opacity ?? 1), transform: `${style?.transform ?? ''} ${m.transform}`}}>{children}</div>;
+  return <div data-element={id} data-component={e.component ?? e.type} style={{position: 'absolute', left: value(shot, frame, id, 'x', e.x), top: value(shot, frame, id, 'y', e.y), width: value(shot, frame, id, 'w', e.w), height: value(shot, frame, id, 'h', e.h), zIndex: e.z ?? 2, ...style, opacity: Number(m.opacity) * Number(style?.opacity ?? 1), transform: `${style?.transform ?? ''} ${m.transform}`}}>{frameChildren(children, elementFrameMode(shot, e, frame) === 'canvas')}</div>;
 };
 
 /** Named parts embedded in a composite use the same timing as positioned layers. */
-const Part: React.FC<SceneProps & {id: string; style?: React.CSSProperties; children?: React.ReactNode}> = ({shot, frame, id, style, children}) => <div data-element={id} data-component={element(shot, id).component} style={{...style, ...motion(shot, frame, id)}}>{children}</div>;
+const Part: React.FC<SceneProps & {id: string; style?: React.CSSProperties; children?: React.ReactNode}> = ({shot, frame, id, style, children}) => <div data-element={id} data-component={element(shot, id).component} style={{...style, ...motion(shot, frame, id)}}>{frameChildren(children, elementFrameMode(shot, element(shot, id), frame) === 'canvas')}</div>;
 
 const TextLayer: React.FC<SceneProps & {id: string; style?: React.CSSProperties}> = ({shot, frame, id, style}) => {
   const e = element(shot, id);
   return <Layer shot={shot} frame={frame} id={id} style={{fontSize: e.fontSize, fontWeight: e.fontWeight, color: e.color, whiteSpace: 'pre-line', textAlign: e.align, display: 'flex', alignItems: 'center', justifyContent: e.align === 'center' ? 'center' : 'flex-start', ...style}}>{e.text}</Layer>;
 };
+
+export const StoryboardElements: React.FC<SceneProps> = ({shot, frame}) => <>{shot.elements.filter(e => COMPONENTS[e.component]).map(e =>
+  <Layer key={e.id} shot={shot} frame={frame} id={e.id}><StoryboardComponent e={e} frame={frame} canvas={elementFrameMode(shot, e, frame) === 'canvas'} /></Layer>
+)}</>;
 
 export const Spinner: React.FC<{frame: number; color?: string}> = ({frame, color = P.primary}) => <svg width="100%" height="100%" viewBox="0 0 100 100" style={{transform: `rotate(${frame * 10}deg)`}} aria-label="加载中"><circle cx={50} cy={50} r={38} stroke={P.muted} strokeWidth={8} fill="none" /><path d="M50 12a38 38 0 0 1 38 38" fill="none" stroke={color} strokeWidth={8} strokeLinecap="round" /></svg>;
 const Logo: React.FC = () => <div style={{width: '100%', height: '100%', background: P.primary, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center'}}><svg width="70%" height="70%" viewBox="0 0 100 60"><circle cx={28} cy={22} r={16} fill={P.accent} /><path d="m15 56 35-44 35 44Z" fill={P.panel} /></svg></div>;
@@ -84,9 +118,14 @@ const TypingScene: React.FC<SceneProps> = ({shot, frame}) => {
   </>;
 };
 
+const has = (shot: Shot, id: string) => shot.elements.some((e) => e.id === id);
+/** Canvas headings that replace a removed window title (only drawn when the storyboard has them). */
+const Heading: React.FC<SceneProps & {id: string; style?: React.CSSProperties}> = ({shot, frame, id, style}) => has(shot, id) ? <TextLayer shot={shot} frame={frame} id={id} style={{whiteSpace: 'nowrap', ...style}} /> : null;
+
 const CacheLookScene: React.FC<SceneProps> = ({shot, frame}) => <>
   <Layer shot={shot} frame={frame} id="browser-ghost"><BrowserChrome width={1600} height={element(shot, 'browser-ghost').h} chromeHeight={110} /></Layer>
   <Layer shot={shot} frame={frame} id="filemgr" style={{transform: `translateY(${(1 - progress(frame, at(shot, 'filemgr'), 20)) * 50}px)`}}><FileManager><></></FileManager></Layer>
+  <Heading shot={shot} frame={frame} id="filemgr-heading" style={{transform: `translateY(${(1 - progress(frame, at(shot, 'filemgr'), 20)) * 50}px)`}} />
   {['file-logo', 'file-css', 'file-old'].map((id) => <Layer key={id} shot={shot} frame={frame} id={id}><FileCard filename={element(shot, id).name} date={element(shot, id).date} /></Layer>)}
 </>;
 
@@ -97,6 +136,7 @@ const CacheHitScene: React.FC<SceneProps> = ({shot, frame}) => {
   const flight = arcPoint(file.x, file.y, file.flyTo[0], file.flyTo[1], p, 160);
   return <>
     <Layer shot={shot} frame={frame} id="filemgr"><FileManager><></></FileManager></Layer>
+    <Heading shot={shot} frame={frame} id="filemgr-heading" />
     <Layer shot={shot} frame={frame} id="browser"><BrowserChrome width={740} height={580} chromeHeight={80} /></Layer>
     <Layer shot={shot} frame={frame} id="file-old-grey"><FileCard filename={element(shot, 'file-old-grey').name} date="很久以前" state="stale" showExpiredBadge={false} /></Layer>
     <TextLayer shot={shot} frame={frame} id="expired-badge" style={{borderRadius: 10, background: P.panel, border: `3px solid ${P.danger}`, fontWeight: 800}} />
@@ -110,10 +150,8 @@ const CacheMissScene: React.FC<SceneProps> = ({shot, frame}) => <>
   <Layer shot={shot} frame={frame} id="qmark" style={{border: `4px dashed ${P.muted}`, borderRadius: 18, color: P.accent, background: P.panel, fontSize: 160, display: 'flex', alignItems: 'center', justifyContent: 'center'}}>?</Layer>
 </>;
 
+// #89: the contacts table is storyboard InfoCards (phone / search / row), drawn by StoryboardElements; the scene only adds the zoom callout.
 const ContactsScene: React.FC<SceneProps> = ({shot, frame}) => <>
-  <Layer shot={shot} frame={frame} id="phone" style={{overflow: 'hidden', borderRadius: 48}}>
-    <PhoneContacts width={element(shot, 'phone').w} height={element(shot, 'phone').h} singleResult query={element(shot, 'search').text} contact={{name: element(shot, 'row').name, number: element(shot, 'row').number}} searchElementId="search" resultsElementId="row" searchStyle={motion(shot, frame, 'search')} resultsStyle={motion(shot, frame, 'row')} resultsOpacity={Number(motion(shot, frame, 'row').opacity)} />
-  </Layer>
   <TextLayer shot={shot} frame={frame} id="zoom-row" style={{background: P.panel, border: `3px solid ${P.primary}`, borderRadius: 22, transformOrigin: 'left center'}} />
 </>;
 
@@ -131,18 +169,23 @@ const DnsScene: React.FC<SceneProps> = ({shot, frame}) => {
   </>;
 };
 
-const RememberScene: React.FC<SceneProps> = ({shot, frame}) => <>
+const RememberScene: React.FC<SceneProps> = ({shot, frame}) => {
+  const canvas = elementFrameMode(shot, element(shot, 'notepad'), frame) === 'canvas';
+  return <>
   <Layer shot={shot} frame={frame} id="pc"><Laptop width={700} height={520} /></Layer>
-  <Layer shot={shot} frame={frame} id="notepad" style={{boxSizing: 'border-box', border: `3px solid ${P.muted}`, borderRadius: 18, overflow: 'hidden', background: P.panel}}>
-    <div style={{height: 86, padding: '0 26px', display: 'flex', alignItems: 'center', gap: 18, background: P.panel2, borderBottom: `2px solid ${P.muted}`}}>
+  <Layer shot={shot} frame={frame} id="notepad" style={{boxSizing: 'border-box', border: `3px solid ${canvas ? 'transparent' : P.muted}`, borderRadius: canvas ? 0 : 18, overflow: 'hidden', background: canvas ? 'transparent' : P.panel}}>
+    {canvas && <div style={{position: 'absolute', inset: '88px 0 0', background: P.panel, borderRadius: 14}} />}
+    {canvas ? <div style={{height: 86, borderBottom: '2px solid transparent'}} /> : <div style={{height: 86, padding: '0 26px', display: 'flex', alignItems: 'center', gap: 18, background: P.panel2, borderBottom: `2px solid ${P.muted}`}}>
       <svg width={34} height={42} viewBox="0 0 34 42" fill="none" stroke={P.primary} strokeWidth={3} aria-hidden="true"><rect x={3} y={2} width={28} height={38} rx={3} /><path d="M9 13h16M9 21h16M9 29h11" /></svg>
       <span style={{fontSize: 40, fontWeight: 700}}>{element(shot, 'notepad').title}</span>
       <span style={{marginLeft: 'auto', color: P.text2, fontSize: 36}} aria-hidden="true">− ×</span>
-    </div>
+    </div>}
     <div style={{padding: '42px 32px', color: P.text, fontFamily: MONO, fontSize: 40, lineHeight: 1.7, transform: `translateY(${(1 - progress(frame, at(shot, 'notepad') + 5, 30)) * -80}px)`}}>{element(shot, 'notepad').line.split(' → ').map((part: string, i: number) => <div key={part} style={{color: i ? P.success : P.text}}>{i ? '→ ' : ''}{part}</div>)}</div>
   </Layer>
+  <Heading shot={shot} frame={frame} id="notepad-heading" />
   <Layer shot={shot} frame={frame} id="fade-line" style={{opacity: 1 - 0.85 * progress(frame, at(shot, 'fade-line') + 4, 30), borderTop: `4px dashed ${P.muted}`}} />
 </>;
+};
 
 const HandshakeScene: React.FC<SceneProps> = ({shot, frame}) => <>
   <Layer shot={shot} frame={frame} id="pc"><Laptop width={420} height={320} /><Caption>浏览器</Caption></Layer>

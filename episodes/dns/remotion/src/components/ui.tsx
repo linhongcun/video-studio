@@ -1,7 +1,7 @@
 import React from 'react';
 import {ShotElement} from '../storyboard';
 import {FONT, MONO, P} from '../theme';
-export type UIProps = {e: ShotElement; frame: number; source?: ShotElement; siblings?: ShotElement[]};
+export type UIProps = {e: ShotElement; frame: number; canvas?: boolean; source?: ShotElement; siblings?: ShotElement[]};
 export const box: React.CSSProperties = {boxSizing: 'border-box', minWidth: 0, minHeight: 0};
 
 /** State fields accumulate; append events are retained independently of later states. */
@@ -23,4 +23,4 @@ export function fitSize(text: string, width: number, desired = 40, mono = false,
   const widest = Math.max(1, ...lines.map(line => textWidth(line, 1, mono)));
   return Math.max(1, Math.min(desired, Math.max(1, width) / (widest * 1.03), height / (lines.length * lineHeight)));
 }
-export const Copy: React.FC<{children?: React.ReactNode; size?: number; width?: number; height?: number; mono?: boolean; style?: React.CSSProperties}> = ({children, size = 40, width, height, mono, style}) => <div style={{...box, fontFamily: mono ? MONO : FONT, fontSize: fitSize(String(children ?? ''), width ?? Infinity, size, mono, height), lineHeight: 1.2, whiteSpace: 'pre-wrap', overflow: 'hidden', ...style}}>{children}</div>;
+export const Copy: React.FC<{children?: React.ReactNode; text?: string; size?: number; width?: number; height?: number; mono?: boolean; style?: React.CSSProperties}> = ({children, text, size = 40, width, height, mono, style}) => <div style={{...box, fontFamily: mono ? MONO : FONT, fontSize: fitSize(text ?? String(children ?? ''), width ?? Infinity, size, mono, height), lineHeight: 1.2, whiteSpace: 'pre-wrap', overflow: 'hidden', ...style}}>{children}</div>;
