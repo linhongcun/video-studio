@@ -1,87 +1,114 @@
 ---
-title: 同一张图，为什么第二次打开不用再下？
-summary: 用「自家冰箱」讲清浏览器缓存：第一次下载顺手存一份、第二次直接用、保质期（max-age）、过期后先问一句（ETag 与 304），以及它和 CDN、负载均衡怎么配合。
+title: 同一个网页，第二次打开为什么快这么多？
+summary: 网速没变，同一个网页第二次打开却一下就全出来了。第一次打开时，标志、商品图、脚本和样式都要从网上下载；下载完，浏览器在你电脑上存一份，这块地方叫浏览器缓存。第二次打开，只要这份还在网站用 Cache-Control 写明的有效期内，浏览器就直接用；过了有效期，先上网问一次网站，没换接着用，换了下载新的再存。文末补充刷新、no-cache、内存缓存等视频里没讲的情况。
 chapters:
-  - { id: hook,       title: 第二次为什么快 }
-  - { id: first,      title: 第一次去店里买 }
-  - { id: second,     title: 第二次直接开冰箱 }
-  - { id: freshness,  title: 保质期 }
-  - { id: revalidate, title: 过期了先问一句 }
-  - { id: recap,      title: 回顾 }
-related: ["cdn", "load-balancing"]
+  - { id: first-download, title: 第一次下载，浏览器在电脑上存一份 }
+  - { id: second-use,     title: 第二次直接用电脑里的文件 }
+  - { id: max-age,        title: 能直接用多久，由网站写明 }
+  - { id: expired,        title: 过了一小时，先上网问一次网站 }
 ---
 
-同一个网站，第一次打开图片一张张冒出来，第二次几乎瞬间出现。原因是**浏览器缓存**（browser cache）：浏览器把下载过的东西在你电脑上存了一份，下次能直接用就不再下载。下面分 6 步讲清楚。
+同一个网页 shop.example，打开两次。第一次，标志出来了，两张商品图还在转圈，已经等了 3.2 秒；第二次，0.3 秒就全部显示。网速没变，差别在哪？
 
-## 6 步看懂浏览器缓存
+> 说明：shop.example 是专门留给示例用的域名[^rfc2606]，不是现实中的商店；文件名、文件大小、3.2 秒和 0.3 秒这些耗时，以及「3600 秒」「300 秒」两项有效期设置，都是本例的示例数据或示例设置，视频里出现的地方都标了「示例数据」「示例设置」。耗时只说明这次示例，不是提速承诺。开场的第二次打开是在存下后约 1 分钟。
 
-### 1. 第二次为什么快 {#hook}
+## 跟着同一个网页走一遍
 
-{/* 配图：同一网页「第一次」逐张加载 vs「第二次」瞬间全出 */}
+### 1. 第一次下载，浏览器在电脑上存一份 {#first-download}
 
-- 网络和网站都没变，变的是：你电脑里已经有了上次下载的图片、脚本和样式。
+{/* 配图：shop.example 网页从空白开始，先出圆弧商店标志，再出两张商品图，最后「立即购买」按钮有了样式；下接一张文件表：文件｜大小｜这次从哪来，五行都写「网上下载」 */}
 
-### 2. 第一次去店里买 {#first}
+第一次打开时，页面上用到的每个文件都得从网上下载：
 
-{/* 配图：浏览器去门店取回三个包，回家放进冰箱 */}
+| 文件 | 大小 | 这次从哪来 |
+|---|---|---|
+| logo.png（商店标志） | 48 KB | 网上下载 |
+| item-1.png（商品图一） | 320 KB | 网上下载 |
+| item-2.png（商品图二） | 310 KB | 网上下载 |
+| app.js（脚本） | 260 KB | 网上下载 |
+| style.css（样式） | 60 KB | 网上下载 |
 
-- 第一次访问，浏览器向服务器（可能经过 CDN 节点和负载均衡）请求每个文件。
-- 服务器回应时会附带缓存相关的响应头，告诉浏览器这份东西能不能存、能存多久。[^rfc9111][^mdn-cache]
-- 浏览器按规则把它存进本地，这块存储就是浏览器缓存。
+这些文件各有大小，下载需要时间，页面就一块一块地显示完整。（加载完成有先有后，不代表浏览器只能一个接一个地下载。）
 
-### 3. 第二次直接开冰箱 {#second}
+下载完，浏览器在你电脑上存了一份。用来存这些文件的地方，就叫**浏览器缓存**。它由浏览器自己安排：有的文件放在内存里，有的放在硬盘上，平时你看不到它。这份缓存只给你这个浏览器自己用[^mdn-caching]。
 
-{/* 配图：直接开冰箱取包；分屏对比 CDN 门店与自家冰箱 */}
+### 2. 第二次直接用电脑里的文件 {#second-use}
 
-- 再次需要同一个文件时，浏览器先查本地缓存；还「新鲜」就直接用，不发网络请求。
-- 区分两者：**CDN** 是离你近的门店（服务端那边的副本），**浏览器缓存**是你自己电脑里的副本。
+{/* 配图：新开一个标签页、输入 shop.example；网页下方停靠开发者工具，只有一行 logo.png　大小：(disk cache)，旁边中文注释 */}
 
-### 4. 保质期 {#freshness}
+第二次打开同一个网页，要用的文件电脑里都有，浏览器直接用，就不用再等网上传来。
 
-{/* 配图：包上贴保质期标签；Cache-Control: max-age=3600 */}
+想自己看一看，可以用浏览器自带的开发者工具（Chrome 里按 F12，选「网络」面板）。**一定要先打开开发者工具，再打开网页**：网络面板只记录工具打开之后发生的请求，先打开网页再开工具，列表是空的[^chrome-network]。视频里也是这个顺序：工具先出现、列表为空，页面加载时 logo.png 那一行才出现。
 
-- 服务器用 `Cache-Control: max-age=秒数` 告诉浏览器「能放多久」。例如 `max-age=3600` 表示一小时内都算新鲜。[^rfc9111][^mdn-cc]
-- 不是每个响应都带 `Cache-Control`。没带的时候，浏览器在满足一定条件时会按启发式规则自己估一个有效期，这叫启发式缓存（heuristic caching）。[^mdn-cache]
-- 新鲜期内直接用；过了就变成「过期」（stale），一般要先问一声再用。例外：响应带 `no-cache` 时，没过期也要先确认；带 `stale-while-revalidate` 时，过期后可以先用旧的，同时在后台确认。
-- 经常变的内容（比如网页本身）通常放得短或每次都要确认；几乎不变的图标、字体可以放得很长。
+视频里第二次打开用的是**新开一个标签页、在地址栏输入网址**。这时商店标志那一行的「大小」一栏写着 `(disk cache)`。简体中文界面的 Chrome 这一格也显示英文原文，半角括号[^devtools-zh][^devtools-src]。disk cache 就是磁盘缓存：这次没上网下载，直接用了电脑里存的那份。
 
-### 5. 过期了先问一句 {#revalidate}
+### 3. 能直接用多久，由网站写明 {#max-age}
 
-{/* 配图：拿过期包问柜台；柜台回「没变」（304）或递出新包 */}
+{/* 配图：回看第一次下载商店标志的记录，开发者工具只亮一行 Cache-Control: max-age=3600，3600 再加一圈细框；下接「存下后」计时条，从 0 分钟走到 30 分钟，标「加速演示」 */}
 
-- 过期不等于作废。浏览器会带上这份东西的「编号」去问服务器：**还是原来那份吗？** 这叫**协商缓存**（重新验证，revalidation）。[^mdn-cache]
-- 编号常见的是 `ETag`（服务器给这份内容打的标识），浏览器用 `If-None-Match` 把它带回去。
-- 没变：服务器回 `304 Not Modified`，意思是「没变」，不带文件内容，浏览器接着用冰箱里的。[^mdn-304]
-- 变了：服务器返回 `200` 和新文件，浏览器换掉旧的。
-- 网站更新时常给文件名加版本或指纹（如 `logo.v2.png`），新地址必然重新下载，旧缓存自然不再被用到。
+电脑里存下的这份文件，不是想用多久就用多久。浏览器还要看它有没有过有效期。
 
-### 6. 回顾 {#recap}
+有效期是服务器给的。第一次下载商店标志时，服务器同时带回一行 **Cache-Control**，就是告诉浏览器有效期的那一行。回看那次下载的响应头，能看到：
 
-- **浏览器缓存**：自家冰箱，最近，能不出门就不出门。
-- **CDN**：附近门店，离你近。
-- **负载均衡**：店里多开柜台，人多也扛得住。
-- 三层叠在一起，网站才能又快又稳。
+```
+Cache-Control: max-age=3600
+```
 
-## 深入一问
+意思是这份文件能直接用 3600 秒，也就是一小时[^mdn-cache-control][^rfc9111-maxage]。只要还在这一小时内，文件仍在有效期里，浏览器就直接用电脑里这份。一般情况下，它连请求都不发。
 
-**`no-cache` 是「不缓存」吗？**  
-不是。`no-cache` 的意思是「可以存，但每次用之前都要先问一句」；真正「不要存」的是 `no-store`。[^mdn-cc]
+这段有效期由网站按文件来定。本例里，不常换的商店标志设成 3600 秒（1 小时）；常换的商品图一设成 300 秒（5 分钟）。这两个数字只是示例设置，用来说明「按文件变化快慢来定」，其他文件视频里没有举例，也不能按标志的一小时去推。
 
-**怎么亲眼看到缓存？**  
-打开浏览器开发者工具的「网络」面板，刷新页面，留意某些资源显示「来自磁盘缓存 / 内存缓存」，或状态码 `304`。
+### 4. 过了一小时，先上网问一次网站 {#expired}
 
-**我改了网站，用户为什么还看到旧的？**  
-多半是旧文件还在保质期内。静态文件更新时换带版本号的新文件名，同时更新网页里的引用；网页本身设成 no-cache，每次用前先验证。
+{/* 配图：同一张计时条，从「存下后 30 分钟」走到「存下后 60 分钟」，绿色条走满并在同一刻变橙，标「已过有效期」；再回到网页，标志位置先变灰色占位，「网站确认：没换」后恢复原标志；另一种情况「网站确认：换了」，标志换成新的波纹图 */}
 
-## 易错点
+过了一小时，这份标志就过了有效期，浏览器不再直接拿它来显示。注意边界：计时条走到 60 分钟那一刻就算过期，不是要等到 61 分钟[^rfc9111-fresh]。
 
-- ❌ 「浏览器缓存就是 CDN」→ ✅ CDN 在服务端那边，缓存在你自己电脑里，两者常一起用。
-- ❌ 「过期了就一定重新下载」→ ✅ 先问一句，没变只回 `304`，不重新传文件。
-- ❌ 「`no-cache` = 不缓存」→ ✅ 那是 `no-store`；`no-cache` 是每次先确认。
+过期不等于立刻扔掉。浏览器会重新上网问一次网站[^mdn-caching][^rfc9111-valid]：
+
+- 网站上的文件**没换**，就接着用电脑里原来存的这份；
+- 网站上的文件**换了**，就下载新的，再存一份，页面上的商店标志也跟着更新。
+
+回到开头：网速没变，第二次打开更快，是因为要的文件都在你电脑上，而且还在有效期内。
+
+记住这一句：**浏览器把下载过的文件在电脑上存一份，下次仍在有效期内，就直接拿来用。**
+
+## 视频里没讲的几件事
+
+- **「存下后」是近似说法。** `max-age` 严格说是从服务器生成这份响应时算起的秒数（响应生成后经过的时间叫「年龄」），不是从写进你电脑那一刻才开始计时，也不是每打开一次就重新计时[^mdn-cache-control][^rfc9111-fresh]。本例下载很快，响应生成和存下几乎同时，所以视频用「存下后一小时」来演示。
+- **刷新不算「普通再次打开」。** 普通刷新时，浏览器会重新确认网页本身；在 Chrome 里，像 logo.png 这样还在有效期内的图片一般仍直接用缓存，不再去问网站。强制刷新（Ctrl+Shift+R）则会绕过缓存重新下载[^mdn-caching]。视频里的第二次打开都是新开标签页输入网址，避开这些情况。
+- **同一标签页里再打开，常显示「（内存缓存）」。** 如果在同一个标签页里再加载一次，「大小」一栏常显示 `（内存缓存）`（全角括号，有中文译文），那是放在内存里的那份[^devtools-zh]。视频里的 `(disk cache)` 是新开标签页时常见的情况。具体显示哪一种，由浏览器自己安排。
+- **no-cache 和 no-store。** 网站如果给文件写 `Cache-Control: no-cache`，浏览器可以存，但每次用之前都要先问网站[^rfc9111-nocache]；写 `no-store` 则根本不存[^mdn-cache-control]。所以「有效期内连请求都不发」只是一般情况。
+- **「问一次网站」的前提。** 过期后能「问一下，没换就接着用」，前提是第一次下载时服务器还带回了 ETag 或 Last-Modified 这类标记，浏览器拿它去问「这份变了没有」[^rfc9111-valid]。本例假设 logo.png 带有其中之一。没有的话，过期后就只能重新下载整份。
+- **网站换标志通常会换文件名。** 很多网站更新图片时会顺手改文件名（比如在文件名里加版本号），新页面引用的是新文件名，旧的缓存自然用不上，大家立刻就能看到新标志。视频为了讲有效期，假设文件名没变。
+- **开发者工具里的 Disable cache。** 网络面板顶部有个「停用缓存」（Disable cache）选项，勾上后工具打开期间不使用缓存[^chrome-network]。照着视频做时要保持它不勾选，否则看不到 `(disk cache)`。
+
+## 想一想
+
+网站换了新的商店标志，可你一小时内再打开，看到的会是新的还是旧的？评论区说说。
+
+**参考答案：**多半还是旧的。商店标志的有效期是 3600 秒，一小时内浏览器一般直接用电脑里存的那份，连请求都不发，也就不知道网站已经换了。除非：网站给它写的是 no-cache（那就没有这一小时，每次用前都要先问网站）；你按了强制刷新；或者网站换标志时改了文件名，而你拿到的是新网页。过了一小时，浏览器先去问网站，发现换了，才下载新的。
+
+下期：数据库明明有数据，为什么还要再存一份？
 
 ## 参考资料
 
-[^rfc9111]: IETF，RFC 9111《HTTP Caching》，2022 年 6 月。https://www.rfc-editor.org/rfc/rfc9111
-[^mdn-cache]: MDN Web Docs，《HTTP caching》（last modified 2026-08-14，访问于 2026-10-14）。https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching
-[^mdn-cc]: MDN Web Docs，《Cache-Control》。https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control
-[^mdn-304]: MDN Web Docs，《304 Not Modified》。https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/304
+[^mdn-caching]: [MDN：HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching)，Private caches（浏览器自己的缓存）、Fresh and stale based on age（有效期内直接用，过期成为 stale）、Validation（过期后向服务器确认）；[Reload 一节](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching#reload)：刷新会重新确认网页本身，Chrome 已改为刷新时不再确认子资源（“revalidation is not performed during reloads for subresources”）；[Force reload 一节](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching#force_reload)：强制刷新绕过缓存重新下载。2026-10-21 访问。
+
+[^mdn-cache-control]: [MDN：Cache-Control](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Cache-Control)，`max-age=N`：响应生成后 N 秒内是新鲜的；`no-cache`、`no-store` 的含义。2026-10-21 访问。
+
+[^rfc9111-fresh]: [RFC 9111：HTTP Caching §4.2 Freshness](https://www.rfc-editor.org/rfc/rfc9111.html#section-4.2)，响应新鲜的条件是 freshness_lifetime > current_age，年龄达到有效期即不再新鲜。
+
+[^rfc9111-valid]: [RFC 9111：HTTP Caching §4.3 Validation](https://www.rfc-editor.org/rfc/rfc9111.html#section-4.3)，过期后向服务器确认；§4.3.1 用 ETag（If-None-Match）或 Last-Modified（If-Modified-Since）发起确认。
+
+[^rfc9111-maxage]: [RFC 9111：HTTP Caching §5.2.2.1 max-age](https://www.rfc-editor.org/rfc/rfc9111.html#section-5.2.2.1)，max-age 以秒为单位。
+
+[^rfc9111-nocache]: [RFC 9111：HTTP Caching §5.2.2.4 no-cache](https://www.rfc-editor.org/rfc/rfc9111.html#section-5.2.2.4)，没有先向服务器确认成功，就不得用存下的响应来满足请求。
+
+[^chrome-network]: [Chrome DevTools：Network features reference](https://developer.chrome.com/docs/devtools/network/reference)，Record network requests（只记录工具打开期间的请求）与 Disable cache 小节。2026-10-21 访问。
+
+[^devtools-zh]: [ChromeDevTools devtools-frontend：zh.json](https://github.com/ChromeDevTools/devtools-frontend/blob/main/front_end/core/i18n/locales/zh.json)，Chrome 开发者工具官方简体中文词库：`NetworkDataGridNode.ts | diskCache` 译文仍为 `(disk cache)`，`memoryCache` 译为「（内存缓存）」。2026-10-21 核对 main 分支。
+
+[^devtools-src]: [ChromeDevTools devtools-frontend：NetworkDataGridNode.ts](https://github.com/ChromeDevTools/devtools-frontend/blob/main/front_end/panels/network/NetworkDataGridNode.ts)，命中磁盘缓存时「大小」一栏写入 `diskCache: '(disk cache)'`。2026-10-21 核对 main 分支。
+
+[^rfc2606]: [RFC 2606：Reserved Top Level DNS Names §2](https://www.rfc-editor.org/rfc/rfc2606.html#section-2)，.example 留作示例用。
