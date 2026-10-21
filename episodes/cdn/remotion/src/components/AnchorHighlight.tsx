@@ -33,7 +33,15 @@ export const AnchorHighlight: React.FC<UIProps> = ({e: original, frame, siblings
       const nodes = (pool.length ? pool : browsers).flatMap(b => Array.from(b.querySelectorAll<HTMLElement>(selector))).filter(n => n.getClientRects().length);
       if (!nodes.length || !(scale > 0)) {flushSync(() => setBox(null)); return;}
       // One box per anchored node (e.g. each card button), each padded outside the node.
-      flushSync(() => setBox(nodes.map(n => n.getBoundingClientRect()).map(r => ({left: (r.left - authored.left) / scale - PAD, top: (r.top - authored.top) / scale - PAD, width: r.width / scale + PAD * 2, height: r.height / scale + PAD * 2}))));
+      // Clip each node to the visible page viewport (a node can overflow a short browser), then keep the padded box inside the browser window.
+      const clip = (n: HTMLElement) => {
+        const r = n.getBoundingClientRect(), page = n.closest<HTMLElement>('[data-page]')?.getBoundingClientRect(), win = n.closest<HTMLElement>('[data-element]')?.getBoundingClientRect();
+        const left = Math.max(r.left, page?.left ?? -Infinity), top = Math.max(r.top, page?.top ?? -Infinity), right = Math.min(r.right, page?.right ?? Infinity), bottom = Math.min(r.bottom, page?.bottom ?? Infinity);
+        const box = {left: left - PAD * scale, top: top - PAD * scale, right: right + PAD * scale, bottom: bottom + PAD * scale};
+        if (win && (r.bottom > bottom || r.right > right)) {box.right = Math.min(box.right, win.right); box.bottom = Math.min(box.bottom, win.bottom);}
+        return {left: (box.left - authored.left) / scale, top: (box.top - authored.top) / scale, width: (box.right - box.left) / scale, height: (box.bottom - box.top) / scale};
+      };
+      flushSync(() => setBox(nodes.map(clip)));
     };
     void measure().catch(cancelRender).finally(() => continueRender(handle));
     return () => {cancelled = true; continueRender(handle);};

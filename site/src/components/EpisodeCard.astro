@@ -1,14 +1,14 @@
 ---
-import {epHref, asset, fmtTime, epLabel, fmtDateShort, isNew} from '../lib/episodes';
+import {epHref, asset, fmtTime, epLabel, fmtDateShort, isNew, LEGACY_LABEL} from '../lib/episodes';
 const {e} = Astro.props;
 ---
-<a class="card" href={epHref(e.slug)} data-tags={e.tags.join('|')} data-series={e.series ?? ''}>
+<a class="card" href={epHref(e.slug)} data-tags={e.tags.join('|')} data-series={e.series ?? ''} data-legacy={e.legacy ? '' : undefined}>
   <div class="cover">
     <img src={asset(e.slug, e.poster)} alt="" width="1280" height="720" loading="lazy" decoding="async" />
     <span class="dur num" aria-label={`时长 ${fmtTime(e.duration)}`}>{fmtTime(e.duration)}</span>
   </div>
   <div class="body">
-    <p class="row"><span class="ep num">{epLabel(e.ep)}</span><time class="date num" datetime={e.date}>{fmtDateShort(e.date)}</time>{isNew(e.date, e.slug) && <span class="new">NEW</span>}</p>
+    <p class="row"><span class="ep num">{epLabel(e.ep)}</span><time class="date num" datetime={e.date}>{fmtDateShort(e.date)}</time>{isNew(e.date, e.slug) && <span class="new">NEW</span>}{e.legacy && <span class="legacy">{LEGACY_LABEL}</span>}</p>
     <h3>{e.title}</h3>
     <p>{e.summary}</p>
     <div class="tags">{e.tags.slice(0, 3).map((t) => <span class="t">#{t}</span>)}</div>
@@ -26,6 +26,7 @@ const {e} = Astro.props;
 .row{margin:0;display:flex;align-items:center;gap:var(--sp-2);font-size:var(--fs-xs)}
 .date{color:var(--c-text-2)}
 .new{font-size:10px;font-weight:700;letter-spacing:.04em;line-height:1;padding:3px 6px;border-radius:var(--r-full);background:var(--c-primary);color:var(--c-on-primary)}
+.legacy{font-size:var(--fs-xs);line-height:1.2;padding:1px 8px;border-radius:var(--r-full);border:1px solid var(--c-border);color:var(--c-text-2);margin-left:auto}
 .ep{font-family:var(--font-mono);color:var(--c-primary);font-size:var(--fs-xs)}
 h3{margin:0;font-size:var(--fs-h3);line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 p{margin:0;color:var(--c-text-2);font-size:var(--fs-small);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}

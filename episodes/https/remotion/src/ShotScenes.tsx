@@ -1,9 +1,10 @@
 import React from 'react';
 import {Easing, interpolate} from 'remotion';
-import {animatedValue, progress} from './animation';
+import {animatedValue, clamp, progress} from './animation';
 import {Shot, ShotElement, shots, storyboard} from './storyboard';
 import {StoryboardComponent, COMPONENTS} from './components/StoryboardComponent';
 import {stateAt, fitSize, colorToken} from './components/ui';
+import {elementFrameMode, switchFramesOf, XFADE} from './frameMode';
 export {Spinner} from './components/Spinner';
 export type SceneProps = {shot: Shot; frame: number};
 export const element = (shot: Shot, id: string): ShotElement => {
@@ -12,12 +13,35 @@ export const element = (shot: Shot, id: string): ShotElement => {
   return found;
 };
 const value = (shot: Shot, frame: number, id: string, property: string, fallback: number) => Number(animatedValue(shot, id, property, frame, fallback));
-export const visibleAt = (e: ShotElement, frame: number) => frame >= (e.appearFrame ?? 0) && (e.disappearFrame === undefined || frame < e.disappearFrame) && stateAt(e, frame).state !== 'hidden';
+export const visibleAt = (e: ShotElement, frame: number, shot?: Shot) => {
+  const tail = shot && switchFramesOf(shot).some(s => s.local === e.disappearFrame) ? XFADE : 0;
+  // #89 dim placeholder: an element with dimFrom is already on screen (at dimOpacity) from dimFrom until it lights up at appearFrame.
+  const start = typeof e.dimFrom === 'number' ? Math.min(e.appearFrame ?? 0, e.dimFrom) : e.appearFrame ?? 0;
+  return frame >= start && (e.disappearFrame === undefined || frame < e.disappearFrame + tail) && stateAt(e, frame).state !== 'hidden';
+};
+/** Replace entrance keys with neutral holds, retaining animations outside each fade. */
+const switchMotionShot = (shot: Shot, e: ShotElement): Shot => {
+  const entrances = switchFramesOf(shot).filter(s => s.switchElement === e.id);
+  if (!entrances.length) return shot;
+  return {...shot, animations: [
+    ...shot.animations.map(a => a.elementId === e.id && (a.property === 'opacity' || a.property === 'scale')
+      ? {...a, keyframes: a.keyframes.filter(k => !entrances.some(s => k.frame >= s.local && k.frame <= s.local + XFADE))} : a),
+    ...['opacity', 'scale'].map(property => ({elementId: e.id, property, keyframes: entrances.flatMap(s =>
+      [s.local, s.local + XFADE].map(frame => ({frame, value: property === 'opacity' ? e.opacity ?? 1 : 1})))})),
+  ]};
+};
 /** Only authored keyframes interpolate; states switch on their exact frame. */
 export const motion = (shot: Shot, frame: number, id: string): React.CSSProperties => {
   const e = stateAt(element(shot, id), frame);
+  const switches = switchFramesOf(shot);
+  const outgoing = switches.find(s => s.local === e.disappearFrame);
+  const incoming = switches.filter(s => s.switchElement === id && s.local <= frame).pop();
+  const crossFade = (outgoing ? 1 - clamp((frame - outgoing.local) / XFADE) : 1)
+    * (incoming ? clamp((frame - incoming.local) / XFADE) : 1);
+  const motionShot = switchMotionShot(shot, e);
   const fade = e.state === 'fadingOut' ? 1 - progress(frame, e.stateFrame, e.fadeFrames ?? e.durationFrames) : 1;
-  return {opacity: visibleAt(e, frame) ? value(shot, frame, id, 'opacity', e.opacity ?? 1) * fade : 0, transform: `scale(${value(shot, frame, id, 'scale', 1)}) rotate(${value(shot, frame, id, 'rotate', 0)}deg) rotateY(${value(shot, frame, id, 'rotateY', 0)}deg)`};
+  const dimmed = typeof e.dimFrom === 'number' && frame < (e.appearFrame ?? 0);
+  return {opacity: visibleAt(e, frame, shot) ? (dimmed ? e.dimOpacity ?? 0.25 : value(motionShot, frame, id, 'opacity', e.opacity ?? 1)) * fade * crossFade : 0, transform: `scale(${value(motionShot, frame, id, 'scale', 1)}) rotate(${value(shot, frame, id, 'rotate', 0)}deg) rotateY(${value(shot, frame, id, 'rotateY', 0)}deg)`};
 };
 export const Layer: React.FC<SceneProps & {id: string; style?: React.CSSProperties; children?: React.ReactNode}> = ({shot, frame, id, style, children}) => {
   const e = stateAt(element(shot, id), frame), m = motion(shot, frame, id);
@@ -93,7 +117,7 @@ const SceneElement: React.FC<SceneProps & {original: ShotElement}> = ({shot, fra
   const e = resolvedElement(shot, original, frame);
   if (e.nativeBrowserPart) return null;
   const insets = horizontalInsets(shot, frame, e);
-  const content = <StoryboardComponent e={e} frame={frame} />;
+  const content = <StoryboardComponent e={e} frame={frame} canvas={elementFrameMode(shot, {...e, frame: original.frame}, frame) === 'canvas'} />;
   const icon = ['WifiIcon', 'KeyIcon', 'LockIcon'].includes(e.component);
   return e.component ? <Layer shot={shot} frame={frame} id={e.id} style={{...(e.state === 'hidden' ? {opacity: 0} : {}), ...(e.component === 'BlockHighlight' && e.target && e.state === 'urgencyHighlighted' ? {left: e.x, top: e.y, width: e.w, height: e.h} : {})}}>{icon && insets.left + insets.right > 0 ? <div style={{position: 'relative', left: insets.left, width: Math.max(0, e.w - insets.left - insets.right), height: '100%'}}>{content}</div> : content}</Layer> : <TextLayer shot={shot} frame={frame} id={e.id} />;
 };

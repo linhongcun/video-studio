@@ -4,7 +4,7 @@ import {cancelRender, continueRender, delayRender} from 'remotion';
 import {ShotElement} from '../storyboard';
 import {FONT, MONO, P} from '../theme';
 import type {BrowserContentLayout} from './browserLayout';
-export type UIProps = {e: ShotElement; frame: number; source?: ShotElement; siblings?: ShotElement[]; browserContentLayout?: BrowserContentLayout};
+export type UIProps = {e: ShotElement; frame: number; canvas?: boolean; source?: ShotElement; siblings?: ShotElement[]; browserContentLayout?: BrowserContentLayout};
 export const box: React.CSSProperties = {boxSizing: 'border-box', minWidth: 0, minHeight: 0};
 
 /** State fields accumulate; append events are retained independently of later states. */

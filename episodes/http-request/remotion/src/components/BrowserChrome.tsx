@@ -3,6 +3,7 @@ import {useCurrentFrame, useVideoConfig} from 'remotion';
 import {FONT, MONO, P} from '../theme';
 
 export type BrowserChromeProps = {
+  canvas?: boolean;
   width?: number;
   height?: number;
   /** Fit the chrome to short storyboard windows without overflowing the shell. */
@@ -32,6 +33,7 @@ const Padlock: React.FC<{size: number}> = ({size}) => (
 
 /** Generic browser shell. Animation is tied to Remotion frames, never wall time. */
 export const BrowserChrome: React.FC<BrowserChromeProps> = ({
+  canvas = false,
   width = 860,
   height = 580,
   chromeHeight,
@@ -66,14 +68,15 @@ export const BrowserChrome: React.FC<BrowserChromeProps> = ({
         flexDirection: 'column',
         flexShrink: 0,
         boxSizing: 'border-box',
-        border: `${4 * unit}px solid ${P.muted}`,
-        borderRadius: 18 * unit,
-        background: P.panel,
+        border: `${4 * unit}px solid ${canvas ? 'transparent' : P.muted}`,
+        borderRadius: canvas ? 0 : 18 * unit,
+        background: canvas ? 'transparent' : P.panel,
         color: P.text,
         fontFamily: FONT,
-        boxShadow: `0 0 ${24 * unit}px ${P.secondary}22`,
+        boxShadow: canvas ? undefined : `0 0 ${24 * unit}px ${P.secondary}22`,
       }}
     >
+      {canvas ? <div style={{height: 136 * unit, flexShrink: 0}} /> : <>
       <div style={{height: 60 * unit, flexShrink: 0, display: 'flex', alignItems: 'flex-end', paddingLeft: 18 * unit, gap: 18 * unit}}>
         <div style={{width: 340 * unit, height: 48 * unit, borderRadius: `${12 * unit}px ${12 * unit}px 0 0`, background: P.panel2, display: 'flex', alignItems: 'center', gap: 14 * unit, padding: `0 ${18 * unit}px`, boxSizing: 'border-box'}}>
           {loading ? (
@@ -105,7 +108,8 @@ export const BrowserChrome: React.FC<BrowserChromeProps> = ({
         </div>
       </div>
 
-      <div style={{position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden', borderRadius: `0 0 ${13 * unit}px ${13 * unit}px`, background: P.bg}}>
+      </>}
+      <div style={{position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden', borderRadius: canvas ? 0 : `0 0 ${13 * unit}px ${13 * unit}px`, background: canvas ? 'transparent' : P.bg}}>
         {children}
       </div>
 

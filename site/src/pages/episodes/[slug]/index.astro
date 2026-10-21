@@ -15,7 +15,7 @@ import EpisodePager from '../../../components/EpisodePager.astro';
 import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
 import PlatformLinks from '../../../components/PlatformLinks.astro';
-import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, isNew, isoDuration, seriesNav, seriesHref} from '../../../lib/episodes';
+import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, isNew, isoDuration, seriesNav, seriesHref, LEGACY_LABEL} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes();
   const pages = eps.map((e, i) => ({params: {slug: e.slug}, props: {e, prev: eps[i + 1], next: eps[i - 1]}}));
@@ -45,6 +45,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
     <Breadcrumb items={[{label: '首页', href: BASE}, ...(sNav ? [{label: sNav.series.title, href: seriesHref(sNav.series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `${epLabel(e.ep)} · 第 ${sNav.index}/${sNav.total} 期` : epLabel(e.ep)}]} />
     <header class="eh" data-pagefind-body>
       <h1 data-pagefind-meta={`image:${asset(e.slug, e.poster)}`}>{e.title}</h1>
+      {e.legacy && <p class="legacy" data-legacy>{LEGACY_LABEL}：这是早期版本，新版制作中，上线后会替换本页视频和文章。</p>}
       <p class="meta num">
         <span><time datetime={e.date}>{fmtDate(e.date)}</time> 发布{isNew(e.date, e.slug) && <span class="new">NEW</span>}</span>
         {e.updated && <span>· 更新于 <time datetime={e.updated}>{fmtDate(e.updated)}</time></span>}
@@ -88,6 +89,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 <style>
 .eh h1{font-size:var(--fs-h1);line-height:1.25;margin:0 0 var(--sp-2)}
 .meta{color:var(--c-text-2);font-size:var(--fs-small);margin:0 0 var(--sp-5);display:flex;gap:var(--sp-2);flex-wrap:wrap}
+.legacy{margin:0 0 var(--sp-3);padding:var(--sp-2) var(--sp-3);font-size:var(--fs-small);color:var(--c-text-2);background:var(--c-surface);border:1px dashed var(--c-border);border-radius:var(--r-md)}
 .meta a{color:var(--c-tag)}
 .meta .tags{display:inline-flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-2)}
 .new{margin-left:6px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:var(--r-full);background:var(--c-primary);color:var(--c-on-primary);vertical-align:1px}

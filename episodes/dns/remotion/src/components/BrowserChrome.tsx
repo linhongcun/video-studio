@@ -3,7 +3,7 @@ import {FONT, MONO, P} from '../theme';
 import {Copy, colorToken, fitSize, stateAt, UIProps} from './ui';
 import {Spinner} from './Spinner';
 
-export const BrowserChrome: React.FC<UIProps> = ({e: original, frame, source, siblings = []}) => {
+export const BrowserChrome: React.FC<UIProps> = ({e: original, frame, canvas, source, siblings = []}) => {
   const e = stateAt(original, frame), compact = e.w < 600;
   const docked = siblings.some(originalSibling => {
     const sibling = stateAt(originalSibling, frame);
@@ -24,8 +24,8 @@ export const BrowserChrome: React.FC<UIProps> = ({e: original, frame, source, si
   }
   rotor += (frame - previousFrame) * speed;
   const cardsVisible = !e.stateKeyframes?.some(key => key.state === 'cardsShown') || e.state === 'cardsShown';
-  return <div data-browser-title={e.title} data-page-blank={!!e.pageBlank} style={{width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', border: `3px solid ${P.muted}`, borderRadius: 18, overflow: 'hidden', background: P.panel, color: P.text, fontFamily: FONT, boxShadow: `0 0 24px ${P.secondary}22`}}>
-    <div style={{height: headerHeight, flexShrink: 0, display: 'flex', flexDirection: compact ? 'column' : 'row', alignItems: compact ? 'stretch' : 'center', gap: compact ? 6 : 12, padding: compact ? '8px 16px' : '8px 16px 8px 8px', boxSizing: 'border-box', background: P.panel2, borderBottom: `2px solid ${P.muted}`}}>
+  return <div data-browser-title={e.title} data-page-blank={!!e.pageBlank} style={{width: '100%', height: '100%', position: 'relative', display: 'flex', flexDirection: 'column', boxSizing: 'border-box', border: `3px solid ${canvas ? 'transparent' : P.muted}`, borderRadius: canvas ? 0 : 18, overflow: 'hidden', background: canvas ? 'transparent' : P.panel, color: P.text, fontFamily: FONT, boxShadow: canvas ? undefined : `0 0 24px ${P.secondary}22`}}>
+    {canvas ? <div style={{height: headerHeight, flexShrink: 0}} /> : <div style={{height: headerHeight, flexShrink: 0, display: 'flex', flexDirection: compact ? 'column' : 'row', alignItems: compact ? 'stretch' : 'center', gap: compact ? 6 : 12, padding: compact ? '8px 16px' : '8px 16px 8px 8px', boxSizing: 'border-box', background: P.panel2, borderBottom: `2px solid ${P.muted}`}}>
       <div style={{width: tabWidth, minWidth: 0, height: compact ? 38 : '100%', display: 'flex', alignItems: 'center', gap: 10, padding: '0 8px', boxSizing: 'border-box', background: P.panel, borderRadius: 10, flexShrink: 0}}>
         {e.tabLoading ? <div data-tab-loading data-spinner-speed={e.spinnerSpeed ?? 1} style={{width: 26, height: 26, flexShrink: 0}}><Spinner frame={rotor} /></div> : <div style={{width: 22, height: 22, flexShrink: 0, background: P.primary, borderRadius: 6}} />}
         <Copy size={compact ? 26 : 24} width={tabWidth - 52} style={{whiteSpace: 'nowrap', fontWeight: 700}}>{e.title}</Copy>
@@ -35,8 +35,8 @@ export const BrowserChrome: React.FC<UIProps> = ({e: original, frame, source, si
         <Copy mono size={compact ? 26 : 32} width={addressWidth - (e.showPadlock ? 34 : 0)} style={{whiteSpace: 'nowrap'}}>{e.url ?? ''}</Copy>
       </div>
       {!compact && <div aria-hidden style={{display: 'grid', gap: 5}}>{[0, 1, 2].map(i => <div key={i} style={{width: 22, height: 3, borderRadius: 2, background: P.text2}} />)}</div>}
-    </div>
-    <div data-page={e.page ?? (e.pageBlank ? 'blank' : undefined)} style={{position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden', background: P.bg}}>
+    </div>}
+    <div data-page={e.page ?? (e.pageBlank ? 'blank' : undefined)} style={{position: 'relative', flex: 1, minHeight: 0, overflow: 'hidden', background: canvas ? 'transparent' : P.bg}}>
       {e.pageNote && <div data-page-note style={{position: 'absolute', inset: 0, padding: '8%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', color: colorToken(e.pageNoteColor) ?? P.text2}}><Copy size={compact ? 36 : 52} width={e.w * .8} height={e.h - headerHeight} style={{textAlign: 'center', fontWeight: 700}}>{e.pageNote}</Copy></div>}
       {!e.pageBlank && e.page === 'aboutNetworkingDns' && <div style={{padding: '28px 32px', boxSizing: 'border-box', height: '100%', overflow: 'hidden'}}>
         <div role="searchbox" style={{padding: '12px 18px', border: `2px solid ${P.muted}`, borderRadius: 10, background: P.panel, marginBottom: 24}}><Copy mono size={32} width={e.w - 108}>{e.searchText}</Copy></div>
