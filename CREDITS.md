@@ -15,7 +15,7 @@ http://creativecommons.org/licenses/by/4.0/
 
 - 配音（第一期）：edge-tts（zh-CN-YunxiNeural）
 
-## 配音（第二期《HTTPS 为什么安全？》、第三期《输入网址后，怎么找到服务器？》、第四期《网站怎么记住你已经登录？》、第五期《网站离你那么远，为什么还这么快？》、第六期《一台服务器忙不过来，怎么办？》、第七期《同一个网页，第二次打开为什么快这么多？》、第八期《数据库明明有数据，为什么还要再存一份？》、第九期《后台改了价格，页面怎么还是旧的？》）
+## 配音（第二期《HTTPS 为什么安全？》、第三期《输入网址后，怎么找到服务器？》、第四期《网站怎么记住你已经登录？》、第五期《网站离你那么远，为什么还这么快？》、第六期《一台服务器忙不过来，怎么办？》、第七期《同一个网页，第二次打开为什么快这么多？》、第八期《数据库明明有数据，为什么还要再存一份？》、第九期《后台改了价格，页面怎么还是旧的？》、第十期《双十一下单那么多，为什么不丢单？》）
 
 第二期、第三期旁白使用 **Xiaomi MiMo TTS**（云端 API，模型 `mimo-v2.5-tts`，预置音色「冰糖」），北京小米移动软件有限公司提供：
 
@@ -30,6 +30,7 @@ http://creativecommons.org/licenses/by/4.0/
 - 第七期合成：同一模型 `mimo-v2.5-tts` 与音色「冰糖」，条款情况同上（读法表 `episodes/browser-cache/pronunciation.md`）；背景音乐同为 Wallpaper（固定音量，比旁白低约 12dB，-16 LUFS）
 - 第八期合成：同一模型 `mimo-v2.5-tts` 与音色「冰糖」，条款情况同上（读法表 `episodes/server-cache/pronunciation.md`）；背景音乐同为 Wallpaper（固定音量，比旁白低约 12dB，-16 LUFS）
 - 第九期合成：同一模型 `mimo-v2.5-tts` 与音色「冰糖」，条款情况同上（读法表 `episodes/cache-consistency/pronunciation.md`）；背景音乐同为 Wallpaper（固定音量，比旁白低约 12dB，-16 LUFS）
+- 第十期合成：同一模型 `mimo-v2.5-tts` 与音色「冰糖」，条款情况同上（读法表 `episodes/message-queue/pronunciation.md`）；背景音乐同为 Wallpaper（固定音量，比旁白低约 12dB，-16 LUFS）
 - 动画：Remotion，代码生成；音效为代码合成
 
 ## 地图数据
