@@ -1,55 +1,63 @@
 ---
 title: 搜索页和结算页，为什么两个价不一样？
-summary: 用到手价计算讲清降级：到手价要同步调用商品价格、优惠券、红包，红包服务卡住会拖垮核心链路；红包异常时先不算红包、照样给价的自动降级；大促时提前关掉搜索推荐页红包计算、把资源留给购物车和结算页的主动降级。
+summary: 大促时搜索页到手价没算红包、结算页才算上：网站主动关掉搜索页里的红包计算，把资源留给结算下单这条核心链路——这就是降级。上期跳过运费险，也算一种降级。
 chapters:
-  - { id: hook,           title: 两个价不一样 }
-  - { id: problem,        title: 一个卡住，全都在等 }
-  - { id: auto-degrade,   title: 先不算红包 }
-  - { id: active-degrade, title: 关空调，保冰箱 }
-related: ["message-queue", "rate-limit", "idempotency"]
+  - { id: hook, title: 两个价不一样 }
+  - { id: turn-off, title: 关掉搜索页的红包计算 }
+  - { id: degrade, title: 降级与核心链路 }
+  - { id: after, title: 降级之后 }
+related: ["circuit-breaker", "rate-limit", "db-index"]
 ---
 
-大促时，搜索页的到手价和结算页的价格对不上，这不一定是 bug（也可能是 bug，或者某些优惠本来就只在结算时才算），很常见的一种原因是网站在**降级**（graceful degradation）：舍掉次要部分，保住最要紧的那一段。下面分 4 步讲清楚。
+大促时，搜索页的到手价和结算页对不上，不一定是 bug。在这个示例里，是因为网站关掉了搜索页的红包计算（**降级**），把资源留给最要紧的那一段——**核心链路**。
 
-## 4 步看懂降级
+## 4 步看懂本期
 
 ### 1. 两个价不一样 {#hook}
 
-{/* 配图：搜索页、结算页两张价格卡，结算页多一行「红包抵扣」 */}
+- 示例里，搜索页到手价 **199 元**（示例）没算红包；结算页有红包抵扣 **20 元**，应付 **179 元**（示例）。网址 `shop.example` 用的是 RFC 2606 保留给文档和示例的 `.example` 域名，不是真实网站。[^rfc2606]
+- 到手价往往要问商品价格、优惠券、红包等多个服务，全回来才能拼出数字。
 
-- 本例里的「到手价」不是存好的一个数字，而是每次实时算出来的：商品价格减去优惠券、红包等优惠（有的系统也会提前算好存起来）。
-- 不同页面可以算得不一样。大促时搜索推荐页可能不算红包，红包服务正常时，结算页照常计算红包。
+### 2. 关掉搜索页的红包计算 {#turn-off}
 
-### 2. 一个卡住，全都在等 {#problem}
+- 大促时搜索页也去算红包，会占掉红包服务的计算和连接；结算下单同样要问红包，两边一起抢，结算就容易慢。
+- 网站可以**提前关掉搜索页里的红包计算**，把红包服务留给结算页。Azure 把这类做法写成关掉非必要功能、让必要功能有足够资源。[^azure-throttle]
 
-{/* 配图：到手价计算同时调用商品价格、优惠券、红包；红包卡住，请求堆积 */}
+### 3. 降级与核心链路 {#degrade}
 
-- 到手价计算要**同步**调用多个服务，全部返回才能出结果。其中一个变慢，计算就跟着等，线程、连接一直被占着。
-- 购物车到结算页这条价格计算链路，是整个网站最要紧的一段，叫**核心链路**。一个依赖卡住、沿调用链拖垮整条链路，就是常说的**雪崩**（级联故障）。
+- **核心链路**：从加购到提交订单再付款，网站最要紧的下单路。
+- **降级**：主动关掉不太要紧的功能，把有限资源留给最要紧那一段。AWS 要求组件在依赖不健康时仍尽量完成核心功能；Azure 要求在降级模式下仍能走完关键流程。[^aws-gd][^azure-self]
+- 上期运费险故障时**跳过运费险、照样下单**，那种跳过，也算一种降级（熔断讲的是先不调用；降级讲的是保哪一段、用什么顶上）。
 
-### 3. 先不算红包 {#auto-degrade}
+### 4. 降级之后 {#after}
 
-{/* 配图：红包灰掉，到手价照常算出，红包回到「我的红包」 */}
+- 搜索页仍能搜、能加购，只是到手价先不算红包；结算页照常算红包、能下单。
+- 红包还在账户里；搜索页这一步先不去算它，也不会因为这次搜索把它用掉。
 
-- **自动降级**：红包服务异常时，计算先不把红包算进去，照样给出到手价。红包本身没被使用，仍在用户账户里。
-- 降级发生在同一条同步链路上：把红包从「硬依赖」（缺了就失败）变成「软依赖」（缺了也能给出结果）。[^aws-gd][^azure-gd]
+## 只放在文章里的补充
 
-### 4. 关空调，保冰箱 {#active-degrade}
+**自动降级与主动降级**
 
-{/* 配图：关空调保冰箱；搜索推荐页红包计算变灰，资源流向结算页 */}
+- **自动降级**：红包服务异常时，计算自动先不算红包，仍给出到手价（硬依赖变软依赖）。[^aws-gd]
+- **主动降级**：大促前按预案关掉搜索页红包计算（本片主线）。实现上常用功能开关／kill switch，无需重新发版。[^azure-feature][^aws-levers]
 
-- **主动降级**：大促前，为了把资源留给购物车、结算页这条核心链路，提前关掉搜索推荐页里的红包计算，避免红包服务资源不够用。结算页照常算红包。这种「大促前按预案提前关掉非核心功能」的做法，在厂商文档和技术社区里都有描述。[^aliyun-ahas][^javaguide]
-- 这也解释了开头：搜索页的到手价没算红包，到了结算页才算上。
-- 「扛住高峰」四招：**消息队列**排队、不容易丢、**限流**守住门口、**幂等**只扣一次钱、**降级**先保核心。
+**和熔断的边界**
 
-## 深入一问
+熔断（EP.13）回答「要不要还去调用故障依赖」；降级回答「不调用或减配之后，页面还展示什么、哪条路必须保住」。雪崩／级联故障见 EP.13 文章，本期不重讲。
 
-**降级和限流有什么区别？**  
-限流管「进来的请求太多」，在门口按数量放人；降级管「资源不够或依赖出问题时做什么」，主动舍掉次要功能，保住核心结果。两者常一起用。
+**讨论题**
+
+要是搜索页和结算页都把红包计算一起关掉，下单还能不能顺利完成？评论区说说。
+
+**讨论题参考答案**
+
+若搜索页和结算页都关掉红包计算，下单通常仍应按原价完成（红包留在账户）；若红包被做成硬依赖，就会失败——所以次要优惠应是软依赖。
 
 ## 参考资料
 
-[^aws-gd]: AWS Well-Architected Framework 可靠性支柱，《REL05-BP01 Implement graceful degradation to transform applicable hard dependencies into soft dependencies》（持续更新的官方文档，访问于 2026-10-13）：https://docs.aws.amazon.com/wellarchitected/latest/reliability-pillar/rel_mitigate_interaction_failure_graceful_degradation.html
-[^azure-gd]: Microsoft Azure Well-Architected Framework，《Self-preservation / graceful degradation》（持续更新的官方文档，访问于 2026-10-13）：https://learn.microsoft.com/en-us/azure/well-architected/reliability/self-preservation
-[^aliyun-ahas]: 阿里云 AHAS 文档，《主动降级业务功能》（lastModifiedTime 2022-05-25，访问于 2026-10-14；该功能模块据公告已于 2025-03-31 停止服务，这里只引用它对「主动降级」概念的说明）：https://help.aliyun.com/zh/ahas/use-feature-switches-to-implement-active-degradation-for-business
-[^javaguide]: JavaGuide，《服务降级与熔断详解》（社区技术文档，非厂商官方；页面未显示日期，访问于 2026-10-14）：https://javaguide.cn/high-availability/fallback-and-circuit-breaker.html
+[^aws-gd]: AWS Well-Architected REL05-BP01《Implement graceful degradation…》（访问于 2026-10-22）：https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html
+[^aws-levers]: AWS Well-Architected REL05-BP07《Implement emergency levers》（访问于 2026-10-22）：https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_emergency_levers.html
+[^azure-self]: Microsoft Azure Well-Architected《self-preservation / graceful degradation mode》（访问于 2026-10-22）：https://learn.microsoft.com/en-us/azure/well-architected/reliability/self-preservation
+[^azure-throttle]: Microsoft Azure Architecture Center《Throttling pattern》中 Graceful feature degradation（访问于 2026-10-22）：https://learn.microsoft.com/en-us/azure/architecture/patterns/throttling
+[^azure-feature]: Microsoft Azure App Configuration《Feature management》（访问于 2026-10-22）：https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-feature-management
+[^rfc2606]: RFC 2606 §2《Reserved Top Level DNS Names》：".example" is recommended for use in documentation or as examples.（访问于 2026-10-22）：https://www.rfc-editor.org/rfc/rfc2606.html#section-2

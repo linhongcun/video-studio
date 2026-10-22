@@ -10,7 +10,7 @@ IT小村工作室的互联网开发技术科普短视频项目：用生活里的
 
 ## 已上线剧集
 
-剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–13 已重制；EP.14–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。
+剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–14 已重制；EP.15–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。
 
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
@@ -27,7 +27,7 @@ IT小村工作室的互联网开发技术科普短视频项目：用生活里的
 | 11 | 扛住高峰 | 抢票那一刻，为什么总提示系统繁忙？ | [rate-limit](https://linhongcun.github.io/video-studio/episodes/rate-limit/) | 2026-10-13 |
 | 12 | 扛住高峰 | 手一抖点了两次支付，为什么只扣一次钱？ | [idempotency](https://linhongcun.github.io/video-studio/episodes/idempotency/) | 2026-10-13 |
 | 13 | 扛住高峰 | 一个服务出故障，为什么整个网站没跟着崩？ | [circuit-breaker](https://linhongcun.github.io/video-studio/episodes/circuit-breaker/) | 2026-10-14 |
-| 14 | 扛住高峰 | 搜索页和结算页，为什么两个价不一样？（旧版，重制中） | [degradation](https://linhongcun.github.io/video-studio/episodes/degradation/) | 2026-10-13 |
+| 14 | 扛住高峰 | 搜索页和结算页，为什么两个价不一样？ | [degradation](https://linhongcun.github.io/video-studio/episodes/degradation/) | 2026-10-13 |
 | 15 | 数据库 | 加个索引，为啥就快了？（旧版，重制中） | [db-index](https://linhongcun.github.io/video-studio/episodes/db-index/) | 2026-10-14 |
 | 16 | 数据库 | 扣了钱，对方没到账？（旧版，重制中） | [db-transaction](https://linhongcun.github.io/video-studio/episodes/db-transaction/) | 2026-10-14 |
 | 17 | 数据库 | 两个人抢同一件货，听谁的？（旧版，重制中） | [db-lock](https://linhongcun.github.io/video-studio/episodes/db-lock/) | 2026-10-15 |
