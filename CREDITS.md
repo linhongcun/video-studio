@@ -33,6 +33,7 @@ http://creativecommons.org/licenses/by/4.0/
 - 第十期合成：同一模型 `mimo-v2.5-tts` 与音色「冰糖」，条款情况同上（读法表 `episodes/message-queue/pronunciation.md`）；背景音乐同为 Wallpaper（固定音量，比旁白低约 12dB，-16 LUFS）
 - 第十一期合成：同一模型 `mimo-v2.5-tts` 与音色「冰糖」，条款情况同上（读法表 `episodes/rate-limit/pronunciation.md`）；背景音乐同为 Wallpaper（固定音量，比旁白低约 12dB，-16 LUFS）
 - 第十二期合成：同一模型 `mimo-v2.5-tts` 与音色「冰糖」，条款情况同上（读法表 `episodes/idempotency/pronunciation.md`）；背景音乐同为 Wallpaper（固定音量，比旁白低约 12dB，-16 LUFS）
+- 第十三期合成：同一模型 `mimo-v2.5-tts` 与音色「冰糖」，条款情况同上（读法表 `episodes/circuit-breaker/pronunciation.md`）；背景音乐同为 Wallpaper（固定音量，比旁白低约 12dB，-16 LUFS）
 - 动画：Remotion，代码生成；音效为代码合成
 
 ## 地图数据

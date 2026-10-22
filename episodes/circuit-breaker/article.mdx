@@ -1,67 +1,184 @@
 ---
 title: 一个服务出故障，为什么整个网站没跟着崩？
-summary: 用家里的电闸讲清熔断：结算页同步调用运费险服务（举例），它故障会引发雪崩（级联故障）；超时为什么不够；熔断怎么跳闸、快速失败；关闭、打开、半开三种状态；以及熔断、限流、降级的区别。
+summary: 后台有个服务出了故障，你打开结算页，照样能下单付款。示例里，浏览器只打一个结算接口，商品、地址、运费险都是这个接口在后台依次去问；运费险服务出故障时，每次最多等 3 秒，到点还没回音就不再等，叫超时；最近十次里失败超过一半，就暂时不去调用它，本地直接跳过，过一会儿再放少量请求试一试，好了就恢复，叫熔断。超时和熔断要一起用。文末补充三种状态的名字、试了还失败怎么办、真实库的默认值与「等于或高于」、故障为什么会一路蔓延（雪崩）、熔断之后返回什么（降级，下期讲）、库存这类重要服务不能跳过、和 EP.06 健康检查的区别，以及讨论题参考答案。
 chapters:
-  - { id: hook,      title: 没跟着崩 }
-  - { id: cascade,   title: 雪崩 }
-  - { id: breaker,   title: 电闸跳闸 }
-  - { id: states,    title: 关闭是通，打开是断 }
-  - { id: half-open, title: 试着合闸 }
-  - { id: recap,     title: 回顾 }
-related: ["degradation", "rate-limit", "idempotency"]
+  - { id: services, title: 一、浏览器只打一个结算接口 }
+  - { id: waiting,  title: 二、一个服务出故障，结算页在白等 }
+  - { id: skip,     title: 三、失败太多，就先不去问 }
+  - { id: retry,    title: 四、过一会儿再试一试 }
 ---
 
-大促时某个后台服务出了故障，整个网站却没跟着崩，靠的是**熔断**（circuit breaker）：发现某个依赖持续出错，就暂时不再调用它，避免故障扩散。它的思路和家里的电闸一样。下面分 6 步讲清楚。
+后台有个服务出了故障，你打开 `shop.example/checkout` 结算页，照样能下单付款，整个网站也没跟着崩，这是怎么做到的？
 
-## 6 步看懂熔断
+> 说明：`shop.example` 是文档专用的示例域名[^rfc2606]，不是现实中的购物网站。商品「保温杯 99 元」、地址「示例路 1 号」、运费险 2 元、应付 101 元、最多等 3 秒、最近 10 次里 6 次失败、暂停 30 秒、先试 3 个请求、开发者工具里的 3.00 秒、请求数和资源百分比，都是本例的示例数据，视频里出现的地方都标了「示例数据」或「示例」。本文不代表任何一家电商平台的具体实现，也没有找到哪家大厂官方文章点名「运费险熔断」，这里只是「比如」。
 
-### 1. 没跟着崩 {#hook}
+## 跟着这张结算页走一遍
 
-{/* 配图：后台一排服务，运费险服务变红，其余亮绿 */}
+### 1. 浏览器只打一个结算接口 {#services}
 
-- 一个网站背后是很多服务互相调用。某个服务出故障很常见，关键是别让它把别的服务一起拖下水。
+{/* 配图：浏览器 → 结算接口 checkout → 后台依次问 商品服务／地址服务／运费险服务 */}
 
-### 2. 雪崩 {#cascade}
+示例里，浏览器只打一个结算接口，商品、地址、运费险，都是这个接口在后台依次去问。
 
-{/* 配图：结算页等运费险服务，请求堆积，红色蔓延到支付 */}
+每个服务只管一件事，结算接口要把它们的回话拼在一起，这一单才能完整显示出来。
 
-- 打开结算页时，系统要**同步**调用运费险服务（这里只是举例），看这一单能不能加运费险。运费险服务故障、迟迟不响应，结算页的线程和连接就被一直占着。
-- 等待的请求越积越多，订单服务也不可用，再影响支付。这叫**雪崩**，也叫**级联故障**（cascading failure）。[^azure-cb]
+也就是说：前端不会依次去调商品、地址、运费险三个依赖；开发者工具的网络面板里，你应该只看到面向页面的那一个结算入口（本例叫 `checkout`），看不到浏览器直接打 `insurance`。
 
-### 3. 电闸跳闸 {#breaker}
+### 2. 一个服务出故障，结算页在白等 {#waiting}
 
-{/* 配图：沙漏超时；电闸一路跳闸；结算页与运费险服务之间的开关，计数板（示例） */}
+{/* 配图：结算页运费险行「加载中…」一直转圈；页外「已等：0 秒→1 秒→2 秒…」；Network 唯一行 checkout　时间 Time: 3.00 秒 */}
 
-- **超时**：每次调用设等待上限，到点放弃。必须有，但高峰时每个请求仍要白等一次。[^aws-tr]
-- **熔断**：熔断器统计最近的调用结果，失败率超过阈值就跳闸，之后的请求不再调用运费险服务，直接**快速失败**、马上返回。这既保护了结算和下单，也给运费险服务恢复的时间。[^r4j-cb]
-- 示例参数（仅示例，需按流量和业务调整）：最近 100 次调用失败率达到 50% 就打开，断开 30 秒（Resilience4j 默认是 60 秒）。
-- 熔断不能代替超时，两者要一起用。
+现在运费险服务出了故障，结算接口去问它，迟迟等不到回音，页面上运费险那一行一直在转圈。
 
-### 4. 关闭是通，打开是断 {#states}
+所以每次去问都要定个时间，比如最多等三秒，到点还没回音就不再等了，这叫**超时**。Azure 的文档这样描述超时[^azure]：
 
-{/* 配图：电闸合上灯亮=关闭；跳开灯灭=打开 */}
+> "For example, you can configure an operation that invokes a service to implement a time-out. If the service fails to respond within this period, the operation replies with a failure message."
 
-- **关闭**（Closed）：正常调用，同时统计失败率。
-- **打开**（Open）：已跳闸，直接拒绝调用。
-- 反直觉之处：和电闸一样，「合上（关闭）」才通电，「跳开（打开）」才断电。
+AWS 的建议更直接[^aws-bl]：
 
-### 5. 试着合闸 {#half-open}
+> "A best practice in Amazon is to set a timeout on any remote call, and generally on any call across processes even on the same box."
 
-{/* 配图：计时器走完（示例 30 秒），放少量试探请求 */}
+在浏览器里能看到这一步：新开标签页，先打开开发者工具，再输入结算页的网址，**结算这个请求**等满三秒才回来，还是失败（示例）。**先打开开发者工具**的「网络 Network」面板时列表是空的，页面加载后列表里才出现唯一入口 `checkout` 这一行，它最后显示：
 
-- **半开**（Half-Open）：打开一段时间后，放少量请求去试探。成功就回到关闭，恢复正常调用；失败就重新打开，过一阵再试。[^r4j-cb][^azure-cb]
+```
+checkout　时间 Time: 3.00 秒
+```
 
-### 6. 回顾 {#recap}
+中文标注的意思是：浏览器只打结算接口；后台去问运费险服务，等满 3 秒还是失败。列表里不会出现 `insurance`——那是后台的依赖，不是浏览器发的。
 
-- 熔断后结算页少显示运费险这一项、下单照常，这一步是**降级**（见上期）。
-- 熔断适合**弱依赖**（挂了不影响主流程，如运费险）；库存这类**强依赖**熔断后不能「降级继续下单」：校验不了库存就快速失败、提示稍后再试，不能跳过校验。[^jd-dep][^sentinel]
-- 三者区别：**限流**管进来的流量；**熔断**隔离出故障的依赖；**降级**牺牲次要功能、保住核心功能。
-- 「扛住高峰」五招：消息队列、限流、幂等、降级、熔断。
+有了超时，页面不会一直卡着，可每个打开结算页的人，都得先白等这三秒，最后还是拿不到运费险。
+
+人一多，等着运费险回话的结算请求越积越多，一直占着网站的资源，连结算页别的部分也会被拖慢。AWS 的原句是[^aws-bl]：
+
+> "When a client is waiting longer than usual for a request to complete, it also holds on to the resources it was using for that request for a longer time."
+
+视频里的资源横条只是示例对应关系，不是真实性能监测。
+
+### 3. 失败太多，就先不去问 {#skip}
+
+{/* 配图：最近十次结果 ✗✓✗✗✓✗✓✗✓✗，失败 6、成功 4，超过一半 → 调用运费险服务：暂停调用（30 秒，示例）→ 本地跳过，不再调用 */}
+
+所以网站会记下最近十次调用运费险服务的结果，示例里，十次里有六次失败，已经超过了一半。
+
+失败太多，网站就暂时不再调用这个服务，比如先停三十秒，这期间直接跳过，不再去等它回话。
+
+这种最近失败太多，就暂时不去调用某个服务，过一会儿再试一试的做法，就叫**熔断**。Martin Fowler 2014 年的经典定义（仅参考）[^fowler]：
+
+> "Once the failures reach a certain threshold, the circuit breaker trips, and all further calls to the circuit breaker return with an error, without the protected call being made at all."
+
+熔断之后，结算接口不再问运费险，那一行马上显示暂不可用，价格、地址和提交订单按钮都照常出来。再新开标签页，输入结算页的网址，运费险那一行**马上**就是暂不可用——网站后台这次根本没再去问它。
+
+注意两点：
+
+1. **熔断打开之后是本地直接跳过，不再调用运费险服务**；不是还发一个请求再「几毫秒回来」。视频里也不再放第二处「几毫秒就回来」的网路面板。
+2. 浏览器里的 `checkout` 是示例网站面向页面的唯一结算入口。后端暂停调用运费险服务，不等于浏览器不再向网站发结算请求——页面照样问网站，只是网站没再去问运费险服务，直接把那一项标成「暂不可用」。3.00 秒 是本例的示例结果，单凭耗时也证明不了某个真实网站的后端用了熔断。
+
+你照样点提交订单，付款成功，这一单只是没加上运费险，下单和付款都没有受到影响。
+
+### 4. 过一会儿再试一试 {#retry}
+
+{/* 配图：30 秒后（示例）→ 先试 3 个请求 → 成功 3／3 → 正常调用；新开标签页，运费险 2 元可勾选，应付 99→101 元（示例） */}
+
+三十秒过去，网站先放少量请求去试一试运费险服务，都成功了，就恢复正常调用。
+
+新开标签页，输入结算页的网址，运费险那一行又有了保费，能照常勾选（勾上后应付从 99 元变成 101 元，示例），服务好了就恢复。
+
+最后记住分工：超时管的是每一次最多等多久，熔断管的是失败太多就先别去问，这两个要一起用。
+
+回到开场，运费险服务出了故障，网站暂时不再调用它，所以你照样能下单付款，网站也没被拖垮。
+
+## 视频里没讲的几件事
+
+**三种状态的名字：关闭 Closed、打开 Open、半开 Half-Open。** 视频里只说「正常调用」「暂停调用」「先放少量请求试一试」，对应的就是这三种状态。名字来自电路里的断路器，Azure 的原文就这么写（视频里不用这个比喻）[^azure]：
+
+> "These states mimic the functionality of an electrical circuit breaker: Closed: The request from the application is routed to the operation."
+
+暂停调用时，请求会立刻失败返回，不再去等[^azure]：
+
+> "Open: The request from the application fails immediately and an exception is returned to the application."
+
+试一试的阶段只放少量请求，成功了就回到正常[^azure]：
+
+> "Half-Open: A limited number of requests from the application are allowed to pass through and invoke the operation. If these requests are successful, the circuit breaker assumes that the fault that caused the failure is fixed, and the circuit breaker switches to the Closed state."
+
+**试的时候还是失败呢？** 视频只演示了「都成功了，就恢复」。要是试的请求里有一个失败，就接着暂停调用，再等一段时间才试，下次也还是只放少量请求，不会一下子全放过去[^azure]：
+
+> "If any request fails, the circuit breaker assumes that the fault is still present, so it reverts to the Open state."
+
+**「超过一半」是示例规则，真实库常用「等于或高于」。** 视频里的「最近 10 次、失败超过一半、先停 30 秒、先试 3 个、每次最多等 3 秒」都是教学示例，不是哪个库的默认值。以 Resilience4j 文档站当前稳定版 2.2.0 为例[^r4j]，失败率**等于或高于**阈值就会打开：
+
+> "The state of the CircuitBreaker changes from CLOSED to OPEN when the failure rate is equal or greater than a configurable threshold."
+
+它的默认值是按最近 100 次记录、失败率阈值 50%、打开后等 60 秒；文档表格抽成文本后属性名和数值连在一起，照录如下（原表为「属性｜默认值｜说明」三列）：
+
+> "failureRateThreshold50Configures the failure rate threshold in percentage."
+
+> "slidingWindowSize100Configures the size of the sliding window which is used to record the outcome of calls when the CircuitBreaker is closed."
+
+> "waitDurationInOpenState60000 [ms]The time that the CircuitBreaker should wait before transitioning from open to half-open."
+
+而且要先攒够**最少调用次数**（`minimumNumberOfCalls`，默认 100）才开始算失败率：
+
+> "minimumNumberOfCalls100Configures the minimum number of calls which are required (per sliding window period) before the CircuitBreaker can calculate the error rate or slow call rate."
+
+> "If only 9 calls have been evaluated the CircuitBreaker will not trip open even if all 9 calls have failed."
+
+所以按真实库的口径，已经攒够最少调用次数时，失败率正好 50% 也会打开；记录不够数时，就算全部失败也不会打开。另外不光失败，**慢调用**比例太高也能触发[^r4j]：
+
+> "The CircuitBreaker considers a call as slow when the call duration is greater than slowCallDurationThreshold When the percentage of slow calls is equal or greater the threshold, the CircuitBreaker transitions to open and starts short-circuiting calls."
+
+**为什么一个服务出故障，会把别的部分也拖垮（雪崩）。** 视频镜 8 只用白话讲了「白等的请求一直占着资源」。这种一个服务出事、一路蔓延到不相干部分的现象，常被叫作**雪崩**或级联故障。Azure 的原句[^azure]：
+
+> "However, this strategy can block concurrent requests to the same operation until the time-out period expires. These blocked requests might hold critical system resources, such as memory, threads, and database connections. This problem can exhaust resources, which might fail other unrelated parts of the system that need to use the same resources."
+
+**熔断不能代替超时。** 等待时间设得太长，熔断也护不住[^azure]：
+
+> "Inappropriate time-outs on external services: A circuit breaker might not fully protect applications from failures in external services that have long time-out periods."
+
+AWS Well-Architected 也是先超时、再决定要不要暂停调用[^aws-wa]：
+
+> "After encountering a timeout, clients make decisions to back off and retry or open a circuit breaker."
+
+> "Implement the circuit breaker pattern to avoid making remote calls when they are timing out."
+
+重试和熔断怎么配合、线程池怎么分、兜底返回值怎么设计，属于实现细节，这里不展开。
+
+**熔断之后返回什么，由调用方决定。** 可以直接报错、给个默认值，也可以像本例这样把运费险那一行先显示成「暂不可用」——这是示例网站的处理，不是熔断自动给的文案[^azure]：
+
+> "Exception handling: An application that invokes an operation through a circuit breaker must be able to handle the exceptions if the operation is unavailable."
+
+先跳过一项、保住主流程，这一步叫**降级**，下期细讲。本期只讲「先不调用」；下期讲「拿什么顶上」。Fowler 也提醒调用方要对熔断做出反应[^fowler]：
+
+> "Breakers on their own are valuable, but clients using them need to react to breaker failures."
+
+**库存这类重要服务不能这样跳过。** 运费险是可选项，跳过它照样能下单。库存不一样：查不到库存就不能「先跳过、继续成交」，只能快速失败、提示稍后再试。这不是说重要服务不能用熔断，而是熔断之后不能省略必要的校验去成交。
+
+**和 EP.06 健康检查的区别。** EP.06 里的健康检查是负载均衡器检查整台服务器、决定还往不往它那儿分流量；熔断是调用方自己根据最近的调用结果，决定先不调用某个服务。
+
+**熔断也有代价（仅参考）。** AWS Builders' Library 2019 年的文章提醒，熔断会让系统多出不好测试的模式，还可能拖长恢复时间（原文如此，"addition"）[^aws-bl]：
+
+> "Unfortunately, circuit breakers introduce modal behavior into systems that can be difficult to test, and can introduce significant addition time to recovery."
+
+**自己看的时候，先打开开发者工具。** 先打开「网络 Network」面板，再打开页面；再次打开时用新开标签页、在地址栏输入网址。否则请求可能在你打开面板之前就已经发完，列表里看不到那一行。工具里的空列表是新标签页加载前的状态，页面加载后才出现那一行；片中的时间数字在「时间 Time」列，不是标头信息。
+
+## 想一想
+
+要是最近十次调用里只有四次失败，网站会暂停调用运费险服务吗？评论区说说。
+
+**参考答案：** 不会。示例规则是最近 10 次里失败**超过一半**才暂停调用；4 次失败、6 次成功，没超过一半，网站照常调用运费险服务——不过每次仍然最多等 3 秒，超时照样起作用。换成真实的库，规则可能是失败率「等于或高于」某个比例（比如 50%），而且要先攒够最少调用次数才开始算，结论要按具体配置来看。
+
+下期：[搜索页和结算页，为什么两个价不一样？](/episodes/degradation/)
 
 ## 参考资料
 
-[^azure-cb]: Microsoft Azure Architecture Center，《Circuit Breaker pattern》（持续更新的官方文档，访问于 2026-10-13）：https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker
-[^r4j-cb]: Resilience4j 官方文档，《CircuitBreaker》（持续更新，访问于 2026-10-13）：https://resilience4j.readme.io/docs/circuitbreaker
-[^jd-dep]: 京东云开发者社区，《【稳定性】稳定性建设之依赖设计》（2024-02-23）：https://developer.jdcloud.com/article/3670
-[^sentinel]: Sentinel 官方文档《熔断降级》（持续更新，访问于 2026-10-14）：https://sentinelguard.io/zh-cn/docs/circuit-breaking.html
-[^aws-tr]: AWS Builders' Library，《Timeouts, retries, and backoff with jitter》（2019，仅参考）：https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/
+[^azure]: Microsoft Azure Architecture Center《Circuit Breaker pattern》（Last updated on 2025-03-21）：https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker 。2026-10-22 访问。
+
+[^fowler]: Martin Fowler《CircuitBreaker》（2014-03-06，仅参考）：https://martinfowler.com/bliki/CircuitBreaker.html 。2026-10-22 访问。
+
+[^r4j]: Resilience4j Docs《CircuitBreaker》（文档站稳定版 2.2.0，页面更新于 2025-01-02）：https://resilience4j.readme.io/docs/circuitbreaker 。2026-10-22 访问。
+
+[^aws-bl]: AWS Builders' Library《Timeouts, retries, and backoff with jitter》（Marc Brooker，2019-12-05，仅参考）：https://aws.amazon.com/builders-library/timeouts-retries-and-backoff-with-jitter/ 。2026-10-22 访问。
+
+[^aws-wa]: AWS Well-Architected Framework REL05-BP05《Set client timeouts》：https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_client_timeouts.html 。2026-10-22 访问。
+
+[^rfc2606]: RFC 2606 §2《Reserved Top Level DNS Names》：https://www.rfc-editor.org/rfc/rfc2606.html#section-2 ，原句 “".example" is recommended for use in documentation or as examples.” 2026-10-22 访问。
