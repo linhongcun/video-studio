@@ -10,7 +10,7 @@ IT小村工作室的互联网开发技术科普短视频项目：用生活里的
 
 ## 已上线剧集
 
-剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–14 已重制；EP.15–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。
+剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–14 已重制；EP.15–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0，只更新站点，不重发平台）。
 
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|

@@ -1,15 +1,15 @@
 import React from 'react';
-import {P} from '../theme';
+import {P, PAGE} from '../theme';
 import {browserPageBox} from './browserLayout';
 import {Copy, stateAt, UIProps} from './ui';
 
 // EP.14 degradation-v1 (knoll-props 3e5cbce8 §1): one page type, three views (search / checkout / success).
 // Every box, string, font size and state frame comes from the storyboard; nothing here is episode copy.
-const PAGE_BG = '#FFFFFF';
-const INK = P.panel;
-const COUPON_GREEN = '#15803D';        // knoll-props §1.1: coupon text colour
-const HIGHLIGHT = '#FEF3C7';           // 行底浅黄
-const HIGHLIGHT_EDGE = '#F59E0B';
+const PAGE_BG = PAGE.bg;
+const INK = PAGE.ink;
+const COUPON_GREEN = PAGE.success;        // knoll-props §1.1: coupon on dark page
+const HIGHLIGHT = PAGE.highlight;         // 行底暗琥珀
+const HIGHLIGHT_EDGE = PAGE.highlightEdge;
 type Ripple = {id: string; bornFrame: number; center: string; r0: number; r1: number; growFrames: number; holdOpacity: number; color: string};
 type Coupon = {visible: boolean; applied: boolean; text: string; highlighted: boolean};
 type Item = {text: string; button?: string; highlighted?: boolean; background?: boolean};
@@ -40,7 +40,7 @@ export const ShopPricePage: React.FC<UIProps> = ({e: original, frame}) => {
     const pad = opts.field ? 12 : 0;
     return <div key={key} data-shop-box={key} data-highlighted={opts.highlighted || undefined} role={opts.button ? 'button' : opts.field ? 'searchbox' : undefined} aria-pressed={opts.button ? !!e.buttonPressed : undefined}
       style={{...browserPageBox(e, b), boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: opts.button ? 'center' : 'flex-start', paddingLeft: opts.button ? 0 : pad, paddingRight: opts.button ? 0 : pad, borderRadius: opts.button ? 10 : 8,
-        ...(opts.field ? {border: `2px solid ${P.muted}`, background: '#F8FAFC'} : {}),
+        ...(opts.field ? {border: `2px solid ${P.muted}`, background: PAGE.field} : {}),
         ...(opts.button ? {background: P.primary, color: P.bg, filter: e.buttonPressed && key === 'button' ? 'brightness(.8)' : undefined, transform: e.buttonPressed && key === 'button' ? 'translateY(2px)' : undefined} : {color: opts.color ?? INK})}}>
       {opts.highlighted && <div aria-hidden data-row-highlight style={{position: 'absolute', top: 0, bottom: 0, left: -10, right: 0, borderRadius: 8, ...lit(true)}} />}
       <Copy text={value} size={size} width={b[2] - pad * 2 - (opts.field ? 4 : 0)} height={b[3] - (opts.field ? 4 : 0)} style={{position: 'relative', fontWeight: opts.bold ? 700 : 400, whiteSpace: 'nowrap', textAlign: opts.button ? 'center' : 'left'}}>{value}</Copy>

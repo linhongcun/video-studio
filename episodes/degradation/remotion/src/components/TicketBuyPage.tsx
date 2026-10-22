@@ -1,5 +1,5 @@
 import React from 'react';
-import {P} from '../theme';
+import {P, PAGE} from '../theme';
 import {browserPageBox} from './browserLayout';
 import {Copy, stateAt, UIProps} from './ui';
 
@@ -14,8 +14,8 @@ export const TicketBuyPage: React.FC<UIProps> = ({e: original, frame}) => {
       <Copy size={size} width={box[2]} height={box[3]} style={{fontWeight: opts.bold ? 700 : 400, whiteSpace: 'nowrap', textAlign: button ? 'center' : 'left', color: button ? undefined : opts.color}}>{value}</Copy>
     </div>;
   };
-  const headlineColor = e.view === 'busy' ? P.danger : e.view === 'ok' ? P.success : P.panel;
-  return <div data-ticket-buy-page data-view={e.view} style={{position: 'absolute', inset: 0, background: '#F8FAFC', color: P.panel}}>
+  const headlineColor = e.view === 'busy' ? P.danger : e.view === 'ok' ? P.success : PAGE.ink;
+  return <div data-ticket-buy-page data-view={e.view} style={{position: 'absolute', inset: 0, background: PAGE.bg, color: PAGE.ink}}>
     {text('title', ticket.title, e.titleSize, {bold: true})}
     {text('headline', ticket.headline, e.headlineSize, {bold: true, anchor: 'ticketHeadline', color: headlineColor})}
     {text('button', ticket.button, e.buttonSize, {bold: true, anchor: 'ticketButton', button: true})}
