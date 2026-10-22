@@ -1,12 +1,11 @@
 import React from 'react';
 import covers from '@covers';
 import {ShotElement, storyboard} from '../storyboard';
-import {P} from '../theme';
+import {P, PAGE} from '../theme';
 import {browserPageBox} from './browserLayout';
 import {Spinner} from './Spinner';
 import {Copy, stateAt, UIProps} from './ui';
 
-const PAGE_BG = '#F8FAFC';
 type Ripple = {id: string; bornFrame: number; center: 'button'; r0: number; r1: number; growFrames: number; holdOpacity: number; color: string};
 type Insurance = {state: string; text?: string; checkbox?: boolean | null; spinning?: boolean};
 const shopElements = (value: any): ShotElement[] => {
@@ -42,11 +41,11 @@ export const ShopCheckoutPage: React.FC<UIProps> = ({e: original, frame}) => {
     if (!box || value === '' || value == null) return null;
     const button = !!opts.button, shift = opts.offset ?? 0;
     return <div key={key} role={button ? 'button' : undefined} aria-pressed={button ? !!e.buttonPressed : undefined} style={{...browserPageBox(e, [box[0] + shift, box[1], box[2] - shift, box[3]]), boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: button ? 'center' : 'flex-start', overflow: 'hidden', color: opts.color, ...(button ? {borderRadius: 10, background: opts.labelOnly ? 'transparent' : P.primary, color: P.bg, filter: e.buttonPressed ? 'brightness(.8)' : undefined, transform: e.buttonPressed ? 'translateY(2px)' : undefined} : {})}}>
-      <Copy text={value} size={size} width={box[2] - shift} height={box[3]} style={{fontWeight: opts.bold ? 700 : 400, whiteSpace: 'nowrap', textAlign: button ? 'center' : 'left', color: button ? undefined : opts.color}}><span style={{background: opts.labelOnly ? P.primary : button ? undefined : PAGE_BG, boxShadow: opts.labelOnly ? `0 0 0 2px ${P.primary}` : button ? undefined : `0 0 0 6px ${PAGE_BG}`, borderRadius: 4}}>{value}</span></Copy>
+      <Copy text={value} size={size} width={box[2] - shift} height={box[3]} style={{fontWeight: opts.bold ? 700 : 400, whiteSpace: 'nowrap', textAlign: button ? 'center' : 'left', color: button ? undefined : opts.color}}><span style={{background: opts.labelOnly ? P.primary : button ? undefined : PAGE.bg, boxShadow: opts.labelOnly ? `0 0 0 2px ${P.primary}` : button ? undefined : `0 0 0 6px ${PAGE.bg}`, borderRadius: 4}}>{value}</span></Copy>
     </div>;
   };
   const button = e.view === 'checkout' && checkout.button && boxes.button && browserPageBox(e, boxes.button);
-  return <div data-shop-checkout-page data-view={e.view} data-insurance-state={state} style={{position: 'absolute', inset: 0, background: PAGE_BG, color: P.panel}}>
+  return <div data-shop-checkout-page data-view={e.view} data-insurance-state={state} style={{position: 'absolute', inset: 0, background: PAGE.bg, color: PAGE.ink}}>
     {e.view === 'checkout' && <>
       {text('button', checkout.button, e.buttonSize, {bold: true, button: true})}
       {/* Rings sit above the button and below the copy, with nested radii and a page-coloured keyline. */}
@@ -58,7 +57,7 @@ export const ShopCheckoutPage: React.FC<UIProps> = ({e: original, frame}) => {
           const nest = (e.ripples ?? []).filter((other: Ripple) => other.center === ripple.center && other.bornFrame < ripple.bornFrame).length;
           const target = ripple.r1 - nest * (ripple.r1 - ripple.r0) * .15;
           const radius = ripple.r0 + (target - ripple.r0) * progress, lit = e.litRipple === ripple.id;
-          return <g key={ripple.id} opacity={lit ? 1 : 1 + (ripple.holdOpacity - 1) * progress}><circle cx={button.left + button.width / 2} cy={button.top + button.height / 2} r={radius} fill="none" stroke={PAGE_BG} strokeWidth={(lit ? 8 : 4) + 4} /><circle cx={button.left + button.width / 2} cy={button.top + button.height / 2} r={radius} fill="none" stroke={ripple.color} strokeWidth={lit ? 8 : 4} /></g>;
+          return <g key={ripple.id} opacity={lit ? 1 : 1 + (ripple.holdOpacity - 1) * progress}><circle cx={button.left + button.width / 2} cy={button.top + button.height / 2} r={radius} fill="none" stroke={PAGE.bg} strokeWidth={(lit ? 8 : 4) + 4} /><circle cx={button.left + button.width / 2} cy={button.top + button.height / 2} r={radius} fill="none" stroke={ripple.color} strokeWidth={lit ? 8 : 4} /></g>;
         })}
       </svg>}
       {/* Redraw the label with its button-coloured halo above the rings. */}
@@ -66,8 +65,8 @@ export const ShopCheckoutPage: React.FC<UIProps> = ({e: original, frame}) => {
       {text('product', checkout.product, e.rowSize)}
       {text('address', checkout.address, e.rowSize)}
       {rowVisible && <>
-        {text('insurance', rowText, e.rowSize, {color: state === 'loading' || state === 'unavailable' ? P.muted : P.panel, offset})}
-        {checkbox && boxes.insuranceCheckbox && <div role="checkbox" aria-checked={ticked} style={{...browserPageBox(e, boxes.insuranceCheckbox), boxSizing: 'border-box', border: `2px solid ${P.panel}`, borderRadius: 4, background: ticked ? P.primary : 'white'}}>{ticked && <svg width="100%" height="100%" viewBox="0 0 24 24" aria-hidden><path d="M5 12l4 4L19 6" fill="none" stroke="white" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" /></svg>}</div>}
+        {text('insurance', rowText, e.rowSize, {color: state === 'loading' || state === 'unavailable' ? P.muted : PAGE.ink, offset})}
+        {checkbox && boxes.insuranceCheckbox && <div role="checkbox" aria-checked={ticked} style={{...browserPageBox(e, boxes.insuranceCheckbox), boxSizing: 'border-box', border: `2px solid ${PAGE.ink}`, borderRadius: 4, background: ticked ? P.primary : PAGE.field}}>{ticked && <svg width="100%" height="100%" viewBox="0 0 24 24" aria-hidden><path d="M5 12l4 4L19 6" fill="none" stroke="white" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" /></svg>}</div>}
         {state === 'loading' && boxes.insuranceSpinner && <div style={browserPageBox(e, boxes.insuranceSpinner)}><Spinner frame={t} /></div>}
       </>}
       {text('total', typeof e.total === 'string' ? e.total : checkout.total, e.rowSize)}

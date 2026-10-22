@@ -14,6 +14,9 @@ export const P = {
   danger: '#EF4444',
 } as const;
 
+// Demo page body (not chrome). See episodes/_shared/theme/pageTheme.ts.
+export {PAGE, pageBg, pageInk} from '../../../_shared/theme/pageTheme';
+
 export const FONT = '"Noto Sans SC","Noto Sans CJK SC",sans-serif';
 export const MONO = '"Noto Sans Mono","Noto Sans Mono CJK SC",monospace';
 

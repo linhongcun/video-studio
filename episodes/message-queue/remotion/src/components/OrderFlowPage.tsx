@@ -1,5 +1,5 @@
 import React from 'react';
-import {P} from '../theme';
+import {P, PAGE} from '../theme';
 import {browserPageBox} from './browserLayout';
 import {ShopImageDrawing} from './shopDrawing';
 import {Copy, stateAt, UIProps} from './ui';
@@ -15,7 +15,7 @@ export const OrderFlowPage: React.FC<UIProps> = ({e: original, frame}) => {
       <Copy size={size} width={box[2]} height={box[3]} style={{fontWeight: bold ? 700 : 400, whiteSpace: 'nowrap', textAlign: button ? 'center' : 'left'}}>{value}</Copy>
     </div>;
   };
-  return <div data-order-flow-page data-view={e.view} style={{position: 'absolute', inset: 0, background: '#F8FAFC', color: P.panel}}>
+  return <div data-order-flow-page data-view={e.view} style={{position: 'absolute', inset: 0, background: PAGE.bg, color: PAGE.ink}}>
     {e.view === 'checkout' && <>
       {text('cTitle', checkout.pageTitle, e.cTitleSize, true)}
       {boxes.cImage && <div style={browserPageBox(e, boxes.cImage)}><ShopImageDrawing id={`${e.id}-checkout`} variant={checkout.pattern} w={boxes.cImage[2]} h={boxes.cImage[3]} frame={frame} /></div>}

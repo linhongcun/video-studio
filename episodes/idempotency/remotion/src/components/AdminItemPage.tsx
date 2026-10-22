@@ -1,5 +1,5 @@
 import React from 'react';
-import {P} from '../theme';
+import {P, PAGE} from '../theme';
 import {browserPageBox} from './browserLayout';
 import {Copy, stateAt, UIProps} from './ui';
 
@@ -15,12 +15,12 @@ export const AdminItemPage: React.FC<UIProps> = ({e: original, frame}) => {
       <Copy text={value} size={size} width={box[2] - (padding + border) * 2} height={box[3] - border * 2} style={{whiteSpace: 'nowrap', textAlign: button ? 'center' : 'left'}}>{value}</Copy>
     </div>;
   };
-  return <div data-admin-item-page style={{position: 'absolute', inset: 0, background: '#F8FAFC', color: P.panel}}>
+  return <div data-admin-item-page style={{position: 'absolute', inset: 0, background: PAGE.bg, color: PAGE.ink}}>
     {text('title', admin.pageTitle, e.adminTitleSize, {fontWeight: 700})}
     {text('name', admin.name, e.adminNameSize)}
     {text('priceLabel', admin.priceLabel, e.priceLabelSize)}
-    {text('input', e.priceValue, e.inputSize, {border: `1px solid ${P.muted}`, background: '#FFFFFF', color: P.panel, padding: '0 8px'}, 'adminInput')}
+    {text('input', e.priceValue, e.inputSize, {border: `1px solid ${P.muted}`, background: PAGE.field, color: PAGE.ink, padding: '0 8px'}, 'adminInput')}
     {text('button', admin.button, e.buttonSize, {borderRadius: 10, background: e.buttonPressed ? P.secondary : P.primary, color: P.bg, fontWeight: 700, transform: e.buttonPressed ? 'translateY(2px)' : undefined})}
-    {e.saved && text('saved', `✓ ${admin.savedText}`, e.savedSize, {color: '#15803D'}, 'adminSaved')}
+    {e.saved && text('saved', `✓ ${admin.savedText}`, e.savedSize, {color: PAGE.success}, 'adminSaved')}
   </div>;
 };
