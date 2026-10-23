@@ -65,7 +65,7 @@ node scripts/prep-stills.mjs /tmp/ep-stills frames.json --covers /tmp/ep-covers
 
 `bash still.sh` 对本期 `Root.tsx` 的每个 composition id 执行 `npx remotion still`，文件在 `stills/`。查溢出仍以 `prep-stills.mjs` / `diagfit.mjs` 的日志为准。
 
-degradation 目录里已有 `cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg` 和 `poster.jpg`。本期 `package.json` 没有把 PNG 转成这些 JPG 的脚本。待补：见最新一期 knoll-props。不要改用下面的共享封面命令来生成 degradation 的封面。
+degradation 目录里已有 `cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg` 和 `poster.jpg`。本期 `package.json` 没有把 PNG 转成这些 JPG 的脚本。各尺寸的框和价格行写在 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md) 第 4 节，那里没有转 JPG 的命令。不要改用下面的共享封面命令来生成 degradation 的封面。
 
 `meta.json` 的 `poster` 在 degradation 是 `cover-16x9.jpg`。`covers.json` 的 `poster.file` 写的是 `poster.jpg`，并注明海报与 3:4 同一构图。两个字段同时存在，改海报时两处一起对，不要只改一处。
 

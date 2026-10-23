@@ -45,7 +45,7 @@ degradation 的脚本写明旧比喻作废、一条主线、术语在口播到�
 |---|---|
 | `storyboard.json` | 镜头、字幕、配音区间、元素。字段见 [storyboard-schema.md](storyboard-schema.md) |
 | `covers.json` | 16:9 / 4:3 / 3:4。重制期由本期 `remotion/src/Cover.tsx` 经别名 `@covers` 读取 |
-| `knoll-props.md` | 待补。`episodes/degradation/storyboard.json` 的 `assets.procedural.description` 指向它，本仓没有这份文件。新页型以 `episodes/degradation/remotion/src/components/` 里实际使用的组件为准 |
+| `knoll-props.md` | 制作说明。空白模板 [knoll-props.template.md](knoll-props.template.md)，EP.14 全文 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。`episodes/degradation/storyboard.json` 的 `assets.procedural.description` 仍点名 `knoll-props.md`，该期目录里没有这份文件。新页型以范例和 `episodes/degradation/remotion/src/components/` 里实际使用的组件为准 |
 
 参考镜头：`episodes/degradation` 共 6 个 `scenes`、20 个 `shots`，`meta.durationInFrames` 为 5152，`fps` 30，`frame` 只有 `browser` 和 `canvas`。
 
@@ -61,7 +61,7 @@ python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --
 
 密钥读环境变量 `MIMO_API_KEY`，或 `--env` 指向的文件（默认 `/workspace/video-studio/.mimo.env`，不在仓库里）。不要把密钥写进仓库。
 
-把逐句 wav 铺成整轨、写 `words.json`、写 `voice/shot_frames.json` 的脚本不在本仓。分镜 `timingSource` 和 `Main.tsx` 提到 `voice/place_v2.py`、`voice/shot_frames.json`、`voice/lastword_fix.py`。待补：见最新一期 knoll-props。铺轨完成前不要渲染成片。
+把逐句 wav 铺成整轨、写 `words.json`、写 `voice/shot_frames.json` 的脚本不在本仓。分镜 `timingSource` 和 `Main.tsx` 提到 `voice/place_v2.py`、`voice/shot_frames.json`、`voice/lastword_fix.py`。这些都不在 knoll-props 模板里。铺轨完成前不要渲染成片。
 
 ## 5. 冻结 SHA-256
 

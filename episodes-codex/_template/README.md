@@ -12,7 +12,7 @@
 
 1. 按 [docs/research-template.md](../../docs/research-template.md) 写公开出处。片中一条主线；多出来的事实只进文章。
 2. 照 `episodes/degradation/script.md`、`article.mdx`、`pronunciation.md` 的结构写这三份。不要先写比喻。
-3. 照 [docs/storyboard-schema.md](../../docs/storyboard-schema.md) 写 `storyboard.json` 和 `covers.json`。`knoll-props.md` 不在本仓。待补：见最新一期 knoll-props。页型从 `episodes/degradation/remotion/src/components/` 里已有的组件选，不要新造假应用窗。
+3. 照 [docs/storyboard-schema.md](../../docs/storyboard-schema.md) 写 `storyboard.json` 和 `covers.json`。制作说明从 [docs/knoll-props.template.md](../../docs/knoll-props.template.md) 抄一份再填，写法对照 [docs/examples/knoll-props.degradation.md](../../docs/examples/knoll-props.degradation.md)。页型从 `episodes/degradation/remotion/src/components/` 里已有的组件选，不要新造假应用窗。
 4. 用 [docs/voice.md](../../docs/voice.md) 的 `mimo_say.py` 逐句合成。整轨、`words.json` 和 `voice/shot_frames.json` 的铺轨脚本不在本仓，缺了就停。
 5. 冻结 SHA-256，做 [docs/validate.md](../../docs/validate.md) 的预检，再按 [docs/render.md](../../docs/render.md) 渲染。
 6. Nolan 与 Deming 审成片，村长 widget 批准之后，把站点需要的 `meta.json`、`article.mdx`、`video.mp4`、封面放进 `episodes/<slug>/`，按 [docs/publish.md](../../docs/publish.md) 发版。

@@ -32,7 +32,7 @@ degradation 的成片把整轨放在 `episodes/degradation/remotion/public/audio
 
 `asrModel` 记的是 `faster-whisper medium`。本仓没有调用它的脚本。
 
-待补：`voice/place_v2.py`、`voice/shot_frames.json`、`voice/lastword_fix.py`，以及从逐句 wav 生成上述 `words.json` 的命令。见最新一期 knoll-props。不要用猜测的参数去跑一个不存在的文件。
+`voice/place_v2.py`、`voice/shot_frames.json`、`voice/lastword_fix.py`，以及从逐句 wav 生成上述 `words.json` 的命令，都不在本仓。[knoll-props.template.md](knoll-props.template.md) 只写画面制作说明，没有这些命令。不要用猜测的参数去跑一个不存在的文件。
 
 分镜侧与词时间对齐的字段是 `shots[].voice`（`wavStart`、`wavEnd`、`localStart`、`localEnd`）和元素上的 `cueOnset`。见 [storyboard-schema.md](storyboard-schema.md)。
 
@@ -42,18 +42,37 @@ degradation 的成片把整轨放在 `episodes/degradation/remotion/public/audio
 
 ## 起音
 
-现行规则：静音之后的第一个摩擦音、爆破音或浊音，电平 ≥ −45 dB。标签入场相对该 onset 的偏差在 −6 到 +2 帧之间。
+实现是 `episodes/_shared/onset_rule.py`（2026-10-21 起，EP.06 及以后）。类名 `Rule`。模块自带的自检：
 
-degradation 分镜把同一条规则写成：
+```sh
+python3 episodes/_shared/onset_rule.py
+```
 
-- 模块：`episodes-codex/_shared/onset_rule.py`（本仓没有）
-- 检查：`episodes-codex/_shared/label_onset_strict.py`（本仓没有）
-- 窗口：`[-6, 2]`
-- 入场帧：`max(1, floor(onsetLocal) − 2) + d`
+打印 `selftest True` 只说明三条合成样本过了。它不读分镜，也不是系列预检入口。
 
-`cueOnset.rule` 在这一期使用 `pause/fricative/plosive`、`pause/voiced`、`pause/fricative (low, h/f)`、`asr/continuous`。`cueOnset` 还带 `sentence`、`asrFrame`、`onsetLocal`、`delay`。
+规则与文件头注释一致：
 
-预检时对照 `appearFrame` 与 `onsetLocal`：差值落在窗口外就退回分镜，不要渲染。没有入库的检查脚本，这一步按字段手算，或等 `onset_rule.py` 进仓后再改 [validate.md](validate.md)。
+1. 找停顿：从提示字的 ASR 起点往回搜，不早于 `max(起点 − 15 帧, 上一字 ASR 起点)`。停顿是连续不少于 2 帧、低于 −40 dB，并且停顿结束不早于上一字的 ASR 结束。起点自己落在停顿里，就用这段停顿。
+2. 起音是停顿之后第一个不低于 −45 dB、且判成摩擦音、爆破音或浊音的时刻。气口不算，跳过，起音落在真正开口处。
+3. 没有合格停顿（连读）时，起音等于提示字的 ASR 起点，`source` 为 `asr`。
+
+帧是 30 fps 的小数帧，分析步长 1/4 帧。和提示帧比较时不取整。
+
+调用：
+
+```python
+Rule(samples, sample_rate).onset(st, en, prevStart=None, prevEnd=None)
+```
+
+`samples` 是一维浮点波形。`st` / `en` 是提示字 ASR 的起止帧。`prevStart` / `prevEnd` 是上一字的 ASR 起止，句首传 `None`。返回字典含 `onset`、`source`（`pause` 或 `asr`）、`kind`、`pause`、`breaths`。
+
+degradation 的 `cueOnset.rule` 是 `source/kind`。这一期见过 `pause/fricative/plosive`、`pause/voiced`、`pause/fricative (low, h/f)`、`asr/continuous`。`cueOnset` 还带 `sentence`、`asrFrame`、`onsetLocal`、`delay`。
+
+标签窗口仍是 `[-6, 2]`，入场帧 `max(1, floor(onsetLocal) − 2) + d`。这道窗口不在 `onset_rule.py` 里算。`episodes-codex/_shared/label_onset_strict.py` 仍不在本仓。现有期级 `validate.py` 也不 import 这个模块。引用方式见 [validate.md](validate.md)。
+
+冻结分镜 `meta.onsetRule.module` 还写着仓外路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py`。以 `episodes/_shared/onset_rule.py` 这一份为准。本仓没有按期拷贝。期目录不要再复制算法；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
+
+预检时对照 `appearFrame` 与 `onsetLocal`：差值落在窗口外就退回分镜，不要渲染。
 
 ## 读音表
 
