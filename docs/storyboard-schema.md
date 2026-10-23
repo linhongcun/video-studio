@@ -12,7 +12,7 @@ degradation 实际使用的键：
 
 和闸门直接相关的几项：
 
-- `onsetRule.module` / `onsetRule.checker`：degradation 冻结稿写的是仓外路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py` 与同目录的 `label_onset_strict.py`。仓内起音模块是 `episodes/_shared/onset_rule.py`。`label_onset_strict.py` 仍不在本仓。
+- `onsetRule.module` / `onsetRule.checker`：degradation 冻结稿写的是仓外路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py` 与同目录的 `label_onset_strict.py`。仓内对应 `episodes/_shared/onset_rule.py` 与 `episodes/_shared/label_onset_strict.py`。检查器只 import 这一份算法。
 - `onsetRule.window`：`[-6, 2]`。`onsetRule.frameFormula`：`max(1, floor(onsetLocal) − 2) + d`。
 - `safeArea`：`margin` 80，`subtitleBand` `[900, 980]`，`contentMaxY` 880，`watermarkClearZone` `[1680, 30, 1880, 100]`。
 - `devtoolsShots`：这一期是空数组。现行上限是 2 处，见 [RULES.md](RULES.md)。

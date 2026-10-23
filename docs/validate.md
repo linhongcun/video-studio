@@ -20,7 +20,13 @@ Deming 预检在配音和分镜 SHA-256 冻结之后、渲染之前。成片审�
 - 入场帧按 `meta.onsetRule.frameFormula`：`max(1, floor(onsetLocal) − 2) + d`。
 - `appearFrame` 或关键帧 `frame` 相对 onset 的差要在 `[-6, 2]`。
 
-阈值写在 [RULES.md](RULES.md) 和 [voice.md](voice.md)。实现是 `episodes/_shared/onset_rule.py`。本仓没有 `label_onset_strict.py`，也没有覆盖全系列的起音命令。下面只是 import，不是新的检查入口。
+阈值写在 [RULES.md](RULES.md) 和 [voice.md](voice.md)。算法是 `episodes/_shared/onset_rule.py`。窗口由检查器计算：
+
+```sh
+python3 episodes/_shared/label_onset_strict.py --dir EPDIR [--exc 06,18] [--out FILE]
+```
+
+退出码 0：没有 FAIL、NOT FOUND 或 MISMATCH。`--exc` 只把这些镜头（id 前两位）的窗口越界改记为 EXCEPTION，不抵消 NOT FOUND 和 MISMATCH。退出码 1：仍有 FAIL、NOT FOUND 或 cueLog 的 MISMATCH。报告默认 `{期目录}/label-onset-strict.txt`。`--words 红包,降级` 只列出规则起音，退出码 0。没有 `storyboard.json` 时必须给 `--words`。wav 默认 `{D}/voice.wav`，没有则用 `{D}/remotion/public/audio/voice.wav`。
 
 期目录里的 `validate.py` 目前都不 import 它，包括 `episodes/db-index/validate.py` 以及依赖 `episodes/_audit/` 的那几份。`episodes/http-request/validate_v6.py` 的文档字符串写的是另接 `episodes/http-request/onset.py`，那个文件也不在本仓。不要把那次未接线的调用改成对共享模块的调用后再当成 EP.01 已经接上。
 
@@ -32,7 +38,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 from onset_rule import Rule
 ```
 
-`label_onset_strict.py` 若以后放进仓库，同样 `from onset_rule import Rule`，先把 `episodes/_shared` 放进 `sys.path`。不要在 `episodes-codex/_shared/` 再留一份。`Rule(samples, sr).onset(st, en, prevStart, prevEnd)` 的参数见 [voice.md](voice.md)。返回的 `onset` 是小数帧。窗口仍用分镜里的 `appearFrame − onsetLocal`，模块自己不算这道窗口。
+`episodes/_shared/label_onset_strict.py` 在文件开头把所在目录放进 `sys.path`，再 `import onset_rule`。不要在 `episodes-codex/_shared/` 再留一份，也不要复制 `Rule` 的函数体。`Rule(samples, sr).onset(st, en, prevStart, prevEnd)` 的参数见 [voice.md](voice.md)。返回的 `onset` 是小数帧。窗口 `[-6, 2]` 在检查器里算：`diff = cueFrameAbs − onsetAbs`。
 
 以 `episodes/_shared/onset_rule.py` 为准。本仓没有按期拷贝。期目录需要同名文件时，symlink 到 `_shared`，或只写转发 import 的薄包装，不要复制函数体。
 

@@ -28,7 +28,7 @@ EP.14（`episodes/degradation`，分镜 slug `degradation-v1`）之后系列暂�
 - 音色「冰糖」（`episodes/_shared/tts/mimo_say.py`，模型 `mimo-v2.5-tts`）。
 - 成片响度 −16 LUFS。混音脚本 `episodes/_shared/music/mix_bgm.py` 的 `--lufs` 默认就是 −16，真峰值目标 −2.0 dBTP。
 - 起音：静音之后第一个摩擦音、爆破音或浊音，阈值 ≥ −45 dB。标签对齐到 onset −6..+2 帧。分镜里的写法是 `max(1, floor(onsetLocal) − 2) + d`，窗口 `[-6, 2]`，见 `episodes/degradation/storyboard.json` 的 `meta.onsetRule`。
-- 算法实现是 `episodes/_shared/onset_rule.py`（类 `Rule`）。冻结分镜 `meta.onsetRule.module` 仍写着仓外旧路径 `episodes-codex/_shared/onset_rule.py`，以仓内这一份为准，不要再复制。`label_onset_strict.py` 仍不在本仓。import 见 [voice.md](voice.md) 和 [validate.md](validate.md)。
+- 算法实现是 `episodes/_shared/onset_rule.py`（类 `Rule`）。检查器是 `episodes/_shared/label_onset_strict.py`，只 import 这一份。冻结分镜 `meta.onsetRule.module` 与 `meta.onsetRule.checker` 仍写着仓外路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py` 和同目录的 `label_onset_strict.py`，对应仓内这两份，不要再复制。import 见 [voice.md](voice.md) 和 [validate.md](validate.md)。
 
 ## 出处
 

@@ -45,7 +45,7 @@ degradation 的脚本写明旧比喻作废、一条主线、术语在口播到�
 |---|---|
 | `storyboard.json` | 镜头、字幕、配音区间、元素。字段见 [storyboard-schema.md](storyboard-schema.md) |
 | `covers.json` | 16:9 / 4:3 / 3:4。重制期由本期 `remotion/src/Cover.tsx` 经别名 `@covers` 读取 |
-| `knoll-props.md` | 制作说明。空白模板 [knoll-props.template.md](knoll-props.template.md)，EP.14 全文 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。`episodes/degradation/storyboard.json` 的 `assets.procedural.description` 仍点名 `knoll-props.md`，该期目录里没有这份文件。新页型以范例和 `episodes/degradation/remotion/src/components/` 里实际使用的组件为准 |
+| `knoll-props.md` | 制作说明。空白模板 [knoll-props.template.md](knoll-props.template.md)，EP.14 全文 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。可生成：`python3 episodes/_shared/make_knoll_props.py --dir EPDIR`（骨架，散文是待填）或 `--spec SPEC.py`。模板仍是标题和散文的参照。`episodes/degradation/storyboard.json` 的 `assets.procedural.description` 仍点名 `knoll-props.md`，该期目录里没有这份文件。新页型以范例和 `episodes/degradation/remotion/src/components/` 里实际使用的组件为准 |
 
 参考镜头：`episodes/degradation` 共 6 个 `scenes`、20 个 `shots`，`meta.durationInFrames` 为 5152，`fps` 30，`frame` 只有 `browser` 和 `canvas`。
 
@@ -61,7 +61,25 @@ python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --
 
 密钥读环境变量 `MIMO_API_KEY`，或 `--env` 指向的文件（默认 `/workspace/video-studio/.mimo.env`，不在仓库里）。不要把密钥写进仓库。
 
-把逐句 wav 铺成整轨、写 `words.json`、写 `voice/shot_frames.json` 的脚本不在本仓。分镜 `timingSource` 和 `Main.tsx` 提到 `voice/place_v2.py`、`voice/shot_frames.json`、`voice/lastword_fix.py`。这些都不在 knoll-props 模板里。铺轨完成前不要渲染成片。
+把逐句 wav 铺成整轨、写 `words.json`、写 `voice/shot_frames.json` 的脚本仍不在本仓：`voice/build.py`（逐句 −21 LUFS，镜内间隔 0.35 秒、镜间 0.70 秒，句前 0.30 秒、句尾 0.60 秒，每镜至少 225 帧，整轨 −16 LUFS，真峰值限制）、`asr.py` / `asr_full.py`（faster-whisper medium）、`onsets.py`、`lastword_fix.py`、`cues_rule.py`。这些产出 `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`。缺了就停，不要新写同名文件顶上。铺轨完成前不要渲染成片。
+
+整轨已经在手、并且是 EP.05 起那种整轨放在第 0 帧时：
+
+```sh
+python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole
+```
+
+先核对 `shots[].voice` 与 wav：`|from + localStart − wavStart|` 默认不超过 0.5 帧，`wavEnd` 不超出总帧，按时间排的句子不重叠，样本数等于 `durationInFrames × 1600`。通过后把源文件原样复制到 `remotion/public/audio/voice.wav`（实体文件，不是软链）。`--no-copy` 只写报告。失败时打印有问题的 id，退出码 1，不写文件。
+
+`--mode place` 只给 EP.02–04 那种先分镜后剪句：从 `wavStart..wavEnd` 剪出，放在 `from + localStart`，再做到 −16 LUFS，软拐点 0.7。`spansInto` 的句子播完，不在镜尾切断。输出默认 `voice/placed.wav`。
+
+标签窗口：
+
+```sh
+python3 episodes/_shared/label_onset_strict.py --dir EPDIR
+```
+
+任一 FAIL、NOT FOUND、MISMATCH 则退出码 1。报告默认 `label-onset-strict.txt`。已批准的例外用 `--exc 06,18`（对镜头 id 前两位）。制作说明用上一节的 `make_knoll_props.py`。
 
 ## 5. 冻结 SHA-256
 
