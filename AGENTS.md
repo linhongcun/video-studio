@@ -42,8 +42,8 @@ EP.14 之后暂停。恢复之前不要开新期，不要从模板复制工程�
 | `episodes-codex/` | 现行制作目录。本仓还没有这一套工程，只有 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
 | `*-backup/` | 各角色备份。本仓没有这些目录 |
 | `share/` | 本仓没有。规范不要写回这里 |
-| `episodes/_shared/` | 页身色、水印规范、混音、TTS、旧的共享封面工程 |
-| `docs/` | 下面这些手册 |
+| `episodes/_shared/` | 页身色、水印规范、混音、TTS、旧的共享封面工程，以及起音模块 `onset_rule.py` |
+| `docs/` | 下面这些手册。制作说明模板是 `docs/knoll-props.template.md` |
 | `site/` | Astro 站点。`site/package.json` 的 `version` 是三段式版本号 |
 | `covers/cover-spec.json` | 只给共享封面工程用，不含 degradation |
 
@@ -58,6 +58,7 @@ EP.14 之后暂停。恢复之前不要开新期，不要从模板复制工程�
 7. [docs/validate.md](docs/validate.md)
 8. [docs/publish.md](docs/publish.md)
 9. [episodes-codex/_template/README.md](episodes-codex/_template/README.md)
+10. [docs/knoll-props.template.md](docs/knoll-props.template.md) — 制作说明模板；EP.14 全文在 [docs/examples/knoll-props.degradation.md](docs/examples/knoll-props.degradation.md)
 
 ## 禁止
 
@@ -66,5 +67,6 @@ EP.14 之后暂停。恢复之前不要开新期，不要从模板复制工程�
 - 把讲解表、图、流程图塞进浏览器壳。浏览器壳只给真网页、地址栏和 DevTools。
 - 大面积纯白页身。页身色用 `episodes/_shared/theme/pageTheme.ts` 的 `pageBg` / `pageInk`。
 - 新发快手或 X，或把平台链接发到群里。
-- 编造本仓没有的脚本。`knoll-props.md`、`episodes-codex/_shared/onset_rule.py`、`voice/place_v2.py` 目前都不在仓库里，碰到就停在手册里的「待补」。
+- 编造本仓没有的脚本。`label_onset_strict.py` 和 `voice/place_v2.py` 仍不在仓库里，碰到就停，不要新写同名文件顶上。
+- 另存一份起音算法。唯一实现是 `episodes/_shared/onset_rule.py`。冻结分镜里的 `episodes-codex/_shared/onset_rule.py` 是旧路径。期目录不要复制；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
 - 把 `episodes/*/validate.py` 里的「画面不出数字 / 不出英文」当成现行检查。那些脚本还依赖本仓没有的 `episodes/_audit/`。

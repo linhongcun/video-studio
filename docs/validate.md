@@ -20,7 +20,21 @@ Deming 预检在配音和分镜 SHA-256 冻结之后、渲染之前。成片审�
 - 入场帧按 `meta.onsetRule.frameFormula`：`max(1, floor(onsetLocal) − 2) + d`。
 - `appearFrame` 或关键帧 `frame` 相对 onset 的差要在 `[-6, 2]`。
 
-阈值（静音后第一个摩擦音、爆破音或浊音 ≥ −45 dB）写在 [RULES.md](RULES.md) 和 [voice.md](voice.md)。实现文件 `episodes-codex/_shared/onset_rule.py` 不在本仓。待补：见最新一期 knoll-props。不要新写一个同名模块来代替缺失文件。
+阈值写在 [RULES.md](RULES.md) 和 [voice.md](voice.md)。实现是 `episodes/_shared/onset_rule.py`。本仓没有 `label_onset_strict.py`，也没有覆盖全系列的起音命令。下面只是 import，不是新的检查入口。
+
+期目录里的 `validate.py` 目前都不 import 它，包括 `episodes/db-index/validate.py` 以及依赖 `episodes/_audit/` 的那几份。`episodes/http-request/validate_v6.py` 的文档字符串写的是另接 `episodes/http-request/onset.py`，那个文件也不在本仓。不要把那次未接线的调用改成对共享模块的调用后再当成 EP.01 已经接上。
+
+期目录里的脚本要使用规则时：
+
+```python
+import os, sys
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '_shared'))
+from onset_rule import Rule
+```
+
+`label_onset_strict.py` 若以后放进仓库，同样 `from onset_rule import Rule`，先把 `episodes/_shared` 放进 `sys.path`。不要在 `episodes-codex/_shared/` 再留一份。`Rule(samples, sr).onset(st, en, prevStart, prevEnd)` 的参数见 [voice.md](voice.md)。返回的 `onset` 是小数帧。窗口仍用分镜里的 `appearFrame − onsetLocal`，模块自己不算这道窗口。
+
+以 `episodes/_shared/onset_rule.py` 为准。本仓没有按期拷贝。期目录需要同名文件时，symlink 到 `_shared`，或只写转发 import 的薄包装，不要复制函数体。
 
 `words.json` 的 `onsetTable` 和 `lastWordFix` 用来核对句首和句末字，不代替标签窗口。
 
@@ -62,7 +76,7 @@ node scripts/diagfit.mjs /tmp/ep-stills frames.json --covers
 
 degradation 的涟漪对象在 `ripples[]`：`id`、`bornFrame`、`center`、`r0`、`r1`、`growFrames`、`holdOpacity`、`color`。`meta.timingSource` 写明点击波纹 20 帧长满，实例的 `growFrames` 为 20。
 
-没有涟漪检查脚本。预检时对照 `timingSource` 和 `growFrames`。组件绘制在 `episodes/degradation/remotion/src/components/ShopPricePage.tsx`（以及同目录里同样读取 `e.ripples` 的页面）。待补：见最新一期 knoll-props。
+没有涟漪检查脚本。预检时对照 `timingSource` 和 `growFrames`。组件绘制在 `episodes/degradation/remotion/src/components/ShopPricePage.tsx`（以及同目录里同样读取 `e.ripples` 的页面）。EP.14 的波纹字段写在 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。
 
 ## 其他和分镜写在一起的限制
 

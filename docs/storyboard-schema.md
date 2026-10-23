@@ -1,6 +1,6 @@
 # 分镜字段
 
-从 `episodes/degradation/storyboard.json` 和 `episodes/degradation/covers.json` 归纳。该分镜 `meta.slug` 是 `degradation-v1`。没有出现的字段不要加。`knoll-props.md` 被 `assets.procedural.description` 点名，本仓没有这份文件；组件行为以 `episodes/degradation/remotion/src/components/` 为准。待补：见最新一期 knoll-props。
+从 `episodes/degradation/storyboard.json` 和 `episodes/degradation/covers.json` 归纳。该分镜 `meta.slug` 是 `degradation-v1`。没有出现的字段不要加。`assets.procedural.description` 点名 `knoll-props.md`；空白模板是 [knoll-props.template.md](knoll-props.template.md)，EP.14 全文范例是 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。`episodes/degradation/` 里没有这份期文件。组件行为以范例和 `episodes/degradation/remotion/src/components/` 为准。
 
 顶层三个键：`meta`、`assets`、`scenes`。没有顶层 `cover`。封面规格在 `meta.covers`，渲染读取的是同目录 `covers.json`（`remotion.config.ts` 把 `@covers` 指到 `../covers.json`）。
 
@@ -12,7 +12,7 @@ degradation 实际使用的键：
 
 和闸门直接相关的几项：
 
-- `onsetRule.module` / `onsetRule.checker`：指向 `episodes-codex/_shared/onset_rule.py` 与 `label_onset_strict.py`（本仓无文件）。
+- `onsetRule.module` / `onsetRule.checker`：degradation 冻结稿写的是仓外路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py` 与同目录的 `label_onset_strict.py`。仓内起音模块是 `episodes/_shared/onset_rule.py`。`label_onset_strict.py` 仍不在本仓。
 - `onsetRule.window`：`[-6, 2]`。`onsetRule.frameFormula`：`max(1, floor(onsetLocal) − 2) + d`。
 - `safeArea`：`margin` 80，`subtitleBand` `[900, 980]`，`contentMaxY` 880，`watermarkClearZone` `[1680, 30, 1880, 100]`。
 - `devtoolsShots`：这一期是空数组。现行上限是 2 处，见 [RULES.md](RULES.md)。

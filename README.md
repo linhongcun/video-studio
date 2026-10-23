@@ -50,7 +50,7 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 
 ```
 AGENTS.md                 给 coding agent 的入口
-docs/                     RULES、pipeline 及分镜、配音、渲染、校验、发布手册
+docs/                     RULES、pipeline、knoll-props.template.md、examples/knoll-props.degradation.md
 episodes-codex/_template/ 开新期的说明（工程文件尚未入库；暂停期间不要开新期）
 episodes/
   <slug>/                 站点内容。每期一个目录
@@ -70,6 +70,7 @@ episodes/
     music/                mix_bgm.py 与 Wallpaper
     theme/pageTheme.ts    演示页身 pageBg / pageInk
     tts/                  mimo_say.py（冰糖）
+    onset_rule.py         起音规则（EP.06 起）。期目录不要另存一份
 site/                     Astro 站点（GitHub Pages）
 covers/cover-spec.json    仅共享封面工程使用的期
 ```
