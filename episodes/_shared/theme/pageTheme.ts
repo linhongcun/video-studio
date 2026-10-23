@@ -2,7 +2,7 @@
  * Demo page body palette (pageBg / pageInk).
  * Separate from remotion P chrome theme: browser chrome / DevTools stay on P.*;
  * in-page surfaces (*Page.tsx) use PAGE.* so they match the dark frame without
- * large pure-white fills.
+ * large pure-white fills. Standing wording: docs/RULES.md.
  */
 export const PAGE = {
   /** Page body background — slate-900, a touch above P.bg so the chrome edge reads. */
