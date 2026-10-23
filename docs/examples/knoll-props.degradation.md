@@ -2,7 +2,7 @@
 
 空白模板在 [../knoll-props.template.md](../knoll-props.template.md)。下面是 EP.14 的完整制作说明，用来看每一节该写成什么样。文中的哈希、镜号和坐标属于这一期，不要抄进新期。
 
-文首点名的 `make_knoll_props.py` 不在本仓，不要去跑。
+文首点名的 `make_knoll_props.py` 现为 `episodes/_shared/make_knoll_props.py`，本文第 9 行起可用 `--spec docs/examples/knoll_props_spec.degradation.py` 逐字节重现。
 
 ---
 

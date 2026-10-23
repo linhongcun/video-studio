@@ -18,7 +18,7 @@ python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --
 
 ## 整轨、词时间和镜头帧
 
-degradation 的成片把整轨放在 `episodes/degradation/remotion/public/audio/voice.wav`。`remotion.config.ts` 用这个文件是否存在来定义 `__HAS_VOICE_AUDIO__`。`Main.tsx` 从第 0 帧播放 `staticFile('audio/voice.wav')`，注释写明轨道已按 `shots[].voice` 铺好（`voice/place_v2.py`）。
+degradation 的成片把整轨放在 `episodes/degradation/remotion/public/audio/voice.wav`。`remotion.config.ts` 用这个文件是否存在来定义 `__HAS_VOICE_AUDIO__`。`Main.tsx` 从第 0 帧播放 `staticFile('audio/voice.wav')`，注释写明轨道已按 `shots[].voice` 铺好（`voice/place_v2.py`）。EP.05–EP.14 这份公开轨与 `voice.wav` 逐字节相同，用 `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole`：校验后原样复制，不重新编码。`--mode place` 才是 EP.02–04 的剪句铺轨。
 
 `words.json` 顶层字段：`script`、`scriptSha256`、`fps`、`audio`、`audioSha256`、`durationFrames`、`asrModel`、`note`、`shots`、`onsetTable`、`lastWordFix`。
 
@@ -32,7 +32,7 @@ degradation 的成片把整轨放在 `episodes/degradation/remotion/public/audio
 
 `asrModel` 记的是 `faster-whisper medium`。本仓没有调用它的脚本。
 
-`voice/place_v2.py`、`voice/shot_frames.json`、`voice/lastword_fix.py`，以及从逐句 wav 生成上述 `words.json` 的命令，都不在本仓。[knoll-props.template.md](knoll-props.template.md) 只写画面制作说明，没有这些命令。不要用猜测的参数去跑一个不存在的文件。
+`voice/shot_frames.json`、`voice/lastword_fix.py`，以及从逐句 wav 生成上述 `words.json` 的命令，都不在本仓。`voice/build.py`、`asr.py`、`asr_full.py`、`onsets.py`、`cues_rule.py` 也不在。整轨在手之后的放置是 `episodes/_shared/place_v2.py`。[knoll-props.template.md](knoll-props.template.md) 只写画面制作说明，没有这些铺轨命令。不要用猜测的参数去跑一个不存在的文件。
 
 分镜侧与词时间对齐的字段是 `shots[].voice`（`wavStart`、`wavEnd`、`localStart`、`localEnd`）和元素上的 `cueOnset`。见 [storyboard-schema.md](storyboard-schema.md)。
 
@@ -68,7 +68,13 @@ Rule(samples, sample_rate).onset(st, en, prevStart=None, prevEnd=None)
 
 degradation 的 `cueOnset.rule` 是 `source/kind`。这一期见过 `pause/fricative/plosive`、`pause/voiced`、`pause/fricative (low, h/f)`、`asr/continuous`。`cueOnset` 还带 `sentence`、`asrFrame`、`onsetLocal`、`delay`。
 
-标签窗口仍是 `[-6, 2]`，入场帧 `max(1, floor(onsetLocal) − 2) + d`。这道窗口不在 `onset_rule.py` 里算。`episodes-codex/_shared/label_onset_strict.py` 仍不在本仓。现有期级 `validate.py` 也不 import 这个模块。引用方式见 [validate.md](validate.md)。
+标签窗口仍是 `[-6, 2]`，入场帧 `max(1, floor(onsetLocal) − 2) + d`。这道窗口不在 `onset_rule.py` 里算，由检查器算：`diff = 镜头绝对帧 − onset`。
+
+```sh
+python3 episodes/_shared/label_onset_strict.py --dir EPDIR
+```
+
+退出码 1 表示有 FAIL、NOT FOUND 或 MISMATCH。`--exc 06,18` 把对应镜头 id 前两位的窗口越界改记为 EXCEPTION。报告默认写在当期目录的 `label-onset-strict.txt`。现有期级 `validate.py` 不 import 这个模块。冻结分镜 `meta.onsetRule.checker` 里的 `/workspace/video-studio/episodes-codex/_shared/label_onset_strict.py` 就是这一份。引用方式见 [validate.md](validate.md)。
 
 冻结分镜 `meta.onsetRule.module` 还写着仓外路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py`。以 `episodes/_shared/onset_rule.py` 这一份为准。本仓没有按期拷贝。期目录不要再复制算法；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
 

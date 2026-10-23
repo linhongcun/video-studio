@@ -4,7 +4,7 @@
 
 分镜 `assets.procedural.description` 可以点名这份说明。写进这里的文字、颜色、坐标和帧号必须与冻结的 `storyboard.json`、`covers.json` 逐字一致。渲染代码不写死这些值。
 
-EP.14 范例的文首写「由 `make_knoll_props.py` 从分镜生成」。该脚本不在本仓，不要去跑。本模板用手填。
+EP.14 范例的文首写「由 `make_knoll_props.py` 从分镜生成」。脚本在 `episodes/_shared/make_knoll_props.py`。骨架：`python3 episodes/_shared/make_knoll_props.py --dir EPDIR`。有散文时加 `--spec SPEC.py`（EP.14 为 `docs/examples/knoll_props_spec.degradation.py`）。本模板仍是标题和散文的参照。
 
 ## 文首（必填）
 
