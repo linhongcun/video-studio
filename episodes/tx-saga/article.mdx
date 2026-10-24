@@ -1,0 +1,54 @@
+---
+title: Saga：扣款成功，缺货了怎么办？
+summary: 一步已经提交、后一步明确失败时，用新的业务操作补偿前一步。用扣款和退款说明原记录为何保留，以及补偿失败怎样恢复。
+chapters:
+  - { id: problem, title: 先看问题 }
+  - { id: success, title: 各步先提交 }
+  - { id: compensate, title: 失败怎么收尾 }
+  - { id: recover, title: 重试与适用边界 }
+related: ["distributed-tx-intro", "tx-2pc", "tx-tcc", "tx-outbox"]
+---
+
+## 先看问题 {#problem}
+
+订单8124购买商品7042一件，金额200元。我们约定：扣款和库存都完成，才能确认本例订单。账户1000元、库存4件是成功分支的起点；缺货分支明确重置为账户1000元、库存0件。它们是互斥教学分支，不是同一次购买顺序改变了库存。
+
+这里的问题是：扣款已经保存，后续库存明确拒绝，前一步怎么收尾？如果还不熟悉“本地提交边界”，先看[分布式事务入门](../distributed-tx-intro/)。
+
+## 各步先提交 {#success}
+
+Saga将一个业务流程拆成本地事务序列。每一步完成自己的提交，再继续推进后面的步骤。流程需要依据故障性质选择继续尝试，或执行业务补偿。[^saga]
+
+本例先在账户库扣200，余额1000→800，并保存扣款流水。随后库存库扣1，库存4→3并提交，最后确认订单。两次提交有先后，不是两个数据库天然拥有同一笔原子提交。
+
+视频只讲这条执行主线。实际可由中心流程协调，也可通过参与者的事件衔接；这两种组织方式不会消除持久进度、安全重试和业务边界的要求。[^saga]
+
+## 失败怎么收尾 {#compensate}
+
+重新从1000元、库存0开始。扣款提交后余额800，库存处理明确拒绝。账户扣款的原事务已经结束，库存库的回滚不能替它撤掉已提交操作。[^local]
+
+此时本例选择退款。退款是一笔**新的业务操作**：账户增加200，余额800→1000，新增退款流水；原来的扣款流水−200仍然存在。
+
+| 本例账户流水 | 金额 | 含义 |
+|---|---:|---|
+| 原扣款 | −200 | 已发生、已提交 |
+| 新退款R8124 | ＋200 | 为本次失败做补偿 |
+
+这是业务上的收尾，不是抹除历史。现实的补偿还要考虑并发、手续费、部分退款或不可逆动作，不能把“补偿”泛化为直接将当前值覆写成旧快照。[^compensate]
+
+## 重试与适用边界 {#recover}
+
+同一退款R8124再次抵达，应认出此前结果，不能再增加200。退款结果与已处理标记要在本地事务内正确衔接，并对并发重复提供唯一约束、锁或等价保护。只先查一下内存，无法消除故障空档。[^safe]
+
+视频另外重置到“扣款已提交、退款尚未完成”的800元阶段。退款服务故障时，流程必须保留“欠着一次退款”的持久进度；重复请求仍须安全，持续失败应告警并安排必要人工处理。[^retry]没有恢复完成，就不能把订单标成已收尾。[^compensate]
+
+Saga也不提供天然全局隔离：前一步已经提交的中间结果，可能被其他操作看到。能否接受这些中间状态、哪些动作可以补偿，都要在业务规则中先确定。[^local]
+
+这一集只回答：**各步先提交以后，后续失败怎样用新动作收尾。** 不能补偿的动作，不应事后假设能够自动还原。[^compensate]
+
+[^saga]: [AWS Prescriptive Guidance：Saga patterns](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-patterns.html)，本地事务序列、continuation/compensation及实现组织方式，访问2026-10-24。
+[^local]: [Azure Architecture Center：Saga distributed transactions](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)，Solution、Irreversible local database changes与Potential data anomalies；实际读取[官方GitHub正文](https://github.com/MicrosoftDocs/architecture-center/blob/main/docs/patterns/saga-content.md)，访问2026-10-24。
+[^compensate]: [Azure Architecture Center：Compensating Transaction](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)，Solution、恢复进度与补偿边界，2026-04更新，访问2026-10-24。
+[^retry]: [Azure Architecture Center：Retry](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry)，Idempotency及Retry strategies；实际读取[官方GitHub正文](https://github.com/MicrosoftDocs/architecture-center/blob/main/docs/patterns/retry-content.md)，访问2026-10-24。
+
+[^safe]: [AWS Builders’ Library：Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，请求标识与业务修改原子处理，访问2026-10-24。
