@@ -137,7 +137,7 @@ export function computeChapters(slug: string, fm: any[] = []) {
   return {chapters, duration: Math.round((finalFrames / fps) * 10) / 10, fps};
 }
 
-/** WebVTT 字幕：与 Remotion Main.tsx 相同的分配规则（v2 的标点集合更全，两套都兼容）（按字数比例铺满真实音频时长） */
+/** WebVTT 字幕优先使用冻结的镜内 from/to；旧稿没有完整时序时按字数分配。 */
 export function buildVtt(slug: string) {
   if (!fs.existsSync(path.join(EP_DIR, slug, 'storyboard.json'))) return 'WEBVTT\n';
   const {fps, scenes} = shotPlan(slug);
@@ -149,8 +149,15 @@ export function buildVtt(slug: string) {
   const v2 = scenes.some((s: any) => s.chapterId);
   const n = (s: string) => s.replace(v2 ? /[\s，。：？！；、,.:?!;—“”"()（）]/g : /[\s，。：？！,.:?!—]/g, '').length || 1;
   const cues: string[] = [];
-  for (const sc of scenes) for (const {sh, from, audioFrames} of sc.shots) {
+  for (const sc of scenes) for (const {sh, from, dur, audioFrames} of sc.shots) {
     const subs = sh.subtitles ?? [];
+    const timed = subs.length > 0 && subs.every((s: any, i: number) =>
+      Number.isInteger(s.from) && Number.isInteger(s.to) && s.from >= 0 && s.to >= s.from && s.to < dur
+      && (i === 0 || s.from > subs[i - 1].to));
+    if (timed) {
+      subs.forEach((s: any) => cues.push(`${ts(from + s.from)} --> ${ts(from + s.to + 1)}\n${s.text}`));
+      continue;
+    }
     const total = subs.reduce((a: number, s: any) => a + n(s.text), 0);
     let t = 0;
     subs.forEach((s: any, i: number) => {

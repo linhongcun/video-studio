@@ -6,7 +6,7 @@
 
 ## 系列状态
 
-EP.14 之后暂停。恢复之前不要开新期，不要从模板复制工程。详见 [docs/RULES.md](docs/RULES.md) 的 STATUS。
+系列默认暂停。2026-10-24 用户单独批准 #66 的 EP.15 重制及 GitHub 站点部署（v0.45.1，只上站点）；其他新期与平台新发尚未恢复。详见 [docs/RULES.md](docs/RULES.md) 的 STATUS。
 
 ## 角色
 
@@ -38,7 +38,7 @@ EP.14 之后暂停。恢复之前不要开新期，不要从模板复制工程�
 |---|---|
 | `episodes/` | 站点内容。已上线各期的 `meta.json`、`article.mdx`、`video.mp4` 和重制工程都在这里 |
 | `episodes/degradation/` | 最新重制参考。分镜 `meta.slug` 是 `degradation-v1`，站点 slug 仍是 `degradation` |
-| `episodes-codex/` | 现行制作目录。本仓还没有这一套工程，只有 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
+| `episodes-codex/` | 现行制作目录。`db-index/` 为 EP.15 已批准的重制工程；其他期入口见 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
 | `*-backup/` | 各角色备份。本仓没有这些目录 |
 | `share/` | 本仓没有。规范不要写回这里 |
 | `episodes/_shared/` | 页身色、水印规范、混音、TTS、旧的共享封面工程，以及 `onset_rule.py`、`label_onset_strict.py`、`place_v2.py`、`make_knoll_props.py`、`voice/`（配音整轨） |

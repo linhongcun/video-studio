@@ -1,6853 +1,1071 @@
 {
- "meta": {
-  "title": "《加个索引，为啥就快了？》",
-  "hook": "加个索引为啥就快了",
-  "episode": 14,
-  "slug": "db-index",
-  "release": "v0.19.0",
-  "series": "技术基础（暂定，合集上线前再定）",
-  "width": 1920,
-  "height": 1080,
-  "fps": 30,
-  "durationInFrames": 3789,
-  "provisionalTiming": false,
-  "style": "深色背景+蓝青高光扁平2D（沿用前几期）",
-  "palette": {
-   "bg": "#0B1020",
-   "panel": "#111827",
-   "primary": "#22D3EE",
-   "secondary": "#3B82F6",
-   "text": "#E5E7EB",
-   "text2": "#9CA3AF",
-   "muted": "#6B7280",
-   "success": "#22C55E",
-   "accent": "#F59E0B",
-   "danger": "#F87171"
-  },
-  "font": "Noto Sans SC",
-  "safeArea": {
-   "margin": 80,
-   "subtitleBand": [
-    900,
-    980
-   ],
-   "contentMaxY": 880,
-   "watermarkClearZone": [
-    1700,
-    80,
-    1840,
-    130
-   ]
-  },
-  "branding": {
-   "spec": "episodes/_shared/branding/spec.json v1.3.0",
-   "cornerWatermark": "右上「IT小村」40%，留空区 x1700–1840 y80–130",
-   "centerWatermark": null,
-   "endCard": "由 <ChannelBranding> 自动追加 60 帧，本分镜不画；durationInFrames 不含片尾"
-  },
-  "shotSentences": {
-   "hook-1": 2,
-   "hook-2": 2,
-   "scan-1": 2,
-   "scan-2": 2,
-   "index-1": 2,
-   "index-2": 2,
-   "btree-1": 2,
-   "btree-2": 2,
-   "more-1": 3,
-   "more-2": 2,
-   "recap-1": 1,
-   "recap-2": 1
-  },
-  "tts": {
-   "note": "pronunciation.md：送 TTS 的旁白把「B+树」写成「B 加树」；字幕 / 标签写「B+ 树」。镜头 ttsText = 送 TTS 文字",
-   "replace": {
-    "B+树": "B 加树"
-   }
-  },
-  "notes": "时长=Knoll 实测（map_timing.py，scale 1）。术语标签（全表扫描 / 索引 / B+ 树 / 索引不是越多越好）在念到该词时淡入（_audit/labelfix.py 对齐，容差 0..+5 帧）；画面不重复字幕句子（术语除外）；示例数字标「示例」；不出现倍数、层数、MySQL / InnoDB。素材全部自绘（assets/*.svg，无文字）。",
-  "poster": {
-   "shotId": "index-2",
-   "localFrame": 260,
-   "frame": 1635,
-   "desc": "左右对比：左「翻书」小人一页页翻、页码计数往上跳；右「查目录」目录→箭头→书，✓ 直达；术语标签「索引」",
-   "file": "poster.jpg"
-  }
- },
- "assets": {
-  "reuse": [
-   {
-    "id": "subtitle",
-    "desc": "字幕层"
-   }
-  ],
-  "new": [
-   {
-    "id": "book",
-    "file": "assets/book.svg",
-    "desc": "厚书（自绘）"
-   },
-   {
-    "id": "toc",
-    "file": "assets/toc.svg",
-    "desc": "目录小册（自绘）"
-   },
-   {
-    "id": "person",
-    "file": "assets/person.svg",
-    "desc": "小人（自绘，同第九期 guest 风格）"
-   },
-   {
-    "id": "phone",
-    "file": "assets/phone.svg",
-    "desc": "手机（自绘）"
-   },
-   {
-    "id": "shelf",
-    "file": "assets/shelf.svg",
-    "desc": "书架=数据库（自绘）"
-   }
-  ]
- },
- "scenes": [
-  {
-   "id": "s0",
-   "chapterId": "hook",
-   "title": "一下子就搜到",
-   "from": 0,
-   "durationInFrames": 483,
-   "narrationChars": 65,
-   "narrationCharsRecount": 65,
-   "shots": [
-    {
-     "id": "hook-1",
-     "chapterId": "hook",
-     "from": 0,
-     "durationInFrames": 234,
-     "narration": "你在网上搜一个订单号，成千上万条记录里，结果一下子就出来了。数据库是怎么做到的？",
-     "subtitles": [
-      {
-       "text": "你在网上搜一个订单号",
-       "from": 0,
-       "to": 59
-      },
-      {
-       "text": "成千上万条记录里",
-       "from": 60,
-       "to": 107
-      },
-      {
-       "text": "结果一下子就出来了",
-       "from": 108,
-       "to": 170
-      },
-      {
-       "text": "数据库是怎么做到的",
-       "from": 171,
-       "to": 233
-      }
-     ],
-     "elements": [
-      {
-       "id": "phone",
-       "type": "image",
-       "asset": "assets/phone.svg",
-       "x": 120,
-       "y": 170,
-       "w": 600,
-       "h": 600,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "search",
-       "type": "rect",
-       "x": 820,
-       "y": 200,
-       "w": 920,
-       "h": 100,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22D3EE",
-       "radius": 50,
-       "label": "订单号 A20261014",
-       "fontSize": 40
-      },
-      {
-       "id": "ex1",
-       "type": "text",
-       "x": 820,
-       "y": 310,
-       "w": 300,
-       "h": 40,
-       "text": "（示例）",
-       "fontSize": 28,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "rw0",
-       "type": "rect",
-       "x": 1040,
-       "y": 470,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw1",
-       "type": "rect",
-       "x": 1040,
-       "y": 504,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw2",
-       "type": "rect",
-       "x": 1040,
-       "y": 538,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw3",
-       "type": "rect",
-       "x": 1040,
-       "y": 572,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw4",
-       "type": "rect",
-       "x": 1040,
-       "y": 606,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw5",
-       "type": "rect",
-       "x": 1040,
-       "y": 640,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw6",
-       "type": "rect",
-       "x": 1040,
-       "y": 674,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw7",
-       "type": "rect",
-       "x": 1040,
-       "y": 708,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw8",
-       "type": "rect",
-       "x": 1040,
-       "y": 742,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw9",
-       "type": "rect",
-       "x": 1040,
-       "y": 776,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "rw10",
-       "type": "rect",
-       "x": 1040,
-       "y": 810,
-       "w": 700,
-       "h": 24,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "hit",
-       "type": "rect",
-       "x": 1040,
-       "y": 626,
-       "w": 700,
-       "h": 52,
-       "color": "#14532D",
-       "reuse": false,
-       "stroke": "#22C55E",
-       "radius": 10,
-       "label": "找到了",
-       "fontSize": 36
-      },
-      {
-       "id": "q",
-       "type": "text",
-       "x": 790,
-       "y": 560,
-       "w": 220,
-       "h": 200,
-       "text": "？",
-       "fontSize": 160,
-       "color": "#F59E0B",
-       "reuse": false,
-       "align": "center"
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "phone",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "search",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 24,
-         "value": 0
-        },
-        {
-         "frame": 36,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "ex1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 24,
-         "value": 0
-        },
-        {
-         "frame": 36,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 60,
-         "value": 0
-        },
-        {
-         "frame": 68,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 63,
-         "value": 0
-        },
-        {
-         "frame": 71,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 66,
-         "value": 0
-        },
-        {
-         "frame": 74,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 69,
-         "value": 0
-        },
-        {
-         "frame": 77,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw4",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 72,
-         "value": 0
-        },
-        {
-         "frame": 80,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw5",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 75,
-         "value": 0
-        },
-        {
-         "frame": 83,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw6",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 78,
-         "value": 0
-        },
-        {
-         "frame": 86,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw7",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 81,
-         "value": 0
-        },
-        {
-         "frame": 89,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw8",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 84,
-         "value": 0
-        },
-        {
-         "frame": 92,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw9",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 87,
-         "value": 0
-        },
-        {
-         "frame": 95,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rw10",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 90,
-         "value": 0
-        },
-        {
-         "frame": 98,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "hit",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 120,
-         "value": 0
-        },
-        {
-         "frame": 132,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "hit",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 120,
-         "value": 0
-        },
-        {
-         "frame": 132,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "q",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 162,
-         "value": 0
-        },
-        {
-         "frame": 174,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "q",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 162,
-         "value": 0
-        },
-        {
-         "frame": 174,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      }
-     ],
-     "transition": {
-      "type": "crossfade",
-      "durationInFrames": 8
-     }
-    },
-    {
-     "id": "hook-2",
-     "chapterId": "hook",
-     "from": 234,
-     "durationInFrames": 249,
-     "narration": "其实，它跟你查一本厚书的办法差不多。这一期，就来讲讲数据库的索引。",
-     "subtitles": [
-      {
-       "text": "其实，它跟你查一本厚书的办法差不多",
-       "from": 0,
-       "to": 101
-      },
-      {
-       "text": "这一期，就来讲讲数据库的索引",
-       "from": 102,
-       "to": 248
-      }
-     ],
-     "elements": [
-      {
-       "id": "shelf",
-       "type": "image",
-       "asset": "assets/shelf.svg",
-       "x": 160,
-       "y": 140,
-       "w": 960,
-       "h": 480,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "dbT",
-       "type": "rect",
-       "x": 160,
-       "y": 650,
-       "w": 280,
-       "h": 84,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22D3EE",
-       "radius": 16,
-       "label": "数据库",
-       "fontSize": 44
-      },
-      {
-       "id": "book",
-       "type": "image",
-       "asset": "assets/book.svg",
-       "x": 1260,
-       "y": 200,
-       "w": 420,
-       "h": 420,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "idx",
-       "type": "rect",
-       "x": 1270,
-       "y": 660,
-       "w": 400,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22D3EE",
-       "radius": 55,
-       "label": "索引",
-       "fontSize": 64
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "shelf",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "dbT",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "book",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 47,
-         "value": 0
-        },
-        {
-         "frame": 59,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "book",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 47,
-         "value": 0
-        },
-        {
-         "frame": 59,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "idx",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 175,
-         "value": 0
-        },
-        {
-         "frame": 187,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "idx",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 175,
-         "value": 0
-        },
-        {
-         "frame": 187,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      }
-     ],
-     "transition": {
-      "type": "fade",
-      "durationInFrames": 12
-     }
-    }
-   ]
-  },
-  {
-   "id": "s1",
-   "chapterId": "scan",
-   "title": "一页一页翻",
-   "from": 483,
-   "durationInFrames": 678,
-   "narrationChars": 86,
-   "narrationCharsRecount": 86,
-   "shots": [
-    {
-     "id": "scan-1",
-     "chapterId": "scan",
-     "from": 483,
-     "durationInFrames": 233,
-     "narration": "先看笨办法。一本没有目录的厚书，想找一句话，只能从第一页开始，一页一页往后翻。",
-     "subtitles": [
-      {
-       "text": "先看笨办法",
-       "from": 0,
-       "to": 48
-      },
-      {
-       "text": "一本没有目录的厚书",
-       "from": 49,
-       "to": 103
-      },
-      {
-       "text": "想找一句话，只能从第一页开始",
-       "from": 104,
-       "to": 181
-      },
-      {
-       "text": "一页一页往后翻",
-       "from": 182,
-       "to": 232
-      }
-     ],
-     "elements": [
-      {
-       "id": "book",
-       "type": "image",
-       "asset": "assets/book.svg",
-       "x": 200,
-       "y": 200,
-       "w": 480,
-       "h": 480,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "noToc",
-       "type": "rect",
-       "x": 230,
-       "y": 700,
-       "w": 420,
-       "h": 84,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#F87171",
-       "radius": 16,
-       "label": "没有目录",
-       "fontSize": 40
-      },
-      {
-       "id": "pg0",
-       "type": "rect",
-       "x": 560,
-       "y": 300,
-       "w": 150,
-       "h": 210,
-       "color": "#F3F4F6",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "pg1",
-       "type": "rect",
-       "x": 560,
-       "y": 300,
-       "w": 150,
-       "h": 210,
-       "color": "#F3F4F6",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "pg2",
-       "type": "rect",
-       "x": 560,
-       "y": 300,
-       "w": 150,
-       "h": 210,
-       "color": "#F3F4F6",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "pg3",
-       "type": "rect",
-       "x": 560,
-       "y": 300,
-       "w": 150,
-       "h": 210,
-       "color": "#F3F4F6",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "pg4",
-       "type": "rect",
-       "x": 560,
-       "y": 300,
-       "w": 150,
-       "h": 210,
-       "color": "#F3F4F6",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "pg5",
-       "type": "rect",
-       "x": 560,
-       "y": 300,
-       "w": 150,
-       "h": 210,
-       "color": "#F3F4F6",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "man",
-       "type": "image",
-       "asset": "assets/person.svg",
-       "x": 900,
-       "y": 420,
-       "w": 280,
-       "h": 280,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "cnt",
-       "type": "text",
-       "x": 1220,
-       "y": 300,
-       "w": 560,
-       "h": 80,
-       "text": "第 1、2、3、4、5……页",
-       "fontSize": 48,
-       "color": "#F59E0B",
-       "reuse": false
-      },
-      {
-       "id": "cntT",
-       "type": "text",
-       "x": 1220,
-       "y": 220,
-       "w": 560,
-       "h": 56,
-       "text": "已翻到",
-       "fontSize": 36,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "book",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "noToc",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 61,
-         "value": 0
-        },
-        {
-         "frame": 73,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "man",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 146,
-         "value": 0
-        },
-        {
-         "frame": 158,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "man",
-       "property": "y",
-       "keyframes": [
-        {
-         "frame": 182,
-         "value": 420
-        },
-        {
-         "frame": 202,
-         "value": 400
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "pg0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 176,
-         "value": 0
-        },
-        {
-         "frame": 178,
-         "value": 1
-        },
-        {
-         "frame": 184,
-         "value": 1
-        },
-        {
-         "frame": 190,
-         "value": 0
-        }
-       ],
-       "easing": "linear"
-      },
-      {
-       "elementId": "pg0",
-       "property": "x",
-       "keyframes": [
-        {
-         "frame": 178,
-         "value": 560
-        },
-        {
-         "frame": 190,
-         "value": 410
-        }
-       ],
-       "easing": "easeIn"
-      },
-      {
-       "elementId": "pg1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 184,
-         "value": 0
-        },
-        {
-         "frame": 186,
-         "value": 1
-        },
-        {
-         "frame": 192,
-         "value": 1
-        },
-        {
-         "frame": 198,
-         "value": 0
-        }
-       ],
-       "easing": "linear"
-      },
-      {
-       "elementId": "pg1",
-       "property": "x",
-       "keyframes": [
-        {
-         "frame": 186,
-         "value": 560
-        },
-        {
-         "frame": 198,
-         "value": 410
-        }
-       ],
-       "easing": "easeIn"
-      },
-      {
-       "elementId": "pg2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 192,
-         "value": 0
-        },
-        {
-         "frame": 194,
-         "value": 1
-        },
-        {
-         "frame": 200,
-         "value": 1
-        },
-        {
-         "frame": 206,
-         "value": 0
-        }
-       ],
-       "easing": "linear"
-      },
-      {
-       "elementId": "pg2",
-       "property": "x",
-       "keyframes": [
-        {
-         "frame": 194,
-         "value": 560
-        },
-        {
-         "frame": 206,
-         "value": 410
-        }
-       ],
-       "easing": "easeIn"
-      },
-      {
-       "elementId": "pg3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 200,
-         "value": 0
-        },
-        {
-         "frame": 202,
-         "value": 1
-        },
-        {
-         "frame": 208,
-         "value": 1
-        },
-        {
-         "frame": 214,
-         "value": 0
-        }
-       ],
-       "easing": "linear"
-      },
-      {
-       "elementId": "pg3",
-       "property": "x",
-       "keyframes": [
-        {
-         "frame": 202,
-         "value": 560
-        },
-        {
-         "frame": 214,
-         "value": 410
-        }
-       ],
-       "easing": "easeIn"
-      },
-      {
-       "elementId": "pg4",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 208,
-         "value": 0
-        },
-        {
-         "frame": 210,
-         "value": 1
-        },
-        {
-         "frame": 216,
-         "value": 1
-        },
-        {
-         "frame": 222,
-         "value": 0
-        }
-       ],
-       "easing": "linear"
-      },
-      {
-       "elementId": "pg4",
-       "property": "x",
-       "keyframes": [
-        {
-         "frame": 210,
-         "value": 560
-        },
-        {
-         "frame": 222,
-         "value": 410
-        }
-       ],
-       "easing": "easeIn"
-      },
-      {
-       "elementId": "pg5",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 216,
-         "value": 0
-        },
-        {
-         "frame": 218,
-         "value": 1
-        },
-        {
-         "frame": 224,
-         "value": 1
-        },
-        {
-         "frame": 230,
-         "value": 0
-        }
-       ],
-       "easing": "linear"
-      },
-      {
-       "elementId": "pg5",
-       "property": "x",
-       "keyframes": [
-        {
-         "frame": 218,
-         "value": 560
-        },
-        {
-         "frame": 230,
-         "value": 410
-        }
-       ],
-       "easing": "easeIn"
-      },
-      {
-       "elementId": "cntT",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 146,
-         "value": 0
-        },
-        {
-         "frame": 158,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "cnt",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 146,
-         "value": 0
-        },
-        {
-         "frame": 158,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "cnt",
-       "property": "charsVisible",
-       "keyframes": [
-        {
-         "frame": 146,
-         "value": 2
-        },
-        {
-         "frame": 193,
-         "value": 14
-        }
-       ],
-       "easing": "easeInOut"
-      }
-     ],
-     "transition": {
-      "type": "crossfade",
-      "durationInFrames": 8
-     }
-    },
-    {
-     "id": "scan-2",
-     "chapterId": "scan",
-     "from": 716,
-     "durationInFrames": 445,
-     "narration": "数据库也一样：没有索引的时候，它只能从第一行开始，一行一行把整张表读一遍，这叫全表扫描。表小的时候还好，表一大，就很慢。",
-     "subtitles": [
-      {
-       "text": "数据库也一样：没有索引的时候",
-       "from": 0,
-       "to": 89
-      },
-      {
-       "text": "它只能从第一行开始",
-       "from": 90,
-       "to": 142
-      },
-      {
-       "text": "一行一行把整张表读一遍",
-       "from": 143,
-       "to": 228
-      },
-      {
-       "text": "这叫全表扫描",
-       "from": 229,
-       "to": 278
-      },
-      {
-       "text": "表小的时候还好，表一大",
-       "from": 279,
-       "to": 359
-      },
-      {
-       "text": "就很慢",
-       "from": 360,
-       "to": 444
-      }
-     ],
-     "elements": [
-      {
-       "id": "tbl",
-       "type": "rect",
-       "x": 220,
-       "y": 160,
-       "w": 680,
-       "h": 660,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 16
-      },
-      {
-       "id": "r0",
-       "type": "rect",
-       "x": 240,
-       "y": 180,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r1",
-       "type": "rect",
-       "x": 240,
-       "y": 238,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r2",
-       "type": "rect",
-       "x": 240,
-       "y": 296,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r3",
-       "type": "rect",
-       "x": 240,
-       "y": 354,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r4",
-       "type": "rect",
-       "x": 240,
-       "y": 412,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r5",
-       "type": "rect",
-       "x": 240,
-       "y": 470,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r6",
-       "type": "rect",
-       "x": 240,
-       "y": 528,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r7",
-       "type": "rect",
-       "x": 240,
-       "y": 586,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r8",
-       "type": "rect",
-       "x": 240,
-       "y": 644,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r9",
-       "type": "rect",
-       "x": 240,
-       "y": 702,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "r10",
-       "type": "rect",
-       "x": 240,
-       "y": 760,
-       "w": 640,
-       "h": 44,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 8
-      },
-      {
-       "id": "bar",
-       "type": "rect",
-       "x": 232,
-       "y": 174,
-       "w": 656,
-       "h": 56,
-       "color": "#22D3EE33",
-       "reuse": false,
-       "stroke": "#22D3EE",
-       "radius": 10
-      },
-      {
-       "id": "fts",
-       "type": "rect",
-       "x": 1080,
-       "y": 170,
-       "w": 520,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#F59E0B",
-       "radius": 55,
-       "label": "全表扫描",
-       "fontSize": 64
-      },
-      {
-       "id": "sm",
-       "type": "rect",
-       "x": 1080,
-       "y": 430,
-       "w": 220,
-       "h": 150,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22C55E",
-       "radius": 14
-      },
-      {
-       "id": "smT",
-       "type": "rect",
-       "x": 1080,
-       "y": 600,
-       "w": 220,
-       "h": 84,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22C55E",
-       "radius": 16,
-       "label": "小表",
-       "fontSize": 40
-      },
-      {
-       "id": "s0",
-       "type": "rect",
-       "x": 1100,
-       "y": 450,
-       "w": 180,
-       "h": 28,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "s1",
-       "type": "rect",
-       "x": 1100,
-       "y": 490,
-       "w": 180,
-       "h": 28,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "s2",
-       "type": "rect",
-       "x": 1100,
-       "y": 530,
-       "w": 180,
-       "h": 28,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 6
-      },
-      {
-       "id": "bg",
-       "type": "rect",
-       "x": 1380,
-       "y": 380,
-       "w": 300,
-       "h": 400,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#F87171",
-       "radius": 14
-      },
-      {
-       "id": "bgT",
-       "type": "rect",
-       "x": 1380,
-       "y": 794,
-       "w": 300,
-       "h": 76,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#F87171",
-       "radius": 16,
-       "label": "大表",
-       "fontSize": 40
-      },
-      {
-       "id": "b0",
-       "type": "rect",
-       "x": 1400,
-       "y": 396,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b1",
-       "type": "rect",
-       "x": 1400,
-       "y": 426,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b2",
-       "type": "rect",
-       "x": 1400,
-       "y": 456,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b3",
-       "type": "rect",
-       "x": 1400,
-       "y": 486,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b4",
-       "type": "rect",
-       "x": 1400,
-       "y": 516,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b5",
-       "type": "rect",
-       "x": 1400,
-       "y": 546,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b6",
-       "type": "rect",
-       "x": 1400,
-       "y": 576,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b7",
-       "type": "rect",
-       "x": 1400,
-       "y": 606,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b8",
-       "type": "rect",
-       "x": 1400,
-       "y": 636,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b9",
-       "type": "rect",
-       "x": 1400,
-       "y": 666,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b10",
-       "type": "rect",
-       "x": 1400,
-       "y": 696,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "b11",
-       "type": "rect",
-       "x": 1400,
-       "y": 726,
-       "w": 260,
-       "h": 20,
-       "color": "#1F2937",
-       "reuse": false,
-       "radius": 4
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "tbl",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r4",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r5",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r6",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r7",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r8",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r9",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r10",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "bar",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 153,
-         "value": 0
-        },
-        {
-         "frame": 165,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "bar",
-       "property": "y",
-       "keyframes": [
-        {
-         "frame": 159,
-         "value": 174
-        },
-        {
-         "frame": 208,
-         "value": 754
-        }
-       ],
-       "easing": "linear"
-      },
-      {
-       "elementId": "fts",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 239,
-         "value": 0
-        },
-        {
-         "frame": 251,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "fts",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 239,
-         "value": 0
-        },
-        {
-         "frame": 251,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "sm",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 279,
-         "value": 0
-        },
-        {
-         "frame": 291,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "s0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 279,
-         "value": 0
-        },
-        {
-         "frame": 291,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "s1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 279,
-         "value": 0
-        },
-        {
-         "frame": 291,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "s2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 279,
-         "value": 0
-        },
-        {
-         "frame": 291,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "smT",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 279,
-         "value": 0
-        },
-        {
-         "frame": 291,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "bg",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 336,
-         "value": 0
-        },
-        {
-         "frame": 348,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 336,
-         "value": 0
-        },
-        {
-         "frame": 342,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 338,
-         "value": 0
-        },
-        {
-         "frame": 344,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 340,
-         "value": 0
-        },
-        {
-         "frame": 346,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 342,
-         "value": 0
-        },
-        {
-         "frame": 348,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b4",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 344,
-         "value": 0
-        },
-        {
-         "frame": 350,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b5",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 346,
-         "value": 0
-        },
-        {
-         "frame": 352,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b6",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 348,
-         "value": 0
-        },
-        {
-         "frame": 354,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b7",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 350,
-         "value": 0
-        },
-        {
-         "frame": 356,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b8",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 352,
-         "value": 0
-        },
-        {
-         "frame": 358,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b9",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 354,
-         "value": 0
-        },
-        {
-         "frame": 360,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b10",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 356,
-         "value": 0
-        },
-        {
-         "frame": 362,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "b11",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 358,
-         "value": 0
-        },
-        {
-         "frame": 364,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "bgT",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 336,
-         "value": 0
-        },
-        {
-         "frame": 348,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      }
-     ],
-     "transition": {
-      "type": "fade",
-      "durationInFrames": 12
-     }
-    }
-   ]
-  },
-  {
-   "id": "s2",
-   "chapterId": "index",
-   "title": "先查目录",
-   "from": 1161,
-   "durationInFrames": 615,
-   "narrationChars": 91,
-   "narrationCharsRecount": 91,
-   "shots": [
-    {
-     "id": "index-1",
-     "chapterId": "index",
-     "from": 1161,
-     "durationInFrames": 214,
-     "narration": "聪明的办法是先查目录。目录记着每个内容在第几页，查到页码，直接翻过去。",
-     "subtitles": [
-      {
-       "text": "聪明的办法是先查目录",
-       "from": 0,
-       "to": 77
-      },
-      {
-       "text": "目录记着每个内容在第几页",
-       "from": 78,
-       "to": 150
-      },
-      {
-       "text": "查到页码，直接翻过去",
-       "from": 151,
-       "to": 213
-      }
-     ],
-     "elements": [
-      {
-       "id": "toc",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 160,
-       "y": 200,
-       "w": 420,
-       "h": 420,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "en0",
-       "type": "rect",
-       "x": 640,
-       "y": 200,
-       "w": 600,
-       "h": 96,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 14,
-       "label": "用户 …… 第 12 页",
-       "fontSize": 40
-      },
-      {
-       "id": "en1",
-       "type": "rect",
-       "x": 640,
-       "y": 320,
-       "w": 600,
-       "h": 96,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 14,
-       "label": "订单 …… 第 128 页",
-       "fontSize": 40
-      },
-      {
-       "id": "en2",
-       "type": "rect",
-       "x": 640,
-       "y": 440,
-       "w": 600,
-       "h": 96,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 14,
-       "label": "商品 …… 第 305 页",
-       "fontSize": 40
-      },
-      {
-       "id": "ex2",
-       "type": "text",
-       "x": 640,
-       "y": 560,
-       "w": 300,
-       "h": 40,
-       "text": "（示例）",
-       "fontSize": 28,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "go",
-       "type": "arrow",
-       "x": 1250,
-       "y": 343,
-       "w": 170,
-       "h": 50,
-       "color": "#F59E0B",
-       "reuse": false,
-       "direction": "r"
-      },
-      {
-       "id": "book",
-       "type": "image",
-       "asset": "assets/book.svg",
-       "x": 1420,
-       "y": 200,
-       "w": 380,
-       "h": 380,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "ok",
-       "type": "text",
-       "x": 1550,
-       "y": 580,
-       "w": 120,
-       "h": 120,
-       "text": "✓",
-       "fontSize": 96,
-       "color": "#22C55E",
-       "reuse": false,
-       "align": "center"
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "toc",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 42,
-         "value": 0
-        },
-        {
-         "frame": 54,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "en0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 133,
-         "value": 0
-        },
-        {
-         "frame": 145,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "en1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 139,
-         "value": 0
-        },
-        {
-         "frame": 151,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "en2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 142,
-         "value": 0
-        },
-        {
-         "frame": 154,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "ex2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 133,
-         "value": 0
-        },
-        {
-         "frame": 145,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "en1",
-       "property": "strokeColor",
-       "keyframes": [
-        {
-         "frame": 151,
-         "value": "#3B82F6"
-        },
-        {
-         "frame": 161,
-         "value": "#F59E0B"
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "go",
-       "property": "drawProgress",
-       "keyframes": [
-        {
-         "frame": 176,
-         "value": 0
-        },
-        {
-         "frame": 191,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "book",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "ok",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 142,
-         "value": 0
-        },
-        {
-         "frame": 154,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "ok",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 142,
-         "value": 0
-        },
-        {
-         "frame": 154,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      }
-     ],
-     "transition": {
-      "type": "crossfade",
-      "durationInFrames": 8
-     }
-    },
-    {
-     "id": "index-2",
-     "chapterId": "index",
-     "from": 1375,
-     "durationInFrames": 401,
-     "narration": "给数据库的某一列建一份这样的目录，就叫索引。这份索引，记着每个值存在哪儿，数据库查一下，就能直接跳到要找的那一行，比一行一行读快很多。",
-     "subtitles": [
-      {
-       "text": "给数据库的某一列建一份这样的目录",
-       "from": 0,
-       "to": 81
-      },
-      {
-       "text": "就叫索引",
-       "from": 82,
-       "to": 120
-      },
-      {
-       "text": "这份索引，记着每个值存在哪儿",
-       "from": 121,
-       "to": 191
-      },
-      {
-       "text": "数据库查一下，就能直接跳到要找的那一行",
-       "from": 192,
-       "to": 290
-      },
-      {
-       "text": "比一行一行读快很多",
-       "from": 291,
-       "to": 400
-      }
-     ],
-     "elements": [
-      {
-       "id": "div",
-       "type": "line",
-       "x": 960,
-       "y": 120,
-       "w": 0,
-       "h": 740,
-       "color": "#6B7280",
-       "reuse": false
-      },
-      {
-       "id": "lT",
-       "type": "rect",
-       "x": 160,
-       "y": 130,
-       "w": 240,
-       "h": 84,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#9CA3AF",
-       "radius": 16,
-       "label": "翻书",
-       "fontSize": 40
-      },
-      {
-       "id": "rT",
-       "type": "rect",
-       "x": 1040,
-       "y": 130,
-       "w": 280,
-       "h": 84,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22D3EE",
-       "radius": 16,
-       "label": "查目录",
-       "fontSize": 40
-      },
-      {
-       "id": "bookL",
-       "type": "image",
-       "asset": "assets/book.svg",
-       "x": 170,
-       "y": 260,
-       "w": 380,
-       "h": 380,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "manL",
-       "type": "image",
-       "asset": "assets/person.svg",
-       "x": 560,
-       "y": 440,
-       "w": 240,
-       "h": 240,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "cntL",
-       "type": "text",
-       "x": 160,
-       "y": 690,
-       "w": 720,
-       "h": 70,
-       "text": "第 1、2、3、4、5、6……页",
-       "fontSize": 44,
-       "color": "#F59E0B",
-       "reuse": false
-      },
-      {
-       "id": "tocR",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 1040,
-       "y": 260,
-       "w": 300,
-       "h": 300,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "goR",
-       "type": "arrow",
-       "x": 1350,
-       "y": 385,
-       "w": 150,
-       "h": 50,
-       "color": "#F59E0B",
-       "reuse": false,
-       "direction": "r"
-      },
-      {
-       "id": "bookR",
-       "type": "image",
-       "asset": "assets/book.svg",
-       "x": 1510,
-       "y": 260,
-       "w": 300,
-       "h": 300,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "okR",
-       "type": "text",
-       "x": 1600,
-       "y": 560,
-       "w": 120,
-       "h": 120,
-       "text": "✓",
-       "fontSize": 96,
-       "color": "#22C55E",
-       "reuse": false,
-       "align": "center"
-      },
-      {
-       "id": "idx",
-       "type": "rect",
-       "x": 1180,
-       "y": 700,
-       "w": 400,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22D3EE",
-       "radius": 55,
-       "label": "索引",
-       "fontSize": 64
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "div",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "lT",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "rT",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "bookL",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "manL",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "tocR",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "bookR",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "cntL",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "cntL",
-       "property": "charsVisible",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 2
-        },
-        {
-         "frame": 371,
-         "value": 16
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "goR",
-       "property": "drawProgress",
-       "keyframes": [
-        {
-         "frame": 226,
-         "value": 0
-        },
-        {
-         "frame": 241,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "okR",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 242,
-         "value": 0
-        },
-        {
-         "frame": 254,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "okR",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 242,
-         "value": 0
-        },
-        {
-         "frame": 254,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "idx",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 96,
-         "value": 0
-        },
-        {
-         "frame": 108,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "idx",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 96,
-         "value": 0
-        },
-        {
-         "frame": 108,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      }
-     ],
-     "transition": {
-      "type": "fade",
-      "durationInFrames": 12
-     }
-    }
-   ]
-  },
-  {
-   "id": "s3",
-   "chapterId": "btree",
-   "title": "多层目录",
-   "from": 1776,
-   "durationInFrames": 559,
-   "narrationChars": 72,
-   "narrationCharsRecount": 71,
-   "shots": [
-    {
-     "id": "btree-1",
-     "chapterId": "btree",
-     "from": 1776,
-     "durationInFrames": 278,
-     "narration": "可目录本身也会很厚。所以数据库把目录做成好几层：大目录指到小目录，小目录再指到具体的位置。",
-     "subtitles": [
-      {
-       "text": "可目录本身也会很厚",
-       "from": 0,
-       "to": 67
-      },
-      {
-       "text": "所以数据库把目录做成好几层",
-       "from": 68,
-       "to": 149
-      },
-      {
-       "text": "大目录指到小目录",
-       "from": 150,
-       "to": 200
-      },
-      {
-       "text": "小目录再指到具体的位置",
-       "from": 201,
-       "to": 277
-      }
-     ],
-     "elements": [
-      {
-       "id": "thick",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 660,
-       "y": 200,
-       "w": 600,
-       "h": 600,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "L1",
-       "type": "rect",
-       "x": 760,
-       "y": 130,
-       "w": 400,
-       "h": 100,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 20,
-       "label": "大目录",
-       "fontSize": 44
-      },
-      {
-       "id": "v1",
-       "type": "line",
-       "x": 960,
-       "y": 230,
-       "w": 0,
-       "h": 70,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "h1",
-       "type": "line",
-       "x": 460,
-       "y": 300,
-       "w": 1000,
-       "h": 0,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v20",
-       "type": "line",
-       "x": 460,
-       "y": 300,
-       "w": 0,
-       "h": 70,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v21",
-       "type": "line",
-       "x": 960,
-       "y": 300,
-       "w": 0,
-       "h": 70,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v22",
-       "type": "line",
-       "x": 1460,
-       "y": 300,
-       "w": 0,
-       "h": 70,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "L20",
-       "type": "rect",
-       "x": 290,
-       "y": 370,
-       "w": 340,
-       "h": 96,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 18,
-       "label": "小目录",
-       "fontSize": 40
-      },
-      {
-       "id": "L21",
-       "type": "rect",
-       "x": 790,
-       "y": 370,
-       "w": 340,
-       "h": 96,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 18,
-       "label": "小目录",
-       "fontSize": 40
-      },
-      {
-       "id": "L22",
-       "type": "rect",
-       "x": 1290,
-       "y": 370,
-       "w": 340,
-       "h": 96,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 18,
-       "label": "小目录",
-       "fontSize": 40
-      },
-      {
-       "id": "v30",
-       "type": "line",
-       "x": 460,
-       "y": 466,
-       "w": 0,
-       "h": 54,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "h30",
-       "type": "line",
-       "x": 300,
-       "y": 520,
-       "w": 320,
-       "h": 0,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v400",
-       "type": "line",
-       "x": 300,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v401",
-       "type": "line",
-       "x": 460,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v402",
-       "type": "line",
-       "x": 620,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "L300",
-       "type": "rect",
-       "x": 235,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L301",
-       "type": "rect",
-       "x": 395,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L302",
-       "type": "rect",
-       "x": 555,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "v31",
-       "type": "line",
-       "x": 960,
-       "y": 466,
-       "w": 0,
-       "h": 54,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "h31",
-       "type": "line",
-       "x": 800,
-       "y": 520,
-       "w": 320,
-       "h": 0,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v410",
-       "type": "line",
-       "x": 800,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v411",
-       "type": "line",
-       "x": 960,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v412",
-       "type": "line",
-       "x": 1120,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "L310",
-       "type": "rect",
-       "x": 735,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L311",
-       "type": "rect",
-       "x": 895,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L312",
-       "type": "rect",
-       "x": 1055,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "v32",
-       "type": "line",
-       "x": 1460,
-       "y": 466,
-       "w": 0,
-       "h": 54,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "h32",
-       "type": "line",
-       "x": 1300,
-       "y": 520,
-       "w": 320,
-       "h": 0,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v420",
-       "type": "line",
-       "x": 1300,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v421",
-       "type": "line",
-       "x": 1460,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v422",
-       "type": "line",
-       "x": 1620,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "L320",
-       "type": "rect",
-       "x": 1235,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L321",
-       "type": "rect",
-       "x": 1395,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L322",
-       "type": "rect",
-       "x": 1555,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "thick",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "thick",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 46,
-         "value": 1
-        },
-        {
-         "frame": 66,
-         "value": 1.25
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "thick",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 119,
-         "value": 1
-        },
-        {
-         "frame": 131,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "L1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 150,
-         "value": 0
-        },
-        {
-         "frame": 162,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 150,
-         "value": 0
-        },
-        {
-         "frame": 162,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "h1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 150,
-         "value": 0
-        },
-        {
-         "frame": 162,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v20",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 182,
-         "value": 0
-        },
-        {
-         "frame": 194,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v21",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 182,
-         "value": 0
-        },
-        {
-         "frame": 194,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v22",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 182,
-         "value": 0
-        },
-        {
-         "frame": 194,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L20",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 182,
-         "value": 0
-        },
-        {
-         "frame": 194,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L21",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 182,
-         "value": 0
-        },
-        {
-         "frame": 194,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L22",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 182,
-         "value": 0
-        },
-        {
-         "frame": 194,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v30",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v31",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v32",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "h30",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "h31",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "h32",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v400",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v401",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v402",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v410",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v411",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v412",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v420",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v421",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "v422",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L300",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L301",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L302",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L310",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L311",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L312",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L320",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L321",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L322",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 238,
-         "value": 0
-        },
-        {
-         "frame": 250,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      }
-     ],
-     "transition": {
-      "type": "crossfade",
-      "durationInFrames": 8
-     }
-    },
-    {
-     "id": "btree-2",
-     "chapterId": "btree",
-     "from": 2054,
-     "durationInFrames": 281,
-     "narration": "从最上面一层往下，翻几层就找到了。这种一层套一层的多层目录，叫B+树。",
-     "ttsText": "从最上面一层往下，翻几层就找到了。这种一层套一层的多层目录，叫B 加树。",
-     "subtitles": [
-      {
-       "text": "从最上面一层往下",
-       "from": 0,
-       "to": 53
-      },
-      {
-       "text": "翻几层就找到了",
-       "from": 54,
-       "to": 109
-      },
-      {
-       "text": "这种一层套一层的多层目录",
-       "from": 110,
-       "to": 197
-      },
-      {
-       "text": "叫B+ 树",
-       "from": 198,
-       "to": 280
-      }
-     ],
-     "elements": [
-      {
-       "id": "L1",
-       "type": "rect",
-       "x": 760,
-       "y": 130,
-       "w": 400,
-       "h": 100,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 20,
-       "label": "大目录",
-       "fontSize": 44
-      },
-      {
-       "id": "v1",
-       "type": "line",
-       "x": 960,
-       "y": 230,
-       "w": 0,
-       "h": 70,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "h1",
-       "type": "line",
-       "x": 460,
-       "y": 300,
-       "w": 1000,
-       "h": 0,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v20",
-       "type": "line",
-       "x": 460,
-       "y": 300,
-       "w": 0,
-       "h": 70,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v21",
-       "type": "line",
-       "x": 960,
-       "y": 300,
-       "w": 0,
-       "h": 70,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v22",
-       "type": "line",
-       "x": 1460,
-       "y": 300,
-       "w": 0,
-       "h": 70,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "L20",
-       "type": "rect",
-       "x": 290,
-       "y": 370,
-       "w": 340,
-       "h": 96,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 18,
-       "label": "小目录",
-       "fontSize": 40
-      },
-      {
-       "id": "L21",
-       "type": "rect",
-       "x": 790,
-       "y": 370,
-       "w": 340,
-       "h": 96,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 18,
-       "label": "小目录",
-       "fontSize": 40
-      },
-      {
-       "id": "L22",
-       "type": "rect",
-       "x": 1290,
-       "y": 370,
-       "w": 340,
-       "h": 96,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 18,
-       "label": "小目录",
-       "fontSize": 40
-      },
-      {
-       "id": "v30",
-       "type": "line",
-       "x": 460,
-       "y": 466,
-       "w": 0,
-       "h": 54,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "h30",
-       "type": "line",
-       "x": 300,
-       "y": 520,
-       "w": 320,
-       "h": 0,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v400",
-       "type": "line",
-       "x": 300,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v401",
-       "type": "line",
-       "x": 460,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v402",
-       "type": "line",
-       "x": 620,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "L300",
-       "type": "rect",
-       "x": 235,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L301",
-       "type": "rect",
-       "x": 395,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L302",
-       "type": "rect",
-       "x": 555,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "v31",
-       "type": "line",
-       "x": 960,
-       "y": 466,
-       "w": 0,
-       "h": 54,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "h31",
-       "type": "line",
-       "x": 800,
-       "y": 520,
-       "w": 320,
-       "h": 0,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v410",
-       "type": "line",
-       "x": 800,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v411",
-       "type": "line",
-       "x": 960,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v412",
-       "type": "line",
-       "x": 1120,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "L310",
-       "type": "rect",
-       "x": 735,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L311",
-       "type": "rect",
-       "x": 895,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L312",
-       "type": "rect",
-       "x": 1055,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "v32",
-       "type": "line",
-       "x": 1460,
-       "y": 466,
-       "w": 0,
-       "h": 54,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "h32",
-       "type": "line",
-       "x": 1300,
-       "y": 520,
-       "w": 320,
-       "h": 0,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v420",
-       "type": "line",
-       "x": 1300,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v421",
-       "type": "line",
-       "x": 1460,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "v422",
-       "type": "line",
-       "x": 1620,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "L320",
-       "type": "rect",
-       "x": 1235,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L321",
-       "type": "rect",
-       "x": 1395,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "L322",
-       "type": "rect",
-       "x": 1555,
-       "y": 580,
-       "w": 130,
-       "h": 70,
-       "color": "#1F2937",
-       "reuse": false,
-       "stroke": "#6B7280",
-       "radius": 12
-      },
-      {
-       "id": "p1",
-       "type": "line",
-       "x": 960,
-       "y": 230,
-       "w": 0,
-       "h": 70,
-       "color": "#F59E0B",
-       "reuse": false
-      },
-      {
-       "id": "p2",
-       "type": "line",
-       "x": 960,
-       "y": 300,
-       "w": 0,
-       "h": 70,
-       "color": "#F59E0B",
-       "reuse": false
-      },
-      {
-       "id": "p3",
-       "type": "line",
-       "x": 960,
-       "y": 466,
-       "w": 0,
-       "h": 54,
-       "color": "#F59E0B",
-       "reuse": false
-      },
-      {
-       "id": "p4",
-       "type": "line",
-       "x": 1120,
-       "y": 520,
-       "w": 0,
-       "h": 60,
-       "color": "#F59E0B",
-       "reuse": false
-      },
-      {
-       "id": "ok",
-       "type": "text",
-       "x": 1060,
-       "y": 660,
-       "w": 120,
-       "h": 120,
-       "text": "✓",
-       "fontSize": 80,
-       "color": "#22C55E",
-       "reuse": false,
-       "align": "center"
-      },
-      {
-       "id": "bt",
-       "type": "rect",
-       "x": 1360,
-       "y": 150,
-       "w": 400,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22D3EE",
-       "radius": 55,
-       "label": "B+ 树",
-       "fontSize": 64
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "L1",
-       "property": "strokeColor",
-       "keyframes": [
-        {
-         "frame": 7,
-         "value": "#3B82F6"
-        },
-        {
-         "frame": 17,
-         "value": "#F59E0B"
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "p1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 15,
-         "value": 0
-        },
-        {
-         "frame": 27,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "p2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 21,
-         "value": 0
-        },
-        {
-         "frame": 33,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L21",
-       "property": "strokeColor",
-       "keyframes": [
-        {
-         "frame": 54,
-         "value": "#3B82F6"
-        },
-        {
-         "frame": 64,
-         "value": "#F59E0B"
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "p3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 62,
-         "value": 0
-        },
-        {
-         "frame": 74,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "p4",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 68,
-         "value": 0
-        },
-        {
-         "frame": 80,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "L312",
-       "property": "strokeColor",
-       "keyframes": [
-        {
-         "frame": 74,
-         "value": "#6B7280"
-        },
-        {
-         "frame": 84,
-         "value": "#F59E0B"
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "ok",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 80,
-         "value": 0
-        },
-        {
-         "frame": 92,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "ok",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 80,
-         "value": 0
-        },
-        {
-         "frame": 92,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "bt",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 196,
-         "value": 0
-        },
-        {
-         "frame": 208,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "bt",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 196,
-         "value": 0
-        },
-        {
-         "frame": 208,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      }
-     ],
-     "transition": {
-      "type": "fade",
-      "durationInFrames": 12
-     }
-    }
-   ]
-  },
-  {
-   "id": "s4",
-   "chapterId": "more",
-   "title": "目录不是越多越好",
-   "from": 2335,
-   "durationInFrames": 860,
-   "narrationChars": 114,
-   "narrationCharsRecount": 114,
-   "shots": [
-    {
-     "id": "more-1",
-     "chapterId": "more",
-     "from": 2335,
-     "durationInFrames": 540,
-     "narration": "那目录是不是越多越好？不是。书里加一页或撕掉一页，所有目录都得跟着改；只改某页上的内容，只有按这部分内容编的目录要跟着改；目录本身也占纸；目录一多，光挑用哪一本都要花时间。",
-     "subtitles": [
-      {
-       "text": "那目录是不是越多越好",
-       "from": 0,
-       "to": 77
-      },
-      {
-       "text": "不是",
-       "from": 78,
-       "to": 101
-      },
-      {
-       "text": "书里加一页或撕掉一页",
-       "from": 102,
-       "to": 176
-      },
-      {
-       "text": "所有目录都得跟着改",
-       "from": 177,
-       "to": 234
-      },
-      {
-       "text": "只改某页上的内容",
-       "from": 235,
-       "to": 290
-      },
-      {
-       "text": "只有按这部分内容编的目录要跟着改",
-       "from": 291,
-       "to": 369
-      },
-      {
-       "text": "目录本身也占纸；目录一多",
-       "from": 370,
-       "to": 460
-      },
-      {
-       "text": "光挑用哪一本都要花时间",
-       "from": 461,
-       "to": 539
-      }
-     ],
-     "elements": [
-      {
-       "id": "book",
-       "type": "image",
-       "asset": "assets/book.svg",
-       "x": 760,
-       "y": 160,
-       "w": 400,
-       "h": 400,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "q",
-       "type": "text",
-       "x": 860,
-       "y": 560,
-       "w": 200,
-       "h": 160,
-       "text": "？",
-       "fontSize": 120,
-       "color": "#F59E0B",
-       "reuse": false,
-       "align": "center"
-      },
-      {
-       "id": "edit",
-       "type": "rect",
-       "x": 960,
-       "y": 250,
-       "w": 170,
-       "h": 90,
-       "color": "#7F1D1D",
-       "reuse": false,
-       "stroke": "#F87171",
-       "radius": 45,
-       "label": "加/撕",
-       "fontSize": 40,
-       "note": "第一拍：加一页或撕一页"
-      },
-      {
-       "id": "edit2",
-       "type": "rect",
-       "x": 960,
-       "y": 250,
-       "w": 170,
-       "h": 90,
-       "color": "#7F1D1D",
-       "reuse": false,
-       "stroke": "#F59E0B",
-       "radius": 45,
-       "label": "改内容",
-       "fontSize": 36,
-       "note": "第二拍：只改某页上的内容"
-      },
-      {
-       "id": "aOnly",
-       "type": "arrow",
-       "x": 440,
-       "y": 205,
-       "w": 320,
-       "h": 50,
-       "color": "#F59E0B",
-       "reuse": false,
-       "direction": "l",
-       "note": "第二拍：只有对应的那本目录（左上）跟着改"
-      },
-      {
-       "id": "t0",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 220,
-       "y": 130,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "t1",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 220,
-       "y": 520,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "t2",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 1500,
-       "y": 130,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "t3",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 1500,
-       "y": 520,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "aL0",
-       "type": "arrow",
-       "x": 440,
-       "y": 205,
-       "w": 320,
-       "h": 50,
-       "color": "#F87171",
-       "reuse": false,
-       "direction": "l"
-      },
-      {
-       "id": "aL1",
-       "type": "arrow",
-       "x": 440,
-       "y": 595,
-       "w": 320,
-       "h": 50,
-       "color": "#F87171",
-       "reuse": false,
-       "direction": "l"
-      },
-      {
-       "id": "aR0",
-       "type": "arrow",
-       "x": 1160,
-       "y": 205,
-       "w": 330,
-       "h": 50,
-       "color": "#F87171",
-       "reuse": false,
-       "direction": "r"
-      },
-      {
-       "id": "aR1",
-       "type": "arrow",
-       "x": 1160,
-       "y": 595,
-       "w": 330,
-       "h": 50,
-       "color": "#F87171",
-       "reuse": false,
-       "direction": "r"
-      },
-      {
-       "id": "run",
-       "type": "image",
-       "asset": "assets/person.svg",
-       "x": 900,
-       "y": 620,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "pile0",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 760,
-       "y": 140,
-       "w": 260,
-       "h": 260,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "pile1",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 774,
-       "y": 180,
-       "w": 260,
-       "h": 260,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "pile2",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 788,
-       "y": 220,
-       "w": 260,
-       "h": 260,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "pile3",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 802,
-       "y": 260,
-       "w": 260,
-       "h": 260,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "pile4",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 816,
-       "y": 300,
-       "w": 260,
-       "h": 260,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "pick",
-       "type": "image",
-       "asset": "assets/person.svg",
-       "x": 1180,
-       "y": 560,
-       "w": 220,
-       "h": 220,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "q2",
-       "type": "text",
-       "x": 1400,
-       "y": 560,
-       "w": 200,
-       "h": 160,
-       "text": "？",
-       "fontSize": 120,
-       "color": "#F59E0B",
-       "reuse": false,
-       "align": "center"
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "book",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "t0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "t1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "t2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "t3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "q",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 21,
-         "value": 0
-        },
-        {
-         "frame": 33,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "q",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 21,
-         "value": 0
-        },
-        {
-         "frame": 33,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "q",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 112,
-         "value": 1
-        },
-        {
-         "frame": 124,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "edit",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 112,
-         "value": 0
-        },
-        {
-         "frame": 124,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "edit",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 112,
-         "value": 0
-        },
-        {
-         "frame": 124,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "aL0",
-       "property": "drawProgress",
-       "keyframes": [
-        {
-         "frame": 203,
-         "value": 0
-        },
-        {
-         "frame": 218,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "aR0",
-       "property": "drawProgress",
-       "keyframes": [
-        {
-         "frame": 208,
-         "value": 0
-        },
-        {
-         "frame": 223,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "aL1",
-       "property": "drawProgress",
-       "keyframes": [
-        {
-         "frame": 213,
-         "value": 0
-        },
-        {
-         "frame": 228,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "aR1",
-       "property": "drawProgress",
-       "keyframes": [
-        {
-         "frame": 218,
-         "value": 0
-        },
-        {
-         "frame": 233,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "t0",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 203,
-         "value": 1.1
-        },
-        {
-         "frame": 215,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "t1",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 208,
-         "value": 1.1
-        },
-        {
-         "frame": 220,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "t2",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 213,
-         "value": 1.1
-        },
-        {
-         "frame": 225,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "t3",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 218,
-         "value": 1.1
-        },
-        {
-         "frame": 230,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "run",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 112,
-         "value": 0
-        },
-        {
-         "frame": 124,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "run",
-       "property": "x",
-       "keyframes": [
-        {
-         "frame": 112,
-         "value": 900
-        },
-        {
-         "frame": 173,
-         "value": 560
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "run",
-       "property": "x",
-       "keyframes": [
-        {
-         "frame": 173,
-         "value": 560
-        },
-        {
-         "frame": 231,
-         "value": 1240
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "edit",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 1
-        },
-        {
-         "frame": 247,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "edit2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 0
-        },
-        {
-         "frame": 247,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "edit2",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 0
-        },
-        {
-         "frame": 247,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "aL0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 1
-        },
-        {
-         "frame": 247,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "t1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 1
-        },
-        {
-         "frame": 247,
-         "value": 0.25
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "t2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 1
-        },
-        {
-         "frame": 247,
-         "value": 0.25
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "t3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 1
-        },
-        {
-         "frame": 247,
-         "value": 0.25
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "aL1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 1
-        },
-        {
-         "frame": 247,
-         "value": 0.25
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "aR0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 1
-        },
-        {
-         "frame": 247,
-         "value": 0.25
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "aR1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 235,
-         "value": 1
-        },
-        {
-         "frame": 247,
-         "value": 0.25
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "aOnly",
-       "property": "drawProgress",
-       "keyframes": [
-        {
-         "frame": 286,
-         "value": 0
-        },
-        {
-         "frame": 301,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "t0",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 286,
-         "value": 1.15
-        },
-        {
-         "frame": 298,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "run",
-       "property": "x",
-       "keyframes": [
-        {
-         "frame": 286,
-         "value": 1240
-        },
-        {
-         "frame": 311,
-         "value": 560
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "book",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 1
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "edit2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 1
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "run",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 1
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "t0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 1
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "aOnly",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 1
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "t1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 0.25
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "t2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 0.25
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "t3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 0.25
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "aL1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 0.25
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "aR0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 0.25
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "aR1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 416,
-         "value": 0.25
-        },
-        {
-         "frame": 428,
-         "value": 0
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "pile0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 422,
-         "value": 0
-        },
-        {
-         "frame": 430,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "pile1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 427,
-         "value": 0
-        },
-        {
-         "frame": 435,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "pile2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 432,
-         "value": 0
-        },
-        {
-         "frame": 440,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "pile3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 437,
-         "value": 0
-        },
-        {
-         "frame": 445,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "pile4",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 442,
-         "value": 0
-        },
-        {
-         "frame": 450,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "pile0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 459,
-         "value": 1
-        },
-        {
-         "frame": 471,
-         "value": 0.6
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "pile1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 459,
-         "value": 1
-        },
-        {
-         "frame": 471,
-         "value": 0.6
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "pile2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 459,
-         "value": 1
-        },
-        {
-         "frame": 471,
-         "value": 0.6
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "pile3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 459,
-         "value": 1
-        },
-        {
-         "frame": 471,
-         "value": 0.6
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "pile4",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 459,
-         "value": 1
-        },
-        {
-         "frame": 471,
-         "value": 0.6
-        }
-       ],
-       "easing": "easeInOut"
-      },
-      {
-       "elementId": "pick",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 461,
-         "value": 0
-        },
-        {
-         "frame": 473,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "q2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 467,
-         "value": 0
-        },
-        {
-         "frame": 479,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "q2",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 467,
-         "value": 0
-        },
-        {
-         "frame": 479,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      }
-     ],
-     "transition": {
-      "type": "crossfade",
-      "durationInFrames": 8
-     }
-    },
-    {
-     "id": "more-2",
-     "chapterId": "more",
-     "from": 2875,
-     "durationInFrames": 320,
-     "narration": "数据库也一样：索引会拖慢写入，占用空间，还要花时间挑用哪一个。所以，索引不是越多越好。",
-     "subtitles": [
-      {
-       "text": "数据库也一样：索引会拖慢写入",
-       "from": 0,
-       "to": 85
-      },
-      {
-       "text": "占用空间，还要花时间挑用哪一个",
-       "from": 86,
-       "to": 185
-      },
-      {
-       "text": "所以，索引不是越多越好",
-       "from": 186,
-       "to": 319
-      }
-     ],
-     "elements": [
-      {
-       "id": "w",
-       "type": "rect",
-       "x": 160,
-       "y": 200,
-       "w": 480,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#F87171",
-       "radius": 16,
-       "label": "写入变慢",
-       "fontSize": 48
-      },
-      {
-       "id": "s",
-       "type": "rect",
-       "x": 720,
-       "y": 200,
-       "w": 480,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#F59E0B",
-       "radius": 16,
-       "label": "占空间",
-       "fontSize": 48
-      },
-      {
-       "id": "c",
-       "type": "rect",
-       "x": 1280,
-       "y": 200,
-       "w": 480,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 16,
-       "label": "要挑选",
-       "fontSize": 48
-      },
-      {
-       "id": "i0",
-       "type": "image",
-       "asset": "assets/book.svg",
-       "x": 300,
-       "y": 350,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "i1",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 860,
-       "y": 350,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "i2",
-       "type": "image",
-       "asset": "assets/person.svg",
-       "x": 1420,
-       "y": 350,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "nm",
-       "type": "rect",
-       "x": 560,
-       "y": 650,
-       "w": 800,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#F87171",
-       "radius": 55,
-       "label": "索引不是越多越好",
-       "fontSize": 56
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "w",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 59,
-         "value": 0
-        },
-        {
-         "frame": 71,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "i0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 59,
-         "value": 0
-        },
-        {
-         "frame": 71,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "s",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 86,
-         "value": 0
-        },
-        {
-         "frame": 98,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "i1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 86,
-         "value": 0
-        },
-        {
-         "frame": 98,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "c",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 145,
-         "value": 0
-        },
-        {
-         "frame": 157,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "i2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 145,
-         "value": 0
-        },
-        {
-         "frame": 157,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "nm",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 203,
-         "value": 0
-        },
-        {
-         "frame": 215,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "nm",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 203,
-         "value": 0
-        },
-        {
-         "frame": 215,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      }
-     ],
-     "transition": {
-      "type": "fade",
-      "durationInFrames": 12
-     }
-    }
-   ]
-  },
-  {
-   "id": "s5",
-   "chapterId": "recap",
-   "title": "回顾",
-   "from": 3195,
-   "durationInFrames": 594,
-   "narrationChars": 76,
-   "narrationCharsRecount": 76,
-   "shots": [
-    {
-     "id": "recap-1",
-     "chapterId": "recap",
-     "from": 3195,
-     "durationInFrames": 385,
-     "narration": "放在一起看：没有目录，只能全表扫描；建了索引，先查目录再直达；多层目录让很大的表也能很快找到；可目录也要维护，够用就好。",
-     "subtitles": [
-      {
-       "text": "放在一起看：没有目录",
-       "from": 0,
-       "to": 64
-      },
-      {
-       "text": "只能全表扫描；建了索引",
-       "from": 65,
-       "to": 137
-      },
-      {
-       "text": "先查目录再直达；多层目录让很大的表也能很快找到",
-       "from": 138,
-       "to": 296
-      },
-      {
-       "text": "可目录也要维护，够用就好",
-       "from": 297,
-       "to": 384
-      }
-     ],
-     "elements": [
-      {
-       "id": "c0",
-       "type": "image",
-       "asset": "assets/book.svg",
-       "x": 230,
-       "y": 170,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "c1",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 650,
-       "y": 170,
-       "w": 200,
-       "h": 200,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "c3",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 1450,
-       "y": 170,
-       "w": 160,
-       "h": 160,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "c3b",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 1530,
-       "y": 200,
-       "w": 160,
-       "h": 160,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "m1",
-       "type": "rect",
-       "x": 1110,
-       "y": 170,
-       "w": 120,
-       "h": 60,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 10
-      },
-      {
-       "id": "m2",
-       "type": "rect",
-       "x": 1020,
-       "y": 290,
-       "w": 120,
-       "h": 60,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 10
-      },
-      {
-       "id": "m3",
-       "type": "rect",
-       "x": 1200,
-       "y": 290,
-       "w": 120,
-       "h": 60,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#3B82F6",
-       "radius": 10
-      },
-      {
-       "id": "mv",
-       "type": "line",
-       "x": 1170,
-       "y": 230,
-       "w": 0,
-       "h": 30,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "mh",
-       "type": "line",
-       "x": 1080,
-       "y": 260,
-       "w": 180,
-       "h": 0,
-       "color": "#9CA3AF",
-       "reuse": false
-      },
-      {
-       "id": "r0",
-       "type": "rect",
-       "x": 150,
-       "y": 440,
-       "w": 360,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#F59E0B",
-       "radius": 55,
-       "label": "全表扫描",
-       "fontSize": 48
-      },
-      {
-       "id": "r1",
-       "type": "rect",
-       "x": 570,
-       "y": 440,
-       "w": 360,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22D3EE",
-       "radius": 55,
-       "label": "索引",
-       "fontSize": 48
-      },
-      {
-       "id": "r2",
-       "type": "rect",
-       "x": 990,
-       "y": 440,
-       "w": 360,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22D3EE",
-       "radius": 55,
-       "label": "B+ 树",
-       "fontSize": 48
-      },
-      {
-       "id": "r3",
-       "type": "rect",
-       "x": 1410,
-       "y": 440,
-       "w": 360,
-       "h": 110,
-       "color": "#111827",
-       "reuse": false,
-       "stroke": "#22C55E",
-       "radius": 55,
-       "label": "适量",
-       "fontSize": 48
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "c0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 65,
-         "value": 0
-        },
-        {
-         "frame": 77,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r0",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 78,
-         "value": 0
-        },
-        {
-         "frame": 90,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "c1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 109,
-         "value": 0
-        },
-        {
-         "frame": 121,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 131,
-         "value": 0
-        },
-        {
-         "frame": 143,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "m1",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 189,
-         "value": 0
-        },
-        {
-         "frame": 201,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "m2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 193,
-         "value": 0
-        },
-        {
-         "frame": 205,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "m3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 193,
-         "value": 0
-        },
-        {
-         "frame": 205,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "mv",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 189,
-         "value": 0
-        },
-        {
-         "frame": 201,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "mh",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 189,
-         "value": 0
-        },
-        {
-         "frame": 201,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r2",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 189,
-         "value": 0
-        },
-        {
-         "frame": 201,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "c3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 338,
-         "value": 0
-        },
-        {
-         "frame": 350,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "c3b",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 338,
-         "value": 0
-        },
-        {
-         "frame": 350,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "r3",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 313,
-         "value": 0
-        },
-        {
-         "frame": 325,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      }
-     ],
-     "transition": {
-      "type": "crossfade",
-      "durationInFrames": 8
-     }
-    },
-    {
-     "id": "recap-2",
-     "chapterId": "recap",
-     "from": 3580,
-     "durationInFrames": 209,
-     "narration": "下次你一下子就搜到了订单，背后其实是一份排好的目录。",
-     "subtitles": [
-      {
-       "text": "下次你一下子就搜到了订单",
-       "from": 0,
-       "to": 74
-      },
-      {
-       "text": "背后其实是一份排好的目录",
-       "from": 75,
-       "to": 208
-      }
-     ],
-     "elements": [
-      {
-       "id": "phone",
-       "type": "image",
-       "asset": "assets/phone.svg",
-       "x": 200,
-       "y": 170,
-       "w": 600,
-       "h": 600,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "hit",
-       "type": "rect",
-       "x": 900,
-       "y": 300,
-       "w": 700,
-       "h": 110,
-       "color": "#14532D",
-       "reuse": false,
-       "stroke": "#22C55E",
-       "radius": 16,
-       "label": "找到了",
-       "fontSize": 44
-      },
-      {
-       "id": "toc",
-       "type": "image",
-       "asset": "assets/toc.svg",
-       "x": 1100,
-       "y": 470,
-       "w": 320,
-       "h": 320,
-       "color": null,
-       "reuse": false
-      },
-      {
-       "id": "subtitle",
-       "type": "text",
-       "x": 160,
-       "y": 900,
-       "w": 1600,
-       "h": 80,
-       "text": "(字幕层)",
-       "fontSize": 44,
-       "color": "#E5E7EB",
-       "reuse": true,
-       "align": "center",
-       "role": "subtitle"
-      }
-     ],
-     "animations": [
-      {
-       "elementId": "phone",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 0,
-         "value": 0
-        },
-        {
-         "frame": 12,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "hit",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 44,
-         "value": 0
-        },
-        {
-         "frame": 56,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "hit",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 44,
-         "value": 0
-        },
-        {
-         "frame": 56,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      },
-      {
-       "elementId": "toc",
-       "property": "opacity",
-       "keyframes": [
-        {
-         "frame": 75,
-         "value": 0
-        },
-        {
-         "frame": 87,
-         "value": 1
-        }
-       ],
-       "easing": "easeOut"
-      },
-      {
-       "elementId": "toc",
-       "property": "scale",
-       "keyframes": [
-        {
-         "frame": 75,
-         "value": 0
-        },
-        {
-         "frame": 87,
-         "value": 1
-        }
-       ],
-       "easing": "spring"
-      }
-     ],
-     "transition": {
-      "type": "fade",
-      "durationInFrames": 12
-     }
-    }
-   ]
-  }
- ],
- "cover": {
-  "kind": "designed",
-  "note": "Miyazaki 定稿设计封面（PNG 源在 cover/，Knoll 转 JPG）；早期 Remotion <Cover> 截帧草稿已作废",
-  "font": "Noto Sans CJK SC Bold",
-  "palette": {
-   "bg": "#0B1020",
-   "title1": "#FFFFFF",
-   "title2": "#F59E0B",
-   "badgeFill": "#22D3EE",
-   "badgeText": "#0B1020",
-   "series": "#9CA3AF",
-   "watermark": "#E5E7EB"
-  },
-  "title": {
-   "lines": [
-    "加个索引",
-    "为啥就快了"
-   ]
-  },
-  "badge": {
-   "text": "索引"
-  },
-  "series": {
-   "text": "技术基础（暂定）"
-  },
-  "watermark": {
-   "text": "IT小村"
-  },
-  "subject": [
-   {
-    "asset": "assets/cover-poster.svg",
-    "box": [
-     0,
-     0,
-     1,
-     1
-    ],
-    "align": "center",
-    "desc": "截帧 1632（index-2 左右对比），裁 x150–1790 y120–830（去右上水印和字幕）"
-   }
-  ],
-  "subject16": [
-   {
-    "asset": "assets/cover-poster.svg",
-    "px": [
-     900,
-     230,
-     760,
-     640
-    ],
-    "align": "bc",
-    "desc": "截帧放标题右侧"
-   }
-  ],
-  "sizes": {
-   "16x9": {
+  "meta": {
+    "title": "加个索引，为啥就快了？",
+    "episode": 15,
+    "slug": "db-index-v1",
     "width": 1920,
     "height": 1080,
-    "platforms": [
-     "B站",
-     "头条",
-     "快手"
-    ],
-    "title": {
-     "x": 280,
-     "y": 120,
-     "fs": 130,
-     "lh": 165,
-     "align": "left",
-     "maxW": 780,
-     "titleBlockHeight": 330
+    "fps": 30,
+    "durationInFrames": 3924,
+    "draft": true,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
     },
-    "badge": {
-     "x": 360,
-     "y": 480,
-     "h": 110,
-     "fs": 72,
-     "w": 254
+    "style": "All canvas; same order table; no metaphor; sample structure, not performance measurement.",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
     },
-    "series": {
-     "x": 360,
-     "gap": 36,
-     "y": 618,
-     "fs": 52,
-     "w": 281
+    "sampleDataLabel": "示例数据 · 结构示意 · 非性能实测",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "加个索引，为啥就快了？",
+      "description": "原创数据库订单表示意，无实物比喻，无浏览器壳。",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "content": {
+            "x": 130,
+            "w": 1660
+          },
+          "watermarkZone": {
+            "x": 130,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 130,
+              "y": 205,
+              "w": 1660,
+              "h": 297
+            },
+            {
+              "x": 130,
+              "y": 495,
+              "w": 1660,
+              "h": 54
+            }
+          ]
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "content": {
+            "x": 315,
+            "w": 810
+          },
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918,
+          "watermarkZone": {
+            "x": 315,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 315,
+              "y": 205,
+              "w": 810,
+              "h": 222
+            },
+            {
+              "x": 315,
+              "y": 495,
+              "w": 810,
+              "h": 44
+            },
+            {
+              "x": 315,
+              "y": 595,
+              "w": 810,
+              "h": 245
+            },
+            {
+              "x": 315,
+              "y": 875,
+              "w": 810,
+              "h": 33
+            }
+          ]
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "content": {
+            "x": 110,
+            "w": 860
+          },
+          "watermarkZone": {
+            "x": 110,
+            "y": 110
+          },
+          "textBoxes": [
+            {
+              "x": 110,
+              "y": 235,
+              "w": 860,
+              "h": 265
+            },
+            {
+              "x": 110,
+              "y": 570,
+              "w": 860,
+              "h": 44
+            }
+          ]
+        }
+      },
+      "poster": {
+        "file": "poster.jpg",
+        "sameAs": "3x4"
+      }
     },
-    "safe": {
-     "crop": [
-      240,
-      1680
-     ],
-     "contentX": [
-      280,
-      1640
-     ],
-     "inset": [
-      360,
-      1560
-     ],
-     "noTextBelowY": 900
+    "nextEpisode": {
+      "episode": 16,
+      "title": "扣了钱，对方没到账？",
+      "teaser": "下期，扣了钱，对方没到账？"
     },
-    "subject": {
-     "x": 1080,
-     "y": 200,
-     "w": 560,
-     "h": 680
-    },
-    "watermark": {
-     "x": 1640,
-     "y": 80,
-     "fs": 40,
-     "align": "right"
-    },
-    "noTextBelowY": 900
-   },
-   "3x4": {
-    "width": 1080,
-    "height": 1440,
-    "platforms": [
-     "小红书",
-     "抖音"
-    ],
-    "title": {
-     "x": 540,
-     "y": 190,
-     "fs": 140,
-     "lh": 170,
-     "align": "center",
-     "maxW": 960,
-     "titleBlockHeight": 340
-    },
-    "badge": {
-     "x": 90,
-     "y": 560,
-     "h": 100,
-     "fs": 64,
-     "w": 228
-    },
-    "series": {
-     "x": 354,
-     "gap": 36,
-     "y": 580,
-     "fs": 52,
-     "w": 281
-    },
-    "safe": {
-     "noTextBelowY": 1224,
-     "noTextAboveY": 144
-    },
-    "subject": {
-     "x": 120,
-     "y": 690,
-     "w": 840,
-     "h": 520
-    },
-    "watermark": {
-     "x": 1000,
-     "y": 144,
-     "fs": 40,
-     "align": "right"
-    },
-    "noTextBelowY": 1224
-   },
-   "4x3": {
-    "width": 1440,
-    "height": 1080,
-    "platforms": [
-     "B站 4:3 预览"
-    ],
-    "from_": "16x9",
-    "crop": [
-     240,
-     0,
-     1680,
-     1080
-    ],
-    "note": "4:3 = 16:9 居中裁切 x240–1680（B站 4:3 预览区，同 /workspace/share/covers/ep12-4x3.jpg 规格 1440×1080）"
-   }
+    "audioReview": "No automatic ASR available. Sentence-boundary captions; final listening review pending."
   },
-  "episode": 14,
-  "approved": true,
-  "source": {
-   "16x9": "cover/ep14-16x9.png",
-   "4x3": "cover/ep14-4x3.png",
-   "3x4": "cover/ep14-3x4.png"
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
   },
-  "generator": "cover/make_cover.py"
- }
+  "scenes": [
+    {
+      "id": "main",
+      "chapterId": "index",
+      "title": "数据库索引",
+      "from": 0,
+      "durationInFrames": 3924,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "hook",
+          "from": 0,
+          "durationInFrames": 265,
+          "narration": "明明只查一笔订单，数据库却迟迟找不出来。数据没有变，换一种找法，为什么就能快起来？",
+          "subtitles": [
+            {
+              "text": "明明只查一笔订单，数据库却迟迟找不出来。",
+              "from": 0,
+              "to": 121,
+              "duration": 122
+            },
+            {
+              "text": "数据没有变，换一种找法，为什么就能快起来？",
+              "from": 122,
+              "to": 264,
+              "duration": 143
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-hook-1",
+              "wavStart": 9.0,
+              "wavEnd": 112.27,
+              "localStart": 9.0,
+              "localEnd": 112.27
+            },
+            {
+              "id": "01-hook-2",
+              "wavStart": 122.77,
+              "wavEnd": 244.01,
+              "localStart": 122.77,
+              "localEnd": 244.01
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              9,
+              122
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 9.0,
+            "wavTo": 244.01,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "首帧完整标题「加个索引，为啥就快了？」；订单表高亮游标逐行前进，上方显示「查订单 7042（示例）」和「还在查找」。前五秒只有扫描与等待，不出现答案结构。",
+          "direction": "首帧完整标题「加个索引，为啥就快了？」；订单表高亮游标逐行前进，上方显示「查订单 7042（示例）」和「还在查找」。前五秒只有扫描与等待，不出现答案结构。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "table",
+          "from": 265,
+          "durationInFrames": 239,
+          "narration": "先看数据库里存的是什么。这一整块数据叫一张表，横着的一行，记录着一笔订单的信息。",
+          "subtitles": [
+            {
+              "text": "先看数据库里存的是什么。",
+              "from": 0,
+              "to": 68,
+              "duration": 69
+            },
+            {
+              "text": "这一整块数据叫一张表，横着的一行，记录着一笔订单的信息。",
+              "from": 69,
+              "to": 238,
+              "duration": 170
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-table-1",
+              "wavStart": 265.01,
+              "wavEnd": 324.27,
+              "localStart": 0.009999999999990905,
+              "localEnd": 59.26999999999998
+            },
+            {
+              "id": "02-table-2",
+              "wavStart": 334.77,
+              "wavEnd": 483.15,
+              "localStart": 69.76999999999998,
+              "localEnd": 218.14999999999998
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              69
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 265.01,
+            "wavTo": 483.15,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "镜头保持同一张订单表；先以范围线标出整张表，再只高亮一横行。列为订单号、商品、金额；不绘软件外壳。",
+          "direction": "镜头保持同一张订单表；先以范围线标出整张表，再只高亮一横行。列为订单号、商品、金额；不绘软件外壳。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "target",
+          "from": 504,
+          "durationInFrames": 286,
+          "narration": "现在，要按订单号找出对应订单。数据库需要判断的，就是哪些记录的订单号，和你要找的一样。",
+          "subtitles": [
+            {
+              "text": "现在，要按订单号找出对应订单。",
+              "from": 0,
+              "to": 103,
+              "duration": 104
+            },
+            {
+              "text": "数据库需要判断的，就是哪些记录的订单号，和你要找的一样。",
+              "from": 104,
+              "to": 285,
+              "duration": 182
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-target-1",
+              "wavStart": 504.15,
+              "wavEnd": 597.97,
+              "localStart": 0.14999999999997726,
+              "localEnd": 93.97000000000003
+            },
+            {
+              "id": "03-target-2",
+              "wavStart": 608.47,
+              "wavEnd": 769.78,
+              "localStart": 104.47000000000003,
+              "localEnd": 265.78
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              104
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 504.15,
+            "wavTo": 769.78,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "放大同一个目标订单号；在订单表上只强调订单号列，其他列降低亮度。目标值出现在查询条件中，表内匹配位置暂不高亮。",
+          "direction": "放大同一个目标订单号；在订单表上只强调订单号列，其他列降低亮度。目标值出现在查询条件中，表内匹配位置暂不高亮。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "scan",
+          "from": 790,
+          "durationInFrames": 289,
+          "narration": "先不给订单号建索引，数据库从前往后读。一行不匹配，就接着看下一行，直到读到相同的订单号。",
+          "subtitles": [
+            {
+              "text": "先不给订单号建索引，数据库从前往后读。",
+              "from": 0,
+              "to": 133,
+              "duration": 134
+            },
+            {
+              "text": "一行不匹配，就接着看下一行，直到读到相同的订单号。",
+              "from": 134,
+              "to": 288,
+              "duration": 155
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-scan-1",
+              "wavStart": 790.78,
+              "wavEnd": 914.35,
+              "localStart": 0.7799999999999727,
+              "localEnd": 124.35000000000002
+            },
+            {
+              "id": "04-scan-2",
+              "wavStart": 924.85,
+              "wavEnd": 1058.82,
+              "localStart": 134.85000000000002,
+              "localEnd": 268.81999999999994
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              134
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 790.78,
+            "wavTo": 1058.82,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "无索引状态。游标依次检查行 1 至行 6，每次只有当前行最亮，其他行保留；到目标行标出「相同」，扫描尚未结束。",
+          "direction": "无索引状态。游标依次检查行 1 至行 6，每次只有当前行最亮，其他行保留；到目标行标出「相同」，扫描尚未结束。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "fullscan",
+          "from": 1079,
+          "durationInFrames": 308,
+          "narration": "全表扫描，就是把整张表读一遍，逐行判断有没有匹配记录。即使读到目标，剩下的记录也要继续检查。",
+          "subtitles": [
+            {
+              "text": "全表扫描，就是把整张表读一遍，逐行判断有没有匹配记录。",
+              "from": 0,
+              "to": 174,
+              "duration": 175
+            },
+            {
+              "text": "即使读到目标，剩下的记录也要继续检查。",
+              "from": 175,
+              "to": 307,
+              "duration": 133
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-fullscan-1",
+              "wavStart": 1079.82,
+              "wavEnd": 1243.82,
+              "localStart": 0.8199999999999363,
+              "localEnd": 164.81999999999994
+            },
+            {
+              "id": "05-fullscan-2",
+              "wavStart": 1254.32,
+              "wavEnd": 1366.22,
+              "localStart": 175.31999999999994,
+              "localEnd": 287.22
+            }
+          ],
+          "cueFrames": {
+            "scanLabel": 1,
+            "sentences": [
+              0,
+              175
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 1079.82,
+            "wavTo": 1366.22,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "句首命名「全表扫描」，从行 6 接着扫描行 7、8，保留目标标记；检查完成后整表范围线出现。不能停在第 6 行就显示查询完成。",
+          "direction": "句首命名「全表扫描」，从行 6 接着扫描行 7、8，保留目标标记；检查完成后整表范围线出现。不能停在第 6 行就显示查询完成。",
+          "elements": [
+            {
+              "id": "scanLabel",
+              "type": "text",
+              "text": "全表扫描",
+              "cueText": "全表扫描",
+              "appearFrame": 1,
+              "x": 110,
+              "y": 200,
+              "w": 500,
+              "h": 80,
+              "fontSize": 48,
+              "cueOnset": {
+                "sentence": "05-fullscan-1",
+                "asrFrame": null,
+                "onsetLocal": 1.8199999999999363,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "growing",
+          "from": 1387,
+          "durationInFrames": 282,
+          "narration": "订单越来越多，这种找法要检查的记录也越来越多。你只想要一笔订单，却可能读了许多无关的数据。",
+          "subtitles": [
+            {
+              "text": "订单越来越多，这种找法要检查的记录也越来越多。",
+              "from": 0,
+              "to": 129,
+              "duration": 130
+            },
+            {
+              "text": "你只想要一笔订单，却可能读了许多无关的数据。",
+              "from": 130,
+              "to": 281,
+              "duration": 152
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-growing-1",
+              "wavStart": 1387.22,
+              "wavEnd": 1507.47,
+              "localStart": 0.22000000000002728,
+              "localEnd": 120.47000000000003
+            },
+            {
+              "id": "06-growing-2",
+              "wavStart": 1517.97,
+              "wavEnd": 1648.94,
+              "localStart": 130.97000000000003,
+              "localEnd": 261.94000000000005
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              130
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 1387.22,
+            "wavTo": 1648.94,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "同一订单表下方延伸出更多行的连续线，扫描游标向下；只显示「更多记录」，不显示来源不明的巨大行数或虚构延时。",
+          "direction": "同一订单表下方延伸出更多行的连续线，扫描游标向下；只显示「更多记录」，不显示来源不明的巨大行数或虚构延时。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "build",
+          "from": 1669,
+          "durationInFrames": 283,
+          "narration": "要减少这些检查，可以提前把订单号组织起来，同时保存能找到对应记录的信息，不必每次从头读完整张表。",
+          "subtitles": [
+            {
+              "text": "要减少这些检查，可以提前把订单号组织起来，同时保存能找到对应记录的信息，不必每次从头读完整张表。",
+              "from": 0,
+              "to": 282,
+              "duration": 283
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-build-1",
+              "wavStart": 1669.94,
+              "wavEnd": 1931.38,
+              "localStart": 0.9400000000000546,
+              "localEnd": 262.3800000000001
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 1669.94,
+            "wavTo": 1931.38,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "订单表缩至右侧但仍清晰；左侧从订单号列抽取教学对应关系，按订单号大小组织。目标与表内数据始终一致，原表不重新排序。",
+          "direction": "订单表缩至右侧但仍清晰；左侧从订单号列抽取教学对应关系，按订单号大小组织。目标与表内数据始终一致，原表不重新排序。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "index",
+          "from": 1952,
+          "durationInFrames": 279,
+          "narration": "索引，就是帮助数据库查找的数据结构。这个示例给订单号建了索引，接下来仍然查刚才那笔订单。",
+          "subtitles": [
+            {
+              "text": "索引，就是帮助数据库查找的数据结构。",
+              "from": 0,
+              "to": 110,
+              "duration": 111
+            },
+            {
+              "text": "这个示例给订单号建了索引，接下来仍然查刚才那笔订单。",
+              "from": 111,
+              "to": 278,
+              "duration": 168
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-index-1",
+              "wavStart": 1952.38,
+              "wavEnd": 2052.88,
+              "localStart": 0.38000000000010914,
+              "localEnd": 100.88000000000011
+            },
+            {
+              "id": "08-index-2",
+              "wavStart": 2063.38,
+              "wavEnd": 2210.32,
+              "localStart": 111.38000000000011,
+              "localEnd": 258.32000000000016
+            }
+          ],
+          "cueFrames": {
+            "indexLabel": 1,
+            "sentences": [
+              0,
+              111
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 1952.38,
+            "wavTo": 2210.32,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "左侧结构标题在口播到「索引」时完整出现；每个订单号对应到原表的记录，静止保留，非扫描动画。旁注「结构示意」。",
+          "direction": "左侧结构标题在口播到「索引」时完整出现；每个订单号对应到原表的记录，静止保留，非扫描动画。旁注「结构示意」。",
+          "elements": [
+            {
+              "id": "indexLabel",
+              "type": "text",
+              "text": "索引",
+              "cueText": "索引",
+              "appearFrame": 1,
+              "x": 110,
+              "y": 200,
+              "w": 500,
+              "h": 80,
+              "fontSize": 48,
+              "cueOnset": {
+                "sentence": "08-index-1",
+                "asrFrame": null,
+                "onsetLocal": 1.3800000000001091,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "locate",
+          "from": 2231,
+          "durationInFrames": 279,
+          "narration": "这次，数据库先利用索引缩小查找范围，找到目标订单号。那些明显不相关的订单，不用再一条条检查。",
+          "subtitles": [
+            {
+              "text": "这次，数据库先利用索引缩小查找范围，找到目标订单号。",
+              "from": 0,
+              "to": 154,
+              "duration": 155
+            },
+            {
+              "text": "那些明显不相关的订单，不用再一条条检查。",
+              "from": 155,
+              "to": 278,
+              "duration": 124
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-locate-1",
+              "wavStart": 2231.32,
+              "wavEnd": 2376.12,
+              "localStart": 0.3200000000001637,
+              "localEnd": 145.1199999999999
+            },
+            {
+              "id": "09-locate-2",
+              "wavStart": 2386.62,
+              "wavEnd": 2489.62,
+              "localStart": 155.6199999999999,
+              "localEnd": 258.6199999999999
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              155
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 2231.32,
+            "wavTo": 2489.62,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "索引中目标所在范围逐步清晰，无关范围退暗，最终高亮 7042；不逐行线性遍历整份索引，不用二叉树，不显示固定比较次数。",
+          "direction": "索引中目标所在范围逐步清晰，无关范围退暗，最终高亮 7042；不逐行线性遍历整份索引，不用二叉树，不显示固定比较次数。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "record",
+          "from": 2510,
+          "durationInFrames": 254,
+          "narration": "再根据索引里的信息，找到对应的订单记录，读出商品和金额。你要的结果，就从这里取出来了。",
+          "subtitles": [
+            {
+              "text": "再根据索引里的信息，找到对应的订单记录，读出商品和金额。",
+              "from": 0,
+              "to": 160,
+              "duration": 161
+            },
+            {
+              "text": "你要的结果，就从这里取出来了。",
+              "from": 161,
+              "to": 253,
+              "duration": 93
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-record-1",
+              "wavStart": 2510.62,
+              "wavEnd": 2660.57,
+              "localStart": 0.6199999999998909,
+              "localEnd": 150.57000000000016
+            },
+            {
+              "id": "10-record-2",
+              "wavStart": 2671.07,
+              "wavEnd": 2743.19,
+              "localStart": 161.07000000000016,
+              "localEnd": 233.19000000000005
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              161
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 2510.62,
+            "wavTo": 2743.19,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "从索引高亮项向原表第 6 行画一条连续引导线，再点亮整条订单记录；其他数据不移动，突出「找订单号→找到订单记录」。",
+          "direction": "从索引高亮项向原表第 6 行画一条连续引导线，再点亮整条订单记录；其他数据不移动，突出「找订单号→找到订单记录」。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "compare",
+          "from": 2764,
+          "durationInFrames": 270,
+          "narration": "对比一下，查的还是同一张表，拿到的也是同一笔订单。改变的是查找过程，少读了大量无关记录。",
+          "subtitles": [
+            {
+              "text": "对比一下，查的还是同一张表，拿到的也是同一笔订单。",
+              "from": 0,
+              "to": 138,
+              "duration": 139
+            },
+            {
+              "text": "改变的是查找过程，少读了大量无关记录。",
+              "from": 139,
+              "to": 269,
+              "duration": 131
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-compare-1",
+              "wavStart": 2764.19,
+              "wavEnd": 2892.55,
+              "localStart": 0.19000000000005457,
+              "localEnd": 128.55000000000018
+            },
+            {
+              "id": "11-compare-2",
+              "wavStart": 2903.05,
+              "wavEnd": 3013.86,
+              "localStart": 139.05000000000018,
+              "localEnd": 249.86000000000013
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              139
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 2764.19,
+            "wavTo": 3013.86,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "左右两块同一份订单数据的示意重放：左逐行检查，右利用索引定位。两侧最终高亮完全相同订单，出现「结果相同」。不比较毫秒或声称检查次数固定。",
+          "direction": "左右两块同一份订单数据的示意重放：左逐行检查，右利用索引定位。两侧最终高亮完全相同订单，出现「结果相同」。不比较毫秒或声称检查次数固定。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "boundary",
+          "from": 3034,
+          "durationInFrames": 287,
+          "narration": "不过，有索引不代表每次都更快。如果表很小，或者本来就要读大部分记录，数据库也可能选择逐行扫描。",
+          "subtitles": [
+            {
+              "text": "不过，有索引不代表每次都更快。",
+              "from": 0,
+              "to": 97,
+              "duration": 98
+            },
+            {
+              "text": "如果表很小，或者本来就要读大部分记录，数据库也可能选择逐行扫描。",
+              "from": 98,
+              "to": 286,
+              "duration": 189
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-boundary-1",
+              "wavStart": 3034.86,
+              "wavEnd": 3122.16,
+              "localStart": 0.8600000000001273,
+              "localEnd": 88.15999999999985
+            },
+            {
+              "id": "12-boundary-2",
+              "wavStart": 3132.66,
+              "wavEnd": 3300.08,
+              "localStart": 98.65999999999985,
+              "localEnd": 266.0799999999999
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              98
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 3034.86,
+            "wavTo": 3300.08,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "用原表缩小版本与大范围高亮表达两种边界：表很小；一次要查大部分记录。不新造数字，不引入维护代价等片外支线。",
+          "direction": "用原表缩小版本与大范围高亮表达两种边界：表很小；一次要查大部分记录。不新造数字，不引入维护代价等片外支线。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "recap",
+          "from": 3321,
+          "durationInFrames": 293,
+          "narration": "所以，索引让查找变快的关键，是帮助数据库定位目标，减少无关数据的读取，而不是把所有查询都变快。",
+          "subtitles": [
+            {
+              "text": "所以，索引让查找变快的关键，是帮助数据库定位目标，减少无关数据的读取，而不是把所有查询都变快。",
+              "from": 0,
+              "to": 292,
+              "duration": 293
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-recap-1",
+              "wavStart": 3321.08,
+              "wavEnd": 3593.61,
+              "localStart": 0.07999999999992724,
+              "localEnd": 272.6100000000001
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 3321.08,
+            "wavTo": 3593.61,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回到索引与订单表，沿用同一目标引导线；无关行退暗，目标行保持。结论分两段出现，保持足够阅读时间。",
+          "direction": "回到索引与订单表，沿用同一目标引导线；无关行退暗，目标行保持。结论分两段出现，保持足够阅读时间。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "14",
+          "scriptShot": 14,
+          "chapterId": "next",
+          "from": 3614,
+          "durationInFrames": 310,
+          "narration": "找得到数据，还得改得对。下期，扣了钱，对方没到账？我们接着看数据库怎么处理这件事。",
+          "subtitles": [
+            {
+              "text": "找得到数据，还得改得对。",
+              "from": 0,
+              "to": 84,
+              "duration": 85
+            },
+            {
+              "text": "下期，扣了钱，对方没到账？",
+              "from": 85,
+              "to": 177,
+              "duration": 93
+            },
+            {
+              "text": "我们接着看数据库怎么处理这件事。",
+              "from": 178,
+              "to": 309,
+              "duration": 132
+            }
+          ],
+          "voice": [
+            {
+              "id": "14-next-1",
+              "wavStart": 3614.61,
+              "wavEnd": 3689.31,
+              "localStart": 0.6100000000001273,
+              "localEnd": 75.30999999999995
+            },
+            {
+              "id": "14-next-2",
+              "wavStart": 3699.81,
+              "wavEnd": 3781.81,
+              "localStart": 85.80999999999995,
+              "localEnd": 167.80999999999995
+            },
+            {
+              "id": "14-next-3",
+              "wavStart": 3792.31,
+              "wavEnd": 3878.8,
+              "localStart": 178.30999999999995,
+              "localEnd": 264.8000000000002
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              85,
+              178
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 4b049078 + words.json 3c788402 + script.md a5f89007",
+            "wavFrom": 3614.61,
+            "wavTo": 3878.8,
+            "holdFrames": 45,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "订单表收束为目标行后离场，干净全屏显示下一期标题「扣了钱，对方没到账？」；末段品牌「IT小村 · 原创」。不提前给出事务原理。",
+          "direction": "订单表收束为目标行后离场，干净全屏显示下一期标题「扣了钱，对方没到账？」；末段品牌「IT小村 · 原创」。不提前给出事务原理。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
 }

@@ -1,8 +1,16 @@
-# EP.14 数据库索引（db-index）
-- storyboard.json：6 章 12 镜头，3645 帧 @30fps + 全局片尾 60 帧 = 3705 帧（123.5 秒）；封面帧 1632（index-2 第 260 帧）
-- 配音：MiMo 冰糖逐句（/workspace/share/ep14，timeline.json；ch3-4「这份索引，…」第 2 轮重配），B+树 送 TTS 写「B 加树」
-- 工具链：map_timing.py <timeline.json> → gen.py → validate.py；remotion/public/audio/<shot>.wav 由逐句 wav 按 timing.json 放置
-- 制作：`cd remotion && npm ci && npm run render`（--bundle-cache=false，mix_bgm.py constant --below 12，Wallpaper，−16 LUFS）
-- 封面：cover-spec.json（Miyazaki 草稿，主图改为截帧 assets/cover-poster.svg），`npm run covers -- db-index`
-- branding v1.3.0：右上「IT小村」+ 60 帧片尾卡
-- 配乐：Kevin MacLeod「Wallpaper」（incompetech.com），CC BY 4.0
+# EP.15 数据库索引（db-index）
+
+2026-10-24 经用户观看并批准，将 `episodes-codex/db-index` 的重制成片接入本站。
+这次只上站点，不重发视频平台，`meta.json` 的历史平台链接保留。
+
+- 成片为 1920×1080、30 fps、3924 帧，画面时长 130.8 秒；不再追加全局片尾。
+- 视频 SHA-256：`1b903ab2b78bb6aea837c0f01db711112df333d0430930c653d23906d57f136e`，与批准的观看版逐字节一致。
+- `meta.json.finalVideoFrames` 固定成片长度，避免按旧工程的片尾规则多算两秒。
+- `storyboard.json`、`voice.wav`、`words.json` 为制作目录的原样副本；分镜冻结副本 `storyboard.fe81a37e.json` 与主分镜相同。
+- `chapters.txt` 按实际镜头起点取整秒（开场、镜 02、04、08、12），对应文章的五个章节锚点。
+- 公开依据见 `research.md`，技术正文及片外补充见 `article.mdx`。
+- 新版的渲染代码、真实音频边界与独立检查报告都在 [`episodes-codex/db-index`](../../episodes-codex/db-index/README.md)。
+
+本目录原有的 `gen.py`、`frame.py`、`remotion/`、`cover/` 等是旧版历史工程，不是当前成片的渲染入口。重新制作请进入 `episodes-codex/db-index/remotion`，不要用旧工程重新生成本目录的分镜或视频。旧的顶层及 Remotion `timing.json` 已删除，防止被站点误用。
+
+配乐：Kevin MacLeod《Wallpaper》（incompetech.com），CC BY 4.0。
