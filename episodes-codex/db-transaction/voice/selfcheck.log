@@ -1,0 +1,53 @@
+onset_rule selftest True
+frames 4066.0 durationFrames 4066 sec 135.53333333333333
+shot table:
+  01-hook                    0-  226 (226f 7.53s)
+  02-scope                 226-  464 (238f 7.93s)
+  03-steps                 464-  690 (226f 7.53s)
+  04-separate              690-  931 (241f 8.03s)
+  05-partial               931- 1183 (252f 8.40s)
+  06-transaction          1183- 1409 (226f 7.53s)
+  07-pending-debit        1409- 1637 (228f 7.60s)
+  08-pending-credit       1637- 1863 (226f 7.53s)
+  09-commit               1863- 2142 (279f 9.30s)
+  10-failed-attempt       2142- 2426 (284f 9.47s)
+  11-rollback             2426- 2711 (285f 9.50s)
+  12-crash                2711- 2946 (235f 7.83s)
+  13-recovery             2946- 3220 (274f 9.13s)
+  14-outcomes             3220- 3506 (286f 9.53s)
+  15-boundary             3506- 3786 (280f 9.33s)
+  16-next                 3786- 4066 (280f 9.33s)
+cues 3 max |cue-rule| 0 outside -6..+2: []
+sentence ASR mismatches:
+   01-hook-1 delete '你的钱少了对方却一分没收到' -> ''
+   01-hook-2 delete '这笔转账怎么只完成了一半' -> ''
+   02-scope-1 delete '先看一个教学例子' -> ''
+   02-scope-2 delete '两个账户在同一个数据库里要把一笔钱从你的账户转给对方' -> ''
+   03-steps-1 delete '数据库要做两次修改从你的余额里扣掉这笔钱再给对方的余额加上同样的钱' -> ''
+   04-separate-1 delete '假如两步各自确认第一步扣款成功后就已经保存了' -> ''
+   04-separate-2 delete '对方的余额此时还没增加' -> ''
+   05-partial-1 delete '偏偏第二步失败了' -> ''
+   05-partial-2 delete '扣款留下入账没做成数据库里就剩下一笔只完成了一半的转账' -> ''
+   06-transaction-1 delete '事务就是把这些修改作为一件事来处理' -> ''
+   06-transaction-2 delete '扣款和入账都放进同一笔事务' -> ''
+   07-pending-debit-1 delete '先执行扣款' -> ''
+   07-pending-debit-2 delete '这里变动的是本次待确认的结果还没有把整笔转账确定下来' -> ''
+   08-pending-credit-1 delete '接着执行入账' -> ''
+   08-pending-credit-2 delete '两步都做好了也先留在这笔事务里等最后一起确认' -> ''
+   09-commit-1 delete '提交就是确认并保存这笔事务的修改' -> ''
+   09-commit-2 delete '扣款和入账一起成为最终结果转账才算完成' -> ''
+   10-failed-attempt-1 delete '再看一个失败的例子重新从原来的余额开始' -> ''
+   10-failed-attempt-2 delete '扣款做好后入账报错应用发现这笔转账没能做完' -> ''
+   11-rollback-1 delete '回滚就是撤销这笔事务的修改' -> ''
+   11-rollback-2 delete '应用选择回滚刚才的待确认扣款也被撤销余额回到转账前' -> ''
+   12-crash-1 delete '如果还没有提交数据库就突然崩溃呢' -> ''
+   12-crash-2 delete '刚才只做了一半的修改不能被当成转账成功' -> ''
+   13-recovery-1 delete '数据库重新启动后会在恢复时撤销未提交的事务' -> ''
+   13-recovery-2 delete '恢复完成这笔转账没有留下单独一笔扣款' -> ''
+   14-outcomes-1 delete '这样转账要么完整做成要么没有做成' -> ''
+   14-outcomes-2 delete '不会把同一笔事务里的扣款单独留下却把入账丢掉' -> ''
+   15-boundary-1 delete '这里讲的是同一个数据库内的修改' -> ''
+   15-boundary-2 delete '真实转账可能还涉及别的系统不能只靠这一笔事务来解决' -> ''
+   16-next-1 delete '两处修改能一起确认了可两个人同时抢最后一件货又该听谁的' -> ''
+   16-next-2 delete '下一期我们接着看' -> ''
+selfcheck ok short shots: []

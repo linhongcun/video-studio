@@ -29,11 +29,12 @@
 ### EP.16 数据库事务
 
 - 对应 [#67](https://github.com/linhongcun/video-studio/issues/67)。第一版SHA前缀`3085d678`；重做后的第二版`6aa379dd`，4066帧、约135.5秒。
-- 用户已观看并认可第二版。当前制作工程在工作区`episodes-codex/db-transaction/`；尚未并入主分支或部署，因此本索引不放指向未入库文件的相对链接。
-- 认可质量不自动等于本期合并、站点或平台发布授权，也不自动关闭issue；根据后续实际指令处理。
+- 用户已观看并认可第二版，随后明确批准合并主干并部署 GitHub；本次发布版本为[v0.45.2](https://github.com/linhongcun/video-studio/releases/tag/v0.45.2)，只上站点，不重发平台。
+- [制作工程](../episodes-codex/db-transaction/README.md)、[连续动画检查](../episodes-codex/db-transaction/qa-motion-v2.md)、[媒体指标](../episodes-codex/db-transaction/render-result.json)与[发布记录](../episodes-codex/db-transaction/release.md)随本期入库；[站点页面](https://linhongcun.github.io/video-studio/episodes/db-transaction/)使用批准版的原样副本。
+- 认可质量不自动等于发布授权；本次合并与站点部署根据后续明确指令执行，不自动关闭包含平台事项的issue。
 
 ## 复用边界
 
 - 14或16镜、具体时长、字号、滚动位移及坐标都是单期实现，不照搬成后续硬规则。
 - 官方ASR模型下载在当时环境被拒绝，后续重新检查能力。既有句级音频边界和声学起音不能冒充逐字识别或完整人工听辨。
-- 授权范围和系列状态以最新用户指令及RULES的STATUS判断。本轮新增两份积累文档，不改变视频或平台的发布状态。
+- 授权范围和系列状态以最新用户指令及RULES的STATUS判断。EP.16本次明确授权合并及站点部署；平台新发未获授权。

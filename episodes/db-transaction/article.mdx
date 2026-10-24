@@ -1,56 +1,78 @@
 ---
 title: 扣了钱，对方没到账？
-episode: 15
-version: v0.20.0
+summary: 同一数据库里的教学转账有扣款、入账两步。把两处修改放进一笔事务，成功时一起提交，未完成时撤销；文章补充错误处理、崩溃恢复、自动提交与脏读。
+chapters:
+  - { id: hook, title: 为什么会只做成一半 }
+  - { id: steps, title: 一笔转账，两处修改 }
+  - { id: transaction, title: 放进同一笔事务 }
+  - { id: rollback, title: 失败后撤销整笔 }
+  - { id: recovery, title: 提交前崩溃怎么办 }
+  - { id: boundary, title: 这项保证的边界 }
+related: ["db-index", "db-lock"]
 ---
 
-# 扣了钱，对方没到账？
+## 为什么会只做成一半 {#hook}
 
-## 1. 扣了没到
-你给朋友转 100 块，你这边扣了，他那边却没收到。这是事务要解决的经典问题，PostgreSQL 官方教程用的也是转账 100 的例子。[^s12]
+本期用一张账户表解释数据库事务，不复刻真实银行或跨行支付系统。你的账户原有 **1000 元**，对方有 **500 元**，希望转出 **200 元**；成功后应是 **800／700**。所有数字都是教学示例。
 
-## 2. 拆成两步
-一次转账至少包含两次更新：给 A 扣钱，给 B 加钱。如果中途出了故障，只完成了第一步，就会出现「扣了没到」。[^s12][^s14]
+如果扣款先独立确认，第二步入账却失败，就可能留下 **800／500** 的半成结果。视频借这个冲突说明：需要把相关修改划入同一笔事务。它不判断现实中某次“扣了钱却没到账”的原因。
 
-## 3. 事务：同一个包裹
-事务把多个步骤打包成一个「要么全做、要么全不做」的整体。[^s12][^s10]
-MySQL 默认开着自动提交（autocommit），每条语句会自己成为一个事务。要把扣钱和加钱绑在一起，得用 `START TRANSACTION`（或 `BEGIN`）开头。[^s2][^s3]
+## 一笔转账，两处修改 {#steps}
 
-```sql
-START TRANSACTION;
-UPDATE accounts SET balance = balance - 100 WHERE name = 'A';
-UPDATE accounts SET balance = balance + 100 WHERE name = 'B';
-COMMIT;
-```
+数据库需要修改你的余额，再修改对方的余额。这里的“两步”是按顺序执行，不是同一瞬间执行。
 
-## 4. 提交：封箱
-`COMMIT` 让本次事务的修改永久生效，并且让其他会话看得到。[^s2][^s3]
+以 MySQL 8.4.0 所属长期支持系列的 InnoDB 为例，默认自动提交状态下，每个成功语句通常各自确认；并不是数据库完全没有事务，而是两条语句没有被合成**同一笔多语句事务**。[^auto]
 
-## 5. 回滚：倒着撤回
-`ROLLBACK` 取消本次事务里的全部修改。[^s2]
-数据库其实已经改过数据了：InnoDB 改数据时会把旧值记进 undo 日志，回滚就是按这些记录把每一步倒着撤回。[^s7][^s10]
-注意：自动提交模式下，单条语句已经提交，不能再用 `ROLLBACK` 撤销。[^s2]
+## 放进同一笔事务 {#transaction}
 
-## 6. 原子性：不能拆一半
-事务要么全部完成，要么完全没发生，不存在只做一半的事务，这叫原子性。[^s10][^s12]
+显式开始事务后，扣款和入账可以属于同一个边界。**提交**确认本事务的修改；**回滚**则取消本事务的修改。[^control]
 
-## 延伸：ACID 的另外三个字母
-- **一致性（C）**：MySQL 词汇表的说法是，数据始终处于一致状态，查询看到的要么全是旧值、要么全是新值，不会新旧混在一起。[^s10] 另一种常见讲法是事务结束时数据要满足所有规则，比如不能只给一个账户入账。[^s14][^s15] 不同资料对 C 的解释角度不一样。
-- **隔离性（I）**：进行中的事务彼此隔离，能看到别人多少改动由隔离级别决定；读已提交及以上看不到对方没提交的数据（读未提交可以，这就是下一期讲的脏读）。[^s10] SQL 标准定义了 4 个隔离级别，InnoDB 默认可重复读[^s5]，PostgreSQL 默认读已提交。[^s13]
-- **持久性（D）**：提交成功后，改动不会因为断电或崩溃丢失。[^s10] 这一点和配置、硬件都有关，在默认的安全配置下才成立。[^s1]
+画面中的金色“本次修改·待确认”表示当前事务自身看到的修改，小号“已确认”原值保留为参照。提交时两处新值共同成为确认结果；回滚时撤除本次修改，原值重新成为主体。这些视觉位置不是内存和磁盘的物理分层，也不表示修改在提交前完全没有写入任何存储。
 
-## 延伸：崩溃了怎么办
-数据库重启时，会先用 redo 日志把崩溃前记下的修改重做一遍（其中可能有没提交的），再用 undo 回滚崩溃时还没提交的事务。[^s6][^s9]
+当前事务能看到自己前面语句的修改，与其他会话此刻读到什么，是两个问题。其他事务还可能使用旧快照；因此视频没有宣称“提交后所有会话马上看到同一个新值”。[^read]
 
-[^s1]: MySQL 8.4 手册 17.2 InnoDB and the ACID Model（2026-10-01 生成）https://dev.mysql.com/doc/refman/8.4/en/mysql-acid.html
-[^s2]: MySQL 8.4 手册 15.3.1 START TRANSACTION, COMMIT, and ROLLBACK（2026-10-01 生成）https://dev.mysql.com/doc/refman/8.4/en/commit.html
-[^s3]: MySQL 8.4 手册 17.7.2.2 autocommit, Commit, and Rollback（2026-10-01 生成）https://dev.mysql.com/doc/refman/8.4/en/innodb-autocommit-commit-rollback.html
-[^s5]: MySQL 8.4 手册 17.7.2.1 Transaction Isolation Levels（2026-10-01 生成）https://dev.mysql.com/doc/refman/8.4/en/innodb-transaction-isolation-levels.html
-[^s6]: MySQL 8.4 手册 17.6.5 Redo Log（2026-10-01 生成）https://dev.mysql.com/doc/refman/8.4/en/innodb-redo-log.html
-[^s7]: MySQL 8.4 手册 17.6.6 Undo Logs（2026-10-01 生成）https://dev.mysql.com/doc/refman/8.4/en/innodb-undo-logs.html
-[^s9]: MySQL 8.4 手册 17.18.2 InnoDB Recovery（2026-10-01 生成）https://dev.mysql.com/doc/refman/8.4/en/innodb-recovery.html
-[^s10]: MySQL 8.4 手册 Glossary（2026-10-01 生成）https://dev.mysql.com/doc/refman/8.4/en/glossary.html
-[^s12]: PostgreSQL 18 文档 3.4 Transactions https://www.postgresql.org/docs/current/tutorial-transactions.html
-[^s13]: PostgreSQL 18 文档 13.2 Transaction Isolation https://www.postgresql.org/docs/current/transaction-iso.html
-[^s14]: Oracle AI Database 26 Concepts, Transactions（2026-04-30）https://docs.oracle.com/en/database/oracle/oracle-database/26/cncpt/transactions.html
-[^s15]: Microsoft Learn, Transaction Locking and Row Versioning Guide（2026-09-22）https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide?view=sql-server-ver17
+## 失败后撤销整笔 {#rollback}
+
+第二步失败时，应用应判断这笔业务是否还完整。如果要取消转账，就请求回滚整笔事务，避免只留下前一步的扣款。
+
+**不能把“某条 SQL 报错”等同于“整笔事务必然自动回滚”。** InnoDB 对不同错误的处理不同，有些只撤销出错语句；应用必须正确处理错误与事务边界。视频里明确显示“应用发现失败，选择回滚”，没有把所有错误都画成自动整笔撤销。[^errors]
+
+已经完成提交的那笔事务，不能再用当前事务的回滚将它倒回。镜 10 是从相同初始余额开始的**另一个失败示例**，并非撤销镜 09 已成功提交的转账。
+
+## 提交前崩溃怎么办 {#recovery}
+
+如果数据库进程在提交前意外退出，InnoDB 在正常重启恢复时会撤销当时未提交的事务。片中恢复后仍保留转账前的余额，没有单独留下扣款。[^recovery]
+
+这不表示恢复瞬间完成，也不涵盖磁盘毁坏、日志丢失或应用收不到提交响应等所有故障。恢复能力与具体配置、存储条件及备份策略相关。[^acid]
+
+## 这项保证的边界 {#boundary}
+
+本片讲的是**同一个支持事务的数据库内，正确划定的一笔事务**。它不能替代跨系统支付流程、业务校验、异常处理或并发控制；不会因为套上一笔事务，所有业务错误就自动消失。
+
+### 原子性与 ACID
+
+事务里相关修改共同确认或撤销，通常归入**原子性**。ACID 还包括一致性、隔离性和持久性。本片只抓住原子性的主线，没有在画面同时介绍四个概念。持久性也与可靠性设置及硬件有关，不能理解为无条件的“任何故障都不会丢”。[^acid]
+
+### 自动提交
+
+在自动提交状态下分别执行两条更新，可能各自形成事务。若它们必须共同完成，需要显式划定同一个事务，而不是期待后一条失败时自动撤销前一笔已提交的修改。[^auto]
+
+### 脏读：为什么“别人看见什么”另有规则
+
+如果一个事务读到了另一个事务尚未提交的修改，后者又撤销了，这次读取就可能依据了最终未保留的数据，称为**脏读**。隔离级别决定不同的读取规则；MySQL 文档特别说明 READ UNCOMMITTED 存在这类不一致读取。[^isolation]
+
+画面里的待确认修改始终表示“当前事务自己的修改”，不是让另一个事务读取它。原子性回答这笔修改能否只确认一半，隔离性回答并发读取和修改如何相互影响；两者不能互相代替。
+
+下一期继续看：两个人同时抢最后一件货，怎样避免相互覆盖修改。
+
+## 参考资料
+
+以下为实际打开并核验正文的 MySQL 官方手册；访问日期均为 **2026-10-24（北京时间）**。详细主张和适用边界见同目录 `research.md`。
+
+[^auto]: §17.7.2.2《autocommit, Commit, and Rollback》：https://dev.mysql.com/doc/refman/8.4/en/innodb-autocommit-commit-rollback.html
+[^control]: §15.3.1《START TRANSACTION, COMMIT, and ROLLBACK Statements》：https://dev.mysql.com/doc/refman/8.4/en/commit.html
+[^errors]: §17.20.5《InnoDB Error Handling》：https://dev.mysql.com/doc/refman/8.4/en/innodb-error-handling.html
+[^recovery]: §17.18.2《InnoDB Recovery》：https://dev.mysql.com/doc/refman/8.4/en/innodb-recovery.html
+[^read]: §17.7.2.3《Consistent Nonlocking Reads》：https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html
+[^isolation]: §17.7.2.1《Transaction Isolation Levels》：https://dev.mysql.com/doc/refman/8.4/en/innodb-transaction-isolation-levels.html
+[^acid]: §17.2《InnoDB and the ACID Model》：https://dev.mysql.com/doc/refman/8.4/en/mysql-acid.html

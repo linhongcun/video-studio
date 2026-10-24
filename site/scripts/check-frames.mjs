@@ -18,8 +18,10 @@ for (const slug of slugs) {
   const tail = m ? [...m[1].matchAll(/:\s*(\d+)/g)].reduce((a, x) => a + Number(x[1]), 0) : null;
   const expected = tail !== null ? sb.durationInFrames + tail : sb.durationInFrames + endCard;
   const rule = tail !== null ? `分镜 ${sb.durationInFrames} + 片尾停留 ${tail}` : `分镜 ${sb.durationInFrames} + 片尾卡 ${endCard}`;
-  const n = Number(execFileSync('ffprobe', ['-v', 'error', '-count_packets', '-select_streams', 'v:0', '-show_entries', 'stream=nb_read_packets', '-of', 'csv=p=0', path.join(dir, 'video.mp4')]).toString().trim());
+  const probe = JSON.parse(execFileSync('ffprobe', ['-v', 'error', '-count_packets', '-select_streams', 'v:0', '-show_entries', 'stream=nb_read_packets', '-of', 'json', path.join(dir, 'video.mp4')]).toString());
+  const n = Number(probe.streams?.[0]?.nb_read_packets);
   const errs = [];
+  if (!Number.isInteger(n)) errs.push('无法读取视频帧数');
   if (sb.finalVideoFrames != null && sb.finalVideoFrames !== n) errs.push(`finalVideoFrames=${sb.finalVideoFrames}`);
   if (tail !== null && expected !== n) errs.push(`期望 ${expected}（${rule}）`);
   if (errs.length) bad++;
