@@ -33,6 +33,13 @@
 - [制作工程](../episodes-codex/db-transaction/README.md)、[连续动画检查](../episodes-codex/db-transaction/qa-motion-v2.md)、[媒体指标](../episodes-codex/db-transaction/render-result.json)与[发布记录](../episodes-codex/db-transaction/release.md)随本期入库；[站点页面](https://linhongcun.github.io/video-studio/episodes/db-transaction/)使用批准版的原样副本。
 - 认可质量不自动等于发布授权；本次合并与站点部署根据后续明确指令执行，不自动关闭包含平台事项的issue。
 
+### EP.17 数据库锁
+
+- 用户明确要求选择并开始制作下一期，选定 [#69](https://github.com/linhongcun/video-studio/issues/69)，接上EP.16片尾的最后一件库存问题。
+- [制作工程](../episodes-codex/db-lock/README.md)已完成本地待观看版：14镜、28句、3457帧、约115.2秒；视频SHA前缀`93804b48`。
+- [权威资料核验](../episodes-codex/db-lock/research.md)、[动态预检](../episodes-codex/db-lock/qa-motion.md)与[成片核验](../episodes-codex/db-lock/qa-final.md)随制作分支保存。重点是乙等待后加锁读取新库存0，再由程序判定缺货，不把行锁当成业务检查。
+- 当前尚无本版用户评价或发布授权；站点及平台旧版保持原样，不自动关闭issue。
+
 ## 复用边界
 
 - 14或16镜、具体时长、字号、滚动位移及坐标都是单期实现，不照搬成后续硬规则。
