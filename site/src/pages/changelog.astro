@@ -4,7 +4,7 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 import {BASE, REPO, getEpisodes, epHref, epLabel, compareLessons} from '../lib/episodes';
 import {getReleases, episodesForRelease} from '../lib/releases';
 const releases = await getReleases();
-const episodes = [...getEpisodes()].sort(compareLessons);
+const episodes = [...getEpisodes({includeArchived: true})].sort(compareLessons);
 // 正文只做最小化渲染：转义后把 `代码` 与 PR #n 变成样式/链接
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'})[c]!);
 const render = (s: string) => esc(s)
