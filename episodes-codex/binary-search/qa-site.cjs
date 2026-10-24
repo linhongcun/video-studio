@@ -16,6 +16,9 @@ const dist = path.join(root, 'site/dist');
 const output = path.join(production, 'remotion/out/site-qa');
 const base = process.env.QA_SITE_BASE || 'http://127.0.0.1:4186/video-studio/';
 const meta = JSON.parse(fs.readFileSync(path.join(canonical, 'meta.json'), 'utf8'));
+const siteVersion = JSON.parse(fs.readFileSync(path.join(root, 'site/package.json'), 'utf8')).version;
+assert.equal(meta.firstRelease, `v${siteVersion}`, 'This new episode must debut in the site version being built');
+const previousReportCommit = '5a41a16ebaadb8339e4bc592edf325a407e74295';
 const storyboard = JSON.parse(fs.readFileSync(path.join(canonical, 'storyboard.json'), 'utf8'));
 const fps = storyboard.meta.fps;
 const frames = storyboard.meta.finalVideoFrames;
@@ -74,6 +77,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       assert.equal(response.status(), 200);
       await page.evaluate(() => document.fonts.ready);
       assert.equal(await page.locator('h1').innerText(), meta.title);
+      assert.ok((await page.locator('footer').innerText()).includes(`v${siteVersion}`), 'Rendered footer must use the new release version');
       assert.ok((await page.locator('.eh .meta').innerText()).includes(displayDuration));
       assert.ok(await page.getByText('LC.704', {exact: false}).count() > 0);
       assert.equal(await page.locator('.pl').count(), 0);
@@ -168,7 +172,11 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         const rss = await context.request.get(new URL('rss.xml', base).href); assert.equal(rss.status(), 200);
         const rssItem = (await rss.text()).match(/<item>[\s\S]*?<\/item>/g)?.find((item) => item.includes('/episodes/binary-search/'));
         assert.ok(rssItem && rssItem.includes('LC.704'));
-        siteEntries = {leetcodeSeriesLessons: hrefs, homeContainsNewEpisode: true, libraryLeetcodeVisibleCount: 3, libraryLearningOrder: libraryHrefs, rssItemPresentWithProblemNumber: true, sourceEntryVerified: expectedSource};
+        const parallelLesson = await context.request.get(new URL('episodes/horse-racing/', base).href);
+        assert.equal(parallelLesson.status(), 200, 'The parallel P01 lesson must remain published');
+        const parallelMeta = JSON.parse(fs.readFileSync(path.join(root, 'episodes/horse-racing/meta.json'), 'utf8'));
+        assert.ok((await parallelLesson.text()).includes(parallelMeta.title));
+        siteEntries = {leetcodeSeriesLessons: hrefs, homeContainsNewEpisode: true, libraryLeetcodeVisibleCount: 3, libraryLearningOrder: libraryHrefs, rssItemPresentWithProblemNumber: true, sourceEntryVerified: expectedSource, parallelP01LessonPreserved: true};
       }
       await context.close();
     }
@@ -176,7 +184,8 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     assert.equal(posterSha, sha(fs.readFileSync(path.join(dist, 'episodes/binary-search/cover-16x9.jpg'))));
     const report = {status: 'passed', checkedAtUTC: new Date().toISOString(), executor: 'Codex binary_site agent',
       baseCommit: cp.execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(),
-      siteVersion: JSON.parse(fs.readFileSync(path.join(root, 'site/package.json'), 'utf8')).version, slug: meta.slug, firstRelease: meta.firstRelease,
+      siteVersion, slug: meta.slug, firstRelease: meta.firstRelease,
+      supersedes: {commit: previousReportCommit, jsonPath: 'episodes-codex/binary-search/qa-site.json', markdownPath: 'episodes-codex/binary-search/qa-site.md', reason: 'The parallel P01 release already owns v0.55.0. The binary-search episode is unchanged; its actual first release and the current site version are v0.56.0.'},
       build: {command: 'cd site && npm run build', passed: true, runs: 1, reusedForBrowserResume: reuseBuild, htmlFiles: countFiles(dist, (name) => name.endsWith('.html')), indexedPages: fs.readdirSync(path.join(dist, 'pagefind/fragment')).filter((name) => name.endsWith('.pf_fragment')).length, log: path.join(output, 'build.log')},
       historicalRegression: {command: 'node site/scripts/check-learning-path.mjs --complete --built', passed: true, runs: 1, log: path.join(output, 'learning-path.log')},
       media: {frames, videoFrameDuration: frames / fps, videoSha256: videoSha, posterSha256: posterSha, sourceBuiltAndHTTPIdentical: true, codeCardFromFrame: card.from, codeCardFrames: card.durationInFrames, codeCardSeconds: card.durationInFrames / fps},
@@ -185,7 +194,7 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
         'VTT timestamps serialize frame times to milliseconds; caption end was checked within 0.001 seconds of the silent card boundary.',
         'Pause and brief muted code-card playback were checked; this is not full-film listening, ASR or algorithm proof.',
         'Actual Release/changelog and production HTTPS media verification remain the publishing task.',
-        'First browser attempt stopped at a stale QA assertion expecting LC.3 text in the redesigned pager. The real pager uses the previous lesson title; the check now verifies its actual canonical href and title. The same successful build/regression were reused for browser completion.']};
+        'The prior v0.55.0 QA and its stale-pager-assertion repair remain traceable at Git commit 5a41a16. This report is a new build and browser check for the corrected v0.56.0 release identity on the main branch that includes P01.']};
     fs.writeFileSync(path.join(production, 'qa-site.json'), JSON.stringify(report, null, 2) + '\n');
     console.log(JSON.stringify({status: report.status, report: path.join(production, 'qa-site.json'), media: report.media, siteEntries, screenshots}, null, 2));
   } finally {
