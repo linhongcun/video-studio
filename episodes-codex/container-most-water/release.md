@@ -49,6 +49,20 @@
 
 - [PR #159](https://github.com/linhongcun/video-studio/pull/159)已squash合并，提交`431c0ab8bc16863eea8be919d38082a1df69babb`保留Codex联合署名。
 - 同提交的附注tag与[Release v0.50.2](https://github.com/linhongcun/video-studio/releases/tag/v0.50.2)已发布，LC.11的firstRelease继续为v0.49.0。Release文案使用题号，避免混淆Agent独立系列的内部期号。
-- Release后[部署40100807342](https://github.com/linhongcun/video-studio/actions/runs/40100807342)于2026-10-24 22:06:39（北京时间）成功，head SHA与合并提交一致，API结果见`deployment.json`。
-- 2026-10-24 22:07:07（北京时间）实际HTTPS GET核验通过：线上视频10,636,628 bytes、完整SHA与修订3媒体一致；海报完整SHA保持，44句VTT与已检查构建逐字节一致。四章精确起点及正文锚点、源码入口、独立算法系列/RSS、首页版本与v0.50.2更新日志通过，见`online-verification.json`。
+- Release后[部署40100807342](https://github.com/linhongcun/video-studio/actions/runs/40100807342)于2026-10-24 22:06:39（北京时间）成功，head SHA与合并提交一致，API结果见`revisions/codecard-five-seconds/v3-deployment.json`。
+- 2026-10-24 22:07:07（北京时间）实际HTTPS GET核验通过：线上视频10,636,628 bytes、完整SHA与修订3媒体一致；海报完整SHA保持，44句VTT与已检查构建逐字节一致。四章精确起点及正文锚点、源码入口、独立算法系列/RSS、首页版本与v0.50.2更新日志通过，见`revisions/codecard-five-seconds/v3-online-verification.json`。
 - 用户未被要求再次审批，未将其对旧主体的认可写成已看过新代码卡。制作issue #78此前已按completed关闭，本次为同一视频修订，无平台新发。
+
+## v0.50.4：代码卡改为5秒
+
+- 用户指出15秒过长，要求5秒和暂停提示。本版卡片6544..6693共150帧，总6694帧、223.133333秒，约3:43，较上一版缩短10秒。完整程序与暂停提示保持。
+- 复用已验收编码画面快速准确截短，重新按新时长共享混音；不整条重渲动画、不重复不变程序测试和全课程检查。人声PCM前缀及44句时间保持，必要的准确末PTS、末帧、字幕及网站时长检查仍执行。
+- 正式媒体SHA256为`f95993b77f0412218af38f9c159596f928009336af1e730f18a4b1d7af401c04`，10,061,812 bytes；190冻结输入、完整解码及−16.0LUFS/−3.7dBTP通过。L020、S013、制作记忆和局部修订清单已更新。合并与线上实际结果见下节。
+
+### 修订4合并与发布
+
+- [PR #187](https://github.com/linhongcun/video-studio/pull/187)已squash合并，提交`0531f3ceb25c07fec3f19b9ffd16ac4d675a13f4`保留Codex联合署名。同步保留另一机器先合并的CDN修订，版本使用v0.50.4、教训使用L020，未占用其v0.50.3和L019。
+- 同提交的附注tag及[Release v0.50.4](https://github.com/linhongcun/video-studio/releases/tag/v0.50.4)已发布，firstRelease仍为v0.49.0。
+- [部署40102306544](https://github.com/linhongcun/video-studio/actions/runs/40102306544)于2026-10-24 22:25:29（北京时间）成功；虽然由合并触发，其构建已包含随后发布的v0.50.4 Release，线上检查另核对了真实Release链接，不只查看页脚版本号。head SHA与合并提交一致，API证据见`deployment.json`。
+- 2026-10-24 22:26:07（北京时间）实际GET通过：线上视频10,061,812 bytes、完整SHA与5秒正式媒体相同；海报及44句VTT逐字节保持，四章/正文锚点、源码入口、系列/RSS、首页版本和更新日志通过，见`online-verification.json`。
+- Release后按流程已另触发部署40102366288，该次状态不作为上述已完成上线核验的依据。
