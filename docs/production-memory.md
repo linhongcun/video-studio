@@ -45,11 +45,12 @@
 
 - **最新观看反馈：**用户已观看v0.52.0并表示整体问题不大，指出章节入口缺少口头衔接；现按该反馈仅修04/11/15，先承接与交代方向、再开始新动作。旧交付记录保留；修订版尚未被用户观看，不把原版总体反馈推广为对新版认可。
 - **章节衔接修订：**六句新口播与三镜动作已完成，5292帧约176.4秒，比原版增加3.13秒；十三镜原PCM、局部字幕/cue和时长严格相同，图像复用转码的代表帧最大平均差0.318/255。163输入、全PTS、完整解码、三处边界实际帧及两视口三章跳转已检查，发布收尾见本期release.md。
+- **修订已上线：**[PR #198](https://github.com/linhongcun/video-studio/pull/198)合并后发布v0.54.1，Release后Pages部署40107945142成功。北京时间2026-10-24 23:41:19，8个canonical普通GET的新版视频完整SHA（7f5606a8…68726）、海报、32句VTT、四章与目录/源码/系列/RSS/更新日志实际核验通过；#163再次以completed关闭，#161同步。新版学习站两视口实际seek与播放已复验；尚无用户观看新版的反馈。
 
 - 用户授权先选一期制作并部署网站，选定[#163](https://github.com/linhongcun/video-studio/issues/163)，slug为strategy-pattern，新独立系列design-patterns；其余模式仍为选题池。
-- [制作工程](../episodes-codex/strategy-pattern/README.md)为16镜32句、四章、5198帧，约2分53秒。同一100元示例订单展示规则抽离、外部选择、统一调用与返回，活动八折改七五折得到75元；新增规则仍需登记，单选不叠加。
+- [首发制作工程](../episodes-codex/strategy-pattern/revisions/v0.52.0/release.md)为16镜32句、四章、5198帧，约2分53秒。同一100元示例订单展示规则抽离、外部选择、统一调用与返回，活动八折改七五折得到75元；新增规则仍需登记，单选不叠加。
 - 六份公开资料、实际示例及最小diff、154项冻结、完整媒体解码与独立实际画面检查、桌面/手机32字幕和四章seek已完成。视频完整SHA为c80f9e44ee8eb668fb702266170d4fd8773d14f120e315b568d6ed5d07c27431，−16.0LUFS/−3.7dBTP；未执行逐字ASR或全片人工听辨，不声称用户已观看认可。
-- 本期已由[PR #192](https://github.com/linhongcun/video-studio/pull/192)合并，发布[v0.52.0](https://github.com/linhongcun/video-studio/releases/tag/v0.52.0)，Release后部署40104729342成功；线上8个canonical普通GET的完整视频/海报SHA、32条VTT、四章、源码/系列/RSS/更新日志核验通过。制作issue #163已以completed关闭，#161同步首期完成；完整证据见[发布记录](../episodes-codex/strategy-pattern/release.md)和[线上报告](../episodes/strategy-pattern/online-verification.json)。
+- 本期首发由[PR #192](https://github.com/linhongcun/video-studio/pull/192)合并，发布[v0.52.0](https://github.com/linhongcun/video-studio/releases/tag/v0.52.0)，Release后部署40104729342成功；线上8个canonical普通GET的完整视频/海报SHA、32条VTT、四章、源码/系列/RSS/更新日志核验通过，曾以completed关闭#163；首发证据见[历史发布记录](../episodes-codex/strategy-pattern/revisions/v0.52.0/release.md)和[历史线上报告](../episodes-codex/strategy-pattern/revisions/v0.52.0/online-verification.json)。
 
 ### LC.3 无重复字符的最长子串
 
