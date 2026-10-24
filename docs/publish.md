@@ -8,7 +8,7 @@
 
 ## 站点内容
 
-一期在站点上可见，需要 `episodes/<slug>/meta.json` 的 `draft` 为 `false`，以及同目录的 `article.mdx`、`video.mp4`、海报。列表和页面由 `site/src/lib/episodes.ts` 读取 `episodes/*/meta.json`。`series` 必须是 `site/src/content/series.json` 里的键：`request`、`cache`、`peak`、`database`、`distributed`、`leetcode`。LeetCode题号写`problemNumber`用于展示LC.N，内部整数`ep`继续用于排序和Release关联；独立算法系列不接入原技术系列的前后课学习链。
+一期在站点上可见，需要 `episodes/<slug>/meta.json` 的 `draft` 为 `false`，以及同目录的 `article.mdx`、`video.mp4`、海报。列表和页面由 `site/src/lib/episodes.ts` 读取 `episodes/*/meta.json`。`series` 必须是 `site/src/content/series.json` 里的键，具体系列以该文件为准；新增系列时同步添加标题、简介与顺序。LeetCode题号写`problemNumber`用于展示LC.N，内部整数`ep`继续用于排序和Release关联；独立算法系列不接入原技术系列的前后课学习链。
 
 `draft: true` 的期默认不进构建。本地要看草稿：
 
