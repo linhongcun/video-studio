@@ -1,0 +1,48 @@
+onset_rule selftest True
+frames 3760.0 durationFrames 3760 sec 125.33333333333333
+shot table:
+  01-hook                    0-  279 (279f 9.30s)
+  02-scope                 279-  547 (268f 8.93s)
+  03-record                547-  860 (313f 10.43s)
+  04-concentrated          860- 1093 (233f 7.77s)
+  05-split                1093- 1354 (261f 8.70s)
+  06-rule                 1354- 1580 (226f 7.53s)
+  07-key                  1580- 1856 (276f 9.20s)
+  08-route-a              1856- 2106 (250f 8.33s)
+  09-route-b              2106- 2348 (242f 8.07s)
+  10-same-user            2348- 2607 (259f 8.63s)
+  11-lookup               2607- 2873 (266f 8.87s)
+  12-resources            2873- 3184 (311f 10.37s)
+  13-limits               3184- 3460 (276f 9.20s)
+  14-next                 3460- 3760 (300f 10.00s)
+cues 2 max |cue-rule| 0 outside -6..+2: []
+sentence ASR mismatches:
+   01-hook-1 delete '订单越来越多写入却还挤在同一个库里' -> ''
+   01-hook-2 delete '一个数据库装不下忙不过来时怎么办' -> ''
+   02-scope-1 delete '下单卡住原因可能有很多' -> ''
+   02-scope-2 delete '这里只看一种情况订单不断增长数据和写入压力集中在一处' -> ''
+   03-record-1 delete '每一条订单都有订单编号也记录属于哪个用户' -> ''
+   03-record-2 delete '先记住这条订单七零四二属于用户四十二' -> ''
+   04-concentrated-1 delete '其他用户的订单也来了' -> ''
+   04-concentrated-2 delete '现在它们都写进同一个订单表数据和工作都不断累积' -> ''
+   05-split-1 delete '分库分表是把数据按规则拆到不同的库和表中' -> ''
+   05-split-2 delete '这里让不同的库各自保存一部分订单' -> ''
+   06-rule-1 delete '可不是把新订单随便分过去' -> ''
+   06-rule-2 delete '每次写入都要先知道该去哪个库' -> ''
+   07-key-1 delete '分片键就是用来决定数据去哪里的字段' -> ''
+   07-key-2 delete '这个例子选择用户编号再按固定规则找到目标位置' -> ''
+   08-route-a-1 delete '先看用户四十二的订单' -> ''
+   08-route-a-2 delete '规则把这个用户对应到A库所以订单沿着这条路写进去' -> ''
+   09-route-b-1 delete '换成用户十七规则得到B库' -> ''
+   09-route-b-2 delete '订单改走另一条路不必所有写入都挤在同一个库' -> ''
+   10-same-user-1 delete '用户四十二又下一单' -> ''
+   10-same-user-2 delete '只要这套规则没有变化它仍然去A库和这个用户的前一单放在一起' -> ''
+   11-lookup-1 delete '查这个用户的订单时也可以用相同规则找到A库' -> ''
+   11-lookup-2 delete '带着用户编号就能缩小这次要查的范围' -> ''
+   12-resources-1 delete '不同库有独立的处理资源才有机会分担写入压力' -> ''
+   12-resources-2 delete '只把表改成几个名字却还争抢同一份资源并不会凭空变快' -> ''
+   13-limits-1 delete '分得开不等于一定分得匀' -> ''
+   13-limits-2 delete '某个用户特别忙或者查询要跨很多库仍然可能成为瓶颈' -> ''
+   14-next-1 delete '所以要先看瓶颈再选合适的分配规则' -> ''
+   14-next-2 delete '可数据库拆开以后两个订单又怎么撞成同一个号了' -> ''
+selfcheck ok short shots: []

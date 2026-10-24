@@ -1,0 +1,48 @@
+onset_rule selftest True
+frames 3560.0 durationFrames 3560 sec 118.66666666666667
+shot table:
+  01-hook                    0-  226 (226f 7.53s)
+  02-record                226-  452 (226f 7.53s)
+  03-source                452-  678 (226f 7.53s)
+  04-replica               678-  904 (226f 7.53s)
+  05-write                 904- 1141 (237f 7.90s)
+  06-ack                  1141- 1381 (240f 8.00s)
+  07-read                 1381- 1683 (302f 10.07s)
+  08-compare              1683- 1909 (226f 7.53s)
+  09-delay                1909- 2172 (263f 8.77s)
+  10-apply                2172- 2398 (226f 7.53s)
+  11-again                2398- 2704 (306f 10.20s)
+  12-route                2704- 3013 (309f 10.30s)
+  13-recap                3013- 3278 (265f 8.83s)
+  14-next                 3278- 3560 (282f 9.40s)
+cues 3 max |cue-rule| 0 outside -6..+2: []
+sentence ASR mismatches:
+   01-hook-1 delete '昵称刚改好页面也提示保存成功' -> ''
+   01-hook-2 delete '一刷新怎么又变回旧名字了' -> ''
+   02-record-1 delete '先看同一个用户的一条昵称记录' -> ''
+   02-record-2 delete '旧名字叫阿青这次要改成青禾' -> ''
+   03-source-1 delete '主库是这个例子里接收修改的数据库' -> ''
+   03-source-2 delete '修改昵称的请求要先到这里完成' -> ''
+   04-replica-1 delete '从库保留着从主库复制来的数据' -> ''
+   04-replica-2 delete '应用可以把一部分读取交给它处理' -> ''
+   05-write-1 delete '现在把青禾这个新名字写进主库' -> ''
+   05-write-2 delete '修改完成并提交后主库里的昵称已经更新了' -> ''
+   06-ack-1 delete '程序收到成功结果先把新名字显示出来' -> ''
+   06-ack-2 delete '但这次成功不等于从库也已经更新' -> ''
+   07-read-1 delete '偏偏刷新时程序把读取请求交给了从库' -> ''
+   07-read-2 delete '它那里还是阿青于是旧名字又回到了页面上' -> ''
+   08-compare-1 delete '这时不是主库把修改撤销了' -> ''
+   08-compare-2 delete '而是同一条记录在两边暂时不一样' -> ''
+   09-delay-1 delete '主从延迟就是这次更改还没在从库应用完成' -> ''
+   09-delay-2 delete '这段间隔里读它就可能看到旧数据' -> ''
+   10-apply-1 delete '更改要被从库接收还要在从库应用' -> ''
+   10-apply-2 delete '等这次更改应用完成它才变成青禾' -> ''
+   11-again-1 delete '这时再从已经跟上的从库读取得到的就是青禾' -> ''
+   11-again-2 delete '刚才看见旧名字是读取时机和去向造成的' -> ''
+   12-route-1 delete '如果改完马上要核对刚才的结果可以让这次新查询直接读刚写入的那个主库' -> ''
+   12-route-2 delete '本例主库已经提交也没有使用旧缓存' -> ''
+   13-recap-1 delete '先分清修改写到哪里再决定这次读取到哪里' -> ''
+   13-recap-2 delete '既要分担普通读取也要照顾刚改完就要看的数据' -> ''
+   14-next-1 delete '昵称的问题说清了可订单越来越多一个数据库装不下又该怎么办' -> ''
+   14-next-2 delete '下一期我们接着看' -> ''
+selfcheck ok short shots: []

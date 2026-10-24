@@ -1,0 +1,48 @@
+onset_rule selftest True
+frames 3791.0 durationFrames 3791 sec 126.36666666666666
+shot table:
+  01-hook                    0-  226 (226f 7.53s)
+  02-two-databases         226-  457 (231f 7.70s)
+  03-distributed           457-  732 (275f 9.17s)
+  04-record-together       732- 1001 (269f 8.97s)
+  05-send                 1001- 1252 (251f 8.37s)
+  06-disconnect           1252- 1508 (256f 8.53s)
+  07-retry                1508- 1734 (226f 7.53s)
+  08-check                1734- 1960 (226f 7.53s)
+  09-atomic-consume       1960- 2218 (258f 8.60s)
+  10-repeat               2218- 2503 (285f 9.50s)
+  11-skip                 2503- 2735 (232f 7.73s)
+  12-eventual             2735- 3103 (368f 12.27s)
+  13-limits               3103- 3431 (328f 10.93s)
+  14-question             3431- 3791 (360f 12.00s)
+cues 2 max |cue-rule| 0 outside -6..+2: []
+sentence ASR mismatches:
+   01-hook-1 delete '你明明下单成功了库存却还没扣' -> ''
+   01-hook-2 delete '订单和库存为什么没有一起改变' -> ''
+   02-two-databases-1 delete '现在订单和库存在两个不同的数据库里' -> ''
+   02-two-databases-2 delete '订单库先写好了扣库存的操作却失败了' -> ''
+   03-distributed-1 delete '分布式事务处理的就是这类跨越多个系统的协作' -> ''
+   03-distributed-2 delete '单个库里的事务不能直接替另一个库完成修改' -> ''
+   04-record-together-1 delete '先看一种做法把订单和待发送的通知记在同一个订单库里' -> ''
+   04-record-together-2 delete '它们放进同一笔事务一起提交' -> ''
+   05-send-1 delete '这样提交成功的订单就留下了可以继续处理的通知' -> ''
+   05-send-2 delete '后台再读出它发出扣库存的消息' -> ''
+   06-disconnect-1 delete '消息发到一半网络断了' -> ''
+   06-disconnect-2 delete '库存暂时没改但已经保存的待办还在程序可以再次尝试' -> ''
+   07-retry-1 delete '重试时还是同一条订单的通知' -> ''
+   07-retry-2 delete '服务恢复后它才继续到达库存这一边' -> ''
+   08-check-1 delete '库存这边先核对这个订单是否已经处理过' -> ''
+   08-check-2 delete '如果没有就准备扣一次库存' -> ''
+   09-atomic-consume-1 delete '扣库存和记下已处理也要放在同一笔本地事务里' -> ''
+   09-atomic-consume-2 delete '一起提交才算这一次处理完成' -> ''
+   10-repeat-1 delete '假如确认回复丢了同一条消息可能又来一次' -> ''
+   10-repeat-2 delete '这就要用前面讲过的幂等重复到达也不能重复扣' -> ''
+   11-skip-1 delete '查到这个订单已经处理过程序直接返回已处理' -> ''
+   11-skip-2 delete '库存保持原值不会再少一件' -> ''
+   12-eventual-1 delete '最终一致是允许中间暂时没对上再经过处理让相关状态按业务要求对齐' -> ''
+   12-eventual-2 delete '它不是两个库在同一瞬间完成提交' -> ''
+   13-limits-1 delete '如果一直失败或者库存根本不够就不能只靠重试等下去' -> ''
+   13-limits-2 delete '还需要告警补偿或人工处理决定这笔业务怎么办' -> ''
+   14-question-1 delete '回头想一想如果只扣了库存却没记住已经处理重复消息来了会怎样' -> ''
+   14-question-2 delete '把每一步连起来看才能找到真正漏掉的保证' -> ''
+selfcheck ok short shots: []

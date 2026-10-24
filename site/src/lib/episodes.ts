@@ -15,7 +15,7 @@ export type Episode = {
   slug: string; ep: number; title: string; summary: string; duration: number; tags: string[];
   date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
   draft: boolean; legacy: boolean; related: {slug: string; label?: string}[];
-  series?: string; description?: string; updated?: string; platforms: Platform[]; readMin: number;
+  series?: string; description?: string; updated?: string; platforms: Platform[]; readMin: number; sourcePath: string;
 };
 export type Platform = {id: string; label: string; url: string};
 /** 平台链接：只渲染 meta.json platforms 里写了真实 URL 的平台，没写的不显示（绝不拼猜） */
@@ -187,6 +187,7 @@ export function getEpisodes(): Episode[] {
         duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, related: meta.related ?? [],
         series: meta.series, description: meta.description, updated: meta.updatedAt && meta.updatedAt > meta.publishedAt ? meta.updatedAt : undefined,
         platforms: platformsOf(meta), readMin: readingMinutes(slug),
+        sourcePath: meta.sourcePath ?? `episodes/${slug}/remotion`,
       };
     })
     .sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.ep - a.ep);

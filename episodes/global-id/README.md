@@ -1,9 +1,13 @@
-# EP.20 全局唯一 ID（global-id）
-- storyboard.json：9 章 14 镜头，2739 帧 @30fps（正片 2633 + 停顿 46 + 全片末尾留白 60）+ 全局片尾卡 60 帧 = 成片 2799 帧
-- 停顿：autoinc-2 7 帧（原音帧 1292，ch5-1 前）、snowflake-3 39 帧（原音帧 2105，ch7-1 前）；build_voice.py 在下一句开口前 0.1 s 的句间静音里插入，整轨 voice.wav = 2679 帧；术语标签完整显示：自增 66、雪花算法 66、时钟回拨 97、全局唯一 ID ≥84（均 ≥63）
-- 配音：MiMo 冰糖（/workspace/share/ep20，整轨 narration.wav sha 9db4978f…，2633 帧）
-- 渲染器沿用 EP.19：camera.pushIn（8 镜，静止段 1.00→1.04，origin [960,470]，字幕和水印不缩放）；配音单条整轨；实物图全部内联本期 assets/*.svg
-- 字幕严格按 storyboard 数字 from/to；空字幕不画框；水印第 0 帧常显（watermarkFadeIn={false}）
-- 制作：`cd remotion && npm ci && npm run render`（--bundle-cache=false，mix_bgm.py constant --below 12，Wallpaper，−16 LUFS，TP −2.0 dBTP）；成片 sha 78bfad13…
-- 封面：Miyazaki 设计稿 cover/ep20-*.png → cover-*.jpg（不取视频帧）
-- 配乐：Kevin MacLeod「Wallpaper」（incompetech.com），CC BY 4.0
+# EP.20 两个订单，怎么撞成同一个号了？（global-id）
+
+2026-10-24 按用户的GitHub持续发布授权，将 `episodes-codex/global-id` 中完成检查的重制成片接入本站，版本v0.45.4。只更新站点，保留原发布日期、首发版本及平台历史链接。
+
+- 成片1920×1080、30fps、4419帧，封装时长147.306秒；不追加全局片尾。
+- 视频SHA-256：`14bd428ea60068a454310759cbf329e80e33a3f5aef6deed3761c8bce21da471`，与制作工程通过检查的冻结文件逐字节一致。
+- 分镜、冻结副本 `storyboard.2fb344e3.json`、最终音轨和词时间兼容文件原样复制；30句外挂字幕采用冻结的 `from/to`，章节按实际镜长及文章ID匹配。
+- `meta.finalVideoFrames` 固定当前成片长度；旧顶层及Remotion的 `timing.json`、`chapters.txt` 已移除，避免旧时序影响本站。
+- 技术依据见 [research.md](research.md)，完整适用边界见 [article.mdx](article.mdx)。
+
+当前渲染入口、选定配音与检查报告在 [制作工程](../../episodes-codex/global-id/README.md)，实际命令在 `episodes-codex/global-id/remotion/` 执行。本目录原有 `gen.py`、旧配音/校验脚本、`remotion/`、`cover/`、`assets/` 等为历史工程，不用于重建当前成片。不要从这些旧文件恢复旧版分镜或声音时序。
+
+配乐：Kevin MacLeod《Wallpaper》（incompetech.com），CC BY 4.0。

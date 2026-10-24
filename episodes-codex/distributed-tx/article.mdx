@@ -1,0 +1,78 @@
+---
+title: 下单成功了，库存怎么没扣？
+summary: 两个数据库不能靠一笔普通本地事务同时修改。用同一条订单通知，讲清同库记录待发事件、失败重试、库存侧幂等处理和最终一致的边界。
+chapters:
+  - { id: hook, title: 两个库为何没有一起改 }
+  - { id: record, title: 先记住订单和待办 }
+  - { id: retry, title: 失败后仍能继续发送 }
+  - { id: consume, title: 库存侧只处理一次 }
+  - { id: eventual, title: 最终一致与失败边界 }
+  - { id: question, title: 回头检查漏掉的保证 }
+related: ["global-id", "db-transaction", "message-queue", "idempotency"]
+---
+
+## 两个库为何没有一起改 {#hook}
+
+订单8124已经记入订单库，库存库里的数量却仍是4。它们是两个不同的数据库，单独提交订单库中的普通本地事务，不会自动替另一个库完成扣减。**分布式事务**面对的，是跨系统操作需要协作的问题；本片只沿着可靠消息这一条主线往下讲。
+
+所有编号和库存都是示例。画面“订单已记录”只表示订单数据写入，不代表业务可以在缺货时仍承诺成交。真实下单系统还需设计库存预留或确认、业务失败、取消和补偿等状态。
+
+## 先记住订单和待办 {#record}
+
+仅在订单提交后直接调用一次库存接口，会留下一个空档：订单已提交，通知却可能因进程退出或网络问题没有发出。
+
+一种做法是**在同一个订单数据库的本地事务中，同时写入订单和待发送的事件记录**。事务失败时两者都不提交；事务成功后，后台能够继续找到已提交的待发事件。它通常称为transactional outbox。[^outbox]
+
+这一步原子化的是“订单与本地待发记录”，不是“订单库与库存库同时提交”。后台发送器还须处理轮询、发送确认、重发与记录生命周期；不能先删除唯一的持久化待办，再寄希望于一次网络调用。
+
+## 失败后仍能继续发送 {#retry}
+
+视频中通知E8124发送途中失败，但原先保存的待办仍在，程序可以在服务恢复后重新尝试。发送器应有持久化进度和失败处理，不能把内存里的重试循环当成可恢复设计。
+
+发布确认与消费确认有不同含义。消息代理接受一条消息，并不等于库存业务已经完成；确认可能因网络故障丢失，重新发送或重新交付又可能导致同一条消息出现多次。[^reliability][^delivery]
+
+因此，视频没有宣称“一定送到为止”。重试策略、消息保留、服务恢复和异常处置共同决定操作能否继续，永久故障不会因为多等一会儿就自动消失。
+
+## 库存侧只处理一次 {#consume}
+
+E8124对应订单8124本次扣减一件库存的操作。库存侧需把**检查处理标识、写入处理标识和扣减库存纳入同一笔库存库本地事务**，并用唯一约束等机制防止并发重复执行。不能只做一个没有并发保护的“先查、再改”。[^consumer]
+
+示意流程如下，省略的异常处理在真实程序中必须实现：
+
+```text
+开始库存库本地事务
+  尝试登记唯一处理键 E8124
+  若已存在：结束本次处理事务后返回已处理，不再次扣减
+  若本例库存足够：库存 4 → 3
+  若业务检查失败：撤销本事务并进入明确的失败处理
+共同提交：处理键 + 库存修改
+成功后再确认消息
+```
+
+如果只扣库存、却没记住已经处理，重复通知就可能再扣一次；如果只记处理标识、扣减失败却独立保留标识，又可能让重试被错误跳过。两份结果必须共同确认。
+
+去重键要标识**同一条消息或同一次业务操作**。不能用“订单出现过”作为所有事件的永久通用屏障，否则会误吞后续合法的退款或库存调整事件。去重记录保留期限、消息重放和跨系统外部副作用也需要配套设计。
+
+## 最终一致与失败边界 {#eventual}
+
+视频的正常路径里，订单先记录，稍后通知被处理，库存从4变成3。**最终一致**允许中间阶段暂时没对上，系统再按业务规则推进并收敛；它不等于两个数据库在同一瞬间提交，也不意味着所有操作都可以忽略中间状态。
+
+示例能走向成功，前提是库存足够、服务恢复，并且持久化、重试、幂等与业务检查正确。遇到永久失败、库存不足或不可继续的业务条件，应进入告警、取消、补偿或人工处理。补偿是根据业务纠正先前操作，不必然等于把所有数据库恢复成原始快照，补偿本身也可能失败。[^compensate]
+
+其他方案如两阶段提交、TCC、Saga和XA属于不同的设计方向，本片不并列演示，更不宣称可靠消息适合所有一致性要求。
+
+## 回头检查漏掉的保证 {#question}
+
+如果只扣了库存，却没记住已经处理，重复消息来了会怎样？再反过来想：如果只记处理标志，扣库存却失败，又会怎样？
+
+把整条链路拆成可核对的步骤：提交的订单有可恢复待办；投递失败有后续处理；重复不会重复产生业务副作用；最后按业务状态确认成功或失败。每一步的保证，都来自具体机制和条件。
+
+## 公开资料
+
+以下正文在2026-10-24实际核验，逐条主张与适用边界见本期research.md。
+
+[^outbox]: [AWS Prescriptive Guidance — Transactional outbox pattern](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)
+[^reliability]: [RabbitMQ — Reliability Guide](https://www.rabbitmq.com/docs/reliability)
+[^delivery]: [Amazon SQS — At-least-once delivery](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues-at-least-once-delivery.html)
+[^consumer]: [Chris Richardson — Idempotent Consumer（2020-10-16，原作者公开说明）](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)
+[^compensate]: [Azure Architecture Center — Compensating Transaction](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)

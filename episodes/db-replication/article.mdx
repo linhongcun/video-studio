@@ -1,78 +1,66 @@
 ---
 title: 刚改的昵称，怎么又变回去了？
-episode: 18
-version: v0.23.0
-series: 数据库入门
+summary: 修改已在主库提交，刷新却从尚未应用更改的从库读取。追踪同一条昵称记录，分清写入结果、复制进度和读取去向。
+chapters:
+  - { id: hook, title: 保存成功却读回旧名字 }
+  - { id: roles, title: 主库和从库各在做什么 }
+  - { id: stale, title: 刷新为什么读到旧值 }
+  - { id: delay, title: 接收更改不等于应用完成 }
+  - { id: route, title: 刚改后要立即核对怎么读 }
+related: ["db-lock", "db-sharding"]
 ---
 
-刚改完昵称，一刷新又变回旧的了。你的修改其实没丢，你只是读到了一台还没跟上的「从库」。这一期讲主从复制和读写分离。
+## 保存成功却读回旧名字 {#hook}
 
-> 版本说明：本文以 **MySQL 8.4**（LTS）为准，不同版本的参数名和默认行为可能不同。
+同一条用户7042的记录，昵称由阿青改为青禾；所有昵称、编号与请求均为教学设计。视频演示一种可能的时序，不判断现实网站每次出现旧昵称的具体原因。
 
-> 叫法说明：中文社区习惯说「主库 / 从库」。MySQL 官方 2020 年起改称 **source / replica**，以前叫 master / slave；命令也改成了 `START REPLICA`、`SHOW REPLICA STATUS`。[^S10][^S3] PostgreSQL 叫 primary / standby。[^S12]
+上期处理同一条库存记录的冲突访问；本期换到数据有多个副本的情况。一次写入成功，不能单独说明另一次读取究竟去了哪里、读到了哪个版本。
 
-## 1. 主从复制：赛场和转播
+## 主库和从库各在做什么 {#roles}
 
-一台库（主库）的数据被复制到一台或多台库（从库）。[^S1] 主库把所有改动记进二进制日志（binlog），普通的 `SELECT` 一般不记。[^S2] 是从库自己去主库**拉**这些改动，然后照着重做一遍，而不是主库推过去。[^S2]
+在本期选定的单主库结构里，应用把修改交给主库，再将部分普通读取分给从库。MySQL官方将这种结构作为适合读多写少工作负载的一种扩展方案；它不是所有数据库部署都必须使用的固定架构。[^scale]
 
-具体分三步，各由一个线程负责：[^S3]
+MySQL复制由源记录更改，副本请求相关日志并在本地重放。动画中的箭头只表示更改与请求的流向，不表示物理服务器设备，也不宣称源在所有实现中都是主动推送。[^impl]
 
-1. 主库的 **binlog dump 线程**：从库连上来时，把 binlog 内容发过去。
-2. 从库的 **I/O（receiver）线程**：向主库要更新，存成本地的**中继日志**（relay log）。
-3. 从库的 **SQL（applier）线程**：读中继日志，把里面的事务执行一遍。开启并行复制时可以有多个 applier 同时干。
+主库、从库是本期的职责标签，不等于从库天然拥有不可修改的所有权限配置。生产系统仍需按自己的权限、写入限制和故障策略配置。
 
-## 2. 为什么要复制
+## 刷新为什么读到旧值 {#stale}
 
-- **分担读**：所有写入都必须在主库上，读可以分到一台或多台从库。[^S1] 这种做法最适合读多写少的场景，大多数网站都是这样。[^S6]
-- **备份**：从库可以暂停复制，在从库上做备份不会影响主库。[^S1]
-- **主库坏了能顶上**：可以把一台从库切换成新的主库。[^S7]
+本例先在主库提交青禾，程序收到成功后显示新昵称。复制尚未在从库应用时，刷新恰好读了仍存阿青的从库，就把旧值重新显示出来。主库并没有因此撤销刚才的修改。
 
-注意，读写分离时从库一般设成只读（MySQL 需要开 `read_only`/`super_read_only`，复制本身不会自动禁写），**不分担写**的压力。[^S13]
+MySQL默认复制是异步的。源在提交成功时，并不能据此确认某个副本何时已经取得、处理了该事务。这里的“暂时不同”指本例的一段时间序列，没有承诺传播一定在固定几秒内完成。[^semi]
 
-## 3. 主从延迟
+## 接收更改不等于应用完成 {#delay}
 
-主从延迟（也叫复制延迟）：主库和从库之间总有一段可测量的延迟，同一时间在两边跑同一条查询，结果可能不同；从库的数据是「最终一致」的。[^S12][^S13] 延迟有多大取决于主库负载和机房之间的距离；Azure 的说明里写，多数情况下在几秒到一两分钟之间。[^S13]
+副本先接收更改，随后由应用线程执行相关事务。视频刻意保留“收到青禾、记录仍是阿青”的阶段；只有在本次更改应用完成后，后续查询才在该副本读到青禾。[^threads]
 
-在 MySQL 里可以用 `SHOW REPLICA STATUS` 看 `Seconds_Behind_Source`：它表示从库的 SQL 线程落后主库 binlog 的秒数，数字大或者一直在涨，说明从库跟不上了。[^S5]
+因此，不应该仅凭“复制连接正常”“已经收到日志”就宣称刚写入的数据已经可从该副本读取。若复制中断或出错，恢复与追赶也需要额外处理，不能把视频的成功追赶示例当成无限故障下的保证。
 
-## 4. 异步、半同步、全同步
+### 状态指标的边界
 
-- **异步（默认）**：MySQL 复制默认是异步的。[^S1] 主库不知道从库有没有、什么时候拿到了改动；主库要是崩了，它已经提交的事务可能还没传给任何从库，这时切到从库就会少数据。[^S4] PostgreSQL 的文档也写了同样的风险：还没传出去的事务会丢。[^S12]
-- **半同步**：主库要等至少一台从库（数量由 `rpl_semi_sync_source_wait_for_replica_count` 设定，默认 1）**收到改动、写进中继日志并刷盘**，才告诉客户端提交成功。默认 `AFTER_SYNC` 模式是先等确认、再在存储引擎里提交；`AFTER_COMMIT` 是先提交、再等确认。这样确认成功时，数据至少在两个地方。代价是要等确认，比异步慢。注意：等确认超时（`rpl_semi_sync_source_timeout`）后，主库会自动退回异步复制，直到有从库跟上。[^S4] 另外，MySQL 8.0.26 之前，半同步的插件和参数叫 `rpl_semi_sync_master_*` / `rpl_semi_sync_slave_*`；从 8.0.26 起提供改用 source / replica 新名字的版本（如 `rpl_semi_sync_source_*`）。[^S18]
-- **全同步**：所有从库都提交了才算完成，可能会有很大延迟。[^S4]
+`SHOW REPLICA STATUS`里的`Seconds_Behind_Source`可以辅助监控，但它并非任何环境下都精确表示副本落后主库多久。官方说明，接收线程落后而应用线程追上已接收内容时，该数值可能为0；因此0也不能单独证明已经读得到最新主库数据。视频不放假定的延迟秒数。[^status]
 
-半同步只要求从库「收到」，不要求从库「执行完」。[^S4] 所以半同步下，刚写完马上去从库读，**还是可能读到旧数据**。
+### 半同步也不等于每次读取都新
 
-## 5. 刚写完就读：怎么不读到旧的
+半同步提供的是等待指定副本收到并记录相关事件的确认，不代表这些事件已经在那个副本应用并提交。不能只因启用半同步，就直接从任意副本读取并声称“刚写入必定可见”。[^semi]
 
-问题出在：用户写进主库，紧接着从一台还没跟上的从库读。[^S14] 常见几种办法：
+## 刚改后要立即核对怎么读 {#route}
 
-1. **写完读主库**：刚写完、或者关键数据，直接去主库读；没有足够新的从库时，也退回主库。代价是主库压力变大。[^S14]
-2. **按会话粘滞**：记下这个会话最后一次写入的时间，接下来一段时间的读都走主库或足够新的从库。[^S14]
-3. **等事务执行到**：写完记下这次事务的 GTID，去从库读之前先用 `WAIT_FOR_EXECUTED_GTID_SET()` 等从库执行到它。[^S8] ProxySQL 也能自动做这件事。[^S15]
-4. **中间件自带**：新版 MySQL Router 有 `wait_for_my_writes` 选项，开启后只读查询会先等本会话最后一次写入，等不到就回主库读。[^S11]
+本例的选择是：主库提交完成后，把紧接着核对刚才修改的**新查询定向到刚写入的同一个主库**，同时不使用旧缓存。这避免了此例中特定副本尚未追上的读取窗口；普通读取仍可按需求分给从库。它是依据数据去向作出的应用路由选择。[^scale]
 
-## 6. 读写分离：谁来分
+还要注意事务与缓存：如果查询沿用一个早已建立的REPEATABLE READ快照，即使连接到了主库，也可能继续看到那个快照。应在需要的位置使用适合的一致性策略，例如结束旧事务、建立新的查询上下文；不能把“主库”两个字当成忽略事务语义、客户端缓存或故障切换的保证。[^snapshot]
 
-写都去主库，读可以去从库。[^S1] 分流可以放在不同的地方：
+视频只讲这条昵称记录的读取时序，没有并列讲GTID等待、读写路由中间件、会话粘滞或故障切换方案。生产实现要结合连接路由、事务边界、错误处理和一致性需求选择。
 
-- **中间件**：MySQL Router 支持读写分离，会判断每条查询是读还是写，再发到对应的库。[^S9] ProxySQL 用 hostgroup 区分主库组和从库组，按端口或规则路由。
-- **云厂商**：比如 Azure Database for MySQL 的 reader endpoint，把读连接分到多台从库（预览功能）。[^S13]
-- **应用自己分**：代码里开两个连接，写走主库，读走从库。[^S14]
+下一期继续：订单太多，一个数据库装不下怎么办？
 
-[^S1]: MySQL 8.4 参考手册，第 19 章 Replication，https://dev.mysql.com/doc/refman/8.4/en/replication.html ，2026-10-15 抓取
-[^S2]: MySQL 8.4 参考手册，19.2 Replication Implementation，https://dev.mysql.com/doc/refman/8.4/en/replication-implementation.html ，2026-10-15 抓取
-[^S3]: MySQL 8.4 参考手册，19.2.3 Replication Threads，https://dev.mysql.com/doc/refman/8.4/en/replication-threads.html ，2026-10-15 抓取
-[^S4]: MySQL 8.4 参考手册，19.4.10 Semisynchronous Replication，https://dev.mysql.com/doc/refman/8.4/en/replication-semisync.html ，2026-10-15 抓取
-[^S5]: MySQL 8.4 参考手册，Checking Replication Status，https://dev.mysql.com/doc/refman/8.4/en/replication-administration-status.html ，2026-10-15 抓取
-[^S6]: MySQL 8.4 参考手册，19.4.5 Using Replication for Scale-Out，https://dev.mysql.com/doc/refman/8.4/en/replication-solutions-scaleout.html ，2026-10-15 抓取
-[^S7]: MySQL 8.4 参考手册，Switching Sources During Failover，https://dev.mysql.com/doc/refman/8.4/en/replication-solutions-switch.html ，2026-10-15 抓取
-[^S8]: MySQL 8.4 参考手册，GTID Functions，https://dev.mysql.com/doc/refman/8.4/en/gtid-functions.html ，2026-10-15 抓取
-[^S9]: MySQL Router 8.4 手册，3.5 Read/Write Splitting，https://dev.mysql.com/doc/mysql-router/8.4/en/router-read-write-splitting.html ，2026-10-15 抓取
-[^S10]: MySQL 官方博客，Kenny Gryp，MySQL Terminology Updates，https://dev.mysql.com/blog-archive/mysql-terminology-updates/ ，2020-07-01
-[^S11]: MySQL Router 26.7 手册（PDF），https://downloads.mysql.com/docs/mysql-router-26.7-en.pdf ，2026-10-15 下载全文核对：原文为 "wait_for_my_writes [ 0 | 1 ]: If enabled, 1, read-only queries wait for the last written transaction of the session."，以及 wait_for_my_writes_timeout "before falling back to a read_write destination"
-[^S12]: PostgreSQL 18 文档，26.4 Hot Standby，https://www.postgresql.org/docs/current/hot-standby.html ；26.2 Log-Shipping Standby，https://www.postgresql.org/docs/current/warm-standby.html
-[^S13]: Microsoft Learn，Azure Database for MySQL：Read replicas，https://learn.microsoft.com/en-us/azure/mysql/flexible-server/concepts-read-replicas ，2026-08-29
-[^S14]: Henrique Fernandes，MySQL Read Replicas and Read-After-Write Semantics，https://hfernandes.com/blog/mysql-read-replicas/ ，2024-06-02
-[^S15]: ProxySQL 博客，GTID consistent reads，https://www.proxysql.com/blog/proxysql-gtid-causal-reads 。页面没有日期，按文中「upcoming ProxySQL 2.0」推断约为 2018 年，**仅参考**
-[^S18]: MySQL 8.0 参考手册，Installing Semisynchronous Replication，https://dev.mysql.com/doc/refman/8.0/en/replication-semisync-installation.html ，2026-10-15 抓取："MySQL 8.0.26 and later supply new versions of the plugins"，旧名 rpl_semi_sync_master，新名 rpl_semi_sync_source（"new terminology (from MySQL 8.0.26)"）
+## 参考资料
+
+以下均为2026-10-24实际核验的MySQL官方正文，逐项边界见本期research.md。
+
+[^impl]: [MySQL 8.4 §19.2 Replication Implementation](https://dev.mysql.com/doc/refman/8.4/en/replication-implementation.html)
+[^threads]: [MySQL 8.4 §19.2.3 Replication Threads](https://dev.mysql.com/doc/refman/8.4/en/replication-threads.html)
+[^scale]: [MySQL 8.4 §19.4.5 Using Replication for Scale-Out](https://dev.mysql.com/doc/refman/8.4/en/replication-solutions-scaleout.html)
+[^semi]: [MySQL 8.4 §19.4.10 Semisynchronous Replication](https://dev.mysql.com/doc/refman/8.4/en/replication-semisync.html)
+[^status]: [MySQL 8.4 §15.7.7.35 SHOW REPLICA STATUS](https://dev.mysql.com/doc/refman/8.4/en/show-replica-status.html)
+[^snapshot]: [MySQL 8.4 §17.7.2.3 Consistent Nonlocking Reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html)
