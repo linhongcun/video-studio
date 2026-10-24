@@ -11,7 +11,13 @@
 
 ## GitHub发布状态
 
-计划版本v0.52.0，新增独立设计模式系列首期。当前等待合并、发布Release、Release后Pages部署及线上普通HTTP GET核验；后续在本节补实际PR、提交与部署记录。
+- [PR #192](https://github.com/linhongcun/video-studio/pull/192)已合并，主干与v0.52.0标签提交为`a7442bc1bc8650d81d0aa4cda1b4266bddbdd1c4`。
+- [v0.52.0 Release](https://github.com/linhongcun/video-studio/releases/tag/v0.52.0)已于2026-10-24 22:56:23（北京时间）发布。
+- Release前自动push部署40104661049已主动取消，避免重复构建；实际交付以Release后的[部署40104729342](https://github.com/linhongcun/video-studio/actions/runs/40104729342)为准。
+- Release后的Pages部署40104729342已完成且success，发布提交与标签一致。
+- 线上核验于2026-10-24T22:59:24.445321+08:00一次通过，8个canonical普通GET均为200；视频流式完整SHA、海报与VTT逐字节一致，四章、正文锚点、源码、JSON-LD、首页、独立系列、RSS及v0.52.0更新日志均通过。
+- 制作issue #163已在线上核验后以`completed`关闭，系列总览#161同步D01完成。
+- [完整线上报告](../../episodes/strategy-pattern/online-verification.json)与本期`deployment.json`保留实际结果；未把机器或上线检查写成用户已观看认可。
 
 线上目标：[策略模式视频与配套文章](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)。线上验证脚本为本期 `verify-online.py`，读取canonical页面、视频、海报、VTT、系列、首页、RSS与更新日志；视频流式完整哈希，不下载另存远程媒体。
 
