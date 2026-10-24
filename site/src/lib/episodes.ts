@@ -198,7 +198,7 @@ export function getTags() {
   for (const e of getEpisodes()) for (const t of e.tags) all.set(t, (all.get(t) ?? 0) + 1);
   const meta = tagsMeta as Record<string, {description?: string; order?: number}>;
   return [...all.entries()]
-    .map(([name, count]) => ({name, count, description: meta[name]?.description ?? `关于「${name}」的全部期数。`, order: meta[name]?.order ?? 99}))
+    .map(([name, count]) => ({name, count, description: meta[name]?.description ?? `与「${name}」相关的视频与图文。`, order: meta[name]?.order ?? 99}))
     .sort((a, b) => a.order - b.order || b.count - a.count);
 }
 

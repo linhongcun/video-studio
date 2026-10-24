@@ -12,18 +12,15 @@ const {t} = Astro.props;
 const eps = getEpisodes().filter((e) => e.tags.includes(t.name));
 const others = getTags().filter((x) => x.name !== t.name);
 ---
-<BaseLayout title={`#${t.name}`} description={t.description} current="tags">
+<BaseLayout title={`#${t.name}`} description={t.description} current="library">
   <div class="container">
-    <Breadcrumb items={[{label: '首页', href: BASE}, {label: '专题', href: `${BASE}tags/`}, {label: t.name}]} />
-    <div class="head"><h1>#{t.name}</h1><span class="num">共 {eps.length} 期</span></div>
-    <p class="desc">{t.description}</p>
-    {others.length > 0 && <p class="others">其他专题：{others.map((o) => <TagPill tag={o.name} href={tagHref(o.name)} />)}</p>}
-    {eps.length ? <EpisodeGrid episodes={eps} /> : <EmptyState message="这个标签还没有片子" />}
+    <Breadcrumb items={[{label: '首页', href: BASE}, {label: '标签索引', href: `${BASE}tags/`}, {label: t.name}]} />
+    <header class="page-intro"><p class="eyebrow">TOPIC / {t.name}</p><h1>#{t.name}</h1><p>{t.description}</p><div class="tag-context"><span>共 {eps.length} 篇相关内容</span><a class="text-link" href={`${BASE}tags/`}>返回标签索引 <span aria-hidden="true">↗</span></a></div></header>
+    {eps.length ? <EpisodeGrid episodes={eps} /> : <EmptyState message="这个标签还没有内容" />}
+    {others.length > 0 && <details class="other-tags"><summary>查找其他知识点</summary><div class="tag-list">{others.map((other) => <TagPill tag={other.name} href={tagHref(other.name)} />)}</div></details>}
   </div>
 </BaseLayout>
 <style>
-.head{display:flex;justify-content:space-between;align-items:baseline;gap:var(--sp-4)}
-h1{font-size:var(--fs-h1);margin:0}.head span{color:var(--c-text-2);font-size:var(--fs-small)}
-.desc{color:var(--c-text-2);margin:var(--sp-2) 0 var(--sp-4)}
-.others{display:flex;gap:var(--sp-2);align-items:center;flex-wrap:wrap;font-size:var(--fs-small);color:var(--c-text-2);margin:0 0 var(--sp-5)}
+.tag-context{display:flex;align-items:center;gap:var(--sp-5);flex-wrap:wrap;margin-top:var(--sp-5);font-size:var(--fs-small);color:var(--c-text-2)}.other-tags{margin-top:var(--sp-7);border-top:1px solid var(--c-border);padding-top:var(--sp-5)}.other-tags summary{cursor:pointer;font-size:var(--fs-small);color:var(--c-text-2);width:fit-content;min-height:44px}.tag-list{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-3)}
+@media(max-width:767px){.tag-context{gap:var(--sp-3)}.other-tags{margin-top:var(--sp-6)}}
 </style>

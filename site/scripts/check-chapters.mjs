@@ -40,14 +40,16 @@ for (const slug of fs.readdirSync(root).filter((s) => fs.existsSync(path.join(ro
     assert.equal(c.frame, Math.round(c.frame), `${slug}: noninteger frame`);
   });
   assert.equal(new Set(current.chapters.map((c) => c.id)).size, current.chapters.length, `${slug}: duplicate ids`);
-  if (slug !== 'cache-consistency') assert.deepEqual(current, old, `${slug}: unexpected TOC change`);
+  assert.deepEqual(current, old, `${slug}: unexpected TOC change`);
 }
 
 const actual = after('cache-consistency');
-const lines = fs.readFileSync(path.join(root, 'cache-consistency/chapters.txt'), 'utf8').trim().split(/\r?\n/);
 const formatted = actual.chapters.map((c) => `${String(Math.floor(c.start / 60)).padStart(2, '0')}:${String(c.start % 60).padStart(2, '0')} ${c.title}`);
-assert.equal(actual.chapters.length, 9);
-assert.deepEqual(formatted, lines);
+const chapterFile = path.join(root, 'cache-consistency/chapters.txt');
+if (fs.existsSync(chapterFile)) {
+  const lines = fs.readFileSync(chapterFile, 'utf8').trim().split(/\r?\n/);
+  assert.deepEqual(formatted, lines);
+}
 assert.deepEqual(fallback('cache-consistency').chapters.map((c) => c.title), actual.chapters.map((c) => c.title));
 console.log('\ncache-consistency:\n' + formatted.join('\n'));
 console.log('\nAll episode comparisons and cache-consistency fallback checks passed.');

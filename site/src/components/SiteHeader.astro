@@ -1,59 +1,76 @@
 ---
-import {BASE, REPO} from '../lib/episodes';
+import {BASE} from '../lib/episodes';
 import ThemeToggle from './ThemeToggle.astro';
-const {current} = Astro.props;
+const {current = ''} = Astro.props;
 const nav = [
-  {id: 'home', label: '期数', href: BASE},
-  {id: 'tags', label: '专题', href: `${BASE}tags/`},
-  {id: 'changelog', label: '更新日志', href: `${BASE}changelog/`},
+  {id: 'home', label: '首页', href: BASE},
+  {id: 'learn', label: '学习系列', href: `${BASE}learn/`},
+  {id: 'library', label: '全部内容', href: `${BASE}library/`},
   {id: 'about', label: '关于', href: `${BASE}about/`},
-  {id: 'search', label: '搜索', href: `${BASE}search/`},
 ];
 ---
 <header class="hdr">
   <div class="container in">
-    <a class="logo" href={BASE}><span aria-hidden="true">▣</span> Video Studio</a>
+    <a class="logo" href={BASE} aria-label="IT小村 首页">
+      <svg class="brand-mark" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x="1" y="1" width="38" height="38" rx="11" fill="currentColor" fill-opacity=".1"/><path d="M10 12.5h7a6 6 0 0 1 6 6V29h-7a6 6 0 0 0-6-3V12.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M23 18.5a6 6 0 0 1 6-6h1V26h-1a6 6 0 0 0-6 3M15 18h3M15 22h3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="brand-name">IT小村<small>技术可视化</small></span>
+    </a>
     <nav class="nav" aria-label="主导航">
       {nav.map((n) => <a href={n.href} aria-current={current === n.id ? 'page' : undefined}>{n.label}</a>)}
-      <a href={REPO} rel="noopener" target="_blank">GitHub ↗</a>
     </nav>
-    <div class="right"><ThemeToggle />
-    <button class="burger" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="drawer">☰</button></div>
-  </div>
-  <div id="drawer" class="drawer" role="dialog" aria-modal="true" aria-label="菜单" hidden>
-    <button class="close" type="button" aria-label="关闭菜单">×</button>
-    {nav.map((n) => <a href={n.href} aria-current={current === n.id ? 'page' : undefined}>{n.label}</a>)}
-    <a href={REPO} rel="noopener" target="_blank">GitHub ↗</a>
+    <div class="right">
+      <a class="icon-button search-link" href={`${BASE}search/`} aria-label="搜索内容" aria-current={current === 'search' ? 'page' : undefined} title="搜索内容"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg></a>
+      <ThemeToggle />
+      <button class="burger icon-button" type="button" aria-label="打开菜单" aria-expanded="false" aria-controls="drawer"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
   </div>
 </header>
+<dialog id="drawer" class="drawer" aria-label="主菜单">
+  <div class="drawer-head"><span>探索 IT小村</span><button class="close icon-button" type="button" aria-label="关闭菜单" autofocus><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+  <nav aria-label="移动端主导航">{nav.map((n, i) => <a href={n.href} aria-current={current === n.id ? 'page' : undefined}><span class="num">0{i + 1}</span>{n.label}<span aria-hidden="true">↗</span></a>)}</nav>
+  <p>用短片理解机制，用图文看清细节。</p>
+</dialog>
 <script>
   const burger = document.querySelector<HTMLButtonElement>('.burger')!;
-  const drawer = document.getElementById('drawer')!;
-  const links = () => [...drawer.querySelectorAll<HTMLElement>('a,button')];
-  const open = () => { drawer.hidden = false; burger.setAttribute('aria-expanded', 'true'); links()[0].focus(); document.body.style.overflow = 'hidden'; };
-  const close = () => { drawer.hidden = true; burger.setAttribute('aria-expanded', 'false'); document.body.style.overflow = ''; burger.focus(); };
-  burger.addEventListener('click', open);
-  drawer.querySelector('.close')!.addEventListener('click', close);
-  drawer.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') close();
-    if (e.key === 'Tab') { const l = links(); const i = l.indexOf(document.activeElement as HTMLElement);
-      if (e.shiftKey && i <= 0) { e.preventDefault(); l[l.length - 1].focus(); }
-      else if (!e.shiftKey && i === l.length - 1) { e.preventDefault(); l[0].focus(); } }
+  const drawer = document.getElementById('drawer') as HTMLDialogElement;
+  let previousOverflow = '';
+  burger.addEventListener('click', () => {
+    previousOverflow = document.body.style.overflow;
+    drawer.showModal();
+    burger.setAttribute('aria-expanded', 'true');
+    document.body.style.overflow = 'hidden';
   });
+  drawer.querySelector('.close')!.addEventListener('click', () => drawer.close());
+  drawer.addEventListener('click', (event) => { if (event.target === drawer) {
+    const box = drawer.getBoundingClientRect();
+    if (event.clientX < box.left || event.clientX > box.right || event.clientY < box.top || event.clientY > box.bottom) drawer.close();
+  }});
+  drawer.addEventListener('close', () => {
+    burger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = previousOverflow;
+    burger.focus();
+  });
+  matchMedia('(min-width: 768px)').addEventListener('change', (event) => { if (event.matches && drawer.open) drawer.close(); });
 </script>
 <style>
-.hdr{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--c-header-bg);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-bottom:1px solid var(--c-border)}
-.in{height:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4)}
-.logo{color:var(--c-text);font-weight:700;text-decoration:none}
-.logo span{color:var(--c-primary)}
-.nav{display:flex;gap:var(--sp-5);margin-left:auto}
-.right{display:flex;align-items:center;gap:var(--sp-2)}
-.nav a,.drawer a{color:var(--c-text-2);text-decoration:none;padding:8px 0;border-bottom:2px solid transparent}
-.nav a:hover{color:var(--c-text)}
-.nav a[aria-current="page"],.drawer a[aria-current="page"]{color:var(--c-primary);border-bottom-color:var(--c-primary)}
-.burger,.close{display:none;width:44px;height:44px;background:none;border:0;color:var(--c-text);font-size:22px;cursor:pointer}
-.drawer{position:fixed;inset:0;z-index:60;background:var(--c-bg);padding:72px var(--gutter);display:flex;flex-direction:column;gap:var(--sp-4);font-size:20px}
-.drawer[hidden]{display:none}
-.close{display:block;position:absolute;top:6px;right:var(--gutter)}
-@media (max-width:767px){.nav{display:none}.burger{display:block}}
+.hdr{position:sticky;top:0;z-index:50;height:var(--header-h);background:var(--c-header-bg);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid var(--c-border)}
+.in{height:100%;display:flex;align-items:center;justify-content:space-between;gap:var(--sp-5)}
+.logo{display:inline-flex;align-items:center;gap:10px;color:var(--c-text);text-decoration:none;flex:none}
+.logo:hover{filter:none}.brand-mark{width:40px;height:40px;color:var(--c-primary)}
+.brand-name{font-size:21px;font-weight:750;letter-spacing:-.04em;line-height:1.2}
+.brand-name small{display:block;font-size:10px;color:var(--c-text-2);font-weight:500;letter-spacing:.16em;margin-top:4px}
+.nav{display:flex;align-items:center;gap:var(--sp-6)}
+.nav a{position:relative;display:flex;align-items:center;min-height:44px;color:var(--c-text-2);font-size:14px;font-weight:550;text-decoration:none;white-space:nowrap}
+.nav a:hover{color:var(--c-text);filter:none}
+.nav a[aria-current="page"]{color:var(--c-text)}
+.nav a[aria-current="page"]::after{content:'';position:absolute;bottom:2px;left:50%;width:4px;height:4px;border-radius:50%;background:var(--c-primary);transform:translateX(-50%)}
+.right{display:flex;align-items:center;gap:4px}.search-link[aria-current]{color:var(--c-primary)}
+.burger{display:none}
+.drawer{width:calc(100% - 32px);max-width:440px;margin:16px auto auto;padding:var(--sp-5);color:var(--c-text);background:var(--c-bg);border:1px solid var(--c-border);border-radius:var(--r-lg);box-shadow:var(--shadow-2)}
+.drawer::backdrop{background:rgba(7,15,27,.58);backdrop-filter:blur(5px)}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--sp-5);font-size:13px;color:var(--c-text-2)}
+.drawer nav{display:grid}.drawer nav a{display:flex;align-items:center;gap:var(--sp-4);padding:var(--sp-4) 0;border-bottom:1px solid var(--c-border);color:var(--c-text);font-size:21px;text-decoration:none}
+.drawer nav a[aria-current]{color:var(--c-primary)}.drawer nav a span:first-child{color:var(--c-muted);font-size:11px;font-family:var(--font-mono)}.drawer nav a span:last-child{margin-left:auto;font-size:18px;color:var(--c-muted)}
+.drawer p{font-size:12px;color:var(--c-text-2);margin:var(--sp-5) 0 0}
+@media (max-width:767px){.nav{display:none}.burger{display:inline-grid}.in{gap:var(--sp-3)}.brand-mark{width:35px;height:35px}.brand-name{font-size:19px}.brand-name small{font-size:9px}}
 </style>

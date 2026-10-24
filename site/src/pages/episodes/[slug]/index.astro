@@ -15,6 +15,7 @@ import EpisodePager from '../../../components/EpisodePager.astro';
 import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
 import PlatformLinks from '../../../components/PlatformLinks.astro';
+import {getTrackForSeries} from '../../../lib/learning';
 import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, isNew, isoDuration, seriesNav, seriesHref, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes({includeArchived: true});
@@ -33,6 +34,8 @@ const Content = e.Content;
 const tree = `${REPO}/blob/main/episodes/${e.slug}`;
 // Markdown → 组件自动映射：Sorkin 的稿件无需改写
 const sNav = seriesNav(e);
+const track = !e.archived ? getTrackForSeries(e.series) : undefined;
+const articleHeadings = e.chapters.filter((c) => c.inArticle);
 const learningGuide = learningGuideFor(e);
 const replacements = e.archived ? archiveReplacementsFor(e) : [];
 const pageUrl = new URL(`${BASE}episodes/${e.slug}/`, Astro.site).href;
@@ -48,7 +51,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 ---
 <BaseLayout title={e.title} description={(e as any).description ?? e.summary} ogImage={asset(e.slug, e.poster)} ogType="video.other" jsonLd={jsonLd} noIndex={e.archived}>
   <div class="container">
-    <Breadcrumb items={[{label: '首页', href: BASE}, ...(sNav ? [{label: sNav.series.title, href: seriesHref(sNav.series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `${epLabel(e)} · 第 ${sNav.index}/${sNav.total} 期` : epLabel(e)}]} />
+    <Breadcrumb items={[{label: '首页', href: BASE}, ...(track && track.title !== sNav?.series.title ? [{label: track.title, href: track.href}] : []), ...(sNav ? [{label: sNav.series.title, href: seriesHref(sNav.series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `${epLabel(e)} · 第 ${sNav.index}/${sNav.total} 期` : epLabel(e)}]} />
     {e.archived && <aside class="archive-notice" data-archived aria-labelledby="archive-title">
       <h2 id="archive-title">此合集已拆为独立短片</h2>
       <p>建议先看入门，再一次学习一种实现。此页保留合集版本供回看。</p>
@@ -68,24 +71,44 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
         <span class="tags">· {e.tags.map((t) => <a href={tagHref(t)}>#{t}</a>)}</span>
       </p>
     </header>
+    <nav class="reading-links" aria-label="选择阅读方式">
+      <a href="#player"><span class="reading-icon" aria-hidden="true">▶</span><span>看视频 <small>{fmtTime(e.duration)}</small></span></a>
+      <a href="#article"><span class="reading-icon" aria-hidden="true">≡</span><span>读图文 {e.readMin > 0 && <small>约 {e.readMin} 分钟</small>}</span></a>
+      {sNav && <a href="#course-directory" data-open-course><span class="reading-icon" aria-hidden="true">☷</span><span>课程目录 <small>{sNav.total} 篇</small></span></a>}
+    </nav>
     <PlatformLinks platforms={e.platforms} />
     <VideoPlayer src={asset(e.slug, e.video)} poster={asset(e.slug, e.poster)} captions={`${BASE}episodes/${e.slug}/captions.vtt`} chapters={e.chapters} title={e.title} />
     {learningGuide && <a class="learning-guide" href={epHref(learningGuide.slug)} aria-label={`${e.learningGuide.label}：${learningGuide.title}`}>
       <span>{e.learningGuide.label}</span><strong>{learningGuide.title} →</strong>
     </a>}
-    <RelatedEpisodes items={getRelated(e)} />
+    {sNav && <details class="course-directory" id="course-directory">
+      <summary><span><span class="directory-label">课程目录</span><strong>{sNav.series.title}</strong></span><span class="directory-position">第 {sNav.index} / {sNav.total} 篇 <span class="directory-chevron" aria-hidden="true">⌄</span></span></summary>
+      <nav aria-label={`${sNav.series.title}课程目录`}><ol>{sNav.series.episodes.map((lesson, i) => <li>
+        <a href={epHref(lesson.slug)} aria-current={lesson.slug === e.slug ? 'page' : undefined}>
+          <span class="lesson-number num">{String(i + 1).padStart(2, '0')}</span><span class="lesson-title">{lesson.title}</span><span class="lesson-duration num">{fmtTime(lesson.duration)}</span>
+        </a>
+      </li>)}</ol></nav>
+    </details>}
   </div>
   <div class="container art-grid">
-    <article class="prose" data-pagefind-body>
+    {articleHeadings.length > 0 && <aside class="toc-col"><Toc headings={articleHeadings} /></aside>}
+    <article class="prose article-body" id="article" tabindex="-1" aria-label="图文讲解" data-pagefind-body>
       {Content && <Content components={components} />}
-      <div data-pagefind-ignore><MusicCredit />
-      <BehindTheScenes script={`${tree}/script.md`} storyboard={`${tree}/storyboard.json`} source={`${REPO}/tree/main/${e.sourcePath}`} />
-      {!e.archived && <EpisodePager nav={sNav ?? {prev, next}} />}</div>
+      <div class="article-end" data-pagefind-ignore>
+        {!e.archived && <EpisodePager nav={sNav ?? {prev, next}} />}
+        <RelatedEpisodes items={getRelated(e)} />
+        <BehindTheScenes script={`${tree}/script.md`} storyboard={`${tree}/storyboard.json`} source={`${REPO}/tree/main/${e.sourcePath}`} />
+        <MusicCredit />
+      </div>
     </article>
-    <aside class="toc-col"><Toc headings={e.chapters.filter((c) => c.inArticle)} /></aside>
   </div>
 </BaseLayout>
 <script>
+  const courseDirectory = document.querySelector<HTMLDetailsElement>('#course-directory');
+  document.querySelector<HTMLAnchorElement>('[data-open-course]')?.addEventListener('click', () => {
+    if (courseDirectory) courseDirectory.open = true;
+  });
+  if (location.hash === '#course-directory' && courseDirectory) courseDirectory.open = true;
   // 正文“▶ 从这里看”→ 播放器；播放器当前章节 → 按钮文案“▶ 正在播放”
   document.querySelectorAll<HTMLAnchorElement>('[data-seek]').forEach((a) => a.addEventListener('click', (ev) => {
     ev.preventDefault(); window.dispatchEvent(new CustomEvent('vs:seek', {detail: {id: a.dataset.seek}}));
@@ -118,16 +141,42 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 .meta a{color:var(--c-tag)}
 .meta .tags{display:inline-flex;flex-wrap:wrap;gap:var(--sp-1) var(--sp-2)}
 .new{margin-left:6px;font-size:10px;font-weight:700;padding:2px 6px;border-radius:var(--r-full);background:var(--c-primary);color:var(--c-on-primary);vertical-align:1px}
-.art-grid{display:grid;grid-template-columns:minmax(0,var(--measure));justify-content:center;margin-top:var(--sp-7)}
-.toc-col{display:none}
-@media (min-width:1440px){.art-grid{grid-template-columns:1fr minmax(0,var(--measure)) 1fr;gap:var(--sp-6)}.prose{grid-column:2}.toc-col{display:block;grid-column:3;max-width:240px}}
+.reading-links{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-5) 0 var(--sp-4)}
+.reading-links a{display:flex;align-items:center;gap:var(--sp-2);padding:10px 16px;min-height:48px;border:1px solid var(--c-border);border-radius:var(--r-md);color:var(--c-text);font-size:var(--fs-small);font-weight:600;text-decoration:none;background:var(--c-surface)}
+.reading-links a:hover{border-color:var(--c-primary-a40);color:var(--c-primary);filter:none}
+.reading-links .reading-icon{color:var(--c-primary);font-size:16px;line-height:1}
+.reading-links small{font-size:var(--fs-xs);color:var(--c-text-2);font-weight:400;margin-left:6px}
+.course-directory{margin-top:var(--sp-5);border:1px solid var(--c-border);background:var(--c-surface);border-radius:var(--r-md);scroll-margin-top:calc(var(--header-h) + 16px)}
+.course-directory summary{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);list-style:none;padding:var(--sp-4) var(--sp-5);cursor:pointer}
+.course-directory summary::-webkit-details-marker{display:none}
+.course-directory summary>span:first-child{display:flex;align-items:center;gap:var(--sp-4)}
+.directory-label,.directory-position{color:var(--c-text-2);font-size:var(--fs-xs)}
+.course-directory strong{font-size:var(--fs-small);font-weight:600}
+.directory-position{display:flex;align-items:center;gap:var(--sp-3);white-space:nowrap}
+.directory-chevron{font-size:18px;transition:transform var(--dur)}
+.course-directory[open] .directory-chevron{transform:rotate(180deg)}
+.course-directory nav{padding:0 var(--sp-5) var(--sp-4)}
+.course-directory ol{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-1)}
+.course-directory a{display:flex;align-items:center;gap:var(--sp-3);color:var(--c-text);text-decoration:none;padding:12px;border-radius:var(--r-sm);font-size:var(--fs-small);line-height:1.6;min-height:48px}
+.course-directory a:hover{background:var(--c-surface-2);filter:none}
+.course-directory a[aria-current]{background:var(--c-primary-a12);font-weight:600;color:var(--c-primary)}
+.lesson-number{color:var(--c-muted);font-family:var(--font-mono);font-size:var(--fs-xs);flex:none}
+.lesson-title{flex:1;min-width:0}
+.lesson-duration{color:var(--c-text-2);font-family:var(--font-mono);font-size:var(--fs-xs);flex:none}
+.art-grid{display:grid;grid-template-columns:minmax(0,var(--measure));justify-content:center;gap:var(--sp-5);margin-top:var(--sp-7)}
+.article-body{scroll-margin-top:calc(var(--header-h) + 24px + var(--sticky-h,0px))}
+.article-body:focus{outline:none;box-shadow:none}
+.toc-col{min-width:0}
+@media (min-width:1200px){.art-grid{grid-template-columns:minmax(0,var(--measure)) minmax(200px,240px);column-gap:var(--sp-7)}.article-body{grid-column:1;grid-row:1}.toc-col{grid-column:2;grid-row:1}}
+@media (max-width:767px){.reading-links{gap:6px}.reading-links a{flex:1;justify-content:center;padding:10px 8px;gap:6px}.reading-links a>span:last-child{display:flex;flex-direction:column;gap:2px}.reading-links small{margin-left:0;font-size:11px}.course-directory summary{padding:var(--sp-4)}.course-directory summary>span:first-child{flex-direction:column;align-items:flex-start;gap:2px}.course-directory nav{padding:0 var(--sp-2) var(--sp-3)}.art-grid{margin-top:var(--sp-6)}}
 </style>
 <style is:global>
 .prose{min-width:0}
+.prose.article-body>:first-child{margin-top:0}
 .prose>p,.prose li{line-height:1.8}
 .prose p{margin:0 0 var(--sp-4)}
 .prose h2{font-size:var(--fs-h2);line-height:1.35;margin:var(--sp-8) 0 var(--sp-4);scroll-margin-top:calc(var(--header-h) + 16px + var(--sticky-h,0px))}
-.prose h3{font-size:var(--fs-h3)}
+.prose h3{font-size:var(--fs-h3);scroll-margin-top:calc(var(--header-h) + 16px + var(--sticky-h,0px))}
 .prose :not(pre)>code{background:var(--c-surface-2);color:var(--c-primary);padding:1px 6px;border-radius:var(--r-sm);font-size:.9em}
 .prose strong{color:var(--c-strong);font-weight:600}
 /* 宽表格在自身容器内横向滚动，不撑宽整页（手机 390px 溢出的根因） */
