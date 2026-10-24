@@ -4,7 +4,7 @@
 
 EP.14 之后系列暂停。恢复之前不要开新期，不要渲染，不要改已上线的 `video.mp4` 和配音。暂停期间只读对照。恢复制作后，预检在 SHA-256 冻结之后、渲染之前；成片审在渲染之后。预检不过就改分镜或配音，回到 [pipeline.md](pipeline.md) 第 5 步重新冻结。
 
-本仓没有覆盖全系列的 `validate.py`。下面标明「手工」的步骤没有脚本。不要新写同名检查脚本，也不要跑 [validate.md](validate.md)「不要跑的脚本」里那些旧 `validate.py`。
+通用分镜检查是 `episodes/_shared/storyboard/validate.py`。命令、引擎覆盖的条目，以及 EP.14 写在 `checks(V)` 里的条目，见 [validate.md](validate.md)「分镜检查」。下面标明「手工」的步骤，引擎没有覆盖。不要跑 [validate.md](validate.md)「不要跑的脚本」里那些旧 `validate.py`，也不要在期目录再写一份同名脚本。
 
 会写文件的命令，输出放到 `/tmp`。`label_onset_strict.py` 默认把报告写进期目录，已上线期必须加 `--out`。
 
@@ -60,7 +60,7 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR --out /tmp/label-onse
 
 文字不自动缩小。溢出日志前缀是 `COPYFIT overflow`，由该期 `remotion/src/components/ui.tsx` 的 `Copy` 打出。`scripts/stills.mjs` 不打这行。`still.sh` 也不是这条的入口。
 
-`episodes/degradation/remotion/scripts/` 和 `episodes/circuit-breaker/remotion/scripts/` 有 `prep-stills.mjs`、`diagfit.mjs`。换期先进那一期的 `remotion/`。没有这两个文件就待补，不要从旧期复制。
+`episodes/degradation/remotion/scripts/` 和 `episodes/circuit-breaker/remotion/scripts/` 有 `prep-stills.mjs`、`diagfit.mjs`。换期先进那一期的 `remotion/`。这一期没有这两个文件，就不要从别的期复制。静帧和分镜检查是两件事，分镜检查用 [validate.md](validate.md) 里的 `validate.py`。
 
 `frames.json` 由调用者临时写到 `/tmp`，不是仓库里的固定文件。至少包括第 0 帧，以及每个 `frame` 为 `browser` 的镜头的 `from`（成片绝对帧）。元素形状：`{"name": "hook", "frame": 0}`。
 
@@ -76,7 +76,7 @@ node scripts/diagfit.mjs /tmp/ep-stills /tmp/frames.json --covers
 
 ### 4. 封面 4:3 安全区
 
-手工。本仓没有单独的安全区脚本。`episodes/https/remotion/scripts/verify-storyboard.tsx` 只回归那一期。
+4:3 的 `centerRegion` 和 `bottom15Y` 由 `episodes/_shared/storyboard/validate.py` 的封面段检查，命令见 [validate.md](validate.md)「分镜检查」。`episodes/https/remotion/scripts/verify-storyboard.tsx` 只回归那一期。
 
 读 `covers.json` 的 `sizes["4x3"]`。规范见 [RULES.md](RULES.md)：内容落在 `centerRegion` 内，底边小于 `bottom15Y`。degradation 是 `centerRegion` `[315, 1125]`、`bottom15Y` `918`。水印用该尺寸的 `watermarkZone`（degradation 4:3 为 `[1200, 30, 1400, 100]`），不要为了塞进 `centerRegion` 去挪水印。
 
@@ -93,13 +93,13 @@ for e in s["elements"]:
 PY
 ```
 
-这段只打印。标题、窗口、价格行算内容，外接框要在区域内，且 `y + h < bottom15Y`。铺满画布的底色不是内容。水印不在 `elements` 里，不参与这条。坐标不合格就改 `covers.json`。同时还要满足上一节的无 `COPYFIT`。
+这段只打印，方便对照引擎报告。标题、窗口、价格行算内容，外接框要在区域内，且 `y + h < bottom15Y`。铺满画布的底色不是内容。水印不在 `elements` 里，不参与这条。坐标不合格就改封面 spec 再重跑，不要手改 `covers.json`。同时还要满足上一节的无 `COPYFIT`。
 
 另外核对 [validate.md](validate.md)「封面」：`meta.covers` 与 `covers.json` 解析后相等；封面第一行离页头 ≥ 24 px；地址栏按 `BrowserChrome.tsx` 的公式放得下，并留 24 px。
 
 ### 5. 字宽和字框
 
-手工估算，不能代替第 3 节的 COPYFIT。本仓没有通用测宽脚本。
+手工估算，不能代替第 3 节的 COPYFIT，也不能代替分镜里的不缩字检查。不缩字在 `episodes/_shared/storyboard/validate.py` 的 `V.wid`（全角 1em、其余 0.62em，≤ `w − 16 − padLeft`），见 [validate.md](validate.md)。
 
 CJK 一字大约等于 `fontSize` 像素。degradation 的实现是 `episodes/degradation/remotion/src/components/ui.tsx` 的 `textWidth`：码点大于 255 的字加 `fontSize`，ASCII 加 `fontSize * 0.58`，等宽加 `fontSize * 0.61`。换期先打开该期自己的 `textWidth`，系数以那份为准。
 
@@ -159,7 +159,7 @@ degradation 是镜 `19-discussion`，然后镜 `20-next-episode` 里先预告、
 
 ### 12. boxShots 和 devtoolsShots
 
-手工。读 `meta.boxShots`、`meta.boxShotRule`、`meta.devtoolsShots`。
+读 `meta.boxShots`、`meta.boxShotRule`、`meta.devtoolsShots`。`validate.py` 会核 `boxShots` 与 spec 的 `BOX_SHOTS`，以及 `devtoolsShots` 与 spec 的 `DEVTOOLS`。不超过 2 仍以 [RULES.md](RULES.md) 为准。
 
 ```sh
 python3 - <<'PY'
@@ -178,10 +178,10 @@ PY
 
 ### 13. 帧数、涟漪、术语时长
 
-手工。细节在 [validate.md](validate.md)。本仓没有这三项的通用脚本。
+各镜 `durationInFrames` 之和等于 spec 的 `WAVLEN`，点击到下一状态 ≥ 12，都在 `episodes/_shared/storyboard/validate.py`。细节见 [validate.md](validate.md)。`meta.durationInFrames`、各镜之和、`words.json` 的 `durationFrames` 三数相同，用下面这段。术语完整显示至少 63 帧仍没有通用脚本。
 
 - `meta.durationInFrames` 等于各镜头 `durationInFrames` 之和，并等于 `words.json` 的 `durationFrames`。degradation 是 5152。
-- 点击（带 `ripples` 的状态帧）到同一元素的下一状态 ≥ 12 帧。`growFrames` 仍与 `meta.timingSource` 一致（degradation 是 20）。见 [validate.md](validate.md)「点击和下一状态」。
+- 点击（带 `ripples` 的状态帧）到同一元素的下一状态 ≥ 12 帧（引擎的 `RIPPLE_MIN`，默认 12）。`growFrames` 仍与 `meta.timingSource` 一致（degradation 是 20）。见 [validate.md](validate.md)「点击和下一状态」。
 - 术语标签完整显示至少 63 帧。
 
 ```sh
@@ -200,14 +200,15 @@ PY
 
 ### 14. 版式
 
-手工。阈值在 [validate.md](validate.md)「画面延续」和「版式」。本仓没有通用脚本。
+先跑 [validate.md](validate.md)「分镜检查」。引擎已经覆盖：上一镜是 canvas 时，browser 镜第 1–8 帧不改 `view` / `pageBlank`；`CalloutTag` / `CornerBadge` 余量 ≥ 12；不缩字（`V.wid` ≤ `w − 16 − padLeft`）。冻结副本不在引擎里，仍用 [validate.md](validate.md)「冻结」那一节的只读比较。
 
-- [ ] browser 镜第 0 帧接上一个 browser 镜的标签和 `view`；中间有 canvas 时，第 1–8 帧不切换
+下面这些不在引擎里。EP.14 写在 `episodes/_shared/storyboard/examples/degradation/validate_spec.py` 的 `checks`。换期要重写，不能当成引擎已经会查：
+
+- [ ] browser 镜第 0 帧接上一个 browser 镜的标签和 `view`
 - [ ] 子流程在父节点下方，且 `x` ≥ 父节点 `x`
 - [ ] 同一个服务只有一个节点，箭头的 `pointsTo` 都指向它
 - [ ] 有「核心链路」时，标签在核心元素正下方
-- [ ] `CalloutTag` / `CornerBadge` 宽度余量 ≥ 12 px；页面注释离按钮 ≥ 16 px
-- [ ] 不缩字：字宽 ≤ `w − 16 − padLeft`
+- [ ] 页面注释离按钮 ≥ 16 px
 - [ ] 冻结副本 `storyboard.<sha8>.json` 与 `storyboard.json` 逐字节相同
 
 ## 成片审
