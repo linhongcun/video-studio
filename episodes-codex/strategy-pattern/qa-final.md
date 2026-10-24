@@ -1,29 +1,34 @@
-# D01章节口头衔接修订：最终检查
+# 策略模式新手版：最终本地交付检查
 
-2026-10-24（北京时间）。用户实际观看v0.52.0后认为整体问题不大，指出章节切换缺少简短承接，听众容易把新内容当作上一模块的延续。本次按反馈集中修订04、11、15，第一句交代下一段方向，第二句才开始本节的新动作。
+2026-10-25（北京时间）。用户授权据新手理解反馈调整并上线；本报告只对应13镜26句的新手版，旧16镜与章节桥接报告保留于revisions/v0.52.0和revisions/v0.54.1。
 
-## 本次范围与结果
+## 结果
 
-- 保持16镜32句，改录六句；其余十三镜的原PCM、局部字幕/cue、局部语音时间和镜长严格一致。
-- 新片5292帧、30fps，画面176.4秒；相较原版5198帧只增加94帧，约3.13秒。
-- 仅三镜由Remotion局部重渲，其余十三镜从已发布画面精确取帧后快速H.264编码。十三镜同局部代表帧最大平均RGB差0.318/255，不声称像素或码流字节相同。
-- 实际1080p H.264/30fps、48kHz AAC，−16.0LUFS/−3.7dBTP；所有5292帧PTS连续，完整解码与163项冻结核对通过。
-- 新视频完整SHA-256：`7f5606a875198472c7f8f052c6e0f14f180a1c9c4b21b0055cb8e9ab8da68726`，9,542,813字节。来源、映射、编码与复用证据见本期`chapter-bridge-baseline.json`、`chapter-bridge-assembly.json`、`chapter-bridge-render.json`及`chapter-bridge-picture-reuse.json`。
+本地制作、真实时序、独立正式成片与站点验收通过，可以合并并发布GitHub站点。当前发布目标v0.54.4，线上结果待Release后部署实际核验，再补release.md与online-verification.json；本地通过不预写成已上线或用户认可。
 
-## 实际局部复核
+- 视频：4895帧，画面163.1667秒、容器163.178秒，1920×1080、30fps、H264、48kHz AAC。
+- 文件：8,674,537字节；完整SHA-256为a7056ae8ccfe6783063b6c679174fa5d15ab410cac0628fe5de12e7fcc9e6696。
+- 共享混音实测-16.0LUFS、-3.7dBTP；完整解码、全部4895显示PTS、视频DTS/AAC包连续性通过，见render-result.json、mix-report.json、qa-encoded-media.json。
+- 137项生产输入冻结核对通过，26条新录音，未沿用旧13镜PCM或旧拼接基线。主WAV SHA为1abd9781d2b417644bd2671d753629aa6fcb284cbc942a0cb7210b9e33dba2fa。
 
-独立编辑先审04/11/15与相邻文本，随后实际查看12张真实时序无字幕预演；正式编码后独立抽看18张实际帧，覆盖03尾→04、10尾→11、14尾→15。根任务另从正式MP4抽11张，实际查看其中4张章节承接/取舍帧。
+## 教学结构与实际画面
 
-三处第一句均保留承接状态和新的方向标题，第二句后才拆规则、修改75%与返回75元、展示适用条件；未发现已查看的新旧字幕串位或金额叠盖。具体文件、帧与范围在`revisions/chapter-bridges/editorial.md`、`revisions/chapter-bridges/qa-independent.md`、`revisions/chapter-bridges/root-encoded-index.json`。三个有声边界片段保留在忽略输出目录，索引为`chapter-bridge-transition-clips.json`。
+只讲会员/活动两种办法，100元分别得90/80元。先建立一个具体函数再命名策略；补齐传函数而非结果、pricing本次关联所选函数、调用以后才计算，换一次办法时先清旧90并从100元重算。改价、新客注册和完整校验移到配套图文拓展。
 
-本次是实际关键帧序列、句边界与字幕/旁白源核对，未称为全片人工听辨或逐字ASR。用户尚未观看修订版，不将检查通过写成其已认可。
+根与独立质检先按六个理解问题审读，随后用最终真实时序生成130全片预演图、53关键图和06–10五段无字幕连续编码。COPYFIT零、无临时时序、最终字幕隐藏参数正确；独立实际查看全13镜25图、从五段MP4自行提取16中间态。根另实际查看6张最终源预演图。范围和实际源SHA见qa-motion.md、qa-motion-samples.json及qa-teaching-beginner.md。
 
-## 站点本地检查
+正式混音MP4上，根精确抽13帧并实际查看8帧，覆盖首帧、选择、未算、参数对应、90返回、清旧、80返回及末尾成本；完整索引与原图见qa-root-beginner-encoded.json、revisions/beginner/frames。独立质检另从正式1080p文件精确抽取并实际查看16帧，核对新章入口、函数身份、计算/返回顺序、原价重算、字幕与结尾，无发布阻塞。实际范围见qa-teaching-beginner.md及当前qa-independent.md，不声称逐帧人工看完整片。
 
-只同步video、script、storyboard、words四项变化；文章和封面SHA保持。两个视口各实际测试delegate、change、boundary三个入口，共六次seek，最大误差约0.000000667秒；32条VTT载入正常，视频无播放错误。
+预检发现并修复的Python前导缩进被pre-line吞掉、顶栏章名未传入问题，均在最终预检与正式编码前关闭；本轮所有最终检查对应修订后的源。三个原封面保持完整SHA一致，见qa-beginner-cover-reuse.json，不重复生成。
 
-四章精确帧为0、907、3188、4541。历史firstRelease保留v0.52.0，补丁版本与线上结果见本期`release.md`和站点`online-verification.json`。本地证据为站点目录`site-bridge-copy-manifest.json`、`site-bridge-static-check.json`、`site-bridge-browser-check.json`。
+## 网站
 
-## 沿用的既有验证
+站点副本使用同一视频、文章、SB/words/script/research，firstRelease仍v0.52.0，slug和四章ID保留。新标题为《策略模式：结算怎样换一种算价办法？》，updatedAt为2026-10-25，版本0.54.4。
 
-本次未增加技术事实或更改示例代码，沿用原六份资料、完整代码和最小差异实跑证据。原版完整交付报告归档在`revisions/v0.52.0/`，其结果与当前修订范围分开，不将旧媒体报告当作新片结果。
+生产构建及静态检查通过。1440/390两视口各四章共8次真实seek及随后播放均通过，最大误差6.67e-7秒，readyState4、无video.error、时间实际前进。26条VTT载入，网页播放器时长163.178秒，与画面差0.011秒；整页无横向溢出，新图无需横向滚动，封面、四章、源码、首页/系列/RSS通过。证据位于episodes/strategy-pattern/site-beginner-{copy-manifest,static-check,browser-check}.json。VTT完整SHA为a47f04c6a0d9ec4a4cf6790bd33f503ada13ba1e31e97171dc42179b81ca4a25。
+
+## 能力与发布边界
+
+配音候选文本/PCM及共享句边界、声学首词、整轨/混音测量完成；保留一条候选0.61秒低信号停顿复核标记，整轨测量与范围见voice/audio-qa.json及beginner报告。当前无可用逐字ASR/直接音频听辨，未把上述检查写成逐字识别或完整人工听辨。
+
+独立六问与画面复核支持本轮编辑判断，不是新手理解实验，也不代表用户已观看认可新版。平台新发未执行。GitHub合并、Release后部署、线上完整SHA与issue关闭由release.md记录真实结果。

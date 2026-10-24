@@ -6,7 +6,7 @@ export {clamp,ease,lerp};
 export const Text:React.FC<{children:React.ReactNode;x:number;y:number;w:number;size?:number;color?:string;alpha?:number;center?:boolean;weight?:number;h?:number;mono?:boolean}>=({children,x,y,w,size=32,color=C.text,alpha=1,center=false,weight=550,h,mono=false})=>{
  const ref=useRef<HTMLDivElement>(null);
  useLayoutEffect(()=>{const e=ref.current;if(e&&e.clientWidth>0&&(e.scrollWidth>e.clientWidth+2||(h&&e.scrollHeight>e.clientHeight+2)))console.error('COPYFIT overflow',String(children),e.scrollWidth,e.clientWidth,e.scrollHeight,e.clientHeight);},[children,w,size,h]);
- return <div ref={ref} data-fit style={{position:'absolute',left:x,top:y,width:w,height:h,color,opacity:alpha,fontFamily:mono?MONO:FONT,fontSize:size,fontWeight:weight,lineHeight:1.4,whiteSpace:'pre-line',textAlign:center?'center':'left',boxSizing:'border-box'}}>{children}</div>;
+ return <div ref={ref} data-fit style={{position:'absolute',left:x,top:y,width:w,height:h,color,opacity:alpha,fontFamily:mono?MONO:FONT,fontSize:size,fontWeight:weight,lineHeight:1.4,whiteSpace:mono?'pre':'pre-line',textAlign:center?'center':'left',boxSizing:'border-box'}}>{children}</div>;
 };
 export const Heading=({children,color=C.text,alpha=1}:{children:React.ReactNode;color?:string;alpha?:number})=><Text x={130} y={171} w={1660} size={49} color={color} alpha={alpha} weight={750}>{children}</Text>;
 export const Note=({children,color=C.muted,alpha=1}:{children:React.ReactNode;color?:string;alpha?:number})=><Text x={180} y={826} w={1560} size={30} center color={color} alpha={alpha}>{children}</Text>;
