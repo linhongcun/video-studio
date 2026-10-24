@@ -41,4 +41,13 @@ LC.11 与 LC.3 各有三项未纳入 Git 的局部拼接中间文件在本工作
 - `remotion/out/problem-first-baseline/storyboard.json`
 - `remotion/out/problem-first-intro.mp4`
 
-这六项是清理前预检已发现的缺失，本次未删除或补写。现有完整成片、站点和其余输入核对通过，但不能据此宣称两期局部拼接流程已从零复现。本次没有重渲视频；在用户明确要求提交上线后，按 v0.56.3 发布，合并、部署及线上实测结果在发布完成后追加。
+这六项是清理前预检已发现的缺失，本次未删除或补写。现有完整成片、站点和其余输入核对通过，但不能据此宣称两期局部拼接流程已从零复现。本次没有重渲视频；按用户后续明确指令发布 v0.56.3，实际结果见下节。
+
+
+## 上线结果
+
+[PR #227](https://github.com/linhongcun/video-studio/pull/227) 已合并到 `main`，发布 [v0.56.3](https://github.com/linhongcun/video-studio/releases/tag/v0.56.3)。附注标签与正式部署指向 `42f0d35161b9557aa18a5a1c166d0200d6e6b8c3`；[Release 后 Pages 部署](https://github.com/linhongcun/video-studio/actions/runs/40139414111) 成功。
+
+部署后对全部 32 条发布内容实际 GET，完整视频/海报 SHA-256、字节数、逐字节字幕、章节、标题和当前源码链接均通过；首页与更新日志可见 v0.56.3 和真实 Release 链接。原 URL 兼容、当前目录和历史合集入口另行核对通过。完整值与执行边界见 [线上核验记录](repository-cleanup-online.json)。未将文件核验声称为浏览器播放、全片听辨或用户观看认可。
+
+LC.704 和 LC.3 的制作目录 `video.mp4` 输出在本工作区原本就未保留，站点及构建媒体与制作 `render-result.json` 的完整 SHA、字节数和帧数一致，报告已分别标注；未重建这些输出。其余 30 条媒体与制作实体文件三方一致。Git 历史保留，其他分支可同步 `origin/main` 获取清理结果。
