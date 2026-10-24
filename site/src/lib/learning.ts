@@ -1,7 +1,7 @@
 import {BASE, getSeries, type Episode, type Series} from './episodes';
 
 export type LearningTrack = {
-  id: 'systems' | 'agent' | 'algorithms' | 'patterns';
+  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles';
   title: string;
   eyebrow: string;
   description: string;
@@ -58,6 +58,16 @@ const definitions: TrackDefinition[] = [
     outcome: '看清职责怎样拆分、变化怎样隔离，并比较引入设计模式与保留简单方案的取舍。',
     audience: '会基本编程，希望理解代码结构和设计取舍的开发者。',
     seriesIds: ['design-patterns'],
+  },
+  {
+    id: 'puzzles',
+    number: '05',
+    title: '趣味推理',
+    eyebrow: '每一步都有依据',
+    description: '从赛马等经典问题出发，先看清题目规则，再用比较和排除一步步找到答案。',
+    outcome: '理解哪些信息已经足够作出判断，能解释每一次选择和排除的依据。',
+    audience: '无需编程基础，喜欢逻辑推理、想把解题过程看明白的学习者。',
+    seriesIds: ['puzzles'],
   },
 ];
 
