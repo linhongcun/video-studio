@@ -12,12 +12,11 @@ EP.14 之后暂停。恢复之前不要开新期，不要从模板复制工程�
 
 | 角色 | 谁 | 做什么 |
 |---|---|---|
-| 导演 | Nolan | 定选题和主线；和质检一起审成片 |
-| 编剧 | Sorkin | 调研、`script.md`、`article.mdx`、读音初稿 |
-| 分镜 | Miyazaki | `storyboard.json`、`covers.json`、画面术语 |
-| 制作 | Knoll | 配音铺轨、Remotion、渲染 |
+| 导演 | Nolan | 定选题和主线；和质检一起审成片。维护 `AGENTS.md`、`docs/RULES.md`、`docs/pipeline.md`，审并合并 PR |
+| 编剧、分镜 | 宫崎（Hayao Miyazaki） | 调研输入、`script.md`、`article.mdx`、`pronunciation.md`、`storyboard.json`、`covers.json` |
+| 制作 | Knoll（John Knoll） | 配音、Remotion、渲染、封面、站点 PR、Release、deploy |
 | 质检 | Deming | 冻结后的预检，以及成片审 |
-| 运营 | — | 站点 PR、Release、三个平台；链接不上群 |
+| 运营 | Tim Cook | 抖音（头条同步）、B站、视频号发布；平台链接私信 Knoll（站点维护者）和 Nolan |
 | 村长 | — | 只批最终上线 |
 
 脚本和分镜在团队内定稿。配音听辨由 Knoll 和 Nolan 完成，不找村长听。请村长决定时用单选 widget，一次只问一件事，并附上成片和站点 PR。
@@ -31,7 +30,7 @@ EP.14 之后暂停。恢复之前不要开新期，不要从模板复制工程�
 3. 渲染 `video.mp4` 和封面。见 [docs/render.md](docs/render.md)。
 4. Nolan 与 Deming 审成片。
 5. 村长用 widget 批准上线。
-6. 站点发版，再发平台。见 [docs/publish.md](docs/publish.md)。
+6. 站点发版，再发平台。见 [docs/publish.md](docs/publish.md)。站点发版由 Knoll 做。
 
 ## 目录地图
 

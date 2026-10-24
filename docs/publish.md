@@ -64,11 +64,7 @@ npm ci
 npm run build
 ```
 
-3. 提交的作者名沿用 `git log` 里已有提交的作者。不要从 `git log` 抄邮箱。说明末尾固定加一行：
-
-```
-Co-authored-by: Cursor Agent <cursoragent@cursor.com>
-```
+3. 提交的作者名沿用 `git log` 里已有提交的作者。不要从 `git log` 抄邮箱。不要把作者或 `Co-authored-by` 写成 Cursor Agent。
 
 开 PR，合并进 `main`。合并带来的那次 Pages 部署读不到这次 Release。随后打附注 tag 并发布。v0.44.0 和 v0.45.0 都是附注 tag，不要用轻量 tag：
 
@@ -97,11 +93,11 @@ gh run watch <id>
 
 5. 打开 https://linhongcun.github.io/video-studio/ 。成片在 `/video-studio/episodes/<slug>/video.mp4`（`meta.json` 的 `video`）。下载后用上面的 `sha256sum | cut -c1-8` 对上批准的 sha8。`site/scripts/copy-assets.mjs` 只把 `video` 和 `poster` 拷进站点；线上海报用 `meta.poster` 的文件名（degradation 是 `cover-16x9.jpg`）。打开该期页面确认海报能显示。`cover-4x3.jpg` 和 `cover-3x4.jpg` 留在仓库里，用同一条 sha8 核对，它们不进 Pages。打开 `/changelog/`，确认新版本已经列出。
 
-6. 运营把 B站和抖音的链接私信给站点维护者。`platforms` 只写这两个真实 URL。视频号没有网页链接，不写。不要新写 `kuaishou`。链接不发到群。
+6. 运营把 B站和抖音的链接私信给 Knoll（站点维护者）和 Nolan。`platforms` 只写这两个真实 URL。视频号没有网页链接，不写。不要新写 `kuaishou`。链接不发到群。
 
 ## 三个平台
 
-现行渠道：抖音（打开同步到今日头条，同一条成片）、B站、微信视频号。不发快手，不发 X，不发小红书。
+现行渠道：抖音（打开同步到今日头条，同一条成片）、B站、微信视频号。不发快手，不发 X。小红书由村长自己发，运营和 Codex 不发。
 
 `meta.json` 的 `platforms` 只填真实 URL。站点实际渲染的键只有 `bilibili` 和 `douyin`（`site/src/lib/episodes.ts` 的 `PLATFORMS`）。不要新写 `kuaishou`。已上线各期里残留的 `kuaishou` URL 是历史链接，规范不再扩展。
 
@@ -115,7 +111,7 @@ EP.14 之后系列暂停，见 [RULES.md](RULES.md) 的 STATUS。恢复制作、
 
 下列是 2026-10-22 核对过的规则。界面文案以后若改名，仍按这些限制做，不要另编一套点击路径。
 
-三个平台和站点一起发，只在村长本人说出「可以，上线三个平台和站点」这类原话之后。发完，运营把 B站和抖音链接私信给站点维护者，并私信 Nolan。群里只 @ Nolan，说明发布已完成，不贴链接。
+三个平台和站点一起发，只在村长本人说出「可以，上线三个平台和站点」这类原话之后。发完，运营把 B站和抖音链接私信给 Knoll（站点维护者）和 Nolan。群里只 @ Nolan，说明发布已完成，不贴链接。
 
 标识：抖音用「内容由AI生成」。B站和视频号用「含AI生成内容」。抖音打开同步到今日头条。
 
