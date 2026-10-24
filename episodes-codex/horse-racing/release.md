@@ -13,7 +13,13 @@
 
 ## 发布状态
 
-制作与本地检查完成，等待本次PR合并、附注tag/Release、Release后部署及线上核验后补实际结果。#205因本次反馈已重新打开，线上完成后以completed关闭。
+[PR #228](https://github.com/linhongcun/video-studio/pull/228)已合并，主干与附注tag v0.56.4实际指向`22f9d16f69f32955aeb4fb44167aea33cf0b7cc9`，已核对该树的站点版本、首发身份、帧数与完整视频SHA。
+
+[Release v0.56.4](https://github.com/linhongcun/video-studio/releases/tag/v0.56.4)发布于北京时间2026-10-25 07:35:38（UTC 2026-10-24T23:35:38Z）。随后于23:35:41Z触发[部署40143372825](https://github.com/linhongcun/video-studio/actions/runs/40143372825)，目标同一提交。构建于23:39:17Z完成，Pages部署于23:39:29Z成功（北京时间07:39:29），完整运行记录见本修订deployment.json。
+
+北京时间2026-10-25 07:40:17，首轮10个canonical普通GET全部通过：完整视频17738419字节及上述SHA、海报完整SHA、50句VTT逐字节、7章精确帧/秒与锚点、源码/系列/课程目录/RSS，以及v0.56.4实际“修正”条目及准确课程链接。远程媒体未保存，未加查询参数、Range或强制缓存头，未盲目重试。报告见online-verification.json，本修订亦保留同字节副本。
+
+#205已在上述检查后以completed再次关闭，#204已同步当前4分59秒与v0.56.4，其他九题仍待安排。用户对原主体的认可保留，新尾尚无观看反馈；未执行的平台事项未记为完成。
 
 ## 历史
 
