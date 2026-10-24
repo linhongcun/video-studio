@@ -8,6 +8,8 @@
 
 ## 最短路径
 
+先按根AGENTS的“开工前同步”检查工作区并同步最新主干，记录基线、删除/移动和依赖变化，再复制现行工程。当前机的旧node_modules缓存或软链不代表删除后的工程仍可从零构建；至少在保留的当前制作目录按锁文件安装依赖，其他新期再共享该有效位置。
+
 参考当前制作工程 `episodes-codex/db-lock/`、`episodes-codex/db-transaction/`（已认可的第二版），以及本轮各期 README。创建 `episodes-codex/<slug>/`；站点目录仍为 `episodes/<slug>/`。只复用配音、冻结和渲染基础设施，按本期主题重新设计动作，镜数与时长不照搬前一期。
 
 1. 实际读取核心公开资料，按 [docs/research-template.md](../../docs/research-template.md) 记录主张、访问日期和边界。先确认观众需要的前置概念；术语与支线按本期范围取舍。
