@@ -355,11 +355,14 @@ def main():
     parser.add_argument('--version', help='Final published Release tag, e.g. v0.47.0')
     parser.add_argument('--out', type=Path, help='Result JSON path under /tmp')
     parser.add_argument('--repo', type=Path, default=Path(__file__).resolve().parents[1])
+    parser.add_argument('--slugs', nargs='+', choices=SLUGS, default=SLUGS,
+                        help='Episodes to verify (default: all 14 episodes)')
     parser.add_argument('--timeout', type=float, default=30, help='Single-request deadline, 0 < seconds <= 30 (default 30)')
     parser.add_argument('--attempts', type=int, choices=(1, 2, 3), default=3, help='Maximum GET attempts, including semantic mismatch retries')
     parser.add_argument('--self-test', action='store_true', help='Offline synthetic tests only; never fetch a URL')
     parser.add_argument('--check-local', action='store_true', help='Local episodes/dist preflight only; never verify deployment')
     args = parser.parse_args()
+    selected = list(dict.fromkeys(args.slugs))
     if args.self_test:
         self_test()
         return 0
@@ -374,6 +377,7 @@ def main():
     report = {'scope': 'local-only' if args.check_local else 'canonical-served-files-only',
               'browserPlaybackReview': False, 'remoteMediaWrittenToDisk': False,
               'releaseVersion': args.version, 'repo': str(repo), 'site': SITE,
+              'selectedSlugs': selected,
               'startedAtUTC': datetime.now(timezone.utc).isoformat(), 'concurrency': 2,
               'singleRequestTimeoutSeconds': args.timeout, 'maximumAttempts': args.attempts,
               'preflightErrors': [], 'episodes': [], 'pages': [], 'onlineVerified': False}
@@ -385,7 +389,7 @@ def main():
                 'local homepage build is stale relative to the requested version')
     except Exception as exc:
         report['preflightErrors'].append(str(exc))
-    for slug in SLUGS:
+    for slug in selected:
         try:
             expected.append(load_episode(repo, slug))
         except Exception as exc:
@@ -399,7 +403,7 @@ def main():
         print('LOCAL ONLY; deployment has NOT been verified.', flush=True)
         for error in report['preflightErrors']:
             print('PREFLIGHT FAIL:', error, flush=True)
-        print(f'{len(expected)}/14 local episode expectations loaded; JSON: {output}', flush=True)
+        print(f'{len(expected)}/{len(selected)} local episode expectations loaded; JSON: {output}', flush=True)
         return 0 if report['passed'] else 1
     with ThreadPoolExecutor(max_workers=2) as executor:
         jobs = {executor.submit(verify_episode, e, args.timeout, args.attempts): ('episode', e['slug']) for e in expected}
@@ -420,7 +424,7 @@ def main():
                 print(f"{name}: {'PASS' if result['passed'] else 'FAIL'} {args.version}", flush=True)
     report['episodes'].sort(key=lambda e: SLUGS.index(e['slug']))
     report['localPreflightPassed'] = True
-    report['passed'] = len(report['episodes']) == 14 and len(report['pages']) == 2 and all(
+    report['passed'] = len(report['episodes']) == len(selected) and len(report['pages']) == 2 and all(
         row['passed'] for row in report['episodes'] + report['pages'])
     report['onlineVerified'] = report['passed']
     report['finishedAtUTC'] = datetime.now(timezone.utc).isoformat()

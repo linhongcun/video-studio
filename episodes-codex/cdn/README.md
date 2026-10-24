@@ -1,25 +1,13 @@
-# EP.05《网站离你那么远，为什么还这么快？》Codex 重制
+# EP05 CDN：地图与术语返工
 
-2026-10-24 用户明确要求将 EP01–14 上一轮 Cursor 制作内容，按当日 Codex 规范与经验全部重制。本目录是本轮独立制作工程；旧站点媒体在完成成片检查前保留。
+2026-10-24，用户观看v0.48.0后要求增加真实地理地图与CDN等技术名词；本轮保留同一图片主线，地图参与调度、未命中回源与命中短返。旧版输入/结果/检查在revisions/v0.48.0，旧发布事实不作为本轮完成证明。
 
-- research.md 记录实际阅读的公开权威正文、逐镜主张与适用边界。
-- script.md、article.mdx、pronunciation.md 为本轮新稿；visual-direction.md 和 knoll-props.md 记录逐镜因果动作与制作要求。
-- voice/ 保留共享脚本生成的选定takes、送模文本、选择、参数、拼接和检查报告；冻结音轨 3901帧，130.033秒。
-- words.json 为真实句级边界和共享声学起音；不是逐字ASR。source-sha256.json 冻结92项实际输入。
-- qa-motion.md 记录多阶段与独立图像复核；qa-final.md、render-result.json 记录实际编码检查完成后的结果。
+当前状态：本轮本地成片已编码，3989帧/132.966667秒，完整SHA `3715e0514c8ec1cef02a8b32027910de16fd18b04ef5b1b0191f9596f277d9e6`；102项冻结输入、全解码/响度与制作实际54帧抽样已通过，新最终片独立35帧/6联系图复核已完成，所看无未解决阻断（qa-independent-encoded.md）。root负责站点/Git/发布，本执行者只制作本目录；本记录不宣称已发布。
 
-## 复现
+复现：仓内episodes/_shared/voice/prep.py、gen.py（voice/jobs_map.json）、build.py；新选定takes保留，避免重请求不确定TTS。assemble.py生成真实句级边界/字幕/术语起音；共享selfcheck/place_v2/label_onset_strict与preflight.py检查；地图转换python assets/map/convert.py。remotion目录npm ci、tsc --noEmit、npm run covers、npm run render。
 
-Python 环境：/workspace/.venvs/video-studio。使用仓内 episodes/_shared/voice/prep.py、gen.py、build.py；保留选定takes可复现整轨，不必再次请求不确定TTS。随后运行本期 assemble.py，再运行共享 selfcheck.py、place_v2.py --mode whole、label_onset_strict.py 和本期 preflight.py。
+TMPDIR和QA大文件均使用本期remotion/out工作盘；flock /tmp/video-studio-render.lock串行较大预演与正式编码。freeze.py冻结地图原始GeoJSON/公开许可依据/元数据/转换脚本与src静态路径、选定音轨、脚本、共享实现等实际输入；freeze.py --verify只读核对。check-render.py对真实MP4测量解码/帧数/响度/完整SHA。
 
-在 remotion/ 执行 npm ci、node_modules/.bin/tsc --noEmit、npm run stills、npm run covers、npm run render。使用 FFmpeg、/usr/bin/chromium 与 Noto Sans CJK SC。工作区 node_modules 软链不入库，独立安装按 package-lock.json。封面 PNG 转 JPG 不改变布局。
+Natural Earth 110m land公有领域；源/许可/固定上游commit/SHA与投影在assets/map/source/metadata.json和assets/map/convert.py。配乐Kevin MacLeod《Wallpaper》CC BY4.0沿用共享。无运行时远端URL。
 
-正式bundle前运行 python ../freeze.py；冻结后修改输入必须重新冻结并重新编码。python ../freeze.py --verify 可只读校验；check-render.py 对真实MP4执行完整解码、帧数、格式、响度和SHA检查。多组制作时使用 flock /tmp/video-studio-render.lock 串行正式渲染与较大动态小样。
-
-配乐沿用共享 Kevin MacLeod《Wallpaper》、CC BY 4.0；成片目标−16LUFS/真峰值≤−2dBTP。ASR模型在环境中缺失且官方端点被proxy拒绝，本期未执行逐字识别或独立人工全片听辨，能力边界在QA中实录。
-
-发布由root统一接入 episodes/cdn/、升级站点修订版本、合并PR、Release、部署并核对线上完整SHA。本目录完成制作不等同于平台已重发；当前只上GitHub站点。
-
-## 站点发布
-
-[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。
+没有逐字ASR或完整独立人工听辨的结论；字幕来自原稿和实际句级边界，术语位于句首并使用共享声学起音规则。qa-motion、qa-final及qa-independent-*记录本轮实际完成范围；本地制作与检查已完成，站点发布和线上核验由root继续记录。

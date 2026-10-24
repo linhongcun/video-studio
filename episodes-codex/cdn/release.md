@@ -1,11 +1,7 @@
-# EP.05 站点发布记录
+# EP05 本轮发布状态
 
-2026-10-24 19:53:36（北京时间），按用户持续授权发布[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)，只上GitHub站点，保留历史平台投稿。
+2026-10-24，地图与CDN术语返工本地制作及独立实际编码图审已完成，视频3989帧/132.966667秒，完整SHA `3715e0514c8ec1cef02a8b32027910de16fd18b04ef5b1b0191f9596f277d9e6`，102项输入/全解码/响度/实际帧检查通过。
 
-- 媒体[PR](https://github.com/linhongcun/video-studio/pull/151)，合并提交 `81ced01a028827ddff1c66138e2d718031ddfdc1`；Release后再次[部署](https://github.com/linhongcun/video-studio/actions/runs/40091595906)。
-- 成片3901帧，完整SHA-256：`11c4163980a1f71f19ca0960c5d6033d51b640dfc9f1c7baac2c9499f34a5539`。
-- 本地制作检查、冻结输入、实际编码抽帧、站点构建及浏览器验证见本期QA和批次记录。
-- 线上canonical视频、海报完整SHA与字节数、VTT逐字节、HTML章节/标题/源码入口，以及首页版本、更新日志实际Release链接均已核验。
-- [完整线上证明](../../docs/codex-remake-ep01-14/online.json)保留逐项GET结果；检查不冒充完整人工播放、逐字ASR或独立完整听辨。
+本记录尚不声明本轮已上线；root将按持续授权完成集成/发布、实际GET核验后更新发布证明。
 
-按持续授权自主发布不表示用户已经观看认可。后续反馈应重新冻结受影响输入并检查、发布。
+历史：v0.48.0曾发布旧版，完整SHA `11c4163980a1f71f19ca0960c5d6033d51b640dfc9f1c7baac2c9499f34a5539`，3901帧；当时输入/结果/QA与发布记录保留在revisions/v0.48.0。此次用户观看反馈要求地图与技术术语补充，不能把历史发布当作新修订通过。
