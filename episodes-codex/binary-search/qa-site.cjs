@@ -44,10 +44,17 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 (async () => {
   fs.mkdirSync(output, {recursive: true});
-  const buildLog = cp.execFileSync('npm', ['run', 'build'], {cwd: path.join(root, 'site'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
-  fs.writeFileSync(path.join(output, 'build.log'), buildLog);
-  const regressionLog = cp.execFileSync('node', ['site/scripts/check-learning-path.mjs', '--complete', '--built'], {cwd: root, encoding: 'utf8'});
-  fs.writeFileSync(path.join(output, 'learning-path.log'), regressionLog);
+  const reuseBuild = process.argv.includes('--reuse-build');
+  if (reuseBuild) {
+    assert.ok(fs.existsSync(path.join(output, 'build.log')) && fs.existsSync(path.join(output, 'learning-path.log')), 'Reuse requires the real successful build/regression logs');
+    assert.equal(videoSha, sha(fs.readFileSync(path.join(dist, 'episodes/binary-search/video.mp4'))));
+    assert.equal(posterSha, sha(fs.readFileSync(path.join(dist, 'episodes/binary-search/cover-16x9.jpg'))));
+  } else {
+    const buildLog = cp.execFileSync('npm', ['run', 'build'], {cwd: path.join(root, 'site'), encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe']});
+    fs.writeFileSync(path.join(output, 'build.log'), buildLog);
+    const regressionLog = cp.execFileSync('node', ['site/scripts/check-learning-path.mjs', '--complete', '--built'], {cwd: root, encoding: 'utf8'});
+    fs.writeFileSync(path.join(output, 'learning-path.log'), regressionLog);
+  }
   const preview = process.env.QA_SITE_BASE ? null : cp.spawn(process.execPath, [path.join(root, 'site/node_modules/astro/astro.js'), 'preview', '--host', '127.0.0.1', '--port', '4186'], {cwd: path.join(root, 'site'), stdio: 'ignore'});
   let browser;
   let siteEntries;
@@ -73,7 +80,9 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
       assert.ok(await page.locator(`a[href="${expectedSource}"]`).count() > 0);
       const articleCode = await page.locator('article pre').allTextContents();
       assert.ok(articleCode.some((text) => text.trim() === fs.readFileSync(path.join(production, 'solution.py'), 'utf8').trim()), 'Article must show the same complete solution');
-      assert.ok((await page.locator('.pager').innerText()).includes('LC.3'));
+      assert.equal(await page.locator('.pager a').count(), 1);
+      assert.equal(await page.locator('.pager a').getAttribute('href'), '/video-studio/episodes/longest-substring/');
+      assert.ok((await page.locator('.pager').innerText()).includes('无重复字符的最长子串'));
 
       const video = page.locator('video');
       await page.waitForFunction(() => document.querySelector('video').readyState >= 1);
@@ -168,14 +177,15 @@ const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     const report = {status: 'passed', checkedAtUTC: new Date().toISOString(), executor: 'Codex binary_site agent',
       baseCommit: cp.execFileSync('git', ['rev-parse', 'HEAD'], {cwd: root, encoding: 'utf8'}).trim(),
       siteVersion: JSON.parse(fs.readFileSync(path.join(root, 'site/package.json'), 'utf8')).version, slug: meta.slug, firstRelease: meta.firstRelease,
-      build: {command: 'cd site && npm run build', passed: true, htmlFiles: countFiles(dist, (name) => name.endsWith('.html')), indexedPages: fs.readdirSync(path.join(dist, 'pagefind/fragment')).filter((name) => name.endsWith('.pf_fragment')).length, log: path.join(output, 'build.log')},
+      build: {command: 'cd site && npm run build', passed: true, runs: 1, reusedForBrowserResume: reuseBuild, htmlFiles: countFiles(dist, (name) => name.endsWith('.html')), indexedPages: fs.readdirSync(path.join(dist, 'pagefind/fragment')).filter((name) => name.endsWith('.pf_fragment')).length, log: path.join(output, 'build.log')},
       historicalRegression: {command: 'node site/scripts/check-learning-path.mjs --complete --built', passed: true, runs: 1, log: path.join(output, 'learning-path.log')},
       media: {frames, videoFrameDuration: frames / fps, videoSha256: videoSha, posterSha256: posterSha, sourceBuiltAndHTTPIdentical: true, codeCardFromFrame: card.from, codeCardFrames: card.durationInFrames, codeCardSeconds: card.durationInFrames / fps},
       browserChecks, siteEntries, screenshots: screenshots.map((p) => ({path: p, sha256: sha(fs.readFileSync(p))})),
       limits: ['Only the new page was checked at 1440px light and 390px dark; old full responsive matrices were not repeated.',
         'VTT timestamps serialize frame times to milliseconds; caption end was checked within 0.001 seconds of the silent card boundary.',
         'Pause and brief muted code-card playback were checked; this is not full-film listening, ASR or algorithm proof.',
-        'Actual Release/changelog and production HTTPS media verification remain the publishing task.']};
+        'Actual Release/changelog and production HTTPS media verification remain the publishing task.',
+        'First browser attempt stopped at a stale QA assertion expecting LC.3 text in the redesigned pager. The real pager uses the previous lesson title; the check now verifies its actual canonical href and title. The same successful build/regression were reused for browser completion.']};
     fs.writeFileSync(path.join(production, 'qa-site.json'), JSON.stringify(report, null, 2) + '\n');
     console.log(JSON.stringify({status: report.status, report: path.join(production, 'qa-site.json'), media: report.media, siteEntries, screenshots}, null, 2));
   } finally {

@@ -58,7 +58,7 @@
 
 ### LC.704 二分查找
 
-- 2026-10-25，用户在认可题意前置修订后要求自选下一道LeetCode继续制作。本次选择[#76](https://github.com/linhongcun/video-studio/issues/76)，slug binary-search，独立算法系列展示LC.704，内部ep24。先交代升序无重复数组、目标和下标/-1，再用同一数组目标13/8解释安全排除、最后一格和空区间；片尾完整Python静态5秒并提示暂停。当前制作及检查中，结果以本期qa-final和release为准，不预写新片用户认可。
+- 2026-10-25，用户在认可题意前置修订后要求自选下一道LeetCode继续制作。本次选择[#76](https://github.com/linhongcun/video-studio/issues/76)，slug binary-search，独立算法系列展示LC.704，内部ep24。先交代升序无重复数组、目标和下标/-1，再用同一数组目标13/8解释安全排除、最后一格和空区间；片尾完整Python静态5秒并提示暂停。14镜28句、4748帧约2:38，137输入冻结；真实小样47阶段、正式MP4独立20阶段与44采样保真、全解码/−16.0LUFS及1440/390网站验证通过，媒体SHA9faef1ba…60ae。发布收尾见[本期记录](../episodes-codex/binary-search/release.md)，不预写新片用户认可。
 
 ### LC.3 无重复字符的最长子串
 

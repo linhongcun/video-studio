@@ -2,6 +2,8 @@
 
 题目先于解法：先交代升序无重复数组、目标、从0开始的下标与未找到返回-1，再用同一数组的两次独立查找解释闭区间排除。目标13返回6，目标8在检查最后一格后返回-1。14镜28句，4748帧/30fps，约2分38秒；最后150帧为完整Python静态代码卡，提示暂停，无旁白和旧字幕。
 
+本地成片及网站检查通过，实际范围见[qa-final.md](qa-final.md)；正式媒体SHA及线上发布结果见[release.md](release.md)。
+
 制作issue为[#76](https://github.com/linhongcun/video-studio/issues/76)。公开资料、可执行核验、编辑检查分别见research.md、research/algorithm-verification.json、qa-editorial.md。动画/正式媒体/网站与上线结果以各自实际报告为准，不能由这些文稿检查推断通过。
 
 ## 重建
