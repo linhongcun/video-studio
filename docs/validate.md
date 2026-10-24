@@ -1,8 +1,8 @@
 # 校验
 
-Deming 预检在配音和分镜 SHA-256 冻结之后、渲染之前。成片审在渲染之后。现行检查没有一支覆盖全系列的 `validate.py`。
+Deming 预检在配音和分镜 SHA-256 冻结之后、渲染之前。成片审在渲染之后。通用分镜检查是 `episodes/_shared/storyboard/validate.py`（仓根下 `python3 -B`，不写 `__pycache__`）。期特有检查在 `--spec` 的 `checks(V)`。EP.14 的 spec 是 `episodes/_shared/storyboard/examples/degradation/validate_spec.py`。字段和命令顺序见 [storyboard-schema.md](storyboard-schema.md)「生成清单」。
 
-按顺序打勾用 [qa.md](qa.md)。页身色的规则和成片采样在本文件「页身色」。本文件是命令和阈值。下面补进的通用项来自 EP.13/EP.14 的 validate 脚本。标成只对某一期成立的检查不进正文，例子见文末。
+按顺序打勾用 [qa.md](qa.md)。页身色的规则和成片采样在本文件「页身色」。本文件是命令和阈值。只对某一期成立的检查不进正文，例子见文末。
 
 ## 不要跑的脚本
 
@@ -13,6 +13,38 @@ Deming 预检在配音和分镜 SHA-256 冻结之后、渲染之前。成片审�
 `episodes/http-request/validate_v6.py` 是 EP.01 专用，里面写死了 `voice.wav` / `words.json` 的 SHA-256 前缀，并提到尚未接入的 `onset.py`。不要把它当成新期入口。
 
 `episodes/https/remotion` 的 `npm run verify:storyboard` 只回归 EP.02 那一版分镜全文 SHA-256，组件白名单含 `NotepadWindow`。换一期会直接断言失败。那是该期的冻结测试，不是系列质检。
+
+## 分镜检查
+
+在仓根运行。有错误退出码 1，每条以 `ERR` 打出。通过时打印 `检查 N 项，错误 0`。EP.14 范例是 `检查 6623 项，错误 0`，起音复核 91/91。`--report` 写到 `/tmp`，不要写进期目录。
+
+对照期目录里已经冻结的分镜和封面（只读这两份，报告写到 `/tmp`）：
+
+```sh
+python3 -B episodes/_shared/storyboard/validate.py \
+  --spec episodes/_shared/storyboard/examples/degradation/validate_spec.py \
+  --episode-dir episodes/degradation \
+  --inputs episodes/_shared/storyboard/examples/degradation/repo-inputs.json \
+  --storyboard episodes/degradation/storyboard.json \
+  --covers episodes/degradation/covers.json \
+  --report /tmp/validate.txt
+```
+
+`repo-inputs.json` 把 `voice.wav`、`narration.py`、`ref-sources.md`、`src` 指到仓内已跟踪的文件。换期换成该期的 spec 和 inputs。输入不在期目录时必须带 `--inputs` 或 `--input 名=路径`，路径相对仓根。
+
+从 spec 重跑整套，再和冻结稿 `cmp`（输出只进临时目录，默认 `mktemp`）：
+
+```sh
+sh episodes/_shared/storyboard/examples/degradation/rerun.sh
+```
+
+暂停期间不要把参数里的输出目录指到 `episodes/degradation/`。预期与 [episodes/_shared/storyboard/README.md](../episodes/_shared/storyboard/README.md) 相同：`storyboard.json` 的 sha256 前缀 `6265993b`，`covers.json` 前缀 `8cb7aafb`，`cmp` 无输出。
+
+引擎里的通用项在 `episodes/_shared/storyboard/validate.py`，由 spec 常量驱动：输入 SHA 前缀、旁白与 `NARRATION_FILE` 逐字、`words.json` 的 `scriptSha256`、画布、`timingSource` 含配音前缀、`onsetRule.module` 以 `_shared/onset_rule.py` 结尾、讨论题、下期预告、`devtoolsShots` 等于 spec 的 `DEVTOOLS`、`boxShots`、镜头首尾相接、段长在该期 spec 的 `MIN..MAX`（`MAX_EXC` 例外）、`holdFrames` 为 0、句子对位绝对差 ≤ 0.5 帧、字幕逐字、单字幕层、`appearFrame`、假窗口组件、canvas 镜不出 `BrowserChrome` 和域名、上一镜是 canvas 时 browser 镜第 1–8 帧不改 `view` / `pageBlank`、带 `ripples` 的状态到下一状态 ≥ `RIPPLE_MIN`（默认 12）、水印、字幕带、窗内深色条左距、`CalloutTag` / `CornerBadge` 余量 ≥ 12、状态帧递增、不重叠、不缩字（`V.wid`）、封面与 `meta.covers` 解析后相等、封面底边与 `centerRegion`、封面第一行离页头 ≥ 24、起音复核（`episodes/_shared/storyboard/onset_check.py` 只 import `episodes/_shared/onset_rule.py`，窗口 −6..+2）。
+
+不在引擎里、写在 EP.14 `validate_spec.py` 的 `checks(V)`：页型与标签接续、地址栏宽度、子流程位置、同一服务单节点、「核心链路」标签位置、页面注释离按钮 ≥ 16 px、封面价格行。换期把等价检查写进该期 `checks`，不要改引擎。
+
+深色页身的 `lum()` 不在这份 `validate.py` 里。见「页身色」。尚未接入。
 
 ## 冻结
 
@@ -58,6 +90,8 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR [--exc 06,18] [--out 
 
 期目录里的 `validate.py` 目前都不 import 它，包括 `episodes/db-index/validate.py` 以及依赖 `episodes/_audit/` 的那几份。`episodes/http-request/validate_v6.py` 的文档字符串写的是另接 `episodes/http-request/onset.py`，那个文件也不在本仓。不要把那次未接线的调用改成对共享模块的调用后再当成 EP.01 已经接上。
 
+`episodes/_shared/storyboard/validate.py` 在报告末尾用 `episodes/_shared/storyboard/onset_check.py` 再核一次，算法只 import `episodes/_shared/onset_rule.py`。窗口仍是 −6..+2。这不代替上面的 `label_onset_strict.py`（分镜模式，不加 `--words`）。
+
 期目录里的脚本要使用规则时：
 
 ```python
@@ -66,7 +100,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'
 from onset_rule import Rule
 ```
 
-`episodes/_shared/label_onset_strict.py` 在文件开头把所在目录放进 `sys.path`，再 `import onset_rule`。不要在 `episodes-codex/_shared/` 再留一份，也不要复制 `Rule` 的函数体。`Rule(samples, sr).onset(st, en, prevStart, prevEnd)` 的参数见 [voice.md](voice.md)。返回的 `onset` 是小数帧。窗口 `[-6, 2]` 在检查器里算：`diff = cueFrameAbs − onsetAbs`。
+`episodes/_shared/label_onset_strict.py` 在文件开头把所在目录放进 `sys.path`，再 `import onset_rule`。算法只保留 `episodes/_shared/onset_rule.py` 这一份。`episodes/_shared/storyboard/onset_check.py` 也只 import 它。不要复制 `Rule` 的函数体。冻结分镜里 `meta.onsetRule.module` 可能仍是以 `_shared/onset_rule.py` 结尾的旧路径字符串；引擎只检查这个后缀（`validate.py` 里的「实录时序 + 开口规则标记」）。按仓内这两份文件走。`Rule(samples, sr).onset(st, en, prevStart, prevEnd)` 的参数见 [voice.md](voice.md)。返回的 `onset` 是小数帧。窗口 `[-6, 2]` 在检查器里算：`diff = cueFrameAbs − onsetAbs`。
 
 以 `episodes/_shared/onset_rule.py` 为准。本仓没有按期拷贝。期目录需要同名文件时，symlink 到 `_shared`，或只写转发 import 的薄包装，不要复制函数体。
 
@@ -91,13 +125,13 @@ node scripts/diagfit.mjs /tmp/ep-stills frames.json --covers
 
 `still.sh` 会对本期 `Root.tsx` 里每个 `id="..."` 跑 `npx remotion still`，日志在 `/tmp/still-<id>.log`。它不是 COPYFIT 的专用入口。
 
-同一套 `prep-stills.mjs` / `diagfit.mjs` / `stills.mjs` 也在 `episodes/circuit-breaker/remotion/scripts/`。换期时进那一期的 `remotion/` 再跑，不要假定每期都有这三个文件。没有的期次就待补，不要从旧期 `validate.py` 顶上。
+同一套 `prep-stills.mjs` / `diagfit.mjs` / `stills.mjs` 也在 `episodes/circuit-breaker/remotion/scripts/`。换期时进那一期的 `remotion/` 再跑。某一期没有这三个文件，就不要从别的期复制；静帧和分镜检查是两件事，分镜检查用上面的 `episodes/_shared/storyboard/validate.py`，不要拿旧期目录里的 `validate.py` 顶静帧。
 
-不缩字还有一条分镜估算，来自 EP.13 Deming 终审，EP.14 的 validate 脚本同样在用。估算宽度 ≤ 元素 `w − 16 − padLeft`（没有 `padLeft` 就只减 16）。字宽用该期 `ui.tsx` 的 `textWidth`。那两份脚本里的估算是全角 1em、其余 0.62em，只作预检，不能代替上面的空 `COPYFIT`。
+不缩字的分镜估算在 `validate.py` 的 `V.wid`：全角（East Asian Width 为 W 或 F）按 1em，其余 0.62em，估算宽度 ≤ 元素 `w − 16 − padLeft`（没有 `padLeft` 就只减 16）。渲染侧的字宽仍是该期 `ui.tsx` 的 `textWidth`（degradation：码点大于 255 的字加 `fontSize`，ASCII 加 `fontSize * 0.58`，等宽加 `fontSize * 0.61`）。`V.wid` 只作预检，不能代替上面的空 `COPYFIT`。
 
 ## 镜头连贯
 
-手工。没有通用脚本。`episodes/_shared/place_v2.py` 只覆盖配音对位。
+镜头首尾、`holdFrames`、字幕逐字、元素 id、单字幕层、`appearFrame`、状态帧递增，由 `validate.py` 的时间轴段检查，命令见「分镜检查」。`episodes/_shared/place_v2.py` 是铺轨工具。引擎对同一条对位不等式也查一遍（`|from + localStart − wavStart|` ≤ 0.5 帧）。
 
 - `scenes` 与镜头的 `from` 首尾相接。
 - 整轨原位铺时，镜头 `holdFrames` 为 0。`--mode place` 的期不套这条。
@@ -113,60 +147,65 @@ python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole --no-copy \
 - 元素 `id` 在镜内唯一。字幕层只有一个（`role` 为 `subtitle`）。`appearFrame` 落在 `[0, durationInFrames)`。
 - 同元素的 `stateKeyframes` 按 `frame` 严格递增。`disappearFrame` 不早于 `appearFrame`。
 
-单镜 180–300 帧是 EP.13/EP.14 validate 脚本里的旧上限。[RULES.md](RULES.md) 不设时长上限，预检不卡这条。`durationExceptions` 只解释该期自己写下的数字。
+单镜时长以 [RULES.md](RULES.md) 为准：不设全系列上限。不要把 180–300 写成每期都必须遵守的闸门。引擎按该期 spec 的 `MIN`、`MAX` 和 `MAX_EXC` 卡段长。EP.14 的 `validate_spec.py` 写的是 `MIN = 180`、`MAX = 300`，镜 1 在 `MAX_EXC` 里为 314。这是该期 spec 的数字。`durationExceptions` 只解释该期自己写下的数字。
 
 ## 画面延续
 
-手工。浏览器壳只给真网页、地址栏和 DevTools；讲解表、图、流程图是 `canvas`，不出现 `BrowserChrome`。假应用窗（含旧组件 `NotepadWindow`）不算通过。见 [RULES.md](RULES.md)。
+浏览器壳只给真网页、地址栏和 DevTools；讲解表、图、流程图是 `canvas`，不出现 `BrowserChrome`。假应用窗（含旧组件 `NotepadWindow`）不算通过。见 [RULES.md](RULES.md)。引擎按 spec 的 `FAKE_COMP`（默认含 `NotepadWindow`）拒绝假窗口，并要求 canvas 镜不出 `BrowserChrome`、不出 spec 的 `URL_DOMAIN`。
 
-browser 镜的接续来自 EP.14 Deming 预检：
+browser 镜的接续：
 
-- 按时间排列 `frame` 为 `browser` 的镜头。后一镜第 0 帧的标签（`backTabs`、当前标题、`afterTabs`）和 `view`，等于前一个 browser 镜结束时的状态。
-- 中间隔着 canvas 时，后一镜的第 1 到第 8 帧不再改标签和 `view`。
+- 上一镜的脚本 `frame` 是 canvas 时，后一镜第 1 到第 8 帧的状态不再改 `view` 和 `pageBlank`。这是 `validate.py` 里的通用检查。它不比较第 0 帧的标签。
+- 后一镜第 0 帧的标签（`backTabs`、当前标题、`afterTabs`）和 `view`，等于前一个 browser 镜结束时的状态。引擎不查这一条。EP.14 写在 `validate_spec.py` 的 `checks`：镜 3→4、4→13、13→14、14→19。换期要在该期 `checks` 里按镜对写，或预检时对照分镜。
 
-地址栏逐字输入时：每帧一字，帧严格递增，加载或回车晚于最后一字。EP.14 的 `timingSource` 写的是输完再过 3 帧回车。换期以该期 `timingSource` 为准。
+地址栏逐字输入时：每帧一字，帧严格递增，加载或回车晚于最后一字。EP.14 的 `checks` 查镜 3、镜 4；`timingSource` 写的是输完再过 3 帧回车。换期以该期 `timingSource` 和 `checks` 为准。
 
 ## 版式
 
-手工。没有通用脚本。箭头和节点的位置还要对照旁白，见 [qa.md](qa.md)。
+箭头和节点是否跟旁白一致，仍是手工，见 [qa.md](qa.md)。位置数字由引擎和 EP.14 的 `checks` 分头查。
 
-- 子流程画在父节点下方，且子节点 `x` ≥ 父节点 `x`。教训来自 EP.13 的渲染。
-- 同一个服务只画一个节点。箭头的 `pointsTo` 都指向它。教训来自 EP.14 Deming 预检。
-- 画面上有「核心链路」时，标签在它所标的核心元素正下方：横向与该元素对齐，`y` 更大。没有这个标签的期跳过。教训来自 EP.14 Deming 预检。
-- `CalloutTag`、`CornerBadge` 的宽度余量 ≥ 12 px（框宽减去字宽）。教训来自 EP.14 Deming 预检。
-- 页面注释离按钮 ≥ 16 px。教训来自 EP.14。
-- 元素不重叠。分镜标明 `overlayOk` 的除外。
-- 水印净区读 `meta.safeArea.watermarkClearZone`，里面没有元素。内容底边不进入 `meta.safeArea.subtitleBand`。degradation 的净区是 `[1680, 30, 1880, 100]`，字幕带是 `[900, 980]`。
-- 窗内深色条若写了 `padLeft`，不少于 32。教训来自 EP.12 的讨论镜，EP.13/EP.14 的脚本都在查。
+引擎（`episodes/_shared/storyboard/validate.py`）：
+
+- `CalloutTag` 的余量是框宽减去 38 再减 `V.wid`，`CornerBadge` 减去 30，结果 ≥ 12。
+- 元素不重叠。`overlayOk`、`BrowserChrome`、`boxCard` 不参与这轮两两比较。
+- 水印用 spec 的 `WATERMARK`（默认 `[1680, 30, 1880, 100]`，与 degradation 的 `meta.safeArea.watermarkClearZone` 相同）。内容底边不超过 spec 的 `SUBTITLE_TOP`（默认 900）。degradation 的字幕带是 `[900, 980]`。
+- 窗口内 `background` 等于 spec 的 `DARK`（默认 `#0B1020`）的条：`x − 窗口.x ≥ 32`，或 `padLeft ≥ 32`。
+
+只在 `episodes/_shared/storyboard/examples/degradation/validate_spec.py` 的 `checks`。换期讲到同一结构时写进该期 `checks`，引擎不会代查：
+
+- 镜 5：子流程在父节点下方，子节点 `x` ≥ 父节点 `x`。
+- 镜 7–9：旁白里的「同一个红包服务」只有节点 `svc-node`，箭头的 `pointsTo` 指向它。
+- 镜 16–18：画面上的「核心链路」在它所标的核心元素那一侧。没有这个标签的期跳过。
+- 镜 3、镜 13：页面注释离商品按钮 ≥ 16 px。
 
 ## 封面
 
-`storyboard.json` 的 `meta.covers` 与 `covers.json` 解析后的对象相等。EP.13/EP.14 的 validate 脚本都查这个。两边空白可以不同，不要拿文件字节去比。
+`storyboard.json` 的 `meta.covers` 与 `covers.json` 解析后的对象相等。`validate.py` 用解析后的 `==` 来比。两边空白可以不同，不要拿文件字节去比。
 
 4:3 安全区读 `covers.json` 的 `sizes["4x3"]`。规范在 [RULES.md](RULES.md)：内容落在 `centerRegion` 内，底边小于 `bottom15Y`。degradation 是 `centerRegion` `[315, 1125]`、`bottom15Y` `918`。水印用该尺寸的 `watermarkZone`（degradation 4:3 为 `[1200, 30, 1400, 100]`），不要为了塞进 `centerRegion` 去挪水印。各尺寸的内容底边都要小于该尺寸的 `bottom15Y`。水印区里没有内容元素。
 
-本仓没有单独的安全区脚本。坐标不合格就改 `covers.json`。同时还要满足「COPYFIT」一节的空日志。
+坐标由 `validate.py` 的封面段检查：每个元素 `y + h ≤ bottom15Y`；该尺寸有 `centerRegion` 时，还要求左缘和右缘都落在区间内，且 `y + h < bottom15Y`。规范仍是 [RULES.md](RULES.md) 的底边小于 `bottom15Y`。坐标不合格就改封面 spec 再重跑，不要手改 `covers.json`。同时还要满足「COPYFIT」一节的空日志。
 
 根 README 里曾经写过的 16:9「x280–1640、y>900」和 3:4「y<144、y>1224」不是现行闸门。
 
-封面窗口里的第一行，离页头至少 24 px。常规页头高 80，见该期 `browserHeaderHeight`。第一行顶边 ≥ 窗口顶 + 页头 + 24。`w < 600` 的 compact 窗先读该期头高，不要套死 80。教训来自 EP.14 Knoll 预检。
+封面窗口里的第一行，离页头至少 24 px。引擎在 `boxes` 存在时检查：`min(boxes 的 y) − (窗口.y + 3 + COVER_HEADER) ≥ COVER_FIRST_ROW_GAP`。默认头高 80、间距 24。EP.14 的 `covers_spec.py` 把 `HEADER` 定为 80，与该期 `browserHeaderHeight` 的常规页头一致。`w < 600` 的 compact 窗先读该期头高，不要套死 80。
 
-封面地址栏按 `episodes/degradation/remotion/src/components/BrowserChrome.tsx` 的公式留得下网址，并再空 24 px。`w` 是窗口宽，标签数含当前页。非 compact（`w ≥ 600`）时标签宽取 `min(160, 0.2w)`，地址栏宽 = `w − Σ标签宽 − 132`；有锁再减 34。`w < 600` 走 compact，地址栏宽 = `w − 44`，有锁再减。网址按 32 px 等宽的 `textWidth` 计算，结果 ≤ 地址栏宽 − 24。EP.13 脚本里的 `w − 182 − min(160, 0.2w)` 已过时，不要再用。教训来自 EP.14 Deming 预检。
+封面地址栏的宽度不在引擎里。EP.14 的 `validate_spec.py` `checks` 按 `episodes/degradation/remotion/src/components/BrowserChrome.tsx`：`w ≥ 600`，标签数含当前页，标签宽取 `min(160, 0.2w)`，可用宽取 `w − Σ标签宽 − 132 − 34` 与 `w − Σ标签宽 − 12×标签数 − 136` 的较小值，字宽取 `max(403.27, 21×32×0.61)`，可用宽 ≥ 字宽 + 24。`covers_spec.py` 的 `finalize` 另用 `w − 182 − min(160, 0.2w)` 填写 `addressFit`，并要求 ≥ 403.27 + 24。两处都在仓内。重跑要和冻结稿逐字节一致，不要改 `finalize`。正片窗口的地址栏宽度也在同一个 `checks`：可用宽是 `w − 182 − min(160, 0.2w)`，搜索网址按 `V.wid(url, 19.2) + 24`，结算网址按 `403.27 + 24`。换期以该期 `BrowserChrome.tsx` 为准，写进该期 `checks`。
 
 ## 点击和下一状态
 
 手工。degradation 的涟漪对象在 `ripples[]`：`id`、`bornFrame`、`center`、`r0`、`r1`、`growFrames`、`holdOpacity`、`color`。组件绘制在 `episodes/degradation/remotion/src/components/ShopPricePage.tsx`（以及同目录里同样读取 `e.ripples` 的页面）。字段说明见 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。
 
-点击到下一状态至少 12 帧。带 `ripples` 的状态帧，到同一元素的下一状态帧，间隔 ≥ 12。`growFrames` 仍与 `meta.timingSource` 里的波纹时长一致（degradation 为 20），那是长满的时间，不代替这 12 帧。教训来自 EP.14 Knoll 预检。本仓没有通用脚本，不要新写。
+点击到下一状态至少 12 帧。`validate.py` 里，带 `ripples` 的状态帧到同一元素的下一状态帧，间隔 ≥ spec 的 `RIPPLE_MIN`，默认 12。EP.14 的 spec 也写 `RIPPLE_MIN = 12`。`growFrames` 仍与 `meta.timingSource` 里的波纹时长一致（degradation 为 20），那是长满的时间，不代替这 12 帧。
 
 ## 其他和分镜写在一起的限制
 
 这些不是独立命令，预检时读 `meta`：
 
-- `devtoolsShots` 不超过 2。degradation 为空。
-- `boxShots` 与 `boxShotRule` 一致。
-- `durationInFrames` 等于各镜头 `durationInFrames` 之和，并等于 `words.json` 的 `durationFrames`（degradation 为 5152）。
-- 术语标签完整显示至少 63 帧（[RULES.md](RULES.md) 仍有效条）。本仓没有计算这 63 帧的通用脚本。
+- `devtoolsShots` 不超过 2（[RULES.md](RULES.md)）。引擎另要求它等于 spec 的 `DEVTOOLS`。degradation 的 spec 是空列表。
+- `boxShots` 与 `boxShotRule` 一致。引擎要求 `boxShot` 镜头与 spec 的 `BOX_SHOTS`、以及 `meta.boxShots` 一致。
+- 各镜头 `durationInFrames` 之和等于 spec 的 `WAVLEN`，并与 `words.json` 的镜头区间一致。`meta.durationInFrames` 还要等于这个和，也等于 `words.json` 的 `durationFrames`（degradation 为 5152）。引擎查的是各镜之和等于 `WAVLEN`，三数对照仍用 [qa.md](qa.md) 里那段。
+- 术语不早于指定镜，由 spec 的 `TERMS` 驱动。EP.14 是「核心链路」从镜 10、「降级」从镜 11。术语标签完整显示至少 63 帧（[RULES.md](RULES.md) 仍有效条）。计算这 63 帧仍没有通用脚本。
 
 ## 成片响度
 
@@ -174,11 +213,11 @@ browser 镜的接续来自 EP.14 Deming 预检：
 
 ## 页身色
 
-规范在 [RULES.md](RULES.md)：演示页身用 `episodes/_shared/theme/pageTheme.ts` 的 `pageBg` `#0F172A`、`pageInk` `#E5E7EB`，禁止大面积纯白页身。浏览器框和 DevTools 用各期 `remotion/src/theme.ts` 的 `P`。这一节同时写分镜阈值和成片采样。两套数都服务于同一条规范，都不是新的设计色。本仓没有页身色脚本，不要新写 `validate.py`。
+规范在 [RULES.md](RULES.md)：演示页身用 `episodes/_shared/theme/pageTheme.ts` 的 `pageBg` `#0F172A`、`pageInk` `#E5E7EB`，禁止大面积纯白页身。浏览器框和 DevTools 用各期 `remotion/src/theme.ts` 的 `P`。这一节同时写分镜阈值和成片采样。两套数都服务于同一条规范，都不是新的设计色。相对亮度 `lum()` 不在 `episodes/_shared/storyboard/validate.py` 里。尚未接入。不要把下面的函数写进引擎。
 
 ### 分镜和源码
 
-渲染前手工查。阈值来自 EP.14 页身改走 `pageTheme` 之后的提案，EP.13/EP.14 的 validate 脚本里还没有这段。
+渲染前手工查。阈值来自 EP.14 页身改走 `pageTheme` 之后的提案。仓内 `episodes/_shared/storyboard/validate.py` 不扫 `background` / `fill` 的相对亮度。
 
 - 每个镜头，以及 `covers.json` 每个尺寸：`background` / `fill` 为 `#` 色、且相对亮度 > 0.8 的元素，面积之和 ≤ 该画布的 5%。画布面积是该镜的 `meta.width × meta.height`，封面用该尺寸的 `width × height`。
 - `#FFF` / `#FFFFFF` 不得作为面积 > 1% 的底。不足 1% 的仍计入上面的 5%。
@@ -187,7 +226,7 @@ browser 镜的接续来自 EP.14 Deming 预检：
 
 用这段 `lum()` 扫 EP.14 的分镜和封面，没有亮度 > 0.8 的 `background` / `fill`。镜 6 的 `res-free` 是 `#86EFAC`、22400 px²（约 1.1%），相对亮度约 0.70，不计入 0.8 那一档。
 
-相对亮度用下面的函数。这是参考实现，尚未接入 validate.py。
+相对亮度用下面的函数。这是参考实现，尚未接入 `episodes/_shared/storyboard/validate.py`。
 
 ```python
 def lum(h):
