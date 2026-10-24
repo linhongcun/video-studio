@@ -121,7 +121,7 @@
 - 制作目录`episodes-codex/container-most-water/`，站点`episodes/container-most-water/`。独立算法系列展示LC.11，内部ep22仅用于排序/Release，不将网络或事务课程当作先修。
 - 22镜44句、4章、6544帧，约3分38秒，冰糖原速。用同一输入`[2,3,10,5,7,8,9]`解释面积、固定短边的整组排除与正式扫描，保留36而非最后面积5。完整视频SHA为`624c2fa8dec7c8f96caad8b25d5890ae83c1854f4c16443617b32685002f18e0`。
 - 真实时序/声学起音、186项冻结输入、全解码、114个预演记录与114个实际MP4帧的保真、独立目视和干净依赖首帧复现已按实际范围记录。未执行逐字ASR或全片人工听辨，未记录为用户观看认可。
-- 本期发现QA传参不能保证实际隐藏字幕，修正后重出并查看真无字幕过程，见L016；安全排除的算法叙事做法与独立证据见S012。发布版本v0.49.0，线上最终状态和issue关闭以[发布记录](../episodes-codex/container-most-water/release.md)及实际GET核验为准。
+- 本期发现QA传参不能保证实际隐藏字幕，修正后重出并查看真无字幕过程，见L016；安全排除的算法叙事做法与独立证据见S012。已由[PR #154](https://github.com/linhongcun/video-studio/pull/154)合并并发布v0.49.0，Release后部署40093925916成功；线上视频/海报完整SHA、44句VTT、四章、独立系列/RSS和更新日志实际GET通过，#78已以completed关闭。完整证据见[发布记录](../episodes-codex/container-most-water/release.md)与online-verification.json，平台未投稿。
 
 ## 复用边界
 
