@@ -1,0 +1,1275 @@
+{
+  "meta": {
+    "title": "策略模式：优惠规则变了，为什么总要改结算？",
+    "episode": 23,
+    "episodePart": "设计模式 D01",
+    "slug": "strategy-pattern",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5198,
+    "finalVideoFrames": 5198,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "Dark full-canvas algorithm delegation. One order; explicit independent recalculations; moving extraction, selected input and return paths; at most two code shots; no metaphor, fake windows, decorative progress bars or busy class diagrams.",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "One strategy-pattern video, one changing-pricing problem. Function strategies, explicit external selection, observable results, concrete change scope and complexity trade-offs.",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "示例订单 · 原价100元 · 优惠每次只选一种",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "策略模式：优惠规则变了，为什么总要改结算？",
+      "description": "选择在外，计算独立：同一订单怎样换规则。",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "content": {
+            "x": 130,
+            "w": 1660
+          },
+          "watermarkZone": {
+            "x": 130,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 130,
+              "y": 210,
+              "w": 1660,
+              "h": 230
+            },
+            {
+              "x": 130,
+              "y": 470,
+              "w": 1660,
+              "h": 80
+            },
+            {
+              "x": 130,
+              "y": 605,
+              "w": 1660,
+              "h": 205
+            },
+            {
+              "x": 130,
+              "y": 859,
+              "w": 1660,
+              "h": 45
+            }
+          ]
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "content": {
+            "x": 315,
+            "w": 810
+          },
+          "watermarkZone": {
+            "x": 315,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 315,
+              "y": 210,
+              "w": 810,
+              "h": 230
+            },
+            {
+              "x": 315,
+              "y": 470,
+              "w": 810,
+              "h": 80
+            },
+            {
+              "x": 315,
+              "y": 605,
+              "w": 810,
+              "h": 205
+            },
+            {
+              "x": 315,
+              "y": 859,
+              "w": 810,
+              "h": 45
+            }
+          ],
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "content": {
+            "x": 110,
+            "w": 860
+          },
+          "watermarkZone": {
+            "x": 110,
+            "y": 110
+          },
+          "textBoxes": [
+            {
+              "x": 110,
+              "y": 245,
+              "w": 860,
+              "h": 260
+            },
+            {
+              "x": 110,
+              "y": 555,
+              "w": 860,
+              "h": 80
+            },
+            {
+              "x": 110,
+              "y": 760,
+              "w": 860,
+              "h": 300
+            },
+            {
+              "x": 110,
+              "y": 1155,
+              "w": 860,
+              "h": 45
+            }
+          ]
+        }
+      },
+      "poster": {
+        "file": "poster.jpg",
+        "sameAs": "3x4"
+      }
+    },
+    "discussionQuestion": "活动折扣再变化时，你需要改的是结算入口、选择位置，还是具体规则？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening."
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "why",
+      "chapterId": "why",
+      "title": "为什么改一条规则要看整段",
+      "from": 0,
+      "durationInFrames": 907,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "why",
+          "visualType": "hook",
+          "from": 0,
+          "durationInFrames": 338,
+          "narration": "活动价改了，为什么又得打开结算函数？普通价、会员价也挤在里面，改动范围很难一眼看清。",
+          "subtitles": [
+            {
+              "text": "活动价改了，为什么又得打开结算函数？",
+              "from": 0,
+              "to": 152,
+              "duration": 153
+            },
+            {
+              "text": "普通价、会员价也挤在里面，改动范围很难一眼看清。",
+              "from": 153,
+              "to": 337,
+              "duration": 185
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-hook-1",
+              "wavStart": 9.0,
+              "wavEnd": 143.07,
+              "localStart": 9.0,
+              "localEnd": 143.07
+            },
+            {
+              "id": "01-hook-2",
+              "wavStart": 153.57,
+              "wavEnd": 317.75,
+              "localStart": 153.57,
+              "localEnd": 317.75
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              153
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 9.0,
+            "wavTo": 317.75,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一帧就是结算主体，三条内部规则可见但不展开代码；标题“改活动价，又要动结算？”和活动八折→七五折的变更请求立即出现。请求抵达内部活动分支，整段结算被框为待查看范围，其他规则退为上下文，强调修改位置不清而非凭空报错。",
+          "direction": "第一帧就是结算主体，三条内部规则可见但不展开代码；标题“改活动价，又要动结算？”和活动八折→七五折的变更请求立即出现。请求抵达内部活动分支，整段结算被框为待查看范围，其他规则退为上下文，强调修改位置不清而非凭空报错。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "why",
+          "visualType": "monolith",
+          "from": 338,
+          "durationInFrames": 281,
+          "narration": "这笔示例订单，原价是一百元。最初没有优惠，结算只要返回这个金额。",
+          "subtitles": [
+            {
+              "text": "这笔示例订单，原价是一百元。",
+              "from": 0,
+              "to": 135,
+              "duration": 136
+            },
+            {
+              "text": "最初没有优惠，结算只要返回这个金额。",
+              "from": 136,
+              "to": 280,
+              "duration": 145
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-monolith-1",
+              "wavStart": 338.75,
+              "wavEnd": 464.07,
+              "localStart": 0.75,
+              "localEnd": 126.07
+            },
+            {
+              "id": "02-monolith-2",
+              "wavStart": 474.57,
+              "wavEnd": 598.69,
+              "localStart": 136.57,
+              "localEnd": 260.69000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              136
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 338.75,
+            "wavTo": 598.69,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回到最初仅普通价的实现，明确“回看最初版本”；同一100元输入沿结算路径抵达100元结果，规则与结算处在同一边界，布局锚点保持。",
+          "direction": "回到最初仅普通价的实现，明确“回看最初版本”；同一100元输入沿结算路径抵达100元结果，规则与结算处在同一边界，布局锚点保持。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "why",
+          "visualType": "new-rule",
+          "from": 619,
+          "durationInFrames": 288,
+          "narration": "后来，会员付九十元，活动付八十元。同一个结算函数里，开始堆起不同的计算分支。",
+          "subtitles": [
+            {
+              "text": "后来，会员付九十元，活动付八十元。",
+              "from": 0,
+              "to": 118,
+              "duration": 119
+            },
+            {
+              "text": "同一个结算函数里，开始堆起不同的计算分支。",
+              "from": 119,
+              "to": 287,
+              "duration": 169
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-new-rule-1",
+              "wavStart": 619.69,
+              "wavEnd": 728.2,
+              "localStart": 0.6900000000000546,
+              "localEnd": 109.20000000000005
+            },
+            {
+              "id": "03-new-rule-2",
+              "wavStart": 738.7,
+              "wavEnd": 886.54,
+              "localStart": 119.70000000000005,
+              "localEnd": 267.53999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              119
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 619.69,
+            "wavTo": 886.54,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "会员九折与活动八折逐个进入同一结算边界，分支随需求增长。出现第一处短代码，仅三条条件及各自结果；演示100分别返回100/90/80，明确“各选一次，不叠加”，每次重置唯一活动路径。",
+          "direction": "会员九折与活动八折逐个进入同一结算边界，分支随需求增长。出现第一处短代码，仅三条条件及各自结果；演示100分别返回100/90/80，明确“各选一次，不叠加”，每次重置唯一活动路径。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "delegate",
+      "chapterId": "delegate",
+      "title": "把算法交给可替换的规则",
+      "from": 907,
+      "durationInFrames": 2232,
+      "shots": [
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "delegate",
+          "visualType": "extract",
+          "from": 907,
+          "durationInFrames": 254,
+          "narration": "先把三种算法，分别提成独立的函数。结算流程保留，具体怎么算交给外面的规则。",
+          "subtitles": [
+            {
+              "text": "先把三种算法，分别提成独立的函数。",
+              "from": 0,
+              "to": 110,
+              "duration": 111
+            },
+            {
+              "text": "结算流程保留，具体怎么算交给外面的规则。",
+              "from": 111,
+              "to": 253,
+              "duration": 143
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-extract-1",
+              "wavStart": 907.54,
+              "wavEnd": 1007.68,
+              "localStart": 0.5399999999999636,
+              "localEnd": 100.67999999999995
+            },
+            {
+              "id": "04-extract-2",
+              "wavStart": 1018.18,
+              "wavEnd": 1140.13,
+              "localStart": 111.17999999999995,
+              "localEnd": 233.1300000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              111
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 907.54,
+            "wavTo": 1140.13,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "原来结算边界内的三块算法依次沿连续轨迹移到外部独立规则区，保持颜色身份和文本。结算主体收为稳定入口，保留一条待接入的统一调用线，不能突然变成两张无关图。",
+          "direction": "原来结算边界内的三块算法依次沿连续轨迹移到外部独立规则区，保持颜色身份和文本。结算主体收为稳定入口，保留一条待接入的统一调用线，不能突然变成两张无关图。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "delegate",
+          "visualType": "contract",
+          "from": 1161,
+          "durationInFrames": 314,
+          "narration": "每条规则都接收原金额，返回应付金额。输入和输出约定一致，结算就能用同一种方式调用。",
+          "subtitles": [
+            {
+              "text": "每条规则都接收原金额，返回应付金额。",
+              "from": 0,
+              "to": 144,
+              "duration": 145
+            },
+            {
+              "text": "输入和输出约定一致，结算就能用同一种方式调用。",
+              "from": 145,
+              "to": 313,
+              "duration": 169
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-contract-1",
+              "wavStart": 1161.13,
+              "wavEnd": 1295.99,
+              "localStart": 0.13000000000010914,
+              "localEnd": 134.99
+            },
+            {
+              "id": "05-contract-2",
+              "wavStart": 1306.49,
+              "wavEnd": 1454.27,
+              "localStart": 145.49,
+              "localEnd": 293.27
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              145
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 1161.13,
+            "wavTo": 1454.27,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "逐个聚焦规则，100元输入从同一入口进入，右侧显示各自应付金额；显示一致的“原金额→应付金额”契约，具体百分比退为背景，强调相同形状的调用。",
+          "direction": "逐个聚焦规则，100元输入从同一入口进入，右侧显示各自应付金额；显示一致的“原金额→应付金额”契约，具体百分比退为背景，强调相同形状的调用。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "delegate",
+          "visualType": "strategy",
+          "from": 1475,
+          "durationInFrames": 359,
+          "narration": "策略模式，就是把可替换的算法分开，再让主流程委托其中一种。这里的策略用函数实现，不必先造一大批类。",
+          "subtitles": [
+            {
+              "text": "策略模式，就是把可替换的算法分开，再让主流程委托其中一种。",
+              "from": 0,
+              "to": 208,
+              "duration": 209
+            },
+            {
+              "text": "这里的策略用函数实现，不必先造一大批类。",
+              "from": 209,
+              "to": 358,
+              "duration": 150
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-strategy-1",
+              "wavStart": 1475.27,
+              "wavEnd": 1673.95,
+              "localStart": 0.2699999999999818,
+              "localEnd": 198.95000000000005
+            },
+            {
+              "id": "06-strategy-2",
+              "wavStart": 1684.45,
+              "wavEnd": 1813.89,
+              "localStart": 209.45000000000005,
+              "localEnd": 338.8900000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "策略模式": 1
+            },
+            "sentences": [
+              0,
+              209
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 1475.27,
+            "wavTo": 1813.89,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "06首句声学起音时才出现“策略模式”主标签；三条算法稳定分开，一条统一委托线由结算连接到当前选中规则。以“本例：函数”短注说明实现形式，保持主体动作，不铺类图。",
+          "direction": "06首句声学起音时才出现“策略模式”主标签；三条算法稳定分开，一条统一委托线由结算连接到当前选中规则。以“本例：函数”短注说明实现形式，保持主体动作，不铺类图。",
+          "elements": [
+            {
+              "id": "label06_0",
+              "type": "text",
+              "text": "策略模式",
+              "cueText": "策略模式",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "06-strategy-1",
+                "asrFrame": null,
+                "onsetLocal": 1.5199999999999818,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "delegate",
+          "visualType": "select",
+          "from": 1834,
+          "durationInFrames": 352,
+          "narration": "由调用方先选好会员规则，再把它交给结算。选择规则这件事仍然存在，只是责任放到了外部。",
+          "subtitles": [
+            {
+              "text": "由调用方先选好会员规则，再把它交给结算。",
+              "from": 0,
+              "to": 136,
+              "duration": 137
+            },
+            {
+              "text": "选择规则这件事仍然存在，只是责任放到了外部。",
+              "from": 137,
+              "to": 351,
+              "duration": 215
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-select-1",
+              "wavStart": 1834.89,
+              "wavEnd": 1960.69,
+              "localStart": 0.8900000000001,
+              "localEnd": 126.69000000000005
+            },
+            {
+              "id": "07-select-2",
+              "wavStart": 1971.19,
+              "wavEnd": 2165.96,
+              "localStart": 137.19000000000005,
+              "localEnd": 331.96000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              137
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 1834.89,
+            "wavTo": 2165.96,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "增加“调用方”节点，先在三个可选规则中选会员，非选中路径明确变暗；选中的函数引用交给结算，选择线与金额计算线区分。调用方保留，避免暗示选择逻辑消失。",
+          "direction": "增加“调用方”节点，先在三个可选规则中选会员，非选中路径明确变暗；选中的函数引用交给结算，选择线与金额计算线区分。调用方保留，避免暗示选择逻辑消失。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "delegate",
+          "visualType": "call",
+          "from": 2186,
+          "durationInFrames": 312,
+          "narration": "结算拿着这一百元，调用收到的会员规则。请求沿着选中的路径前进，其他两条规则不执行。",
+          "subtitles": [
+            {
+              "text": "结算拿着这一百元，调用收到的会员规则。",
+              "from": 0,
+              "to": 131,
+              "duration": 132
+            },
+            {
+              "text": "请求沿着选中的路径前进，其他两条规则不执行。",
+              "from": 132,
+              "to": 311,
+              "duration": 180
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-call-1",
+              "wavStart": 2186.96,
+              "wavEnd": 2307.76,
+              "localStart": 0.9600000000000364,
+              "localEnd": 121.76000000000022
+            },
+            {
+              "id": "08-call-2",
+              "wavStart": 2318.26,
+              "wavEnd": 2477.24,
+              "localStart": 132.26000000000022,
+              "localEnd": 291.2399999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              132
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 2186.96,
+            "wavTo": 2477.24,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "选中关系保持不变，100元金额标记由订单进入结算，再沿唯一路径进入会员规则；普通/活动不点亮，也不产生计算或结果。到达后留出可读停留。",
+          "direction": "选中关系保持不变，100元金额标记由订单进入结算，再沿唯一路径进入会员规则；普通/活动不点亮，也不产生计算或结果。到达后留出可读停留。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "delegate",
+          "visualType": "return",
+          "from": 2498,
+          "durationInFrames": 331,
+          "narration": "会员规则算出九十元，再把结果返回结算。结算不需要知道九折怎样算，只负责接住应付金额。",
+          "subtitles": [
+            {
+              "text": "会员规则算出九十元，再把结果返回结算。",
+              "from": 0,
+              "to": 132,
+              "duration": 133
+            },
+            {
+              "text": "结算不需要知道九折怎样算，只负责接住应付金额。",
+              "from": 133,
+              "to": 330,
+              "duration": 198
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-return-1",
+              "wavStart": 2498.24,
+              "wavEnd": 2620.68,
+              "localStart": 0.23999999999978172,
+              "localEnd": 122.67999999999984
+            },
+            {
+              "id": "09-return-2",
+              "wavStart": 2631.18,
+              "wavEnd": 2808.72,
+              "localStart": 133.17999999999984,
+              "localEnd": 310.7199999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              133
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 2498.24,
+            "wavTo": 2808.72,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "会员区域100×90%=90的示例计算只在焦点处发生；90元结果沿返回路径回结算，最后进入应付金额位置，原100元输入标签与结果清楚分开，不重影。",
+          "direction": "会员区域100×90%=90的示例计算只在焦点处发生；90元结果沿返回路径回结算，最后进入应付金额位置，原100元输入标签与结果清楚分开，不重影。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "delegate",
+          "visualType": "switch",
+          "from": 2829,
+          "durationInFrames": 310,
+          "narration": "现在重置同一笔订单，只换成活动规则。结算仍然发出相同调用，这次返回八十元。",
+          "subtitles": [
+            {
+              "text": "现在重置同一笔订单，只换成活动规则。",
+              "from": 0,
+              "to": 150,
+              "duration": 151
+            },
+            {
+              "text": "结算仍然发出相同调用，这次返回八十元。",
+              "from": 151,
+              "to": 309,
+              "duration": 159
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-switch-1",
+              "wavStart": 2829.72,
+              "wavEnd": 2970.05,
+              "localStart": 0.7199999999997999,
+              "localEnd": 141.05000000000018
+            },
+            {
+              "id": "10-switch-2",
+              "wavStart": 2980.55,
+              "wavEnd": 3118.02,
+              "localStart": 151.55000000000018,
+              "localEnd": 289.02
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              151
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 2829.72,
+            "wavTo": 3118.02,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先明确“重置同一订单，改选活动”，清空上次90元结果；调用方仅改选中引用，结算位置不变，100再次进入活动规则并返回80。不得把会员折扣与活动继续叠算。",
+          "direction": "先明确“重置同一订单，改选活动”，清空上次90元结果；调用方仅改选中引用，结算位置不变，100再次进入活动规则并返回80。不得把会员折扣与活动继续叠算。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "change",
+      "chapterId": "change",
+      "title": "规则改变时，究竟改哪里",
+      "from": 3139,
+      "durationInFrames": 1313,
+      "shots": [
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "change",
+          "visualType": "change",
+          "from": 3139,
+          "durationInFrames": 343,
+          "narration": "接着，把活动规则从八折改成七五折。它返回七十五元，会员规则和结算函数都不用跟着改。",
+          "subtitles": [
+            {
+              "text": "接着，把活动规则从八折改成七五折。",
+              "from": 0,
+              "to": 159,
+              "duration": 160
+            },
+            {
+              "text": "它返回七十五元，会员规则和结算函数都不用跟着改。",
+              "from": 160,
+              "to": 342,
+              "duration": 183
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-change-1",
+              "wavStart": 3139.02,
+              "wavEnd": 3288.74,
+              "localStart": 0.01999999999998181,
+              "localEnd": 149.73999999999978
+            },
+            {
+              "id": "11-change-2",
+              "wavStart": 3299.24,
+              "wavEnd": 3461.51,
+              "localStart": 160.23999999999978,
+              "localEnd": 322.5100000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              160
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 3139.02,
+            "wavTo": 3461.51,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "活动规则内部80%退出后75%进入，修改边框只包住活动；同一100输入再次经过活动规则，结果由重新计算得到75，结算与会员无修改标记，原80作为旧结果明确退出。",
+          "direction": "活动规则内部80%退出后75%进入，修改边框只包住活动；同一100输入再次经过活动规则，结果由重新计算得到75，结算与会员无修改标记，原80作为旧结果明确退出。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "change",
+          "visualType": "compare",
+          "from": 3482,
+          "durationInFrames": 322,
+          "narration": "减少的是不同算法对主流程的牵连。调用约定必须保持，选择和注册新规则也不会自动完成。",
+          "subtitles": [
+            {
+              "text": "减少的是不同算法对主流程的牵连。",
+              "from": 0,
+              "to": 135,
+              "duration": 136
+            },
+            {
+              "text": "调用约定必须保持，选择和注册新规则也不会自动完成。",
+              "from": 136,
+              "to": 321,
+              "duration": 186
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-compare-1",
+              "wavStart": 3482.51,
+              "wavEnd": 3607.85,
+              "localStart": 0.5100000000002183,
+              "localEnd": 125.84999999999991
+            },
+            {
+              "id": "12-compare-2",
+              "wavStart": 3618.35,
+              "wavEnd": 3783.87,
+              "localStart": 136.3499999999999,
+              "localEnd": 301.8699999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              136
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 3482.51,
+            "wavTo": 3783.87,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保持当前结构，用实际改动范围回看旧结算内分支与现在独立活动规则；共同调用契约和调用方选择保留在图上，突出“改一条规则”与“改共同约定”不同。避免宣称结算永久不改。",
+          "direction": "保持当前结构，用实际改动范围回看旧结算内分支与现在独立活动规则；共同调用契约和调用方选择保留在图上，突出“改一条规则”与“改共同约定”不同。避免宣称结算永久不改。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "change",
+          "visualType": "add",
+          "from": 3804,
+          "durationInFrames": 307,
+          "narration": "再加一种新客减十元的规则，就新增这个函数。调用方把它加入可选项，结算仍按相同方式调用。",
+          "subtitles": [
+            {
+              "text": "再加一种新客减十元的规则，就新增这个函数。",
+              "from": 0,
+              "to": 136,
+              "duration": 137
+            },
+            {
+              "text": "调用方把它加入可选项，结算仍按相同方式调用。",
+              "from": 137,
+              "to": 306,
+              "duration": 170
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-add-1",
+              "wavStart": 3804.87,
+              "wavEnd": 3930.99,
+              "localStart": 0.8699999999998909,
+              "localEnd": 126.98999999999978
+            },
+            {
+              "id": "13-add-2",
+              "wavStart": 3941.49,
+              "wavEnd": 4090.88,
+              "localStart": 137.48999999999978,
+              "localEnd": 286.8800000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              137
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 3804.87,
+            "wavTo": 4090.88,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "新客规则从无到有出现，并向调用方可选项加入“新客”；这两个地方明确高亮为新增。结算仍通过同一调用收到规则，100减10返回90；画面标明另一次独立计算。",
+          "direction": "新客规则从无到有出现，并向调用方可选项加入“新客”；这两个地方明确高亮为新增。结算仍通过同一调用收到规则，100减10返回90；画面标明另一次独立计算。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "14",
+          "scriptShot": 14,
+          "chapterId": "change",
+          "visualType": "code",
+          "from": 4111,
+          "durationInFrames": 341,
+          "narration": "看代码，结算把具体计算交给传进来的函数。读复杂项目时，就沿着参数追过去，找出实际选中了哪条规则。",
+          "subtitles": [
+            {
+              "text": "看代码，结算把具体计算交给传进来的函数。",
+              "from": 0,
+              "to": 143,
+              "duration": 144
+            },
+            {
+              "text": "读复杂项目时，就沿着参数追过去，找出实际选中了哪条规则。",
+              "from": 144,
+              "to": 340,
+              "duration": 197
+            }
+          ],
+          "voice": [
+            {
+              "id": "14-code-1",
+              "wavStart": 4111.88,
+              "wavEnd": 4244.66,
+              "localStart": 0.8800000000001091,
+              "localEnd": 133.65999999999985
+            },
+            {
+              "id": "14-code-2",
+              "wavStart": 4255.16,
+              "wavEnd": 4431.73,
+              "localStart": 144.15999999999985,
+              "localEnd": 320.72999999999956
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              144
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 4111.88,
+            "wavTo": 4431.73,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第二处代码，显示真实示例中可读的核心函数与调用：checkout(amount, rule)统一委托，外部传member或campaign；用实测最终版本活动75%。沿实参→形参→rule(amount)→返回结果依次聚焦，完整实现含选择注册、校验和舍入在文章。可暂停阅读，画面不与密集类图同屏。",
+          "direction": "第二处代码，显示真实示例中可读的核心函数与调用：checkout(amount, rule)统一委托，外部传member或campaign；用实测最终版本活动75%。沿实参→形参→rule(amount)→返回结果依次聚焦，完整实现含选择注册、校验和舍入在文章。可暂停阅读，画面不与密集类图同屏。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "什么时候值得多拆这一层",
+      "from": 4452,
+      "durationInFrames": 746,
+      "shots": [
+        {
+          "id": "15",
+          "scriptShot": 15,
+          "chapterId": "boundary",
+          "visualType": "boundary",
+          "from": 4452,
+          "durationInFrames": 412,
+          "narration": "如果只有两条长期不变的简单判断，直接写清楚往往更省事。规则真的需要分别变化时，再承担拆分和跳转阅读的成本。",
+          "subtitles": [
+            {
+              "text": "如果只有两条长期不变的简单判断，直接写清楚往往更省事。",
+              "from": 0,
+              "to": 196,
+              "duration": 197
+            },
+            {
+              "text": "规则真的需要分别变化时，再承担拆分和跳转阅读的成本。",
+              "from": 197,
+              "to": 411,
+              "duration": 215
+            }
+          ],
+          "voice": [
+            {
+              "id": "15-boundary-1",
+              "wavStart": 4452.73,
+              "wavEnd": 4639.11,
+              "localStart": 0.7299999999995634,
+              "localEnd": 187.10999999999967
+            },
+            {
+              "id": "15-boundary-2",
+              "wavStart": 4649.61,
+              "wavEnd": 4843.67,
+              "localStart": 197.60999999999967,
+              "localEnd": 391.6700000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              197
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 4452.73,
+            "wavTo": 4843.67,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "用两个明确场景分别展示稳定的少量分支与经常独立变化的多条规则；当下焦点只在一侧，另一侧退为上下文。拆开后需要沿调用跳转的路径被短暂展示，说明阅读成本，不能画为无条件优于原代码。",
+          "direction": "用两个明确场景分别展示稳定的少量分支与经常独立变化的多条规则；当下焦点只在一侧，另一侧退为上下文。拆开后需要沿调用跳转的路径被短暂展示，说明阅读成本，不能画为无条件优于原代码。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "16",
+          "scriptShot": 16,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 4864,
+          "durationInFrames": 334,
+          "narration": "同样一笔订单，换规则就换了计算方式。结算保持同一个入口，规则的选择和实现各有自己的位置。",
+          "subtitles": [
+            {
+              "text": "同样一笔订单，换规则就换了计算方式。",
+              "from": 0,
+              "to": 128,
+              "duration": 129
+            },
+            {
+              "text": "结算保持同一个入口，规则的选择和实现各有自己的位置。",
+              "from": 129,
+              "to": 333,
+              "duration": 205
+            }
+          ],
+          "voice": [
+            {
+              "id": "16-recap-1",
+              "wavStart": 4864.67,
+              "wavEnd": 4982.82,
+              "localStart": 0.6700000000000728,
+              "localEnd": 118.81999999999971
+            },
+            {
+              "id": "16-recap-2",
+              "wavStart": 4993.32,
+              "wavEnd": 5161.4,
+              "localStart": 129.3199999999997,
+              "localEnd": 297.39999999999964
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              129
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 5c31eb28 + words.json c6b00244 + script.md 305e73e9",
+            "wavFrom": 4864.67,
+            "wavTo": 5161.4,
+            "holdFrames": 36,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回到本期同一订单和稀疏全局结构，调用方选规则、结算统一调用、规则返回结果三个动作依次回收；最后停在“选择在外，计算独立”并显示IT小村·原创。没有下集预告和装饰进度线。",
+          "direction": "回到本期同一订单和稀疏全局结构，调用方选规则、结算统一调用、规则返回结果三个动作依次回收；最后停在“选择在外，计算独立”并显示IT小村·原创。没有下集预告和装饰进度线。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}
