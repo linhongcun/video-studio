@@ -4,7 +4,10 @@ import {Shot,shots} from './data';
 import {C,FONT} from './theme';
 import {at,eventAt} from './motion';
 import {Title,Reset,Note,Coordinator,Participant,Token,Cross,Txt,Chip,Line,ease,lerp} from './components';
+import {createBranchNavigator} from '../../../_shared/branch-map';
+import {navigationSpec} from './branch-map';
 declare const __HAS_VOICE_AUDIO__:boolean;
+const BranchNavigator=createBranchNavigator(React);
 const phase=(s:Shot,f:number,i:number,a=.08,b=.68)=>ease(f,at(s,i,a),at(s,i,b)-at(s,i,a));
 const hit=(s:Shot,f:number,n:string)=>f>=eventAt(s,n);
 const cue=(s:Shot,n:string)=>Number(s.cueFrames?.labels?.[n]??1);
@@ -37,10 +40,10 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  </>;
  if(t==='prepare-request'){
   const a=hit(s,f,'order-work-ready'),b=hit(s,f,'stock-work-ready');
-  return <><Title color={C.gold} alpha={f>=cue(s,'准备')?1:0}>准备：先做好修改，不先宣布成功</Title>
+  return <>
    <Coordinator state="先询问两边：能否完成？"/>
    {pair({mode:a?'working':'empty'},{mode:b?'working':'empty'})}
-   {outward(phase(s,f,0,.02,.58),phase(s,f,1,.02,.24),'先做好修改')}
+   {outward(phase(s,f,0,.32,.58),phase(s,f,1,.02,.24),'先做好修改')}
    <Note alpha={phase(s,f,1)}>金色是本次待确认修改，不是已完成结果</Note></>;
  }
  if(t==='prepared-votes'){
@@ -143,17 +146,15 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
   <Txt x={960} y={886} center size={23} color={C.muted} alpha={c}>IT小村 · 原创</Txt>
  </>;
 };
-const chapters:Record<string,[number,string]>={question:[1,'共同确认'],prepare:[2,'先把修改做好'],decision:[3,'落实共同结果'],failure:[4,'故障怎样收尾']};
 const ShotView:React.FC<{s:Shot;captions:boolean}>=({s,captions})=>{
- const f=useCurrentFrame(),[n,label]=chapters[s.chapterId]??[1,'共同确认'];
+ const f=useCurrentFrame();
  const sub=s.subtitles?.find(q=>f>=q.from&&f<=(q.to??q.from+(q.duration??1)-1));
  return <AbsoluteFill style={{background:C.bg,color:C.text,fontFamily:FONT,overflow:'hidden'}}>
   <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 86% 2%,#1B435C66,transparent 65%)'}}/>
   <Txt x={100} y={52} size={24} color={C.muted}>分布式 · 独立短片</Txt><Txt x={1700} y={52} size={25}>IT小村</Txt>
-  <Txt x={100} y={96} size={22} color={C.blue}>{String(n).padStart(2,'0')} / 04 · {label}</Txt>
   <Txt x={1650} y={104} center width={430} size={19} color={C.muted}>示例数据 · 订单 8124</Txt>
-  <div style={{position:'absolute',top:140,left:100,display:'flex',gap:9}}>{[1,2,3,4].map(i=><div key={i} style={{height:4,width:i===n?68:28,borderRadius:4,background:i===n?C.blue:C.edge}}/>)}</div>
-  <Scene s={s} f={f}/>
+  <BranchNavigator spec={navigationSpec(s,f)} shotId={s.id} frame={f} durationInFrames={s.durationInFrames} foreground={s.id==='03'?<Title color={C.gold} alpha={f>=cue(s,'准备')?1:0}>准备：先做好修改，不先宣布成功</Title>:undefined}><Scene s={s} f={f}/></BranchNavigator>
+  {s.id==='14'&&<Txt x={960} y={886} center size={23} color={C.muted}>IT小村 · 原创</Txt>}
   {captions&&sub&&<div style={{position:'absolute',left:130,right:130,top:925,minHeight:100,display:'flex',justifyContent:'center',alignItems:'center',fontSize:40,lineHeight:1.4,textAlign:'center',padding:'7px 15px',boxSizing:'border-box',background:`${C.bg}F8`,borderRadius:12}}>{sub.text}</div>}
  </AbsoluteFill>;
 };
