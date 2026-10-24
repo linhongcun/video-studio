@@ -1,83 +1,66 @@
 ---
 title: 两个订单，怎么撞成同一个号了？
-episode: 20
-version: v0.25.1
-series: 数据库入门
+summary: 独立分片各自自增，编号可能重复。用时间、生成器编号与同毫秒序号解释雪花算法，并说明编号唯一、时间和状态处理的前提。
+chapters:
+  - { id: hook, title: 两笔订单同一个号 }
+  - { id: local, title: 本表自增为何不够 }
+  - { id: snowflake, title: 三部分如何区分 }
+  - { id: conditions, title: 不重复需要前提 }
+  - { id: recap, title: 三种差异各管什么 }
+related: ["db-sharding", "distributed-tx"]
 ---
 
-你刚下的单，客服一查，同一个订单号下面竟然还有别人的订单。订单太多，数据库拆成了好几个，每个都自己编号，就撞了。这一期讲全局唯一 ID。
+## 两笔订单同一个号 {#hook}
 
-> 说明：本文资料核查于 2026-10-15；发表早于 2020 年的资料标「仅参考」。
+接上期，订单分到多个数据库。两个独立表都可能从相同起点继续编号，各自在本表内正常，却产生相同订单号。本期订单、相对时间、生成器编号均为教学示例，不代表真实事故。
 
-## 1. 为什么本机自增会撞
+## 本表自增为何不够 {#local}
 
-订单太多，数据库拆成了好几个（多个分片）之后，写压力分散了；但各分片若仍用本机自增当订单号，很容易打出同一个值。Azure 架构中心写明：非分片键上的自增字段，不同分片里的两条数据可能被赋成同一个 ID。[^S4]
+MySQL的AUTO_INCREMENT能为记录自动生成编号，官方示例配合主键约束使用。约束保障的是所在表，独立分片之间不会自动交换“某个号已经被使用”的信息。[^auto][^current]
 
-以 MySQL 8.4 为例：
+可以规划不同起点和步长，也可以采用独立发号服务、号段或UUID等方案。本期只讲雪花算法一条主线，不暗示自增永远不能用于分布式设计。
 
-- `AUTO_INCREMENT` 给新行生成「唯一身份」——作用域是**这一张表、这一台服务器上的序列**，不是跨机全局约定。[^S1]
-- InnoDB 每张带自增的表有内存计数器；重启后从数据字典 / redo 恢复；回滚会留下空洞，但仍然只保证本表内不重复。[^S2]
-- `auto_increment_increment` / `auto_increment_offset` 本意是循环复制（多源写）时错开序列；会影响该服务器上**所有**自增表，且步长和偏移量要提前统一规划，预留的范围内可以加分片；超出预留范围就得重新规划，扩容要额外协调。[^S3]
+## 三部分如何区分 {#snowflake}
 
-结论：每个分片各自从本机序列往上加，互不知道对方发到哪——很容易撞号。这不是 MySQL「坏了」，是自增的作用域本来就在单机。
+雪花算法通常将时间、生成器标识与序号安排在不同字段。不同毫秒可由时间区分；同一毫秒中，不同生成器由身份区分，同一生成器的多个请求由序号区分。[^current]
 
-## 2. 雪花式
+原始Twitter实现把机房号和机器号分开。本片用“生成器的机器编号”概括它们组成的身份字段，不能把两个进程共用一个身份仍当作两个不同生成器。历史原实现仅用于解释原理，不作为当前部署默认配置指南。[^original]
 
-Twitter Snowflake（开源归档，约 2010，**仅参考**）的目标包括：各机不必互相商量再发号（Uncoordinated）、大致按时间有序、尽量紧凑。[^S7] 组成直觉：时间戳部分 + 配置好的机器号 + 同一毫秒内的序号。[^S7]
+画面的三段带颜色是**字段示意**。真实结果按整数位运算组合，不是直接连接十进制字符串。示例采用10位生成器身份、12位序号，使用以下相对时间生成17位整数：
 
-打个比方：时间色带 + 站徽章 + 同瞬流水戳。机器之间多数时候不用排队领号。
+```js
+const id = (4000000000n << 22n) | (7n << 12n) | 0n;
+const text = id.toString(); // "16777216000028672"
+```
 
-时钟往回拨时，原版 `IdWorker` 会拒绝发号（"Clock moved backwards. Refusing to generate id"）——宁可暂停，也不冒险撞号。[^S8] 一句话：宁可先停下来，也不打重复条码。
+同一相对毫秒、机器编号9得到`16777216000036864`；机器编号7但序号1得到`16777216000028673`。这三者精确不同。字段范围、纪元、身份分配与运行状态仍要由实际系统正确维护。[^implementation]
 
-美团 Leaf 的 Snowflake 模式「算法取自 twitter 开源的 snowflake」；另有号段模式（见下）。[^S9][^S10] Apache ShardingSphere 也内置 `SNOWFLAKE` 主键生成器，说明中间件生态常用同类思路（举例，不做推荐）。[^S13]
+## 不重复需要前提 {#conditions}
 
-## 3. 号段
+- 活跃生成器不能误用同一身份；重启或复用身份时也应处理先前状态，不能随意从相同时间和序号重新开始。
+- 时钟回拨需要依实现拒绝、等待或其他正确策略处理，不能让时间倒退后照常重用相同组合。
+- 同一毫秒的序号用尽，要等到下一毫秒等规则处理，而非直接绕回重复发号。原始实现有明确等待与回拨错误分支。[^original]
 
-Leaf 号段模式：服务从 DB 一次取走一段号（`max_id` + `step`），在内存里往下发；双 Buffer 可在一段用完前异步取下一段，短期可容忍 DB 不可用。[^S9][^S10]
+这些前提不是人工记住一句“用了雪花”就会自动满足。当前实现的worker-id分配与容忍时间差等参数也有明确要求，适用范围应以所用实现为准。[^current][^implementation]
 
-开源说明对比：号段「低位趋势增长」「能容忍 MySQL 短时间不可用」；Snowflake「完全分布式，ID 有语义」。[^S9]
+### 大整数与顺序
 
-代价要诚实：发号仍依赖（或阶段性依赖）中心号段表——不是「完全去中心」，而是「少打几次 DB」。比喻：一台发号机一次发给每个站一整叠空白号牌，各站自己撕着用。
+JavaScript的Number安全整数最大值为`9007199254740991`。本片17位示例超过这个范围，因此全部用BigInt从整数或字符串构造，再以字符串显示，不经Number转换。跨接口传递时也要遵循明确的字符串等序列化约定。[^number]
 
-## 4. UUID / ULID
+时间字段常使编号具有一定时间顺序特征，但跨机器的时钟、调度和业务执行顺序不能据此变成严格的全局业务先后；编号也不是秘密或授权凭证。
 
-RFC 9562（2024-05）把 UUID 定为 128 位，不需要中央权威；动机里写明：分布式场景下协调连续数字编号的成本很容易变成负担。[^S5]
+## 三种差异各管什么 {#recap}
 
-- **UUIDv4**：随机 / 伪随机；适合不想暴露创建时间；但非时间序版本数据库索引局部性差（连续插入在 B-tree 里东插西插）。[^S5]
-- **UUIDv7**：Unix 毫秒时间在高位 + 随机/计数；规范建议在可能时优先用 v7 代替 v1 / v6；便于按时间排序、改善索引局部性。[^S5]
-- **ULID**（社区规范）：128 位；毫秒时间 + 随机；字典序可排序。RFC 9562 动机列表把它列为既有实践之一；若只点名一种「随机全球号」，优先说 UUID，ULID 作对照。[^S11][^S5]
+本片想说明的是：本地自增只看到自己，跨分片要统一设计编号范围和生成规则。雪花算法通过时间、生成器身份和序号分工，在前提得到正确维护时，让各处可分别生成不冲突的编号。
 
-UUID 的特点：各机自己生成、更长；随机版索引更碎。
+下一期：下单成功了，库存怎么没扣？
 
-## 5. Redis INCR
+## 参考资料
 
-`INCR` 原子 +1；键不存在则当 0 再加；限 64 位有符号整数。官方文档主讲 counter / rate limiter，不是「分布式主键最佳实践」专文。[^S6]
+以下官方正文及原始代码均于2026-10-24实际核验；2010—2012原实现标为仅参考，详细主张和适用范围见research.md。
 
-全局唯一且连续的前提是所有人找同一套 Redis 计数——简单，但重新引入单点 / 中心瓶颈。持久化与故障切换若丢计数，有重复风险；**无 Redis 官方「用作订单主键」保证**，本文不承诺「绝对安全」。简单说：可以用 Redis 这种公共计数器，但大家又都挤回一台发号机了。
-
-## 6. 方案怎么选（对照）
-
-| 方案 | 优点 | 代价 | 详见 |
-|---|---|---|---|
-| 本机自增 | 简单 | 分库后会撞号 | §1 |
-| 雪花式 | 各机自己发号、大致按时间有序 | 依赖时钟，回拨要停发 | §2 |
-| 号段 | 少打几次数据库 | 仍依赖中心号段表 | §3 |
-| UUID / ULID | 不需要中心 | 更长，随机版索引更碎 | §4 |
-| Redis INCR | 简单、连续 | 又回到单点 | §5 |
-
-数据库拆开之后，主键也要按「全局不撞」来设计。
-
----
-
-[^S1]: MySQL 8.4 参考手册，5.6.9 Using AUTO_INCREMENT，https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html ，2026-10-15 抓取
-[^S2]: MySQL 8.4 参考手册，17.6.1.6 AUTO_INCREMENT Handling in InnoDB，https://dev.mysql.com/doc/refman/8.4/en/innodb-auto-increment-handling.html ，2026-10-15 抓取
-[^S3]: MySQL 8.4 参考手册，19.1.6.2 Replication Source Options（auto_increment_increment / offset），https://dev.mysql.com/doc/refman/8.4/en/replication-options-source.html ，2026-10-15 抓取
-[^S4]: Azure 架构中心，Sharding pattern，https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding ，2026-10-15 抓取
-[^S5]: IETF RFC 9562，Universally Unique IDentifiers (UUIDs)，https://www.rfc-editor.org/rfc/rfc9562.html ，2024-05
-[^S6]: Redis 文档，INCR，https://redis.io/docs/latest/commands/incr/ ，2026-10-15 抓取
-[^S7]: Twitter Snowflake 开源归档 README（snowflake-2010），https://github.com/twitter-archive/snowflake/blob/snowflake-2010/README.mkd ，约 2010 → **仅参考**
-[^S8]: Twitter Snowflake IdWorker.scala，https://github.com/twitter-archive/snowflake/blob/snowflake-2010/src/main/scala/com/twitter/service/snowflake/IdWorker.scala ，约 2010 → **仅参考**
-[^S9]: 美团 Leaf 开源说明，https://tech.meituan.com/2019/03/07/open-source-project-leaf.html ，2019-03-07 → **仅参考**
-[^S10]: Meituan-Dianping/Leaf README_CN，https://github.com/Meituan-Dianping/Leaf/blob/master/README_CN.md ，2026-10-15 抓取
-[^S11]: ULID 规范仓库 README，https://github.com/ulid/spec/blob/master/README.md ，2026-10-15 抓取（社区规范，页面无 IETF 发布日）
-[^S13]: Apache ShardingSphere，Key Generate Algorithm，https://shardingsphere.apache.org/document/current/en/user-manual/common-config/builtin-algorithm/keygen/ ，current 版，页面无日期 → **仅参考**
+[^auto]: [MySQL 8.4 Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html)
+[^current]: [Apache ShardingSphere Key Generate Algorithm](https://shardingsphere.apache.org/document/current/en/user-manual/common-config/builtin-algorithm/keygen/)
+[^original]: [Twitter archived IdWorker.scala，仅参考](https://github.com/twitter-archive/snowflake/blob/snowflake-2010/src/main/scala/com/twitter/service/snowflake/IdWorker.scala)
+[^implementation]: [Apache ShardingSphere SnowflakeKeyGenerateAlgorithm.java](https://github.com/apache/shardingsphere/blob/master/infra/algorithm/type/key-generator/type/snowflake/src/main/java/org/apache/shardingsphere/infra/algorithm/keygen/snowflake/SnowflakeKeyGenerateAlgorithm.java)
+[^number]: [MDN Number.MAX_SAFE_INTEGER](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER)；[MDN BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt)

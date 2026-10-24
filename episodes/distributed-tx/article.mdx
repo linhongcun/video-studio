@@ -1,98 +1,78 @@
 ---
-title: 两个库，怎么一起成功或一起失败？
-episode: 21
-version: v0.26.0
-series: 数据库入门
+title: 下单成功了，库存怎么没扣？
+summary: 两个数据库不能靠一笔普通本地事务同时修改。用同一条订单通知，讲清同库记录待发事件、失败重试、库存侧幂等处理和最终一致的边界。
+chapters:
+  - { id: hook, title: 两个库为何没有一起改 }
+  - { id: record, title: 先记住订单和待办 }
+  - { id: retry, title: 失败后仍能继续发送 }
+  - { id: consume, title: 库存侧只处理一次 }
+  - { id: eventual, title: 最终一致与失败边界 }
+  - { id: question, title: 回头检查漏掉的保证 }
+related: ["global-id", "db-transaction", "message-queue", "idempotency"]
 ---
 
-你下单付了钱，页面显示成功，仓库却根本没扣库存。如果订单和库存记在不同的数据库里、各记各的，就可能出现这种「一个成了，另一个没成」的情况。这一期讲：数据分在不同的库里以后，怎么还能一起成功或一起失败——也就是分布式事务。
+## 两个库为何没有一起改 {#hook}
 
-> 说明：本文资料核查于 2026-10-15，S1、S2、S3、S5、S7 于 2026-10-16 重新抓取复核。本文讲四种实现：两阶段提交、TCC（预留 / 确认 / 取消）、Saga（先做、失败了反向补偿）、可靠消息。本文不引用任何性能数字（吞吐、延迟、锁持有时间）。没有日期的页面只作机制描述，版本以 Releases 页为准；microservices.io 页面无日期，标「仅参考」。
+订单8124已经记入订单库，库存库里的数量却仍是4。它们是两个不同的数据库，单独提交订单库中的普通本地事务，不会自动替另一个库完成扣减。**分布式事务**面对的，是跨系统操作需要协作的问题；本片只沿着可靠消息这一条主线往下讲。
 
-## 1. 为什么本地事务不够用了
+所有编号和库存都是示例。画面“订单已记录”只表示订单数据写入，不代表业务可以在缺货时仍承诺成交。真实下单系统还需设计库存预留或确认、业务失败、取消和补偿等状态。
 
-同一个库里，一笔事务要么全部生效，要么全部撤回。可它的「提交 / 回滚」只对**本库**的数据有效：订单库回滚，管不到库存库。数据分到不同的库以后（分库分表的代价之一就是跨库事务变难），两个库各自提交，中间任何一步失败——库存不足、网络断、进程重启——就只剩一半生效。
+## 先记住订单和待办 {#record}
 
-Azure 架构中心的说法是：单个服务在一个数据库里能遵守 ACID，跨多个服务时就复杂得多，传统的 ACID 保证「aren't directly applicable to multiple independently managed data stores」[^S7]。RocketMQ 文档也用电商下单举过反例：订单执行了，消息却没发出去；超时错误又没法可靠判断要不要回滚订单[^S5]。
+仅在订单提交后直接调用一次库存接口，会留下一个空档：订单已提交，通知却可能因进程退出或网络问题没有发出。
 
-## 2. 第一种，两阶段提交（2PC / XA）：先准备、再统一生效
+一种做法是**在同一个订单数据库的本地事务中，同时写入订单和待发送的事件记录**。事务失败时两者都不提交；事务成功后，后台能够继续找到已提交的待发事件。它通常称为transactional outbox。[^outbox]
 
-以 MySQL 8.4 为例，XA 事务让多个独立的事务资源参与同一个全局事务，「either all components must commit, or all components must roll back」[^S1]。
+这一步原子化的是“订单与本地待发记录”，不是“订单库与库存库同时提交”。后台发送器还须处理轮询、发送确认、重发与记录生命周期；不能先删除唯一的持久化待办，再寄希望于一次网络调用。
 
-- 角色：**事务管理器 TM**（协调者，比喻里拿对讲机的调度员）+ 各个**资源管理器 RM**（每台 MySQL，比喻里听调度员指挥的驿站）。连到 MySQL 的客户端程序充当 TM[^S1]。
-- 第一阶段：所有分支先 prepare，各 RM 把本分支的动作记到稳定存储里，并回报能不能提交（铅笔写好、货锁进待出库格子，再举绿牌或红牌）[^S1]。
-- 第二阶段：全都能提交，TM 让所有分支提交；有一个不能，就让所有分支回滚（一起盖章 / 全部擦掉）[^S1]。
+## 失败后仍能继续发送 {#retry}
 
-MySQL 里的语句大致是 `XA START` → 执行 SQL → `XA END` → `XA PREPARE` → `XA COMMIT`（或 `XA ROLLBACK`）。
+视频中通知E8124发送途中失败，但原先保存的待办仍在，程序可以在服务恢复后重新尝试。发送器应有持久化进度和失败处理，不能把内存里的重试循环当成可恢复设计。
 
-**代价**：进入 PREPARED 状态的 XA 事务会一直保留，直到显式执行 `XA COMMIT` 或 `XA ROLLBACK`[^S2]，可以用 `XA RECOVER` 查出还悬着的事务。也就是说，投了「准备好」以后，参与者自己不能决定，只能等协调者；协调者挂了，它就悬着，相关数据一直被占着（好比「对讲机没声了，只能干等」）。RocketMQ 文档也定性地指出 XA 要锁住大量资源，并发低[^S5]。另外 MySQL 对 XA 还有复制过滤、binlog 分段写等限制，见手册[^S2]。
+发布确认与消费确认有不同含义。消息代理接受一条消息，并不等于库存业务已经完成；确认可能因网络故障丢失，重新发送或重新交付又可能导致同一条消息出现多次。[^reliability][^delivery]
 
-## 3. 第二种，TCC：先预留，再确认或取消
+因此，视频没有宣称“一定送到为止”。重试策略、消息保留、服务恢复和异常处置共同决定操作能否继续，永久故障不会因为多等一会儿就自动消失。
 
-Seata 文档：TCC 是两阶段提交里资源管理器的一种「面向服务」的实现；Try 负责检查并**预留**资源，是第一阶段；Confirm 是第二阶段提交；Cancel 是第二阶段回滚，释放预留、恢复原状[^S3]。它不依赖底层数据库，能缩短资源锁定的时间（reduces resource lock holding time），但要业务系统自己实现 Try / Confirm / Cancel 三个动作，设计相对复杂[^S3]，还要处理幂等、空回滚、悬挂。
+## 库存侧只处理一次 {#consume}
 
-用驿站说：不让数据库一直锁着，改成业务自己贴封条——蓝站先在货上贴「已预留」封条，货还在架上但别人买不走（Try）；之后还是由调度员（协调者，Seata 文档里由 TM 分两阶段协调）喊确认或取消：订单成了就撕封条真出库（Confirm），没成就撕封条、货照常卖（Cancel）[^S3]。一致性怎么说：Seata 的原话是由 TM 分两阶段协调，保证所有资源的最终状态一致——要么都提交，要么都回滚（简单说：最后要么都确认，要么都取消）[^S3]。本文不把 TCC 称为「强一致」：Try 之后、Confirm 之前，预留是业务层的，不是数据库锁。「防着同一个指令重复送来」，就是 Seata 说的幂等问题[^S3]。Pat Helland 把这种做法叫 tentative operation（暂定操作）：对方先接受不确定，之后收到确认或取消[^S10]。
+E8124对应订单8124本次扣减一件库存的操作。库存侧需把**检查处理标识、写入处理标识和扣减库存纳入同一笔库存库本地事务**，并用唯一约束等机制防止并发重复执行。不能只做一个没有并发保护的“先查、再改”。[^consumer]
 
-版本：Apache Seata（孵化项目）最新正式版 **2.6.0**（2026-01-28）；2.7.0 目前还是 RC 预发布版，不是正式版[^S4]。
+示意流程如下，省略的异常处理在真实程序中必须实现：
 
-## 4. 第三种，Saga：先做，失败了再补偿
+```text
+开始库存库本地事务
+  尝试登记唯一处理键 E8124
+  若已存在：结束本次处理事务后返回已处理，不再次扣减
+  若本例库存足够：库存 4 → 3
+  若业务检查失败：撤销本事务并进入明确的失败处理
+共同提交：处理键 + 库存修改
+成功后再确认消息
+```
 
-Saga 把一个事务拆成一串本地事务；某一步失败，就执行一系列补偿事务，抵消前面已经做过的改动[^S7]。组织方式有两种：编舞（choreography，各方发事件，没有中心）和编排（orchestration，有一个编排器，但它本身会成为故障点）[^S7]。
+如果只扣库存、却没记住已经处理，重复通知就可能再扣一次；如果只记处理标识、扣减失败却独立保留标识，又可能让重试被错误跳过。两份结果必须共同确认。
 
-要诚实讲清的几点[^S7]：
+去重键要标识**同一条消息或同一次业务操作**。不能用“订单出现过”作为所有事件的永久通用屏障，否则会误吞后续合法的退款或库存调整事件。去重记录保留期限、消息重放和跨系统外部副作用也需要配套设计。
 
-- 没有内置的跨服务隔离，中间状态别人看得见；
-- 已提交的改动不能真的回滚，只能用反向操作补；
-- 补偿也可能失败；
-- 各步骤要幂等。
+## 最终一致与失败边界 {#eventual}
 
-用驿站说：蓝站先真把货出了库，后面红站失败，就把货「重新上架」——这是一个反向动作，不是时光倒流：已提交的改动不能回滚[^S7]。中间那段时间别人能看见货架空了（没有隔离）；补偿本身也可能失败，要能重试且幂等[^S7]。Azure 还指出，可重试的步骤让 saga「eventually achieve a consistent state」，即最终一致[^S7]。Seata 2.x 也提供 Saga 模式[^S4]。另见 microservices.io 的总结：缺少自动回滚、缺少隔离[^S8]。
+视频的正常路径里，订单先记录，稍后通知被处理，库存从4变成3。**最终一致**允许中间阶段暂时没对上，系统再按业务规则推进并收敛；它不等于两个数据库在同一瞬间提交，也不意味着所有操作都可以忽略中间状态。
 
-## 5. 第四种，可靠消息：先记下来，再保证送到（不自动撤回订单；永久失败要另外处理）
+示例能走向成功，前提是库存足够、服务恢复，并且持久化、重试、幂等与业务检查正确。遇到永久失败、库存不足或不可继续的业务条件，应进入告警、取消、补偿或人工处理。补偿是根据业务纠正先前操作，不必然等于把所有数据库恢复成原始快照，补偿本身也可能失败。[^compensate]
 
-### 5.1 本地消息表（Transactional outbox，仅参考）
+其他方案如两阶段提交、TCC、Saga和XA属于不同的设计方向，本片不并列演示，更不宣称可靠消息适合所有一致性要求。
 
-订单库在**同一个本地事务**里，同时写「订单」和「一条待发送的通知」；之后后台反复把通知投递给库存服务，直到对方确认[^S9]。这样就避免了「数据库改了、消息没发」的一半状态。下游要按订单号去重（幂等），因为通知可能重复送达。
+## 回头检查漏掉的保证 {#question}
 
-### 5.2 RocketMQ 事务消息（半消息）
+如果只扣了库存，却没记住已经处理，重复消息来了会怎样？再反过来想：如果只记处理标志，扣库存却失败，又会怎样？
 
-流程[^S5]：先发一条「半消息」（暂不投递）→ 生产者执行本地事务 → 提交 Commit 或 Rollback；broker 没收到结果时，会主动回查生产者这条半消息的状态。超时未决默认回滚半消息（具体时长见官方参数说明，本文不引数字）[^S5]。打个比方：条子交邮局暂存不送 = 半消息；「可以送了 / 作废」= Commit / Rollback；邮局回头问 = 回查；蓝站没处理好就再送 = 消费重试[^S5]。注意：「同一页账上同时写订单和条子」是本地消息表的做法（见 5.1，仅参考），不是 RocketMQ 事务消息；事务消息也不是「连调度员都不要」，RocketMQ 自述是「在普通消息上支持两阶段提交」。
+把整条链路拆成可核对的步骤：提交的订单有可恢复待办；投递失败有后续处理；重复不会重复产生业务副作用；最后按业务状态确认成功或失败。每一步的保证，都来自具体机制和条件。
 
-一致性边界：它「ensures only final consistency」，也不保证下游消费结果和上游执行结果一致，下游业务必须自己保证正确处理[^S5]。版本：RocketMQ 最新 **5.5.1**（2026-08-20），文档按 5.x[^S6]。
+## 公开资料
 
-## 6. 最终一致：Saga 和可靠消息都是
+以下正文在2026-10-24实际核验，逐条主张与适用边界见本期research.md。
 
-最终一致不是 Saga 或可靠消息独有的说法，这两种都是：中间会有一段时间订单和库存对不上，等补偿（Saga）或重送（可靠消息）做成了，最后再对上[^S5][^S7]。但不能说「最后一定对上」：Azure 明确写了补偿事务可能失败，系统会停在不一致状态，要靠监控和重试[^S7]。
-
-## 7. 方案怎么选（对照）
-
-| 方案 | 一致性 | 协调者 | 失败怎么办 | 代价 | 比喻 | 详见 |
-|---|---|---|---|---|---|---|
-| 两阶段提交（XA） | 全局事务也具备 ACID（MySQL 手册原话 “extends ACID properties up a level”） | 要（TM） | 准备阶段有人失败就全部回滚；已决定提交的，恢复后继续提交 | 锁多、并发低；协调者挂了会卡住 | 调度员、干等 | §2（语句、PREPARED、限制） |
-| TCC | 最终状态要么都确认、要么都取消（Seata 原话；不称强一致） | 要（如 Seata） | Cancel 释放预留 | 业务三套动作，复杂；要防重复 | 封条 | §3 |
-| Saga | 最终一致，无隔离 | 编排有 / 编舞无 | 反向补偿（可能失败） | 中间态可见、要幂等 | 重新上架 | §4 |
-| 本地消息表 / 事务消息 | 最终一致 | 不需要跨业务的全局事务协调者（消息服务器负责半消息的提交和回查） | 重试 + 回查 | 有延迟、下游要幂等 | 条子、邮局回头问、重送、认单号 | §5 |
-
-### 四格对比（一句话版）
-
-| 方案 | 怎么做 | 代价 |
-|---|---|---|
-| 两阶段提交 | 先准备、再统一生效 | 货一直锁着，别人也买不走 |
-| TCC（预留确认取消） | 先预留，再确认或取消 | 每个业务都得自己写预留、确认、取消这三套动作 |
-| Saga（补偿事务） | 先做，失败了再补偿 | 中间那段时间，别人能看见货架空了 |
-| 可靠消息 | 先记下来，再保证送到 | 通知一定发出去；临时失败靠重试，永久失败要另外设计补偿或人工处理 |
-
-注意区分：可靠消息本身不自动撤回订单，它保证的是通知一定送出去；临时失败靠重试，重试到上限会进死信队列，永久失败（比如库存不足）需要业务另行设计补偿或人工处理。Helland 也指出：多数分布式事务系统里，一个节点故障会让提交卡住[^S10]。没有哪一种「最好」，看业务能不能接受短暂对不上。
-
----
-
-[^S1]: MySQL 8.4 Reference Manual, 15.3.8 XA Transactions，https://dev.mysql.com/doc/refman/8.4/en/xa.html ，2026-10-15 抓取，2026-10-16 复核
-[^S2]: MySQL 8.4 Reference Manual, 15.3.8.3 Restrictions on XA Transactions，https://dev.mysql.com/doc/refman/8.4/en/xa-restrictions.html ，2026-10-15 抓取，2026-10-16 复核
-[^S3]: Apache Seata 文档：TCC 模式，https://seata.apache.org/docs/user/mode/tcc/ ，页面无日期，2026-10-15 抓取，2026-10-16 复核（机制描述；版本以 S4 为准）
-[^S4]: Apache Seata GitHub Releases，https://github.com/apache/incubator-seata/releases ，2026-10-15 抓取（v2.6.0 发布于 2026-01-28；v2.7.0 为 RC）
-[^S5]: Apache RocketMQ 文档：Transaction Message，https://rocketmq.apache.org/docs/featureBehavior/04transactionmessage/ ，页面无日期，2026-10-15 抓取，2026-10-16 复核（机制描述；版本以 S6 为准）
-[^S6]: Apache RocketMQ GitHub Releases，https://github.com/apache/rocketmq/releases ，2026-10-15 抓取（rocketmq-all-5.5.1，2026-08-20）
-[^S7]: Azure Architecture Center：Saga design pattern，https://learn.microsoft.com/en-us/azure/architecture/patterns/saga ，2026-10-15 抓取，2026-10-16 复核
-[^S8]: microservices.io：Pattern: Saga（Chris Richardson），https://microservices.io/patterns/data/saga.html ，页面无日期，2026-10-15 抓取 → **仅参考**
-[^S9]: microservices.io：Pattern: Transactional outbox（Chris Richardson），https://microservices.io/patterns/data/transactional-outbox.html ，页面无日期，2026-10-15 抓取 → **仅参考**（机制与 S5 交叉）
-[^S10]: Pat Helland, "Life Beyond Distributed Transactions: An apostate's opinion", ACM Queue 14(5), 2016-12-12，https://queue.acm.org/detail.cfm?id=3025012 ，2026-10-15 抓取 → 2020 年以前 **仅参考**
+[^outbox]: [AWS Prescriptive Guidance — Transactional outbox pattern](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)
+[^reliability]: [RabbitMQ — Reliability Guide](https://www.rabbitmq.com/docs/reliability)
+[^delivery]: [Amazon SQS — At-least-once delivery](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues-at-least-once-delivery.html)
+[^consumer]: [Chris Richardson — Idempotent Consumer（2020-10-16，原作者公开说明）](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)
+[^compensate]: [Azure Architecture Center — Compensating Transaction](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)

@@ -1,0 +1,66 @@
+---
+title: 两个订单，怎么撞成同一个号了？
+summary: 独立分片各自自增，编号可能重复。用时间、生成器编号与同毫秒序号解释雪花算法，并说明编号唯一、时间和状态处理的前提。
+chapters:
+  - { id: hook, title: 两笔订单同一个号 }
+  - { id: local, title: 本表自增为何不够 }
+  - { id: snowflake, title: 三部分如何区分 }
+  - { id: conditions, title: 不重复需要前提 }
+  - { id: recap, title: 三种差异各管什么 }
+related: ["db-sharding", "distributed-tx"]
+---
+
+## 两笔订单同一个号 {#hook}
+
+接上期，订单分到多个数据库。两个独立表都可能从相同起点继续编号，各自在本表内正常，却产生相同订单号。本期订单、相对时间、生成器编号均为教学示例，不代表真实事故。
+
+## 本表自增为何不够 {#local}
+
+MySQL的AUTO_INCREMENT能为记录自动生成编号，官方示例配合主键约束使用。约束保障的是所在表，独立分片之间不会自动交换“某个号已经被使用”的信息。[^auto][^current]
+
+可以规划不同起点和步长，也可以采用独立发号服务、号段或UUID等方案。本期只讲雪花算法一条主线，不暗示自增永远不能用于分布式设计。
+
+## 三部分如何区分 {#snowflake}
+
+雪花算法通常将时间、生成器标识与序号安排在不同字段。不同毫秒可由时间区分；同一毫秒中，不同生成器由身份区分，同一生成器的多个请求由序号区分。[^current]
+
+原始Twitter实现把机房号和机器号分开。本片用“生成器的机器编号”概括它们组成的身份字段，不能把两个进程共用一个身份仍当作两个不同生成器。历史原实现仅用于解释原理，不作为当前部署默认配置指南。[^original]
+
+画面的三段带颜色是**字段示意**。真实结果按整数位运算组合，不是直接连接十进制字符串。示例采用10位生成器身份、12位序号，使用以下相对时间生成17位整数：
+
+```js
+const id = (4000000000n << 22n) | (7n << 12n) | 0n;
+const text = id.toString(); // "16777216000028672"
+```
+
+同一相对毫秒、机器编号9得到`16777216000036864`；机器编号7但序号1得到`16777216000028673`。这三者精确不同。字段范围、纪元、身份分配与运行状态仍要由实际系统正确维护。[^implementation]
+
+## 不重复需要前提 {#conditions}
+
+- 活跃生成器不能误用同一身份；重启或复用身份时也应处理先前状态，不能随意从相同时间和序号重新开始。
+- 时钟回拨需要依实现拒绝、等待或其他正确策略处理，不能让时间倒退后照常重用相同组合。
+- 同一毫秒的序号用尽，要等到下一毫秒等规则处理，而非直接绕回重复发号。原始实现有明确等待与回拨错误分支。[^original]
+
+这些前提不是人工记住一句“用了雪花”就会自动满足。当前实现的worker-id分配与容忍时间差等参数也有明确要求，适用范围应以所用实现为准。[^current][^implementation]
+
+### 大整数与顺序
+
+JavaScript的Number安全整数最大值为`9007199254740991`。本片17位示例超过这个范围，因此全部用BigInt从整数或字符串构造，再以字符串显示，不经Number转换。跨接口传递时也要遵循明确的字符串等序列化约定。[^number]
+
+时间字段常使编号具有一定时间顺序特征，但跨机器的时钟、调度和业务执行顺序不能据此变成严格的全局业务先后；编号也不是秘密或授权凭证。
+
+## 三种差异各管什么 {#recap}
+
+本片想说明的是：本地自增只看到自己，跨分片要统一设计编号范围和生成规则。雪花算法通过时间、生成器身份和序号分工，在前提得到正确维护时，让各处可分别生成不冲突的编号。
+
+下一期：下单成功了，库存怎么没扣？
+
+## 参考资料
+
+以下官方正文及原始代码均于2026-10-24实际核验；2010—2012原实现标为仅参考，详细主张和适用范围见research.md。
+
+[^auto]: [MySQL 8.4 Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html)
+[^current]: [Apache ShardingSphere Key Generate Algorithm](https://shardingsphere.apache.org/document/current/en/user-manual/common-config/builtin-algorithm/keygen/)
+[^original]: [Twitter archived IdWorker.scala，仅参考](https://github.com/twitter-archive/snowflake/blob/snowflake-2010/src/main/scala/com/twitter/service/snowflake/IdWorker.scala)
+[^implementation]: [Apache ShardingSphere SnowflakeKeyGenerateAlgorithm.java](https://github.com/apache/shardingsphere/blob/master/infra/algorithm/type/key-generator/type/snowflake/src/main/java/org/apache/shardingsphere/infra/algorithm/keygen/snowflake/SnowflakeKeyGenerateAlgorithm.java)
+[^number]: [MDN Number.MAX_SAFE_INTEGER](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER)；[MDN BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt)

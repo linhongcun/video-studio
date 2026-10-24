@@ -48,6 +48,22 @@
 - [权威资料核验](../episodes-codex/db-lock/research.md)、[动态预检](../episodes-codex/db-lock/qa-motion.md)与[成片核验](../episodes-codex/db-lock/qa-final.md)及[发布记录](../episodes-codex/db-lock/release.md)随本期入库。重点是乙等待后加锁读取新库存0，再由程序判定缺货，不把行锁当成业务检查。
 - [站点页面](https://linhongcun.github.io/video-studio/episodes/db-lock/)使用本期通过的同一份视频；平台历史投稿保留。#69 已按用户后续指令以`completed`关闭。
 
+### EP.18–21 旧版重制批次
+
+2026-10-24 接续EP.17，完成其余四期已上线旧版的重制，本站版本v0.45.4。按持续授权自主发布，制作检查通过不记为用户已经观看认可。四期保留同一示例逐步展示因果动作，复杂技术分支放在配套文章。
+
+| 期 | 制作与检查入口 | 主要动画 | 实际帧数 | 视频SHA前缀 | 对应issue |
+|---|---|---|---|---|---|
+| EP.18 | [db-replication](../episodes-codex/db-replication/README.md) · [成片检查](../episodes-codex/db-replication/qa-final.md) | 昵称从主库提交，经接收再应用到从库 | 3560 | `f149b8ad` | [#70](https://github.com/linhongcun/video-studio/issues/70) |
+| EP.19 | [db-sharding](../episodes-codex/db-sharding/README.md) · [成片检查](../episodes-codex/db-sharding/qa-final.md) | 提取用户键，再将订单路由到固定分片 | 3760 | `ff3d0ba1` | [#71](https://github.com/linhongcun/video-studio/issues/71) |
+| EP.20 | [global-id](../episodes-codex/global-id/README.md) · [成片检查](../episodes-codex/global-id/qa-final.md) | 本地号码碰撞，再逐字段生成与核对完整ID | 4419 | `14bd428e` | [#72](https://github.com/linhongcun/video-studio/issues/72) |
+| EP.21 | [distributed-tx](../episodes-codex/distributed-tx/README.md) · [成片检查](../episodes-codex/distributed-tx/qa-final.md) | 订单和待办共同落盘，重试送达，去重后扣库存 | 3791 | `4f01d09a` | [#73](https://github.com/linhongcun/video-studio/issues/73) |
+
+- 官方MySQL、Vitess、Apache、AWS等正文及历史原始实现按主张记录在各期research中。Snowflake示例使用BigInt并验证字段计算；历史Twitter源码明确标为原理参考，不当成当前运维建议。
+- 动态复核拦截并修复文字被路径穿过、提取值重复及查询结果交叉叠写；修订后重新冻结和完整编码。具体案例补入L003–L005。
+- 站点复制完成检查的同一文件，使用实际最终帧数和字幕边界；GitHub上线核验通过后关闭四个对应制作issue。平台历史投稿保留。
+- 官方ASR模型权重在当前网络下不可用，已保留选定takes、声学起音、信号与响度检查；未声称完成逐字ASR或全片人工听辨。
+
 ## 复用边界
 
 - 14或16镜、具体时长、字号、滚动位移及坐标都是单期实现，不照搬成后续硬规则。

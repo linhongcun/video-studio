@@ -35,7 +35,7 @@ npm run preview
 
 ## PR 与版本
 
-版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。第17期数据库锁重制本次版本为 v0.45.3；实际版本以该文件及 Release 为准。
+版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。第18至21期旧版重制本次版本为 v0.45.4；实际版本以该文件及 Release 为准。
 
 1. 改 `meta.json`：`draft: false`，写上 `publishedAt`。重发或只改站点时更新 `updatedAt`。
 2. 开 PR，合并进 `main`。推到 `main` 会跑 `.github/workflows/deploy.yml`，部署 GitHub Pages。这次构建发生在 Release 之前，`/changelog/` 还不会带上新版本。新版本要等第 4 步，在 Release 发出后再手动部署一次。命令顺序见「站点发版清单」。
@@ -58,7 +58,7 @@ gh workflow run deploy.yml --ref main
 sha256sum <file> | cut -c1-8
 ```
 
-2. 改 `site/package.json` 的 `version`：只改成片或文章升修订号；新一期或站点功能升次版本号。改该期 `meta.json`：`draft` 设为 `false`，写上 `publishedAt`；重发或只改站点时更新 `updatedAt`。本地先构建通过：
+2. 改 `site/package.json` 的 `version`：只改成片或文章升修订号；新一期或站点功能升次版本号。改该期 `meta.json`：`draft` 设为 `false`，写上 `publishedAt`；重发或只改站点时更新 `updatedAt`。制作入口迁到 `episodes-codex/` 时，将 `sourcePath` 设为对应仓库相对目录（如 `episodes-codex/db-replication/remotion`），让页面“源码”指向当前工程；未设置时兼容原来的 `episodes/<slug>/remotion`。本地先构建通过：
 
 ```sh
 cd site

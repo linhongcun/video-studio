@@ -12,7 +12,7 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 
 ## 已上线剧集
 
-剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–17 已重制；EP.18–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0）；EP.15 索引在 v0.45.1 更新为订单表查找动画；EP.16 事务在 v0.45.2 更新为逐步展示修改、提交和回滚的动画；EP.17 锁在 v0.45.3 更新为加锁读取、等待后重新检查库存的动画。以上均只更新站点，不重发平台。
+剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–21 已重制；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0）；EP.15 索引在 v0.45.1 更新为订单表查找动画；EP.16 事务在 v0.45.2 更新为逐步展示修改、提交和回滚的动画；EP.17 锁在 v0.45.3 更新为加锁读取、等待后重新检查库存的动画。v0.45.4 重制 EP.18–21，分别用昵称复制、按用户分片、号码字段与持久待办事件展示主从复制、分库分表、全局 ID 和跨服务一致性。以上均只更新站点，不重发平台。
 
 2026-10-24 用户批准 EP.17 合并及 GitHub 站点发布，并持续授权后续视频制作和质量检查完成后自主合并、上线，有反馈再修正发布，不再逐次等待确认。该授权适用于 GitHub 主干、Release 和本站；平台新发仍需单独授权。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
 
@@ -35,10 +35,10 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 | 15 | 数据库 | 加个索引，为啥就快了？ | [db-index](https://linhongcun.github.io/video-studio/episodes/db-index/) | 2026-10-14 |
 | 16 | 数据库 | 扣了钱，对方没到账？ | [db-transaction](https://linhongcun.github.io/video-studio/episodes/db-transaction/) | 2026-10-14 |
 | 17 | 数据库 | 两个人抢最后一件货，听谁的？ | [db-lock](https://linhongcun.github.io/video-studio/episodes/db-lock/) | 2026-10-15 |
-| 18 | 数据库 | 刚改的昵称，怎么又变回去了？（旧版，重制中） | [db-replication](https://linhongcun.github.io/video-studio/episodes/db-replication/) | 2026-10-15 |
-| 19 | 分布式 | 大促一到，下单怎么就卡住了？（旧版，重制中） | [db-sharding](https://linhongcun.github.io/video-studio/episodes/db-sharding/) | 2026-10-15 |
-| 20 | 分布式 | 两个订单，怎么撞成同一个号了？（旧版，重制中） | [global-id](https://linhongcun.github.io/video-studio/episodes/global-id/) | 2026-10-15 |
-| 21 | 分布式 | 两个库，怎么一起成功或一起失败？（旧版，重制中） | [distributed-tx](https://linhongcun.github.io/video-studio/episodes/distributed-tx/) | 2026-10-16 |
+| 18 | 数据库 | 刚改的昵称，怎么又变回去了？ | [db-replication](https://linhongcun.github.io/video-studio/episodes/db-replication/) | 2026-10-15 |
+| 19 | 分布式 | 订单太多，一个数据库装不下怎么办？ | [db-sharding](https://linhongcun.github.io/video-studio/episodes/db-sharding/) | 2026-10-15 |
+| 20 | 分布式 | 两个订单，怎么撞成同一个号了？ | [global-id](https://linhongcun.github.io/video-studio/episodes/global-id/) | 2026-10-15 |
+| 21 | 分布式 | 下单成功了，库存怎么没扣？ | [distributed-tx](https://linhongcun.github.io/video-studio/episodes/distributed-tx/) | 2026-10-16 |
 
 ## 制作流程
 
