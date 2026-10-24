@@ -1,7 +1,5 @@
-# 配音选段与能力边界
+# 地图返工送模替换与选片
 
-本期全部使用共享 gen.py 产生的 a take，选段明确记入 picks.json；共享 build.py 负责裁掉附加的“好。”尾巴与整轨，不复制裁切/起音算法。送模文字与原旁白的差异以 params.json 的 subst 为准。Cookie 送模为“库奇”，字幕保留原文。
+2026-10-24，沿用共享prep/gen/build，音色冰糖（mimo-v2.5-tts）。CDN字幕/脚本原文保留CDN，params.subst仅将送模文本改为C D N，要求按三个英文字母读；不把这份送模请求记录冒称完整人工听辨。选中03-network-1/03-network-2/04-edge-1/05-miss-2的b候选；其余20句沿用v0.48.0的a候选。所有旧a候选保留，未覆盖。生成作业jobs_map.json与gen-map.log保留。
 
-检查了 build.json 的句内静音、拼接跃变、句间响度与 tailCut；本轮未安装 faster-whisper/ctranslate2，官方模型端点被环境 proxy CONNECT 403 拒绝（root 集中检查）。未执行 ASR、逐字对齐或独立人工听辨，不将声学包络当作错字识别。保留全部选中 takes 与原送模文本，便于复核、换候选。
-
-words.json 仅包含真实句级边界与实测句首声学起音；内部字符的 sentence envelope 明确不代表逐字时间。只将句首术语用于严格起音检查，不估算句中词。
+历史v0.48.0的params中曾沿用无实际匹配的Cookie替换，本期没有Cookie口播，当前只保留有用的CDN替换。共享prep添加的“好。”是裁切尾标，字幕和成片旁白均不包含。

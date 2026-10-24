@@ -31,7 +31,7 @@
 
 三尺寸封面实际查看，COPYFIT为空，4:3内容在x315..1125且说明底边未越918。最终PNG导出JPEG后，主任务实际查看16:9/4:3；导出参数和完整SHA见cover-exports.json。海报文件为3:4同构图，网站使用meta.poster指定的cover-16x9.jpg。
 
-canonical slug仍为agent-intro，源码指向agent-intro-v2/remotion，firstRelease保留v0.50.0。目标版本v0.50.3；站点正式构建、4章精确frame/fps、22条VTT及桌面/手机浏览器实测记录由episodes/agent-intro/site-integration.json保存。实际PR、Release、部署与线上完整SHA收尾记录在issue #131；本报告不预写尚未发生的线上结果。
+canonical slug仍为agent-intro，源码指向agent-intro-v2/remotion，firstRelease保留v0.50.0。目标版本v0.50.4；站点正式构建、4章精确frame/fps、22条VTT及桌面/手机浏览器实测记录由episodes/agent-intro/site-integration.json保存。实际PR、Release、部署与线上完整SHA收尾记录在issue #131；本报告不预写尚未发生的线上结果。
 
 旧agent-intro制作目录171项输入与旧MP4未改写，V1/v0.50.0历史保留。本次只上GitHub站点，未进行平台新发。
 

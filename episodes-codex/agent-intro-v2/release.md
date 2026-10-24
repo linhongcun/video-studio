@@ -2,11 +2,11 @@
 
 用户观看V1后指出主线模糊、开头像流水账。本轮重新制作11镜22句，只回答“返回结果怎样改变智能体的下一步”。开头直接提出“查着订单，为什么突然反问你”，第二镜进入首次查询；结尾以使用情况仍未知解释改为询问的原因。固定工作流比较和实现边界移到配套文章。
 
-canonical观看入口仍为[Agent A01](https://linhongcun.github.io/video-studio/episodes/agent-intro/)，制作入口改为本目录。V1制作与v0.50.0历史保留。本次教训记录在L019，并将唯一问题、开头承诺、逐镜因果和结尾兑现加入冻结前编辑检查。
+canonical观看入口仍为[Agent A01](https://linhongcun.github.io/video-studio/episodes/agent-intro/)，制作入口改为本目录。V1制作与v0.50.0历史保留。本次教训记录在L020，并将唯一问题、开头承诺、逐镜因果和结尾兑现加入冻结前编辑检查。
 
 本地实际成片：2864帧、95.466667秒、5,945,472字节；−16.0LUFS/−3.8dBTP。视频完整SHA-256为f9cdfa3b10e0d26baa57ad64a71b34e31860a0304ad6b619a92f346bf3e8ec15。120项实际输入冻结、完整解码和119预演/120实际帧比对通过；独立干净安装、TypeScript与首帧完整PNG SHA一致。各项范围见qa-final及独立报告。
 
-本次目标版本v0.50.3；实际PR、Release、部署及线上完整SHA核验在[制作issue #131](https://github.com/linhongcun/video-studio/issues/131)收尾。并行主干#159合入时停止首轮编码，重新检查和冻结后从头编码，未用新清单认可旧媒体，记录见revisions/main-sync/restart.json。
+本次目标版本v0.50.4；实际PR、Release、部署及线上完整SHA核验在[制作issue #131](https://github.com/linhongcun/video-studio/issues/131)收尾。并行主干#159合入时停止首轮编码，重新检查和冻结后从头编码，未用新清单认可旧媒体，记录见revisions/main-sync/restart.json。
 
 本片为合成数据的机制动画，没有执行真实退款。句级边界、声学起音和信号审计不等于逐字ASR或全片人工听辨；相关能力限制据实记录，不预写用户观看认可。
 
