@@ -119,26 +119,28 @@ EP.02 的 `episodes/https/remotion/scripts/verify-storyboard.tsx` 在 `shot.came
 
 ## 生成清单（EP.14 实际做法）
 
-EP.13、EP.14 的分镜不是手写 JSON，而是由几支期目录脚本生成。这些脚本**不在本仓**，只在宫崎的工作备份 `miyazaki-backup/episodes-codex/degradation-v1/`（以及 `circuit-breaker-v1/`）里；本仓待补。仓里已有的共享件只有 `episodes/_shared/onset_rule.py`、`episodes/_shared/label_onset_strict.py`、`episodes/_shared/make_knoll_props.py` 和 `episodes/_shared/voice/`。新期恢复后可以照下面的分工重写，不要从旧期 `validate.py` 抄。
+EP.13、EP.14 的分镜不是手写 JSON，而是由生成器算出来的。仓内的通用生成器在 `episodes/_shared/storyboard/`（`layout.py`、`make_covers.py`、`build_sb.py`、`validate.py`，说明见 [episodes/_shared/storyboard/README.md](../episodes/_shared/storyboard/README.md)）；每期只写一组期 spec（Python 模块，经 `--spec` 传入），引擎不含任何期内容。EP.14 的整套 spec 在 `episodes/_shared/storyboard/examples/degradation/`，重跑结果与冻结稿 storyboard `6265993b`、covers `8cb7aafb` 逐字节相同。其他共享件：`episodes/_shared/onset_rule.py`、`episodes/_shared/label_onset_strict.py`、`episodes/_shared/make_knoll_props.py` 和 `episodes/_shared/voice/`。新期照 EP.14 的 spec 另写一组，不要从旧期 `validate.py` 抄。
 
 ### 输入（都要先冻结，SHA-256 写进 `meta.timingSource`）
 
 | 文件 | 来源 |
 |---|---|
 | `script.md` | 编剧／分镜。每镜四行：`frame：`、`画面：`、`旁白：`、`屏幕文字：`，外加标注表（镜号、挂在哪个词） |
-| 旁白定稿 | 与 `script.md` 的「旁白：」逐字一致（EP.14 另存一份 `narration.py`，属备份件） |
+| 旁白定稿 | 与 `script.md` 的「旁白：」逐字一致（spec 设 `NARRATION_FILE` 时另存一份 `N = (…)` 元组，EP.14 是 `episodes/_shared/storyboard/examples/degradation/narration.py`） |
 | `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json` | `episodes/_shared/voice/`（见 [voice.md](voice.md)）。镜头绝对帧以 `words.json shots[]` / `shot_frames.json` 为准，分镜不改 |
 
-### 脚本分工与顺序（备份件，本仓待补）
+### 脚本分工与顺序（`episodes/_shared/storyboard/`）
 
-1. `make_covers.py` → `covers.json`。三尺寸各自算框；记录 `layout` / `layoutReason`；BrowserChrome 写 `addressFit`。
-2. `layout.py` → `layout.json`。每镜元素的位置、文字、状态。帧号不写死，写成三种之一：`{"$cue": 词, "d": n}`（按起音），`{"$timer": 词, "d": n, "why": …}`（按画面节奏，从该词起算），或纯整数。波纹 `bornFrame` 写 `"@"` = 取所在状态帧。
-3. `build_sb.py` → `storyboard.json`（和 `build-onsets.txt`）。读脚本、旁白、`words.json`、`voice.wav`、`layout.json`、`covers.json`，核对各输入 SHA-256 前缀；整轨按原位置铺，不插停顿；`$cue` 帧用 `onset_rule.py` 算成 `max(1, floor(onsetLocal) − 2) + d` 并写 `cueText` / `cueOnset` / `onsetLocal`；`$timer` 帧写 `timerDriven` 与 `timerLog`；`covers.json` 原样嵌进 `meta.covers`；字幕照脚本原字切。
-4. 期目录 `validate.py` + `python3 episodes/_shared/label_onset_strict.py --dir EPDIR`。判定条目见 [validate.md](validate.md)。
+下面 `S=episodes/_shared/storyboard`，`EX` 是期 spec 目录，`EP` 是期目录（`--episode-dir`；输入不在期目录时用 `--inputs MAP.json` 或 `--input 名=路径` 指过去，路径相对仓根）。都在仓根下跑 `python3 -B`。
+
+1. `python3 -B $S/make_covers.py --spec $EX/covers_spec.py --out covers.json`。三尺寸各自算框；记录 `layout` / `layoutReason`；BrowserChrome 写 `addressFit`。
+2. `python3 -B $S/layout.py --spec $EX/layout_spec.py --episode-dir EP [--inputs MAP.json] --out layout.json`。每镜元素的位置、文字、状态。帧号不写死，写成三种之一：`{"$cue": 词, "d": n}`（按起音），`{"$timer": 词, "d": n, "why": …}`（按画面节奏，从该词起算），或纯整数。波纹 `bornFrame` 写 `"@"` = 取所在状态帧。
+3. `python3 -B $S/build_sb.py --spec $EX/build_spec.py --episode-dir EP [--inputs MAP.json] --layout layout.json --covers covers.json --out storyboard.json`（`build-onsets.txt` 默认写在 `--out` 同目录，`--onsets-out` 可改）。读脚本、旁白、`words.json`、`voice.wav`、`layout.json`、`covers.json`，核对 spec `SHA` 里各输入的 SHA-256 前缀；整轨按原位置铺，不插停顿；`$cue` 帧用 `onset_rule.py` 算成 `max(1, floor(onsetLocal) − 2) + d` 并写 `cueText` / `cueOnset` / `onsetLocal`；`$timer` 帧写 `timerDriven` 与 `timerLog`；`covers.json` 原样嵌进 `meta.covers`；字幕照脚本原字切。
+4. `python3 -B $S/validate.py --spec $EX/validate_spec.py --episode-dir EP [--inputs MAP.json] --storyboard storyboard.json --covers covers.json [--report validate.txt]`（有错误退出码 1；通用检查在引擎里，期特有的在 spec `checks(v)`），再跑 `python3 -B episodes/_shared/label_onset_strict.py --storyboard storyboard.json --wav voice.wav --words-json words.json`（期目录齐全时 `--dir EPDIR`）。判定条目见 [validate.md](validate.md)。
 5. 冻结一次（见下）。
-6. `knoll-props.md`：仓内用 `python3 episodes/_shared/make_knoll_props.py --dir EPDIR`（骨架）或 `--spec SPEC.py`，加 `--require-frozen` 要求冻结副本存在（EP.14 范例 `docs/examples/knoll_props_spec.degradation.py`）。EP.14 备份里的同名期脚本会先断言冻结副本与 `storyboard.json` 逐字节相同。
+6. `knoll-props.md`：仓内用 `python3 episodes/_shared/make_knoll_props.py --dir EPDIR`（骨架）或 `--spec SPEC.py`，加 `--require-frozen` 要求冻结副本存在（EP.14 范例 `docs/examples/knoll_props_spec.degradation.py`）。只要 `storyboard.<sha8>.json` 存在，`make_knoll_props.py` 都会先断言它与 `storyboard.json` 逐字节相同。
 
-改任何一处（文字、坐标、帧）都改 `layout.py` / `make_covers.py`，再从第 1 步重跑，不手改 `storyboard.json`。
+改任何一处（文字、坐标、帧）都改期 spec（`layout_spec.py` / `covers_spec.py`），再从第 1 步重跑，不手改 `storyboard.json`。
 
 ### 冻结一次
 
