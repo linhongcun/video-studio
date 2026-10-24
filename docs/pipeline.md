@@ -98,6 +98,8 @@ EP.02 把整份分镜的全文 SHA-256 写死在 `episodes/https/remotion/script
 
 见 [validate.md](validate.md)。预检不过就改分镜或配音，然后回到第 5 步重新冻结。
 
+打勾顺序见 [qa.md](qa.md)（预检和成片审）。
+
 ## 7. 渲染
 
 见 [render.md](render.md)。参考实现：
