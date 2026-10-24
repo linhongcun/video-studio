@@ -6,6 +6,16 @@
 
 本仓没有 `share/RULES.md`。2026-10-16 那份团队规范里的冲突条已经写进 `docs/RULES.md` 的废止节。不要从根 `README.md` 的旧段落、`design.md`、`site-plan.md`、站点关于页，或各期 `plan.md` 里恢复「比喻优先」和「发布含快手」。
 
+## 提交署名
+
+2026-10-24 用户要求：后续由本机 Codex 创建的 Git 提交，保留原有主作者身份，在提交信息末尾空一行加入以下 trailer，以识别 Codex 参与：
+
+```text
+Co-authored-by: Codex <codex@openai.com>
+```
+
+Squash 合并生成的新提交也须保留该行；使用 GitHub merge API 时显式写入 `commit_message`。此约定从后续提交开始，不重写历史提交。
+
 ## 系列状态
 
 系列默认暂停。2026-10-24 用户先批准 #66 的 EP.15 重制与站点部署（v0.45.1），随后要求挑下一期，观看 #67 的 EP.16 第二版后批准合并主干、部署 GitHub 站点（v0.45.2）。两期只上站点；平台新发尚未恢复。详见 [docs/RULES.md](docs/RULES.md) 的 STATUS。
