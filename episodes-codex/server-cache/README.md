@@ -9,3 +9,7 @@
 Remotion：在remotion目录npm ci、npx tsc --noEmit、npm run covers、npm run render。正式编码用flock /tmp/video-studio-render.lock串行协调有限资源，单次渲染并发2。开发node_modules软链不提交；锁文件可独立安装。配乐Kevin MacLeod《Wallpaper》，CC BY 4.0，目标−16 LUFS。
 
 站点由root统一接入发布；本目录制作代理不修改episodes/。
+
+## 站点发布
+
+[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。

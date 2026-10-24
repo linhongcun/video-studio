@@ -11,3 +11,7 @@ source-sha256.json与verify-freeze.py核对实际输入；动态检查、成片�
 背景音乐：Kevin MacLeod《Wallpaper》，CC BY 4.0；复用仓内共享混音，成片目标−16 LUFS。check-inputs.py检验实际冻结输入的时序/字幕/哈希，verify-freeze.py检验输入字节。
 
 本地成片已完成并复核：2926帧，97.533秒。视频SHA-256 `8cb05987532571038b4b815b6837177613d33cfb8120b331f9bb62e48537d1ea`。检查执行范围、能力限制与实际编码证据见[qa-final.md](qa-final.md)、[qa-independent.md](qa-independent.md)、[render-result.json](render-result.json)。本制作代理未改站点、提交或发布。
+
+## 站点发布
+
+[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。

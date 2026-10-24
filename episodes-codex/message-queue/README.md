@@ -17,3 +17,7 @@
 最终视频video.mp4、三种封面、captions.srt供root接入同名站点slug。平台历史投稿不自动重发。
 
 独立实际编码图审结果见qa-independent-encoded.md；所有能力限制如实记在qa-final.md。
+
+## 站点发布
+
+[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。
