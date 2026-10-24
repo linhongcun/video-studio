@@ -1,22 +1,22 @@
-# EP.23 · 设计模式D01：策略模式新手版
+# EP.23 · 设计模式D01：策略模式设计思想修订
 
-制作issue [#163](https://github.com/linhongcun/video-studio/issues/163)，系列总览[#161](https://github.com/linhongcun/video-studio/issues/161)。用户2026-10-25明确授权按新手理解反馈重排视频并完成网站上线。
+本轮依据用户2026-10-25反馈：上一版过度讲函数和参数，偏语法；设计模式应讲与语言无关的思想，并要求更新经验教训。制作issue为#163，系列总览#161，原观看URL和firstRelease保持。
 
-## 当前内容
+## 当前主线
 
-《策略模式：结算怎样换一种算价办法？》采用13镜26句、四章，一笔原价100元的示例订单贯穿。先认识会员九折与活动八折两个函数，再明确传入函数本身、pricing本次对应所选函数、调用之后才产生结果。会员返回90元，重新从100元开始改传活动函数得到80元；只切换一次，优惠不叠加。
+《策略模式：结算怎样换一种算价办法？》为11镜22句，只讲结算流程、定价策略、选择三类职责。两种策略完成相同任务，按共同业务约定接收原金额、交回应付金额；结算把具体定价委托给已选策略。会员100元得90元，再重置原价只换活动得80元。重点是变化隔离、共同流程为何保留、独立维护边界和协作成本，不以算术或某语言机制代替模式定义。
 
-观众前置为简单函数调用与条件判断，函数可以作为参数在片中补齐。三问为为什么考虑拆分、具体怎样替换和执行、何时值得用。七五折变更、新客注册、类型和校验留在文章拓展。依据与新手检查问题见[参考拆解](../../docs/strategy-beginner-reference.md)；真实帧数和媒体SHA以qa-timing.json、render-result.json与release.md为准。
+视频无代码或语言语法；具体Python实现、函数绑定与校验仅在配套文章可选附录。现有demo记录证明教学金额与该实现，不定义模式。新稿、真实时序和媒体SHA以本轮script/QA/release为准；不能把旧版已通过的程序和音画检查当作新方向已通过。
 
-## 历史边界
+## 历史与经验
 
-v0.52.0首发16镜，v0.54.1仅补三处章节入口。两版技术报告分别保留在revisions/v0.52.0与revisions/v0.54.1；原媒体、音轨和工程均可从各自不可变Git tag恢复。本轮完整重做，不使用旧三镜拼接结果或旧版局部检查给新版结论。历史revise_chapter_bridges.py仍保留，但不是当前重建入口。
+v0.52.0首发、v0.54.1章节衔接版、v0.54.4语言实现讲解版的报告分别在对应revisions目录；原媒体、音轨和源码可从各自不可变Git tag恢复。所有旧takes原位保留，新稿使用idea后缀，必要idea2。本轮完整重做，不使用历史局部拼接入口。
 
-## 真实配音与装配
+用户反馈已写入RULES设计模式教学节、pipeline思想审查、L030及项目记忆，并纠正L027/S016把函数传参当核心目标的适用范围。经验记录须区分用户指导、独立检查和真实观看效果。
 
-共享实现为episodes/_shared/voice及episodes-codex/_shared，不复制TTS、裁尾、铺轨、起音或混音算法。当前新take使用beginner后缀，旧a/b/c不覆盖。候选选择、文本一致性、信号边界与实际能力限制见voice下本轮报告。
+## 配音、装配和冻结
 
-从仓根用已选定录音重建，无需再次请求TTS：
+沿用episodes/_shared/voice的prep/gen/build，以及共享assemble_sentence_episode、place_v2、label_onset_strict、check_sentence_episode，不复制TTS、起音、铺轨或混音算法。重建已有选定takes无需再次请求TTS：
 
 ```sh
 python3 episodes/_shared/voice/build.py --dir episodes-codex/strategy-pattern
@@ -26,30 +26,17 @@ python3 episodes/_shared/label_onset_strict.py --dir episodes-codex/strategy-pat
 python3 episodes-codex/_shared/check_sentence_episode.py episodes-codex/strategy-pattern
 ```
 
-词兼容字段使用句包络，不是逐字时间戳。首次策略模式位于04第一句，以共享声学起音对齐；缺失的逐字ASR或全片人工听辨不得写成通过。
+词兼容字段是句包络，不是逐字识别。04第一句策略模式按共享声学起音出现至少63帧；无可用ASR/听辨时如实写边界，不称读音或全片听辨通过。
 
-## 动画预检与冻结
-
-本期remotion下运行npx tsc --noEmit，再以scripts/qa.mjs生成全13镜真实时序预演；06–10需要连续无字幕过程，检查尚未执行、参数绑定、执行返回、清旧结果及同原价重算。报告必须含源SHA、provisional:false和最终hideSubtitles/showSubtitles参数，实际图像仍须查看。
-
-根任务与独立复核确认生产输入停写后，从仓根冻结：
+真实时序预检前运行npx tsc --noEmit；既有qa.mjs生成全11镜无字幕图及03/06/07关键连续片及05/08状态图，检查最终props、非占位、COPYFIT和实际中间态。思想审查须仅凭本片解释谁选择、谁委托、谁计算、何种约定使替换成立。生产源停写且独立预检通过后：
 
 ```sh
 python3 episodes-codex/strategy-pattern/freeze.py
 python3 episodes-codex/strategy-pattern/freeze.py --verify
 ```
 
-冻结包含选定新录音、真实SB/words、生产源码和共享实现、本期可执行demo及实际使用的mjs脚本；不再自动依赖历史chapterbridge/out/base文件。原封面三尺寸内容仍符合主题，复用已上线原件并核对完整SHA。
+## 编码与上线
 
-## 完整编码与发布
+本期remotion下用原npm run render完整编码，短TMPDIR=/workspace/strategy-tmp与/tmp/video-studio-render.lock串行锁；共享Wallpaper混音目标-16LUFS。封面原件内容仍符合规则独立和流程稳定，核对完整SHA后复用。冻结后源变更须停止编码并重新检查/冻结。
 
-正式渲染由本期remotion/package.json调用Remotion和共享Wallpaper混音工具。使用短TMPDIR=/workspace/strategy-tmp和/tmp/video-studio-render.lock；输入变化必须停止当前渲染、重新检查并冻结。随后执行：
-
-```sh
-python3 episodes-codex/strategy-pattern/freeze.py --verify
-python3 episodes-codex/_shared/check_encoded_episode.py episodes-codex/strategy-pattern
-```
-
-正式MP4还要完整解码、实际关键帧与跨镜过程复核。站点复制同一媒体及字幕/章节数据，保留slug、四个章ID和firstRelease v0.52.0。合并、Release后Pages部署，再执行verify-online.py的8个canonical普通GET，流式完整核对视频、海报、VTT和章节/系列/RSS/更新日志；核验通过后completed关闭#163。平台新发未授权。
-
-配乐Kevin MacLeod《Wallpaper》，CC BY4.0。最终执行结果与未完成能力以实际QA/release记录为准，不将制作验收当成用户已观看认可。
+正式片执行共享check_encoded、完整解码/PTS、实际成片字幕与职责过程复核，再复制同一媒体接入网站。合并、Release后Pages部署、8个canonical普通GET流式完整核对视频/海报/VTT及四章/目录/源码/系列/RSS/更新日志，通过后completed关闭#163。平台未新发；实际结果见release.md和本轮报告。

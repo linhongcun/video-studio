@@ -54,7 +54,7 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 ## 设计模式
 
-独立系列每种模式制作一期，围绕“为什么需要、解决什么、什么时候值得用”展开，按具体内容选择图文、代码与动态表达。首期为[EP.23 · D01《策略模式：结算怎样换一种算价办法？》](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)，约2分43秒；同一100元订单只演会员、活动两种办法，逐步解释传入函数、参数对应、调用后才产生结果，配套文章提供完整可运行代码及资料。制作与检查见[本期工程](episodes-codex/strategy-pattern/README.md)，选题池见[23种模式总览 #161](https://github.com/linhongcun/video-studio/issues/161)。
+独立系列每种模式制作一期，围绕“为什么需要、解决什么、什么时候值得用”展开，按具体内容选择图文、代码与动态表达。首期为[EP.23 · D01《策略模式：结算怎样换一种算价办法？》](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)，约2分27秒；同一100元订单展示稳定流程与变化策略，围绕共同约定、外侧选择、委托和独立维护解释设计思想；具体语言实现放在配套文章可选附录。制作与检查见[本期工程](episodes-codex/strategy-pattern/README.md)，选题池见[23种模式总览 #161](https://github.com/linhongcun/video-studio/issues/161)。
 
 ## LeetCode · 算法可视化
 

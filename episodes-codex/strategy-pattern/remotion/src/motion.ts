@@ -6,25 +6,22 @@ export const at=(s:Shot,sentence:number,ratio:number)=>{
 };
 type Window=[number,number,number];
 const WINDOWS:Record<string,Record<string,Window>>={
- question:{member:[0,.08,.72],campaign:[1,.08,.72]},
- 'inline-rules':{activity:[0,.08,.75],motive:[1,.08,.75]},
- 'member-method':{input:[1,.04,.32],result:[1,.42,.78]},
- 'two-strategies':{campaign:[1,.08,.7]},
- 'choose-function':{selected:[1,.05,.35],explained:[1,.42,.8]},
- 'function-not-result':{emphasis:[0,.08,.75],parameter:[1,.06,.7]},
- 'parameter-binding':{amount:[0,.06,.75],function:[1,.06,.7]},
- 'execute-member':{invocation:[0,.06,.7],calculation:[1,.05,.42],returned:[1,.52,.85]},
- 'switch-function':{cleared:[1,.03,.25],replaced:[1,.33,.65]},
- 'execute-campaign':{invocation:[0,.06,.7],calculation:[1,.05,.42],returned:[1,.52,.85]},
- 'pattern-recap':{responsibility:[0,.05,.75],definition:[1,.06,.7]},
- 'when-to-use':{member:[1,.06,.38],campaign:[1,.45,.75]},
- 'cost-recap':{direct:[0,.06,.7],cost:[1,.06,.75]},
+ 'same-task':{member:[0,.05,.55],campaign:[0,.58,.94]},
+ 'mixed-pricing':{details:[0,.05,.72],maintenance:[1,.06,.72]},
+ 'separate-pricing':{separate:[1,.05,.83],retained:[1,.86,.98]},
+ 'shared-contract':{contract:[0,.06,.75],examples:[1,.06,.75]},
+ 'choose-strategy':{selection:[1,.06,.7]},
+ 'member-delegation':{request:[0,.1,.85],calculation:[1,.02,.22],returned:[1,.28,.68],used:[1,.73,.96]},
+ 'swap-strategy':{cleared:[0,.45,.75],selection:[0,.78,.98],request:[1,.04,.3],calculation:[1,.34,.46],returned:[1,.51,.78],used:[1,.83,.97]},
+ 'stable-collaboration':{steps:[0,.04,.9],contract:[1,.06,.75]},
+ 'maintenance-boundary':{scope:[1,.05,.78]},
+ 'cost-boundary':{reading:[0,.04,.94],direct:[1,.08,.75]},
+ 'idea-recap':{roles:[0,.04,.95],idea:[1,.06,.8]},
 };
 export const beat=(s:Shot,f:number,key:string)=>{
  const window=WINDOWS[s.visualType]?.[key];
  if(!window)throw new Error('Unknown motion beat: '+s.visualType+'/'+key);
- const [sentence,start,end]=window,a=at(s,sentence,start),b=at(s,sentence,end);
- const p=Math.max(0,Math.min(1,(f-a)/Math.max(1,b-a)));
+ const [sentence,start,end]=window,a=at(s,sentence,start),b=at(s,sentence,end),p=Math.max(0,Math.min(1,(f-a)/Math.max(1,b-a)));
  return p*p*(3-2*p);
 };
 const first=(s:Shot,key:string,limit=.99,strict=false)=>{
@@ -34,19 +31,17 @@ const first=(s:Shot,key:string,limit=.99,strict=false)=>{
 export const events=(s:Shot):[string,number][]=>{
  const after=(name:string,key:string,limit=.99,strict=false):[string,number]=>[name,first(s,key,limit,strict)];
  const chosen:Record<string,()=>[string,number][]>= {
-  question:()=>[after('member-example','member'),after('campaign-example','campaign')],
-  'inline-rules':()=>[after('two-methods-inside-checkout','activity'),after('independent-maintenance-motive','motive')],
-  'member-method':()=>[['second-sentence-start',at(s,1,0)],after('amount-enters-member','input'),after('member-example-returns-ninety','result')],
-  'two-strategies':()=>[after('campaign-method-visible','campaign')],
-  'choose-function':()=>[['new-call-shown',at(s,1,.03)],after('member-chosen-as-argument','selected'),after('function-explained','explained')],
-  'function-not-result':()=>[after('member-function-emphasized','emphasis',.25,true),after('still-no-result','parameter')],
-  'parameter-binding':()=>[after('amount-correspondence','amount'),after('pricing-binding-starts','function',0,true),after('pricing-points-to-member','function')],
-  'execute-member':()=>[after('member-invocation-identified','invocation'),after('member-calculated','calculation'),after('ninety-returned','returned')],
-  'switch-function':()=>[['second-sentence-start',at(s,1,0)],after('old-ninety-cleared','cleared'),after('pricing-replaced-by-campaign','replaced',.5,true)],
-  'execute-campaign':()=>[after('campaign-invocation-identified','invocation'),after('campaign-calculated','calculation'),after('eighty-returned','returned')],
-  'pattern-recap':()=>[after('checkout-responsibility','responsibility',.5,true),after('strategy-responsibility','definition',.35,true)],
-  'when-to-use':()=>[after('member-maintenance-emphasis','member',.25,true),after('campaign-maintenance-emphasis','campaign',.25,true)],
-  'cost-recap':()=>[['cost-discussion-starts',at(s,1,.03)],after('direct-conditions','direct'),after('reading-cost','cost')],
+  'same-task':()=>[after('member-task-example','member'),after('campaign-task-example','campaign')],
+  'mixed-pricing':()=>[after('pricing-details-inside-flow','details',.1,true),after('maintenance-enters-common-flow','maintenance',.2,true)],
+  'separate-pricing':()=>[['second-sentence-start',at(s,1,0)],after('pricing-separation-starts','separate',0,true),after('pricing-separation-complete','separate'),after('pricing-duty-retained','retained')],
+  'shared-contract':()=>[after('common-contract-visible','contract'),after('same-task-different-results','examples')],
+  'choose-strategy':()=>[['selection-role-appears',at(s,1,.03)],after('member-selected-without-pricing','selection',.5,true)],
+  'member-delegation':()=>[after('original-amount-delivered','request'),after('member-pricing-calculated','calculation'),after('ninety-returned','returned'),after('common-flow-continues','used',.3,true)],
+  'swap-strategy':()=>[after('old-ninety-cleared','cleared'),after('campaign-selected','selection'),after('original-hundred-delivered','request'),after('campaign-pricing-calculated','calculation'),after('eighty-returned','returned'),after('same-flow-continues','used',.3,true)],
+  'stable-collaboration':()=>[after('common-steps-reviewed','steps'),after('flow-depends-on-contract','contract',.2,true),after('algorithm-details-remain-outside','contract',.4)],
+  'maintenance-boundary':()=>[['second-sentence-start',at(s,1,0)],after('member-internal-maintenance-scope','scope',.2,true)],
+  'cost-boundary':()=>[after('collaboration-reading-cost','reading',.65),['simple-direct-alternative',at(s,1,.04)]],
+  'idea-recap':()=>[after('strategy-role','roles',.33),after('settlement-role','roles',.66,true),after('design-idea-recap','idea')],
  };
  return [...Object.entries(s.cueFrames?.labels??{}).map(([name,frame])=>['label:'+name,Number(frame)] as [string,number]),...(chosen[s.visualType]?.()??[])];
 };

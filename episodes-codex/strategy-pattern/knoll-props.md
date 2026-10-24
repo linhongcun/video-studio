@@ -1,23 +1,17 @@
-# 制作说明：策略模式新手版
+# 制作说明：策略模式设计思想版
 
-本轮为13镜26句、四章的完整教学重排，全新自然配音和动画。实际时长由共享句级装配输出，不变速压缩。当前布局和因果顺序见visual-direction.md；旧16镜/三镜拼接报告保留在revisions/v0.54.1，仅作历史。
+当前11镜22句、四章，完整重排为语言无关的职责与协作，实际时长由自然配音和必要动作停留决定。旧v0.54.4语法版的报告与时序存于revisions/v0.54.4，媒体/音轨/工程由不可变tag恢复；不复用旧版已通过的思想结论。
 
-## 生产输入
+## 内容与来源
 
-使用episodes/_shared/voice的prep/gen/build及共享assemble_sentence_episode、place_v2、label_onset_strict和check_sentence_episode，不另写配音整轨或起音算法。选定新take后，voice.wav与remotion/public/audio/voice.wav必须为同一实体内容；storyboard/words/captions均基于真实句级时序。
+按script/plan及visual-direction构图：稳定结算流程、独立定价策略、外侧选择，原价100元先会员90元，再重置选活动80元。共同业务约定允许不同实现替换，结算把变化的定价交给所选策略；图示对象和数据保持不同身份。无代码、语言标识、函数参数、分单位或密集类图。首术语策略模式在04第一句，以共享声学起音显示至少63帧。
 
-本轮只有会员/活动两个函数，输入10000分（100元），输出9000/8000分（90/80元）。参数与函数身份由demo/beginner-evidence.json的实际执行观察支撑。核心逻辑摘录显式标注省略校验，完整现有demo保留在图文。
+共享实现仍用episodes/_shared/voice与episodes-codex/_shared的prep/gen/build/assemble/place/strict/check，不另写配音整轨、起音或混音算法。新take后缀idea，必要idea2；旧beginner/a/b/c保留。字幕逐字对应真实录音源文本，词兼容包络不冒充逐字识别。
 
-## 视觉与品牌
+## 预检、编码与复核
 
-页身引用共享深色主题，中文Noto Sans CJK SC、代码Noto Sans Mono，右上IT小村、片尾IT小村·原创。规则身份与金额结果始终区分；参数解释期间停止金额动画。章节id保留why/delegate/change/boundary及旧正文URL。首术语策略模式位于04第一句，按共享声学起音显示至少63帧。
+npx tsc检查后，用既有qa.mjs生成全11镜真实时序无字幕预演和关键03/06/07连续片及05/08状态图。报告记录最终props、源SHA、provisional:false和COPYFIT；人员实际查看关键中间态。共同流程与策略来回动作完整，尤其06结果返回后继续、07先重置再替换、08关系回收、09前提限定。
 
-封面标题和同一100元/规则可换流程稳定的内容仍适用，沿用已上线三尺寸原件及完整SHA；本轮不重新生成不同的封面。正文代码最多两处布局，不含额外代码附录。无比喻、假窗、装饰进度条或密集类图。
+生产源停写、思想与动态预检闭合后冻结，再以短TMPDIR=/workspace/strategy-tmp和/tmp/video-studio-render.lock执行原npm run render；共享Wallpaper混音目标-16LUFS。三尺寸原封面短文案仍符合‘把变化的规则独立出来’，复用完整SHA相同原件，不重复制作。
 
-## 预检与编码
-
-本期remotion下运行npx tsc --noEmit；用scripts/qa.mjs生成全13镜真实时序图与06–10关键连续无字幕片。实际检查composition.props的hideSubtitles:true/showSubtitles:false、源SHA、COPYFIT与中间动作，不能只看命令参数。
-
-全体生产输入停写、编辑和动态检查闭合后冻结，正式渲染使用TMPDIR=/workspace/strategy-tmp与/tmp/video-studio-render.lock。执行npm run render调用既有Remotion编码和共享Wallpaper混音，目标-16 LUFS。冻结后若生产源变化，停止排队/编码并重新检查和冻结。
-
-正式MP4完成共享check_encoded_episode、完整解码、真实帧/过渡及字幕核对，再复制同一媒体接入站点。发布按持续授权合并、Release后部署，普通canonical GET流式完整哈希核对视频/海报/VTT和章节/系列/RSS/更新日志，随后completed关闭#163。执行范围和ASR/听辨能力限制如实记录。
+最终执行冻结核对、shared check_encoded、完整解码/PTS、实际成片字幕与过程复核，再复制同一媒体接入网站。保留slug/四章ID/firstRelease，合并Release后部署并以canonical普通GET流式完整核对视频/海报/VTT及章目录/系列/RSS/更新日志；通过后completed关闭#163。能力限制如实记录，不将独立审读当作新手实验或用户认可。平台未新发。

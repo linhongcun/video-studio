@@ -1,34 +1,33 @@
-# 策略模式新手版：最终本地交付检查
+# 策略模式设计思想版：最终本地交付
 
-2026-10-25（北京时间）。用户授权据新手理解反馈调整并上线；本报告只对应13镜26句的新手版，旧16镜与章节桥接报告保留于revisions/v0.52.0和revisions/v0.54.1。
+2026-10-25（北京时间）。本轮根据用户“偏语法，应讲与语言无关思想”的反馈，完整重排为11镜22句，0代码/语言语法画面。当前本地验收通过，可按v0.56.1发布；线上结果须Release后实际部署和核验，再补发布记录。
 
-## 结果
+## 内容与思想关口
 
-本地制作、真实时序、独立正式成片与站点验收通过。v0.54.4已由PR #216合并，经Release后Pages部署40113587396成功上线；线上8个canonical普通GET于2026-10-25T00:58:39.395227+08:00一次通过，完整视频/海报/VTT与本地一致。实际结果见release.md与online-verification.json；制作与线上检查不等于用户观看认可。
+只用结算流程、定价策略、外侧选择三类职责，解释同一任务的变化隔离、共同业务约定、结算委托、一次策略替换，以及约定不变时的维护边界和协作成本。两次独立原价100元得到会员90/活动80元；思想解释不依赖函数、参数、类等写法。具体Python实现只在图文最后可选附录，不以相同签名或独立函数本身定义模式。
 
-- 视频：4895帧，画面163.1667秒、容器163.178秒，1920×1080、30fps、H264、48kHz AAC。
-- 文件：8,674,537字节；完整SHA-256为a7056ae8ccfe6783063b6c679174fa5d15ab410cac0628fe5de12e7fcc9e6696。
-- 共享混音实测-16.0LUFS、-3.7dBTP；完整解码、全部4895显示PTS、视频DTS/AAC包连续性通过，见render-result.json、mix-report.json、qa-encoded-media.json。
-- 137项生产输入冻结核对通过，26条新录音，未沿用旧13镜PCM或旧拼接基线。主WAV SHA为1abd9781d2b417644bd2671d753629aa6fcb284cbc942a0cb7210b9e33dba2fa。
+最终稿SHA2544193fefb22aeb9b161c8c83f86910089066d1a1a3d3e51cad177e2928970d经过根逐句审读与独立六项思想关口。真实时序预检119图，抽离/委托返回/替换过程43图和3支连续无字幕MP4，COPYFIT零、非占位、隐藏字幕最终props正确。根实际看6张all及3张同源快检；独立实际看32张all，从三支实际MP4自行精确抽17中间帧。范围见qa-motion.md、qa-root-ideas-preflight.json和qa-ideas-independent.md。
 
-## 教学结构与实际画面
+正式MP4上，独立精确抽并实际看19张1080p帧，有限核对13条不同字幕；根另抽15并实际看9张，覆盖首帧、共同约定、外侧选择、90返回、清旧结果、80返回、稳定关系、维护前提及结尾，见qa-root-ideas-encoded.json及revisions/ideas/frames。均无发布阻塞，不将有限复核称为逐帧人工观看或用户认可。
 
-只讲会员/活动两种办法，100元分别得90/80元。先建立一个具体函数再命名策略；补齐传函数而非结果、pricing本次关联所选函数、调用以后才计算，换一次办法时先清旧90并从100元重算。改价、新客注册和完整校验移到配套图文拓展。
+## 媒体与来源
 
-根与独立质检先按六个理解问题审读，随后用最终真实时序生成130全片预演图、53关键图和06–10五段无字幕连续编码。COPYFIT零、无临时时序、最终字幕隐藏参数正确；独立实际查看全13镜25图、从五段MP4自行提取16中间态。根另实际查看6张最终源预演图。范围和实际源SHA见qa-motion.md、qa-motion-samples.json及qa-teaching-beginner.md。
+- 4410帧、画面147.000秒、容器147.008秒，1920×1080 H264/30fps，48kHz AAC，7,927,803字节。
+- 视频完整SHA-256：9293cf4d66319a44ac7808f5f75d8bdd1da3a3cec627b8da4d57f802466a1a57。
+- 实测-16.0LUFS、-3.8dBTP；125项冻结、完整解码、全部显示PTS/视频DTS/AAC包连续性通过，见render-result.json和qa-encoded-media.json。
+- 新音轨WAV SHA17bee932f69a4127fa11efe39daca06ad1647448af74b13f6f9434fbf4c2746b，22条新录音，旧录音原位保留。实际unmixed AAC解码与冻结WAV相关性0.9999830097、offset0、gain0.9989996421；22句最小相关性0.9999758676，排除384尾部填充样本。见qa-encoded-voice-content.json，此为内容一致性，不是识别或听辨。
+- 三尺寸原封面完整SHA保持，短文案仍符合规则独立与流程稳定，见qa-ideas-cover-reuse.json。旧v0.54.4函数版报告存于revisions/v0.54.4，不给本轮结论。
 
-正式混音MP4上，根精确抽13帧并实际查看8帧，覆盖首帧、选择、未算、参数对应、90返回、清旧、80返回及末尾成本；完整索引与原图见qa-root-beginner-encoded.json、revisions/beginner/frames。独立质检另从正式1080p文件精确抽取并实际查看16帧，核对新章入口、函数身份、计算/返回顺序、原价重算、字幕与结尾，无发布阻塞。实际范围见qa-teaching-beginner.md及当前qa-independent.md，不声称逐帧人工看完整片。
+## 网站与经验
 
-预检发现并修复的Python前导缩进被pre-line吞掉、顶栏章名未传入问题，均在最终预检与正式编码前关闭；本轮所有最终检查对应修订后的源。三个原封面保持完整SHA一致，见qa-beginner-cover-reuse.json，不重复生成。
+生产构建及两视口验收通过：1440/390各4章共8次实际seek及随后播放，最大误差6.67e-7秒，readyState4/无error，时间实际前进；22条VTT均载入，播放器147.008秒，无整页横向溢出。章帧0/809/1611/3118，源码/封面/系列/RSS和保留32个已发布页面均通过。记录见episodes/strategy-pattern/site-ideas-{copy-manifest,static-check,browser-check}.json，VTT SHA7bb7e3be4931c7df7ca7666b6d6a937fe242d885b13eeadd8cb225064ff7ce30。
 
-## 网站
+保留title、slug、四章ID、publishedAt和firstRelease v0.52.0；更新日为北京时间2026-10-25。RULES/pipeline增加思想与实现分层，L030新增语法化教训，L027/S016纠正旧目标，S017记录先检查设计关系的实践及验证边界。
 
-站点副本使用同一视频、文章、SB/words/script/research，firstRelease仍v0.52.0，slug和四章ID保留。新标题为《策略模式：结算怎样换一种算价办法？》，updatedAt为2026-10-25，版本0.54.4。
+完整两视口播放检查发生在0.55.1候选阶段。合并并行任务最新v0.56.0主干后，本期版本改为0.56.1，site/src模板及本片媒体/文章均未变；最终另做生产构建、静态元数据和单视口footer/时长/22cue轻量复验，未把它假称重跑了8次seek。原始与追加记录均保留在site-ideas报告中。
 
-生产构建及静态检查通过。1440/390两视口各四章共8次真实seek及随后播放均通过，最大误差6.67e-7秒，readyState4、无video.error、时间实际前进。26条VTT载入，网页播放器时长163.178秒，与画面差0.011秒；整页无横向溢出，新图无需横向滚动，封面、四章、源码、首页/系列/RSS通过。证据位于episodes/strategy-pattern/site-beginner-{copy-manifest,static-check,browser-check}.json。VTT完整SHA为a47f04c6a0d9ec4a4cf6790bd33f503ada13ba1e31e97171dc42179b81ca4a25。
+## 限制
 
-## 能力与发布边界
+当前无可用逐字ASR或直接全片音频听辨，文本/PCM/信号、声学起音、响度和实际音轨相关性均不冒称听辨。候选01第二句0.70秒、07第二句0.55秒低信号停顿作为自然停顿复核标记保留，见voice/audio-qa.json和idea报告，不称已确认漏字或断音。
 
-配音候选文本/PCM及共享句边界、声学首词、整轨/混音测量完成；保留一条候选0.61秒低信号停顿复核标记，整轨测量与范围见voice/audio-qa.json及beginner报告。当前无可用逐字ASR/直接音频听辨，未把上述检查写成逐字识别或完整人工听辨。
-
-独立六问与画面复核支持本轮编辑判断，不是新手理解实验，也不代表用户已观看认可新版。平台新发未执行。GitHub合并、Release后部署、线上完整SHA与issue关闭由release.md记录真实结果。
+思想审读、动画和媒体检查不是新手理解实验；用户尚未观看本版。平台未新发。GitHub合并、Release后Pages部署、线上8个canonical普通GET完整文件核对及issue关闭由release.md记录实际结果。
