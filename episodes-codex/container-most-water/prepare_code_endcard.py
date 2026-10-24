@@ -17,7 +17,7 @@ assert card['from'] > max(v['wavEnd'] for sc in sb['scenes'] for sh in sc['shots
 last['codeCardFrom'] = card['from'] - last['from']
 last['subtitles'][-1]['to'] = last['codeCardFrom'] - 1
 last['subtitles'][-1]['duration'] = last['subtitles'][-1]['to'] - last['subtitles'][-1]['from'] + 1
-last['timing']['holdReason'] = 'Original closing retained; final15 seconds show a complete static Python solution without narration/captions.'
+last['timing']['holdReason'] = f"Original closing retained; final{card['durationInFrames'] / sb['meta']['fps']:g} seconds show a complete static Python solution without narration/captions."
 for field in ['codeSource', 'displaySource']:
     card[field + 'Sha256'] = hashlib.sha256((EP / card[field]).read_bytes()).hexdigest()
 sb['meta']['unvoicedEndCard'] = card
