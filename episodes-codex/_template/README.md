@@ -13,7 +13,7 @@
 1. 按 [docs/research-template.md](../../docs/research-template.md) 写公开出处。片中一条主线；多出来的事实只进文章。
 2. 照 `episodes/degradation/script.md`、`article.mdx`、`pronunciation.md` 的结构写这三份。不要先写比喻。
 3. 照 [docs/storyboard-schema.md](../../docs/storyboard-schema.md) 写 `storyboard.json` 和 `covers.json`。制作说明从 [docs/knoll-props.template.md](../../docs/knoll-props.template.md) 抄一份再填，写法对照 [docs/examples/knoll-props.degradation.md](../../docs/examples/knoll-props.degradation.md)。页型从 `episodes/degradation/remotion/src/components/` 里已有的组件选，不要新造假应用窗。
-4. 用 [docs/voice.md](../../docs/voice.md) 的 `mimo_say.py` 逐句合成。整轨、`words.json` 和 `voice/shot_frames.json` 的铺轨脚本不在本仓，缺了就停。整轨在手之后：`python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole`（整轨放第 0 帧，校验后原样复制到 `remotion/public/audio/voice.wav`，实体文件）。
+4. 配音按 [episodes/_shared/voice/README.md](../../episodes/_shared/voice/README.md)：`prep.py` → `cue_tests.py` → `gen.py`（要 `MIMO_API_KEY`）→ 选 take 与听辨（人或代理判断，写 `voice/picks.json`）→ `sh episodes/_shared/voice/run.sh EPDIR`（`selfcheck` 退出码 1 就停）。整轨在手之后：`python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole`（整轨放第 0 帧，校验后原样复制到 `remotion/public/audio/voice.wav`，实体文件）。
 5. 制作说明：`python3 episodes/_shared/make_knoll_props.py --dir EPDIR`（或 `--spec`）。冻结 SHA-256，跑 `python3 episodes/_shared/label_onset_strict.py --dir EPDIR`（退出码 1 即未过），再做 [docs/validate.md](../../docs/validate.md) 的其余预检，按 [docs/render.md](../../docs/render.md) 渲染。
 6. Nolan 与 Deming 审成片，村长 widget 批准之后，把站点需要的 `meta.json`、`article.mdx`、`video.mp4`、封面放进 `episodes/<slug>/`，按 [docs/publish.md](../../docs/publish.md) 发版。
 

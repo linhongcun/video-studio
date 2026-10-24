@@ -53,15 +53,15 @@ degradation 的脚本写明旧比喻作废、一条主线、术语在口播到�
 
 交付物：`remotion/public/audio/voice.wav`、`words.json`，以及分镜里每个镜头的 `voice` / `timing`。细节见 [voice.md](voice.md)。
 
-本仓能直接调用的合成命令只有逐句 TTS：
+逐句 TTS：
 
 ```sh
 python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --out /tmp/line.wav --voice 冰糖 --gap 0.28 --segments /tmp/line.json
 ```
 
-密钥读环境变量 `MIMO_API_KEY`，或 `--env` 指向的文件（默认 `/workspace/video-studio/.mimo.env`，不在仓库里）。不要把密钥写进仓库。
+密钥读环境变量 `MIMO_API_KEY`，或 `--env` 指向的文件（默认 `/workspace/video-studio/.mimo.env`：工作区根目录下、已被 `.gitignore` 忽略的文件）。不要把密钥写进仓库；`episodes/_shared/tests/secret_scan.py` 会拦。
 
-把逐句 wav 铺成整轨、写 `words.json`、写 `voice/shot_frames.json` 的脚本仍不在本仓：`voice/build.py`（逐句 −21 LUFS，镜内间隔 0.35 秒、镜间 0.70 秒，句前 0.30 秒、句尾 0.60 秒，每镜至少 225 帧，整轨 −16 LUFS，真峰值限制）、`asr.py` / `asr_full.py`（faster-whisper medium）、`onsets.py`、`lastword_fix.py`、`cues_rule.py`。这些产出 `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`。缺了就停，不要新写同名文件顶上。铺轨完成前不要渲染成片。
+从脚本到整轨的脚本在 `episodes/_shared/voice/`，用法见那里的 `README.md`。顺序：`prep.py`（`voice/sents.json`）→ `cue_tests.py`（`voice/cue_tests.json`）→ `gen.py`（TTS takes，结果每次不同）→ `take_asr.py` / `score.py` / `take_sandhi.py` / `take_probe.py` 选 take、改送模文本，必要时 `pitch_edit.py` + `splice_edit.py`，写 `voice/picks.json` 和 `voice/substitutions.md` → `sh episodes/_shared/voice/run.sh EPDIR`（`build.py`：逐句 −21 LUFS，镜内间隔 0.35 秒、镜间 0.70 秒，句前 0.30 秒、句尾 0.60 秒，非末镜至少 225 帧，整轨 −16 LUFS，真峰值限制；`asr.py` / `asr_full.py`：faster-whisper medium；`onsets.py`、`lastword_fix.py`、`cues_rule.py`、`shot_frames.py`、`selfcheck.py`、读音检查）。产出 `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`。参数默认即 EP.14 的值，按期改写 `voice/params.json`。选 take 和听辨（读音、变调、`selfcheck.log` 里的 ASR 不一致）要人或代理判断，脚本不替你判。`selfcheck.py` 退出码 1 就停。每镜旁白以 。？！ 结尾：跨镜的一句 `onsets.py` 处理不了。铺轨完成前不要渲染成片。
 
 整轨已经在手、并且是 EP.05 起那种整轨放在第 0 帧时：
 

@@ -42,7 +42,7 @@ EP.14 之后暂停。恢复之前不要开新期，不要从模板复制工程�
 | `episodes-codex/` | 现行制作目录。本仓还没有这一套工程，只有 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
 | `*-backup/` | 各角色备份。本仓没有这些目录 |
 | `share/` | 本仓没有。规范不要写回这里 |
-| `episodes/_shared/` | 页身色、水印规范、混音、TTS、旧的共享封面工程，以及 `onset_rule.py`、`label_onset_strict.py`、`place_v2.py`、`make_knoll_props.py` |
+| `episodes/_shared/` | 页身色、水印规范、混音、TTS、旧的共享封面工程，以及 `onset_rule.py`、`label_onset_strict.py`、`place_v2.py`、`make_knoll_props.py`、`voice/`（配音整轨） |
 | `docs/` | 下面这些手册。制作说明模板是 `docs/knoll-props.template.md` |
 | `site/` | Astro 站点。`site/package.json` 的 `version` 是三段式版本号 |
 | `covers/cover-spec.json` | 只给共享封面工程用，不含 degradation |
@@ -67,6 +67,7 @@ EP.14 之后暂停。恢复之前不要开新期，不要从模板复制工程�
 - 把讲解表、图、流程图塞进浏览器壳。浏览器壳只给真网页、地址栏和 DevTools。
 - 大面积纯白页身。页身色用 `episodes/_shared/theme/pageTheme.ts` 的 `pageBg` / `pageInk`。
 - 新发快手或 X，或把平台链接发到群里。
-- 编造本仓没有的脚本。整轨仍缺 `voice/build.py`、`asr.py`、`asr_full.py`、`onsets.py`、`lastword_fix.py`、`cues_rule.py`（产出 `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`）。碰到就停，不要新写同名文件顶上。
+- 编造本仓没有的脚本，或在期目录另写一份配音整轨脚本。配音整轨用 `episodes/_shared/voice/`（产出 `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`）；参数改 `voice/params.json`，不要改脚本里的数。
 - 另存一份起音算法。唯一实现是 `episodes/_shared/onset_rule.py`。`episodes/_shared/label_onset_strict.py` 只 import 它。冻结分镜里的 `episodes-codex/_shared/onset_rule.py` 是旧路径。期目录不要复制；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
 - 把 `episodes/*/validate.py` 里的「画面不出数字 / 不出英文」当成现行检查。那些脚本还依赖本仓没有的 `episodes/_audit/`。
+- 把密钥、token、cookie 写进仓库或日志。TTS 密钥只来自环境变量 `MIMO_API_KEY`（或 `mimo_say.py --env` 指向的已忽略文件）；提交前跑 `python3 episodes/_shared/tests/secret_scan.py`。
