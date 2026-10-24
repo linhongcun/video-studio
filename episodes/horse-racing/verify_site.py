@@ -120,6 +120,9 @@ def main() -> None:
             playback = page.locator('video').evaluate('video => ({time: video.currentTime, paused: video.paused, error: video.error?.code ?? null})')
             assert playback['time'] > 0.1 and not playback['paused'] and playback['error'] is None
             page.locator('video').evaluate('video => video.pause()')
+            # The existing mobile player releases its sticky state three seconds
+            # after pause. Capture the normal page only after that transition.
+            page.wait_for_function('!document.querySelector(".vwrap").classList.contains("stuck")')
             overflow = page.evaluate('document.documentElement.scrollWidth > innerWidth + 1')
             assert not overflow, f'Horizontal overflow at {width}'
             page.evaluate('scrollTo(0,0)')
