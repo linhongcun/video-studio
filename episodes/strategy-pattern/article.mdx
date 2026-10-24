@@ -1,91 +1,149 @@
 ---
-title: 策略模式：优惠规则变了，为什么总要改结算？
-summary: 同一笔100元示例订单，先把普通、会员、活动算法挤在结算里，再让调用方选择独立规则，跟着输入与返回值看懂策略模式解决了什么、又增加了什么成本。
+title: 策略模式：结算怎样换一种算价办法？
+summary: 先用会员90元、活动80元认识两种定价办法，再看怎样把选好的函数交给结算，最后只换一次办法，理解相同调用怎样得到不同结果。
 chapters:
-  - { id: why, title: 为什么改一条规则要看整段 }
-  - { id: delegate, title: 把算法交给可替换的规则 }
-  - { id: change, title: 规则改变时，究竟改哪里 }
-  - { id: boundary, title: 什么时候值得多拆这一层 }
+  - { id: why, title: 同一件事，为什么要换办法 }
+  - { id: delegate, title: 两个函数，两种策略 }
+  - { id: change, title: 先选择函数，再执行计算 }
+  - { id: boundary, title: 什么时候值得这样拆分 }
 related: []
 ---
 
-## 为什么改一条规则要看整段 {#why}
+## 同一件事，为什么要换办法 {#why}
 
-活动价从八折改成七五折，只改一条计算规则，为什么又得打开结算函数？因为普通价、会员价、活动价都写在里面。结算既组织共同流程，又掌握每种优惠的计算细节。
+同一笔原价100元的订单，按会员办法计算，付90元；按活动办法计算，付80元。结算这件事没变，变化的是**怎么算应付金额**。
 
-先固定本片的教学规则：同一笔订单原价100元；普通付100元，会员付90元，活动付80元。**每次只选择一种，重新从100元开始算，优惠不叠加。** 这些金额和政策都是示例。
+本片先只认识这两种办法：会员九折、活动八折。每次都重新使用原价100元，只选一种优惠；不会先算90元，再在90元上打折。金额和折扣都是教学示例。
 
-<figure style={{ margin: '1.5rem 0', maxWidth: '100%', overflowX: 'auto' }} tabIndex={0} aria-label="重构前的结算分支图，可横向滚动">
-<svg viewBox="0 0 840 260" width="100%" style={{ minWidth: '640px', display: 'block' }} role="img" aria-labelledby="strategy-before-title" xmlns="http://www.w3.org/2000/svg">
-  <title id="strategy-before-title">重构前，结算函数内部包含三种计算分支</title>
-  <rect width="840" height="260" rx="18" fill="#0F172A" />
-  <rect x="30" y="92" width="150" height="76" rx="12" fill="#17283E" stroke="#64748B" />
-  <text x="105" y="124" textAnchor="middle" fill="#E5E7EB" fontSize="22">示例订单</text>
-  <text x="105" y="151" textAnchor="middle" fill="#94A3B8" fontSize="20">100 元</text>
-  <path d="M180 130H240" stroke="#64748B" strokeWidth="3" />
-  <path d="M228 122L240 130L228 138" fill="none" stroke="#64748B" strokeWidth="3" />
-  <rect x="245" y="24" width="555" height="212" rx="14" fill="#17283E" stroke="#FBBF24" strokeWidth="2" />
-  <text x="275" y="61" fill="#FBBF24" fontSize="23">结算函数</text>
-  <path d="M280 130H350M350 91V183M350 91H390M350 137H390M350 183H390" fill="none" stroke="#64748B" strokeWidth="2" />
-  <text x="408" y="98" fill="#E5E7EB" fontSize="22">普通：原价 → 100 元</text>
-  <text x="408" y="144" fill="#E5E7EB" fontSize="22">会员：九折 → 90 元</text>
-  <text x="408" y="190" fill="#FBBF24" fontSize="22">活动：八折 → 80 元</text>
+<figure style={{ margin: '1.5rem 0', maxWidth: '100%' }} aria-label="同一原价分别按两种办法计算的结果">
+<svg viewBox="0 0 420 260" width="100%" style={{ maxWidth: '420px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="strategy-two-prices-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="strategy-two-prices-title">每次从100元重新计算：会员九折得90元，活动八折得80元</title>
+  <rect width="420" height="260" rx="16" fill="#0F172A" />
+  <text x="22" y="32" fill="#94A3B8" fontSize="18">示例 · 每次都从原价100元重新计算</text>
+  <rect x="20" y="55" width="380" height="80" rx="12" fill="#14342F" stroke="#2DD4BF" />
+  <text x="38" y="84" fill="#2DD4BF" fontSize="19">会员办法：九折</text>
+  <text x="38" y="116" fill="#E5E7EB" fontSize="24">100 元 → 90 元</text>
+  <rect x="20" y="155" width="380" height="80" rx="12" fill="#182F48" stroke="#38BDF8" />
+  <text x="38" y="184" fill="#38BDF8" fontSize="19">活动办法：八折</text>
+  <text x="38" y="216" fill="#E5E7EB" fontSize="24">100 元 → 80 元</text>
 </svg>
-<figcaption>图1：三种算法都在结算函数内。窄屏可在图内横向滚动查看。</figcaption>
+<figcaption>两次输入都是100元，区别是采用的计算办法。</figcaption>
 </figure>
 
-这段代码并没有天然错误。规则很少、很稳定时，它清楚而直接。需要进一步设计的信号是：各条规则开始独立变化，主流程却总与具体算法一起被修改和阅读。UBC 的课程建议先检查变化与痛点，再判断机制和成本，适合用来衡量这次拆分是否值得。[^ubc]
+最直接的写法，是在结算里判断：会员就执行九折计算，活动就执行八折计算。**只有这两条简单、稳定的判断时，直接写完全可以。**
 
-## 把算法交给可替换的规则 {#delegate}
+现在考虑的是，两种计算办法需要各自维护，也需要按情况替换。它们如果都写在结算内部，改其中一种时就要进入包含其他规则的流程。要不要进一步拆分，应结合实际变化和维护成本判断。[^ubc]
 
-把普通、会员、活动的计算分别提成函数，约定它们都接收原金额、返回应付金额。结算入口收到其中一个函数，再通过相同方式调用它。这就是本例的策略：**独立的可替换算法，由主流程委托执行。**[^strategy]
+## 两个函数，两种策略 {#delegate}
 
-<figure style={{ margin: '1.5rem 0', maxWidth: '100%', overflowX: 'auto' }} tabIndex={0} aria-label="重构后的规则委托图，可横向滚动">
-<svg viewBox="0 0 840 310" width="100%" style={{ minWidth: '640px', display: 'block' }} role="img" aria-labelledby="strategy-after-title" xmlns="http://www.w3.org/2000/svg">
-  <title id="strategy-after-title">调用方先选择会员规则，结算统一调用，会员规则返回90元</title>
-  <rect width="840" height="310" rx="18" fill="#0F172A" />
-  <rect x="25" y="27" width="205" height="66" rx="12" fill="#17283E" stroke="#FBBF24" />
-  <text x="127" y="56" textAnchor="middle" fill="#FBBF24" fontSize="21">调用方</text>
-  <text x="127" y="81" textAnchor="middle" fill="#E5E7EB" fontSize="18">先选择：会员规则</text>
-  <path d="M230 60H383V124" fill="none" stroke="#FBBF24" strokeWidth="2" />
-  <path d="M375 112L383 124L391 112" fill="none" stroke="#FBBF24" strokeWidth="2" />
-  <rect x="25" y="142" width="180" height="78" rx="12" fill="#17283E" stroke="#64748B" />
-  <text x="115" y="173" textAnchor="middle" fill="#E5E7EB" fontSize="21">同一示例订单</text>
-  <text x="115" y="201" textAnchor="middle" fill="#94A3B8" fontSize="20">原价 100 元</text>
-  <path d="M205 181H280" stroke="#38BDF8" strokeWidth="3" />
-  <path d="M268 173L280 181L268 189" fill="none" stroke="#38BDF8" strokeWidth="3" />
-  <rect x="285" y="130" width="200" height="102" rx="12" fill="#17283E" stroke="#38BDF8" strokeWidth="2" />
-  <text x="385" y="171" textAnchor="middle" fill="#E5E7EB" fontSize="23">结算入口</text>
-  <text x="385" y="204" textAnchor="middle" fill="#94A3B8" fontSize="18">调用收到的规则</text>
-  <path d="M485 163H585" stroke="#38BDF8" strokeWidth="3" />
-  <path d="M573 155L585 163L573 171" fill="none" stroke="#38BDF8" strokeWidth="3" />
-  <rect x="590" y="130" width="220" height="102" rx="12" fill="#13352E" stroke="#2DD4BF" strokeWidth="2" />
-  <text x="700" y="171" textAnchor="middle" fill="#2DD4BF" fontSize="23">会员规则</text>
-  <text x="700" y="204" textAnchor="middle" fill="#E5E7EB" fontSize="20">100 元 → 90 元</text>
-  <path d="M590 213H510V267H385V232" fill="none" stroke="#2DD4BF" strokeWidth="2" />
-  <path d="M377 244L385 232L393 244" fill="none" stroke="#2DD4BF" strokeWidth="2" />
-  <text x="498" y="294" textAnchor="middle" fill="#2DD4BF" fontSize="19">返回应付金额：90 元</text>
+### 先认识一个“策略”
+
+先单独看会员办法：收到原价，按九折计算，再返回应付金额。在这里，这一种独立的定价办法，就是一个**定价策略**。活动办法也是一个策略，只是计算方式换成八折。[^strategy]
+
+下面只摘出两种计算；金额单位是**分**，10000分就是100元。完整输入校验放在后半部分。
+
+```python
+def member(amount):
+    return amount * 90 // 100
+
+def campaign(amount):
+    return amount * 80 // 100
+```
+
+`member` 是会员函数，`campaign` 是活动函数。先记住它们分别代表哪种办法。
+
+## 先选择函数，再执行计算 {#change}
+
+### 交进去的是函数，不是已经算好的90元
+
+调用结算的代码先选好会员办法，再把这个函数交给结算：
+
+```python
+checkout(10000, member)
+```
+
+这里的 `member` 后面没有括号，表示传入会员函数本身。函数可以像其他值一样作为参数传入；结算随后调用它时，才会算出9000分，也就是90元。Python 官方教程也用一个名字指向已有函数的例子，说明函数对象与调用结果的区别。[^functions]
+
+| 写法 | 此刻表达什么 |
+|---|---|
+| `member` | 会员函数本身，一种计算办法 |
+| `member(10000)` | 现在执行会员函数，得到9000分 |
+| `checkout(10000, member)` | 把10000分和会员函数交给结算，由结算执行计算 |
+
+### `pricing` 此时对应哪个函数？
+
+再看结算内部的核心逻辑。**这是省略校验的讲解摘录，完整可运行程序在后文。**
+
+```python
+def checkout(amount, pricing):
+    payable = pricing(amount)
+    return payable
+```
+
+`amount` 接收原金额，`pricing` 接收这次选好的函数。刚才传进来的是 `member`，所以这次执行中，**`pricing` 指向的就是 `member`**；不是凭空多出一种叫“pricing”的算法。
+
+<figure style={{ margin: '1.5rem 0', maxWidth: '100%' }} aria-label="结算参数pricing对应传入的会员函数">
+<svg viewBox="0 0 420 290" width="100%" style={{ maxWidth: '420px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="strategy-function-parameter-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="strategy-function-parameter-title">传入member时，结算参数pricing指向同一个会员函数</title>
+  <rect width="420" height="290" rx="16" fill="#0F172A" />
+  <text x="22" y="32" fill="#94A3B8" fontSize="18">传入的是函数 · 90元尚未算出</text>
+  <rect x="30" y="55" width="360" height="78" rx="12" fill="#182F48" stroke="#38BDF8" />
+  <text x="50" y="84" fill="#E5E7EB" fontSize="22">结算中的参数：pricing</text>
+  <text x="50" y="114" fill="#38BDF8" fontSize="19">这次接收 member</text>
+  <path d="M210 133V179" stroke="#2DD4BF" strokeWidth="3" />
+  <path d="M202 167L210 179L218 167" fill="none" stroke="#2DD4BF" strokeWidth="3" />
+  <text x="230" y="161" fill="#94A3B8" fontSize="16">指向同一函数</text>
+  <rect x="30" y="185" width="360" height="78" rx="12" fill="#14342F" stroke="#2DD4BF" />
+  <text x="50" y="214" fill="#2DD4BF" fontSize="22">member：会员函数</text>
+  <text x="50" y="244" fill="#E5E7EB" fontSize="19">接收原价，按九折计算</text>
 </svg>
-<figcaption>图2：调用方先选规则，结算统一调用并接收返回值。窄屏可在图内横向滚动查看。</figcaption>
+<figcaption>两处名称此时都指向同一个会员函数。</figcaption>
 </figure>
 
-按图追一遍：调用方先选会员规则；结算把100元交给它；规则算出90元；90元回到结算。普通和活动规则没有在这次请求里执行。改选活动时先重置到原价100元，再得到80元。
+沿着这次调用走三步：
 
-选择逻辑仍然存在。它可能来自请求参数、配置或业务判断，本例放在调用方。将其移到外部，是明确职责，不是让系统无需作出选择。
+1. 进入结算：`amount` 是10000分，`pricing` 是会员函数。
+2. 执行 `pricing(amount)`：这次实际执行的是 `member(10000)`，算出9000分。
+3. `return payable`：把9000分返回，得到应付90元的结果。
 
-策略可以通过对象接口实现，也可以像本例一样用函数。Python 官方排序接口能接收 `key` 函数，Java 的排序方法能接收 `Comparator`，都能帮助识别“稳定过程接收外部局部行为”这种结构。前者选择取键行为，后者选择比较规则，**都不能据此说成更换了整个排序算法**。[^python][^comparator][^arrays]
+**先选择办法，再交给结算；结算调用以后，金额结果才出现。** 谁负责选择，代码里仍然有明确的位置。
 
-## 规则改变时，究竟改哪里 {#change}
+本期还直接检查了函数执行时的对应关系：[调用记录](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo/beginner-evidence.json)确认，传入 `member` 时 `pricing` 就是该会员函数，10000分得到9000分；改传 `campaign` 后对应活动函数，得到8000分。
 
-把活动函数的八折改成七五折，再选择这个新版本。同一100元输入得到75元，结算函数和会员函数不需要随这次算法变化而修改。需要保持的是共同契约：金额单位、参数含义、返回值和错误规则都相容。
+### 现在只换一次办法
 
-| 本例需求 | 实际需要改变 | 本次保持 |
-|---|---|---|
-| 活动八折改七五折 | 活动算法及调用侧采用的版本 | 结算入口、普通与会员算法 |
-| 新增新客减10元 | 新函数、登记项及选择规则 | 已有结算调用方式 |
-| 改为同时叠加多个优惠 | 重新定义组合、顺序与舍入 | 本片的单选结构不足以直接覆盖 |
+现在只换一次办法。先保留同一笔订单的原价100元，重新计算，这次传入活动函数：
 
-下面是本期完整可运行的 Python 程序，与制作目录的 `demo/pricing.py` 一致。金额单位为**整数分**，百分比不足一分的部分向下取整。这是本例明确选择的教学规则，真实项目应按自己的金额与舍入要求设计。
+```python
+checkout(10000, campaign)
+```
+
+结算中的 `pricing` 这次指向 `campaign`。执行的仍是同一句 `pricing(amount)`，但这次实际执行 `campaign(10000)`，返回8000分，也就是80元。
+
+| 这一次交入的函数 | 结算内部怎样调用 | 实际执行 | 本次结果 |
+|---|---|---|---|
+| `member` | `pricing(amount)` | `member(10000)` | 9000分，90元 |
+| 换成 `campaign` | `pricing(amount)` | `campaign(10000)` | 8000分，80元 |
+
+两次输入都是10000分。第二次不是对先前的90元继续打折，而是**清楚地更换函数，再从原价重算**。
+
+能保持同一种调用方式，是因为两个函数遵守相同约定：接收原金额，返回应付金额；单位和含义也一致。若一个返回金额、另一个却返回折扣率，就不能不加调整地互换。
+
+## 什么时候值得这样拆分 {#boundary}
+
+回头看本例，调用结算的代码负责选办法，结算负责调用，具体函数负责计算。**把同一任务的不同办法分开，让共同流程按统一约定使用选中的一种，这就是这里的策略模式。**[^ubc][^strategy]
+
+重点不只是把代码提成几个函数，还在于结算能够接收并使用可替换的函数。阅读项目时，可以追踪三个具体问题：谁选出了函数？参数现在指向谁？真正的计算写在哪里？
+
+当不同算法确实需要分别维护、替换时，这样拆分有价值。它也增加了一层调用关系，读代码时需要从结算跳到具体函数，调用侧还要维护选择逻辑。若只有两条长期不变的简单判断，保持直接写法通常更省事。不能只看 `if` 有没有消失来评价设计。
+
+到这里已经完成本片主线：**会员函数交给结算得到90元，改传活动函数得到80元，结算沿用同一种调用方式。** 接下来是实现拓展，可以在理解这条主线后再读。
+
+### 实现拓展：完整整数分代码与校验
+
+以下内容不是视频里的新步骤。为了保留完整实现和变更对照，程序还包含普通原价、活动七五折新版、新客减免、登记表和错误校验。它们是进一步练习，不需要同时记住才能理解前面的两次调用。
+
+金额使用非负整数分；本例百分比不足一分的部分向下取整。`checkout` 同时校验输入和策略返回值，不能把上面的三行核心摘录直接当作完整生产实现。以下代码与制作目录的 `demo/pricing.py` 逐字一致。
 
 ```python
 """Single-rule pricing example for D01. Amounts are integer cents.
@@ -187,11 +245,21 @@ campaign after update: 7500
 newcomer: 9000
 ```
 
-`before_checkout` 保留重构前的写法；`checkout` 是稳定的结算入口；`select_rule` 是调用侧的选择。这个单文件程序同时保留活动旧版和新版，借助 `RULES_V2` 映射切换，方便直接比较结果。**它展示版本对照，不是“一处修改”的源码补丁。**
+这里的 `Pricing = Callable[[int], int]` 用于表达“接收整数、返回整数”的函数类型；它不会自动完成业务校验。真正的金额范围检查仍由函数体执行。`select_rule` 是完整程序里的调用侧选择入口，选择责任没有因为引入策略而消失。
 
-### 真正只改活动算法的补丁
+### 实现拓展：七五折和新客规则会改哪里？
 
-制作目录另存了两份可独立运行的最小源快照：`demo/snapshots/before.py` 与 `after.py`。它们使用相同的 `campaign` 名字、相同的注册表和结算入口，实际差异只有：
+下面再讨论新的需求，不与前面视频中的“只更换一次办法”混在一起。
+
+| 后续需求 | 实际需要改变 | 本例可保留的部分 |
+|---|---|---|
+| 活动八折改七五折 | 活动算法 | 结算入口、其他算法及共同调用方式 |
+| 新增新客减10元 | 新函数、登记项及选择规则 | 已有结算调用方式 |
+| 改为叠加多个优惠 | 重新定义组合、顺序与舍入 | 本片的单选结构不足以直接覆盖 |
+
+完整单文件程序用 `campaign_v2` 与 `RULES_V2` 同时保存两个版本，方便比较；这是版本演示，不是“一处修改”的源码补丁。
+
+制作目录另存了 `demo/snapshots/before.py` 与 `after.py`：保留同名 `campaign`、相同注册表与结算入口，实际差异只有：
 
 ```diff
  def campaign(total_cents: int) -> int:
@@ -199,32 +267,26 @@ newcomer: 9000
 +    return total_cents * 75 // 100
 ```
 
-两份源快照分别运行后，同一10000分输入的普通、会员、活动结果为 `[10000, 9000, 8000]` 和 `[10000, 9000, 7500]`。验证器还比较了解析后的代码结构：只有 `campaign` 函数节点改变，注册表、选择函数和结算函数均未改变。21组快照对照覆盖了整元和非整元输入；完整补丁与源散列保留在运行报告中。视频“本次只改活动”对应这组实际证据。
+两份快照对同一10000分输入，活动结果分别为8000分和7500分；已有验证报告中的21组快照对照与代码结构比较确认，唯一改变的顶层函数是 `campaign`。这解释的是“修改一个算法”的范围，不意味着增加任何功能都无需修改其他代码。
 
-新客减免用 `max(0, total_cents - 1_000)` 防止小额订单出现负应付金额。未知规则直接拒绝，不悄悄回退为原价；策略返回浮点、负数或超过原价的金额，也违反本例契约。
+新客减免使用 `max(0, total_cents - 1_000)`，避免小额订单出现负应付金额。未知规则明确拒绝；返回浮点、负数或超过原价的金额，也违反本例约定。
 
-### 运行与验证
+### 实现拓展：运行证据与阅读实际项目
 
-仓库中的演示和验证可直接执行：
+演示和验证的运行入口保持为：
 
 ```sh
 python3 episodes-codex/strategy-pattern/demo/pricing.py
 python3 episodes-codex/strategy-pattern/demo/verify_demo.py
 ```
 
-本次在 Python 3.12.14 实际运行：150003组重构前后等价检查、33组 Decimal 舍入参照、21组最小源快照对照，以及非法金额、未知规则、非法策略返回值和新客截零边界均通过。实际输入、输出、调用轨迹和源码散列保存在同目录的 `verified-results.json`。这些是对本例的有限验证，不是任意策略都正确的证明，也不是性能测试。
+现有 `demo/verified-results.json` 记录了 Python 3.12.14 下的150003组重构前后等价检查、33组 Decimal 舍入参照、21组最小源快照对照，以及非法金额、未知规则、非法返回值和新客截零边界。代码未因本次讲解重排而改变；这些是本例的有限验证，不是性能测试或所有策略都正确的证明。
 
-## 什么时候值得多拆这一层 {#boundary}
+在真实接口里，也可以寻找“稳定过程接收外部行为”的关系。Python 的排序接口接收 `key` 函数，Java 的排序接口接收 `Comparator`：前者选择取键行为，后者选择比较规则，都不能据此说成更换了整个排序算法。[^python][^comparator][^arrays]
 
-可以先看三个具体条件：这件任务是否真的有不同算法；算法是否需要分别变化；它们能否遵守有意义的共同契约。满足这些条件时，拆开通常更容易定位每条规则，但阅读者也要从结算跳到具体函数，调用侧要维护选择与登记。
+策略与状态还需要按意图区分。本例为同一个定价任务选择不同办法；状态模式关注对象内部状态变化时怎样处理操作与迁移。两者可能采用相似的委托结构，仅看类图或名字不足以判断。[^state]
 
-如果只有两条长期不变的简单判断，直接写清楚可能更省事。不要为凑模式引入一套空接口、工厂和类层次；也不要仅以 `if` 是否消失判断设计好坏。
-
-读复杂项目时，可以沿着一个参数或接口追踪：**谁选出了实现，谁调用它，具体算法写在哪里？** 如果结算仍在内部自行判断所有规则，只是把分支搬进另一个大函数，算法的独立变化可能仍未建立。
-
-策略与状态也需要按意图区分。本例在同一任务里选择一种计算方法；状态模式关注对象处于不同内部状态时如何处理操作，以及怎样迁移。两者可能出现相似的委托结构，不能只看类图或名字。[^state]
-
-本片解释的是代码组织。资格校验、优惠叠加、税费、舍入、支付与并发仍需各自明确设计；策略模式不会自动解决这些业务问题，也不保证代码运行得更快。
+资格校验、优惠叠加、税费、支付和并发仍需各自设计；策略模式不会自动解决这些业务问题，也不保证运行得更快。
 
 [^ubc]: [UBC CPSC 310：Design Patterns](https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/)，Design Pattern Process、Strategy与Analysis，页面未标独立发布日期，访问日期2026-10-24（北京时间）。
 [^strategy]: [Refactoring.Guru：Strategy](https://refactoring.guru/design-patterns/strategy)，Solution、Structure及Pros and Cons；专业辅助教学资料，非官方规范，页面未标发布日期，访问日期2026-10-24（北京时间）。
@@ -232,3 +294,5 @@ python3 episodes-codex/strategy-pattern/demo/verify_demo.py
 [^comparator]: [Oracle Java SE 25：Comparator](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Comparator.html)，接口及函数式接口说明；页面未标独立发布日期，访问日期2026-10-24（北京时间）。
 [^arrays]: [Oracle Java SE 25：Arrays.sort](https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html#sort(T%5B%5D,java.util.Comparator))，比较器重载契约；页面未标独立发布日期，访问日期2026-10-24（北京时间）。
 [^state]: [Refactoring.Guru：State](https://refactoring.guru/design-patterns/state)，Intent与Solution，并对照UBC课程State小节；仅作辅助辨析，页面未标发布日期，访问日期2026-10-24（北京时间）。
+
+[^functions]: [Python 3.12：Defining Functions](https://docs.python.org/3.12/tutorial/controlflow.html#defining-functions)，函数定义、函数对象及其他名字指向同一函数的说明；动态版本文档，本次未单独核验页尾更新时间，访问日期2026-10-24（北京时间）。
