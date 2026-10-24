@@ -7,4 +7,4 @@
 - 原44句及人声PCM前缀逐样本保持，150帧代码卡人声全零；字幕仍止于6543帧。首次术语起音检查通过，代码程序与图形沿用v0.50.2已验收结果，本轮未重复算法测试或完整站点回归。
 - 190项冻结输入核对、完整解码、6994→6694帧、AAC48kHz、−16.0LUFS/−3.7dBTP通过。3个新边界预演与实际编码对照最大平均RGB差1.8293/255，卡片首末预演逐字节相同。实际媒体10,061,812 bytes，完整SHA256为`f95993b77f0412218af38f9c159596f928009336af1e730f18a4b1d7af401c04`。
 
-独立检查确认PTS连续0..6693，末PTS223.1秒、最后一帧return完整；原0/6543帧对照MAE0.131/0.136、PSNR52.17/52.33dB。单页网站构建与1440尺寸检查通过，显示3:43，video.duration223.146秒，44句VTT逐字节保持，四章相同，220秒CC为0且可暂停看完整代码。证据见`qa-codecard-five-seconds-independent.json`与`qa-codecard-five-seconds-site.json`。发布及线上完整SHA核验在完成后补齐；不新增全片人工听辨或ASR声明。v3原QA/媒体/线上证据在`revisions/codecard-five-seconds/v3-*`，更多不变部分的历史检查仍见v0.50.2报告。
+独立检查确认PTS连续0..6693，末PTS223.1秒、最后一帧return完整；原0/6543帧对照MAE0.131/0.136、PSNR52.17/52.33dB。单页网站构建与1440尺寸检查通过，显示3:43，video.duration223.146秒，44句VTT逐字节保持，四章相同，220秒CC为0且可暂停看完整代码。证据见`qa-codecard-five-seconds-independent.json`与`qa-codecard-five-seconds-site.json`。v0.50.4已由PR #187合并上线，线上完整视频/海报SHA、44句VTT、四章及更新日志真实Release链接实际GET通过，见`online-verification.json`与`release.md`；不新增全片人工听辨或ASR声明。v3原QA/媒体/线上证据在`revisions/codecard-five-seconds/v3-*`，更多不变部分的历史检查仍见v0.50.2报告。
