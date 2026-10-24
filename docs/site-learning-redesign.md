@@ -28,4 +28,4 @@
 
 ## 发布
 
-发布与线上检查入口：[v0.54.0 Release](https://github.com/linhongcun/video-studio/releases/tag/v0.54.0)。线上媒体完整SHA、页面与浏览器核验结果保存在Release的`online-verification.json`附件，本地检查不代替部署后核验。
+发布与线上检查入口：[v0.54.0 Release](https://github.com/linhongcun/video-studio/releases/tag/v0.54.0)。Release后部署40106285542成功；线上媒体完整SHA、页面与浏览器核验结果见 [线上核验记录](site-learning-redesign/online-verification.json)。30个公开课程、854句字幕及页面实际复验通过。
