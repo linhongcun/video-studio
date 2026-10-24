@@ -19,6 +19,16 @@ else:
     runpy.run_path(str(ROOT / 'episodes-codex/_shared/freeze_sentence_episode.py'), run_name='__main__')
     manifest = json.loads(manifest_path.read_text())
     extra = [Path(__file__).resolve()]
+    if (D / 'revise_chapter_bridges.py').exists():
+        extra += [D / name for name in [
+            'revise_chapter_bridges.py', 'chapter-bridge-baseline.json',
+            'chapter-bridge-assembly.json', 'voice/chapter-bridge-picks.json',
+            'voice/chapter-bridge-qa.json',
+            'remotion/out/chapter-bridges/base/video.mp4',
+            'remotion/out/chapter-bridges/base/voice.wav',
+            'remotion/out/chapter-bridges/base/storyboard.json',
+            'remotion/out/chapter-bridges/base/voice/build.json',
+        ]]
     extra += [p for p in (D / 'demo').rglob('*') if p.is_file() and '__pycache__' not in p.parts]
     extra += [p for p in (D / 'remotion/scripts').glob('*.mjs')]
     for p in extra:

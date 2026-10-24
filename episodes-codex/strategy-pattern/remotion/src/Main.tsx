@@ -80,8 +80,8 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
   </>;
  }
  if(kind==='extract'){
-  const p=phase(s,f,0,.06,.98),q=phase(s,f,1,.05,.68),base=at(s,0,.06),end=at(s,1,.55),progress=ease(f,base,end-base);
-  return <><Heading>把会变化的算法，逐个抽出来</Heading>
+  const p=phase(s,f,1,.05,.72),q=phase(s,f,1,.78,.96),base=at(s,1,.05),end=at(s,1,.72),progress=ease(f,base,end-base);
+  return <><Heading>{f<at(s,1,0)?'问题看清了，接下来整理结算':'把会变化的算法，逐个抽出来'}</Heading>
    <Frame x={380} y={337} w={lerp(1160,740,progress)} h={411} label={progress>.7?'结算 · 保留共同流程':'结算函数 · 原来的位置'} color={C.edge}/>
    <Text x={414} y={487} w={280} size={38} color={C.blue} center>读取金额</Text>
    {oldRules.map(([name,formula],i)=>{const move=ease(f,base+i*13,Math.max(1,end-base-i*13));return <Rule key={name} x={lerp(760,1320,move)} y={lerp(404+i*107,ruleY(i),move)} w={lerp(660,460,move)} name={name+'规则'} formula={['原价','×90%','×80%'][i]} active={move>.02&&move<.98} color={C.teal}/>;})}
@@ -144,12 +144,12 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
   </>;
  }
  if(kind==='change'){
-  const changed=phase(s,f,0,.05,.75)>.5,call=phase(s,f,1,.03,.35),ret=phase(s,f,1,.42,.85),done=ret>=.99;
-  return <><Heading>活动从八折改七五折，只修改活动规则</Heading><Reset>同一100元示例订单 · 重新计算 · 会员和结算保留原样</Reset><Whole selected={2} rate={changed?75:80} amount="75" waiting={!done} changed={changed}/>
+  const changed=phase(s,f,1,.03,.22)>.5,call=phase(s,f,1,.23,.42),ret=phase(s,f,1,.43,.65),done=ret>=.99;
+  return <><Heading>{f<at(s,1,0)?'规则能替换了，再看变化时要改哪里':'活动从八折改七五折，只修改活动规则'}</Heading><Reset>{changed?'清空旧结果 · 同一100元重新计算 · 会员和结算保留原样':'承接上一阶段 · 活动八折，应付80元'}</Reset><Whole selected={2} rate={changed?75:80} amount={changed?'75':'80'} waiting={changed&&!done} changed={changed} orderVisible={changed}/>
    <Text x={1340} y={754} w={420} size={24} color={C.gold} center>{changed?'本次只改这里：75%':'旧活动规则：80%'}</Text>
-   {f>=at(s,1,.03)&&f<at(s,1,.42)&&<Travel endInset={110} points={callPoints(2)} p={call} text="100 元" color={C.teal}/>}
-   {f>=at(s,1,.42)&&!done&&<Travel endInset={65} points={returnPoints(2)} p={ret} text="75 元" color={C.gold}/>}
-   <Note color={C.gold}>{done?'75元来自新规则的重新计算，不是在80元上再打折':f>=at(s,1,.03)?'正在从100元重新计算，等待结果返回':changed?'新规则已配置，等待从100元重新计算':'原活动规则八折，先修改活动算法'}</Note>
+   {f>=at(s,1,.23)&&f<at(s,1,.43)&&<Travel endInset={110} points={callPoints(2)} p={call} text="100 元" color={C.teal}/>}
+   {f>=at(s,1,.43)&&!done&&<Travel endInset={65} points={returnPoints(2)} p={ret} text="75 元" color={C.gold}/>}
+   <Note color={C.gold}>{done?'75元来自新规则的重新计算，不是在80元上再打折':f>=at(s,1,.23)?'正在从100元重新计算，等待结果返回':changed?'新规则已配置，等待从100元重新计算':'上一阶段已算得80元，接下来检查需求变化的修改范围'}</Note>
   </>;
  }
  if(kind==='compare'){
@@ -198,19 +198,20 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
   </>;
  }
  if(kind==='boundary'){
-  const p=phase(s,f,0,.03,.7),q=phase(s,f,1,.03,.7);
+  const p=phase(s,f,1,.03,.24),q=phase(s,f,1,.32,.6),cost=phase(s,f,1,.64,.93);
+  if(f<at(s,1,.02))return <><Heading>最后，判断这层拆分值不值得</Heading><Whole selected={2} rate={75} amount="75" waiting={false}/><Note>修改效果已经看过，现在判断什么时候值得拆开</Note></>;
   return <><Heading>规则值得独立变化时，再多拆这一层</Heading>
-   <Frame x={160} y={338} w={700} h={390} label="简单而稳定" color={q>.35?C.edge:C.teal} alpha={1-q*.45}>
+   <Frame x={160} y={338} w={700} h={390} label="简单而稳定" color={q>.35?C.edge:C.teal} alpha={p*(1-q*.45)}>
     <Text x={30} y={83} w={640} size={38} center>两条长期不变的判断</Text>
     <Text x={30} y={166} w={640} size={34} center color={C.teal} alpha={p}>直接写清楚，往往更省事</Text>
     <Text x={30} y={272} w={640} size={26} center color={C.muted}>不为套模式制造额外结构</Text>
    </Frame>
-   <Frame x={1020} y={338} w={740} h={390} label="算法确实分别变化" color={q>.35?C.gold:C.edge} alpha={.45+q*.55}>
+   <Frame x={1020} y={338} w={740} h={390} label="算法确实分别变化" color={q>.35?C.gold:C.edge} alpha={q*(.45+q*.55)}>
     <Text x={30} y={83} w={680} size={38} center>独立修改 · 独立验证</Text>
     <Text x={30} y={166} w={680} size={33} center color={C.gold}>结算 → 规则 → 返回</Text>
-    <Text x={30} y={272} w={680} size={26} center color={C.muted} alpha={q}>代价：拆分、装配与跳转阅读</Text>
+    <Text x={30} y={272} w={680} size={26} center color={C.muted} alpha={cost}>代价：拆分、装配与跳转阅读</Text>
    </Frame>
-   <Note color={C.gold} alpha={q}>先确认变化和收益，再决定是否承担间接层的成本</Note>
+   <Note color={C.gold} alpha={cost}>先确认变化和收益，再决定是否承担间接层的成本</Note>
   </>;
  }
  const p=phase(s,f,0,.04,.84),q=phase(s,f,1,.04,.82),done=q>=.8;

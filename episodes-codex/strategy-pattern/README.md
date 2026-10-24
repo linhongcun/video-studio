@@ -6,6 +6,24 @@
 
 16镜32句、四章；具体帧数、媒体指标及最终SHA见 `qa-timing.json` 与 `render-result.json`。旁白采用冰糖自然配音，不加速。代码画面仅03、14；其余用规则实际拆出、选中引用、金额调用与返回、修改范围说明设计，不加装饰进度条。
 
+## 当前修订：章节口头衔接
+
+用户观看v0.52.0后认为整体问题不大，指出章节入口缺少承接与方向说明。本次只改04、11、15的六句与对应动作：先说清下一段要看什么，第二句再展开。旧版工程和媒体以Git tag `v0.52.0`为不可变基线，历史检查报告存于`revisions/v0.52.0/`。
+
+当前5292帧、176.4秒，比原版增加94帧、约3.13秒。其余十三镜的原PCM、局部字幕/cue及镜长逐项严格保持，见`chapter-bridge-assembly.json`。只重渲三个镜头；其余画面从原版精确取帧，统一快速H.264编码与共享混音，码流字节不声明相同。
+
+本次修订的复现入口（仓根；使用仓库已有的v0.52.0 tag）：
+
+```sh
+python3 episodes-codex/strategy-pattern/revise_chapter_bridges.py archive
+python3 episodes-codex/strategy-pattern/revise_chapter_bridges.py assemble
+python3 episodes-codex/strategy-pattern/freeze.py
+python3 episodes-codex/strategy-pattern/revise_chapter_bridges.py render
+python3 episodes-codex/strategy-pattern/verify_chapter_picture_reuse.py
+```
+
+`archive`从不可变tag恢复忽略目录中的旧基线，`assemble`调用共享配音和时序实现，只替换三镜PCM；全量配音重建命令作为原版历史步骤保留在下文。当前冻结清单包括局部拼接脚本与真实基线输入，冷检前先恢复这些基线。
+
 ## 内容与运行证据
 
 - `research.md`：实际查阅的课程和官方文档、短引、日期、使用位置与边界；未取得的GoF全书不伪称已读。
