@@ -6,7 +6,7 @@
 
 ## STATUS
 
-EP.14（`episodes/degradation`，分镜 slug `degradation-v1`）之后系列暂停。恢复之前不开新期，不从 `episodes-codex/_template/` 复制工程，不新发平台。恢复时改这一节，并改根 `README.md` 的暂停说明。
+EP.14（`episodes/degradation`，分镜 slug `degradation-v1`）之后系列暂停。恢复之前不开新期，不从 `episodes-codex/_template/` 复制工程，不新发平台，也不要另编一套发布。恢复时改这一节，并改根 `README.md` 的暂停说明。
 
 ## 画面
 
@@ -40,8 +40,9 @@ EP.14（`episodes/degradation`，分镜 slug `degradation-v1`）之后系列暂�
 ## 发布
 
 - 发布渠道：抖音（头条同步同一条成片）、B站、微信视频号，加上本站。
-- 不发快手，不发 X。平台链接写进 `meta.json` 或 Release 说明，不上群。
-- 本仓站点代码仍只识别 `bilibili`、`douyin`、`kuaishou` 三个键（`site/src/lib/episodes.ts`）。现行发布不再填写 `kuaishou`。头条和微信视频号没有单独的 meta 键，写在 Release 说明里。空链接时关于页和 `PlatformLinks.astro` 仍会提到快手，那是旧文案，不是本文件。
+- 不发快手，不发 X。平台链接不上群。`meta.json` 只填 `bilibili` 和 `douyin`。头条不单独占键，与抖音同一条成片。视频号没有网页链接，不写。
+- 本仓站点代码仍只识别 `bilibili`、`douyin`、`kuaishou` 三个键（`site/src/lib/episodes.ts`）。现行发布不再填写 `kuaishou`。空链接时关于页和 `PlatformLinks.astro` 仍会提到快手，那是旧文案，不是本文件。
+- 三平台实操和站点发版清单见 [publish.md](publish.md)。
 - 版本号三段式，记在 `site/package.json`。只改内容升修订号；新一期、新功能或站点改动升次版本号。
 - 村长只批最终上线。脚本和分镜团队内定稿。
 
