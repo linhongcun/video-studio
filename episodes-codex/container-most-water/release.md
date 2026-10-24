@@ -33,6 +33,14 @@
 ### 修订2上线核验完成
 
 - [PR #157](https://github.com/linhongcun/video-studio/pull/157)已合并，提交`ab825f324aa8ea255f61c23d5ad702438ac9b7d2`；附注tag和[Release v0.50.1](https://github.com/linhongcun/video-studio/releases/tag/v0.50.1)已发布。
-- Release后[部署40097496603](https://github.com/linhongcun/video-studio/actions/runs/40097496603)成功，source head一致，实际API证据见deployment.json。
-- 2026-10-24 21:21:43（北京时间）实际GET核验通过：线上完整视频SHA为上述修订2的6d1e3b4c…8adb，10,017,737 bytes；海报完整SHA与v1相同，44句VTT逐字节保持、四章精确起点/锚点、源码入口、独立系列/RSS、首页和更新日志通过。见online-verification.json。
+- Release后[部署40097496603](https://github.com/linhongcun/video-studio/actions/runs/40097496603)成功，source head一致，实际API证据见revisions/python-endcard/v2-deployment.json。
+- 2026-10-24 21:21:43（北京时间）实际GET核验通过：线上完整视频SHA为上述修订2的6d1e3b4c…8adb，10,017,737 bytes；海报完整SHA与v1相同，44句VTT逐字节保持、四章精确起点/锚点、源码入口、独立系列/RSS、首页和更新日志通过。见revisions/python-endcard/v2-online-verification.json。
 - 教训L018的修后验证已补齐。用户对v1主体的认可与本次独立检查分开记录，不声称用户已观看新版。
+
+## v0.50.2：片尾完整 Python 解法
+
+- 按用户明确要求，在原讲解之后追加15秒静态完整Python解法，含可提交接口、缩进、两个指针分支和返回值，提示暂停查看。正文的关键行讲解与原四章保持；代码卡不显示旧字幕，不恢复装饰进度条。
+- 程序、显示源和文章16行实现一致，独立代表用例、真实预演和正式编码保真检查通过。总6994帧，画面233.133333秒，容器233.152秒；视频10,636,628 bytes，完整SHA256为`072ae1db566209c671dfb3819cfbbac1f927098e2b65bfe7df9bd89cf903535b`。
+- 原44句时间及人声PCM前缀严格保持，新增尾部人声全零；BGM沿用共享混音流程。190冻结输入、完整解码、−16.0LUFS和−3.7dBTP通过，详见当前`qa-final.md`及独立报告。
+- S013、画面规范、制作检查清单和项目记忆记录“讲解后附完整代码”的方法及验证范围；本期15秒不固定为全系列参数，不将用户新要求误写成已观看认可新卡片。
+- 站点发布仍按既有持续授权；合并、Release、部署及线上完整GET证据在完成后追加。修订2证据已归档，不新增平台投稿。

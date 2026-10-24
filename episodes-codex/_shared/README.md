@@ -16,6 +16,8 @@ python3 episodes-codex/_shared/check_sentence_episode.py episodes-codex/tx-2pc
 
 首现cue只能选真实句首。词时间兼容字段保存整句包络，不是内部逐字对齐；无官方ASR模型时不得伪称逐字ASR或全片人工听辨。术语窗口、声学计算只用`episodes/_shared/onset_rule.py`。
 
+算法片尾可显式声明`meta.unvoicedEndCard`（`kind: full-python-solution`、整帧`from`/`durationInFrames`），并在末镜写`codeCardFrom`。字幕在附录前结束，旁白音轨用共享build的尾停参数延长；检查器仍严格核对全部原句和字幕连续性，额外要求附录覆盖视频最后一段、原句音轨不越界、该区间voice PCM全零。它不允许省掉正文字幕或遮住未讲完的句子。LC.11的`prepare_code_endcard.py`只调用共享装配后声明附录，不复制配音/起音实现。
+
 所有写入负责人停写、动态表达独立检查闭合后：
 
 ```sh
