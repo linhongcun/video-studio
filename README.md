@@ -12,9 +12,9 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 
 ## 已上线剧集
 
-剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–15 已重制；EP.16–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0）；EP.15 索引在 v0.45.1 更新为订单表查找动画，均只更新站点，不重发平台。
+剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–16 已重制；EP.17–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0）；EP.15 索引在 v0.45.1 更新为订单表查找动画；EP.16 事务在 v0.45.2 更新为逐步展示修改、提交和回滚的动画。以上均只更新站点，不重发平台。
 
-系列默认暂停。2026-10-24 用户单独授权 EP.15 索引重制，并在观看成片后批准合并、部署 GitHub 站点；其他新期与平台新发尚未恢复。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
+系列默认暂停。2026-10-24 用户先后批准 EP.15 索引、EP.16 事务重制，并在观看各期成片后批准合并、部署 GitHub 站点；其他新期与平台新发尚未恢复。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
 
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
@@ -32,8 +32,8 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 | 12 | 扛住高峰 | 手一抖点了两次支付，为什么只扣一次钱？ | [idempotency](https://linhongcun.github.io/video-studio/episodes/idempotency/) | 2026-10-13 |
 | 13 | 扛住高峰 | 一个服务出故障，为什么整个网站没跟着崩？ | [circuit-breaker](https://linhongcun.github.io/video-studio/episodes/circuit-breaker/) | 2026-10-14 |
 | 14 | 扛住高峰 | 搜索页和结算页，为什么两个价不一样？ | [degradation](https://linhongcun.github.io/video-studio/episodes/degradation/) | 2026-10-13 |
-| 15 | 数据库 | 加个索引，为啥就快了？（旧版，重制中） | [db-index](https://linhongcun.github.io/video-studio/episodes/db-index/) | 2026-10-14 |
-| 16 | 数据库 | 扣了钱，对方没到账？（旧版，重制中） | [db-transaction](https://linhongcun.github.io/video-studio/episodes/db-transaction/) | 2026-10-14 |
+| 15 | 数据库 | 加个索引，为啥就快了？ | [db-index](https://linhongcun.github.io/video-studio/episodes/db-index/) | 2026-10-14 |
+| 16 | 数据库 | 扣了钱，对方没到账？ | [db-transaction](https://linhongcun.github.io/video-studio/episodes/db-transaction/) | 2026-10-14 |
 | 17 | 数据库 | 两个人抢同一件货，听谁的？（旧版，重制中） | [db-lock](https://linhongcun.github.io/video-studio/episodes/db-lock/) | 2026-10-15 |
 | 18 | 数据库 | 刚改的昵称，怎么又变回去了？（旧版，重制中） | [db-replication](https://linhongcun.github.io/video-studio/episodes/db-replication/) | 2026-10-15 |
 | 19 | 分布式 | 大促一到，下单怎么就卡住了？（旧版，重制中） | [db-sharding](https://linhongcun.github.io/video-studio/episodes/db-sharding/) | 2026-10-15 |
