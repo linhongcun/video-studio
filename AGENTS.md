@@ -14,7 +14,13 @@
 Co-authored-by: Codex <codex@openai.com>
 ```
 
-Cursor 或其他工具独立制作的提交沿用各自的署名约定，不要求添加 Codex 署名。不得删除、替换或重复追加已有的 `Co-authored-by`；多工具实际共同贡献时可以并存多条不同署名。
+Cursor 制作的变更使用以下署名，沿用仓库已有的显示名与用户确认的邮箱：
+
+```text
+Co-authored-by: Cursor Agent <cursoragent@cursor.com>
+```
+
+Cursor 或其他工具独立制作的提交不要求添加 Codex 署名，Codex 独立制作的提交也不添加 Cursor 署名。不得删除、替换或重复追加已有的 `Co-authored-by`；多工具实际共同贡献时可以并存多条不同署名。
 
 Squash 合并生成的新提交应保留本次变更实际贡献者已有的全部联合署名；使用 GitHub merge API 时显式写入 `commit_message`，不能用固定的 Codex 署名覆盖其他贡献者。是否添加 Codex 署名依据实际贡献，不仅依据谁执行合并。
 
