@@ -16,7 +16,13 @@
 - 同提交的附注tag及[GitHub Release v0.53.0](https://github.com/linhongcun/video-studio/releases/tag/v0.53.0)已发布，firstRelease为v0.53.0，正式媒体保持检查后的同一份。
 
 
-- [部署40105542981](https://github.com/linhongcun/video-studio/actions/runs/40105542981)于2026-10-24 23:09:55（北京时间）成功，head与合并提交一致，API证据见deployment.json。合并触发的构建已收录实际v0.53.0 Release链接，线上脚本对此另有断言，不只比对页脚版本。
+- [部署40105542981](https://github.com/linhongcun/video-studio/actions/runs/40105542981)于2026-10-24 23:09:55（北京时间）成功，head与合并提交一致，API证据见revisions/problem-first/before-deployment.json。合并触发的构建已收录实际v0.53.0 Release链接，线上脚本对此另有断言，不只比对页脚版本。
 - 2026-10-24 23:10:27（北京时间）实际HTTPS GET核验通过：线上视频8,391,127 bytes、完整SHA与检查后媒体相同；海报123,430 bytes、完整SHA为85982c447c2494becba5d476367f9865b26c12d890fcf066cc8860b6334330b1；36句VTT逐字节一致，SHA为0bcfb90d0e8c7eb5a74c242e6a5b88cd41490cbd3491737890b8b3db03987785。
-- 四章精确起点、正文锚点、源码入口、独立系列、首页/RSS及实际Release更新日志通过，见online-verification.json。2026-10-24 23:10:55（北京时间）已将#79以completed关闭，API结果见issue-closure.json；不表示外部平台已经发布。
+- 四章精确起点、正文锚点、源码入口、独立系列、首页/RSS及实际Release更新日志通过，见revisions/problem-first/before-online-verification.json。2026-10-24 23:10:55（北京时间）已将#79以completed关闭，API结果见issue-closure.json；不表示外部平台已经发布。
 - Release后另按流程触发的[部署40105615410](https://github.com/linhongcun/video-studio/actions/runs/40105615410)也已成功，head与合并提交一致，见release-deployment.json；未取消其他工作流。
+
+## v0.54.2：题意先于解法
+
+- 按用户共同反馈重做前两镜：先讲输入、可选内容和限制、目标及返回值，再进入原方法。保留已发布正文和5秒完整Python卡；源文件后缀与后续takes不变，每镜仅静态尾停补剪最多1帧。
+- 当前5129帧、170.966667秒，较上一版仅增加1.700秒；视频8,468,691 bytes，完整SHA256 `61e6d380eb260b2cac5a629aaef62f544fdcd3d7b928da8db242efe9f53088a1`。题意预检、独立实际MP4检查、166输入冻结、完整解码和音量通过。
+- 本轮补丁接续学习站v0.54.0与策略模式v0.54.1，未回退其它机器的内容；题意规范、L026、经验与制作检查清单更新。网页1440两页/新VTT/章节检查通过，合并、Release、部署及实际线上证据完成后补齐，不声称用户已观看新版。

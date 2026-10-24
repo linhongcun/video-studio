@@ -53,8 +53,11 @@ const PairMatrix=({progress=1,checked=false,stage=6,alpha=1}:any)=>{
 };
 const Scene=({s,f}:{s:Shot;f:number})=>{
  const t=s.visualType,p=phase(s,f),q=phase(s,f,1);
- if(t==='hook'){const k=Math.min(20,Math.floor(f/35)),[l,r]=pairs[k];return <><Head title="21 种配对，都要算吗？" sub="怎样找到最大的面积？"/><Chart l={l} r={r} pointers={false} fill={1} waterAlpha={.16}/><Pill x={1130} y={312} w={370} label="候选还在增加……" color={C.blue}/><Bottom>七条竖线，只能选两条</Bottom></>}
- if(t==='data')return <><Head title="把高度，画成一排竖线" sub="示例高度：[2, 3, 10, 5, 7, 8, 9]"/><Chart selected={false} pointers={false}/><g opacity={p}><Line x1={tx(0)} y1={850} x2={tx(1)} y2={850} color={C.blue} width={3}/><T x={(tx(0)+tx(1))/2} y={891} color={C.blue} size={30} anchor="middle">间距 1</T></g><Bottom alpha={q}>选出两条，让围成的面积最大</Bottom></>;
+ if(t==='hook'){
+  const chosen=f>=at(s,1,.04),water=phase(s,f,1,.3,.8);
+  return <><Head title="选哪两条，能围出最大面积？" sub="输入示例：[2, 3, 10, 5, 7, 8, 9] · 数字表示竖线高度"/><Chart l={0} r={6} pointers={false} selected={chosen} muted={chosen} fill={water}/>{!chosen&&<g>{H.map((height,i)=><g key={i}><Line x1={tx(i)} y1={base} x2={tx(i)} y2={base-height*unit} color={C.muted} width={5}/><T x={tx(i)} y={base-height*unit-23} color={C.text} anchor="middle" size={29} mono>{height}</T></g>)}</g>}<Line x1={1668} y1={764} x2={1723} y2={764} color={C.blue} width={2}/><T x={1740} y={775} size={26} color={C.blue}>底边</T><Pill x={1140} y={312} w={570} label={chosen?'任选两条，与底边组成容器':'每个数字，对应一条竖线的高度'} color={chosen?C.teal:C.muted}/><Bottom color={C.blue}>目标：找出能装水最多的那一对</Bottom></>;
+ }
+ if(t==='data')return <><Head title="相邻间隔为 1，容器不能倾斜" sub="同一排竖线 · 位置固定，水面保持水平"/><Chart l={0} r={6} pointers={false} fill={1}/><g opacity={p}><Line x1={tx(0)} y1={852} x2={tx(1)} y2={852} color={C.blue} width={3}/><Line x1={tx(0)} y1={842} x2={tx(0)} y2={862} color={C.blue} width={3}/><Line x1={tx(1)} y1={842} x2={tx(1)} y2={862} color={C.blue} width={3}/><T x={(tx(0)+tx(1))/2} y={899} color={C.blue} size={30} anchor="middle">间距 1</T></g><Pill x={1140} y={312} w={520} label="容器不能倾斜" color={C.blue}/><Bottom alpha={q} color={C.teal}>返回最大的面积，不是两条线的下标</Bottom></>;
  if(t==='width')return <><Head title="宽度，看两条边的距离" sub="最左下标 0，最右下标 6"/><Chart pointers={false} fill={0} drawWidth={p}/><Pill x={960} y={320} w={470} color={C.blue} alpha={q} label="6 段距离，不是 7 条线"/></>;
  if(t==='short-height')return <><Head title="水面高度，由短边决定" sub="左边高 2，右边高 9"/><Chart fill={p} pointers={false} drawHeight={q}/><Formula l={0} r={6} alpha={q}/></>;
  if(t==='definition')return <><Head title="面积，只由选中的两条边决定" sub="中间这些线，不扣掉面积"/><Chart pointers={false} muted fill={1}/><Formula l={0} r={6}/><Pill x={1060} y={454} w={500} label="宽 × 较矮的高度" color={C.blue} alpha={q}/></>;
