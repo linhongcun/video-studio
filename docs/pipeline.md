@@ -15,6 +15,7 @@
 - [ ] `storyboard.json`、`covers.json` 冻结，并写上配音 SHA-256
 - [ ] `words.json` 的 `scriptSha256`、`audioSha256` 与文件一致
 - [ ] Deming 预检：起音窗口、无 `COPYFIT`、封面 4:3 安全区
+- [ ] 检查持续动态元素是否参与当前讲解：成片内不叠加与内容无关的装饰进度条；播放器原生可操作进度控件保留
 - [ ] `video.mp4` 与封面由当期 `package.json` 的脚本产出
 - [ ] 成片复核完成，执行者和实际检查范围已记录，未执行的能力未伪称通过
 - [ ] 符合 STATUS 的 GitHub 持续发布授权范围

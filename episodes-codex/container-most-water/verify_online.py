@@ -17,7 +17,7 @@ DIST = ROOT / 'site/dist'
 META = json.loads((SITE / 'meta.json').read_text())
 SB = json.loads((SITE / 'storyboard.json').read_text())
 BASE = 'https://linhongcun.github.io/video-studio/'
-TAG = META['firstRelease']
+TAG = 'v' + json.loads((ROOT / 'site/package.json').read_text())['version']
 
 
 def get(rel):

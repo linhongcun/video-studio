@@ -1,0 +1,537 @@
+[
+  {
+    "id": "01",
+    "visualType": "hook",
+    "title": "会回答，就能办事？",
+    "narration": "回复写着可以申请，订单却没有变化。这是在给你建议，还是已经替你办好了？",
+    "sentences": [
+      "回复写着可以申请，订单却没有变化。",
+      "这是在给你建议，还是已经替你办好了？"
+    ],
+    "state": "订单8124：退款未执行；回复只显示可申请，不画成已退款。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "回复建议进入左侧；右侧订单状态保持未执行，焦点沿两者切换。"
+      },
+      {
+        "sentence": 1,
+        "description": "保持订单记录不变；突出建议与执行的冲突，不提前给出循环答案。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "hook",
+    "chapterId": "conflict",
+    "chapterTitle": "回答了，还是办好了",
+    "cues": []
+  },
+  {
+    "id": "02",
+    "visualType": "scope",
+    "title": "先看同一笔退款咨询",
+    "narration": "用户想退这一笔示例订单，先问能不能申请。我们要看清，建议和执行之间隔着什么。",
+    "sentences": [
+      "用户想退这一笔示例订单，先问能不能申请。",
+      "我们要看清，建议和执行之间隔着什么。"
+    ],
+    "state": "订单8124，用户问题：这单能申请退款吗？",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "同一订单8124缩退为稳定右侧锚点；用户问题进入。"
+      },
+      {
+        "sentence": 1,
+        "description": "建议与执行两个结果位分开，当前均未核验。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "goal",
+    "chapterId": "conflict",
+    "chapterTitle": "回答了，还是办好了",
+    "cues": []
+  },
+  {
+    "id": "03",
+    "visualType": "scope",
+    "title": "本片只查询与给建议",
+    "narration": "这次只查询资料，最后给出申请建议。订单和规则都是示例，不连接真实退款系统。",
+    "sentences": [
+      "这次只查询资料，最后给出申请建议。",
+      "订单和规则都是示例，不连接真实退款系统。"
+    ],
+    "state": "全部数据与政策为教学示例；只读查询；退款未执行。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "只读查询的范围线包住订单查询和规则查询；写操作区域不接通。"
+      },
+      {
+        "sentence": 1,
+        "description": "显式保留示例声明与退款未执行，逐步让规则对象入场。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "scope",
+    "chapterId": "conflict",
+    "chapterTitle": "回答了，还是办好了",
+    "cues": []
+  },
+  {
+    "id": "04",
+    "visualType": "model",
+    "title": "先认识模型",
+    "narration": "模型，接收你提供的信息，再生成回复。没有查询记录，不能凭一段回答确认这笔订单的状态。",
+    "sentences": [
+      "模型，接收你提供的信息，再生成回复。",
+      "没有查询记录，不能凭一段回答确认这笔订单的状态。"
+    ],
+    "state": "首次术语：模型；此时订单事实未知。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "模型在左侧进入；用户问题流入模型，回复从模型流出。"
+      },
+      {
+        "sentence": 1,
+        "description": "查询记录位保持空；回复不能改变右侧订单的真实状态。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "model",
+    "chapterId": "roles",
+    "chapterTitle": "模型和执行程序各做什么",
+    "cues": [
+      {
+        "term": "模型",
+        "sentence": 0
+      }
+    ]
+  },
+  {
+    "id": "05",
+    "visualType": "model",
+    "title": "这一单需要这一单的资料",
+    "narration": "如果只问一般规则，它可以先解释常见条件。可要判断这一单，就得拿到这一单的资料。",
+    "sentences": [
+      "如果只问一般规则，它可以先解释常见条件。",
+      "可要判断这一单，就得拿到这一单的资料。"
+    ],
+    "state": "一般说明与本单事实分开；仍无本单事实。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "一般说明退出当前焦点，回到订单8124的问题。"
+      },
+      {
+        "sentence": 1,
+        "description": "订单事实槽为空并标未查询，等待真实查询返回。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "need-data",
+    "chapterId": "roles",
+    "chapterTitle": "模型和执行程序各做什么",
+    "cues": []
+  },
+  {
+    "id": "06",
+    "visualType": "capabilities",
+    "title": "应用把能力交给模型",
+    "narration": "应用程序，把用户的问题和可用的查询方法交给模型。这里有查订单和查规则，两种只读能力。",
+    "sentences": [
+      "应用程序，把用户的问题和可用的查询方法交给模型。",
+      "这里有查订单和查规则，两种只读能力。"
+    ],
+    "state": "左模型、中应用执行程序、右订单与规则；查订单/查规则可用。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "应用执行程序在中间入场，向左交付问题及可用能力说明。"
+      },
+      {
+        "sentence": 1,
+        "description": "右侧只引入查订单、查规则两个入口；退款执行没有被提供。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "application",
+    "chapterId": "roles",
+    "chapterTitle": "模型和执行程序各做什么",
+    "cues": []
+  },
+  {
+    "id": "07",
+    "visualType": "tool-contract",
+    "title": "请求和执行要分开",
+    "narration": "工具，让程序能够查询这些外部信息。模型提出调用请求，真正的查询由执行程序完成。",
+    "sentences": [
+      "工具，让程序能够查询这些外部信息。",
+      "模型提出调用请求，真正的查询由执行程序完成。"
+    ],
+    "state": "首次术语：工具；调用请求不等于执行。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "工具首词起音时标签出现；显示两种查询能力。"
+      },
+      {
+        "sentence": 1,
+        "description": "调用请求从模型到执行程序，执行路径再到查询入口，禁止模型直连改订单。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "tool",
+    "chapterId": "roles",
+    "chapterTitle": "模型和执行程序各做什么",
+    "cues": [
+      {
+        "term": "工具",
+        "sentence": 0
+      }
+    ]
+  },
+  {
+    "id": "08",
+    "visualType": "request",
+    "title": "第一步，查询订单",
+    "narration": "这次，模型先请求查询这笔订单。程序检查订单编号和读取权限，再去取回记录。",
+    "sentences": [
+      "这次，模型先请求查询这笔订单。",
+      "程序检查订单编号和读取权限，再去取回记录。"
+    ],
+    "state": "查询订单8124；应用校验编号和当前用户读取权限。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "请求载荷8124从左抵达中间，先停在待校验。"
+      },
+      {
+        "sentence": 1,
+        "description": "编号与读取权限依次通过后，查询才抵达订单记录；不读取其他订单。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "order-request",
+    "chapterId": "loop",
+    "chapterTitle": "拿到结果，再选下一步",
+    "cues": []
+  },
+  {
+    "id": "09",
+    "visualType": "order-result",
+    "title": "订单返回什么",
+    "narration": "返回结果是，商品已经签收三天。是否使用过，记录里还不知道。",
+    "sentences": [
+      "返回结果是，商品已经签收三天。",
+      "是否使用过，记录里还不知道。"
+    ],
+    "state": "订单8124：签收3天；使用情况未知；退款未执行。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "同一订单卡揭示签收3天，查询结果进入返回路径。"
+      },
+      {
+        "sentence": 1,
+        "description": "使用情况字段保持未知；不擅自填未使用。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "order-result",
+    "chapterId": "loop",
+    "chapterTitle": "拿到结果，再选下一步",
+    "cues": []
+  },
+  {
+    "id": "10",
+    "visualType": "feedback",
+    "title": "把结果交回模型",
+    "narration": "这份结果送回模型，成为下一次选择的依据。模型再按缺少的信息，选择下一步要做什么。",
+    "sentences": [
+      "这份结果送回模型，成为下一次选择的依据。",
+      "模型再按缺少的信息，选择下一步要做什么。"
+    ],
+    "state": "订单查询输出经应用返回模型；缺退款规则与使用情况。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "查询结果从右经中抵达模型，订单原卡保留，数据包只代表返回副本。"
+      },
+      {
+        "sentence": 1,
+        "description": "两个缺口逐个显示；模型下一动作选择位从待定转查规则。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "feedback",
+    "chapterId": "loop",
+    "chapterTitle": "拿到结果，再选下一步",
+    "cues": []
+  },
+  {
+    "id": "11",
+    "visualType": "policy-request",
+    "title": "再查询退款规则",
+    "narration": "接下来，它请求查询退款规则。程序取回对应规则，再把原文结果送回来。",
+    "sentences": [
+      "接下来，它请求查询退款规则。",
+      "程序取回对应规则，再把原文结果送回来。"
+    ],
+    "state": "同一订单适用的示例政策；不引入RAG/MCP术语。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "查规则请求从模型经执行程序抵达同一示例政策入口。"
+      },
+      {
+        "sentence": 1,
+        "description": "规则原文从右经中返回模型；只显示当前规则。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "policy-request",
+    "chapterId": "loop",
+    "chapterTitle": "拿到结果，再选下一步",
+    "cues": []
+  },
+  {
+    "id": "12",
+    "visualType": "policy-result",
+    "title": "规则满足了一半",
+    "narration": "示例规则写着，签收七天内且未使用，可以申请。时间条件已经满足，使用情况还缺证据。",
+    "sentences": [
+      "示例规则写着，签收七天内且未使用，可以申请。",
+      "时间条件已经满足，使用情况还缺证据。"
+    ],
+    "state": "示例政策：签收7天内且未使用→可申请；3天≤7天；使用未知。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "示例规则逐条出现，签收3天与期限7天对齐后仅时间条件确认。"
+      },
+      {
+        "sentence": 1,
+        "description": "使用未知保持金色待核实，申请资格仍待判断；不提前显示可申请。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "policy-result",
+    "chapterId": "loop",
+    "chapterTitle": "拿到结果，再选下一步",
+    "cues": []
+  },
+  {
+    "id": "13",
+    "visualType": "ask",
+    "title": "缺信息，先问用户",
+    "narration": "模型于是先问，商品有没有使用过。询问发给用户，这一轮先停在等待补充。",
+    "sentences": [
+      "模型于是先问，商品有没有使用过。",
+      "询问发给用户，这一轮先停在等待补充。"
+    ],
+    "state": "模型可见选择：向用户询问；等待补充；退款未执行。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "询问从模型经应用送向用户，同一订单仍在右侧。"
+      },
+      {
+        "sentence": 1,
+        "description": "工具路径暂停，明确等待补充；不继续自说自话补造使用状态。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "ask",
+    "chapterId": "loop",
+    "chapterTitle": "拿到结果，再选下一步",
+    "cues": []
+  },
+  {
+    "id": "14",
+    "visualType": "loop",
+    "title": "智能体如何接着做",
+    "narration": "智能体，把模型选择、程序执行和结果反馈接成循环。它根据已经得到的信息，在允许的动作里继续选择。",
+    "sentences": [
+      "智能体，把模型选择、程序执行和结果反馈接成循环。",
+      "它根据已经得到的信息，在允许的动作里继续选择。"
+    ],
+    "state": "首次术语：智能体；包含模型和应用控制，不只一个模型框。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "智能体首词起音后，用外边界包住模型、执行程序及反馈连接；顺次回看请求、执行、结果三段。"
+      },
+      {
+        "sentence": 1,
+        "description": "突出下一步受已知结果影响，仍保留等待用户状态；不画隐藏思考文本。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "agent",
+    "chapterId": "loop",
+    "chapterTitle": "拿到结果，再选下一步",
+    "cues": [
+      {
+        "term": "智能体",
+        "sentence": 0
+      }
+    ]
+  },
+  {
+    "id": "15",
+    "visualType": "user-reply",
+    "title": "补充信息再继续",
+    "narration": "用户补充没有使用过，应用把回答交回模型。前面查到的订单和规则，也继续作为这次判断的依据。",
+    "sentences": [
+      "用户补充没有使用过，应用把回答交回模型。",
+      "前面查到的订单和规则，也继续作为这次判断的依据。"
+    ],
+    "state": "用户陈述：未使用；签收3天与规则7天继续保留；未独立核验实物。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "用户回答经应用抵达模型，使用字段显示用户补充未使用并标来源。"
+      },
+      {
+        "sentence": 1,
+        "description": "本轮输入汇合已查询订单、对应规则和用户补充，不重新复制三个大面板。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "user-reply",
+    "chapterId": "loop",
+    "chapterTitle": "拿到结果，再选下一步",
+    "cues": []
+  },
+  {
+    "id": "16",
+    "visualType": "recommendation",
+    "title": "给建议，还没有退款",
+    "narration": "按目前这些资料，它给出可以申请的建议。这份建议有了依据，退款状态仍然没有改变。",
+    "sentences": [
+      "按目前这些资料，它给出可以申请的建议。",
+      "这份建议有了依据，退款状态仍然没有改变。"
+    ],
+    "state": "按当前查询与用户陈述：可申请；退款未执行。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "时间条件与用户补充依次汇入建议，显示按当前资料可申请。"
+      },
+      {
+        "sentence": 1,
+        "description": "建议确认后，订单退款状态仍锁定未执行，禁止变为已退款。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "recommendation",
+    "chapterId": "loop",
+    "chapterTitle": "拿到结果，再选下一步",
+    "cues": []
+  },
+  {
+    "id": "17",
+    "visualType": "workflow-compare",
+    "title": "固定流程也能有分支",
+    "narration": "再看固定工作流，下一步由预先写好的程序规定。它也能查资料和按条件分支，不一定只有一条直线。",
+    "sentences": [
+      "再看固定工作流，下一步由预先写好的程序规定。",
+      "它也能查资料和按条件分支，不一定只有一条直线。"
+    ],
+    "state": "对比示意：预写路径可查询、判条件、询问；不是无分支直线。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "明确切到同一咨询的架构对比示意，不重演已退款业务；显示程序预定查订单→查规则。"
+      },
+      {
+        "sentence": 1,
+        "description": "使用情况已知/未知的条件分支依次展开，两条路径都由预写规则控制。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "workflow",
+    "chapterId": "choice",
+    "chapterTitle": "谁来决定下一步",
+    "cues": []
+  },
+  {
+    "id": "18",
+    "visualType": "control-boundary",
+    "title": "关键是谁选择下一步",
+    "narration": "这里的区别，是谁决定下一步怎样走。智能体允许模型根据结果选择动作，应用仍要限制权限和运行次数。",
+    "sentences": [
+      "这里的区别，是谁决定下一步怎样走。",
+      "智能体允许模型根据结果选择动作，应用仍要限制权限和运行次数。"
+    ],
+    "state": "实用架构区分，不声称唯一公认定义；应用控制边界保留。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "对比预写路径与模型根据返回选择，明确箭头归属；不靠是否有分支判Agent。"
+      },
+      {
+        "sentence": 1,
+        "description": "应用外边界保持只读与停止条件；模型选择不能穿透限制。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "control",
+    "chapterId": "choice",
+    "chapterTitle": "谁来决定下一步",
+    "cues": []
+  },
+  {
+    "id": "19",
+    "visualType": "verify",
+    "title": "执行结果要另外核对",
+    "narration": "需要真的改订单，就得另有被允许的执行动作。还要核对系统结果，不能把模型说完成当成已经完成。",
+    "sentences": [
+      "需要真的改订单，就得另有被允许的执行动作。",
+      "还要核对系统结果，不能把模型说完成当成已经完成。"
+    ],
+    "state": "本片未提供退款写工具；退款未执行；核对实际状态。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "回到同一订单8124的事实视图，写动作入口仍未提供，不实际执行。"
+      },
+      {
+        "sentence": 1,
+        "description": "模型完成文字淡出核对路径，订单实际未执行成为判据；建议完成和退款完成分列。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "execution-boundary",
+    "chapterId": "verify",
+    "chapterTitle": "怎样才算真的完成",
+    "cues": []
+  },
+  {
+    "id": "20",
+    "visualType": "recap",
+    "title": "沿着结果检查",
+    "narration": "所以看一个智能体，要沿着请求、执行和返回结果去检查。它能不能办成事，要由真实结果来证明。",
+    "sentences": [
+      "所以看一个智能体，要沿着请求、执行和返回结果去检查。",
+      "它能不能办成事，要由真实结果来证明。"
+    ],
+    "state": "本片结果：有依据的申请建议；未退款；IT小村·原创。",
+    "actions": [
+      {
+        "sentence": 0,
+        "description": "顺次点亮本片确实发生的查询请求、执行、返回与补充，不伪造未执行步骤。"
+      },
+      {
+        "sentence": 1,
+        "description": "落到可申请建议和退款未执行两个准确结果；原创片尾入场，不说下期见。"
+      }
+    ],
+    "frame": "canvas",
+    "slug": "recap",
+    "chapterId": "verify",
+    "chapterTitle": "怎样才算真的完成",
+    "cues": []
+  }
+]
