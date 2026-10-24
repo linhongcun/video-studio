@@ -4,4 +4,4 @@
 
 完整视频SHA-256：`c2cd0d7ed3dc9d202c2e364550f73e7c1586d2d2673256a594c9780fe8d4ff0d`。具体动态、独立编辑与正式媒体证据见[最终检查](qa-final.md)。历史媒体与源见[原版索引](revisions/pre-flow-map.json)。
 
-本地正式成片与站点副本已核对；本批发布版本v0.56.2，保留至v0.56.1的多机协作主干，Release后部署、线上完整文件/字幕/章节/海报/更新日志通过再关闭#199。只上GitHub站点，不将检查记为用户已认可新版。
+已由[PR #224](https://github.com/linhongcun/video-studio/pull/224)合并，随[v0.56.2](https://github.com/linhongcun/video-studio/releases/tag/v0.56.2)上线，并经[Release后Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40118710238)成功。线上视频完整SHA与上述本地成片一致，字幕、章节、海报和更新日志已核验；#199已以completed关闭，见[线上证据](../../docs/flow-navigation-audit/online-verification.json)。本轮仅更新GitHub站点，用户对新版的观看反馈后续另记。
