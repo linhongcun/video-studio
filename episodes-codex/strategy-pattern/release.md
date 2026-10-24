@@ -1,12 +1,18 @@
 # 策略模式D01：发布记录
 
-## 新手讲解重制（v0.54.4待发布）
+## 新手讲解重制（v0.54.4已上线）
 
 2026-10-25，用户明确授权根据新手反馈调整并完成上线。当前13镜26句、4895帧约2分43秒；只保留会员/活动两种办法，直接解释函数本身与结果、参数对应、先选择后执行，并保留自然章节承接和成本边界。改价/新客注册/完整校验留在图文拓展。
 
 新视频完整SHA-256：`a7056ae8ccfe6783063b6c679174fa5d15ab410cac0628fe5de12e7fcc9e6696`，8,674,537字节，1080p/30fps/AAC48k，−16.0LUFS/−3.7dBTP。137输入冻结、完整解码与PTS连续性、独立实际成片/字幕及两视口8次seek验收通过；本轮报告见qa-final.md、qa-teaching-beginner.md及site-beginner检查记录。
 
-当前待合并、Release后Pages部署与8个canonical普通GET核验；firstRelease仍为v0.52.0。以下v0.54.1及v0.52.0保留为历史，不能作为新版线上核验。
+- [PR #216](https://github.com/linhongcun/video-studio/pull/216)已合并，提交与附注标签为`277ef7091994bedf1a2c48be978a69a59e7994a3`。
+- [v0.54.4 Release](https://github.com/linhongcun/video-studio/releases/tag/v0.54.4)于2026-10-24T16:52:29Z（北京时间2026-10-25 00:52:29）发布。
+- 重复push部署40113533206已取消；实际交付以Release后的[Pages部署40113587396](https://github.com/linhongcun/video-studio/actions/runs/40113587396)为准，2026-10-24T16:58:11Z完成且success，head与标签一致。实际结果见deployment.json。
+- 线上核验于2026-10-25T00:58:39.395227+08:00一次通过：8个canonical普通GET全部200，视频8,674,537字节完整SHA、原海报、26条VTT逐字节一致；新标题、四章0/796/1514/4166帧、目录、源码、JSON-LD、首页、系列、RSS与v0.54.4更新日志均通过。见[完整线上报告](../../episodes/strategy-pattern/online-verification.json)。
+- #163已在核验后以completed关闭，#161同步当前新手版。用户尚未观看本版，不将编辑或线上检查称作用户认可；平台未新发。
+
+firstRelease仍为v0.52.0。以下v0.54.1及v0.52.0保留为历史，不作为新版线上核验。
 
 
 ## 章节衔接修订（v0.54.1已上线）
@@ -44,4 +50,4 @@
 
 线上目标：[策略模式视频与配套文章](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)。线上验证脚本为本期 `verify-online.py`，读取canonical页面、视频、海报、VTT、系列、首页、RSS与更新日志；视频流式完整哈希，不下载另存远程媒体。
 
-用户已观看v0.52.0并提出章节衔接反馈；当前v0.54.1尚无用户观看反馈。平台新发未执行。
+用户先看v0.52.0提出章节衔接反馈，后看v0.54.1仍认为新手难理解；当前v0.54.4尚无用户观看反馈。平台新发未执行。
