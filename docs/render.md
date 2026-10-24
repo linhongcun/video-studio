@@ -38,6 +38,12 @@ python3 ../../../episodes/_shared/music/mix_bgm.py \
 
 人声文件要先放在 `remotion/public/audio/voice.wav`。`remotion.config.ts` 据此设置 `__HAS_VOICE_AUDIO__`。文件不存在时画面仍会出，但没有配音。
 
+`remotion/public/audio/voice.wav` 必须是实体文件（或打包后仍有效的拷贝）。不要用相对软链指过去：Remotion bundle 时把 `public/` 拷进临时目录，相对软链在那里断掉，渲染时 `staticFile('audio/voice.wav')` 404，整片渲染失败（EP.14 出过一次）。用 `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole` 放置，它按字节复制，目标若是软链会先删掉再写实体文件。手动放时用 `cp`，不要 `ln -s`。渲染前可以确认：
+
+```sh
+test -f remotion/public/audio/voice.wav && test ! -L remotion/public/audio/voice.wav && echo ok
+```
+
 `mix_bgm.py` 还可选 `--lufs`（默认 −16）、`--offset`、`--wav`。`--mode duck` 在重制期的 `package.json` 里没有使用。
 
 输出：
@@ -47,6 +53,31 @@ python3 ../../../episodes/_shared/music/mix_bgm.py \
 - `episodes/<slug>/remotion/out/mix-report.json` — `final_LUFS`、`true_peak_dBTP`
 
 degradation 的成片帧数等于分镜 `durationInFrames`（5152），也等于 `words.json` 的 `durationFrames`。片尾句子在最后一镜里。`Main.tsx` 没有挂 `ChannelBranding`，不会在这 5152 帧后再加一段。`episodes/_shared/branding/spec.json` 的 `endCard.frames` 仍是 60，那是水印组件规范；这一期的工程没有调用它。不要在分镜总帧数之外再加 60 帧，除非该期 `timingSource` 写明要加。
+
+## 演示页页身色
+
+浏览器壳和 DevTools 用各期 `theme.ts` 的 `P.*`，保持深色不动。壳里的网页页身（各期 `src/components/*Page.tsx`）用 `episodes/_shared/theme/pageTheme.ts` 的 `PAGE`：`bg` `#0F172A`、`ink` `#E5E7EB`，另有 `muted`、`field`、`row`、`border`、`highlight`、`highlightEdge`、`success`。别名 `pageBg` = `PAGE.bg`，`pageInk` = `PAGE.ink`。
+
+引用方式：每期 `remotion/src/theme.ts` 转发一行，不要把色值抄进期目录：
+
+```ts
+// Demo page body (not chrome). See episodes/_shared/theme/pageTheme.ts.
+export {PAGE, pageBg, pageInk} from '../../../_shared/theme/pageTheme';
+```
+
+`*Page.tsx` 从本期 `theme` 引入（参考 `episodes/degradation/remotion/src/components/ShopPricePage.tsx`）：
+
+```ts
+import {P, PAGE} from '../theme';
+// 页身根节点
+<div style={{position: 'absolute', inset: 0, background: PAGE.bg, color: PAGE.ink}}>
+```
+
+新增 `*Page.tsx` 必须这样用 `PAGE.bg` / `PAGE.ink`（或 `pageBg` / `pageInk`），输入框、卡片、行底用 `PAGE.field` / `PAGE.row` / `PAGE.border`。不要写死 `#FFFFFF`、`#F8FAFC` 一类大面积浅色底；高亮、成功色在深底上用 `PAGE.highlight*` / `PAGE.success`，不要沿用浅底时代的色值。要改配色只改 `pageTheme.ts`，改后受影响各期都要重渲并重新审片。提交前可以查：
+
+```sh
+rg -n -i "#fff(fff)?\b|#f8fafc" episodes/*/remotion/src/components/*Page.tsx
+```
 
 ## 重制期封面
 
