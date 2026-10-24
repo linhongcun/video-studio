@@ -19,3 +19,7 @@ Python 环境：/workspace/.venvs/video-studio。使用仓内 episodes/_shared/v
 配乐沿用共享 Kevin MacLeod《Wallpaper》、CC BY 4.0；成片目标−16LUFS/真峰值≤−2dBTP。ASR模型在环境中缺失且官方端点被proxy拒绝，本期未执行逐字识别或独立人工全片听辨，能力边界在QA中实录。
 
 发布由root统一接入 episodes/cookie-session/、升级站点修订版本、合并PR、Release、部署并核对线上完整SHA。本目录完成制作不等同于平台已重发；当前只上GitHub站点。
+
+## 站点发布
+
+[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。

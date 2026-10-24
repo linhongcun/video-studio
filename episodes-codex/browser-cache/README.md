@@ -29,3 +29,7 @@ flock /tmp/video-studio-render.lock node scripts/motion-qa.mjs /tmp/ep07-codex-m
 正式编码前运行freeze.py，冻结脚本、文章、调研、读音、全部Remotion源码及脚本、选定配音takes、整轨、时间数据和共享实现。编码后用verify.py核对输入未变及实际MP4。动态与最终复核实际范围见qa-motion.md和qa-final.md。
 
 配乐沿用Kevin MacLeod《Wallpaper》，CC BY 4.0。混音调用共享mix_bgm.py，目标−16 LUFS、真峰值−2 dBTP。发布只覆盖GitHub站点，平台新发仍按原授权边界处理。
+
+## 站点发布
+
+[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。

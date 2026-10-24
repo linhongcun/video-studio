@@ -36,6 +36,7 @@
 - 制作目录为 `episodes-codex/<slug>/`，逐期执行资料、动态表达、配音时序、冻结、成片及线上核验；按既有持续授权发布 GitHub 站点。平台投稿不在本次范围。
 - [批次记录](codex-remake-ep01-14.md)区分制作中、检查通过、接入站点和线上核验完成，不将旧轮次已关闭的 issue 当成本轮已完成。
 - 本轮v0.48.0：160镜、320句新配音、45667帧，合计约25分22秒。各期本地完整解码、动态及独立实际帧复核完成；统一构建、浏览器与线上核验结果分别记录，不将已发布等同用户已观看认可。
+- [v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已由[媒体PR](https://github.com/linhongcun/video-studio/pull/151)合并并[部署](https://github.com/linhongcun/video-studio/actions/runs/40091595906)，2026-10-24 19:53:36（北京时间）线上14期视频/海报完整SHA、字幕逐字节、章节与源码入口、首页和更新日志核验通过；完整证据见[online.json](codex-remake-ep01-14/online.json)。各期release.md与来源SHA可追溯，平台投稿保留。
 
 ### EP.15 数据库索引
 
