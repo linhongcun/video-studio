@@ -1,0 +1,48 @@
+onset_rule selftest True
+frames 3457.0 durationFrames 3457 sec 115.23333333333333
+shot table:
+  01-hook                    0-  226 (226f 7.53s)
+  02-record                226-  452 (226f 7.53s)
+  03-read                  452-  703 (251f 8.37s)
+  04-first                 703-  929 (226f 7.53s)
+  05-overwrite             929- 1169 (240f 8.00s)
+  06-lost                 1169- 1439 (270f 9.00s)
+  07-restart              1439- 1675 (236f 7.87s)
+  08-lock                 1675- 1937 (262f 8.73s)
+  09-wait                 1937- 2176 (239f 7.97s)
+  10-commit               2176- 2401 (225f 7.50s)
+  11-fresh                2401- 2675 (274f 9.13s)
+  12-reject               2675- 2901 (226f 7.53s)
+  13-recap                2901- 3188 (287f 9.57s)
+  14-next                 3188- 3457 (269f 8.97s)
+cues 2 max |cue-rule| 0 outside -6..+2: []
+sentence ASR mismatches:
+   01-hook-1 delete '只剩最后一件货两个人却都下单成功了' -> ''
+   01-hook-2 delete '数据库里的库存哪里出了问题' -> ''
+   02-record-1 delete '看这条教学记录同一件商品库存是一' -> ''
+   02-record-2 delete '甲和乙都想买走一件' -> ''
+   03-read-1 delete '一种有漏洞的做法是先普通查询再把算好的库存写回' -> ''
+   03-read-2 delete '两个请求都读到了一' -> ''
+   04-first-1 delete '甲认为还有货算出一减一等于零' -> ''
+   04-first-2 delete '程序写回零并让甲通过' -> ''
+   05-overwrite-1 delete '乙用的还是刚才读到的一也算出了零' -> ''
+   05-overwrite-2 delete '它再写一次零也认为可以下单' -> ''
+   06-lost-1 delete '丢失更新就是前一次修改被后一次旧结果盖掉了' -> ''
+   06-lost-2 delete '这里通过了两次购买库存却只扣了一次' -> ''
+   07-restart-1 delete '重来一次起点仍是库存一' -> ''
+   07-restart-2 delete '这回把检查和修改放在各自的事务里' -> ''
+   08-lock-1 delete '行锁可以让冲突的操作分先后' -> ''
+   08-lock-2 delete '甲在事务里加锁读取这一行先获得了修改它的权利' -> ''
+   09-wait-1 delete '乙也要加锁读同一行就得先等' -> ''
+   09-wait-2 delete '它现在还没拿到结果不能拿旧库存继续扣' -> ''
+   10-commit-1 delete '甲读到一确认有货扣成零' -> ''
+   10-commit-2 delete '等甲提交这一行的锁才释放' -> ''
+   11-fresh-1 delete '等待结束乙的加锁查询读到的是零' -> ''
+   11-fresh-2 delete '它必须用这个新结果重新检查库存' -> ''
+   12-reject-1 delete '已经没有货程序就不再扣减也不让乙下单' -> ''
+   12-reject-2 delete '最后只有一人买到这一件' -> ''
+   13-recap-1 delete '所以要先加锁读取再检查和修改最后结束事务' -> ''
+   13-recap-2 delete '只排队却继续用旧值计算还是可能出错' -> ''
+   14-next-1 delete '这一行的修改有了先后可刚改好的昵称一刷新怎么又变回去了' -> ''
+   14-next-2 delete '下一期我们接着看' -> ''
+selfcheck ok short shots: []

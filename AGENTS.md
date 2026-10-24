@@ -28,7 +28,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 
 ## 系列状态
 
-系列默认暂停。2026-10-24 用户先批准 #66 的 EP.15 重制与站点部署（v0.45.1），随后要求挑下一期，观看 #67 的 EP.16 第二版后批准合并主干、部署 GitHub 站点（v0.45.2）。两期只上站点；平台新发尚未恢复。详见 [docs/RULES.md](docs/RULES.md) 的 STATUS。
+2026-10-24 用户认可 EP.17 后批准本期合并及 GitHub 站点上线，并授权今后视频做好、完成检查后自主合并主干、发布 Release 和部署 Pages，无需逐期等待用户观看或 widget 批准；有反馈再修改、重新上线。资料、动画动态表达、配音时序、成片和线上完整 SHA 检查继续，能力限制须如实记录。授权范围和选题推进以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准；平台新发仍须另行明确授权。
 
 ## 角色
 
@@ -39,9 +39,9 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 | 制作 | Knoll（John Knoll） | 配音、Remotion、渲染、封面、站点 PR、Release、deploy |
 | 质检 | Deming | 冻结后的预检，以及成片审 |
 | 运营 | Tim Cook | 抖音（头条同步）、B站、视频号发布；平台链接私信 Knoll（站点维护者）和 Nolan |
-| 村长 | — | 只批最终上线 |
+| 村长 | — | 提出反馈；另行决定平台发布等持续授权范围外事项 |
 
-脚本和分镜在团队内定稿。配音听辨由 Knoll 和 Nolan 完成，不找村长听。请村长决定时用单选 widget，一次只问一件事，并附上成片和站点 PR。
+脚本和分镜在团队内定稿。配音听辨由制作和复核人员处理，实际未完成的检查如实记录，不找村长代做质量检查。GitHub 站点按持续授权发布；确需用户决定范围外事项时，一次只问一件事，并附上成片和站点 PR。
 
 ## 闸门
 
@@ -50,9 +50,9 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 1. 配音与分镜冻结：把 SHA-256 写进 `words.json` 和 `storyboard.json` 的 `meta.timingSource`。
 2. Deming 预检：起音窗口、COPYFIT、封面 4:3 安全区。见 [docs/validate.md](docs/validate.md)。
 3. 渲染 `video.mp4` 和封面。见 [docs/render.md](docs/render.md)。
-4. Nolan 与 Deming 审成片。
-5. 村长用 widget 批准上线。
-6. 站点发版，再发平台。见 [docs/publish.md](docs/publish.md)。站点发版由 Knoll 做。
+4. 完成成片复核，记录执行者、检查结果与能力限制。
+5. 按 STATUS 的持续授权确认 GitHub 站点发布范围，无需逐期索取 widget 批准。
+6. 合并主干、发布 Release、部署站点，并核对线上完整 SHA、字幕、章节、海报及更新日志。见 [docs/publish.md](docs/publish.md)。平台仅在另行明确授权后发布。
 
 ## 目录地图
 
@@ -83,7 +83,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 
 ## 禁止
 
-- 暂停期间开新期，或改已上线成片。
+- 将 GitHub 站点持续发布授权用于尚未获授权的平台新发。
 - 比喻、实物设备、假应用窗（文件管理器、记事本一类）。
 - 把讲解表、图、流程图塞进浏览器壳。浏览器壳只给真网页、地址栏和 DevTools。
 - 大面积纯白页身。页身色用 `episodes/_shared/theme/pageTheme.ts` 的 `pageBg` / `pageInk`。

@@ -2,7 +2,7 @@
 
 从调研做到站点发版。命令只列仓库里真实存在的脚本。某一步没有脚本时写成待补，参考实现是 `episodes/degradation`（分镜 `meta.slug` 为 `degradation-v1`）。开新期的目录说明在 [../episodes-codex/_template/README.md](../episodes-codex/_template/README.md)。规范在 [RULES.md](RULES.md)。
 
-EP.14 之后暂停。STATUS 改掉之前，做到「对照参考实现」为止，不要开新目录、不要重渲。
+制作与发布范围按 [RULES.md 的 STATUS](RULES.md#status) 执行。2026-10-24 起，用户交办或已确定选题的视频做好并检查后，可自主合并、发布 Release、部署 GitHub 站点；不再逐期等待用户批准。平台新发仍须另行授权。
 
 ## 检查清单
 
@@ -12,10 +12,11 @@ EP.14 之后暂停。STATUS 改掉之前，做到「对照参考实现」为止�
 - [ ] `words.json` 的 `scriptSha256`、`audioSha256` 与文件一致
 - [ ] Deming 预检：起音窗口、无 `COPYFIT`、封面 4:3 安全区
 - [ ] `video.mp4` 与封面由当期 `package.json` 的脚本产出
-- [ ] Nolan 与 Deming 审过成片
-- [ ] 村长 widget 批准上线
+- [ ] 成片复核完成，执行者和实际检查范围已记录，未执行的能力未伪称通过
+- [ ] 符合 STATUS 的 GitHub 持续发布授权范围
 - [ ] 站点 PR 合并、`site/package.json` 升版本、tag 与 Release
-- [ ] 抖音（头条同步）、B站、微信视频号；没有快手，没有 X；链接没有发到群里
+- [ ] Release 后部署完成，线上媒体完整 SHA、字幕、章节、海报和更新日志核验
+- [ ] 若另获平台发布授权，再发抖音（头条同步）、B站、微信视频号；不发快手或 X，链接不上群
 
 ## 1. 调研
 
@@ -116,6 +117,6 @@ npm run render
 
 ## 8. 成片审与上线
 
-Nolan 和 Deming 看成片。通过之后，村长用单选 widget 批准上线。然后按 [publish.md](publish.md) 改 `episodes/<slug>/meta.json`、开站点 PR、打 tag、发 Release、发三个平台。站点发版由 Knoll 做。
+完成动态表达与实际成片复核，记录执行者、检查结果和能力限制。通过后沿用 STATUS 的持续授权，按 [publish.md](publish.md) 接入 `episodes/<slug>/`、更新元数据与版本、合并站点 PR、打 tag、发 Release，再部署并核验线上文件；不再逐期等待用户 widget 批准。收到反馈后修正、重新检查和发布。平台新发需用户另行明确授权。
 
 站点只改页面、不重发平台时，沿用 v0.45.0 的做法：PR 说明写「只上站点」，Release 同样写明，平台链接保持不动。

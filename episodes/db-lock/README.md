@@ -1,9 +1,13 @@
 # EP.17 数据库锁（db-lock）
-- storyboard.json：10 章 17 镜头，3850 帧 @30fps（含 6 处术语标签停顿共 151 帧，recap-2 末尾留白 60 帧）+ 全局片尾卡 60 帧 = 3910 帧（与 EP.16 同规则：2664+60=2724）
-- 标签停顿：丢失更新 22（603–624）、写锁 21（1040–1060）、读锁 34（1383–1416）、死锁 26（2227–2252）、悲观锁 26（2839–2864）、乐观锁 22（3286–3307）；落在镜头尾的无声段，由逐镜切音自然留空（不改整轨）
-- 配音：MiMo 冰糖逐句（/workspace/share/ep17，整轨 narration.wav sha 3487654c…（v3：行→háng 重配 ch5-2、ch10-1），121.291 s）；build_shot_audio.py 按 timing.json 切出 remotion/public/audio/<shot>.wav，切点首尾 5 ms 振幅 ≤ 44/32768
-- 渲染器沿用 EP.16；实物图全部 staticFile 直出；动画属性 rotation 与 rotate 同义（dead-2 时钟旋转）
-- 字幕严格按 storyboard 数字 from/to；空字幕不画框；水印第 0 帧常显（watermarkFadeIn={false}）
-- 制作：`cd remotion && npm ci && npm run render`（--bundle-cache=false，mix_bgm.py constant --below 12，Wallpaper，−16 LUFS）
-- 封面：Miyazaki 设计稿 cover/ep17-*.png → cover-*.jpg q95（不取视频帧）
-- 配乐：Kevin MacLeod「Wallpaper」（incompetech.com），CC BY 4.0
+
+2026-10-24 经用户观看并认可，将 `episodes-codex/db-lock` 的重制成片接入本站，发布版本 v0.45.3。本次只上站点，保留历史平台链接。
+
+- 成片1920×1080、30fps、3457帧，画面115.233秒、容器115.242秒；不追加全局片尾。
+- 视频 SHA-256：`93804b4838a9e414a930c91e15bd6e835cba2913d6aea747195ac624f46b4299`，与用户观看版逐字节一致。
+- 分镜及冻结副本 `storyboard.34fe0cd8.json`、音轨和词时间兼容文件原样复制；28句字幕使用冻结的 `from/to`，章节直接按镜长和文章ID匹配。
+- `meta.finalVideoFrames` 固定成片长度；顶层及 Remotion 的两份旧 `timing.json` 已删除，避免旧数据覆盖新镜长。
+- 公开依据见 [research.md](research.md)，技术边界及补充见 [article.mdx](article.mdx)。
+
+当前渲染入口、选定配音、动态检查及发布记录在[制作工程](../../episodes-codex/db-lock/README.md)。本目录原有 `gen.py`、`build_shot_audio.py`、`map_timing.py`、`common_split.py`、`validate.py`、`realign.sh`、`shotlist.md`、`remotion/`、`cover/` 和 `assets/` 是旧版历史工程，不用于重建当前视频。
+
+配乐：Kevin MacLeod《Wallpaper》（incompetech.com），CC BY 4.0。

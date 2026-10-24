@@ -2,7 +2,7 @@
 
 给 Codex 或同类 coding agent 打勾。规范以 [RULES.md](RULES.md) 为准。命令和阈值的出处在 [validate.md](validate.md)。本文件只排顺序，不另写一套起音、响度或安全区。
 
-EP.14 之后系列暂停。恢复之前不要开新期，不要渲染，不要改已上线的 `video.mp4` 和配音。暂停期间只读对照。恢复制作后，预检在 SHA-256 冻结之后、渲染之前；成片审在渲染之后。预检不过就改分镜或配音，回到 [pipeline.md](pipeline.md) 第 5 步重新冻结。
+制作与站点发布沿用 [RULES.md 的 STATUS](RULES.md#status) 中用户的持续授权。预检在 SHA-256 冻结之后、渲染之前；成片审在渲染之后。预检不过就改分镜或配音，回到 [pipeline.md](pipeline.md) 第 5 步重新冻结。检查通过后可以自主合并和部署 GitHub 站点，不再逐期等待用户批准；平台发布另行授权。
 
 通用分镜检查是 `episodes/_shared/storyboard/validate.py`。命令、引擎覆盖的条目，以及 EP.14 写在 `checks(V)` 里的条目，见 [validate.md](validate.md)「分镜检查」。下面标明「手工」的步骤，引擎没有覆盖。不要跑 [validate.md](validate.md)「不要跑的脚本」里那些旧 `validate.py`，也不要在期目录再写一份同名脚本。
 
@@ -213,7 +213,7 @@ PY
 
 ## 成片审
 
-Nolan 和 Deming 看渲染结果。通过之后才轮到村长。不要在这一步改已上线成片。
+复核动态表达和实际编码结果，记录执行者、检查结果及能力限制。检查通过后按 STATUS 的持续授权发布 GitHub 站点，无需逐期用户批准；先核验冻结输入与待发布文件，再替换站点成片。缺失的 ASR 或人工听辨不得冒称完成，用户后续反馈按实际问题修正并重新检查、发布。
 
 ### 1. 帧数和时长
 
@@ -255,9 +255,9 @@ ffprobe -v error -select_streams v:0 \
 - 讨论题、预告、关注句的先后（第 11 节）
 - 4:3 封面的 jpg 和 png（成片审第 3 节）
 
-### 5. 发站点前对上批准的 SHA
+### 5. 发站点前对上冻结的 SHA
 
-手工。站点路径是 `episodes/<slug>/`。`episodes-codex/` 在本仓还没有工程，只有模板。恢复后若制作稿在 `episodes-codex/<slug>/`，发站点前把那份和 `episodes/<slug>/` 里的 `voice.wav`、`words.json`、`storyboard.json` 再哈希一次，8 位前缀必须等于预检通过的那一版。对不上就停，不要开站点 PR。做法与第 1 节相同。发布步骤见 [publish.md](publish.md)，暂停期间不发新期。
+手工。制作源在 `episodes-codex/<slug>/`，站点读取 `episodes/<slug>/`。发布前核对两份 `video.mp4`、海报、`voice.wav`、`words.json` 与 `storyboard.json` 的完整 SHA-256，必须与检查通过的冻结文件一致；有用户批准文件时也使用同一份。对不上先修复，不以更新清单代替重新核验。做法与第 1 节相同，发布按 [publish.md](publish.md) 和 STATUS 的持续授权执行。
 
 ## 页身色
 
