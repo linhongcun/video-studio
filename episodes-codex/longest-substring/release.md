@@ -35,3 +35,4 @@
 - [部署40109143808](https://github.com/linhongcun/video-studio/actions/runs/40109143808)于2026-10-24 23:57:05（北京时间）成功，head与合并提交一致；API证据见deployment.json。此次合并构建已收录随后发布的实际v0.54.2 Release链接，核验不只依赖页脚版本号。
 - 2026-10-24 23:57:57（北京时间）实际HTTPS GET核验通过：视频/海报完整字节与SHA均匹配本地新媒体，36句VTT与本地已检查构建逐字节一致，四章/正文锚点、源码入口、library/系列/RSS、学习站首页及实际Release条目通过，见online-verification.json及docs/leetcode-problem-first/online-verification.json。
 - 原制作issue保持completed；本轮为已上线视频修订，由PR #201跟踪，未将平台发布事项说成已完成。不声称用户已观看认可新开头。
+- Release后另触发的[部署40109221283](https://github.com/linhongcun/video-studio/actions/runs/40109221283)也已成功，head与合并提交一致，见release-deployment.json；未取消其它工作流。
