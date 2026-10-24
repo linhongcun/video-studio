@@ -15,7 +15,7 @@ const fractions=(process.env.QA_FRACTIONS??(proof?'0,0.2,0.4,0.6,0.8,0.98':'0.65
 const explicit=(process.env.QA_FRAMES??'').split(',').filter(Boolean).map(Number);
 const additional=(process.env.QA_EXTRA_FRAMES??'').split(',').filter(Boolean).map(Number);
 const inputProps={hideSubtitles:process.env.QA_HIDE_SUBTITLES==='1'||proof};
-const sourceFiles=[input,root+'/covers.json',...['Main.tsx','Cover.tsx','Root.tsx','theme.ts','data.ts','index.ts'].map(x=>path.resolve('src',x)),...['qa.mjs','covers.mjs'].map(x=>path.resolve('scripts',x)),path.resolve('remotion.config.ts'),path.resolve('package.json'),path.resolve('package-lock.json'),repo+'/episodes/_shared/theme/pageTheme.ts'];
+const sourceFiles=[input,root+'/covers.json',root+'/solution.py',root+'/solution.json',...['Main.tsx','CodeCard.tsx','Cover.tsx','Root.tsx','theme.ts','data.ts','index.ts'].map(x=>path.resolve('src',x)),...['qa.mjs','covers.mjs'].map(x=>path.resolve('scripts',x)),path.resolve('remotion.config.ts'),path.resolve('package.json'),path.resolve('package-lock.json'),repo+'/episodes/_shared/theme/pageTheme.ts'];
 const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 const sourceSHA=Object.fromEntries(sourceFiles.map(p=>[path.relative(repo,p),hash(p)]));
 const serveUrl=await bundle({entryPoint:path.resolve('src/index.ts'),enableCaching:false,webpackOverride:c=>({...c,resolve:{...c.resolve,alias:{...c.resolve?.alias,'@storyboard':input,'@covers':root+'/covers.json'},modules:[path.resolve('node_modules'),'node_modules']},plugins:[...(c.plugins??[]),new webpack.DefinePlugin({__HAS_VOICE_AUDIO__:false})]})});
