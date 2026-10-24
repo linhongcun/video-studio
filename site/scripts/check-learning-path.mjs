@@ -141,3 +141,61 @@ if (process.argv.includes('--built')) {
 console.log(existingOnly
   ? 'Archive/catalog separation passed; original page and release history remain addressable. New-course checks intentionally skipped.'
   : `Learning path passed: EP.20 → 入门 → 2PC → TCC → Saga → 可靠消息; archive excluded from catalog, draft links safe, original release history preserved${complete ? '; all four shorts published' : ''}.`);
+
+// LeetCode problem numbers are display labels, not historical EP identifiers.
+const algorithmSlug = 'container-most-water';
+const algorithm = lessons.find((e) => e.slug === algorithmSlug);
+assert.ok(algorithm, 'The first algorithm lesson must be available in preview');
+assert.equal(algorithm.ep, 22);
+assert.equal(algorithm.problemNumber, 11);
+assert.equal(preview.epLabel(algorithm), 'LC.11');
+assert.equal(preview.epLabel(11), 'EP.11');
+assert.equal(preview.epLabel(preview.getRelated({related: [algorithmSlug]})[0]), 'LC.11');
+assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'leetcode').episodes), [algorithmSlug]);
+assert.equal(preview.seriesNav(algorithm).prev, undefined, 'Algorithms have no distributed-systems prerequisite');
+assert.notEqual(preview.seriesNav(lessons.find((e) => e.slug === mechanismSlugs.at(-1))).next?.series, 'leetcode', 'System-design learning path must not lead into an unrelated algorithm');
+assert.equal(liveLessons.some((e) => e.slug === algorithmSlug), !algorithm.draft);
+assert.deepEqual(slugs(episodesForRelease({tag: algorithm.firstRelease, kind: '新增', eps: [22]}, lessons)), [algorithmSlug]);
+assert.ok(!slugs(episodesForRelease({tag: 'v0.45.0', kind: '修正', eps: [11]}, lessons)).includes(algorithmSlug),
+  'An old EP.11 release must not link to LeetCode problem 11');
+console.log('Learning paths passed: historical EP.21 sequence and releases preserved; LC.11 has an independent series, display number and release identity.');
+
+if (process.argv.includes('--built')) {
+  const dist = path.join(site, 'dist');
+  const text = (rel) => fs.readFileSync(path.join(dist, rel), 'utf8');
+  const route = `episodes/${algorithmSlug}/`;
+  const publishedIndex = text('index.html');
+  if (algorithm.draft) {
+    assert.equal(fs.existsSync(path.join(dist, route, 'index.html')), false, 'Draft algorithm must not have a public page');
+    assert.equal(publishedIndex.includes(`/episodes/${algorithmSlug}/`), false, 'Draft algorithm leaked into home');
+    assert.equal(text('rss.xml').includes(`/episodes/${algorithmSlug}/`), false, 'Draft algorithm leaked into RSS');
+  } else {
+    const page = text(`${route}index.html`);
+    assert.ok(page.includes(`<title>${algorithm.title} · Video Studio</title>`), 'Algorithm page title is stale');
+    assert.ok(page.includes('LC.11') && !page.includes('EP.22'), 'The algorithm page must display the problem number');
+    assert.ok(page.includes('/series/leetcode/'), 'Algorithm page must link its own series');
+    assert.equal(page.includes('搜索「IT小村」'), false, 'A site-only lesson must not imply that it was published on other platforms');
+    assert.equal(page.includes('aria-label="在其他平台观看"'), false, 'No platform navigation is shown without real episode links');
+    assert.ok(text('series/leetcode/index.html').includes(`/episodes/${algorithmSlug}/`));
+    assert.ok(publishedIndex.includes('data-series="leetcode"') && publishedIndex.includes(`/episodes/${algorithmSlug}/`));
+    assert.ok(text('rss.xml').includes('LC.11') && text('rss.xml').includes(`/episodes/${algorithmSlug}/`));
+    assert.deepEqual(Array.from(algorithm.chapters, (c) => c.id), ['area', 'proof', 'scan', 'code']);
+    for (const chapter of algorithm.chapters) {
+      assert.ok(page.includes(`id="${chapter.id}"`), `Missing article anchor ${chapter.id}`);
+      assert.ok(page.includes(`data-id="${chapter.id}" data-start="${chapter.start}"`), `Missing timed chapter ${chapter.id}`);
+    }
+    const storyboard = readJson(path.join(site, '../episodes', algorithmSlug, 'storyboard.json'));
+    const narration = storyboard.scenes.flatMap((s) => s.shots.flatMap((sh) => sh.subtitles.map((sub) => sub.text)));
+    const captions = text(`${route}captions.vtt`).trim().split(/\r?\n\s*\r?\n/).slice(1)
+      .map((cue) => cue.split(/\r?\n/).slice(1).join('\n'));
+    assert.equal(narration.length, 44, 'The frozen lesson must contain all 44 narration sentences');
+    assert.deepEqual(captions, narration, 'Published subtitles must match every frozen narration sentence in order');
+    for (const file of [algorithm.video, algorithm.poster]) {
+      const source = fs.readFileSync(path.join(site, '../episodes', algorithmSlug, file));
+      const built = fs.readFileSync(path.join(dist, route, file));
+      assert.equal(createHash('sha256').update(built).digest('hex'), createHash('sha256').update(source).digest('hex'),
+        `Built ${file} differs from the approved source`);
+    }
+    console.log('Built LC.11 passed: title, independent series, four chapter anchors, 44 exact subtitles, copied video and poster.');
+  }
+}

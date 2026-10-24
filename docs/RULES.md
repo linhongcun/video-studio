@@ -59,7 +59,7 @@
 
 - 发布渠道：抖音（头条同步同一条成片）、B站、微信视频号，加上本站。
 - 不发快手，不发 X。小红书由村长自己发，运营和 Codex 不发。平台链接不上群。`meta.json` 只填 `bilibili` 和 `douyin`。头条不单独占键，与抖音同一条成片。视频号没有网页链接，不写。
-- 本仓站点代码仍只识别 `bilibili`、`douyin`、`kuaishou` 三个键（`site/src/lib/episodes.ts`）。现行发布不再填写 `kuaishou`。空链接时关于页和 `PlatformLinks.astro` 仍会提到快手，那是旧文案，不是本文件。
+- 本仓站点代码仍只识别 `bilibili`、`douyin`、`kuaishou` 三个键（`site/src/lib/episodes.ts`）。现行发布不再填写 `kuaishou`。`PlatformLinks.astro` 在没有真实平台链接时不显示，避免将仅站点发布误示为平台已发；关于页仍提到快手的历史文案不作为发布授权。
 - 三平台实操和站点发版清单见 [publish.md](publish.md)。
 - 版本号三段式，记在 `site/package.json`。只改内容升修订号；新一期、新功能或站点改动升次版本号。
 - 脚本和分镜团队内定稿。GitHub 站点按 STATUS 的持续授权，在制作和检查完成后自主上线；平台发布由用户另行明确授权。

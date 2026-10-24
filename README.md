@@ -1,12 +1,12 @@
 # video-studio · IT小村工作室
 
-IT小村工作室的互联网开发技术科普短视频项目。一条主线讲清楚一个问题，画面不用比喻。视频用代码生成（[Remotion](https://www.remotion.dev/)），每期配一篇图文文章。
+IT小村工作室的互联网开发技术与算法科普短视频项目。一条主线讲清楚一个问题，画面不用比喻。视频用代码生成（[Remotion](https://www.remotion.dev/)），每期配一篇图文文章。
 
 做片的人从 [AGENTS.md](AGENTS.md) 进入，规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
 
 - 线上站点：https://linhongcun.github.io/video-studio/
 - 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。不发快手，不发 X。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
-- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
+- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式 / LeetCode · 算法可视化）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
 - 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
@@ -49,6 +49,10 @@ v0.48.0 已将 EP.01–14 的上一轮 Cursor 重制版全部替换为本轮 Cod
 EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → Saga → 可靠消息（Outbox）”。每个实现独立短片，用一个示例逐步展示成功、失败和适用边界。实际时长与完整检查见各片制作入口；本批版本v0.47.0。
 
 原约6分29秒[多方案合集](https://linhongcun.github.io/video-studio/episodes/distributed-tx/)保留历史页面与媒体，从推荐学习路径和搜索移出，页面提供独立短片入口。旧制作冻结输入不改；不能将原有机器/抽帧检查当作用户已认可合集教学效果。最新反馈和复盘见[教训L012](docs/lessons-learned.md)。
+
+## LeetCode · 算法可视化
+
+独立算法系列使用题号展示，不要求先看网络或分布式课程。首期为[LC.11《盛最多水的容器：为什么每次都移动短边？》](https://linhongcun.github.io/video-studio/episodes/container-most-water/)，22镜、约3分38秒，用同一组竖线讲清面积、整组排除依据和双指针扫描。完整Python实现与证明放配套文章，制作入口见[本期工程](episodes-codex/container-most-water/README.md)。本期只上站点。
 
 ## 制作流程
 

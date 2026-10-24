@@ -12,7 +12,7 @@ const articles = import.meta.glob('../../../episodes/*/article.mdx', {eager: tru
 
 export type Chapter = {id: string; title: string; start: number; frame: number; fmStart?: number; inArticle?: boolean};
 export type Episode = {
-  slug: string; ep: number; episodePart?: string; lessonOrder?: number; firstRelease?: string; title: string; summary: string; duration: number; tags: string[];
+  slug: string; ep: number; problemNumber?: number; episodePart?: string; lessonOrder?: number; firstRelease?: string; title: string; summary: string; duration: number; tags: string[];
   date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
   draft: boolean; legacy: boolean; archived: boolean; replacedBy?: string[]; related: {slug: string; label?: string}[];
   learningGuide?: {slug: string; label: string}; series?: string; description?: string; updated?: string; platforms: Platform[]; readMin: number; sourcePath: string;
@@ -49,8 +49,8 @@ export function getRelated(e: Episode) {
     const r = typeof raw === 'string' ? {slug: raw} : raw;
     const m = all.get(r.slug);
     if (!m || m.archived) return null;
-    return {slug: r.slug, ep: Number(m.ep) || 0, episodePart: m.episodePart, lessonOrder: m.lessonOrder, label: r.label ?? '', title: m.title, summary: m.summary, legacy: !!m.legacy, published: !m.draft || SHOW_DRAFTS};
-  }).filter(Boolean).sort(compareLessons) as {slug: string; ep: number; episodePart?: string; lessonOrder?: number; label: string; title: string; summary: string; legacy: boolean; published: boolean}[];
+    return {slug: r.slug, ep: Number(m.ep) || 0, problemNumber: m.problemNumber, episodePart: m.episodePart, lessonOrder: m.lessonOrder, label: r.label ?? '', title: m.title, summary: m.summary, legacy: !!m.legacy, published: !m.draft || SHOW_DRAFTS};
+  }).filter(Boolean).sort(compareLessons) as {slug: string; ep: number; problemNumber?: number; episodePart?: string; lessonOrder?: number; label: string; title: string; summary: string; legacy: boolean; published: boolean}[];
 }
 /** 旧版标记：EP.08 起尚未重制的旧期 meta.json 写 legacy: true，卡片和详情页显示这句；重制版上线时删掉该字段 */
 export const LEGACY_LABEL = '旧版，重制中';
@@ -181,7 +181,7 @@ export function getEpisodes({includeArchived = false}: {includeArchived?: boolea
       const fm = mod?.frontmatter ?? {};
       const {chapters, duration, fps} = computeChapters(slug, fm.chapters);
       return {
-        slug, ep: meta.ep ?? 0, episodePart: meta.episodePart, lessonOrder: meta.lessonOrder, firstRelease: meta.firstRelease, learningGuide: meta.learningGuide, replacedBy: meta.replacedBy, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
+        slug, ep: meta.ep ?? 0, problemNumber: meta.problemNumber, episodePart: meta.episodePart, lessonOrder: meta.lessonOrder, firstRelease: meta.firstRelease, learningGuide: meta.learningGuide, replacedBy: meta.replacedBy, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
         tags: meta.tags ?? [], date: meta.publishedAt, poster: meta.poster, video: meta.video,
         duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, archived: !!meta.archived, related: meta.related ?? [],
         series: meta.series, description: meta.description, updated: meta.updatedAt && meta.updatedAt > meta.publishedAt ? meta.updatedAt : undefined,
@@ -206,7 +206,10 @@ export const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor
 /** 教学顺序与历史期号分开：同一期可有入门、方案详解，不改旧链接与整数期号。 */
 export const compareLessons = (a: {ep: number; lessonOrder?: number}, b: {ep: number; lessonOrder?: number}) =>
   a.ep - b.ep || (a.lessonOrder ?? 0) - (b.lessonOrder ?? 0);
-export const epLabel = (item: number | {ep: number; episodePart?: string}) => {
+/** 题号用于算法系列展示；整数 ep 继续用于历史排序和 Release 关联。 */
+export const epLabel = (item: number | {ep: number; problemNumber?: number; episodePart?: string}) => {
+  if (typeof item !== 'number' && Number.isInteger(item.problemNumber) && item.problemNumber! > 0)
+    return `LC.${item.problemNumber}`;
   const ep = typeof item === 'number' ? item : item.ep;
   const part = typeof item === 'number' ? '' : item.episodePart;
   return `EP.${String(ep).padStart(2, '0')}${part ? ` · ${part}` : ''}`;
@@ -236,20 +239,22 @@ export const isNew = (d: string, slug?: string) => {
 export const isoDuration = (s: number) => `PT${Math.floor(s / 60)}M${Math.floor(s % 60)}S`;
 
 /** 系列（篇章）：series.json 定义顺序与简介；每期 meta.json 的 series 指向其 id。系列内按期号与教学顺序升序 */
-export type Series = {id: string; title: string; description: string; order: number; episodes: Episode[]};
+export type Series = {id: string; title: string; description: string; order: number; crossSeriesNavigation?: boolean; episodes: Episode[]};
 export function getSeries(): Series[] {
-  const meta = seriesMeta as Record<string, {title: string; description: string; order: number}>;
+  const meta = seriesMeta as Record<string, {title: string; description: string; order: number; crossSeriesNavigation?: boolean}>;
   return Object.entries(meta).map(([id, m]) => ({id, ...m, episodes: getEpisodes().filter((e) => e.series === id).sort(compareLessons)}))
     .filter((s) => s.episodes.length).sort((a, b) => a.order - b.order);
 }
-/** 某期在系列中的位置与系列内上/下一期；系列末尾的“下一期”接下一个系列的第一期 */
+/** 某期在系列中的位置与系列内上/下一期；独立系列不与相邻系列组成学习路径。 */
 export function seriesNav(e: Episode) {
   if (e.archived) return null;
   const all = getSeries();
   const si = all.findIndex((s) => s.id === e.series);
   if (si < 0) return null;
   const s = all[si], i = s.episodes.findIndex((x) => x.slug === e.slug);
-  const prevS = all[si - 1], nextS = all[si + 1];
+  const adjacent = (neighbor: Series | undefined) =>
+    s.crossSeriesNavigation !== false && neighbor?.crossSeriesNavigation !== false ? neighbor : undefined;
+  const prevS = adjacent(all[si - 1]), nextS = adjacent(all[si + 1]);
   return {
     series: s, index: i + 1, total: s.episodes.length,
     prev: s.episodes[i - 1] ?? (prevS ? prevS.episodes[prevS.episodes.length - 1] : undefined),
