@@ -54,7 +54,7 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 ## 设计模式
 
-独立系列每种模式制作一期，围绕“为什么需要、解决什么、什么时候值得用”展开，按具体内容选择图文、代码与动态表达。首期为[EP.23 · D01《策略模式：优惠规则变了，为什么总要改结算？》](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)，约2分53秒；同一100元订单贯穿外部选择、规则调用与结果返回，配套文章提供完整可运行代码及资料。制作与检查见[本期工程](episodes-codex/strategy-pattern/README.md)，选题池见[23种模式总览 #161](https://github.com/linhongcun/video-studio/issues/161)。
+独立系列每种模式制作一期，围绕“为什么需要、解决什么、什么时候值得用”展开，按具体内容选择图文、代码与动态表达。首期为[EP.23 · D01《策略模式：优惠规则变了，为什么总要改结算？》](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)，约2分56秒；同一100元订单贯穿外部选择、规则调用与结果返回，配套文章提供完整可运行代码及资料。制作与检查见[本期工程](episodes-codex/strategy-pattern/README.md)，选题池见[23种模式总览 #161](https://github.com/linhongcun/video-studio/issues/161)。
 
 ## LeetCode · 算法可视化
 

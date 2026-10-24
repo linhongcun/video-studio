@@ -1,5 +1,13 @@
 # 策略模式D01：发布记录
 
+## 章节衔接修订（待发布补丁）
+
+用户观看v0.52.0后认为整体问题不大，要求主要章节入口有简短口头承接。本次只重配04/11/15六句、同步延后正文动作到第二句，局部重渲三镜；十三镜原PCM和局部时序保持。新片5292帧、176.4秒，仅增加3.13秒。
+
+新视频SHA-256：`7f5606a875198472c7f8f052c6e0f14f180a1c9c4b21b0055cb8e9ab8da68726`，−16.0LUFS/−3.7dBTP。163项冻结、连续PTS/完整解码、十三镜画面复用比较、实际章节边界及两视口三章seek通过；本地报告见qa-final.md。当前计划补丁v0.54.1，待合并、Release后部署和线上核验；firstRelease仍为v0.52.0。
+
+## v0.52.0首发历史
+
 ## 已完成的本地交付
 
 - 制作issue：[#163](https://github.com/linhongcun/video-studio/issues/163)，系列总览：[#161](https://github.com/linhongcun/video-studio/issues/161)。
@@ -17,7 +25,7 @@
 - Release后的Pages部署40104729342已完成且success，发布提交与标签一致。
 - 线上核验于2026-10-24T22:59:24.445321+08:00一次通过，8个canonical普通GET均为200；视频流式完整SHA、海报与VTT逐字节一致，四章、正文锚点、源码、JSON-LD、首页、独立系列、RSS及v0.52.0更新日志均通过。
 - 制作issue #163已在线上核验后以`completed`关闭，系列总览#161同步D01完成。
-- [完整线上报告](../../episodes/strategy-pattern/online-verification.json)与本期`deployment.json`保留实际结果；未把机器或上线检查写成用户已观看认可。
+- [v0.52.0历史线上报告](revisions/v0.52.0/online-verification.json)与本期`deployment.json`保留实际结果；未把机器或上线检查写成用户已观看认可。
 
 线上目标：[策略模式视频与配套文章](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)。线上验证脚本为本期 `verify-online.py`，读取canonical页面、视频、海报、VTT、系列、首页、RSS与更新日志；视频流式完整哈希，不下载另存远程媒体。
 
