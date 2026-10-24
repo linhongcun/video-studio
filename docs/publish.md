@@ -95,7 +95,9 @@ gh run watch <id>
 
 5. 打开 https://linhongcun.github.io/video-studio/ 。成片在 `/video-studio/episodes/<slug>/video.mp4`（`meta.json` 的 `video`）。核验实际线上文件的完整 SHA-256 与发布清单相同；有用户批准版时也必须与批准文件一致，不能只比较 sha8。`site/scripts/copy-assets.mjs` 只把 `video` 和 `poster` 拷进站点；线上海报用 `meta.poster` 的文件名（degradation 是 `cover-16x9.jpg`）。打开该期页面确认海报能显示。`cover-4x3.jpg` 和 `cover-3x4.jpg` 留在仓库里，用同一条 sha8 核对，它们不进 Pages。打开 `/changelog/`，确认新版本已经列出。
 
-6. 仅在另获平台发布授权并完成对应发布后，运营把 B站和抖音的链接私信给 Knoll（站点维护者）和 Nolan。`platforms` 只写这两个真实 URL。视频号没有网页链接，不写。不要新写 `kuaishou`。链接不发到群。
+6. 视频制作、合并上线和线上核验完成后，将对应制作或重制 issue 关闭，状态理由为 `completed`；用户已持续授权这一步，无需另问。关闭时保留事项的真实执行情况，不把尚未执行的平台发布勾成完成，也不因旧选题模板含平台事项而遗漏制作 issue 的收尾。
+
+7. 仅在另获平台发布授权并完成对应发布后，运营把 B站和抖音的链接私信给 Knoll（站点维护者）和 Nolan。`platforms` 只写这两个真实 URL。视频号没有网页链接，不写。不要新写 `kuaishou`。链接不发到群。
 
 ## 三个平台
 

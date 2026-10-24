@@ -16,6 +16,7 @@
 - [ ] 符合 STATUS 的 GitHub 持续发布授权范围
 - [ ] 站点 PR 合并、`site/package.json` 升版本、tag 与 Release
 - [ ] Release 后部署完成，线上媒体完整 SHA、字幕、章节、海报和更新日志核验
+- [ ] 将对应制作或重制 issue 以 `completed` 关闭
 - [ ] 若另获平台发布授权，再发抖音（头条同步）、B站、微信视频号；不发快手或 X，链接不上群
 
 ## 1. 调研
