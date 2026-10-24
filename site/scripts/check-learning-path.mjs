@@ -29,7 +29,7 @@ function episodeRuntime(showDrafts) {
 }
 const releasesSource = stripImports(fs.readFileSync(path.join(site, 'src/lib/releases.ts'), 'utf8'));
 const releaseCode = transformSync(releasesSource, {loader: 'ts'}).code;
-const {episodesForRelease} = vm.compileFunction(`${releaseCode}\nreturn {episodesForRelease};`, ['fs', 'path'])(fs, path);
+const {episodesForRelease, parseEpisodeSlugs} = vm.compileFunction(`${releaseCode}\nreturn {episodesForRelease, parseEpisodeSlugs};`, ['fs', 'path'])(fs, path);
 const slugs = (rows) => Array.from(rows, (e) => e.slug);
 const introArticle = fs.readFileSync(path.join(site, '../episodes', introSlug, 'article.mdx'), 'utf8');
 assert.equal(introArticle.includes('../distributed-tx/'), false, 'Published intro article must not lead back to the compilation');
@@ -163,7 +163,22 @@ assert.equal(liveLessons.some((e) => e.slug === algorithmSlug), !algorithm.draft
 assert.deepEqual(slugs(episodesForRelease({tag: algorithm.firstRelease, kind: '新增', eps: [22]}, lessons)), [algorithmSlug]);
 assert.ok(!slugs(episodesForRelease({tag: 'v0.45.0', kind: '修正', eps: [11]}, lessons)).includes(algorithmSlug),
   'An old EP.11 release must not link to LeetCode problem 11');
+
+// Agent and LeetCode can share ep=22 without a patch linking both courses.
+const agentSlug = 'agent-intro';
+const agentLesson = lessons.find((e) => e.slug === agentSlug);
+assert.ok(agentLesson);
+const explicitAgentSlugs = parseEpisodeSlugs('[第22期](https://linhongcun.github.io/video-studio/episodes/agent-intro/)\n[同一页](https://linhongcun.github.io/video-studio/episodes/agent-intro/#ask)');
+assert.deepEqual(Array.from(explicitAgentSlugs), [agentSlug]);
+assert.deepEqual(Array.from(parseEpisodeSlugs('https://github.com/linhongcun/video-studio/tree/main/episodes/agent-intro/ https://example.com/episodes/agent-intro/ https://linhongcun.github.io/video-studio/episodes/agent-intro/video.mp4')), []);
+for (const kind of ['修正', '更新']) {
+  assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.3', kind, eps: [22], episodeSlugs: explicitAgentSlugs}, lessons)), [agentSlug]);
+}
+assert.deepEqual(slugs(episodesForRelease({tag: 'v0.49.1', kind: '修正', eps: [22], episodeSlugs: explicitAgentSlugs}, lessons)), [], 'An explicit link must retain the first-release gate');
+assert.deepEqual(slugs(episodesForRelease({tag: agentLesson.firstRelease, kind: '新增', eps: [22]}, lessons)), [agentSlug]);
+assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.3', kind: '修正', eps: [12]}, lessons)), ['idempotency'], 'Old EP-only releases must retain their fallback');
 console.log('Learning paths passed: historical EP.21 sequence and releases preserved; LC.11 has an independent series, display number and release identity.');
+console.log('Explicit canonical release links passed: same-EP patches select only the linked course; debut gates and legacy EP fallback preserved.');
 
 if (process.argv.includes('--built')) {
   const dist = path.join(site, 'dist');

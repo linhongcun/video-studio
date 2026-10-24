@@ -2,7 +2,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-export type Release = {tag: string; name: string; date: string; body: string; url: string; kind: '新增' | '修正' | '更新'; eps: number[]};
+export type Release = {tag: string; name: string; date: string; body: string; url: string; kind: '新增' | '修正' | '更新'; eps: number[]; episodeSlugs?: string[]};
 const API = 'https://api.github.com/repos/linhongcun/video-studio/releases?per_page=100';
 let cache: Promise<Release[] | null> | null = null;
 
@@ -71,6 +71,11 @@ export const parseEps = (text: string): number[] => {
   return [...out].filter((n) => n > 0 && n < 1000).sort((a, b) => a - b);
 };
 
+/** 本站正文页的显式链接可区分共用整数 ep 的课程；源码/资源路径不作为课程指定。 */
+export const parseEpisodeSlugs = (text: string): string[] => [...new Set(
+  [...text.matchAll(/https:\/\/linhongcun\.github\.io\/video-studio\/episodes\/([a-z0-9][a-z0-9-]*)\/(?=[#?\s)<>"\]]|$)/g)].map((m) => m[1]),
+)];
+
 /** v0.37.0 重排期号（#91）：之前的 Release 正文按旧期号写，链接前换成新期号；旧 EP.16 隔离级别已下架，不再链接 */
 const RENUMBERED_IN = [0, 37, 0];
 const OLD_TO_NEW: Record<number, number | null> = {9: 10, 10: 11, 11: 12, 12: 14, 14: 15, 15: 16, 16: null, 22: 9};
@@ -84,9 +89,10 @@ const before = (tag: string, v: number[]) => {
 export const renumber = (tag: string, eps: number[]): number[] => !before(tag, RENUMBERED_IN) ? eps
   : [...new Set(eps.map((n) => (n in OLD_TO_NEW ? OLD_TO_NEW[n] : n)).filter((n): n is number => n != null))].sort((a, b) => a - b);
 
-/** 同一期的前置篇独立首发：旧 Release 不应被新增课程追溯覆盖。 */
-export function episodesForRelease<T extends {ep: number; firstRelease?: string}>(release: Pick<Release, 'tag' | 'eps' | 'kind'>, episodes: T[]): T[] {
-  return episodes.filter((e) => release.eps.includes(e.ep) && (release.kind === '新增'
+/** 新增按首发版本关联；修正/更新优先采用显式课程链接，旧 Release 保留整数 ep 回退。 */
+export function episodesForRelease<T extends {slug?: string; ep: number; firstRelease?: string}>(release: Pick<Release, 'tag' | 'eps' | 'kind' | 'episodeSlugs'>, episodes: T[]): T[] {
+  const explicitSlugs = release.kind !== '新增' && release.episodeSlugs?.length ? new Set(release.episodeSlugs) : undefined;
+  return episodes.filter((e) => (explicitSlugs ? !!e.slug && explicitSlugs.has(e.slug) : release.eps.includes(e.ep)) && (release.kind === '新增'
     ? e.firstRelease === release.tag
     : !e.firstRelease || !before(release.tag, (e.firstRelease.match(/^v?(\d+)\.(\d+)\.(\d+)/)?.slice(1, 4) ?? []).map(Number))));
 }
@@ -108,8 +114,10 @@ async function load(): Promise<Release[] | null> {
       const kind = kindOf(tag, debut);
       // 新增：链首发期；修正/更新：链正文提到的期
       const eps = kind === '新增' ? debut ?? [] : renumber(tag, parseEps(`${r.name ?? ''}\n${body}`));
+      const episodeSlugs = parseEpisodeSlugs(body);
       return {
         tag, name: r.name || r.tag_name, url: r.html_url, body, kind, eps,
+        ...(episodeSlugs.length ? {episodeSlugs} : {}),
         // 北京时间日期
         date: new Date(Date.parse(r.published_at ?? r.created_at) + 8 * 3600e3).toISOString().slice(0, 16).replace('T', ' '),
       };
