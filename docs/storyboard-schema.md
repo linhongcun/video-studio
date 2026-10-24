@@ -1,8 +1,8 @@
 # 分镜字段
 
-以下字段说明保留上一轮 EP.14 的历史范例。EP.01–14 本轮 Codex 制作在 `episodes-codex/<slug>/`；站点 `episodes/degradation/` 已是新片数据，不能再用它复现6265993b/5152帧的旧范例。固定旧输入见 `episodes/_shared/tests/fixtures/`，当前结构与检查入口见各期 README；哈希定义按当期冻结文件明确记录。
+以下字段说明适用于上一轮 EP.14 的固定历史 fixture。现行制作在 `episodes-codex/<slug>/`，字段、生成和检查入口以本期装配脚本、README 及冻结分镜为准；哈希定义按本期冻结文件记录。站点目录已是当前发布数据，不能用它复现旧范例。
 
-从 `episodes/degradation/storyboard.json` 和 `episodes/degradation/covers.json` 归纳（冻结稿 storyboard `6265993b`、covers `8cb7aafb`）。该分镜 `meta.slug` 是 `degradation-v1`。没有出现的字段不要加。`assets.procedural.description` 点名 `knoll-props.md`；空白模板是 [knoll-props.template.md](knoll-props.template.md)，EP.14 全文范例是 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。`episodes/degradation/` 里没有这份期文件。组件行为以范例和 `episodes/degradation/remotion/src/components/` 为准。
+本历史范例来自 [degradation-v0.45.0 固定输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md) 的 `storyboard.json` 与 `covers.json`（冻结稿前缀分别为 `6265993b`、`8cb7aafb`，`meta.slug` 为 `degradation-v1`）。制作说明模板见 [knoll-props.template.md](knoll-props.template.md)，历史全文见 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。旧渲染工程已清理，历史字段行为以固定输入和共享 spec 为参照；新期组件行为以对应 Codex 工程实际源码为准，不为满足旧样例补字段。
 
 本文件只写字段和「怎样生成」。检查项与阈值的判定在 [validate.md](validate.md)，规范原文在 [RULES.md](RULES.md)，步骤顺序在 [pipeline.md](pipeline.md)。
 
@@ -111,7 +111,7 @@ degradation 实际使用的键：
 
 类型还有 `pill`。
 
-EP.02 的 `episodes/https/remotion/scripts/verify-storyboard.tsx` 在 `shot.camera` 非空时读取 `keyframes[].frame` 和 `scale`。degradation 没有使用 `camera`，新分镜不要为了这个检查去补相机。该脚本的组件白名单含 `NotepadWindow`，与现行「无假应用窗」冲突，不要照抄。
+本历史 degradation fixture 没有使用 `camera`。现行相机和全局/局部导航字段由对应 Codex 工程的装配及渲染源码定义，不能为旧校验器补相机字段；画面是否允许应用外壳仍按 RULES。
 
 ## 页身色
 
@@ -119,9 +119,9 @@ EP.02 的 `episodes/https/remotion/scripts/verify-storyboard.tsx` 在 `shot.came
 
 分镜里没有页身色字段，不要新增 `pageBg`。分镜能影响的只有页外和 canvas 上的元素：文字 `background` 用 `meta.palette.bg` `#0B1020` 一类深色，强调色用这一期已有的值（如 `#86EFAC`、`#FDBA74`、`#22D3EE`、`#FDE68A` on `#7C2D12`）。不要写大面积浅色 `background` / `fill`（白、近白）；这一期浅色填充只有镜 6 资源横条 `#86EFAC`（800×28 级别）。
 
-## 生成清单（EP.14 实际做法）
+## 生成清单（历史 EP.14 fixture 的做法）
 
-EP.13、EP.14 的分镜不是手写 JSON，而是由生成器算出来的。仓内的通用生成器在 `episodes/_shared/storyboard/`（`layout.py`、`make_covers.py`、`build_sb.py`、`validate.py`，说明见 [episodes/_shared/storyboard/README.md](../episodes/_shared/storyboard/README.md)）；每期只写一组期 spec（Python 模块，经 `--spec` 传入），引擎不含任何期内容。EP.14 的整套 spec 在 `episodes/_shared/storyboard/examples/degradation/`，重跑结果与冻结稿 storyboard `6265993b`、covers `8cb7aafb` 逐字节相同。其他共享件：`episodes/_shared/onset_rule.py`、`episodes/_shared/label_onset_strict.py`、`episodes/_shared/make_knoll_props.py` 和 `episodes/_shared/voice/`。新期照 EP.14 的 spec 另写一组，不要从旧期 `validate.py` 抄。
+历史 EP.13、EP.14 的分镜由生成器计算。仓内保留的通用生成器在 `episodes/_shared/storyboard/`（`layout.py`、`make_covers.py`、`build_sb.py`、`validate.py`，说明见 [episodes/_shared/storyboard/README.md](../episodes/_shared/storyboard/README.md)）；期内容由 `--spec` 传入，引擎不含任何期内容。历史 EP.14 spec 位于 `episodes/_shared/storyboard/examples/degradation/`，配合固定 fixture 重跑应与 storyboard `6265993b`、covers `8cb7aafb` 逐字节相同，回归命令见 [validate.md](validate.md)。以下步骤用于解释这套历史字段和生成工具；新期按对应 Codex 装配脚本及冻结规范，不默认复制历史 spec。
 
 ### 输入（都要先冻结，SHA-256 写进 `meta.timingSource`）
 
@@ -161,7 +161,7 @@ EP.13、EP.14 的分镜不是手写 JSON，而是由生成器算出来的。仓�
 - **状态变化要有帧。** 脚本里写到的每个状态都要有一条 `stateKeyframes`（或独立元素的 `appearFrame`），不靠渲染端推断；同一元素状态帧严格递增。
 - **点击到下一状态 ≥ 12 帧。** 带 `ripples` 的关键帧之后，下一条关键帧至少隔 12 帧，EP.14 取 20 帧（与 `growFrames` 20 一致）。点击本身已在挂词首帧时，把后续状态用 `$timer … d: 20` 往后放。
 - **第 0 帧接上一镜。** 连续 browser 镜之间，第 0 帧的 `backTabs + title + afterTabs` 与 `view` 等于上一 browser 镜结尾；上一镜是 canvas 时，镜首就是该页面的初始状态，前 8 帧不再换 `view` / `pageBlank`（避免闪一帧）。不留旧标签：标签链只放旁白里真打开过的页。
-- **地址栏与 `backTabs`。** 地址栏可用宽按 `episodes/degradation/remotion/src/components/BrowserChrome.tsx` 算（非 compact：窗宽 − 各标签宽 − 132，标签默认 `min(160, 0.2 × 窗宽)`；窗宽 < 600 走 compact），按原字号放得下目标网址并留 ≥ 24 px。标签越多可用越少：封面一律 `backTabs: []`、`afterTabs: []`。逐字输入写成每帧一条 `type<n>` 关键帧，`url` 为目标串前 n 个字符，输完再 `loaded`。
+- **地址栏与 `backTabs`（历史字段）。** 固定 fixture 的非 compact 窗口按「窗宽 − 各标签宽 − 132」估算可用宽，标签默认 `min(160, 0.2 × 窗宽)`；目标网址按原字号放下并留 ≥ 24 px。对应历史 spec 保存在 `episodes/_shared/storyboard/examples/degradation/`，新工程须按自己的实际窗口组件核对，不套用此公式。历史封面使用 `backTabs: []`、`afterTabs: []`；逐字输入每帧一条 `type<n>` 关键帧，`url` 为目标串前 n 个字符，输完再 `loaded`。
 - **不缩字。** 渲染不自动缩小（溢出只打 `COPYFIT`），生成时按原字号算宽：每行字宽 ≤ 框宽 − 16 − `padLeft`；`CalloutTag` / `CornerBadge` 的 `w` 再加 12 px 余量。
 - **「同一个」只画一个。** 旁白说「同一个 X 服务」时，只建一个节点（`sharedNode: true`），各条箭头 `pointsTo` 它。
 - **标签挂在它说的东西下面。** 例如「保核心链路」放在核心链路那一侧元素正下方，x 对齐。子流程放在父节点下方，x 不小于父节点 x。

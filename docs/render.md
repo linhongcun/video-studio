@@ -1,119 +1,72 @@
 # 渲染与封面
 
-当前制作工程在 `episodes-codex/<slug>/`，按该期 README、package.json 与冻结清单执行。下文20镜/5152帧的 degradation 是上一轮历史范例；EP.14 站点数据现已由新的 Codex 版替换，不能用旧 `episodes/degradation/remotion/` 重渲新片。现行实现可参考 `episodes-codex/db-lock/` 与 `episodes-codex/degradation/`。
-
-以各期 `remotion/package.json` 为准。下面的命令从现行 `package.json`、`episodes/_shared/music/mix_bgm.py` 和 `episodes/_shared/cover/render.mjs` 抄出。过时说法（每句 −21 LUFS、渲染器一律在正片后追加 2 秒片尾、`npm run typecheck`、`npm run still`）不要再执行：degradation、circuit-breaker、https、http-request 的 `package.json` 都没有 `typecheck` 和 `still`。
+制作工程在 `episodes-codex/<slug>/`，站点发布副本在 `episodes/<slug>/`。按当期 README、`remotion/package.json` 和 `source-sha256.json` 执行；参考实现为 [EP.14 当前工程](../episodes-codex/degradation/README.md)。旧期制作工程已清理，不从站点目录重新渲染。
 
 ## 正片
 
-参考 `episodes/degradation/remotion/package.json`：
+以下命令使用当前 EP.14 的实际入口。运行前先完成 [校验](validate.md) 与冻结核对；换期应先读该期 README。
 
 ```sh
-cd episodes/degradation/remotion
+cd episodes-codex/degradation/remotion
 npm ci
+npx tsc --noEmit
 npm run render
 ```
 
-`npm run render` 等于：
+当前 EP.14 的 `render` 先执行 `render:voice` 生成 `out/voice.mp4`，再执行 `render:mix`，通过共享混音脚本生成上层 `video.mp4`。编码器、CRF、并发、浏览器位置以各期 package.json 为准，不把单期参数当成全系列命令。
+
+共享混音从该制作目录调用 `../../../episodes/_shared/music/mix_bgm.py`，输入 `out/voice.mp4`、背景音乐 `../../../episodes/_shared/music/Wallpaper.mp3`，以 `--mode constant --below 12` 输出上层 `video.mp4`，报告写入 `out/mix-report.json`。默认响度目标 −16 LUFS、真峰值 −2.0 dBTP；实际值读混音报告，不以配置目标代替成片测量。
+
+人声文件是 `remotion/public/audio/voice.wav`。渲染配置可能在它缺失时仍生成无声画面，渲染前必须确认音轨存在且与冻结输入相同。Remotion bundle 会复制 public 目录，音轨必须是实体文件，不能用相对软链代替。在 remotion 目录检查：
 
 ```sh
-npm run render:voice
-npm run render:mix
+test -f public/audio/voice.wav && test ! -L public/audio/voice.wav && echo ok
 ```
 
-`render:voice`：
+仓根可用 `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole` 校验并按字节复制音轨；`EPDIR` 指制作目录。不要对已冻结工程重跑会写文件的步骤来代替只读检查。
+
+输出位置：
+
+- `episodes-codex/<slug>/remotion/out/voice.mp4`：混音前视频。
+- `episodes-codex/<slug>/video.mp4`：待检查的成片。
+- `episodes-codex/<slug>/remotion/out/mix-report.json`：响度及真峰值测量。
+
+最终帧数按该期分镜、`meta.finalVideoFrames`、实际片尾实现和编码检查确定。某些工程在正片后保留尾帧，算法片可能有无旁白代码附录；不能统一追加或扣除 60 帧。发布前再把检查通过的产物复制到站点目录，见 [publish.md](publish.md)。
+
+## 静帧与动态复核
+
+当前 EP.14 支持：
 
 ```sh
-remotion render src/index.ts Main out/voice.mp4 --codec=h264 --crf=26 --bundle-cache=false
+cd episodes-codex/degradation/remotion
+npm run stills -- /tmp/degradation-stills
 ```
 
-`render:mix`：
-
-```sh
-python3 ../../../episodes/_shared/music/mix_bgm.py \
-  --in out/voice.mp4 \
-  --bgm ../../../episodes/_shared/music/Wallpaper.mp3 \
-  --mode constant --below 12 \
-  --out ../video.mp4 \
-  --report out/mix-report.json
-```
-
-人声文件要先放在 `remotion/public/audio/voice.wav`。`remotion.config.ts` 据此设置 `__HAS_VOICE_AUDIO__`。文件不存在时画面仍会出，但没有配音。
-
-`remotion/public/audio/voice.wav` 必须是实体文件（或打包后仍有效的拷贝）。不要用相对软链指过去：Remotion bundle 时把 `public/` 拷进临时目录，相对软链在那里断掉，渲染时 `staticFile('audio/voice.wav')` 404，整片渲染失败（EP.14 出过一次）。用 `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole` 放置，它按字节复制，目标若是软链会先删掉再写实体文件。手动放时用 `cp`，不要 `ln -s`。渲染前可以确认：
-
-```sh
-test -f remotion/public/audio/voice.wav && test ! -L remotion/public/audio/voice.wav && echo ok
-```
-
-`mix_bgm.py` 还可选 `--lufs`（默认 −16）、`--offset`、`--wav`。`--mode duck` 在重制期的 `package.json` 里没有使用。
-
-输出：
-
-- `episodes/<slug>/remotion/out/voice.mp4` — 混音前
-- `episodes/<slug>/video.mp4` — 成片
-- `episodes/<slug>/remotion/out/mix-report.json` — `final_LUFS`、`true_peak_dBTP`
-
-degradation 的成片帧数等于分镜 `durationInFrames`（5152），也等于 `words.json` 的 `durationFrames`。片尾句子在最后一镜里。`Main.tsx` 没有挂 `ChannelBranding`，不会在这 5152 帧后再加一段。`episodes/_shared/branding/spec.json` 的 `endCard.frames` 仍是 60，那是水印组件规范；这一期的工程没有调用它。不要在分镜总帧数之外再加 60 帧，除非该期 `timingSource` 写明要加。
+该入口输出首帧和各镜中段采样，不是完整的溢出或动态审片。静帧、运动小样、导航检查的入口与参数以各期 scripts 和 README 为准；没有对应脚本时不要从旧期复制命令。对状态切换、变焦中间态、返回总览和跨情景衔接要看连续片段。
 
 ## 演示页页身色
 
-浏览器壳和 DevTools 用各期 `theme.ts` 的 `P.*`，保持深色不动。壳里的网页页身（各期 `src/components/*Page.tsx`）用 `episodes/_shared/theme/pageTheme.ts` 的 `PAGE`：`bg` `#0F172A`、`ink` `#E5E7EB`，另有 `muted`、`field`、`row`、`border`、`highlight`、`highlightEdge`、`success`。别名 `pageBg` = `PAGE.bg`，`pageInk` = `PAGE.ink`。
-
-引用方式：每期 `remotion/src/theme.ts` 转发一行，不要把色值抄进期目录：
+页身使用 `episodes/_shared/theme/pageTheme.ts` 的 `PAGE`：`bg` 为 `#0F172A`、`ink` 为 `#E5E7EB`。各期 `remotion/src/theme.ts` 从共享模块引入，不能另抄一套色值：
 
 ```ts
-// Demo page body (not chrome). See episodes/_shared/theme/pageTheme.ts.
-export {PAGE, pageBg, pageInk} from '../../../_shared/theme/pageTheme';
+export {PAGE, pageBg, pageInk} from '../../../../episodes/_shared/theme/pageTheme';
 ```
 
-`*Page.tsx` 从本期 `theme` 引入（参考 `episodes/degradation/remotion/src/components/ShopPricePage.tsx`）：
+组件从本期 theme 引用，页身用 `PAGE.bg` / `PAGE.ink`，输入框、卡片、行底用 `PAGE.field` / `PAGE.row` / `PAGE.border`。浏览器框和 DevTools 按该期主题绘制。禁止大面积纯白页身，检查方法见 [validate.md](validate.md) 的「页身色」。修改共享主题会影响冻结输入，应按实际受影响范围重新检查、冻结和渲染。
 
-```ts
-import {P, PAGE} from '../theme';
-// 页身根节点
-<div style={{position: 'absolute', inset: 0, background: PAGE.bg, color: PAGE.ink}}>
-```
+## 封面
 
-新增 `*Page.tsx` 必须这样用 `PAGE.bg` / `PAGE.ink`（或 `pageBg` / `pageInk`），输入框、卡片、行底用 `PAGE.field` / `PAGE.row` / `PAGE.border`。不要写死 `#FFFFFF`、`#F8FAFC` 一类大面积浅色底；高亮、成功色在深底上用 `PAGE.highlight*` / `PAGE.success`，不要沿用浅底时代的色值。要改配色只改 `pageTheme.ts`，改后受影响各期都要重渲并重新审片。提交前可以查：
+封面由当期 `remotion/src/Cover.tsx` 和 `covers.json` 定义。当前 EP.14 的实际入口是：
 
 ```sh
-rg -n -i "#fff(fff)?\b|#f8fafc" episodes/*/remotion/src/components/*Page.tsx
+cd episodes-codex/degradation/remotion
+npm run covers
 ```
 
-## 重制期封面
+该脚本生成上层目录的 `cover-16x9.png/jpg`、`cover-4x3.png/jpg`、`cover-3x4.png/jpg`，并将 3:4 JPG 复制为 `poster.jpg`。其他期以自己的脚本为准。
 
-`episodes/degradation/remotion/src/Root.tsx` 注册 `Cover16x9`、`Cover4x3`、`Cover3x4`，尺寸来自 `covers.json` 的 `sizes`。`Cover.tsx` 用 `@covers` 读 `covers.json`。
+逐份打开实际产物，检查文字、裁切、水印和 4:3 安全区：内容 x 315..1125、底边 y < 918，且无 `COPYFIT`。水印按该尺寸的 watermarkZone，不能为了塞入内容安全区挪动水印。`meta.poster` 决定站点海报文件，`covers.json` 的 poster 约定也要一起核对。
 
-出静帧并查看 `COPYFIT`：
+## 共享工具回归
 
-```sh
-cd episodes/degradation/remotion
-node scripts/prep-stills.mjs /tmp/ep-stills frames.json --covers /tmp/ep-covers
-```
-
-`frames.json` 形如 `[{"name":"hook","frame":0}]`。封面 PNG 写到 `--covers` 目录，文件名 `Cover16x9.png`、`Cover4x3.png`、`Cover3x4.png`。
-
-`node scripts/diagfit.mjs /tmp/ep-stills frames.json --covers` 同样会出封面，并打印 `COPYFIT`。
-
-`bash still.sh` 对本期 `Root.tsx` 的每个 composition id 执行 `npx remotion still`，文件在 `stills/`。查溢出仍以 `prep-stills.mjs` / `diagfit.mjs` 的日志为准。
-
-degradation 目录里已有 `cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg` 和 `poster.jpg`。本期 `package.json` 没有把 PNG 转成这些 JPG 的脚本。各尺寸的框和价格行写在 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md) 第 4 节，那里没有转 JPG 的命令。不要改用下面的共享封面命令来生成 degradation 的封面。
-
-`meta.json` 的 `poster` 在 degradation 是 `cover-16x9.jpg`。`covers.json` 的 `poster.file` 写的是 `poster.jpg`，并注明海报与 3:4 同一构图。两个字段同时存在，改海报时两处一起对，不要只改一处。
-
-## 共享封面工程
-
-只适用于分镜顶层有 `cover`，或 slug 写在 `covers/cover-spec.json` 里的期。`episodes/degradation/storyboard.json` 没有顶层 `cover`，`cover-spec.json` 也没有 `degradation`。对这种期运行下面的命令会退出并打印「没有 … 的 cover 节点」。
-
-```sh
-cd episodes/_shared/cover
-npm ci
-npm run covers -- <slug>
-npm run covers -- <slug> --out <dir> --only Cover34
-npm run covers -- <slug> --set-poster
-```
-
-合成 id 是 `Cover169`、`Cover43`、`Cover34`（`src/Root.tsx`）。输出 `cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg`，JPG 控制在 2MB 以内。`--set-poster` 把该期 `meta.json` 的 `poster` 写成 `cover-16x9.jpg`，而且不能和 `--out` 一起用。
-
-4:3 安全区不由这个工程计算。现行闸门见 [validate.md](validate.md)：x 315..1125、y < 918，且无 `COPYFIT`。
+历史 EP.14 的 20 镜、5152 帧样例只保存在 [固定回归输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md)，用于共享工具测试，不是现行渲染工程。相关命令见 [validate.md](validate.md) 的「共享工具回归」。

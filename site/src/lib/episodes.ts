@@ -20,7 +20,6 @@ export type Episode = {
 export type Platform = {id: string; label: string; url: string};
 /** 平台链接：只渲染 meta.json platforms 里写了真实 URL 的平台，没写的不显示（绝不拼猜） */
 const PLATFORMS: [string, string][] = [['bilibili', 'B站'], ['douyin', '抖音'], ['kuaishou', '快手']];
-export const ACCOUNT = 'IT小村';
 const platformsOf = (m: any): Platform[] => PLATFORMS
   .map(([id, label]) => ({id, label, url: String(m.platforms?.[id] ?? '').trim()}))
   .filter((p) => /^https:\/\//.test(p.url));

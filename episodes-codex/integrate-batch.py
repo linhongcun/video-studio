@@ -114,10 +114,10 @@ def integrate(slug):
             if key in p:
                 meta[key] = p[key]
     meta.pop('legacy', None)
-    names = ['video.mp4', 'voice.wav', 'script.md', 'research.md', 'pronunciation.md',
+    # WAV and PNG production masters stay in episodes-codex; the site uses MP4/JPG.
+    names = ['video.mp4', 'script.md', 'research.md', 'pronunciation.md',
              'storyboard.json', 'words.json', 'covers.json', 'render-result.json',
-             'captions.srt', 'cover-16x9.jpg', 'cover-4x3.jpg', 'cover-3x4.jpg',
-             'cover-16x9.png', 'cover-4x3.png', 'cover-3x4.png', 'poster.jpg']
+             'captions.srt', 'cover-16x9.jpg', 'cover-4x3.jpg', 'cover-3x4.jpg']
     copied = {}
     for name in names:
         if (src / name).exists():
@@ -125,8 +125,11 @@ def integrate(slug):
             copied[name] = digest(dst / name)
     (dst / 'article.mdx').write_text(article)
     (dst / 'meta.json').write_text(json.dumps(meta, ensure_ascii=False, indent=2) + '\n')
-    for name in ['timing.json', 'remotion/src/timing.json', 'chapters.txt']:
+    for name in ['timing.json', 'remotion/src/timing.json', 'chapters.txt',
+                 'voice.wav', 'cover-16x9.png', 'cover-4x3.png', 'cover-3x4.png']:
         (dst / name).unlink(missing_ok=True)
+    if meta.get('poster') != 'poster.jpg':
+        (dst / 'poster.jpg').unlink(missing_ok=True)
     for key in ['publishedAt', 'firstRelease', 'platforms', 'series', 'tags', 'related']:
         assert meta.get(key) == before.get(key), f'{slug}: historical field changed: {key}'
     integration = dict(productionArticleSha256=digest(src / 'article.mdx'),
@@ -139,8 +142,8 @@ def integrate(slug):
         f'2026-10-24 Codex 重制，实测 {report["frames"]} 帧。现行制作与检查入口：'
         f'[episodes-codex/{slug}](../../episodes-codex/{slug}/README.md)。\n\n'
         '本站使用检查通过的冻结成片和字幕，保留原发布日期、首发版本与历史平台链接。'
-        '文章仅在站点接入层补章节锚点，变换记录见 site-integration.json。旧 remotion/ 目录为历史工程，'
-        '现行源码以 meta.json 的 sourcePath 为准。\n')
+        '文章仅在站点接入层补章节锚点，变换记录见 site-integration.json。'
+        '制作源码、WAV 与 PNG 原稿仅存于上述制作目录；旧工程通过 Git 历史追溯。\n')
     print(f'EP{meta["ep"]:02d} {slug}: integrated {len(copied)} frozen assets; preserved historical metadata')
 
 

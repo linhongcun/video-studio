@@ -6,7 +6,7 @@
 
 - Node.js 20+，Python 3，FFmpeg；系统中文字体 Noto Sans CJK SC。
 - Chromium：当前运行环境为 `/usr/bin/chromium`，配置及脚本中显式指定。
-- 当前工作区复用 `episodes/degradation/remotion/node_modules` 的依赖软链；独立环境运行 `npm ci` 安装锁定依赖。
+- 在本目录运行 `npm ci` 安装锁定依赖；不依赖已清理的旧期工程目录。
 
 ```sh
 npm ci

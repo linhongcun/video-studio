@@ -1,6 +1,6 @@
 # 配音
 
-音色、响度和起音以 [RULES.md](RULES.md) 为准。当前实现参考 `episodes-codex/db-lock/`、`episodes-codex/http-request/` 的 README、选中takes、铺轨及冻结检查。下文的 degradation 数值与词级ASR示例属于上一轮历史记录；EP.14站点数据现已更换，旧回归输入单独固定于 `episodes/_shared/tests/fixtures/`，不要混用旧Remotion公开音轨与新分镜。
+音色、响度和起音以 [RULES.md](RULES.md) 为准。制作音轨保存在 `episodes-codex/<slug>/`；站点目录只保留发布所需数据，不存配音整轨。参考当前 `episodes-codex/db-lock/`、`episodes-codex/http-request/` 的 README、选中 takes、铺轨及冻结检查。历史逐字 ASR 范例单独保存在固定 fixture，不能与现行句级声学数据混用。
 
 ## 合成一句
 
@@ -12,33 +12,29 @@ python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --
 
 脚本按 `。？！` 分句，默认音色「冰糖」，模型 `mimo-v2.5-tts`，句间 `--gap` 默认 0.28 秒。`--segments` 写出每句的 `text`、`start`、`dur`。整期批量合成用 `episodes/_shared/voice/gen.py`（jobs 文件 `[[句id, take, 送模文本或 null, style?], …]`），它只调用 `mimo_say.py`，自己不读密钥。密钥只来自 `MIMO_API_KEY` 或 `--env` 文件，不提交。
 
-`episodes/_shared/tts/kokoro_say.py` 是另一套引擎。现行配音不用它。
+## 整轨、句时间和镜头帧
 
-`episodes/tts_timing.py` 会按镜头调用 TTS，默认引擎是 edge-tts（`zh-CN-YunxiNeural`），并写出 `remotion/src/timing.json`，用 `scale` 改镜头时长。`--engine=mimo` 时它去调用 `episodes/_shared/tts/.venv/bin/python`，不是直接调用上面的 `python3 .../mimo_say.py`。degradation 没有 `timing.json`，整轨从第 0 帧播放。重制期不要跑 `tts_timing.py`，否则会把已经冻结的绝对帧改掉。
+复用 `episodes/_shared/voice/` 的 `prep.py`、`gen.py`、`build.py`，按 `voice/params.json` 构建整轨。选段写入 `voice/picks.json`，送模文本修订及能力边界写入 `voice/substitutions.md`；保留已选中 takes，不因普通复核重新请求非确定性 TTS。
 
-## 整轨、词时间和镜头帧
+当前句级工程通过本期 `assemble.py` 或 [共享句级装配](../episodes-codex/_shared/README.md) 建立 `words.json`、字幕、镜头边界和句首声学起音。`asrModel: none`、`wordAlignment: false` 时，兼容 words/chars 字段不代表完成逐字 ASR。具体参数与顺序按本期 README，不把旧 EP.14 的镜数或停留秒数当成统一值。
 
-degradation 的成片把整轨放在 `episodes/degradation/remotion/public/audio/voice.wav`。`remotion.config.ts` 用这个文件是否存在来定义 `__HAS_VOICE_AUDIO__`。`Main.tsx` 从第 0 帧播放 `staticFile('audio/voice.wav')`，注释写明轨道已按 `shots[].voice` 铺好（`voice/place_v2.py`）。EP.05–EP.14 这份公开轨与 `voice.wav` 逐字节相同，用 `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole`（`whole` 是默认值）：校验后按字节复制成实体文件，不重新编码，目标原来是软链也会换成实体文件。不要手动用软链代替，见 [render.md](render.md)。`--mode place` 才是 EP.02–04 的剪句铺轨。
+已有逐字 ASR 管线的工具仍在 [voice/README.md](../episodes/_shared/voice/README.md)：`asr.py` / `asr_full.py`、`onsets.py`、`lastword_fix.py`、`cues_rule.py`、`shot_frames.py`、`selfcheck.py`。只有模型、运行结果和检查均实际完成时才记录对应能力；不能因历史管线存在就自动填写通过。
 
-`words.json` 顶层字段：`script`、`scriptSha256`、`fps`、`audio`、`audioSha256`、`durationFrames`、`asrModel`、`note`、`shots`、`onsetTable`、`lastWordFix`。
+当前整轨通过下列命令校验后，按字节复制到实体 `remotion/public/audio/voice.wav`，从第 0 帧播放：
 
-`shots[]`：`id`、`onsetFrame`、`sentences`、`speechStartFrame`、`speechEndFrame`、`startFrame`、`endFrame`、`durationFrames`。
+```sh
+python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole
+```
 
-`sentences[]`：`index`、`id`、`text`、`take`、`startFrame`、`endFrame`、`onsetFrame`、`asr`、`asrCoverage`、`chars`、`words`。`words[]` 为 `{w, startFrame, endFrame}`。`chars[]` 为 `{ch, startFrame, endFrame}`。
+`EPDIR` 为制作目录。目标不能是相对软链，Remotion bundle 后会失效，见 [render.md](render.md)。`--mode place` 只用于历史剪句回归，不用于改变当前冻结时序。已发布工程只读复核用 `--no-copy`，报告放 `/tmp`。
 
-`onsetTable[]`：`shot`、`sentence`、`onsetFrame`、`frameInt`、`sec`、`source`。
-
-`lastWordFix[]`：`id`、`ch`、`old`、`new`、`speechEnd`。`note` 写明句末字若落在静音上，改用能量谷，并点名 `voice/lastword_fix.py`。
-
-`asrModel` 记的是 `faster-whisper medium`。由 `episodes/_shared/voice/asr.py` 产生（参数见 `voice/params.json` 的 `asr`）。
-
-生成这些文件的脚本在 `episodes/_shared/voice/`（见其 `README.md`）：`build.py` 出 `voice.wav` 与 `voice/build.json`，`asr.py` / `asr_full.py` 出 `voice/asr.json` / `voice/asr_full.json`，`onsets.py` 出 `words.json` 与 `voice/cues.json`，`lastword_fix.py` 写 `lastWordFix`，`cues_rule.py` 用 `onset_rule.py` 改 `voice/cues.json` 的 `onsetFrame`，`shot_frames.py` 出 `voice/shot_frames.json`，`selfcheck.py` 自检。一次跑完：`sh episodes/_shared/voice/run.sh EPDIR`。EP.14 在同一批 takes 上逐字节复现（`episodes/_shared/tests/test_voice.py`）。整轨在手之后的放置是 `episodes/_shared/place_v2.py`。[knoll-props.template.md](knoll-props.template.md) 只写画面制作说明。
-
-分镜侧与词时间对齐的字段是 `shots[].voice`（`wavStart`、`wavEnd`、`localStart`、`localEnd`）和元素上的 `cueOnset`。见 [storyboard-schema.md](storyboard-schema.md)。
+分镜的 `shots[].voice` 记录 `wavStart`、`wavEnd`、`localStart`、`localEnd`，元素的 `cueOnset` 记录所用起音。`words.json` 的 shots/sentences 记录真实句边界、选定 take、音轨和脚本哈希。字段说明见 [storyboard-schema.md](storyboard-schema.md)；实际语义以本期装配实现为准。
 
 ## 冻结
 
-`audioSha256` 是 `voice.wav` 的 SHA-256 全文。`scriptSha256` 是当时脚本的全文。改口播或重配之后两个值都要重写，并改 `storyboard.json` 的 `meta.timingSource` 与 `shots[].timing.source` 前缀。EP.02 另把分镜全文写进 `verify-storyboard.tsx`，只有那一期这么做。
+`audioSha256` 是实际 `voice.wav` 的完整 SHA-256。`scriptSha256` 的输入定义按本期装配代码：当前 EP.14 比较整份 `script.md`，历史回归中的旁白提取文本定义不同，不能混用。改口播、重配或重装配后，要重新核对分镜时序、起音、冻结清单及受影响媒体。
+
+冻结与只读核对入口见 [validate.md](validate.md)。校验失败先找原因，不能用更新清单把新源码追认给旧成片。
 
 ## 起音
 
@@ -66,7 +62,7 @@ Rule(samples, sample_rate).onset(st, en, prevStart=None, prevEnd=None)
 
 `samples` 是一维浮点波形。`st` / `en` 是提示字 ASR 的起止帧。`prevStart` / `prevEnd` 是上一字的 ASR 起止，句首传 `None`。返回字典含 `onset`、`source`（`pause` 或 `asr`）、`kind`、`pause`、`breaths`。
 
-degradation 的 `cueOnset.rule` 是 `source/kind`。这一期见过 `pause/fricative/plosive`、`pause/voiced`、`pause/fricative (low, h/f)`、`asr/continuous`。`cueOnset` 还带 `sentence`、`asrFrame`、`onsetLocal`、`delay`。
+历史 EP.14 fixture 的 `cueOnset.rule` 是 `source/kind`。该样例记录过 `pause/fricative/plosive`、`pause/voiced`、`pause/fricative (low, h/f)`、`asr/continuous`。`cueOnset` 还带 `sentence`、`asrFrame`、`onsetLocal`、`delay`。
 
 标签窗口仍是 `[-6, 2]`，入场帧 `max(1, floor(onsetLocal) − 2) + d`。这道窗口不在 `onset_rule.py` 里算，由检查器算：`diff = 镜头绝对帧 − onset`。
 
@@ -74,7 +70,7 @@ degradation 的 `cueOnset.rule` 是 `source/kind`。这一期见过 `pause/frica
 python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 ```
 
-退出码 1 表示有 FAIL、NOT FOUND 或 MISMATCH。`--exc 06,18` 把对应镜头 id 前两位的窗口越界改记为 EXCEPTION。报告默认写在当期目录的 `label-onset-strict.txt`。现有期级 `validate.py` 不 import 这个模块。冻结分镜 `meta.onsetRule.checker` 里的 `/workspace/video-studio/episodes-codex/_shared/label_onset_strict.py` 就是这一份。引用方式见 [validate.md](validate.md)。
+退出码 1 表示有 FAIL、NOT FOUND 或 MISMATCH。`--exc 06,18` 把对应镜头 id 前两位的窗口越界改记为 EXCEPTION。报告默认写在当期目录的 `label-onset-strict.txt`。当前工程是否另有本期检查入口，以本期 README 为准。冻结分镜 `meta.onsetRule.checker` 里的 `/workspace/video-studio/episodes-codex/_shared/label_onset_strict.py` 就是这一份。引用方式见 [validate.md](validate.md)。
 
 冻结分镜 `meta.onsetRule.module` 还写着仓外路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py`。以 `episodes/_shared/onset_rule.py` 这一份为准。本仓没有按期拷贝。期目录不要再复制算法；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
 

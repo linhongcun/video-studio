@@ -1,10 +1,5 @@
-# EP.21 · 入门：发布副本
+# 什么是分布式事务？
 
-本目录由站点读取。当前制作工程、配音、输入冻结和检查报告在
-[episodes-codex/distributed-tx-intro](../../episodes-codex/distributed-tx-intro/README.md)。
-20镜40句、5章、5155帧，约171.8秒；媒体完整SHA见本目录render-result.json。
+本站发布目录。现行制作、配音和检查入口：[制作工程](../../episodes-codex/distributed-tx-intro/README.md)。
 
-学习顺序：EP.20 → 本片入门 → [两阶段提交](../tx-2pc/) → [TCC](../tx-tcc/) → [Saga](../tx-saga/) → [可靠消息 / Outbox](../tx-outbox/)。
-各实现独立媒体与URL；原合集留在归档页供回看。本站不复制一套制作工程，源码链接由meta.sourcePath指向当前目录。
-
-站点文章中的学习路径随短片拆分更新；原制作冻结输入保留v0.46.0复现。仅发布文章的引导与链接调整，原配音、字幕、章节、成片、分镜和制作快照不变。
+源码位置由 `meta.json.sourcePath` 指定；WAV、PNG 原稿和冻结输入保存在制作目录。已被替代的旧工程通过 Git 历史追溯，清理范围见 [仓库清理记录](../../docs/repository-cleanup.md)。

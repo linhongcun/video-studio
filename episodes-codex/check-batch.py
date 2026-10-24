@@ -113,7 +113,7 @@ def verify(slug, integrated, built):
         sm = read(site / 'meta.json')
         assert sm['ep'] == ep and not sm.get('draft') and not sm.get('legacy')
         assert sm['finalVideoFrames'] == frames and sm['sourcePath'] == f'episodes-codex/{slug}/remotion'
-        for name in ['video.mp4', 'storyboard.json', 'words.json', 'voice.wav', 'script.md',
+        for name in ['video.mp4', 'storyboard.json', 'words.json', 'script.md',
                      'research.md', 'pronunciation.md', 'covers.json',
                      'cover-16x9.jpg', 'cover-4x3.jpg', 'cover-3x4.jpg']:
             assert digest(d / name) == digest(site / name), f'{slug}: site copy {name}'

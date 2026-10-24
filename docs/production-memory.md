@@ -86,9 +86,9 @@
 以下保留V1的制作与发布历史：
 
 - 用户要求先选一期制作看效果，选定 A01 / [#131](https://github.com/linhongcun/video-studio/issues/131)《AI 能回答问题，怎么才能真正帮你办事？》，制作与站点 slug 为 agent-intro，新系列键 agent。
-- [制作工程](../episodes-codex/agent-intro/README.md)为20镜40句、5章、5420帧，约180.7秒；通过同一合成退款咨询解释模型请求、程序执行、结果回传和动态选择，只查询并给申请建议，退款始终未执行。
-- 实际媒体SHA-256为44b21f36f6b99b4106141548a6bbc70c7556a394e4f1e819949b0e2af9be9b9c，−16.0LUFS；171冻结输入、完整解码、73预演/74实际帧比对、18张独立实际成片图及干净构建已检查。未执行逐字ASR或全片人工听辨，详见[最终报告](../episodes-codex/agent-intro/qa-final.md)。
-- 站点正式构建、40条VTT、5章精确跳转、桌面/手机布局和完整媒体SHA已有本地证据；[发布记录](../episodes-codex/agent-intro/release.md)、GitHub [v0.50.0](https://github.com/linhongcun/video-studio/releases/tag/v0.50.0)及制作issue保留最终发布与线上核验状态。用户尚未观看，不记为用户认可。
+- [V1 历史制作工程](https://github.com/linhongcun/video-studio/blob/686473df4fe89f6083a2386a8631d5dc32f4c04a/episodes-codex/agent-intro/README.md)为20镜40句、5章、5420帧，约180.7秒；通过同一合成退款咨询解释模型请求、程序执行、结果回传和动态选择，只查询并给申请建议，退款始终未执行。V1 已从工作树清理，以上固定提交链接用于历史追溯；当前入口见 [V3 工程](../episodes-codex/agent-intro-v3/README.md)。
+- 实际媒体SHA-256为44b21f36f6b99b4106141548a6bbc70c7556a394e4f1e819949b0e2af9be9b9c，−16.0LUFS；171冻结输入、完整解码、73预演/74实际帧比对、18张独立实际成片图及干净构建已检查。未执行逐字ASR或全片人工听辨，详见[V1 最终报告](https://github.com/linhongcun/video-studio/blob/686473df4fe89f6083a2386a8631d5dc32f4c04a/episodes-codex/agent-intro/qa-final.md)。
+- 站点正式构建、40条VTT、5章精确跳转、桌面/手机布局和完整媒体SHA已有本地证据；[V1 发布记录](https://github.com/linhongcun/video-studio/blob/686473df4fe89f6083a2386a8631d5dc32f4c04a/episodes-codex/agent-intro/release.md)、GitHub [v0.50.0](https://github.com/linhongcun/video-studio/releases/tag/v0.50.0)及制作issue保留最终发布与线上核验状态。用户尚未观看，不记为用户认可。
 
 ### EP.05 CDN 地图与术语返工
 
