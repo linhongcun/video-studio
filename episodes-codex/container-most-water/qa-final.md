@@ -11,4 +11,4 @@
 
 独立实际成片复核通过：实际查看3964/6543/6544/6750/6993帧，450卡帧全部扫描，最大帧平均RGB差0.006/255且return区域每帧可见；旧0/3964/6486编码逐像素一致，6543仅有压缩微差。混音1–210秒相关0.9998286、拟合增益约+0.001dB，20–40秒最佳对齐为0样本。详见`qa-python-endcard-independent.md/json`。
 
-站点构建73页、27索引及旧课程/Agent回归通过。390/1440两尺寸显示3:53，四章跳转精确、原生控件保留；CC在原讲解有实际cue、225秒代码卡无cue，暂停完整程序和约1秒静音播放通过，无溢出或运行错误。44句VTT逐字节保持。详见`qa-python-endcard-site.md/json`。上线完整GET待发布后补齐。修订2全部历史证据已存`revisions/python-endcard/v2-*`，初版证据仍在`revisions/progress-removal/v1-*`。未新增逐字ASR、句内词级对齐或全片人工听辨；不声称已测量学习收益。
+站点构建73页、27索引及旧课程/Agent回归通过。390/1440两尺寸显示3:53，四章跳转精确、原生控件保留；CC在原讲解有实际cue、225秒代码卡无cue，暂停完整程序和约1秒静音播放通过，无溢出或运行错误。44句VTT逐字节保持。详见`qa-python-endcard-site.md/json`。v0.50.2已合并、发布并部署；线上实际完整视频/海报SHA、44句VTT逐字节一致、四章/正文锚点、源码入口、系列/RSS、首页和更新日志核验通过，见`online-verification.json`与`release.md`。修订2全部历史证据已存`revisions/python-endcard/v2-*`，初版证据仍在`revisions/progress-removal/v1-*`。未新增逐字ASR、句内词级对齐或全片人工听辨；不声称已测量学习收益。
