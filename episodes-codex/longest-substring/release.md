@@ -19,7 +19,7 @@
 - [部署40105542981](https://github.com/linhongcun/video-studio/actions/runs/40105542981)于2026-10-24 23:09:55（北京时间）成功，head与合并提交一致，API证据见revisions/problem-first/before-deployment.json。合并触发的构建已收录实际v0.53.0 Release链接，线上脚本对此另有断言，不只比对页脚版本。
 - 2026-10-24 23:10:27（北京时间）实际HTTPS GET核验通过：线上视频8,391,127 bytes、完整SHA与检查后媒体相同；海报123,430 bytes、完整SHA为85982c447c2494becba5d476367f9865b26c12d890fcf066cc8860b6334330b1；36句VTT逐字节一致，SHA为0bcfb90d0e8c7eb5a74c242e6a5b88cd41490cbd3491737890b8b3db03987785。
 - 四章精确起点、正文锚点、源码入口、独立系列、首页/RSS及实际Release更新日志通过，见revisions/problem-first/before-online-verification.json。2026-10-24 23:10:55（北京时间）已将#79以completed关闭，API结果见issue-closure.json；不表示外部平台已经发布。
-- Release后另按流程触发的[部署40105615410](https://github.com/linhongcun/video-studio/actions/runs/40105615410)也已成功，head与合并提交一致，见release-deployment.json；未取消其他工作流。
+- Release后另按流程触发的[部署40105615410](https://github.com/linhongcun/video-studio/actions/runs/40105615410)也已成功，head与合并提交一致，见revisions/problem-first/before-release-deployment.json；未取消其他工作流。
 
 ## v0.54.2：题意先于解法
 
