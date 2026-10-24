@@ -22,7 +22,19 @@ else:
     sys.argv = [str(ROOT/'episodes-codex/_shared/freeze_sentence_episode.py'), str(D)]
     runpy.run_path(sys.argv[0], run_name='__main__')
     manifest = json.loads((D/'source-sha256.json').read_text())
-    extra = [Path(__file__).resolve(), D/'research-math.md', D/'verify_math.py']
+    extra = [Path(__file__).resolve(), D/'research-math.md', D/'verify_math.py',
+             D/'revise_ending_voice.py']
+    # The tail uses a shared voice build, then an exact prefix concatenation.
+    # Freeze its real provenance and small baseline timing inputs as well.
+    extra += [D/'voice'/name for name in [
+        'ending-build.json', 'ending-params.json', 'ending-sents.json',
+        'ending-picks.json', 'ending-input-provenance.json',
+        'ending-composition.json']]
+    baseline = D/'revisions/self-contained-ending/before'
+    extra += [baseline.parent/'before-media-sha256.json']
+    extra += [baseline/name for name in [
+        'voice/build.json', 'voice/sents.json', 'voice/picks.json',
+        'words.json', 'storyboard.json']]
     extra += [p for p in (D/'remotion/scripts').rglob('*') if p.is_file()]
     for p in extra:
         manifest[os.path.relpath(p, D)] = digest(p)

@@ -3,6 +3,7 @@ import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {GROUPS,HORSES,Shot,shots} from './data';
 import {C,FONT} from './theme';
 import {useLayoutAudit} from './LayoutAudit';
+import {LowerBoundScene} from './LowerBound';
 import {Arrow,Board,CHAMPIONS,FINALISTS,FasterProof,Head,Node,Note,RETAINED,T,across,at,clamp,ease,mix,nodeXY,phase,steps} from './primitives';
 declare const __HAS_VOICE_AUDIO__:boolean;
 
@@ -31,6 +32,7 @@ const rankLabels=(ids:string[],positions:Record<string,{x:number;y:number}>,reve
 
 const Scene=({s,f}:{s:Shot;f:number})=>{
  const t=s.visualType,p=phase(s,f),q=phase(s,f,1);
+ if(Number(s.id)>=18)return <LowerBoundScene s={s} f={f}/>;
  if(t==='hook'){
   const take=phase(s,f,0,.13,.88),positions:Record<string,{x:number;y:number}>={};
   HORSES.forEach(h=>{positions[h.id]={x:340+h.col*170,y:355+h.row*98};});
@@ -191,14 +193,7 @@ const Scene=({s,f}:{s:Shot;f:number})=>{
    <Note color={C.gold}>排除有依据，留下的候选覆盖所有前三可能</Note>
   </>;
  }
- // Closing deliberately keeps the observed podium separate from the proof recap.
- const back=phase(s,f,0,.13,.4),context=1-phase(s,f,0,.01,.12),positions=blendPositions({},podiumPositions,back),alpha=Object.fromEntries(HORSES.map(h=>[h.id,['甲1','甲2','乙1'].includes(h.id)?1:alphaStage(4)[h.id]*context]));
- return <><Head kicker="结果回看 · 趣味推理 P01" title="七场，确定最快的前三名" sub="最坏情况下，保证找出前三及顺序所需的最少场数" color={C.teal}/>
-  <Board positions={positions} alpha={alpha} groupLabels={back===0} rankHeaders={back===0} colors={{甲1:C.teal,甲2:C.gold,乙1:C.gold}} scales={{甲1:mix(1,1.4,back),甲2:mix(1,1.4,back),乙1:mix(1,1.4,back)}}/>
-  <g opacity={back}>{['总第一','总第二','总第三'].map((label,i)=><T key={label} x={[360,900,1440][i]} y={282} size={32} color={i===0?C.teal:C.gold} anchor="middle" weight={750}>{label}</T>)}</g>
-  <g opacity={q}><T x={960} y={642} size={75} color={C.teal} anchor="middle" weight={760}>5 + 1 + 1 = 7</T><T x={960} y={760} size={35} color={C.muted} anchor="middle">为什么6场不能保证？完整证明见配套图文</T></g>
-  <T x={960} y={910} size={28} color={C.muted} anchor="middle">IT小村 · 原创</T>
- </>;
+ throw new Error('Unknown horse-racing visualType: '+t);
 };
 
 const ShotView=({s,hideSubtitles=false,auditLayout=false}:{s:Shot;hideSubtitles?:boolean;auditLayout?:boolean})=>{
