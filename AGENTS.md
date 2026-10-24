@@ -4,7 +4,7 @@
 
 制作或重制视频前，先读 [教训](docs/lessons-learned.md) 和 [成功经验](docs/successful-practices.md)，再用 [项目制作记忆](docs/production-memory.md) 确认用户偏好和案例状态。每期制作、返工和收到用户反馈时都检查是否需要更新记录：新发现的错误与已经验证有效的做法分别追加到这两份文件，写清案例、改法与验证方式；尚未验证的指导先记到项目记忆，验证后再补证据。没有新发现时不凑条目；单期参数不自动变成新规范。
 
-本仓没有 `share/RULES.md`。2026-10-16 那份团队规范里的冲突条已经写进 `docs/RULES.md` 的废止节。不要从根 `README.md` 的旧段落、`design.md`、`site-plan.md`、站点关于页，或各期 `plan.md` 里恢复「比喻优先」和「发布含快手」。
+本仓没有 `share/RULES.md`。2026-10-16 那份团队规范里的冲突条已经写进 `docs/RULES.md` 的废止节。旧工程和旧站规划已清理，不要从 Git 历史恢复「比喻优先」和「发布含快手」。
 
 ## 提交署名
 
@@ -59,15 +59,16 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 
 | 路径 | 本仓实际情况 |
 |---|---|
-| `episodes/` | 站点内容。已上线各期的 `meta.json`、`article.mdx`、`video.mp4` 和重制工程都在这里 |
-| `episodes/degradation/` | EP.14 站点数据副本；当前制作工程在 `episodes-codex/degradation/`，原 `remotion/` 为历史工程 |
+| `episodes/` | 站点发布内容：元数据、文章、字幕、分镜、MP4 和 JPG；制作源码及 WAV、PNG 原稿留在 `episodes-codex/` |
+| `episodes/degradation/` | EP.14 站点数据副本；当前制作工程在 `episodes-codex/degradation/` |
 | `episodes-codex/` | EP.01–21 的当前 Codex 制作目录，另有 EP.21 前置入门 `distributed-tx-intro/` 与独立短片 `tx-2pc/`、`tx-tcc/`、`tx-saga/`、`tx-outbox/`。EP.01–14 本轮状态见 [批次记录](docs/codex-remake-ep01-14.md)；开新期入口见 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
 | `*-backup/` | 各角色备份。本仓没有这些目录 |
 | `share/` | 本仓没有。规范不要写回这里 |
-| `episodes/_shared/` | 页身色、水印规范、混音、TTS、旧的共享封面工程，以及 `onset_rule.py`、`label_onset_strict.py`、`place_v2.py`、`make_knoll_props.py`、`voice/`（配音整轨） |
+| `episodes/_shared/` | 页身色、水印规范、混音、MiMo TTS，以及起音、铺轨、制作说明与配音整轨工具；固定回归样本仍保留 |
 | `docs/` | 下面这些手册。制作说明模板是 `docs/knoll-props.template.md` |
 | `site/` | Astro 站点。`site/package.json` 的 `version` 是三段式版本号 |
-| `covers/cover-spec.json` | 只给共享封面工程用，不含 degradation |
+
+2026-10-25 清理已被替代的旧工程，记录见 [docs/repository-cleanup.md](docs/repository-cleanup.md)。当前制作入口以各期 `meta.json.sourcePath` 为准；Agent 为 `agent-intro-v3/`，其拼接仍依赖 `agent-intro-v2/video.mp4`，不要删掉该输入。下架隔离级别和 Agent 第一版通过 Git 历史追溯。
 
 ## 手册
 
@@ -92,5 +93,5 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 - 新发快手或 X，或把平台链接发到群里。
 - 编造本仓没有的脚本，或在期目录另写一份配音整轨脚本。配音整轨用 `episodes/_shared/voice/`（产出 `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`）；参数改 `voice/params.json`，不要改脚本里的数。
 - 另存一份起音算法。唯一实现是 `episodes/_shared/onset_rule.py`。`episodes/_shared/label_onset_strict.py` 只 import 它。冻结分镜里的 `episodes-codex/_shared/onset_rule.py` 是旧路径。期目录不要复制；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
-- 把 `episodes/*/validate.py` 里的「画面不出数字 / 不出英文」当成现行检查。那些脚本还依赖本仓没有的 `episodes/_audit/`。
+- 从历史旧校验器恢复「画面不出数字 / 不出英文」规则。现行检查入口见 `docs/validate.md`。
 - 把密钥、token、cookie 写进仓库或日志。TTS 密钥只来自环境变量 `MIMO_API_KEY`（或 `mimo_say.py --env` 指向的已忽略文件）；提交前跑 `python3 episodes/_shared/tests/secret_scan.py`。
