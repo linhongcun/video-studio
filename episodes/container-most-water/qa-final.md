@@ -26,7 +26,7 @@
 
 独立目录按相同仓结构复制17个必要输入，真实npm ci、TypeScript与同QA首帧通过；后续Main澄清、QA脚本修正及真实placeholder同步分别复验，保留旧轮次证据。最终首帧与主工程PNG字节及像素相同，SHA为`493415363ed352a1db3d388aa2fa6121cc6973dd92d11346105afd50b0e1ba4d`。范围为同主机Chromium/字体下的依赖重建与单帧复现，不声称跨系统或重复全片编码。
 
-站点使用逐字节复制的冻结媒体，展示LC.11，独立LeetCode系列；内部ep22只用于排序与Release关联。两次正式网站构建、历史学习链/归档回归、44句VTT和四章锚点、built视频与海报完整SHA通过。32页面尺寸/主题状态和8播放器状态无横溢或JS错误，四章真实seek最大误差约0.014秒；空平台提示删除后另做手机/桌面深浅4组局部复验、历史真实链接与约一秒静音播放smoke test，readyState4/networkState1，无加载转圈。主任务实际查看最终手机深色与桌面浅色截图。`site-ui-check.json`保留具体范围，短时播放不当作全片观看。线上核验以`online-verification.json`与`release.md`完成状态为准。
+站点使用逐字节复制的冻结媒体，展示LC.11，独立LeetCode系列；内部ep22只用于排序与Release关联。两次正式网站构建、历史学习链/归档回归、44句VTT和四章锚点、built视频与海报完整SHA通过。32页面尺寸/主题状态和8播放器状态无横溢或JS错误，四章真实seek最大误差约0.014秒；空平台提示删除后另做手机/桌面深浅4组局部复验、历史真实链接与约一秒静音播放smoke test，readyState4/networkState1，无加载转圈。主任务实际查看最终手机深色与桌面浅色截图。`site-ui-check.json`保留具体范围，短时播放不当作全片观看。Release后部署成功，实际GET核验线上视频/海报完整SHA、44句VTT字节、四章精确起点/锚点、源码入口、独立系列、RSS、首页和更新日志均通过，#78已以completed关闭，见`online-verification.json`与`release.md`。
 
 ## 能力限制与授权
 
