@@ -25,7 +25,7 @@
 
 14项发布副本完整SHA同源；v0.56.4本地构建89页，Pagefind31正文页。1440×1000与390×844实际验证50句字幕、7章、新证明章195.833333…秒跳转、正文跳转和播放，前6章起点保留；无溢出、运行错误或HTTP失败。新报告qa-site-ending单独保存，不用旧站点报告替代。
 
-GitHub合并、Release后部署、线上完整媒体/字幕/章节及issue收尾状态以release.md和online-verification.json为准；当前制作与本地检查已完成，尚未在本报告预记上线。
+PR #228已合并，附注tag v0.56.4指向22f9d16f69f32955aeb4fb44167aea33cf0b7cc9，Release后部署40143372825成功。北京时间2026-10-25 07:40:17首轮10个canonical普通GET的完整媒体/海报SHA、50句字幕逐字节、7章、课程入口及真实修正条目核验通过；#205已completed关闭，#204同步。实际证据见release.md和online-verification.json。
 
 ## 能力范围
 
