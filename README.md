@@ -12,9 +12,9 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 
 ## 已上线剧集
 
-剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–14 已重制；EP.15–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0，只更新站点，不重发平台）。
+剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–15 已重制；EP.16–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0）；EP.15 索引在 v0.45.1 更新为订单表查找动画，均只更新站点，不重发平台。
 
-系列在 EP.14 之后暂停，恢复前不开新期。状态写在 [docs/RULES.md](docs/RULES.md) 的 STATUS，改暂停只改那里和本段。
+系列默认暂停。2026-10-24 用户单独授权 EP.15 索引重制，并在观看成片后批准合并、部署 GitHub 站点；其他新期与平台新发尚未恢复。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
 
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
@@ -51,7 +51,8 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 ```
 AGENTS.md                 给 coding agent 的入口
 docs/                     RULES、pipeline、knoll-props.template.md、examples/knoll-props.degradation.md
-episodes-codex/_template/ 开新期的说明（工程文件尚未入库；暂停期间不要开新期）
+episodes-codex/db-index/  EP.15 索引重制工程、配音与公开资料
+episodes-codex/_template/ 开新期的说明（其他期仍暂停）
 episodes/
   <slug>/                 站点内容。每期一个目录
     meta.json             期号、标题、简介、标签、publishedAt、series（site/src/content/series.json）、updatedAt、platforms（站点渲染 bilibili / douyin；不再新写 kuaishou）、draft、legacy

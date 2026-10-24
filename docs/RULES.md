@@ -6,7 +6,7 @@
 
 ## STATUS
 
-EP.14（`episodes/degradation`，分镜 slug `degradation-v1`）之后系列暂停。恢复之前不开新期，不从 `episodes-codex/_template/` 复制工程，不新发平台，也不要另编一套发布。恢复时改这一节，并改根 `README.md` 的暂停说明。
+系列默认暂停。2026-10-24 用户单独授权 #66 的 EP.15 数据库索引重制，并在观看成片后批准合并代码、部署 GitHub 站点；本次按 v0.45.1「只上站点，不重发平台」发布，制作源为 `episodes-codex/db-index/`，站点仍用 `episodes/db-index/`。其他新期与平台新发仍未恢复，不从模板自行开后续期。后续恢复时更新本节与根 `README.md` 的说明。
 
 ## 画面
 
