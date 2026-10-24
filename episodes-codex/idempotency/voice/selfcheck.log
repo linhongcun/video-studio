@@ -1,0 +1,36 @@
+onset_rule selftest True
+frames 2998.0 durationFrames 2998 sec 99.93333333333334
+shot table:
+  01-hook                    0-  296 (296f 9.87s)
+  02-intent                296-  614 (318f 10.60s)
+  03-lost                  614-  886 (272f 9.07s)
+  04-again                 886- 1140 (254f 8.47s)
+  05-record               1140- 1427 (287f 9.57s)
+  06-reuse                1427- 1662 (235f 7.83s)
+  07-idempotent           1662- 1962 (300f 10.00s)
+  08-concurrent           1962- 2293 (331f 11.03s)
+  09-limit                2293- 2614 (321f 10.70s)
+  10-recap                2614- 2998 (384f 12.80s)
+cues 2 max |cue-rule| 0 outside -6..+2: []
+sentence ASR mismatches:
+   01-hook-1 delete '支付页面一直转圈你又点了一次钱却只扣了一次' -> ''
+   01-hook-2 delete '同一笔支付发了两遍网站怎么认出来的' -> ''
+   02-intent-1 delete '看这笔教学支付要付三十元账户原来有一百元' -> ''
+   02-intent-2 delete '系统先为这一次支付分配编号后面再发也沿用它' -> ''
+   03-lost-1 delete '重试是没收到结果时把同一个请求再发一次' -> ''
+   03-lost-2 delete '但没收到回音不代表刚才没有扣款' -> ''
+   04-again-1 delete '刚才那笔其实已经扣了三十元只是成功回音没回来' -> ''
+   04-again-2 delete '现在再发一次编号仍然是同一个' -> ''
+   05-record-1 delete '回看第一次处理服务端先认这次支付的编号' -> ''
+   05-record-2 delete '扣款和记下编号结果必须可靠地一起完成' -> ''
+   06-reuse-1 delete '再遇到同一个编号就读取已经完成的结果' -> ''
+   06-reuse-2 delete '把成功结果回给你不再做第二次扣款' -> ''
+   07-idempotent-1 delete '幂等说的是同一操作重复执行业务效果仍和一次一样' -> ''
+   07-idempotent-2 delete '这里请求可以多次扣款效果只有一次' -> ''
+   08-concurrent-1 delete '如果两次同时到也不能都先查到没有再各扣一次' -> ''
+   08-concurrent-2 delete '系统要让这个编号只有一个处理者其他请求等待或按约定重试' -> ''
+   09-limit-1 delete '换一笔新的支付就要换一个编号哪怕金额一样' -> ''
+   09-limit-2 delete '编号也有有效期不能把任意重复点击都理解成永远不会再扣钱' -> ''
+   10-recap-1 delete '所以关键是同一次支付用同一个编号服务端可靠地记住并复用结果' -> ''
+   10-recap-2 delete '按钮少点一次有帮助真正防重复还得靠后台' -> ''
+selfcheck ok short shots: []

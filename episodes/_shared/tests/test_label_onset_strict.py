@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Synthetic selftest plus the EP.14 label-onset regression."""
+"""Synthetic selftest plus historical EP.14 v0.45.0 label-onset regression."""
 import hashlib
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from degradation_fixture import historical_degradation
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / 'episodes' / '_shared'))
@@ -15,10 +16,11 @@ EXPECTED = 'aaf507b3200a7bd4c80e7389d3710aa3d352ff974e0c41cb05104f9471f27344'
 
 
 def regression():
+    ep = historical_degradation()
     need = [
-        ROOT / 'episodes/degradation/storyboard.json',
-        ROOT / 'episodes/degradation/words.json',
-        ROOT / 'episodes/degradation/remotion/public/audio/voice.wav',
+        ep / 'storyboard.json',
+        ep / 'words.json',
+        ep / 'remotion/public/audio/voice.wav',
     ]
     missing = [p for p in need if not p.exists()]
     if missing:
@@ -27,7 +29,7 @@ def regression():
     out = Path(tempfile.mkdtemp(prefix='label-reg-')) / 'x.txt'
     r = subprocess.run(
         [sys.executable, str(ROOT / 'episodes/_shared/label_onset_strict.py'),
-         '--dir', str(ROOT / 'episodes/degradation'), '--out', str(out)],
+         '--dir', str(ep), '--out', str(out)],
         cwd=ROOT, check=False)
     assert r.returncode == 0, r.returncode
     got = out.read_bytes()

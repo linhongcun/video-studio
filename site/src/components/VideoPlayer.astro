@@ -1,5 +1,5 @@
 ---
-// 原生 <video> + 章节（桌面右侧列表 / 平板 2 列 / 手机 chips）。无 JS 时章节为正文锚点链接。
+// 原生 <video> + 章节。无 JS 时跳到对应正文；没有正文段落的章节回到播放器。
 import {fmtTime} from '../lib/episodes';
 const {src, poster, captions, chapters, stickyOnMobile = true, title = ''} = Astro.props;
 ---
@@ -20,7 +20,7 @@ const {src, poster, captions, chapters, stickyOnMobile = true, title = ''} = Ast
     <h2 class="side-h">章节</h2>
     <ol class="list">
       {chapters.map((c, i) => (
-        <li><a class="ch" href={`#${c.id}`} data-id={c.id} data-start={c.start} data-index={i}>
+        <li><a class="ch" href={c.inArticle ? `#${c.id}` : '#player'} data-id={c.id} data-start={c.start} data-index={i}>
           <span class="ts num">{fmtTime(c.start)}</span><span class="tt">{c.title}</span><span class="bar" aria-hidden="true"><i></i></span>
         </a></li>
       ))}
@@ -29,7 +29,7 @@ const {src, poster, captions, chapters, stickyOnMobile = true, title = ''} = Ast
   </div>
   <div class="chips-wrap"><div class="chips" role="list" aria-label="章节">
     {chapters.map((c, i) => (
-      <a class="chip" role="listitem" href={`#${c.id}`} data-id={c.id} data-start={c.start} data-index={i}><span class="num">{fmtTime(c.start)}</span> {c.title}</a>
+      <a class="chip" role="listitem" href={c.inArticle ? `#${c.id}` : '#player'} data-id={c.id} data-start={c.start} data-index={i}><span class="num">{fmtTime(c.start)}</span> {c.title}</a>
     ))}
   </div></div>
   <p class="sr-only" aria-live="polite" data-live></p>

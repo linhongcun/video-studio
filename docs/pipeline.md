@@ -1,6 +1,8 @@
 # 做片流程
 
-从调研做到站点发版。命令只列仓库里真实存在的脚本。某一步没有脚本时写成待补，参考实现是 `episodes/degradation`（分镜 `meta.slug` 为 `degradation-v1`）。开新期的目录说明在 [../episodes-codex/_template/README.md](../episodes-codex/_template/README.md)。规范在 [RULES.md](RULES.md)。
+从调研做到站点发版。命令只列仓库里真实存在的脚本。现行工程参考 `episodes-codex/db-lock/`、`episodes-codex/db-transaction/` 及各期 README；开新期的目录说明在 [../episodes-codex/_template/README.md](../episodes-codex/_template/README.md)。规范在 [RULES.md](RULES.md)。
+
+本文中 `episodes/degradation` 的20镜、5152帧及旧组件结构属于上一轮范例。EP.01–14 再次重制后，站点目录已换成新片数据，不能将 live 目录当作旧回归输入或当前制作工程；[固定历史输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md)保存旧分镜、音轨及完整哈希，旧制作说明在 `docs/examples/`。每期实际命令、哈希定义和能力边界以该期 `episodes-codex/<slug>/README.md` 为准。
 
 制作与发布范围按 [RULES.md 的 STATUS](RULES.md#status) 执行。2026-10-24 起，用户交办或已确定选题的视频做好并检查后，可自主合并、发布 Release、部署 GitHub 站点；不再逐期等待用户批准。平台新发仍须另行授权。
 

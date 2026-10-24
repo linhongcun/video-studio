@@ -1,12 +1,12 @@
 # video-studio · IT小村工作室
 
-IT小村工作室的互联网开发技术科普短视频项目。一条主线讲清楚一个问题，画面不用比喻。视频用代码生成（[Remotion](https://www.remotion.dev/)），每期配一篇图文文章。
+IT小村工作室的互联网开发技术与算法科普短视频项目。一条主线讲清楚一个问题，画面不用比喻。视频用代码生成（[Remotion](https://www.remotion.dev/)），每期配一篇图文文章。
 
 做片的人从 [AGENTS.md](AGENTS.md) 进入，规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
 
 - 线上站点：https://linhongcun.github.io/video-studio/
 - 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。不发快手，不发 X。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
-- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
+- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式 / LeetCode · 算法可视化）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
 - 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
@@ -15,6 +15,8 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–21 已重制；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0）；EP.15 索引在 v0.45.1 更新为订单表查找动画；EP.16 事务在 v0.45.2 更新为逐步展示修改、提交和回滚的动画；EP.17 锁在 v0.45.3 更新为加锁读取、等待后重新检查库存的动画。v0.45.4 重制 EP.18–21，分别用昵称复制、按用户分片、号码字段与持久待办事件展示主从复制、分库分表、全局 ID 和跨服务一致性。以上均只更新站点，不重发平台。
 
 2026-10-24 用户批准 EP.17 合并及 GitHub 站点发布，并持续授权后续视频制作和质量检查完成后自主合并、上线，有反馈再修正发布，不再逐次等待确认。该授权适用于 GitHub 主干、Release 和本站；平台新发仍需单独授权。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
+
+v0.48.0 已将 EP.01–14 的上一轮 Cursor 重制版全部替换为本轮 Codex 版：160镜、320句新配音，逐期重写脚本与主体动画，补齐章节导航和字幕。制作与检查见[本轮批次记录](docs/codex-remake-ep01-14.md)，当前源码由各期 `sourcePath` 指向 `episodes-codex/`。只上本站，历史平台投稿保留。
 
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
@@ -27,8 +29,8 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 | 7 | 浏览器与网络 | 同一个网页，第二次打开为什么快这么多？ | [browser-cache](https://linhongcun.github.io/video-studio/episodes/browser-cache/) | 2026-10-12 |
 | 8 | 后台缓存 | 数据库明明有数据，为什么还要再存一份？ | [server-cache](https://linhongcun.github.io/video-studio/episodes/server-cache/) | 2026-10-13 |
 | 9 | 后台缓存 | 后台改了价格，页面怎么还是旧的？ | [cache-consistency](https://linhongcun.github.io/video-studio/episodes/cache-consistency/) | 2026-10-16 |
-| 10 | 扛住高峰 | 双十一下单那么多，为什么不丢单？ | [message-queue](https://linhongcun.github.io/video-studio/episodes/message-queue/) | 2026-10-13 |
-| 11 | 扛住高峰 | 抢票那一刻，为什么总提示系统繁忙？ | [rate-limit](https://linhongcun.github.io/video-studio/episodes/rate-limit/) | 2026-10-13 |
+| 10 | 扛住高峰 | 订单已提交，为什么还没处理完？ | [message-queue](https://linhongcun.github.io/video-studio/episodes/message-queue/) | 2026-10-13 |
+| 11 | 扛住高峰 | 抢票时，为什么总提示系统繁忙？ | [rate-limit](https://linhongcun.github.io/video-studio/episodes/rate-limit/) | 2026-10-13 |
 | 12 | 扛住高峰 | 手一抖点了两次支付，为什么只扣一次钱？ | [idempotency](https://linhongcun.github.io/video-studio/episodes/idempotency/) | 2026-10-13 |
 | 13 | 扛住高峰 | 一个服务出故障，为什么整个网站没跟着崩？ | [circuit-breaker](https://linhongcun.github.io/video-studio/episodes/circuit-breaker/) | 2026-10-14 |
 | 14 | 扛住高峰 | 搜索页和结算页，为什么两个价不一样？ | [degradation](https://linhongcun.github.io/video-studio/episodes/degradation/) | 2026-10-13 |
@@ -47,6 +49,10 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → Saga → 可靠消息（Outbox）”。每个实现独立短片，用一个示例逐步展示成功、失败和适用边界。实际时长与完整检查见各片制作入口；本批版本v0.47.0。
 
 原约6分29秒[多方案合集](https://linhongcun.github.io/video-studio/episodes/distributed-tx/)保留历史页面与媒体，从推荐学习路径和搜索移出，页面提供独立短片入口。旧制作冻结输入不改；不能将原有机器/抽帧检查当作用户已认可合集教学效果。最新反馈和复盘见[教训L012](docs/lessons-learned.md)。
+
+## LeetCode · 算法可视化
+
+独立算法系列使用题号展示，不要求先看网络或分布式课程。首期为[LC.11《盛最多水的容器：为什么每次都移动短边？》](https://linhongcun.github.io/video-studio/episodes/container-most-water/)，22镜、约3分38秒，用同一组竖线讲清面积、整组排除依据和双指针扫描。完整Python实现与证明放配套文章，制作入口见[本期工程](episodes-codex/container-most-water/README.md)。本期只上站点。
 
 ## 制作流程
 

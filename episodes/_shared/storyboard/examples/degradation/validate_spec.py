@@ -1,8 +1,8 @@
-"""EP.14 degradation (slug degradation-v1) validate spec — ported from the episode-dir validate.py (frozen result: 6623 checks / 0 errors,
+"""Historical EP.14 v0.45.0 degradation (slug degradation-v1) validate spec — ported from the episode-dir validate.py (frozen result: 6623 checks / 0 errors,
 onset 91/91, 标注表 59/0). Generic checks run in episodes/_shared/storyboard/validate.py from the constants below; checks(v) holds the
 EP.14-only ones (shopPrice pages, tab chain, shot-by-shot facts, cover price line, RFC 2606 in the article).
 Run:  python3 -B episodes/_shared/storyboard/validate.py --spec episodes/_shared/storyboard/examples/degradation/validate_spec.py \
-        --episode-dir episodes/degradation --inputs episodes/_shared/storyboard/examples/degradation/repo-inputs.json \
+        --episode-dir episodes/_shared/tests/fixtures/degradation-v0.45.0 --inputs episodes/_shared/storyboard/examples/degradation/repo-inputs.json \
         --storyboard OUT/storyboard.json --covers OUT/covers.json"""
 import json, re
 TITLE = '搜索页和结算页，为什么两个价不一样？'; EPISODE = 14; SLUG = 'degradation-v1'

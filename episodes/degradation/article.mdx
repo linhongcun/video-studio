@@ -1,63 +1,32 @@
 ---
-title: 搜索页和结算页，为什么两个价不一样？
-summary: 大促时搜索页到手价没算红包、结算页才算上：网站主动关掉搜索页里的红包计算，把资源留给结算下单这条核心链路——这就是降级。上期跳过运费险，也算一种降级。
+title: "搜索页和结算页，为什么两个价不一样？"
+summary: "少算一处非核心功能，保住下单。"
+related: []
 chapters:
-  - { id: hook, title: 两个价不一样 }
-  - { id: turn-off, title: 关掉搜索页的红包计算 }
-  - { id: degrade, title: 降级与核心链路 }
-  - { id: after, title: 降级之后 }
-related: ["circuit-breaker", "rate-limit", "db-index"]
+  - id: load
+    title: "搜索预估也消耗资源"
+  - id: degrade
+    title: "减少功能仍要交代清楚"
+  - id: boundary
+    title: "核心链路不能靠跳过校验维持"
 ---
 
-大促时，搜索页的到手价和结算页对不上，不一定是 bug。在这个示例里，是因为网站关掉了搜索页的红包计算（**降级**），把资源留给最要紧的那一段——**核心链路**。
+视频使用同一件教学商品：标价199元，符合条件的红包减20元，结算确认179元。搜索与结算价格不同，来自示例系统临时关闭了搜索中的红包预估；这不是对所有网站差价原因的解释。
 
-## 4 步看懂本期
+## 搜索预估也消耗资源 {#load}
 
-### 1. 两个价不一样 {#hook}
+平常搜索可能为很多商品预估优惠。高峰时，这些计算会与结算业务竞争资源。示例系统先减少搜索预估，保持商品搜索可用，把优惠核验留到结算。
 
-- 示例里，搜索页到手价 **199 元**（示例）没算红包；结算页有红包抵扣 **20 元**，应付 **179 元**（示例）。网址 `shop.example` 用的是 RFC 2606 保留给文档和示例的 `.example` 域名，不是真实网站。[^rfc2606]
-- 到手价往往要问商品价格、优惠券、红包等多个服务，全回来才能拼出数字。
+## 减少功能仍要交代清楚 {#degrade}
 
-### 2. 关掉搜索页的红包计算 {#turn-off}
+降级是有计划地减少部分功能，让重要业务继续提供。搜索展示199元时，应明确标明未计红包、以结算为准；结算再按资格和规则核验，显示确认金额供用户决定。
 
-- 大促时搜索页也去算红包，会占掉红包服务的计算和连接；结算下单同样要问红包，两边一起抢，结算就容易慢。
-- 网站可以**提前关掉搜索页里的红包计算**，把红包服务留给结算页。Azure 把这类做法写成关掉非必要功能、让必要功能有足够资源。[^azure-throttle]
+## 核心链路不能靠跳过校验维持 {#boundary}
 
-### 3. 降级与核心链路 {#degrade}
+结算、库存、支付的正确性仍然重要。核心校验失败不能假装成功；合适的方案可能是明确失败、只读或保留待完成状态。降级路径要更简单、经过测试并有监控，压力减轻后再逐步恢复。随意切到另一个脆弱依赖，可能使故障更严重。
 
-- **核心链路**：从加购到提交订单再付款，网站最要紧的下单路。
-- **降级**：主动关掉不太要紧的功能，把有限资源留给最要紧那一段。AWS 要求组件在依赖不健康时仍尽量完成核心功能；Azure 要求在降级模式下仍能走完关键流程。[^aws-gd][^azure-self]
-- 上期运费险故障时**跳过运费险、照样下单**，那种跳过，也算一种降级（熔断讲的是先不调用；降级讲的是保哪一段、用什么顶上）。
+## 公开资料
 
-### 4. 降级之后 {#after}
-
-- 搜索页仍能搜、能加购，只是到手价先不算红包；结算页照常算红包、能下单。
-- 红包还在账户里；搜索页这一步先不去算它，也不会因为这次搜索把它用掉。
-
-## 只放在文章里的补充
-
-**自动降级与主动降级**
-
-- **自动降级**：红包服务异常时，计算自动先不算红包，仍给出到手价（硬依赖变软依赖）。[^aws-gd]
-- **主动降级**：大促前按预案关掉搜索页红包计算（本片主线）。实现上常用功能开关／kill switch，无需重新发版。[^azure-feature][^aws-levers]
-
-**和熔断的边界**
-
-熔断（EP.13）回答「要不要还去调用故障依赖」；降级回答「不调用或减配之后，页面还展示什么、哪条路必须保住」。雪崩／级联故障见 EP.13 文章，本期不重讲。
-
-**讨论题**
-
-要是搜索页和结算页都把红包计算一起关掉，下单还能不能顺利完成？评论区说说。
-
-**讨论题参考答案**
-
-若搜索页和结算页都关掉红包计算，下单通常仍应按原价完成（红包留在账户）；若红包被做成硬依赖，就会失败——所以次要优惠应是软依赖。
-
-## 参考资料
-
-[^aws-gd]: AWS Well-Architected REL05-BP01《Implement graceful degradation…》（访问于 2026-10-22）：https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html
-[^aws-levers]: AWS Well-Architected REL05-BP07《Implement emergency levers》（访问于 2026-10-22）：https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_emergency_levers.html
-[^azure-self]: Microsoft Azure Well-Architected《self-preservation / graceful degradation mode》（访问于 2026-10-22）：https://learn.microsoft.com/en-us/azure/well-architected/reliability/self-preservation
-[^azure-throttle]: Microsoft Azure Architecture Center《Throttling pattern》中 Graceful feature degradation（访问于 2026-10-22）：https://learn.microsoft.com/en-us/azure/architecture/patterns/throttling
-[^azure-feature]: Microsoft Azure App Configuration《Feature management》（访问于 2026-10-22）：https://learn.microsoft.com/en-us/azure/azure-app-configuration/concept-feature-management
-[^rfc2606]: RFC 2606 §2《Reserved Top Level DNS Names》：".example" is recommended for use in documentation or as examples.（访问于 2026-10-22）：https://www.rfc-editor.org/rfc/rfc2606.html#section-2
+- [AWS Well-Architected — graceful degradation](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html)，实际访问2026-10-24。
+- [Microsoft Well-Architected — self-healing and self-preservation](https://learn.microsoft.com/en-us/azure/well-architected/reliability/self-preservation)，实际访问2026-10-24。
+- [AWS Builders Library — Avoiding fallback in distributed systems](https://aws.amazon.com/builders-library/avoiding-fallback-in-distributed-systems/)，实际访问2026-10-24。

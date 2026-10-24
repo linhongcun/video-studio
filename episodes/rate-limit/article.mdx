@@ -1,105 +1,36 @@
 ---
-title: 抢票那一刻，为什么总提示系统繁忙？
-summary: 演唱会开票那一刻你点下购买，页面却弹出「系统繁忙，请稍后再试」。很多人以为网站坏了。示例里这一秒涌进来一万个请求，网站一秒只能处理一千个；网站在入口控量，一秒只放进处理得了的请求，多出来的当场挡回去，这叫限流。被挡回后狂点只会制造新请求，稍等新的一秒再点更好。限流常和消息队列一起用。文末补充令牌桶、漏桶、503 与 Nginx 默认值、狂点建议，以及讨论题参考答案九万九千。
+title: "抢票时，为什么总提示系统繁忙？"
+summary: "用同一入口和两个额度格，演示按额度放行、缺额拒绝、按时间补充，以及重试和公平的边界。"
+related:
+  - message-queue
+  - load-balancing
 chapters:
-  - { id: spike,    title: 开票请求远超处理能力 }
-  - { id: gate,     title: 入口限流：只放进处理得了的请求 }
-  - { id: contrast, title: 对照不做限流，新的一秒再买 }
-  - { id: mash,     title: 被挡回以后别狂点 }
+  - id: allow
+    title: "同一入口，先扣额度再放行"
+  - id: refill
+    title: "等待以后，仍可能再次失败"
+  - id: recap
+    title: "限流不负责决定票归谁"
 ---
 
-演唱会开票那一刻，你在 `ticket.example/buy` 点下购买，页面却弹出「系统繁忙，请稍后再试」。很多人以为网站坏了。其实很多时候，网站还在正常工作——它在入口拦住了多出来的请求。
+“系统繁忙”有很多可能原因。本片只讲其中一种：请求在短时间内大量到来，入口通过限流减少进入后台的请求量。不能只凭页面文案认定服务使用了哪种算法，或判断后台已经崩溃。HTTP429表示请求量触及了服务所采用的规则。[^status]
 
-> 说明：`ticket.example` 是文档专用的示例域名[^rfc2606]，不是现实中的购票网站。开票这一秒 10000 请求、处理能力 1000 请求／秒、挡回 9000、差 10 倍、对照中的 0 人／1000 人，以及文末讨论题里的十万请求，都是本例的示例数据，视频里出现的地方都标了「示例数据」或「示例」。这些数字不是任何网站的实测值，也不代表真实售票结果。
+## 同一入口，先扣额度再放行 {#allow}
 
-## 跟着这一秒的请求走一遍
+教学示例把容量设为2、每秒补1。甲来时扣掉1，乙再用掉1，丙到达时没有额度，于是被拒绝。拒绝式令牌桶不会把丙留在后台偷偷排队；已经放行的甲乙则继续处理。容量、补充量和间隔是不同参数。[^envoy]
 
-### 1. 开票请求远超处理能力 {#spike}
+示例为便于观察经过放慢，甲乙丙的密集到达发生在同一补充间隔内。它不是实际服务的承载数字，也不等于每个真实接口都应使用这种配置。
 
-{/* 配图：左「进来：10000 请求／秒（示例）」，右「处理能力：1000 请求／秒（示例）」，中间「差 10 倍」 */}
+## 等待以后，仍可能再次失败 {#refill}
 
-示例里，开票这一秒涌进来一万个请求，可网站一秒只能处理一千个，差了整整十倍。
+时间到达后，示例只补充1个额度，并不会把所有额度全部重置。其他人也可能先消耗这个额度，所以稍后重试不等于成功。响应如果带有Retry-After，可按提示时间再发起后续请求；不停点击只会增加请求，不会改变补充规则。[^retry]
 
-要是这一万个请求一起涌进去，服务器会被挤垮，连原本能买到票的人也买不到了。
+## 限流不负责决定票归谁 {#recap}
 
-### 2. 入口限流：只放进处理得了的请求 {#gate}
+限流规则可以按用户、资源、接口或服务范围设置。请求进入后台后，还要由业务检查库存等条件；限流本身并不保证公平或保证获得票。规则的范围、业务优先级和重试方式，需要结合服务能力设计。[^status]
 
-{/* 配图：入口控量 → 每秒放行 1000（示例）→ 挡回超出的请求 */}
+额度控制的是进入速度，并不直接限制同时正在处理的请求数；请求耗时变长时，仍可能积压。片中的两个后台位置只帮助追踪甲乙，并非把令牌桶误当并发上限。
 
-所以网站先在入口控量：一秒只放进处理得了的一千个请求，多出来的先当场挡回去。这种主动控制每秒放进多少请求的做法，就叫**限流**。每秒放多少，叫每秒请求数，简称 **QPS**。
-
-在浏览器里能看到这一步。先打开开发者工具的「网络 Network」面板，列表是空的；再在购票页按「购买」，列表这时才出现 `buy` 这一行。点开它的「标头 Headers」，能看到状态码 `429 Too Many Requests`。RFC 6585 对 429 的说明是[^rfc6585]：
-
-> "The 429 status code indicates that the user has sent too many requests in a given amount of time ("rate limiting")."
-
-意思是：用户在一段时间内发了太多请求，被限流了。页面上写成「系统繁忙，请稍后再试」，这时候网站其实还在正常工作——已经放进来的请求照常往下处理，示例里这一秒仍有一千人能走到购票确认流程。
-
-限流不是把网站关掉，而是让进来的量不超过处理能力，已经进来的人还能买成票。
-
-Amazon API Gateway 用令牌桶做限流，文档原句是[^aws]：
-
-> "API Gateway throttles requests to your API using the token bucket algorithm, where a token counts for a request."
-
-超过稳态速率和突发上限时，客户端可能收到 429[^aws]：
-
-> "When request submissions exceed the steady-state request rate and burst limits, API Gateway begins to throttle requests. Clients may receive `429 Too Many Requests` error responses at this point."
-
-令牌桶的算法细节视频里没展开，只作文章补充。片中状态码示例选用 429；不同实现返回码可能不同，见下文 Nginx 默认 503。
-
-### 3. 对照不做限流，新的一秒再买 {#contrast}
-
-{/* 配图：左「不做限流：0 人（示例）」，右「限流：1000 人（示例）」 */}
-
-同样这一秒，不做限流可能一个人都买不成，做了限流至少还有一千人能顺利走到确认。
-
-示例里，入口每秒放行一千个，多出来的九千个当场被挡回去，下一秒再重新开始算。这期间你稍等一下，新开标签页重新打开购票页，等到了新的一秒，入口又有空位了。这次先打开开发者工具，再点一次购买，这一行的状态码已经是 200，页面显示可以下单。
-
-### 4. 被挡回以后别狂点 {#mash}
-
-那刚才被挡回去以后，一直狂点购买有用吗？没用。每点一次就是一个新请求，还得跟别人抢同一秒的名额，稍等一下再点更好。
-
-消息队列把多出来的单先排着慢慢处理；限流则是在入口就挡住多出来的请求。这两招常一起用：入口先控量，放进来的请求再排队慢慢处理，高峰时刻才扛得住。上一期讲消息队列，这一期讲限流，合起来就是网站扛住高峰的两招。
-
-回到开场，你看到系统繁忙，很可能是网站正在限流，好让已经进来的人还能顺利买成票。
-
-## 视频里没讲的几件事
-
-**页面写「系统繁忙」，不一定就是限流。** 繁忙文案是网站自己写的，也可能是后台故障、维护或别的暂时不可用。片中只演示限流返回 429 的一种情形；单看文案，分不清到底是哪一种。
-
-**503 与 Nginx 默认。** Nginx 的 `limit_req` 用漏桶限流，文档原句是[^nginx]：
-
-> "The limitation is done using the "leaky bucket" method."
-
-默认拒回状态码是 503：`limit_req_status 503;`，文档写「Sets the status code to return in response to rejected requests.»[^nginx]。RFC 9110 对 503 的说明是[^rfc9110]：
-
-> "The 503 (Service Unavailable) status code indicates that the server is currently unable to handle the request due to a temporary overload or scheduled maintenance, which will likely be alleviated after some delay."
-
-所以限流挡回也可能返回 503，并不只有 429。片中选用 RFC 6585 的 429 作限流示例，503 只写在文章里，不上屏、不口播。
-
-**并发数、配额、熔断与降级。** 限流还可以按并发连接数或配额（一天多少次）来定，不只 QPS 一种；熔断、降级是另外两招，留给 EP.13／EP.14。
-
-**被挡回以后别狂点。** 每点一次就是一个新请求，还得跟别人抢同一秒的名额；稍等新的一秒再点，往往更划算。
-
-**自己看的时候，先打开开发者工具。** 先打开「网络 Network」面板，再按「购买」，否则请求可能在你打开面板之前就已经发完，列表里看不到那一行。
-
-## 想一想
-
-要是这一秒涌进来不是一万个请求而是十万个，入口还是一秒一千，要挡回去多少？评论区说说。
-
-**参考答案：** 九万九千个（示例）。100000 − 1000 = 99000，前提是入口仍按每秒一千放行、这一秒只算这一批。
-
-消息队列那边的问题，可以回看 EP.10 [《双十一下单那么多，为什么不丢单？》](/message-queue-v1)：下单先写进队列、马上回已提交，后台再按自己的速度处理。
-
-下期：手一抖点了两次支付，为什么只扣一次钱？
-
-## 参考资料
-
-[^rfc6585]: RFC 6585 §4《429 Too Many Requests》：https://www.rfc-editor.org/rfc/rfc6585.html#section-4 。2026-10-21 访问。
-
-[^aws]: Amazon API Gateway《Throttle requests to your REST APIs for better throughput in API Gateway》：https://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-request-throttling.html 。2026-10-21 访问。
-
-[^nginx]: Nginx 文档《Module ngx_http_limit_req_module》：https://nginx.org/en/docs/http/ngx_http_limit_req_module.html 。2026-10-21 访问。
-
-[^rfc9110]: RFC 9110 §15.6.4《503 Service Unavailable》：https://www.rfc-editor.org/rfc/rfc9110.html#section-15.6.4 。2026-10-21 访问。
-
-[^rfc2606]: RFC 2606 §2《Reserved Top Level DNS Names》：https://www.rfc-editor.org/rfc/rfc2606.html#section-2 ，原句 “".example" is recommended for use in documentation or as examples.” 2026-10-21 访问。
+[^envoy]: Envoy，[Local rate limit](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/local_rate_limit_filter)，访问于2026-10-24。
+[^status]: MDN，[429 Too Many Requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429)，访问于2026-10-24。
+[^retry]: MDN，[Retry-After](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After)，访问于2026-10-24。

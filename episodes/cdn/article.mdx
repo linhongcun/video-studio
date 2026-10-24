@@ -1,118 +1,43 @@
 ---
 title: 网站离你那么远，为什么还这么快？
-summary: 服务器远在美国西海岸，跨洋来回一趟约 140 毫秒，网页却秒开。跟着一张图片 logo.png 走一遍：所有人直接找源站又远又挤；CDN 在各地放节点，把人人一样、不常变的文件放到你附近；DNS 把你带到附近、不太忙的节点；节点第一次没有就回源取一份，交给你也留一份，下一个人直接用缓存。文末补充缓存能存多久、怎么更新，以及 CNAME、ECS、任播。
+summary: 同一张公开图片先回源、再被边缘节点复用，理解内容分发网络能省掉哪一段传输。
+related:
+  - dns
+  - browser-cache
+  - load-balancing
 chapters:
-  - { id: origin,   title: 所有人都去找源站 }
-  - { id: nearby,   title: 把文件放到你附近 }
-  - { id: dns,      title: DNS 带你到附近的节点 }
-  - { id: cache,    title: 第一次回源，之后直接用缓存 }
-  - { id: personal, title: 订单、余额还要去源站 }
+  - id: network
+    title: "先到合适的节点"
+  - id: miss
+    title: "没有副本，就继续回源"
+  - id: hit
+    title: "命中且允许复用，才省掉本次回源"
+  - id: fresh
+    title: "私人订单不能误进共享副本"
 ---
 
-你在上海打开 shop.example，服务器在美国西海岸，网页却几乎秒开。可数据跨洋来回一趟，就要大约 140 毫秒：公开的测量数据里，上海到洛杉矶的往返时间平均大多在 135–142 毫秒。[^wn-lax]
+网站的源站离用户很远，并不意味着每一次图片请求都必须从源站重新下载。内容分发网络（CDN）将节点分布在多个网络位置，让允许共享和复用的内容在合适的节点保存。本期只追踪一张公开商品图片，不用地理距离或虚构速度数字代替真实网络条件。
 
-而打开一个网页不止来回一趟：先建立连接，再取页面，页面里的图片、脚本和样式还要再取。这些等待叠起来，网页本该慢得很明显。[^mdn-latency]
+## 先到合适的节点 {#network}
 
-> 说明：shop.example 是专门留给示例用的域名[^rfc2606]；198.51.100.20 属于专门写文档用的示例地址段[^rfc5737]；logo.png、`Age: 1800`、余额 ¥128.00、各节点忙不忙，都是示例数据，视频里出现的地方都标了「示例数据」。地图底图来自 Natural Earth（公有领域）。
+请求经过配置的路由与解析机制，被引到适合服务的边缘位置。“近”通常指网络时延较低，未必是地图上离得最近；负载、路由与服务配置也会影响选择。[AWS 的交付流程](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowCloudFrontWorks.html)
 
-## 跟着一张图片走一遍
+## 没有副本，就继续回源 {#miss}
 
-### 1. 所有人都去找源站 {#origin}
+节点先检查能否找到可使用的响应。没有时，请求继续向上游或源站获取。简化画面只保留一层边缘和源站，真实系统可能有区域缓存或多级缓存。
 
-{/* 配图：网页世界地图，美国西海岸的圆点标「源站」，旁边是文件列表 logo.png、app.js、style.css；上海、北京、伦敦、圣保罗四个圆点各拉一条线连到源站，光点挤向源站，「待处理请求」列表变长，源站圆点由绿变红 */}
+源站内容返回后，节点可以开始转发给用户，同时按缓存规则保留副本。并非必须等整张图片完整下载后才开始传输。第一次未命中仍可能需要走远端路径，不能承诺一定加速。
 
-网站自己那台存着全部内容的服务器，叫**源站**。没有别的服务器帮忙时，各地的人都直接找它。
+## 命中且允许复用，才省掉本次回源 {#hit}
 
-这样有两个问题：离得远的人，每一趟都等得久；访问的人一多，请求全挤到源站，还得排队等它处理。[^mdn-cdn]
+下一个等价请求到达时，若缓存键匹配、响应可复用且满足新鲜度等规则，节点可以直接响应。这样减少本次内容回源的传输与源站工作，但改善幅度取决于命中率、网络、内容大小和配置，没有统一倍数。
 
-### 2. 把文件放到你附近 {#nearby}
+缓存不是永远有效。内容过期后可能需要验证或重新获取；特定条件下允许使用旧响应的策略必须显式正确配置。应依据 HTTP 语义和实际 CDN 产品规则配置，而非假定所有响应都会自动缓存。[RFC 9111](https://www.rfc-editor.org/rfc/rfc9111.html)、[Cloudflare 默认缓存行为](https://developers.cloudflare.com/cache/concepts/default-cache-behavior/)
 
-{/* 配图：同一张地图，世界各地依次亮起蓝色的 CDN 节点，上海附近的一个节点单独标出；商店页上标志、按钮、排版三处被圈出，标「人人一样、不常变 → 放到节点上」；地图推近到上海一带，计时器从「约 140 ms」换成「约 10 ms」 */}
+## 私人订单不能误进共享副本 {#fresh}
 
-**CDN**，中文叫内容分发网络。它在世界各地放了很多服务器，叫 CDN 节点，上海附近也有。[^mdn-cdn]
+商品图片通常适合公开共享，个人订单响应则有访问边界。不能因为响应带 Cookie 就认定共享缓存会自动保护它。应根据真实业务和产品规则正确设置 `private`、`no-store` 等指令或绕缓存策略，避免将一个用户的数据发给其他用户。[MDN 的私有与共享缓存说明](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching)
 
-CDN 往节点上放的，主要是图片、脚本、样式这些人人拿到都一样、又不常变的文件。
+CDN 还可能提供动态内容传输优化等能力，但它不会自动修复源站程序、数据库或业务逻辑中的瓶颈。本片聚焦可缓存图片的命中与回源。
 
-文件就放在附近的节点上，来回一趟只要十来毫秒，比跨洋的 140 毫秒短得多，也不用等源站。作为参考，同一份测量数据里，上海到杭州的机房之间往返平均约 9 毫秒；家里的网络到附近节点还要加上接入网的时间，所以视频里说「十来毫秒」，画面上写「约 10 ms」。[^wn-hz]
-
-### 3. DNS 带你到附近的节点 {#dns}
-
-{/* 配图：地图上的节点从远到近依次闪一下，停在上海附近的两个候选节点；DNS 查询卡片「查询：shop.example」，节点甲「正忙」被跳过，节点乙「不太忙」被选中，卡片返回「答：198.51.100.20（附近的 CDN 节点）」；商店页下方的开发者工具只亮一行：logo.png 远程地址 198.51.100.20 */}
-
-节点这么多，浏览器得先知道该连哪一个。这一步交给第三期讲过的 DNS：浏览器只按域名去查。
-
-网站用了 CDN，DNS 回答的就不是源站地址，而是一个离你近、又不太忙的节点地址。按位置和负载挑节点是常见做法，具体怎么挑，各家 CDN 不一样。
-
-打开开发者工具，看商店标志这张图片 logo.png 的远程地址：198.51.100.20。它连上的是附近的 CDN 节点，不是美国的源站。
-
-### 4. 第一次回源，之后直接用缓存 {#cache}
-
-{/* 配图：节点旁的列表「logo.png 没有」；地图拉远，节点沿跨洋长线去源站取图，标「回源」；图片回到节点，一份交给你，一份留在节点「已存」；30 分钟后，附近的下一个人连到同一个节点直接拿到；开发者工具只亮一行 Age: 1800 */}
-
-这个节点第一次收到这张图的请求时，手里还没有，就替你去美国的源站取。这一步叫**回源**。
-
-图片取回来，节点一份交给你的浏览器，自己也留一份。第一期讲过，存下来的就是缓存。节点上的这种缓存，附近很多人共用，规范里叫「共享缓存」。[^rfc9111-cache]
-
-附近的下一个人也要这张图，连到同一个节点，直接拿缓存，不用再跨洋跑一趟。开发者工具里这次响应有一行 `Age: 1800`：意思是这份内容从源站取来（或者最近一次跟源站确认）已经过了 1800 秒，也就是半小时，这次是节点直接给的。[^rfc9111-age][^mdn-age]
-
-越来越多的人在附近就拿到了文件，真正回源的只是少数，源站那边排队的请求也少了。
-
-### 5. 订单、余额还要去源站 {#personal}
-
-{/* 配图：商店页「我的订单」「余额：¥128.00」；小地图上请求经过附近节点不停留，一路跨洋到源站，标「订单、余额：去源站取」 */}
-
-订单、余额这种每个人都不一样的内容，节点不能拿别人的给你，还是要去源站取。网站会在响应里注明这类内容不让共享缓存存下（比如 `Cache-Control: private` 或 `no-store`）。[^rfc9111-private]
-
-回到开头：源站还在美国，可图片、脚本、样式都从附近节点来，跨洋的只剩少数几趟。
-
-串起来就是：DNS 带你到附近的节点，节点有缓存就直接给，没有就回源取一份留着，下次直接用。
-
-## 视频里没讲的几件事
-
-**缓存能存多久**：源站用 `Cache-Control` 响应头告诉缓存这份内容能新鲜多久，比如 `max-age=3600` 是一小时；`s-maxage` 专门给 CDN 这类共享缓存用。[^rfc9111-cc]
-
-**过期以后**：内容过期后，节点不一定整份重新下载，可以带上原来的版本信息去问源站「还能用吗」，源站说没变，就接着用，这叫重新确认。[^rfc9111-validation]
-
-**网站更新了怎么办**：要么等缓存过期，要么让 CDN 主动清除旧文件（各家 CDN 都有自己的清除功能），要么换一个新文件名（比如 `app.3f9a.js`），节点会把它当成新文件去回源。
-
-**DNS 怎么把你交给 CDN**：常见做法是网站用一条 CNAME 记录，把域名交给 CDN 的 DNS 来回答。[^rfc1034]
-
-**DNS 怎么知道你在哪**：CDN 的 DNS 看到的通常是你所用的递归解析器的位置，不是你本人；EDNS 客户端子网（ECS）这个扩展让解析器把你所在网段的一部分信息带过去，帮它选得更准。[^rfc7871]
-
-**任播**：有的 CDN 让很多节点共用同一个 IP 地址，由网络路由把你送到其中一个，通常是路由上较近的那个。
-
-## 想一想
-
-同一张图片，第一个打开的人和第二个打开的人，谁更快？评论区说说为什么。
-
-下期：一台服务器忙不过来，怎么办？
-
-## 参考资料
-
-[^wn-lax]: [WonderNetwork Global Ping Statistics：Shanghai → Los Angeles](https://wondernetwork.com/pings/Shanghai/Los%20Angeles)，2026-10-20 访问；2026-10-06 至 10-20 每小时一次，平均值大多在 135–142 ms，个别时段 150–168 ms。
-
-[^wn-hz]: [WonderNetwork Global Ping Statistics：Shanghai → Hangzhou](https://wondernetwork.com/pings/Shanghai/Hangzhou)，2026-10-20 访问，机房之间平均约 9 ms。
-
-[^mdn-latency]: [MDN：Understanding latency](https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/Understanding_latency)，打开网页需要建立连接、请求页面和子资源，往返时间会叠加。
-
-[^mdn-cdn]: [MDN：CDN](https://developer.mozilla.org/en-US/docs/Glossary/CDN)，CDN 由分布在各地的服务器组成，就近提供内容并分担源站负载。
-
-[^rfc9111-cache]: [RFC 9111：HTTP Caching §1、§3](https://www.rfc-editor.org/rfc/rfc9111.html#section-3)，IETF，2022-06，共享缓存存下响应、供之后的请求复用。
-
-[^rfc9111-age]: [RFC 9111 §5.1 Age](https://www.rfc-editor.org/rfc/rfc9111.html#section-5.1)，Age 表示响应自源站生成或确认以来经过的秒数；出现 Age 通常说明响应来自缓存。
-
-[^mdn-age]: [MDN：Age](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Age)。
-
-[^rfc9111-private]: [RFC 9111 §5.2.2.7 private、§5.2.2.5 no-store](https://www.rfc-editor.org/rfc/rfc9111.html#section-5.2.2.7)，标了 private 的响应不能由共享缓存存储。
-
-[^rfc9111-cc]: [RFC 9111 §5.2.2.1 max-age、§5.2.2.10 s-maxage](https://www.rfc-editor.org/rfc/rfc9111.html#section-5.2.2.1)。
-
-[^rfc9111-validation]: [RFC 9111 §4.3 Validation](https://www.rfc-editor.org/rfc/rfc9111.html#section-4.3)，过期后向源站发条件请求确认。
-
-[^rfc1034]: [RFC 1034 §3.6.2 Aliases and canonical names](https://www.rfc-editor.org/rfc/rfc1034.html#section-3.6.2)，CNAME 记录。
-
-[^rfc7871]: [RFC 7871：Client Subnet in DNS Queries](https://www.rfc-editor.org/rfc/rfc7871.html)，IETF，2016-05。
-
-[^rfc2606]: [RFC 2606：Reserved Top Level DNS Names §2](https://www.rfc-editor.org/rfc/rfc2606.html#section-2)，.example 留作示例用。
-
-[^rfc5737]: [RFC 5737：IPv4 Address Blocks Reserved for Documentation §3](https://www.rfc-editor.org/rfc/rfc5737.html#section-3)，198.51.100.0/24 留作文档示例。
+资料访问日期：2026-10-24（北京时间）。

@@ -8,7 +8,7 @@
 
 ## 站点内容
 
-一期在站点上可见，需要 `episodes/<slug>/meta.json` 的 `draft` 为 `false`，以及同目录的 `article.mdx`、`video.mp4`、海报。列表和页面由 `site/src/lib/episodes.ts` 读取 `episodes/*/meta.json`。`series` 必须是 `site/src/content/series.json` 里的键：`request`、`cache`、`peak`、`database`、`distributed`。
+一期在站点上可见，需要 `episodes/<slug>/meta.json` 的 `draft` 为 `false`，以及同目录的 `article.mdx`、`video.mp4`、海报。列表和页面由 `site/src/lib/episodes.ts` 读取 `episodes/*/meta.json`。`series` 必须是 `site/src/content/series.json` 里的键：`request`、`cache`、`peak`、`database`、`distributed`、`leetcode`。LeetCode题号写`problemNumber`用于展示LC.N，内部整数`ep`继续用于排序和Release关联；独立算法系列不接入原技术系列的前后课学习链。
 
 `draft: true` 的期默认不进构建。本地要看草稿：
 
@@ -35,7 +35,7 @@ npm run preview
 
 ## PR 与版本
 
-版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。第21期常见实现独立短片与旧合集归档本次版本为 v0.47.0；实际版本以该文件及 Release 为准。
+版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。第21期常见实现独立短片与旧合集归档本次版本为 v0.47.0；EP.01–14 Codex重制与章节首帧定位版本为 v0.48.0；实际版本以该文件及 Release 为准。
 
 1. 改 `meta.json`：`draft: false`，写上 `publishedAt`。重发或只改站点时更新 `updatedAt`。
 2. 开 PR，合并进 `main`。推到 `main` 会跑 `.github/workflows/deploy.yml`，部署 GitHub Pages。这次构建发生在 Release 之前，`/changelog/` 还不会带上新版本。新版本要等第 4 步，在 Release 发出后再手动部署一次。命令顺序见「站点发版清单」。
@@ -107,7 +107,7 @@ gh run watch <id>
 
 头条没有单独的键，在抖音侧同步，不另传一条。视频号没有网页链接，不写进 `meta.json`，也不写进 Release。不要为了显示视频号去改 `episodes.ts`。
 
-`site/src/pages/about.astro` 和 `site/src/components/PlatformLinks.astro` 的空状态仍写着「B站、抖音、快手」。那是旧文案。发布时不要照着它去发快手。
+`site/src/components/PlatformLinks.astro` 在没有真实平台链接时不显示，不以泛化搜索提示暗示本期已在平台发布。`site/src/pages/about.astro` 仍写着「B站、抖音、快手」，那是历史文案，发布时不要照着它去发快手。
 
 ## 三平台实操
 
