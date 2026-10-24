@@ -47,7 +47,7 @@ HTTPS不把握手核验和数据验证混为一个分叉；DNS不画浏览器直
 
 ## 状态与经验
 
-扫描及六片制作完成。六片原AAC逐字节保持；660冻结输入、21,434帧相机/焦点检查、独立关键过程及最终MP4共48个时点复核通过。fresh依赖与独立源码构建的六张代表PNG字节/像素完全一致。正式媒体、根执行者抽帧和编码保真另见各片QA。v0.56.2合并与Release后部署、线上核验及#199关闭仍按实际收尾，不预写用户对六支新版认可。
+扫描及六片制作完成。六片原AAC逐字节保持；660冻结输入、21,434帧相机/焦点检查、独立关键过程及最终MP4共48个时点复核通过。fresh依赖与独立源码构建的六张代表PNG字节/像素完全一致。正式媒体、根执行者抽帧和编码保真另见各片QA。已由[PR #224](https://github.com/linhongcun/video-studio/pull/224)合并，随[v0.56.2](https://github.com/linhongcun/video-studio/releases/tag/v0.56.2)发布并经[Release后Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40118710238)成功；线上六片完整SHA、字幕、章节、海报及更新日志核验通过，#199已以completed关闭，详见[线上证据](flow-navigation-audit/online-verification.json)。本轮仅更新GitHub站点，用户对六支新版的观看反馈后续另记。
 
 制作期间，其他机器更新了Agent、两条LeetCode与策略模式，并新增赛马题及二分查找；本批完整合入至d9df57e/v0.56.1，保留那些主干结果。原29支的扫描结论按旧SHA追溯，不冒称已审核后来改版。集成后的实际媒体保护和660输入不变分别见preservation-check.json与post-main-integration.json。
 

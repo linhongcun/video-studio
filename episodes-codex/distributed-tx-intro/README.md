@@ -1,6 +1,6 @@
 # EP.21 · 入门：什么是分布式事务？
 
-当前进行`flow-map-20261024/#199`导航修订：以同一张概念图区分管理范围对照、问题示例与恢复要求，细讲留位置、换情景回图，保持原5155帧及配音字幕。见[navigation.md](navigation.md)；原成片与源码由revisions/pre-flow-map.json索引，现有render-result/qa-final是修订前媒体记录，不能当作新导航已编码或上线的证明。
+本轮`flow-map-20261024/#199`导航修订：以同一张概念图区分管理范围对照、问题示例与恢复要求，细讲留位置、换情景回图，保持原5155帧及配音字幕。见[navigation.md](navigation.md)；新版正式成片检查见[qa-final.md](qa-final.md)，上线结果见[release.md](release.md)；修订前媒体与源码由[原版索引](revisions/pre-flow-map.json)追溯。
 
 按用户指导新增概念前置，现有[EP.21方案详解](../distributed-tx/README.md)保留五类机制与适用边界。新片20镜40句、5章，5155帧（约171.8秒）；同一订单8124购买商品7042一件，从库存4到3的教学规则贯穿全片。完整媒体指标须以`render-result.json`及实际成片检查为准。
 
