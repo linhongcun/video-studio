@@ -46,10 +46,10 @@
 - 六份公开资料、实际示例及最小diff、154项冻结、完整媒体解码与独立实际画面检查、桌面/手机32字幕和四章seek已完成。视频完整SHA为c80f9e44ee8eb668fb702266170d4fd8773d14f120e315b568d6ed5d07c27431，−16.0LUFS/−3.7dBTP；未执行逐字ASR或全片人工听辨，不声称用户已观看认可。
 - 本期已由[PR #192](https://github.com/linhongcun/video-studio/pull/192)合并，发布[v0.52.0](https://github.com/linhongcun/video-studio/releases/tag/v0.52.0)，Release后部署40104729342成功；线上8个canonical普通GET的完整视频/海报SHA、32条VTT、四章、源码/系列/RSS/更新日志核验通过。制作issue #163已以completed关闭，#161同步首期完成；完整证据见[发布记录](../episodes-codex/strategy-pattern/release.md)和[线上报告](../episodes/strategy-pattern/online-verification.json)。
 
-### LC.3 无重复字符的最长子串（本地检查完成）
+### LC.3 无重复字符的最长子串
 
 - 用户在LC.11修订后授权再自选有信心的题目制作精品，本次选定[#79](https://github.com/linhongcun/video-studio/issues/79)，slug longest-substring。用abcbadea解释重复时为何连续收左边、最后窗口变短仍保留历史最长；不加入装饰进度线，完整Python卡5秒供暂停。
-- 18镜36句、5078帧约2:49；官方题意/集合语义/平均复杂度已实际核验，独立有限实现测试、关键无字幕过程和真实配音PNG预检通过，161实际输入冻结。正式5078帧编码、完整解码与−16.0LUFS/−3.6dBTP通过，46采样保真检查通过；正式媒体SHA为c8adbb51…2043，80页站点构建、既有学习路径与1440/390新页复验通过，上线结果待完成，当前不声称用户已观看认可；实际范围见本期qa-final.md。
+- 18镜36句、5078帧约2:49；官方题意/集合语义/平均复杂度已实际核验，独立有限实现测试、关键无字幕过程和真实配音PNG预检通过，161实际输入冻结。正式5078帧编码、完整解码与−16.0LUFS/−3.6dBTP通过，46采样保真检查通过；正式媒体SHA为c8adbb51…2043，80页站点构建、既有学习路径与1440/390新页复验通过，v0.53.0由PR #194合并并部署40105542981成功，线上完整视频/海报SHA、36句VTT、四章、系列/RSS与实际Release条目GET通过，#79已completed关闭；当前不声称用户已观看认可；实际范围见本期qa-final.md。
 
 ### EP.22 Agent 概念入门
 
