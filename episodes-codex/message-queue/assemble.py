@@ -124,7 +124,7 @@ sb = dict(meta=dict(title=EPISODE['title'],episode=EPISODE['ep'],slug=EPISODE['s
                     timingSource=source,
                     onsetRule=dict(module='episodes/_shared/onset_rule.py',checker='episodes/_shared/label_onset_strict.py',window=[-6,2]),
                     style='One causal data example; progressive reveal and continuous request identity; dark canvas, no physical metaphor or fake window.',
-                    visualRevision=1,visualDirection='visual-direction.md',
+                    visualRevision=EPISODE.get('visualRevision',1),navigationRevision=EPISODE.get('navigationRevision'),visualDirection='visual-direction.md',
                     palette=dict(bg='#0F172A',text='#E5E7EB'),
                     sampleDataLabel='教学示例 · 数值非生产参数',
                     boxShots=[],mapShots=[],devtoolsShots=[],covers=covers,

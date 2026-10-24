@@ -1,11 +1,11 @@
 # EP.21 入门：什么是分布式事务？
 
-依据：storyboard.json 95e91c6c；covers.json 40f10a4a。冻结副本由 root 的 freeze.py 产出，以 source-sha256.json 为准。
+当前设计ID：flow-map-20261024/#199，visualRevision2；原storyboard95e91c6c与原媒体由revisions/pre-flow-map.json保存Git索引，covers.json40f10a4a不变。新冻结副本由root的freeze.py产出，当前旧source-sha256不是新导航的冻结证明。
 script 2e98b2b8 / voice 86b9bd79 / words 285f4761，5155 帧，20镜。画布1920×1080；所有局部帧从本镜0起算。
 
 ## 本版相对上一冻结的变化
 
-首次新增前置视频，无上一冻结。全片重新制作；现有方案详解视频不重渲。预演05/07中央状态曾遮挡边界标签，现改y263；06状态移到中心空隙y493，17决定状态y263。源文件和实际预演须复核后才冻结。06/09失败X移到x1630右侧空白；17工作流未执行状态改为本步待处理；18成功落点与待恢复分支各有对应顶部说明。
+当前仅做概念导航与08/12必要动作窗口修订，保留原声字幕和所有shot边界，详见navigation.md。以下先保留原版制作时发现的问题与修复：首次新增前置视频，全片制作；现有方案详解视频未重渲。预演05/07中央状态曾遮挡边界标签，现改y263；06状态移到中心空隙y493，17决定状态y263。源文件和实际预演须复核后才冻结。06/09失败X移到x1630右侧空白；17工作流未执行状态改为本步待处理；18成功落点与待恢复分支各有对应顶部说明。
 
 ## 相对方案详解的变化
 
@@ -42,9 +42,9 @@ script 2e98b2b8 / voice 86b9bd79 / words 285f4761，5155 帧，20镜。画布192
 
 - 镜05 local-commit：150帧 joint-local-commit。
 - 镜06 local-rollback：62帧 stock-failed；170帧 pending-order-discarded。
-- 镜08 split-boundaries：126帧 independent-boundaries。
+- 镜08 split-boundaries（导航修订）：84帧相机落定；90→132原共同边界淡出，132→190独立边界建立，190帧independent-boundaries。
 - 镜09 partial-success：29帧 order-local-committed；74帧 stock-failed；167帧 stock-local-rolled-back。
-- 镜12 timeout：59帧 remote-stock-committed；107帧 reply-lost；167帧 caller-timeout-unknown。
+- 镜12 timeout（导航修订）：66帧相机落定；72→102请求完整抵达并本地保存，106→140回复行进/丢失；167帧caller-timeout-unknown不变。
 - 镜13 two-possibilities：73帧 switch-to-already-executed-possibility。
 - 镜14 unsafe-retry：99帧 wrong-double-decrement；151帧 reset-to-never-executed-branch；220帧 wrong-reverse-increment。
 - 镜15 durable-progress：75帧 stock-and-progress-local-commit；158帧 process-interrupted-record-survives；202帧 recovery-checks-record。
@@ -54,7 +54,7 @@ script 2e98b2b8 / voice 86b9bd79 / words 285f4761，5155 帧，20镜。画布192
 
 ## 2. 页外角标与叠字
 
-- 顶部左：[100,54]“分布式 · 概念入门”，字号24。五章白话导航[100,98]，字号21。
+- 顶部左：[100,54]“分布式 · 概念入门”，字号24。旧五章短条被共享固定面包屑[430,77]替代；概念图及返回点见navigation.md。
 - 顶部右：[1700,54]“IT小村”，字号25；示例说明中心[1650,103]，字号19。
 - 主标题：[130,190]，字号46。三术语标题的appear严格读取cueFrames.labels；所有其他首次术语不出现于更早导航。
 - 字幕带：[130,925,1660,至少100]，字号40，逐句读取冻结subtitles，不加快语音。

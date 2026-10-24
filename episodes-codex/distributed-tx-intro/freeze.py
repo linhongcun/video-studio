@@ -21,11 +21,12 @@ snapshot = D/f'storyboard.{sha(D/"storyboard.json")[:8]}.json'
 shutil.copy2(D/'storyboard.json', snapshot)
 shutil.copy2(D/'storyboard.json', D/'remotion/src/placeholders/storyboard.json')
 files = [D/f for f in ['script.md','article.mdx','research.md','pronunciation.md',
-    'intro-plan.json','assemble.py','freeze.py','check-timing.py','check-final.py','visual-direction.md','knoll-props.md',
+    'intro-plan.json','assemble.py','freeze.py','check-timing.py','check-final.py','visual-direction.md','knoll-props.md','navigation.md','research-navigation.json',
     'storyboard.json','words.json','covers.json','voice.wav','voice/params.json',
     'voice/picks.json','voice/sents.json','voice/build.json','voice/substitutions.md','voice/script-narration-sha256.json',
     'remotion/package.json','remotion/package-lock.json','remotion/remotion.config.ts',
-    'remotion/tsconfig.json','remotion/public/audio/voice.wav']]
+    'remotion/tsconfig.json','remotion/public/audio/voice.wav','remotion/scripts/branch-qa.mjs',
+    '../_shared/branch-map/index.ts','../_shared/branch-map/qa.mjs','revisions/pre-flow-map.json']]
 files += [snapshot]
 files += [p for p in (D/'remotion/src').rglob('*') if p.is_file()]
 picks = json.loads((D/'voice/picks.json').read_text())

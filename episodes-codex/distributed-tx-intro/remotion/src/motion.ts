@@ -1,4 +1,9 @@
 import type {Shot} from './data';
+// Full action windows start after the shared navigator has reached readable detail.
+export const navigationMotion = {
+ split: {oldBoundary:[90,132], independentBoundaries:[132,190]},
+ timeout: {request:[72,102], reply:[106,140]},
+} as const;
 export const at=(s:Shot,sentence:number,ratio:number)=>{
  const starts=s.cueFrames?.sentences??[9,Math.round(s.durationInFrames/2)];
  const a=Number(starts[sentence]??0),b=Number(starts[sentence+1]??s.durationInFrames-15);
@@ -9,9 +14,9 @@ export const events=(s:Shot):[string,number][]=>{
  return ({
   'local-commit':[['joint-local-commit',p(1,.52)]],
   'local-rollback':[['stock-failed',p(0,.55)],['pending-order-discarded',p(1,.58)]],
-  'split-boundaries':[['independent-boundaries',p(1,.16)]],
+  'split-boundaries':[['boundary-split-start',navigationMotion.split.oldBoundary[0]],['independent-boundaries',navigationMotion.split.independentBoundaries[1]]],
   'partial-success':[['order-local-committed',p(0,.28)],['stock-failed',p(0,.7)],['stock-local-rolled-back',p(1,.55)]],
-  'timeout':[['remote-stock-committed',p(0,.44)],['reply-lost',p(0,.79)],['caller-timeout-unknown',p(1,.22)]],
+  'timeout':[['request-start',navigationMotion.timeout.request[0]],['remote-stock-committed',navigationMotion.timeout.request[1]],['reply-start',navigationMotion.timeout.reply[0]],['reply-lost',navigationMotion.timeout.reply[1]],['caller-timeout-unknown',p(1,.22)]],
   'two-possibilities':[['switch-to-already-executed-possibility',p(0,.56)]],
   'unsafe-retry':[['wrong-double-decrement',p(0,.67)],['reset-to-never-executed-branch',p(1,.03)],['wrong-reverse-increment',p(1,.66)]],
   'durable-progress':[['stock-and-progress-local-commit',p(0,.57)],['process-interrupted-record-survives',p(1,.25)],['recovery-checks-record',p(1,.67)]],

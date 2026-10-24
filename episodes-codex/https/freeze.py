@@ -44,6 +44,7 @@ for row in json.loads((D/'voice/sents.json').read_text()):
 files += [D/'../../episodes/_shared'/f for f in [
     'onset_rule.py','voice/prep.py','voice/gen.py','voice/build.py','voice/common.py',
     'tts/mimo_say.py','theme/pageTheme.ts','music/mix_bgm.py','music/Wallpaper.mp3']]
+files += [D/'../_shared/branch-map/index.ts']
 # Keep parent references portable instead of writing workspace absolute paths.
 manifest = {os.path.relpath(p, D):sha(p) for p in sorted(set(files))}
 (D/'source-sha256.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')

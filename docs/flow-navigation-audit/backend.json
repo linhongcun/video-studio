@@ -1,0 +1,1049 @@
+{
+  "scope": "EP08–14 current site media/read-only global-flow audit",
+  "date": "2026-10-24",
+  "repositoryHead": "6765032d772c3266f2006de8019f7b69712a134c",
+  "sitePackageVersion": "0.54.0",
+  "guidanceBasis": [
+    "AGENTS.md",
+    "docs/RULES.md",
+    "docs/lessons-learned.md:L022/L023",
+    "docs/successful-practices.md:S015"
+  ],
+  "method": "Selected each current project from current site meta.sourcePath; read actual storyboard and animation code; sampled actual current MP4 exact frames, preserving full media/source hashes. Head reviewer actually viewed37frames and delegated reviewer30frames.",
+  "viewingScope": {
+    "actualViewedUniqueFramesTotal": 67,
+    "byReviewer": {
+      "/root/tx_outbox": 37,
+      "/root/tx_outbox/backend_tail_audit": 30
+    },
+    "perEpisodeCountRange": [
+      9,
+      10
+    ],
+    "limitations": "Selected real encoded frames only. No complete playback, full listening, ASR, production validation or user-understanding test claimed."
+  },
+  "productionOrRepositoryDocumentationModified": false,
+  "highestValue": [
+    {
+      "slug": "cache-consistency",
+      "ep": 9,
+      "reason": "正确顺序/错误交错/删除失败前提最需要稳定流程＋并发双轨定位；聚焦写后删缓存，不扩为方案合集。"
+    },
+    {
+      "slug": "message-queue",
+      "ep": 10,
+      "reason": "两类确认和业务中断/确认丢失的分叉需要全局生命周期与同ID重投回边；只讲手动确认机制。"
+    },
+    {
+      "slug": "circuit-breaker",
+      "ep": 13,
+      "reason": "正常/暂停/探测的状态循环和恢复条件天然适合稳定全局图，避免把业务继续误作依赖已恢复。"
+    }
+  ],
+  "decisionCounts": {
+    "优先重制": 3,
+    "轻量调整": 3,
+    "暂不调整": 1
+  },
+  "episodes": [
+    {
+      "slug": "server-cache",
+      "ep": 8,
+      "title": "数据库明明有数据，为什么还要再存一份？",
+      "sourcePath": "episodes-codex/server-cache/remotion",
+      "metaSha256": "356fba11538cb1244035a01ad2dc314efbf9c813522a22b7d2e7c4f9eabc8ddc",
+      "storyboardSha256": "e711f971eaad2bda43cf4013f809b26312c197cbd78b840b96fb5812fa82bb6f",
+      "mainSha256": "24fef6f8b710f976a5cb386c55995498aa3a47f1e4d630b8f4edc023600095b5",
+      "mediaPath": "episodes/server-cache/video.mp4",
+      "mediaSha256": "185ef935abb55e776ee44a2e5b174e0ce3cbafaf19964e72e807eedbdf3ba456",
+      "media": {
+        "frames": 3491,
+        "fps": "30/1",
+        "width": 1920,
+        "height": 1080,
+        "seconds": 116.373
+      },
+      "sampleCount": 9,
+      "sampledFrames": [
+        {
+          "frame": 0,
+          "seconds": 0.0,
+          "shot": "01",
+          "local": 0,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/server-cache/frame-01.png",
+          "sha256": "f578c93ba34c04372119fccf40bc0fa077665da2f448981e254bf25d8545ab29"
+        },
+        {
+          "frame": 854,
+          "seconds": 28.467,
+          "shot": "03",
+          "local": 190,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/server-cache/frame-02.png",
+          "sha256": "e0f3ea1b9d2e34705305c69cb80e7522ce93ac81235874a94be2c9a76c2ec859"
+        },
+        {
+          "frame": 1132,
+          "seconds": 37.733,
+          "shot": "04",
+          "local": 180,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/server-cache/frame-03.png",
+          "sha256": "ae2f75de2a704f9c77f5603f199adc3b62fce65f4cfad51d2261fd1ebbecaf6b"
+        },
+        {
+          "frame": 1702,
+          "seconds": 56.733,
+          "shot": "06",
+          "local": 180,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/server-cache/frame-04.png",
+          "sha256": "ccb4ecea9c737e659361e61df29a1156dde96fba26c7688f152d1df09a9e4984"
+        },
+        {
+          "frame": 1919,
+          "seconds": 63.967,
+          "shot": "07",
+          "local": 160,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/server-cache/frame-05.png",
+          "sha256": "1fa931c92a4a2c0f0942c9f6a3308f2a2490bb58e51de215e5319bc1dd0a4f68"
+        },
+        {
+          "frame": 2242,
+          "seconds": 74.733,
+          "shot": "08",
+          "local": 200,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/server-cache/frame-06.png",
+          "sha256": "7f68b220df12fa87f2e024d35239189b57f718945e09b3e9982070b13e624dd3"
+        },
+        {
+          "frame": 2788,
+          "seconds": 92.933,
+          "shot": "10",
+          "local": 200,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/server-cache/frame-07.png",
+          "sha256": "79e461e1f276eba7ce3fcac28af710c12004ee697040d68b413a61584ccfbebe"
+        },
+        {
+          "frame": 3099,
+          "seconds": 103.3,
+          "shot": "11",
+          "local": 230,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/server-cache/frame-08.png",
+          "sha256": "efe308dc7c00beed03ef40dce484af37133d606f7a23ea44f09ddd7fc30f8846"
+        },
+        {
+          "frame": 3378,
+          "seconds": 112.6,
+          "shot": "12",
+          "local": 210,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/server-cache/frame-09.png",
+          "sha256": "0811e3b7f6fea5910e3697d11aeb2ee36ddc469d145c0675a12680d6bacb4328"
+        }
+      ],
+      "contactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-samples/server-cache/sequence-1.jpg"
+      ],
+      "actualViewed": true,
+      "decision": "轻量调整",
+      "priorityRank": 6,
+      "reviewer": "/root/tx_outbox",
+      "strengths": [
+        "实际1702/1919/2242中应用、缓存、数据库三列位置稳定，未命中去原记录、填充、命中不查库已有具体路径。",
+        "2788回源与3378原记录改价/副本未改也已表现，不是只有字幕变化的静态页。"
+      ],
+      "specificMissingGlobalRelations": [
+        "04引入副本后没有一次明确合拢命中/未命中两个出口；06清空、08命中、10失效靠逐镜标题衔接。",
+        "结尾转入副本更新问题，没有再把失效后回源归回同一条读取循环。缺口较小，因为对象与路径本来就在同一空间。"
+      ],
+      "suggestedTrueTopology": {
+        "type": "一个读取流程的命中/未命中分流，失效是副本生命周期回边",
+        "nodes": [
+          "读取请求",
+          "检查对应缓存项",
+          "直接返回缓存值",
+          "读取数据库",
+          "填回同一缓存项并返回"
+        ],
+        "edges": [
+          "检查命中→直接返回",
+          "未命中→读取数据库→填回并返回",
+          "到期/清理只令以后检查未命中，数据库原记录不删"
+        ]
+      },
+      "recommendedReturnToOverview": [
+        "保留开场冲突；05建立缓存身份后用现有三列短暂显式标出两个出口。",
+        "06清空之前回到检查点，08切命中时定位另一出口，10到期回同一检查点；其余镜保持稳定局部，不每镜变焦。",
+        "12先回收减少重复读取这一主线，再只用现有句子提示更新问题。"
+      ],
+      "mechanismScopeAndLength": {
+        "oneMechanism": "同一键的旁路读取缓存；不并列讲所有淘汰策略/分布式缓存部署。",
+        "lengthPolicy": "保持约116.37秒；以少量流程标注替换重复摘要，不为新风格全面重新配音/制作。"
+      },
+      "evidenceObserved": [
+        {
+          "frame": 1702,
+          "observation": "缓存未找到，原记录199，回源路径可见。"
+        },
+        {
+          "frame": 2242,
+          "observation": "缓存命中199，数据库明显弱化且标明这次不用查。"
+        },
+        {
+          "frame": 3378,
+          "observation": "DB179/缓存199提示更新责任，尚未合回读取分流。"
+        }
+      ],
+      "sourceEvidence": [
+        "Main.tsx const A=320,K=950,D=1560贯穿对象位置；id6未命中、id8命中、id10到期回源，末镜是副本价格分叉。",
+        "ui.tsx Link/Record为全屏同位对象，没有共享流程地图/相机；与cache-consistency的ui.tsx字节完全相同。"
+      ],
+      "actualViewedUniqueFrames": [
+        0,
+        854,
+        1132,
+        1702,
+        1919,
+        2242,
+        2788,
+        3099,
+        3378
+      ],
+      "actualViewedCount": 9,
+      "assessmentLimit": "实际读取当前SB/Main并查看所列当前站点MP4帧；未全片播放、完整听辨、ASR或测量学习效果。"
+    },
+    {
+      "slug": "cache-consistency",
+      "ep": 9,
+      "title": "后台改了价格，页面怎么还是旧的？",
+      "sourcePath": "episodes-codex/cache-consistency/remotion",
+      "metaSha256": "a6492aca810fd3c7df2391f5fa99fae22d3356820f91e03266f8c333de48cc70",
+      "storyboardSha256": "0356a9877b5a260bdd7970b72ba3b446eb11013f8114583e1dc74e95d5916d54",
+      "mainSha256": "1292cdb0b64c7553caa1974867299e888bd1ee3aa17a86f97cf0b73444e96a66",
+      "mediaPath": "episodes/cache-consistency/video.mp4",
+      "mediaSha256": "3199246bd350cbd0a58813f1d48823c98e7d840eac4583404bdba39f244b8013",
+      "media": {
+        "frames": 3464,
+        "fps": "30/1",
+        "width": 1920,
+        "height": 1080,
+        "seconds": 115.477
+      },
+      "sampleCount": 9,
+      "sampledFrames": [
+        {
+          "frame": 0,
+          "seconds": 0.0,
+          "shot": "01",
+          "local": 0,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/frame-01.png",
+          "sha256": "e930d812555b13280a362d27b351c0542cfc7c145ca631a0f56a578f0e94ae67"
+        },
+        {
+          "frame": 699,
+          "seconds": 23.3,
+          "shot": "03",
+          "local": 100,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/frame-02.png",
+          "sha256": "662fba69bee0d155715b9c3da7891f27009b7d06eece1584cf7fbdd0da8dc569"
+        },
+        {
+          "frame": 1290,
+          "seconds": 43.0,
+          "shot": "05",
+          "local": 230,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/frame-03.png",
+          "sha256": "a51900a51cc1832379f4d559d9a54485a506b08fedd46fe5f8ed2afb078daa65"
+        },
+        {
+          "frame": 1543,
+          "seconds": 51.433,
+          "shot": "06",
+          "local": 200,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/frame-04.png",
+          "sha256": "8b9b95b8a4ef9d7551c6052d047aec0edcf48242990b53f3c62b56238d8458d8"
+        },
+        {
+          "frame": 1863,
+          "seconds": 62.1,
+          "shot": "07",
+          "local": 225,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/frame-05.png",
+          "sha256": "5694c35472896e4e5e8d2fb2efa455b50870e621e60d13ce7b1d5024db97153f"
+        },
+        {
+          "frame": 2469,
+          "seconds": 82.3,
+          "shot": "09",
+          "local": 300,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/frame-06.png",
+          "sha256": "d9d05c25a427597a2d01f4c3743f824259a62de3761358377685af0a45f998e7"
+        },
+        {
+          "frame": 2711,
+          "seconds": 90.367,
+          "shot": "10",
+          "local": 200,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/frame-07.png",
+          "sha256": "c010a7a69b74e19a978b1c9628987b22df17b4e25153eaeffaa5d1203f7b83d1"
+        },
+        {
+          "frame": 3028,
+          "seconds": 100.933,
+          "shot": "11",
+          "local": 220,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/frame-08.png",
+          "sha256": "7eebe6ad31ce5b80581123b86d51a6d9507293eee78c296f8871ea0bd5ab5e88"
+        },
+        {
+          "frame": 3293,
+          "seconds": 109.767,
+          "shot": "12",
+          "local": 210,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/frame-09.png",
+          "sha256": "219a518b79fd0d6c96d1a652f18862022f20c484af0d8970d50d022c9af9d3be"
+        }
+      ],
+      "contactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-samples/cache-consistency/sequence-1.jpg"
+      ],
+      "actualViewed": true,
+      "decision": "优先重制",
+      "priorityRank": 1,
+      "reviewer": "/root/tx_outbox",
+      "strengths": [
+        "实际0/699先建立DB179与副本199的冲突；1290/1543/1863正确删除及新价回填具体且不密集。",
+        "3028清楚写删除失败旧值仍在，3293保留过期不能替代更新处理的边界。"
+      ],
+      "specificMissingGlobalRelations": [
+        "固定三列显示了值，却没有稳定的写入者/读取者先后关系；2469的另一个读取插入、2711随后DB更新，要观众自行拼成两条并发时间线。",
+        "05正确顺序、09先删后改对照、11正确顺序中的删除失败是三个不同前提；只用标题切换，缺少回到哪个起点、失败从哪一步分出的定位。"
+      ],
+      "suggestedTrueTopology": {
+        "type": "一条Cache-Aside写后删主流程，局部双轨并发时间线；不是把两种顺序当等价方案的二叉树",
+        "nodes": [
+          "保存数据库新价",
+          "删除对应旧缓存",
+          "后续读取检查缓存",
+          "未命中读取原记录",
+          "回填并返回新价"
+        ],
+        "edges": [
+          "DB提交→删对应缓存→后续读未命中→读DB→回填",
+          "删除失败→旧副本仍可读/待恢复，不能提前宣称一致",
+          "错误顺序另从199/199重置：先删除→读取插入取旧199并回填→DB后改179→副本仍199"
+        ],
+        "caveats": [
+          "错误顺序是对照，不是另一条推荐实现。",
+          "需要在局部双轨保留写/读发生先后；单纯给三列套相机不能解释并发。",
+          "过期只限制旧副本使用期限，不画成解决所有并发的必然成功。"
+        ]
+      },
+      "recommendedReturnToOverview": [
+        "保留开场179/199冲突，02后先看写路径全局；细讲仍使用当前稳定数据三列。",
+        "05重新演示正确顺序前，回总图明确从199/199开始；05–08保持该路径局部。",
+        "09错误顺序前回同一前提，突出两步次序被交换，再放大双轨读取插入；不要从已完成179/179直接跳成199/199。",
+        "11回正确路径的DB已提交、缓存待删除节点，分出删除失败；12结尾回收同图并保留期限边界。"
+      ],
+      "mechanismScopeAndLength": {
+        "oneMechanism": "常见旁路缓存的一种更新处理：先提交数据库，再删除该键缓存；用一个先删后改的并发反例说明顺序。",
+        "avoid": "不扩成Write-through/Write-behind/CDC/双写策略合集，不宣称强一致。",
+        "lengthPolicy": "保持约115.47秒；用地图与双轨替换已有重述，不追加篇幅或加快旁白。"
+      },
+      "evidenceObserved": [
+        {
+          "frame": 2469,
+          "observation": "另一个读取199、缓存旧199已回填、DB仍199；没有可同时追踪写者的稳定时间轨。"
+        },
+        {
+          "frame": 2711,
+          "observation": "接着DB179而缓存199，顺序问题是关键教学内容。"
+        },
+        {
+          "frame": 3028,
+          "observation": "删除失败与DB179同框，适合从DB提交后分出明确恢复边。"
+        }
+      ],
+      "sourceEvidence": [
+        "Main.tsx id5/6为正确顺序；id9先删并回填旧值，id10随后改库，id11删除失败；每镜只有同位Record/Link和标题，无流程位置状态。",
+        "实际SB为stale/invalidate/order三章，12镜24句；各章存在但画面没有持续全局导航。"
+      ],
+      "actualViewedUniqueFrames": [
+        0,
+        699,
+        1290,
+        1543,
+        1863,
+        2469,
+        2711,
+        3028,
+        3293
+      ],
+      "actualViewedCount": 9,
+      "assessmentLimit": "实际读取当前SB/Main并查看所列当前站点MP4帧；未全片播放、完整听辨、ASR或测量学习效果。"
+    },
+    {
+      "slug": "message-queue",
+      "ep": 10,
+      "title": "订单已提交，为什么还没处理完？",
+      "sourcePath": "episodes-codex/message-queue/remotion",
+      "metaSha256": "0f78051190d9cf3717e1e52a6464af8007cce66f3c1c06cc15aacf60bf808df2",
+      "storyboardSha256": "2cad9a4cac71fa0e3d49d38460d9a68141b4880a86b9dec2d17696f5271c874a",
+      "mainSha256": "1bd66225db587c6010bfe3ebb80386b063983bdb52f9b71c0914807c8e91ee2c",
+      "mediaPath": "episodes/message-queue/video.mp4",
+      "mediaSha256": "cd6d0e8b1205fe740c0736cc8c8481aa2d4b915139b584839837c5ecd2522482",
+      "media": {
+        "frames": 3100,
+        "fps": "30/1",
+        "width": 1920,
+        "height": 1080,
+        "seconds": 103.338
+      },
+      "sampleCount": 9,
+      "sampledFrames": [
+        {
+          "frame": 0,
+          "seconds": 0.0,
+          "shot": "01",
+          "local": 0,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/message-queue/frame-01.png",
+          "sha256": "7b3a2e7e0ea637050064a7da7f3a011444a1443864da691bb722cdd136101325"
+        },
+        {
+          "frame": 920,
+          "seconds": 30.667,
+          "shot": "04",
+          "local": 200,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/message-queue/frame-02.png",
+          "sha256": "9784b59a4c55e391b56ed9f52bda853ee7dbf5542e3755a0c052a8af9649b290"
+        },
+        {
+          "frame": 1173,
+          "seconds": 39.1,
+          "shot": "05",
+          "local": 195,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/message-queue/frame-03.png",
+          "sha256": "5fd1d8bfd706ee5ab5e90f9b92d89cb221f7c695a3c0178823a587ec6b856011"
+        },
+        {
+          "frame": 1664,
+          "seconds": 55.467,
+          "shot": "07",
+          "local": 210,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/message-queue/frame-04.png",
+          "sha256": "2b3868c4dce3b403912d9011957bc80a56dc637b046193bab2fb439d243c548a"
+        },
+        {
+          "frame": 1897,
+          "seconds": 63.233,
+          "shot": "08",
+          "local": 210,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/message-queue/frame-05.png",
+          "sha256": "f0fd0ea1c8f078345e66195299a90c74db09a51fc28827fe7c561fb74522fcbf"
+        },
+        {
+          "frame": 2182,
+          "seconds": 72.733,
+          "shot": "09",
+          "local": 240,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/message-queue/frame-06.png",
+          "sha256": "bfd8fc425479a664e6d3bcf685e8271beb0bcd8f6fdc5beda32ea514b6695db2"
+        },
+        {
+          "frame": 2309,
+          "seconds": 76.967,
+          "shot": "10",
+          "local": 80,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/message-queue/frame-07.png",
+          "sha256": "e2d915d6abed12d415f4eac462e8291b9723c618633f19beeff648d3534eba1a"
+        },
+        {
+          "frame": 2469,
+          "seconds": 82.3,
+          "shot": "10",
+          "local": 240,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/message-queue/frame-08.png",
+          "sha256": "a14e8056bbb7f12ec4a27797aa74e8eab0818ea96dbd03c889f86243e8dac341"
+        },
+        {
+          "frame": 3011,
+          "seconds": 100.367,
+          "shot": "12",
+          "local": 210,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/message-queue/frame-09.png",
+          "sha256": "59ed157a37a5f5b4b7c5ba6205d9191f810ee43a471f3bd2ca0f011c548c2cdf"
+        }
+      ],
+      "contactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-samples/message-queue/sequence-1.jpg"
+      ],
+      "actualViewed": true,
+      "decision": "优先重制",
+      "priorityRank": 2,
+      "reviewer": "/root/tx_outbox",
+      "strengths": [
+        "920已经把可靠入队确认与页面已提交分开；1173/1664具体展示待确认和业务后处理确认。",
+        "1897/2182保持同一7043任务的失败重投；2309/2469另演业务已成功但确认丢失及复用结果。"
+      ],
+      "specificMissingGlobalRelations": [
+        "两类确认和两个故障前提位于不同镜头，没有同一张状态流程把入队确认、业务成功、收到处理确认连接起来。",
+        "08连接断开/未完成、10业务成功/确认丢失都变成重新投递，但未从同一待确认分叉处回看；只看局部容易把未确认误当业务必失败。",
+        "3011结尾是可靠入队/后台处理/完成确认三组文字，未将重投与防重复回边收拢。"
+      ],
+      "suggestedTrueTopology": {
+        "type": "手动处理确认的一条投递生命周期与未确认回边，不套事务方案树",
+        "nodes": [
+          "任务可靠入队",
+          "待投递",
+          "投递后待确认",
+          "后台业务处理",
+          "成功后发送处理确认",
+          "确认收到后本次投递结束"
+        ],
+        "edges": [
+          "发送端可靠保存确认→页面已提交，不等于后台完成",
+          "待投递→业务处理→成功后处理确认送达→本次投递结束",
+          "手动确认模式中，连接断开且未确认→同一ID回待投递",
+          "重投时业务可能未完成，也可能早已完成；后者复用已有业务结果而非再执行业务"
+        ],
+        "caveats": [
+          "未收到ACK并不能推出业务没有成功。",
+          "确认丢失不能被画成队列立即知道业务状态或无条件立即重投。",
+          "可靠入队不等于订单数据库与队列共同原子提交；不扩讲Outbox或所有消息可靠性方案。"
+        ]
+      },
+      "recommendedReturnToOverview": [
+        "开场提交/未完成冲突后，03建立队列时交代全局生命周期，分别标注发送端确认与处理确认。",
+        "07完成正常路径后回总图，再在08定位业务处理中断、待确认未结束的前提。",
+        "09重投后、10确认丢失对照前，回待确认分叉并明确重置为业务已成功的另一个结果。",
+        "11/12结尾回同图：异步等待不让后台变快，容量/故障/重复仍是边界。"
+      ],
+      "mechanismScopeAndLength": {
+        "oneMechanism": "一个队列的手动消费确认与未确认恢复/重投；发送端可靠入队仅作前置。",
+        "avoid": "不同时展开Kafka offset、事务消息、Outbox或完整幂等实现，幂等细节继续引导EP12。",
+        "lengthPolicy": "保持约103.33秒；重新组织局部与状态导航，不增加机制数量。"
+      },
+      "evidenceObserved": [
+        {
+          "frame": 1664,
+          "observation": "业务成功并发确认，队列结束本次投递。"
+        },
+        {
+          "frame": 1897,
+          "observation": "7043处理到一半断开，未确认。"
+        },
+        {
+          "frame": 2309,
+          "observation": "同ID7043另一分支已业务成功但确认丢失，队列仍未收到处理确认。"
+        },
+        {
+          "frame": 2469,
+          "observation": "重来时复用已有结果，适合与前一故障回到同一分叉对比。"
+        }
+      ],
+      "sourceEvidence": [
+        "Main.tsx id4保存确认/返回页面；id7处理确认；id8/9处理断开与同ID重投；id10另一成功但确认丢失分支；id12仅文字摘要。",
+        "实际SB分enqueue/process/retry/recap等5章，但没有相机/流程地图/当前位置实现。"
+      ],
+      "actualViewedUniqueFrames": [
+        0,
+        920,
+        1173,
+        1664,
+        1897,
+        2182,
+        2309,
+        2469,
+        3011
+      ],
+      "actualViewedCount": 9,
+      "assessmentLimit": "实际读取当前SB/Main并查看所列当前站点MP4帧；未全片播放、完整听辨、ASR或测量学习效果。"
+    },
+    {
+      "slug": "rate-limit",
+      "ep": 11,
+      "title": "抢票时，为什么总提示系统繁忙？",
+      "sourcePath": "episodes-codex/rate-limit/remotion",
+      "metaSha256": "9778597f2565a5e0e277df0f617c7d1ab2ee39e46bf458e8bab11e67c70c0810",
+      "storyboardSha256": "81255aa3d4105ffefddbfd7d17c110473afcedc16cb00c6f0bbad61ce32068ab",
+      "mainSha256": "13e9a5a0ebab7c2f8da160cc5b92756a8cc2e2ebb6873cc1ecc46568fccf85f6",
+      "mediaPath": "episodes/rate-limit/video.mp4",
+      "mediaSha256": "3ccfda880a081af515ca92f62a96c635ec949a35c95a9b0b10bf7ffe2f69f420",
+      "media": {
+        "frames": 3271,
+        "fps": "30/1",
+        "width": 1920,
+        "height": 1080,
+        "seconds": 109.034
+      },
+      "sampleCount": 10,
+      "sampledFrames": [
+        {
+          "frame": 0,
+          "seconds": 0.0,
+          "shot": "01",
+          "local": 0,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-01.png",
+          "sha256": "4f6b4c462e40c243bcd03c822c9a8db3cb58cee643f74299d56fd2d1dd0d28de"
+        },
+        {
+          "frame": 770,
+          "seconds": 25.667,
+          "shot": "03",
+          "local": 220,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-02.png",
+          "sha256": "02812181b7bab59905d461191b05027a28b50c01505926d5fc0cbb21fc4e7693"
+        },
+        {
+          "frame": 1047,
+          "seconds": 34.9,
+          "shot": "04",
+          "local": 230,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-03.png",
+          "sha256": "11f876c3dc941b312d081072f5494a7b0ddaf490df6d787b484e85a487547feb"
+        },
+        {
+          "frame": 1271,
+          "seconds": 42.367,
+          "shot": "05",
+          "local": 190,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-04.png",
+          "sha256": "bc37ff1ce485e91b5cc3c52305ea27ae1f5722c8e687d255fc64db2c1b13cc06"
+        },
+        {
+          "frame": 1537,
+          "seconds": 51.233,
+          "shot": "06",
+          "local": 230,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-05.png",
+          "sha256": "d001805f39c5a714ecdc13c1110545144da82f9aa5f2de704c81376469cc447a"
+        },
+        {
+          "frame": 1803,
+          "seconds": 60.1,
+          "shot": "07",
+          "local": 230,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-06.png",
+          "sha256": "314040cb48baa95c22bae9eaba418fd276901d6d6bceebb177e2b76e57d291f6"
+        },
+        {
+          "frame": 2070,
+          "seconds": 69.0,
+          "shot": "08",
+          "local": 215,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-07.png",
+          "sha256": "bbc54ca45a296617af33d37971d664c6b46909478d850da0cadbd01e823a5f5c"
+        },
+        {
+          "frame": 2351,
+          "seconds": 78.367,
+          "shot": "09",
+          "local": 240,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-08.png",
+          "sha256": "096f5827ecb644ea5b97371d8ec86972606efb451540adbba263c53dc4a83651"
+        },
+        {
+          "frame": 2909,
+          "seconds": 96.967,
+          "shot": "11",
+          "local": 230,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-09.png",
+          "sha256": "1205957dd1b29cb95fba4cec3f143a0e353de9e9012725355f26a67c3387c91f"
+        },
+        {
+          "frame": 3185,
+          "seconds": 106.167,
+          "shot": "12",
+          "local": 220,
+          "file": "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/frame-10.png",
+          "sha256": "49daf246fd424add90a949bb2199462f379f08301d6abbdaae9b4f26aa9ade29"
+        }
+      ],
+      "contactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/sequence-1.jpg",
+        "/workspace/.video-studio-flow-audit/backend-samples/rate-limit/sequence-2.jpg"
+      ],
+      "actualViewed": true,
+      "decision": "暂不调整",
+      "priorityRank": 7,
+      "reviewer": "/root/tx_outbox",
+      "strengths": [
+        "入口额度与后台始终同位：1047额度1/甲在后台、1271额度0/甲乙仍处理、1537丙被拒绝且后台没收到丙。",
+        "1803/2070时间补充独立于请求，2351重新申请后才通过，2909保留通过不等于有票/公平的边界。",
+        "这是一个稳定入口的局部分流，已提供大部分全局空间关系，不需要为了统一外观每镜缩放。"
+      ],
+      "specificMissingGlobalRelations": [
+        "3185结尾只有请求到达/额度判断/放行拒绝文字，若后续自然维护可补实际箭头；但当前动作已在固定画布显出关系，缺口不足以排进本轮重制。"
+      ],
+      "suggestedTrueTopology": {
+        "type": "若以后调整，仅需额度判断的两出口与时间补充回边",
+        "nodes": [
+          "请求到达",
+          "有可用额度？",
+          "扣一个再放行",
+          "当场拒绝",
+          "按时间补充且不超容量"
+        ],
+        "edges": [
+          "有→先扣额度→放行后台",
+          "无→当场拒绝，不偷偷排队",
+          "时间到→增加可用额度，重试是新申请且不保证成功"
+        ]
+      },
+      "recommendedReturnToOverview": [
+        "当前不安排重制；如后续做小维护，可在06拒绝/08补充/09再次申请之间复用同一入口全图，保留当前动作与时长。",
+        "结尾补连线即可，不必新增密集状态树，也不把公平、库存或排队画成令牌桶内的结果。"
+      ],
+      "mechanismScopeAndLength": {
+        "oneMechanism": "当前已经聚焦令牌桶：按时间补充、容量上限、先扣再放行/无额度拒绝。",
+        "lengthPolicy": "保留约109.03秒；本轮不为形式重做或重新配音。"
+      },
+      "evidenceObserved": [
+        {
+          "frame": 1537,
+          "observation": "额度0、丙退回，甲乙后台仍工作，分流与局部边界清楚。"
+        },
+        {
+          "frame": 2070,
+          "observation": "1秒只补1额度，两个容量格可见，不是全部重置。"
+        },
+        {
+          "frame": 3185,
+          "observation": "结尾三词组缺箭头属于轻微回收表现，不影响前面具体流程。"
+        }
+      ],
+      "sourceEvidence": [
+        "Main.tsx Gate/Backend固定x750/x1390；id4/5先扣后pass，id6明确拒绝，id8按时间加1，id9重申请；均在同一画布。",
+        "实际SB allow/deny/refill分章，分支保持同一地点，不存在多个新场景缺回前提的问题。"
+      ],
+      "actualViewedUniqueFrames": [
+        0,
+        770,
+        1047,
+        1271,
+        1537,
+        1803,
+        2070,
+        2351,
+        2909,
+        3185
+      ],
+      "actualViewedCount": 10,
+      "assessmentLimit": "实际读取当前SB/Main并查看所列当前站点MP4帧；未全片播放、完整听辨、ASR或测量学习效果。"
+    },
+    {
+      "slug": "idempotency",
+      "ep": 12,
+      "sourcePath": "episodes-codex/idempotency/remotion",
+      "videoPath": "/workspace/video-studio/episodes/idempotency/video.mp4",
+      "sha256": "93167c788f97ec666be2ff42f011d4506a8205f84c343a40a4b27acc3e64ce3d",
+      "mainSha256": "95c10f62cb216e2eed0e9aae40906a2e4238bfb88342f473431c5061141c6625",
+      "storyboardSha256": "ecc777acf875da6380177e8518659091f7b92286625c9fd7f5bdfe4b1e60770d",
+      "frames": 2998,
+      "fps": "30/1",
+      "seconds": 99.946,
+      "selectedFrames": [
+        0,
+        495,
+        825,
+        1080,
+        1360,
+        1590,
+        1850,
+        2090,
+        2520,
+        2800
+      ],
+      "contactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-tail/idempotency/contact-1.jpg",
+        "/workspace/.video-studio-flow-audit/backend-tail/idempotency/contact-2.jpg"
+      ],
+      "decision": "轻量调整",
+      "priorityWithinEP12to14": 2,
+      "currentMediaMatchesProductionRenderResult": true,
+      "actualViewedUniqueFrames": [
+        0,
+        495,
+        825,
+        1080,
+        1360,
+        1590,
+        1850,
+        2090,
+        2520,
+        2800
+      ],
+      "actualViewedCount": 10,
+      "actualViewedContactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-tail/idempotency/contact-1.jpg",
+        "/workspace/.video-studio-flow-audit/backend-tail/idempotency/contact-2.jpg"
+      ],
+      "strengths": [
+        "7042、30元、余额100→70在全片保持，825具体展示扣款已完成但成功回音丢失；1590画出复用结果、余额仍70。",
+        "1360把可靠记录和余额一起框在局部边界，2090明确甲处理/乙等待；不是只有字幕变化的静态表格。",
+        "05标题明确回看首次处理，09显示真正新支付7043并说明独立操作此处不执行。"
+      ],
+      "specificMissingGlobalRelations": [
+        "03/04先看到结果丢失和重发，再跳回05首次处理；虽有回看标题，但没有说明这几个画面在同一条请求/记录状态路线上各处何处。",
+        "已完成重复、正在处理并发、真正新支付三种前提没有一个稳定入口图；08处理权等待与06复用完成结果容易只被记成两个例子。"
+      ],
+      "suggestedTrueTopology": {
+        "type": "同一编号的记录状态分流＋响应丢失后的客户端重试回边",
+        "nodes": [
+          "同一次操作沿用编号",
+          "读取/认领该编号",
+          "首次处理",
+          "处理中",
+          "已完成结果"
+        ],
+        "edges": [
+          "没有该编号且独占认领成功 → 首次处理 → 余额变更与结果可靠落地 → 已完成结果",
+          "已经完成 → 直接复用同一结果，不再扣款",
+          "正在处理 → 等待或按约定用同一编号重试",
+          "成功回音丢失 → 客户端未知 → 同编号重试回到记录判断"
+        ],
+        "boundary": "新支付用新编号仅作图外边界；不把金额相同当同一操作，不把每次点击都生成新编号。"
+      },
+      "recommendedReturnToOverview": [
+        "在02建立编号之后短暂总览，将03/04定位为已完成但响应丢失的回边。",
+        "05回图明确回到首次处理/余额100的前提，再放大可靠保存；这是回看，不是把已完成支付回滚。",
+        "08并发前回到同一编号入口，显示独占处理者与等待者；09新支付不再展开完整新流程。",
+        "10用同一地图收拢已完成复用路径，原稳定三栏对象可以保留。"
+      ],
+      "mechanismScopeAndLength": {
+        "oneMechanism": "同一操作编号＋服务端可靠记录/复用结果；可继续使用账户余额扣款例子。",
+        "retain": "约99.93秒，优先保留旁白和大部分局部动作，以导航/状态定位补足；无需全面重新调研配音。",
+        "avoid": "不扩讲外部支付网关协议、所有幂等实现或TTL清理算法；若后来细化原子方案，应明确是同库余额示例，不暗示第三方扣款可被普通本地事务包住。"
+      },
+      "sourceEvidence": [
+        {
+          "path": "episodes-codex/idempotency/storyboard.json",
+          "detail": "retry章03/04在identity章05首次处理之前，boundary章08并发/09新支付。"
+        },
+        {
+          "path": "episodes-codex/idempotency/remotion/src/Main.tsx",
+          "lines": [
+            20,
+            21,
+            22,
+            23,
+            25,
+            26,
+            27,
+            30
+          ],
+          "detail": "03响应丢失、05首次认领/余额结果共同边界、08双请求、09新编号分别独立画布；10仍回到三栏摘要。"
+        }
+      ],
+      "assessmentLimit": "实际读取当前SB/Main并查看这10个实际MP4帧；未声称全片播放、逐字听辨、ASR或学习效果测量。",
+      "reviewer": "/root/tx_outbox/backend_tail_audit",
+      "priorityRank": 4
+    },
+    {
+      "slug": "circuit-breaker",
+      "ep": 13,
+      "sourcePath": "episodes-codex/circuit-breaker/remotion",
+      "videoPath": "/workspace/video-studio/episodes/circuit-breaker/video.mp4",
+      "sha256": "8cb05987532571038b4b815b6837177613d33cfb8120b331f9bb62e48537d1ea",
+      "mainSha256": "798973f34c8d29e4d591c1a237ed748334a512b95bbe0754c58e12309a7abc2c",
+      "storyboardSha256": "560023718f62c99af85fa268fa510c8e5f4c0fbf620be89c928446ba2caab855",
+      "frames": 2926,
+      "fps": "30/1",
+      "seconds": 97.536,
+      "selectedFrames": [
+        0,
+        420,
+        720,
+        1000,
+        1250,
+        1550,
+        1860,
+        2200,
+        2500,
+        2780
+      ],
+      "contactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-tail/circuit-breaker/contact-1.jpg",
+        "/workspace/.video-studio-flow-audit/backend-tail/circuit-breaker/contact-2.jpg"
+      ],
+      "decision": "优先重制",
+      "priorityWithinEP12to14": 1,
+      "currentMediaMatchesProductionRenderResult": true,
+      "actualViewedUniqueFrames": [
+        0,
+        420,
+        720,
+        1000,
+        1250,
+        1550,
+        1860,
+        2200,
+        2500,
+        2780
+      ],
+      "actualViewedCount": 10,
+      "actualViewedContactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-tail/circuit-breaker/contact-1.jpg",
+        "/workspace/.video-studio-flow-audit/backend-tail/circuit-breaker/contact-2.jpg"
+      ],
+      "strengths": [
+        "局部因果已经可读：420/720从3个等待位置发展到共享资源满；1000观察失败达到示例条件；1250暂停调用并返回不可用。",
+        "1550明确不提供运费险仍可按业务规则提交，1860保留必要库存/支付校验边界；2200探测失败和2500稍后探测成功也已分开。"
+      ],
+      "specificMissingGlobalRelations": [
+        "调用状态、业务处置、依赖是否修复三种关系分散在不同画布；暂停调用1250→业务可继续1550→等待1860→探测失败2200→再探测成功2500没有同一张状态循环图。",
+        "结尾2780是暂停/保住/验证三个分散词组，未把失败回暂停、满足恢复条件回正常的两条回边收拢；需要观众自己把08/09两次探测拼成循环。"
+      ],
+      "suggestedTrueTopology": {
+        "type": "带条件回边的状态图，不是二叉树",
+        "nodes": [
+          "正常调用",
+          "暂停调用",
+          "少量探测"
+        ],
+        "edges": [
+          "正常调用 — 最近失败满足设定条件 → 暂停调用",
+          "暂停调用 — 等待条件满足 → 少量探测",
+          "少量探测 — 仍失败 → 暂停调用",
+          "少量探测 — 满足恢复条件 → 正常调用"
+        ],
+        "sideRelationship": "暂停时快速反馈不可用；上层业务单独决定不提供可选运费险并继续必要校验。熔断状态不直接等同订单成功，也不等同依赖已修好。"
+      },
+      "recommendedReturnToOverview": [
+        "保留原开场冲突；在04统计触发暂停前先看稀疏全图，并把02/03资源耗尽视为进入保护的原因。",
+        "05/06进入暂停节点的局部输出/业务规则；07末回图定位等待→探测，再放大08。",
+        "08失败完整显示后回图沿失败边返回暂停；09先明确稍后再次探测，再放大成功路径，不能从失败画面直接剪成成功。",
+        "10结尾回到同图，依次强调暂停、少量验证、条件恢复；不每镜缩放。"
+      ],
+      "mechanismScopeAndLength": {
+        "oneMechanism": "一个依赖的熔断调用状态循环；运费险仅作可选依赖示例。",
+        "retain": "保留约97.53秒、现有旁白和具体资源/探测动作优先；不要并列讲线程隔离、重试策略、限流算法。",
+        "actionWindow": "进入局部相机落定后，才开始探测请求的移动；正常/暂停/探测的提示使用当前状态或机制要求，不能提前写恢复成功。"
+      },
+      "sourceEvidence": [
+        {
+          "path": "episodes-codex/circuit-breaker/storyboard.json",
+          "detail": "10镜；stop章04–06，recover章07–09，recap章10。"
+        },
+        {
+          "path": "episodes-codex/circuit-breaker/remotion/src/Main.tsx",
+          "lines": [
+            20,
+            21,
+            22,
+            23,
+            25,
+            26,
+            27,
+            30
+          ],
+          "detail": "各镜独立Slots/Node/Path；08失败与09稍后再次探测两套局部，结尾仅三句文字。"
+        }
+      ],
+      "assessmentLimit": "实际读取当前SB/Main并查看这10个实际MP4帧；未声称全片播放、逐字听辨、ASR或学习效果测量。",
+      "reviewer": "/root/tx_outbox/backend_tail_audit",
+      "priorityRank": 3
+    },
+    {
+      "slug": "degradation",
+      "ep": 14,
+      "sourcePath": "episodes-codex/degradation/remotion",
+      "videoPath": "/workspace/video-studio/episodes/degradation/video.mp4",
+      "sha256": "4b589fd0cbf55f2c336d3f6e62f3a25225d49eacf79181709fab8430835a2245",
+      "mainSha256": "14a3c825de59a48a10b85a4019f365dc668e80db1056c72a4ff50de201232fa0",
+      "storyboardSha256": "8eab20d3aec8e5c96ff68eb98a4e12f809701086f21f907674ed9aed88f9228c",
+      "frames": 3134,
+      "fps": "30/1",
+      "seconds": 104.469,
+      "selectedFrames": [
+        0,
+        580,
+        820,
+        1120,
+        1430,
+        1790,
+        2080,
+        2400,
+        2690,
+        3020
+      ],
+      "contactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-tail/degradation/contact-1.jpg",
+        "/workspace/.video-studio-flow-audit/backend-tail/degradation/contact-2.jpg"
+      ],
+      "decision": "轻量调整",
+      "priorityWithinEP12to14": 3,
+      "currentMediaMatchesProductionRenderResult": true,
+      "actualViewedUniqueFrames": [
+        0,
+        580,
+        820,
+        1120,
+        1430,
+        1790,
+        2080,
+        2400,
+        2690,
+        3020
+      ],
+      "actualViewedCount": 10,
+      "actualViewedContactSheets": [
+        "/workspace/.video-studio-flow-audit/backend-tail/degradation/contact-1.jpg",
+        "/workspace/.video-studio-flow-audit/backend-tail/degradation/contact-2.jpg"
+      ],
+      "strengths": [
+        "820已经同时画出搜索预估与结算请求竞争同一红包计算服务；1120具体切断搜索侧计算、保留结算侧调用。",
+        "1790搜索199及优惠以结算为准、2080结算核验后179，兑现开头20元差额；2690必要校验失败停止的边界清楚。",
+        "2400已给出结算核验→库存检查→确认下单的局部主链，3020恢复的是搜索预估功能。"
+      ],
+      "specificMissingGlobalRelations": [
+        "搜索路径、结算路径在03/04短暂同框，06/07又变成两个独立价格画布，没有持续标记当前在可削减预估还是必要结算。",
+        "09必要校验失败与10恢复搜索预估属于不同层次：前者单次订单守卫，后者功能模式恢复；结尾没有回到两条路径指出恢复的是哪条可选调用。"
+      ],
+      "suggestedTrueTopology": {
+        "type": "两条共享计算资源的请求路径＋可选调用开关，不套熔断三状态",
+        "rails": [
+          "搜索请求 → 可选红包预估 → 搜索展示",
+          "结算请求 → 优惠/必要条件核验 → 确认金额 → 用户确认下单"
+        ],
+        "degradedChange": "高峰仅关闭搜索→红包预估这条可选边；搜索先显示199并提示以结算为准，结算仍核验后确认179。",
+        "guardAndRecovery": [
+          "必要库存/支付校验不满足 → 停止，不是降级成功",
+          "监控验证压力缓解 → 逐步恢复未来搜索请求的预估边；不改变已经确认的成交规则"
+        ]
+      },
+      "recommendedReturnToOverview": [
+        "保留价格冲突开头，在03共用资源全图固定搜索/结算两条轨道；04只改变可选搜索边。",
+        "06进入搜索展示局部前定位搜索轨；07回总图再进入结算轨，完整展示20元核验动作。",
+        "09从结算必要校验守卫分出停止边；10回同图恢复可选搜索边，清楚区分模式恢复与单次订单结果。"
+      ],
+      "mechanismScopeAndLength": {
+        "oneMechanism": "通过暂停搜索红包预估，给必要结算留资源；不是对所有降级策略的分类课。",
+        "retain": "约104.47秒，局部动作和示例金额已经有效，轻量导航调整价值大于全面重写。",
+        "avoid": "不要为了树图加上本片没有展开的所有优惠资格分支；不要把恢复预估画成已下单价格回滚。"
+      },
+      "sourceEvidence": [
+        {
+          "path": "episodes-codex/degradation/storyboard.json",
+          "detail": "load章03/04已有共用资源与削减，degrade章06/07分开价格，boundary章09/10分别订单守卫/功能恢复。"
+        },
+        {
+          "path": "episodes-codex/degradation/remotion/src/Main.tsx",
+          "lines": [
+            20,
+            21,
+            22,
+            23,
+            25,
+            26,
+            27,
+            30
+          ],
+          "detail": "03双来源调用、04切搜索边、06搜索价格单画布、08必要步骤、09校验失败停止、10恢复搜索价格。"
+        }
+      ],
+      "assessmentLimit": "实际读取当前SB/Main并查看这10个实际MP4帧；未声称全片播放、逐字听辨、ASR或学习效果测量。",
+      "reviewer": "/root/tx_outbox/backend_tail_audit",
+      "priorityRank": 5
+    }
+  ],
+  "delegatedEvidence": "/workspace/.video-studio-flow-audit/backend-tail.json",
+  "status": "Audit complete; all audit outputs stopped. Production has not started under this audit task."
+}

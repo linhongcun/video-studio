@@ -1,11 +1,7 @@
-# EP.10 站点发布记录
+# 订单已提交，为什么还没处理完？：全流程与局部定位重制
 
-2026-10-24 19:53:36（北京时间），按用户持续授权发布[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)，只上GitHub站点，保留历史平台投稿。
+对应[#199](https://github.com/linhongcun/video-studio/issues/199)，本批设计ID与实际站点发布号分别追溯。保留原配音、字幕与3100帧时长，增加适合本片机制的稀疏全局图、局部聚焦、情景重置与结尾回收。
 
-- 媒体[PR](https://github.com/linhongcun/video-studio/pull/151)，合并提交 `81ced01a028827ddff1c66138e2d718031ddfdc1`；Release后再次[部署](https://github.com/linhongcun/video-studio/actions/runs/40091595906)。
-- 成片3100帧，完整SHA-256：`cd6d0e8b1205fe740c0736cc8c8481aa2d4b915139b584839837c5ecd2522482`。
-- 本地制作检查、冻结输入、实际编码抽帧、站点构建及浏览器验证见本期QA和批次记录。
-- 线上canonical视频、海报完整SHA与字节数、VTT逐字节、HTML章节/标题/源码入口，以及首页版本、更新日志实际Release链接均已核验。
-- [完整线上证明](../../docs/codex-remake-ep01-14/online.json)保留逐项GET结果；检查不冒充完整人工播放、逐字ASR或独立完整听辨。
+完整视频SHA-256：`08f04f8b839e2e984b2bd8ac6d5dd3c4366e559581c5df6c4b57c0b7ed79785d`。具体动态、独立编辑与正式媒体证据见[最终检查](qa-final.md)。历史媒体与源见[原版索引](revisions/pre-flow-map.json)。
 
-按持续授权自主发布不表示用户已经观看认可。后续反馈应重新冻结受影响输入并检查、发布。
+本地正式成片与站点副本已核对；本批发布号在主干集成收尾时确定，Release后部署、线上完整文件/字幕/章节/海报/更新日志通过再关闭#199。只上GitHub站点，不将检查记为用户已认可新版。

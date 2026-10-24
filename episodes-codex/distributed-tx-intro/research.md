@@ -48,3 +48,11 @@
 ## 配音前独立复核
 
 独立教学技术代理已逐镜阅读20镜40句脚本，未发现配音阻断项。按其意见将15镜画面明确为“库存扣减与已处理标记在同一本地事务保存”，文章补充最终一致的恢复条件。09镜采用主任务建议，明确库存库回滚不能撤销另一边已提交订单。以上是稿件复核，实际成片检查另记。
+
+## 导航修订的官方正文复读
+
+2026-10-24，`flow-map-20261024/#199`保持原事实，另实际阅读PostgreSQL18的Transactions140–240行，以及MicrosoftDocs官方GitHub的Compensating Transaction、Retry实际include正文与Idempotent Consumer。完整URL、SHA及实际阅读范围见research-navigation.json。
+
+PostgreSQL共同提交/撤销支持同笔范围；Retry的Idempotency段明确“服务已成功处理却没能发出回复，重发会产生重复效果”，约束图中的结果未知；Idempotent Consumer说明业务效果和去重标记共同原子保存及并发约束；Compensating Transaction说明持久进度、业务规则、不可逆步骤与失败恢复。图中上下是管理范围对照，部分成功/未知是问题示例，不把示例拼成一笔业务必经路径，也不将两类协作思路说成穷尽二分类。
+
+本次AWS正文直连被网络隧道403阻断，未记为重新读到；超时与重复效果使用上述实际可读的官方GitHub正文独立核对。retry.yml本身只是包装，已继续打开retry-content.md，未把包装摘要当作正文。

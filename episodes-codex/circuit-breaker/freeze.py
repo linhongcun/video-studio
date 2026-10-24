@@ -29,6 +29,7 @@ files = [D/f for f in ['script.md','article.mdx','research.md','pronunciation.md
 files += [snapshot]
 files += [p for p in (D/'remotion/src').rglob('*') if p.is_file()]
 files += [p for p in (D/'remotion/scripts').rglob('*') if p.is_file()]
+files += [D/'navigation.md', D.parent/'_shared/branch-map/index.ts']
 picks = json.loads((D/'voice/picks.json').read_text())
 for row in json.loads((D/'voice/sents.json').read_text()):
     stem = f"{row['id']}-{picks.get(row['id'],'a')}"

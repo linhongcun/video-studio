@@ -2,9 +2,12 @@ import React from 'react';
 import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {Shot,shots} from './data';
 import {C,FONT} from './theme';
-import {at,eventAt} from './motion';
+import {at,eventAt,navigationMotion} from './motion';
+import {createBranchNavigator} from '../../../_shared/branch-map';
+import {navigationSpec} from './branch-map';
 import {Title,Note,Reset,Order,Stock,SplitBoundaries,Cross,Check,Txt,Chip,Line,LocalBoundary,MovingChip,ease,lerp} from './objects';
 declare const __HAS_VOICE_AUDIO__:boolean;
+const BranchNavigator=createBranchNavigator(React);
 const phase=(s:Shot,f:number,i:number,a=.08,b=.67)=>ease(f,at(s,i,a),at(s,i,b)-at(s,i,a));
 const hit=(s:Shot,f:number,name:string)=>f>=eventAt(s,name);
 const cue=(s:Shot,name:string)=>Number(s.cueFrames?.labels?.[name]??1);
@@ -45,8 +48,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  }
  if(t==='local-intro'){
   const p=phase(s,f,0),q=phase(s,f,1);
-  return <><Title color={C.teal} alpha={f>=cue(s,'本地事务')?1:0}>本地事务</Title>
-   {local(p)}<Order pending state="待提交" color={C.gold}/><Stock value={4} state="原库存：4" detail="拟改为 3 · 尚未提交" color={C.gold} alpha={q}/>
+  return <>{local(p)}<Order pending state="待提交" color={C.gold}/><Stock value={4} state="原库存：4" detail="拟改为 3 · 尚未提交" color={C.gold} alpha={q}/>
    <Note alpha={q}>两处修改，交给同一笔事务管理</Note></>;
  }
  if(t==='local-commit'){
@@ -77,7 +79,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
    <Note alpha={p}>看清这条边界，才知道它能保证什么</Note></>;
  }
  if(t==='split-boundaries'){
-  const p=phase(s,f,0,.18,.8),q=phase(s,f,1,.05,.55);
+  const w=navigationMotion.split,p=ease(f,w.oldBoundary[0],w.oldBoundary[1]-w.oldBoundary[0]),q=ease(f,w.independentBoundaries[0],w.independentBoundaries[1]-w.independentBoundaries[0]);
   return <><Title>拆开以后，各有各的提交</Title><Reset>架构变化 · 示例重置：无本单记录，库存 4</Reset>
    <Order state="订单库"/><Stock value={4} state="库存库"/>
    <div style={{opacity:1-p}}>{local(1,C.gold,'原来：一笔事务管理')}</div>
@@ -87,7 +89,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  }
  if(t==='partial-success'){
   const committed=hit(s,f,'order-local-committed'),failed=hit(s,f,'stock-failed'),rolled=hit(s,f,'stock-local-rolled-back');
-  return <><Title>一边已保存，另一边失败</Title>
+  return <><Title>{rolled?'库存本地回滚，订单仍已保存':failed?'一边已保存，另一边失败':committed?'订单已保存，等待库存结果':'先保存订单，再处理库存'}</Title>
    <SplitBoundaries colorLeft={committed?C.teal:C.edge} colorRight={failed?C.red:C.gold}/>
    <Order exists={committed} state={committed?'本单已记录':'待提交'} color={committed?C.teal:C.gold}/>
    <Stock value={4} state={rolled?'本地已回滚':failed?'处理失败':'准备扣 1 件'} detail={rolled?'库存仍 4':'本单尚未扣减'} color={failed?C.red:C.gold}/>
@@ -98,8 +100,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  }
  if(t==='distributed-intro'){
   const p=phase(s,f,0,.08,.6);
-  return <><Title color={C.teal} alpha={f>=cue(s,'分布式事务')?1:0}>分布式事务</Title>
-   <Order exists state="已记录" color={C.teal}/><Stock value={4} state="本单待处理" color={C.gold}/>
+  return <><Order exists state="已记录" color={C.teal}/><Stock value={4} state="本单待处理" color={C.gold}/>
    <SplitBoundaries colorLeft={C.teal} colorRight={C.gold}/>
    <Line x1={520} y1={300} x2={1400} y2={300} p={p} color={C.blue} dashed/>
    <Chip x={960} y={267} width={440} color={C.blue} alpha={p}>同一笔业务的协作范围</Chip>
@@ -116,7 +117,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  }
  if(t==='timeout'){
   const saved=hit(s,f,'remote-stock-committed'),lost=hit(s,f,'reply-lost'),unknown=hit(s,f,'caller-timeout-unknown');
-  const req=phase(s,f,0,.02,.44),reply=phase(s,f,0,.52,.79);
+  const w=navigationMotion.timeout,req=ease(f,w.request[0],w.request[1]-w.request[0]),reply=ease(f,w.reply[0],w.reply[1]-w.reply[0]);
   return <><Title>请求超时，结果可能仍然发生了</Title><Reset>新分支 · 订单已记录，库存从 4 开始</Reset>
    <SplitBoundaries left="调用方看到的情况" right="库存库实际发生的情况" colorLeft={C.gold} colorRight={saved?C.teal:C.edge}/>
    <Order exists state={unknown?'等待超时 · 结果未知':'等待扣减回复'} color={C.gold}/>
@@ -190,8 +191,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  if(t==='eventual-consistency'){
   const stalled=hit(s,f,'rewind-to-stalled-recovery-branch'),done=!stalled&&hit(s,f,'recovery-converges'),paused=stalled&&hit(s,f,'recovery-pauses-business-pending');
   const p=stalled?phase(s,f,1,.1,.4)*.5:phase(s,f,0,.15,.7);
-  return <><Title color={C.teal} alpha={f>=cue(s,'最终一致')?1:0}>最终一致</Title>
-   <Reset>{stalled?'回看另一种结果 · 恢复过程暂停':done?'本例已收拢 · 订单确认，库存 3':'约定的中间状态 · 本单仍待确认'}</Reset>
+  return <><Reset>{stalled?'回看另一种结果 · 恢复过程暂停':done?'本例已收拢 · 订单确认，库存 3':'约定的中间状态 · 本单仍待确认'}</Reset>
    <SplitBoundaries colorLeft={done?C.teal:C.gold} colorRight={done?C.teal:C.gold}/>
    <Order exists state={done?'订单确认':'已记录 · 整单待确认'} color={done?C.teal:C.gold}/>
    <Stock value={done?3:4} state={done?'本单已扣 1 件':paused?'等待恢复':'本单待处理'} color={done?C.teal:C.gold}/>
@@ -213,24 +213,23 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  return <><Title>先理解问题，再深入方案</Title>
   <div style={{opacity:1-p*.85}}><Order exists state="订单确认" color={C.teal}/><Stock value={3} state="本单已扣 1 件" color={C.teal}/><SplitBoundaries colorLeft={C.teal} colorRight={C.teal}/></div>
   <div style={{position:'absolute',left:lerp(1920,360,p),top:382,width:1200,padding:'45px 55px',boxSizing:'border-box',borderTop:`3px solid ${C.teal}`,borderBottom:`2px solid ${C.edge}`,background:C.bg}}>
-   <div style={{fontSize:27,color:C.muted}}>继续深入 · 现有方案详解</div><div style={{fontSize:49,color:C.teal,marginTop:22}}>分布式事务，几种方案到底怎么选？</div>
-   <div style={{fontSize:28,color:C.muted,marginTop:25}}>逐章区分机制、失败处理与适用边界</div>
+   <div style={{fontSize:27,color:C.muted}}>继续深入 · 独立机制短片</div><div style={{fontSize:49,color:C.teal,marginTop:22}}>按一种机制一集，理解协作与恢复</div>
+   <div style={{fontSize:28,color:C.muted,marginTop:25}}>逐步看清动作、失败处理与适用边界</div>
   </div>
   <Note color={C.teal}>一笔业务跨了提交边界，就要设计协作和恢复</Note>
   <Txt x={960} y={885} center size={23} color={C.muted} alpha={p}>IT小村 · 原创</Txt>
  </>;
 };
-const chapterInfo=(s:Shot):[number,string]=>({conflict:[1,'订单与库存'],local:[2,'一起保存'],split:[3,'各自提交'],uncertain:[4,'结果未知'],recap:[5,'规则与恢复']} as Record<string,[number,string]>)[s.chapterId]??[1,'订单与库存'];
+const firstTerms:Record<string,string>={'local-intro':'本地事务','distributed-intro':'分布式事务','eventual-consistency':'最终一致'};
 const ShotView:React.FC<{shot:Shot;captions:boolean}>=({shot:s,captions})=>{
- const f=useCurrentFrame(),[n,label]=chapterInfo(s);
+ const f=useCurrentFrame(),term=firstTerms[s.visualType];
  const sub=s.subtitles?.find(v=>f>=v.from&&f<=(v.to??v.from+(v.duration??1)-1));
  return <AbsoluteFill style={{background:C.bg,color:C.text,fontFamily:FONT,overflow:'hidden'}}>
   <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 85% 5%, #173B5555, transparent 62%)'}}/>
   <Txt x={100} y={54} size={24} color={C.muted}>分布式 · 概念入门</Txt>
-  <Txt x={100} y={98} size={21} color={C.teal}>{String(n).padStart(2,'0')} / 05 · {label}</Txt>
-  <div style={{position:'absolute',left:100,top:140,display:'flex',gap:9}}>{[1,2,3,4,5].map(i=><div key={i} style={{width:i===n?65:26,height:4,borderRadius:4,background:i===n?C.teal:C.edge}}/>)}</div>
   <Txt x={1700} y={54} size={25}>IT小村</Txt><Txt x={1650} y={103} center width={420} size={19} color={C.muted}>示例数据 · 订单 8124</Txt>
-  <Scene s={s} f={f}/>
+  <BranchNavigator spec={navigationSpec(s,f)} shotId={s.id} frame={f} durationInFrames={s.durationInFrames} foreground={term?<Title color={C.teal} alpha={f>=cue(s,term)?1:0}>{term}</Title>:undefined}><Scene s={s} f={f}/></BranchNavigator>
+  {s.visualType==='bridge'&&<Txt x={960} y={885} center size={23} color={C.muted} alpha={phase(s,f,1,.04,.5)}>IT小村 · 原创</Txt>}
   {captions&&sub&&<div data-subtitle style={{position:'absolute',left:130,right:130,top:925,minHeight:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:40,fontWeight:500,lineHeight:1.4,textAlign:'center',background:`${C.bg}F8`,borderRadius:12,padding:'7px 15px',boxSizing:'border-box'}}>{sub.text}</div>}
  </AbsoluteFill>;
 };
