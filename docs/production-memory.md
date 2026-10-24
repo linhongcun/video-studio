@@ -38,7 +38,7 @@
 - 用户要求先选一期制作看效果，选定 A01 / [#131](https://github.com/linhongcun/video-studio/issues/131)《AI 能回答问题，怎么才能真正帮你办事？》，制作与站点 slug 为 agent-intro，新系列键 agent。
 - [制作工程](../episodes-codex/agent-intro/README.md)为20镜40句、5章、5420帧，约180.7秒；通过同一合成退款咨询解释模型请求、程序执行、结果回传和动态选择，只查询并给申请建议，退款始终未执行。
 - 实际媒体SHA-256为44b21f36f6b99b4106141548a6bbc70c7556a394e4f1e819949b0e2af9be9b9c，−16.0LUFS；171冻结输入、完整解码、73预演/74实际帧比对、18张独立实际成片图及干净构建已检查。未执行逐字ASR或全片人工听辨，详见[最终报告](../episodes-codex/agent-intro/qa-final.md)。
-- 站点正式构建、40条VTT、5章精确跳转、桌面/手机布局和完整媒体SHA已有本地证据；[发布记录](../episodes-codex/agent-intro/release.md)、GitHub [v0.49.0](https://github.com/linhongcun/video-studio/releases/tag/v0.49.0)及制作issue保留最终发布与线上核验状态。用户尚未观看，不记为用户认可。
+- 站点正式构建、40条VTT、5章精确跳转、桌面/手机布局和完整媒体SHA已有本地证据；[发布记录](../episodes-codex/agent-intro/release.md)、GitHub [v0.50.0](https://github.com/linhongcun/video-studio/releases/tag/v0.50.0)及制作issue保留最终发布与线上核验状态。用户尚未观看，不记为用户认可。
 
 ### EP.01–14 新一轮 Codex 重制
 
@@ -125,6 +125,14 @@
 - 四片分别冻结131/129/131/131项输入；真实媒体H.264/1080p/30fps、−16LUFS，完整解码通过。独立80张/主任务37张编码查看及438点预演保真闭合；无逐字ASR、句内词级对齐或全片人工听辨结论。
 - 公开资料、过程边界和实际查看范围见[批次独立审查](transaction-split-editorial-review.md)，干净构建证据见[报告](transaction-split-clean-build.json)。L012/S011记录拆题，L013记录计数歧义，L014记录独立临时盘耗尽与完整重新编码，不将机器成功当成用户认可。
 - 发布版本v0.47.0，GitHub合并/Release/部署及线上核验按持续授权执行；四个制作issue在线上核验后completed关闭，最终状态见Release与issue。用户尚未观看四片，平台新发未授权。
+
+## LeetCode 首期：LC.11 盛最多水的容器
+
+- 2026-10-24，用户从本仓12条LeetCode选题中采纳[#78](https://github.com/linhongcun/video-studio/issues/78)，明确授权开始制作《盛最多水的容器：为什么每次都移动短边？》，完成后合并项目并发布网站。未授权外部平台投稿。
+- 制作目录`episodes-codex/container-most-water/`，站点`episodes/container-most-water/`。独立算法系列展示LC.11，内部ep22仅用于排序/Release，不将网络或事务课程当作先修。
+- 22镜44句、4章、6544帧，约3分38秒，冰糖原速。用同一输入`[2,3,10,5,7,8,9]`解释面积、固定短边的整组排除与正式扫描，保留36而非最后面积5。完整视频SHA为`624c2fa8dec7c8f96caad8b25d5890ae83c1854f4c16443617b32685002f18e0`。
+- 真实时序/声学起音、186项冻结输入、全解码、114个预演记录与114个实际MP4帧的保真、独立目视和干净依赖首帧复现已按实际范围记录。未执行逐字ASR或全片人工听辨，未记录为用户观看认可。
+- 本期发现QA传参不能保证实际隐藏字幕，修正后重出并查看真无字幕过程，见L016；安全排除的算法叙事做法与独立证据见S012。已由[PR #154](https://github.com/linhongcun/video-studio/pull/154)合并并发布v0.49.0，Release后部署40093925916成功；线上视频/海报完整SHA、44句VTT、四章、独立系列/RSS和更新日志实际GET通过，#78已以completed关闭。完整证据见[发布记录](../episodes-codex/container-most-water/release.md)与online-verification.json，平台未投稿。
 
 ## 复用边界
 

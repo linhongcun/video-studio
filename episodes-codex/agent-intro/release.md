@@ -1,11 +1,11 @@
-# EP.22 / v0.49.0 发布记录
+# EP.22 / v0.50.0 发布记录
 
 本期是Agent系列A01概念入口：同一笔合成退款咨询，展示请求、程序执行、结果回传与下一步选择。20镜40句、5章、5420帧，约3分1秒。只查询与给建议，不执行真实退款。
 
 ## 固定发布产物
 
 - 站点：[EP.22](https://linhongcun.github.io/video-studio/episodes/agent-intro/)。
-- Release：[v0.49.0](https://github.com/linhongcun/video-studio/releases/tag/v0.49.0)。
+- Release：[v0.50.0](https://github.com/linhongcun/video-studio/releases/tag/v0.50.0)。
 - 制作与线上核验的完整收尾记录：[issue #131](https://github.com/linhongcun/video-studio/issues/131)。本文件不预写未执行的线上结果；实际合并SHA、部署run、线上GET核验与关闭时间保存在该issue。
 - 最终视频：11,999,892字节，SHA-256 44b21f36f6b99b4106141548a6bbc70c7556a394e4f1e819949b0e2af9be9b9c。
 - 音轨：dd94b8b2963f099122a3e81d2bc066f18ff158ad9504c70cc2af291ca0360022。

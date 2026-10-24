@@ -8,7 +8,7 @@
 
 ## 站点内容
 
-一期在站点上可见，需要 `episodes/<slug>/meta.json` 的 `draft` 为 `false`，以及同目录的 `article.mdx`、`video.mp4`、海报。列表和页面由 `site/src/lib/episodes.ts` 读取 `episodes/*/meta.json`。`series` 必须是 `site/src/content/series.json` 里的键，具体系列以该文件为准；新增系列时同步添加标题、简介与顺序。
+一期在站点上可见，需要 `episodes/<slug>/meta.json` 的 `draft` 为 `false`，以及同目录的 `article.mdx`、`video.mp4`、海报。列表和页面由 `site/src/lib/episodes.ts` 读取 `episodes/*/meta.json`。`series` 必须是 `site/src/content/series.json` 里的键，具体系列以该文件为准；新增系列时同步添加标题、简介与顺序。LeetCode题号写`problemNumber`用于展示LC.N，内部整数`ep`继续用于排序和Release关联；独立算法系列不接入原技术系列的前后课学习链。
 
 `draft: true` 的期默认不进构建。本地要看草稿：
 
@@ -107,7 +107,7 @@ gh run watch <id>
 
 头条没有单独的键，在抖音侧同步，不另传一条。视频号没有网页链接，不写进 `meta.json`，也不写进 Release。不要为了显示视频号去改 `episodes.ts`。
 
-`site/src/pages/about.astro` 和 `site/src/components/PlatformLinks.astro` 的空状态仍写着「B站、抖音、快手」。那是旧文案。发布时不要照着它去发快手。
+`site/src/components/PlatformLinks.astro` 在没有真实平台链接时不显示，不以泛化搜索提示暗示本期已在平台发布。`site/src/pages/about.astro` 仍写着「B站、抖音、快手」，那是历史文案，发布时不要照着它去发快手。
 
 ## 三平台实操
 
