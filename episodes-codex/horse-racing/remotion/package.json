@@ -7,7 +7,12 @@
     "render:voice": "remotion render src/index.ts Main out/voice.mp4 --codec=h264 --crf=20 --concurrency=2 --browser-executable=/usr/bin/chromium --bundle-cache=false",
     "render:mix": "python3 ../../../episodes/_shared/music/mix_bgm.py --in out/voice.mp4 --bgm ../../../episodes/_shared/music/Wallpaper.mp3 --mode constant --below 12 --out ../video.mp4 --report out/mix-report.json",
     "covers": "node scripts/covers.mjs",
-    "stills": "node scripts/qa.mjs"
+    "stills": "node scripts/qa.mjs",
+    "plan:tail": "node scripts/render-tail.mjs",
+    "render:tail": "node scripts/render-tail.mjs --run",
+    "render:reuse-prefix": "python3 scripts/remix_tail.py --run",
+    "render:mix-ending": "python3 ../../../episodes/_shared/music/mix_bgm.py --in out/voice-revised-ending.mp4 --bgm ../../../episodes/_shared/music/Wallpaper.mp3 --mode constant --below 12 --out ../video.mp4 --report out/mix-ending-report.json",
+    "render:ending": "npm run render:tail && npm run render:reuse-prefix && npm run render:mix-ending"
   },
   "dependencies": {
     "@remotion/cli": "4.0.534",
