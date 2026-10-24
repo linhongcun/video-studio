@@ -14,7 +14,7 @@ export type Chapter = {id: string; title: string; start: number; frame: number; 
 export type Episode = {
   slug: string; ep: number; episodePart?: string; lessonOrder?: number; firstRelease?: string; title: string; summary: string; duration: number; tags: string[];
   date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
-  draft: boolean; legacy: boolean; related: {slug: string; label?: string}[];
+  draft: boolean; legacy: boolean; archived: boolean; replacedBy?: string[]; related: {slug: string; label?: string}[];
   learningGuide?: {slug: string; label: string}; series?: string; description?: string; updated?: string; platforms: Platform[]; readMin: number; sourcePath: string;
 };
 export type Platform = {id: string; label: string; url: string};
@@ -48,7 +48,7 @@ export function getRelated(e: Episode) {
   return ((e.related ?? []) as (string | {slug: string; label?: string})[]).map((raw) => {
     const r = typeof raw === 'string' ? {slug: raw} : raw;
     const m = all.get(r.slug);
-    if (!m) return null;
+    if (!m || m.archived) return null;
     return {slug: r.slug, ep: Number(m.ep) || 0, episodePart: m.episodePart, lessonOrder: m.lessonOrder, label: r.label ?? '', title: m.title, summary: m.summary, legacy: !!m.legacy, published: !m.draft || SHOW_DRAFTS};
   }).filter(Boolean).sort(compareLessons) as {slug: string; ep: number; episodePart?: string; lessonOrder?: number; label: string; title: string; summary: string; legacy: boolean; published: boolean}[];
 }
@@ -103,7 +103,7 @@ export function computeChapters(slug: string, fm: any[] = []) {
     const s = group[0];
     // 章卡可能有独立 id；正文锚点取同组中能匹配 frontmatter 的分镜。
     const f: any = byId ? group.map((s) => fmById.get(s.chapterId)).find(Boolean) ?? {} : fm[i] ?? {};
-    const start = Math.round((s.from / fps) * 10) / 10;
+    const start = s.from / fps;
     if (!hasChapters && f.start !== undefined && Math.abs(f.start - start) > 0.5)
       console.warn(`[chapters] ${slug}#${f.id}: frontmatter start=${f.start}s → 实际 ${start}s（frame ${s.from}）`);
     return {id: f.id ?? s.chapterId ?? s.id, title: f.title ?? s.title, start, frame: s.from, fmStart: f.start, inArticle: !!f.id};
@@ -171,9 +171,8 @@ export function buildVtt(slug: string) {
 }
 
 let cache: Episode[] | null = null;
-export function getEpisodes(): Episode[] {
-  if (cache) return cache;
-  cache = fs.readdirSync(EP_DIR)
+export function getEpisodes({includeArchived = false}: {includeArchived?: boolean} = {}): Episode[] {
+  if (!cache) cache = fs.readdirSync(EP_DIR)
     .filter((slug) => fs.existsSync(path.join(EP_DIR, slug, 'meta.json')))
     .filter((slug) => SHOW_DRAFTS || !readMeta(slug).draft)
     .map((slug) => {
@@ -182,16 +181,16 @@ export function getEpisodes(): Episode[] {
       const fm = mod?.frontmatter ?? {};
       const {chapters, duration, fps} = computeChapters(slug, fm.chapters);
       return {
-        slug, ep: meta.ep ?? 0, episodePart: meta.episodePart, lessonOrder: meta.lessonOrder, firstRelease: meta.firstRelease, learningGuide: meta.learningGuide, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
+        slug, ep: meta.ep ?? 0, episodePart: meta.episodePart, lessonOrder: meta.lessonOrder, firstRelease: meta.firstRelease, learningGuide: meta.learningGuide, replacedBy: meta.replacedBy, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
         tags: meta.tags ?? [], date: meta.publishedAt, poster: meta.poster, video: meta.video,
-        duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, related: meta.related ?? [],
+        duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, archived: !!meta.archived, related: meta.related ?? [],
         series: meta.series, description: meta.description, updated: meta.updatedAt && meta.updatedAt > meta.publishedAt ? meta.updatedAt : undefined,
         platforms: platformsOf(meta), readMin: readingMinutes(slug),
         sourcePath: meta.sourcePath ?? `episodes/${slug}/remotion`,
       };
     })
     .sort((a, b) => String(b.date).localeCompare(String(a.date)) || compareLessons(b, a));
-  return cache;
+  return includeArchived ? cache : cache.filter((e) => !e.archived);
 }
 
 export function getTags() {
@@ -215,6 +214,8 @@ export const epLabel = (item: number | {ep: number; episodePart?: string}) => {
 /** 引导目标必须已发布（或显式预览草稿），避免展示尚未上线的教学链接。 */
 export const learningGuideFor = (e: Episode) => e.learningGuide
   ? getEpisodes().find((x) => x.slug === e.learningGuide!.slug) : undefined;
+/** 归档页只链接已发布的替代课程；制作中的课程保留可识别名称，不产生死链接。 */
+export const archiveReplacementsFor = (e: Episode) => getRelated({...e, related: (e.replacedBy ?? []).map((slug) => ({slug}))});
 export const tagHref = (t: string) => `${BASE}tags/${encodeURIComponent(t)}/`;
 export const epHref = (slug: string) => `${BASE}episodes/${slug}/`;
 export const asset = (slug: string, f: string) => `${BASE}episodes/${slug}/${f}`;
@@ -243,6 +244,7 @@ export function getSeries(): Series[] {
 }
 /** 某期在系列中的位置与系列内上/下一期；系列末尾的“下一期”接下一个系列的第一期 */
 export function seriesNav(e: Episode) {
+  if (e.archived) return null;
   const all = getSeries();
   const si = all.findIndex((s) => s.id === e.series);
   if (si < 0) return null;

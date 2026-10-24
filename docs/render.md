@@ -1,5 +1,7 @@
 # 渲染与封面
 
+当前制作工程在 `episodes-codex/<slug>/`，按该期 README、package.json 与冻结清单执行。下文20镜/5152帧的 degradation 是上一轮历史范例；EP.14 站点数据现已由新的 Codex 版替换，不能用旧 `episodes/degradation/remotion/` 重渲新片。现行实现可参考 `episodes-codex/db-lock/` 与 `episodes-codex/degradation/`。
+
 以各期 `remotion/package.json` 为准。下面的命令从现行 `package.json`、`episodes/_shared/music/mix_bgm.py` 和 `episodes/_shared/cover/render.mjs` 抄出。过时说法（每句 −21 LUFS、渲染器一律在正片后追加 2 秒片尾、`npm run typecheck`、`npm run still`）不要再执行：degradation、circuit-breaker、https、http-request 的 `package.json` 都没有 `typecheck` 和 `still`。
 
 ## 正片

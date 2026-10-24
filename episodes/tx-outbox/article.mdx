@@ -1,0 +1,50 @@
+---
+title: 可靠消息：Outbox怎样把通知送出去？
+summary: 一笔本地事务先保存订单和待发通知，再由独立程序转发；通知可能重复，消费端用同一本地事务保护库存修改与处理标记。
+chapters:
+  - { id: gap, title: 一条通知，卡住整笔业务 }
+  - { id: local, title: 先把待办一起保存 }
+  - { id: send, title: 发送与重发是下一步 }
+  - { id: consume, title: 库存与处理标记共同提交 }
+  - { id: boundary, title: 最后看清保证的边界 }
+related: ["distributed-tx-intro", "idempotency", "tx-saga"]
+---
+
+## 一条通知，卡住整笔业务 {#gap}
+
+订单已保存以后，程序可能在发通知前中断；把发消息代码放在数据库提交之后，仍会留下这一段故障空档。反过来先发消息，数据库后续回滚也会留下错误通知。[^aws]
+
+示例订单8124购买商品7042一件，初始库存4。订单记录落地只表示这一步保存，不表示整笔业务已经完成。事件E8124代表这次库存安排，重送时沿用同一个身份；数字均为教学设定。
+
+尚未熟悉提交边界，可以先看[分布式事务入门](../distributed-tx-intro/)。本片只讲可靠消息的一种具体做法Outbox。
+
+## 先把待办一起保存 {#local}
+
+Outbox把需要发送的事件与本地业务一起保存。本例订单表与待发表属于订单库同一笔事务：一起提交或一起撤销，发送程序只读取已提交记录。[^aws]
+
+这解决本地业务与发送意图的持久衔接，队列和下游数据库仍在事务边界外。即使应用在提交后停止，待办仍可供恢复程序读取。
+
+## 发送与重发是下一步 {#send}
+
+独立转发程序读取待办、发送事件、收到队列确认后标记发送结果。发送与标记之间不能被画成一笔本地原子提交；若程序恰在这个空档停止，恢复时可能再次发送同一事件。[^outbox]
+
+因此，需要在队列持久性与确认、可恢复发送进度、同一聚合的顺序、积压监控和失败出口之间建立正确约定。本片用单一事件说明机制，没有承诺所有队列配置天然不丢、不乱序或只投递一次。
+
+## 库存与处理标记共同提交 {#consume}
+
+消费端在另一笔本地事务中，保存唯一事件身份和库存修改。示例把库存4扣成3，同时记录E8124已处理；中途失败则两处修改一起撤销。[^consumer]
+
+**唯一约束与本地事务缺一不可。** 只先查询“有没有处理过”，并不能阻止并发请求都读到不存在后各自扣减。已处理标识应按消费者作用域与事件身份建立唯一约束，业务变更与该标记共同提交。重复同一事件时识别已处理，返回相应结果并按消息协议确认，不能再扣一次。[^safe]
+
+保留标识多久、事件身份如何定义、并发冲突如何重试、确认丢失后如何重投，都属于实现责任。针对不同业务意图，不应只凭请求参数相同就合并成一次。
+
+## 最后看清保证的边界 {#boundary}
+
+生产端本地事务、发送流程、消息系统、消费端本地事务，是相互衔接的不同边界。Outbox没有让订单库和库存库变成同一次全局提交，也不自动提供全局隔离。
+
+消息、发送和消费恢复真正工作，才有继续推进的基础。临时故障可按策略重试；缺货等永久业务拒绝要明确取消、补偿或人工处理的规则，不能靠无限重试宣称一定成功。业务补偿可继续看[Saga单集](../tx-saga/)，本片不同时展开另一套机制。
+
+[^aws]: [AWS：Transactional outbox pattern](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)，Intent、Issues and considerations、Using an outbox table，访问2026-10-24。
+[^outbox]: [Chris Richardson：Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html)，Solution、Result context，访问2026-10-24。
+[^consumer]: [Chris Richardson：Handling duplicate messages using the Idempotent consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，2020-10-16，Tracking message IDs，访问2026-10-24。
+[^safe]: [AWS：Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，Reducing client complexity，访问2026-10-24。

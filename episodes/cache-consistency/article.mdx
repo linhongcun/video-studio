@@ -1,85 +1,34 @@
 ---
-title: 后台改了价格，页面怎么还是旧的？
-summary: 在后台把价格从 199 改成 169，新开商品页却还是 199。后台改的是数据库，页面先读的是服务端缓存里另存的那一份，没人动它，它就一直是旧价。做法是先改数据库、再删除缓存，下一个人打开时缓存里没有，就去数据库拿新价并存回去；删除这一步也可能没做成，所以每一份缓存数据都要带一个过期时间（TTL），到点自动删掉，旧价最多留到那时。文末补充 Redis 的 EXPIRE / DEL、为什么删而不改、先改库再删缓存仍留的小窗口等视频里没讲的事。
+title: "后台改了价格，页面怎么还是旧的？"
+summary: "数据库里的价格已改，应用却仍读了缓存旧副本。沿同一商品看失效、重新填充和操作顺序。"
+related:
+  - server-cache
+  - db-replication
 chapters:
-  - { id: stale-cache,  title: 后台改的是数据库，页面读的是缓存 }
-  - { id: delete-cache, title: 改完数据库，删除缓存 }
-  - { id: ttl,          title: 过期时间兜底 }
+  - id: stale
+    title: "刷新产生新请求，仍可能命中旧副本"
+  - id: invalidate
+    title: "一种常见路径：写原记录，再删除对应缓存"
+  - id: order
+    title: "正确顺序仍不能替代完整的一致性设计"
 ---
 
-你在后台 `admin.shop.example/item/1001` 把「示例 T 恤」的价格从 ¥199 改成 ¥169，页面也提示「已保存：价格 ¥169」；可新开一个标签页、在地址栏输入 `shop.example/item/1001` 打开商品页，价格还是 ¥199。后台明明改了，页面怎么还是旧的？
+数据库和服务端缓存是两份数据。视频延续商品7042，以199元改成179元说明：数据库已经更新，不代表应用稍后读的缓存也自动变新。这些价格和编号仅为教学示例。
 
-> 说明：`shop.example`、`admin.shop.example` 是文档专用的示例域名[^rfc2606]，不是现实中的商店。商品 1001「示例 T 恤」、旧价 ¥199、新价 ¥169、过期时间 10 分钟、倒计时 10:00，都是本例的示例数据，视频里出现的地方都标了「示例数据」或「示例」。这些数字不是任何网站的实测值，也不是推荐的设置。
+## 刷新产生新请求，仍可能命中旧副本 {#stale}
 
-## 跟着同一次改价走一遍
+本片讨论的是应用管理的服务端缓存。页面刷新后请求确实重新到达应用，但应用如果仍从缓存取出199，就会继续返回旧价格。这里不是浏览器缓存，也不是数据库主从延迟。[Redis官方参考](https://redis.io/docs/latest/develop/reference/client-side-caching/)用过时副本说明失效的必要性，访问于2026-10-24。
 
-### 1. 后台改的是数据库，页面读的是缓存 {#stale-cache}
+## 一种常见路径：写原记录，再删除对应缓存 {#invalidate}
 
-{/* 配图：左「数据库：¥169」，右「服务端缓存：¥199」暖色；下方流程「先看服务端缓存 → 有 → 直接用 ¥199 → 页面显示：¥199（旧价）」 */}
+修改数据库成功后，使对应缓存失效。下一次读找不到这一项，再从数据库取179并填回缓存。原记录始终留在数据库里，删除副本不等于删除商品。[Microsoft Cache-Aside模式](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)说明了这条更新和重建路径，访问于2026-10-24。
 
-上期说过，热门商品的数据，网站会在**服务端缓存**里另存一份，页面先从这一份里拿。
+如果反过来先删缓存、后改数据库，两个动作之间插入的读取可能拿到数据库旧值，并重新填回缓存。随后原记录虽然更新，缓存却又旧了。视频把这组交错动作拉开给观众看，并没有赋予它固定耗时。
 
-后台改价，改的是数据库：数据库里商品 1001 已经是 ¥169，可服务端缓存里那一份没人动，还是 ¥199。下一次有人打开商品页，服务器照旧先看服务端缓存，里面正好有，就直接拿了这份 ¥199，页面显示的就是旧价。
+## 正确顺序仍不能替代完整的一致性设计 {#order}
 
-在浏览器里也能看到这一点：先打开开发者工具的「网络 Network」面板，再新开一个标签页、在地址栏输入网址打开商品页，列表里会出现 `item?id=1001` 这一行；点开它的「预览 Preview」，能看到服务器返回的 `"price": 199`。注意这一行只说明服务器这次返回的是 199，它本身看不到服务器内部是从哪里拿的；本例里原因就是上面那一份没人动的缓存。
+写数据库和删缓存通常不是一个跨系统原子操作。删除可能失败；并发读取也可能在不合适的时点携带旧结果回来。重试、失效消息、版本控制和业务侧核验的选择，要看系统约束。视频只用删除失败提示这个边界，不声称“先写后删”带来强一致。
 
-要是没人去动它，又没有给它安排到点删除，这份旧价就会一直留着，不管谁再打开，页面都会显示 199。
+给缓存条目设置过期时间能限制该条目的使用期限，不能保证所有读都立刻看见最新值，也不能阻止错误逻辑重新填入旧数据。缓存策略应结合允许的新旧程度与成本选择，见[Microsoft缓存指南](https://learn.microsoft.com/en-us/azure/architecture/best-practices/caching)，访问于2026-10-24。
 
-### 2. 改完数据库，删除缓存 {#delete-cache}
-
-{/* 配图：两栏「数据库」「服务端缓存」都是一行「1001｜示例 T 恤｜¥199」；左行变 ¥169，右行淡出只留空行位；左上小角标「同一次改价」 */}
-
-做法是：改完数据库，紧接着把缓存里这件商品的那一份删掉，这一步叫**删除缓存**。注意是删掉，不是把缓存里的值改成新价。
-
-视频里重演的是同一次改价：在后台点下保存，网站先把数据库里的价格改成 169，再删除这件商品的缓存。下一个人打开商品页，缓存里没有，就去数据库查，拿到新价 169，再顺手存进缓存。这时新开一个标签页、输入网址打开商品页，价格已经是 ¥169，和后台改的一样了。
-
-AWS 的缓存实践文档写的正是这个做法：“Cache expiration is easily handled by simply deleting the cached object. A new object will be fetched from the database the next time it is requested.”（删除缓存里的那份数据，下次请求时就会从数据库取新的。）[^aws]
-
-开发者工具里也能看到这次取新价：本例的网站在响应头里自己加了一个标记 `X-Cache: MISS`，意思是这次缓存里没有，数据是刚从数据库拿的。视频里这一段是对刚才那次打开的重演，所以画面上标了「刚才那次打开」。
-
-### 3. 过期时间兜底 {#ttl}
-
-{/* 配图：左侧「最多还剩 10:00（示例）」与满格计时条，右上「倒计时快进演示」；倒计时与计时条同步滚到「还剩 0:00」，旧行淡出，新行「1001｜示例 T 恤｜¥169」存回原位 */}
-
-可删除缓存这一步也可能没做成，比如连接断了一下，缓存里那份 199 就又留下了。
-
-所以缓存里的每一份数据，都要带一个**过期时间**，叫 **TTL**（time to live），比如 10 分钟，到点就自动删掉。AWS 的建议是：“Always apply a time to live (TTL) to all of your cache keys, except those you are updating by write-through caching.”[^aws] 本文只讲「先改数据库、再删除缓存」这条做法，原句里另一种更新方式这里不展开。它的作用也写得很清楚：“This approach catches application bugs, where you forget to update or delete a given cache key when updating the underlying record. Eventually, the cache key will auto-expire and get refreshed.”[^aws] 原句举的是忘了更新或删除的情况；「连接断了一下」是本文的白话例子。
-
-视频里倒计时写的是「最多还剩 10:00（示例）」：这份旧价可能早就存进缓存了，实际剩下的时间只会更短。画面标了「倒计时快进演示」，十分钟压缩到两秒内演完，倒计时数字和计时条按同一个剩余秒数一起走到 0:00。十分钟一到，这份旧价自己就没了，下一次打开又会去数据库拿新价，存回去的新数据重新带上新的 10 分钟。读取这份数据不会让它的过期时间重新计算。所以就算那次没删成，10 分钟后再新开商品页，价格也会变成数据库里的 ¥169，旧价最多留 10 分钟。
-
-过期时间怎么定？设得短，旧价留得短，但查数据库的次数会变多；设得长，查得少，旧价可能留得久。这是一个取舍，要看这份数据能容忍旧多久。
-
-回到开场：后台改了价格，删除缓存后，新开的商品页就是 ¥169，后台和页面对上了。
-
-记住这一句：**先改数据库，再删除缓存，每一份都要带过期时间（TTL）来兜底。**
-
-## 视频里没讲的几件事
-
-- **Redis 里怎么做。** 很多网站用 Redis 存服务端缓存。设过期时间用 EXPIRE 命令，官方文档原句：“Set a timeout on key. After the timeout has expired, the key will automatically be deleted.”[^expire]；删除用 DEL 命令：“Removes the specified keys. A key is ignored if it does not exist.”[^del]；想看一份数据还剩多久，TTL 命令“Returns the remaining time to live of a key that has a timeout.”[^ttl] 视频里只画剩余时间，不演示命令。
-- **为什么删掉，而不是直接改成新价。** 删除可以重复做，做几次结果都一样；直接改值时，几个请求同时进行，先后顺序一乱，可能把旧值写回去。Facebook 在 NSDI'13 的论文里写：“For write requests, the web server issues SQL statements to the database and then sends a delete request to memcache that invalidates any stale data. We choose to delete cached data instead of updating it because deletes are idempotent.”[^nsdi13]（idempotent，即重复执行结果不变。）这种「先读缓存、没有再查数据库并存回」的用法常被叫作旁路缓存（Cache-Aside）。
-- **先改库再删缓存，也还留一个很小的窗口。** 设想一个读请求在改价之前发现缓存里没有，从数据库读到旧价 199；这时后台把数据库改成 169，并删除缓存；这个读请求之后才把 199 存回缓存，旧价就又留在缓存里，直到过期时间到点。论文把这种情况叫 stale set：“A stale set occurs when a web server sets a value in memcache that does not reflect the latest value that should be cached. This can occur when concurrent updates to memcache get reordered.”[^nsdi13] 论文用租约（lease）来处理这个问题，这里不展开。所以「先改数据库、再删除缓存」只是大大缩小出错的窗口，不能保证缓存和数据库时时相同；过期时间正是兜这种情况的底[^aws]。
-- **删除没成功怎么办、先后顺序怎么排。** 删除失败时可以重试，比如把待删的条目放进消息队列重试，或订阅数据库的 binlog 再去删；先删缓存还是先改数据库，顺序不同，出错的方式也不同，先删缓存时更容易让并发的读请求把旧值又存回去，有人会再加一次延迟双删（这是工程上的常见做法，不是某份标准规定的步骤）。数据库有主从复制时，从库还可能有主从延迟。这些办法都只是缩小出错的窗口，缓存和数据库之间通常是「最终一致」，过一会儿才对上。另外，缓存空间满了时，缓存软件还会按规则淘汰一些数据，这和过期时间是两回事。
-- **X-Cache 不是标准字段。** `X-Cache` 是网站自己加的响应头，名字和取值由各家自己约定。很多 CDN 也用 X-Cache，那里指的是 CDN 缓存，和本文说的服务端缓存不是一回事；看到 `MISS` 或 `HIT`，先弄清楚是谁加的标记。
-- **先打开开发者工具。** 网络面板只记录它打开之后的请求，所以要先打开开发者工具，再新开标签页、输入网址打开页面，否则会漏掉那一行。
-
-## 想一想
-
-要是缓存里的价格可能旧上几分钟，下单付款这一步，还能直接用它吗？评论区说说。
-
-**参考答案：**不适合。付款时要读数据库里的权威价格；商品页展示允许旧几分钟。AWS 的原话是：“For example, during online checkout, you need the authoritative price of an item, so caching might not be appropriate. On other pages, however, the price might be a few minutes out of date without a negative impact on users.”[^aws] 这只说明结账需要权威价格，各家付款系统具体怎么实现并不相同。
-
-下期：双十一下单那么多，为什么不丢单？
-
-## 参考资料
-
-[^aws]: AWS《Caching Best Practices》：https://aws.amazon.com/caching/best-practices/ （Lazy caching、Time-to-live、How to apply caching 各节）。2026-10-21 访问。
-
-[^expire]: Redis 文档《EXPIRE》：https://redis.io/docs/latest/commands/expire/ 。2026-10-21 访问。
-
-[^del]: Redis 文档《DEL》：https://redis.io/docs/latest/commands/del/ 。2026-10-21 访问。
-
-[^ttl]: Redis 文档《TTL》：https://redis.io/docs/latest/commands/ttl/ 。2026-10-21 访问。
-
-[^rfc2606]: RFC 2606 §2《Reserved Top Level DNS Names》：https://www.rfc-editor.org/rfc/rfc2606.html#section-2 ，原句 “".example" is recommended for use in documentation or as examples.” 2026-10-21 访问。
-
-[^nsdi13]: Nishtala 等《Scaling Memcache at Facebook》，NSDI'13：https://www.usenix.org/system/files/conference/nsdi13/nsdi13-final170_update.pdf （第 2 节 Query cache，PDF 第 2 页；第 3.2.1 节 Leases，PDF 第 4 页）。2026-10-21 访问。
+展示价格可以短暂陈旧，不代表交易时能盲目信任展示缓存。实际结算仍应在业务要求的权威数据和正确事务范围里核验；本片不替具体系统选择一致性方案。

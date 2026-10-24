@@ -1,5 +1,7 @@
 # Deming 质检清单
 
+当前工程和媒体身份见 `episodes-codex/<slug>/README.md`、`source-sha256.json` 与 `qa-final.md`。下文提及的 degradation 20镜/5152帧及旧字段结构属于历史范例；本轮站点数据已替换，旧回归输入使用独立 fixture，不再从 live 站点目录获取。句级声学对齐不能冒充逐字ASR。
+
 给 Codex 或同类 coding agent 打勾。规范以 [RULES.md](RULES.md) 为准。命令和阈值的出处在 [validate.md](validate.md)。本文件只排顺序，不另写一套起音、响度或安全区。
 
 制作与站点发布沿用 [RULES.md 的 STATUS](RULES.md#status) 中用户的持续授权。预检在 SHA-256 冻结之后、渲染之前；成片审在渲染之后。预检不过就改分镜或配音，回到 [pipeline.md](pipeline.md) 第 5 步重新冻结。检查通过后可以自主合并和部署 GitHub 站点，不再逐期等待用户批准；平台发布另行授权。

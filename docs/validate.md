@@ -1,5 +1,7 @@
 # 校验
 
+现行 Codex 工程按 `episodes-codex/<slug>/README.md` 执行本期预检、冻结、共享起音检查与实际媒体复核。下文 EP.14 的固定镜号、5152帧和期spec属于上一轮历史范例；live 站点数据已更换，旧回归读取独立 fixture，不能用旧期spec判定新分镜。通用规范仍以 RULES 为准。
+
 Deming 预检在配音和分镜 SHA-256 冻结之后、渲染之前。成片审在渲染之后。通用分镜检查是 `episodes/_shared/storyboard/validate.py`（仓根下 `python3 -B`，不写 `__pycache__`）。期特有检查在 `--spec` 的 `checks(V)`。EP.14 的 spec 是 `episodes/_shared/storyboard/examples/degradation/validate_spec.py`。字段和命令顺序见 [storyboard-schema.md](storyboard-schema.md)「生成清单」。
 
 按顺序打勾用 [qa.md](qa.md)。页身色的规则和成片采样在本文件「页身色」。本文件是命令和阈值。只对某一期成立的检查不进正文，例子见文末。

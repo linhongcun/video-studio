@@ -1,6 +1,6 @@
-"""EP.14 degradation (slug degradation-v1) build spec — ported from the episode-dir build_sb.py v1.0.0 (frozen storyboard 6265993b).
+"""Historical EP.14 v0.45.0 degradation (slug degradation-v1) build spec — ported from the episode-dir build_sb.py v1.0.0 (frozen storyboard 6265993b).
 Run:  python3 -B episodes/_shared/storyboard/build_sb.py --spec episodes/_shared/storyboard/examples/degradation/build_spec.py \
-        --episode-dir episodes/degradation --inputs episodes/_shared/storyboard/examples/degradation/repo-inputs.json \
+        --episode-dir episodes/_shared/tests/fixtures/degradation-v0.45.0 --inputs episodes/_shared/storyboard/examples/degradation/repo-inputs.json \
         --layout OUT/layout.json --covers OUT/covers.json --out OUT/storyboard.json
 Inputs: script.md 629b5042 (narration), words.json 36bccee8, voice.wav 9e70470c, voice/cues.json 751217cb and voice/shot_frames.json
 f8f03b6c (sha pinning only), narration.py 013cfb9b. The meta strings below are frozen data (they describe the episode as released,

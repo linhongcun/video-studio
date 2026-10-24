@@ -1,68 +1,42 @@
 ---
 title: 网站怎么记住你已经登录？
-summary: 刷新、换页后网站还认得你，可服务器不会自己把前后两次访问连起来。跟着一次登录走一遍：服务器发来一串编号，浏览器存成 Cookie、每次访问自动带上，服务器按编号查到会话认出你；退出时服务器作废会话、浏览器删掉 Cookie。文末补充 HttpOnly、域名范围和过期时间。
+summary: 同一网站的多次请求怎样关联到同一个账户：浏览器保存编号，服务器保存会话并检查有效性。
+related:
+  - https
+  - load-balancing
 chapters:
-  - { id: login,   title: 登录后，两边各自保存 }
-  - { id: refresh, title: 刷新与换页 }
-  - { id: logout,  title: 退出登录 }
+  - id: session
+    title: "登录成功，先建立会话"
+  - id: lookup
+    title: "新请求携带编号，服务器再次检查"
+  - id: expire
+    title: "有编号不代表一直有效"
+  - id: recap
+    title: "本片的范围"
 ---
 
-你在 shop.example 登录后按下刷新，结果网站还认得你。可服务器其实不会自己记住你：刷新前后是两次访问，它不会自动把它们连起来。HTTP 规范把这叫作「无状态」。[^rfc9110]
+同一个网站上，登录后再打开订单页，浏览器发出的是一次新请求。网站要将它与刚验证过的账户关联起来，必须有额外的状态管理机制。本期演示常见的“服务器会话 + Cookie”实现，所有账户与编号均为示例。
 
-> 说明：shop.example 是专门留给示例用的域名[^example]；账号「小林」、编号 `sid=k3x9q7…` 都是示例数据，视频里出现的地方都标了「示例数据」。
+## 登录成功，先建立会话 {#session}
 
-## 跟着一次登录走一遍
+网站验证登录信息后，在服务器保存一段会话状态。一个难猜、无业务含义的会话 ID 与账户相关联。示意画面把它标为“会话甲”，只是为了看清同一个编号的去向，不能照着这种可猜编号实现生产系统。
 
-### 1. 登录后，两边各自保存 {#login}
+网站通过响应的 `Set-Cookie` 指示浏览器保存会话 ID。Cookie 是浏览器按规则保存的数据；会话是服务器侧的状态。两者相互配合，不能混成同一件东西。[MDN 的登录流程说明](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies)
 
-{/* 配图：shop.example 登录页，账号框「小林」；登录后页面下方的开发者工具只显示一行 Set-Cookie: sid=k3x9q7…，旁注「服务器发来登录编号」；随后两张原理演示网页：浏览器保存的「登录编号：k3x9q7… 已保存」，服务器保存的会话记录「登录编号 k3x9q7… ｜ 账号 小林 ｜ 已登录」 */}
+## 新请求携带编号，服务器再次检查 {#lookup}
 
-输入账号密码点登录，服务器核对通过后发回结果。结果里带着一行 `Set-Cookie: sid=k3x9q7…`，意思是请浏览器把这串编号存下来。[^rfc6265]
+后续请求在符合 Cookie 的域、路径、Secure、SameSite 等发送条件时带上该编号。网站查询会话，确认它仍然有效，再根据关联账户查询订单；访问权限仍须另外正确检查。持久 HTTP 连接不是登录状态，不能仅因请求来自同一连接就认为身份相同。
 
-**Cookie** 就是浏览器保存的一小段数据，这次存的就是这串编号。
+这个例子不需要把密码保存在 Cookie 里，也不用每次重新提交密码。但会话编号一旦泄露，仍可能被他人拿来冒用。实际系统要配合 HTTPS、`Secure`、`HttpOnly`、适当的 `SameSite` 与跨站请求伪造防护；它们各管不同问题，不能互相替代。[OWASP 会话管理指南](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
 
-**会话** 就是服务器保存的登录记录：它记着这串编号对应哪个账号。编号本身是随机生成的，不含密码。
+## 有编号不代表一直有效 {#expire}
 
-### 2. 刷新与换页 {#refresh}
+会话可能因为超时、退出或管理操作而失效。浏览器即使仍带着旧编号，服务器也不能继续把它当作有效登录。退出通常同时让服务器会话失效、让浏览器删除对应 Cookie。只删浏览器 Cookie 不能代替服务器撤销。
 
-{/* 配图：刷新时开发者工具只显示一行 Cookie: sid=k3x9q7…，旁注「浏览器自动带上登录编号」；原理演示网页依次亮起「收到登录编号」「查到会话：小林 ｜ 已登录」「返回小林已登录的页面」；订单页 shop.example/orders 右上角仍是「小林，已登录」 */}
+关闭浏览器也不保证所有登录状态消失：会话恢复和 Cookie 持久化各有规则，服务器还应执行自己的有效期与撤销检查。
 
-按刷新，浏览器自动在这次访问里带上 Cookie（`Cookie: sid=k3x9q7…`），里面还是那串编号。服务器按编号查到会话，认出你是谁，再返回已登录的页面。[^rfc6265]
+## 本片的范围 {#recap}
 
-换到订单页也一样：编号自动带上，服务器照样认出你。
+这是常见实现之一。应用也可能采用签名令牌等方案；Cookie 本身只说明存储与传递方式，不能据此判断服务器必然保存了哪种会话结构。跨域、跨站、单点登录与分布式会话存储不在本片同时展开。
 
-### 3. 退出登录 {#logout}
-
-{/* 配图：原理演示网页「退出处理」，会话记录从「已登录」变成「已作废」；商店页回到「登录」按钮，标注「浏览器里的这条 Cookie 已删除」，再点「我的订单」提示「请先登录」 */}
-
-点退出，服务器先作废这条会话，同一个编号就不能再用来认出你。服务器还让浏览器删掉这条 Cookie，再刷新或换页就不会自动带上它。
-
-所以刷新后还认得你，靠的是浏览器带编号、服务器查会话，这两步缺一不可。
-
-## 视频里没讲的三件事
-
-**HttpOnly**：服务器设置 Cookie 时可以加上 HttpOnly，这样网页里的脚本读不到这条 Cookie，但浏览器访问网站时照样会带上它。它能挡住一部分脚本偷编号的情况，却不能让被偷走的编号失效。[^rfc6265-httponly]
-
-**域名范围**：Cookie 按域名保存、按域名带回。shop.example 发来的 Cookie，浏览器只在访问 shop.example（以及服务器明确允许的范围）时带上，访问别的网站不会带过去。[^rfc6265-domain]
-
-**过期时间**：服务器可以用 Expires 或 Max-Age 指定 Cookie 存到什么时候；不指定的话，它通常在关闭浏览器后就被清掉。服务器那边的会话另有自己的期限，两边各管各的。退出时常见的写法，是让这条 Cookie 立刻过期，浏览器就会删掉它。[^rfc6265-expires]
-
-## 想一想
-
-只删浏览器里的 Cookie，服务器的会话还有效。有人拿着旧编号，还能被认出来吗？欢迎在评论区说说你的判断。
-
-下期：网站离你那么远，为什么还这么快？
-
-## 参考资料
-
-[^rfc9110]: [RFC 9110：HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html#section-3.3)，IETF，2022-06，§3.3：HTTP 是无状态的，每个请求可以脱离其他请求来理解。
-
-[^rfc6265]: [RFC 6265：HTTP State Management Mechanism](https://www.rfc-editor.org/rfc/rfc6265.html)，IETF，2011-04，Set-Cookie（§4.1）、Cookie 请求头（§4.2）。
-
-[^rfc6265-httponly]: [RFC 6265 §4.1.2.6 The HttpOnly Attribute](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.1.2.6)，HttpOnly 限制非 HTTP 方式（如脚本）读取 Cookie。
-
-[^rfc6265-domain]: [RFC 6265 §4.1.2.3 The Domain Attribute](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.1.2.3)，Cookie 按域名带回的范围；另见 §5.4。
-
-[^rfc6265-expires]: [RFC 6265 §4.1.2.1–4.1.2.2 Expires / Max-Age](https://www.rfc-editor.org/rfc/rfc6265.html#section-4.1.2.1)，Cookie 的过期时间；未设置时为会话 Cookie，当前会话结束时清除，何时结束由浏览器决定。
-
-[^example]: [RFC 2606：Reserved Top Level DNS Names](https://www.rfc-editor.org/rfc/rfc2606.html#section-2)，IETF，1999-06，.example 留作示例用（§2）。
+资料访问日期：2026-10-24（北京时间）。公开出处与逐镜主张见制作工程 `research.md`。

@@ -2,7 +2,7 @@
   "slug": "circuit-breaker",
   "ep": 13,
   "title": "一个服务出故障，为什么整个网站没跟着崩？",
-  "summary": "后台有个服务出了故障，你打开结算页，照样能下单付款。示例里，浏览器只打一个结算接口，商品、地址、运费险都是这个接口在后台依次去问；运费险服务出故障时，每次最多等 3 秒，到点还没回音就不再等，叫超时；最近十次里失败超过一半，就暂时不去调用它，本地直接跳过，过一会儿再放少量请求试一试，好了就恢复，叫熔断。超时和熔断要一起用。文末补充三种状态的名字、试了还失败怎么办、真实库的默认值与「等于或高于」、故障为什么会一路蔓延（雪崩）、熔断之后返回什么（降级，下期讲）、库存这类重要服务不能跳过、和 EP.06 健康检查的区别，以及讨论题参考答案。",
+  "summary": "暂停失败调用，保住其他请求。",
   "tags": [
     "后端",
     "熔断",
@@ -19,13 +19,14 @@
     "idempotency",
     "degradation"
   ],
-  "targetDuration": 175,
-  "description": "约 2 分 55 秒的动画科普：跟着结算页走一遍，浏览器只打一个结算接口 checkout，商品、地址、运费险都由后台依次去问；运费险故障时先超时，失败太多就本地跳过不再调用（熔断），过一会儿半开试探，都成功就恢复；下单付款照常，整站不跟着崩。",
+  "targetDuration": 98,
+  "description": "暂停失败调用，保住其他请求。",
   "platforms": {
     "douyin": "https://www.douyin.com/video/7699412202029108490",
     "bilibili": "https://www.bilibili.com/video/BV1rJnm64EzV"
   },
-  "updatedAt": "2026-10-22",
+  "updatedAt": "2026-10-24",
   "coverFrame": 0,
-  "finalVideoFrames": 5252
+  "finalVideoFrames": 2926,
+  "sourcePath": "episodes-codex/circuit-breaker/remotion"
 }

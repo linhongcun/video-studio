@@ -1,0 +1,42 @@
+onset_rule selftest True
+frames 3464.0 durationFrames 3464 sec 115.46666666666667
+shot table:
+  01-hook                    0-  255 (255f 8.50s)
+  02-copies                255-  599 (344f 11.47s)
+  03-write                 599-  834 (235f 7.83s)
+  04-stale                 834- 1060 (226f 7.53s)
+  05-invalidate           1060- 1343 (283f 9.43s)
+  06-remove               1343- 1638 (295f 9.83s)
+  07-reload               1638- 1883 (245f 8.17s)
+  08-fresh                1883- 2169 (286f 9.53s)
+  09-order                2169- 2511 (342f 11.40s)
+  10-race                 2511- 2808 (297f 9.90s)
+  11-limit                2808- 3083 (275f 9.17s)
+  12-close                3083- 3464 (381f 12.70s)
+cues 1 max |cue-rule| 0 outside -6..+2: []
+sentence ASR mismatches:
+   01-hook-1 delete '后台明明把价格改成了一百七十九页面却还是一百九十九' -> ''
+   01-hook-2 delete '刷新了怎么还没变' -> ''
+   02-copies-1 delete '沿着上期的同一件商品看数据库原来是一百九十九缓存也留着一百九十九' -> ''
+   02-copies-2 delete '这一页的价格是应用从缓存里拿的' -> ''
+   03-write-1 delete '管理员把数据库价格改成一百七十九' -> ''
+   03-write-2 delete '缓存里的那份一百九十九还留在原处' -> ''
+   04-stale-1 delete '页面刷新后应用仍先查缓存' -> ''
+   04-stale-2 delete '它命中了旧副本所以回来的还是一百九十九' -> ''
+   05-invalidate-1 delete '缓存失效就是让应用不再采用那份临时副本' -> ''
+   05-invalidate-2 delete '一种常见做法是先改数据库再删除对应的缓存项' -> ''
+   06-remove-1 delete '这次数据库先确认保存一百七十九' -> ''
+   06-remove-2 delete '随后应用把同一商品的旧缓存删除让它变成未找到' -> ''
+   07-reload-1 delete '下个请求找不到缓存就转去数据库' -> ''
+   07-reload-2 delete '取回一百七十九再把新的这一份放回缓存' -> ''
+   08-fresh-1 delete '再往后的请求才从新缓存里拿到一百七十九' -> ''
+   08-fresh-2 delete '这里删掉的是缓存副本数据库记录一直都在' -> ''
+   09-order-1 delete '如果先删缓存却还没来得及改数据库另一个读取可能插进来' -> ''
+   09-order-2 delete '它找不到缓存就把数据库里旧的一百九十九又填了回去' -> ''
+   10-race-1 delete '接着数据库才改成一百七十九可缓存已经被旧值填回去了' -> ''
+   10-race-2 delete '所以删除和修改的顺序有实际影响' -> ''
+   11-limit-1 delete '先改数据库再删缓存也不代表永远不会读到旧值' -> ''
+   11-limit-2 delete '删除失败并发交错都还需要额外处理' -> ''
+   12-close-1 delete '给缓存设置过期时间可以限制旧副本停留的时间却不能代替更新处理' -> ''
+   12-close-2 delete '缓存带来速度也带来了管理多份数据的责任' -> ''
+selfcheck ok short shots: []

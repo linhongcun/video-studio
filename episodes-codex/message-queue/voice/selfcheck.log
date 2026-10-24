@@ -1,0 +1,42 @@
+onset_rule selftest True
+frames 3100.0 durationFrames 3100 sec 103.33333333333333
+shot table:
+  01-hook                    0-  233 (233f 7.77s)
+  02-burst                 233-  494 (261f 8.70s)
+  03-queue                 494-  720 (226f 7.53s)
+  04-confirm               720-  978 (258f 8.60s)
+  05-take                  978- 1204 (226f 7.53s)
+  06-work                 1204- 1454 (250f 8.33s)
+  07-ack                  1454- 1687 (233f 7.77s)
+  08-fail                 1687- 1942 (255f 8.50s)
+  09-redeliver            1942- 2229 (287f 9.57s)
+  10-duplicate            2229- 2515 (286f 9.53s)
+  11-peak                 2515- 2801 (286f 9.53s)
+  12-recap                2801- 3100 (299f 9.97s)
+cues 3 max |cue-rule| 0 outside -6..+2: []
+sentence ASR mismatches:
+   01-hook-1 delete '页面明明说订单已提交后台却还没处理完' -> ''
+   01-hook-2 delete '这笔订单现在到底在哪里' -> ''
+   02-burst-1 delete '先看一个教学示例三笔订单几乎同时到来' -> ''
+   02-burst-2 delete '后台来不及一起处理页面一直等也不是办法' -> ''
+   03-queue-1 delete '消息队列可以先接住待处理的任务' -> ''
+   03-queue-2 delete '网站把同一笔订单的处理任务写进队列' -> ''
+   04-confirm-1 delete '先等队列确认任务已经可靠保存再告诉页面已提交' -> ''
+   04-confirm-2 delete '这个确认不代表后面的业务已经做完' -> ''
+   05-take-1 delete '后台有空时再接收一笔任务来处理' -> ''
+   05-take-2 delete '看七零四二开始处理其他任务仍然等待' -> ''
+   06-work-1 delete '后台按自己的处理能力完成这笔订单的工作' -> ''
+   06-work-2 delete '任务已经送出也不能立刻当成处理成功' -> ''
+   07-ack-1 delete '处理确认要等业务真正成功后再发送' -> ''
+   07-ack-2 delete '队列收到确认才把这次投递视为完成' -> ''
+   08-fail-1 delete '再看下一笔后台处理到一半连接断了' -> ''
+   08-fail-2 delete '因为还没收到处理确认队列不能把它算成成功' -> ''
+   09-redeliver-1 delete '在这里采用的手动确认模式下连接断开会触发重新投递' -> ''
+   09-redeliver-2 delete '还是同一笔任务不是用户又下了一单' -> ''
+   10-duplicate-1 delete '也可能业务已经成功只是确认没送到' -> ''
+   10-duplicate-2 delete '任务再来一次时程序要避免把同一笔业务重复执行' -> ''
+   11-peak-1 delete '削峰就是把短时间的集中任务摊开来处理' -> ''
+   11-peak-2 delete '队列没有让后台瞬间变快只是允许任务先等一会儿' -> ''
+   12-recap-1 delete '所以已提交和已处理完是两个状态' -> ''
+   12-recap-2 delete '队列也有容量和故障边界不能承诺订单永远不丢' -> ''
+selfcheck ok short shots: []

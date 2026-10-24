@@ -1,92 +1,69 @@
 ---
-title: 输入网址后，怎么找到服务器？
-summary: 在地址栏敲下 shop.example，页面为什么还空着？跟着一次查询走一遍：本地缓存、递归解析器、根、.example 顶级域、权威服务器，最后拿到 IP 地址，TTL 决定这条记录能缓存多久。
+title: '输入网址后，怎么找到服务器？'
+summary: '用同一个示例域名逐步演示本地缓存、递归解析器、逐级询问、权威回答及缓存有效期，说明域名查询只解决地址获取，不等于页面加载完成。'
+related: []
 chapters:
-  - { id: local,    title: 先翻本地记录 }
-  - { id: resolver, title: 交给递归解析器 }
-  - { id: layers,   title: 一层层往下问 }
-  - { id: answer,   title: 答案回来了 }
-  - { id: load,     title: 页面开始加载 }
+  - id: hook
+    title: "域名，和服务器地址不是一回事"
+  - id: cache
+    title: "先看本地有没有可用答案"
+  - id: query
+    title: "本地没有，就交给解析器"
+  - id: ttl
+    title: "答案也有保存时间"
+  - id: recap
+    title: "适用边界与来源"
 ---
 
-你在地址栏敲下 shop.example，按下回车，结果页面还空着。这时浏览器其实还不知道，服务器在哪。
+用同一个示例域名逐步演示本地缓存、递归解析器、逐级询问、权威回答及缓存有效期，说明域名查询只解决地址获取，不等于页面加载完成。
 
-这一步通常只要零点几秒。下面把它放慢，跟着这一次访问从头走一遍：浏览器怎么按域名查到服务器的 IP 地址，查到以后页面才开始加载。
+## 域名，和服务器地址不是一回事 {#hook}
 
-> 说明：shop.example 是专门留给示例用的域名[^example]，203.0.113.10 是专门留给文档用的示例地址[^docip]。.example 在真实的互联网上没有对应的服务器，所以视频里根、.example 和权威服务器那几步的终端画面都标了「模拟查询」，演示的是一个普通网站会怎么走。
+域名方便人记，网络连接还需要地址。本期一直跟着这个保留的示例域名，只看查询过程。
 
-## 跟着一次查询走一遍
+## 先把名字查成地址
 
-### 1. 先翻本地记录 {#local}
+域名解析，就是为这个名字查找需要的记录。这里我们只演示：查出一个可以连接的地址。
 
-{/* 配图：原理演示网页，两行字段「域名：shop.example」「IP 地址：尚未获得」；随后是 Firefox 的 about:networking#dns 页面搜不到 shop.example，旁边终端的系统查询日志显示「本地缓存：未命中」 */}
+## 先看本地有没有可用答案 {#cache}
 
-**IP 地址**是联网时用来找到对方的数字地址，浏览器要连上服务器，得先有它。人记的是 shop.example 这样的**域名**，**DNS** 负责按域名查出对应的 IP 地址。[^dns][^ip]
+浏览器和系统可能已经缓存过答案。若已有可用记录，就能复用，不用每次重新问到最上层。
 
-第一站在本地。浏览器和操作系统都会把最近查过的结果暂存一段时间，这就是**本地缓存**：浏览器缓存、系统缓存里有还能用的记录，就直接拿来用，不用往外问。
+## 本地没有，就交给解析器 {#query}
 
-这一次，两处都没有 shop.example 的记录，只能往外问。
+递归解析器，替客户端完成后面的查询。这次它自己的缓存里也没有可用答案，于是继续向外询问。
 
-### 2. 交给递归解析器 {#resolver}
+## 先问：这个后缀由谁负责
 
-{/* 配图：终端窗口「递归解析器｜原理演示」，逐行显示「收到查询：shop.example 的 A 记录」「已有记录：未命中」「从根开始查」 */}
+解析器先向根服务器询问。根通常不直接给出这个网站的地址，而是告诉它，下一步该找哪组服务器。
 
-往外问，问的是**递归解析器**：替你跑腿去查的服务。它通常由网络运营商提供，也可以在系统里改成别的公共服务。系统只问它一句「shop.example 的地址是多少」，剩下的路由它去跑。[^rfc1034][^terms]
+## 接着，再找到负责这个域的服务器
 
-递归解析器自己也有缓存，有还能用的记录就直接回答。这一次它手里也没有，就从最顶层开始问。
+解析器根据指引，继续问顶级域服务器。它再获得负责这个域的权威服务器信息。
 
-### 3. 一层层往下问 {#layers}
+## 最后拿到负责方的回答
 
-{/* 配图：终端里的 dig 输出，标题栏标「模拟查询（普通域名会这样走）」：问根的命令和回答「example. IN NS ns.example.」，旁边中文译注「根：我不知道，去问 .example」；接着问 .example 的命令和回答「shop.example. IN NS ns.shop.example.」，译注「顶级域：去问 ns.shop.example」 */}
+然后，解析器向权威服务器查询。这个例子中，权威回答给出了网站的地址记录。
 
-假设 shop.example 是个普通网站。域名是分层的，最顶层叫**根**。根服务器有 13 组名字，背后有很多台机器，分布在世界各地。[^root]
+## 答案返回，浏览器才能继续连接
 
-根不给最终地址，只告诉解析器下一层该问谁。于是解析器转去问 **.example 顶级域**，也就是域名最右边那一段。顶级域同样不给地址，只指向管这个网站的服务器。[^rfc1034]
+解析器把答案返回客户端，也通常会保存一份缓存。浏览器拿到地址，才继续后面的网络连接。
 
-> 实际上，真实的根会告诉你 .example 这个顶级域不存在，因为它只留作示例用。[^example]
+## 答案也有保存时间 {#ttl}
 
-### 4. 答案回来了 {#answer}
+缓存有效期，规定这条记录通常可以缓存多久。有效期内可以复用；到期后，再按规则重新查询。
 
-{/* 配图：终端里问权威服务器的 dig 输出（标「模拟查询」），ANSWER SECTION 高亮「shop.example. 300 IN A 203.0.113.10」，译注「答案：地址是 203.0.113.10」；再高亮 TTL 列 300；最后切到 Firefox 的 about:networking#dns，表里出现 shop.example → 203.0.113.10，标「浏览器按自己的规则暂存」 */}
+## 第二次，可能直接得到答案
 
-**权威服务器**是负责发布这个域名记录的服务器。前面几层只给线索，到了这里，才拿到真正的地址：shop.example 对应 203.0.113.10。[^terms][^rfc1035]
+所以，下一次访问同一个名字，可能很快就从缓存拿到地址。但缓存命中，不代表网页内容已经下载好了。
 
-答案里还带着 **TTL**，就是这条记录允许被缓存多久，单位是秒。到期就重新查，没到期就直接用。[^rfc1035]
+## 适用边界与来源 {#recap}
 
-浏览器自己的缓存按自己的规则保存，about:networking 页面里看到的到期时间，不一定等于 DNS 回答里的 TTL。
+[RFC 9499（2024）DNS术语](https://www.rfc-editor.org/rfc/rfc9499.html)：DNS可返回多种记录；递归解析器可能转发，片中只选无缓存时的典型逐级查询。（访问于2026-10-24）
 
-解析器把地址交回系统，再交给浏览器。浏览器终于知道，该连哪台服务器了。
+[ICANN：What Does ICANN Do?（2012，仅参考）](https://www.icann.org/resources/pages/what-2012-02-25-en)：较早材料仅参考；DNS不是下载网页，也不是所有域名永久对应一个IP。（访问于2026-10-24）
 
-### 5. 页面开始加载 {#load}
+[RFC 2606（1999，仅参考）示例域名保留](https://www.rfc-editor.org/rfc/rfc2606.html)：shop.example与203.0.113.10仅是教学图；画面不表示真实公开DNS会返回这些值。（访问于2026-10-24）
 
-{/* 配图：回到开场的 Firefox 标签页，开发者工具「网络」面板里 shop.example 那一行的远程地址填上 203.0.113.10，状态变 200；演示商店页依次出现标题和两张商品卡 */}
 
-浏览器照着这个地址连上服务器，请求网页，空白页上开始出现标题和商品。在 Firefox 开发者工具的「网络」面板里，可以看到这个请求连的远程地址。[^devtools]
-
-整条路回顾一下：本地没有，就交给解析器，从根问到顶级域，最后由权威服务器给出地址。
-
-## 想一想
-
-马上再打开一次这个网站，还会从根开始查吗？评论区说说理由。
-
-页面打开了，网站又怎么认出你？下期讲 Cookie 和会话。关注我，觉得有用就点赞、收藏
-
-## 参考资料
-
-[^dns]: [MDN：DNS](https://developer.mozilla.org/en-US/docs/Glossary/DNS)，DNS 把域名转换成 IP 地址。
-
-[^ip]: [MDN：IP Address](https://developer.mozilla.org/en-US/docs/Glossary/IP_Address)，IP 地址是联网设备的数字地址。
-
-[^rfc1034]: [RFC 1034：Domain Names - Concepts and Facilities](https://www.rfc-editor.org/rfc/rfc1034.html)，IETF，1987-11，域名分层、解析器与逐级引用（§4.3.2、§5.3.3）。
-
-[^rfc1035]: [RFC 1035：Domain Names - Implementation and Specification](https://www.rfc-editor.org/rfc/rfc1035.html)，IETF，1987-11，资源记录格式、A 记录与 TTL（§3.2.1、§3.4.1）。
-
-[^terms]: [RFC 9499：DNS Terminology](https://www.rfc-editor.org/rfc/rfc9499.html)，IETF，2024-03，递归解析器、权威服务器等术语（§6–7）。
-
-[^root]: [IANA：Root Servers](https://www.iana.org/domains/root/servers)，13 组根服务器名称及其运营机构。
-
-[^example]: [RFC 2606：Reserved Top Level DNS Names](https://www.rfc-editor.org/rfc/rfc2606.html)，IETF，1999-06，.example 留作示例用（§2）。
-
-[^docip]: [RFC 5737：IPv4 Address Blocks Reserved for Documentation](https://www.rfc-editor.org/rfc/rfc5737.html)，IETF，2010-01，203.0.113.0/24 专供文档示例（§3）。
-
-[^devtools]: [Firefox 开发者工具：Network Monitor](https://firefox-source-docs.mozilla.org/devtools-user/network_monitor/index.html)，网络面板中的请求与远程地址。
+片中地址203.0.113.10取自[RFC 5737文档地址块](https://www.rfc-editor.org/rfc/rfc5737.html)（2010，仅参考；访问于2026-10-24），并非实际公开服务测量结果。
