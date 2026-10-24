@@ -1,29 +1,22 @@
-# EP.23 · 设计模式 D01：策略模式
+# EP.23 · 设计模式D01：策略模式新手版
 
-制作 issue [#163](https://github.com/linhongcun/video-studio/issues/163)，系列总览 [#161](https://github.com/linhongcun/video-studio/issues/161)。用户授权从设计模式选题中选择一期制作，完成后部署 GitHub 网站，本次选择策略模式。
+制作issue [#163](https://github.com/linhongcun/video-studio/issues/163)，系列总览[#161](https://github.com/linhongcun/video-studio/issues/161)。用户2026-10-25明确授权按新手理解反馈重排视频并完成网站上线。
 
-一笔100元示例订单贯穿：普通100、会员90、活动80；算法从结算内部拆成可替换函数，由调用方选择，再将原金额交给规则并接回结果。活动八折改七五折得到75，新增新客减10元得到90。各次独立计算，优惠不叠加。数字、规则与舍入都是教学设定，完整代码及实际运行证据在 `demo/`。
+## 当前内容
 
-16镜32句、四章；具体帧数、媒体指标及最终SHA见 `qa-timing.json` 与 `render-result.json`。旁白采用冰糖自然配音，不加速。代码画面仅03、14；其余用规则实际拆出、选中引用、金额调用与返回、修改范围说明设计，不加装饰进度条。
+《策略模式：结算怎样换一种算价办法？》采用13镜26句、四章，一笔原价100元的示例订单贯穿。先认识会员九折与活动八折两个函数，再明确传入函数本身、pricing本次对应所选函数、调用之后才产生结果。会员返回90元，重新从100元开始改传活动函数得到80元；只切换一次，优惠不叠加。
 
-## 内容与运行证据
+观众前置为简单函数调用与条件判断，函数可以作为参数在片中补齐。三问为为什么考虑拆分、具体怎样替换和执行、何时值得用。七五折变更、新客注册、类型和校验留在文章拓展。依据与新手检查问题见[参考拆解](../../docs/strategy-beginner-reference.md)；真实帧数和媒体SHA以qa-timing.json、render-result.json与release.md为准。
 
-- `research.md`：实际查阅的课程和官方文档、短引、日期、使用位置与边界；未取得的GoF全书不伪称已读。
-- `script.md`、`article.mdx`、`pronunciation.md`：同一主线的脚本、图文与读音。
-- `demo/pricing.py`、`demo/verify_demo.py`：整数分计算、重构对照、选择与返回值契约、金额舍入和边界检查。
-- `demo/`的版本快照与diff：同名活动函数只改80→75的真实补丁证据；单文件V1/V2模拟另行标明。
-- `qa-editorial.md`、后续动态与成片报告：检查执行者、范围和限制，以实际存在的产物为准，不将机器通过写成用户已观看认可。
+## 历史边界
 
-仓根运行：
+v0.52.0首发16镜，v0.54.1仅补三处章节入口。两版技术报告分别保留在revisions/v0.52.0与revisions/v0.54.1；原媒体、音轨和工程均可从各自不可变Git tag恢复。本轮完整重做，不使用旧三镜拼接结果或旧版局部检查给新版结论。历史revise_chapter_bridges.py仍保留，但不是当前重建入口。
 
-```sh
-python3 episodes-codex/strategy-pattern/demo/pricing.py
-python3 episodes-codex/strategy-pattern/demo/verify_demo.py
-```
+## 真实配音与装配
 
-## 配音与真实句级装配
+共享实现为episodes/_shared/voice及episodes-codex/_shared，不复制TTS、裁尾、铺轨、起音或混音算法。当前新take使用beginner后缀，旧a/b/c不覆盖。候选选择、文本一致性、信号边界与实际能力限制见voice下本轮报告。
 
-使用共享 `episodes/_shared/voice/` 的prep/gen/build，不复制TTS、裁尾、铺轨或起音算法。重建已有takes无需再次请求TTS：
+从仓根用已选定录音重建，无需再次请求TTS：
 
 ```sh
 python3 episodes/_shared/voice/build.py --dir episodes-codex/strategy-pattern
@@ -33,38 +26,30 @@ python3 episodes/_shared/label_onset_strict.py --dir episodes-codex/strategy-pat
 python3 episodes-codex/_shared/check_sentence_episode.py episodes-codex/strategy-pattern
 ```
 
-首次术语“策略模式”在06句首，使用共享Rule的实测声学起音；句包络兼容字段不是逐字对齐。本次ASR能力、候选选择和实际执行的声音检查见 `voice/` 的报告，缺失的逐字ASR或全片人工听辨不声称通过。
+词兼容字段使用句包络，不是逐字时间戳。首次策略模式位于04第一句，以共享声学起音对齐；缺失的逐字ASR或全片人工听辨不得写成通过。
 
-## 动画、冻结与正式编码
+## 动画预检与冻结
 
-在本期 `remotion/` 运行：
+本期remotion下运行npx tsc --noEmit，再以scripts/qa.mjs生成全13镜真实时序预演；06–10需要连续无字幕过程，检查尚未执行、参数绑定、执行返回、清旧结果及同原价重算。报告必须含源SHA、provisional:false和最终hideSubtitles/showSubtitles参数，实际图像仍须查看。
 
-```sh
-npm ci
-npx tsc --noEmit
-node scripts/qa.mjs out/qa-stills
-node scripts/qa.mjs out/qa-motion --shots=04,07,08,09,10,11,13 --motion --no-captions
-npm run covers
-```
-
-QA目录应使用本期已忽略的 `remotion/out/` 路径或工作盘的临时目录，避免填满独立 `/tmp`。具体执行路径见检查报告。无字幕样片必须检查最终composition参数及实际输出，不能仅凭传参认定。
-
-所有生产输入负责人停写、关键动作独立复核闭合后，从仓根冻结：
+根任务与独立复核确认生产输入停写后，从仓根冻结：
 
 ```sh
 python3 episodes-codex/strategy-pattern/freeze.py
 python3 episodes-codex/strategy-pattern/freeze.py --verify
 ```
 
-`freeze.py`调用共享冻结器，并将本期可运行代码、版本快照、示例结果及渲染辅助脚本补入同一清单。它不复制起音或时序算法。正式编码在本期 `remotion/` 运行 `npm run render`；多人共用时以 `/tmp/video-studio-render.lock` 串行编码，`TMPDIR`使用工作盘上的短路径，本期为`/workspace/strategy-tmp`；路径过长会使Chromium的SingletonSocket无法创建，首次失败和修正见`qa-render-environment.json`。修改冻结输入前必须停止本期排队或渲染，重新复核、冻结并编码。
+冻结包含选定新录音、真实SB/words、生产源码和共享实现、本期可执行demo及实际使用的mjs脚本；不再自动依赖历史chapterbridge/out/base文件。原封面三尺寸内容仍符合主题，复用已上线原件并核对完整SHA。
 
-复制混音报告后，从仓根执行：
+## 完整编码与发布
+
+正式渲染由本期remotion/package.json调用Remotion和共享Wallpaper混音工具。使用短TMPDIR=/workspace/strategy-tmp和/tmp/video-studio-render.lock；输入变化必须停止当前渲染、重新检查并冻结。随后执行：
 
 ```sh
 python3 episodes-codex/strategy-pattern/freeze.py --verify
 python3 episodes-codex/_shared/check_encoded_episode.py episodes-codex/strategy-pattern
 ```
 
-最终还需实际编码的状态与中间态复核。站点副本位于 `episodes/strategy-pattern/`，不得重生成另一个未经检查的媒体；视频、海报、字幕、四章起点、源码入口、系列与更新日志按完整SHA和实际HTTP GET核验。发布记录见 `release.md` 与线上核验JSON。
+正式MP4还要完整解码、实际关键帧与跨镜过程复核。站点复制同一媒体及字幕/章节数据，保留slug、四个章ID和firstRelease v0.52.0。合并、Release后Pages部署，再执行verify-online.py的8个canonical普通GET，流式完整核对视频、海报、VTT和章节/系列/RSS/更新日志；核验通过后completed关闭#163。平台新发未授权。
 
-配乐：Kevin MacLeod《Wallpaper》，CC BY 4.0。发布按仓库现行规范与用户授权执行。
+配乐Kevin MacLeod《Wallpaper》，CC BY4.0。最终执行结果与未完成能力以实际QA/release记录为准，不将制作验收当成用户已观看认可。

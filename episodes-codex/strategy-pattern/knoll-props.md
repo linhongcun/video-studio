@@ -1,31 +1,23 @@
-# 制作说明：策略模式
+# 制作说明：策略模式新手版
 
-本期Remotion工程位于 `remotion/`，使用16镜真实句级 `storyboard.json`；30fps、1920×1080，总帧数由共享句级装配输出，根数据模块逐镜累加，不在渲染器另加片尾。配音由共享 `episodes/_shared/voice/` 生成，`public/audio/voice.wav` 必须为实体副本。
+本轮为13镜26句、四章的完整教学重排，全新自然配音和动画。实际时长由共享句级装配输出，不变速压缩。当前布局和因果顺序见visual-direction.md；旧16镜/三镜拼接报告保留在revisions/v0.54.1，仅作历史。
 
-## 主体与构图
+## 生产输入
 
-布局按 `visual-direction.md`：旧结算内具体分支 → 算法逐个抽出 → 外部选函数 → 统一委托 → 结果返回 → 修改与新增范围 → 代价。输入为示例100元；普通100、会员90、旧活动80、新活动75、新客90。每次只选一种，换规则先重置，绝不把90或80当下一次折扣的输入。
+使用episodes/_shared/voice的prep/gen/build及共享assemble_sentence_episode、place_v2、label_onset_strict和check_sentence_episode，不另写配音整轨或起音算法。选定新take后，voice.wav与remotion/public/audio/voice.wav必须为同一实体内容；storyboard/words/captions均基于真实句级时序。
 
-07起调用方左侧、结算中间、规则右侧保持锚点；活动改动仅其函数金色标记，新客新增同时标实现与选择入口。移动金额沿调用或返回路线推进；靠近节点文本时在接收口前淡出，底层路径仍接入，再更新最终落定值，以免“等待返回”和金额形成重影。
+本轮只有会员/活动两个函数，输入10000分（100元），输出9000/8000分（90/80元）。参数与函数身份由demo/beginner-evidence.json的实际执行观察支撑。核心逻辑摘录显式标注省略校验，完整现有demo保留在图文。
 
-## 字体、颜色与品牌
+## 视觉与品牌
 
-页身使用共享深色主题，中文字体Noto Sans CJK SC，代码Noto Sans Mono。主题由 `src/theme.ts` 转发共享页身色，不修改共享主题。正文代码最多两处；不存在完整代码附录或算法题专用组件。右上角“IT小村”、片尾“IT小村 · 原创”。无假窗、比喻、装饰进度条或持续运动的章节线。
+页身引用共享深色主题，中文Noto Sans CJK SC、代码Noto Sans Mono，右上IT小村、片尾IT小村·原创。规则身份与金额结果始终区分；参数解释期间停止金额动画。章节id保留why/delegate/change/boundary及旧正文URL。首术语策略模式位于04第一句，按共享声学起音显示至少63帧。
 
-## 脚本入口
+封面标题和同一100元/规则可换流程稳定的内容仍适用，沿用已上线三尺寸原件及完整SHA；本轮不重新生成不同的封面。正文代码最多两处布局，不含额外代码附录。无比喻、假窗、装饰进度条或密集类图。
 
-从 `remotion/` 运行：
+## 预检与编码
 
-```sh
-npm ci
-npx tsc --noEmit
-node scripts/qa.mjs out/true-timing-all --no-captions
-node scripts/qa.mjs out/true-timing-motion --shots=04,07,08,09,10,11,13 --motion --no-captions
-npm run covers
-```
+本期remotion下运行npx tsc --noEmit；用scripts/qa.mjs生成全13镜真实时序图与06–10关键连续无字幕片。实际检查composition.props的hideSubtitles:true/showSubtitles:false、源SHA、COPYFIT与中间动作，不能只看命令参数。
 
-QA覆盖最终 `composition.props` 的 `hideSubtitles:true/showSubtitles:false`，不只在最外层传参；实际输出仍由主任务和独立复核者查看。记录里 `voice:false` 表示QA片无声，不代表没有真实配音时序；`provisional:false` 才表示用的是根真实装配文件。
+全体生产输入停写、编辑和动态检查闭合后冻结，正式渲染使用TMPDIR=/workspace/strategy-tmp与/tmp/video-studio-render.lock。执行npm run render调用既有Remotion编码和共享Wallpaper混音，目标-16 LUFS。冻结后若生产源变化，停止排队/编码并重新检查和冻结。
 
-全部写入者停写、动态复核闭合后，由根任务冻结生产输入，再执行 `npm run render`。正式渲染明确注入真实音频存在标记，编码H.264/CRF20，配乐使用共享Wallpaper及混音工具，成片目标−16 LUFS。封面组件遵守 `covers.json` 的各尺寸内容区域及4:3安全区，PNG转JPG与站点副本由根任务负责。
-
-旧 `out/provisional-key/` 是早期临时时序与返回叠字修订前的预演，不作最终合格证据。真实时序最终采样/连续片及最终媒体的执行结果以实际QA报告为准，不预写已通过或用户认可。
+正式MP4完成共享check_encoded_episode、完整解码、真实帧/过渡及字幕核对，再复制同一媒体接入站点。发布按持续授权合并、Release后部署，普通canonical GET流式完整哈希核对视频/海报/VTT和章节/系列/RSS/更新日志，随后completed关闭#163。执行范围和ASR/听辨能力限制如实记录。

@@ -1,13 +1,11 @@
-# LC.11 · 盛最多水的容器
+# LC.11 · 题意先于解法
 
-标题：《盛最多水的容器：为什么每次都移动短边？》。对应[#78](https://github.com/linhongcun/video-studio/issues/78)，站点展示LC.11，独立LeetCode系列。
+当前修订先介绍题目，再解释方法。前两镜用可视例子交代输入、选择与限制、目标和返回值；第03镜以后保留既有讲解，完整Python片尾仍5秒并提示暂停。对应原制作issue与历史发布见release.md；用户对旧主体的认可不能作为新开头观看结论。
 
-当前修订4按用户最新要求，把完整Python解法卡从15秒缩短为5秒，保留“暂停查看完整代码”提示。原讲解6544帧，其后150帧静态卡，共6694帧、30fps、223.133秒，约3分43秒；代码与画面内容不改。用户对原主体的认可、15秒过长的反馈和新版技术检查分开记录。
+当前6734帧/30fps（约3:44），44句字幕，四章精确时间来自storyboard。题意预检、实际成片、输入冻结/完整解码/音量和12采样保真通过，见qa-final.md及qa-problem-first-*.json/md。网页及v0.54.2实际完整媒体/字幕/章节和真实Release条目核验通过，见本轮报告、online-verification.json与release.md。
 
-22镜44句、四章起点保持：0、44.2666666667、103.0666666667、176.2秒。正文字幕止于6543，代码卡6544..6693无人声、无旧字幕。完整16行`solution.py`与文章及`solution.json`逐字相同；程序检查沿用v0.50.2已通过结果。
+本次按package脚本render:opener只重渲前两镜，再用共享remix_opener.py复用已验收正文，最后使用共享mix_bgm；配音仍由共享voice/build生成。实际来源与命令在opener-remix-plan.json，最终媒体SHA在render-result.json。完整重建仍可用本期npm run render。
 
-本次复用已验收的编码画面，经FFmpeg准确截短并沿用共享混音调整结尾，不整条重渲动画。人声使用共享`episodes/_shared/voice/build.py`生成5秒尾段，原44句时间及人声PCM前缀逐样本保持；检查聚焦新总长、末帧/展示PTS、代码可读、尾音与网站新时长。生产输入仍冻结，具体执行与旧证据继承范围见`qa-codecard-five-seconds.json`、`qa-codecard-five-seconds-independent.json`与`qa-final.md`。
+快速复用所需旧输入在ignored remotion/out/problem-first-baseline。若缓存不存在，按revisions/problem-first/baseline.json里的commit与videoPath/storyboardPath，用git show恢复video.mp4和storyboard.json并核对完整SHA；不能改清单认可其它旧媒体。前2镜范围须按真实新分镜更新，正文变动超过镜尾1帧时helper会拒绝复用。
 
-完整重建仍使用本期`remotion/package.json`；共享配音build后运行`prepare_code_endcard.py`，同步public音轨、冻结输入，再运行`npm run render`。本轮快速修订另记录实际FFmpeg输入SHA与参数。站点实际读取`episodes/container-most-water/`逐字节副本。
-
-v0.50.2的15秒版本证据见旧提交及`qa-python-endcard-independent.md/json`、`qa-python-endcard-site.md/json`，不将历史时长当作当前状态。各版合并、Release与线上结果见`release.md`。未新增逐字ASR或全片人工听辨，不含外部平台投稿。
+本次不重复未改程序的穷举验证或全部旧页面矩阵；没有可用逐字ASR/全片人工听辨结论。历史说明、QA和上线结果保存在revisions/problem-first/before-*与Git历史。

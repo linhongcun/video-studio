@@ -6,7 +6,7 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 
 - 线上站点：https://linhongcun.github.io/video-studio/
 - 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。不发快手，不发 X。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
-- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式 / LeetCode · 算法可视化 / Agent 开发 / 设计模式）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
+- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式 / LeetCode · 算法可视化 / Agent 开发 / 设计模式 / 趣味推理）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
 - 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
@@ -54,11 +54,15 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 ## 设计模式
 
-独立系列每种模式制作一期，围绕“为什么需要、解决什么、什么时候值得用”展开，按具体内容选择图文、代码与动态表达。首期为[EP.23 · D01《策略模式：优惠规则变了，为什么总要改结算？》](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)，约2分53秒；同一100元订单贯穿外部选择、规则调用与结果返回，配套文章提供完整可运行代码及资料。制作与检查见[本期工程](episodes-codex/strategy-pattern/README.md)，选题池见[23种模式总览 #161](https://github.com/linhongcun/video-studio/issues/161)。
+独立系列每种模式制作一期，围绕“为什么需要、解决什么、什么时候值得用”展开，按具体内容选择图文、代码与动态表达。首期为[EP.23 · D01《策略模式：结算怎样换一种算价办法？》](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)，约2分43秒；同一100元订单只演会员、活动两种办法，逐步解释传入函数、参数对应、调用后才产生结果，配套文章提供完整可运行代码及资料。制作与检查见[本期工程](episodes-codex/strategy-pattern/README.md)，选题池见[23种模式总览 #161](https://github.com/linhongcun/video-studio/issues/161)。
 
 ## LeetCode · 算法可视化
 
 独立算法系列使用题号展示，不要求先看网络或分布式课程。首期为[LC.11《盛最多水的容器：为什么每次都移动短边？》](https://linhongcun.github.io/video-studio/episodes/container-most-water/)，22镜、约3分38秒，用同一组竖线讲清面积、整组排除依据和双指针扫描。完整Python实现与证明放配套文章，制作入口见[本期工程](episodes-codex/container-most-water/README.md)。本期只上站点。
+
+## 趣味推理
+
+独立系列从经典智力题出发，先交代完整题意，再用连续动画呈现每次比较、排除和信息变化。首期为[P01《25匹马赛跑：怎样用7场找出前三名？》](https://linhongcun.github.io/video-studio/episodes/horse-racing/)，18镜、约3分31秒；用同一组赛果展示“三匹确定更快”的排除见证，配套文章补充任意六场自适应策略的严格下界。制作与实际检查见[本期工程](episodes-codex/horse-racing/README.md)，后续选题见[首批10题总览 #204](https://github.com/linhongcun/video-studio/issues/204)。
 
 ## 制作流程
 

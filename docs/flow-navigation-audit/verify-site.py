@@ -39,6 +39,7 @@ class Document(HTMLParser):
         self.ids = set()
         self.chapters = None
         self.videos = []
+        self.chapter_links = {}
         self.feed(text)
 
     def handle_starttag(self, tag, attrs):
@@ -49,6 +50,8 @@ class Document(HTMLParser):
             self.chapters = json.loads(attrs['data-chapters'])
         if tag == 'video':
             self.videos.append(attrs)
+        if tag == 'a' and 'data-id' in attrs and 'data-start' in attrs:
+            self.chapter_links[attrs['data-id']] = attrs
 
 rows = []
 for slug in INDEX['selected']:
@@ -76,7 +79,10 @@ for slug in INDEX['selected']:
         chapter_id = scene.get('chapterId', scene['id'])
         assert chapter['id'] == chapter_id
         assert abs(chapter['start'] - scene['from'] / SB['meta']['fps']) < .001
-        assert chapter_id in parsed.ids
+        link = parsed.chapter_links[chapter_id]
+        assert abs(float(link['data-start']) - chapter['start']) < .001
+        expected_target = chapter_id if chapter_id in parsed.ids else 'player'
+        assert link['href'] == '#' + expected_target and expected_target in parsed.ids
     seconds = E['frames'] / 30
     minutes, remainder = int(seconds // 60), int(seconds % 60)
     assert f'视频 {minutes}:{remainder:02}' in body

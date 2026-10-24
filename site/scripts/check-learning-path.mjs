@@ -167,8 +167,19 @@ assert.ok(nextAlgorithm, 'The sliding-window lesson must be available in preview
 assert.equal(nextAlgorithm.ep, 23);
 assert.equal(nextAlgorithm.problemNumber, 3);
 assert.equal(preview.epLabel(nextAlgorithm), 'LC.3');
-assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'leetcode').episodes), [algorithmSlug, nextAlgorithmSlug]);
+const binaryAlgorithmSlug = 'binary-search';
+const binaryAlgorithm = lessons.find((e) => e.slug === binaryAlgorithmSlug);
+assert.ok(binaryAlgorithm, 'The binary-search lesson must be available in preview');
+assert.equal(binaryAlgorithm.ep, 24);
+assert.equal(binaryAlgorithm.problemNumber, 704);
+assert.equal(preview.epLabel(binaryAlgorithm), 'LC.704');
+assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'leetcode').episodes), [algorithmSlug, nextAlgorithmSlug, binaryAlgorithmSlug]);
 assert.equal(preview.seriesNav(nextAlgorithm).prev.slug, algorithmSlug);
+assert.equal(preview.seriesNav(nextAlgorithm).next.slug, binaryAlgorithmSlug);
+assert.equal(preview.seriesNav(binaryAlgorithm).prev.slug, nextAlgorithmSlug);
+assert.equal(preview.seriesNav(binaryAlgorithm).next, undefined, 'Algorithms must not lead into an unrelated learning direction');
+assert.deepEqual(slugs(episodesForRelease({tag: binaryAlgorithm.firstRelease, kind: '新增', eps: [24]}, lessons)), [binaryAlgorithmSlug]);
+assert.deepEqual(slugs(episodesForRelease({tag: binaryAlgorithm.firstRelease, kind: '新增', eps: [24], episodeSlugs: parseEpisodeSlugs('https://linhongcun.github.io/video-studio/episodes/binary-search/')}, lessons)), [binaryAlgorithmSlug]);
 assert.deepEqual(slugs(episodesForRelease({tag: nextAlgorithm.firstRelease, kind: '新增', eps: [23]}, lessons)), [nextAlgorithmSlug]);
 assert.equal(preview.seriesNav(algorithm).prev, undefined, 'Algorithms have no distributed-systems prerequisite');
 assert.notEqual(preview.seriesNav(lessons.find((e) => e.slug === mechanismSlugs.at(-1))).next?.series, 'leetcode', 'System-design learning path must not lead into an unrelated algorithm');
@@ -241,7 +252,8 @@ if (process.argv.includes('--built')) {
 // direction, but must never imply that another direction is a prerequisite.
 const learning = learningRuntime(published);
 const tracks = learning.getLearningTracks();
-assert.equal(tracks.length, 4, 'All four published learning directions must be available');
+const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
+assert.equal(tracks.length, puzzle ? 5 : 4, 'Every published learning direction must be available');
 assert.ok(learningRuntime(preview).getLearningTracks().every((track) => track.episodes.every((e) => !e.draft && !e.archived)),
   'Draft preview must not advertise unfinished lessons as published direction content');
 assert.equal(learning.getTrackForSeries(), undefined);
@@ -267,7 +279,13 @@ assert.equal(tracks.find((t) => t.id === 'agent')?.start.slug, agentSlug, 'Agent
 assert.equal(tracks.find((t) => t.id === 'algorithms')?.start.slug, algorithmSlug);
 assert.equal(tracks.find((t) => t.id === 'patterns')?.start.slug, 'strategy-pattern', 'Design patterns must start with the published strategy lesson');
 assert.equal(learning.getTrackForSeries('design-patterns')?.id, 'patterns', 'Design patterns have their own learning direction');
-console.log('Four learning directions passed: every published lesson has one home; Agent, algorithms and design patterns remain independent from the systems path.');
+if (puzzle) {
+  assert.equal(puzzle.series, 'puzzles');
+  assert.equal(learning.getTrackForSeries('puzzles')?.id, 'puzzles', 'Puzzles have their own learning direction');
+  assert.equal(tracks.find((track) => track.id === 'puzzles')?.start.slug, 'horse-racing', 'Puzzles start with the published horse-racing lesson');
+  assert.equal(published.seriesNav(puzzle).prev, undefined, 'The first puzzle must not inherit a technical prerequisite');
+}
+console.log(`${tracks.length} learning directions passed: every published lesson has one home; independent directions remain outside the systems path.`);
 
 if (process.argv.includes('--built')) {
   const dist = path.join(site, 'dist');

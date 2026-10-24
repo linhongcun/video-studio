@@ -24,7 +24,8 @@ SB = json.loads((EP / 'storyboard.json').read_text())
 VERSION = json.loads((ROOT / 'site/package.json').read_text())['version']
 FPS = SB['meta'].get('fps', 30)
 PAGE_URL = BASE + 'episodes/' + SLUG + '/'
-assert VERSION == '0.52.0'
+assert re.fullmatch(r'\d+\.\d+\.\d+', VERSION)
+assert META['firstRelease'] == 'v0.52.0'
 assert META['draft'] is False
 assert META['sourcePath'] == 'episodes-codex/strategy-pattern/remotion'
 vtt_path = DIST / 'episodes/strategy-pattern/captions.vtt'
@@ -92,8 +93,11 @@ try:
     assert source_url in html.unescape(page)
     assert META['title'] in page
     assert 'EP.23 · 设计模式 D01' in page
-    assert '系列 · 设计模式' in page
-    assert '第一期' in page and '敬请期待' in page
+    assert 'id="course-directory"' in page
+    directory = re.search(r'<nav[^>]*aria-label="设计模式课程目录"[^>]*>(.*?)</nav>', page, re.S).group(1)
+    current_lesson = re.search(r'<a\b(?=[^>]*href="/video-studio/episodes/strategy-pattern/")(?=[^>]*aria-current="page")[^>]*>', directory)
+    assert current_lesson, 'current lesson missing from design patterns directory'
+    assert 'aria-label="上一课 / 下一课"' not in page
     assert offset == META['finalVideoFrames']
     ld_text = re.search(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>', page, re.S).group(1)
     ld = json.loads(html.unescape(ld_text))
@@ -103,7 +107,7 @@ try:
     home = get('home', BASE).decode('utf-8')
     assert '/video-studio/episodes/strategy-pattern/' in home
     assert 'data-series="design-patterns"' in home
-    assert '0.52.0' in home
+    assert VERSION in home
     series = get('series', BASE + 'series/design-patterns/').decode('utf-8')
     assert '/video-studio/episodes/strategy-pattern/' in series and META['title'] in series
     rss = get('rss', BASE + 'rss.xml').decode('utf-8')

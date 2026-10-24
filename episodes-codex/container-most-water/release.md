@@ -63,6 +63,22 @@
 
 - [PR #187](https://github.com/linhongcun/video-studio/pull/187)已squash合并，提交`0531f3ceb25c07fec3f19b9ffd16ac4d675a13f4`保留Codex联合署名。同步保留另一机器先合并的CDN修订，版本使用v0.50.4、教训使用L020，未占用其v0.50.3和L019。
 - 同提交的附注tag及[Release v0.50.4](https://github.com/linhongcun/video-studio/releases/tag/v0.50.4)已发布，firstRelease仍为v0.49.0。
-- [部署40102306544](https://github.com/linhongcun/video-studio/actions/runs/40102306544)于2026-10-24 22:25:29（北京时间）成功；虽然由合并触发，其构建已包含随后发布的v0.50.4 Release，线上检查另核对了真实Release链接，不只查看页脚版本号。head SHA与合并提交一致，API证据见`deployment.json`。
-- 2026-10-24 22:26:07（北京时间）实际GET通过：线上视频10,061,812 bytes、完整SHA与5秒正式媒体相同；海报及44句VTT逐字节保持，四章/正文锚点、源码入口、系列/RSS、首页版本和更新日志通过，见`online-verification.json`。
+- [部署40102306544](https://github.com/linhongcun/video-studio/actions/runs/40102306544)于2026-10-24 22:25:29（北京时间）成功；虽然由合并触发，其构建已包含随后发布的v0.50.4 Release，线上检查另核对了真实Release链接，不只查看页脚版本号。head SHA与合并提交一致，API证据见`revisions/problem-first/before-deployment.json`。
+- 2026-10-24 22:26:07（北京时间）实际GET通过：线上视频10,061,812 bytes、完整SHA与5秒正式媒体相同；海报及44句VTT逐字节保持，四章/正文锚点、源码入口、系列/RSS、首页版本和更新日志通过，见`revisions/problem-first/before-online-verification.json`。
 - Release后按流程已另触发部署40102366288，该次状态不作为上述已完成上线核验的依据。
+
+## v0.54.2：题意先于解法
+
+- 按用户共同反馈重做前两镜：先讲输入、可选内容和限制、目标及返回值，再进入原方法。保留已发布正文和5秒完整Python卡；源文件后缀与后续takes不变，每镜仅静态尾停补剪最多1帧。
+- 当前6734帧、224.466667秒，较上一版仅增加1.333秒；视频10,208,542 bytes，完整SHA256 `0c356319fcbe49b429b17a5afd6b2cbea776fad725a40df60bd1c5b2a5994639`。题意预检、独立实际MP4检查、190输入冻结、完整解码和音量通过。
+- 本轮补丁接续学习站v0.54.0与策略模式v0.54.1，未回退其它机器的内容；题意规范、L026、经验与制作检查清单更新。网页1440两页/新VTT/章节检查通过，实际合并、Release及线上证据见下节，不声称用户已观看新版。
+
+### 题意前置修订：合并与Release
+
+- [PR #201](https://github.com/linhongcun/video-studio/pull/201)已squash合并，提交`5cbc413c0535222f148b264b8efd9dee961f4b55`保留Codex联合署名。
+- 同提交的附注tag和[Release v0.54.2](https://github.com/linhongcun/video-studio/releases/tag/v0.54.2)已发布，firstRelease和其它系列的发布记录保持。线上实际结果见下节。
+
+- [部署40109143808](https://github.com/linhongcun/video-studio/actions/runs/40109143808)于2026-10-24 23:57:05（北京时间）成功，head与合并提交一致；API证据见deployment.json。此次合并构建已收录随后发布的实际v0.54.2 Release链接，核验不只依赖页脚版本号。
+- 2026-10-24 23:57:52（北京时间）实际HTTPS GET核验通过：视频/海报完整字节与SHA均匹配本地新媒体，44句VTT与本地已检查构建逐字节一致，四章/正文锚点、源码入口、library/系列/RSS、学习站首页及实际Release条目通过，见online-verification.json及docs/leetcode-problem-first/online-verification.json。
+- 原制作issue保持completed；本轮为已上线视频修订，由PR #201跟踪，未将平台发布事项说成已完成。不声称用户已观看认可新开头。
+- Release后另触发的[部署40109221283](https://github.com/linhongcun/video-studio/actions/runs/40109221283)也已成功，head与合并提交一致，见release-deployment.json；未取消其它工作流。
