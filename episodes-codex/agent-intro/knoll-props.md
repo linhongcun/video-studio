@@ -1,6 +1,6 @@
 # EP.22 agent-intro-v1 从回答到办事，先看清执行循环
 
-依据：storyboard.json 5a1c39c6；covers.json 308bb4c1。正式冻结副本由导演在最终预检后生成；当前逐字节比较状态以最终冻结报告为准。
+依据：storyboard.json 2e296855；covers.json 308bb4c1。正式冻结副本由导演在最终预检后生成；当前逐字节比较状态以最终冻结报告为准。
 script 73c54ff1 / voice dd94b8b2 / words d5245db0 / cues 9f85a623 / shot_frames e70dcf7c，5420帧，20镜。
 所有局部帧从本镜第0帧算。正片1920×1080、30fps。
 
