@@ -15,7 +15,7 @@ EP.14 degradation 配音那一步的脚本，按期参数化。每个脚本都�
 | 5 | `take_sandhi.py`、`take_probe.py 词 takes/...`；读错的改送模文本再 `gen.py --jobs`；必要时 `pitch_edit.py` + `splice_edit.py` | `voice/picks.json`、`voice/substitutions.md` | **人或代理听辨** |
 | 6 | `sh episodes/_shared/voice/run.sh EPDIR` | `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`、`voice/build.json`、各 log | 机器；`selfcheck` 失败退出 1 |
 | 7 | 读 `voice/selfcheck.log` 的 ASR 不一致、`sandhi_*.log`、`probe.log` | 回到 5 或通过 | **人或代理听辨** |
-| 8 | `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole` | `remotion/public/audio/voice.wav` | 机器 |
+| 8 | `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole`（默认 `whole`） | `remotion/public/audio/voice.wav`（按字节复制的实体文件，不是软链；见 `docs/render.md`） | 机器 |
 
 `run.sh` 依次跑 build → asr → asr_full → onsets → lastword_fix → cues_rule → shot_frames → selfcheck → sandhi（一、不）→ sandhi_verdict →（有 `voice/probe.in` 时）probe。`--no-asr` 复用已有 `voice/asr.json`，只在 takes 和 build 参数都没变时用。
 

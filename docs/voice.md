@@ -18,7 +18,7 @@ python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --
 
 ## 整轨、词时间和镜头帧
 
-degradation 的成片把整轨放在 `episodes/degradation/remotion/public/audio/voice.wav`。`remotion.config.ts` 用这个文件是否存在来定义 `__HAS_VOICE_AUDIO__`。`Main.tsx` 从第 0 帧播放 `staticFile('audio/voice.wav')`，注释写明轨道已按 `shots[].voice` 铺好（`voice/place_v2.py`）。EP.05–EP.14 这份公开轨与 `voice.wav` 逐字节相同，用 `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole`：校验后原样复制，不重新编码。`--mode place` 才是 EP.02–04 的剪句铺轨。
+degradation 的成片把整轨放在 `episodes/degradation/remotion/public/audio/voice.wav`。`remotion.config.ts` 用这个文件是否存在来定义 `__HAS_VOICE_AUDIO__`。`Main.tsx` 从第 0 帧播放 `staticFile('audio/voice.wav')`，注释写明轨道已按 `shots[].voice` 铺好（`voice/place_v2.py`）。EP.05–EP.14 这份公开轨与 `voice.wav` 逐字节相同，用 `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole`（`whole` 是默认值）：校验后按字节复制成实体文件，不重新编码，目标原来是软链也会换成实体文件。不要手动用软链代替，见 [render.md](render.md)。`--mode place` 才是 EP.02–04 的剪句铺轨。
 
 `words.json` 顶层字段：`script`、`scriptSha256`、`fps`、`audio`、`audioSha256`、`durationFrames`、`asrModel`、`note`、`shots`、`onsetTable`、`lastWordFix`。
 
