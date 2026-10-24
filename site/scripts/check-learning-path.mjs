@@ -172,11 +172,13 @@ const explicitAgentSlugs = parseEpisodeSlugs('[第22期](https://linhongcun.gith
 assert.deepEqual(Array.from(explicitAgentSlugs), [agentSlug]);
 assert.deepEqual(Array.from(parseEpisodeSlugs('https://github.com/linhongcun/video-studio/tree/main/episodes/agent-intro/ https://example.com/episodes/agent-intro/ https://linhongcun.github.io/video-studio/episodes/agent-intro/video.mp4')), []);
 for (const kind of ['修正', '更新']) {
-  assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.3', kind, eps: [22], episodeSlugs: explicitAgentSlugs}, lessons)), [agentSlug]);
+  assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.4', kind, eps: [22], episodeSlugs: explicitAgentSlugs}, lessons)), [agentSlug]);
 }
 assert.deepEqual(slugs(episodesForRelease({tag: 'v0.49.1', kind: '修正', eps: [22], episodeSlugs: explicitAgentSlugs}, lessons)), [], 'An explicit link must retain the first-release gate');
 assert.deepEqual(slugs(episodesForRelease({tag: agentLesson.firstRelease, kind: '新增', eps: [22]}, lessons)), [agentSlug]);
-assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.3', kind: '修正', eps: [12]}, lessons)), ['idempotency'], 'Old EP-only releases must retain their fallback');
+assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.3', kind: '修正', eps: [5], episodeSlugs: parseEpisodeSlugs('https://linhongcun.github.io/video-studio/episodes/cdn/')}, lessons)), ['cdn']);
+assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.2', kind: '修正', eps: [22], episodeSlugs: parseEpisodeSlugs('https://linhongcun.github.io/video-studio/episodes/container-most-water/')}, lessons)), [algorithmSlug]);
+assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.4', kind: '修正', eps: [12]}, lessons)), ['idempotency'], 'Old EP-only releases must retain their fallback');
 console.log('Learning paths passed: historical EP.21 sequence and releases preserved; LC.11 has an independent series, display number and release identity.');
 console.log('Explicit canonical release links passed: same-EP patches select only the linked course; debut gates and legacy EP fallback preserved.');
 
