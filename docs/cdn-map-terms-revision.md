@@ -27,3 +27,5 @@
 本轮未执行逐字ASR或完整独立人工听辨；句级声学起音、静帧与文件检查不冒充这些能力。新版尚未获用户观看认可。
 
 [最终独立结论](cdn-map-terms/independent-final.md)及[新片独立解码35帧索引](cdn-map-terms/independent-final-frames.json)绑定新MP4完整SHA；图审范围不扩称全片实时播放/词级ASR/独立听辨。
+
+候选提交检查：密钥扫描通过；[5处结构性空白记录](cdn-map-terms/whitespace.json)均在当前冻结输入或原样历史快照内，保留其完整SHA，非冻结文件无空白告警。已合入最新主干的LC.11线上证明，站点程序与其他视频媒体未改变。
