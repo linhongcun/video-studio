@@ -114,6 +114,6 @@ npm run render
 
 ## 8. 成片审与上线
 
-Nolan 和 Deming 看成片。通过之后，村长用单选 widget 批准上线。然后按 [publish.md](publish.md) 改 `episodes/<slug>/meta.json`、开站点 PR、打 tag、发 Release、发三个平台。
+Nolan 和 Deming 看成片。通过之后，村长用单选 widget 批准上线。然后按 [publish.md](publish.md) 改 `episodes/<slug>/meta.json`、开站点 PR、打 tag、发 Release、发三个平台。站点发版由 Knoll 做。
 
 站点只改页面、不重发平台时，沿用 v0.45.0 的做法：PR 说明写「只上站点」，Release 同样写明，平台链接保持不动。
