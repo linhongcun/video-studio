@@ -1,64 +1,73 @@
 ---
-title: 两个人抢同一件货，听谁的？
-episode: 17
-version: v0.22.0
+title: 两个人抢最后一件货，听谁的？
+summary: 同一条库存记录，被两个请求读到同一个旧值。演示加锁读取、等待、读取新库存后重新判断，区分行锁与业务检查。
+chapters:
+  - { id: hook, title: 最后一件怎么通过两次 }
+  - { id: stale, title: 两次读取同一个旧值 }
+  - { id: locking, title: 先加锁，再检查修改 }
+  - { id: fresh, title: 等待后读取新库存 }
+  - { id: recap, title: 锁与业务检查各管什么 }
+related: ["db-transaction", "db-replication"]
 ---
 
-# 两个人抢同一件货，听谁的？
+## 最后一件怎么通过两次 {#hook}
 
-上期讲了隔离级别，结尾说「撞车了只能整单重来」。这期讲撞车之前，数据库怎么让大家排队：锁。
+商品7042的库存是1，甲乙各要1件，数字均为教学示例。视频用数据库记录和请求直接演示，不复刻完整商城或支付系统。
 
-## 1. 为什么需要锁：丢失更新
-两个事务读了同一行，再按各自读到的旧值去更新它。谁也不知道对方的存在，后写的覆盖了先写的，前一个人的改动就丢了。[^s10]
+上期的事务保证本笔修改如何共同确认；多个事务同时访问同一记录，还需要协调读取和修改的顺序。本期只讲“丢失更新”和“行锁”。
 
-## 2. 读锁和写锁
-InnoDB 的行级锁有两种：共享锁（S，读锁）允许持有者读这一行；排他锁（X，写锁）允许持有者修改或删除这一行。[^s1]
-- 一个事务持有读锁时，别人再要读锁可以马上拿到；要写锁就得等。[^s1]
-- 一个事务持有写锁时，别人要哪种锁都得等它释放。[^s1]
+## 两次读取同一个旧值 {#stale}
 
-注意：在默认的可重复读或读已提交级别下，InnoDB 的普通 `SELECT` 读快照、不加锁（见 EP.16），所以写锁并不会挡住普通查询；在 SERIALIZABLE 级别并关掉自动提交时，普通 `SELECT` 会自动加共享锁。要加锁读，得显式写：
-- `SELECT ... FOR SHARE`：给读到的行加读锁，别人能读，但在你提交前不能改。[^s2]
-- `SELECT ... FOR UPDATE`：像 `UPDATE` 一样把行锁住。[^s2]
+错误流程是：甲乙分别普通查询，各自得到旧库存1；程序各算1−1=0；甲写回0、提交，乙又按自己的旧读取结果写回0。程序错误地放行两次购买，库存变化只反映一次扣减。
 
-## 3. 行锁和表锁
-- InnoDB 用行级锁，多个会话可以同时写同一张表的不同行；不同会话访问不同的行时，锁冲突更少。[^s6]
-- MyISAM、MEMORY、MERGE 表用表级锁，同一时间只允许一个会话更新整张表。[^s6]
-- InnoDB 还有表级的意向锁，用来标明一个事务稍后要在表里的某行上加哪种锁。[^s1]
+这里的错误是**把旧读取值算出的绝对结果写回，并据此放行**。不是说UPDATE不加锁；InnoDB的UPDATE本身也会锁记录，但不会自动修复应用已经算好的旧结果。相同值写回可能并未改变数据；程序不应把“SQL没有报错”当成业务扣减成功。[^set]
 
-## 4. 等锁和超时
-拿不到锁的事务会一直等，直到对方释放。[^s1] 但等 InnoDB 行锁不会无限等下去：
-- `innodb_lock_wait_timeout` 默认 50 秒（这个参数不管表锁），超时会报 `ERROR 1205 (HY000): Lock wait timeout exceeded; try restarting transaction`。[^s5]
-- **超时默认只回滚当前这一条语句，不是整个事务。** 想让整个事务回滚，需要用 `--innodb-rollback-on-timeout` 启动服务器。[^s5]
+## 先加锁，再检查修改 {#locking}
 
-## 5. 死锁
-多个事务各自持有对方需要的锁，谁都在等，谁也不释放，这就是死锁。[^s3]
-- 死锁检测默认是开着的（`innodb_deadlock_detect` 默认 ON）。InnoDB 发现死锁后，会回滚其中一个事务。[^s3][^s5]
-- 它会尽量挑「小」的事务回滚，大小按插入、更新、删除的行数算。[^s4]
-- 关掉死锁检测后，就只能靠锁等待超时来回滚了。[^s3]
-- 即使应用逻辑没错，也要处理事务被回滚、需要重试的情况。[^s3]
-- PostgreSQL 也会自动发现死锁并中止其中一个事务，但具体中止哪一个很难预测。[^s8] 它等多久才开始检查死锁由 `deadlock_timeout` 决定，默认 1 秒。[^s9]
-- 最好的办法是避免死锁：所有程序都按同样的顺序给多个对象加锁。[^s8]
-
-## 延伸：悲观锁和乐观锁
-- **悲观锁**：牺牲一些性能或并发，换取安全。[^s7] InnoDB 用的就是悲观锁策略。[^s7] 做法是先在数据源上锁住行，不让别人改。[^s11]
-- **乐观锁**：不先上锁，而是在更新时检查值有没有在你读之后被别人改过。[^s11] 一种做法是用时间戳列，每次更新都刷新时间戳。[^s11]
-
-下面是一种常见的通用写法（用版本号列，思路和时间戳列相同）。这是业界常用做法的示例，不是官方定义；乐观锁这一节的出处目前只有一份 2017 年的资料，仅作参考：
+以MySQL 8.4.0所属长期支持系列的InnoDB为背景，主键id精确定位一个已经存在的商品记录。在**同一个显式事务中**先加锁读取，再检查库存，执行修改，最后提交。FOR UPDATE是加锁读取，返回最新可用数据；已有冲突锁时默认等待。[^read]
 
 ```sql
-UPDATE tshirt SET price = ?, version = version + 1
-WHERE id = ? AND version = ?;
--- 影响 0 行，说明别人先改了，重新读一遍再试
+START TRANSACTION;
+SELECT stock FROM goods WHERE id = 7042 FOR UPDATE;
+-- 应用检查返回值：stock >= 1 才继续，否则回滚并返回缺货。
+-- 以下更新仅在检查通过的分支执行：
+UPDATE goods SET stock = stock - 1 WHERE id = 7042 AND stock >= 1;
+-- 还应检查实际更新结果，并在同一事务内处理所需业务数据。
+COMMIT;
 ```
 
-[^s1]: MySQL 8.4 手册 17.7.1 InnoDB Locking（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-locking.html
-[^s2]: MySQL 8.4 手册 Locking Reads（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html
-[^s3]: MySQL 8.4 手册 17.7.5 Deadlocks in InnoDB（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-deadlocks.html
-[^s4]: MySQL 8.4 手册 17.7.5.2 Deadlock Detection（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-deadlock-detection.html
-[^s5]: MySQL 8.4 手册 InnoDB Startup Options and System Variables（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/innodb-parameters.html
-[^s6]: MySQL 8.4 手册 Internal Locking Methods（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/internal-locking.html
-[^s7]: MySQL 8.4 手册 Glossary（2026-10-15 抓取）https://dev.mysql.com/doc/refman/8.4/en/glossary.html
-[^s8]: PostgreSQL 18 文档 13.3 Explicit Locking https://www.postgresql.org/docs/current/explicit-locking.html
-[^s9]: PostgreSQL 18 文档 Lock Management https://www.postgresql.org/docs/current/runtime-config-locks.html
-[^s10]: Microsoft Learn：Transaction locking and row versioning guide（2026-04-22）https://learn.microsoft.com/en-us/sql/relational-databases/sql-server-transaction-locking-and-row-versioning-guide
-[^s11]: Microsoft ADO.NET：Optimistic Concurrency（2017-03-30，仅参考）https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/optimistic-concurrency
+以上是流程示意，分支检查和异常处理必须由应用实现，注释不是可直接执行的完整购买程序。单行条件扣减也是可用的实现方向，需检查更新结果；视频选择加锁读取，是为了把检查过程演示清楚，并非宣称只有这一种正确写法。
+
+## 等待后读取新库存 {#fresh}
+
+甲先获得本例冲突锁，乙的加锁查询尚未返回。甲提交后，锁释放，乙继续并读取到0，程序据此判定缺货，不扣减、不放行，再结束自己的事务。提交或回滚都会释放该事务的相关锁。[^auto]
+
+“等过了”不等于“可以购买”。如果等到锁后仍拿早先普通查询的1继续算，就失去了这套流程的关键保护。视频也不承诺谁先到达一定先获得锁。
+
+## 锁与业务检查各管什么 {#recap}
+
+锁协调冲突访问，库存是否足够是业务检查。应用还需正确处理事务失败、超时、重试与其他业务条件，不能只加一把锁就认为不会出错。
+
+### 普通查询、锁定范围和更多术语
+
+常见隔离级别下的普通一致性读使用快照，不等于FOR UPDATE，因此“有行锁时任何查询都不能读”不成立。SERIALIZABLE等情况另有规则。[^snapshot]
+
+InnoDB记录锁实际锁定索引记录。本例采用主键精确查找已存在记录；范围扫描、非唯一条件、缺少合适索引，都可能扩大相关锁定范围，不能推广为“只要WHERE只写一个商品，就只锁这一行”。读锁/写锁、表锁、间隙锁、意向锁、悲观/乐观方法均不在画面展开。[^locks]
+
+### 等待失败与死锁
+
+等待可能超时，多条记录互相等待也可能死锁；错误处理取决于具体原因和配置，有时只撤销失败语句，有时整笔事务回滚。程序应明确结束或重试相应事务，保持事务短小、访问次序一致。视频不演示具体超时秒数，也不声称等待必定成功。[^error][^dead]
+
+下一期：刚改好的昵称，一刷新怎么又变回去了？
+
+## 参考资料
+
+以下官方正文均在2026-10-24实际核验；逐项主张与范围见本期research.md。
+
+[^read]: [MySQL 8.4 §17.7.2.4 Locking Reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html)
+[^set]: [MySQL 8.4 §17.7.3 Locks Set by Different SQL Statements](https://dev.mysql.com/doc/refman/8.4/en/innodb-locks-set.html)
+[^auto]: [MySQL 8.4 §17.7.2.2 autocommit, Commit, and Rollback](https://dev.mysql.com/doc/refman/8.4/en/innodb-autocommit-commit-rollback.html)
+[^snapshot]: [MySQL 8.4 §17.7.2.3 Consistent Nonlocking Reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html)
+[^locks]: [MySQL 8.4 §17.7.1 InnoDB Locking](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking.html)
+[^error]: [MySQL 8.4 §17.20.5 InnoDB Error Handling](https://dev.mysql.com/doc/refman/8.4/en/innodb-error-handling.html)
+[^dead]: [MySQL 8.4 §17.7.5 Deadlocks in InnoDB](https://dev.mysql.com/doc/refman/8.4/en/innodb-deadlocks.html)

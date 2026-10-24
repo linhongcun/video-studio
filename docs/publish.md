@@ -1,6 +1,8 @@
 # 发布
 
-村长本人说出「可以，上线三个平台和站点」之后，才发三个平台。代理、质检或导演在对话里的同意不算。名单和暂停以 [RULES.md](RULES.md) 的 STATUS 与「发布」为准。EP.14 之后暂停：不开新期，不新发平台。只改站点走「只上站点」和「站点发版清单」。
+2026-10-24 用户已批准 EP.17 合并及 GitHub 上线，并持续授权以后视频做好、完成检查后自主合并主干、发布 Release、部署 Pages；有反馈再修改重发，不再逐期等待 widget 批准。授权范围以 [RULES.md](RULES.md) 的 STATUS 为准，质量与部署后完整 SHA 检查继续执行，实际能力限制如实记录。
+
+此授权仅覆盖 GitHub 与本站。抖音、B站、视频号等平台新发仍须用户另行明确授权；代理、质检或导演的同意不代替用户的平台授权。只上站点走下方「站点发版清单」和「只上站点」。
 
 链接不发到群。`meta.json` 的 `platforms` 只填真实的 `bilibili` 和 `douyin`。视频号没有网页链接，不写。
 
@@ -15,7 +17,7 @@ cd site
 SHOW_DRAFTS=1 npm run build
 ```
 
-现行重制的制作目录按 [../AGENTS.md](../AGENTS.md) 是 `episodes-codex/`。本仓还没有该目录下的工程。已经上线的文件在 `episodes/<slug>/`。新期恢复制作后，进站点的仍然是 `episodes/<slug>/` 这份，slug 与 `meta.json` 的 `slug` 一致。degradation 的分镜内部 slug `degradation-v1` 不要当成站点路径。
+现行重制的制作目录按 [../AGENTS.md](../AGENTS.md) 是 `episodes-codex/<slug>/`，已包含 `db-index/`、`db-transaction/`、`db-lock/` 工程。站点仍只读取 `episodes/<slug>/`；将检查通过的冻结产物接入该目录，slug 与 `meta.json` 的 `slug` 一致。分镜内部 slug（如 `degradation-v1`）不要当成站点路径。
 
 ## 本地站点
 
@@ -33,7 +35,7 @@ npm run preview
 
 ## PR 与版本
 
-版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。当前已发布到 v0.45.0。
+版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。第17期数据库锁重制本次版本为 v0.45.3；实际版本以该文件及 Release 为准。
 
 1. 改 `meta.json`：`draft: false`，写上 `publishedAt`。重发或只改站点时更新 `updatedAt`。
 2. 开 PR，合并进 `main`。推到 `main` 会跑 `.github/workflows/deploy.yml`，部署 GitHub Pages。这次构建发生在 Release 之前，`/changelog/` 还不会带上新版本。新版本要等第 4 步，在 Release 发出后再手动部署一次。命令顺序见「站点发版清单」。
@@ -50,7 +52,7 @@ gh workflow run deploy.yml --ref main
 
 下面每条命令都在仓库或本机工具里，发布前已核对：`sha256sum`、`cut`、`site/package.json` 的 `npm ci` 与 `npm run build`、`git tag`、`git push`，以及 `gh release create`、`gh workflow run`、`gh run list`、`gh run cancel`、`gh run watch`。工作流文件是 `.github/workflows/deploy.yml`，含 `workflow_dispatch`。
 
-1. 把已批准的 `video.mp4`、`cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg` 从备份拷进 `episodes/<slug>/`。该期若有制作目录 `episodes-codex/<slug>/`，同样拷入。本仓的 `episodes-codex/` 目前只有 `_template/`，没有期工程；站点只读 `episodes/<slug>/`。每个文件的前 8 位要和批准时的 sha8 一致：
+1. 把制作目录 `episodes-codex/<slug>/` 中检查通过并冻结的 `video.mp4`、`cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg` 及站点所需数据复制到 `episodes/<slug>/`。若用户已观看批准，使用同一份批准文件，不重新生成未经观看的替代品；按持续授权自主发布时使用完成检查的冻结文件。站点只读 `episodes/<slug>/`。保存各文件完整 SHA-256，并在部署后核对完整值；以下 sha8 只便于展示：
 
 ```sh
 sha256sum <file> | cut -c1-8
@@ -91,9 +93,9 @@ gh workflow run deploy.yml --ref main
 gh run watch <id>
 ```
 
-5. 打开 https://linhongcun.github.io/video-studio/ 。成片在 `/video-studio/episodes/<slug>/video.mp4`（`meta.json` 的 `video`）。下载后用上面的 `sha256sum | cut -c1-8` 对上批准的 sha8。`site/scripts/copy-assets.mjs` 只把 `video` 和 `poster` 拷进站点；线上海报用 `meta.poster` 的文件名（degradation 是 `cover-16x9.jpg`）。打开该期页面确认海报能显示。`cover-4x3.jpg` 和 `cover-3x4.jpg` 留在仓库里，用同一条 sha8 核对，它们不进 Pages。打开 `/changelog/`，确认新版本已经列出。
+5. 打开 https://linhongcun.github.io/video-studio/ 。成片在 `/video-studio/episodes/<slug>/video.mp4`（`meta.json` 的 `video`）。核验实际线上文件的完整 SHA-256 与发布清单相同；有用户批准版时也必须与批准文件一致，不能只比较 sha8。`site/scripts/copy-assets.mjs` 只把 `video` 和 `poster` 拷进站点；线上海报用 `meta.poster` 的文件名（degradation 是 `cover-16x9.jpg`）。打开该期页面确认海报能显示。`cover-4x3.jpg` 和 `cover-3x4.jpg` 留在仓库里，用同一条 sha8 核对，它们不进 Pages。打开 `/changelog/`，确认新版本已经列出。
 
-6. 运营把 B站和抖音的链接私信给 Knoll（站点维护者）和 Nolan。`platforms` 只写这两个真实 URL。视频号没有网页链接，不写。不要新写 `kuaishou`。链接不发到群。
+6. 仅在另获平台发布授权并完成对应发布后，运营把 B站和抖音的链接私信给 Knoll（站点维护者）和 Nolan。`platforms` 只写这两个真实 URL。视频号没有网页链接，不写。不要新写 `kuaishou`。链接不发到群。
 
 ## 三个平台
 
@@ -107,7 +109,7 @@ gh run watch <id>
 
 ## 三平台实操
 
-EP.14 之后系列暂停，见 [RULES.md](RULES.md) 的 STATUS。恢复制作、并且村长本人说出上线原话之前，不要向三个平台新发成片，也不要因为站点返工把旧成片再传一遍。v0.45.0 那种只改页身，走「只上站点」。
+GitHub 站点已有持续发布授权，见 [RULES.md](RULES.md) 的 STATUS；该授权不扩展为三平台发布。在用户另行明确授权平台新发之前，不向三个平台上传成片，也不因站点返工把旧成片再传一遍。只改站点走「只上站点」。
 
 下列是 2026-10-22 核对过的规则。界面文案以后若改名，仍按这些限制做，不要另编一套点击路径。
 
@@ -129,4 +131,4 @@ B站改封面只有封面制作里的一个上传位，4:3 由这一张图裁出
 
 页面或演示页改了、平台成片不重发时：升版本、PR、Release，正文写明「只上站点，不重发平台」。v0.45.0 即此例（第 9 至 14 期深色页身）。`platforms` 保持原链接，不把新站内地址当作平台链接。
 
-暂停期间不做新期发布。已上线内容的站点返工仍走本节，并在 PR 里写明没有新开一期。
+用户交办或已确定选题的内容做好并检查后，按持续授权走本节自主发布；收到反馈后修正、重新检查并发新版。PR 与 Release 写清本次实际涉及的期数和变更，平台历史链接保持原样。

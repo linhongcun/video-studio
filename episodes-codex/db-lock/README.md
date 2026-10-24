@@ -1,6 +1,6 @@
 # EP.17《两个人抢最后一件货，听谁的？》
 
-2026-10-24 用户要求选择并开始制作下一期，选定[#69](https://github.com/linhongcun/video-studio/issues/69)，接上EP.16片尾。本目录为本地待观看版；发布范围以用户后续指令为准。
+2026-10-24 用户要求选择并开始制作下一期，选定[#69](https://github.com/linhongcun/video-studio/issues/69)，接上EP.16片尾。用户观看后认可并批准合并、GitHub站点发布；v0.45.3使用本目录的观看版原样副本，见[发布记录](release.md)。
 
 - [research.md](research.md)：实际核验的七份MySQL官方正文、主张及边界。
 - [script.md](script.md)、[article.mdx](article.mdx)、[pronunciation.md](pronunciation.md)：14镜脚本、28句旁白及片外补充。

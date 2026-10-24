@@ -12,9 +12,9 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 
 ## 已上线剧集
 
-剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–16 已重制；EP.17–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0）；EP.15 索引在 v0.45.1 更新为订单表查找动画；EP.16 事务在 v0.45.2 更新为逐步展示修改、提交和回滚的动画。以上均只更新站点，不重发平台。
+剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–17 已重制；EP.18–21 目前是旧版（`meta.json` 写 `"legacy": true`，站点显示「旧版，重制中」），重制版上线时去掉；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0）；EP.15 索引在 v0.45.1 更新为订单表查找动画；EP.16 事务在 v0.45.2 更新为逐步展示修改、提交和回滚的动画；EP.17 锁在 v0.45.3 更新为加锁读取、等待后重新检查库存的动画。以上均只更新站点，不重发平台。
 
-系列默认暂停。2026-10-24 用户先后批准 EP.15 索引、EP.16 事务重制，并在观看各期成片后批准合并、部署 GitHub 站点；其他新期与平台新发尚未恢复。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
+2026-10-24 用户批准 EP.17 合并及 GitHub 站点发布，并持续授权后续视频制作和质量检查完成后自主合并、上线，有反馈再修正发布，不再逐次等待确认。该授权适用于 GitHub 主干、Release 和本站；平台新发仍需单独授权。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
 
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
@@ -34,7 +34,7 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 | 14 | 扛住高峰 | 搜索页和结算页，为什么两个价不一样？ | [degradation](https://linhongcun.github.io/video-studio/episodes/degradation/) | 2026-10-13 |
 | 15 | 数据库 | 加个索引，为啥就快了？ | [db-index](https://linhongcun.github.io/video-studio/episodes/db-index/) | 2026-10-14 |
 | 16 | 数据库 | 扣了钱，对方没到账？ | [db-transaction](https://linhongcun.github.io/video-studio/episodes/db-transaction/) | 2026-10-14 |
-| 17 | 数据库 | 两个人抢同一件货，听谁的？（旧版，重制中） | [db-lock](https://linhongcun.github.io/video-studio/episodes/db-lock/) | 2026-10-15 |
+| 17 | 数据库 | 两个人抢最后一件货，听谁的？ | [db-lock](https://linhongcun.github.io/video-studio/episodes/db-lock/) | 2026-10-15 |
 | 18 | 数据库 | 刚改的昵称，怎么又变回去了？（旧版，重制中） | [db-replication](https://linhongcun.github.io/video-studio/episodes/db-replication/) | 2026-10-15 |
 | 19 | 分布式 | 大促一到，下单怎么就卡住了？（旧版，重制中） | [db-sharding](https://linhongcun.github.io/video-studio/episodes/db-sharding/) | 2026-10-15 |
 | 20 | 分布式 | 两个订单，怎么撞成同一个号了？（旧版，重制中） | [global-id](https://linhongcun.github.io/video-studio/episodes/global-id/) | 2026-10-15 |
@@ -42,7 +42,7 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 
 ## 制作流程
 
-完整清单在 [docs/pipeline.md](docs/pipeline.md)。顺序是：调研 → `script.md` / `article.mdx` / `pronunciation.md` → `storyboard.json` / `covers.json` → 配音冻结 → Deming 预检 → 渲染 → Nolan 与 Deming 审成片 → 村长批准上线 → 站点与三个平台。
+完整清单在 [docs/pipeline.md](docs/pipeline.md)。顺序是：调研 → `script.md` / `article.mdx` / `pronunciation.md` → `storyboard.json` / `covers.json` → 配音冻结 → Deming 预检 → 渲染 → Nolan 与 Deming 审成片 → 按持续授权合并、Release、部署 GitHub 站点 → 线上文件核验；三个平台另行授权。
 
 「先讲比喻，再给术语」已废止。配音用冰糖，成片 −16 LUFS。不要再按「每句 −21 LUFS」或「渲染器一律追加 2 秒片尾」操作，这两句和现行脚本不一致，说明见 [docs/render.md](docs/render.md)。
 
@@ -52,7 +52,7 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 AGENTS.md                 给 coding agent 的入口
 docs/                     RULES、pipeline、knoll-props.template.md、examples/knoll-props.degradation.md
 episodes-codex/db-index/  EP.15 索引重制工程、配音与公开资料
-episodes-codex/_template/ 开新期的说明（其他期仍暂停）
+episodes-codex/_template/ 开新期的说明（按当前选题和授权推进）
 episodes/
   <slug>/                 站点内容。每期一个目录
     meta.json             期号、标题、简介、标签、publishedAt、series（site/src/content/series.json）、updatedAt、platforms（站点渲染 bilibili / douyin；不再新写 kuaishou）、draft、legacy
@@ -110,7 +110,7 @@ npm run covers -- <slug>
 - 版本号用三段式 `主.次.修订`，记在 `site/package.json`，每次发布打同名 tag 并发 Release。
 - 只改内容（文字修订、重配、重渲等）升修订号（patch），例如 v0.25.0 → v0.25.1。
 - 新增一期、新功能或站点改动升次版本号（minor），例如 v0.25.1 → v0.26.0。
-- 村长只批准最终上线。脚本和分镜在团队内定稿。见 [AGENTS.md](AGENTS.md)。
+- 脚本、分镜和成片按质量流程核验；GitHub 站点沿用用户持续授权自主发布，平台发布另行授权。见 [AGENTS.md](AGENTS.md)。
 
 ## 署名
 
