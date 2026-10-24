@@ -6,9 +6,9 @@
 
 旧站点成片SHA-256：`11c4163980a1f71f19ca0960c5d6033d51b640dfc9f1c7baac2c9499f34a5539`，3901帧。该版独立检查和发布证明作为历史记录保留。
 
-对应重制issue [#57](https://github.com/linhongcun/video-studio/issues/57)已为本次返工重新打开，线上核验后再以completed关闭。
+对应重制issue [#57](https://github.com/linhongcun/video-studio/issues/57)已为本次返工重新打开，并于线上核验通过后以completed关闭。
 
-当前状态：本地制作、正式编码、冻结输入、独立过程检查、统一站点构建及实际浏览器检查通过；新正式片独立终审35帧及完整SHA复验通过，等待合并、Release、部署与线上核验。此阶段不记作已经上线或用户已观看认可。
+当前状态：v0.50.3已合并、发布并部署；2026-10-24 22:24:22（北京时间）线上视频/海报完整SHA、字幕逐字节、章节/源码与首页/更新日志均核验通过。
 
 教训见L019；S002补充了正式名称必须落地的适用边界。新的有效做法须有实际独立检查证据后再写入成功经验。
 
@@ -31,3 +31,7 @@
 候选提交检查：密钥扫描通过；[5处结构性空白记录](cdn-map-terms/whitespace.json)均在当前冻结输入或原样历史快照内，保留其完整SHA，非冻结文件无空白告警。已合入最新主干的LC.11线上证明，站点程序与其他视频媒体未改变。
 
 发布前已合入LC.11完整代码片尾及线上证明，当前本批版本顺延为v0.50.3。成功经验中的地图案例编号为S014，保留主干已发表的S013代码卡案例；两项指导同时保留。
+
+## 发布与线上证明
+
+[媒体PR](https://github.com/linhongcun/video-studio/pull/162) · [v0.50.3](https://github.com/linhongcun/video-studio/releases/tag/v0.50.3) · [Release后部署](https://github.com/linhongcun/video-studio/actions/runs/40102166946) · [完整线上JSON](cdn-map-terms/online.json)。

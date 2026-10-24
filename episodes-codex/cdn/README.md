@@ -1,8 +1,9 @@
 # EP05 CDN：地图与术语返工
 
+当前站点状态：[v0.50.3](https://github.com/linhongcun/video-studio/releases/tag/v0.50.3)已上线并核验通过（2026-10-24 22:24:22北京时间），见[发布记录](release.md)。
+
 2026-10-24，用户观看v0.48.0后要求增加真实地理地图与CDN等技术名词；本轮保留同一图片主线，地图参与调度、未命中回源与命中短返。旧版输入/结果/检查在revisions/v0.48.0，旧发布事实不作为本轮完成证明。
 
-当前状态：本轮本地成片已编码，3989帧/132.966667秒，完整SHA `3715e0514c8ec1cef02a8b32027910de16fd18b04ef5b1b0191f9596f277d9e6`；102项冻结输入、全解码/响度与制作实际54帧抽样已通过，新最终片独立35帧/6联系图复核已完成，所看无未解决阻断（qa-independent-encoded.md）。root负责站点/Git/发布，本执行者只制作本目录；本记录不宣称已发布。
 
 复现：仓内episodes/_shared/voice/prep.py、gen.py（voice/jobs_map.json）、build.py；新选定takes保留，避免重请求不确定TTS。assemble.py生成真实句级边界/字幕/术语起音；共享selfcheck/place_v2/label_onset_strict与preflight.py检查；地图转换python assets/map/convert.py。remotion目录npm ci、tsc --noEmit、npm run covers、npm run render。
 

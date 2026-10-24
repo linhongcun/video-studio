@@ -46,8 +46,10 @@
 
 ### EP.05 CDN 地图与术语返工
 
+- [v0.50.3](https://github.com/linhongcun/video-studio/releases/tag/v0.50.3)已由[媒体PR](https://github.com/linhongcun/video-studio/pull/162)合并并[部署](https://github.com/linhongcun/video-studio/actions/runs/40102166946)，2026-10-24 22:24:22（北京时间）CDN视频/海报完整SHA、字幕、章节/源码入口及首页/更新日志实际GET通过；证据见[online.json](cdn-map-terms/online.json)。新版尚未被用户观看认可，历史平台投稿保留。
+
 - 用户实际观看v0.48.0后要求加入地图及CDN等核心名称，本次按反馈返工。用同一公开图片演示临近边缘节点服务、未命中回源与命中短返，地图交代网络路径/时延调度的边界；09镜同时修正接收图片与等待文字的时序。
-- 对应[#57](https://github.com/linhongcun/video-studio/issues/57)已为本次返工重开。本地制作、独立过程片、正式编码及35帧独立图审与网页检查已完成，线上发布结果按实际完成写入[返工记录](cdn-map-terms-revision.md)，不将用户对旧片的修改意见写成已认可新版。
+- 本次制作、独立复核、GitHub站点发布和线上核验均已完成；对应制作issue收尾以GitHub状态为准，不将本次自主发布写成用户已观看认可。
 
 ### EP.01–14 新一轮 Codex 重制
 
