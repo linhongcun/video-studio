@@ -3,6 +3,9 @@ import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {Shot,shots} from './data';
 import {C,FONT} from './theme';
 import {at,eventAt} from './motion';
+import {createBranchNavigator} from '../../../_shared/branch-map';
+import {sagaMapForFrame} from './branch-map';
+const BranchNavigator = createBranchNavigator(React);
 import {Title,Reset,Note,Account,Stock,Txt,Chip,Line,LocalBoundary,MovingChip,Cross,Check,ease} from './objects';
 declare const __HAS_VOICE_AUDIO__:boolean;
 const phase=(s:Shot,f:number,i:number,a=.08,b=.67)=>ease(f,at(s,i,a),at(s,i,b)-at(s,i,a));
@@ -67,15 +70,14 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  const read=hit(s,f,'intermediate-value-read'),finish=hit(s,f,'suitable-business-boundary');
  return <><Title>先确定业务能不能接受和补偿</Title><Reset>回看各步已经提交的阶段 · 示例账户800</Reset><Account value={800}state="已经本地提交"history="debit"color={C.teal}/><Txt x={1400}y={390}center size={27}color={C.muted}>另一笔操作读取</Txt><Txt x={1400}y={445}center size={90}color={read?C.gold:C.muted}>{read?'800':'?'}</Txt><Line x1={825}y1={515}x2={1100}y2={515}p={phase(s,f,0,.1,.68)}color={C.gold}/><Chip x={1400}y={620}width={470}color={C.gold}>中间结果可能对外可见</Chip><Note color={C.teal}>{finish?'各步先提交；失败用新的业务操作收尾':'这不是天然的全局隔离'}</Note><Txt x={960}y={885}center size={23}color={C.muted}alpha={finish?1:0}>IT小村 · 原创</Txt></>;
 };
-const chapters:Record<string,[number,string]>={problem:[1,'先看问题'],success:[2,'各步先保存'],compensate:[3,'失败怎么收尾'],recover:[4,'重试与边界']};
 const ShotView:React.FC<{shot:Shot;captions:boolean}>=({shot:s,captions})=>{
- const f=useCurrentFrame(),[n,label]=chapters[s.chapterId]??[1,'先看问题'];
+ const f=useCurrentFrame();
  const sub=s.subtitles?.find(v=>f>=v.from&&f<=(v.to??v.from+(v.duration??1)-1));
  return <AbsoluteFill style={{background:C.bg,color:C.text,fontFamily:FONT,overflow:'hidden'}}>
   <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 86% 8%, #173B5555, transparent 62%)'}}/>
-  <Txt x={100}y={54}size={24}color={C.muted}>分布式 · 一种实现</Txt><Txt x={100}y={98}size={21}color={C.teal}>{String(n).padStart(2,'0')} / 04 · {label}</Txt>
-  <div style={{position:'absolute',left:100,top:140,display:'flex',gap:9}}>{[1,2,3,4].map(i=><div key={i}style={{width:i===n?65:26,height:4,borderRadius:4,background:i===n?C.teal:C.edge}}/>)}</div>
-  <Txt x={1700}y={54}size={25}>IT小村</Txt><Txt x={1650}y={103}center width={420}size={19}color={C.muted}>示例数据 · 订单8124</Txt><Scene s={s}f={f}/>
+  <Txt x={100}y={54}size={24}color={C.muted}>分布式 · 一种实现</Txt>
+  <Txt x={1700}y={54}size={25}>IT小村</Txt><Txt x={1650}y={103}center width={420}size={19}color={C.muted}>示例数据 · 订单8124</Txt>
+  <BranchNavigator spec={sagaMapForFrame(s,f)} shotId={s.id} frame={f} durationInFrames={s.durationInFrames}><Scene s={s}f={f}/></BranchNavigator>
   {captions&&sub&&<div data-subtitle style={{position:'absolute',left:130,right:130,top:925,minHeight:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:40,fontWeight:500,lineHeight:1.4,textAlign:'center',background:`${C.bg}F8`,borderRadius:12,padding:'7px 15px',boxSizing:'border-box'}}>{sub.text}</div>}
  </AbsoluteFill>;
 };

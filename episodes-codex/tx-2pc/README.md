@@ -28,4 +28,4 @@ Remotion目录npm ci后npx tsc --noEmit；node scripts/qa.mjs生成多阶段图�
 
 ## 成片与发布记录
 
-已完成正式编码与独立媒体复核，指标和完整SHA见[render-result.json](render-result.json)，执行者与限制见[qa-final.md](qa-final.md)。本批v0.47.0，按既有GitHub持续授权在站点核验后关闭对应制作issue；用户观看结论另记。
+v0.51.0流程导航修订已完成正式编码与独立媒体复核，完整SHA见[render-result.json](render-result.json)，实际范围/限制见[qa-final.md](qa-final.md)。原v0.47.0已被用户观看并提出结构反馈，旧输入通过[历史索引](revisions/v0.47.0.json)追溯；本版不预记用户认可。GitHub发布与线上核验后按#152收尾。
