@@ -89,14 +89,14 @@ for (n, slug, body), ws in zip(sections, words_shots):
     elements = []
     cue_frames = {}
     # These labels start their own sentence, so no estimated interior word cue is used.
-    for term, number, key in [('内容分发网络', 3, 'cdnLabel')]:
+    for term, number, key, display, x, y, width, size in [('CDN', 3, 'cdnLabel', 'CDN · 内容分发网络', 130, 250, 720, 39), ('边缘节点', 4, 'edgeLabel', '边缘节点', 818, 365, 240, 34), ('回源', 5, 'originLabel', '回源', 1090, 350, 160, 38)]:
         if int(n) == number:
             sent = next(s for s in ws['sentences'] if s['text'].startswith(term))
             onset = sent['onsetFrame'] - start
             fr = max(1, math.floor(onset)-2)
             cue_frames[key] = fr
-            elements.append(dict(id=key, type='text', text=term, cueText=term,
-                                 appearFrame=fr, x=130,y=165,w=500,h=80,fontSize=58,
+            elements.append(dict(id=key, type='text', text=display, cueText=term,
+                                 appearFrame=fr, x=x,y=y,w=width,h=80,fontSize=size,
                                  cueOnset=dict(sentence=sent['id'], asrFrame=None,
                                                onsetLocal=onset,rule='pause/acoustic sentence onset',delay=0)))
             cues.append(dict(shot=ws['id'],cue=term,sentence=sent['id'],onsetFrame=sent['onsetFrame']))
@@ -110,26 +110,26 @@ for (n, slug, body), ws in zip(sections, words_shots):
                 timing=dict(source=source,wavFrom=ws['speechStartFrame'],wavTo=ws['speechEndFrame'],
                             holdFrames=0,
                             holdReason='Whole track placed at frame zero; natural sentence pauses are already in audio.'),
-                frame=('browser' if int(n) in [1] else 'canvas'), camera=None,boxShot=False,mapShot=False,
+                frame=('browser' if int(n) in [1] else 'canvas'), camera=None,boxShot=False,mapShot=(int(n) in [3,4,5,6,7,8,12]),
                 scriptVisual=visual,direction=visual,elements=elements,animations=[],
                 transition=dict(type='cut',durationInFrames=0))
     shots.append(shot)
 save(D/'voice/cues.json', cues)
 save(D/'voice/cue_tests.json', [[c['shot'],c['cue']] for c in cues])
 covers = json.loads((D/'covers.json').read_text()) if (D/'covers.json').exists() else {}
-sb = dict(meta=dict(title='网站离你那么远，为什么还这么快？',episode=5,slug='cdn-codex-v1',
+sb = dict(meta=dict(title='网站离你那么远，为什么还这么快？',episode=5,slug='cdn-map-terms-v2',
                     width=1920,height=1080,fps=30,durationInFrames=words['durationFrames'],finalVideoFrames=words['durationFrames'],
                     draft=True,provisionalTiming=False,pendingAudio=False,
                     timingSource=source,
                     onsetRule=dict(module='episodes/_shared/onset_rule.py',checker='episodes/_shared/label_onset_strict.py',window=[-6,2]),
-                    style='Progressive continuous-object cdn explanation; requests carry real state; no physical metaphor.',
-                    visualRevision=1,visualDirection='visual-direction.md',
+                    style='Real Natural Earth Pacific map with continuous image/request roles; selected nearby edge only; network proximity is not straight-line proximity.',
+                    visualRevision=2,visualDirection='visual-direction.md',
                     palette=dict(bg='#0F172A',text='#E5E7EB'),
-                    sampleDataLabel='同一张公开图片 · 路径示意',
-                    boxShots=[],mapShots=[],devtoolsShots=[],covers=covers,
+                    sampleDataLabel='同一张公开图片 · 地图节点和网络路径均为示例',
+                    boxShots=[],mapShots=['03','04','05','06','07','08','12'],devtoolsShots=[],covers=covers,
                     
-                    audioReview='No automatic ASR available. Sentence-boundary captions; final listening review pending.'),
-          assets=dict(new=[],reuse=[],procedural=dict(description='See knoll-props.md and remotion/src/Main.tsx.')),
+                    audioReview='No word ASR or full independent listening performed. Measured sentence boundaries and acoustic sentence-onset cues only.'),
+          assets=dict(new=[dict(path='assets/map/source/land-110m.geojson',sha256=sha(D/'assets/map/source/land-110m.geojson'),license='Natural Earth public domain',conversion='assets/map/convert.py',rendered='remotion/src/landPaths.ts')],reuse=['20 unchanged selected v0.48.0 voice takes'],procedural=dict(description='Same public product image, real map paths and selected edge; see visual-direction.md.')),
           scenes=[])
 # Preserve meaningful scene groups so the eventual site can use real chapter starts.
 for cid, title, first, last in [('hook', '远处的图片', 1, 2), ('network', '边缘节点', 3, 4), ('miss', '未命中就回源', 5, 6), ('hit', '命中直接返回', 7, 8), ('fresh', '规则与边界', 9, 11), ('recap', '复用才省回源', 12, 12)]:

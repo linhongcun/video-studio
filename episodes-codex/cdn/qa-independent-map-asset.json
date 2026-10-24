@@ -1,0 +1,144 @@
+{
+  "updatedAt": "2026-10-24T21:44:24.895897+08:00",
+  "reviewer": "Codex map-asset subagent under independent EP05 reviewer",
+  "scope": "Read-only asset provenance, land layer type, longitude handling and projection source review; one initial annotated still only",
+  "status": "no_blocking_asset_or_projection_source_issue_observed",
+  "readFiles": [
+    {
+      "path": "/workspace/video-studio/episodes-codex/cdn/assets/map/source/metadata.json",
+      "sha256AtRecord": "98889385caf25e5c3e3f9f55bff4c347dd1d00431a6eea85f740efa527043b05"
+    },
+    {
+      "path": "/workspace/video-studio/episodes-codex/cdn/assets/map/source/upstream-README.md",
+      "sha256AtRecord": "28b7c031e45c88d7ce20b7782373aaac378f459e9460001dadc8cfd824c3173b"
+    },
+    {
+      "path": "/workspace/video-studio/episodes-codex/cdn/assets/map/source/land-110m.geojson",
+      "sha256AtRecord": "9e0729ee253ca7d7a5c4ae9395fb1902264c5377c52e224d13dd85010e2835d9"
+    },
+    {
+      "path": "/workspace/video-studio/episodes-codex/cdn/assets/map/convert.py",
+      "sha256AtRecord": "e98693de9197d8ec13f36744911790a393d925d046cf399899344657fcdc03a9"
+    },
+    {
+      "path": "/workspace/video-studio/episodes-codex/cdn/remotion/src/landPaths.ts",
+      "sha256AtRecord": "091fc368f8fa972ff339175eed1a67111cc7f6df799fdbb4949818ce0c1e5797"
+    },
+    {
+      "path": "/workspace/video-studio/episodes-codex/cdn/remotion/src/GeoScene.tsx",
+      "sha256AtRecord": "4e5da877d5f6a60d64ebdd498554904fee660ebe49ff04278212772853b51b2b"
+    }
+  ],
+  "asset": {
+    "upstreamCommit": "ca96624a56bd078437bca8184e78163e5039ad19",
+    "rawUrl": "https://raw.githubusercontent.com/nvkelso/natural-earth-vector/ca96624a56bd078437bca8184e78163e5039ad19/geojson/ne_110m_land.geojson",
+    "actualRawRead": {
+      "httpStatus": 200,
+      "bytes": 138160,
+      "sameBytesAsLocal": true,
+      "sha256": "9e0729ee253ca7d7a5c4ae9395fb1902264c5377c52e224d13dd85010e2835d9",
+      "method": "urllib request with inherited proxy/TLS settings; no network-policy changes or bypass"
+    },
+    "name": "ne_110m_land",
+    "scale": "1:110,000,000",
+    "featureCount": 127,
+    "geometryTypes": [
+      "Polygon"
+    ],
+    "featureClasses": [
+      "Land"
+    ],
+    "ringCount": 128,
+    "holeCount": 1,
+    "all128RingsClosed": true,
+    "administrativeBoundaries": "Not loaded; land polygon layer only",
+    "license": "Public domain; current official Terms of Use actually read"
+  },
+  "projection": {
+    "type": "Pacific-centered equirectangular coordinate expansion",
+    "sourceFormula": "x=210+(unwrappedLongitude-55)*7.5; y=290+(75-latitude)*7.5",
+    "geometryHandling": "Each ring unwrapped continuously, repeated at -360/0/+360, clipped by SVG viewport. geo() uses same 55-degree seam offset for roles.",
+    "rawSeamEdgesOver180": 1,
+    "remainingConsecutiveLongitudeJumpsOver180AfterUnwrap": 0,
+    "maxConsecutiveUnwrappedLongitudeDeltaDegrees": 9.032043000000016,
+    "roleCoordinates": {
+      "user": {
+        "lonlat": [
+          113,
+          24
+        ],
+        "xy": [
+          645,
+          672.5
+        ]
+      },
+      "selectedEdge": {
+        "lonlat": [
+          132,
+          35
+        ],
+        "xy": [
+          787.5,
+          590
+        ]
+      },
+      "origin": {
+        "lonlat": [
+          -125,
+          38
+        ],
+        "wrappedLongitude": 235,
+        "xy": [
+          1560,
+          567.5
+        ]
+      }
+    },
+    "sourceLinesAtRecord": [
+      "const geo=(lon:number,lat:number):Point=>({x:210+((lon<55?lon+360:lon)-55)*7.5,y:290+(75-lat)*7.5});",
+      "const user=geo(113,24),edge=geo(132,35),origin=geo(-125,38);",
+      "const otherEdges=[geo(104,2),geo(-155,21),geo(75,44)];"
+    ],
+    "limits": "Equirectangular drawing and illustrative Bezier paths do not establish geographic shortest paths, measured network delay or actual vendor locations."
+  },
+  "optionalPointPlacement": {
+    "classification": "Nonblocking illustrative-placement suggestion",
+    "observed": "origin(-125,38) is outside the selected110m land polygons; edge(132,35) also falls just offshore under this generalized land layer.",
+    "suggestion": "For visual intuition, origin could move to(-121,38), which is inside North America land and projects30px right. No requirement to alter source because nodes/routes are explicitly examples.",
+    "method": "Light point-in-polygon calculation against selected local land layer; no real datacenter-location assertion."
+  },
+  "officialSourcesActuallyRead": [
+    {
+      "url": "https://www.naturalearthdata.com/about/terms-of-use/",
+      "date": "2026-10-24 Asia/Shanghai",
+      "section": "Terms of Use main text",
+      "supports": "Public-domain status and allowed reuse/modification."
+    },
+    {
+      "url": "https://github.com/nvkelso/natural-earth-vector/blob/ca96624a56bd078437bca8184e78163e5039ad19/README.md",
+      "date": "2026-10-24 Asia/Shanghai",
+      "section": "About Natural Earth Vector and Neatness Counts",
+      "supports": "Upstream provenance, public-domain dataset and intended generalized small-scale maps."
+    },
+    {
+      "url": "https://www.naturalearthdata.com/downloads/110m-physical-vectors/110m-land/",
+      "date": "2026-10-24 Asia/Shanghai",
+      "section": "Land description",
+      "supports": "Land polygons including major islands. Older page dated2009; only reference for static asset type, not CDN factual evidence."
+    }
+  ],
+  "visualEvidence": {
+    "file": "/workspace/video-studio/episodes-codex/cdn/remotion/out/map-first/03.png",
+    "sha256": "26ee1066eae6c1221243dc7f446b2c6e4d32d70a7ca4593aa0c7a980e424c05d",
+    "actualView": "One initial source-rendered still with subtitles; recognizable Asia/Pacific/North America; user, nearby edge and distant origin relationship clear.",
+    "notClaimed": [
+      "Continuous motion review",
+      "Final encoded MP4 frame review",
+      "Listening or ASR",
+      "All CDN factual claims"
+    ]
+  },
+  "unresolvedBlockers": [],
+  "repositoryWrites": false,
+  "projectTestsOrRenderingRun": false
+}

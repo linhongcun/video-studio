@@ -15,6 +15,7 @@ snapshot=D/f'storyboard.{sha(D/"storyboard.json")[:8]}.json';shutil.copy2(D/'sto
 (D/'remotion/src/placeholders').mkdir(parents=True,exist_ok=True)
 shutil.copy2(D/'storyboard.json',D/'remotion/src/placeholders/storyboard.json')
 files=[D/p for p in ['episode.json','script.md','article.mdx','research.md','pronunciation.md','assemble.py','freeze.py','preflight.py','visual-direction.md','knoll-props.md','storyboard.json','words.json','covers.json','voice.wav','voice/params.json','voice/picks.json','voice/sents.json','voice/build.json','voice/substitutions.md','remotion/package.json','remotion/package-lock.json','remotion/remotion.config.ts','remotion/tsconfig.json','remotion/public/audio/voice.wav']]
+files += [p for p in (D/'assets').rglob('*') if p.is_file()]+[D/'revision-plan.md']
 files += [snapshot]+[p for p in (D/'remotion/src').rglob('*') if p.is_file()]+[p for p in (D/'remotion/scripts').rglob('*') if p.is_file()]
 picks=json.loads((D/'voice/picks.json').read_text())
 for row in json.loads((D/'voice/sents.json').read_text()):
