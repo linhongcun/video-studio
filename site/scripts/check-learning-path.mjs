@@ -79,8 +79,10 @@ if (!existingOnly) {
     assert.equal(preview.seriesNav(e).prev.slug, i ? chain[i - 1].slug : 'global-id');
     // The last mechanism may lead into the first lesson of a later series.
     const series = preview.getSeries();
-    const nextSeries = series[series.findIndex((s) => s.id === e.series) + 1];
-    assert.equal(preview.seriesNav(e).next?.slug, chain[i + 1]?.slug ?? nextSeries?.episodes[0]?.slug);
+    const seriesIndex = series.findIndex((s) => s.id === e.series);
+    const nextSeries = series[seriesIndex + 1];
+    const crossNext = series[seriesIndex].crossSeriesNavigation !== false && nextSeries?.crossSeriesNavigation !== false ? nextSeries : undefined;
+    assert.equal(preview.seriesNav(e).next?.slug, chain[i + 1]?.slug ?? crossNext?.episodes[0]?.slug);
     if (i < chain.length - 1) {
       assert.equal(preview.learningGuideFor(e)?.slug, chain[i + 1].slug);
       const actual = published.learningGuideFor(e);

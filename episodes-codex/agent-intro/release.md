@@ -15,7 +15,7 @@
 
 媒体格式、完整解码、−16.0LUFS/−3.7dBTP、冻结输入与配音原位放置通过。73幅带字幕预演与74个实际MP4帧比对通过；独立查看18张正式MP4全分辨率图，无阻断。干净npm ci、TypeScript、静帧和正式站点构建通过。
 
-源/站点/dist视频完整SHA一致。40条VTT精确采用分镜边界，5章锚点与真实frame/fps对应；浏览器全部实点，最大定位误差0.004283秒，桌面与390px手机无横向溢出或媒体错误。详见站点site-integration.json。
+源/站点/dist视频完整SHA一致。40条VTT精确采用分镜边界，5章锚点与真实frame/fps对应；浏览器全部实点，最大定位误差0.004652秒，桌面与390px手机无横向溢出或媒体错误。详见站点site-integration.json。
 
 未执行逐字ASR、句内字级对齐或全片人工听辨，不将上述检查写成用户已观看认可。具体范围见qa-final.md、qa-final-independent.md与voice/substitutions.md。
 
