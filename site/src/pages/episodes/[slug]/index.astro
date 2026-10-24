@@ -15,10 +15,14 @@ import EpisodePager from '../../../components/EpisodePager.astro';
 import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
 import PlatformLinks from '../../../components/PlatformLinks.astro';
-import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, isNew, isoDuration, seriesNav, seriesHref, LEGACY_LABEL, learningGuideFor, epHref} from '../../../lib/episodes';
+import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, isNew, isoDuration, seriesNav, seriesHref, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
 export function getStaticPaths() {
-  const eps = getEpisodes();
-  const pages = eps.map((e, i) => ({params: {slug: e.slug}, props: {e, prev: eps[i + 1], next: eps[i - 1]}}));
+  const eps = getEpisodes({includeArchived: true});
+  const current = getEpisodes();
+  const pages = eps.map((e) => {
+    const i = current.findIndex((lesson) => lesson.slug === e.slug);
+    return {params: {slug: e.slug}, props: {e, prev: i >= 0 ? current[i + 1] : undefined, next: i >= 0 ? current[i - 1] : undefined}};
+  });
   // 未发布草稿：若有短版，旧链接临时跳转过去（避免 v0.3.0 已分享的 /episodes/http-request/ 404）
   const drafts = SHOW_DRAFTS ? [] : getAllMeta().filter((m) => m.draft && m.quickVersion);
   return [...pages, ...drafts.map((m) => ({params: {slug: m.slug}, props: {redirectTo: m.quickVersion}}))];
@@ -30,6 +34,7 @@ const tree = `${REPO}/blob/main/episodes/${e.slug}`;
 // Markdown → 组件自动映射：Sorkin 的稿件无需改写
 const sNav = seriesNav(e);
 const learningGuide = learningGuideFor(e);
+const replacements = e.archived ? archiveReplacementsFor(e) : [];
 const pageUrl = new URL(`${BASE}episodes/${e.slug}/`, Astro.site).href;
 const abs = (u: string) => new URL(u, Astro.site).href;
 const jsonLd = {
@@ -41,9 +46,17 @@ const jsonLd = {
 };
 const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blockquote: Callout, Figure, Callout, Steps, Summary, CodeBlock};
 ---
-<BaseLayout title={e.title} description={(e as any).description ?? e.summary} ogImage={asset(e.slug, e.poster)} ogType="video.other" jsonLd={jsonLd}>
+<BaseLayout title={e.title} description={(e as any).description ?? e.summary} ogImage={asset(e.slug, e.poster)} ogType="video.other" jsonLd={jsonLd} noIndex={e.archived}>
   <div class="container">
     <Breadcrumb items={[{label: '首页', href: BASE}, ...(sNav ? [{label: sNav.series.title, href: seriesHref(sNav.series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `${epLabel(e)} · 第 ${sNav.index}/${sNav.total} 期` : epLabel(e)}]} />
+    {e.archived && <aside class="archive-notice" data-archived aria-labelledby="archive-title">
+      <h2 id="archive-title">此合集已拆为独立短片</h2>
+      <p>建议先看入门，再一次学习一种实现。此页保留合集版本供回看。</p>
+      {replacements.length ? <ol>{replacements.map((lesson) => <li>{lesson.published
+        ? <a href={epHref(lesson.slug)}>{epLabel(lesson)} · {lesson.title}</a>
+        : <span>{epLabel(lesson)} · {lesson.title}（制作中）</span>}</li>)}</ol>
+        : <p>独立短片正在制作。</p>}
+    </aside>}
     <header class="eh" data-pagefind-body>
       <h1 data-pagefind-meta={`image:${asset(e.slug, e.poster)}`}>{e.title}</h1>
       {e.legacy && <p class="legacy" data-legacy>{LEGACY_LABEL}：这是早期版本，新版制作中，上线后会替换本页视频和文章。</p>}
@@ -67,7 +80,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
       {Content && <Content components={components} />}
       <div data-pagefind-ignore><MusicCredit />
       <BehindTheScenes script={`${tree}/script.md`} storyboard={`${tree}/storyboard.json`} source={`${REPO}/tree/main/${e.sourcePath}`} />
-      <EpisodePager nav={sNav ?? {prev, next}} /></div>
+      {!e.archived && <EpisodePager nav={sNav ?? {prev, next}} />}</div>
     </article>
     <aside class="toc-col"><Toc headings={e.chapters.filter((c) => c.inArticle)} /></aside>
   </div>
@@ -91,6 +104,11 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
   }));
 </script>
 <style>
+.archive-notice{margin:var(--sp-4) 0;padding:var(--sp-4);border:1px solid var(--c-border);border-left:3px solid var(--c-primary);border-radius:var(--r-md);background:var(--c-surface)}
+.archive-notice h2{margin:0 0 var(--sp-2);font-size:var(--fs-h3)}
+.archive-notice p{margin:0 0 var(--sp-2);color:var(--c-text-2)}
+.archive-notice ol{margin:0;padding-left:1.4em;line-height:1.8}
+.archive-notice a{overflow-wrap:anywhere}
 .learning-guide{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4);align-items:center;margin:var(--sp-4) 0;padding:var(--sp-3) var(--sp-4);border:1px solid var(--c-primary-a40);border-radius:var(--r-md);background:var(--c-surface);text-decoration:none}
 .learning-guide span{color:var(--c-text-2);font-size:var(--fs-small)}
 .learning-guide strong{color:var(--c-primary);font-size:var(--fs-small)}

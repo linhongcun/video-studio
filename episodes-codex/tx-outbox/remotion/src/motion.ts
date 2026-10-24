@@ -1,0 +1,7 @@
+import type {Shot} from './data';
+export const at=(s:Shot,i:number,r:number)=>{const starts=s.cueFrames?.sentences??[9,155];const a=Number(starts[i]??0),b=Number(starts[i+1]??s.durationInFrames-15);return Math.round(a+(b-a)*r);};
+export const events=(s:Shot):[string,number][]=>{
+ const p=(i:number,r:number)=>at(s,i,r);
+ return ({hook:[['send-path-stops',p(0,.55)]],write:[['order-candidate',p(0,.24)],['event-candidate',p(0,.7)]],commit:[['producer-joint-commit',p(0,.52)],['application-stops-records-survive',p(1,.38)]],rollback:[['event-write-fails',p(0,.6)],['producer-both-rolled-back',p(1,.5)]],relay:[['relay-reads-durable-event',p(1,.52)]],send:[['broker-accepts-event',p(0,.68)],['relay-records-sent',p(1,.55)]],crash:[['relay-stops-before-sent-mark',p(1,.45)]],redeliver:[['same-event-republished',p(0,.65)],['duplicate-awaits-consumption',p(1,.35)]],consume:[['consumer-candidate-created',p(0,.58)],['consumer-joint-commit',p(1,.42)]],'consumer-rollback':[['consumer-first-candidate-created',p(0,.32)],['consumer-retry-candidate-created',p(1,.4)],['consumer-both-rolled-back',p(0,.6)],['retry-consumer-joint-commit',p(1,.67)]],dedup:[['duplicate-recognized',p(1,.35)]],boundary:[['reset-to-business-rejection',p(1,.04)],['business-rejection',p(1,.55)]],recap:[['focus-relay',p(0,.6)],['focus-consumer',p(1,.2)]]} as Record<string,[string,number][]>)[s.visualType]??[];
+};
+export const eventAt=(s:Shot,name:string)=>events(s).find(([n])=>n===name)?.[1]??0;

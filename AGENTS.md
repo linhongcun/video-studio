@@ -61,7 +61,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 |---|---|
 | `episodes/` | 站点内容。已上线各期的 `meta.json`、`article.mdx`、`video.mp4` 和重制工程都在这里 |
 | `episodes/degradation/` | EP.14 站点数据副本；当前制作工程在 `episodes-codex/degradation/`，原 `remotion/` 为历史工程 |
-| `episodes-codex/` | EP.01–21 的当前 Codex 制作目录，另有 EP.21 前置入门 `distributed-tx-intro/`。EP.01–14 本轮状态见 [批次记录](docs/codex-remake-ep01-14.md)；开新期入口见 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
+| `episodes-codex/` | EP.01–21 的当前 Codex 制作目录，另有 EP.21 前置入门 `distributed-tx-intro/` 与独立短片 `tx-2pc/`、`tx-tcc/`、`tx-saga/`、`tx-outbox/`。EP.01–14 本轮状态见 [批次记录](docs/codex-remake-ep01-14.md)；开新期入口见 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
 | `*-backup/` | 各角色备份。本仓没有这些目录 |
 | `share/` | 本仓没有。规范不要写回这里 |
 | `episodes/_shared/` | 页身色、水印规范、混音、TTS、旧的共享封面工程，以及 `onset_rule.py`、`label_onset_strict.py`、`place_v2.py`、`make_knoll_props.py`、`voice/`（配音整轨） |
@@ -79,8 +79,9 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 6. [docs/render.md](docs/render.md)
 7. [docs/validate.md](docs/validate.md)
 8. [docs/publish.md](docs/publish.md)
-9. [episodes-codex/_template/README.md](episodes-codex/_template/README.md)
-10. [docs/knoll-props.template.md](docs/knoll-props.template.md) — 制作说明模板；EP.14 全文在 [docs/examples/knoll-props.degradation.md](docs/examples/knoll-props.degradation.md)
+9. 新拆分短片的句级装配/时序/冻结/编码检查共用 [episodes-codex/_shared/README.md](episodes-codex/_shared/README.md)，不复制配音整轨或起音算法。
+10. [episodes-codex/_template/README.md](episodes-codex/_template/README.md)
+11. [docs/knoll-props.template.md](docs/knoll-props.template.md) — 制作说明模板；EP.14 全文在 [docs/examples/knoll-props.degradation.md](docs/examples/knoll-props.degradation.md)
 
 ## 禁止
 

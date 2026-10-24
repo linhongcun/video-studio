@@ -16,7 +16,7 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 
 2026-10-24 用户批准 EP.17 合并及 GitHub 站点发布，并持续授权后续视频制作和质量检查完成后自主合并、上线，有反馈再修正发布，不再逐次等待确认。该授权适用于 GitHub 主干、Release 和本站；平台新发仍需单独授权。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
 
-v0.47.0 将 EP.01–14 的上一轮 Cursor 重制版全部替换为本轮 Codex 版：160镜、320句新配音，逐期重写脚本与主体动画，补齐章节导航和字幕。制作与检查见[本轮批次记录](docs/codex-remake-ep01-14.md)，当前源码由各期 `sourcePath` 指向 `episodes-codex/`。只上本站，历史平台投稿保留。
+v0.48.0 将 EP.01–14 的上一轮 Cursor 重制版全部替换为本轮 Codex 版：160镜、320句新配音，逐期重写脚本与主体动画，补齐章节导航和字幕。制作与检查见[本轮批次记录](docs/codex-remake-ep01-14.md)，当前源码由各期 `sourcePath` 指向 `episodes-codex/`。只上本站，历史平台投稿保留。
 
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
@@ -41,9 +41,14 @@ v0.47.0 将 EP.01–14 的上一轮 Cursor 重制版全部替换为本轮 Codex 
 | 19 | 分布式 | 订单太多，一个数据库装不下怎么办？ | [db-sharding](https://linhongcun.github.io/video-studio/episodes/db-sharding/) | 2026-10-15 |
 | 20 | 分布式 | 两个订单，怎么撞成同一个号了？ | [global-id](https://linhongcun.github.io/video-studio/episodes/global-id/) | 2026-10-15 |
 | 21 · 入门 | 分布式 | 什么是分布式事务？ | [distributed-tx-intro](https://linhongcun.github.io/video-studio/episodes/distributed-tx-intro/) | 2026-10-24 |
-| 21 · 方案详解 | 分布式 | 分布式事务，几种方案到底怎么选？ | [distributed-tx](https://linhongcun.github.io/video-studio/episodes/distributed-tx/) | 2026-10-16 |
+| 21 · 2PC | 分布式 | 两阶段提交，两个库怎么共同确认？ | [tx-2pc](https://linhongcun.github.io/video-studio/episodes/tx-2pc/) | 2026-10-24 |
+| 21 · TCC | 分布式 | TCC：先预留，再确认 | [tx-tcc](https://linhongcun.github.io/video-studio/episodes/tx-tcc/) | 2026-10-24 |
+| 21 · Saga | 分布式 | Saga：扣款成功，缺货了怎么办？ | [tx-saga](https://linhongcun.github.io/video-studio/episodes/tx-saga/) | 2026-10-24 |
+| 21 · 可靠消息 | 分布式 | 可靠消息：Outbox怎样把通知送出去？ | [tx-outbox](https://linhongcun.github.io/video-studio/episodes/tx-outbox/) | 2026-10-24 |
 
-EP.21增加独立[概念入门](episodes-codex/distributed-tx-intro/README.md)，先讲本地事务、独立提交边界、部分成功与超时未知，再衔接原有方案详解；两片互相提供学习入口。原片在v0.45.5按用户反馈扩展为分章总览：2PC/XA、Seata AT、TCC、Saga、可靠消息（区分Outbox与事务消息），逐项展示机制、失败处理与适用边界。新版38镜、约6分29秒，详细依据和当前制作入口见[制作工程](episodes-codex/distributed-tx/README.md)。
+EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → Saga → 可靠消息（Outbox）”。每个实现独立短片，用一个示例逐步展示成功、失败和适用边界。实际时长与完整检查见各片制作入口；本批版本v0.47.0。
+
+原约6分29秒[多方案合集](https://linhongcun.github.io/video-studio/episodes/distributed-tx/)保留历史页面与媒体，从推荐学习路径和搜索移出，页面提供独立短片入口。旧制作冻结输入不改；不能将原有机器/抽帧检查当作用户已认可合集教学效果。最新反馈和复盘见[教训L012](docs/lessons-learned.md)。
 
 ## 制作流程
 
