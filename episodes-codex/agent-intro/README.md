@@ -22,6 +22,8 @@ Agent 开发系列 A01，制作 issue [#131](https://github.com/linhongcun/video
 
 动画及封面从本期 remotion/ 运行实际脚本：
 
+本期辅助QA脚本的干净构建记录使用Node 24.19.0；脚本会读取TypeScript模块，使用其他Node版本时需核对原生TypeScript支持或配置相应loader。正式渲染由Remotion打包，浏览器系统依赖为Chromium。
+
     npm ci
     npx tsc --noEmit
     node scripts/qa.mjs /tmp/agent-intro-qa

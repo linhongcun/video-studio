@@ -33,6 +33,13 @@
 
 ## 已验证案例与当前状态
 
+### EP.22 Agent 概念入门
+
+- 用户要求先选一期制作看效果，选定 A01 / [#131](https://github.com/linhongcun/video-studio/issues/131)《AI 能回答问题，怎么才能真正帮你办事？》，制作与站点 slug 为 agent-intro，新系列键 agent。
+- [制作工程](../episodes-codex/agent-intro/README.md)为20镜40句、5章、5420帧，约180.7秒；通过同一合成退款咨询解释模型请求、程序执行、结果回传和动态选择，只查询并给申请建议，退款始终未执行。
+- 实际媒体SHA-256为44b21f36f6b99b4106141548a6bbc70c7556a394e4f1e819949b0e2af9be9b9c，−16.0LUFS；171冻结输入、完整解码、73预演/74实际帧比对、18张独立实际成片图及干净构建已检查。未执行逐字ASR或全片人工听辨，详见[最终报告](../episodes-codex/agent-intro/qa-final.md)。
+- 站点正式构建、40条VTT、5章精确跳转、桌面/手机布局和完整媒体SHA已有本地证据；[发布记录](../episodes-codex/agent-intro/release.md)、GitHub [v0.49.0](https://github.com/linhongcun/video-studio/releases/tag/v0.49.0)及制作issue保留最终发布与线上核验状态。用户尚未观看，不记为用户认可。
+
 ### EP.01–14 新一轮 Codex 重制
 
 - 2026-10-24 用户确认：将 EP.01–14 的上一轮 Cursor 重制版，全部按照今天 Codex 重制版的规格和经验进行 Codex 重制。

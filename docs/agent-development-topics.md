@@ -22,6 +22,8 @@
 
 2026-10-24 用户已认可选题并要求先登记 issue，后续分批制作。系列总览：[#130](https://github.com/linhongcun/video-studio/issues/130)。以下 20 个选题均已建单，创建时为待排期；后续进度以 GitHub issue 的实际状态为准。
 
+用户随后要求先做一期看效果，本次已制作 A01 / EP.22，成片与检查入口见 [制作说明](../episodes-codex/agent-intro/README.md)；发布及线上核验见 #131。其余选题仍按用户后续批次安排。
+
 | 学习编号 | 选题 issue |
 |---|---|
 | A01 | [#131 AI 能回答问题，怎么才能真正帮你办事？](https://github.com/linhongcun/video-studio/issues/131) |

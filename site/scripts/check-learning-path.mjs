@@ -77,7 +77,10 @@ if (!existingOnly) {
     assert.equal(e.ep, 21);
     assert.equal(e.lessonOrder, i);
     assert.equal(preview.seriesNav(e).prev.slug, i ? chain[i - 1].slug : 'global-id');
-    assert.equal(preview.seriesNav(e).next?.slug, chain[i + 1]?.slug);
+    // The last mechanism may lead into the first lesson of a later series.
+    const series = preview.getSeries();
+    const nextSeries = series[series.findIndex((s) => s.id === e.series) + 1];
+    assert.equal(preview.seriesNav(e).next?.slug, chain[i + 1]?.slug ?? nextSeries?.episodes[0]?.slug);
     if (i < chain.length - 1) {
       assert.equal(preview.learningGuideFor(e)?.slug, chain[i + 1].slug);
       const actual = published.learningGuideFor(e);
