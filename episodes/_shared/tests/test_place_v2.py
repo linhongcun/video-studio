@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Synthetic selftest plus the EP.14 whole-track regression. Does not write into the episode."""
+"""Synthetic selftest plus the historical EP.14 v0.45.0 whole-track regression."""
 import hashlib
 import json
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+from degradation_fixture import historical_degradation
 
 ROOT = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(ROOT / 'episodes' / '_shared'))
@@ -15,8 +16,9 @@ EXPECTED = '9e70470c096c4198f679eceb5323b0cd9f90323784e7dad284dc43c47265468b'
 
 
 def regression():
-    src = ROOT / 'episodes/degradation/remotion/public/audio/voice.wav'
-    sb = ROOT / 'episodes/degradation/storyboard.json'
+    ep = historical_degradation()
+    src = ep / 'remotion/public/audio/voice.wav'
+    sb = ep / 'storyboard.json'
     if not src.exists() or not sb.exists():
         print('skip degradation place regression, missing voice.wav or storyboard.json')
         return
@@ -26,7 +28,7 @@ def regression():
     report = td / 'r.json'
     r = subprocess.run(
         [sys.executable, str(ROOT / 'episodes/_shared/place_v2.py'),
-         '--dir', str(ROOT / 'episodes/degradation'), '--mode', 'whole',
+         '--dir', str(ep), '--mode', 'whole',
          '--src', str(src), '--copy-to', str(copied), '--report', str(report)],
         cwd=ROOT, check=False)
     assert r.returncode == 0, r.returncode

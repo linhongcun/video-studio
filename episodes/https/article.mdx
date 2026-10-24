@@ -1,132 +1,67 @@
 ---
-title: HTTPS 为什么安全？
-summary: 在咖啡馆连公共无线网登录网站，密码会不会被人看到？从加密、各自算出钥匙、证书核对身份、TLS 握手到防篡改，讲清地址栏那把小锁管什么、不管什么。
+title: 'HTTPS 为什么安全？'
+summary: '跟随一次示例登录，演示明文传输的风险，以及HTTPS怎样用身份核验、加密和完整性保护传输；同时说明加密不等于网站可信。'
+related: []
 chapters:
-  - { id: leak,      title: 密码为什么会泄露 }
-  - { id: encrypt,   title: 先让路上的人看不懂 }
-  - { id: key,       title: 钥匙不传，各自算出来 }
-  - { id: identity,  title: 对面究竟是谁 }
-  - { id: handshake, title: 这些准备要等多久 }
-  - { id: tamper,    title: 路上被改了怎么办 }
-  - { id: lock,      title: 有锁就能放心吗 }
+  - id: hook
+    title: "先看没有加密的情况"
+  - id: identity
+    title: "网站先出示证书"
+  - id: encryption
+    title: "握手，共同建立传输保护"
+  - id: integrity
+    title: "被篡改的数据，不该照常接受"
 ---
 
-你在咖啡馆刚登录一个网站，结果密码被人看光了。同一个公共无线网里的人，真的能看到你的密码吗？
+跟随一次示例登录，演示明文传输的风险，以及HTTPS怎样用身份核验、加密和完整性保护传输；同时说明加密不等于网站可信。
 
-答案取决于这个网站有没有用 **HTTPS**。下面跟着一次登录，从头走一遍：密码为什么会泄露，HTTPS 怎么让路上的人看不懂，钥匙从哪儿来，浏览器怎么确认对面是真网站，以及地址栏那把小锁管不了什么。
+## 先看没有加密的情况 {#hook}
 
-## 跟着一次登录走一遍
+先看没有加密保护的示意。请求内容原样经过网络，能够观察这段流量的人，就可能读到其中的信息。
 
-### 1. 密码为什么会泄露 {#leak}
+## 看见以外，还可能被动手脚
 
-{/* 配图：地址栏显示 http:// 与「连接不安全」提示；旁边「热点控制者看到的内容」窗口里，登录请求展开后露出演示账号和密码原文 */}
+问题不只是被看见。传输缺少可靠保护时，内容还可能被替换，接收方却难以发现。
 
-登录框里的圆点，只是不让旁边的人从屏幕上看到密码。密码真正发出去时是什么样，要看网页用的是什么方式通信。
+## 给传输加上保护
 
-假如这个网站没上 HTTPS，用的就是不加密的 **HTTP**。HTTP 是浏览器和网站之间收发网页的规则；不加密时，数据在路上就是原文。控制咖啡馆热点、或者能截获这段网络流量的人，可以直接读到你提交的账号和密码。[^why]
+HTTPS，在网页通信外加上安全传输保护。但在发送密码之前，还得先确认：对面真是这个域名的网站吗？
 
-他还能做得更多：把你收到的页面改掉，比如换掉收款码，或者直接塞给你一张假的登录页。
+## 网站先出示证书 {#identity}
 
-所以要同时防三件事：防偷看、防偷改，还要认准网站。第一步，先让路上的人看不懂。
+证书，把网站的公钥和域名等身份信息联系起来。浏览器会检查证书是否适用于这个域名，是否有效，以及信任关系。
 
-### 2. 先让路上的人看不懂 {#encrypt}
+## 核验不过，不能当成正常连接
 
-{/* 配图：同一个演示站换成 https://，地址栏出现小锁；抓包窗口里原来的密码变成看不懂的加密字节 */}
+如果证书不匹配或不被信任，浏览器会发出警告。随手忽略警告，可能破坏原本要建立的身份保护。
 
-**HTTPS** 就是在 HTTP 外面加一层安全保护，这层保护叫 TLS。换成 HTTPS 后，你发出的密码在路上变成只有你和网站能还原的乱码；抓包的人能看到有数据经过，却读不出内容。[^https][^tlsmdn]
+## 握手，共同建立传输保护 {#encryption}
 
-真正给大量数据加密的，是**对称加密**：两边用同一串秘密数字当钥匙，一个负责加密，一个负责解密。它速度快，网页里的图片、视频也能大量传输。[^sym]
+在握手过程中，双方会协商保护连接所需的密钥，也完成必要的身份核验。密钥不会作为普通明文直接放在网络上发送。
 
-难题在钥匙本身：你和网站从没见过，哪来同一把钥匙？要是直接把钥匙发过去，控制热点的人一样能截到。
+## 这次，密码先变成密文
 
-### 3. 钥匙不传，各自算出来 {#key}
+现在，登录请求先加密，再经过网络。中间观察到的是密文，网站这一端才能还原并处理请求。
 
-{/* 配图：开发者工具「安全性」标签，慢慢推近「密钥交换组」一栏（如 X25519）和协议版本 TLS 1.3；抓包窗口里只看得到公开交换的数据 */}
+## 返回的数据，也受到保护
 
-HTTPS 的办法是：钥匙根本不在网上传。
+网站返回的页面内容，同样通过受保护的连接传输。保护发生在双方之间的传输过程。
 
-以现在常用的 TLS 1.3 为例，浏览器和网站每次连接都各自临时生成一个秘密，只把由它算出来的公开部分发给对方。双方再用「自己的秘密 + 对方的公开部分」各自计算，就能得到同一个结果，并由它生成这次通信要用的钥匙。路上的人只看到公开部分，缺少任何一方的秘密，算不出钥匙。[^tls][^x25519]
+## 被篡改的数据，不该照常接受 {#integrity}
 
-在浏览器开发者工具里打开一个 HTTPS 请求的安全信息，可以看到这次连接用的协议版本和密钥交换方式。[^devtools]
+完整性保护，让接收方能发现传输数据被改动。验证不过的数据会被拒绝，而不是悄悄当成正常内容。
 
-钥匙是保住了。可如果跟你交换数据的那一头，本来就是冒牌网站呢？
+## 传输安全，不等于网站可信
 
-### 4. 对面究竟是谁 {#identity}
+不过，加密连接不代表网站卖的东西靠谱，也不代表网站不会滥用你交出的数据。密码到达网站以后，已经离开这段传输保护的边界。
 
-{/* 配图：点击地址栏小锁，打开 Firefox 证书查看窗口；依次高亮网站名称、有效期、颁发者，以及签名字段和上一级证书 */}
+## 适用边界与来源
 
-所以浏览器还要检查**证书**。证书是一份电子证明，写着它属于哪个网址，以及用来核对网站身份的公开数据。
+[MDN：传输层安全](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Transport_Layer_Security)：保护的是端点之间的传输，不能推出网站商业信誉、服务端存储安全。（访问于2026-10-24）
 
-浏览器会核对：证书上的网址和你访问的是否一致，是否还在有效期内，然后顺着签发关系一级级往上，直到查到自己信任的证书机构（CA），才接受这份证书。[^pkix][^ca]
+[RFC 9110（2022）HTTPS与证书验证](https://www.rfc-editor.org/rfc/rfc9110.html#section-4.3.4)：安全连接不是用户登录认证；证书有效不证明网站商品真实。（访问于2026-10-24）
 
-证书本身由受信任的机构签过名。签名是用机构保管的秘密生成的一串数据，证书里哪怕改动一个字，签名就对不上。[^cert][^sig]
+[RFC 8446（2018，仅参考）TLS1.3](https://www.rfc-editor.org/rfc/rfc8446.html)：为密码学流程补充原始标准；片中不展示TLS1.2的RSA传钥，不说全程所有元数据都隐藏。（访问于2026-10-24）
 
-光有证书还不够，因为证书是公开的，谁都能抄一份。网站还得在这次连接里当场证明「这次通信是我自己」：它用只有自己保管的私钥，对这次握手的内容签名，浏览器用证书里的公开数据核对。冒牌货只抄到证书，拿不出私钥，做不到，连接就断了。[^tls]
 
-那这些检查要等多久？
-
-### 5. 这些准备要等多久 {#handshake}
-
-{/* 配图：开发者工具 Network 面板选中登录请求，「安全性」标签显示 TLS 1.3，「时间」标签里 TLS 设置那一小段高亮 */}
-
-上面这一整套——商量加密办法、各自算出钥匙、核对证书和身份——合起来叫 **TLS 握手**。
-
-现在常见的 TLS 1.3，完整握手一个来回就做完了：浏览器先发出自己的公开部分和支持的加密办法，网站回复自己的公开部分，再把证书和签名加密发过来。之后浏览器就可以发送加密后的请求。[^tls]
-
-在开发者工具的「时间」信息里，可以看到建立连接时 TLS 握手用了多久。[^devtools]
-
-可路上有人动手脚呢？
-
-### 6. 路上被改了怎么办 {#tamper}
-
-{/* 配图：原理演示：抓包工具里改掉一条加密记录的一个字节，接收方校验失败、拒收；浏览器显示连接中断 */}
-
-TLS 1.3 加密时，每条记录还会带上校验数据。接收方用同一套钥匙解密并检查，内容哪怕只改了一点，校验就通不过，这条数据会被直接拒收，连接也会中断。[^tls]
-
-所以 HTTPS 同时做到了三件事：加密防偷看，证书防冒充，校验防篡改。
-
-可有锁就放心吗？
-
-### 7. 有锁就能放心吗 {#lock}
-
-{/* 配图：两个真实样式的登录页并排，一个是正常网站，一个是网址多了 -verify 的仿冒网站，两边地址栏都有小锁 */}
-
-骗你交密码的钓鱼网站，也能有小锁。钓鱼网站同样可以申请到有效证书，它证明的只是「你连上的就是这个网址」，而不是「这个网址背后的人可靠」。[^le]
-
-小锁只说明连接加密了，不说明网站可信，要看清网址。遇到催你「立即验证账号」的页面，先核对完整网址，或者从自己保存的官方入口重新进入。[^phish]
-
-HTTPS 也只保护传输过程。数据到了网站那边怎么处理，或者你自己的设备上装了什么软件，都不在它的保护范围内。[^why]
-
-## 想一想
-
-你判断登录页能不能信，还会看什么？
-
-下期讲 DNS：输入网址后怎么找到服务器。关注我，觉得有用就点赞、收藏
-
-## 参考资料
-
-[^why]: [web.dev：Why HTTPS matters](https://web.dev/articles/why-https-matters)，未加密连接可被窃听和篡改，HTTPS 保护的范围。
-
-[^https]: [MDN：HTTPS](https://developer.mozilla.org/en-US/docs/Glossary/HTTPS)；[RFC 9110：HTTP Semantics](https://www.rfc-editor.org/rfc/rfc9110.html)，IETF，2022-06，https 网址方案与安全连接要求。
-
-[^tlsmdn]: [MDN：Transport Layer Security](https://developer.mozilla.org/en-US/docs/Web/Security/Transport_Layer_Security)，TLS 在网页中的作用。
-
-[^sym]: [MDN：Symmetric-key cryptography](https://developer.mozilla.org/en-US/docs/Glossary/Symmetric-key_cryptography)，对称加密用同一把钥匙加密和解密。
-
-[^tls]: [RFC 8446：The Transport Layer Security (TLS) Protocol Version 1.3](https://www.rfc-editor.org/rfc/rfc8446.html)，IETF，2018-08，临时密钥交换、证书与签名验证（CertificateVerify）、一次往返的完整握手、带校验的加密记录。
-
-[^x25519]: [RFC 7748：Elliptic Curves for Security](https://www.rfc-editor.org/rfc/rfc7748.html)，IETF，2016-01，X25519 密钥交换：双方用各自秘密和对方公开值算出相同结果。
-
-[^devtools]: [Firefox 开发者工具：Network request details](https://firefox-source-docs.mozilla.org/devtools-user/network_monitor/request_details/index.html)，「安全性」与「时间」标签中的 TLS 信息。
-
-[^pkix]: [RFC 5280：Internet X.509 Public Key Infrastructure Certificate and CRL Profile](https://www.rfc-editor.org/rfc/rfc5280.html)，IETF，2008-05，证书字段、有效期与证书路径校验。
-
-[^ca]: [MDN：Certificate authority](https://developer.mozilla.org/en-US/docs/Glossary/Certificate_authority)；[Mozilla 支持：How do I tell if my connection to a website is secure?](https://support.mozilla.org/en-US/kb/how-do-i-tell-if-my-connection-is-secure)，地址栏小锁与查看证书。
-
-[^cert]: [MDN：Digital certificate](https://developer.mozilla.org/en-US/docs/Glossary/Digital_certificate)，证书把公开数据与身份绑定，由机构签名。
-
-[^sig]: [MDN：Digital signature](https://developer.mozilla.org/en-US/docs/Glossary/Signature/Security)，数字签名用于发现内容被改动、确认签名者。
-
-[^le]: [Let's Encrypt：FAQ](https://letsencrypt.org/docs/faq/)，证书只验证对域名的控制权，不判断网站是否在做钓鱼或诈骗。
-
-[^phish]: [CISA：Recognize and Report Phishing](https://www.cisa.gov/secure-our-world/recognize-and-report-phishing)，识别钓鱼页面与催促话术。
+本片按理解顺序分解身份核验与密钥协商，并非TLS消息的逐条时序；保护以端点及密钥未失陷、身份验证成功为前提。

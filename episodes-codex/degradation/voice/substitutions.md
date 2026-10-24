@@ -1,0 +1,7 @@
+# 配音选段与检查边界
+
+使用共享prep/gen/build和MiMo冰糖音色，保留TTS原始takes；尾部“好。”按共享裁切去除。字幕与script.md保持原文。
+
+ASR：root于本轮集中检查，环境未装faster_whisper且官方模型端点被现有网络策略拒绝；不绕策略。使用真实TTS句边界及共享onset_rule声学句首。words.json的字符项只是兼容检查器的句级包络，不是逐字识别。最终未执行独立人工逐字听辨，不能宣称其通过。
+
+选中takes详见picks.json；若声学预检发现尾段/停顿异常，则重新合成并记录。

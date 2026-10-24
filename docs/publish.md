@@ -35,7 +35,7 @@ npm run preview
 
 ## PR 与版本
 
-版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。第21期常见实现独立短片与旧合集归档本次版本为 v0.47.0；实际版本以该文件及 Release 为准。
+版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。第21期常见实现独立短片与旧合集归档本次版本为 v0.47.0；EP.01–14 Codex重制与章节首帧定位版本为 v0.48.0；实际版本以该文件及 Release 为准。
 
 1. 改 `meta.json`：`draft: false`，写上 `publishedAt`。重发或只改站点时更新 `updatedAt`。
 2. 开 PR，合并进 `main`。推到 `main` 会跑 `.github/workflows/deploy.yml`，部署 GitHub Pages。这次构建发生在 Release 之前，`/changelog/` 还不会带上新版本。新版本要等第 4 步，在 Release 发出后再手动部署一次。命令顺序见「站点发版清单」。

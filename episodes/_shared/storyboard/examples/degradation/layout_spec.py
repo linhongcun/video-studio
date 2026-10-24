@@ -1,6 +1,6 @@
-"""EP.14 degradation (slug degradation-v1) layout spec — ported from the episode-dir layout.py v1.0.0 (script 629b5042, voice 9e70470c).
+"""Historical EP.14 v0.45.0 degradation (slug degradation-v1) layout spec — ported from the episode-dir layout.py v1.0.0 (script 629b5042, voice 9e70470c).
 Run:  python3 -B episodes/_shared/storyboard/layout.py --spec episodes/_shared/storyboard/examples/degradation/layout_spec.py \
-        --episode-dir episodes/degradation --inputs episodes/_shared/storyboard/examples/degradation/repo-inputs.json --out OUT/layout.json
+        --episode-dir episodes/_shared/tests/fixtures/degradation-v0.45.0 --inputs episodes/_shared/storyboard/examples/degradation/repo-inputs.json --out OUT/layout.json
 Two picture kinds (the script marks each shot's frame):
   browser (shots 1, 3, 4, 13, 14, 17, 19): real pages shop.example/search and shop.example/checkout (BrowserChrome page type shopPrice:
     view = search | checkout | success); shots 1 and 17 two windows side by side; shots 3/4 open a new tab and type the URL; 13/14 switch tabs; no devtools.

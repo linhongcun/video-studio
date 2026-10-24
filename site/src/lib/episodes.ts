@@ -103,7 +103,7 @@ export function computeChapters(slug: string, fm: any[] = []) {
     const s = group[0];
     // 章卡可能有独立 id；正文锚点取同组中能匹配 frontmatter 的分镜。
     const f: any = byId ? group.map((s) => fmById.get(s.chapterId)).find(Boolean) ?? {} : fm[i] ?? {};
-    const start = Math.round((s.from / fps) * 10) / 10;
+    const start = s.from / fps;
     if (!hasChapters && f.start !== undefined && Math.abs(f.start - start) > 0.5)
       console.warn(`[chapters] ${slug}#${f.id}: frontmatter start=${f.start}s → 实际 ${start}s（frame ${s.from}）`);
     return {id: f.id ?? s.chapterId ?? s.id, title: f.title ?? s.title, start, frame: s.from, fmStart: f.start, inArticle: !!f.id};
