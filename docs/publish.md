@@ -64,7 +64,7 @@ npm ci
 npm run build
 ```
 
-3. 提交的作者名沿用 `git log` 里已有提交的作者。不要从 `git log` 抄邮箱。按 [AGENTS.md 的提交署名约定](../AGENTS.md#提交署名)，本机 Codex 提交在信息末尾加 `Co-authored-by: Codex <codex@openai.com>`；Squash 合并的新提交也保留该行。不要把作者或 `Co-authored-by` 写成 Cursor Agent。
+3. 保留各机器已有的主作者身份，不从 `git log` 抄邮箱。按 [AGENTS.md 的提交署名约定](../AGENTS.md#提交署名)，本机 Codex 制作的变更在提交信息末尾加 `Co-authored-by: Codex <codex@openai.com>`；Cursor 等工具独立制作的提交沿用自己的署名，不强制添加 Codex。Squash 合并保留本次变更实际贡献者已有的全部联合署名，不相互覆盖，不修改机器的全局 Git 配置。
 
 开 PR，合并进 `main`。合并带来的那次 Pages 部署读不到这次 Release。随后打附注 tag 并发布。v0.44.0 和 v0.45.0 都是附注 tag，不要用轻量 tag：
 
