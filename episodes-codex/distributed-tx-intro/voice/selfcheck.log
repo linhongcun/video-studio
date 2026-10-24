@@ -1,0 +1,66 @@
+onset_rule selftest True
+frames 5155.0 durationFrames 5155 sec 171.83333333333334
+shot table:
+  01-hook                    0-  246 (246f 8.20s)
+  02-business-goal         246-  482 (236f 7.87s)
+  03-scope                 482-  738 (256f 8.53s)
+  04-local-intro           738-  979 (241f 8.03s)
+  05-local-commit          979- 1206 (227f 7.57s)
+  06-local-rollback       1206- 1432 (226f 7.53s)
+  07-local-boundary       1432- 1658 (226f 7.53s)
+  08-split-boundaries     1658- 1884 (226f 7.53s)
+  09-partial-success      1884- 2117 (233f 7.77s)
+  10-distributed-intro    2117- 2414 (297f 9.90s)
+  11-not-machine-count    2414- 2651 (237f 7.90s)
+  12-timeout              2651- 2948 (297f 9.90s)
+  13-two-possibilities    2948- 3190 (242f 8.07s)
+  14-unsafe-retry         3190- 3462 (272f 9.07s)
+  15-durable-progress     3462- 3713 (251f 8.37s)
+  16-safe-retry           3713- 3983 (270f 9.00s)
+  17-decision-or-workflow  3983- 4262 (279f 9.30s)
+  18-eventual-consistency  4262- 4542 (280f 9.33s)
+  19-business-boundaries  4542- 4832 (290f 9.67s)
+  20-bridge               4832- 5155 (323f 10.77s)
+cues 3 max |cue-rule| 0 outside -6..+2: []
+sentence ASR mismatches:
+   01-hook-1 delete '订单记下来了库存却一件没扣算下单成功吗' -> ''
+   01-hook-2 delete '这两个结果为什么会分开' -> ''
+   02-business-goal-1 delete '我们用一笔示例订单只买一件商品' -> ''
+   02-business-goal-2 delete '订单确认时库存也得从四件扣成三件' -> ''
+   03-scope-1 delete '这里先不考虑付款也不加更多服务' -> ''
+   03-scope-2 delete '只看记订单和扣库存怎样交出一致的结果' -> ''
+   04-local-intro-1 delete '本地事务能把同一个数据库里的修改放在一起' -> ''
+   04-local-intro-2 delete '订单记录和库存修改先都等着提交' -> ''
+   05-local-commit-1 delete '两步都做好再提交这笔事务' -> ''
+   05-local-commit-2 delete '提交成功订单记录和库存扣减就一起保存' -> ''
+   06-local-rollback-1 delete '换个失败分支库存修改没有完成' -> ''
+   06-local-rollback-2 delete '撤销这笔事务订单记录也不留下' -> ''
+   07-local-boundary-1 delete '这能成立靠的是两步都在同一笔事务里' -> ''
+   07-local-boundary-2 delete '它管理的范围我们画成这一条边界' -> ''
+   08-split-boundaries-1 delete '现在把订单和库存分到各自管理的数据库' -> ''
+   08-split-boundaries-2 delete '两边仍有事务但已经各管各的提交' -> ''
+   09-partial-success-1 delete '订单这一边提交了库存那边却处理失败' -> ''
+   09-partial-success-2 delete '库存库里的回滚撤不掉另一边已提交的订单' -> ''
+   10-distributed-intro-1 delete '分布式事务要协调跨越这些独立边界的操作' -> ''
+   10-distributed-intro-2 delete '目标是让这笔业务按约定的规则完成或收尾' -> ''
+   11-not-machine-count-1 delete '关键不在几台机器也不只限于微服务' -> ''
+   11-not-machine-count-2 delete '要看这些操作能不能由同一笔事务管理' -> ''
+   12-timeout-1 delete '更棘手的是请求发出以后没有收到回复' -> ''
+   12-timeout-2 delete '超时只能说明没等到不能说明对方没执行' -> ''
+   13-two-possibilities-1 delete '同样一个超时可能根本没扣也可能已经扣了' -> ''
+   13-two-possibilities-2 delete '调用方看到的却一样都是结果未知' -> ''
+   14-unsafe-retry-1 delete '如果已经扣过再来一次普通扣减库存就会多扣一遍' -> ''
+   14-unsafe-retry-2 delete '直接反着改也可能改错本来没执行的操作' -> ''
+   15-durable-progress-1 delete '所以要留下持久进度知道这笔操作走到了哪一步' -> ''
+   15-durable-progress-2 delete '出故障以后才能查证结果接着恢复' -> ''
+   16-safe-retry-1 delete '同一笔操作再次送来也要避免重复产生效果' -> ''
+   16-safe-retry-2 delete '暂时故障可以重试业务拒绝还要另外处理' -> ''
+   17-decision-or-workflow-1 delete '有的方案先协调决定再让参与方提交' -> ''
+   17-decision-or-workflow-2 delete '有的方案允许各步先完成再继续推进或处理失败' -> ''
+   18-eventual-consistency-1 delete '最终一致允许约定的中间状态再把结果收拢' -> ''
+   18-eventual-consistency-2 delete '它不是等一会儿就会成功恢复机制必须真的工作' -> ''
+   19-business-boundaries-1 delete '能不能等待失败能不能撤销要先由业务定规则' -> ''
+   19-business-boundaries-2 delete '不能撤销的动作更不能事后假设可以自动还原' -> ''
+   20-bridge-1 delete '先记住一笔业务跨了提交边界就要设计协作和恢复' -> ''
+   20-bridge-2 delete '理解这个问题再看方案详解区别就清楚了' -> ''
+selfcheck ok short shots: []

@@ -84,6 +84,13 @@ const before = (tag: string, v: number[]) => {
 export const renumber = (tag: string, eps: number[]): number[] => !before(tag, RENUMBERED_IN) ? eps
   : [...new Set(eps.map((n) => (n in OLD_TO_NEW ? OLD_TO_NEW[n] : n)).filter((n): n is number => n != null))].sort((a, b) => a - b);
 
+/** 同一期的前置篇独立首发：旧 Release 不应被新增课程追溯覆盖。 */
+export function episodesForRelease<T extends {ep: number; firstRelease?: string}>(release: Pick<Release, 'tag' | 'eps' | 'kind'>, episodes: T[]): T[] {
+  return episodes.filter((e) => release.eps.includes(e.ep) && (release.kind === '新增'
+    ? e.firstRelease === release.tag
+    : !e.firstRelease || !before(release.tag, (e.firstRelease.match(/^v?(\d+)\.(\d+)\.(\d+)/)?.slice(1, 4) ?? []).map(Number))));
+}
+
 async function load(): Promise<Release[] | null> {
   if (process.env.SKIP_CHANGELOG === '1') return null;
   try {
