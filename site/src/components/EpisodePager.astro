@@ -1,31 +1,33 @@
 ---
-// 系列内上一期/下一期 + “系列第 n/m 期”进度；系列首尾跨到相邻系列时标注“进入下一系列”
-import {epHref, epLabel, seriesHref} from '../lib/episodes';
+// 教学顺序由 seriesNav 提供；独立方向之间不自动衔接。
+import {epHref, seriesHref} from '../lib/episodes';
 const {nav} = Astro.props;
 const {prev, next, series, index, total, prevCross, nextCross} = nav ?? {};
 ---
 {series && (
-  <div class="sp" aria-label="系列进度">
-    <p class="sp-h"><a href={seriesHref(series.id)}>系列 · {series.title}</a><span class="num">第 {index}/{total} 期</span></p>
-    <ol class="dots" aria-hidden="true">{series.episodes.map((x, i) => <li class={i + 1 < index ? 'done' : i + 1 === index ? 'cur' : ''}></li>)}</ol>
+  <div class="sp" aria-label="系列位置">
+    <div><span class="sp-label">本系列</span><a href={seriesHref(series.id)}>{series.title}</a></div>
+    <a class="sp-directory" href={seriesHref(series.id)}><span class="num">第 {index} / {total} 篇</span><span>查看目录 <span aria-hidden="true">↗</span></span></a>
   </div>
 )}
-<nav class="pager" aria-label="上一期 / 下一期">
-  {prev ? <a class="p" href={epHref(prev.slug)}><small>← {prevCross ? `上一系列 · ${prevCross.title}` : '上一期'} · {epLabel(prev)}</small><span>{prev.title}</span></a> : <span class="p empty" aria-hidden="true"><small>← 上一期</small><span>已经是第一期</span></span>}
-  {next ? <a class="p r" href={epHref(next.slug)}><small>{nextCross ? `进入下一系列 · ${nextCross.title}` : '下一期'} · {epLabel(next)} →</small><span>{next.title}</span></a> : <span class="p r empty" aria-hidden="true"><small>下一期 →</small><span>敬请期待</span></span>}
-</nav>
+{(prev || next) && <nav class:list={['pager', {single: !prev || !next}]} aria-label="上一课 / 下一课">
+  {prev && <a class="p" href={epHref(prev.slug)}><small>← {prevCross ? `上一系列 · ${prevCross.title}` : '上一课'}</small><strong>{prev.title}</strong></a>}
+  {next && <a class="p r" href={epHref(next.slug)}><small>{nextCross ? `下一系列 · ${nextCross.title}` : '下一课'} →</small><strong>{next.title}</strong></a>}
+</nav>}
 <style>
-.sp{margin-top:var(--sp-7);padding:var(--sp-4);background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md)}
-.sp-h{display:flex;justify-content:space-between;gap:var(--sp-3);margin:0 0 var(--sp-3);font-size:var(--fs-small)}
-.sp-h a{color:var(--c-text);font-weight:600}.sp-h .num{color:var(--c-text-2)}
-.dots{list-style:none;margin:0;padding:0;display:flex;gap:4px}
-.dots li{flex:1;height:4px;border-radius:2px;background:var(--c-surface-2);border:1px solid var(--c-border)}
-.dots li.done{background:var(--c-primary-a40);border-color:transparent}
-.dots li.cur{background:var(--c-primary);border-color:var(--c-primary)}
-.pager{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-top:var(--sp-4)}
-@media (max-width:767px){.pager{grid-template-columns:1fr}}
-.p{display:flex;flex-direction:column;padding:var(--sp-4);background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);color:var(--c-text);text-decoration:none;min-height:72px}
+.sp{margin-top:var(--sp-7);padding:var(--sp-4) var(--sp-5);border:1px solid var(--c-border);border-radius:var(--r-md);display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);background:var(--c-surface)}
+.sp>div{display:flex;flex-direction:column;gap:2px}
+.sp-label{font-size:var(--fs-xs);color:var(--c-text-2)}
+.sp a{color:var(--c-text);font-weight:600;text-decoration:none}
+.sp a:hover{color:var(--c-primary)}
+.sp-directory{display:flex;align-items:flex-end;flex-direction:column;gap:2px;font-size:var(--fs-small)}
+.sp-directory .num{font-size:var(--fs-xs);color:var(--c-text-2);font-weight:400}
+.sp-directory>span:last-child{color:var(--c-primary)}
+.pager{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-top:var(--sp-3)}
+.pager.single{grid-template-columns:1fr}
+.p{display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-4) var(--sp-5);background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);color:var(--c-text);text-decoration:none;min-height:100px}
 a.p:hover{border-color:var(--c-primary-a40);filter:none}
-.r{text-align:right}small{color:var(--c-text-2);font-size:var(--fs-small)}
-.empty{opacity:.6}.empty span{color:var(--c-text-2)}
+.r{text-align:right}small{color:var(--c-text-2);font-size:var(--fs-xs)}
+.p strong{font-size:var(--fs-small);font-weight:600;line-height:1.6}
+@media (max-width:767px){.pager{grid-template-columns:1fr}.sp{padding:var(--sp-4)}}
 </style>

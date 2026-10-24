@@ -3,9 +3,9 @@ import '../styles/global.css';
 import SiteHeader from '../components/SiteHeader.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import {VERSION, BASE} from '../lib/episodes';
-const {title, description = '用代码拍科普：技术动画短片 + 图文讲解，把网络与浏览器原理讲清楚', ogImage, current = 'home', ogType = 'website', jsonLd, noIndex = false} = Astro.props;
+const {title, description = '用技术动画短片与图文讲解，理解系统原理、Agent 开发、算法与设计模式。IT小村，把每一步讲清楚。', ogImage, current = '', ogType = 'website', jsonLd, noIndex = false} = Astro.props;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
-const full = title ? `${title} · Video Studio` : 'Video Studio 技术科普';
+const full = title ? `${title} · IT小村` : 'IT小村 · 技术可视化学习站';
 const og = ogImage ? new URL(ogImage, Astro.site).href : undefined;
 ---
 <!doctype html>
@@ -14,8 +14,9 @@ const og = ogImage ? new URL(ogImage, Astro.site).href : undefined;
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <meta name="color-scheme" content="light dark" />
-  <meta name="theme-color" content="#0B1020" media="(prefers-color-scheme: dark)" />
-  <meta name="theme-color" content="#F8FAFC" media="(prefers-color-scheme: light)" />
+  <link rel="icon" type="image/svg+xml" href={`${BASE}favicon.svg`} />
+  <meta name="theme-color" content="#0F172A" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#F5F7F6" media="(prefers-color-scheme: light)" />
   <!-- 首屏前写入 data-theme，防止主题闪烁（必须在样式之前、同步执行） -->
   <script is:inline>
     (function () {
@@ -27,7 +28,7 @@ const og = ogImage ? new URL(ogImage, Astro.site).href : undefined;
         var t = pref === 'system' ? (mq.matches ? 'light' : 'dark') : pref;
         d.setAttribute('data-theme', t); d.setAttribute('data-theme-pref', pref);
         var m = document.querySelectorAll('meta[name="theme-color"]');
-        for (var i = 0; i < m.length; i++) m[i].setAttribute('content', t === 'light' ? '#F8FAFC' : '#0B1020');
+        for (var i = 0; i < m.length; i++) m[i].setAttribute('content', t === 'light' ? '#F5F7F6' : '#0F172A');
       };
       window.__vsTheme = {
         get: function () { return pref; },
@@ -44,7 +45,7 @@ const og = ogImage ? new URL(ogImage, Astro.site).href : undefined;
   <meta property="og:description" content={description} />
   <meta property="og:type" content={ogType} />
   <meta property="og:url" content={canonical} />
-  <meta property="og:site_name" content="Video Studio · IT小村" />
+  <meta property="og:site_name" content="IT小村" />
   <meta property="og:locale" content="zh_CN" />
   {og && <meta property="og:image" content={og} />}
   <meta name="twitter:card" content={og ? 'summary_large_image' : 'summary'} />
@@ -52,7 +53,7 @@ const og = ogImage ? new URL(ogImage, Astro.site).href : undefined;
   <meta name="twitter:description" content={description} />
   {og && <meta name="twitter:image" content={og} />}
   <link rel="canonical" href={canonical} />
-  <link rel="alternate" type="application/rss+xml" title="Video Studio · IT小村 新片订阅" href={`${BASE}rss.xml`} />
+  <link rel="alternate" type="application/rss+xml" title="IT小村 新片订阅" href={`${BASE}rss.xml`} />
   <link rel="sitemap" href={`${BASE}sitemap-index.xml`} />
   {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 </head>

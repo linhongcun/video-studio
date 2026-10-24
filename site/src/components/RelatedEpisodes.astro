@@ -1,22 +1,26 @@
 ---
 import {epHref, epLabel, LEGACY_LABEL} from '../lib/episodes';
-const {items} = Astro.props;
+const {items = []} = Astro.props;
 ---
 {items.length > 0 && (
-  <aside class="rel" aria-label="相关版本">
-    {items.map((r) => r.published ? (
-      <a class="rc" href={epHref(r.slug)}><small>{r.label || '相关'} · {epLabel(r)}{r.legacy ? ` · ${LEGACY_LABEL}` : ''} →</small><strong>{r.title}</strong><span>{r.summary}</span></a>
+  <aside class="rel" aria-label="相关内容">
+    <h2 class="rel-title">继续探索</h2>
+    <div class="rel-list">{items.map((r) => r.published ? (
+      <a class="rc" href={epHref(r.slug)}><small>{r.label || '相关内容'}{r.legacy ? ` · ${LEGACY_LABEL}` : ''}<span aria-hidden="true"> ↗</span></small><strong>{r.title}</strong><span>{r.summary}</span><span class="episode-label">{epLabel(r)}</span></a>
     ) : (
-      <div class="rc soon"><small>{r.label || '相关'} · 制作中</small><strong>{r.title}</strong><span>即将上线，敬请期待</span></div>
-    ))}
+      <div class="rc soon"><small>{r.label || '相关内容'} · 制作中</small><strong>{r.title}</strong><span>内容制作中</span></div>
+    ))}</div>
   </aside>
 )}
 <style>
-.rel{display:grid;gap:var(--sp-3);margin:var(--sp-5) 0 0}
-.rc{display:flex;flex-direction:column;gap:2px;padding:var(--sp-3) var(--sp-4);background:var(--c-surface);border:1px solid var(--c-border);border-left:3px solid var(--c-secondary);border-radius:var(--r-md);color:var(--c-text);text-decoration:none}
+.rel{margin-top:var(--sp-7)}
+.rel .rel-title{font-size:var(--fs-h3);margin:0 0 var(--sp-4);line-height:1.4}
+.rel-list{display:grid;gap:var(--sp-3)}
+.rc{position:relative;display:flex;flex-direction:column;gap:var(--sp-2);padding:var(--sp-4) var(--sp-5);background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-md);color:var(--c-text);text-decoration:none}
 a.rc:hover{border-color:var(--c-primary-a40);filter:none}
-.rc small{color:var(--c-primary);font-size:var(--fs-xs);font-weight:600}
-.rc strong{font-size:var(--fs-small)}
-.rc span{color:var(--c-text-2);font-size:var(--fs-xs)}
-.soon{border-left-color:var(--c-muted)}.soon small{color:var(--c-text-2)}
+.rc small{color:var(--c-primary);font-size:var(--fs-xs);font-weight:600;display:flex;justify-content:space-between}
+.rc strong{font-size:var(--fs-body);line-height:1.5}
+.rc>span{color:var(--c-text-2);font-size:var(--fs-small);line-height:1.6}
+.rc .episode-label{color:var(--c-muted);font-size:var(--fs-xs);font-family:var(--font-mono)}
+.soon small{color:var(--c-text-2)}
 </style>

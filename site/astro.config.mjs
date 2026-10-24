@@ -30,6 +30,20 @@ function remarkHeadingId() {
   };
 }
 
+// 制作稿里的用途提示不作为读者标题；保留原始文章与既有锚点。
+function rehypeReaderHeadings() {
+  return (tree) => {
+    const walk = (node) => {
+      if (node.type === 'element' && /^h[1-6]$/.test(node.tagName)) {
+        const first = node.children?.find((child) => child.type === 'text');
+        if (first) first.value = first.value.replace(/^只放文章[：:]\s*/, '');
+      }
+      (node.children || []).forEach(walk);
+    };
+    walk(tree);
+  };
+}
+
 // 把 “## 小结” 及其后到下一个 h2 前的内容包成 Summary 卡；最后一段“动手试试”包成 tip Callout
 function rehypeSummary() {
   const text = (n) => (n.type === 'text' ? n.value : (n.children || []).map(text).join(''));
@@ -59,7 +73,7 @@ export default defineConfig({
   site: 'https://linhongcun.github.io',
   base: '/video-studio/',
   trailingSlash: 'always',
-  integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick/.test(p)}), mdx({remarkPlugins: [remarkHeadingId], rehypePlugins: [rehypeSummary], syntaxHighlight: false})],
+  integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick/.test(p)}), mdx({remarkPlugins: [remarkHeadingId], rehypePlugins: [rehypeReaderHeadings, rehypeSummary], syntaxHighlight: false})],
   vite: {
     plugins: [headingIdPre()],
     server: {fs: {allow: [fileURLToPath(new URL('..', import.meta.url))]}},

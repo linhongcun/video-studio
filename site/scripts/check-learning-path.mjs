@@ -27,6 +27,11 @@ function episodeRuntime(showDrafts) {
     readJson(path.join(site, 'src/content/series.json')),
     {cwd: () => site, env: {SHOW_DRAFTS: showDrafts ? '1' : '0'}});
 }
+function learningRuntime(episodes) {
+  const source = stripImports(fs.readFileSync(path.join(site, 'src/lib/learning.ts'), 'utf8'));
+  const {code} = transformSync(source, {loader: 'ts'});
+  return vm.compileFunction(`${code}\nreturn {getLearningTracks, getTrackForSeries};`, ['getSeries', 'BASE'])(episodes.getSeries, '/video-studio/');
+}
 const releasesSource = stripImports(fs.readFileSync(path.join(site, 'src/lib/releases.ts'), 'utf8'));
 const releaseCode = transformSync(releasesSource, {loader: 'ts'}).code;
 const {episodesForRelease, parseEpisodeSlugs} = vm.compileFunction(`${releaseCode}\nreturn {episodesForRelease, parseEpisodeSlugs};`, ['fs', 'path'])(fs, path);
@@ -201,13 +206,14 @@ if (process.argv.includes('--built')) {
     assert.equal(text('rss.xml').includes(`/episodes/${algorithmSlug}/`), false, 'Draft algorithm leaked into RSS');
   } else {
     const page = text(`${route}index.html`);
-    assert.ok(page.includes(`<title>${algorithm.title} · Video Studio</title>`), 'Algorithm page title is stale');
+    assert.ok(page.includes(`<title>${algorithm.title} · IT小村</title>`), 'Algorithm page title is stale');
     assert.ok(page.includes('LC.11') && !page.includes('EP.22'), 'The algorithm page must display the problem number');
     assert.ok(page.includes('/series/leetcode/'), 'Algorithm page must link its own series');
     assert.equal(page.includes('搜索「IT小村」'), false, 'A site-only lesson must not imply that it was published on other platforms');
     assert.equal(page.includes('aria-label="在其他平台观看"'), false, 'No platform navigation is shown without real episode links');
     assert.ok(text('series/leetcode/index.html').includes(`/episodes/${algorithmSlug}/`));
-    assert.ok(publishedIndex.includes('data-series="leetcode"') && publishedIndex.includes(`/episodes/${algorithmSlug}/`));
+    const library = text('library/index.html');
+    assert.ok(library.includes('data-series="leetcode"') && library.includes(`/episodes/${algorithmSlug}/`), 'The full library must include the independent algorithm series');
     assert.ok(text('rss.xml').includes('LC.11') && text('rss.xml').includes(`/episodes/${algorithmSlug}/`));
     assert.deepEqual(Array.from(algorithm.chapters, (c) => c.id), ['area', 'proof', 'scan', 'code']);
     for (const chapter of algorithm.chapters) {
@@ -228,4 +234,63 @@ if (process.argv.includes('--built')) {
     }
     console.log('Built LC.11 passed: title, independent series, four chapter anchors, 44 exact subtitles, copied video and poster.');
   }
+}
+
+// Exercise the actual direction loader against published metadata. Every current
+// lesson must have one clear home; previous/next may cross chapters within that
+// direction, but must never imply that another direction is a prerequisite.
+const learning = learningRuntime(published);
+const tracks = learning.getLearningTracks();
+assert.equal(tracks.length, 4, 'All four published learning directions must be available');
+assert.ok(learningRuntime(preview).getLearningTracks().every((track) => track.episodes.every((e) => !e.draft && !e.archived)),
+  'Draft preview must not advertise unfinished lessons as published direction content');
+assert.equal(learning.getTrackForSeries(), undefined);
+assert.equal(learning.getTrackForSeries('unknown-series'), undefined);
+const assigned = tracks.flatMap((track) => Array.from(track.episodes, (e) => e.slug));
+assert.equal(new Set(assigned).size, assigned.length, 'A lesson must not appear in multiple directions');
+assert.deepEqual([...assigned].sort(), slugs(liveLessons).sort(), 'Every current lesson must be reachable through a direction');
+for (const track of tracks) {
+  assert.ok(track.start && track.episodes.some((e) => e.slug === track.start.slug), `${track.title} needs a published starting lesson`);
+  assert.ok(track.episodes.every((e) => !e.draft && !e.archived), `${track.title} must not advertise unavailable lessons`);
+  for (const series of track.series) {
+    assert.equal(learning.getTrackForSeries(series.id)?.id, track.id);
+  }
+  for (const lesson of track.episodes) {
+    const nav = published.seriesNav(lesson);
+    for (const neighbor of [nav?.prev, nav?.next].filter(Boolean)) {
+      assert.equal(learning.getTrackForSeries(neighbor.series)?.id, track.id, `${lesson.slug} must not lead into unrelated ${neighbor.series}`);
+    }
+  }
+}
+assert.equal(tracks.find((t) => t.id === 'systems')?.start.slug, 'http-request', 'System fundamentals should start with the request');
+assert.equal(tracks.find((t) => t.id === 'agent')?.start.slug, agentSlug, 'Agent development must start at its own introduction');
+assert.equal(tracks.find((t) => t.id === 'algorithms')?.start.slug, algorithmSlug);
+assert.equal(tracks.find((t) => t.id === 'patterns')?.start.slug, 'strategy-pattern', 'Design patterns must start with the published strategy lesson');
+assert.equal(learning.getTrackForSeries('design-patterns')?.id, 'patterns', 'Design patterns have their own learning direction');
+console.log('Four learning directions passed: every published lesson has one home; Agent, algorithms and design patterns remain independent from the systems path.');
+
+if (process.argv.includes('--built')) {
+  const dist = path.join(site, 'dist');
+  const readPage = (rel) => fs.readFileSync(path.join(dist, rel), 'utf8');
+  const home = readPage('index.html');
+  const learn = readPage('learn/index.html');
+  const library = readPage('library/index.html');
+  for (const href of ['/video-studio/learn/', '/video-studio/library/']) {
+    assert.ok(home.includes(`href="${href}"`), `Home must expose ${href}`);
+  }
+  for (const track of tracks) {
+    const fragment = new URL(track.href, 'https://linhongcun.github.io').hash.slice(1);
+    assert.ok(learn.includes(`id="${fragment}"`), `Missing destination for ${track.href}`);
+    assert.ok(home.includes(`href="${track.href}"`), `Home must expose ${track.title}`);
+    assert.ok(learn.includes(`href="/video-studio/episodes/${track.start.slug}/"`), `${track.title} must offer its published starting lesson`);
+    for (const series of track.series) {
+      assert.ok(learn.includes(`href="/video-studio/series/${series.id}/"`), `${track.title} must expose chapter ${series.title}`);
+      assert.ok(fs.existsSync(path.join(dist, `series/${series.id}/index.html`)), `Missing preserved series URL: ${series.id}`);
+    }
+  }
+  for (const lesson of liveLessons) {
+    assert.ok(library.includes(`href="/video-studio/episodes/${lesson.slug}/"`), `Full library is missing ${lesson.slug}`);
+  }
+  assert.equal(library.includes(`/episodes/${archiveSlug}/`), false, 'Historical compilation must stay outside the current library');
+  console.log('Built navigation passed: home, direction anchors, published starting lessons, all chapter URLs and the complete current library.');
 }

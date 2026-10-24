@@ -107,7 +107,7 @@ gh run watch <id>
 
 头条没有单独的键，在抖音侧同步，不另传一条。视频号没有网页链接，不写进 `meta.json`，也不写进 Release。不要为了显示视频号去改 `episodes.ts`。
 
-`site/src/components/PlatformLinks.astro` 在没有真实平台链接时不显示，不以泛化搜索提示暗示本期已在平台发布。`site/src/pages/about.astro` 仍写着「B站、抖音、快手」，那是历史文案，发布时不要照着它去发快手。
+`site/src/components/PlatformLinks.astro` 在没有真实平台链接时不显示，不以泛化搜索提示暗示本期已在平台发布。关于页不以泛化搜索提示暗示各期已在平台发布；平台入口以各期真实链接为准。
 
 ## 三平台实操
 

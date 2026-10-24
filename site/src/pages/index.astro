@@ -1,26 +1,59 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import Hero from '../components/Hero.astro';
-import SeriesFilter from '../components/SeriesFilter.astro';
 import EpisodeGrid from '../components/EpisodeGrid.astro';
-import EmptyState from '../components/EmptyState.astro';
-import {getEpisodes, getSeries, asset} from '../lib/episodes';
+import TrackMark from '../components/TrackMark.astro';
+import {getEpisodes, BASE, epHref, fmtTime, asset} from '../lib/episodes';
+import {getLearningTracks} from '../lib/learning';
 const eps = getEpisodes();
 const latest = eps[0];
+const tracks = getLearningTracks();
 ---
 <BaseLayout current="home" ogImage={latest && asset(latest.slug, latest.poster)}>
   <div class="container">
-    {latest && <Hero e={latest} />}
-    <section class="all" aria-labelledby="all-title">
-      <h2 id="all-title">全部期数</h2>
-      <SeriesFilter series={getSeries()} />
-      <div id="all-grid"><EpisodeGrid episodes={eps} /></div>
-      <div id="tf-empty" hidden><EmptyState message="这个系列还没有片子" /></div>
+    <section class="home-hero" aria-labelledby="home-title">
+      <div class="hero-copy">
+        <p class="hero-label"><span></span> IT小村 · 技术可视化学习站</p>
+        <h1 id="home-title">把技术原理，<br />一步步<span>看明白。</span></h1>
+        <p class="hero-description">跟着数据看过程，沿着问题理解原理。<br class="desktop-break" />用一支短片入门，再用图文和代码深入。</p>
+        <div class="hero-actions"><a class="hero-cta" href={`${BASE}learn/`}>找到你的学习起点 <span aria-hidden="true">↗</span></a><a class="hero-secondary" href={`${BASE}library/`}>浏览全部内容 →</a></div>
+        <p class="hero-note"><span class="num">{eps.length}</span> 篇视频与图文 <span class="note-separator">/</span> {tracks.length} 个学习方向 <span class="note-separator">/</span> 持续更新</p>
+      </div>
+      <div class="track-links" aria-label="选择学习方向">
+        {tracks.map((track) => <a class={`track-link track-${track.id}`} href={track.href}>
+          <div class="track-top"><span class="track-number num">{track.number} / {track.eyebrow}</span><span class="track-count">{track.episodes.length} 篇</span></div>
+          <div class="track-main"><TrackMark id={track.id} /><div><h2>{track.title}</h2><p>{track.id === 'systems' ? '网络 · 缓存 · 数据库 · 分布式' : track.id === 'agent' ? '理解模型、工具与执行循环' : track.id === 'patterns' ? '从需求变化理解代码设计' : '看见步骤，理解解法与代码'}</p></div><span class="track-arrow" aria-hidden="true">↗</span></div>
+        </a>)}
+      </div>
     </section>
+    <section class="starting" aria-labelledby="starting-title">
+      <div class="section-heading"><div><p class="eyebrow">START HERE</p><h2 id="starting-title">从一个问题开始</h2></div><p>无需从第一期刷起，选择你关心的方向。</p></div>
+      <div class="start-grid">{tracks.map((track) => <a class="start-link" href={epHref(track.start.slug)}>
+        <span class="start-label">{track.title} · 入门</span><h3>{track.start.title}</h3><span class="start-bottom">视频 {fmtTime(track.start.duration)} · 配套图文 <span aria-hidden="true">→</span></span>
+      </a>)}</div>
+    </section>
+    <section class="recent" aria-labelledby="recent-title">
+      <div class="section-heading"><div><p class="eyebrow">LATEST LESSONS</p><h2 id="recent-title">最近发布</h2></div><a class="text-link" href={`${BASE}library/`}>全部 {eps.length} 篇内容 <span aria-hidden="true">→</span></a></div>
+      <EpisodeGrid episodes={eps.slice(0, 6)} />
+    </section>
+    <aside class="home-method"><div><span class="eyebrow">我们的讲解方式</span><h2>看清每一步，也讲清为什么。</h2><p>从具体问题出发，用连续动画展示机制，用图文补充边界、实现和资料来源。</p></div><a class="text-link" href={`${BASE}about/`}>认识 IT小村 <span aria-hidden="true">↗</span></a></aside>
   </div>
 </BaseLayout>
+<script is:inline define:vars={{library: `${BASE}library/`}}>
+  // 保留此前分享的首页系列筛选链接。
+  if (new URLSearchParams(location.search).has('series')) location.replace(library + location.search + location.hash);
+</script>
 <style>
-.all{margin-top:var(--sp-9)}
-@media (max-width:767px){.all{margin-top:var(--sp-7)}}
-h2{font-size:var(--fs-h2);line-height:1.35;margin:0 0 var(--sp-4)}
+.home-hero{margin-top:28px;padding:56px 48px;display:grid;grid-template-columns:1.15fr 1fr;gap:56px;align-items:center;border-radius:24px;background:#101d2d;color:#eef5f6;position:relative;overflow:hidden}
+.home-hero::before{content:'';position:absolute;width:500px;height:500px;right:-230px;top:-300px;border:1px solid #314555;border-radius:50%;pointer-events:none}
+.hero-copy,.track-links{position:relative;min-width:0}.hero-label{display:flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.08em;color:#b3c9ce;margin:0 0 24px}.hero-label span{width:6px;height:6px;border-radius:50%;background:#56e4d3}
+h1{font-size:clamp(38px,4.3vw,62px);line-height:1.22;letter-spacing:-.045em;font-weight:650;margin:0 0 22px}h1 span{color:#82e9db}.hero-description{font-size:16px;line-height:1.9;color:#b7c8d1;margin:0 0 30px}
+.hero-actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap}.hero-cta{display:inline-flex;gap:24px;align-items:center;min-height:48px;padding:0 20px;background:#8aebdc;color:#102b2a;border-radius:8px;font-size:14px;font-weight:650;text-decoration:none}.hero-secondary{color:#d1dce2;font-size:13px;text-decoration:none}.hero-note{margin:28px 0 0;color:#8fa6b4;font-size:12px}.hero-note>.num{color:#d4e2e7}.note-separator{margin:0 10px;color:#56707f}
+.track-links{display:grid;gap:12px}.track-link{padding:16px 22px 20px;background:#1b2a3b;border:1px solid #304355;border-radius:12px;text-decoration:none;color:#edf5f6;transition:background var(--dur),border-color var(--dur)}.track-link:hover{background:#223549;border-color:#7daaa9;filter:none}.track-top{display:flex;justify-content:space-between;gap:16px;margin-bottom:14px;font-size:10px;letter-spacing:.04em;color:#9ab2c2}.track-count{white-space:nowrap}.track-main{display:flex;align-items:center;gap:17px}.track-main :global(svg){width:48px;height:48px;flex:none;color:#81dece}.track-agent :global(svg){color:#9fbdea}.track-algorithms :global(svg){color:#efcb8b}.track-main h2{font-size:20px;line-height:1.4;letter-spacing:.02em;margin:0 0 4px}.track-main p{margin:0;font-size:12px;color:#a5bac7}.track-arrow{margin-left:auto;font-size:24px;color:#b9cbd6}
+.starting,.recent{margin-top:64px}.start-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px}.start-link{display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--c-border);color:var(--c-text);text-decoration:none}.start-link:hover h3{color:var(--c-primary)}.start-label{font-size:12px;color:var(--c-primary);font-weight:600}.start-link h3{font-size:19px;font-weight:600;line-height:1.6;margin:0;max-width:24em}.start-bottom{margin-top:auto;display:flex;justify-content:space-between;gap:12px;font-size:12px;color:var(--c-text-2)}.start-bottom span{font-size:18px;color:var(--c-primary)}
+.home-method{margin-top:64px;padding:32px 36px;background:var(--c-surface-2);border:1px solid var(--c-border);border-radius:16px;display:flex;align-items:center;justify-content:space-between;gap:32px}.home-method h2{font-size:24px;margin:6px 0 8px;line-height:1.5}.home-method p{margin:0;font-size:14px;color:var(--c-text-2)}.home-method>a{flex:none}
+.track-link{padding-block:14px}.track-top{margin-bottom:10px}.track-main :global(svg){width:40px;height:40px}.track-patterns :global(svg){color:#c3b9e8}.start-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media(max-width:1100px){.home-hero{padding:40px 32px;gap:32px}.hero-actions{gap:16px}.track-link{padding-inline:16px}.track-main{gap:12px}.track-main :global(svg){width:36px}.track-main p{font-size:11px}}
+@media(min-width:768px) and (max-width:1100px){.start-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:767px){.home-hero{grid-template-columns:1fr;margin-top:16px;padding:30px 24px;gap:30px;border-radius:16px}.hero-label{font-size:10px;margin-bottom:20px}h1{font-size:38px;letter-spacing:-.04em;margin-bottom:16px}.hero-description{font-size:14px;margin-bottom:22px}.desktop-break{display:none}.hero-cta{font-size:13px;min-height:44px;gap:14px;padding:0 14px}.hero-secondary{font-size:12px}.hero-note{margin-top:20px;font-size:10px}.note-separator{margin:0 7px}.track-links{gap:10px}.track-link{padding:12px 14px 14px}.track-top{margin-bottom:8px;font-size:9px}.track-main h2{font-size:18px}.track-main p{font-size:11px}.track-main :global(svg){width:36px;height:36px}.starting,.recent{margin-top:40px}.start-grid{grid-template-columns:1fr;gap:0}.start-link{padding:20px 0;gap:8px}.start-link h3{font-size:18px}.home-method{margin-top:40px;padding:24px;flex-direction:column;align-items:flex-start;gap:20px}.home-method h2{font-size:21px}}
+@media(max-width:767px){.track-links{gap:8px}.track-link{padding:10px 14px}.track-top{margin-bottom:6px}.track-main p{display:none}.track-main :global(svg){width:32px;height:32px}}
 </style>
