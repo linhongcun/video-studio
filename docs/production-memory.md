@@ -44,7 +44,7 @@
 - 用户授权先选一期制作并部署网站，选定[#163](https://github.com/linhongcun/video-studio/issues/163)，slug为strategy-pattern，新独立系列design-patterns；其余模式仍为选题池。
 - [制作工程](../episodes-codex/strategy-pattern/README.md)为16镜32句、四章、5198帧，约2分53秒。同一100元示例订单展示规则抽离、外部选择、统一调用与返回，活动八折改七五折得到75元；新增规则仍需登记，单选不叠加。
 - 六份公开资料、实际示例及最小diff、154项冻结、完整媒体解码与独立实际画面检查、桌面/手机32字幕和四章seek已完成。视频完整SHA为c80f9e44ee8eb668fb702266170d4fd8773d14f120e315b568d6ed5d07c27431，−16.0LUFS/−3.7dBTP；未执行逐字ASR或全片人工听辨，不声称用户已观看认可。
-- 本期接续最新主干，v0.51.0已由事务导航版占用，故本期最终计划为v0.52.0。发布、线上核验和issue收尾的实际状态见[发布记录](../episodes-codex/strategy-pattern/release.md)。
+- 本期已由[PR #192](https://github.com/linhongcun/video-studio/pull/192)合并，发布[v0.52.0](https://github.com/linhongcun/video-studio/releases/tag/v0.52.0)，Release后部署40104729342成功；线上8个canonical普通GET的完整视频/海报SHA、32条VTT、四章、源码/系列/RSS/更新日志核验通过。制作issue #163已以completed关闭，#161同步首期完成；完整证据见[发布记录](../episodes-codex/strategy-pattern/release.md)和[线上报告](../episodes/strategy-pattern/online-verification.json)。
 
 
 ### EP.22 Agent 概念入门
