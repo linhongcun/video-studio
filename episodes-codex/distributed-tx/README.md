@@ -1,17 +1,36 @@
-# EP.21《下单成功了，库存怎么没扣？》
+# EP.21 分布式事务：方案与边界（分章修订版）
 
-按用户批量重制与自主GitHub发布授权完成本期，对应[#73](https://github.com/linhongcun/video-studio/issues/73)。只讲可靠消息一条线：同库保存订单和待发事件、恢复重试、库存侧同事务扣减及记录已处理、重复不多扣、最终一致及失败边界。站点接入与发布由主任务统一完成。
+用户观看v0.45.4后要求主流方案分章梳理、每种边界清楚。本工程现行入口为本目录的`remotion/`，38镜、76句、11675帧、约389.2秒。五条常见工程路线：2PC/XA、Seata AT、TCC、Saga、可靠消息；消息章区分Outbox和RocketMQ事务消息。这里是机制地图，不作市场占有率或性能排名。
 
-- research.md为五份原始/官方资料实际阅读记录与边界；article.mdx保留实现条件和片外补充。
-- script.md为14镜28句旁白；pronunciation.md列出多音字。visual-direction.md和knoll-props.md说明连续动作。
-- storyboard.json与sha8副本为冻结时序，words.json为实测TTS句界/共享句首起音兼容格式，不是逐字ASR。
-- video.mp4为成片，三尺寸JPG/PNG为封面，source-sha256.json记录实际输入，render-result.json和mix-report.json记录实际媒体检查。
-- qa-motion.md与qa-final.md写明实际检查范围，不将多阶段截图或机器通过冒称完整人工审片/听辨。
+- [script.md](script.md)、[article.mdx](article.mdx)、[research.md](research.md)：旁白、七章文章及实际阅读的公开权威资料。
+- [overview-plan.json](overview-plan.json)、[visual-direction.md](visual-direction.md)、[knoll-props.md](knoll-props.md)：镜头/章节映射与逐步动作、成功/失败重置、事务边界。
+- [voice/substitutions.md](voice/substitutions.md)、[voice/qa-v2.json](voice/qa-v2.json)：69b+6c+1d所选候选与准确检查范围。音轨SHA256为`06ac9f6c31476e24b4930042c402af1b4e82a5f73a276c705270366409f9b459`。
+- [words.json](words.json)、[storyboard.json](storyboard.json)、[qa-timing.json](qa-timing.json)：真实句级边界、9个首次名称声学起音与全部76句连续字幕；不是句内逐字识别。
+- `freeze.py`冻结实际输入；最终编码指标与多阶段检查另见`render-result.json`、`qa-motion.md`和`qa-final.md`，只有实际检查后才更新。
 
-重现：从仓根用共享voice/prep.py、gen.py、build.py加--dir episodes-codex/distributed-tx，再运行本期assemble.py；随后共享selfcheck.py、place_v2.py --mode whole及label_onset_strict.py。保留选定takes避免重新请求非确定性TTS。Python环境/workspace/.venvs/video-studio；TTS线程2，密钥仅环境变量。
+配音、裁尾、铺轨、起音和混音使用`episodes/_shared/`。重建所选音轨使用共享build，不重新请求TTS替换通过检查的文件；需要重新配音时生成独立候选并重新检查。Python依赖需numpy/scipy/soundfile，使用当前已配置的环境。
 
-进入remotion：npm ci、npx tsc --noEmit、npm run stills、npm run covers、npm run render。工作区node_modules软链不入库，独立安装用锁文件。需要FFmpeg、/usr/bin/chromium、Noto Sans CJK SC。完整渲染通过共享锁flock /tmp/video-studio-render.lock调度。
+```sh
+python3 episodes/_shared/voice/build.py --dir episodes-codex/distributed-tx
+python3 episodes-codex/distributed-tx/assemble.py
+python3 episodes/_shared/place_v2.py --dir episodes-codex/distributed-tx --mode whole
+python3 episodes/_shared/label_onset_strict.py --dir episodes-codex/distributed-tx
+```
 
-动态预演：node scripts/motion-qa.mjs /tmp/ep21-motion --shots=04,06,09,10,11,12 --flow=08-11。预演关闭字幕和声音，用于观察对象与状态，不能代替成片媒体检查。
+渲染入口：
 
-配乐为仓库共享Kevin MacLeod《Wallpaper》，CC BY 4.0。混音目标−16 LUFS，真峰值上限−2 dBTP；实际值见报告。
+```sh
+cd episodes-codex/distributed-tx/remotion
+npm ci
+npx tsc --noEmit
+node scripts/v2-qa.mjs /tmp/ep21-overview-qa
+npm run covers
+```
+
+所有负责人停写、实际动态检查收敛后，从仓库根目录运行`python3 episodes-codex/distributed-tx/freeze.py`；再在`remotion/`执行`npm run render`并复制`out/mix-report.json`至本目录，运行`check-final.py`。多人共用机器时完整渲染使用`/tmp/video-studio-render.lock`，冻结后修源须先停止本期排队/运行任务，再重新冻结及完整编码。
+
+站点使用`episodes/distributed-tx/`中的发布副本；那里原有`remotion/`、旧配音/校验脚本与assets是历史工程，不用于重建本片。当前页面源码链接由meta.sourcePath明确指向这里。旧可靠消息单线版可在[v0.45.4标签](https://github.com/linhongcun/video-studio/tree/v0.45.4/episodes-codex/distributed-tx)追溯，不要用其3791帧或旧清单校验本版。
+
+三尺寸封面使用本期Cover.tsx/covers.json；4:3核心x315..1125且y<918，poster与3:4 JPEG一致。无额外全局片尾。配乐Kevin MacLeod《Wallpaper》，CC BY 4.0。
+
+当前环境没有可用官方ASR权重，未绕过网络限制；不声称完成逐字ASR或全片人工听辨。自动信号、全部句级时序、关键动态状态和实际编码抽帧的检查范围分别记录。

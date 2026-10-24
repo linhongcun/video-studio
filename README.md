@@ -38,7 +38,9 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 | 18 | 数据库 | 刚改的昵称，怎么又变回去了？ | [db-replication](https://linhongcun.github.io/video-studio/episodes/db-replication/) | 2026-10-15 |
 | 19 | 分布式 | 订单太多，一个数据库装不下怎么办？ | [db-sharding](https://linhongcun.github.io/video-studio/episodes/db-sharding/) | 2026-10-15 |
 | 20 | 分布式 | 两个订单，怎么撞成同一个号了？ | [global-id](https://linhongcun.github.io/video-studio/episodes/global-id/) | 2026-10-15 |
-| 21 | 分布式 | 下单成功了，库存怎么没扣？ | [distributed-tx](https://linhongcun.github.io/video-studio/episodes/distributed-tx/) | 2026-10-16 |
+| 21 | 分布式 | 分布式事务，几种方案到底怎么选？ | [distributed-tx](https://linhongcun.github.io/video-studio/episodes/distributed-tx/) | 2026-10-16 |
+
+EP.21在v0.45.5按用户反馈扩展为分章总览：2PC/XA、Seata AT、TCC、Saga、可靠消息（区分Outbox与事务消息），逐项展示机制、失败处理与适用边界。新版38镜、约6分29秒，详细依据和当前制作入口见[制作工程](episodes-codex/distributed-tx/README.md)。
 
 ## 制作流程
 

@@ -1,15 +1,107 @@
-# EP.21 核心资料核验
+# EP.21 主流方案分章版：权威资料与技术边界
 
-访问日期：2026-10-24（北京时间）。实际阅读正文后写作，不以issue、旧稿或搜索摘要代替公开来源。片中不展开产品配置和软件版本，不借用旧版四方案并列。
+访问日期：2026-10-24（北京时间）。根据用户最新反馈重新核验，替代原片只讲可靠消息的内容范围。本文件由独立技术研究代理实际打开官方正文并核对有关段落后写作。当前范围为五类方案的新版稿件与配套文章；不是最终编码或上线检查报告。
 
-|ID|公开原始资料|已核验主张|本片使用与边界|
-|---|---|---|---|
-|R1|[AWS Prescriptive Guidance: Transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)|业务行与outbox事件在同一数据库事务写入；提交后另行读取发送；可能重复，消费者须幂等|04—07。待发记录不是内存纸条；订单本地事务不直接修改远端库存|
-|R2|[RabbitMQ Reliability Guide](https://www.rabbitmq.com/docs/reliability)|网络断连可能需要重新发送；发布确认/消费确认有不同含义；确认丢失会导致重复，消费端须按幂等处理|06、10—11。消息已被代理接受不等于库存业务已完成，不宣称无限必达|
-|R3|[Amazon SQS at-least-once delivery](https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/standard-queues-at-least-once-delivery.html)|标准队列可能再次交付同一条消息；应用应使重复处理没有额外不良影响|10—11。仅支持重复可能性，不把所有队列都概括为完全相同保证|
-|R4|[Azure Architecture Center: Compensating Transaction](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)|跨步骤中间状态可暂时不一致；失败恢复需业务化补偿，可能告警人工介入；补偿也可能失败|12—13。不把最终一致写成不论永久故障/缺货都自动成功|
-|R5|[Chris Richardson: Idempotent Consumer, 2020-10-16](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)|在处理消息的数据库事务中记录消息ID并更新业务状态，以唯一性检查拦截重复；事务失败不留下半份处理状态|08—11。处理标记与扣减必须同库存库事务；记录保留与唯一约束是必要实现条件|
+## 先确定讲解的层次
 
-订单8124、通知E8124、商品库存4→3均为教学设计。仅演示同一条库存扣减通知，去重键应包含消息ID或业务操作标识，不能用泛化“订单处理过”吞掉后续退款/调整等合法操作。未做吞吐、延迟或真实商城压测；动画时间不是服务延迟指标。正常路径假设库存足够、服务恢复、重试与持久化机制正确，异常路径明确转交后续处理。
+新版按 **2PC/XA → Seata AT → TCC → Saga → 可靠消息** 分章，最后比较。这里是常用设计方向的教学地图，不是市场占有率排名，也不宣称穷尽全部研究协议。
 
-画面里的订单“已记录”不等于完整业务成交确认。本片修复的是已提交订单的通知不可恢复地漏发、以及重复通知多扣库存的问题；缺货、永久失败和业务取消仍需设计完成/失败状态和补偿。2PC、TCC、Saga、XA等只在片外说明其属于其他设计方向，不并列讲解。
+- **2PC** 是原子提交协议的两阶段过程；**XA** 是事务管理器与资源管理器协作的标准接口。两者在同章说明关系，不能数成两个互不相关的方案。
+- **AT** 是框架的一种事务模式；本片所述具体机制属于 **Seata AT**，不把产品模式泛化为全行业统一标准。
+- **TCC** 把资源准备、确认、取消放到业务接口；**Saga** 把长流程拆为本地事务，并设计继续推进或业务补偿。
+- **Outbox、事务消息** 首先处理“本地业务提交与消息发布”的衔接；它们不是自动把下游数据库纳入同一笔原子提交。可靠发布可以成为 Saga 的组成部分，因此不能画成彼此完全排斥的分类。
+- “最终一致”是对收敛结果的要求，既不是具体框架，也不是“等一会儿一定成功”的机制。
+
+用户这次明确要求覆盖多方案，优先于旧稿“只保留两三个术语”的范围限制。适合保留的视觉原则是分章、同一示例、渐进揭示，一屏只讲当前步骤，不能因为方案增加而把所有流程长期铺满画面。
+
+## 官方正文核验表
+
+以下为独立转述，页面路径未带版本号者在访问时按官网当前文档阅读；本片不报性能排名或产品配置版本。
+
+| ID | 已实际阅读的官方正文 | 支撑范围与关键边界 |
+|---|---|---|
+| A1 | [MySQL：XA Transactions](https://dev.mysql.com/doc/refman/8.4/en/xa.html)，“XA Transactions”正文，特别是全局事务与两阶段过程 | TM 协调各 RM：准备阶段报告能否提交；全部可提交才下达提交，否则回滚。2PC 是过程，XA 规定协作接口。 |
+| A2 | [MySQL：XA Transaction States](https://dev.mysql.com/doc/refman/8.4/en/xa-states.html)，“PREPARED”及恢复状态 | prepare 后尚未终结；显式 commit/rollback 才结束。连接可分离不等于事务已完成或锁自动释放。 |
+| A3 | [MySQL：Restrictions on XA Transactions](https://dev.mysql.com/doc/refman/8.4/en/xa-restrictions.html)，“persistent”与 XA RECOVER | prepared 状态可以持久存在；故障恢复要识别未完成 XA。不能把超时或连接断开画成已准备参与者自行回滚。 |
+| A4 | [Seata：XA Mode](https://seata.apache.org/docs/user/mode/xa/)，“Overall Mechanism”“Disadvantages” | 资源本身需支持 XA；prepare 之后可能等待终决并长期占用锁，限制并发和适用事务长度。 |
+| B1 | [Seata：AT Mode](https://seata.apache.org/docs/user/mode/at/)，“Overall Mechanism” | 一阶段将业务修改与 undo_log 在同一本地事务提交，释放本地锁；二阶段成功清理，失败用日志补偿。 |
+| B2 | [Seata：AT 开发原理](https://seata.apache.org/docs/dev/mode/at-mode/)，“Write isolation”“Read isolation”“Phase 1”“Phase 2” | 全局锁约束参与写入；普通 SELECT 不自动检查全局锁，可能看见本地已提交但全局未完成的数据。回滚需校验前后镜像，不能盲目覆盖并发新数据。 |
+| B3 | [Seata：What Is Seata?](https://seata.apache.org/docs/overview/what-is-seata/)，“AT Mode”“Read isolation” | 当前总览也区分本地提交和全局完成，说明需额外代理读隔离；避免只按产品简介笼统说强隔离。 |
+| C1 | [Seata：TCC Mode](https://seata.apache.org/docs/user/mode/tcc/)，“Overview”“Disadvantages” | 业务实现 Try、Confirm、Cancel，侵入业务但不依赖底层提供 XA；需要资源预留及异常控制。 |
+| C2 | [Seata：TCC 开发原理](https://seata.apache.org/docs/dev/mode/tcc-mode/) | 两阶段由自定义准备、确认和取消行为组成；不是数据库自动回滚。 |
+| C3 | [Seata：TCC Fence 原理，2022-06-25](https://seata.apache.org/blog/seata-tcc-fence/)，“TCC”“Empty rollback”“Idempotence”“Hanging” | Try 实际提交业务预留；重复请求、先 Cancel 后 Try、未执行 Try 的 Cancel 都需设计。框架可辅助，不替代业务正确性。 |
+| D1 | [Seata：Saga Mode](https://seata.apache.org/docs/user/mode/saga/)，“Overview”“Dealing with Lack of Isolation” | 各参与者逐步提交本地事务，失败可补偿；默认没有跨整个流程的事务隔离，已产生的可见业务效果不能当作未发生。 |
+| D2 | [AWS：Saga patterns](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-patterns.html) | 可向前重试或向后补偿；包含编排和事件协同两种组织方式。不是只有中心协调器才叫 Saga。 |
+| D3 | [AWS：Saga orchestration](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-orchestration.html)，“Issues and considerations” | 幂等、无全局事务隔离、语义锁、状态可观察性是具体实现责任。只引用这些边界，不沿用其将所有 database-per-service 情形一概排除 2PC 的概括。 |
+| D4 | [Azure：Compensating Transaction](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)，“Solution”“Problems and considerations” | 补偿依赖业务，不必恢复原快照，不必严格反向执行；补偿会失败，需持久进度、重试和人工处理。 |
+| E1 | [AWS：Transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)，“Intent”“Issues and considerations”“Using an outbox table” | 业务行与待发事件同库事务，另行发送；可能重复，消费者需幂等。它弥合本地持久化与通知之间的双写空档。 |
+| E2 | [RocketMQ：Transaction Message](https://rocketmq.apache.org/docs/featureBehavior/04transactionmessage/)，“Working mechanism”“Usage limits”“Usage notes” | 先保存不可投递半消息，再执行本地事务并报告结果；未知时回查本地结果。边界是本地事务与消息可投递性，下游成功不自动受同一事务保障；只支持接受异步的场景，回查有时限和终止策略。 |
+| E3 | [RocketMQ：Transactional Message Sending](https://rocketmq.apache.org/docs/4.x/producer/06message5/)，Introduction及本地结果回查示例 | 补充核验半消息暂不可投递、执行本地事务、提交/取消结果通知、丢失后回查的顺序。此页用于原理交叉核对，配置和API以实际选定版本为准。 |
+| E4 | [Chris Richardson：Idempotent Consumer，2020-10-16](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，Tracking message IDs及PROCESSED_MESSAGE | 原作者正文实际重读：唯一处理标识与业务修改同事务提交，重复由唯一键拦截；不能只在内存查重或将已处理标识独立提交。 |
+
+本次核心依据均为当前官方文档、2022 年官方技术文章或 2020 年原作者公开说明；未将 2020 年以前材料作为本片关键事实依据。Saga 原论文历史可另列“仅参考”，不需要为了完整性而展开学术沿革。
+
+## 各章统一回答的五个问题
+
+为避免“全部列举以后还是混在一起”，每章必须用相同问题做收尾：**谁负责协调？何时实际提交？失败如何结束？期间别人能看到什么？适合哪些前提？**
+
+| 方案 | 提交与协调 | 正常完成 / 失败 | 期间状态和代价 | 清楚的适用边界 |
+|---|---|---|---|---|
+| 2PC / XA | 协调器决策；支持 XA 的资源先 prepared，后执行最终决定 | 全部准备后决定提交；任一准备失败可决定回滚。进入终决后按记录恢复，不能随意改决定 | prepared 可能持续持锁和等待；原子提交不等同于全局快照、串行化或同一毫秒可见 | 受控、支持 XA 的参与资源与较短事务；不自动纳入普通 HTTP 接口或已发出的邮件 |
+| Seata AT | 代理记录修改前后镜像与 undo_log，本地先提交，全局后决定 | 成功清理日志；失败校验后用日志补偿 | 提早释放本地锁，但仍有全局锁、日志和回滚开销；普通读可能看到全局中间状态 | 支持的数据库、SQL、数据源代理与参与写入路径；不能把外部不可逆副作用当成 SQL 自动撤销 |
+| TCC | 业务实现可恢复的资源预留及确认/取消 | Try 完成资源预留；全部 Try 成功后确认，否则释放预留。阶段调用需可重复与可恢复 | 资源业务上被占用；Try 自身通常已经本地提交，不能画成悬而未提交的 DB 长事务 | 能提供预留接口并正确处理幂等、空回滚和悬挂的业务；不能只做一次查询就声称已预留 |
+| Saga | 各步骤本地提交；由流程编排或事件协同推进 | 暂时故障可继续重试，业务失败可补偿已完成步骤 | 中间结果可见，无天然全局隔离；补偿是新的业务动作 | 长流程、多服务、允许中间状态和业务补偿；不可逆步骤需另行安排或人工处理 |
+| 可靠消息 | 先保证本地提交与发布意图有可靠衔接，再异步消费 | 发布/消费重试，幂等处理；永久业务失败另走失败或补偿流程 | 上下游暂时不一致；消息确认不代表业务成功 | 能接受异步推进的业务；不保证所有资源在同一原子事务里提交 |
+
+该表用于创作和文章，不建议整表长时间铺满视频。视频各章只留下本章最关键的“动作 + 边界”两行，结尾逐行加入对照。
+
+## 可靠消息一章必须再分清的两个实现
+
+**Outbox：**订单库中，订单 8124 与事件 E8124 同笔本地事务写入。提交后由持久化发送进度驱动投递。此处“同笔事务”只包住订单与同库事件，不包住库存库。外发重试可能重复，库存处理标识与库存修改还需在库存本地事务共同提交。
+
+**事务消息（以 RocketMQ 机制作公开依据）：**先在消息系统保存“暂不可投递”的半消息；生产者执行本地事务，再向消息系统确认提交或取消。报告丢失时，消息系统回查生产者所能核验的本地事务最终结果；事务尚在进行应回答 Unknown，不凭空猜结果。此处回查不是询问下游库存有没有扣完。
+
+二者都在弥合本地写入与发布之间的空档，但持久证据位置、先后顺序与恢复协议不同，不能把“Outbox 表”画成“半消息队列”。它们也都不使库存扣减与订单本地提交在同一原子边界内。
+
+## 适合动画的统一业务例子
+
+以下全部为教学示例，不是性能实验。每章明确“重新演示”，复用订单 8124、库存 4 件、本次买 1 件，若展示账户则余额 1000、本次支付 200。颜色稳定：金色为待决定或预留，青色为本步已确认，红色为失败，白色为当前可读基线。不要单靠颜色分辨状态，必须写短状态字。
+
+1. **开场：**两个独立数据资源，订单已写、库存未改，展示普通本地事务边界。随后给出五章导航，当前章单独高亮，其余缩退。
+2. **XA：**两边修改进入准备状态，出现“可提交 / 等决定”；协调器将唯一提交决定持久化，再把决定分别送达。可画一边先收到、一边尚在等待，最后两边完成；不要用同帧变绿暗示消息零时延。另画准备失败→回滚；prepared 后故障则停在“待恢复决定”，不用擅自超时变回原值。
+3. **AT：**库存 4→3 与撤销日志“4→3”共同本地落盘；画面注明“本地已提交，全局未完成”。第二步失败后，从日志发起校验和恢复 3→4，最后释放全局锁。让旁观普通读短暂看到 3，可直观解释与 XA 的边界不同。
+4. **TCC：**库存从“可用 4，预留 0”变成“可用 3，预留 1”。确认分支将预留 1 转成已售 1；取消分支将预留 1 释放，可用回到 4。先预留，再确认，不画成先卖出去再退款。账户若展示，1000 分为可用 800 与预留 200，不凭空改变总量。
+5. **Saga：**本章明确重置示例库存为 0：账户先扣款 200 并本地提交，随后库存检查不足；补偿新增一次“退款 200”的业务操作，余额 800 回到 1000。保留原扣款记录与退款记录，不把时间倒带并抹掉历史。补偿暂时失败时停在“待重试/人工处理”，不要立即宣称全流程完成。
+6. **消息：**先展示 Outbox 的订单+事件同库边界，事件穿过异步链路到库存；随后明确切换“另一种发布机制”，展示半消息/本地事务/结果确认/回查。二者共用下游幂等步骤：E8124 已处理后库存仍为 3。
+7. **结尾：**按“数据库准备 / 日志补偿 / 业务预留 / 业务补偿 / 异步通知”依次回放五个动作，一次只加一个。收尾一句：“先问业务能否等待、能否预留、能否补偿，再选机制；这些方案能组合，没有一项适合所有场景。”此句是基于上述边界的创作归纳，不是来源原话。
+
+## 必须拦截的误导主张
+
+- “XA 和 2PC 是两种并列协议。”应明确接口标准与提交过程的关系。
+- “XA 要求所有库同一瞬间可见”“2PC 自动给出跨库一致快照或全局串行化”。原子终决不推出这些额外保证。
+- “XA 参与者准备后，超时就自己回滚。”已准备资源不能凭本地猜测推翻全局决定。
+- “AT 一阶段还没提交”“释放了全部锁”“跟 XA 的读隔离完全一样”。实际是本地已提交、全局锁仍有作用，普通读还需考虑中间值。
+- “AT 能自动撤销一切副作用”“发现脏写也直接覆写回旧值”。其适用范围是受支持、受代理的数据资源与操作。
+- “TCC 只需检查库存足够”“Try 预留不需要本地持久化”“Confirm 只调用一次就够”。必须真的占住资源并支持恢复与重复调用。
+- “TCC 只有 Try/Confirm 两步”“Saga 只是 TCC 改个名字”。TCC 的取消是释放事先预留；Saga 常在已完成本地业务之后补偿。
+- “Saga 失败就是数据库回滚”“补偿会清掉原来的历史”“补偿永远成功”“Saga 天然全局隔离”。均不成立。
+- “Outbox 保证订单库和库存库原子提交”“半消息回查的是库存消费结果”“事务消息保证下游业务成功”。均越过真实事务边界。
+- “消息只会收到一次”“收到代理确认就是库存改完”“无限重试必然成功”。永久故障、保留期限、业务拒绝及重复必须处理。
+- “可靠消息与 Saga 完全互斥”。可靠事件发布可以支撑 Saga 的某一步或协同消息。
+- “当前主流只有这五种”“某方案一定最快”“某一种占多数”。本次未做市场调查和吞吐比较，视频应说“常见的五个设计方向”，不报排名。
+
+## 内容范围建议
+
+将 3PC、共识算法、数据库内部复制事务、分布式 SQL 内核、框架产品清单放在文章“延伸与范围”即可，不把抽象层不同的名称继续平铺为视频第六、第七种业务方案。若介绍 3PC，应另读原始论文并标年代；不能仅凭网络概括称它“彻底解决 2PC 阻塞”。本次没有为 3PC 或具体分布式数据库产品做完整选型研究，不给该方向作性能或普及率结论。
+
+交付边界：本文件是技术研究与动画建议，不是成片 QA；配音、起音、动态实现、最终编码和上线检查须在新版本实际完成后另行记录。
+
+## 38 镜新版稿件独立审读
+
+已逐镜阅读 `script-overview-v2.md` 与 `visual-overview-v2.md` 的首版 38 镜草稿。五章机制、成功与失败边界基本符合上述官方正文；Saga 第20镜已显式重置库存0，余额1000→800→退款1000没有数值矛盾。XA 的唯一终决、AT 的本地先提交与普通读、TCC 的预留、Saga 的新业务补偿、Outbox 与半消息的不同边界均在稿中出现。
+
+首版审读发现并已由主任务修订：第08镜条件句；第10镜本地锁与全局写锁的区别；第14镜TCC三个操作而非依次三步；第15镜Try预留已经本地提交；第37镜改为幂等与失败处理，避免暗示重试必定使业务成功。第12镜回看全局未结束、第18镜确认成功分支、第22镜退款失败分支均增加明确重置说明。
+
+已重新逐镜核读当前script.md，以上修订已经进入当前旁白与画面描述，稿件核心技术和示例数值检查通过，主任务已启动配音。本研究代理未修改script.md，也不以稿件通过替代实际配音、动态小样或最终编码检查。
+
+配套article.mdx使用固定七章problem、xa、at、tcc、saga、message、compare，并补充XA恢复、AT读隔离、TCC空回滚与悬挂、Saga补偿失败、可靠消息的本地与消费边界和统一比较表。所有阅读记录仅证明资料与稿件已核验；未声称完成人工听辨、逐字ASR、成片审或线上核验。

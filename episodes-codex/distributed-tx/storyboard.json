@@ -1,17 +1,17 @@
 {
   "meta": {
-    "title": "下单成功了，库存怎么没扣？",
+    "title": "分布式事务，几种方案到底怎么选？",
     "episode": 21,
-    "slug": "distributed-tx-v1",
+    "slug": "distributed-tx-v2",
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "durationInFrames": 3791,
-    "finalVideoFrames": 3791,
+    "durationInFrames": 11675,
+    "finalVideoFrames": 11675,
     "draft": true,
     "provisionalTiming": false,
     "pendingAudio": false,
-    "timingSource": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
+    "timingSource": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
     "onsetRule": {
       "module": "episodes/_shared/onset_rule.py",
       "checker": "episodes/_shared/label_onset_strict.py",
@@ -20,9 +20,10 @@
         2
       ]
     },
-    "style": "Progressive outbox and idempotent consumer example; persistent notification, retry, atomic local processing, duplicate skip and bounded eventual consistency; no physical metaphor.",
-    "visualRevision": 1,
+    "style": "Chaptered comparison of 2PC/XA, Seata AT, TCC, Saga and reliable messages; progressive concrete state changes, explicit branch resets and transaction boundaries.",
+    "visualRevision": 2,
     "visualDirection": "visual-direction.md",
+    "userScope": "Five common engineering routes; latest user request supersedes the old two-term scope; not a market ranking.",
     "palette": {
       "bg": "#0F172A",
       "text": "#E5E7EB"
@@ -32,8 +33,8 @@
     "mapShots": [],
     "devtoolsShots": [],
     "covers": {
-      "title": "下单成功了，库存怎么没扣？",
-      "description": "同一条通知，失败后重试，重复不再扣减。",
+      "title": "分布式事务，几种方案到底怎么选？",
+      "description": "五条常见路线，分别讲机制、失败处理与适用边界。",
       "sizes": {
         "16x9": {
           "width": 1920,
@@ -148,8 +149,8 @@
         "sameAs": "3x4"
       }
     },
-    "discussionQuestion": "如果只扣了库存，却没记住已经处理，重复消息来了会怎样？",
-    "audioReview": "No automatic ASR available. Sentence-boundary captions; final listening review pending."
+    "discussionQuestion": "资源、隔离、时长与失败收尾，哪些是这笔业务的约束？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening."
   },
   "assets": {
     "new": [],
@@ -160,69 +161,93 @@
   },
   "scenes": [
     {
-      "id": "hook",
-      "chapterId": "hook",
-      "title": "两个库为何没有一起改",
+      "id": "problem",
+      "chapterId": "problem",
+      "title": "跨系统协作的边界",
       "from": 0,
-      "durationInFrames": 732,
+      "durationInFrames": 872,
       "shots": [
         {
           "id": "01",
           "scriptShot": 1,
-          "chapterId": "hook",
+          "chapterId": "problem",
+          "visualType": "hook",
           "from": 0,
-          "durationInFrames": 226,
-          "narration": "你明明下单成功了，库存却还没扣。订单和库存，为什么没有一起改变？",
+          "durationInFrames": 294,
+          "narration": "库存扣了，支付却失败了，这笔订单怎么办？分布式事务，常见方案到底有什么区别？",
           "subtitles": [
             {
-              "text": "你明明下单成功了，库存却还没扣。",
+              "text": "库存扣了，支付却失败了，这笔订单怎么办？",
               "from": 0,
-              "to": 110,
-              "duration": 111
+              "to": 132,
+              "duration": 133
             },
             {
-              "text": "订单和库存，为什么没有一起改变？",
-              "from": 111,
-              "to": 225,
-              "duration": 115
+              "text": "分布式事务，常见方案到底有什么区别？",
+              "from": 133,
+              "to": 293,
+              "duration": 161
             }
           ],
           "voice": [
             {
               "id": "01-hook-1",
               "wavStart": 9.0,
-              "wavEnd": 100.72,
+              "wavEnd": 123.18,
               "localStart": 9.0,
-              "localEnd": 100.72
+              "localEnd": 123.18
             },
             {
               "id": "01-hook-2",
-              "wavStart": 111.22,
-              "wavEnd": 202.01,
-              "localStart": 111.22,
-              "localEnd": 202.01
+              "wavStart": 133.68,
+              "wavEnd": 273.91,
+              "localStart": 133.68,
+              "localEnd": 273.91
             }
           ],
           "cueFrames": {
+            "labels": {
+              "分布式事务": 133
+            },
             "sentences": [
               9,
-              111
+              133
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
             "wavFrom": 9.0,
-            "wavTo": 202.01,
-            "holdFrames": 23,
+            "wavTo": 273.91,
+            "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
           "frame": "canvas",
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "首帧订单已写与库存4并排出现冲突，随后连接路径中断。",
-          "direction": "首帧订单已写与库存4并排出现冲突，随后连接路径中断。",
-          "elements": [],
+          "scriptVisual": "首帧订单8124与库存4→3出现，付款200请求红色失败；订单保留待确认，禁止显示整单成功。两个结果分阶段发生，不全量铺方案。",
+          "direction": "首帧订单8124与库存4→3出现，付款200请求红色失败；订单保留待确认，禁止显示整单成功。两个结果分阶段发生，不全量铺方案。",
+          "elements": [
+            {
+              "id": "label01_0",
+              "type": "text",
+              "text": "分布式事务",
+              "cueText": "分布式事务",
+              "appearFrame": 133,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "01-hook-2",
+                "asrFrame": null,
+                "onsetLocal": 135.68,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
           "animations": [],
           "transition": {
             "type": "cut",
@@ -232,50 +257,52 @@
         {
           "id": "02",
           "scriptShot": 2,
-          "chapterId": "hook",
-          "from": 226,
-          "durationInFrames": 231,
-          "narration": "现在，订单和库存在两个不同的数据库里。订单库先写好了，扣库存的操作却失败了。",
+          "chapterId": "problem",
+          "visualType": "local-boundary",
+          "from": 294,
+          "durationInFrames": 297,
+          "narration": "同一个数据库里，可以用本地事务一起提交。跨到另一个系统，就不能靠这一笔事务全包。",
           "subtitles": [
             {
-              "text": "现在，订单和库存在两个不同的数据库里。",
+              "text": "同一个数据库里，可以用本地事务一起提交。",
               "from": 0,
-              "to": 106,
-              "duration": 107
+              "to": 138,
+              "duration": 139
             },
             {
-              "text": "订单库先写好了，扣库存的操作却失败了。",
-              "from": 107,
-              "to": 230,
-              "duration": 124
+              "text": "跨到另一个系统，就不能靠这一笔事务全包。",
+              "from": 139,
+              "to": 296,
+              "duration": 158
             }
           ],
           "voice": [
             {
-              "id": "02-two-databases-1",
-              "wavStart": 226.01,
-              "wavEnd": 323.12,
-              "localStart": 0.009999999999990905,
-              "localEnd": 97.12
+              "id": "02-local-boundary-1",
+              "wavStart": 294.91,
+              "wavEnd": 423.2,
+              "localStart": 0.910000000000025,
+              "localEnd": 129.2
             },
             {
-              "id": "02-two-databases-2",
-              "wavStart": 333.62,
-              "wavEnd": 436.92,
-              "localStart": 107.62,
-              "localEnd": 210.92000000000002
+              "id": "02-local-boundary-2",
+              "wavStart": 433.7,
+              "wavEnd": 570.85,
+              "localStart": 139.7,
+              "localEnd": 276.85
             }
           ],
           "cueFrames": {
+            "labels": {},
             "sentences": [
               0,
-              107
+              139
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 226.01,
-            "wavTo": 436.92,
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 294.91,
+            "wavTo": 570.85,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -283,8 +310,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "订单与库存主体拉开距离，先确认订单，再显示库存操作失败。",
-          "direction": "订单与库存主体拉开距离，先确认订单，再显示库存操作失败。",
+          "scriptVisual": "先只显示订单库里的两条操作，由一个边界包住并共同提交；再将库存库移出这个边界，连接请求抵达失败。始终只有一个当前焦点。",
+          "direction": "先只显示订单库里的两条操作，由一个边界包住并共同提交；再将库存库移出这个边界，连接请求抵达失败。始终只有一个当前焦点。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -295,51 +322,52 @@
         {
           "id": "03",
           "scriptShot": 3,
-          "chapterId": "hook",
-          "from": 457,
-          "durationInFrames": 275,
-          "narration": "分布式事务，处理的就是这类跨越多个系统的协作。单个库里的事务，不能直接替另一个库完成修改。",
+          "chapterId": "problem",
+          "visualType": "five-routes",
+          "from": 591,
+          "durationInFrames": 281,
+          "narration": "常见做法，可以按五条工程路线来理解。它们不是同层概念，下面分别看机制和边界。",
           "subtitles": [
             {
-              "text": "分布式事务，处理的就是这类跨越多个系统的协作。",
+              "text": "常见做法，可以按五条工程路线来理解。",
               "from": 0,
-              "to": 137,
-              "duration": 138
+              "to": 125,
+              "duration": 126
             },
             {
-              "text": "单个库里的事务，不能直接替另一个库完成修改。",
-              "from": 138,
-              "to": 274,
-              "duration": 137
+              "text": "它们不是同层概念，下面分别看机制和边界。",
+              "from": 126,
+              "to": 280,
+              "duration": 155
             }
           ],
           "voice": [
             {
-              "id": "03-distributed-1",
-              "wavStart": 457.92,
-              "wavEnd": 584.71,
-              "localStart": 0.9200000000000159,
-              "localEnd": 127.71000000000004
+              "id": "03-five-routes-1",
+              "wavStart": 591.85,
+              "wavEnd": 707.25,
+              "localStart": 0.8500000000000227,
+              "localEnd": 116.25
             },
             {
-              "id": "03-distributed-2",
-              "wavStart": 595.21,
-              "wavEnd": 711.93,
-              "localStart": 138.21000000000004,
-              "localEnd": 254.92999999999995
+              "id": "03-five-routes-2",
+              "wavStart": 717.75,
+              "wavEnd": 851.79,
+              "localStart": 126.75,
+              "localEnd": 260.78999999999996
             }
           ],
           "cueFrames": {
-            "distributedLabel": 1,
+            "labels": {},
             "sentences": [
               0,
-              138
+              126
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 457.92,
-            "wavTo": 711.93,
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 591.85,
+            "wavTo": 851.79,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -347,24 +375,121 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "分布式事务挂词按句首onset出现，订单侧事务边界仅覆盖左侧记录，右侧库存保持4。",
-          "direction": "分布式事务挂词按句首onset出现，订单侧事务边界仅覆盖左侧记录，右侧库存保持4。",
+          "scriptVisual": "当前两资源退为淡色上下文，屏幕中央按顺序出现机制、失败处理、适用边界三个观察点；五个无名称章节刻度只显示当前01，不提前出现未配音的方案术语。",
+          "direction": "当前两资源退为淡色上下文，屏幕中央按顺序出现机制、失败处理、适用边界三个观察点；五个无名称章节刻度只显示当前01，不提前出现未配音的方案术语。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "xa",
+      "chapterId": "xa",
+      "title": "两阶段提交与XA",
+      "from": 872,
+      "durationInFrames": 1458,
+      "shots": [
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "xa",
+          "visualType": "xa-intro",
+          "from": 872,
+          "durationInFrames": 296,
+          "narration": "两阶段提交，先让参与者准备，再作统一决定。XA，提供了让数据库参与这类事务的接口。",
+          "subtitles": [
+            {
+              "text": "两阶段提交，先让参与者准备，再作统一决定。",
+              "from": 0,
+              "to": 134,
+              "duration": 135
+            },
+            {
+              "text": "XA，提供了让数据库参与这类事务的接口。",
+              "from": 135,
+              "to": 295,
+              "duration": 161
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-xa-intro-1",
+              "wavStart": 872.79,
+              "wavEnd": 996.89,
+              "localStart": 0.7899999999999636,
+              "localEnd": 124.88999999999999
+            },
+            {
+              "id": "04-xa-intro-2",
+              "wavStart": 1007.39,
+              "wavEnd": 1147.77,
+              "localStart": 135.39,
+              "localEnd": 275.77
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "两阶段提交": 1,
+              "2PC": 1,
+              "XA": 134
+            },
+            "sentences": [
+              0,
+              135
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 872.79,
+            "wavTo": 1147.77,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "延续订单8124与库存，回到全新示例起点库存4；章名随对应首词起音依次出现。协调者进入上方，准备路径先指向订单库，再指向库存库。XA标签作为接口注释，不能画成第二个并列算法。",
+          "direction": "延续订单8124与库存，回到全新示例起点库存4；章名随对应首词起音依次出现。协调者进入上方，准备路径先指向订单库，再指向库存库。XA标签作为接口注释，不能画成第二个并列算法。",
           "elements": [
             {
-              "id": "distributedLabel",
+              "id": "label04_0",
               "type": "text",
-              "text": "分布式事务",
-              "cueText": "分布式事务",
+              "text": "两阶段提交",
+              "cueText": "两阶段提交",
               "appearFrame": 1,
               "x": 130,
               "y": 165,
-              "w": 500,
+              "w": 1100,
               "h": 80,
-              "fontSize": 58,
+              "fontSize": 52,
               "cueOnset": {
-                "sentence": "03-distributed-1",
+                "sentence": "04-xa-intro-1",
                 "asrFrame": null,
-                "onsetLocal": 2.170000000000016,
+                "onsetLocal": 1.7899999999999636,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            },
+            {
+              "id": "label04_1",
+              "type": "text",
+              "text": "XA",
+              "cueText": "XA",
+              "appearFrame": 134,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "04-xa-intro-2",
+                "asrFrame": null,
+                "onsetLocal": 136.39,
                 "rule": "pause/acoustic sentence onset",
                 "delay": 0
               }
@@ -375,63 +500,56 @@
             "type": "cut",
             "durationInFrames": 0
           }
-        }
-      ]
-    },
-    {
-      "id": "record",
-      "chapterId": "record",
-      "title": "先记住订单和待办",
-      "from": 732,
-      "durationInFrames": 520,
-      "shots": [
+        },
         {
-          "id": "04",
-          "scriptShot": 4,
-          "chapterId": "record",
-          "from": 732,
-          "durationInFrames": 269,
-          "narration": "先看一种做法：把订单和待发送的通知，记在同一个订单库里。它们放进同一笔事务，一起提交。",
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "xa",
+          "visualType": "xa-prepare",
+          "from": 1168,
+          "durationInFrames": 270,
+          "narration": "订单库和库存库先执行修改，暂时不提交。准备成功后，数据库通常还要占着锁。",
           "subtitles": [
             {
-              "text": "先看一种做法：把订单和待发送的通知，记在同一个订单库里。",
+              "text": "订单库和库存库先执行修改，暂时不提交。",
               "from": 0,
-              "to": 161,
-              "duration": 162
+              "to": 139,
+              "duration": 140
             },
             {
-              "text": "它们放进同一笔事务，一起提交。",
-              "from": 162,
-              "to": 268,
-              "duration": 107
+              "text": "准备成功后，数据库通常还要占着锁。",
+              "from": 140,
+              "to": 269,
+              "duration": 130
             }
           ],
           "voice": [
             {
-              "id": "04-record-together-1",
-              "wavStart": 732.93,
-              "wavEnd": 884.2,
-              "localStart": 0.92999999999995,
-              "localEnd": 152.20000000000005
+              "id": "05-xa-prepare-1",
+              "wavStart": 1168.77,
+              "wavEnd": 1297.94,
+              "localStart": 0.7699999999999818,
+              "localEnd": 129.94000000000005
             },
             {
-              "id": "04-record-together-2",
-              "wavStart": 894.7,
-              "wavEnd": 980.88,
-              "localStart": 162.70000000000005,
-              "localEnd": 248.88
+              "id": "05-xa-prepare-2",
+              "wavStart": 1308.44,
+              "wavEnd": 1417.22,
+              "localStart": 140.44000000000005,
+              "localEnd": 249.22000000000003
             }
           ],
           "cueFrames": {
+            "labels": {},
             "sentences": [
               0,
-              162
+              140
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 732.93,
-            "wavTo": 980.88,
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 1168.77,
+            "wavTo": 1417.22,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -439,8 +557,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "焦点移动到订单库，订单8124与待发通知E8124依次进入同一边界，提交时一起确认。",
-          "direction": "焦点移动到订单库，订单8124与待发通知E8124依次进入同一边界，提交时一起确认。",
+          "scriptVisual": "订单8124待提交与库存待提交3依次出现；已确认库存仍4，待提交修改用金色。准备响应返回时，每侧增加资源占用短线，禁止用实物锁或数据库已提交绿色。",
+          "direction": "订单8124待提交与库存待提交3依次出现；已确认库存仍4，待提交修改用金色。准备响应返回时，每侧增加资源占用短线，禁止用实物锁或数据库已提交绿色。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -449,124 +567,54 @@
           }
         },
         {
-          "id": "05",
-          "scriptShot": 5,
-          "chapterId": "record",
-          "from": 1001,
-          "durationInFrames": 251,
-          "narration": "这样，提交成功的订单，就留下了可以继续处理的通知。后台再读出它，发出扣库存的消息。",
-          "subtitles": [
-            {
-              "text": "这样，提交成功的订单，就留下了可以继续处理的通知。",
-              "from": 0,
-              "to": 134,
-              "duration": 135
-            },
-            {
-              "text": "后台再读出它，发出扣库存的消息。",
-              "from": 135,
-              "to": 250,
-              "duration": 116
-            }
-          ],
-          "voice": [
-            {
-              "id": "05-send-1",
-              "wavStart": 1001.88,
-              "wavEnd": 1126.31,
-              "localStart": 0.8799999999999955,
-              "localEnd": 125.30999999999995
-            },
-            {
-              "id": "05-send-2",
-              "wavStart": 1136.81,
-              "wavEnd": 1231.62,
-              "localStart": 135.80999999999995,
-              "localEnd": 230.6199999999999
-            }
-          ],
-          "cueFrames": {
-            "sentences": [
-              0,
-              135
-            ]
-          },
-          "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 1001.88,
-            "wavTo": 1231.62,
-            "holdFrames": 20,
-            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
-          },
-          "frame": "canvas",
-          "camera": null,
-          "boxShot": false,
-          "mapShot": false,
-          "scriptVisual": "保留已存待办，读取出同一通知的发送实例沿路径向右移动。",
-          "direction": "保留已存待办，读取出同一通知的发送实例沿路径向右移动。",
-          "elements": [],
-          "animations": [],
-          "transition": {
-            "type": "cut",
-            "durationInFrames": 0
-          }
-        }
-      ]
-    },
-    {
-      "id": "retry",
-      "chapterId": "retry",
-      "title": "失败后仍能继续发送",
-      "from": 1252,
-      "durationInFrames": 482,
-      "shots": [
-        {
           "id": "06",
           "scriptShot": 6,
-          "chapterId": "retry",
-          "from": 1252,
-          "durationInFrames": 256,
-          "narration": "消息发到一半，网络断了。库存暂时没改，但已经保存的待办还在，程序可以再次尝试。",
+          "chapterId": "xa",
+          "visualType": "xa-commit",
+          "from": 1438,
+          "durationInFrames": 286,
+          "narration": "协调者确认大家都准备好，再记录提交决定。各库按这个决定提交，回复可以先后到达。",
           "subtitles": [
             {
-              "text": "消息发到一半，网络断了。",
+              "text": "协调者确认大家都准备好，再记录提交决定。",
               "from": 0,
-              "to": 84,
-              "duration": 85
+              "to": 136,
+              "duration": 137
             },
             {
-              "text": "库存暂时没改，但已经保存的待办还在，程序可以再次尝试。",
-              "from": 85,
-              "to": 255,
-              "duration": 171
+              "text": "各库按这个决定提交，回复可以先后到达。",
+              "from": 137,
+              "to": 285,
+              "duration": 149
             }
           ],
           "voice": [
             {
-              "id": "06-disconnect-1",
-              "wavStart": 1252.62,
-              "wavEnd": 1327.32,
-              "localStart": 0.6199999999998909,
-              "localEnd": 75.31999999999994
+              "id": "06-xa-commit-1",
+              "wavStart": 1438.22,
+              "wavEnd": 1564.61,
+              "localStart": 0.22000000000002728,
+              "localEnd": 126.6099999999999
             },
             {
-              "id": "06-disconnect-2",
-              "wavStart": 1337.82,
-              "wavEnd": 1487.64,
-              "localStart": 85.81999999999994,
-              "localEnd": 235.6400000000001
+              "id": "06-xa-commit-2",
+              "wavStart": 1575.11,
+              "wavEnd": 1703.2,
+              "localStart": 137.1099999999999,
+              "localEnd": 265.20000000000005
             }
           ],
           "cueFrames": {
+            "labels": {},
             "sentences": [
               0,
-              85
+              137
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 1252.62,
-            "wavTo": 1487.64,
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 1438.22,
+            "wavTo": 1703.2,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -574,8 +622,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "发送实例在路径断点停住并消失，左侧待办仍保留；右侧库存4没有变化。",
-          "direction": "发送实例在路径断点停住并消失，左侧待办仍保留；右侧库存4没有变化。",
+          "scriptVisual": "两个准备响应全到达后，协调者先把提交决定写入持久记录；提交命令分别沿路径抵达，各库可先后确认，最终两边完成。禁止同一帧神奇全局变色来暗示瞬间提交。",
+          "direction": "两个准备响应全到达后，协调者先把提交决定写入持久记录；提交命令分别沿路径抵达，各库可先后确认，最终两边完成。禁止同一帧神奇全局变色来暗示瞬间提交。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -586,185 +634,117 @@
         {
           "id": "07",
           "scriptShot": 7,
-          "chapterId": "retry",
-          "from": 1508,
-          "durationInFrames": 226,
-          "narration": "重试时，还是同一条订单的通知。服务恢复后，它才继续到达库存这一边。",
+          "chapterId": "xa",
+          "visualType": "xa-abort",
+          "from": 1724,
+          "durationInFrames": 269,
+          "narration": "如果有一方准备失败，协调者决定回滚。已做的待提交修改，都按决定撤销。",
           "subtitles": [
             {
-              "text": "重试时，还是同一条订单的通知。",
+              "text": "如果有一方准备失败，协调者决定回滚。",
               "from": 0,
-              "to": 101,
-              "duration": 102
+              "to": 126,
+              "duration": 127
             },
             {
-              "text": "服务恢复后，它才继续到达库存这一边。",
-              "from": 102,
-              "to": 225,
-              "duration": 124
+              "text": "已做的待提交修改，都按决定撤销。",
+              "from": 127,
+              "to": 268,
+              "duration": 142
             }
           ],
           "voice": [
             {
-              "id": "07-retry-1",
-              "wavStart": 1508.64,
-              "wavEnd": 1599.95,
-              "localStart": 0.6400000000001,
-              "localEnd": 91.95000000000005
+              "id": "07-xa-abort-1",
+              "wavStart": 1724.2,
+              "wavEnd": 1840.78,
+              "localStart": 0.20000000000004547,
+              "localEnd": 116.77999999999997
             },
             {
-              "id": "07-retry-2",
-              "wavStart": 1610.45,
-              "wavEnd": 1706.64,
-              "localStart": 102.45000000000005,
-              "localEnd": 198.6400000000001
+              "id": "07-xa-abort-2",
+              "wavStart": 1851.28,
+              "wavEnd": 1972.14,
+              "localStart": 127.27999999999997,
+              "localEnd": 248.1400000000001
             }
           ],
           "cueFrames": {
+            "labels": {},
             "sentences": [
               0,
-              102
+              127
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 1508.64,
-            "wavTo": 1706.64,
-            "holdFrames": 27,
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 1724.2,
+            "wavTo": 1972.14,
+            "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
           "frame": "canvas",
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "同一ID的消息从保存的待办重新发送，沿恢复路径抵达库存侧，不凭空生成新ID。",
-          "direction": "同一ID的消息从保存的待办重新发送，沿恢复路径抵达库存侧，不凭空生成新ID。",
+          "scriptVisual": "明确本镜是新的失败分支，库存回到4起点；订单侧准备成功，库存侧准备拒绝；协调者记录回滚决定，再撤除订单待提交修改，确认值不曾更改。",
+          "direction": "明确本镜是新的失败分支，库存回到4起点；订单侧准备成功，库存侧准备拒绝；协调者记录回滚决定，再撤除订单待提交修改，确认值不曾更改。",
           "elements": [],
           "animations": [],
           "transition": {
             "type": "cut",
             "durationInFrames": 0
           }
-        }
-      ]
-    },
-    {
-      "id": "consume",
-      "chapterId": "consume",
-      "title": "库存侧只处理一次",
-      "from": 1734,
-      "durationInFrames": 1001,
-      "shots": [
+        },
         {
           "id": "08",
           "scriptShot": 8,
-          "chapterId": "consume",
-          "from": 1734,
-          "durationInFrames": 226,
-          "narration": "库存这边先核对，这个订单是否已经处理过。如果没有，就准备扣一次库存。",
+          "chapterId": "xa",
+          "visualType": "xa-boundary",
+          "from": 1993,
+          "durationInFrames": 337,
+          "narration": "但准备以后，协调者失联，参与者不能猜结果。它适合短事务，代价是等待和资源占用。",
           "subtitles": [
             {
-              "text": "库存这边先核对，这个订单是否已经处理过。",
+              "text": "但准备以后，协调者失联，参与者不能猜结果。",
               "from": 0,
-              "to": 110,
-              "duration": 111
+              "to": 163,
+              "duration": 164
             },
             {
-              "text": "如果没有，就准备扣一次库存。",
-              "from": 111,
-              "to": 225,
-              "duration": 115
+              "text": "它适合短事务，代价是等待和资源占用。",
+              "from": 164,
+              "to": 336,
+              "duration": 173
             }
           ],
           "voice": [
             {
-              "id": "08-check-1",
-              "wavStart": 1734.64,
-              "wavEnd": 1835.44,
-              "localStart": 0.6400000000001,
-              "localEnd": 101.44000000000005
+              "id": "08-xa-boundary-1",
+              "wavStart": 1993.14,
+              "wavEnd": 2146.54,
+              "localStart": 0.14000000000010004,
+              "localEnd": 153.53999999999996
             },
             {
-              "id": "08-check-2",
-              "wavStart": 1845.94,
-              "wavEnd": 1923.57,
-              "localStart": 111.94000000000005,
-              "localEnd": 189.56999999999994
+              "id": "08-xa-boundary-2",
+              "wavStart": 2157.04,
+              "wavEnd": 2309.82,
+              "localStart": 164.03999999999996,
+              "localEnd": 316.82000000000016
             }
           ],
           "cueFrames": {
+            "labels": {},
             "sentences": [
               0,
-              111
+              164
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 1734.64,
-            "wavTo": 1923.57,
-            "holdFrames": 36,
-            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
-          },
-          "frame": "canvas",
-          "camera": null,
-          "boxShot": false,
-          "mapShot": false,
-          "scriptVisual": "聚焦右侧订单8124与处理记录查询，未处理才显示扣减待确认，明确本例库存充足。",
-          "direction": "聚焦右侧订单8124与处理记录查询，未处理才显示扣减待确认，明确本例库存充足。",
-          "elements": [],
-          "animations": [],
-          "transition": {
-            "type": "cut",
-            "durationInFrames": 0
-          }
-        },
-        {
-          "id": "09",
-          "scriptShot": 9,
-          "chapterId": "consume",
-          "from": 1960,
-          "durationInFrames": 258,
-          "narration": "扣库存和记下已处理，也要放在同一笔本地事务里。一起提交，才算这一次处理完成。",
-          "subtitles": [
-            {
-              "text": "扣库存和记下已处理，也要放在同一笔本地事务里。",
-              "from": 0,
-              "to": 137,
-              "duration": 138
-            },
-            {
-              "text": "一起提交，才算这一次处理完成。",
-              "from": 138,
-              "to": 257,
-              "duration": 120
-            }
-          ],
-          "voice": [
-            {
-              "id": "09-atomic-consume-1",
-              "wavStart": 1960.56,
-              "wavEnd": 2088.09,
-              "localStart": 0.5599999999999454,
-              "localEnd": 128.09000000000015
-            },
-            {
-              "id": "09-atomic-consume-2",
-              "wavStart": 2098.59,
-              "wavEnd": 2197.44,
-              "localStart": 138.59000000000015,
-              "localEnd": 237.44000000000005
-            }
-          ],
-          "cueFrames": {
-            "sentences": [
-              0,
-              138
-            ]
-          },
-          "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 1960.56,
-            "wavTo": 2197.44,
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 1993.14,
+            "wavTo": 2309.82,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -772,134 +752,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "库存4→3的待确认修改与已处理E8124标记同时进入本地边界；共同提交，不先独立确认其中一边。",
-          "direction": "库存4→3的待确认修改与已处理E8124标记同时进入本地边界；共同提交，不先独立确认其中一边。",
-          "elements": [],
-          "animations": [],
-          "transition": {
-            "type": "cut",
-            "durationInFrames": 0
-          }
-        },
-        {
-          "id": "10",
-          "scriptShot": 10,
-          "chapterId": "consume",
-          "from": 2218,
-          "durationInFrames": 285,
-          "narration": "假如确认回复丢了，同一条消息可能又来一次。这就要用前面讲过的幂等，重复到达，也不能重复扣。",
-          "subtitles": [
-            {
-              "text": "假如确认回复丢了，同一条消息可能又来一次。",
-              "from": 0,
-              "to": 133,
-              "duration": 134
-            },
-            {
-              "text": "这就要用前面讲过的幂等，重复到达，也不能重复扣。",
-              "from": 134,
-              "to": 284,
-              "duration": 151
-            }
-          ],
-          "voice": [
-            {
-              "id": "10-repeat-1",
-              "wavStart": 2218.44,
-              "wavEnd": 2341.51,
-              "localStart": 0.44000000000005457,
-              "localEnd": 123.51000000000022
-            },
-            {
-              "id": "10-repeat-2",
-              "wavStart": 2352.01,
-              "wavEnd": 2482.46,
-              "localStart": 134.01000000000022,
-              "localEnd": 264.46000000000004
-            }
-          ],
-          "cueFrames": {
-            "sentences": [
-              0,
-              134
-            ]
-          },
-          "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 2218.44,
-            "wavTo": 2482.46,
-            "holdFrames": 20,
-            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
-          },
-          "frame": "canvas",
-          "camera": null,
-          "boxShot": false,
-          "mapShot": false,
-          "scriptVisual": "回复路径途中消失，E8124同一消息再次抵达；库存3与已处理标记保留。",
-          "direction": "回复路径途中消失，E8124同一消息再次抵达；库存3与已处理标记保留。",
-          "elements": [],
-          "animations": [],
-          "transition": {
-            "type": "cut",
-            "durationInFrames": 0
-          }
-        },
-        {
-          "id": "11",
-          "scriptShot": 11,
-          "chapterId": "consume",
-          "from": 2503,
-          "durationInFrames": 232,
-          "narration": "查到这个订单已经处理过，程序直接返回已处理。库存保持原值，不会再少一件。",
-          "subtitles": [
-            {
-              "text": "查到这个订单已经处理过，程序直接返回已处理。",
-              "from": 0,
-              "to": 129,
-              "duration": 130
-            },
-            {
-              "text": "库存保持原值，不会再少一件。",
-              "from": 130,
-              "to": 231,
-              "duration": 102
-            }
-          ],
-          "voice": [
-            {
-              "id": "11-skip-1",
-              "wavStart": 2503.46,
-              "wavEnd": 2622.8,
-              "localStart": 0.4600000000000364,
-              "localEnd": 119.80000000000018
-            },
-            {
-              "id": "11-skip-2",
-              "wavStart": 2633.3,
-              "wavEnd": 2714.5,
-              "localStart": 130.30000000000018,
-              "localEnd": 211.5
-            }
-          ],
-          "cueFrames": {
-            "sentences": [
-              0,
-              130
-            ]
-          },
-          "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 2503.46,
-            "wavTo": 2714.5,
-            "holdFrames": 20,
-            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
-          },
-          "frame": "canvas",
-          "camera": null,
-          "boxShot": false,
-          "mapShot": false,
-          "scriptVisual": "第二次消息匹配已处理E8124，路径到此停止，库存保持3，禁止出现2。",
-          "direction": "第二次消息匹配已处理E8124，路径到此停止，库存保持3，禁止出现2。",
+          "scriptVisual": "另一个故障分支：两边已准备，提交/回滚决定尚未知；协调者路径变断，两边保持待决和资源占用，不因超时自行绿灯提交或自动释放。右侧只留下短事务、等待两个关键词。",
+          "direction": "另一个故障分支：两边已准备，提交/回滚决定尚未知；协调者路径变断，两边保持待决和资源占用，不因超时自行绿灯提交或自动释放。右侧只留下短事务、等待两个关键词。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -910,60 +764,63 @@
       ]
     },
     {
-      "id": "eventual",
-      "chapterId": "eventual",
-      "title": "最终一致与失败边界",
-      "from": 2735,
-      "durationInFrames": 696,
+      "id": "at",
+      "chapterId": "at",
+      "title": "AT：本地先提交",
+      "from": 2330,
+      "durationInFrames": 1501,
       "shots": [
         {
-          "id": "12",
-          "scriptShot": 12,
-          "chapterId": "eventual",
-          "from": 2735,
-          "durationInFrames": 368,
-          "narration": "最终一致，是允许中间暂时没对上，再经过处理，让相关状态按业务要求对齐。它不是两个库在同一瞬间完成提交。",
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "at",
+          "visualType": "at-intro",
+          "from": 2330,
+          "durationInFrames": 294,
+          "narration": "AT模式，让框架代理数据库操作。它用本地事务保存业务修改和撤销记录。",
           "subtitles": [
             {
-              "text": "最终一致，是允许中间暂时没对上，再经过处理，让相关状态按业务要求对齐。",
+              "text": "AT模式，让框架代理数据库操作。",
               "from": 0,
-              "to": 249,
-              "duration": 250
+              "to": 120,
+              "duration": 121
             },
             {
-              "text": "它不是两个库在同一瞬间完成提交。",
-              "from": 250,
-              "to": 367,
-              "duration": 118
+              "text": "它用本地事务保存业务修改和撤销记录。",
+              "from": 121,
+              "to": 293,
+              "duration": 173
             }
           ],
           "voice": [
             {
-              "id": "12-eventual-1",
-              "wavStart": 2735.5,
-              "wavEnd": 2975.14,
-              "localStart": 0.5,
-              "localEnd": 240.13999999999987
+              "id": "09-at-intro-1",
+              "wavStart": 2330.82,
+              "wavEnd": 2441.06,
+              "localStart": 0.8200000000001637,
+              "localEnd": 111.05999999999995
             },
             {
-              "id": "12-eventual-2",
-              "wavStart": 2985.64,
-              "wavEnd": 3082.28,
-              "localStart": 250.63999999999987,
-              "localEnd": 347.2800000000002
+              "id": "09-at-intro-2",
+              "wavStart": 2451.56,
+              "wavEnd": 2603.55,
+              "localStart": 121.55999999999995,
+              "localEnd": 273.5500000000002
             }
           ],
           "cueFrames": {
-            "eventualLabel": 1,
+            "labels": {
+              "AT": 1
+            },
             "sentences": [
               0,
-              250
+              121
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 2735.5,
-            "wavTo": 3082.28,
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 2330.82,
+            "wavTo": 2603.55,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -971,24 +828,24 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "最终一致挂词按句首onset；时间先后轴先显示订单已记录/库存未扣，再移动到订单与库存已对齐。",
-          "direction": "最终一致挂词按句首onset；时间先后轴先显示订单已记录/库存未扣，再移动到订单与库存已对齐。",
+          "scriptVisual": "章切换明确示例重置，协调者/准备资源退出；库存4与新撤销记录同时置于同一本地事务边界。AT名称起音出现，角注说明本章指Seata AT机制。",
+          "direction": "章切换明确示例重置，协调者/准备资源退出；库存4与新撤销记录同时置于同一本地事务边界。AT名称起音出现，角注说明本章指Seata AT机制。",
           "elements": [
             {
-              "id": "eventualLabel",
+              "id": "label09_0",
               "type": "text",
-              "text": "最终一致",
-              "cueText": "最终一致",
+              "text": "AT",
+              "cueText": "AT",
               "appearFrame": 1,
               "x": 130,
               "y": 165,
-              "w": 500,
+              "w": 1100,
               "h": 80,
-              "fontSize": 58,
+              "fontSize": 52,
               "cueOnset": {
-                "sentence": "12-eventual-1",
+                "sentence": "09-at-intro-1",
                 "asrFrame": null,
-                "onsetLocal": 1.5,
+                "onsetLocal": 1.8200000000001637,
                 "rule": "pause/acoustic sentence onset",
                 "delay": 0
               }
@@ -1001,52 +858,54 @@
           }
         },
         {
-          "id": "13",
-          "scriptShot": 13,
-          "chapterId": "eventual",
-          "from": 3103,
-          "durationInFrames": 328,
-          "narration": "如果一直失败，或者库存根本不够，就不能只靠重试等下去。还需要告警、补偿或人工处理，决定这笔业务怎么办。",
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "at",
+          "visualType": "at-success",
+          "from": 2624,
+          "durationInFrames": 315,
+          "narration": "库存先扣成三件，并且已经在本地提交。本地锁先释放，全局写锁要等整笔事务结束。",
           "subtitles": [
             {
-              "text": "如果一直失败，或者库存根本不够，就不能只靠重试等下去。",
+              "text": "库存先扣成三件，并且已经在本地提交。",
               "from": 0,
-              "to": 168,
-              "duration": 169
+              "to": 133,
+              "duration": 134
             },
             {
-              "text": "还需要告警、补偿或人工处理，决定这笔业务怎么办。",
-              "from": 169,
-              "to": 327,
-              "duration": 159
+              "text": "本地锁先释放，全局写锁要等整笔事务结束。",
+              "from": 134,
+              "to": 314,
+              "duration": 181
             }
           ],
           "voice": [
             {
-              "id": "13-limits-1",
-              "wavStart": 3103.28,
-              "wavEnd": 3261.8,
-              "localStart": 0.2800000000002001,
-              "localEnd": 158.80000000000018
+              "id": "10-at-success-1",
+              "wavStart": 2624.55,
+              "wavEnd": 2747.73,
+              "localStart": 0.5500000000001819,
+              "localEnd": 123.73000000000002
             },
             {
-              "id": "13-limits-2",
-              "wavStart": 3272.3,
-              "wavEnd": 3410.28,
-              "localStart": 169.30000000000018,
-              "localEnd": 307.2800000000002
+              "id": "10-at-success-2",
+              "wavStart": 2758.23,
+              "wavEnd": 2918.32,
+              "localStart": 134.23000000000002,
+              "localEnd": 294.32000000000016
             }
           ],
           "cueFrames": {
+            "labels": {},
             "sentences": [
               0,
-              169
+              134
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 3103.28,
-            "wavTo": 3410.28,
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 2624.55,
+            "wavTo": 2918.32,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -1054,8 +913,203 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "正常流程退为上下文，重试中断后转入待处理状态，依次出现告警与处理分支，避免无条件成功结论。",
-          "direction": "正常流程退为上下文，重试中断后转入待处理状态，依次出现告警与处理分支，避免无条件成功结论。",
+          "scriptVisual": "本地事务共同提交库存3和撤销记录4→3；3用已提交青色，另挂全局待定金色小状态。订单分支成功回复后全局结束，写冲突控制退出，撤销记录淡出表示后续清理。",
+          "direction": "本地事务共同提交库存3和撤销记录4→3；3用已提交青色，另挂全局待定金色小状态。订单分支成功回复后全局结束，写冲突控制退出，撤销记录淡出表示后续清理。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "at",
+          "visualType": "at-failure",
+          "from": 2939,
+          "durationInFrames": 287,
+          "narration": "另一项操作失败，框架就发起全局回滚。先校验，再用撤销记录恢复，不能盲目覆盖。",
+          "subtitles": [
+            {
+              "text": "另一项操作失败，框架就发起全局回滚。",
+              "from": 0,
+              "to": 138,
+              "duration": 139
+            },
+            {
+              "text": "先校验，再用撤销记录恢复，不能盲目覆盖。",
+              "from": 139,
+              "to": 286,
+              "duration": 148
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-at-failure-1",
+              "wavStart": 2939.32,
+              "wavEnd": 3068.21,
+              "localStart": 0.3200000000001637,
+              "localEnd": 129.21000000000004
+            },
+            {
+              "id": "11-at-failure-2",
+              "wavStart": 3078.71,
+              "wavEnd": 3205.21,
+              "localStart": 139.71000000000004,
+              "localEnd": 266.21000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              139
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 2939.32,
+            "wavTo": 3205.21,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确回到同一操作的失败分支，已提交库存3和撤销记录仍在；订单写入失败，框架核对当前值与记录后产生恢复操作，库存3→4。禁止表现为从未提交，也禁止直接删除无校验恢复他人写入。",
+          "direction": "明确回到同一操作的失败分支，已提交库存3和撤销记录仍在；订单写入失败，框架核对当前值与记录后产生恢复操作，库存3→4。禁止表现为从未提交，也禁止直接删除无校验恢复他人写入。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "at",
+          "visualType": "at-isolation",
+          "from": 3226,
+          "durationInFrames": 288,
+          "narration": "普通查询，可能读到全局结束前的修改。需要更强隔离，还得满足框架的接入要求。",
+          "subtitles": [
+            {
+              "text": "普通查询，可能读到全局结束前的修改。",
+              "from": 0,
+              "to": 132,
+              "duration": 133
+            },
+            {
+              "text": "需要更强隔离，还得满足框架的接入要求。",
+              "from": 133,
+              "to": 287,
+              "duration": 155
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-at-isolation-1",
+              "wavStart": 3226.21,
+              "wavEnd": 3348.98,
+              "localStart": 0.21000000000003638,
+              "localEnd": 122.98000000000002
+            },
+            {
+              "id": "12-at-isolation-2",
+              "wavStart": 3359.48,
+              "wavEnd": 3493.12,
+              "localStart": 133.48000000000002,
+              "localEnd": 267.1199999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              133
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 3226.21,
+            "wavTo": 3493.12,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确标注“回看：全局未结束时”，再放大全局待定期间库存3，本地普通读箭头读取并返回3；全局待定标记同时保留，防止误解为全局成功。再把符合框架要求的读画成另一条受控制路径；避免承诺所有普通SELECT都阻塞。",
+          "direction": "明确标注“回看：全局未结束时”，再放大全局待定期间库存3，本地普通读箭头读取并返回3；全局待定标记同时保留，防止误解为全局成功。再把符合框架要求的读画成另一条受控制路径；避免承诺所有普通SELECT都阻塞。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "at",
+          "visualType": "at-limit",
+          "from": 3514,
+          "durationInFrames": 317,
+          "narration": "它适合框架支持的数据库和SQL操作。它不是对任意外部调用都能自动撤销。",
+          "subtitles": [
+            {
+              "text": "它适合框架支持的数据库和SQL操作。",
+              "from": 0,
+              "to": 170,
+              "duration": 171
+            },
+            {
+              "text": "它不是对任意外部调用都能自动撤销。",
+              "from": 171,
+              "to": 316,
+              "duration": 146
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-at-limit-1",
+              "wavStart": 3514.12,
+              "wavEnd": 3674.62,
+              "localStart": 0.11999999999989086,
+              "localEnd": 160.6199999999999
+            },
+            {
+              "id": "13-at-limit-2",
+              "wavStart": 3685.12,
+              "wavEnd": 3810.47,
+              "localStart": 171.1199999999999,
+              "localEnd": 296.4699999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              171
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 3514.12,
+            "wavTo": 3810.47,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "主体仍为库存行与撤销记录，先高亮被代理的数据库操作；再引入独立的外部调用节点，撤销记录路径不能包住它，标需另行设计。每次只强调一个边界。",
+          "direction": "主体仍为库存行与撤销记录，先高亮被代理的数据库操作；再引入独立的外部调用节点，撤销记录路径不能包住它，标需另行设计。每次只强调一个边界。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -1066,59 +1120,1758 @@
       ]
     },
     {
-      "id": "question",
-      "chapterId": "question",
-      "title": "回头检查漏掉的保证",
-      "from": 3431,
-      "durationInFrames": 360,
+      "id": "tcc",
+      "chapterId": "tcc",
+      "title": "TCC：业务先预留",
+      "from": 3831,
+      "durationInFrames": 1569,
       "shots": [
         {
           "id": "14",
           "scriptShot": 14,
-          "chapterId": "question",
-          "from": 3431,
-          "durationInFrames": 360,
-          "narration": "回头想一想：如果只扣了库存，却没记住已经处理，重复消息来了会怎样？把每一步连起来看，才能找到真正漏掉的保证。",
+          "chapterId": "tcc",
+          "visualType": "tcc-intro",
+          "from": 3831,
+          "durationInFrames": 345,
+          "narration": "TCC，让业务实现尝试、确认和取消三个操作。先看库存，尝试阶段先预留一件。",
           "subtitles": [
             {
-              "text": "回头想一想：如果只扣了库存，却没记住已经处理，重复消息来了会怎样？",
+              "text": "TCC，让业务实现尝试、确认和取消三个操作。",
               "from": 0,
-              "to": 195,
-              "duration": 196
+              "to": 223,
+              "duration": 224
             },
             {
-              "text": "把每一步连起来看，才能找到真正漏掉的保证。",
-              "from": 196,
-              "to": 359,
-              "duration": 164
+              "text": "先看库存，尝试阶段先预留一件。",
+              "from": 224,
+              "to": 344,
+              "duration": 121
             }
           ],
           "voice": [
             {
-              "id": "14-question-1",
-              "wavStart": 3431.28,
-              "wavEnd": 3616.73,
-              "localStart": 0.2800000000002001,
-              "localEnd": 185.73000000000002
+              "id": "14-tcc-intro-1",
+              "wavStart": 3831.47,
+              "wavEnd": 4045.09,
+              "localStart": 0.4699999999997999,
+              "localEnd": 214.09000000000015
             },
             {
-              "id": "14-question-2",
-              "wavStart": 3627.23,
-              "wavEnd": 3745.61,
-              "localStart": 196.23000000000002,
-              "localEnd": 314.6100000000001
+              "id": "14-tcc-intro-2",
+              "wavStart": 4055.59,
+              "wavEnd": 4155.48,
+              "localStart": 224.59000000000015,
+              "localEnd": 324.47999999999956
             }
           ],
           "cueFrames": {
+            "labels": {
+              "TCC": 1
+            },
             "sentences": [
               0,
-              196
+              224
             ]
           },
           "timing": {
-            "source": "voice.wav 84d227b2 + words.json 405ff3c4 + script.md c0b3f689",
-            "wavFrom": 3431.28,
-            "wavTo": 3745.61,
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 3831.47,
+            "wavTo": 4155.48,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "AT撤销记录退出，库存恢复可用4、预留0；TCC名称起音出现。尝试请求沿路径进入库存，预留位从同一库存对象分出，不克隆第二份库存。",
+          "direction": "AT撤销记录退出，库存恢复可用4、预留0；TCC名称起音出现。尝试请求沿路径进入库存，预留位从同一库存对象分出，不克隆第二份库存。",
+          "elements": [
+            {
+              "id": "label14_0",
+              "type": "text",
+              "text": "TCC",
+              "cueText": "TCC",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "14-tcc-intro-1",
+                "asrFrame": null,
+                "onsetLocal": 1.4699999999998,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "15",
+          "scriptShot": 15,
+          "chapterId": "tcc",
+          "visualType": "tcc-try",
+          "from": 4176,
+          "durationInFrames": 363,
+          "narration": "可用库存从四变三，预留从零变一。资源先被占好并本地提交，还没有正式成交。",
+          "subtitles": [
+            {
+              "text": "可用库存从四变三，预留从零变一。",
+              "from": 0,
+              "to": 184,
+              "duration": 185
+            },
+            {
+              "text": "资源先被占好并本地提交，还没有正式成交。",
+              "from": 185,
+              "to": 362,
+              "duration": 178
+            }
+          ],
+          "voice": [
+            {
+              "id": "15-tcc-try-1",
+              "wavStart": 4176.48,
+              "wavEnd": 4350.75,
+              "localStart": 0.47999999999956344,
+              "localEnd": 174.75
+            },
+            {
+              "id": "15-tcc-try-2",
+              "wavStart": 4361.25,
+              "wavEnd": 4518.56,
+              "localStart": 185.25,
+              "localEnd": 342.5600000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              185
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 4176.48,
+            "wavTo": 4518.56,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "同一件库存标记从可用列移动到预留列，落点时可用4→3、预留0→1同时更新；订单8124处于尝试完成，禁止写扣减成功。",
+          "direction": "同一件库存标记从可用列移动到预留列，落点时可用4→3、预留0→1同时更新；订单8124处于尝试完成，禁止写扣减成功。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "16",
+          "scriptShot": 16,
+          "chapterId": "tcc",
+          "visualType": "tcc-confirm",
+          "from": 4539,
+          "durationInFrames": 235,
+          "narration": "各方尝试都成功，再执行确认。预留转成正式扣减，不再重复扣一遍。",
+          "subtitles": [
+            {
+              "text": "各方尝试都成功，再执行确认。",
+              "from": 0,
+              "to": 107,
+              "duration": 108
+            },
+            {
+              "text": "预留转成正式扣减，不再重复扣一遍。",
+              "from": 108,
+              "to": 234,
+              "duration": 127
+            }
+          ],
+          "voice": [
+            {
+              "id": "16-tcc-confirm-1",
+              "wavStart": 4539.56,
+              "wavEnd": 4636.61,
+              "localStart": 0.5600000000004002,
+              "localEnd": 97.60999999999967
+            },
+            {
+              "id": "16-tcc-confirm-2",
+              "wavStart": 4647.11,
+              "wavEnd": 4753.87,
+              "localStart": 108.10999999999967,
+              "localEnd": 214.8699999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              108
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 4539.56,
+            "wavTo": 4753.87,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "订单分支尝试成功的响应抵达后，确认命令进入库存；预留1转为已扣1，可用仍3，禁止再次3→2。落点后预留归零，保留可用3/本单扣减1可读停留。",
+          "direction": "订单分支尝试成功的响应抵达后，确认命令进入库存；预留1转为已扣1，可用仍3，禁止再次3→2。落点后预留归零，保留可用3/本单扣减1可读停留。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "17",
+          "scriptShot": 17,
+          "chapterId": "tcc",
+          "visualType": "tcc-cancel",
+          "from": 4774,
+          "durationInFrames": 277,
+          "narration": "如果一方尝试失败，就取消已经预留的资源。可用库存回到四，预留回到零。",
+          "subtitles": [
+            {
+              "text": "如果一方尝试失败，就取消已经预留的资源。",
+              "from": 0,
+              "to": 153,
+              "duration": 154
+            },
+            {
+              "text": "可用库存回到四，预留回到零。",
+              "from": 154,
+              "to": 276,
+              "duration": 123
+            }
+          ],
+          "voice": [
+            {
+              "id": "17-tcc-cancel-1",
+              "wavStart": 4774.87,
+              "wavEnd": 4917.6,
+              "localStart": 0.8699999999998909,
+              "localEnd": 143.60000000000036
+            },
+            {
+              "id": "17-tcc-cancel-2",
+              "wavStart": 4928.1,
+              "wavEnd": 5030.71,
+              "localStart": 154.10000000000036,
+              "localEnd": 256.71000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              154
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 4774.87,
+            "wavTo": 5030.71,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确失败分支回到可用3/预留1，订单尝试失败，取消命令抵达；同一预留标记返回可用列，落点同时可用3→4、预留1→0。",
+          "direction": "明确失败分支回到可用3/预留1，订单尝试失败，取消命令抵达；同一预留标记返回可用列，落点同时可用3→4、预留1→0。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "18",
+          "scriptShot": 18,
+          "chapterId": "tcc",
+          "visualType": "tcc-limit",
+          "from": 5051,
+          "durationInFrames": 349,
+          "narration": "确认和取消必须幂等，并防住超时后迟到的尝试。它适合可预留资源，三套接口由业务实现。",
+          "subtitles": [
+            {
+              "text": "确认和取消必须幂等，并防住超时后迟到的尝试。",
+              "from": 0,
+              "to": 174,
+              "duration": 175
+            },
+            {
+              "text": "它适合可预留资源，三套接口由业务实现。",
+              "from": 175,
+              "to": 348,
+              "duration": 174
+            }
+          ],
+          "voice": [
+            {
+              "id": "18-tcc-limit-1",
+              "wavStart": 5051.71,
+              "wavEnd": 5215.58,
+              "localStart": 0.7100000000000364,
+              "localEnd": 164.57999999999993
+            },
+            {
+              "id": "18-tcc-limit-2",
+              "wavStart": 5226.08,
+              "wavEnd": 5379.1,
+              "localStart": 175.07999999999993,
+              "localEnd": 328.10000000000036
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              175
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 5051.71,
+            "wavTo": 5379.1,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确改看“确认成功分支”，展示已确认状态，一次重复确认到达后只返回原结果，可用保持3；再以简短的取消已完成/迟到尝试被拦截示意乱序。空回滚、悬挂细节放文章，不新增密集术语牌。",
+          "direction": "明确改看“确认成功分支”，展示已确认状态，一次重复确认到达后只返回原结果，可用保持3；再以简短的取消已完成/迟到尝试被拦截示意乱序。空回滚、悬挂细节放文章，不新增密集术语牌。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "saga",
+      "chapterId": "saga",
+      "title": "Saga：提交与补偿",
+      "from": 5400,
+      "durationInFrames": 1411,
+      "shots": [
+        {
+          "id": "19",
+          "scriptShot": 19,
+          "chapterId": "saga",
+          "visualType": "saga-intro",
+          "from": 5400,
+          "durationInFrames": 297,
+          "narration": "Saga，把长流程拆成一笔笔本地事务。每步先提交，全部完成，这笔业务才算走完。",
+          "subtitles": [
+            {
+              "text": "Saga，把长流程拆成一笔笔本地事务。",
+              "from": 0,
+              "to": 138,
+              "duration": 139
+            },
+            {
+              "text": "每步先提交，全部完成，这笔业务才算走完。",
+              "from": 139,
+              "to": 296,
+              "duration": 158
+            }
+          ],
+          "voice": [
+            {
+              "id": "19-saga-intro-1",
+              "wavStart": 5400.1,
+              "wavEnd": 5529.47,
+              "localStart": 0.1000000000003638,
+              "localEnd": 129.47000000000025
+            },
+            {
+              "id": "19-saga-intro-2",
+              "wavStart": 5539.97,
+              "wavEnd": 5676.61,
+              "localStart": 139.97000000000025,
+              "localEnd": 276.6099999999997
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "Saga": 1
+            },
+            "sentences": [
+              0,
+              139
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 5400.1,
+            "wavTo": 5676.61,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "TCC预留结构退出，明确示例重置。订单8124居上，付款200与库存4沿时间轴分列；每步用自己的本地提交边界依次确认，整单完成标记只在末步后出现。",
+          "direction": "TCC预留结构退出，明确示例重置。订单8124居上，付款200与库存4沿时间轴分列；每步用自己的本地提交边界依次确认，整单完成标记只在末步后出现。",
+          "elements": [
+            {
+              "id": "label19_0",
+              "type": "text",
+              "text": "Saga",
+              "cueText": "Saga",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "19-saga-intro-1",
+                "asrFrame": null,
+                "onsetLocal": 1.1000000000003638,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "20",
+          "scriptShot": 20,
+          "chapterId": "saga",
+          "visualType": "saga-failure",
+          "from": 5697,
+          "durationInFrames": 277,
+          "narration": "换个失败例，这次库存已经是零。两百元已经扣款，随后扣库存却失败了。",
+          "subtitles": [
+            {
+              "text": "换个失败例，这次库存已经是零。",
+              "from": 0,
+              "to": 115,
+              "duration": 116
+            },
+            {
+              "text": "两百元已经扣款，随后扣库存却失败了。",
+              "from": 116,
+              "to": 276,
+              "duration": 161
+            }
+          ],
+          "voice": [
+            {
+              "id": "20-saga-failure-1",
+              "wavStart": 5697.61,
+              "wavEnd": 5803.28,
+              "localStart": 0.6099999999996726,
+              "localEnd": 106.27999999999975
+            },
+            {
+              "id": "20-saga-failure-2",
+              "wavStart": 5813.78,
+              "wavEnd": 5953.93,
+              "localStart": 116.77999999999975,
+              "localEnd": 256.9300000000003
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              116
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 5697.61,
+            "wavTo": 5953.93,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确切换到缺货失败例，章内横幅写“另一个失败例：库存0”，不得承接上镜成功路径的库存4；付款200已本地提交，余额若显示则1000→800，保留扣款记录。随后本单扣库存被拒绝，补偿路径从失败点返回付款服务。",
+          "direction": "明确切换到缺货失败例，章内横幅写“另一个失败例：库存0”，不得承接上镜成功路径的库存4；付款200已本地提交，余额若显示则1000→800，保留扣款记录。随后本单扣库存被拒绝，补偿路径从失败点返回付款服务。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "21",
+          "scriptShot": 21,
+          "chapterId": "saga",
+          "visualType": "saga-compensate",
+          "from": 5974,
+          "durationInFrames": 266,
+          "narration": "退款，是一笔新的业务操作。它不会抹掉原扣款记录，也不是数据库回滚。",
+          "subtitles": [
+            {
+              "text": "退款，是一笔新的业务操作。",
+              "from": 0,
+              "to": 106,
+              "duration": 107
+            },
+            {
+              "text": "它不会抹掉原扣款记录，也不是数据库回滚。",
+              "from": 107,
+              "to": 265,
+              "duration": 159
+            }
+          ],
+          "voice": [
+            {
+              "id": "21-saga-compensate-1",
+              "wavStart": 5974.93,
+              "wavEnd": 6070.88,
+              "localStart": 0.930000000000291,
+              "localEnd": 96.88000000000011
+            },
+            {
+              "id": "21-saga-compensate-2",
+              "wavStart": 6081.38,
+              "wavEnd": 6219.12,
+              "localStart": 107.38000000000011,
+              "localEnd": 245.1199999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              107
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 5974.93,
+            "wavTo": 6219.12,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保留原扣款−200记录，新增退款+200记录并独立提交；两条记录都留存，余额若显示则800→1000。用新的退款请求向前执行，禁止时间倒放、删除扣款或标成同一个原事务回滚。",
+          "direction": "保留原扣款−200记录，新增退款+200记录并独立提交；两条记录都留存，余额若显示则800→1000。用新的退款请求向前执行，禁止时间倒放、删除扣款或标成同一个原事务回滚。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "22",
+          "scriptShot": 22,
+          "chapterId": "saga",
+          "visualType": "saga-risk",
+          "from": 6240,
+          "durationInFrames": 315,
+          "narration": "补偿也可能失败，需要重试、告警或人工处理。而且别的事务，可能看到中途已经提交的状态。",
+          "subtitles": [
+            {
+              "text": "补偿也可能失败，需要重试、告警或人工处理。",
+              "from": 0,
+              "to": 170,
+              "duration": 171
+            },
+            {
+              "text": "而且别的事务，可能看到中途已经提交的状态。",
+              "from": 171,
+              "to": 314,
+              "duration": 144
+            }
+          ],
+          "voice": [
+            {
+              "id": "22-saga-risk-1",
+              "wavStart": 6240.12,
+              "wavEnd": 6400.6,
+              "localStart": 0.11999999999989086,
+              "localEnd": 160.60000000000036
+            },
+            {
+              "id": "22-saga-risk-2",
+              "wavStart": 6411.1,
+              "wavEnd": 6534.86,
+              "localStart": 171.10000000000036,
+              "localEnd": 294.8599999999997
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              171
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 6240.12,
+            "wavTo": 6534.86,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确另起“退款失败分支”，重置为已扣款/尚未退款，再将退款请求失败后保留待补偿状态，重试路径与告警依次出现；接着另一个查询读取到已扣款/待退款状态，突出这些本地结果已提交，不画全程隔离大边界。",
+          "direction": "明确另起“退款失败分支”，重置为已扣款/尚未退款，再将退款请求失败后保留待补偿状态，重试路径与告警依次出现；接着另一个查询读取到已扣款/待退款状态，突出这些本地结果已提交，不画全程隔离大边界。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "23",
+          "scriptShot": 23,
+          "chapterId": "saga",
+          "visualType": "saga-limit",
+          "from": 6555,
+          "durationInFrames": 256,
+          "narration": "它适合能定义补偿的长流程。不能接受中间状态、又无法补偿的动作，就不合适。",
+          "subtitles": [
+            {
+              "text": "它适合能定义补偿的长流程。",
+              "from": 0,
+              "to": 93,
+              "duration": 94
+            },
+            {
+              "text": "不能接受中间状态、又无法补偿的动作，就不合适。",
+              "from": 94,
+              "to": 255,
+              "duration": 162
+            }
+          ],
+          "voice": [
+            {
+              "id": "23-saga-limit-1",
+              "wavStart": 6555.86,
+              "wavEnd": 6638.85,
+              "localStart": 0.8599999999996726,
+              "localEnd": 83.85000000000036
+            },
+            {
+              "id": "23-saga-limit-2",
+              "wavStart": 6649.35,
+              "wavEnd": 6790.26,
+              "localStart": 94.35000000000036,
+              "localEnd": 235.26000000000022
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              94
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 6555.86,
+            "wavTo": 6790.26,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "付款/退款记录缩退为上下文，当前焦点移到可补偿判断；已发出的不可撤销外部动作只用简洁文字对象说明需先设计边界，不扩展成新技术分支。",
+          "direction": "付款/退款记录缩退为上下文，当前焦点移到可补偿判断；已发出的不可撤销外部动作只用简洁文字对象说明需先设计边界，不扩展成新技术分支。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "message",
+      "chapterId": "message",
+      "title": "可靠消息的两种衔接",
+      "from": 6811,
+      "durationInFrames": 2437,
+      "shots": [
+        {
+          "id": "24",
+          "scriptShot": 24,
+          "chapterId": "message",
+          "visualType": "message-intro",
+          "from": 6811,
+          "durationInFrames": 348,
+          "narration": "可靠消息，让一边先完成本地事务，再异步通知另一边。它允许中间暂时没对上，但必须留下可追踪的进度。",
+          "subtitles": [
+            {
+              "text": "可靠消息，让一边先完成本地事务，再异步通知另一边。",
+              "from": 0,
+              "to": 165,
+              "duration": 166
+            },
+            {
+              "text": "它允许中间暂时没对上，但必须留下可追踪的进度。",
+              "from": 166,
+              "to": 347,
+              "duration": 182
+            }
+          ],
+          "voice": [
+            {
+              "id": "24-message-intro-1",
+              "wavStart": 6811.26,
+              "wavEnd": 6966.72,
+              "localStart": 0.2600000000002183,
+              "localEnd": 155.72000000000025
+            },
+            {
+              "id": "24-message-intro-2",
+              "wavStart": 6977.22,
+              "wavEnd": 7138.49,
+              "localStart": 166.22000000000025,
+              "localEnd": 327.4899999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "可靠消息": 1
+            },
+            "sentences": [
+              0,
+              166
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 6811.26,
+            "wavTo": 7138.49,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "Saga退款历史退出，示例重置为订单8124待创建、库存4；订单先本地记录，库存仍4，整单待确认。细时间轴明确两边先后，禁止共同提交边界跨两库。",
+          "direction": "Saga退款历史退出，示例重置为订单8124待创建、库存4；订单先本地记录，库存仍4，整单待确认。细时间轴明确两边先后，禁止共同提交边界跨两库。",
+          "elements": [
+            {
+              "id": "label24_0",
+              "type": "text",
+              "text": "可靠消息",
+              "cueText": "可靠消息",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "24-message-intro-1",
+                "asrFrame": null,
+                "onsetLocal": 1.2600000000002183,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "25",
+          "scriptShot": 25,
+          "chapterId": "message",
+          "visualType": "outbox-record",
+          "from": 7159,
+          "durationInFrames": 322,
+          "narration": "Outbox，把订单和待发送事件记在同一个库。两条记录放在一笔本地事务里，一起提交。",
+          "subtitles": [
+            {
+              "text": "Outbox，把订单和待发送事件记在同一个库。",
+              "from": 0,
+              "to": 161,
+              "duration": 162
+            },
+            {
+              "text": "两条记录放在一笔本地事务里，一起提交。",
+              "from": 162,
+              "to": 321,
+              "duration": 160
+            }
+          ],
+          "voice": [
+            {
+              "id": "25-outbox-record-1",
+              "wavStart": 7159.49,
+              "wavEnd": 7311.05,
+              "localStart": 0.4899999999997817,
+              "localEnd": 152.05000000000018
+            },
+            {
+              "id": "25-outbox-record-2",
+              "wavStart": 7321.55,
+              "wavEnd": 7460.7,
+              "localStart": 162.55000000000018,
+              "localEnd": 301.6999999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "Outbox": 1
+            },
+            "sentences": [
+              0,
+              162
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 7159.49,
+            "wavTo": 7460.7,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "只聚焦订单库，订单8124与事件E8124依次放入同一本地事务边界；提交点两者一起确认，库存4仍在边界外淡显。",
+          "direction": "只聚焦订单库，订单8124与事件E8124依次放入同一本地事务边界；提交点两者一起确认，库存4仍在边界外淡显。",
+          "elements": [
+            {
+              "id": "label25_0",
+              "type": "text",
+              "text": "Outbox",
+              "cueText": "Outbox",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "25-outbox-record-1",
+                "asrFrame": null,
+                "onsetLocal": 1.4899999999997817,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "26",
+          "scriptShot": 26,
+          "chapterId": "message",
+          "visualType": "outbox-send",
+          "from": 7481,
+          "durationInFrames": 268,
+          "narration": "提交后，后台再把事件送给消息队列。发送失败就重试，待办记录不能提前消失。",
+          "subtitles": [
+            {
+              "text": "提交后，后台再把事件送给消息队列。",
+              "from": 0,
+              "to": 135,
+              "duration": 136
+            },
+            {
+              "text": "发送失败就重试，待办记录不能提前消失。",
+              "from": 136,
+              "to": 267,
+              "duration": 132
+            }
+          ],
+          "voice": [
+            {
+              "id": "26-outbox-send-1",
+              "wavStart": 7481.7,
+              "wavEnd": 7606.86,
+              "localStart": 0.6999999999998181,
+              "localEnd": 125.85999999999967
+            },
+            {
+              "id": "26-outbox-send-2",
+              "wavStart": 7617.36,
+              "wavEnd": 7728.88,
+              "localStart": 136.35999999999967,
+              "localEnd": 247.8800000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              136
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 7481.7,
+            "wavTo": 7728.88,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "持久事件保留，发送实例从该事件读出沿路径移动；断线后发送实例消失而待办仍在；新尝试沿恢复路径再次发出同一E8124，不生成新业务事件。",
+          "direction": "持久事件保留，发送实例从该事件读出沿路径移动；断线后发送实例消失而待办仍在；新尝试沿恢复路径再次发出同一E8124，不生成新业务事件。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "27",
+          "scriptShot": 27,
+          "chapterId": "message",
+          "visualType": "outbox-consume",
+          "from": 7749,
+          "durationInFrames": 293,
+          "narration": "库存收到消息后，扣减和去重标记也一起提交。同一事件再来，查到已处理，就不再扣一次。",
+          "subtitles": [
+            {
+              "text": "库存收到消息后，扣减和去重标记也一起提交。",
+              "from": 0,
+              "to": 155,
+              "duration": 156
+            },
+            {
+              "text": "同一事件再来，查到已处理，就不再扣一次。",
+              "from": 156,
+              "to": 292,
+              "duration": 137
+            }
+          ],
+          "voice": [
+            {
+              "id": "27-outbox-consume-1",
+              "wavStart": 7749.88,
+              "wavEnd": 7895.21,
+              "localStart": 0.8800000000001091,
+              "localEnd": 146.21000000000004
+            },
+            {
+              "id": "27-outbox-consume-2",
+              "wavStart": 7905.71,
+              "wavEnd": 8021.09,
+              "localStart": 156.71000000000004,
+              "localEnd": 272.09000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              156
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 7749.88,
+            "wavTo": 8021.09,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "消息抵达库存侧，本地边界内库存待修改3与处理E8124标记共同提交；重复E8124抵达后返回已处理，库存保持3。事件标识用于本次消费，不泛用订单标记吞掉后续合法动作。",
+          "direction": "消息抵达库存侧，本地边界内库存待修改3与处理E8124标记共同提交；重复E8124抵达后返回已处理，库存保持3。事件标识用于本次消费，不泛用订单标记吞掉后续合法动作。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "28",
+          "scriptShot": 28,
+          "chapterId": "message",
+          "visualType": "outbox-limit",
+          "from": 8042,
+          "durationInFrames": 257,
+          "narration": "消息可靠，不代表库存一定够。一直失败，还要补偿、告警或人工处理。",
+          "subtitles": [
+            {
+              "text": "消息可靠，不代表库存一定够。",
+              "from": 0,
+              "to": 109,
+              "duration": 110
+            },
+            {
+              "text": "一直失败，还要补偿、告警或人工处理。",
+              "from": 110,
+              "to": 256,
+              "duration": 147
+            }
+          ],
+          "voice": [
+            {
+              "id": "28-outbox-limit-1",
+              "wavStart": 8042.09,
+              "wavEnd": 8141.63,
+              "localStart": 0.09000000000014552,
+              "localEnd": 99.63000000000011
+            },
+            {
+              "id": "28-outbox-limit-2",
+              "wavStart": 8152.13,
+              "wavEnd": 8278.53,
+              "localStart": 110.13000000000011,
+              "localEnd": 236.53000000000065
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              110
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 8042.09,
+            "wavTo": 8278.53,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "缺货分支明确重置库存0，消息已送达但扣减被拒绝，整单仍待处理；告警、取消订单或退款处理依次出现，禁止无条件把重试画成成功。",
+          "direction": "缺货分支明确重置库存0，消息已送达但扣减被拒绝，整单仍待处理；告警、取消订单或退款处理依次出现，禁止无条件把重试画成成功。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "29",
+          "scriptShot": 29,
+          "chapterId": "message",
+          "visualType": "tx-message-intro",
+          "from": 8299,
+          "durationInFrames": 328,
+          "narration": "RocketMQ事务消息，先存一条暂时不能消费的消息。消息存好，生产者再执行自己的本地事务。",
+          "subtitles": [
+            {
+              "text": "RocketMQ事务消息，先存一条暂时不能消费的消息。",
+              "from": 0,
+              "to": 172,
+              "duration": 173
+            },
+            {
+              "text": "消息存好，生产者再执行自己的本地事务。",
+              "from": 173,
+              "to": 327,
+              "duration": 155
+            }
+          ],
+          "voice": [
+            {
+              "id": "29-tx-message-intro-1",
+              "wavStart": 8299.53,
+              "wavEnd": 8461.83,
+              "localStart": 0.5300000000006548,
+              "localEnd": 162.82999999999993
+            },
+            {
+              "id": "29-tx-message-intro-2",
+              "wavStart": 8472.33,
+              "wavEnd": 8606.02,
+              "localStart": 173.32999999999993,
+              "localEnd": 307.02000000000044
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "RocketMQ事务消息": 1
+            },
+            "sentences": [
+              0,
+              173
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 8299.53,
+            "wavTo": 8606.02,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "Outbox数据库待办明确退出，本镜改看另一种机制；先向消息服务保存半消息，消费者侧路径关闭，再执行生产者订单库的本地事务。订单库里不再画Outbox表，防止误认为两个实现都必须同时存在。",
+          "direction": "Outbox数据库待办明确退出，本镜改看另一种机制；先向消息服务保存半消息，消费者侧路径关闭，再执行生产者订单库的本地事务。订单库里不再画Outbox表，防止误认为两个实现都必须同时存在。",
+          "elements": [
+            {
+              "id": "label29_0",
+              "type": "text",
+              "text": "RocketMQ事务消息",
+              "cueText": "RocketMQ事务消息",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "29-tx-message-intro-1",
+                "asrFrame": null,
+                "onsetLocal": 1.5300000000006548,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "30",
+          "scriptShot": 30,
+          "chapterId": "message",
+          "visualType": "tx-message-check",
+          "from": 8627,
+          "durationInFrames": 284,
+          "narration": "本地成功才开放消费，失败就丢弃消息。结果不明，消息服务再回查本地事务状态。",
+          "subtitles": [
+            {
+              "text": "本地成功才开放消费，失败就丢弃消息。",
+              "from": 0,
+              "to": 128,
+              "duration": 129
+            },
+            {
+              "text": "结果不明，消息服务再回查本地事务状态。",
+              "from": 129,
+              "to": 283,
+              "duration": 155
+            }
+          ],
+          "voice": [
+            {
+              "id": "30-tx-message-check-1",
+              "wavStart": 8627.02,
+              "wavEnd": 8746.0,
+              "localStart": 0.020000000000436557,
+              "localEnd": 119.0
+            },
+            {
+              "id": "30-tx-message-check-2",
+              "wavStart": 8756.5,
+              "wavEnd": 8890.15,
+              "localStart": 129.5,
+              "localEnd": 263.14999999999964
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              129
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 8627.02,
+            "wavTo": 8890.15,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "成功分支开放半消息给消费者；失败分支淡化为丢弃。随后重点显示结果回复丢失，消息服务发回查请求，读取持久的本地事务业务状态后再决定，不把回查当成重新执行本地事务。",
+          "direction": "成功分支开放半消息给消费者；失败分支淡化为丢弃。随后重点显示结果回复丢失，消息服务发回查请求，读取持久的本地事务业务状态后再决定，不把回查当成重新执行本地事务。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "31",
+          "scriptShot": 31,
+          "chapterId": "message",
+          "visualType": "tx-message-limit",
+          "from": 8911,
+          "durationInFrames": 337,
+          "narration": "它衔接的是生产端的本地事务和消息发布。消费端仍要处理失败和重复，不是跨库一起提交。",
+          "subtitles": [
+            {
+              "text": "它衔接的是生产端的本地事务和消息发布。",
+              "from": 0,
+              "to": 155,
+              "duration": 156
+            },
+            {
+              "text": "消费端仍要处理失败和重复，不是跨库一起提交。",
+              "from": 156,
+              "to": 336,
+              "duration": 181
+            }
+          ],
+          "voice": [
+            {
+              "id": "31-tx-message-limit-1",
+              "wavStart": 8911.15,
+              "wavEnd": 9056.87,
+              "localStart": 0.1499999999996362,
+              "localEnd": 145.8700000000008
+            },
+            {
+              "id": "31-tx-message-limit-2",
+              "wavStart": 9067.37,
+              "wavEnd": 9227.88,
+              "localStart": 156.3700000000008,
+              "localEnd": 316.8799999999992
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              156
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 8911.15,
+            "wavTo": 9227.88,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "生产端本地事务与消息开放之间形成明确的机制连接，消费端独立放在右侧；消费者一次失败或重复到达时，自己的本地处理/幂等边界单独高亮。禁止画包住两端的全局事务框。",
+          "direction": "生产端本地事务与消息开放之间形成明确的机制连接，消费端独立放在右侧；消费者一次失败或重复到达时，自己的本地处理/幂等边界单独高亮。禁止画包住两端的全局事务框。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "compare",
+      "chapterId": "compare",
+      "title": "按业务约束选择",
+      "from": 9248,
+      "durationInFrames": 2427,
+      "shots": [
+        {
+          "id": "32",
+          "scriptShot": 32,
+          "chapterId": "compare",
+          "visualType": "compare-questions",
+          "from": 9248,
+          "durationInFrames": 307,
+          "narration": "这五条路线，解决问题的方式并不相同。先问：业务能不能等待，能不能接受中间状态？",
+          "subtitles": [
+            {
+              "text": "这五条路线，解决问题的方式并不相同。",
+              "from": 0,
+              "to": 127,
+              "duration": 128
+            },
+            {
+              "text": "先问：业务能不能等待，能不能接受中间状态？",
+              "from": 128,
+              "to": 306,
+              "duration": 179
+            }
+          ],
+          "voice": [
+            {
+              "id": "32-compare-questions-1",
+              "wavStart": 9248.88,
+              "wavEnd": 9366.43,
+              "localStart": 0.8799999999991996,
+              "localEnd": 118.43000000000029
+            },
+            {
+              "id": "32-compare-questions-2",
+              "wavStart": 9376.93,
+              "wavEnd": 9534.57,
+              "localStart": 128.9300000000003,
+              "localEnd": 286.5699999999997
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              128
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 9248.88,
+            "wavTo": 9534.57,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "五章轨迹收束成逐行比较的第一屏，只显示问题维度，不一次展现五行全表。短事务等待与中间状态两枚可移动指标依次出现；之后每镜只带出当前一行。",
+          "direction": "五章轨迹收束成逐行比较的第一屏，只显示问题维度，不一次展现五行全表。短事务等待与中间状态两枚可移动指标依次出现；之后每镜只带出当前一行。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "33",
+          "scriptShot": 33,
+          "chapterId": "compare",
+          "visualType": "compare-xa",
+          "from": 9555,
+          "durationInFrames": 328,
+          "narration": "需要统一提交决定，先看两阶段提交和XA。数据库要支持，事务也应尽量短。",
+          "subtitles": [
+            {
+              "text": "需要统一提交决定，先看两阶段提交和XA。",
+              "from": 0,
+              "to": 192,
+              "duration": 193
+            },
+            {
+              "text": "数据库要支持，事务也应尽量短。",
+              "from": 193,
+              "to": 327,
+              "duration": 135
+            }
+          ],
+          "voice": [
+            {
+              "id": "33-compare-xa-1",
+              "wavStart": 9555.57,
+              "wavEnd": 9738.13,
+              "localStart": 0.569999999999709,
+              "localEnd": 183.1299999999992
+            },
+            {
+              "id": "33-compare-xa-2",
+              "wavStart": 9748.63,
+              "wavEnd": 9862.84,
+              "localStart": 193.6299999999992,
+              "localEnd": 307.84000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              193
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 9555.57,
+            "wavTo": 9862.84,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "只显示2PC/XA一行：机制是准备/决定，代价是等待与资源占用；背景留两资源曾准备的状态轮廓。上一行不常驻为密集矩阵。",
+          "direction": "只显示2PC/XA一行：机制是准备/决定，代价是等待与资源占用；背景留两资源曾准备的状态轮廓。上一行不常驻为密集矩阵。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "34",
+          "scriptShot": 34,
+          "chapterId": "compare",
+          "visualType": "compare-at",
+          "from": 9883,
+          "durationInFrames": 419,
+          "narration": "AT减少手写补偿，但受数据库、SQL和接入方式限制。不能把普通读，自动当成全局隔离。",
+          "subtitles": [
+            {
+              "text": "AT减少手写补偿，但受数据库、SQL和接入方式限制。",
+              "from": 0,
+              "to": 240,
+              "duration": 241
+            },
+            {
+              "text": "不能把普通读，自动当成全局隔离。",
+              "from": 241,
+              "to": 418,
+              "duration": 178
+            }
+          ],
+          "voice": [
+            {
+              "id": "34-compare-at-1",
+              "wavStart": 9883.84,
+              "wavEnd": 10113.68,
+              "localStart": 0.8400000000001455,
+              "localEnd": 230.6800000000003
+            },
+            {
+              "id": "34-compare-at-2",
+              "wavStart": 10124.18,
+              "wavEnd": 10281.41,
+              "localStart": 241.1800000000003,
+              "localEnd": 398.40999999999985
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              241
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 9883.84,
+            "wavTo": 10281.41,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "当前一行替换为AT：本地先提交+撤销记录，普通读箭头仍能读中间值的短动作再现。前一行缩退到仅方案名，不保留整段说明。",
+          "direction": "当前一行替换为AT：本地先提交+撤销记录，普通读箭头仍能读中间值的短动作再现。前一行缩退到仅方案名，不保留整段说明。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "35",
+          "scriptShot": 35,
+          "chapterId": "compare",
+          "visualType": "compare-tcc",
+          "from": 10302,
+          "durationInFrames": 396,
+          "narration": "资源能先预留，再确认或取消，可以考虑TCC。代价是业务接口、幂等和异常控制都要自己设计。",
+          "subtitles": [
+            {
+              "text": "资源能先预留，再确认或取消，可以考虑TCC。",
+              "from": 0,
+              "to": 205,
+              "duration": 206
+            },
+            {
+              "text": "代价是业务接口、幂等和异常控制都要自己设计。",
+              "from": 206,
+              "to": 395,
+              "duration": 190
+            }
+          ],
+          "voice": [
+            {
+              "id": "35-compare-tcc-1",
+              "wavStart": 10302.41,
+              "wavEnd": 10497.83,
+              "localStart": 0.4099999999998545,
+              "localEnd": 195.82999999999993
+            },
+            {
+              "id": "35-compare-tcc-2",
+              "wavStart": 10508.33,
+              "wavEnd": 10677.46,
+              "localStart": 206.32999999999993,
+              "localEnd": 375.4599999999991
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              206
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 10302.41,
+            "wavTo": 10677.46,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "当前行是TCC，库存一件从可用移入预留再被确认；屏幕主体只保留业务预留、接口成本两个维度，其他行不展开。",
+          "direction": "当前行是TCC，库存一件从可用移入预留再被确认；屏幕主体只保留业务预留、接口成本两个维度，其他行不展开。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "36",
+          "scriptShot": 36,
+          "chapterId": "compare",
+          "visualType": "compare-saga",
+          "from": 10698,
+          "durationInFrames": 319,
+          "narration": "流程较长，而且能设计补偿，可以考虑Saga。补偿要有明确业务含义，失败也要有人接得住。",
+          "subtitles": [
+            {
+              "text": "流程较长，而且能设计补偿，可以考虑Saga。",
+              "from": 0,
+              "to": 149,
+              "duration": 150
+            },
+            {
+              "text": "补偿要有明确业务含义，失败也要有人接得住。",
+              "from": 150,
+              "to": 318,
+              "duration": 169
+            }
+          ],
+          "voice": [
+            {
+              "id": "36-compare-saga-1",
+              "wavStart": 10698.46,
+              "wavEnd": 10837.76,
+              "localStart": 0.4599999999991269,
+              "localEnd": 139.76000000000022
+            },
+            {
+              "id": "36-compare-saga-2",
+              "wavStart": 10848.26,
+              "wavEnd": 10996.92,
+              "localStart": 150.26000000000022,
+              "localEnd": 298.9200000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              150
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 10698.46,
+            "wavTo": 10996.92,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "当前行Saga，已提交扣款旁新增退款记录，失败重试标记轻量出现；不重演大段流程，突出本地先提交与业务补偿。",
+          "direction": "当前行Saga，已提交扣款旁新增退款记录，失败重试标记轻量出现；不重演大段流程，突出本地先提交与业务补偿。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "37",
+          "scriptShot": 37,
+          "chapterId": "compare",
+          "visualType": "compare-message",
+          "from": 11017,
+          "durationInFrames": 309,
+          "narration": "允许异步完成，可以考虑可靠消息。两端各自提交，还要设计幂等和失败后的处理。",
+          "subtitles": [
+            {
+              "text": "允许异步完成，可以考虑可靠消息。",
+              "from": 0,
+              "to": 129,
+              "duration": 130
+            },
+            {
+              "text": "两端各自提交，还要设计幂等和失败后的处理。",
+              "from": 130,
+              "to": 308,
+              "duration": 179
+            }
+          ],
+          "voice": [
+            {
+              "id": "37-compare-message-1",
+              "wavStart": 11017.92,
+              "wavEnd": 11137.48,
+              "localStart": 0.9200000000000728,
+              "localEnd": 120.47999999999956
+            },
+            {
+              "id": "37-compare-message-2",
+              "wavStart": 11147.98,
+              "wavEnd": 11305.22,
+              "localStart": 130.97999999999956,
+              "localEnd": 288.21999999999935
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              130
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 11017.92,
+            "wavTo": 11305.22,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "当前行可靠消息，同一E8124移动到消费端，订单先完成、库存后完成的时间轴重现；Outbox与事务消息以二选一机制小标签出现，消费幂等独立保留。",
+          "direction": "当前行可靠消息，同一E8124移动到消费端，订单先完成、库存后完成的时间轴重现；Outbox与事务消息以二选一机制小标签出现，消费幂等独立保留。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "38",
+          "scriptShot": 38,
+          "chapterId": "compare",
+          "visualType": "recap",
+          "from": 11326,
+          "durationInFrames": 349,
+          "narration": "选方案，要看资源、隔离、时长和失败后的处理。没有一种方案，能把这些代价全部消掉。",
+          "subtitles": [
+            {
+              "text": "选方案，要看资源、隔离、时长和失败后的处理。",
+              "from": 0,
+              "to": 188,
+              "duration": 189
+            },
+            {
+              "text": "没有一种方案，能把这些代价全部消掉。",
+              "from": 189,
+              "to": 348,
+              "duration": 160
+            }
+          ],
+          "voice": [
+            {
+              "id": "38-recap-1",
+              "wavStart": 11326.22,
+              "wavEnd": 11505.26,
+              "localStart": 0.21999999999934516,
+              "localEnd": 179.26000000000022
+            },
+            {
+              "id": "38-recap-2",
+              "wavStart": 11515.76,
+              "wavEnd": 11629.73,
+              "localStart": 189.76000000000022,
+              "localEnd": 303.72999999999956
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              189
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 06ac9f6c + words.json d6770dd6 + script.md 9766d5c2",
+            "wavFrom": 11326.22,
+            "wavTo": 11629.73,
             "holdFrames": 45,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -1126,8 +2879,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "用库存3、缺失处理记录与重复通知构成互动问题，不展示新方案；问题停留后品牌收束，无新季承诺。",
-          "direction": "用库存3、缺失处理记录与重复通知构成互动问题，不展示新方案；问题停留后品牌收束，无新季承诺。",
+          "scriptVisual": "五条路线以方案名为主的简洁竖向索引依次点亮，每条仅一短语：准备决定/自动撤销/业务预留/业务补偿/异步消息；资源、隔离、时长、失败收尾四维逐次出现而非同屏密表。最后保留“按业务约束选择”及品牌收束。",
+          "direction": "五条路线以方案名为主的简洁竖向索引依次点亮，每条仅一短语：准备决定/自动撤销/业务预留/业务补偿/异步消息；资源、隔离、时长、失败收尾四维逐次出现而非同屏密表。最后保留“按业务约束选择”及品牌收束。",
           "elements": [],
           "animations": [],
           "transition": {

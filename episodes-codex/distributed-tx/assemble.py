@@ -35,6 +35,9 @@ with wave.open(str(D / 'voice.wav')) as w:
 rule = Rule(samples, sr)
 script = (D / 'script.md').read_text()
 sections = re.findall(r'### (\d+) ([\w-]+)\n(.*?)(?=\n### |\Z)', script, re.S)
+plan = json.loads((D / 'overview-plan.json').read_text())
+assert len(plan) == len(sections) == 38
+plan_by_n = {int(q['id']): q for q in plan}
 words_shots = []
 for n, slug, body in sections:
     rows = [r for r in build['sentences'] if r['shot'] == f'{int(n):02d}-{slug}']
@@ -88,20 +91,25 @@ for (n, slug, body), ws in zip(sections, words_shots):
         subs.append(dict(text=sent['text'], **{'from':fr}, to=to, duration=to-fr+1))
     elements = []
     cue_frames = {}
-    # These labels start their own sentence, so no estimated interior word cue is used.
-    for term, number, key in [('分布式事务',3,'distributedLabel'), ('最终一致',12,'eventualLabel')]:
-        if int(n) == number:
-            sent = next(s for s in ws['sentences'] if s['text'].startswith(term))
-            onset = sent['onsetFrame'] - start
-            fr = max(1, math.floor(onset)-2)
-            cue_frames[key] = fr
-            elements.append(dict(id=key, type='text', text=term, cueText=term,
-                                 appearFrame=fr, x=130,y=165,w=500,h=80,fontSize=58,
-                                 cueOnset=dict(sentence=sent['id'], asrFrame=None,
-                                               onsetLocal=onset,rule='pause/acoustic sentence onset',delay=0)))
-            cues.append(dict(shot=ws['id'],cue=term,sentence=sent['id'],onsetFrame=sent['onsetFrame']))
+    # Every first-name cue begins a real sentence; no interior word timings.
+    labels = {}
+    for index, cfg in enumerate(plan_by_n[int(n)]['cues']):
+        term = cfg['term']
+        sent = ws['sentences'][cfg['sentence']]
+        assert sent['text'].startswith(term), (n, term, sent['text'])
+        onset = sent['onsetFrame'] - start
+        fr = max(1, math.floor(onset)-2)
+        labels[term] = fr
+        if term == '两阶段提交':
+            labels['2PC'] = fr
+        elements.append(dict(id=f'label{n}_{index}', type='text', text=term, cueText=term,
+                             appearFrame=fr, x=130,y=165,w=1100,h=80,fontSize=52,
+                             cueOnset=dict(sentence=sent['id'], asrFrame=None,
+                                           onsetLocal=onset,rule='pause/acoustic sentence onset',delay=0)))
+        cues.append(dict(shot=ws['id'],cue=term,sentence=sent['id'],onsetFrame=sent['onsetFrame']))
+    cue_frames['labels'] = labels
     cue_frames['sentences'] = [math.floor(s['startFrame'])-start for s in ws['sentences']]
-    shot = dict(id=f'{int(n):02d}', scriptShot=int(n), chapterId=slug,
+    shot = dict(id=f'{int(n):02d}', scriptShot=int(n), chapterId=plan_by_n[int(n)]['chapterId'], visualType=slug,
                 **{'from':start}, durationInFrames=ws['durationFrames'],
                 narration=narration, subtitles=subs,
                 voice=[dict(id=s['id'],wavStart=s['startFrame'],wavEnd=s['endFrame'],
@@ -117,25 +125,29 @@ for (n, slug, body), ws in zip(sections, words_shots):
 save(D/'voice/cues.json', cues)
 save(D/'voice/cue_tests.json', [[c['shot'],c['cue']] for c in cues])
 covers = json.loads((D/'covers.json').read_text()) if (D/'covers.json').exists() else {}
-sb = dict(meta=dict(title='下单成功了，库存怎么没扣？',episode=21,slug='distributed-tx-v1',
+sb = dict(meta=dict(title='分布式事务，几种方案到底怎么选？',episode=21,slug='distributed-tx-v2',
                     width=1920,height=1080,fps=30,durationInFrames=words['durationFrames'],finalVideoFrames=words['durationFrames'],
                     draft=True,provisionalTiming=False,pendingAudio=False,
                     timingSource=source,
                     onsetRule=dict(module='episodes/_shared/onset_rule.py',checker='episodes/_shared/label_onset_strict.py',window=[-6,2]),
-                    style='Progressive outbox and idempotent consumer example; persistent notification, retry, atomic local processing, duplicate skip and bounded eventual consistency; no physical metaphor.',
-                    visualRevision=1,visualDirection='visual-direction.md',
+                    style='Chaptered comparison of 2PC/XA, Seata AT, TCC, Saga and reliable messages; progressive concrete state changes, explicit branch resets and transaction boundaries.',
+                    visualRevision=2,visualDirection='visual-direction.md', userScope='Five common engineering routes; latest user request supersedes the old two-term scope; not a market ranking.',
                     palette=dict(bg='#0F172A',text='#E5E7EB'),
                     sampleDataLabel='订单8124 · 通知E8124 · 示例数据',
                     boxShots=[],mapShots=[],devtoolsShots=[],covers=covers,
-                    discussionQuestion='如果只扣了库存，却没记住已经处理，重复消息来了会怎样？',
-                    audioReview='No automatic ASR available. Sentence-boundary captions; final listening review pending.'),
+                    discussionQuestion='资源、隔离、时长与失败收尾，哪些是这笔业务的约束？',
+                    audioReview='Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.'),
           assets=dict(new=[],reuse=[],procedural=dict(description='See knoll-props.md and remotion/src/Main.tsx.')),
           scenes=[])
 # Preserve meaningful scene groups so the eventual site can use real chapter starts.
-for cid, title, first, last in [('hook','两个库为何没有一起改',1,3), ('record','先记住订单和待办',4,5), ('retry','失败后仍能继续发送',6,7), ('consume','库存侧只处理一次',8,11), ('eventual','最终一致与失败边界',12,13), ('question','回头检查漏掉的保证',14,14)]:
-    group = [q for q in shots if first <= q['scriptShot'] <= last]
-    for q in group: q['chapterId'] = cid
-    sb['scenes'].append(dict(id=cid,chapterId=cid,title=title,**{'from':group[0]['from']},durationInFrames=sum(q['durationInFrames'] for q in group),shots=group))
+for item in plan:
+    cid = item['chapterId']
+    if sb['scenes'] and sb['scenes'][-1]['chapterId'] == cid:
+        continue
+    group = [q for q in shots if q['chapterId'] == cid]
+    sb['scenes'].append(dict(id=cid,chapterId=cid,title=item['chapterTitle'],
+                            **{'from':group[0]['from']},
+                            durationInFrames=sum(q['durationInFrames'] for q in group),shots=group))
 save(D/'storyboard.json', sb)
 save(D/'voice/shot_frames.json', dict(fps=30,durationFrames=words['durationFrames'],
                                      audioSha256=words['audioSha256'],shots=words_shots))
