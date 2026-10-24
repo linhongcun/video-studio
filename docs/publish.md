@@ -101,7 +101,7 @@ gh run watch <id>
 
 ## 三个平台
 
-现行渠道：抖音（按 [RULES.md](RULES.md) 的 STATUS 同步同一条成片到今日头条、懂车帝、番茄小说、红果短剧的可用项）、B站、微信视频号。不发快手，不发 X。小红书由村长自己发，运营和 Codex 不发。
+现行渠道：抖音（按 [RULES.md](RULES.md) 的 STATUS 同步同一条成片到今日头条、懂车帝、番茄小说、红果短剧的可用项）、B站、微信视频号。默认不发快手；仅执行 STATUS 中 2026-10-25 对 LC.11、LC.3、LC.704 的本次投稿授权，不扩展为持续授权，扫码登录、账号绑定或协议授权由用户操作，投稿后核验实际发布或审核状态。不发 X。小红书由村长自己发，运营和 Codex 不发。
 
 `meta.json` 的 `platforms` 只填真实 URL。站点实际渲染的键只有 `bilibili` 和 `douyin`（`site/src/lib/episodes.ts` 的 `PLATFORMS`）。不要新写 `kuaishou`。已上线各期里残留的 `kuaishou` URL 是历史链接，规范不再扩展。
 

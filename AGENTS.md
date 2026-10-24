@@ -89,7 +89,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 - 比喻、实物设备，以及给机制图套无关应用外壳。可以按用户指导用对应功能的交互界面建立使用场景，具体边界见 `docs/RULES.md` 画面节。
 - 把讲解表、图、流程图塞进浏览器壳。浏览器壳只给真网页、地址栏和 DevTools。
 - 大面积纯白页身。页身色用 `episodes/_shared/theme/pageTheme.ts` 的 `pageBg` / `pageInk`。
-- 新发快手或 X，或把平台链接发到群里。
+- 新发快手（[STATUS](docs/RULES.md) 中 2026-10-25 本次三条授权除外）或 X，或把平台链接发到群里。
 - 编造本仓没有的脚本，或在期目录另写一份配音整轨脚本。配音整轨用 `episodes/_shared/voice/`（产出 `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`）；参数改 `voice/params.json`，不要改脚本里的数。
 - 另存一份起音算法。唯一实现是 `episodes/_shared/onset_rule.py`。`episodes/_shared/label_onset_strict.py` 只 import 它。冻结分镜里的 `episodes-codex/_shared/onset_rule.py` 是旧路径。期目录不要复制；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
 - 把 `episodes/*/validate.py` 里的「画面不出数字 / 不出英文」当成现行检查。那些脚本还依赖本仓没有的 `episodes/_audit/`。
