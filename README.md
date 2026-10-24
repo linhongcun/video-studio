@@ -18,6 +18,8 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 
 v0.48.0 已将 EP.01–14 的上一轮 Cursor 重制版全部替换为本轮 Codex 版：160镜、320句新配音，逐期重写脚本与主体动画，补齐章节导航和字幕。制作与检查见[本轮批次记录](docs/codex-remake-ep01-14.md)，当前源码由各期 `sourcePath` 指向 `episodes-codex/`。只上本站，历史平台投稿保留。
 
+v0.50.2 更新 EP.05 CDN：在地图上演示临近边缘节点取图，并结合动作介绍CDN、边缘节点和回源；修订与实际检查见[本次记录](docs/cdn-map-terms-revision.md)。
+
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
 | 1 | 浏览器与网络 | 浏览器输入网址后发生了什么？ | [http-request](https://linhongcun.github.io/video-studio/episodes/http-request/) | 2026-10-12 |
