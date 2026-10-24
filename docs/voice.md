@@ -10,7 +10,7 @@
 python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --out /tmp/line.wav --voice 冰糖 --gap 0.28 --segments /tmp/line.json
 ```
 
-脚本按 `。？！` 分句，默认音色「冰糖」，模型 `mimo-v2.5-tts`，句间 `--gap` 默认 0.28 秒。`--segments` 写出每句的 `text`、`start`、`dur`。密钥只来自 `MIMO_API_KEY` 或 `--env` 文件，不提交。
+脚本按 `。？！` 分句，默认音色「冰糖」，模型 `mimo-v2.5-tts`，句间 `--gap` 默认 0.28 秒。`--segments` 写出每句的 `text`、`start`、`dur`。整期批量合成用 `episodes/_shared/voice/gen.py`（jobs 文件 `[[句id, take, 送模文本或 null, style?], …]`），它只调用 `mimo_say.py`，自己不读密钥。密钥只来自 `MIMO_API_KEY` 或 `--env` 文件，不提交。
 
 `episodes/_shared/tts/kokoro_say.py` 是另一套引擎。现行配音不用它。
 
@@ -30,9 +30,9 @@ degradation 的成片把整轨放在 `episodes/degradation/remotion/public/audio
 
 `lastWordFix[]`：`id`、`ch`、`old`、`new`、`speechEnd`。`note` 写明句末字若落在静音上，改用能量谷，并点名 `voice/lastword_fix.py`。
 
-`asrModel` 记的是 `faster-whisper medium`。本仓没有调用它的脚本。
+`asrModel` 记的是 `faster-whisper medium`。由 `episodes/_shared/voice/asr.py` 产生（参数见 `voice/params.json` 的 `asr`）。
 
-`voice/shot_frames.json`、`voice/lastword_fix.py`，以及从逐句 wav 生成上述 `words.json` 的命令，都不在本仓。`voice/build.py`、`asr.py`、`asr_full.py`、`onsets.py`、`cues_rule.py` 也不在。整轨在手之后的放置是 `episodes/_shared/place_v2.py`。[knoll-props.template.md](knoll-props.template.md) 只写画面制作说明，没有这些铺轨命令。不要用猜测的参数去跑一个不存在的文件。
+生成这些文件的脚本在 `episodes/_shared/voice/`（见其 `README.md`）：`build.py` 出 `voice.wav` 与 `voice/build.json`，`asr.py` / `asr_full.py` 出 `voice/asr.json` / `voice/asr_full.json`，`onsets.py` 出 `words.json` 与 `voice/cues.json`，`lastword_fix.py` 写 `lastWordFix`，`cues_rule.py` 用 `onset_rule.py` 改 `voice/cues.json` 的 `onsetFrame`，`shot_frames.py` 出 `voice/shot_frames.json`，`selfcheck.py` 自检。一次跑完：`sh episodes/_shared/voice/run.sh EPDIR`。EP.14 在同一批 takes 上逐字节复现（`episodes/_shared/tests/test_voice.py`）。整轨在手之后的放置是 `episodes/_shared/place_v2.py`。[knoll-props.template.md](knoll-props.template.md) 只写画面制作说明。
 
 分镜侧与词时间对齐的字段是 `shots[].voice`（`wavStart`、`wavEnd`、`localStart`、`localEnd`）和元素上的 `cueOnset`。见 [storyboard-schema.md](storyboard-schema.md)。
 
@@ -82,7 +82,7 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 
 ## 读音表
 
-`pronunciation.md` 用表：文本、读法、出现镜号。多音字全部列出。英文缩写逐字母读；Redis、MySQL 按一个单词读。画面上的域名和数字只显示、不进读音表的口播。TTS 若把某个词读错，改送模文本，字幕和 `script.md` 的旁白保持原文。听辨由 Knoll 和 Nolan 做，不找村长。
+`pronunciation.md` 用表：文本、读法、出现镜号。多音字全部列出。英文缩写逐字母读；Redis、MySQL 按一个单词读。画面上的域名和数字只显示、不进读音表的口播。TTS 若把某个词读错，改送模文本，字幕和 `script.md` 的旁白保持原文。听辨由 Knoll 和 Nolan 做，不找村长。改送模文本的记录写在 `voice/substitutions.md`，选定的 take 写在 `voice/picks.json`。
 
 ## 响度
 

@@ -1,6 +1,6 @@
 """Xiaomi MiMo TTS（mimo-v2.5-tts，预置音色 冰糖）逐句合成一段旁白 → wav。
 按 。？！ 分句，每句单独请求、去首尾静音，句间留 --gap 秒；--segments 输出每句起点/时长（JSON）。
-密钥从环境变量 MIMO_API_KEY 读取，或从 --env 文件（默认仓库外 /workspace/video-studio/.mimo.env）读取；不写入仓库。
+密钥从环境变量 MIMO_API_KEY 读取，或从 --env 文件（默认 /workspace/video-studio/.mimo.env（工作区根目录，已被 .gitignore 忽略））读取；不写入仓库。
 用法：mimo_say.py --text "..." --out x.wav [--voice 冰糖] [--gap 0.28] [--segments x.json]"""
 import argparse, base64, io, json, os, re, time, urllib.request
 import numpy as np, soundfile as sf
