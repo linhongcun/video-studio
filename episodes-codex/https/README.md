@@ -11,3 +11,11 @@ Python环境：/workspace/.venvs/video-studio。Remotion安装npm ci，随后npx
 ## 站点发布
 
 [v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。
+
+## 全局/局部导航返工（待独立复核）
+
+2026-10-24，批次`flow-map-20261024/#199`。保留原音轨、脚本、words、字幕、12镜和3589帧，新增安全握手与接收验证的分层全局关系、核验失败后的正常情景重置及结尾回收。历史输入和当前媒体由[索引](revisions/pre-flow-map.json)关联基线`6765032`，没有复制大媒体。
+
+本轮预演与完整动作窗口证据见[QA记录](qa-flow-map.json)。动画源已停写，等待独立编辑复核；未执行本轮最终冻结、完整正式编码或发布。原`qa-final.md`、`release.md`及`source-sha256.json`继续对应旧版，最终制作由主任务统一安排。共用导航只引用`../_shared/branch-map/index.ts`，没有改动共用实现。
+
+独立编辑首轮发现07提前高亮“握手完成”出口，R1已将该边延后到local273协商落定。只重采受影响07关键帧与identity跨镜片；初版源和QA在`revisions/flow-map-before-r1/`保留，证据按旧/新指纹分组，等待重点复验。

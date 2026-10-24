@@ -29,7 +29,7 @@ snapshot = D/f'storyboard.{sha(D/"storyboard.json")[:8]}.json'
 shutil.copy2(D/'storyboard.json', snapshot)
 shutil.copy2(D/'storyboard.json', D/'remotion/src/placeholders/storyboard.json')
 files = [D/f for f in ['script.md','article.mdx','research.md','pronunciation.md',
-    'production.json','assemble.py','freeze.py','preflight.py','visual-direction.md','knoll-props.md',
+    'production.json','research-flow-map.md','assemble.py','freeze.py','preflight.py','visual-direction.md','knoll-props.md',
     'storyboard.json','words.json','covers.json','voice.wav','voice/params.json',
     'voice/picks.json','voice/sents.json','voice/build.json','voice/substitutions.md',
     'remotion/package.json','remotion/package-lock.json','remotion/remotion.config.ts',
@@ -44,6 +44,7 @@ for row in json.loads((D/'voice/sents.json').read_text()):
 files += [D/'../../episodes/_shared'/f for f in [
     'onset_rule.py','voice/prep.py','voice/gen.py','voice/build.py','voice/common.py',
     'tts/mimo_say.py','theme/pageTheme.ts','music/mix_bgm.py','music/Wallpaper.mp3']]
+files += [D/'../_shared/branch-map/index.ts']
 # Keep parent references portable instead of writing workspace absolute paths.
 manifest = {os.path.relpath(p, D):sha(p) for p in sorted(set(files))}
 (D/'source-sha256.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')

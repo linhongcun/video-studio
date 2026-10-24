@@ -30,12 +30,14 @@ shutil.copy2(D/'storyboard.json', snapshot)
 (D/'remotion/src/placeholders').mkdir(exist_ok=True)
 shutil.copy2(D/'storyboard.json', D/'remotion/src/placeholders/storyboard.json')
 files = [D/f for f in ['script.md','article.mdx','research.md','pronunciation.md',
-    'episode.json','prepare.py','assemble.py','freeze.py','visual-direction.md','knoll-props.md',
+    'episode.json','navigation.md','prepare.py','assemble.py','freeze.py','visual-direction.md','knoll-props.md',
     'storyboard.json','words.json','covers.json','voice.wav','voice/params.json',
     'voice/picks.json','voice/sents.json','voice/build.json','voice/substitutions.md','voice/tail-comparison.json','render-final.sh',
     'remotion/package.json','remotion/package-lock.json','remotion/remotion.config.ts',
     'remotion/tsconfig.json','remotion/public/audio/voice.wav']]
 files += [snapshot]
+# Actual shared navigation source is a runtime production dependency.
+files += [D/'../_shared/branch-map/index.ts']
 files += [p for folder in ['src','scripts'] for p in (D/'remotion'/folder).rglob('*') if p.is_file()]
 picks = json.loads((D/'voice/picks.json').read_text())
 for row in json.loads((D/'voice/sents.json').read_text()):

@@ -8,7 +8,7 @@ import webpack from 'webpack';
 import crypto from 'node:crypto';
 
 const args=process.argv.slice(2);
-const output=path.resolve(args.find(a=>!a.startsWith('--'))??'/tmp/ep17-motion');
+const output=path.resolve(args.find(a=>!a.startsWith('--'))??'/workspace/.video-studio-flow-audit/dns-remake/motion');
 const ids=(args.find(a=>a.startsWith('--shots='))?.slice(8)??'03,05,08,09,10,11,12').split(',');
 const clips=args.includes('--clips');
 const flow=args.find(a=>a.startsWith('--flow='))?.slice(7).split('-');
@@ -17,7 +17,7 @@ const storyboard=JSON.parse(fs.readFileSync(root+'/storyboard.json','utf8'));
 const selected=storyboard.scenes.flatMap(s=>s.shots).filter(s=>ids.includes(s.id));
 if(selected.length!==ids.length)throw new Error('Unknown shot selection');
 fs.mkdirSync(output,{recursive:true});
-const inputProps={hideSubtitles:true};
+const inputProps={hideSubtitles:true,showSubtitles:false};
 const serveUrl=await bundle({entryPoint:path.resolve('src/index.ts'),enableCaching:false,
  webpackOverride:c=>({...c,resolve:{...c.resolve,alias:{...c.resolve?.alias,
  '@storyboard':root+'/storyboard.json','@covers':root+'/covers.json'},
@@ -25,7 +25,7 @@ const serveUrl=await bundle({entryPoint:path.resolve('src/index.ts'),enableCachi
  new webpack.DefinePlugin({__HAS_VOICE_AUDIO__:false})]})});
 const browser=await openBrowser('chrome',{browserExecutable:'/usr/bin/chromium',logLevel:'error'});
 const records=[];
-const sourcePaths=['../storyboard.json','../production.json','src/Main.tsx','src/Scenes.tsx','src/Primitives.tsx','src/theme.ts'];
+const sourcePaths=['../storyboard.json','../production.json','src/Main.tsx','src/Scenes.tsx','src/Primitives.tsx','src/theme.ts','src/branch-map.ts','src/motion.ts','../../_shared/branch-map/index.ts'];
 const sourceHashes=Object.fromEntries(sourcePaths.map(p=>[p,crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex')]));
 const copyfit=[];const onBrowserLog=log=>{if(log.text?.includes('COPYFIT'))copyfit.push(log.text)};
 try{

@@ -15,3 +15,7 @@ source-sha256.json与verify-freeze.py核对实际输入；动态检查、成片�
 ## 站点发布
 
 [v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。
+
+## 全局/局部导航重制
+
+设计ID为`flow-map-20261024/#199`。保留原配音、字幕及2926帧，复用共享相机，增加关闭/打开/半开的真实循环及独立无保护教学对照；分镜meta不写未来发布号。基线见`revisions/pre-flow-map.json`，拓扑与动作窗口见`navigation.md`，制作自审与实际小样见`qa-flow-map.md`和`qa-flow-map.json`。当前已停写输入，待独立编辑与root统一冻结/正式编码；本节不把旧8cb059…媒体称为新导航成片。
