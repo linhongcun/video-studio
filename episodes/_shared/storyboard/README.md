@@ -34,15 +34,15 @@ python3 -B episodes/_shared/label_onset_strict.py --storyboard $O/storyboard.jso
 
 改文字、坐标、帧都改 spec 再从头重跑，不手改 `storyboard.json`。全过之后才冻结（`storyboard.<sha8>.json`，见 schema 文档「冻结一次」）。
 
-## EP.14 范例（`examples/degradation/`）
+## 历史 EP.14 v0.45.0 范例（`examples/degradation/`）
 
-EP.14 降级（`meta.slug` `degradation-v1`）的整套 spec：`covers_spec.py`、`layout_spec.py`、`build_spec.py`、`validate_spec.py`，加上仓里没有的输入 `narration.py`、`sources/ref-sources.md`、`sources/src/*.txt`；`repo-inputs.json` 把其余输入指到仓内已跟踪的文件（`episodes/degradation/`、`episodes/_shared/tests/golden/degradation/voice/`）。
+EP.14 降级（`meta.slug` `degradation-v1`）的整套 spec：`covers_spec.py`、`layout_spec.py`、`build_spec.py`、`validate_spec.py`，配套的 `narration.py`、`sources/ref-sources.md`、`sources/src/*.txt` 也保存在该范例目录；`repo-inputs.json` 把其余输入指到固定历史 fixture（`episodes/_shared/tests/fixtures/degradation-v0.45.0/`）和已有 `episodes/_shared/tests/golden/degradation/voice/`。fixture 提取自提交 `c1da2a1eef696d8bd08c9b078d7b833d75308498`，不随站点 `episodes/degradation/` 的新成片变化。
 
 ```sh
 sh episodes/_shared/storyboard/examples/degradation/rerun.sh [OUTDIR]
 ```
 
-预期：`检查 6623 项，错误 0`，起音复核 91/91，`label_onset_strict` `91 cues, 0 fail`；`storyboard.json` sha256 `6265993b…`、`covers.json` `8cb7aafb…`，与 `episodes/degradation/` 下两份 `cmp` 无输出。
+预期：`检查 6623 项，错误 0`，起音复核 91/91，`label_onset_strict` `91 cues, 0 fail`；`storyboard.json` sha256 `6265993b…`、`covers.json` `8cb7aafb…`，与历史 fixture 下两份 `cmp` 无输出。
 
 新期：复制这四个 spec 改内容即可；期特有的检查放 `validate_spec.checks(V)`，不要改引擎。引擎改动必须保证 `rerun.sh` 仍逐字节一致、仍是 6623 项。
 

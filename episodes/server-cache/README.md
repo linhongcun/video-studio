@@ -1,7 +1,5 @@
-# EP.08 服务端缓存（server-cache）
-- storyboard.json：13 镜头，3900 帧 @30fps（不含全局片尾 60 帧），provisionalTiming=false（Knoll 实测 timing.json / timing.mimo.json，scale 1，无 extraHold；v0.12.1：旁白补上术语（服务端缓存、Redis、缓存命中/没命中、TTL、CDN），第 1、3、4、6 章重配）
-- 工具链同第五～七期：gen_assets.py → gen.py → validate.py；frame.py 出检查帧（check/）；map_timing.py 接实测 timing
-- 制作：`cd remotion && npm ci && npm run render`（Remotion 渲染 + mix_bgm.py constant --below 12，Wallpaper，−16 LUFS）
-- 封面 poster.jpg = 全片第 1505 帧（hit-miss-1 局部 227）
-- branding v1.3.0：只有右上「IT小村」+ 60 帧片尾卡；无中央水印；全片无「我是 IT小村」
-- 配乐：Kevin MacLeod「Wallpaper」（incompetech.com），CC BY 4.0
+# EP.08《数据库明明有数据，为什么还要再存一份？》
+
+2026-10-24 Codex 重制，实测 3491 帧。现行制作与检查入口：[episodes-codex/server-cache](../../episodes-codex/server-cache/README.md)。
+
+本站使用检查通过的冻结成片和字幕，保留原发布日期、首发版本与历史平台链接。文章仅在站点接入层补章节锚点，变换记录见 site-integration.json。旧 remotion/ 目录为历史工程，现行源码以 meta.json 的 sourcePath 为准。

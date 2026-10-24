@@ -1,5 +1,7 @@
 # 分镜字段
 
+以下字段说明保留上一轮 EP.14 的历史范例。EP.01–14 本轮 Codex 制作在 `episodes-codex/<slug>/`；站点 `episodes/degradation/` 已是新片数据，不能再用它复现6265993b/5152帧的旧范例。固定旧输入见 `episodes/_shared/tests/fixtures/`，当前结构与检查入口见各期 README；哈希定义按当期冻结文件明确记录。
+
 从 `episodes/degradation/storyboard.json` 和 `episodes/degradation/covers.json` 归纳（冻结稿 storyboard `6265993b`、covers `8cb7aafb`）。该分镜 `meta.slug` 是 `degradation-v1`。没有出现的字段不要加。`assets.procedural.description` 点名 `knoll-props.md`；空白模板是 [knoll-props.template.md](knoll-props.template.md)，EP.14 全文范例是 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。`episodes/degradation/` 里没有这份期文件。组件行为以范例和 `episodes/degradation/remotion/src/components/` 为准。
 
 本文件只写字段和「怎样生成」。检查项与阈值的判定在 [validate.md](validate.md)，规范原文在 [RULES.md](RULES.md)，步骤顺序在 [pipeline.md](pipeline.md)。

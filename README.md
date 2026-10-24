@@ -16,6 +16,8 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 
 2026-10-24 用户批准 EP.17 合并及 GitHub 站点发布，并持续授权后续视频制作和质量检查完成后自主合并、上线，有反馈再修正发布，不再逐次等待确认。该授权适用于 GitHub 主干、Release 和本站；平台新发仍需单独授权。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
 
+v0.47.0 将 EP.01–14 的上一轮 Cursor 重制版全部替换为本轮 Codex 版：160镜、320句新配音，逐期重写脚本与主体动画，补齐章节导航和字幕。制作与检查见[本轮批次记录](docs/codex-remake-ep01-14.md)，当前源码由各期 `sourcePath` 指向 `episodes-codex/`。只上本站，历史平台投稿保留。
+
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
 | 1 | 浏览器与网络 | 浏览器输入网址后发生了什么？ | [http-request](https://linhongcun.github.io/video-studio/episodes/http-request/) | 2026-10-12 |
@@ -27,8 +29,8 @@ IT小村工作室的互联网开发技术科普短视频项目。一条主线讲
 | 7 | 浏览器与网络 | 同一个网页，第二次打开为什么快这么多？ | [browser-cache](https://linhongcun.github.io/video-studio/episodes/browser-cache/) | 2026-10-12 |
 | 8 | 后台缓存 | 数据库明明有数据，为什么还要再存一份？ | [server-cache](https://linhongcun.github.io/video-studio/episodes/server-cache/) | 2026-10-13 |
 | 9 | 后台缓存 | 后台改了价格，页面怎么还是旧的？ | [cache-consistency](https://linhongcun.github.io/video-studio/episodes/cache-consistency/) | 2026-10-16 |
-| 10 | 扛住高峰 | 双十一下单那么多，为什么不丢单？ | [message-queue](https://linhongcun.github.io/video-studio/episodes/message-queue/) | 2026-10-13 |
-| 11 | 扛住高峰 | 抢票那一刻，为什么总提示系统繁忙？ | [rate-limit](https://linhongcun.github.io/video-studio/episodes/rate-limit/) | 2026-10-13 |
+| 10 | 扛住高峰 | 订单已提交，为什么还没处理完？ | [message-queue](https://linhongcun.github.io/video-studio/episodes/message-queue/) | 2026-10-13 |
+| 11 | 扛住高峰 | 抢票时，为什么总提示系统繁忙？ | [rate-limit](https://linhongcun.github.io/video-studio/episodes/rate-limit/) | 2026-10-13 |
 | 12 | 扛住高峰 | 手一抖点了两次支付，为什么只扣一次钱？ | [idempotency](https://linhongcun.github.io/video-studio/episodes/idempotency/) | 2026-10-13 |
 | 13 | 扛住高峰 | 一个服务出故障，为什么整个网站没跟着崩？ | [circuit-breaker](https://linhongcun.github.io/video-studio/episodes/circuit-breaker/) | 2026-10-14 |
 | 14 | 扛住高峰 | 搜索页和结算页，为什么两个价不一样？ | [degradation](https://linhongcun.github.io/video-studio/episodes/degradation/) | 2026-10-13 |

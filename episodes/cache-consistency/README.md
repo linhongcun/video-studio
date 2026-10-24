@@ -1,11 +1,5 @@
-# EP.22 缓存与数据库一致性（cache-consistency）——v9 重写版（无比喻，9 章按问题命名）
-- storyboard.json（sha 9b12a780…，冻结副本 Miyazaki storyboard.9b12a780.json）：55 镜，8606 帧 @30fps（5 张彩色章卡各 78 帧 + 2 张灰色过渡卡各 45 帧）；meta.finalVideoFrames = 8636
-- 成片 video.mp4 = 分镜 8606 + 片尾停留 30 帧 = 8636 帧（4:47.9），sha c71a2370…05be
-- 配音：/workspace/share/ep22-v9 narration.wav sha 0e3138f7…（MiMo 冰糖，257.84 s）；build_voice.py 在 insertBeforeSentence 前插章卡静音并自动补尾 → remotion/public/audio/voice.wav（= 8606 帧）
-- timing.json / remotion/src/timing.json：Miyazaki 按 v9 真实配音对齐；remotion/src/timing.json 由 sync_assets.mjs 从 storyboard 生成
-- 章节：chapters.txt 9 条，站点目录直接取 chapters.txt
-- 片尾 = ending-1 问题卡 + ending-2 关注卡（endcard.txt），角标「结尾」；不追加全局 60 帧片尾卡
-- 素材 assets/：cache、cache-empty、cache-ttl、data-old、data-new 等；价签类素材已移除
-- 封面：Miyazaki covers/ep22-*.jpg → cover-*.jpg
-- 制作：`cd remotion && npm ci && npm run render`；渲染前 `python3 prerender_check.py`
-- 检查：`node site/scripts/check-frames.mjs cache-consistency`
+# EP.09《后台改了价格，页面怎么还是旧的？》
+
+2026-10-24 Codex 重制，实测 3464 帧。现行制作与检查入口：[episodes-codex/cache-consistency](../../episodes-codex/cache-consistency/README.md)。
+
+本站使用检查通过的冻结成片和字幕，保留原发布日期、首发版本与历史平台链接。文章仅在站点接入层补章节锚点，变换记录见 site-integration.json。旧 remotion/ 目录为历史工程，现行源码以 meta.json 的 sourcePath 为准。

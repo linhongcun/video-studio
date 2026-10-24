@@ -1,6 +1,6 @@
 # 配音
 
-音色、响度和起音以 [RULES.md](RULES.md) 为准。参考实现：`episodes/degradation/words.json`、`episodes/degradation/pronunciation.md`、`episodes/degradation/remotion/public/audio/voice.wav`。
+音色、响度和起音以 [RULES.md](RULES.md) 为准。当前实现参考 `episodes-codex/db-lock/`、`episodes-codex/http-request/` 的 README、选中takes、铺轨及冻结检查。下文的 degradation 数值与词级ASR示例属于上一轮历史记录；EP.14站点数据现已更换，旧回归输入单独固定于 `episodes/_shared/tests/fixtures/`，不要混用旧Remotion公开音轨与新分镜。
 
 ## 合成一句
 

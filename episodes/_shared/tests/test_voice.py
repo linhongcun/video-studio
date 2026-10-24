@@ -7,8 +7,8 @@ local stand-in for mimo_say.py that writes tone-burst "takes", each with a
 lastword_fix, cues_rule, shot_frames, selfcheck.
 Needs ffmpeg, scipy and soundfile; skipped when any is missing.
 
-regression(): EP.14 degradation, from the repo voice.wav + script.md and the
-frozen fixtures in tests/golden/degradation/voice/ (build.json, asr.json,
+regression(): historical EP.14 v0.45.0, from immutable fixture voice.wav +
+script.md and tests/golden/degradation/voice/ (build.json, asr.json,
 cue_tests.json; the picked takes are not in the repo, so build.py and ASR are
 not rerun). Checks sents.json, words.json, cues.json, shot_frames.json and
 selfcheck against EP.14. Set VOICE_REG_TAKES=/path/to/takes (EP.14 picked
@@ -17,11 +17,11 @@ the episode.
 """
 import hashlib, json, os, shutil, subprocess, sys, tempfile
 from pathlib import Path
+from degradation_fixture import FIXTURE as EP, historical_degradation
 
 ROOT = Path(__file__).resolve().parents[3]
 V = ROOT / 'episodes/_shared/voice'
 G = ROOT / 'episodes/_shared/tests/golden/degradation/voice'
-EP = ROOT / 'episodes/degradation'
 WAV_SHA = '9e70470c096c4198f679eceb5323b0cd9f90323784e7dad284dc43c47265468b'
 sha = lambda p: hashlib.sha256(Path(p).read_bytes()).hexdigest()
 
@@ -118,6 +118,7 @@ def synthetic():
 
 
 def regression():
+    historical_degradation()
     need = [EP / 'script.md', EP / 'words.json', EP / 'remotion/public/audio/voice.wav', G / 'build.json', G / 'asr.json', G / 'cue_tests.json']
     if not all(p.exists() for p in need) or not have('numpy', 'soundfile'):
         print('skip voice regression, missing EP.14 files, ffmpeg or soundfile'); return
@@ -134,7 +135,7 @@ def regression():
     run('onsets.py', d); run('lastword_fix.py', d); run('cues_rule.py', d); run('shot_frames.py', d)
     got = json.loads((d / 'words.json').read_text(encoding='utf-8')); exp = json.loads((EP / 'words.json').read_text(encoding='utf-8'))
     exp['scriptSha256'] = got['scriptSha256']   # repo script.md differs from EP.14's only in 画面 lines
-    assert got == exp, 'words.json differs from episodes/degradation/words.json'
+    assert got == exp, 'words.json differs from the immutable EP.14 fixture'
     for f in ('cues.json', 'shot_frames.json'):
         assert (d / 'voice' / f).read_bytes() == (G / f).read_bytes(), f
     out = run('selfcheck.py', d); assert 'selfcheck ok' in out, out

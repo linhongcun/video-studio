@@ -1,5 +1,7 @@
 # 调研模板
 
+当前实际核验示例见 `episodes-codex/db-index/research.md`、`episodes-codex/db-lock/research.md` 及本轮各期 `research.md`。本文提到的 degradation 文首结构是历史范例；新稿使用现行制作目录，不依据已被替换的旧站点稿恢复流程。
+
 公开来源才能进脚本和文章。内部材料（handoff、旧分镜、群消息、未入库的 backup）只帮助起草，写的时候标「仅参考内部材料，不可作引用」，并且不要出现在 `article.mdx` 的脚注里。
 
 `episodes/degradation/article.mdx` 的脚注是现行写法：资料名、访问日期、可打开的 URL。`episodes/degradation/script.md` 文首用「文章提醒」把只进文章的事实和片中主线分开。

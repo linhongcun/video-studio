@@ -1,156 +1,31 @@
 ---
-title: 手一抖点了两次支付，为什么只扣一次钱？
-summary: 付钱时页面一直转圈，你手一抖又点了一次支付，结果钱只扣了一次。示例里，打开支付页时网页就给这笔支付配好一个支付编号 7001，之后不管发几次都带着它；网站收到后先查编号，没见过就照常扣款并记下结果，见过就不再扣钱，只把上次的结果原样回给你。没收到回音就把同一个请求再发一次，叫重试；发一次和发很多次效果都一样，叫幂等。文末补充真实编号长什么样、编号由谁生成、HTTP 方法的幂等、24 小时保存、409 与已过期的 IETF 草案、按钮变灰挡不住网络重发，以及讨论题参考答案。
+title: "手一抖点了两次支付，为什么只扣一次钱？"
+summary: "同一次支付，保留同一个编号。"
+related: []
 chapters:
-  - { id: twice, title: 一、点两次，网站就收到两个请求 }
-  - { id: key,   title: 二、同一笔支付，带同一个支付编号 }
-  - { id: seen,  title: 三、编号见过，就不再扣钱 }
-  - { id: idem,  title: 四、这就是幂等 }
+  - id: retry
+    title: "没收到结果，结果仍可能已发生"
+  - id: identity
+    title: "后台可靠地记住同一次操作"
+  - id: boundary
+    title: "幂等承诺有范围"
 ---
 
-付钱时，`pay.example/checkout` 的页面一直转圈，你手一抖又点了一次「支付」，结果钱只扣了一次。这是怎么做到的？
+同一笔支付发出两次请求，不一定需要扣两次款。教学例子里，支付金额30元，账户从100元变为70元；即使成功响应丢了，重发同一次支付也仍使用编号7042。
 
-> 说明：`pay.example` 是文档专用的示例域名[^rfc2606]，不是现实中的支付网站。订单金额 680 元、合计 1360 元、支付编号 7001 和 7002、点击／请求／发送／扣款次数，都是本例的示例数据，视频里出现的地方都标了「示例数据」或「示例」。本文不代表任何一家支付平台的具体实现。
+## 没收到结果，结果仍可能已发生 {#retry}
 
-## 跟着这笔支付走一遍
+请求可能已完成，只是响应没有回来。重试需要先区分“同一次操作”与“另一笔内容相同的新操作”：两笔真正不同的30元支付应该有不同编号。仅拿金额或请求参数做去重，不足以表达业务意图。
 
-### 1. 点两次，网站就收到两个请求 {#twice}
+## 后台可靠地记住同一次操作 {#identity}
 
-{/* 配图：「点击：1 次 → 2 次」，下面「支付请求 ①／②：付 680 元（示例）」 */}
+首次处理必须协调编号登记、业务变更和结果记录，使它们不会出现“钱扣了却没有去重记录”的断裂。重复请求拿到此前结果，而不是再扣一次。两次并发到来时，只有一个处理者可认领同一编号；另一份应等待或按接口约定重试，不能让两个处理者都先查到不存在。
 
-示例里，转圈时你又点了一次，网站就先后收到两个支付请求，每个都是付六百八十元。
+## 幂等承诺有范围 {#boundary}
 
-要是网站把这两个请求当成两笔新的支付，就会扣两次，一共扣掉一千三百六十元（680 ＋ 680 ＝ 1360，示例）。
+幂等约束的是重复操作的业务效果，不要求每次HTTP报文逐字节相同。不同接口的保留期、处理中响应、错误重试策略各有定义；编号过期后重用可能被当成新请求，调用者身份和请求参数也应纳入校验。视频没有承诺所有网站、所有重复点击永久只扣一次。
 
-还有一种情况你没点第二次：网络一卡，请求发出去迟迟没回音，有的页面会自己把它再发一次。没收到回音，就把同一个请求再发一次，这叫**重试**。点两次也好，重试也好，网站都会收到两个一样的请求。
+## 公开资料
 
-### 2. 同一笔支付，带同一个支付编号 {#key}
-
-{/* 配图：打开支付页 → 支付编号：7001（示例）→ 第 1 次／第 2 次／再发一次，都是 7001 */}
-
-办法是：打开支付页时，网页就给这笔支付配好一个支付编号，之后不管发几次都带着它。
-
-在浏览器里能看到这一步。**先打开开发者工具**的「网络 Network」面板，列表是空的；再点「支付」，列表这时才出现 `pay` 这一行。点开它、切到「标头 Headers」，示例里能看到这一行：
-
-```
-Idempotency-Key: 7001
-```
-
-视频里这一行前面的「支付编号」是中文译注，不是原始字段的一部分；`Idempotency-Key` 是请求头的名字。先开工具再点支付，是因为工具打开之前发出的请求不会出现在列表里。
-
-网站收到后先查这个编号：没见过，就照常扣款六百八十元，再把编号和结果记下来。
-
-扣款其实已经成功了，可回给你的结果在网络上卡住了，所以你的页面还在一直转圈。
-
-### 3. 编号见过，就不再扣钱 {#seen}
-
-{/* 配图：查编号 7001 → 见过 → 不再扣款 → 回上次的结果：支付成功，680 元 */}
-
-这时你又点了一次支付，新的请求出现在列表里（视频里开发者工具重新展开，所以列表从空开始，这不是第一笔请求消失了），带的还是同一个支付编号 7001。
-
-网站一查，7001 已经扣款成功过，就不再扣钱，直接把上次记下的结果原样回给你。
-
-你的页面终于不转了，显示支付成功，六百八十元——这是第一次扣款的结果，不是新扣的一笔。
-
-再新开标签页，在地址栏输入 `pay.example/bills` 打开我的账单看看：这笔支付只有一条记录「7001｜680 元｜支付成功（示例）」，扣了六百八十元，只扣了一次。
-
-### 4. 这就是幂等 {#idem}
-
-{/* 配图：同一个请求：发 1 次 ＝ 发很多次，扣款次数：1（示例） */}
-
-同一个请求，发一次和发很多次，最后的效果都一样，钱只扣一次，这种性质就叫**幂等**。
-
-RFC 9110 对幂等的定义是[^rfc9110]：
-
-> "A request method is considered "idempotent" if the intended effect on the server of multiple identical requests with that method is the same as the effect for a single such request."
-
-有了幂等，重试才能放心用：网络一卡，网页就带着同一个编号再发一次，发几次都只扣一次钱。
-
-反过来，要是第二次换了一个新编号（比如 7002），网站查不到记录，就会当成新的一笔，再扣六百八十元。Stripe 的文档也写了这一点[^stripe-err]：
-
-> "A new key can start a second operation."
-
-所以关键就两步：
-
-1. 同一笔支付始终带同一个编号；
-2. 网站见过这个编号，就不再扣钱，只回上次的结果。
-
-回到开场，你手一抖点了两次支付，两个请求带着同一个支付编号，所以网站只扣了一次钱。
-
-## 视频里没讲的几件事
-
-**7001 只是简化示例，真实编号是一长串随机字符。** 视频里用 7001 是为了好认好读。实际使用时，编号要足够随机、不容易撞上别人的。Stripe 的建议原句是[^stripe-idem]：
-
-> "we suggest using V4 UUIDs, or another random string with enough entropy to avoid collisions"
-
-V4 UUID 长得像 `3f2b8c1e-9d4a-4e7b-a1c2-5f6e7d8c9b0a` 这样（这一串也是示例）。
-
-**编号由发请求的一方生成，在哪里生成各网站不同。** 编号不是网站收到请求后才分配的，而是发请求的一方事先生成、每次发送都带上。Stripe 的原句是[^stripe-idem]：
-
-> "A client generates an idempotency key, which is a unique key that the server uses to recognize subsequent retries of the same request."
-
-视频里为了好讲，示例是「打开支付页时网页就生成」；现实中，有的网站在浏览器里生成，有的由网站自己的服务器在调用支付接口前生成，做法因网站而异。关键只在于：同一笔支付的每一次发送，带的都是同一个编号。
-
-**HTTP 方法层面的幂等。** RFC 9110 讲的幂等本来是针对请求方法的[^rfc9110]：
-
-> "Of the request methods defined by this specification, PUT, DELETE, and safe request methods are idempotent."
-
-安全方法指 GET、HEAD、OPTIONS、TRACE。POST 不在其中，按方法语义它不是幂等的；支付通常用 POST 发送，所以需要像支付编号这样的额外机制，让同一笔支付的重复发送只生效一次。RFC 9110 也解释了为什么幂等对重试重要[^rfc9110]：
-
-> "Idempotent methods are distinguished because the request can be repeated automatically if a communication failure occurs before the client is able to read the server's response. For example, if a client sends a PUT request and the underlying connection is closed before any response is received, then the client can establish a new connection and retry the idempotent request. It knows that repeating the request will have the same intended effect, even if the original request succeeded, though the response might differ."
-
-视频讲的是「同一笔支付的最终效果」，方法层面的区别只放在这里。
-
-**网站记下的是什么、记多久。** 以 Stripe 为例[^stripe-idem]：
-
-> "For API v1, Stripe saves the status code and body of the first request made with a given idempotency key after endpoint execution begins. Retries with the same key return the saved response, including 500 errors."
-
-也就是说，回的是第一次的结果，即使那次是错误也照样原样回。编号也不是永久保存的[^stripe-idem]：
-
-> "For API v1, you can remove keys from the system automatically after they’re at least 24 hours old."
-
-同一个编号如果配上了不同的参数（比如金额变了），会直接报错[^stripe-idem]：
-
-> "The idempotency layer compares incoming parameters to those of the original request and errors if they’re not the same to prevent accidental misuse."
-
-这些是一家的实现边界，不代表所有支付网站都一样。
-
-**上一笔还在办的时候又来一次。** 视频只演示了「上次已经办完」的情况。如果第一次还没处理完，同一编号又来了，Stripe 会返回 409[^stripe-err]：
-
-> "If a 409 indicates that another request with the same key is still executing, wait and retry with that key and the same parameters."
-
-`Idempotency-Key` 这个请求头名，来自 IETF 的草案 draft-ietf-httpapi-idempotency-key-header-07[^ietf]：
-
-> "The HTTP Idempotency-Key request header field can be used to make non-idempotent HTTP methods such as POST or PATCH fault-tolerant."
-
-草案对「原请求还在处理时又来重试」也写了 409[^ietf]：
-
-> "If the request is retried, while the original request is still being processed, the resource SHOULD reply with an HTTP 409 status code with body containing problem description."
-
-注意：这份草案在 datatracker 上标为「Expired Internet-Draft」，2026 年 4 月 18 日已过期，**不是正式标准**，不能当成已生效的统一规定。
-
-**按钮变灰挡不住网络重发。** 点了以后把「支付」按钮变灰，能减少手一抖的重复点击，但挡不住网络卡住时页面或程序自己重试，也挡不住刷新、多开标签页。真正兜底的是网站这一侧「见过这个编号就不再扣钱」；网站在记录编号时，常用数据库唯一约束保证同一个编号只能记一条，具体实现这里不展开。
-
-**支付编号不是订单号。** 视频里的支付编号只用来认出「同一笔支付的再次发送」。它和订单号、全局唯一 ID 不是一回事，后者留到 EP.20 再讲。
-
-**自己看的时候，先打开开发者工具。** 先打开「网络 Network」面板，再点支付；再次打开页面时，用新开标签页、在地址栏输入网址。否则请求可能在你打开面板之前就已经发完，列表里看不到那一行。
-
-## 想一想
-
-要是网络卡了，网页带着同一个编号一共重试了三次，加上第一次，这笔钱会扣几次？评论区说说。
-
-**参考答案：** 只扣一次，680 元（示例）。第一次加上三次重试，一共四次请求，带的都是同一个支付编号 7001；网站第一次没见过就扣款并记下结果，后面三次都见过，不再扣钱，只回上次的结果。
-
-下期：一个服务出故障，为什么整个网站没跟着崩？
-
-## 参考资料
-
-[^rfc9110]: RFC 9110 §9.2.2《Idempotent Methods》：https://www.rfc-editor.org/rfc/rfc9110.html#section-9.2.2 。2026-10-22 访问。
-
-[^stripe-idem]: Stripe API Reference《Idempotent requests》：https://docs.stripe.com/api/idempotent_requests 。2026-10-22 访问。
-
-[^stripe-err]: Stripe Docs《Advanced error handling》：https://docs.stripe.com/error-low-level 。2026-10-22 访问。
-
-[^ietf]: IETF Internet-Draft draft-ietf-httpapi-idempotency-key-header-07《The Idempotency-Key HTTP Header Field》（Expired Internet-Draft，Expires 18 April 2026）：https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-idempotency-key-header 。2026-10-22 访问。
-
-[^rfc2606]: RFC 2606 §2《Reserved Top Level DNS Names》：https://www.rfc-editor.org/rfc/rfc2606.html#section-2 ，原句 “".example" is recommended for use in documentation or as examples.” 2026-10-22 访问。
+- [AWS Builders Library — Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，实际访问2026-10-24。
+- [Stripe API — Idempotent requests](https://docs.stripe.com/api/idempotent_requests)，实际访问2026-10-24。
