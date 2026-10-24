@@ -12,10 +12,10 @@ const articles = import.meta.glob('../../../episodes/*/article.mdx', {eager: tru
 
 export type Chapter = {id: string; title: string; start: number; frame: number; fmStart?: number; inArticle?: boolean};
 export type Episode = {
-  slug: string; ep: number; title: string; summary: string; duration: number; tags: string[];
+  slug: string; ep: number; episodePart?: string; lessonOrder?: number; firstRelease?: string; title: string; summary: string; duration: number; tags: string[];
   date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
   draft: boolean; legacy: boolean; related: {slug: string; label?: string}[];
-  series?: string; description?: string; updated?: string; platforms: Platform[]; readMin: number; sourcePath: string;
+  learningGuide?: {slug: string; label: string}; series?: string; description?: string; updated?: string; platforms: Platform[]; readMin: number; sourcePath: string;
 };
 export type Platform = {id: string; label: string; url: string};
 /** 平台链接：只渲染 meta.json platforms 里写了真实 URL 的平台，没写的不显示（绝不拼猜） */
@@ -49,8 +49,8 @@ export function getRelated(e: Episode) {
     const r = typeof raw === 'string' ? {slug: raw} : raw;
     const m = all.get(r.slug);
     if (!m) return null;
-    return {slug: r.slug, ep: Number(m.ep) || 0, label: r.label ?? '', title: m.title, summary: m.summary, legacy: !!m.legacy, published: !m.draft || SHOW_DRAFTS};
-  }).filter(Boolean).sort((a: any, b: any) => a.ep - b.ep) as {slug: string; ep: number; label: string; title: string; summary: string; legacy: boolean; published: boolean}[];
+    return {slug: r.slug, ep: Number(m.ep) || 0, episodePart: m.episodePart, lessonOrder: m.lessonOrder, label: r.label ?? '', title: m.title, summary: m.summary, legacy: !!m.legacy, published: !m.draft || SHOW_DRAFTS};
+  }).filter(Boolean).sort(compareLessons) as {slug: string; ep: number; episodePart?: string; lessonOrder?: number; label: string; title: string; summary: string; legacy: boolean; published: boolean}[];
 }
 /** 旧版标记：EP.08 起尚未重制的旧期 meta.json 写 legacy: true，卡片和详情页显示这句；重制版上线时删掉该字段 */
 export const LEGACY_LABEL = '旧版，重制中';
@@ -182,7 +182,7 @@ export function getEpisodes(): Episode[] {
       const fm = mod?.frontmatter ?? {};
       const {chapters, duration, fps} = computeChapters(slug, fm.chapters);
       return {
-        slug, ep: meta.ep ?? 0, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
+        slug, ep: meta.ep ?? 0, episodePart: meta.episodePart, lessonOrder: meta.lessonOrder, firstRelease: meta.firstRelease, learningGuide: meta.learningGuide, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
         tags: meta.tags ?? [], date: meta.publishedAt, poster: meta.poster, video: meta.video,
         duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, related: meta.related ?? [],
         series: meta.series, description: meta.description, updated: meta.updatedAt && meta.updatedAt > meta.publishedAt ? meta.updatedAt : undefined,
@@ -190,7 +190,7 @@ export function getEpisodes(): Episode[] {
         sourcePath: meta.sourcePath ?? `episodes/${slug}/remotion`,
       };
     })
-    .sort((a, b) => String(b.date).localeCompare(String(a.date)) || b.ep - a.ep);
+    .sort((a, b) => String(b.date).localeCompare(String(a.date)) || compareLessons(b, a));
   return cache;
 }
 
@@ -204,7 +204,17 @@ export function getTags() {
 }
 
 export const fmtTime = (s: number) => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
-export const epLabel = (n: number) => `EP.${String(n).padStart(2, '0')}`;
+/** 教学顺序与历史期号分开：同一期可有入门、方案详解，不改旧链接与整数期号。 */
+export const compareLessons = (a: {ep: number; lessonOrder?: number}, b: {ep: number; lessonOrder?: number}) =>
+  a.ep - b.ep || (a.lessonOrder ?? 0) - (b.lessonOrder ?? 0);
+export const epLabel = (item: number | {ep: number; episodePart?: string}) => {
+  const ep = typeof item === 'number' ? item : item.ep;
+  const part = typeof item === 'number' ? '' : item.episodePart;
+  return `EP.${String(ep).padStart(2, '0')}${part ? ` · ${part}` : ''}`;
+};
+/** 引导目标必须已发布（或显式预览草稿），避免展示尚未上线的教学链接。 */
+export const learningGuideFor = (e: Episode) => e.learningGuide
+  ? getEpisodes().find((x) => x.slug === e.learningGuide!.slug) : undefined;
 export const tagHref = (t: string) => `${BASE}tags/${encodeURIComponent(t)}/`;
 export const epHref = (slug: string) => `${BASE}episodes/${slug}/`;
 export const asset = (slug: string, f: string) => `${BASE}episodes/${slug}/${f}`;
@@ -224,11 +234,11 @@ export const isNew = (d: string, slug?: string) => {
 /** ISO 8601 时长，供 JSON-LD 使用 */
 export const isoDuration = (s: number) => `PT${Math.floor(s / 60)}M${Math.floor(s % 60)}S`;
 
-/** 系列（篇章）：series.json 定义顺序与简介；每期 meta.json 的 series 指向其 id。系列内按 ep 升序 */
+/** 系列（篇章）：series.json 定义顺序与简介；每期 meta.json 的 series 指向其 id。系列内按期号与教学顺序升序 */
 export type Series = {id: string; title: string; description: string; order: number; episodes: Episode[]};
 export function getSeries(): Series[] {
   const meta = seriesMeta as Record<string, {title: string; description: string; order: number}>;
-  return Object.entries(meta).map(([id, m]) => ({id, ...m, episodes: getEpisodes().filter((e) => e.series === id).sort((a, b) => a.ep - b.ep)}))
+  return Object.entries(meta).map(([id, m]) => ({id, ...m, episodes: getEpisodes().filter((e) => e.series === id).sort(compareLessons)}))
     .filter((s) => s.episodes.length).sort((a, b) => a.order - b.order);
 }
 /** 某期在系列中的位置与系列内上/下一期；系列末尾的“下一期”接下一个系列的第一期 */

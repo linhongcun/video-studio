@@ -15,7 +15,7 @@ import EpisodePager from '../../../components/EpisodePager.astro';
 import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
 import PlatformLinks from '../../../components/PlatformLinks.astro';
-import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, isNew, isoDuration, seriesNav, seriesHref, LEGACY_LABEL} from '../../../lib/episodes';
+import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, isNew, isoDuration, seriesNav, seriesHref, LEGACY_LABEL, learningGuideFor, epHref} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes();
   const pages = eps.map((e, i) => ({params: {slug: e.slug}, props: {e, prev: eps[i + 1], next: eps[i - 1]}}));
@@ -29,6 +29,7 @@ const Content = e.Content;
 const tree = `${REPO}/blob/main/episodes/${e.slug}`;
 // Markdown → 组件自动映射：Sorkin 的稿件无需改写
 const sNav = seriesNav(e);
+const learningGuide = learningGuideFor(e);
 const pageUrl = new URL(`${BASE}episodes/${e.slug}/`, Astro.site).href;
 const abs = (u: string) => new URL(u, Astro.site).href;
 const jsonLd = {
@@ -42,7 +43,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 ---
 <BaseLayout title={e.title} description={(e as any).description ?? e.summary} ogImage={asset(e.slug, e.poster)} ogType="video.other" jsonLd={jsonLd}>
   <div class="container">
-    <Breadcrumb items={[{label: '首页', href: BASE}, ...(sNav ? [{label: sNav.series.title, href: seriesHref(sNav.series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `${epLabel(e.ep)} · 第 ${sNav.index}/${sNav.total} 期` : epLabel(e.ep)}]} />
+    <Breadcrumb items={[{label: '首页', href: BASE}, ...(sNav ? [{label: sNav.series.title, href: seriesHref(sNav.series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `${epLabel(e)} · 第 ${sNav.index}/${sNav.total} 期` : epLabel(e)}]} />
     <header class="eh" data-pagefind-body>
       <h1 data-pagefind-meta={`image:${asset(e.slug, e.poster)}`}>{e.title}</h1>
       {e.legacy && <p class="legacy" data-legacy>{LEGACY_LABEL}：这是早期版本，新版制作中，上线后会替换本页视频和文章。</p>}
@@ -56,6 +57,9 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
     </header>
     <PlatformLinks platforms={e.platforms} />
     <VideoPlayer src={asset(e.slug, e.video)} poster={asset(e.slug, e.poster)} captions={`${BASE}episodes/${e.slug}/captions.vtt`} chapters={e.chapters} title={e.title} />
+    {learningGuide && <a class="learning-guide" href={epHref(learningGuide.slug)} aria-label={`${e.learningGuide.label}：${learningGuide.title}`}>
+      <span>{e.learningGuide.label}</span><strong>{learningGuide.title} →</strong>
+    </a>}
     <RelatedEpisodes items={getRelated(e)} />
   </div>
   <div class="container art-grid">
@@ -87,6 +91,9 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
   }));
 </script>
 <style>
+.learning-guide{display:flex;flex-wrap:wrap;gap:var(--sp-2) var(--sp-4);align-items:center;margin:var(--sp-4) 0;padding:var(--sp-3) var(--sp-4);border:1px solid var(--c-primary-a40);border-radius:var(--r-md);background:var(--c-surface);text-decoration:none}
+.learning-guide span{color:var(--c-text-2);font-size:var(--fs-small)}
+.learning-guide strong{color:var(--c-primary);font-size:var(--fs-small)}
 .eh h1{font-size:var(--fs-h1);line-height:1.25;margin:0 0 var(--sp-2)}
 .meta{color:var(--c-text-2);font-size:var(--fs-small);margin:0 0 var(--sp-5);display:flex;gap:var(--sp-2);flex-wrap:wrap}
 .legacy{margin:0 0 var(--sp-3);padding:var(--sp-2) var(--sp-3);font-size:var(--fs-small);color:var(--c-text-2);background:var(--c-surface);border:1px dashed var(--c-border);border-radius:var(--r-md)}

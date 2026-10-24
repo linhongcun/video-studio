@@ -1,10 +1,10 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Breadcrumb from '../components/Breadcrumb.astro';
-import {BASE, REPO, getEpisodes, epHref, epLabel} from '../lib/episodes';
-import {getReleases} from '../lib/releases';
+import {BASE, REPO, getEpisodes, epHref, epLabel, compareLessons} from '../lib/episodes';
+import {getReleases, episodesForRelease} from '../lib/releases';
 const releases = await getReleases();
-const byEp = new Map(getEpisodes().map((e) => [e.ep, e]));
+const episodes = [...getEpisodes()].sort(compareLessons);
 // 正文只做最小化渲染：转义后把 `代码` 与 PR #n 变成样式/链接
 const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'})[c]!);
 const render = (s: string) => esc(s)
@@ -28,8 +28,8 @@ const render = (s: string) => esc(s)
               <span class={`k k-${r.kind === '新增' ? 'add' : r.kind === '修正' ? 'fix' : 'upd'}`}>{r.kind}</span>
               <time class="num">{r.date}</time>
             </div>
-            {r.eps.filter((n) => byEp.has(n)).length > 0 && (
-              <p class="eps">{r.eps.filter((n) => byEp.has(n)).map((n) => <a href={epHref(byEp.get(n)!.slug)}>{epLabel(n)} {byEp.get(n)!.title}</a>)}</p>
+            {episodesForRelease(r, episodes).length > 0 && (
+              <p class="eps">{episodesForRelease(r, episodes).map((e) => <a href={epHref(e.slug)}>{epLabel(e)} {e.title}</a>)}</p>
             )}
             {r.body && <div class="body" set:html={render(r.body)} />}
           </li>

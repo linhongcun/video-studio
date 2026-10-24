@@ -2,7 +2,7 @@
 
 给 Codex 或同类 coding agent。做一期之前先读本文件，再按下面的手册往下走。规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
 
-制作或重制视频前，先读 [教训](docs/lessons-learned.md) 和 [成功经验](docs/successful-practices.md)，再用 [项目制作记忆](docs/production-memory.md) 确认用户偏好和案例状态。新发现的错误与已经验证有效的做法分别追加到这两份文件，写清案例、改法与验证方式；单期参数不自动变成新规范。
+制作或重制视频前，先读 [教训](docs/lessons-learned.md) 和 [成功经验](docs/successful-practices.md)，再用 [项目制作记忆](docs/production-memory.md) 确认用户偏好和案例状态。每期制作、返工和收到用户反馈时都检查是否需要更新记录：新发现的错误与已经验证有效的做法分别追加到这两份文件，写清案例、改法与验证方式；尚未验证的指导先记到项目记忆，验证后再补证据。没有新发现时不凑条目；单期参数不自动变成新规范。
 
 本仓没有 `share/RULES.md`。2026-10-16 那份团队规范里的冲突条已经写进 `docs/RULES.md` 的废止节。不要从根 `README.md` 的旧段落、`design.md`、`site-plan.md`、站点关于页，或各期 `plan.md` 里恢复「比喻优先」和「发布含快手」。
 
@@ -61,7 +61,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 |---|---|
 | `episodes/` | 站点内容。已上线各期的 `meta.json`、`article.mdx`、`video.mp4` 和重制工程都在这里 |
 | `episodes/degradation/` | 最新重制参考。分镜 `meta.slug` 是 `degradation-v1`，站点 slug 仍是 `degradation` |
-| `episodes-codex/` | EP.15–21 现行制作目录：`db-index/`、`db-transaction/`、`db-lock/`、`db-replication/`、`db-sharding/`、`global-id/`、`distributed-tx/`；其他期入口见 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
+| `episodes-codex/` | EP.15–21 现行制作目录：`db-index/`、`db-transaction/`、`db-lock/`、`db-replication/`、`db-sharding/`、`global-id/`、`distributed-tx/`，另有 EP.21 前置入门 `distributed-tx-intro/`；其他期入口见 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
 | `*-backup/` | 各角色备份。本仓没有这些目录 |
 | `share/` | 本仓没有。规范不要写回这里 |
 | `episodes/_shared/` | 页身色、水印规范、混音、TTS、旧的共享封面工程，以及 `onset_rule.py`、`label_onset_strict.py`、`place_v2.py`、`make_knoll_props.py`、`voice/`（配音整轨） |

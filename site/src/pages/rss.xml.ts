@@ -12,7 +12,7 @@ export function GET(ctx: APIContext) {
     trailingSlash: true,
     customData: '<language>zh-CN</language>',
     items: getEpisodes().map((e) => ({
-      title: `${epLabel(e.ep)} ${e.title}`,
+      title: `${epLabel(e)} ${e.title}`,
       link: `episodes/${e.slug}/`,
       pubDate: new Date(`${e.date}T00:00:00+08:00`),
       description: `${e.description ?? e.summary}（视频 ${fmtTime(e.duration)}）`,
