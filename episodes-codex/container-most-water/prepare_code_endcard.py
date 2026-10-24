@@ -7,9 +7,13 @@ import sys
 
 EP = Path(__file__).resolve().parent
 ROOT = EP.parents[1]
-subprocess.run([sys.executable, str(ROOT / 'episodes-codex/_shared/assemble_sentence_episode.py'), str(EP)], check=True)
 config = json.loads((EP / 'episode-config.json').read_text())
 card = dict(config['unvoicedEndCard'])
+build = json.loads((EP / 'voice/build.json').read_text())
+card['from'] = build['summary']['frames'] - card['durationInFrames']
+config['unvoicedEndCard']['from'] = card['from']
+(EP / 'episode-config.json').write_text(json.dumps(config, ensure_ascii=False, indent=2) + '\n')
+subprocess.run([sys.executable, str(ROOT / 'episodes-codex/_shared/assemble_sentence_episode.py'), str(EP)], check=True)
 sb = json.loads((EP / 'storyboard.json').read_text())
 last = sb['scenes'][-1]['shots'][-1]
 assert card['from'] + card['durationInFrames'] == sb['meta']['durationInFrames']
@@ -21,6 +25,6 @@ last['timing']['holdReason'] = f"Original closing retained; final{card['duration
 for field in ['codeSource', 'displaySource']:
     card[field + 'Sha256'] = hashlib.sha256((EP / card[field]).read_bytes()).hexdigest()
 sb['meta']['unvoicedEndCard'] = card
-sb['meta']['revisionNote'] = 'Append complete Python solution for pause-to-read closure; previous6544 visual frames and spoken sentences preserved.'
+sb['meta']['revisionNote'] = 'Explain the problem before the method; later narration retained; five-second complete Python appendix.'
 (EP / 'storyboard.json').write_text(json.dumps(sb, ensure_ascii=False, indent=2) + '\n')
 print(f"Python card: frame{card['from']}..{card['from'] + card['durationInFrames'] - 1}")

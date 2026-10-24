@@ -76,10 +76,12 @@ const CodeLine=({children,alpha=1,color=C.gold}:any)=><g opacity={alpha}><rect x
 
 const Scene=({s,f}:{s:Shot;f:number})=>{
  const t=s.visualType,p=phase(s,f),q=phase(s,f,1);
- if(t==='hook')return <><Head title="遇到重复，只移一步够吗？" sub="例子 abcbadea · 先停在第四个字符"/><Board left={0} right={2} best={3} pending={3} duplicate={1}/><Note color={C.red}>旧字符还在，新字符先别加入</Note></>;
+ if(t==='hook'){
+  const selected=phase(s,f,0,.18,.85),unique=phase(s,f,1,.02,.42),longest=phase(s,f,1,.45,.88);
+  return <><Head title="找最长、连续、无重复的一段" sub="输入示例：abcbadea · 从原字符串中选出连续片段"/><Board left={0} right={7} best={0} showSet={false} showStats={false} showPointers={false} windowAlpha={0} windowColor={C.text}/><g opacity={selected}><rect x={x(0)-78} y={388} width={2*170+156} height={168} rx={18} fill={C.teal+'0E'} stroke={C.teal} strokeWidth={3}/><T x={x(1)} y={584} color={C.teal} size={24} anchor="middle">一段连续的字符</T></g><g opacity={unique}><rect x={405} y={727} width={470} height={92} rx={18} fill={C.surface} stroke={C.teal}/><T x={640} y={786} size={36} color={C.teal} anchor="middle">这段里，没有重复字符</T></g><g opacity={longest}><rect x={1015} y={727} width={470} height={92} rx={18} fill={C.surface} stroke={C.gold}/><T x={1250} y={786} size={36} color={C.gold} anchor="middle">长度，要尽可能长</T></g></>;
+ }
  if(t==='substring'){
-  const alternate=f>=at(s,1,.02);
-  return <><Head title={alternate?'要找最长的连续区间':'子串，必须是连续的一段'} sub="原字符串始终保留位置，不交换、不跳选"/>{!alternate?<><Board left={0} right={2} best={3} showSet={false} showStats={false}/><Note color={C.teal}>连续取出 abc，是一个子串</Note></>:<><Board left={0} right={-1} best={3} showSet={false} showStats={false} showPointers={false} windowAlpha={0}/>{[0,2,5].map(i=><rect key={i} x={x(i)-67} y={404} width={134} height={138} rx={16} fill="none" stroke={C.red} strokeWidth={3}/>)}<T x={960} y={780} anchor="middle" size={42} mono color={C.red}>a · c · d</T><Note color={C.red}>隔着选出来的字符，不是子串</Note></>}</>;
+  return <><Head title="abc 是合法候选，还能找到更长的吗？" sub="前三个字符连续且互不重复 · 示例候选长度是 3"/><Board left={0} right={7} best={0} showSet={false} showStats={false} showPointers={false} windowAlpha={0} windowColor={C.text}/><rect x={x(0)-78} y={388} width={2*170+156} height={168} rx={18} fill={C.teal+'0E'} stroke={C.teal} strokeWidth={3}/><T x={x(1)} y={584} color={C.teal} size={24} anchor="middle">连续片段 abc</T><g opacity={p}><T x={655} y={789} size={43} color={C.teal} anchor="middle">候选长度：3</T></g><g opacity={q}><T x={1295} y={789} size={36} color={C.gold} anchor="middle">继续寻找更长的合法片段</T></g><Note alpha={q}>最后只返回最长长度</Note></>;
  }
  if(t==='window'){
   const term=f>=Number(s.cueFrames?.labels?.['滑动窗口']??0);
