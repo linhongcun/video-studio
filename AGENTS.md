@@ -2,6 +2,8 @@
 
 给 Codex 或同类 coding agent。做一期之前先读本文件，再按下面的手册往下走。规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
 
+重制视频前，再读 [制作记忆：EP.15 的已验证经验](docs/production-memory.md)。其中记录了用户明确的质量偏好、音画制作与站点接入的实际经验；案例参数不自动变成新规范。
+
 本仓没有 `share/RULES.md`。2026-10-16 那份团队规范里的冲突条已经写进 `docs/RULES.md` 的废止节。不要从根 `README.md` 的旧段落、`design.md`、`site-plan.md`、站点关于页，或各期 `plan.md` 里恢复「比喻优先」和「发布含快手」。
 
 ## 系列状态
