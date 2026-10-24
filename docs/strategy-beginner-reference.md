@@ -4,6 +4,8 @@
 
 2026-10-25补充：用户进一步明确授权据此调整视频并完成上线。以下保留参考阶段的诊断与草案；实际制作采用[13镜生产讲稿](../episodes-codex/strategy-pattern/script.md)，新配音、真实时序画面与最终发布结果以[本期记录](../episodes-codex/strategy-pattern/release.md)为准，不再把本文件的“尚未制作”历史描述当作当前进度。
 
+新手版已按v0.54.4上线，Release后Pages部署与线上完整文件核验通过；当前成片约2分43秒。具体证据见上述本期发布记录，不将本文件草案或技术检查当成用户观看认可。
+
 ## 实际阅读与可借鉴的组织方式
 
 - [Design Patterns](https://refactoring.guru/design-patterns)：先提供概念入门与目录入口。
