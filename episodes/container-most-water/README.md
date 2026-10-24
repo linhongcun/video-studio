@@ -2,7 +2,7 @@
 
 当前修订先介绍题目，再解释方法。前两镜用可视例子交代输入、选择与限制、目标和返回值；第03镜以后保留既有讲解，完整Python片尾仍5秒并提示暂停。对应原制作issue与历史发布见release.md；用户对旧主体的认可不能作为新开头观看结论。
 
-当前6734帧/30fps（约3:44），44句字幕，四章精确时间来自storyboard。题意预检、实际成片、输入冻结/完整解码/音量和12采样保真通过，见qa-final.md及qa-problem-first-*.json/md。网页及上线实际结果见本轮报告和release.md。
+当前6734帧/30fps（约3:44），44句字幕，四章精确时间来自storyboard。题意预检、实际成片、输入冻结/完整解码/音量和12采样保真通过，见qa-final.md及qa-problem-first-*.json/md。网页及v0.54.2实际完整媒体/字幕/章节和真实Release条目核验通过，见本轮报告、online-verification.json与release.md。
 
 本次按package脚本render:opener只重渲前两镜，再用共享remix_opener.py复用已验收正文，最后使用共享mix_bgm；配音仍由共享voice/build生成。实际来源与命令在opener-remix-plan.json，最终媒体SHA在render-result.json。完整重建仍可用本期npm run render。
 
