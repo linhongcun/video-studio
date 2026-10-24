@@ -1,12 +1,20 @@
 # 策略模式D01：发布记录
 
-## 设计思想修订（v0.56.1待发布）
+## 设计思想修订（v0.56.1已上线）
 
 2026-10-25，用户指出v0.54.4过多讲函数和参数，要求回到不绑定语言的设计思想并更新经验教训。本轮11镜22句、4410帧约2分27秒，视频完全移出语法，围绕稳定流程、变化策略、共同约定、外侧选择、委托、维护边界与成本；具体语言仅在图文可选附录。
 
 新视频完整SHA：`9293cf4d66319a44ac7808f5f75d8bdd1da3a3cec627b8da4d57f802466a1a57`，7,927,803字节，1080p/30fps/AAC48k，-16.0LUFS/-3.8dBTP。125源、完整解码/PTS、实际新音轨相关性、独立19张正式帧（根另9张）与两视口8次seek/22字幕通过。具体范围见qa-final.md和qa-ideas-independent.md。
 
-经验与教训已更新：L030、S017，并纠正L027/S016把函数传参当核心目标的局限。当前待合并、Release后部署与线上核验；以下旧版本均为历史，不作当前线上通过结论。
+经验与教训已更新：L030、S017，并纠正L027/S016把函数传参当核心目标的局限。本轮已完成合并、Release后部署与线上核验：
+
+- [PR #223](https://github.com/linhongcun/video-studio/pull/223)已合并，提交与附注标签为`d9df57e434783de855e4794a6641c4324db7facb`。实际tag树核对视频/4410帧/版本与firstRelease，见[标签身份记录](revisions/ideas/tag-identity.json)。
+- [v0.56.1 Release](https://github.com/linhongcun/video-studio/releases/tag/v0.56.1)于2026-10-24T17:55:41Z（北京时间2026-10-25 01:55:41）发布。合并提交跳过重复push部署，Release后执行同一Pages工作流完整构建与部署。
+- [Pages部署40118351325](https://github.com/linhongcun/video-studio/actions/runs/40118351325)于2026-10-24T17:58:15Z完成且success，head与标签一致，见deployment.json。
+- 线上核验于2026-10-25T01:58:59.083759+08:00一次通过：8个canonical普通GET全部200；视频7,927,803字节完整SHA、原海报、22条VTT逐字节一致，四章0/809/1611/3118帧、目录/源码/JSON-LD/首页/系列/RSS及v0.56.1更新日志均通过，见[线上报告](../../episodes/strategy-pattern/online-verification.json)。
+- #163已在核验通过后以completed关闭，#161同步；L030/S017及旧经验边界与制作规范已更新。用户尚未观看本版，不把制作和线上检查称为用户认可，平台未新发。
+
+以下旧版本均为历史，不作当前线上通过结论。
 
 
 ## 新手讲解重制（v0.54.4已上线）
@@ -59,4 +67,4 @@ firstRelease仍为v0.52.0。以下v0.54.1及v0.52.0保留为历史，不作为�
 
 线上目标：[策略模式视频与配套文章](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)。线上验证脚本为本期 `verify-online.py`，读取canonical页面、视频、海报、VTT、系列、首页、RSS与更新日志；视频流式完整哈希，不下载另存远程媒体。
 
-用户先看v0.52.0提出章节衔接反馈，后看v0.54.1仍认为新手难理解；当前v0.54.4尚无用户观看反馈。平台新发未执行。
+用户先反馈章节衔接，后反馈复杂，再指出v0.54.4偏语法；当前v0.56.1尚无用户观看反馈。平台新发未执行。
