@@ -117,6 +117,8 @@
 - **案例：**D01策略模式先用单文件V1/V2映射对照行为，独立审读指出它还变更了调用侧映射。随后补同名`campaign`的两份完整快照，只有函数体80→75，注册表、选择和结算保持不变；视频11–12镜使用这份最小差异证据。
 - **验证：**文本和AST检查只发现`campaign`变化，21组独立前后运行确认普通/会员不变、100元活动价由80变75；正式MP4的规则改动、等待/回传和代码由独立质检实际查看。详见[示例证据](../episodes-codex/strategy-pattern/demo/verified-results.json)、[编辑审读](../episodes-codex/strategy-pattern/qa-editorial.md)与[成片复核](../episodes-codex/strategy-pattern/qa-independent.md)。这些证据支持本例的事实与表达，不代表观众学习效果或用户已经认可。
 
+- **后续限制：**用户观看章节衔接修订后仍指出内容复杂、新手难理解。最小diff和运行结果能支撑修改范围，不能代替教会“函数本身可作为参数、执行之后才产生结果”等前置关系；本例后续讲解重排见L027和[新手讲稿草案](strategy-beginner-reference.md)。
+
 ## 如何继续追加
 
 保留已有编号，新增下一条。建议格式：
