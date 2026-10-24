@@ -36,6 +36,11 @@ files = [D/f for f in ['script.md','article.mdx','research.md','pronunciation.md
     'remotion/tsconfig.json','remotion/public/audio/voice.wav']]
 files += [snapshot]
 files += [ROOT/'episodes-codex/_shared'/f for f in ['assemble_sentence_episode.py','freeze_sentence_episode.py','check_sentence_episode.py','check_encoded_episode.py']]
+# Navigation is a production dependency shared by the revised short episodes.
+# Freeze its actual source alongside the local graph/shot mapping in remotion/src.
+navigation = ROOT/'episodes-codex/_shared/branch-map'
+if navigation.is_dir():
+    files += [p for p in navigation.rglob('*') if p.is_file() and p.suffix in {'.ts', '.tsx', '.json'}]
 files += [p for p in (D/'remotion/src').rglob('*') if p.is_file()]
 picks = json.loads((D/'voice/picks.json').read_text())
 for row in json.loads((D/'voice/sents.json').read_text()):
