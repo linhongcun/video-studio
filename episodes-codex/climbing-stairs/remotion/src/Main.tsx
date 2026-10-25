@@ -22,8 +22,8 @@ const pathWords=(path:number[])=>path.map(v=>v===1?'一阶':'两阶').join(' →
 const ThreeWalks=({progress=1,mode='paths',lastProgress=1,groupAlpha=1}:any)=><g data-three-stair-walks="111/12/21">{PATHS.map((path,i)=>{
  const g=mini(i),color=groupColor(path),prefixLength=path.length-1,walked=mode==='prefix'?(prefixLength*progress+lastProgress)/path.length:mode==='last'?(prefixLength+lastProgress)/path.length:progress;
  return <g key={i} data-route-identity={i+1}>
-  <T x={g.x+g.width} y={346} size={30} anchor="middle">走法{i+1}</T>
-  {mode!=='paths'&&<g opacity={groupAlpha}><rect x={g.x-54} y={373} width={310} height={49} rx={13} fill={color+'0B'} stroke={color} strokeWidth={1.5}/><T x={g.x+101} y={407} size={23} anchor="middle" color={color}>最后上{path[path.length-1]===1?'一':'两'}阶这一组</T></g>}
+  <T x={g.x+g.width} y={310} size={30} anchor="middle">走法{i+1}</T>
+  {mode!=='paths'&&<g opacity={groupAlpha}><rect x={g.x-31} y={330} width={264} height={49} rx={13} fill={color+'0B'} stroke={color} strokeWidth={1.5}/><T x={g.x+101} y={364} size={23} anchor="middle" color={color}>最后上{path[path.length-1]===1?'一':'两'}阶这一组</T></g>}
   <Staircase geometry={g} showOrigin terminalLabel="终点" numberSize={21}/><Route geometry={g} path={path} progress={walked} highlightLast={mode!=='paths'} lastColor={color} walkerScale={.81}/>
   <T x={g.x+102} y={800} size={26} anchor="middle" color={mode==='paths'?C.blue:color}>{mode==='prefix'&&lastProgress===0?`前面到第${3-path[path.length-1]}阶`:pathWords(path)}</T>
  </g>;
@@ -44,7 +44,7 @@ const Variable=({x,name,value,step,color,alpha=1}:any)=>{
 const Scene=({s,f}:{s:Shot;f:number})=>{
  const t=s.visualType,p=phase(s,f),q=phase(s,f,1),second=f>=sentence(s,1);
  if(t==='problem')return <>
-  <Head kicker="LeetCode 70 · 先看题目" title="爬楼梯：一共有多少种走法？" sub="输入示例 n = 3 · 从地面出发，每次上一阶或两阶"/><Staircase geometry={BIG} terminalLabel="第3阶 · 终点" numberSize={25}/><Route geometry={BIG} path={[1,2]} progress={phase(s,f,0,.08,.91)} walkerScale={1.15}/><g opacity={p}><T x={397} y={516} size={33} color={C.blue}>先上一阶</T><T x={975} y={382} size={33} color={C.blue}>再上两阶</T></g><g opacity={q}><rect x={1430} y={505} width={330} height={198} rx={23} fill={C.surface} stroke={C.gold} strokeWidth={2}/><T x={1595} y={559} size={26} anchor="middle" color={C.muted}>要求返回</T><T x={1595} y={628} size={37} anchor="middle" color={C.gold}>不同走法的数量</T></g><Note color={C.gold}>只能上1或2阶 · 必须恰好到终点</Note>
+  <Head kicker="LeetCode 70 · 先看题目" title="爬楼梯：一共有多少种走法？" sub="输入示例 n = 3 · 从地面出发，每次上一阶或两阶"/><Staircase geometry={BIG} terminalLabel="第3阶 · 终点" numberSize={25}/><Route geometry={BIG} path={[1,2]} progress={phase(s,f,0,.08,.91)} walkerScale={1.15}/><g opacity={p}><T x={397} y={516} size={33} color={C.blue}>先上一阶</T><T x={975} y={320} size={33} color={C.blue}>再上两阶</T></g><g opacity={q}><rect x={1430} y={505} width={330} height={198} rx={23} fill={C.surface} stroke={C.gold} strokeWidth={2}/><T x={1595} y={559} size={26} anchor="middle" color={C.muted}>要求返回</T><T x={1595} y={628} size={37} anchor="middle" color={C.gold}>不同走法的数量</T></g><Note color={C.gold}>只能上1或2阶 · 必须恰好到终点</Note>
  </>;
  if(t==='order')return <><Head kicker="LeetCode 70 · 看清不同走法" title="同一段楼梯，可以这样走三次" sub="从各自的地面重新出发 · 每条轨迹都恰好到第3阶"/><ThreeWalks progress={phase(s,f,0,.02,.91)}/><Result alpha={q}>返回：3种不同走法</Result><Note alpha={q} color={C.gold}>先上一阶再上两阶，与先上两阶再上一阶，顺序不同</Note></>;
  if(t==='last-step')return <>
