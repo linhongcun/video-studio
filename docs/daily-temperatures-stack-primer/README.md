@@ -1,6 +1,6 @@
 # 每日温度：单调栈前置铺垫修订
 
-状态：修稿、实际动态预检和正式成片声画检查通过，网站接入和本地检查通过，正式发布待核验。用户已实际观看旧版并指出基础概念跳步；尚无修后用户观看结论。
+状态：修稿、实际动态预检和正式成片声画检查通过，网站接入、本地检查、正式发布与线上核验全部通过。用户已实际观看旧版并指出基础概念跳步；尚无修后用户观看结论。
 
 先用原题日期卡演示同一末尾加入/取出、后放先取、栈底与栈顶，再说明待解决温度从底到顶不升（允许相等），演完维护顺序后才命名单调栈。新增两镜四句，原28句take完整复用；实际重做04–07共1385帧画面。原算法、trace、封面保持，正文5322帧，Python仍150帧/5秒；按最新主干默认流程再接150帧参考资料卡，最终5472帧/182.4秒。
 
@@ -10,4 +10,8 @@
 
 证据见制作目录的`qa-preflight`、`qa-audio-preflight`、`qa-final`、`qa-media-independent`、`qa-media-samples`及`reference-appendix-media-check`。没有逐字ASR、全片人工听辨或学习效果测量。
 
-开工基线、后续整合与冻结输入交集见[startup.json](startup.json)。保留全部最新其他课程，原slug/标题/首发身份不变；旧片和旧QA在`revisions/stack-primer-before`完整归档，不重写旧QA来否认用户反馈。本地实际1次构建（含参考资料检查）、1日期与1历史检查；1440亮色/390暗色、8章seek、真实播放/字幕、两卡精确边界与参考卡全屏通过，8图逐份实阅。第一轮资料版本整串排版误报保留，修harness后同build完整复核；不改冻结文章。45其他课849个canonical文件保持。见[网站QA](qa-site.md)，生产Release/部署和HTTP实证待补。
+开工基线、后续整合与冻结输入交集见[startup.json](startup.json)。保留全部最新其他课程，原slug/标题/首发身份不变；旧片和旧QA在`revisions/stack-primer-before`完整归档，不重写旧QA来否认用户反馈。本地实际1次构建（含参考资料检查）、1日期与1历史检查；1440亮色/390暗色、8章seek、真实播放/字幕、两卡精确边界与参考卡全屏通过，8图逐份实阅。第一轮资料版本整串排版误报保留，修harness后同build完整复核；不改冻结文章。45其他课849个canonical文件保持。见[网站QA](qa-site.md)，生产Release/部署和HTTP实证见下。
+
+内容[PR #335](https://github.com/linhongcun/video-studio/pull/335)合并`d6b7e61b52d6ea06f4976786df34097235250cf0`，附注tag及[Release v0.70.1](https://github.com/linhongcun/video-studio/releases/tag/v0.70.1)于15:28:48Z发布；随后手动Pages [40207127313](https://github.com/linhongcun/video-studio/actions/runs/40207127313)使用相同HEAD，15:33:13Z成功。15:34:17Z首轮10次canonical HTTPS完整GET、9,834,154字节通过，视频/海报完整SHA、32句字幕/四章、两张5秒卡、资料与图文链接、日期以及本Release自身只关联本片均一致；45其他课849文件完整保留。四次API本轮均首读成功。见[线上核验](online-verification.md)和[发布回执](publication.json)。原issue #80保持已completed历史，未重复操作；本轮未发外部平台。
+
+[观看修订版](https://linhongcun.github.io/video-studio/episodes/daily-temperatures/)。尚无用户修后观看结论或学习效果测量；本轮技术检查不扩展为该结论。
