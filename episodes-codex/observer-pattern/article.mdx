@@ -1,212 +1,112 @@
 ---
 title: 观察者模式：订单变了，谁该收到通知？
-summary: 先在商家订单详情里操作一次付款状态，看到摘要与变化记录联动，再从同一对象展开观察者结构。沿登记、通知和取消解释职责，片尾Java关键代码连接思想与实现。
+summary: 用订单页面理解观察者原理，把实战重点放在跨服务MQ发布订阅：独立队列、消费确认、离线积压、恢复重投与幂等，并说明事件发布和业务一致性的边界。Java只作简短原理对照。
 chapters:
-  - { id: why, title: 从产品操作展开结构 }
-  - { id: subscribe, title: 先登记，再按共同约定通知 }
-  - { id: notify, title: 跟着一次变化走一遍 }
-  - { id: unsubscribe, title: 取消订阅后，再看下一次变化 }
-  - { id: boundary, title: 收益、成本和适用边界 }
-related: []
+  - { id: why, title: 从订单操作理解观察者 }
+  - { id: subscribe, title: 跨服务实战：用MQ承接通知 }
+  - { id: notify, title: 各自消费，处理成功后确认 }
+  - { id: unsubscribe, title: 故障后积压、恢复与幂等 }
+  - { id: boundary, title: 一致性边界与机制选择 }
+related: [message-queue, idempotency, tx-outbox]
 ---
 
-## 从产品操作展开结构 {#why}
+## 从订单操作理解观察者 {#why}
 
-先看商家正在使用的订单详情页。十七号订单处于“待付款”，旁边打开订单摘要和变化记录。商家点击**“标记为已付款”**之后，订单先采用新状态，两个面板随后联动：
+商家把十七号订单标为“已付款”，订单摘要更新显示，变化记录新增一条事实。**一次状态变化，怎样让需要它的功能各自响应？**
 
-- **订单摘要**要显示“已付款”。
-- **变化记录**要记下“订单17，已付款”这条事实。
+这仍是原来的订单案例。开头的商家订单页是功能教学重建，“标记为已付款”只改变示例状态，不执行真实付款。后面的服务架构也是本项目设计的教学示例，不代表某家商家后台的真实实现。
 
-这里是商家订单功能的教学重建，界面明确标“教学示意”。“标记为已付款”只在示例中改变订单状态，不执行真实付款，也没有核验任何真实商家后台的内部架构。订单号17、状态路径和两个模块仍沿用本片原案例。变化记录只是一个接收者，按收到的消息留痕；它不是可靠投递设施，也不承担业务支付统计。
+先用观察者模式理解职责：关心订单变化的接收方登记接收意愿；订单变化后，按共同约定通知当前接收方。摘要负责显示，记录负责留痕，订单不用掌握各方如何处理。来源仍依赖订阅关系与通知约定，不能说各方完全没有依赖。[^observer]
 
-最直接的安排，是让订单处理知道“要通知摘要”“要通知记录”。只有少数稳定接收方时，这样做可以很清楚。但是，如果接收需求常变化，订单处理里的这份安排就要跟着改；它还可能接触各接收者怎样显示、怎样留痕的细节。
+| 角色 | 原理小例子中的职责 |
+|---|---|
+| 订单来源 | 维护状态和订阅关系，变化后通知 |
+| 共同约定 | 说明收到的是什么，例如订单号与新状态 |
+| 摘要观察者 | 根据收到的状态更新显示 |
+| 记录观察者 | 根据收到的事件追加事实 |
 
-我们要解决的问题是：**能否让接收者各自登记需要什么消息，再由订单依照共同约定通知，而把收到后的具体工作留给接收者？** 观察者模式关注的正是这种一对多的变化通知关系。[^cornell][^ms-observer]
+这已经足以理解模式的核心。代码通常就是接收接口、登记关系和一次通知遍历；本片不再花主要篇幅讲手写名单、移除名单和逐行Java语法。
 
-### 从刚才的界面，找到结构里的角色
+## 跨服务实战：用MQ承接通知 {#subscribe}
 
-界面对象没有换。订单来源对应同一订单；摘要和变化记录对应刚才联动的两个面板。把它们展开成结构，逐个看职责：
+**在跨服务的业务通知中，经常使用MQ的发布订阅机制，而不是自己维护一套跨服务观察者调用。** 观察者模式帮助理解“变化发生后，让关心它的各方分别响应”的设计意图；消息中间件负责进一步承接网络通信、消息保存、路由与消费确认。两者有相似思想，不能简单画等号。[^pubsub]
 
-| 产品中的对象与关系 | 标准结构角色 | Java示例名 | 本例职责 |
-|---|---|---|---|
-| 订单及当前接收者名单 | 来源 | `Order` | 保存状态，维护名单，发生变化后通知 |
-| 接收变化的共同约定 | 观察者约定 | `OrderObserver` | 统一如何接收订单号与新状态 |
-| 摘要面板 | 具体观察者 | `SummaryObserver` | 更新自己的显示 |
-| 变化记录 | 具体观察者 | `ChangeLogObserver` | 追加自己收到的事实 |
-| 一次状态变化的数据 | 通知内容 | `OrderChange` | 本例的订单号和新状态 |
+仍看订单17由待付款变为已付款。为了展开内部机制，视频从同进程原理示例明确切换到跨服务部署：
 
-共同约定是结构契约，不是夹在来源与接收者之间的转发服务。订单通过约定联系接收者，而显示和留痕仍由具体观察者负责。Java名称帮助和片尾代码一一对应；模式思想不限定为Java语法。[^cornell][^ms-observer]
+1. 订单服务产生“订单17已付款”的事实事件。
+2. 发布到消息中间件。
+3. 消息分别进入摘要与变化记录各自的订阅队列。
+4. 两个服务分别消费，完成自己的工作。
 
-## 先登记，再按共同约定通知 {#subscribe}
+本片用**RabbitMQ**作具体实现示例：事件先交给交换机，再按绑定关系路由到两个队列。教学采用发布订阅关系；两个队列分别代表两个业务订阅。[^rabbit-pubsub]
 
-看到一次联动和各自职责后，视频明确切到**“回看·本次付款前”**，解释这次联动之前如何建立联系。此时来源和摘要是待付款，变化记录为空，接收者名单尚未建立；这是同一次付款的机制回放，不是订单状态倒退，也不是再次付款。
+| 消息的去向 | 接收后的业务工作 |
+|---|---|
+| 摘要队列 → 摘要服务 | 更新订单摘要，供页面读取 |
+| 记录队列 → 变化记录服务 | 追加订单状态变化事实 |
 
-先让摘要和变化记录登记接收意愿。订单一侧维护一份**当前接收者名单**。这种登记关系叫作**订阅**。摘要和变化记录都是本例的**观察者**，订单是它们关心的变化来源。[^ms-observer]
+**两个不同业务都要收到一份，应当有各自的订阅队列。** 如果只是让两个消费者竞争同一个队列，通常一条投递只交给其中一个消费者，不能据此保证两边都处理。一个业务订阅内部可以增加多个消费者分担工作，这与增加一个新的业务订阅是两件事。[^rabbit-pubsub][^rabbit-work]
 
-观察者模式不要求某一种语言或特定写法。关键在于职责关系：
+事件只是在陈述“订单已付款”，不是让摘要和记录再执行一次付款。各方仍要共同理解事件字段及其含义；MQ不会消除对事件契约的依赖。
 
-| 一方 | 本例承担的工作 | 不需要承担的细节 |
+## 各自消费，处理成功后确认 {#notify}
+
+摘要服务消费自己队列里的事件，更新摘要；变化记录服务消费另一份，追加记录。在本片选定的**手动确认**实现中，业务处理成功后才向MQ确认。不能在业务工作还没完成时，就把确认画成已经完成。[^rabbit-confirms]
+
+以后增加新的订阅方，可以为它建立自己的队列、绑定和消费逻辑。**在已有事件契约能满足新需求的前提下**，订单服务仍然发布原事件，不必增加一次对新服务的直接调用；配置、订阅方代码、访问权限与事件版本仍需要维护。
+
+这也解释了项目为什么经常采用这种机制：各订阅方的处理速度、上线节奏和故障不必与一次同步调用链紧密绑定。它带来的代价是处理过程更间接，需要观察积压、重试、失败和端到端结果；不是引入一个组件就结束了设计。[^pubsub]
+
+## 故障后积压、恢复与幂等 {#unsubscribe}
+
+视频回到**本次事件已路由、尚未消费**的时点，另看记录服务暂时离线的故障情况：摘要服务仍可处理自己的消息；记录队列保留待处理事件，等待记录服务恢复。
+
+能够这样保留与恢复，依赖具体队列及部署条件。例如RabbitMQ中的持久队列、持久消息和发布确认需要配合使用；发布失败、无法路由、重试上限、积压容量及告警也需要处理。**订阅关系存在、发布确认返回、消费者处理成功，是不同阶段。** 发布确认不等于两个业务都已经完成。[^rabbit-work][^rabbit-confirms]
+
+再看恢复后的重复处理风险：
+
+1. 记录服务恢复，取到事件`e17-1`，业务记录写入成功。
+2. 消费确认没有被MQ收到；连接随后断开并被检测到，未确认投递重新入队。
+3. 相同事件`e17-1`可能再次送达。
+4. 消费者识别已经处理过它，跳过重复业务效果，再确认。
+
+这里的`e17-1`是教学事件编号，不是订单号；同一订单后续的不同状态事件应有各自的事件编号。重投不是一次新付款，也不能推断第一次业务一定没有成功。普通计时器到点不等于RabbitMQ自动重投；本片展示的是手动确认下，断连检测触发未确认消息重新入队的情况。[^rabbit-confirms]
+
+**幂等**关心的是：同一事件重复到达，业务效果仍只发生一次。按事件编号去重是一种常见办法，但去重记录与业务写入需要原子提交，例如在同一本地数据库事务中插入带唯一约束的事件处理记录并完成业务更新。不能先查“没处理过”，再分别写两次，从而留下并发或崩溃窗口。对外部系统的副作用，还需它支持幂等键或采用适合该业务的协调方案。[^pubsub]
+
+这不是MQ天然提供的“恰好一次业务处理”保证。消费次数可以多次，业务效果需要应用正确设计。
+
+## 一致性边界与机制选择 {#boundary}
+
+还有一个发生在发布端的问题：**订单已经更新，但事件没有发出去。** 如果订单数据库提交与发消息是两个独立动作，程序可能在中间故障。单靠MQ的订阅和消费确认，不能让这两个动作自动成为一笔事务。
+
+一种做法是本地消息表，也常称为**Outbox**：在同一本地数据库事务中，同时保存订单变更和待发事件；后续由转发程序发送并维护进度。转发本身仍可能重复，所以消费者的幂等继续有用。视频这里只点出衔接方向，完整过程见[可靠消息与Outbox](../tx-outbox/)。[^outbox]
+
+跨服务异步处理也意味着页面可能短暂落后：订单服务已采用“已付款”，摘要服务还没消费到事件，页面仍显示旧值。需要结合业务设计“处理中”等提示、重试与对账；最终收敛依赖实际处理成功，不能把“最终一致性”理解为放着不管也一定会一致。[^pubsub]
+
+| 实际范围 | 经常采用的机制 | 需要重点判断 |
 |---|---|---|
-| 订单来源 | 改变订单状态，维护订阅关系，通知当前接收者 | 摘要怎样排版、变化记录怎样展示 |
-| 订单摘要 | 按收到的变化，更新自己显示的状态 | 另一个接收者怎样响应 |
-| 变化记录 | 按收到顺序，追加变更事实 | 摘要是否仍打开 |
+| 同一程序内的界面监听、模块联动 | 框架事件、监听器或进程内事件总线 | 订阅生命周期、异常处理、同步或异步规则 |
+| 跨服务的一对多业务事件 | MQ发布订阅 | 路由、持久化、确认、重试、幂等、可观测性与一致性 |
+| 简单且长期稳定的直接关系 | 直接调用也可能足够 | 是否需要异步、独立故障处理与消息保存 |
 
-<figure style={{ margin: '1.5rem 0', maxWidth: '100%' }} aria-label="订单来源维护当前接收者，两个观察者依同一约定各自响应">
-<svg viewBox="0 0 430 380" width="100%" style={{ maxWidth: '430px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="observer-roles-title" xmlns="http://www.w3.org/2000/svg">
-  <title id="observer-roles-title">来源维护当前名单，订单摘要和变化记录分别承担响应职责</title>
-  <rect width="430" height="380" rx="16" fill="#0F172A" />
-  <text x="22" y="32" fill="#94A3B8" font-size="18">关系示意 · 本例两个接收者已订阅</text>
-  <rect x="76" y="52" width="278" height="116" rx="12" fill="#182F48" stroke="#38BDF8" />
-  <text x="96" y="83" fill="#38BDF8" font-size="23">订单来源</text>
-  <text x="96" y="112" fill="#E5E7EB" font-size="18">维护订单状态</text>
-  <text x="96" y="140" fill="#E5E7EB" font-size="17">当前名单：摘要、变化记录</text>
-  <path d="M215 168 V200 M112 200 H318 M112 200 V245 M318 200 V245" fill="none" stroke="#38BDF8" stroke-width="2" />
-  <rect x="30" y="207" width="370" height="26" rx="5" fill="#0F172A" />
-  <text x="215" y="227" text-anchor="middle" fill="#E5E7EB" font-size="17">共同约定：订单号＋新状态</text>
-  <rect x="22" y="245" width="182" height="100" rx="12" fill="#14342F" stroke="#2DD4BF" />
-  <text x="42" y="277" fill="#2DD4BF" font-size="22">订单摘要</text>
-  <text x="42" y="307" fill="#E5E7EB" font-size="18">自己更新显示</text>
-  <text x="42" y="331" fill="#94A3B8" font-size="16">观察者</text>
-  <rect x="226" y="245" width="182" height="100" rx="12" fill="#14342F" stroke="#2DD4BF" />
-  <text x="246" y="277" fill="#2DD4BF" font-size="22">变化记录</text>
-  <text x="246" y="307" fill="#E5E7EB" font-size="18">自己追加事实</text>
-  <text x="246" y="331" fill="#94A3B8" font-size="16">观察者</text>
-  <text x="22" y="369" fill="#94A3B8" font-size="15">连线说明订阅关系，不表示同时执行</text>
-</svg>
-<figcaption>名单属于来源维护的订阅关系；共同约定说明通知内容，不是额外的执行模块。</figcaption>
-</figure>
+所以，不必把实践概括成“观察者模式没人用”。更准确的是：**理解观察者的事件通知思想；同进程经常使用已有框架机制，跨服务通知经常借助MQ；通常不需要从零手写一套模式框架。** 具体选择仍取决于部署、延迟、可靠性和维护成本。
 
-本例选择的共同通知约定是：**包含订单号和新状态。** 比如“订单17，已付款”。这条消息陈述已经发生的状态变化，摘要据此显示，记录据此留痕；它不是要求观察者去执行付款的命令。
+### Java原理对照 {#java}
 
-约定不只是格式相同，字段的含义也必须一致。如果有的接收者把“已付款”当成事实，有的却把它当成付款指令，就无法安全配合。
+片尾只保留5秒静默Java关键节选卡，供暂停阅读。它对应**同进程的原理示例**，帮助识别接收接口、订阅与通知；不是RabbitMQ客户端代码，也不能表达网络故障恢复。
 
-这里选择直接把必要数据送给接收者。另一些实现只告诉接收者“发生了变化”，再由接收者获取状态；这属于具体通知约定的选择，不改变先订阅、来源通知、接收者分别响应的核心关系。[^cornell][^ms-observer]
+完整可运行的原理示例保留在[ObserverDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/ObserverDemo.java)，[验证入口](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/verify.py)核对编译、角色关系和示例行为。原理小例子里的同步次序、取消语义和异常处理属于该程序，不推广为所有观察者或MQ的统一规则。
 
-## 跟着一次变化走一遍 {#notify}
-
-摘要和变化记录都已订阅。现在让同一订单从“待付款”变为“已付款”：
-
-1. 订单来源先更新自己的状态。
-2. 来源按当前通知名单，把“订单17，已付款”交给摘要。
-3. 摘要显示“已付款”。
-4. 来源再通知变化记录；记录新增“订单17，已付款”。
-
-本例中，一方处理完，再轮到另一方。这个先后是我们所选实现的规则，**不是观察者模式统一规定的顺序**。Microsoft 的观察者接口一般不定义通知顺序；Node.js 的 `EventEmitter` 则明确说明了它的同步和注册顺序规则，二者不能互相推广。事件通知也不天然意味着后台并行或异步执行。[^ms-observer][^node-events]
-
-先更新来源、再通知，是本例实际执行的顺序。它让接收者收到的是来源已经采用的新状态。但通知本身不会自动把所有接收者的处理变成一笔事务：其中一方失败时会怎样，仍需具体实现定义。
-
-### 分开的是什么，保留的又是什么
-
-摘要怎样显示、记录怎样留痕，留在各自职责内部。来源只按共同约定通知当前接收者，不必掌握每一方的响应细节。
-
-联系并没有消失：来源仍维护订阅关系，仍要知道当前应该联系哪些接收者，也仍依赖约定能被理解。观察者模式降低的是对具体接收者细节的依赖，不能概括成“完全没有依赖”。[^cornell][^guru]
-
-## 取消订阅后，再看下一次变化 {#unsubscribe}
-
-第一次通知结束后，在界面点击摘要面板的关闭按钮。面板收起后，画面只保留标明“最后收到”的历史提示，不把它当作实时摘要。摘要不再需要后续消息，因此**取消订阅**，从来源的当前名单移除；变化记录继续保留。[^ms-observer][^ms-practices]
-
-同一订单接着从“已付款”变为“已发货”。来源再次先更新状态，再通知当前接收者。这次名单里只有变化记录：它追加“订单17，已发货”。摘要没有再收到消息。
-
-| 此时的位置 | 内容 | 应当怎样理解 |
-|---|---|---|
-| 订单来源 | 当前状态：已发货 | 同一订单现在的状态 |
-| 变化记录 | 先已付款，再已发货 | 两次实际收到的变更事实 |
-| 已退出的摘要 | 最后收到：已付款；已停止接收 | 历史显示值，不能当作实时订单状态 |
-
-<figure style={{ margin: '1.5rem 0', maxWidth: '100%' }} aria-label="取消摘要后，只有变化记录收到下一次已发货通知">
-<svg viewBox="0 0 430 390" width="100%" style={{ maxWidth: '430px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="observer-unsubscribe-title" xmlns="http://www.w3.org/2000/svg">
-  <title id="observer-unsubscribe-title">同一订单已经发货，名单只保留变化记录，摘要保存历史值并停止接收</title>
-  <rect width="430" height="390" rx="16" fill="#0F172A" />
-  <text x="22" y="32" fill="#94A3B8" font-size="18">示例 · 摘要已取消订阅</text>
-  <rect x="76" y="52" width="278" height="112" rx="12" fill="#182F48" stroke="#38BDF8" />
-  <text x="96" y="83" fill="#38BDF8" font-size="23">订单17 · 已发货</text>
-  <text x="96" y="114" fill="#E5E7EB" font-size="18">当前名单：变化记录</text>
-  <text x="96" y="143" fill="#94A3B8" font-size="16">先更新状态，再发送这次通知</text>
-  <path d="M292 164 V230" fill="none" stroke="#2DD4BF" stroke-width="3" />
-  <path d="M286 222 L292 230 L298 222" fill="none" stroke="#2DD4BF" stroke-width="2" />
-  <text x="307" y="199" fill="#2DD4BF" font-size="16">仅此路径</text>
-  <rect x="22" y="230" width="182" height="122" rx="12" fill="#172033" stroke="#64748B" />
-  <text x="40" y="262" fill="#94A3B8" font-size="22">订单摘要</text>
-  <text x="40" y="292" fill="#E5E7EB" font-size="17">最后收到：已付款</text>
-  <text x="40" y="323" fill="#FBBF24" font-size="18">已停止接收</text>
-  <rect x="226" y="230" width="182" height="122" rx="12" fill="#14342F" stroke="#2DD4BF" />
-  <text x="244" y="262" fill="#2DD4BF" font-size="22">变化记录</text>
-  <text x="244" y="292" fill="#E5E7EB" font-size="18">17 · 已付款</text>
-  <text x="244" y="323" fill="#E5E7EB" font-size="18">17 · 已发货</text>
-  <text x="22" y="376" fill="#94A3B8" font-size="15">摘要历史值保留，未再收到新消息</text>
-</svg>
-<figcaption>同一订单继续变化，改变的是本次接收者名单；没有重新付款，也没有把已发货退回已付款。</figcaption>
-</figure>
-
-取消订阅不等于抹掉此前已经收到的消息；一般也不能笼统承诺撤销正在执行的通知。本例在第一次通知完全结束后取消，所以第二次确定不会通知摘要。通知过程中取消会怎样，属于实现契约，见下方可选实现。
-
-## 收益、成本和适用边界 {#boundary}
-
-**值得考虑的情况：**同一来源的变化需要让多个接收方各自响应，而且接收者集合或响应细节会独立变化。共同约定不变时，本例通过订阅增减接收者；各接收者分别维护自己的响应，来源不用把这些细节写进订单处理。[^cornell][^guru]
-
-这不表示新增功能时整个项目都不用改。新的接收者本身、建立订阅的位置、使用到的消息字段与生命周期安排，仍需要设计；如果共同约定改变，也要评估相关各方。
-
-**需要承担的成本：**
-
-- **订阅有生命周期。**不再需要消息时应当取消；具体引用关系可能使已不用的接收者继续被保留。不能只演示注册，省掉退出。
-- **处理链更间接。**阅读一次订单变化时，还要找到当前接收者，才能知道后面会发生什么。
-- **通知有具体语义。**同步还是异步、先后、传哪些信息、出错后继续还是停止、通知中新增或移除接收者、能否在响应里再次改来源，都需要明确规则。[^ms-practices]
-- **可靠投递要另外解决。**同一程序里有订阅关系，不会自动带来持久化、崩溃补发、网络重试或恰好一次处理。分布式的发布/订阅系统可能使用消息中间件，并提供自己的投递与故障语义；不能把那些保证仅归因于“用了观察者模式”。[^azure]
-
-只有一个长期固定的接收方，而且直接关系已经足够清楚时，直接通知往往更省事。这是结合变化和成本作出的选择，不是“模式越多，设计越好”。
-
-读一个已有项目时，可以沿着“谁登记接收 → 来源保存哪份名单 → 变化时发出什么 → 谁负责响应 → 何时退出”找设计关系。不能只看到某个名称，就判定已经使用了该模式。
-
-观察者模式的核心，是把**来源怎样变化**和**各接收者收到后做什么**分开，再用可以增减的订阅关系把双方接起来。
-
-### 与上一期策略模式怎样区分
-
-[策略模式](/video-studio/episodes/strategy-pattern/)关注同一任务的不同做法怎样被选择、替换和使用。本例的观察者模式关注同一来源变化后，当前接收者怎样分别响应：不是从摘要和记录中挑一个来替换另一个，而是按当前订阅关系通知需要接收的各方。相似的连线或命名不能代替设计意图判断。[^guru]
-
-### Java关键代码与完整运行示例 {#java}
-
-片尾单独保留5秒静默代码卡，标明“暂停阅读”和“关键节选”；正文不逐行讲语法。下面与卡片同源，呈现共同观察者约定、来源内部的通知和一次订阅/取消使用。注释中的“Order内”和“main内”说明节选所属位置，**这段节选不是独立完整程序**。
-
-```java
-record OrderChange(String orderId, String status) {}
-interface OrderObserver { void onChange(OrderChange change); }
-
-// Order内：先改状态，再通知当前名单快照
-status = next;
-OrderChange change = new OrderChange(id, next);
-
-for (OrderObserver observer : List.copyOf(observers)) {
-    observer.onChange(change);
-}
-
-// main内：摘要显示，变化记录追加，各自响应
-Order order = new Order("17");
-SummaryObserver summary = new SummaryObserver();
-ChangeLogObserver log = new ChangeLogObserver();
-order.subscribe(summary);
-order.subscribe(log);
-order.changeStatus("已付款");
-order.unsubscribe(summary);
-order.changeStatus("已发货");
-// 摘要最后收到已付款，记录保留已付款、已发货
-```
-
-完整实现与上下文见[ObserverDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/ObserverDemo.java)，实际运行入口见[verify.py](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/verify.py)，[验证报告](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/verified-results.json)记录编译器、源码SHA、卡片节选映射和八类行为检查。此次在OpenJDK21实际编译、运行；没有使用已弃用的`java.util.Observer`来定义模式。
-
-主线结果仍是：订单当前已发货，摘要最后收到已付款且已取消，变化记录按顺序保留已付款、已发货。完整代码中，摘要与变化记录各自实现接收后的工作；卡片没有把这些工作搬进订单来源。
-
-本例选择单进程、单线程；不在订阅时补发历史，按通知开始时的接收者快照，依登记顺序同步处理。取消影响后续事件。接收者抛错时错误向外传播，停止后续通知；来源状态不回滚，没有自动重试；通知中再次修改来源会被拒绝。具体政策以源码与运行报告为准，不是所有观察者模式都必须如此。
-
-上一版[Python实现与七项行为记录](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/observer-pattern/demo)保留为历史可选参考，不再承担当前视频的代码展示。两种语言表达同一组职责，不以语言机制定义模式。[^demo]
+这期实战应当记住的，是沿着“订单变化 → 发布事实事件 → 各订阅方处理”追踪结果，并回答：发出去了吗、路由对了吗、失败如何恢复、重复如何避免、各处状态何时收敛。
 
 ### 资料与阅读范围
 
-下面资料实际访问于**2026-10-25（北京时间）**。公开资料支持模式关系和实现边界，教学订单状态与动作由本项目示例实际运行支撑。未取得经典 GoF 书籍全文，不声称已阅读其章节；Refactoring.Guru用于辅助交叉核对。
+以下为公开资料。实际取得正文、访问日期与受限项详见制作工程`research.md`；不以旧内部笔记代替官方来源，不声称已阅读GoF书籍全文。所有订单、事件编号、界面与服务部署均为自建教学示例。
 
-[^cornell]: [Design patterns — Cornell CS2112，Observer节](https://courses.cs.cornell.edu/cs2112/2022fa/lectures/patterns/index.html)，2022秋季课程资料。读取登记集合、来源变化推送、接收者各自响应与通知约定的正文；对应研究S1。
-[^ms-observer]: [Observer design pattern — Microsoft .NET](https://learn.microsoft.com/en-us/dotnet/standard/events/observer-design-pattern)，页面标更新2026-06-02。支持来源、观察者、订阅/取消、一对多与顺序边界；.NET接口细节不推广到所有语言，对应研究S2。
-[^ms-practices]: [Observer design pattern best practices — Microsoft .NET](https://learn.microsoft.com/en-us/dotnet/standard/events/observer-design-pattern-best-practices)，页面标更新2026-06-02。支持生命周期、共同约定及通知错误等需要另行确定的行为；对应研究S3。
-[^node-events]: [Events — Node.js](https://nodejs.org/api/events.html)，动态文档，本次读取v26.12.1。仅用于说明一种具体事件实现的同步、注册顺序与取消语义，不把它当作模式的统一规则；对应研究S4。
-[^guru]: [Observer — Refactoring.Guru](https://refactoring.guru/design-patterns/observer)，页面未标发布日期，辅助解释来源。用于核对订阅、通知、适用与取舍，不当作官方API规范；对应研究S5。
-[^azure]: [Publisher-Subscriber pattern — Microsoft Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber)，页面标更新2026-03-06。用于辨析分布式消息结构与投递保证另需实现；不说明本例具备中间件能力，对应研究S7。
-[^demo]: 本项目[当前Java示例与八项运行结果](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/observer-pattern/demo-java)及保留的[历史Python示例与七项运行结果](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/observer-pattern/demo)。订单17和状态均为示例。程序运行验证具体行为，不证明观众已理解模式，也不代表实际支付、发货或跨服务执行。
+[^observer]: [Observer design pattern — Microsoft .NET](https://learn.microsoft.com/en-us/dotnet/standard/events/observer-design-pattern)。用于来源、观察者、订阅和通知职责；语言接口是具体实现。
+[^pubsub]: [Publisher-Subscriber pattern — Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber)。用于跨服务发布订阅、解耦、消息重复与一致性边界。
+[^rabbit-pubsub]: [RabbitMQ Tutorial: Publish/Subscribe](https://www.rabbitmq.com/tutorials/tutorial-three-python)。用于交换机向各订阅队列路由，与同队列内竞争消费的区别；不直接照搬教程中临时队列的可靠性配置。
+[^rabbit-work]: [RabbitMQ Tutorial: Work Queues](https://www.rabbitmq.com/tutorials/tutorial-two-python)。用于消费确认、队列与消息持久化的配合及其限制。
+[^rabbit-confirms]: [Consumer Acknowledgements and Publisher Confirms](https://www.rabbitmq.com/docs/confirms)。发布确认与消费确认分开；手动确认下断连检测后的未确认消息重新入队，消费者须能处理重投。
+[^outbox]: [Transactional outbox — microservices.io](https://microservices.io/patterns/data/transactional-outbox.html)。用于数据库变更与待发事件本地原子保存、后续转发及重复处理边界。

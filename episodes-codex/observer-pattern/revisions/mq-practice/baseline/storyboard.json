@@ -1,0 +1,1074 @@
+{
+  "meta": {
+    "title": "观察者模式：订单变了，谁该收到通知？",
+    "episode": 28,
+    "episodePart": "设计模式 D02",
+    "slug": "observer-pattern",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5328,
+    "finalVideoFrames": 5328,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "Product operation first, then language-independent observer roles and collaboration, with a separate short silent Java pause card. Same in-process order17 pending-payment to paid, then shipped; same summary and change record. Shot01 merchant order-details UI explicitly marked teaching simulation: visible mark-paid click, state then summary and history update. Shot02 expands the same paid-result objects into Order source, OrderObserver common contract, concrete SummaryObserver and ChangeLogObserver roles. Contract node is a structural agreement, not a forwarding actor. Shot03 explicitly replays before-payment setup before subscription; shots05-06 replay the same payment mechanism. Shot08 visible close-summary UI action then removal from list. Preserve old causal notifications/cancellation semantics, no new story/feature, no syntax lesson, no fake browser chrome around internal diagrams, no decorative progress.",
+    "visualRevision": 2,
+    "visualDirection": "visual-direction.md",
+    "userScope": "Keep original order17/summary/change-record example. Improve teaching order: a tangible product operation, corresponding standard observer role structure explained node by node, then existing registration/notification/cancellation/remaining delivery and tradeoffs. End with 5 seconds of key Java role/use code for pausing; full runnable Java in article, not a syntax course.",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "示例 · 同一程序内 · 订单17",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "观察者模式：订单变了，谁该收到通知？",
+      "description": "先登记，再通知；接收方各自响应变化。",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "content": {
+            "x": 130,
+            "w": 1660
+          },
+          "watermarkZone": {
+            "x": 130,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 130,
+              "y": 210,
+              "w": 1660,
+              "h": 230
+            },
+            {
+              "x": 130,
+              "y": 470,
+              "w": 1660,
+              "h": 80
+            },
+            {
+              "x": 130,
+              "y": 605,
+              "w": 1660,
+              "h": 205
+            },
+            {
+              "x": 130,
+              "y": 859,
+              "w": 1660,
+              "h": 45
+            }
+          ]
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "content": {
+            "x": 315,
+            "w": 810
+          },
+          "watermarkZone": {
+            "x": 315,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 315,
+              "y": 210,
+              "w": 810,
+              "h": 230
+            },
+            {
+              "x": 315,
+              "y": 470,
+              "w": 810,
+              "h": 80
+            },
+            {
+              "x": 315,
+              "y": 605,
+              "w": 810,
+              "h": 205
+            },
+            {
+              "x": 315,
+              "y": 859,
+              "w": 810,
+              "h": 45
+            }
+          ],
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "content": {
+            "x": 110,
+            "w": 860
+          },
+          "watermarkZone": {
+            "x": 110,
+            "y": 110
+          },
+          "textBoxes": [
+            {
+              "x": 110,
+              "y": 245,
+              "w": 860,
+              "h": 260
+            },
+            {
+              "x": 110,
+              "y": 555,
+              "w": 860,
+              "h": 80
+            },
+            {
+              "x": 110,
+              "y": 760,
+              "w": 860,
+              "h": 300
+            },
+            {
+              "x": 110,
+              "y": 1155,
+              "w": 860,
+              "h": 45
+            }
+          ]
+        }
+      },
+      "poster": {
+        "file": "poster.jpg",
+        "sameAs": "3x4"
+      }
+    },
+    "discussionQuestion": "摘要取消订阅后，订单再变为已发货，谁会收到通知？订单仍依赖哪些共同约定？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "javaEndCard": {
+      "kind": "java-design-pattern",
+      "from": 5178,
+      "durationInFrames": 150
+    }
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "why",
+      "chapterId": "why",
+      "title": "从产品操作展开结构",
+      "from": 0,
+      "durationInFrames": 956,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "why",
+          "visualType": "product-update",
+          "from": 0,
+          "durationInFrames": 413,
+          "narration": "商家在订单详情里，把十七号订单标为已付款，摘要和变化记录随即更新。一次状态变化，怎样让需要它的功能各自响应？",
+          "subtitles": [
+            {
+              "text": "商家在订单详情里，把十七号订单标为已付款，摘要和变化记录随即更新。",
+              "from": 0,
+              "to": 246,
+              "duration": 247
+            },
+            {
+              "text": "一次状态变化，怎样让需要它的功能各自响应？",
+              "from": 247,
+              "to": 412,
+              "duration": 166
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-product-update-1",
+              "wavStart": 9.0,
+              "wavEnd": 236.67,
+              "localStart": 9.0,
+              "localEnd": 236.67
+            },
+            {
+              "id": "01-product-update-2",
+              "wavStart": 247.17,
+              "wavEnd": 392.72,
+              "localStart": 247.17,
+              "localEnd": 392.72
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              247
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 9.0,
+            "wavTo": 392.72,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一帧就是商家订单详情教学示意页面，显示订单17待付款、可读“标记为已付款”按钮，以及已打开的摘要面板和变化记录。鼠标移动并点击按钮，来源先显示已付款，摘要随后更新，记录再新增17·已付款。完整演出一次可见操作与联动，不先讲内部模块图；末帧停在已付款/摘要已付款/一条记录。标题2秒内可见，界面注明教学示意，不执行真实支付。",
+          "direction": "第一帧就是商家订单详情教学示意页面，显示订单17待付款、可读“标记为已付款”按钮，以及已打开的摘要面板和变化记录。鼠标移动并点击按钮，来源先显示已付款，摘要随后更新，记录再新增17·已付款。完整演出一次可见操作与联动，不先讲内部模块图；末帧停在已付款/摘要已付款/一条记录。标题2秒内可见，界面注明教学示意，不执行真实支付。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "why",
+          "visualType": "observer-roles",
+          "from": 413,
+          "durationInFrames": 543,
+          "narration": "先把刚才的界面展开，订单来源负责状态和通知，摘要负责显示，变化记录负责留痕。共同观察者约定，把接收变化的方式统一起来，让订单不用掌握各个接收方的响应细节。",
+          "subtitles": [
+            {
+              "text": "先把刚才的界面展开，订单来源负责状态和通知，摘要负责显示，变化记录负责留痕。",
+              "from": 0,
+              "to": 282,
+              "duration": 283
+            },
+            {
+              "text": "共同观察者约定，把接收变化的方式统一起来，让订单不用掌握各个接收方的响应细节。",
+              "from": 283,
+              "to": 542,
+              "duration": 260
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-observer-roles-1",
+              "wavStart": 413.72,
+              "wavEnd": 686.41,
+              "localStart": 0.7200000000000273,
+              "localEnd": 273.40999999999997
+            },
+            {
+              "id": "02-observer-roles-2",
+              "wavStart": 696.91,
+              "wavEnd": 935.24,
+              "localStart": 283.90999999999997,
+              "localEnd": 522.24
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              283
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 413.72,
+            "wavTo": 935.24,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "继承01已付款和一条记录，从同一订单、摘要、变化记录展开角色图，位置/颜色延续：订单来源Order负责状态/名单/通知；摘要与记录是具体观察者，显示/留痕由各自负责。第二句真实句首起音出现“共同观察者约定”，展开OrderObserver契约节点，两具体观察者遵守它，来源依赖它通知。此图是结构关系，不把契约节点画成消息转发服务，不退回付款前。",
+          "direction": "继承01已付款和一条记录，从同一订单、摘要、变化记录展开角色图，位置/颜色延续：订单来源Order负责状态/名单/通知；摘要与记录是具体观察者，显示/留痕由各自负责。第二句真实句首起音出现“共同观察者约定”，展开OrderObserver契约节点，两具体观察者遵守它，来源依赖它通知。此图是结构关系，不把契约节点画成消息转发服务，不退回付款前。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "subscribe",
+      "chapterId": "subscribe",
+      "title": "先登记，再按共同约定通知",
+      "from": 956,
+      "durationInFrames": 958,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "subscribe",
+          "visualType": "register-interest",
+          "from": 956,
+          "durationInFrames": 431,
+          "narration": "知道各自职责后，再回看这次付款前，双方怎样建立联系。订阅，就是摘要和变化记录先登记接收意愿，订单一侧保留当前接收者的名单。",
+          "subtitles": [
+            {
+              "text": "知道各自职责后，再回看这次付款前，双方怎样建立联系。",
+              "from": 0,
+              "to": 168,
+              "duration": 169
+            },
+            {
+              "text": "订阅，就是摘要和变化记录先登记接收意愿，订单一侧保留当前接收者的名单。",
+              "from": 169,
+              "to": 430,
+              "duration": 262
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-register-interest-1",
+              "wavStart": 956.24,
+              "wavEnd": 1114.73,
+              "localStart": 0.2400000000000091,
+              "localEnd": 158.73000000000002
+            },
+            {
+              "id": "03-register-interest-2",
+              "wavStart": 1125.23,
+              "wavEnd": 1366.63,
+              "localStart": 169.23000000000002,
+              "localEnd": 410.6300000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "订阅": 168
+            },
+            "sentences": [
+              0,
+              169
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 956.24,
+            "wavTo": 1366.63,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先保留02已付款结果，第一句说明“回看这次付款前”之后，明确标注“机制回放·付款前”，才回到来源/摘要待付款、记录空、双方尚未登记；第二句再让两接收者依次向订单侧登记。订单旁形成“当前接收者”名单，先摘要一行、再变化记录一行。箭头方向是登记流向来源；尚未发生订单状态更新，不出现通知令牌。",
+          "direction": "先保留02已付款结果，第一句说明“回看这次付款前”之后，明确标注“机制回放·付款前”，才回到来源/摘要待付款、记录空、双方尚未登记；第二句再让两接收者依次向订单侧登记。订单旁形成“当前接收者”名单，先摘要一行、再变化记录一行。箭头方向是登记流向来源；尚未发生订单状态更新，不出现通知令牌。",
+          "elements": [
+            {
+              "id": "label03_0",
+              "type": "text",
+              "text": "订阅",
+              "cueText": "订阅",
+              "appearFrame": 168,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "03-register-interest-2",
+                "asrFrame": null,
+                "onsetLocal": 170.23000000000002,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "subscribe",
+          "visualType": "common-notification",
+          "from": 1387,
+          "durationInFrames": 527,
+          "narration": "观察者模式，让关心变化的接收者先订阅，来源变化时通知它们，这些接收者就是观察者。这里约定通知包含订单号和新状态，收到后怎样响应，由各观察者负责。",
+          "subtitles": [
+            {
+              "text": "观察者模式，让关心变化的接收者先订阅，来源变化时通知它们，这些接收者就是观察者。",
+              "from": 0,
+              "to": 293,
+              "duration": 294
+            },
+            {
+              "text": "这里约定通知包含订单号和新状态，收到后怎样响应，由各观察者负责。",
+              "from": 294,
+              "to": 526,
+              "duration": 233
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-common-notification-1",
+              "wavStart": 1387.63,
+              "wavEnd": 1670.94,
+              "localStart": 0.6300000000001091,
+              "localEnd": 283.94000000000005
+            },
+            {
+              "id": "04-common-notification-2",
+              "wavStart": 1681.44,
+              "wavEnd": 1893.28,
+              "localStart": 294.44000000000005,
+              "localEnd": 506.28
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "观察者模式": 1
+            },
+            "sentences": [
+              0,
+              294
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 1387.63,
+            "wavTo": 1893.28,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "句首“观察者模式”按声学起音出现主标签并完整显示至少63帧。保留来源与当前接收者，旁边只展开共同通知的两项内容“订单号”“新状态”；用两个不同响应落点说明摘要负责显示、记录负责留痕。此时是关系说明，不把示意消息误当一次已执行的更新。",
+          "direction": "句首“观察者模式”按声学起音出现主标签并完整显示至少63帧。保留来源与当前接收者，旁边只展开共同通知的两项内容“订单号”“新状态”；用两个不同响应落点说明摘要负责显示、记录负责留痕。此时是关系说明，不把示意消息误当一次已执行的更新。",
+          "elements": [
+            {
+              "id": "label04_0",
+              "type": "text",
+              "text": "观察者模式",
+              "cueText": "观察者模式",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "04-common-notification-1",
+                "asrFrame": null,
+                "onsetLocal": 1.6300000000001091,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "notify",
+      "chapterId": "notify",
+      "title": "跟着一次变化走一遍",
+      "from": 1914,
+      "durationInFrames": 1246,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "notify",
+          "visualType": "change-before-notify",
+          "from": 1914,
+          "durationInFrames": 382,
+          "narration": "订阅关系建立后，跟着这次付款走一遍。订单先从待付款改成已付款，再把十七号、已付款这条消息，发给名单里的接收者。",
+          "subtitles": [
+            {
+              "text": "订阅关系建立后，跟着这次付款走一遍。",
+              "from": 0,
+              "to": 104,
+              "duration": 105
+            },
+            {
+              "text": "订单先从待付款改成已付款，再把十七号、已付款这条消息，发给名单里的接收者。",
+              "from": 105,
+              "to": 381,
+              "duration": 277
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-change-before-notify-1",
+              "wavStart": 1914.28,
+              "wavEnd": 2009.3,
+              "localStart": 0.2799999999999727,
+              "localEnd": 95.29999999999995
+            },
+            {
+              "id": "05-change-before-notify-2",
+              "wavStart": 2019.8,
+              "wavEnd": 2275.75,
+              "localStart": 105.79999999999995,
+              "localEnd": 361.75
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              105
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 1914.28,
+            "wavTo": 2275.75,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一句留出关系总览，第二句先让订单17本体从待付款变为已付款并稳定显示，再生成本次“17·已付款”通知，沿名单中的第一条路径前进。接收者尚未收到前不能先更新；发出的是状态事实，不是要求执行付款的指令。",
+          "direction": "第一句留出关系总览，第二句先让订单17本体从待付款变为已付款并稳定显示，再生成本次“17·已付款”通知，沿名单中的第一条路径前进。接收者尚未收到前不能先更新；发出的是状态事实，不是要求执行付款的指令。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "notify",
+          "visualType": "each-reacts",
+          "from": 2296,
+          "durationInFrames": 432,
+          "narration": "摘要收到消息，显示十七号已付款，变化记录收到后，再新增同样的变更事实。本例依次通知，一方处理完，再轮到另一方。",
+          "subtitles": [
+            {
+              "text": "摘要收到消息，显示十七号已付款，变化记录收到后，再新增同样的变更事实。",
+              "from": 0,
+              "to": 274,
+              "duration": 275
+            },
+            {
+              "text": "本例依次通知，一方处理完，再轮到另一方。",
+              "from": 275,
+              "to": 431,
+              "duration": 157
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-each-reacts-1",
+              "wavStart": 2296.75,
+              "wavEnd": 2561.44,
+              "localStart": 0.75,
+              "localEnd": 265.44000000000005
+            },
+            {
+              "id": "06-each-reacts-2",
+              "wavStart": 2571.94,
+              "wavEnd": 2707.02,
+              "localStart": 275.94000000000005,
+              "localEnd": 411.02
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              275
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 2296.75,
+            "wavTo": 2707.02,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "连续完成05通知过程：摘要收到后状态才变为已付款；随后沿第二条路径送达变化记录，新增唯一“17·已付款”一行。前一接收者响应完成后才开始后一条，不画同时扇出；已处理通知不重复计入记录。",
+          "direction": "连续完成05通知过程：摘要收到后状态才变为已付款；随后沿第二条路径送达变化记录，新增唯一“17·已付款”一行。前一接收者响应完成后才开始后一条，不画同时扇出；已处理通知不重复计入记录。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "notify",
+          "visualType": "separate-responsibilities",
+          "from": 2728,
+          "durationInFrames": 432,
+          "narration": "显示状态和留下记录，是两个接收者自己的工作，订单不用掌握这些细节。它仍要维护接收者名单，并按共同约定通知，双方的联系没有消失。",
+          "subtitles": [
+            {
+              "text": "显示状态和留下记录，是两个接收者自己的工作，订单不用掌握这些细节。",
+              "from": 0,
+              "to": 201,
+              "duration": 202
+            },
+            {
+              "text": "它仍要维护接收者名单，并按共同约定通知，双方的联系没有消失。",
+              "from": 202,
+              "to": 431,
+              "duration": 230
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-separate-responsibilities-1",
+              "wavStart": 2728.02,
+              "wavEnd": 2919.68,
+              "localStart": 0.01999999999998181,
+              "localEnd": 191.67999999999984
+            },
+            {
+              "id": "07-separate-responsibilities-2",
+              "wavStart": 2930.18,
+              "wavEnd": 3139.69,
+              "localStart": 202.17999999999984,
+              "localEnd": 411.69000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              202
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 2728.02,
+            "wavTo": 3139.69,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保留已付款与第一条变化记录，用职责边界依次圈定摘要的显示和记录的新增，再回到来源旁的名单和共同约定。不要给画面叠上另一份名单或将所有连线消除；明确降低的是对响应细节的依赖。",
+          "direction": "保留已付款与第一条变化记录，用职责边界依次圈定摘要的显示和记录的新增，再回到来源旁的名单和共同约定。不要给画面叠上另一份名单或将所有连线消除；明确降低的是对响应细节的依赖。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "unsubscribe",
+      "chapterId": "unsubscribe",
+      "title": "取消订阅后，再看下一次变化",
+      "from": 3160,
+      "durationInFrames": 712,
+      "shots": [
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "unsubscribe",
+          "visualType": "unsubscribe-summary",
+          "from": 3160,
+          "durationInFrames": 337,
+          "narration": "这次两个模块都收到了，接下来关闭摘要，让它退出。取消订阅时，把摘要从名单移除，变化记录继续保留。",
+          "subtitles": [
+            {
+              "text": "这次两个模块都收到了，接下来关闭摘要，让它退出。",
+              "from": 0,
+              "to": 161,
+              "duration": 162
+            },
+            {
+              "text": "取消订阅时，把摘要从名单移除，变化记录继续保留。",
+              "from": 162,
+              "to": 336,
+              "duration": 175
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-unsubscribe-summary-1",
+              "wavStart": 3160.69,
+              "wavEnd": 3312.35,
+              "localStart": 0.6900000000000546,
+              "localEnd": 152.3499999999999
+            },
+            {
+              "id": "08-unsubscribe-summary-2",
+              "wavStart": 3322.85,
+              "wavEnd": 3476.9,
+              "localStart": 162.8499999999999,
+              "localEnd": 316.9000000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "取消订阅": 161
+            },
+            "sentences": [
+              0,
+              162
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 3160.69,
+            "wavTo": 3476.9,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先用同一商家产品页承接07已付款和一条记录，第一句实际移动鼠标点击摘要面板的关闭X，第二句再解释取消。摘要向来源取消登记，名单中的摘要行和后续通知路径移除。摘要位置保持，灰显“已停止接收”，旧值标“最后收到：已付款”，不能冒充当前订单状态。变化记录仍留在名单。",
+          "direction": "先用同一商家产品页承接07已付款和一条记录，第一句实际移动鼠标点击摘要面板的关闭X，第二句再解释取消。摘要向来源取消登记，名单中的摘要行和后续通知路径移除。摘要位置保持，灰显“已停止接收”，旧值标“最后收到：已付款”，不能冒充当前订单状态。变化记录仍留在名单。",
+          "elements": [
+            {
+              "id": "label08_0",
+              "type": "text",
+              "text": "取消订阅",
+              "cueText": "取消订阅",
+              "appearFrame": 161,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "08-unsubscribe-summary-2",
+                "asrFrame": null,
+                "onsetLocal": 163.8499999999999,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "unsubscribe",
+          "visualType": "notify-remaining",
+          "from": 3497,
+          "durationInFrames": 375,
+          "narration": "同一订单接着变为已发货，订单只通知仍在名单里的变化记录。记录新增已发货，退出的摘要没有再收到这条消息。",
+          "subtitles": [
+            {
+              "text": "同一订单接着变为已发货，订单只通知仍在名单里的变化记录。",
+              "from": 0,
+              "to": 210,
+              "duration": 211
+            },
+            {
+              "text": "记录新增已发货，退出的摘要没有再收到这条消息。",
+              "from": 211,
+              "to": 374,
+              "duration": 164
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-notify-remaining-1",
+              "wavStart": 3497.9,
+              "wavEnd": 3698.29,
+              "localStart": 0.900000000000091,
+              "localEnd": 201.28999999999996
+            },
+            {
+              "id": "09-notify-remaining-2",
+              "wavStart": 3708.79,
+              "wavEnd": 3851.91,
+              "localStart": 211.78999999999996,
+              "localEnd": 354.90999999999985
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              211
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 3497.9,
+            "wavTo": 3851.91,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "来源订单17已付款→已发货，再发送本次“17·已发货”通知，仅沿仍在名单的记录路径移动。记录保留上一行已付款，再新增已发货一行。摘要继续灰显最后收到已付款/已停止接收，无令牌、无状态更新；不得画成同一订单重新付款或情景重置。",
+          "direction": "来源订单17已付款→已发货，再发送本次“17·已发货”通知，仅沿仍在名单的记录路径移动。记录保留上一行已付款，再新增已发货一行。摘要继续灰显最后收到已付款/已停止接收，无令牌、无状态更新；不得画成同一订单重新付款或情景重置。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "收益、成本和适用边界",
+      "from": 3872,
+      "durationInFrames": 1456,
+      "shots": [
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "boundary",
+          "visualType": "change-membership",
+          "from": 3872,
+          "durationInFrames": 430,
+          "narration": "两次通知对比后，再看这种分工解决了什么变化。共同约定不变时，本例可以通过订阅调整接收者，而不用把它们各自的响应细节写进订单处理。",
+          "subtitles": [
+            {
+              "text": "两次通知对比后，再看这种分工解决了什么变化。",
+              "from": 0,
+              "to": 139,
+              "duration": 140
+            },
+            {
+              "text": "共同约定不变时，本例可以通过订阅调整接收者，而不用把它们各自的响应细节写进订单处理。",
+              "from": 140,
+              "to": 429,
+              "duration": 290
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-change-membership-1",
+              "wavStart": 3872.91,
+              "wavEnd": 4001.91,
+              "localStart": 0.9099999999998545,
+              "localEnd": 129.90999999999985
+            },
+            {
+              "id": "10-change-membership-2",
+              "wavStart": 4012.41,
+              "wavEnd": 4281.59,
+              "localStart": 140.40999999999985,
+              "localEnd": 409.59000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              140
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 3872.91,
+            "wavTo": 4281.59,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一句回看同一稳定来源与先两人/后一人的接收关系，第二句显示“共同约定不变”前提，圈定名单的增减和接收者自己的响应区域，订单状态处理保持原锚点。无无限扩张承诺，不声称整个系统从此无需修改。",
+          "direction": "第一句回看同一稳定来源与先两人/后一人的接收关系，第二句显示“共同约定不变”前提，圈定名单的增减和接收者自己的响应区域，订单状态处理保持原锚点。无无限扩张承诺，不声称整个系统从此无需修改。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "boundary",
+          "visualType": "lifecycle-and-delivery",
+          "from": 4302,
+          "durationInFrames": 393,
+          "narration": "这份名单也有维护成本，不再需要时应及时取消订阅。同一程序内的通知，不保证程序崩溃后还能补发，可靠投递需要另外设计。",
+          "subtitles": [
+            {
+              "text": "这份名单也有维护成本，不再需要时应及时取消订阅。",
+              "from": 0,
+              "to": 162,
+              "duration": 163
+            },
+            {
+              "text": "同一程序内的通知，不保证程序崩溃后还能补发，可靠投递需要另外设计。",
+              "from": 163,
+              "to": 392,
+              "duration": 230
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-lifecycle-and-delivery-1",
+              "wavStart": 4302.59,
+              "wavEnd": 4454.67,
+              "localStart": 0.5900000000001455,
+              "localEnd": 152.67000000000007
+            },
+            {
+              "id": "11-lifecycle-and-delivery-2",
+              "wavStart": 4465.17,
+              "wavEnd": 4674.28,
+              "localStart": 163.17000000000007,
+              "localEnd": 372.27999999999975
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              163
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 4302.59,
+            "wavTo": 4674.28,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先重新聚焦退出摘要时清理名单的动作，随后以短边界说明显示同一程序范围。不要演成已经存在消息队列、持久化日志或自动重试，更不能将变化记录中的业务留痕当成可靠投递设施。",
+          "direction": "先重新聚焦退出摘要时清理名单的动作，随后以短边界说明显示同一程序范围。不要演成已经存在消息队列、持久化日志或自动重试，更不能将变化记录中的业务留痕当成可靠投递设施。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "boundary",
+          "visualType": "idea-recap",
+          "from": 4695,
+          "durationInFrames": 633,
+          "narration": "只有一个长期固定的接收方时，直接通知往往更清楚。观察者模式把状态怎样变化，和收到后做什么分开，用可增减的订阅关系，把双方接起来。",
+          "subtitles": [
+            {
+              "text": "只有一个长期固定的接收方时，直接通知往往更清楚。",
+              "from": 0,
+              "to": 181,
+              "duration": 182
+            },
+            {
+              "text": "观察者模式把状态怎样变化，和收到后做什么分开，用可增减的订阅关系，把双方接起来。",
+              "from": 182,
+              "to": 482,
+              "duration": 301
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-idea-recap-1",
+              "wavStart": 4695.28,
+              "wavEnd": 4867.33,
+              "localStart": 0.27999999999974534,
+              "localEnd": 172.32999999999993
+            },
+            {
+              "id": "12-idea-recap-2",
+              "wavStart": 4877.83,
+              "wavEnd": 5141.22,
+              "localStart": 182.82999999999993,
+              "localEnd": 446.22000000000025
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              182
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ba5cf6b5 + words.json 5aa43c5c + script.md 76ac04f1",
+            "wavFrom": 4695.28,
+            "wavTo": 5141.22,
+            "holdFrames": 36,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先给一个稳定接收方的简洁直接路径，再回到本例最终结构：来源订单17已发货、当前名单仅变化记录、历史两条记录、灰显已退出摘要。按“来源变化→通知当前订阅者→各自响应”回收主线，以“IT小村·原创”收尾；随后单独5秒静默Java关键代码卡提示暂停阅读，角色名与结构对应，不添下期标题或装饰进度条。",
+          "direction": "先给一个稳定接收方的简洁直接路径，再回到本例最终结构：来源订单17已发货、当前名单仅变化记录、历史两条记录、灰显已退出摘要。按“来源变化→通知当前订阅者→各自响应”回收主线，以“IT小村·原创”收尾；随后单独5秒静默Java关键代码卡提示暂停阅读，角色名与结构对应，不添下期标题或装饰进度条。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "javaCardFrom": 483
+        }
+      ]
+    }
+  ]
+}
