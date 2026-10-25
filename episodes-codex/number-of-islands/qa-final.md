@@ -1,6 +1,6 @@
 # LC.200边界反馈修订成片复核
 
-当前制作侧与独立复核通过；本地网页与发布结果以docs/number-of-islands-boundaries实际记录为准。原v66报告保存在revisions/boundary-before/qa-final.md，不用新结果覆盖用户反馈前的身份与范围。
+当前制作侧、独立复核和本地网页通过；已合并PR282、发布附注tag/Release v0.67.1，Release后Pages40187760204成功，10次完整线上核验通过，实际证据见docs/number-of-islands-boundaries。原v66报告保存在revisions/boundary-before/qa-final.md，不用新结果覆盖用户反馈前的身份与范围。
 
 用户指出首格左/上为何跳过未说明，本轮仅改06第二句与边界可见动画。151项冻结；其他27句take/程序/trace/封面保持，13镜局部时序全等，整体仅+62帧，末卡仍150帧。正式新06为487帧，其他画面按splice-plan复用，整轨新配音与BGM重新混音；splice-result记录实际输入/输出全文SHA。
 
