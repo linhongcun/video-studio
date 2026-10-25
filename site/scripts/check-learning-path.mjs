@@ -198,6 +198,8 @@ for (const [i, e] of algorithmChain.entries()) {
 }
 assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'leetcode').episodes), previewAlgorithmSlugs);
 for (const [i, e] of previewAlgorithmChain.entries()) {
+  assert.ok(Number.isInteger(e.problemNumber) && e.problemNumber > 0, `${e.slug}: missing problem number`);
+  assert.equal(preview.epLabel(e), `LC.${e.problemNumber}`);
   const nav = preview.seriesNav(e);
   assert.equal(nav.prev?.slug, previewAlgorithmSlugs[i - 1], `${e.slug}: incorrect previous algorithm`);
   assert.equal(nav.next?.slug, previewAlgorithmSlugs[i + 1], `${e.slug}: incorrect next algorithm`);
