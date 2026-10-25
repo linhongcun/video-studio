@@ -24,4 +24,8 @@
 
 已完成锁定依赖安装、Astro/Pagefind构建（35个搜索页面）、学习路径/章节/帧数回归、秘密扫描及独立删除范围审读。1440/390两视口的首页、学习方向、目录共6个浏览器用例通过，8个旧页面/视频/海报/字幕URL在本地均返回404；其余72个媒体SHA-256保持一致。
 
-版本为v0.60.3。PR、Release、部署与线上状态在实际执行后补录至本文件及[验证记录](agent-video-retirement.json)，不将本地删除预写为线上已经撤下。此为下架操作，不生成新TTS或视频。
+[PR #252](https://github.com/linhongcun/video-studio/pull/252)已合并为`f7f2df5785ce057692b6ef96b4efc7456028a818`，附注tag与[Release v0.60.3](https://github.com/linhongcun/video-studio/releases/tag/v0.60.3)发布后，[部署40152148732](https://github.com/linhongcun/video-studio/actions/runs/40152148732)成功。
+
+北京时间2026-10-25T09:53:54.026147+08:00，18个普通canonical HTTPS GET核验全部通过：两期页面、视频、海报与字幕共8个旧地址均404；首页、学习方向、目录、RSS、站点地图和含v0.60.3的更新日志均200且无两期活动链接；事务入门与观察者模式的代表视频/海报完整SHA与本轮发布输入一致。详见[验证记录](agent-video-retirement.json)。线上证据针对本次部署，不将此前技术检查写成用户认可。
+
+#130/#131/#132已补充实际撤下状态；#131保持历史completed，#132保持not_planned。未来Agent课程可重新形成非空方向，回归按实际发布状态检查，不把本次空系列隐藏写成永久禁止新Agent内容。无新TTS、渲染或平台操作。
