@@ -36,6 +36,19 @@ else:
             extras.extend(p for p in base.rglob('*') if p.is_file()
                           and not any(x in {'node_modules', '__pycache__', 'out'} for x in p.parts)
                           and p.suffix not in {'.class', '.pyc', '.mp4'})
+    # Current reference inputs are separate from the preserved 4442-frame core.
+    extras += [D/'references.json', D/'article.mdx', D/'remotion/package.json',
+               ROOT/'episodes-codex/_shared/append_references_original.py',
+               ROOT/'episodes-codex/_shared/append_references.py',
+               ROOT/'episodes-codex/_shared/render_with_references.py',
+               ROOT/'episodes-codex/_shared/requirements-reference-appendix.txt',
+               ROOT/'site/scripts/check-references.mjs',
+               ROOT/'episodes/_shared/theme/pageTheme.ts']
+    for source in json.loads((D/'references.json').read_text())['sources']:
+        evidence_paths = [source['verification']['evidence'], source['titleEvidence']['evidence']]
+        if 'quotation' in source:
+            evidence_paths.append(source['quotation']['evidence'])
+        extras.extend(ROOT/evidence for evidence in evidence_paths)
     for path in extras:
         manifest[os.path.relpath(path, D)] = sha(path)
     (D/'source-sha256.json').write_text(json.dumps(dict(sorted(manifest.items())),

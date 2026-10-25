@@ -3,7 +3,7 @@
 
 The episode's render:body script must write remotion/out/body.mp4, including
 any existing code card. This wrapper never edits narration, timing or metadata.
-It uses the unchanged appendix renderer and emits a publication metadata patch
+It uses the original-title/excerpt renderer and emits a publication metadata patch
 in render-result.json. Independent source and visual review remain required.
 
   python3 episodes-codex/_shared/render_with_references.py episodes-codex/SLUG
@@ -23,7 +23,8 @@ from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[2]
-APPENDER = ROOT / 'episodes-codex/_shared/append_references.py'
+APPENDER = ROOT / 'episodes-codex/_shared/append_references_original.py'
+OLD_ENGINE = APPENDER.with_name('append_references.py')
 CHECKER = ROOT / 'site/scripts/check-references.mjs'
 BODY_GUARD = 'VIDEO_STUDIO_REFERENCE_BODY_RENDER'
 
@@ -54,11 +55,13 @@ def verify_freeze(directory: Path) -> None:
             raise ValueError(f'Frozen input changed: {relative}')
         paths[path] = expected
     required = [directory / 'references.json', directory / 'article.mdx',
-                directory / 'remotion/package.json', Path(__file__).resolve(), APPENDER, CHECKER,
+                directory / 'remotion/package.json', Path(__file__).resolve(), APPENDER, OLD_ENGINE, CHECKER,
                 APPENDER.with_name('requirements-reference-appendix.txt'),
                 ROOT / 'episodes/_shared/theme/pageTheme.ts']
     references = read(directory / 'references.json')
     required += [ROOT / source['verification']['evidence'] for source in references['sources']]
+    required += [ROOT / source['titleEvidence']['evidence'] for source in references['sources']]
+    required += [ROOT / source['quotation']['evidence'] for source in references['sources'] if 'quotation' in source]
     missing = [str(p.relative_to(ROOT)) for p in required if p.resolve() not in paths]
     if missing:
         raise ValueError('Freeze reference production inputs before rendering: ' + ', '.join(missing))

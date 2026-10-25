@@ -14,7 +14,7 @@ Natural Earth 110m land公有领域；源/许可/固定上游commit/SHA与投影
 没有逐字ASR或完整独立人工听辨的结论；字幕来自原稿和实际句级边界，术语位于句首并使用共享声学起音规则。qa-motion、qa-final及qa-independent-*记录本轮实际完成范围；本地制作与检查已完成，站点发布和线上核验由root继续记录。
 
 
-## 参考资料默认入口与本批存量接入（2026-10-25）
+## 第2批参考资料接入（2026-10-25历史记录）
 
 本期已接入统一的 `render_with_references.py` 默认入口。调研时同步维护 `references.json`，配套文章保留正式链接、固定实读版本和对应论点；先在本期 `remotion/` 运行 `npm run check:references`。Python附录依赖按 `../_shared/requirements-reference-appendix.txt` 固定版本安装，字体与FFmpeg按共享工具的真实环境要求准备。
 
@@ -27,3 +27,14 @@ Natural Earth 110m land公有领域；源/许可/固定上游commit/SHA与投影
 原脚本、分镜、`words.json`、人声与字幕继续描述正文；最终总帧数、正文终点和资料页范围由实际 `reference-appendix.json` 及发布元数据声明。附录回执先由共享工具写入 `revisions/reference-endcards/`，交付副本位于本期根目录；`render-result.json.publicationMetadata`给出应同步到发布`meta.json`的`finalVideoFrames`与`referenceAppendix`。本批手动复用正文后也必须按实际结果接齐这些交付文件，不能用旧时长/旧哈希代替最终身份。
 
 接齐后在 `remotion/` 运行 `npm run verify:references`：统一wrapper只读核对来源、冻结、真实最终媒体及交付回执，不重新渲染正文。旧正文编码检查器的帧数断言只用于对应正文副本，不直接用它判断已追加附录的最终`video.mp4`。实际查看所有资料页、精确首卡字幕边界以及桌面/手机原生播放器暂停和全屏效果，再同步发布副本；保留原URL、创建/首发时间、已有平台链接及未执行ASR/人工听辨的能力边界。本批制作和上线状态以批次证据为准，不预记已通过或已发布。
+
+
+## 原始题名与原文短引：当前资料入口
+
+本轮按用户要求使用 `presentation: original-title-quote`：卡片保留来源的实际完整原题名和原语言，原文短引保持连续逐字文本并标明位置；内部 `supports` 只用于研究映射，不作为原文上屏。每页最多2项、默认5秒，按实际页数记录最终帧数；不沿用旧单页附录的总时长。引用正文、核验记录与本轮状态见 [原题名修订](../../docs/reference-endcards/original-titles/README.md)，旧回执及修前文章/研究/资料清单已保存在 `revisions/original-titles/`，不覆盖或改写旧验收事实。
+
+在本期 `remotion/` 运行 `npm run check:references` 检查当前资料。全部输入停写后使用本期 `freeze.py` 冻结、加 `--verify` 只读核对；清单保留原正文/声音/素材依赖，并加入 `append_references_original.py`、未改字节的旧媒体引擎 `append_references.py`、默认wrapper、发布检查器、Pillow版本锁、主题，以及 `verification`、`titleEvidence`、可选 `quotation` 声明的全部实际证据文件。
+
+后续完整制作的 `npm run render` 使用统一wrapper，先检查来源及冻结，再调用 `render:body` 原有画面/混音流程生成 `out/body.mp4`，最后通过新原题名渲染器追加资料到 `../video.mp4`。本次修订只复用已核验的原 `out/body.mp4`，调用新器的 `render:references` 生成资料尾卡，不重渲正文或重新混音。原旁白、字幕、分镜和 `words.json` 继续表示正文时序；原体与旧最终视频不得混用，避免重复叠加资料卡。
+
+`revisions/reference-endcards/reference-appendix.json` 与媒体检查回执记录实际新附录；最终交付副本位于本期根目录。接齐新的回执和 `render-result.json.publicationMetadata` 后，在 `remotion/` 运行 `npm run verify:references`，由默认wrapper核对来源、冻结、最终媒体及发布身份，不重新编码正文。最后实际查看所有新资料页、精确首卡字幕边界和播放器暂停/全屏；正文旧QA仅在原画面/声音确证保持的范围复用，不冒称本轮已通过、已上线或获用户观看认可。

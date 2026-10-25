@@ -54,6 +54,20 @@ files += [D/'references.json', D/'references.md',
     D/'../_shared/append_references.py',
     D/'../_shared/requirements-reference-appendix.txt',
     D/'../../docs/reference-endcards/batch-1/source-verification.json']
+# Original-title/quotation production inputs; legacy media provenance stays archived.
+ROOT = D.parents[1]
+files += [D/'references.json', D/'article.mdx', D/'remotion/package.json',
+    ROOT/'episodes-codex/_shared/append_references_original.py',
+    ROOT/'episodes-codex/_shared/append_references.py',
+    ROOT/'episodes-codex/_shared/render_with_references.py',
+    ROOT/'episodes-codex/_shared/requirements-reference-appendix.txt',
+    ROOT/'site/scripts/check-references.mjs',
+    ROOT/'episodes/_shared/theme/pageTheme.ts']
+for source in json.loads((D/'references.json').read_text())['sources']:
+    evidence_paths = [source['verification']['evidence'], source['titleEvidence']['evidence']]
+    if 'quotation' in source:
+        evidence_paths.append(source['quotation']['evidence'])
+    files.extend(ROOT/evidence for evidence in evidence_paths)
 # Keep parent references portable instead of writing workspace absolute paths.
 manifest = {os.path.relpath(p, D):sha(p) for p in sorted(set(files))}
 (D/'source-sha256.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')

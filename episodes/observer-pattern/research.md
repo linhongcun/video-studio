@@ -62,3 +62,13 @@ Microsoft取回元数据M1的`updated_at`为2026-06-02，M2为2026-06-03；`ms.d
 视频与文章主线均为观察者模式；文章在唯一简短实战段之前的模式正文约1967中文字，应用段约122字，模式内容占这两部分约94%，不是MQ教程。视频仅09一镜联系应用，不讲ACK、离线积压、重投、幂等或Outbox；历史七页证据不成为重新加入这些支线的理由。
 
 脚本、音轨、声学起音、动态表达、封面、正式媒体与线上检查须按本轮实际输出重新记录。公开资料与程序运行分别支持事实和示例行为，不等于观众已经理解，也不预记用户已认可新版。
+
+## 原题名与引用语段校订（2026-10-25）
+
+本轮只校订参考资料的题名与显示原句，未重写技术讲解。实际重新GET四项中属于本片的官方固定正文，完整响应SHA、题名原文和逐字短引见[核验记录](../../docs/reference-endcards/original-titles/sources-extra.json)。旧资料读取记录保留，不追改为新访问。
+
+- M1 原题：Observer design pattern；定位：Observer design pattern, opening paragraph；实际固定正文：https://github.com/dotnet/docs/blob/244e976348b389933eacd12918abc272bed423b3/docs/standard/events/observer-design-pattern.md。
+  - 原句（108字符）：The observer design pattern enables a subscriber to register with and receive notifications from a provider.
+
+- M2 原题：Publisher-Subscriber Pattern；定位：Publisher-Subscriber pattern, opening paragraph；实际固定正文：https://github.com/MicrosoftDocs/architecture-center/blob/a41f5d84c421591f415ad9b1b40f2b86b1d4fd4a/docs/patterns/publisher-subscriber.md。
+  - 原句（136字符）：Broadcast events asynchronously to multiple interested consumers through an intermediary, without coupling the senders to the receivers.

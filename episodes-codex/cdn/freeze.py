@@ -32,5 +32,18 @@ files += [D/'references.json',
 # Article, package.json and shared pageTheme.ts are already included above.
 for source in json.loads((D/'references.json').read_text())['sources']:
     files.append(ROOT/source['verification']['evidence'])
+# Original-title/quotation production inputs; legacy media provenance stays archived.
+files += [D/'references.json', D/'article.mdx', D/'remotion/package.json',
+    ROOT/'episodes-codex/_shared/append_references_original.py',
+    ROOT/'episodes-codex/_shared/append_references.py',
+    ROOT/'episodes-codex/_shared/render_with_references.py',
+    ROOT/'episodes-codex/_shared/requirements-reference-appendix.txt',
+    ROOT/'site/scripts/check-references.mjs',
+    ROOT/'episodes/_shared/theme/pageTheme.ts']
+for source in json.loads((D/'references.json').read_text())['sources']:
+    evidence_paths = [source['verification']['evidence'], source['titleEvidence']['evidence']]
+    if 'quotation' in source:
+        evidence_paths.append(source['quotation']['evidence'])
+    files.extend(ROOT/evidence for evidence in evidence_paths)
 m={os.path.relpath(p,D):sha(p) for p in sorted(set(files))};(D/'source-sha256.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
 print('Frozen',len(m),'inputs; storyboard',sha(D/'storyboard.json'))

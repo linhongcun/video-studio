@@ -2,10 +2,11 @@
 """Freeze EA01's current reference orchestration without rewriting body history.
 
 The retained 5881-frame body was rendered at c80faaef using the archived146
-inputs. Its original package is verified at its relocated, byte-identical
-snapshot. The new source-sha256.json describes reference appending and future
-renders through the new package; it never claims that package rendered the
-retained body. Videos and generated receipts are outputs, not frozen inputs.
+inputs. Its original package, article and research are verified at relocated,
+byte-identical snapshots. The new source-sha256.json describes the current
+reference appending and future renders; it never claims that later citation
+edits or the current package produced the retained body. Videos and generated
+receipts are outputs, not frozen inputs.
 
 Usage: freeze_with_references.py [--verify | --check-body]
 """
@@ -25,6 +26,10 @@ ARCHIVE = D / 'revisions/reference-endcards'
 BODY_MANIFEST = ARCHIVE / 'body-source-sha256.json'
 BODY_MANIFEST_SHA256 = 'f5380a8b01cf9b8a2badcfe38a108cfa6f76ba9a682c50c7c7860448ddc5060c'
 BODY_PACKAGE = ARCHIVE / 'body-remotion-package.json'
+BODY_DOCUMENTS = {
+    'article.mdx': D / 'revisions/original-titles/before-article.mdx',
+    'research.md': D / 'revisions/original-titles/before-research.md',
+}
 MANIFEST = D / 'source-sha256.json'
 
 
@@ -45,40 +50,49 @@ def body_inputs() -> dict[str, str]:
     original = read(BODY_MANIFEST)
     assert isinstance(original, dict) and len(original) == 146
     failures = []
+    relocated = {'remotion/package.json': BODY_PACKAGE, **BODY_DOCUMENTS}
     for relative, expected in original.items():
-        target = BODY_PACKAGE if relative == 'remotion/package.json' else D / relative
+        target = relocated.get(relative, D / relative)
         resolved = target.resolve()
         assert resolved.is_relative_to(ROOT), f'Body input outside repository: {relative}'
         if not resolved.is_file() or sha(resolved) != expected:
             failures.append(relative)
-    assert not failures, f'Original body inputs changed, using package relocation: {failures}'
+    assert not failures, f'Original body inputs changed, using archived package/document mappings: {failures}'
     return original
 
 
 def compose_manifest() -> dict[str, str]:
     original = body_inputs()
-    # The current package is an input to future full renders/reference appending;
-    # the archived package separately records what produced the retained body.
+    # Current citation documents/package govern the new appendix and future
+    # full renders; their original body-era bytes remain independently checked.
     result = dict(original)
     result['remotion/package.json'] = sha(D / 'remotion/package.json')
+    for relative in BODY_DOCUMENTS:
+        result[relative] = sha(D / relative)
     refs = read(D / 'references.json')
     extras = [
         Path(__file__).resolve(),
         BODY_MANIFEST,
         BODY_PACKAGE,
+        *BODY_DOCUMENTS.values(),
         ARCHIVE / 'body-provenance.json',
         D / 'references.json',
         D / 'references.md',
         ROOT / 'episodes-codex/_shared/render_with_references.py',
+        ROOT / 'episodes-codex/_shared/append_references_original.py',
         ROOT / 'episodes-codex/_shared/append_references.py',
         ROOT / 'episodes-codex/_shared/requirements-reference-appendix.txt',
         ROOT / 'site/scripts/check-references.mjs',
         ROOT / 'episodes-codex/_template/reference-scripts.json',
     ]
     for source in refs['sources']:
-        evidence = source['verification']['evidence']
-        assert isinstance(evidence, str) and not Path(evidence).is_absolute()
-        extras.append(ROOT / evidence)
+        records = [source['verification'], source['titleEvidence']]
+        if 'quotation' in source:
+            records.append(source['quotation'])
+        for record in records:
+            evidence = record['evidence']
+            assert isinstance(evidence, str) and not Path(evidence).is_absolute()
+            extras.append(ROOT / evidence)
     for path in extras:
         path = path.resolve()
         assert path.is_relative_to(ROOT) and path.is_file(), f'Missing/outside input: {path}'
@@ -104,6 +118,8 @@ def main():
     if args.check_body:
         print(json.dumps({'status': 'passed', 'originalBodyInputs': len(original),
                           'packageCheckedAt': str(BODY_PACKAGE.relative_to(D)),
+                          'documentsCheckedAt': {name: str(path.relative_to(D))
+                                                 for name, path in BODY_DOCUMENTS.items()},
                           'originalBodyManifestSHA256': BODY_MANIFEST_SHA256,
                           'bodyRenderRepeated': False}, ensure_ascii=False))
         return
@@ -124,6 +140,7 @@ def main():
         'originalBodyManifestSHA256': BODY_MANIFEST_SHA256,
         'currentPackageSHA256': expected['remotion/package.json'],
         'oldPackageSnapshotSHA256': sha(BODY_PACKAGE),
+        'oldDocumentSnapshotSHA256': {name: sha(path) for name, path in BODY_DOCUMENTS.items()},
         'manifestSHA256': sha(MANIFEST),
         'bodyRenderRepeated': False,
         'renderedOutputsIncluded': False,

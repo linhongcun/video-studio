@@ -18,3 +18,33 @@
 ## 追加范围
 
 `references.json`按共享`append_references.py`的schemaVersion 1保存：两条来源均含完整标题、机构、适用版本、HTTPS URL、具体支持论点、原文章节及已核验记录，另给适合片尾显示的短标题与短论点。正文约3分16秒加参考5秒，不新增口播；原5881帧正文和原AAC的保持由追加工具实际验证，本任务不修改既有冻结清单去追认新媒体。
+
+## 2026-10-25：原题名与逐字引用（当前显示）
+
+此前记录作为历史保留。旧版为画面改拟短标题或短论点的做法已撤下；当前`presentation`为`original-title-quote`，显示原题名、完整逐字原句与独立定位。
+
+### R1 · Module ngx_http_upstream_module
+
+- 机构：NGINX
+- 版本：持续维护文档 · 核验2026-10-25
+- 正式链接：<https://nginx.org/en/docs/http/ngx_http_upstream_module.html#hash>
+- 实读固定正文：<https://github.com/nginx/nginx.org/blob/34f63eb329ff52623cec453cd8f7539f9a5f8606/xml/en/docs/http/ngx_http_upstream_module.xml>
+- 完整正文SHA-256：`0955576db8c2cafa8385214f0862e3751d6518efca3ccdcfc5e59557f2f0eaca`
+- 定位：hash directive, consistent parameter paragraph
+- 核验记录：[sources-extra.json](../../docs/reference-endcards/original-titles/sources-extra.json)
+
+> The method ensures that only a few keys will be remapped to different servers when a server is added to or removed from the group.
+
+### R2 · Dynamo
+
+- 机构：Apache Cassandra
+- 版本：5.0文档 · 核验2026-10-25
+- 正式链接：<https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html>
+- 实读固定正文：<https://github.com/apache/cassandra/blob/76550e931481e965ae3283d8cf4a59c320d74c55/doc/modules/cassandra/pages/architecture/dynamo.adoc>
+- 完整正文SHA-256：`cf06d9156e211e81bf2530c33806d1ffc6a8ac1440c28669750f65d4e1760bb4`
+- 定位：Multiple Tokens per Physical Node (vnodes), paragraph 2
+- 核验记录：[sources-extra.json](../../docs/reference-endcards/original-titles/sources-extra.json)
+
+> Virtual nodes solve the problem by assigning multiple tokens in the token ring to each physical node.
+
+R2原题是Cassandra官方文档《Dynamo》，并非Amazon原论文；此身份与组织、URL及实际正文保持一致。

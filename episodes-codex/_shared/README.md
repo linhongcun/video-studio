@@ -4,18 +4,22 @@
 
 ## 新期的固定参考资料流程
 
-新制作或重制的视频从调研起准备本期 `references.json`、原文证据和文章出处；默认入口必须覆盖参考资料附录。[新期模板](../_template/README.md)提供待填写JSON、package脚本片段及冻结清单示例。不要把复制旧工程的 `render` 命令当作已接入新流程。
+新制作或重制的视频从调研起准备 `presentation: original-title-quote` 的本期 `references.json`、原题/原文证据和文章出处；默认入口必须覆盖参考资料附录。[新期模板](../_template/README.md)提供待填写JSON、package脚本片段及冻结清单示例。不要把复制旧工程的 `render` 命令当作已接入新流程。
+
+`title` 必须保留文档实际原始题名及其语言、字词与标点，`titleEvidence: {locator, evidence}` 可定位。可选 `quotation: {text, locator, evidence}` 保存需要展示的连续原文，画面标「原文摘录」；无需摘录则省略字段。不自行拼接省略，不用概括或译文替代原题/原文；`displayTitle`、`displaySupport` 禁用，内部 `supports` 不上屏。文章引用区另附翻译或解释时分别标「译文」「编者说明」。
 
 ```sh
 node site/scripts/check-references.mjs --sources episodes-codex/your-episode
 python3 episodes-codex/_shared/render_with_references.py episodes-codex/your-episode
 ```
 
-入口先只读检查来源/文章链接及本期实际 `source-sha256.json`，再调用本期 `npm run render:body`；该命令应把完整正文和已有代码卡混音到 `remotion/out/body.mp4`。随后复用未改动的 `append_references.py`，默认每页5秒、最多3项、提示暂停阅读，生成最终 `video.mp4`。资料不全或冻结失效时应在正文渲染前失败。
+入口先只读检查来源/文章链接及本期实际 `source-sha256.json`，再调用本期 `npm run render:body`；该命令应把完整正文和已有代码卡混音到 `remotion/out/body.mp4`。随后使用 `append_references_original.py`，默认每页5秒、最多2项、提示暂停阅读，生成最终 `video.mp4`。新器保留并依赖旧 `append_references.py` 的媒体处理实现，不修改旧引擎字节。资料不全或冻结失效时应在正文渲染前失败。
 
-资料清单、文章、证据、package脚本、默认入口、追加器/依赖锁、资料预检代码与实际主题都随本期输入冻结；最终视频和生成回执不作为编码前输入。Pillow按 `requirements-reference-appendix.txt` 安装，字体及编码环境按实际生成回执记录。该流程不复制配音、混音或起音算法，不改已经发布的冻结追加器。
+资料清单、文章、核验/题名/短引证据、package脚本、默认入口、新追加器及其旧引擎依赖/依赖锁、资料预检代码与实际主题都随本期输入冻结；最终视频和生成回执不作为编码前输入。Pillow按 `requirements-reference-appendix.txt` 安装，字体及编码环境按实际生成回执记录。该流程不复制配音、混音或起音算法，不改已经发布的冻结追加器。
 
 生成的两份附录回执放在 `revisions/reference-endcards/`，并复制到本期根目录；`render-result.json` 提供最终SHA和 `publicationMetadata`。发布时复制最终视频、文章、来源及两份回执，按该metadata片段填写 `meta.referenceAppendix`、`meta.finalVideoFrames`，正文分镜和 `words.json` 继续描述实际正文范围。
+
+新回执将 `sourceTitles`、`quotations` 与实际清单逐条绑定，记录新器的生成身份及旧引擎依赖SHA。标题与短引各自最多3行，溢出时明确失败，不自动截断、改写成概括或从 `supports` 合成原文。实际原题/原文、版式及播放器仍须复核，不能把回执存在当作已看过原文。
 
 ```sh
 python3 episodes-codex/_shared/render_with_references.py episodes-codex/your-episode --verify
