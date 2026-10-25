@@ -58,13 +58,6 @@
 
 ## 已验证案例与当前状态
 
-### EP.28 · Agent A02：工具调用由谁执行
-
-- 用户要求同步最新代码后继续下一期，选定[#132](https://github.com/linhongcun/video-studio/issues/132)，制作/站点slug为agent-tool-execution，接A01。原始基线1834450d/v0.57.0，编码前整合e38fa923文档收尾，无生产输入交集；当前工程按锁独立npm ci，未用删除目录下的ignored依赖。
-- [本期工程](../episodes-codex/agent-tool-execution/README.md)11镜22句、3305帧、110.166667秒。开头退款咨询UI建立查询签收天数的目标，完整展示调用请求→应用检查/实际查询→返回先到应用再到模型→对话；再另起新用户无权限会话，查询0次，结尾区分请求与执行结果。
-- 2026-10-25重新联网读取官方工具调用/执行宿主/授权文档，真实本地HTTP正常1次、拒绝0次；模型侧为固定fixture。128生产输入、独立73个有效动态阶段和29张正式编码帧、163预演/164编码帧保真、完整解码与−16.0LUFS检查通过；视频完整SHA为b1be594841f8e41d0922a4087c725bf05ccb0fd2252eab1388d1a1631d93211e。实际边界见[成片报告](../episodes-codex/agent-tool-execution/qa-final.md)。
-- 两个TTS候选裁尾风险与10镜说明中间态重叠分别追加L006/L003；功能场景入口的独立验证补入S002，不凑新编号。GitHub站点按持续授权收尾，真实版本、部署与线上核验见#132及本期site记录；没有逐字ASR/全片人工听辨、真实模型推理或用户观看认可，平台未新发。
-
 ### 设计模式D02：观察者模式（v0.58.0已上线）
 
 - 2026-10-25，用户认可D01当前版本后要求开始下一个模式，并再次强调先拉取最新代码避免冲突。已从干净main快进至`1834450d6dd6e36762aa1862a72282c4e89822ac`，创建`codex/observer-pattern`，重读上游清理/手册与依赖变化，记录见[开工核对](../episodes-codex/observer-pattern/startup.json)。
@@ -219,6 +212,13 @@
 - 用户认可v0.51.0的清晰度后要求扫描旧片并按价值重制。基线6765032/v0.54.0：29支当前内容，25支重新检查源码和229个实际编码时点，4支刚获认可的事务导航片保留；原长合集和下架隔离级别分别归档/隐藏。
 - 本批选HTTPS、DNS、缓存一致性、消息队列、熔断器、分布式事务入门六片；9支适合局部增强，14支保留。逐片原因与实际证据见[扫描报告](flow-navigation-audit.md)及[制作issue #199](https://github.com/linhongcun/video-studio/issues/199)。已有全数组或调用关系图的算法/模式片不为统一皮肤整片返工。
 - 复用已审共享相机，保留原配音、脚本、字幕和总帧数。按真实网络、读写路径、状态机或范围对照组织全局；导航的颜色、提示和标题也须与当前实例进度一致。制作/独立检查、正式编码、上线与用户新观看结论按实际阶段分别补齐。六支已正式编码并通过独立最终媒体复核，660冻结输入、原AAC与时序保持、六片fresh独立代表PNG复现通过；已由[PR #224](https://github.com/linhongcun/video-studio/pull/224)合并，随[v0.56.2](https://github.com/linhongcun/video-studio/releases/tag/v0.56.2)发布并经[Release后Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40118710238)成功；线上六片完整SHA、字幕、章节、海报及更新日志核验通过，#199已以completed关闭，详见[线上证据](flow-navigation-audit/online-verification.json)。本轮仅更新GitHub站点，用户对六支新版的观看反馈后续另记。
+
+### EP.28 · Agent A02：工具调用由谁执行
+
+- 用户要求同步最新代码后继续下一期，选定[#132](https://github.com/linhongcun/video-studio/issues/132)，制作/站点slug为agent-tool-execution，接A01。原始基线1834450d/v0.57.0，编码前整合e38fa923文档收尾，无生产输入交集；当前工程按锁独立npm ci，未用删除目录下的ignored依赖。
+- [本期工程](../episodes-codex/agent-tool-execution/README.md)11镜22句、3305帧、110.166667秒。开头退款咨询UI建立查询签收天数的目标，完整展示调用请求→应用检查/实际查询→返回先到应用再到模型→对话；再另起新用户无权限会话，查询0次，结尾区分请求与执行结果。
+- 2026-10-25重新联网读取官方工具调用/执行宿主/授权文档，真实本地HTTP正常1次、拒绝0次；模型侧为固定fixture。128生产输入、独立73个有效动态阶段和29张正式编码帧、163预演/164编码帧保真、完整解码与−16.0LUFS检查通过；视频完整SHA为b1be594841f8e41d0922a4087c725bf05ccb0fd2252eab1388d1a1631d93211e。实际边界见[成片报告](../episodes-codex/agent-tool-execution/qa-final.md)。
+- 两个TTS候选裁尾风险与10镜说明中间态重叠分别追加L006/L003；功能场景入口的独立验证补入S002，不凑新编号。GitHub站点按持续授权收尾，真实版本、部署与线上核验见#132及本期site记录；没有逐字ASR/全片人工听辨、真实模型推理或用户观看认可，平台未新发。
 
 ## LeetCode 首期：LC.11 盛最多水的容器
 
