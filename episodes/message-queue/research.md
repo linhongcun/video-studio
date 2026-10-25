@@ -24,3 +24,9 @@
 - When Will Published Messages Be Confirmed（603–618行）对可路由的持久消息与持久队列，确认要等可靠保存；无法路由也可能收到confirm，所以本例画明任务已写入目标队列，不将任意confirm视为业务成功。持久化/路由和程序可靠性边界保留原文章，不扩展成其他消息方案。
 
 导航仅把原片已经分别讲过的两类回执、未完成中断、业务成功但确认未达两个情景放回同一生命周期。第10镜仍止于复用已有结果，队列未收到处理确认；从复用到队列结束的虚线是后续要求，不假装该事件已经发生。
+
+## 2026-10-26 片尾原题与原文核验
+
+本轮实际GET RabbitMQ官方仓库固定commit `29cb9ecf131223ad9b7faf61921ac3683008f722` 的`docs/confirms.md`与`docs/reliability.md`，两份全文均200。原题分别为`Consumer Acknowledgements and Publisher Confirms`与`Reliability Guide`，来自frontmatter，未拼接小节或改写题名。[本片证据](../../docs/reference-endcards/batch-4/sources-message-queue.json)保存完整SHA、连续完整原句、原定位及逐论点段落。
+
+核对重点为发布确认与消费确认互不替代、目标队列与持久配置下的保存条件、手动确认断连重入队，以及确认不确定造成的重复／幂等边界。无法路由也可能confirm，重投不能反推业务一定未完成，不作exactly-once承诺。旧Work Queues与Queue Length Limit脚注沿用原历史日期，不记作本轮重新读取。原article主体、frontmatter、锚点、旁白、分镜、旧冻结与媒体保持。

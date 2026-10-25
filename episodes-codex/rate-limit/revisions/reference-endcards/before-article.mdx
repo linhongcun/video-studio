@@ -1,0 +1,40 @@
+---
+title: "抢票时，为什么总提示系统繁忙？"
+summary: "用同一入口和两个额度格，演示按额度放行、缺额拒绝、按时间补充，以及重试和公平的边界。"
+chapters:
+  - id: hook
+    title: 请求为何被挡回
+  - id: allow
+    title: 按额度决定放行
+  - id: deny
+    title: 没有额度就拒绝
+  - id: refill
+    title: 按时间补充额度
+  - id: recap
+    title: 重试与公平边界
+related:
+  - message-queue
+  - load-balancing
+---
+
+“系统繁忙”有很多可能原因。本片只讲其中一种：请求在短时间内大量到来，入口通过限流减少进入后台的请求量。不能只凭页面文案认定服务使用了哪种算法，或判断后台已经崩溃。HTTP429表示请求量触及了服务所采用的规则。[^status]
+
+## 同一入口，先扣额度再放行
+
+教学示例把容量设为2、每秒补1。甲来时扣掉1，乙再用掉1，丙到达时没有额度，于是被拒绝。拒绝式令牌桶不会把丙留在后台偷偷排队；已经放行的甲乙则继续处理。容量、补充量和间隔是不同参数。[^envoy]
+
+示例为便于观察经过放慢，甲乙丙的密集到达发生在同一补充间隔内。它不是实际服务的承载数字，也不等于每个真实接口都应使用这种配置。
+
+## 等待以后，仍可能再次失败
+
+时间到达后，示例只补充1个额度，并不会把所有额度全部重置。其他人也可能先消耗这个额度，所以稍后重试不等于成功。响应如果带有Retry-After，可按提示时间再发起后续请求；不停点击只会增加请求，不会改变补充规则。[^retry]
+
+## 限流不负责决定票归谁
+
+限流规则可以按用户、资源、接口或服务范围设置。请求进入后台后，还要由业务检查库存等条件；限流本身并不保证公平或保证获得票。规则的范围、业务优先级和重试方式，需要结合服务能力设计。[^status]
+
+额度控制的是进入速度，并不直接限制同时正在处理的请求数；请求耗时变长时，仍可能积压。片中的两个后台位置只帮助追踪甲乙，并非把令牌桶误当并发上限。
+
+[^envoy]: Envoy，[Local rate limit](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/local_rate_limit_filter)，访问于2026-10-24。
+[^status]: MDN，[429 Too Many Requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429)，访问于2026-10-24。
+[^retry]: MDN，[Retry-After](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After)，访问于2026-10-24。

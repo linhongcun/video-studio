@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "presentation": "original-title-quote",
+  "episode": "rate-limit",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-26",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Envoy",
+      "title": "Local rate limit",
+      "version": "维护文档 · 2026-10-26核验",
+      "url": "https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/local_rate_limit_filter",
+      "titleEvidence": {
+        "locator": "reStructuredText document heading (line 3)",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+      },
+      "quotation": {
+        "text": "If the local rate limit token bucket is checked, and there are no tokens available, a 429 response is returned (the response is configurable).",
+        "locator": "Opening behavior description (lines 15–16)",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+      },
+      "supports": [
+        "已启用并执行的本地令牌桶检查按请求消耗令牌；没有可用令牌时按配置拒绝，默认状态是429而非让该请求等待额度。",
+        "max_tokens配置容量和初始令牌数；tokens_per_fill配置每次补充量；fill_interval配置补充间隔，补充后不超过容量。",
+        "令牌桶可按Envoy进程或下游连接等范围配置；可选Retry-After仅在指定条件下发出，不是所有429都默认附带。"
+      ],
+      "sections": "Opening behavior description；Retry-After header；对应TokenBucket API的max_tokens／tokens_per_fill／fill_interval与LocalRateLimit API的token_bucket",
+      "shots": [
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "12"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-26",
+        "method": "通过继承代理实际完整GET官方GitHub固定commit正文，核对文档原题、连续完整原句及逐论点上下文；不将旧访问记录当作本轮读取。",
+        "sourceId": "rate-limit-envoy-local",
+        "sourceUrl": "https://github.com/envoyproxy/envoy/blob/83297dad103f3dbd6320d0b29cd1e7781cf45305/docs/root/configuration/http/http_filters/local_rate_limit_filter.rst",
+        "retrievedUrl": "https://raw.githubusercontent.com/envoyproxy/envoy/83297dad103f3dbd6320d0b29cd1e7781cf45305/docs/root/configuration/http/http_filters/local_rate_limit_filter.rst",
+        "commit": "83297dad103f3dbd6320d0b29cd1e7781cf45305",
+        "sha256": "7db0308c39cb772046dc9e604df049ae591871926ea2252a7bcdf695bc178bdf",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json",
+        "canonicalAccess": "本轮实读官方GitHub固定正文，未将正式页面记为另一次成功请求。"
+      },
+      "scope": "内部supports只作论点对应，不上屏；片尾仅显示原题、机构/版本及连续原句。"
+    },
+    {
+      "id": "R2",
+      "organization": "MDN Web Docs",
+      "title": "429 Too Many Requests",
+      "version": "维护文档 · 2026-10-26核验",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429",
+      "titleEvidence": {
+        "locator": "frontmatter title (line 2)",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+      },
+      "quotation": {
+        "text": "Implementations of rate limiting vary; restrictions may be server-wide or per resource.",
+        "locator": "Opening discussion (line 14)",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+      },
+      "supports": [
+        "HTTP429表示客户端在一段时间内发送的请求过多，具体限流条件由服务的规则决定。",
+        "Retry-After响应头是可选的等待信息，不意味着所有429都带该字段；等待后仍需按当时规则判断请求。",
+        "限流范围可以是整个服务或某项资源，也可基于IP、身份等条件；仅凭系统繁忙文案不能断言HTTP状态或算法。"
+      ],
+      "sections": "Opening status explanation；Retry-After paragraph；Scope discussion；Response containing Retry-After header",
+      "shots": [
+        "01",
+        "03",
+        "09",
+        "10",
+        "11",
+        "12"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-26",
+        "method": "通过继承代理实际完整GET官方GitHub固定commit正文，核对文档原题、连续完整原句及逐论点上下文；不将旧访问记录当作本轮读取。",
+        "sourceId": "rate-limit-mdn-429",
+        "sourceUrl": "https://github.com/mdn/content/blob/87ca9db1ebe56eb20c1f20b91fca43955d8f0e26/files/en-us/web/http/reference/status/429/index.md",
+        "retrievedUrl": "https://raw.githubusercontent.com/mdn/content/87ca9db1ebe56eb20c1f20b91fca43955d8f0e26/files/en-us/web/http/reference/status/429/index.md",
+        "commit": "87ca9db1ebe56eb20c1f20b91fca43955d8f0e26",
+        "sha256": "9d00420fcbd41b38a4016031ec5df0c13f8a495295d38b4c0b3487c60c5bbe8b",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json",
+        "canonicalAccess": "本轮实读官方GitHub固定正文，未将正式页面记为另一次成功请求。"
+      },
+      "scope": "内部supports只作论点对应，不上屏；片尾仅显示原题、机构/版本及连续原句。"
+    }
+  ],
+  "scope": "一页两项、默认5秒；原题与连续原句按实际正文核验。容量2、每秒补1属于教学配置，不以限流证明并发上限、库存判断或公平。"
+}

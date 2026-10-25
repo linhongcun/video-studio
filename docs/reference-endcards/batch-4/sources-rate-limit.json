@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-4",
+  "episode": "rate-limit",
+  "baselineCommit": "3156d84542f97bc5e73610c6ec82a6850f83d752",
+  "checkedAt": "2026-10-26",
+  "checkedAtBeijing": "2026-10-26T07:11:59.266095+08:00",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex workflow_docs rate-limit source author",
+  "scope": "Two original documents plus two same-commit Envoy API bodies for parameter interpretation. Full official raw GET, exact titles, <=150-character contiguous quotations and claim context only; no freeze/media/ASR/listening/deployment claims.",
+  "sources": [
+    {
+      "id": "rate-limit-envoy-local",
+      "episode": "rate-limit",
+      "referenceId": "R1",
+      "organization": "Envoy",
+      "title": "Local rate limit",
+      "titleEvidence": {
+        "locator": "reStructuredText document heading (line 3)",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+      },
+      "titleMatchesExactly": true,
+      "canonicalUrl": "https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/local_rate_limit_filter",
+      "canonicalAccess": {
+        "status": "not-requested",
+        "verifiedBody": false,
+        "scope": "本轮仅访问允许的官方GitHub/API目的地，不绕过网络策略。"
+      },
+      "repository": "envoyproxy/envoy",
+      "repositoryFile": "docs/root/configuration/http/http_filters/local_rate_limit_filter.rst",
+      "commit": "83297dad103f3dbd6320d0b29cd1e7781cf45305",
+      "fixedSourceUrl": "https://github.com/envoyproxy/envoy/blob/83297dad103f3dbd6320d0b29cd1e7781cf45305/docs/root/configuration/http/http_filters/local_rate_limit_filter.rst",
+      "retrievedUrl": "https://raw.githubusercontent.com/envoyproxy/envoy/83297dad103f3dbd6320d0b29cd1e7781cf45305/docs/root/configuration/http/http_filters/local_rate_limit_filter.rst",
+      "retrieval": {
+        "status": 200,
+        "bytes": 7861,
+        "sha256": "7db0308c39cb772046dc9e604df049ae591871926ea2252a7bcdf695bc178bdf"
+      },
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-26",
+      "checkedAtBeijing": "2026-10-26T07:11:59.266095+08:00",
+      "quotation": {
+        "text": "If the local rate limit token bucket is checked, and there are no tokens available, a 429 response is returned (the response is configurable).",
+        "locator": "Opening behavior description (lines 15–16)",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+      },
+      "quotationCharacters": 142,
+      "quotationMatchesContiguousOriginalAfterWhitespaceNormalization": true,
+      "quotationNormalization": "Envoy quote only joins layout line breaks; the MDN quote is a literal source substring. No words, punctuation, macros, translation or ellipsis were changed.",
+      "supports": [
+        "已启用并执行的本地令牌桶检查按请求消耗令牌；没有可用令牌时按配置拒绝，默认状态是429而非让该请求等待额度。",
+        "max_tokens配置容量和初始令牌数；tokens_per_fill配置每次补充量；fill_interval配置补充间隔，补充后不超过容量。",
+        "令牌桶可按Envoy进程或下游连接等范围配置；可选Retry-After仅在指定条件下发出，不是所有429都默认附带。"
+      ],
+      "sections": "Opening behavior description；Retry-After header；对应TokenBucket API的max_tokens／tokens_per_fill／fill_interval与LocalRateLimit API的token_bucket",
+      "shots": [
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "12"
+      ],
+      "limitations": [
+        "本片容量2、每秒补1是教学参数组合，不是默认配置或承载建议；API只说明tokens_per_fill未指定时默认1，fill_interval仍是必填参数。",
+        "这里采用执行拒绝的示例；仅启用但不执行限流时可能只记录并继续转发，不能推广为所有部署都拒绝。",
+        "令牌桶控制进入速率与突发，不等同于正在处理的并发数；库存、公平与业务成功也不是该过滤器保证。",
+        "Envoy进程级共享桶不能自动等同于任意跨实例全局预算，实际作用范围取决于配置。"
+      ],
+      "excerpts": [
+        {
+          "kind": "original-title",
+          "startLine": 3,
+          "endLine": 4,
+          "text": "Local rate limit\n================"
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 10,
+          "endLine": 23,
+          "text": "The HTTP local rate limit filter applies a :ref:`token bucket\n<envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.token_bucket>` rate\nlimit when the request's route or virtual host has a per filter\n:ref:`local rate limit configuration <envoy_v3_api_msg_extensions.filters.http.local_ratelimit.v3.LocalRateLimit>`.\n\nIf the local rate limit token bucket is checked, and there are no tokens available, a 429 response is returned\n(the response is configurable). The local rate limit filter then sets the\n:ref:`x-envoy-ratelimited<config_http_filters_router_x-envoy-ratelimited>` response header. :ref:`Additional response headers\n<envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.response_headers_to_add>` can be\nconfigured to be returned.\n\n:ref:`Request headers\n<envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.request_headers_to_add_when_not_enforced>` can be\nconfigured to be added to forwarded requests to the upstream when the local rate limit filter is enabled but not enforced."
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 25,
+          "endLine": 40,
+          "text": "Depending on the value of the config :ref:`local_rate_limit_per_downstream_connection <envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.local_rate_limit_per_downstream_connection>`,\nthe token bucket is either shared across all workers or on a per connection basis. This results in the local rate limits being applied either per Envoy process or per downstream connection.\nBy default the rate limits are applied per Envoy process.\n\nRetry-After header\n------------------\n\nWhen :ref:`enable_retry_after_header\n<envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.enable_retry_after_header>`\nis enabled and the filter enforces a 429 response, the response includes ``Retry-After`` using the\n``delay-seconds`` form. The delay is the number of seconds until the next token is available in the\nbucket that rejected the request, clamped to at least one second.\nIf ``response_headers_to_add`` sets a ``Retry-After`` header, the filter does not overwrite it.\n\nThe header is not emitted for an upstream-generated 429 response, when rate limiting is not\nenforced, or when a custom status other than 429 is configured. The option is disabled by default."
+        }
+      ],
+      "supportingDocuments": [
+        {
+          "id": "envoy-bucket",
+          "repository": "envoyproxy/envoy",
+          "repositoryFile": "api/envoy/type/v3/token_bucket.proto",
+          "commit": "83297dad103f3dbd6320d0b29cd1e7781cf45305",
+          "retrievedUrl": "https://raw.githubusercontent.com/envoyproxy/envoy/83297dad103f3dbd6320d0b29cd1e7781cf45305/api/envoy/type/v3/token_bucket.proto",
+          "fixedSourceUrl": "https://github.com/envoyproxy/envoy/blob/83297dad103f3dbd6320d0b29cd1e7781cf45305/api/envoy/type/v3/token_bucket.proto",
+          "status": 200,
+          "bytes": 1585,
+          "sha256": "267a27afdc735fa581a83d8186361dede7c8b32b076fb185851833c811c7f1e5",
+          "excerpts": [
+            {
+              "kind": "supporting-context",
+              "startLine": 18,
+              "endLine": 38,
+              "text": "// [#protodoc-title: Token bucket]\n\n// Configures a token bucket, typically used for rate limiting.\nmessage TokenBucket {\n  option (udpa.annotations.versioning).previous_message_type = \"envoy.type.TokenBucket\";\n\n  // The maximum tokens that the bucket can hold. This is also the number of tokens that the bucket\n  // initially contains. A value of 0 means the bucket will always be empty and all requests will\n  // be rate limited (i.e., always reject).\n  uint32 max_tokens = 1 [(validate.rules).uint32 = {gte: 0}];\n\n  // The number of tokens added to the bucket during each fill interval. If not specified, defaults\n  // to a single token.\n  google.protobuf.UInt32Value tokens_per_fill = 2 [(validate.rules).uint32 = {gt: 0}];\n\n  // The fill interval that tokens are added to the bucket. During each fill interval\n  // ``tokens_per_fill`` are added to the bucket. The bucket will never contain more than\n  // ``max_tokens`` tokens.\n  google.protobuf.Duration fill_interval = 3 [(validate.rules).duration = {\n    required: true\n    gt {}"
+            }
+          ]
+        },
+        {
+          "id": "envoy-config",
+          "repository": "envoyproxy/envoy",
+          "repositoryFile": "api/envoy/extensions/filters/http/local_ratelimit/v3/local_rate_limit.proto",
+          "commit": "83297dad103f3dbd6320d0b29cd1e7781cf45305",
+          "retrievedUrl": "https://raw.githubusercontent.com/envoyproxy/envoy/83297dad103f3dbd6320d0b29cd1e7781cf45305/api/envoy/extensions/filters/http/local_ratelimit/v3/local_rate_limit.proto",
+          "fixedSourceUrl": "https://github.com/envoyproxy/envoy/blob/83297dad103f3dbd6320d0b29cd1e7781cf45305/api/envoy/extensions/filters/http/local_ratelimit/v3/local_rate_limit.proto",
+          "status": 200,
+          "bytes": 10444,
+          "sha256": "9843b677a5a90595ab1d595c9f1765c1cdf620b5beefb6ea57ea215c8bab5e83",
+          "excerpts": [
+            {
+              "kind": "supporting-context",
+              "startLine": 31,
+              "endLine": 55,
+              "text": "  // This field allows for a custom HTTP response status code to the downstream client when\n  // the request has been rate limited.\n  // Defaults to 429 (TooManyRequests).\n  //\n  // .. note::\n  //   If this is set to < 400, 429 will be used instead.\n  type.v3.HttpStatus status = 2;\n\n  // The token bucket configuration to use for rate limiting requests that are processed by this\n  // filter. Each request processed by the filter consumes a single token. If the token is available,\n  // the request will be allowed. If no tokens are available, the request will receive the configured\n  // rate limit status.\n  //\n  // .. note::\n  //   It's fine for the token bucket to be unset for the global configuration since the rate limit\n  //   can be applied at a the virtual host or route level. Thus, the token bucket must be set\n  //   for the per route configuration otherwise the config will be rejected.\n  //\n  // .. note::\n  //   When using per route configuration, the bucket becomes unique to that route.\n  //\n  // .. note::\n  //   In the current implementation the token bucket's :ref:`fill_interval\n  //   <envoy_v3_api_field_type.v3.TokenBucket.fill_interval>` must be >= 50ms to avoid too aggressive\n  //   refills."
+            },
+            {
+              "kind": "supporting-context",
+              "startLine": 108,
+              "endLine": 116,
+              "text": "  // If set to true, a token bucket is allocated for each connection.\n  // Thus the rate limits are applied per connection thereby allowing\n  // one to rate limit requests on a per connection basis.\n  // If unspecified, the default value is false.\n  bool local_rate_limit_per_downstream_connection = 11;\n\n  // Enables the local cluster level rate limiting, iff this is set explicitly. For example,\n  // given an Envoy gateway that contains N Envoy instances and a rate limit rule X tokens\n  // per second. If this is set, the total rate limit of whole gateway will always be X tokens"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "rate-limit-mdn-429",
+      "episode": "rate-limit",
+      "referenceId": "R2",
+      "organization": "MDN Web Docs",
+      "title": "429 Too Many Requests",
+      "titleEvidence": {
+        "locator": "frontmatter title (line 2)",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+      },
+      "titleMatchesExactly": true,
+      "canonicalUrl": "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429",
+      "canonicalAccess": {
+        "status": "not-requested",
+        "verifiedBody": false,
+        "scope": "本轮仅访问允许的官方GitHub/API目的地，不绕过网络策略。"
+      },
+      "repository": "mdn/content",
+      "repositoryFile": "files/en-us/web/http/reference/status/429/index.md",
+      "commit": "87ca9db1ebe56eb20c1f20b91fca43955d8f0e26",
+      "fixedSourceUrl": "https://github.com/mdn/content/blob/87ca9db1ebe56eb20c1f20b91fca43955d8f0e26/files/en-us/web/http/reference/status/429/index.md",
+      "retrievedUrl": "https://raw.githubusercontent.com/mdn/content/87ca9db1ebe56eb20c1f20b91fca43955d8f0e26/files/en-us/web/http/reference/status/429/index.md",
+      "retrieval": {
+        "status": 200,
+        "bytes": 2072,
+        "sha256": "9d00420fcbd41b38a4016031ec5df0c13f8a495295d38b4c0b3487c60c5bbe8b"
+      },
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-26",
+      "checkedAtBeijing": "2026-10-26T07:11:59.266095+08:00",
+      "quotation": {
+        "text": "Implementations of rate limiting vary; restrictions may be server-wide or per resource.",
+        "locator": "Opening discussion (line 14)",
+        "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+      },
+      "quotationCharacters": 87,
+      "quotationMatchesContiguousOriginalAfterWhitespaceNormalization": true,
+      "quotationNormalization": "Envoy quote only joins layout line breaks; the MDN quote is a literal source substring. No words, punctuation, macros, translation or ellipsis were changed.",
+      "supports": [
+        "HTTP429表示客户端在一段时间内发送的请求过多，具体限流条件由服务的规则决定。",
+        "Retry-After响应头是可选的等待信息，不意味着所有429都带该字段；等待后仍需按当时规则判断请求。",
+        "限流范围可以是整个服务或某项资源，也可基于IP、身份等条件；仅凭系统繁忙文案不能断言HTTP状态或算法。"
+      ],
+      "sections": "Opening status explanation；Retry-After paragraph；Scope discussion；Response containing Retry-After header",
+      "shots": [
+        "01",
+        "03",
+        "09",
+        "10",
+        "11",
+        "12"
+      ],
+      "limitations": [
+        "状态码描述请求受规则限制，不保证客户端稍后重试一定成功，也不证明库存仍可用。",
+        "文中的3600秒是MDN示例，不是HTTP429的通用重试时间，本片每秒补1也不是该示例的配置。",
+        "页面繁忙文案、限流算法、并发容量和业务成败分别判断，不把429一概解释为后台崩溃。"
+      ],
+      "excerpts": [
+        {
+          "kind": "original-title-and-status-context",
+          "startLine": 1,
+          "endLine": 15,
+          "text": "---\ntitle: 429 Too Many Requests\nslug: Web/HTTP/Reference/Status/429\npage-type: http-status-code\nspec-urls: https://www.rfc-editor.org/info/rfc6585/#section-4\nsidebar: http\n---\n\nThe HTTP **`429 Too Many Requests`** [client error response](/en-US/docs/Web/HTTP/Reference/Status#client_error_responses) status code indicates the client has sent too many requests in a given amount of time.\nThis mechanism of asking the client to slow down the rate of requests is commonly called \"{{glossary(\"rate limit\", \"rate limiting\")}}\".\n\nA {{HTTPHeader(\"Retry-After\")}} header may be included to this response to indicate how long a client should wait before making the request again.\n\nImplementations of rate limiting vary; restrictions may be server-wide or per resource.\nTypically, rate-limiting restrictions are based on a client's IP but can be specific to users or authorized applications if requests are authenticated or contain a {{Glossary(\"cookie\")}}."
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 25,
+          "endLine": 38,
+          "text": "### Response containing Retry-After header\n\nThe following request is being sent repeatedly in a loop by a client that is misconfigured:\n\n```http\nGET /reports/mdn HTTP/1.1\nHost: example.com\n```\n\nIn this example, server-wide rate limiting is active when a client exceeds a set threshold of requests per minute.\nA 429 response is returned with a {{HTTPHeader(\"Retry-After\")}} header that indicates requests will be allowed for this client again after 3600 seconds (60 minutes):\n\n```http\nHTTP/1.1 429 Too Many Requests"
+        }
+      ],
+      "supportingDocuments": []
+    }
+  ],
+  "appendOnlyPreservation": {
+    "article": {
+      "originalBytes": 2630,
+      "originalSHA256": "ee5a97dd9fa56f55328ec937aaa8ae39a8bc39c848fb2ea9d8dd2af91b9ddb58",
+      "currentPrefixSHA256": "ee5a97dd9fa56f55328ec937aaa8ae39a8bc39c848fb2ea9d8dd2af91b9ddb58"
+    },
+    "research": {
+      "originalBytes": 2045,
+      "originalSHA256": "5c4b264226c86e2292d78d914dc9bbcedb30298b86801492db17b81b568c1c14",
+      "currentPrefixSHA256": "5c4b264226c86e2292d78d914dc9bbcedb30298b86801492db17b81b568c1c14"
+    }
+  },
+  "teachingConfiguration": {
+    "maxTokens": 2,
+    "tokensPerFill": 1,
+    "fillIntervalSeconds": 1,
+    "status": "教学示例，不是默认配置、真实服务承载量、库存或并发上限",
+    "sourceDefaultNuance": "TokenBucket API specifies default tokens_per_fill=1 when absent, but requires fill_interval. The whole 2/1/1s example is not a universal product default."
+  },
+  "networkScope": "Inherited proxy/CA configuration retained; only allowed official GitHub/API requests made. Canonical links are retained for readers and are not counted as newly fetched pages."
+}
