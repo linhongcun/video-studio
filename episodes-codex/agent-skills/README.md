@@ -1,6 +1,12 @@
 # Agent Skills：一个Markdown文件，为什么能成为技能？
 
-新方向首片，内部EP.31、slug `agent-skills`，对应[#139](https://github.com/linhongcun/video-studio/issues/139)。约3分8秒，以一次团队API兼容审查解释可发现的方法包、渐进加载、资料读取/脚本执行分流和使用代价。当前本地制作、独立成片与站点检查均完成，拟发行v0.62.0；GitHub合并、Release、Pages和线上核验尚待收尾，不预写用户认可。
+新方向首片，内部EP.31、slug `agent-skills`，对应[#139](https://github.com/linhongcun/video-studio/issues/139)。约3分8秒，以一次团队API兼容审查解释可发现的方法包、渐进加载、资料读取/脚本执行分流和使用代价。已按v0.62.0合并、发布并部署，[观看视频与图文](https://linhongcun.github.io/video-studio/episodes/agent-skills/)。本地制作、独立成片、站点及线上核验已完成；用户尚未观看新片，不预写其认可。
+
+## 发行与线上证据
+
+[PR #263](https://github.com/linhongcun/video-studio/pull/263)合并为`ea4538be0dba8d562f17db183908e03830e10db8`，附注tag与[Release v0.62.0](https://github.com/linhongcun/video-studio/releases/tag/v0.62.0)发布后，[部署40157863039](https://github.com/linhongcun/video-studio/actions/runs/40157863039)成功。
+
+北京时间2026-10-25T11:25:29.722283+08:00，20个普通canonical HTTPS GET全部通过：新视频/海报完整SHA、24句精确VTT、页面四章与源码入口、首页/学习/目录/Agent系列/订阅/站点地图及含v0.62.0的更新日志正常；两期已删课的页面和视频共4地址仍404，保留课程代表媒体完整SHA一致。详情见[线上报告](online-verification.json)与[发行身份](release.json)。普通GET不冒充浏览器播放；真实双视口播放与跳转另见本地站点报告。
 
 ## 成片与关键身份
 
