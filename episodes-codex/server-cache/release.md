@@ -21,3 +21,7 @@
 - [完整线上证明](../../docs/codex-remake-ep01-14/online.json)保留逐项GET结果；检查不冒充完整人工播放、逐字ASR或独立完整听辨。
 
 按持续授权自主发布不表示用户已经观看认可。后续反馈应重新冻结受影响输入并检查、发布。
+
+## v0.70.4 · 第三批片尾参考资料
+
+本片补充一页5秒可暂停资料卡，保留实际原题、连续原文摘录和位置；原正文/音轨/分镜与视觉保持，最终3641帧，完整SHA-256：`c5cb410edc4d962a3f0de66b7bffe588d8b3cf447502653f4d320b58b8327f85`。[PR #339](https://github.com/linhongcun/video-studio/pull/339)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.70.4)和[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40242724829)完成。13次canonical完整GET覆盖本片视频/海报SHA、字幕、章节、出处和更新日志通过，见[本批记录](../../docs/reference-endcards/batch-3/README.md)。仅GitHub站点，无平台重发或本版用户观看结论。

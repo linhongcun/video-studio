@@ -29,3 +29,31 @@ chapters:
 
 - [Microsoft Azure Architecture Center — Circuit Breaker pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)，实际访问2026-10-24。
 - [AWS Well-Architected — graceful degradation](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html)，实际访问2026-10-24。
+
+## 参考资料
+
+片尾精选以下两项官方资料，实际读取与核验于2026-10-26（北京时间）。保留原始题名与原文；运费险场景、处理位、失败次数和探测量均为教学示意，实际参数应按服务和业务条件设置。
+
+**[R1] Circuit Breaker Pattern**
+
+Microsoft · Azure Architecture Center · 2026-10-26核验
+
+[正式文档](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)；[实读固定原文](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/circuit-breaker.md)。
+
+> A limited number of requests from the application are allowed to pass through and invoke the operation.
+
+原文位置：Solution / Half-Open · line 45。
+
+**编者说明：**该文档说明正常放行并统计近期失败、达到条件后快速拒绝，以及等待后少量试探。失败试探仍要继续暂停，达到恢复条件才恢复；熔断本身不会修好下游，业务还须正确处理不可用。
+
+**[R2] Retry pattern**
+
+Microsoft · Azure Architecture Center · 2026-10-26核验
+
+[正式文档](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry)；[实读固定原文](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry-content.md)；[固定页面版本](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry.yml)。
+
+> For some noncritical operations, it's better to fail fast rather than retry several times and affect the throughput of the application.
+
+原文位置：Issues and considerations / Impact on performance · line 44。
+
+**编者说明：**该文档用于说明非关键操作可以快速失败，避免反复调用继续消耗资源；恢复策略也需按故障和业务条件验证。可选运费险不可用不表示库存、支付等必要条件可以跳过，熔断或重试不能替代业务一致性。

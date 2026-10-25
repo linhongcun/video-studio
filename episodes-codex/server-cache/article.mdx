@@ -32,3 +32,27 @@ related:
 如果数据经常重复读取、变化相对少，缓存更容易被复用；如果每次都读不同内容，多一次检查和填充也有开销。命中率、内存成本、允许的陈旧程度、缓存不可用时的回源压力，都要结合实际系统评估。视频没有提供固定的提速倍数。
 
 首次未命中有额外访问成本，也见[AWS缓存模式白皮书](https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html)，访问于2026-10-24，较旧材料仅参考。不要把教学动画的计数当作基准测试。
+
+## 参考资料
+
+以下保留本片主要资料的原始题名与原文短引，核验于2026-10-26（北京时间）。正式链接与本轮实读的官方仓库固定版本分别列出；前文资料及访问日期继续保留。
+
+**[R1] Cache-Aside Pattern**（Microsoft · Azure Architecture Center；官方文档 · 2026-10-26核验）。
+
+> The application determines whether an item currently resides in the cache by attempting to read from the cache.
+
+定位：Solution, step 1 (line 19)。 [正式原文](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside) · [本轮实读固定正文](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside-content.md)。
+
+[该页原题与内容入口](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside.yml)。
+
+编者说明：该文说明先查缓存、未命中取数据源并回填的流程，也明确指出Cache-Aside不保证缓存与数据源始终一致。本片中的Redis共享缓存是一种实现示例，应用进程内缓存也是另一种放置方式。
+
+**[R2] EXPIRE**（Redis；官方命令文档 · 2026-10-26核验）。
+
+> After the timeout has expired, the key will automatically be deleted.
+
+定位：Opening paragraph (line 77)。 [正式原文](https://redis.io/docs/latest/commands/expire/) · [本轮实读固定正文](https://github.com/redis/docs/blob/1406db84d01f1d6a07fe567cbdea4d051456a2d7/content/commands/expire.md)。
+
+编者说明：EXPIRE说明已设置超时的Redis键如何过期；未设置TTL的键并不会因此自动过期。失效后重新查数据库与回填由应用负责，设置某个TTL不能证明数据库修改已同步到缓存，更不能证明强一致。
+
+商品7042、199元、请求数量及读取计数仍为教学设计，不作为官方性能测试或统一TTL配置。

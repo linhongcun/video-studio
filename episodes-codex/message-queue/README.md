@@ -23,8 +23,23 @@
 [v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。
 
 
-## flow-map-20261024 / #199 导航重制输入
+## flow-map-20261024 / #199 导航重制输入（历史阶段记录）
 
 本轮只改视觉关系，历史媒体及源索引见revisions/pre-flow-map.json（6765032），不复制原大媒体。当前全局图把保存回执到网站、处理确认到队列、断连后的同ID重投和另一已有业务结果情景接回同一生命周期。保留原音轨、24句字幕、12镜和3100帧。
 
 导航初版生产者预演见qa-flow-map.json：37张有字幕样本、两段真无字幕MP4和完整动作窗口检查。独立审查后仅修正08投递到达前的状态文字；当前R1见qa-flow-map-r1.json，包含10张新有字幕边界图和重出的第一段真实MP4。第二段及其他未受影响预演保留原始源SHA，逐帧场景输出证明改动只在08局部0–99的Task/Worker标签，不将旧样本冒充新源。尚未最终冻结/整片正式编码，旧qa-final/render-result属于历史媒体，正式编码由root统一安排。
+
+
+## 第4批参考资料：当前默认入口
+
+本批只在已发布原片后追加参考资料。不可变完整原片位于`revisions/reference-endcards/body.mp4`，原始SHA及帧数见同目录`baseline.json`；`before-source-sha256.json`、修前文章/调研/冻结器/package等快照保持历史字节。当前原脚本、配音、字幕、分镜、动作及已有身份图标不重制，不把新资料段或新入口的冻结清单追认为旧原片的实际编码输入。
+
+`references.json`使用`presentation: original-title-quote`：保留完整原始题名和原语言，短引采用连续逐字原文并标明位置；内部`supports`不作为文献原句上屏。每页最多2项、默认5秒，完整出处在文章中保留。当前来源与实际进度见 [第4批记录](../../docs/reference-endcards/batch-4/README.md)，不预记资料或成片已通过。
+
+先在本期`remotion/`执行`npm run check:references`，全部输入停写后使用本期`freeze.py`，再以`freeze.py --verify`只读核对。冻结保留原片现有全部生产依赖：导航片继续收录branch-map，MQ继续收录后补middleware源码、原SVG、许可、来源及包装器；不回退旧冻结历史。新输入另含新原题名器、未改字节的旧媒体引擎、默认wrapper、发布检查器、Pillow版本锁、主题、当前资料/文章/package与`verification.evidence`、`titleEvidence.evidence`及可选`quotation.evidence`实际文件。
+
+后续完整制作的`npm run render`经共享wrapper先检查来源和冻结，再调用`render:body`原有`render:voice`→`render:mix`闭环，将完整正文生成到`out/body.mp4`，最后追加资料到`../video.mp4`。本片既有编码/并发参数保持；本批不执行正文编码或重新混音，只由根代理消费上述已验收原片生成尾卡。可选`render:references`面向已准备且SHA核对相同的`out/body.mp4`，不能把含附录的最终文件再次当成正文。
+
+根级交付回执、`render-result.json.publicationMetadata`及发布总帧数按实际附录结果接齐后，`npm run verify:references`可验证来源、冻结、最终媒体和交付身份。其普通wrapper从`out/body.mp4`读取正文，本批该副本已按不可变原片SHA准备。已由追加器完成的全量帧/PTS/AAC/PCM保真检查按真实执行范围记录，不为重复验证而重渲或再次混音；旧正文检查器的帧数断言只用于正文副本。
+
+实际查看所有资料页、精确首卡字幕边界、桌面/手机暂停和原生全屏后再接入站点。原创建/首发时间与历史平台链接保留，ASR或全片人工听辨未执行时如实记录；旧QA只在原体完整保真得到证明的范围复用。
