@@ -78,6 +78,25 @@ try:
     captions = get('captions', captions_url, expected_sha=sha_file(vtt_path))
     get_cue_count = captions.count(b' --> ')
     assert get_cue_count == sum(len(shot['subtitles']) for scene in SB['scenes'] for shot in scene['shots'])
+    # Check the shared Java-card boundary on the two retained pattern lessons too.
+    def vtt_end_seconds(body):
+        endings = re.findall(r' --> ([0-9:.]+)', body.decode('utf-8'))
+        assert endings, 'No VTT cues'
+        hours, minutes, seconds = endings[-1].split(':')
+        return int(hours)*3600 + int(minutes)*60 + float(seconds)
+    java_boundaries = []
+    own_card = SB['meta']['javaEndCard']['from'] / FPS
+    assert vtt_end_seconds(captions) < own_card
+    java_boundaries.append({'slug': SLUG, 'captionEnd': vtt_end_seconds(captions), 'cardStart': own_card})
+    for other_slug in ['strategy-pattern', 'adapter-pattern']:
+        local_vtt = DIST / 'episodes' / other_slug / 'captions.vtt'
+        if local_vtt.is_dir():
+            local_vtt = local_vtt / 'index.html'
+        body = get(other_slug+'-captions', BASE+'episodes/'+other_slug+'/captions.vtt', expected_sha=sha_file(local_vtt))
+        story = json.loads((ROOT/'episodes'/other_slug/'storyboard.json').read_text())
+        boundary = story['meta']['javaEndCard']['from'] / story['meta'].get('fps', 30)
+        assert vtt_end_seconds(body) < boundary
+        java_boundaries.append({'slug': other_slug, 'captionEnd': vtt_end_seconds(body), 'cardStart': boundary})
     page = get('episode', PAGE_URL).decode('utf-8')
     chapters = json.loads(html.unescape(re.search(r'data-chapters="([^"]+)"', page).group(1)))
     expected_chapters = []
@@ -98,8 +117,10 @@ try:
     assert META['title'] in page
     assert 'EP.28 · 设计模式 D02' in page
     assert 'id="course-directory"' in page
-    assert 'MQ' in page and 'RabbitMQ' in page and '幂等' in page
-    assert '故障后积压、恢复与幂等' in page
+    assert '观察者模式' in page and 'OrderObserver' in page and '取消订阅' in page
+    assert '实战中的简短对应' in page
+    assert '来源变化，观察者各自响应' in page
+    assert '故障后积压、恢复与幂等' not in page
     directory = re.search(r'<nav[^>]*aria-label="设计模式课程目录"[^>]*>(.*?)</nav>', page, re.S).group(1)
     current_lesson = re.search(r'<a\b(?=[^>]*href="/video-studio/episodes/observer-pattern/")(?=[^>]*aria-current="page")[^>]*>', directory)
     assert current_lesson, 'current lesson missing from design patterns directory'
@@ -107,7 +128,10 @@ try:
     assert '/video-studio/episodes/strategy-pattern/' in directory
     pager = re.search(r'<nav[^>]*class="pager(?: [^"]*)?"[^>]*>(.*?)</nav>', page, re.S).group(1)
     assert '/video-studio/episodes/strategy-pattern/' in pager
-    assert offset == META['finalVideoFrames']
+    appendix = META.get('referenceAppendix', {})
+    assert appendix.get('from') == offset
+    assert offset + appendix.get('durationInFrames', 0) == META['finalVideoFrames']
+    assert '资料与阅读范围' in page and 'Observer design pattern' in page
     ld_text = re.search(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>', page, re.S).group(1)
     ld = json.loads(html.unescape(ld_text))
     assert ld['name'] == META['title']
@@ -133,10 +157,11 @@ try:
               'release': 'v' + VERSION, 'canonicalQueriesAdded': False,
               'remoteMediaSaved': False, 'fullVideoStreamHashed': True,
               'results': results, 'chapters': expected_chapters,
-              'finalVideoFrames': offset, 'durationSeconds': offset / FPS,
+              'coreVideoFrames': offset, 'finalVideoFrames': META['finalVideoFrames'],
+              'referenceAppendix': appendix, 'durationSeconds': META['finalVideoFrames'] / FPS,
               'sourceUrl': source_url,
               'seriesOrder': ['strategy-pattern', SLUG],
-              'subtitleCueCount': get_cue_count,
+              'subtitleCueCount': get_cue_count, 'javaCaptionBoundaries': java_boundaries,
               'previousNextPath': 'D01 → D02 → D03',
               'scope': 'Published artifact byte equality, exact chapter and anchor data, source link, series, RSS and Release entry; browser behavior is recorded separately.'}
     (Path(__file__).resolve().parent / 'site-online-verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')

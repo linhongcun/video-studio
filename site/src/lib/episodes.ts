@@ -141,10 +141,10 @@ export function computeChapters(slug: string, fm: any[] = []) {
 export function buildVtt(slug: string) {
   if (!fs.existsSync(path.join(EP_DIR, slug, 'storyboard.json'))) return 'WEBVTT\n';
   const {fps, scenes} = shotPlan(slug);
+  const meta = readJson(path.join(EP_DIR, slug, 'storyboard.json')).meta;
   const metaPath = path.join(EP_DIR, slug, 'meta.json');
   const epMeta = fs.existsSync(metaPath) ? readJson(metaPath) : {};
-  const card = readJson(path.join(EP_DIR, slug, 'storyboard.json')).meta?.unvoicedEndCard
-    ?? epMeta.referenceAppendix;
+  const card = meta?.unvoicedEndCard ?? meta?.javaEndCard ?? epMeta.referenceAppendix;
   const cardFrom = Number.isInteger(card?.from) && card.from >= 0
     && Number.isInteger(card?.durationInFrames) && card.durationInFrames > 0 ? card.from : undefined;
   const ts = (f: number, cueEnd = false) => {
