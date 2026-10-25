@@ -26,7 +26,7 @@
 - 33张预演代表帧：事务组16张实际为960×540，其余17张为1920×1080；包括库角色、调用方不误标、缩放中间态和回图。历史早期负载均衡检查由最终[独立预检](mysql-database-identity/load-balancing-preflight.json)取代，旧源/图指纹不改写为新版。
 - 993条冻结声明对应866个唯一输入。fresh复制逐项SHA一致，全新依赖安装后10片类型检查通过；负载均衡2835帧与事务入门1848帧按实际相同比例复现，PNG字节和解码像素一致。纠正比例共输出3张图、仅2个代表时点，见[干净构建](mysql-database-identity/clean-build.json)。
 - 画面正式编码，原混合AAC流直接复制；每片完整解码、格式/帧数和输入检查。负载均衡与本地事务只重新渲染涉及图标的镜头，未改镜头复用原画面，再统一编码；新源片段采用高质量CRF1中间编码，完整过程与基线指纹单列，不伪称整片均重新渲染。
-- 正式MP4另由未制作该片的执行者逐片查看关键编码帧；这些抽查不等于全片实时人工听看或逐字ASR。用户对新版的观看结论后续另记。
+- 正式MP4另由未制作该片的执行者逐片查看关键编码帧；这些抽查不等于全片实时人工听看或逐字ASR。用户随后明确反馈数据库内容更清晰，具体观看片目未逐一确认。
 
 ## 复现入口
 
@@ -36,6 +36,6 @@
 
 ## 当前状态
 
-[PR #235](https://github.com/linhongcun/video-studio/pull/235)已合并，随[v0.58.1](https://github.com/linhongcun/video-studio/releases/tag/v0.58.1)发布；[Release后Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40147968820)成功。线上10支完整视频SHA、字幕、章节、封面、源链接与实际更新日志核验通过，#230已以completed关闭。仅更新GitHub站点，用户对新版的观看反馈后续另记。
+[PR #235](https://github.com/linhongcun/video-studio/pull/235)已合并，随[v0.58.1](https://github.com/linhongcun/video-studio/releases/tag/v0.58.1)发布；[Release后Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40147968820)成功。线上10支完整视频SHA、字幕、章节、封面、源链接与实际更新日志核验通过，#230已以completed关闭。仅更新GitHub站点。2026-10-25用户反馈“现在这个关于数据库的内容看着就清晰多了”，已补入S019与项目记忆；不记为十片均获逐项认可。
 
 [线上核验](mysql-database-identity/online-verification.json)与[发布身份](mysql-database-identity/release-binding.json)保存实际结果。

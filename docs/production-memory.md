@@ -254,6 +254,8 @@
 - 2026-10-25，用户确认数据库圆柱与角色标签的建议，并明确选择MySQL icon，要求帮助观众识别数据库；保留内部记录、表格和事务范围，不把它们全部画成数据库。
 - 本批10片：服务端缓存、缓存一致性、主从复制、2PC、负载均衡，以及事务入门、Saga、Outbox、本地事务、分库分表。索引树、库存行、锁、消息和TCC资源状态保持原表达。
 - 使用Devicon的原色MySQL识别图标与数据库圆柱组合，按原比例显示，保留来源、MIT notice与品牌说明，不宣称官方授权或品牌背书。标记只表示数据库角色，不把通用机制的适用范围改成某个产品。
-- 原声、字幕、分镜及相机保持；同库共同边界一枚、两独立库各一枚，标识随对象缩放；正式编码保留原AAC流。993项冻结声明、fresh依赖安装与10片类型检查已通过，两代表时点同尺度PNG字节与像素复现一致。[PR #235](https://github.com/linhongcun/video-studio/pull/235)已合并，随[v0.58.1](https://github.com/linhongcun/video-studio/releases/tag/v0.58.1)发布；[Release后Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40147968820)成功。线上10支完整视频SHA、字幕、章节、封面、源链接与实际更新日志核验通过，#230已以completed关闭。仅更新GitHub站点，用户对新版的观看反馈后续另记。见[本批线上记录](mysql-database-identity/online-verification.json)。
+- 原声、字幕、分镜及相机保持；同库共同边界一枚、两独立库各一枚，标识随对象缩放；正式编码保留原AAC流。993项冻结声明、fresh依赖安装与10片类型检查已通过，两代表时点同尺度PNG字节与像素复现一致。[PR #235](https://github.com/linhongcun/video-studio/pull/235)已合并，随[v0.58.1](https://github.com/linhongcun/video-studio/releases/tag/v0.58.1)发布；[Release后Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40147968820)成功。线上10支完整视频SHA、字幕、章节、封面、源链接与实际更新日志核验通过，#230已以completed关闭。仅更新GitHub站点；用户随后已给出数据库内容更清晰的定性反馈，具体观看片目未逐一确认。见[本批线上记录](mysql-database-identity/online-verification.json)。
 - 开工已同步a5871f7；制作期间再fetch并审读新主干28b347d/v0.57.1，确认与993冻结项无交集，保留新增三条LeetCode和赛马短版。本批版本顺延v0.57.2；按新同步规范将旧目录依赖软链迁至保留的load-balancing工程，依赖依据为当前相同锁包图及已独立完成的fresh安装/构建，不把ignored旧工程作为后续入口。
 - 发布收尾再同步b86168c/v0.58.0，保留同期观察者模式；本批最终编号按该主干顺延v0.58.1。此次仅新增其他内容与文档，播放器源码和本批10片媒体/冻结输入无交集，既有UI结果按实际0.57.2版本保留，不重贴为新版本。
+
+- **用户观看反馈：**2026-10-25，用户明确表示“现在这个关于数据库的内容看着就清晰多了”。记为对本轮清晰度的正向反馈，后续沿用可辨识的数据库身份标记与中文库名，继续区分库、事务范围和内部记录；不扩写成每支视频均已观看认可。见S019。
