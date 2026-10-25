@@ -1,0 +1,814 @@
+{
+  "reviewer": "Codex independent observer_audit agent",
+  "reviewedAtUtc": "2026-10-25T12:36:16.838603+00:00",
+  "scope": "Final selected 20 takes and exact assembled voiced body plus separately appended 150-frame silent Java card; signal/provenance review only. No synthesis/picks/source edits.",
+  "status": "pass-with-documented-signal-flag-and-listening-limitations",
+  "inputHashes": {
+    "script.md": "f1ee372fb7ea670ef5c002a95b86cd6d149638987501501d4ac4be78ac0510c2",
+    "voice/sents.json": "b6a72bb31c17e9f753f796c6910ffabca386c1235bd18abf40774b1c39333c16",
+    "voice/picks.json": "db6713199edd027f5d5bda904d578b96cda41fd519702951a7034ac5b8059f98",
+    "voice/build.json": "fe3a0549e193da53e6032d59417438ffe223ce7d2e5908ce6c6bc662af92d82e",
+    "voice/params.json": "6b41973dfd478db55f8e748d62db86b2948f25721b708873c4d6a8b894785975",
+    "revisions/mq-practice/voiced-body/voice.wav": "6e5f3d45ed44af25e735ea952110ae1f62d1b009bbd6379018067f1bf04d7876",
+    "voice.wav": "8ea548e81025c19bf658200218791661c613d3408b7d57e1a7fc3e14f825e2b9"
+  },
+  "sharedHelperHashes": {
+    "episodes/_shared/voice/common.py": "fb23dcf57e318c1a875741c9f0cfef6f7e460ff737b412b8b24e0c04ed69f0f0",
+    "episodes/_shared/voice/build.py": "d01cd6ccb29bfd53d1413561a502641db12a1cf2d3ab230e6c0b5757ccac91b6",
+    "episodes/_shared/voice/gen.py": "de24b72ecfc5cf7f6fa730c2fbc052616c4529dcf7602e481b7b14a1f89740ce"
+  },
+  "methods": [
+    "Imported common.load and common.cut from the repository. No independent trimming, onset or silence removal implementation.",
+    "For each selected take, compared .txt.json exactly with final sents.json tts; compared build id/shot/text/tts/take to final selection.",
+    "Re-ran ffmpeg conversion of actual .raw.wav to 48kHz mono signed16bit PCM in memory and compared exactly with selected .wav PCM.",
+    "Located retained common.cut interior samples in actual selected take. Compared retained end with discarded-tail start returned by shared helper; no ASR claim about tail words.",
+    "Compared final sentence PCM files byte-for-byte with corresponding actual voiced-body intervals, checked intersentence gaps are zero PCM, and matched body hash to build summary.",
+    "Independently scanned normalized sentence audio with build QA threshold: maximum absolute amplitude per 10ms block <=0.005. This is low-signal QA, not word alignment or phonetic judgement.",
+    "Compared reused flow take/raw/text full file hashes with the archived pre-revision frozen manifest."
+  ],
+  "summary": {
+    "sentenceCount": 20,
+    "newSelectedTakes": 18,
+    "reusedSelectedTakes": 2,
+    "correctedSelectedTake": "07-recover-idempotent-2-mq2",
+    "scriptNarrationMatchesFinalSentences": true,
+    "submittedTextChecks": 20,
+    "exactRawPcmChecks": 20,
+    "tailSeparationChecks": 20,
+    "sentenceBodyPcmChecks": 20,
+    "bodyBuildHashMatches": true,
+    "bodySamples": 6691200,
+    "bodyFrames": 4182,
+    "bodyLufsMeasured": -16.0,
+    "bodyFormat": [
+      48000,
+      1,
+      2
+    ],
+    "finalFormat": [
+      48000,
+      1,
+      2
+    ],
+    "finalBodyPrefixPcmExact": true,
+    "appendedTailSamples": 240000,
+    "appendedTailFrames": 150,
+    "appendedTailPcmAllZero": true,
+    "intersentencePcmAllZero": true,
+    "clippedPcmSamples": 0,
+    "minDiscardedTailSeparationSeconds": 0.11
+  },
+  "signalFlagAssessment": {
+    "id": "08-consistency-boundary-1",
+    "thresholdDurationSeconds": 0.5,
+    "observedLowSignal": [
+      {
+        "startSeconds": 1.53,
+        "endSeconds": 2.04,
+        "durationSeconds": 0.51,
+        "maxAbs": 0.004852294921875,
+        "rmsDbfs": -59.37,
+        "zeroFraction": 0.0225
+      }
+    ],
+    "assessment": "The 0.51s low-signal span is at 1.53–2.04s near the opening clause in a 7.16s retained sentence, with substantial speech signal on both sides. It is already present in the raw/selected source and is not an assembly seam, clipping, or discarded-tail inclusion. Its location is compatible with the scripted colon after 再看一致性边界, but no word timing or listening was performed, so its linguistic cause is not claimed as proven. Preserve and document this flag; do not silently relabel as no dropouts.",
+    "sourceSpan": {
+      "selectedTakeMaxAbs": 0.00244140625,
+      "selectedTakeRmsDbfs": -65.2,
+      "normalizedPreceding250msRmsDbfs": -22.14,
+      "normalizedFollowing250msRmsDbfs": -13.72,
+      "normalizedRetainedSentenceSeconds": 7.160292
+    }
+  },
+  "limitations": [
+    "No human listening, word-level ASR, or phonetic/pronunciation verification was performed. Submitted text provenance does not prove every intended phoneme was synthesized.",
+    "Tail separation is verified acoustically using the shared cutter; identification of the isolated tail as spoken 好 is based on submitted text, not acoustic linguistic recognition.",
+    "No complete rendered-video audio review is included; this report concerns WAV provenance and signal. Actual final encoded track checks belong to formal media QA."
+  ],
+  "sentences": [
+    {
+      "id": "01-product-update-1",
+      "selectedTake": "flow",
+      "sourceHashes": {
+        "voice/takes/01-product-update-1-flow.raw.wav": "f17b8cb42b836c3349474a0849c8ed1e2ee2999abb972589db89b30afcb62c77",
+        "voice/takes/01-product-update-1-flow.wav": "a08698cdcc47f3c849ecb2e29f228404f06fc995f29ea9e39c126e4badef5a7d",
+        "voice/takes/01-product-update-1-flow.txt.json": "cc3d355a076778089298978d68e2f8c5e7b05c40a6c5607673099dbcd2d3139c",
+        "voice/sentences/01-product-update-1.wav": "f6f8cd9570ed9a5b3eee401ace835177060c412f17df17ddf1fc995a90983222"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": {
+        "voice/takes/01-product-update-1-flow.raw.wav": true,
+        "voice/takes/01-product-update-1-flow.wav": true,
+        "voice/takes/01-product-update-1-flow.txt.json": true
+      },
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 7.67,
+        "discardedTailStartsSeconds": 7.89,
+        "discardedTailDurationSeconds": 0.49921,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "01-product-update-2",
+      "selectedTake": "flow",
+      "sourceHashes": {
+        "voice/takes/01-product-update-2-flow.raw.wav": "87a034a968f63ee52001fd2ed006524263c622a9b0c80a39d00ce2378f822602",
+        "voice/takes/01-product-update-2-flow.wav": "245e7a4aa266a485226cae2aaacddff2278805196e9d4329bdcfa3260c81f334",
+        "voice/takes/01-product-update-2-flow.txt.json": "0ab479a6dda9a77bee64e44d9ee6175614471a1cf8bee5b13b13be9b8040c967",
+        "voice/sentences/01-product-update-2.wav": "6cc8cc6602854a36880e7a6c2db52ae8d44e1f16989f8ba1410adbfd371b788b"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": {
+        "voice/takes/01-product-update-2-flow.raw.wav": true,
+        "voice/takes/01-product-update-2-flow.wav": true,
+        "voice/takes/01-product-update-2-flow.txt.json": true
+      },
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 4.94,
+        "discardedTailStartsSeconds": 5.16,
+        "discardedTailDurationSeconds": 0.37317,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": [
+        {
+          "startSeconds": 1.55,
+          "endSeconds": 1.88,
+          "durationSeconds": 0.33,
+          "maxAbs": 0.0048828125,
+          "rmsDbfs": -56.37,
+          "zeroFraction": 0.01
+        }
+      ]
+    },
+    {
+      "id": "02-observer-brief-1",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/02-observer-brief-1-mq.raw.wav": "e78cdf6938cbeb8cea0ccdf396c816ee1863054429b7c58b5a4753bfde13f443",
+        "voice/takes/02-observer-brief-1-mq.wav": "c48289b4fccf4cec6ea9cdcf2ae5a7169e974d984840b68126297e3c521849cb",
+        "voice/takes/02-observer-brief-1-mq.txt.json": "11e7ee5d355c35e913976b8f16c824cb0b9d6db3df4748a141ddba657731eb47",
+        "voice/sentences/02-observer-brief-1.wav": "e1e8692e1bfe1a4d09c699d8dc7daea58a8350b1be4ed2feb93931247521d6b8"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 5.57,
+        "discardedTailStartsSeconds": 5.79,
+        "discardedTailDurationSeconds": 0.484,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "02-observer-brief-2",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/02-observer-brief-2-mq.raw.wav": "cb86d4f1561c1507c33e891f162e326f60d1c11b6b8662bc2507b317765f370b",
+        "voice/takes/02-observer-brief-2-mq.wav": "3169ca304de016868d01a1451a2d9dc12dfcbb3f0e0c3703db7332c00d32186f",
+        "voice/takes/02-observer-brief-2-mq.txt.json": "2adfb6ed38986354b7cdc039283ff5df25c437403cb073efe0eb6ddbd5d41855",
+        "voice/sentences/02-observer-brief-2.wav": "c90057fa4a33ccc98333f943fe8d7785343f71891bdde9b616119cfc2fd3b1d2"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 6.25,
+        "discardedTailStartsSeconds": 6.44,
+        "discardedTailDurationSeconds": 0.43992,
+        "separationSeconds": 0.19,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "03-mq-practice-1",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/03-mq-practice-1-mq.raw.wav": "ae8e4ed5726637e849a5ed0847bfd4a5cb315cb116ff350d5369f0fe99863689",
+        "voice/takes/03-mq-practice-1-mq.wav": "b7845e23ce2433ba6793b826a55f16265ce43a19c2694b619a2a96726dbae716",
+        "voice/takes/03-mq-practice-1-mq.txt.json": "c5d3449eda39accc920c5d062741d2cb44aefd741309eb1e33e780727d5b4fc9",
+        "voice/sentences/03-mq-practice-1.wav": "fc2f27624fefa0ccc9b55fd65348a2e6b2a81a94b16f4edf55c08a4ac6d9d1d7"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 7.93,
+        "discardedTailStartsSeconds": 8.15,
+        "discardedTailDurationSeconds": 0.43392,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": [
+        {
+          "startSeconds": 2.74,
+          "endSeconds": 3.1,
+          "durationSeconds": 0.36,
+          "maxAbs": 0.004852294921875,
+          "rmsDbfs": -59.61,
+          "zeroFraction": 0.0199
+        }
+      ]
+    },
+    {
+      "id": "03-mq-practice-2",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/03-mq-practice-2-mq.raw.wav": "f0e3ac3c09fb9cacccd50f8cc839ff338efb54d1abd6e94b6f86f5369b1a5750",
+        "voice/takes/03-mq-practice-2-mq.wav": "8fe9bdaf0b3d45e00996959423fc92711830518802900543410541a08a8e2175",
+        "voice/takes/03-mq-practice-2-mq.txt.json": "d72dd70b613dc3ab99466f25e9a653f087db5782b42805b8e49e2f7361b0758e",
+        "voice/sentences/03-mq-practice-2.wav": "a388088869b28a77136a6b7f70417b3acf2e864e6bc3a09cc6abf2a741ab9b9b"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 5.02,
+        "discardedTailStartsSeconds": 5.24,
+        "discardedTailDurationSeconds": 0.34575,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "04-publish-route-1",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/04-publish-route-1-mq.raw.wav": "3f34b29ae64994d3633587eec5ac727513cb0de4b1c9fe14154e6dc121de92be",
+        "voice/takes/04-publish-route-1-mq.wav": "6fd9f160617bc6980b25ed7fc5f321a1662ab5b37825125c246843bc9c045c5f",
+        "voice/takes/04-publish-route-1-mq.txt.json": "0b845386f1d8fb200c11e43f5444ba77cc2112d319892be4270ad6da7278e417",
+        "voice/sentences/04-publish-route-1.wav": "f1c5d12dbe9c478cda105fd06ea19141340dd635a07d8de7ecf95624467697a4"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 4.99,
+        "discardedTailStartsSeconds": 5.21,
+        "discardedTailDurationSeconds": 0.37229,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "04-publish-route-2",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/04-publish-route-2-mq.raw.wav": "b8bf8dbcf5526f64295f14950a5d4325f5e5e06b87ac507126a1b2adbbd2eb94",
+        "voice/takes/04-publish-route-2-mq.wav": "304aebf3bbd2aa0c0b2c8b109902d87bda3d97030dd23716cdcfea0e0a7457ff",
+        "voice/takes/04-publish-route-2-mq.txt.json": "1208817e0b1757afbe95eed2740c6045a7d9e392fc8658bc4c1bf37a5310ede7",
+        "voice/sentences/04-publish-route-2.wav": "f0f4ebc65fa4f1567a996b025460a823124adffe38094bd1f798e44be04f4cc8"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 6.16,
+        "discardedTailStartsSeconds": 6.38,
+        "discardedTailDurationSeconds": 0.41108,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "05-independent-consume-1",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/05-independent-consume-1-mq.raw.wav": "a8dcdcea0d0fa57ea9036efb33b7f8385f2d923390c0e83ad92fd585ebde09c6",
+        "voice/takes/05-independent-consume-1-mq.wav": "04e92c6ce506ba3af3cb70b2eb082e8b0cb3ce80e5f8bde1aff8fd1f53aa1180",
+        "voice/takes/05-independent-consume-1-mq.txt.json": "e69899fa11ff44ac196eb03381251fec066e6e62e6c64ddac652a23e058fe9b0",
+        "voice/sentences/05-independent-consume-1.wav": "1ec084d83e85da82158840bd55dd783f5e0b10d3c0883f1d00298703d88496e4"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 7.13,
+        "discardedTailStartsSeconds": 7.35,
+        "discardedTailDurationSeconds": 0.47067,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "05-independent-consume-2",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/05-independent-consume-2-mq.raw.wav": "f24259dcf1c90a42fdde31a23f910ed528df3e6f2110e6dd2610bfaa2e5b5769",
+        "voice/takes/05-independent-consume-2-mq.wav": "9d3228c6912e8defc9d17529171e06f3c247da27819bae5c4161bf6d7a1d305f",
+        "voice/takes/05-independent-consume-2-mq.txt.json": "cb18bcb601bbf67ae3fea3da3b565881324ccfa4349cf54003a393eae77ae9f3",
+        "voice/sentences/05-independent-consume-2.wav": "162f6a66c1acb26110739d25aa5c528051480054e3c787e0fd538d5b80806fd9"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 5.53,
+        "discardedTailStartsSeconds": 5.75,
+        "discardedTailDurationSeconds": 0.43554,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "06-offline-backlog-1",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/06-offline-backlog-1-mq.raw.wav": "2a2ee9b91f93b5ca9cef60463b85f39a3e0c7d80a6c765b54047aa45e9a90393",
+        "voice/takes/06-offline-backlog-1-mq.wav": "ffe4a312dc6d6f29dd335e411180afa3c373f106eb4b690db7e8b0395530ab94",
+        "voice/takes/06-offline-backlog-1-mq.txt.json": "27b7c8851097247a98db208cd22a2675b3dcf29952f56587e3f579ae999fa7f2",
+        "voice/sentences/06-offline-backlog-1.wav": "338e6b74ae88b42f3da975d9d850ec9b078ca896c8d4c4202a18b8dc071b598f"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 6.82,
+        "discardedTailStartsSeconds": 7.04,
+        "discardedTailDurationSeconds": 0.30192,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "06-offline-backlog-2",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/06-offline-backlog-2-mq.raw.wav": "b34372910c3b0c5bee9f12e0e67804b880edc7ae34272ae7a349eaf9490b26e7",
+        "voice/takes/06-offline-backlog-2-mq.wav": "2b44056b5a1cf66b9754da5553eefbb6407e953afcfb7feccc4e57a5e545d595",
+        "voice/takes/06-offline-backlog-2-mq.txt.json": "7f9ae0733c329432b3c19fd12a212e2c520b9bf5b3b597f76eaec084436ddc3f",
+        "voice/sentences/06-offline-backlog-2.wav": "12d5fc04eba938a739f91d9914ff7f2d302fcee2bc3ab9c14a02da725135fc93"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 6.21,
+        "discardedTailStartsSeconds": 6.43,
+        "discardedTailDurationSeconds": 0.46842,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "07-recover-idempotent-1",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/07-recover-idempotent-1-mq.raw.wav": "a7412bc5625fe807d0471fc7e334ff2b1d77ae5d81b80184e42fc374d8a9b1ba",
+        "voice/takes/07-recover-idempotent-1-mq.wav": "7e2b0e9a10748a9d9c1729921e71db094b3e7ccf2dc8b51fa44df148aab6008f",
+        "voice/takes/07-recover-idempotent-1-mq.txt.json": "ea2bccb7dcc807933fb6e9b0753e9b32d08ac600b6abe3d7793203acc65f7b51",
+        "voice/sentences/07-recover-idempotent-1.wav": "b79f916aa18ee565f402570871b4de19b048593c26985048dd5015680c9af306"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 6.94,
+        "discardedTailStartsSeconds": 7.16,
+        "discardedTailDurationSeconds": 0.43767,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "07-recover-idempotent-2",
+      "selectedTake": "mq2",
+      "sourceHashes": {
+        "voice/takes/07-recover-idempotent-2-mq2.raw.wav": "178e1966d8be1bc31472ee6558e47a241399de81f4eed5f23556d6df4e183499",
+        "voice/takes/07-recover-idempotent-2-mq2.wav": "0354795e864520b3b8b4fb347e8b187502f5f4f53161dde70f4861b6b7c337f5",
+        "voice/takes/07-recover-idempotent-2-mq2.txt.json": "b27e2d141a0e478f0f3de49c0ceef934e1253e907a25c52a0540aa16ddfabcb5",
+        "voice/sentences/07-recover-idempotent-2.wav": "892ff477bcd5083b63226f22d0ab7ff89d883c7929786194f4ac4debadf4be4a"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 6.6,
+        "discardedTailStartsSeconds": 6.71,
+        "discardedTailDurationSeconds": 0.44846,
+        "separationSeconds": 0.11,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "08-consistency-boundary-1",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/08-consistency-boundary-1-mq.raw.wav": "729eddffe4feb52d30bde3602004ec993fa0bc9b9c7dd71865b1dfaa065e50cc",
+        "voice/takes/08-consistency-boundary-1-mq.wav": "08e4fd56ecaaae6dada7aa98ef6bdeb2927534a91b110ad5fcf6211104bceef6",
+        "voice/takes/08-consistency-boundary-1-mq.txt.json": "4ea0a4d65f1d6b7f4f8d8f866dd9d46ce9ab9ed2701cd222879a5401a892b4a3",
+        "voice/sentences/08-consistency-boundary-1.wav": "9a0bf341dd869b1c34fff970543202b2777f1cb143e8e56437a3c249169961d3"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 7.25,
+        "discardedTailStartsSeconds": 7.47,
+        "discardedTailDurationSeconds": 0.44921,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": [
+        {
+          "startSeconds": 1.53,
+          "endSeconds": 2.04,
+          "durationSeconds": 0.51,
+          "maxAbs": 0.004852294921875,
+          "rmsDbfs": -59.37,
+          "zeroFraction": 0.0225
+        }
+      ]
+    },
+    {
+      "id": "08-consistency-boundary-2",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/08-consistency-boundary-2-mq.raw.wav": "e670939ba6ab02dc82bd1eadf5f0211f30855e05ae3325f61ddd3097f376e59e",
+        "voice/takes/08-consistency-boundary-2-mq.wav": "b859d97c83c7eb102c3a02a6313c6de74fac2fc5c90b0a4a7f4763c9ca82e339",
+        "voice/takes/08-consistency-boundary-2-mq.txt.json": "6d7fdaa91c69eb7fb3c96b582a5a9867e48ae4e1cce8a5d358671f0245615b9d",
+        "voice/sentences/08-consistency-boundary-2.wav": "5d57e7eb218fca7f8d13e763691d07eee2f445b861d7e6c3fc8ed030e31b313b"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 6.55,
+        "discardedTailStartsSeconds": 6.77,
+        "discardedTailDurationSeconds": 0.32804,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "09-scope-choice-1",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/09-scope-choice-1-mq.raw.wav": "582c7113762d1aa49c72b8ff6a43fc64fa5076d189b21e24bdf06130b8bde5e3",
+        "voice/takes/09-scope-choice-1-mq.wav": "6bfd027e515500381ccf34be545bc79b9364ca4e390d3c0fcdbf6748f9c10eea",
+        "voice/takes/09-scope-choice-1-mq.txt.json": "1b7a974ffb7d28643d2d25b02c695066c09cf51b67cfe04320e3a1b723f80e49",
+        "voice/sentences/09-scope-choice-1.wav": "3e6cc27bddfca62271e79cf258c7aa872723ab03f3d28b03894b7786c2132472"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 6.26,
+        "discardedTailStartsSeconds": 6.48,
+        "discardedTailDurationSeconds": 0.43408,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "09-scope-choice-2",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/09-scope-choice-2-mq.raw.wav": "ba066c288db96b5c703c2e8cf150d007e2a1af2254ab25bc3c5c9a68d2a04865",
+        "voice/takes/09-scope-choice-2-mq.wav": "64107a39fe95c6bd6440d1ace0a9c2426e3a57734e441be7b6f8aad23e786ea4",
+        "voice/takes/09-scope-choice-2-mq.txt.json": "1dae2a0e5c8984216503c51fe5e5f019824452938df7d3b925855142bec12d1b",
+        "voice/sentences/09-scope-choice-2.wav": "5f6ed2fb3bea272ccc286f97a742018b9f3a9022303fd96828a1acc41cd5a900"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 7.29,
+        "discardedTailStartsSeconds": 7.51,
+        "discardedTailDurationSeconds": 0.43796,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    },
+    {
+      "id": "10-practice-recap-1",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/10-practice-recap-1-mq.raw.wav": "3140854f1e71238b5909ad3729fd3b04bf08d6f021916e77027604bb94e4c21b",
+        "voice/takes/10-practice-recap-1-mq.wav": "03ce957063675738667bac4f8332cb410af532fe6906fb5584264089b6fa8e52",
+        "voice/takes/10-practice-recap-1-mq.txt.json": "bfdf9a268852d06eef00c6740203633a4d3a267138105a40f8592b1bee7300fe",
+        "voice/sentences/10-practice-recap-1.wav": "d3429cce450fc474e905ef5cf7ea6a7f3b032aeb2054b538a17d194a95cd392e"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 7.75,
+        "discardedTailStartsSeconds": 7.97,
+        "discardedTailDurationSeconds": 0.30213,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": [
+        {
+          "startSeconds": 5.25,
+          "endSeconds": 5.57,
+          "durationSeconds": 0.32,
+          "maxAbs": 0.004730224609375,
+          "rmsDbfs": -57.48,
+          "zeroFraction": 0.0152
+        }
+      ]
+    },
+    {
+      "id": "10-practice-recap-2",
+      "selectedTake": "mq",
+      "sourceHashes": {
+        "voice/takes/10-practice-recap-2-mq.raw.wav": "ebb45431ddfe1182356a0c79d98523d789f663623e99a2d6c4dc43fe3bbfe97e",
+        "voice/takes/10-practice-recap-2-mq.wav": "c87e740849cb35548d3a0aed62edf55b707ead41c3e285c36c60c277cafe92f0",
+        "voice/takes/10-practice-recap-2-mq.txt.json": "7a5cacc193c7e3c7d0f2a7b8dee56398d0c9210357215c0ddba74a797ddf5121",
+        "voice/sentences/10-practice-recap-2.wav": "4e10925ff3d88ea15a9335c715b2ba7f0d7f7f292dc573a6252944b9f4bfae3c"
+      },
+      "submittedTextMatchesFinalTts": true,
+      "buildTextAndSelectionMatch": true,
+      "rawWavFormat": [
+        24000,
+        1,
+        2
+      ],
+      "selectedWavFormat": [
+        48000,
+        1,
+        2
+      ],
+      "rawTo48kMono16bitPcmExact": true,
+      "reusedBaselineFilesMatch": null,
+      "sharedCut": {
+        "sourceStartSeconds": 0.0,
+        "sourceEndSeconds": 7.15,
+        "discardedTailStartsSeconds": 7.37,
+        "discardedTailDurationSeconds": 0.521,
+        "separationSeconds": 0.22,
+        "tailNotInRetainedClip": true
+      },
+      "sentencePcmEqualsBodyInterval": true,
+      "innerLowSignalOver300ms": []
+    }
+  ]
+}

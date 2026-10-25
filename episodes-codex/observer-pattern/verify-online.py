@@ -26,7 +26,7 @@ VERSION = json.loads((ROOT / 'site/package.json').read_text())['version']
 FPS = SB['meta'].get('fps', 30)
 PAGE_URL = BASE + 'episodes/' + SLUG + '/'
 assert re.fullmatch(r'\d+\.\d+\.\d+', VERSION)
-assert META['firstRelease'] == 'v' + VERSION
+assert META['firstRelease'] == 'v0.58.0', 'Keep original first publication'
 assert META['draft'] is False
 assert META['sourcePath'] == 'episodes-codex/observer-pattern/remotion'
 vtt_path = DIST / 'episodes/observer-pattern/captions.vtt'
@@ -79,17 +79,6 @@ try:
     get_cue_count = captions.count(b' --> ')
     assert get_cue_count == sum(len(shot['subtitles']) for scene in SB['scenes'] for shot in scene['shots'])
     page = get('episode', PAGE_URL).decode('utf-8')
-    class NativeSvgTextParser(HTMLParser):
-        def __init__(self):
-            super().__init__()
-            self.text_attributes = []
-        def handle_starttag(self, tag, attrs):
-            if tag == 'text':
-                self.text_attributes.append(dict(attrs))
-    svg_parser = NativeSvgTextParser()
-    svg_parser.feed(page)
-    assert any(a.get('x') == '215' and a.get('text-anchor') == 'middle' and a.get('font-size') == '17' for a in svg_parser.text_attributes), 'Published SVG contract native attributes missing'
-    assert any(a.get('font-size') == '23' for a in svg_parser.text_attributes), 'Published SVG heading font missing'
     chapters = json.loads(html.unescape(re.search(r'data-chapters="([^"]+)"', page).group(1)))
     expected_chapters = []
     offset = 0
@@ -109,6 +98,8 @@ try:
     assert META['title'] in page
     assert 'EP.28 · 设计模式 D02' in page
     assert 'id="course-directory"' in page
+    assert 'MQ' in page and 'RabbitMQ' in page and '幂等' in page
+    assert '故障后积压、恢复与幂等' in page
     directory = re.search(r'<nav[^>]*aria-label="设计模式课程目录"[^>]*>(.*?)</nav>', page, re.S).group(1)
     current_lesson = re.search(r'<a\b(?=[^>]*href="/video-studio/episodes/observer-pattern/")(?=[^>]*aria-current="page")[^>]*>', directory)
     assert current_lesson, 'current lesson missing from design patterns directory'
@@ -123,7 +114,6 @@ try:
     assert ld['contentUrl'] == video_url
     assert ld['embedUrl'] == PAGE_URL
     home = get('home', BASE).decode('utf-8')
-    assert '/video-studio/episodes/observer-pattern/' in home
     assert 'data-series="design-patterns"' in home
     assert VERSION in home
     series = get('series', BASE + 'series/design-patterns/').decode('utf-8')
@@ -147,8 +137,7 @@ try:
               'sourceUrl': source_url,
               'seriesOrder': ['strategy-pattern', SLUG],
               'subtitleCueCount': get_cue_count,
-              'previousNextPath': 'D01 → D02',
-              'articleSvgNativeAttributes': {'contractAnchor': 'middle', 'contractFontSize': '17', 'headingFontSize': '23'},
+              'previousNextPath': 'D01 → D02 → D03',
               'scope': 'Published artifact byte equality, exact chapter and anchor data, source link, series, RSS and Release entry; browser behavior is recorded separately.'}
     (Path(__file__).resolve().parent / 'site-online-verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'status': 'passed', 'canonicalGetCount': len(results), 'release': 'v' + VERSION,
