@@ -1,0 +1,137 @@
+{
+  "title": "Java关键代码 · 节选",
+  "subtitle": "暂停查看",
+  "language": "Java",
+  "lines": [
+    "interface PricingStrategy { BigDecimal price(BigDecimal original); }",
+    "static final class MemberPricing implements PricingStrategy {",
+    "    public BigDecimal price(BigDecimal n) { return discounted(n, \"0.90\"); }",
+    "}",
+    "static final class CampaignPricing implements PricingStrategy {",
+    "    public BigDecimal price(BigDecimal n) { return discounted(n, \"0.80\"); }",
+    "}",
+    "",
+    "static final class Checkout {",
+    "    private final PricingStrategy strategy;",
+    "    Checkout(PricingStrategy strategy) { this.strategy = Objects.requireNonNull(strategy); }",
+    "    BigDecimal total(BigDecimal original) { return strategy.price(original); }",
+    "}",
+    "",
+    "public static void main(String[] args) {",
+    "    BigDecimal original = new BigDecimal(\"100.00\");",
+    "    Checkout checkout = new Checkout(new MemberPricing());",
+    "    System.out.println(checkout.total(original)); // 90.00",
+    "    checkout = new Checkout(new CampaignPricing());",
+    "    System.out.println(checkout.total(original)); // 80.00",
+    "}"
+  ],
+  "sourceFile": "demo-java/StrategyDemo.java",
+  "sourceSha256": "100e7424eabb55c6f779399ac154254ca8f3b12ac1a15db3a127558814d46ff8",
+  "excerptRanges": [
+    {
+      "from": 8,
+      "to": 28,
+      "removeIndent": 4
+    }
+  ],
+  "lineSources": [
+    {
+      "line": 8,
+      "removeIndent": 4
+    },
+    {
+      "line": 9,
+      "removeIndent": 4
+    },
+    {
+      "line": 10,
+      "removeIndent": 4
+    },
+    {
+      "line": 11,
+      "removeIndent": 4
+    },
+    {
+      "line": 12,
+      "removeIndent": 4
+    },
+    {
+      "line": 13,
+      "removeIndent": 4
+    },
+    {
+      "line": 14,
+      "removeIndent": 4
+    },
+    {
+      "line": 15,
+      "removeIndent": 4
+    },
+    {
+      "line": 16,
+      "removeIndent": 4
+    },
+    {
+      "line": 17,
+      "removeIndent": 4
+    },
+    {
+      "line": 18,
+      "removeIndent": 4
+    },
+    {
+      "line": 19,
+      "removeIndent": 4
+    },
+    {
+      "line": 20,
+      "removeIndent": 4
+    },
+    {
+      "line": 21,
+      "removeIndent": 4
+    },
+    {
+      "line": 22,
+      "removeIndent": 4
+    },
+    {
+      "line": 23,
+      "removeIndent": 4
+    },
+    {
+      "line": 24,
+      "removeIndent": 4
+    },
+    {
+      "line": 25,
+      "removeIndent": 4
+    },
+    {
+      "line": 26,
+      "removeIndent": 4
+    },
+    {
+      "line": 27,
+      "removeIndent": 4
+    },
+    {
+      "line": 28,
+      "removeIndent": 4
+    }
+  ],
+  "lineCount": 21,
+  "longestLineCharacters": 92,
+  "roleMapping": {
+    "共同定价约定": "PricingStrategy",
+    "会员具体策略": "MemberPricing",
+    "活动具体策略": "CampaignPricing",
+    "结算上下文": "Checkout",
+    "外侧选择": "main"
+  },
+  "scope": "A contiguous core excerpt inside StrategyDemo; imports and the common amount validation/rounding helper are in the full program.",
+  "omittedSections": [
+    "enclosing StrategyDemo class/imports",
+    "discounted amount validation and cent-rounding helper"
+  ]
+}

@@ -1,0 +1,950 @@
+{
+  "meta": {
+    "title": "策略模式：结算怎样换一种算价办法？",
+    "episode": 23,
+    "episodePart": "设计模式 D01",
+    "slug": "strategy-pattern",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 4410,
+    "finalVideoFrames": 4410,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "Language-independent strategy design. Stable checkout workflow, independent interchangeable pricing strategies, common business contract and external selection. Show who owns changing algorithm detail and why the workflow delegates by contract. One original 100-yuan order, member90 then reset original100/campaign80. No source code, function/parameter teaching, language identifiers, cents, dense class diagrams, analogies, fake windows or decorative progress. Spoken chapter bridges before new details. Stable role and data identities; actual computation and returned payable shown in order.",
+    "visualRevision": 4,
+    "visualDirection": "visual-direction.md",
+    "userScope": "Teach strategy design intent: isolate varying implementations of one task; use a shared meaningful contract; keep selection outside the workflow; delegate to the selected strategy; show replacement, independent maintenance boundaries and collaboration/selection costs. Concrete language implementation belongs to optional article appendix.",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "示例订单 · 原价100元 · 优惠每次只选一种",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "策略模式：优惠规则变了，为什么总要改结算？",
+      "description": "选择在外，计算独立：同一订单怎样换规则。",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "content": {
+            "x": 130,
+            "w": 1660
+          },
+          "watermarkZone": {
+            "x": 130,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 130,
+              "y": 210,
+              "w": 1660,
+              "h": 230
+            },
+            {
+              "x": 130,
+              "y": 470,
+              "w": 1660,
+              "h": 80
+            },
+            {
+              "x": 130,
+              "y": 605,
+              "w": 1660,
+              "h": 205
+            },
+            {
+              "x": 130,
+              "y": 859,
+              "w": 1660,
+              "h": 45
+            }
+          ]
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "content": {
+            "x": 315,
+            "w": 810
+          },
+          "watermarkZone": {
+            "x": 315,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 315,
+              "y": 210,
+              "w": 810,
+              "h": 230
+            },
+            {
+              "x": 315,
+              "y": 470,
+              "w": 810,
+              "h": 80
+            },
+            {
+              "x": 315,
+              "y": 605,
+              "w": 810,
+              "h": 205
+            },
+            {
+              "x": 315,
+              "y": 859,
+              "w": 810,
+              "h": 45
+            }
+          ],
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "content": {
+            "x": 110,
+            "w": 860
+          },
+          "watermarkZone": {
+            "x": 110,
+            "y": 110
+          },
+          "textBoxes": [
+            {
+              "x": 110,
+              "y": 245,
+              "w": 860,
+              "h": 260
+            },
+            {
+              "x": 110,
+              "y": 555,
+              "w": 860,
+              "h": 80
+            },
+            {
+              "x": 110,
+              "y": 760,
+              "w": 860,
+              "h": 300
+            },
+            {
+              "x": 110,
+              "y": 1155,
+              "w": 860,
+              "h": 45
+            }
+          ]
+        }
+      },
+      "poster": {
+        "file": "poster.jpg",
+        "sameAs": "3x4"
+      }
+    },
+    "discussionQuestion": "换成另一种定价策略时，谁决定用哪一种，结算依赖的共同约定是什么？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening."
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "why",
+      "chapterId": "why",
+      "title": "同一任务，做法会变",
+      "from": 0,
+      "durationInFrames": 809,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "why",
+          "visualType": "same-task",
+          "from": 0,
+          "durationInFrames": 384,
+          "narration": "同一笔一百元的订单，会员付九十元，参加活动付八十元。做的都是结算，怎样替换定价办法，又沿用同一个流程？",
+          "subtitles": [
+            {
+              "text": "同一笔一百元的订单，会员付九十元，参加活动付八十元。",
+              "from": 0,
+              "to": 193,
+              "duration": 194
+            },
+            {
+              "text": "做的都是结算，怎样替换定价办法，又沿用同一个流程？",
+              "from": 194,
+              "to": 383,
+              "duration": 190
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-same-task-1",
+              "wavStart": 9.0,
+              "wavEnd": 183.6,
+              "localStart": 9.0,
+              "localEnd": 183.6
+            },
+            {
+              "id": "01-same-task-2",
+              "wavStart": 194.1,
+              "wavEnd": 363.43,
+              "localStart": 194.1,
+              "localEnd": 363.43
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              194
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 9.0,
+            "wavTo": 363.43,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一帧显示标题“换优惠，结算流程怎样照常走？”和原价100元，接着用同一任务下的两种备选办法分别对应会员90元、活动80元。结果是任务说明，不把两次优惠画成连续叠加；不展开选择路径或整张协作图。",
+          "direction": "第一帧显示标题“换优惠，结算流程怎样照常走？”和原价100元，接着用同一任务下的两种备选办法分别对应会员90元、活动80元。结果是任务说明，不把两次优惠画成连续叠加；不展开选择路径或整张协作图。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "why",
+          "visualType": "mixed-pricing",
+          "from": 384,
+          "durationInFrames": 425,
+          "narration": "如果两种定价细节都放在结算里，维护其中一种，就得进入这段共同流程。我们要分清，哪些步骤保持一致，哪些做法需要分别维护。",
+          "subtitles": [
+            {
+              "text": "如果两种定价细节都放在结算里，维护其中一种，就得进入这段共同流程。",
+              "from": 0,
+              "to": 214,
+              "duration": 215
+            },
+            {
+              "text": "我们要分清，哪些步骤保持一致，哪些做法需要分别维护。",
+              "from": 215,
+              "to": 424,
+              "duration": 210
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-mixed-pricing-1",
+              "wavStart": 384.43,
+              "wavEnd": 589.26,
+              "localStart": 0.4300000000000068,
+              "localEnd": 205.26
+            },
+            {
+              "id": "02-mixed-pricing-2",
+              "wavStart": 599.76,
+              "wavEnd": 788.82,
+              "localStart": 215.76,
+              "localEnd": 404.82000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              215
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 384.43,
+            "wavTo": 788.82,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先建立共同步骤“读取原价→定价→显示应付”，再在定价这一步内部逐个显示会员九折、活动八折两套细节。维护会员定价的焦点必须进入整个流程边界，说明共同步骤与变化做法混在一起；不把两个简单判断本身画成故障。",
+          "direction": "先建立共同步骤“读取原价→定价→显示应付”，再在定价这一步内部逐个显示会员九折、活动八折两套细节。维护会员定价的焦点必须进入整个流程边界，说明共同步骤与变化做法混在一起；不把两个简单判断本身画成故障。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "delegate",
+      "chapterId": "delegate",
+      "title": "把变化独立成策略",
+      "from": 809,
+      "durationInFrames": 802,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "delegate",
+          "visualType": "separate-pricing",
+          "from": 809,
+          "durationInFrames": 352,
+          "narration": "接下来，把会变化的定价做法，从共同流程里分开。会员负责九折，活动负责八折，各自成为独立的定价办法。",
+          "subtitles": [
+            {
+              "text": "接下来，把会变化的定价做法，从共同流程里分开。",
+              "from": 0,
+              "to": 152,
+              "duration": 153
+            },
+            {
+              "text": "会员负责九折，活动负责八折，各自成为独立的定价办法。",
+              "from": 153,
+              "to": 351,
+              "duration": 199
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-separate-pricing-1",
+              "wavStart": 809.82,
+              "wavEnd": 952.36,
+              "localStart": 0.82000000000005,
+              "localEnd": 143.36
+            },
+            {
+              "id": "03-separate-pricing-2",
+              "wavStart": 962.86,
+              "wavEnd": 1140.45,
+              "localStart": 153.86,
+              "localEnd": 331.45000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              153
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 809.82,
+            "wavTo": 1140.45,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一句保留原流程并交代将拆开变化做法，第二句才把会员九折和活动八折分别从定价区域移到独立位置。共同流程的读取原价与显示应付保持锚点，中间保留定价这项职责，不能突然换成一张无关结构图。此时先给具体办法，不提前展示抽象定义。",
+          "direction": "第一句保留原流程并交代将拆开变化做法，第二句才把会员九折和活动八折分别从定价区域移到独立位置。共同流程的读取原价与显示应付保持锚点，中间保留定价这项职责，不能突然换成一张无关结构图。此时先给具体办法，不提前展示抽象定义。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "delegate",
+          "visualType": "shared-contract",
+          "from": 1161,
+          "durationInFrames": 450,
+          "narration": "策略模式，把同一任务的不同做法独立起来，按共同约定替换使用。两种定价策略都接收原价、交回应付金额，会员九十元，活动八十元。",
+          "subtitles": [
+            {
+              "text": "策略模式，把同一任务的不同做法独立起来，按共同约定替换使用。",
+              "from": 0,
+              "to": 222,
+              "duration": 223
+            },
+            {
+              "text": "两种定价策略都接收原价、交回应付金额，会员九十元，活动八十元。",
+              "from": 223,
+              "to": 449,
+              "duration": 227
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-shared-contract-1",
+              "wavStart": 1161.45,
+              "wavEnd": 1374.11,
+              "localStart": 0.4500000000000455,
+              "localEnd": 213.1099999999999
+            },
+            {
+              "id": "04-shared-contract-2",
+              "wavStart": 1384.61,
+              "wavEnd": 1590.13,
+              "localStart": 223.6099999999999,
+              "localEnd": 429.1300000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "策略模式": 1
+            },
+            "sentences": [
+              0,
+              223
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 1161.45,
+            "wavTo": 1590.13,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "04首句“策略模式”声学起音时出现主标签；将会员定价、活动定价各自标为一种策略。第二句用相同形状的“接收原价→交回应付金额”分别对应两者，配合会员90元、活动80元的已知示例，突出共同的是任务与约定，不要求结果相同。",
+          "direction": "04首句“策略模式”声学起音时出现主标签；将会员定价、活动定价各自标为一种策略。第二句用相同形状的“接收原价→交回应付金额”分别对应两者，配合会员90元、活动80元的已知示例，突出共同的是任务与约定，不要求结果相同。",
+          "elements": [
+            {
+              "id": "label04_0",
+              "type": "text",
+              "text": "策略模式",
+              "cueText": "策略模式",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "04-shared-contract-1",
+                "asrFrame": null,
+                "onsetLocal": 1.4500000000000455,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "change",
+      "chapterId": "change",
+      "title": "先选策略，再让结算使用",
+      "from": 1611,
+      "durationInFrames": 1507,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "change",
+          "visualType": "choose-strategy",
+          "from": 1611,
+          "durationInFrames": 352,
+          "narration": "两种策略准备好了，再看这次选择哪一种。结算外侧的选择环节仍要作决定，这次选会员策略，再交给结算流程使用。",
+          "subtitles": [
+            {
+              "text": "两种策略准备好了，再看这次选择哪一种。",
+              "from": 0,
+              "to": 127,
+              "duration": 128
+            },
+            {
+              "text": "结算外侧的选择环节仍要作决定，这次选会员策略，再交给结算流程使用。",
+              "from": 128,
+              "to": 351,
+              "duration": 224
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-choose-strategy-1",
+              "wavStart": 1611.13,
+              "wavEnd": 1728.96,
+              "localStart": 0.13000000000010914,
+              "localEnd": 117.96000000000004
+            },
+            {
+              "id": "05-choose-strategy-2",
+              "wavStart": 1739.46,
+              "wavEnd": 1942.09,
+              "localStart": 128.46000000000004,
+              "localEnd": 331.0899999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              128
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 1611.13,
+            "wavTo": 1942.09,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一句先交代从准备策略转到本次选择，前面用于说明任务的90元、80元结果退场；第二句在结算流程外侧建立简洁“选择”标记，确定“当前：会员”。未选中的活动策略只留短名称，本次尚未定价，不让选择标记直接产生90元。",
+          "direction": "第一句先交代从准备策略转到本次选择，前面用于说明任务的90元、80元结果退场；第二句在结算流程外侧建立简洁“选择”标记，确定“当前：会员”。未选中的活动策略只留短名称，本次尚未定价，不让选择标记直接产生90元。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "change",
+          "visualType": "member-delegation",
+          "from": 1963,
+          "durationInFrames": 378,
+          "narration": "结算走到定价这一步，就按约定交给当前的会员策略。会员策略交回九十元，结算继续显示结果，不必掌握九折的细节。",
+          "subtitles": [
+            {
+              "text": "结算走到定价这一步，就按约定交给当前的会员策略。",
+              "from": 0,
+              "to": 154,
+              "duration": 155
+            },
+            {
+              "text": "会员策略交回九十元，结算继续显示结果，不必掌握九折的细节。",
+              "from": 155,
+              "to": 377,
+              "duration": 223
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-member-delegation-1",
+              "wavStart": 1963.09,
+              "wavEnd": 2107.65,
+              "localStart": 0.08999999999991815,
+              "localEnd": 144.6500000000001
+            },
+            {
+              "id": "06-member-delegation-2",
+              "wavStart": 2118.15,
+              "wavEnd": 2320.0,
+              "localStart": 155.1500000000001,
+              "localEnd": 357.0
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              155
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 1963.09,
+            "wavTo": 2320.0,
+            "holdFrames": 21,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保留外侧“当前：会员”的选择标记；结算共同流程从读取100元原价走到定价这一步，按04的约定把定价交给会员策略。只有会员策略展开九折细节并交回90元，流程才继续显示应付金额；用职责边界说明结算使用策略，具体九折并未重新搬回共同流程。",
+          "direction": "保留外侧“当前：会员”的选择标记；结算共同流程从读取100元原价走到定价这一步，按04的约定把定价交给会员策略。只有会员策略展开九折细节并交回90元，流程才继续显示应付金额；用职责边界说明结算使用策略，具体九折并未重新搬回共同流程。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "change",
+          "visualType": "swap-strategy",
+          "from": 2341,
+          "durationInFrames": 377,
+          "narration": "会员这次得到九十元，接下来换成活动策略，重新从一百元算起。结算仍按原来的步骤走，活动策略交回八十元。",
+          "subtitles": [
+            {
+              "text": "会员这次得到九十元，接下来换成活动策略，重新从一百元算起。",
+              "from": 0,
+              "to": 201,
+              "duration": 202
+            },
+            {
+              "text": "结算仍按原来的步骤走，活动策略交回八十元。",
+              "from": 202,
+              "to": 376,
+              "duration": 175
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-swap-strategy-1",
+              "wavStart": 2341.0,
+              "wavEnd": 2533.32,
+              "localStart": 0.0,
+              "localEnd": 192.32000000000016
+            },
+            {
+              "id": "07-swap-strategy-2",
+              "wavStart": 2543.82,
+              "wavEnd": 2697.54,
+              "localStart": 202.82000000000016,
+              "localEnd": 356.53999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              202
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 2341.0,
+            "wavTo": 2697.54,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "会员90元结果先有清楚停留，第一句说明将改选并从原价重算，随后清空上次结果。外侧选择标记由会员切为活动；共同流程位置、步骤和04约定均保持，只沿当前活动策略完成一次100元→80元。会员不执行，不把90元作为新输入。",
+          "direction": "会员90元结果先有清楚停留，第一句说明将改选并从原价重算，随后清空上次结果。外侧选择标记由会员切为活动；共同流程位置、步骤和04约定均保持，只沿当前活动策略完成一次100元→80元。会员不执行，不把90元作为新输入。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "change",
+          "visualType": "stable-collaboration",
+          "from": 2718,
+          "durationInFrames": 400,
+          "narration": "两次结算的步骤没变，变化的只是当前定价策略。在定价这一步，结算只按共同约定使用策略，具体怎么算由策略负责。",
+          "subtitles": [
+            {
+              "text": "两次结算的步骤没变，变化的只是当前定价策略。",
+              "from": 0,
+              "to": 157,
+              "duration": 158
+            },
+            {
+              "text": "在定价这一步，结算只按共同约定使用策略，具体怎么算由策略负责。",
+              "from": 158,
+              "to": 399,
+              "duration": 242
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-stable-collaboration-1",
+              "wavStart": 2718.54,
+              "wavEnd": 2865.96,
+              "localStart": 0.5399999999999636,
+              "localEnd": 147.96000000000004
+            },
+            {
+              "id": "08-stable-collaboration-2",
+              "wavStart": 2876.46,
+              "wavEnd": 3097.5,
+              "localStart": 158.46000000000004,
+              "localEnd": 379.5
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              158
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 2718.54,
+            "wavTo": 3097.5,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "用同一流程骨架回看两次结算，稳定步骤保持位置，当前策略标记可以切换。逐步突出“接收原价”“交回应付金额”的共同约定，九折和八折细节仍位于各自策略中；外侧选择标记保留，说明流程按约定使用已选策略，不在内部自行挑选定价办法。",
+          "direction": "用同一流程骨架回看两次结算，稳定步骤保持位置，当前策略标记可以切换。逐步突出“接收原价”“交回应付金额”的共同约定，九折和八折细节仍位于各自策略中；外侧选择标记保留，说明流程按约定使用已选策略，不在内部自行挑选定价办法。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "独立维护的收益与成本",
+      "from": 3118,
+      "durationInFrames": 1292,
+      "shots": [
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "boundary",
+          "visualType": "maintenance-boundary",
+          "from": 3118,
+          "durationInFrames": 407,
+          "narration": "两种策略能替换了，再看它们怎样分别维护。共同约定不变时，本例的会员定价细节可以独立维护，不必把活动策略和共同流程一起改动。",
+          "subtitles": [
+            {
+              "text": "两种策略能替换了，再看它们怎样分别维护。",
+              "from": 0,
+              "to": 135,
+              "duration": 136
+            },
+            {
+              "text": "共同约定不变时，本例的会员定价细节可以独立维护，不必把活动策略和共同流程一起改动。",
+              "from": 136,
+              "to": 406,
+              "duration": 271
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-maintenance-boundary-1",
+              "wavStart": 3118.5,
+              "wavEnd": 3243.89,
+              "localStart": 0.5,
+              "localEnd": 125.88999999999987
+            },
+            {
+              "id": "09-maintenance-boundary-2",
+              "wavStart": 3254.39,
+              "wavEnd": 3504.03,
+              "localStart": 136.38999999999987,
+              "localEnd": 386.0300000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              136
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 3118.5,
+            "wavTo": 3504.03,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一句承接刚才的替换过程，交代转向分别维护；第二句先显示“本例：共同约定不变”的前提，再只圈定会员策略内部作为维护范围，活动策略和共同流程退为保留上下文。此处展示职责和范围，不增加折扣新版本或另一组金额，也不标全系统永远无需调整。",
+          "direction": "第一句承接刚才的替换过程，交代转向分别维护；第二句先显示“本例：共同约定不变”的前提，再只圈定会员策略内部作为维护范围，活动策略和共同流程退为保留上下文。此处展示职责和范围，不增加折扣新版本或另一组金额，也不标全系统永远无需调整。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "boundary",
+          "visualType": "cost-boundary",
+          "from": 3525,
+          "durationInFrames": 392,
+          "narration": "这种分工也要维护选择规则和协作关系，阅读时还要多追踪一层。只有少量长期不变的判断，直接处理往往更省事。",
+          "subtitles": [
+            {
+              "text": "这种分工也要维护选择规则和协作关系，阅读时还要多追踪一层。",
+              "from": 0,
+              "to": 220,
+              "duration": 221
+            },
+            {
+              "text": "只有少量长期不变的判断，直接处理往往更省事。",
+              "from": 221,
+              "to": 391,
+              "duration": 171
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-cost-boundary-1",
+              "wavStart": 3525.03,
+              "wavEnd": 3736.13,
+              "localStart": 0.03000000000020009,
+              "localEnd": 211.1300000000001
+            },
+            {
+              "id": "10-cost-boundary-2",
+              "wavStart": 3746.63,
+              "wavEnd": 3896.19,
+              "localStart": 221.6300000000001,
+              "localEnd": 371.19000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              221
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 3525.03,
+            "wavTo": 3896.19,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先点亮外侧选择标记和策略与流程的协作关系，显示它们仍需维护；随后沿已出现的关系作一次焦点跳转，表达阅读时多追踪一层的成本。第二句再缩回两个简单稳定的白话判断，说明不一定要拆；不摆满优缺点矩阵，不引入其他方案或语言细节。",
+          "direction": "先点亮外侧选择标记和策略与流程的协作关系，显示它们仍需维护；随后沿已出现的关系作一次焦点跳转，表达阅读时多追踪一层的成本。第二句再缩回两个简单稳定的白话判断，说明不一定要拆；不摆满优缺点矩阵，不引入其他方案或语言细节。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "boundary",
+          "visualType": "idea-recap",
+          "from": 3917,
+          "durationInFrames": 493,
+          "narration": "选择在外侧决定用谁，定价策略负责怎么算，结算流程按约定使用当前策略。把变化独立、让策略可换而共同步骤保留，就是这里的策略模式。",
+          "subtitles": [
+            {
+              "text": "选择在外侧决定用谁，定价策略负责怎么算，结算流程按约定使用当前策略。",
+              "from": 0,
+              "to": 248,
+              "duration": 249
+            },
+            {
+              "text": "把变化独立、让策略可换而共同步骤保留，就是这里的策略模式。",
+              "from": 249,
+              "to": 492,
+              "duration": 244
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-idea-recap-1",
+              "wavStart": 3917.19,
+              "wavEnd": 4155.88,
+              "localStart": 0.19000000000005457,
+              "localEnd": 238.8800000000001
+            },
+            {
+              "id": "11-idea-recap-2",
+              "wavStart": 4166.38,
+              "wavEnd": 4373.27,
+              "localStart": 249.3800000000001,
+              "localEnd": 456.27000000000044
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              249
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 17bee932 + words.json 1d054f7b + script.md 2544193f",
+            "wavFrom": 3917.19,
+            "wavTo": 4373.27,
+            "holdFrames": 36,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "使用本片同一简洁布局，依次点亮外侧“选择”、当前“定价策略”、共同“结算流程”，各自对应决定采用谁、负责怎么算、按约定使用当前策略。最后同时保留三者职责边界与统一约定，停在“变化独立，策略可换，共同步骤保留”和IT小村·原创；不讲任何实现写法或再次长篇演算。",
+          "direction": "使用本片同一简洁布局，依次点亮外侧“选择”、当前“定价策略”、共同“结算流程”，各自对应决定采用谁、负责怎么算、按约定使用当前策略。最后同时保留三者职责边界与统一约定，停在“变化独立，策略可换，共同步骤保留”和IT小村·原创；不讲任何实现写法或再次长篇演算。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

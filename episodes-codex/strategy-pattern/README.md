@@ -1,42 +1,44 @@
-# EP.23 · 设计模式D01：策略模式设计思想修订
+# EP.23 · 设计模式D01：保留原例的流程修订
 
-本轮依据用户2026-10-25反馈：上一版过度讲函数和参数，偏语法；设计模式应讲与语言无关的思想，并要求更新经验教训。制作issue为#163，系列总览#161，原观看URL和firstRelease保持。
+**当前已上线v0.60.4。** 本轮媒体与网站/线上检查通过，#163已completed关闭；原例、首发与URL保留。见[发布记录](release.md)。
+
+本轮依据用户最新要求保留原例，只调整呈现流程。仍是一笔100元订单在会员九折90元、活动八折80元之间单选，不改成支付方式，也不引入新故事。原观看URL与首次发布日期保留。
 
 ## 当前主线
 
-《策略模式：结算怎样换一种算价办法？》为11镜22句，只讲结算流程、定价策略、选择三类职责。两种策略完成相同任务，按共同业务约定接收原金额、交回应付金额；结算把具体定价委托给已选策略。会员100元得90元，再重置原价只换活动得80元。重点是变化隔离、共同流程为何保留、独立维护边界和协作成本，不以算术或某语言机制代替模式定义。
+《策略模式：结算怎样换一种算价办法？》保留11镜22句。开头先给结算功能教学示意，看到商品、原价、单选优惠和应付，再解释程序内部。两种策略准备好后，对照结构图说明选择方、结算上下文、定价共同约定及两个具体策略，然后沿原例演一次选择与委托、重置原价替换策略，以及维护收益和成本。
 
-视频无代码或语言语法；具体Python实现、函数绑定与校验仅在配套文章可选附录。现有demo记录证明教学金额与该实现，不定义模式。新稿、真实时序和媒体SHA以本轮script/QA/release为准；不能把旧版已通过的程序和音画检查当作新方向已通过。
+只替换01两句、05两句、06第一句，共5句；其余17句逐字保留并复用原takes。视频正文仍讲与语言无关的思想，不口播函数、参数或接口语法。片尾增加150帧静默Java关键代码节选，明确提示暂停；完整可编译程序和真实运行结果在demo-java及文章。结构图中的结算上下文是业务职责，最小Java示例的Checkout.total只展示核心定价委托，main承担输入/输出演示，并未实现整套结算页面。
 
-## 历史与经验
+## 归档与真实时序
 
-v0.52.0首发、v0.54.1章节衔接版、v0.54.4语言实现讲解版的报告分别在对应revisions目录；原媒体、音轨和源码可从各自不可变Git tag恢复。所有旧takes原位保留，新稿使用idea后缀，必要idea2。本轮完整重做，不使用历史局部拼接入口。
+修改前源、时序、语音及原媒体身份归档在revisions/flow-ui-java/baseline。旧takes原位保留并逐文件比对SHA。当前真实装配为正文4628帧、Java卡150帧，共4778帧，30fps。voice与时序由共享流程生成；Java尾段只由新增共享append_java_endcard.py维护，禁止用旧装配命令覆盖静默尾卡。
 
-用户反馈已写入RULES设计模式教学节、pipeline思想审查、L030及项目记忆，并纠正L027/S016把函数传参当核心目标的适用范围。经验记录须区分用户指导、独立检查和真实观看效果。
-
-## 配音、装配和冻结
-
-沿用episodes/_shared/voice的prep/gen/build，以及共享assemble_sentence_episode、place_v2、label_onset_strict、check_sentence_episode，不复制TTS、起音、铺轨或混音算法。重建已有选定takes无需再次请求TTS：
+只读复核入口：
 
 ```sh
-python3 episodes/_shared/voice/build.py --dir episodes-codex/strategy-pattern
-python3 episodes-codex/_shared/assemble_sentence_episode.py episodes-codex/strategy-pattern
-python3 episodes/_shared/place_v2.py --dir episodes-codex/strategy-pattern --mode whole
-python3 episodes/_shared/label_onset_strict.py --dir episodes-codex/strategy-pattern
-python3 episodes-codex/_shared/check_sentence_episode.py episodes-codex/strategy-pattern
+python3 episodes-codex/strategy-pattern/demo-java/verify.py
+python3 episodes-codex/_shared/append_java_endcard.py verify episodes-codex/strategy-pattern
 ```
 
-词兼容字段是句包络，不是逐字识别。04第一句策略模式按共享声学起音出现至少63帧；无可用ASR/听辨时如实写边界，不称读音或全片听辨通过。
+旧Python程序和完整证据继续保留作另一语言实现参考，不能把旧Python运行或旧观看反馈充当本轮Java及媒体验证。Java卡是关键节选，省略外层类、import和校验/舍入帮助方法；完整文件才是编译入口。
 
-真实时序预检前运行npx tsc --noEmit；既有qa.mjs生成全11镜无字幕图及03/06/07关键连续片及05/08状态图，检查最终props、非占位、COPYFIT和实际中间态。思想审查须仅凭本片解释谁选择、谁委托、谁计算、何种约定使替换成立。生产源停写且独立预检通过后：
+## 预检、冻结与编码
+
+本期remotion已按当前lock重新npm ci；短TMPDIR为/workspace/pattern-tmp。真实时序预演记录在remotion/out/flow-preflight-v1：129张状态、01/05–06/11三个无字幕无声连续片，实际props关闭字幕，COPYFIT为空。该预演不代替正式成片或真实观看检查。
+
+生产输入停写并经独立QA后，由主任务执行本期freeze.py及--verify，再启动package入口。正式方案记录在revisions/flow-ui-java/render-plan.json：新渲染01–07共2936帧，复用已证明等价的旧08–11正文1692帧，新渲染Java卡150帧。36张相同local状态的fresh PNG与旧accepted缓存逐字节相同，字幕与cue局部时序亦相同；证明和适用边界见tail-reuse-proof.json。
 
 ```sh
-python3 episodes-codex/strategy-pattern/freeze.py
-python3 episodes-codex/strategy-pattern/freeze.py --verify
+cd episodes-codex/strategy-pattern/remotion
+TMPDIR=/workspace/pattern-tmp npm run render:voice -- --plan-only
+TMPDIR=/workspace/pattern-tmp npm run render
 ```
 
-## 编码与上线
+render:voice校验生产输入SHA，旧视频只取视频流，整轨使用新WAV，重新混共享Wallpaper。保留render:voice:full作为直接全片渲染入口；不以近似时序复用任何一帧。正式编码后的长度、完整解码、PTS、两个拼接边界、字幕和音画，以及同媒体的站点接入与部署，由主任务记录最终证据。
 
-本期remotion下用原npm run render完整编码，短TMPDIR=/workspace/strategy-tmp与/tmp/video-studio-render.lock串行锁；共享Wallpaper混音目标-16LUFS。封面原件内容仍符合规则独立和流程稳定，核对完整SHA后复用。冻结后源变更须停止编码并重新检查/冻结。
+## 历史
 
-正式片执行共享check_encoded、完整解码/PTS、实际成片字幕与职责过程复核，再复制同一媒体接入网站。合并、Release后Pages部署、8个canonical普通GET流式完整核对视频/海报/VTT及四章/目录/源码/系列/RSS/更新日志，通过后completed关闭#163。平台未新发；实际结果见release.md和本轮报告。
+v0.52.0首发、v0.54.1章节衔接、v0.54.4语法讲解及v0.56.1思想修订为历史产物。对应revisions与不可变tag保留各自来源，不能改写为本轮结果。本轮是对既有思想版的有限流程修订；所学经验由主任务更新共享文档。
+
+本轮实际冻结入口：从仓库根执行`python3 episodes-codex/strategy-pattern/freeze.py`，编码前后只读复核加`--verify`。它委托新增pattern-flow共享包装，保留旧共享检查器，显式验证真实有声正文与Java静默尾卡派生，并纳入源码、Java、正文快照、旧媒体参照和复用依据。

@@ -1,6 +1,7 @@
 import React from 'react';
 import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {shots,Shot} from './data';
+import javaCard from './java-card.json';
 import {C,FONT} from './theme';
 import {at,beat} from './motion';
 import {Heading,Note,Text,Frame,Path,clamp,lerp} from './objects';
@@ -50,33 +51,103 @@ const Diagram:React.FC<{state?:State;summaryState?:State;recordStates?:State[];s
 </>;
 const PaidDiagram:React.FC<{focus?:Focus;stopped?:boolean;summaryMember?:boolean;state?:State;recordStates?:State[];cost?:boolean}>=({focus,stopped=false,summaryMember=true,state='已付款',recordStates=['已付款'],cost=false})=><Diagram state={state} summaryState="已付款" recordStates={recordStates} focus={focus} stopped={stopped} summaryMember={summaryMember} cost={cost}/>;
 
+const CloseButton:React.FC<{active?:boolean}>=({active=false})=><div style={{position:'absolute',left:1701,top:367,width:43,height:43,border:'1px solid '+(active?C.gold:C.edge),borderRadius:8,color:active?C.gold:C.muted,fontSize:31,textAlign:'center',lineHeight:'38px'}}>×</div>;
+const Cursor:React.FC<{x:number;y:number;click?:number}>=({x,y,click=0})=><div style={{position:'absolute',left:x,top:y,pointerEvents:'none',zIndex:9}}>
+ {click>0&&click<1&&<div style={{position:'absolute',left:-24,top:-24,width:48,height:48,border:'3px solid '+C.gold,borderRadius:'50%',opacity:1-click,transform:`scale(${.5+click})`}}/>}
+ <svg width={34} height={43} viewBox="0 0 34 43"><path d="M3 2 L3 34 L12 27 L19 40 L25 37 L18 24 L30 23 Z" fill={C.text} stroke={C.bg} strokeWidth={2}/></svg>
+</div>;
+const ProductUI:React.FC<{state?:State;summaryState?:State;records?:State[];stopped?:boolean;showInternalList?:boolean;focus?:'source'|'summary'|'record';buttonActive?:boolean;closeActive?:boolean}>=({state='待付款',summaryState='待付款',records=[],stopped=false,showInternalList=false,focus,buttonActive=false,closeActive=false})=><>
+ <Frame x={150} y={350} w={940} h={440} label="商家 · 订单详情" color={focus==='source'?C.gold:C.blue}/>
+ <Text x={192} y={416} w={500} size={45} weight={750}>订单17</Text>
+ <Text x={192} y={486} w={400} size={25} color={C.muted}>付款与履约状态</Text>
+ <div style={{position:'absolute',left:192,top:535,width:330,height:82,borderRadius:12,background:C.surface,border:'1px solid '+(focus==='source'?C.gold:C.edge)}}><Text x={22} y={11} w={286} size={42} weight={750} color={state==='待付款'?C.text:C.teal}>{state}</Text></div>
+ <Text x={192} y={650} w={420} size={25} color={C.muted}>教学示意 · 不执行真实支付</Text>
+ {showInternalList?<>
+  <Text x={644} y={451} w={391} size={26} color={C.muted}>内部：当前接收者</Text>
+  <Text x={644} y={511} w={391} size={31} color={stopped?C.muted:C.text}>{stopped?'摘要已移除':'订单摘要'}</Text>
+  <Text x={644} y={574} w={391} size={31} color={C.teal}>变化记录</Text>
+ </>:<>
+  <Text x={650} y={449} w={386} size={27} color={C.muted}>订单操作</Text>
+  <div style={{position:'absolute',left:650,top:540,width:386,height:90,border:'2px solid '+(buttonActive?C.gold:state==='待付款'?C.teal:C.edge),borderRadius:12,background:buttonActive?'#4F442B':state==='待付款'?'#19403D':C.surface}}>
+   <Text x={10} y={19} w={366} size={32} center color={state==='待付款'?C.teal:C.muted}>{state==='待付款'?'标记为已付款':'已标记付款'}</Text>
+  </div>
+  <Text x={650} y={663} w={386} size={24} color={C.muted}>操作后，相关面板响应变化</Text>
+ </>}
+ {stopped?<>
+  <Frame x={1320} y={350} w={450} h={152} label="摘要已关闭 · 停止接收" color={C.muted}/>
+  <Text x={1346} y={417} w={398} size={28} color={C.muted}>最后收到：17 · 已付款</Text>
+ </>:<Receiver kind="summary" summaryState={summaryState} active={focus==='summary'}/>}
+ <Receiver kind="record" recordStates={records} active={focus==='record'}/>
+ {!stopped&&<CloseButton active={closeActive}/>}
+</>;
+const RoleStructure:React.FC<{s:Shot;f:number}>=({s,f})=>{
+ const spread=beat(s,f,'expand'),source=beat(s,f,'source'),summary=beat(s,f,'summary'),record=beat(s,f,'record'),contract=beat(s,f,'contract'),active=contract>.15;
+ return <>
+  <Frame x={150} y={350} w={lerp(940,620,spread)} h={440} label={spread<.5?'商家 · 订单详情':'订单来源 · Order'} color={source>0&&contract===0?C.gold:C.blue}/>
+  <Text x={192} y={425} w={500} size={38} color={C.blue} weight={700}>订单17 · 已付款</Text>
+  <Text x={192} y={505} w={500} size={31} color={C.text} alpha={source}>维护状态</Text>
+  <Text x={192} y={564} w={500} size={31} color={C.text} alpha={source}>保留接收者名单</Text>
+  <Text x={192} y={623} w={500} size={31} color={C.text} alpha={source}>状态变化后，按约定通知</Text>
+  <Receiver kind="summary" summaryState="已付款" active={summary>0&&record===0&&contract===0}/><Receiver kind="record" recordStates={['已付款']} active={record>0&&contract===0}/>
+  <Text x={1346} y={522} w={398} size={22} color={C.blue} alpha={summary}>具体观察者 · SummaryObserver</Text>
+  <Text x={1346} y={745} w={398} size={22} color={C.blue} alpha={record}>具体观察者 · ChangeLogObserver</Text>
+  {contract>0&&<>
+   <Path points={[[770,477],[850,477]]} color={C.blue} alpha={contract}/>
+   <Path points={[[1320,490],[1240,490],[1240,477],[1190,477]]} color={C.teal} alpha={contract} dashed/>
+   <Path points={[[1320,700],[1240,700],[1240,540],[1190,540]]} color={C.teal} alpha={contract} dashed/>
+   <Frame x={850} y={395} w={340} h={216} label="共同观察者约定" color={active?C.gold:C.edge} alpha={contract}/>
+   <Text x={874} y={456} w={292} size={26} center mono color={C.blue} alpha={contract}>OrderObserver</Text>
+   <Text x={874} y={507} w={292} size={28} center color={C.text} alpha={contract}>接收订单号与新状态</Text>
+   <Text x={855} y={639} w={340} size={23} center color={C.muted} alpha={contract}>结构约定，非消息中转</Text>
+  </>}
+  <Note>{active?'来源按共同约定通知，摘要与记录分别承担显示与留痕':record>0?'同一变化记录，对应负责留痕的具体观察者':summary>0?'同一摘要面板，对应负责显示的具体观察者':'从刚才的产品对象展开职责，当前仍是已付款结果'}</Note>
+ </>;
+};
+const JavaCard:React.FC=()=>{
+ const lines=(javaCard as any).lines as string[];
+ const size=Math.min(30,Math.floor(742/(lines.length*1.4)));
+ return <>
+  <Text x={130} y={54} w={1660} size={44} weight={750}>{(javaCard as any).title??'观察者模式 · Java关键关系'}</Text>
+  <Text x={130} y={124} w={1660} size={27} color={C.gold}>暂停阅读 · 关键节选 · 完整可运行示例见图文</Text>
+  <div style={{position:'absolute',left:120,top:190,width:1680,height:790,border:'1px solid '+C.edge,borderRadius:14,background:C.surface}}>
+   <Text x={28} y={22} w={1100} h={744} size={size} mono color={C.text}>{lines.join('\n')}</Text>
+   <div style={{position:'absolute',left:1166,top:33,width:1,height:721,background:C.edge}}/>
+   <Text x={1210} y={33} w={410} size={27} color={C.gold}>与结构角色对应</Text>
+   {[
+    ['Order','来源与名单'],
+    ['OrderObserver','共同约定'],
+    ['SummaryObserver','显示最后收到状态'],
+    ['ChangeLogObserver','追加变化事实'],
+   ].map(([name,role],i)=><React.Fragment key={name}>
+    <Text x={1210} y={106+i*153} w={410} size={25} mono color={C.blue}>{name}</Text>
+    <Text x={1210} y={151+i*153} w={410} size={27} color={C.text}>{role}</Text>
+   </React.Fragment>)}
+  </div>
+  <Text x={130} y={1004} w={1660} size={23} color={C.muted}>IT小村 · 原创　　角色名与前面的订单、共同约定、摘要和变化记录一致</Text>
+ </>;
+};
+
 const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  const kind=s.visualType;
- if(kind==='order-change'){
-  const p=beat(s,f,'summary'),q=beat(s,f,'record');
-  return <><Heading>订单变了，谁要跟着响应？</Heading>
-   <Frame x={190} y={350} w={820} h={440} label="商家处理示例订单" color={C.blue}/>
-   <Text x={240} y={446} w={720} size={57} color={C.blue} weight={750}>订单17 · 待付款</Text>
-   <Text x={240} y={560} w={720} size={33} color={C.muted}>接下来：订单付款</Text>
-   <Text x={240} y={626} w={720} size={29} color={C.muted}>付款后，两项功能都需要响应</Text>
-   <Receiver kind="summary" goal alpha={.35+.65*p}/><Receiver kind="record" goal alpha={.35+.65*q}/>
-   <Note>两项是付款后的目标，本镜尚未执行状态更新</Note>
+ if(kind==='product-update'){
+  const click=beat(s,f,'click'),state=beat(s,f,'state'),summary=beat(s,f,'summary'),record=beat(s,f,'record');
+  return <><Heading>标记一次付款，两个面板怎样联动？</Heading>
+   <ProductUI state={state>=.99?'已付款':'待付款'} summaryState={summary>=.99?'已付款':'待付款'} records={record>=.99?['已付款']:[]} buttonActive={click>.6&&state<.99} focus={record>0?'record':summary>0?'summary':state>0?'source':undefined}/>
+   <Cursor x={lerp(1060,850,click)} y={lerp(730,581,click)} click={click>.8?(click-.8)/.2:0}/>
+   <Note>{record>=.99?'一次状态更新后，摘要显示新状态，变化记录留下事实':summary>=.99?'摘要已经显示已付款，变化记录随后留痕':state>=.99?'订单先变为已付款，两个面板随后响应':'商家在订单详情里操作，观察右侧两项功能'}</Note>
   </>;
  }
- if(kind==='direct-dependencies'){
-  const p=beat(s,f,'summary'),q=beat(s,f,'record'),maintenance=beat(s,f,'maintenance');
-  return <><Heading>订单处理里，点名安排每个接收方</Heading><Diagram direct contract={false} summaryMember={p>=.99} recordMember={q>=.99} focus={maintenance>.2?'source':undefined}/>
-   {p>.01&&p<.99&&<Path points={SummaryPath} p={p} color={C.blue}/>}{q>.01&&q<.99&&<Path points={RecordPath} p={q} color={C.blue}/>}
-   <Note color={maintenance>.2?C.gold:C.muted} alpha={maintenance}>接收方增减时，要回到订单处理内调整通知安排</Note>
-  </>;
+ if(kind==='observer-roles'){
+  return <><Heading>从同一产品对象，展开观察者结构</Heading><RoleStructure s={s} f={f}/></>;
  }
  if(kind==='register-interest'){
-  const p=beat(s,f,'summary'),q=beat(s,f,'record'),before=f<termAt(s,'订阅');
-  return <><Heading>{before?'接下来，把接收需求与订单变化分开':f>=termAt(s,'订阅')?'订阅：接收方登记意愿，来源保留当前名单':'接收方登记意愿，来源保留当前名单'}</Heading>
-   <Diagram direct={before} contract={false} summaryMember={before||p>=.99} recordMember={before||q>=.99} showPaths={before}/>
-   {!before&&p>.0&&p<.99&&<Notification points={reverse(SummaryPath)} p={p} text="摘要登记" registration/>}
-   {!before&&q>.0&&q<.99&&<Notification points={reverse(RecordPath)} p={q} text="记录登记" registration/>}
-   <Note>{before?'先改变职责关系，订单当前仍是待付款':q>=.99?'两项都已登记；订单状态尚未变化':'接收方先登记，尚未发生订单变化通知'}</Note>
+  const p=beat(s,f,'summary'),q=beat(s,f,'record'),before=f<termAt(s,'订阅'),registration=!before;
+  return <><Heading>{before?'从当前结果，准备回看付款前':'订阅：接收方登记意愿，来源保留当前名单'}</Heading>
+   {before?<PaidDiagram/>:<Diagram contract={false} summaryMember={p>=.99} recordMember={q>=.99} showPaths={false}/>}
+   {!before&&<Text x={170} y={278} w={1590} size={29} center color={C.gold}>回看 · 本次付款前 · 初始名单为空</Text>}
+   {registration&&p>.0&&p<.99&&<Notification points={reverse(SummaryPath)} p={p} text="摘要登记" registration/>}
+   {registration&&q>.0&&q<.99&&<Notification points={reverse(RecordPath)} p={q} text="记录登记" registration/>}
+   <Note>{before?'承接刚才的已付款与一条记录，接下来回看登记的前置安排':q>=.99?'两项都已登记；订单状态尚未变化':'先回看付款前的空名单，接收方登记抵达后才加入'}</Note>
   </>;
  }
  if(kind==='common-notification'){
@@ -110,11 +181,11 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
   </>;
  }
  if(kind==='unsubscribe-summary'){
-  const p=beat(s,f,'cancel'),stopped=p>=.99,q=beat(s,f,'stopped');
-  return <><Heading>{f<termAt(s,'取消订阅')?'两个模块都收到后，再看摘要怎样退出':'取消订阅：摘要退出名单，变化记录仍然保留'}</Heading>
-   <PaidDiagram stopped={stopped} summaryMember={!stopped} focus={p>0&&!stopped?'list':undefined}/>
-   {p>0&&!stopped&&<Notification points={reverse(SummaryPath)} p={p} text="摘要退出" registration/>}
-   <Note>{stopped?'摘要保留最后收到的已付款，之后不再接收变化':p>0?'取消登记过程中，本次订单仍是已付款':'承接前次结果，本镜尚未发生下一次订单变化'}</Note>
+  const close=beat(s,f,'close'),p=beat(s,f,'cancel'),stopped=p>=.99;
+  return <><Heading>{f<termAt(s,'取消订阅')?'关闭已不需要的摘要面板，让它退出':'取消订阅：摘要退出名单，变化记录仍然保留'}</Heading>
+   <ProductUI state="已付款" summaryState="已付款" records={['已付款']} stopped={stopped} showInternalList={f>=termAt(s,'取消订阅')} closeActive={close>.7&&!stopped}/>
+   {close<.99&&<Cursor x={lerp(1600,1712,close)} y={lerp(593,383,close)} click={close>.8?(close-.8)/.2:0}/>}
+   <Note>{stopped?'摘要保留最后收到的已付款，已关闭并停止接收，记录继续保留':p>0?'关闭摘要后，将它从当前接收者名单移除':'先回到同一产品页，再关闭不需要继续查看的摘要'}</Note>
   </>;
  }
  if(kind==='notify-remaining'){
@@ -153,11 +224,12 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
 };
 
 const ShotView:React.FC<{shot:Shot;captions:boolean}>=({shot:s,captions})=>{
- const f=useCurrentFrame(),sub=s.subtitles?.find(v=>f>=v.from&&f<=(v.to??v.from+(v.duration??1)-1));
+ const f=useCurrentFrame(),javaFrom=s.javaCardFrom==null?Infinity:Number(s.javaCardFrom),sub=f<javaFrom?s.subtitles?.find(v=>f>=v.from&&f<=(v.to??v.from+(v.duration??1)-1)):undefined;
+ if(f>=javaFrom)return <AbsoluteFill style={{background:C.bg,color:C.text,fontFamily:FONT,overflow:'hidden'}}><JavaCard/></AbsoluteFill>;
  return <AbsoluteFill style={{background:C.bg,color:C.text,fontFamily:FONT,overflow:'hidden'}}>
   <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 88% 3%, #173B5544, transparent 62%)'}}/>
   <Text x={130} y={54} w={1450} size={25} color={C.muted}>设计模式 · {s.visualType==='unsubscribe-summary'&&f<termAt(s,'取消订阅')?'摘要怎样退出':s.chapterTitle??'变化与响应'}</Text><Text x={1690} y={54} w={150} size={25}>IT小村</Text>
-  <Text x={130} y={108} w={1650} size={23} color={C.blue}>示例 · 同一程序内 · 订单17 · 待付款 → 已付款 → 已发货</Text>
+  <Text x={130} y={108} w={1650} size={23} color={C.blue}>教学示意 · 同一程序内 · 订单17{['product-update','observer-roles'].includes(s.visualType)?'':' · 待付款 → 已付款 → 已发货'}</Text>
   <Scene s={s} f={f}/>
   {captions&&sub&&<div data-subtitle style={{position:'absolute',left:130,right:130,top:925,minHeight:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:39,fontWeight:500,lineHeight:1.4,textAlign:'center',background:C.bg+'F8',borderRadius:12,padding:'7px 15px',boxSizing:'border-box'}}>{sub.text}</div>}
  </AbsoluteFill>;

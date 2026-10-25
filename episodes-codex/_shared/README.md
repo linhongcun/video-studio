@@ -49,3 +49,16 @@ python3 episodes-codex/_shared/check_branch_preservation.py --baseline d2e949bbc
 
 
 规范冻结器本身也被已发布LC.11固定引用，导航片不修改它。当前四片保存编码前实际冻结器的原字节快照和路径迁移记录，摘要完全不变；未来用薄包装加入导航依赖。迁移与独立冒烟验证见[共享冻结器保护报告](../../docs/transaction-branch-freezer-preservation.json)。
+
+## 设计模式的Java暂停卡
+
+D01/D02使用`append_java_endcard.py`在已校验的完整人声正文后附150帧静默Java节选卡。先保存不可变正文和来源身份，再显式声明`meta.javaEndCard`与末镜`javaCardFrom`；字幕和句子时间保持在正文内。`verify`会重建原正文供原句级检查器验证，并校验PCM前缀与零尾，不将Java伪标成Python卡，不改旧共享检查器。
+
+```sh
+python3 episodes-codex/_shared/append_java_endcard.py append episodes-codex/observer-pattern --frames 150
+python3 episodes-codex/_shared/append_java_endcard.py verify episodes-codex/observer-pattern
+python3 episodes-codex/observer-pattern/freeze.py
+python3 episodes-codex/observer-pattern/freeze.py --verify
+```
+
+两期薄包装转发到新增`freeze_pattern_flow_episode.py`，冻结Java来源、原声正文、复用证明与归档媒体；旧冻结器保持原字节。`audit_sentence_reuse.py`核对复用take和裁切来源。最终派生稿不要再次运行正文装配覆盖尾卡。追加器的异常路径由`test_append_java_endcard.py`验证；实际编码和播放器仍需检查卡首、中、末、无旧字幕及暂停后的解码画面。

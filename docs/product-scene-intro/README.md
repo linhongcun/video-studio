@@ -1,6 +1,6 @@
 # 分布式事务入门：产品交互入口单期试点
 
-**制作与本地检查完成，待GitHub发布。** 对应[#242](https://github.com/linhongcun/video-studio/issues/242)。用户选择先用《什么是分布式事务？》做单期示范；这不授权把其他视频一并重制，也不表示本版已验收或上线。
+**已合并、发布v0.60.2并上线核验。** 对应[#242](https://github.com/linhongcun/video-studio/issues/242)。用户选择先用《什么是分布式事务？》做单期示范；这不授权把其他视频一并重制，也不表示本版已验收或上线。
 
 本次指导是：**实际APP功能操作 → 页面反馈 → 同一业务对象 → 机制 → 回页面**。先让观众看懂谁在用什么功能、操作后看到什么，再从同一订单和商品展开机制；产品交互不是给原来的内部框套一层装饰外壳。界面为教学重建，不冒充实际操作某个真实平台。
 
@@ -29,7 +29,7 @@
 
 ## 检查与发布状态
 
-[23帧独立预检](independent-preflight.json)与[16帧正式成片独立复核](independent-encoded.json)通过；[编码检查](encoded-check.json)、[保护项与原AAC字节核对](preservation.json)、[本地站点40条字幕/5章验证](local-verification.json)、[桌面/手机真实播放](ui-check.json)均已完成。1046帧来自新源，4109帧复用原解码画面，整片H.264重新编码一次，原AAC直接复制；不把图像重编码说成数学无损。上线结果随后补录。未把外部未查看的提取帧复制进仓库或充作本次QA，也未新增音频听辨或ASR结论。
+[23帧独立预检](independent-preflight.json)与[16帧正式成片独立复核](independent-encoded.json)通过；[编码检查](encoded-check.json)、[保护项与原AAC字节核对](preservation.json)、[本地站点40条字幕/5章验证](local-verification.json)、[桌面/手机真实播放](ui-check.json)均已完成。1046帧来自新源，4109帧复用原解码画面，整片H.264重新编码一次，原AAC直接复制；不把图像重编码说成数学无损。线上完整视频SHA、40条字幕、5章、海报、源码链接及真实Release更新日志已核验。未把外部未查看的提取帧复制进仓库或充作本次QA，也未新增音频听辨或ASR结论。
 
 [站点核验脚本](verify-site.py)仅处理`baseline.json`的`selected`入门一片，比较正式制作媒体、海报、历史元数据、源链接、原生控件、精确章节和VTT；live模式另查真实Release更新日志。它须在root完成正式媒体与新站点构建后运行：
 
@@ -43,3 +43,5 @@ python docs/product-scene-intro/verify-site.py --live --report /path/to/online-v
 本轮两次画面修正：后台库存卡片中心与内部横线对齐；打开订单明确切换到详情与处理进度，长状态文案放回卡片边界。UI helper首轮在恢复disabled字幕模式后读取空cues报错，未执行到截图；[失败记录](ui-check-helper-v1-failure.json)保留，修为hidden模式加载时先记cue数，恢复后重新实播两视口并实际查看四图。未修改播放器或隐藏浏览器控件。
 
 发布前再同步`8bef491`：保留P02及五片算法修订，180冻结输入交集为空且完整SHA复核通过；新站点v0.60.2构建、媒体/40条VTT/5章和完整学习路径通过。此前v0.60.1真实播放四图按实际版本保留，播放器模板/本片媒体与字幕输入相同，未重贴成v0.60.2；见[协作审计](prepublish-upstream-audit.json)。算法批次已修正旧谜题断言，最终采用上游检查器，不重复提交本地的等价修复。
+
+[PR #249](https://github.com/linhongcun/video-studio/pull/249)已合并，附注tag指向`1135c8ef186016c1f3c47178f10ed343d84e3e61`；[v0.60.2](https://github.com/linhongcun/video-studio/releases/tag/v0.60.2)后重新[部署Pages](https://github.com/linhongcun/video-studio/actions/runs/40151454493)成功。[线上核验](online-verification.json)通过，#242以completed关闭；见[发布凭据](release.json)。本次只改事务入门，用户观看反馈待后续实际收到。

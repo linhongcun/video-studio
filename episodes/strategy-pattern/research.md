@@ -4,6 +4,14 @@
 
 本期仅讲一笔订单选择一种优惠规则，不叠加优惠，不接入真实支付系统。数字、订单、折扣和舍入方式均为教学设定。本文记录实际打开的公开正文及本地运行结果；不将选题 issue、旧分镜或内部对话作为事实来源。
 
+## 本轮原例与呈现流程修订（2026-10-25）
+
+本轮按用户最新决定保留100元、会员90元、活动80元的原例，只增加结算功能教学示意、结构角色对应与静默Java关键代码卡。页面为原创教学示意，不代表某个真实商家的产品；金额规则与不叠加范围仍是本例设定。当前01先看用户操作，05再对照Client/Context/Strategy/ConcreteStrategy，06–11沿原例说明委托、替换与取舍。
+
+Java实现与代码卡的官方语义来源、实际阅读范围和日期记录于[demo-java/README.md](demo-java/README.md)，真实Java21编译/40002组参照比较记录于[运行证据](demo-java/verified-results.json)。Checkout.total只映射核心定价委托，main演示输入输出，不把最小程序称为整套结算页面。旧Python核验继续作为历史和另一语言实现证据，不定义Java语义。
+
+真实时序无字幕预演位于remotion/out/flow-preflight-v1，129张状态、3段连续片，COPYFIT为空；独立概念/画面检查分别落在revisions/flow-ui-java。旧正文复用只允许局部时序与fresh PNG严格相等的08–11正文，其输入与36张对照完整SHA记录于tail-reuse-proof.json；该证据不等于正式媒体或观众理解通过。
+
 ## 本期结论与证据分工
 
 - 本轮语言无关的模式意图、职责、共同约定、选择与委托及取舍：2026-10-25实际重读UBC Strategy正文与Analysis、Refactoring.Guru的Solution/Structure/Pros and Cons/Relations。以原始课程材料为主要教学依据，二手教学资料交叉核对；共同约定有同一业务任务和行为含义，不简化成语法或签名相同。
