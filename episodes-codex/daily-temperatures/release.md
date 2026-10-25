@@ -11,3 +11,7 @@
 用户已观看旧版并指出默认观众懂单调栈。现先演栈的同端存取、后放先取、栈底/顶，再演温度不升与维护，最后合称单调栈。4句新增、28句take复用；Python仍5秒，新增默认5秒参考资料卡，最终5472帧/182.4秒。完整SHA256：`f3aa4f315770896ef3b3d15d8ad3d38ed5602d07528d9fcc20300bad3d6b3a3b`。190项生产输入、实际预演、独立最终MP4视觉/媒体与音源检查通过，原片/原QA在revisions/stack-primer-before。
 
 内容PR #335合并d6b7e61b52d6ea06f4976786df34097235250cf0，附注tag/Release v0.70.1后manual Pages40207127313成功，15:34:17Z首轮10次完整HTTPS核验通过；视频/海报全文SHA、32字幕/四章、完整Python/两卡边界、参考资料/日期及本Release自身关联均一致，45其他课849文件保持。发布、线上和真实检查范围见[本轮修订](../../docs/daily-temperatures-stack-primer/README.md)。首发v0.69.0、slug/标题、createdAt/publishedAt保持，修后用户观看与学习效果尚未取得。
+
+## v0.70.3 · 原始题名与原文摘录
+
+参考资料卡改为实际原题、逐字原文短引和位置，原讲解/声音/代码卡保持；当前发布5472帧，完整SHA-256：`67907fdb572b7fe681c69050936f5d20bc10c45e72fce07a95d3146bce98c343`。[PR #338](https://github.com/linhongcun/video-studio/pull/338)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.70.3)与[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40210425589)已完成，41次canonical GET覆盖本片完整视频/海报SHA、VTT、原章节/日期/引用和更新日志通过。实际来源、媒体保真与播放器范围见[本批记录](../../docs/reference-endcards/original-titles/README.md)。仅GitHub站点，无平台重发；不表示用户已观看认可。

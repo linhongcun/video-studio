@@ -48,3 +48,7 @@ v0.70.1完整站点构建126页、共享门槛及1440／390在当前CSS下的新
 ## 用户观看反馈
 
 用户随后实际观看v0.67.0，表示自然想到二分法，而视频开始的一连串尝试没有先解释目的，因此看着懵。对照首发稿，03直接提出每隔10层、06直接给14次预算，二分法的资源限制和预算来源没有前置。这是方法动机与观看理解方面的负面反馈，不能继续记为未观看或制作获得认可。最初先解释原理并记录诊断，随后用户明确要求改视频开头，现已执行上节所述03／04修订。首发技术检查保持原范围；修订正文通过不等于用户已经认可新版讲解，详见[反馈记录](feedback.md)。
+
+## v0.70.3 · 原始题名与原文摘录
+
+参考资料卡改为实际原题、逐字原文短引和位置，原讲解/声音/代码卡保持；当前发布5719帧，完整SHA-256：`d88cb96faeeb0170a24366f0a6509f2bc0e693ae0a1f66058a30151e8652e4a5`。[PR #338](https://github.com/linhongcun/video-studio/pull/338)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.70.3)与[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40210425589)已完成，41次canonical GET覆盖本片完整视频/海报SHA、VTT、原章节/日期/引用和更新日志通过。实际来源、媒体保真与播放器范围见[本批记录](../../docs/reference-endcards/original-titles/README.md)。仅GitHub站点，无平台重发；不表示用户已观看认可。

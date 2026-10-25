@@ -36,3 +36,7 @@ D02视频SHA-256：6a8435f5fe3c51e1e7bd61b8b83af3dd52457f15884ff4074bbb8721f4279
 [PR #331](https://github.com/linhongcun/video-studio/pull/331)合并`86929ae71ea26dcddeb069b4f5d2cc5671c2d5b9`，实际整树与验收分支一致；附注tag与[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.69.2)确指此提交。核心181输入及4442帧SHA23b49bf1…beb64be7保留，参考追加器全量证明原视频帧/时间戳及AAC/PCM保持；最终发布源video-with-references.mp4，完整SHA `5b98a0bca7135d78d44dfff8774274b441fbd4cfd4c4714481a34caa0cea67d0`。两项原文来源与支持范围已核验，来源/发布门禁、最新合并树构建及94静态验收字节对应；独立20句音轨/3起音、149预演与34状态+78连续样本、47正式核心与4参考帧、实际桌面/模拟手机暂停及Fullscreen API截图按报告通过。手机代码较小且暂停控件可能覆盖末行注释/页脚，原生手机全屏按钮未验证，不把模拟API检查写成真机通过。
 
 [Release后Pages 40205012192](https://github.com/linhongcun/video-studio/actions/runs/40205012192)成功；本任务只取消同提交、未含Release的自动运行40204996101。2026-10-25T23:07:26.140981+08:00最终11项canonical GET完整视频/海报/VTT SHA、20句/5章/3片Java字幕边界、主题/导航/RSS和真实Release日志通过，#305随后以completed关闭。证据见qa-observer-first-release-identity.json和site-online-verification.json。外部平台未新发，无全片人工听辨/逐字ASR、新手实验或用户新版观看认可结论。
+
+## v0.70.3 · 原始题名与原文摘录
+
+参考资料卡改为实际原题、逐字原文短引和位置，原讲解/声音/代码卡保持；当前发布4592帧，完整SHA-256：`224a898b68d8e5ffb8f08f88f13af6b2fbc02a14f2d80ca1d3bee03007066256`。[PR #338](https://github.com/linhongcun/video-studio/pull/338)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.70.3)与[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40210425589)已完成，41次canonical GET覆盖本片完整视频/海报SHA、VTT、原章节/日期/引用和更新日志通过。实际来源、媒体保真与播放器范围见[本批记录](../../docs/reference-endcards/original-titles/README.md)。仅GitHub站点，无平台重发；不表示用户已观看认可。

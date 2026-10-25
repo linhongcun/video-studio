@@ -13,3 +13,7 @@
 实际验证：44项Node测试、12项Python真实CLI/媒体保真测试、全站构建、10片帧数与日期/RSS/学习路径检查通过。独立复核13页49个实际编码采样帧，13张页面证据见evidence。全帧与原声保真由生产报告证明，独立审读未重复跑全片声音或声称全片听辨；播放器与上线核验分别按实际报告记录。
 
 证据入口：startup.json、sources-core.json、sources-extra.json、sources-algorithms.json、input-change-review.json、qa-independent.json、media-results.json、delivery.json；测试/构建日志见tests-node.log、tests-python.log、build.log。播放器已完成20个视口场景、10次桌面1倍速尾段播放至结束、13页手机原生全屏，23张截图经实际查看；725项断言、104个暂停点、20次本地完整视频GET/SHA及46次出处点击通过，见qa-browser.json。390px内嵌小窗和原生控件覆盖部分代码卡补充说明的限制如实记录，完整代码正文可见；手机全屏资料完整。上线前local-verification.json已通过，线上完整SHA和发布身份完成后另记。仅GitHub站点，无平台重发，不表示用户已观看认可或粉丝量提升。
+
+## 发布与线上核验
+
+[PR #338](https://github.com/linhongcun/video-studio/pull/338)已合并为`261420f188e3cfb9d581c48612778dc5e07a01ab`，附注标签与[Release v0.70.3](https://github.com/linhongcun/video-studio/releases/tag/v0.70.3)指向实际验收树。Release后的[Pages 40210425589](https://github.com/linhongcun/video-studio/actions/runs/40210425589)完成全部构建/门禁/部署。2026-10-26T00:16:12.124196+08:00开始的41次普通canonical完整GET核对10片整条视频/海报SHA、VTT全文与时序、原章节/日期/源链接、原题/短引/位置及更新日志真实Release链接通过，见[线上报告](online-verification.json)。远程媒体仅流式计算完整SHA，未下载落盘。GitHub站点已更新，无平台投稿；没有用户对本版的观看结论。

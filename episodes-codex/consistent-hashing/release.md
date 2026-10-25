@@ -18,3 +18,7 @@ Pages只发布video.mp4与meta.poster（16:9）；4:3/3:4封面留Git。verify_p
 正式线上浏览器轻检：Chromium154在1440与390宽度均实际短播放、点击四章seek并暂停首个参考卡，原生28cue载入且首卡activeCues为空，无JS错误。不是实体手机、全片播放或声音听辨；实际范围、截图见qa-online-browser.json与qa-online-browser-evidence。root实际查看两张正式网页资料卡截图，来源与正文说明匹配。
 
 制作issue [#295](https://github.com/linhongcun/video-studio/issues/295)已于2026-10-25T15:24:26Z以completed关闭；总览[#294](https://github.com/linhongcun/video-studio/issues/294)同步为1项完成、其余8项待安排。
+
+## v0.70.3 · 原始题名与原文摘录
+
+参考资料卡改为实际原题、逐字原文短引和位置，原讲解/声音/代码卡保持；当前发布6031帧，完整SHA-256：`bd4e264c4db3e619df02170e4af24e76e172c825190ef522a63f9ebf96d7d482`。[PR #338](https://github.com/linhongcun/video-studio/pull/338)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.70.3)与[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40210425589)已完成，41次canonical GET覆盖本片完整视频/海报SHA、VTT、原章节/日期/引用和更新日志通过。实际来源、媒体保真与播放器范围见[本批记录](../../docs/reference-endcards/original-titles/README.md)。仅GitHub站点，无平台重发；不表示用户已观看认可。

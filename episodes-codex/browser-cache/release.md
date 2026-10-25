@@ -15,3 +15,7 @@
 2026-10-25为原正文追加5秒可暂停参考资料卡，配套文章提供完整来源及对应知识点。原正文全量解码帧/时间戳、原AAC包/时间戳和PCM保持；新片尾、原生字幕结束、播放器暂停与手机全屏按实际范围复核。
 
 [PR #330](https://github.com/linhongcun/video-studio/pull/330)、[Release v0.69.1](https://github.com/linhongcun/video-studio/releases/tag/v0.69.1)及Release后Pages40200401923已完成；完整线上媒体/海报SHA、VTT、原章节和来源链接核验通过。实际证据见[首批记录](../../docs/reference-endcards/batch-1/README.md)，本期追加输入与原正文基线在revisions/reference-endcards。仅GitHub站点，无平台重发。
+
+## v0.70.3 · 原始题名与原文摘录
+
+参考资料卡改为实际原题、逐字原文短引和位置，原讲解/声音/代码卡保持；当前发布2796帧，完整SHA-256：`305136581ee8609f6980d2977623948f8f363983d1f64d045c567c1c4f104e42`。[PR #338](https://github.com/linhongcun/video-studio/pull/338)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.70.3)与[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40210425589)已完成，41次canonical GET覆盖本片完整视频/海报SHA、VTT、原章节/日期/引用和更新日志通过。实际来源、媒体保真与播放器范围见[本批记录](../../docs/reference-endcards/original-titles/README.md)。仅GitHub站点，无平台重发；不表示用户已观看认可。
