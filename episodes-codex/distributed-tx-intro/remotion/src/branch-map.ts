@@ -40,7 +40,7 @@ export const branchMapSpec: BranchMapSpec = {
     '01': {focus:'goal',activeNodes:['goal','split','partial'],activeEdges:['range-split','example-partial'],crumb:'问题定位｜订单已记录，库存安排还未落实'},
     '02': {focus:'goal',exit:{zoom:30,hold:10},activeNodes:['goal'],activeEdges:[],crumb:'下单目标｜订单确认，还要满足本例库存规则',overviewTitle:'把同一下单目标，放回管理范围中看'},
     '03': {focus:'goal',enter:{hold:50,zoom:34},activeNodes:['goal','local','split'],activeEdges:['range-local','range-split'],crumb:'大纲起点｜只看记订单与扣库存',overviewTitle:'先认清范围，再看具体动作'},
-    '04': {focus:'local',activeNodes:localNodes,activeEdges:localEdges,crumb:'范围对照①｜两处修改交给同一笔管理'},
+    '04': {focus:'local',activeNodes:localNodes,activeEdges:localEdges,crumb:'机制对照重置｜回到提交之前：本单待提交、库存4'},
     '05': {focus:'joint',activeNodes:localNodes,activeEdges:localEdges,crumb:'同笔范围｜两处就绪后，一起确认保存'},
     '06': {focus:'joint',activeNodes:localNodes,activeEdges:localEdges,crumb:'另一结果重置｜无本单记录、库存4，再看撤销'},
     '07': {focus:'local',exit:{zoom:24,hold:8},activeNodes:localNodes,activeEdges:localEdges,crumb:'同笔范围回顾｜共同保证来自共同管理',overviewTitle:'范围对照：接着改看两边独立提交'},
