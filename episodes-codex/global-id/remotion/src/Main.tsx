@@ -3,6 +3,7 @@ import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {C,FONT,MONO} from './theme';
 import {Shot,VIDEO,shots} from './data';
 import {TIME,IDS} from './sample-data';
+import {MethodsScene} from './Methods';
 declare const __HAS_VOICE_AUDIO__:boolean;
 const clamp=(v:number)=>Math.max(0,Math.min(1,v));
 const go=(f:number,a:number,n=30)=>{const v=clamp((f-a)/Math.max(1,n));return v*v*(3-2*v)};
@@ -25,6 +26,7 @@ const Result:React.FC<{children:React.ReactNode;alpha?:number;color?:string;y?:n
 
 const Scene:React.FC<{shot:Shot}>=({shot:s})=>{
  const f=useCurrentFrame(),d=s.durationInFrames,id=Number(s.id),s1=s.cueFrames?.sentences?.[1]??d*.5;
+ if(id===16||id===17)return <MethodsScene shot={s}/>;
  if(id===1){const p=go(f,25,55);return <>
   <Txt size={63}>两个订单，怎么撞成同一个号了？</Txt>
   <Order who="甲的订单" id="42" x={520} color={C.red}/><Order who="乙的订单" id="42" x={1400} color={C.red}/>

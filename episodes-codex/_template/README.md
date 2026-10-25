@@ -12,6 +12,8 @@
 
 参考当前制作工程 `episodes-codex/db-lock/`、`episodes-codex/db-transaction/`（已认可的第二版），以及本轮各期 README。创建 `episodes-codex/<slug>/`；站点目录仍为 `episodes/<slug>/`。只复用配音、冻结和渲染基础设施，按本期主题重新设计动作，镜数与时长不照搬前一期。
 
+建立新期时在 `meta.json` 记录实际 `createdAt` 与 `updatedAt`（初始相同），首次公开再写 `publishedAt`；新时间使用含时区的 ISO 8601 值。修改既有期保留创建与首发时间，实质内容修改才刷新 `updatedAt`，对外以北京时间日期区分版本，同日多版带时分秒，不累加“重制版”名字。历史时间不补造精度，纯站点调整不改视频修改时间；完整口径见 [视频时间与版本](../../docs/publish.md#视频时间与版本)。
+
 1. 实际读取核心公开资料，按 [docs/research-template.md](../../docs/research-template.md) 记录主张、访问日期和边界。先确认观众需要的前置概念；术语与支线按本期范围取舍。
 2. 编写 `script.md`、`article.mdx`、`pronunciation.md` 和 `visual-direction.md`。同一对象、渐进揭示，让动作解释因果；先做关键连续过程的小样，再展开全片。用当前期的脚本结构，旧20镜EP.14仅作为历史范例。
 3. 生成本期 `storyboard.json`、`covers.json` 和 `knoll-props.md`。结构参照 [分镜字段](../../docs/storyboard-schema.md)，画面与封面依当前 [RULES](../../docs/RULES.md)。不要因旧组件存在就恢复假应用窗或密集信息常驻。

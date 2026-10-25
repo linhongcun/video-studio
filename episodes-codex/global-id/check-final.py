@@ -19,6 +19,8 @@ assert video['r_frame_rate'] == '30/1'
 assert int(video['nb_frames']) == meta['durationInFrames']
 assert abs(float(probe['format']['duration'])-meta['durationInFrames']/meta['fps']) < .1
 assert audio['codec_name'] == 'aac' and int(audio['sample_rate']) == 48000
+assert int(video['nb_frames']) == meta['finalVideoFrames']
+subprocess.run(['python3', str(D/'freeze.py'), '--verify'], check=True)
 mix = json.loads((D/'mix-report.json').read_text())
 assert abs(mix['final_LUFS']+16) <= .3
 assert mix['true_peak_dBTP'] <= -2.0
