@@ -12,17 +12,22 @@ from datetime import datetime, timezone
 
 from playwright.sync_api import sync_playwright
 
-from sync_site import PRODUCTION, ROOT, SITE, DIST, SLUG, load_facts, check_local_delivery, puzzle_slugs
+from sync_site import (PRODUCTION, ROOT, SITE, DIST, SLUG, FIRST_RELEASE, REVISION,
+                       REVISION_DIR, QA_OUTPUT, load_facts, check_local_delivery,
+                       puzzle_slugs, release_version)
 from verify_online import Page, check_episode
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base', default='http://127.0.0.1:4398/video-studio/')
+    parser.add_argument('--release', required=True,
+                        help='Current correction Release; firstRelease remains v0.67.0.')
     args = parser.parse_args()
     base = args.base.rstrip('/') + '/'
     facts = load_facts()
-    manifest = check_local_delivery(facts)
+    manifest = check_local_delivery(facts, args.release)
+    assert release_version('v' + json.loads((ROOT / 'site/package.json').read_text())['version']) >= release_version(args.release)
     meta, chapters = facts['meta'], facts['chapters']
     frames, fps = facts['frames'], facts['fps']
     duration = frames / fps
@@ -31,7 +36,7 @@ def main():
     assert SLUG in (DIST / 'rss.xml').read_text()
     expected_links = ['/video-studio/episodes/' + slug + '/' for slug in puzzle_slugs()]
     assert SLUG in puzzle_slugs() and 'monty-hall' in puzzle_slugs()
-    output = PRODUCTION / 'out/site-qa'
+    output = QA_OUTPUT
     output.mkdir(parents=True, exist_ok=True)
     results = []
     with sync_playwright() as playwright:
@@ -83,6 +88,22 @@ def main():
                 video.evaluate('v => v.pause()')
                 page.wait_for_function('!document.querySelector("video").seeking')
                 assert abs(video.evaluate('v => v.currentTime') - chapter['start']) < 0.2
+            opening_checks, opening_screenshots = [], []
+            revised_shots = [shot for shot in facts['shots'] if shot['id'] in ('03', '04')]
+            assert [shot['id'] for shot in revised_shots] == ['03', '04']
+            for shot in revised_shots:
+                start = shot['from'] / fps
+                video.evaluate('async(v,t)=>{v.currentTime=t;await v.play();}', start)
+                page.wait_for_timeout(400)
+                state = video.evaluate('v=>({time:v.currentTime,paused:v.paused,error:v.error?.code??null})')
+                assert state['time'] > start + 0.1 and not state['paused'] and state['error'] is None
+                video.evaluate('(v,t)=>{v.pause();v.currentTime=t;}', (shot['from'] + min(3 * fps, shot['durationInFrames'] - 1)) / fps)
+                page.wait_for_function('!document.querySelector("video").seeking')
+                screenshot = output / f'opening-shot-{shot["id"]}-{width}.png'
+                video.screenshot(path=str(screenshot))
+                opening_screenshots.append(screenshot)
+                opening_checks.append({'shot': shot['id'], 'frame': shot['from'],
+                                       'durationInFrames': shot['durationInFrames'], 'playback': state})
             video.evaluate('async v => {v.currentTime=0; await v.play();}')
             page.wait_for_timeout(400)
             playback = video.evaluate('v => ({time:v.currentTime,paused:v.paused,error:v.error?.code??null})')
@@ -166,13 +187,14 @@ def main():
             results.append({'viewport': [width, height], 'video': info, 'chapters': seek_checks,
                 'allArticleChapterSeeksPassed': True, 'captions': len(cues), 'activeCaptionChecked': sample['text'],
                 'playback': playback, 'endingPlayback': ending_playback, 'ended': ended,
+                'revisedOpeningShotPlayback': opening_checks,
                 'horizontalOverflow': False, 'articleOnlyAppendixReadable': True, 'appendixVideoJump': False,
                 'runtimeErrors': errors, 'failedResponses': failed, 'footnotes': footnote_geometry,
                 'budgetTableRows': actual_budgets, 'exampleEventRows': actual_example, 'thresholdRows': actual_bounds,
-                'screenshots': [str(p.relative_to(ROOT)) for p in (first_shot, last_shot, proof_shot, certificate_shot, footnote_shot)]})
+                'screenshots': [str(p.relative_to(ROOT)) for p in (first_shot, last_shot, proof_shot, certificate_shot, footnote_shot, *opening_screenshots)]})
             # Persist real measurements at each completed viewport so a later
             # viewport failure cannot erase an earlier result or invite backfill.
-            (PRODUCTION / f'qa-site-viewport-{width}.json').write_text(json.dumps({
+            (output / f'qa-site-viewport-{width}.json').write_text(json.dumps({
                 'status': 'passed', 'checkedAtUTC': datetime.now(timezone.utc).isoformat(),
                 'base': base, 'viewportResult': results[-1],
                 'scope': 'This viewport only; full-run status is recorded separately in qa-site.json.'
@@ -180,6 +202,7 @@ def main():
             context.close()
         browser.close()
     report = {'status': 'passed', 'checkedAtUTC': datetime.now(timezone.utc).isoformat(),
+              'release': args.release, 'firstRelease': FIRST_RELEASE, 'revision': REVISION,
               'base': base, 'candidateVersion': json.loads((ROOT / 'site/package.json').read_text())['version'],
               'builtHtmlPageCount': len(list(DIST.rglob('*.html'))), 'frames': frames, 'fps': fps,
               'subtitleCount': len(facts['subtitles']), 'shotCount': len(facts['shots']), 'chapters': chapters,
@@ -187,9 +210,11 @@ def main():
               'deliveryFileCount': len(manifest['filesSHA256']), 'mediaSHA256': {n: manifest['filesSHA256'][n] for n in (meta['video'],meta['poster'])},
               'viewports': results,
               'scope': 'Actual Chromium UI and built delivery. Not a full audiovisual review or a measured learning-outcome experiment.'}
-    (PRODUCTION / 'qa-site.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
-    (SITE / 'qa-site.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
-    (PRODUCTION / 'qa-site.md').write_text(f"P05 local site QA passed at 1440×1000 and 390×844.\n\n{frames} frames / {fps} fps; {len(facts['subtitles'])} captions; {len(chapters)} chapters. All chapter and article seeks, complete caption text/timing, start and ending playback, final frame, normal end, article-only lower bound and threshold checks, and puzzles navigation checked in Chromium. Screenshot paths and exact hashes are in qa-site.json.\n\nScope: delivery and browser behavior only; no claim of full human audiovisual review or measured understanding.\n")
+    REVISION_DIR.mkdir(parents=True, exist_ok=True)
+    for directory in (output, REVISION_DIR):
+        (directory / 'qa-site.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+        (directory / 'qa-site.md').write_text(f"P05 {REVISION} site QA passed at 1440×1000 and390×844. Current delivery {args.release}; debut {FIRST_RELEASE}.\n\n{frames} frames / {fps} fps; {len(facts['subtitles'])} captions; {len(chapters)} chapters. Dynamic chapter/article seeks, complete caption text/timing, revised03/04 playback, start/end playback, last frame, natural end, ordinary proof/bounds anchors, tables, footnotes and puzzle navigation passed. Actual data and screenshot paths are in qa-site.json.\n\nScope: browser and delivery checks only; not a full audiovisual review or measured learning outcome.\n")
+    (SITE / 'qa-site-binary-opening.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'status': 'passed', 'viewports': [[1440,1000],[390,844]], 'frames': frames,
                       'captions': len(facts['subtitles']), 'chapters': len(chapters), 'pages': report['builtHtmlPageCount']}, ensure_ascii=False))
 

@@ -20,6 +20,10 @@ ROOT = PRODUCTION.parents[1]
 SLUG = 'egg-drop'
 SITE = ROOT / 'episodes' / SLUG
 DIST = ROOT / 'site/dist'
+FIRST_RELEASE = 'v0.67.0'
+REVISION = 'binary-opening'
+REVISION_DIR = PRODUCTION / 'revisions' / REVISION
+QA_OUTPUT = PRODUCTION / 'out' / 'binary-opening-site'
 PUBLIC_FILES = ('article.mdx', 'script.md', 'pronunciation.md', 'words.json',
                 'storyboard.json', 'captions.srt', 'video.mp4', 'render-result.json',
                 'mix-report.json', 'source-sha256.json', 'cover-16x9.jpg',
@@ -38,6 +42,12 @@ def sha_file(path):
     return digest.hexdigest()
 
 
+def release_version(value):
+    match = re.fullmatch(r'v(\d+)\.(\d+)\.(\d+)', value)
+    assert match, ('Expected an explicit three-part Release tag', value)
+    return tuple(map(int, match.groups()))
+
+
 def load_facts():
     """Derive every timing/text fact from the actual final production inputs."""
     config = read_json(PRODUCTION / 'episode-config.json')
@@ -50,6 +60,7 @@ def load_facts():
     assert config['episodePart'] == meta['episodePart'] == '趣味推理 P05'
     assert config['title'] == meta['title']
     assert meta['series'] == 'puzzles'
+    assert meta['firstRelease'] == FIRST_RELEASE, 'A revision must preserve the original debut'
     assert meta['sourcePath'] == 'episodes-codex/egg-drop/remotion'
     fps = sb['meta']['fps']
     assert fps == 30 and not sb['meta'].get('pendingAudio') and not sb['meta'].get('provisionalTiming')
@@ -105,12 +116,16 @@ def puzzle_slugs():
             if m.get('series') == 'puzzles' and not m.get('draft') and not m.get('archived')]
 
 
-def check_local_delivery(facts):
+def check_local_delivery(facts, expected_release=None):
     meta = facts['meta']
     assert meta['draft'] is False and meta['finalVideoFrames'] == facts['frames']
     manifest = read_json(SITE / 'delivery-copy.json')
     assert set(manifest['filesSHA256']) == set(PUBLIC_FILES)
-    assert manifest['release'] == meta['firstRelease']
+    assert manifest['firstRelease'] == meta['firstRelease'] == FIRST_RELEASE
+    assert manifest['revision'] == REVISION
+    assert release_version(manifest['release']) > release_version(FIRST_RELEASE)
+    if expected_release is not None:
+        assert manifest['release'] == expected_release, 'Check the current delivery, not the debut manifest'
     for name in PUBLIC_FILES:
         assert sha_file(PRODUCTION / name) == sha_file(SITE / name) == manifest['filesSHA256'][name], name
     # Astro deliberately serves only the selected video and poster; the other
@@ -127,7 +142,10 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--publish', action='store_true', required=True,
                         help='Use only after the parent has approved the complete formal render.')
+    parser.add_argument('--release', required=True,
+                        help='Actual current delivery tag, selected after checking concurrent releases; debut stays v0.67.0.')
     args = parser.parse_args()
+    assert release_version(args.release) > release_version(FIRST_RELEASE)
     facts = load_facts()
     assert len(PUBLIC_FILES) == 14
     for name in PUBLIC_FILES:
@@ -140,11 +158,13 @@ def main():
     meta = facts['meta']
     meta.update(draft=False, finalVideoFrames=facts['frames'])
     (SITE / 'meta.json').write_text(json.dumps(meta, ensure_ascii=False, indent=2) + '\n')
-    manifest = {'source': str(PRODUCTION.relative_to(ROOT)), 'release': meta['firstRelease'],
+    manifest = {'source': str(PRODUCTION.relative_to(ROOT)), 'release': args.release,
+                'firstRelease': FIRST_RELEASE, 'revision': REVISION,
                 'copiedAtUTC': datetime.now(timezone.utc).isoformat(),
                 'finalVideoFrames': facts['frames'], 'filesSHA256': hashes}
     (SITE / 'delivery-copy.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n')
-    print(json.dumps({'status': 'copied', 'files': len(hashes), 'frames': facts['frames'],
+    print(json.dumps({'status': 'copied', 'release': args.release, 'firstRelease': FIRST_RELEASE,
+                      'files': len(hashes), 'frames': facts['frames'],
                       'videoSha256': hashes['video.mp4']}, ensure_ascii=False))
 
 
