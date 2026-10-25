@@ -2,13 +2,15 @@ import React from 'react';
 import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {C,FONT} from './theme';
 import {Shot,shots} from './data';
+import {createDatabaseIdentity} from '../../../_shared/database-identity';
+const DatabaseMark=createDatabaseIdentity(React);
 declare const __HAS_VOICE_AUDIO__:boolean;
 const cap=(n:number)=>Math.max(0,Math.min(1,n));
 const ease=(f:number,start:number,len=32)=>{const t=cap((f-start)/len);return t*t*(3-2*t)};
 const lerp=(a:number,b:number,t:number)=>a+(b-a)*t;
 const Text:React.FC<{children:React.ReactNode;x?:number;y?:number;w?:number;size?:number;color?:string;alpha?:number;center?:boolean}>=({children,x=130,y=180,w=1660,size=58,color=C.text,alpha=1,center=false})=><div ref={e=>{if(e&&e.scrollWidth>e.clientWidth+2)console.error('COPYFIT overflow',String(children));}} style={{position:'absolute',left:center?x-w/2:x,top:y,width:w,fontSize:size,lineHeight:1.35,fontWeight:600,color,opacity:alpha,textAlign:center?'center':'left',whiteSpace:'nowrap'}}>{children}</div>;
-const Node:React.FC<{label:string;detail?:string;x:number;y:number;color?:string;alpha?:number;progress?:number}>=({label,detail='',x,y,color=C.blue,alpha=1,progress})=><div style={{position:'absolute',left:x-165,top:y-65,width:330,height:130,border:`2px solid ${color}`,borderRadius:20,background:C.surface,opacity:alpha,textAlign:'center'}}>
- <div style={{fontSize:40,fontWeight:650,marginTop:15,color}}>{label}</div><div style={{fontSize:23,color:C.muted,marginTop:5}}>{detail}</div>
+const Node:React.FC<{label:string;detail?:string;x:number;y:number;color?:string;alpha?:number;progress?:number;database?:boolean}>=({label,detail='',x,y,color=C.blue,alpha=1,progress,database=false})=><div style={{position:'absolute',left:x-165,top:y-65,width:330,height:130,border:`2px solid ${color}`,borderRadius:20,background:C.surface,opacity:alpha,textAlign:'center'}}>
+ <div style={{fontSize:40,fontWeight:650,marginTop:15,color}}>{database?<span style={{display:'inline-flex',alignItems:'center',gap:8}}><DatabaseMark size={44}/><span>{label}</span></span>:label}</div><div style={{fontSize:23,color:C.muted,marginTop:5}}>{detail}</div>
  {progress!==undefined&&<div style={{position:'absolute',left:15,right:15,bottom:9,height:4,background:C.edge}}><div style={{width:cap(progress)*100+'%',height:4,background:color}}/></div>}
 </div>;
 const Link:React.FC<{x1:number;y1:number;x2:number;y2:number;color?:string;p?:number;alpha?:number;dashed?:boolean}>=({x1,y1,x2,y2,color=C.edge,p=1,alpha=1,dashed=false})=><svg width={1920} height={1080} style={{position:'absolute',inset:0,opacity:alpha}}><path d={`M${x1} ${y1} L${x2} ${y2}`} pathLength={1} stroke={color} strokeWidth={3} fill="none" strokeDasharray={dashed?'.025 .02':'1'} strokeDashoffset={dashed?0:1-cap(p)}/></svg>;
@@ -86,7 +88,7 @@ const Scene:React.FC<{shot:Shot}>=({shot:s})=>{
  </>}
  if(id===11){const focus=ease(f,s1-5,45);return <><Text>实例增加，性能不一定按倍数增加</Text>
   {[0,1,2].map((i)=><React.Fragment key={i}><Node label={'应用'+['甲','乙','丙'][i]} detail="同一套网站程序" x={450} y={345+i*185} alpha={1-focus*.4}/><Link x1={615} y1={345+i*185} x2={1220} y2={530} color={C.gold} p={focus}/><Packet label="查询" x1={615} y1={345+i*185} x2={1120-i*95} y2={530} p={ease(f,s1+10+i*20,45)} hold/></React.Fragment>)}
-  <Node label="同一个数据库" detail="仍可能成为瓶颈" x={1440} y={530} color={C.gold} alpha={focus}/>
+  <Node label="同一个数据库" detail="仍可能成为瓶颈" x={1440} y={530} color={C.gold} alpha={focus} database/>
   {finish('处理能力取决于整条链路，不承诺快 3 倍',focus,C.gold)}
  </>}
  const a=ease(f,20,45),b=ease(f,70,45),c=ease(f,125,45),end=ease(f,d-55,35);return <>

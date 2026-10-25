@@ -1,5 +1,15 @@
 # EP.18 最终成片检查
 
+## 当前：MySQL数据库身份修订（#230）
+
+当前正式成片SHA-256：`b156e0a555b4cbac61f7033a3190b666667a79cb6bb205dafeec5be5a57dd754`，3560帧，1920×1080/30fps。库名旁增加数据库圆柱与MySQL识别图标；内部记录、原字幕、分镜、数值、相机及原混合AAC保持。原AAC完整SHA为`152d108fb64b2c5f43e5549786cfc61f7d135bc083f8ec6a2a71a38bbce86fd2`，与新片提取流逐字节一致；完整解码、格式与冻结输入检查通过。
+
+独立执行者`/root/tx_saga`从正式新MP4实际查看[600, 1800]帧，真实范围见[本轮QA](qa-mysql-identity.json)及[独立报告](../../docs/mysql-database-identity/final-review-db-replication.json)；预演和fresh构建另有记录，不将它们冒称全片人工听看或用户已认可。发布状态见[本期发布记录](release.md)。
+
+## 修订前历史检查
+
+以下段落保留修订前检查的原始范围，历史媒体与输入由[Git索引](revisions/mysql-identity-before.json)追溯；不能将旧SHA对应的检查冒记为本次重新执行。
+
 2026-10-24，visualRevision 2。最终发布候选为video.mp4，SHA256 `f149b8adb84c516d5fc2fc427f8930d5c1552cf4386362c8af7f8d6eea71f2ba`，6,603,403 bytes。旧编码5078d417cb07ef78026ba38a22bec32a1915d53af4f0da7553440f09db1aecd0因移动文字与轨迹重叠已撤销，不用于发布。
 
 ## 编码与冻结

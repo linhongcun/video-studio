@@ -1,3 +1,15 @@
+# 数据库身份修订（#230）
+
+扣了钱，对方没到账？：保留原配音、字幕与4066帧时长，给真实库角色增加MySQL识别标记，内部记录与提交范围保持。
+
+当前视频完整SHA-256：`66b2075f55dc68d673ed16347049d2c597949a30f12f803ef6f92f98522cc690`；原混合AAC逐字节保持。正式媒体/预演/fresh复现的实际范围见[本轮QA](qa-mysql-identity.json)。图标来源为Devicon，原始SVG、MIT notice和品牌说明见[共享素材](../_shared/database-identity/source.json)，不称官方授权素材。
+
+[PR #235](https://github.com/linhongcun/video-studio/pull/235)已合并，随[v0.58.1](https://github.com/linhongcun/video-studio/releases/tag/v0.58.1)发布；[Release后Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40147968820)成功。线上10支完整视频SHA、字幕、章节、封面、源链接与实际更新日志核验通过，#230已以completed关闭。仅更新GitHub站点，用户对新版的观看反馈后续另记。
+
+[实际线上证据](../../docs/mysql-database-identity/online-verification.json)。
+
+## 历史发布记录
+
 # EP.16 第二版站点发布记录
 
 2026-10-24（北京时间），用户观看第二版后表示“这次就符合预期了”，随后明确要求“代码给合并到主干分支，然后将视频部署到GitHub上了”。本次按 v0.45.2 发布第16期数据库事务重制，只上站点，不重发平台。
