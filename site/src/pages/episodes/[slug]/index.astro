@@ -16,7 +16,7 @@ import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
 import PlatformLinks from '../../../components/PlatformLinks.astro';
 import {getTrackForSeries} from '../../../lib/learning';
-import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, isNew, isoDuration, seriesNav, seriesHref, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
+import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, fmtVersion, dateIso, isNew, isoDuration, seriesNav, seriesHref, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes({includeArchived: true});
   const current = getEpisodes();
@@ -42,9 +42,9 @@ const pageUrl = new URL(`${BASE}episodes/${e.slug}/`, Astro.site).href;
 const abs = (u: string) => new URL(u, Astro.site).href;
 const jsonLd = {
   '@context': 'https://schema.org', '@type': 'VideoObject', name: e.title, description: e.description ?? e.summary,
-  thumbnailUrl: [abs(asset(e.slug, e.poster))], uploadDate: `${e.date}T00:00:00+08:00`, duration: isoDuration(e.duration),
+  thumbnailUrl: [abs(asset(e.slug, e.poster))], ...(e.publishedAt ? {uploadDate: dateIso(e.publishedAt)} : {}), duration: isoDuration(e.duration),
   contentUrl: abs(asset(e.slug, e.video)), embedUrl: pageUrl, inLanguage: 'zh-CN',
-  ...(e.updated ? {dateModified: `${e.updated}T00:00:00+08:00`} : {}),
+  dateCreated: dateIso(e.createdAt), dateModified: dateIso(e.updatedAt),
   publisher: {'@type': 'Organization', name: 'IT小村工作室', url: abs(BASE)},
 };
 const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blockquote: Callout, Figure, Callout, Steps, Summary, CodeBlock};
@@ -63,9 +63,10 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
     <header class="eh" data-pagefind-body>
       <h1 data-pagefind-meta={`image:${asset(e.slug, e.poster)}`}>{e.title}</h1>
       {e.legacy && <p class="legacy" data-legacy>{LEGACY_LABEL}：这是早期版本，新版制作中，上线后会替换本页视频和文章。</p>}
+      <p class="episode-version num"><time datetime={e.updatedAt} aria-label="当前版本">{fmtVersion(e.updatedAt)}</time>{e.publishedAt && isNew(e.publishedAt, e.slug) && <span class="new">NEW</span>}</p>
       <p class="meta num">
-        <span><time datetime={e.date}>{fmtDate(e.date)}</time> 发布{isNew(e.date, e.slug) && <span class="new">NEW</span>}</span>
-        {e.updated && <span>· 更新于 <time datetime={e.updated}>{fmtDate(e.updated)}</time></span>}
+        <span>创建于 <time datetime={e.createdAt}>{fmtDate(e.createdAt)}</time></span>
+        <span>· 修改于 <time datetime={e.updatedAt}>{fmtDate(e.updatedAt)}</time></span>
         <span>· 视频 {fmtTime(e.duration)}</span>
         {e.readMin > 0 && <span>· 约 {e.readMin} 分钟读完</span>}
         <span class="tags">· {e.tags.map((t) => <a href={tagHref(t)}>#{t}</a>)}</span>
@@ -136,6 +137,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 .learning-guide span{color:var(--c-text-2);font-size:var(--fs-small)}
 .learning-guide strong{color:var(--c-primary);font-size:var(--fs-small)}
 .eh h1{font-size:var(--fs-h1);line-height:1.25;margin:0 0 var(--sp-2)}
+.episode-version{display:flex;align-items:center;flex-wrap:wrap;gap:var(--sp-2);margin:0 0 var(--sp-3);color:var(--c-primary);font-size:var(--fs-small);font-weight:600}
 .meta{color:var(--c-text-2);font-size:var(--fs-small);margin:0 0 var(--sp-5);display:flex;gap:var(--sp-2);flex-wrap:wrap}
 .legacy{margin:0 0 var(--sp-3);padding:var(--sp-2) var(--sp-3);font-size:var(--fs-small);color:var(--c-text-2);background:var(--c-surface);border:1px dashed var(--c-border);border-radius:var(--r-md)}
 .meta a{color:var(--c-tag)}

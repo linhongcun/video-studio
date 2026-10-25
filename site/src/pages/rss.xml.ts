@@ -1,6 +1,6 @@
 import rss from '@astrojs/rss';
 import type {APIContext} from 'astro';
-import {getEpisodes, epLabel, fmtTime} from '../lib/episodes';
+import {getEpisodes, epLabel, fmtTime, dateIso} from '../lib/episodes';
 
 /** 新片订阅：pubDate 取 meta.json publishedAt（北京时间当天 00:00） */
 export function GET(ctx: APIContext) {
@@ -11,10 +11,10 @@ export function GET(ctx: APIContext) {
     site,
     trailingSlash: true,
     customData: '<language>zh-CN</language>',
-    items: getEpisodes().map((e) => ({
+    items: getEpisodes().filter((e) => !!e.publishedAt).map((e) => ({
       title: `${epLabel(e)} ${e.title}`,
       link: `episodes/${e.slug}/`,
-      pubDate: new Date(`${e.date}T00:00:00+08:00`),
+      pubDate: new Date(dateIso(e.publishedAt!)),
       description: `${e.description ?? e.summary}（视频 ${fmtTime(e.duration)}）`,
       categories: e.tags,
     })),
