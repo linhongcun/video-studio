@@ -1,0 +1,155 @@
+{
+  "title": "Java关键代码 · 节选",
+  "subtitle": "暂停查看",
+  "language": "Java",
+  "lines": [
+    "record OrderChange(String orderId, String status) {}",
+    "interface OrderObserver { void onChange(OrderChange change); }",
+    "",
+    "// Order内：先改状态，再通知当前名单快照",
+    "status = next;",
+    "OrderChange change = new OrderChange(id, next);",
+    "",
+    "for (OrderObserver observer : List.copyOf(observers)) {",
+    "    observer.onChange(change);",
+    "}",
+    "",
+    "// main内：摘要显示，变化记录追加，各自响应",
+    "Order order = new Order(\"17\");",
+    "SummaryObserver summary = new SummaryObserver();",
+    "ChangeLogObserver log = new ChangeLogObserver();",
+    "order.subscribe(summary);",
+    "order.subscribe(log);",
+    "order.changeStatus(\"已付款\");",
+    "order.unsubscribe(summary);",
+    "order.changeStatus(\"已发货\");",
+    "// 摘要最后收到已付款，记录保留已付款、已发货"
+  ],
+  "sourceFile": "demo-java/ObserverDemo.java",
+  "sourceSha256": "94e6853c8453daf4646a1e72b352155687971fccceb552280537ffea8d1189cc",
+  "excerptRanges": [
+    {
+      "from": 8,
+      "to": 9,
+      "removeIndent": 4
+    },
+    {
+      "from": 33,
+      "to": 35,
+      "removeIndent": 12
+    },
+    {
+      "from": 40,
+      "to": 42,
+      "removeIndent": 16
+    },
+    {
+      "from": 66,
+      "to": 75,
+      "removeIndent": 8
+    }
+  ],
+  "lineSources": [
+    {
+      "line": 8,
+      "removeIndent": 4
+    },
+    {
+      "line": 9,
+      "removeIndent": 4
+    },
+    {
+      "line": null,
+      "removeIndent": 0
+    },
+    {
+      "line": 33,
+      "removeIndent": 12
+    },
+    {
+      "line": 34,
+      "removeIndent": 12
+    },
+    {
+      "line": 35,
+      "removeIndent": 12
+    },
+    {
+      "line": null,
+      "removeIndent": 0
+    },
+    {
+      "line": 40,
+      "removeIndent": 16
+    },
+    {
+      "line": 41,
+      "removeIndent": 16
+    },
+    {
+      "line": 42,
+      "removeIndent": 16
+    },
+    {
+      "line": null,
+      "removeIndent": 0
+    },
+    {
+      "line": 66,
+      "removeIndent": 8
+    },
+    {
+      "line": 67,
+      "removeIndent": 8
+    },
+    {
+      "line": 68,
+      "removeIndent": 8
+    },
+    {
+      "line": 69,
+      "removeIndent": 8
+    },
+    {
+      "line": 70,
+      "removeIndent": 8
+    },
+    {
+      "line": 71,
+      "removeIndent": 8
+    },
+    {
+      "line": 72,
+      "removeIndent": 8
+    },
+    {
+      "line": 73,
+      "removeIndent": 8
+    },
+    {
+      "line": 74,
+      "removeIndent": 8
+    },
+    {
+      "line": 75,
+      "removeIndent": 8
+    }
+  ],
+  "lineCount": 21,
+  "longestLineCharacters": 62,
+  "roleMapping": {
+    "订单来源与名单": "Order",
+    "共同观察者约定": "OrderObserver",
+    "通知事实": "OrderChange",
+    "订单摘要": "SummaryObserver",
+    "变化记录": "ChangeLogObserver",
+    "订阅与取消的使用": "main"
+  },
+  "scope": "Four exact source excerpts: shared contract, inside Order.changeStatus, notification loop, and inside main. Method/context comments are real source lines; this is not a standalone full program.",
+  "omittedSections": [
+    "Order fields and subscribe/unsubscribe methods",
+    "SummaryObserver and ChangeLogObserver full implementations",
+    "input/no-change/reentrancy guards and try/finally notification lifecycle",
+    "imports and enclosing class"
+  ]
+}

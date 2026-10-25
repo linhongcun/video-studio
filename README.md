@@ -84,7 +84,7 @@ episodes/
 site/                      Astro 站点（GitHub Pages）
 ```
 
-发布目录不另存旧动画工程、WAV 或 PNG 原稿；幕后源码链接由 `meta.json.sourcePath` 指向制作工程。Agent 当前入口为 `agent-intro-v3/`，第二版成片仍是其拼接输入，保留 `agent-intro-v2/`。
+发布目录不另存旧动画工程、WAV 或 PNG 原稿；幕后源码链接由 `meta.json.sourcePath` 指向制作工程。用户已要求删除A01/EP.22与A02/EP.28两期Agent试片，相关发布内容与制作工程退出当前目录；原`agent-intro-v2/`拼接依赖不再保留。旧工程可通过Git历史追溯，当前范围与发布验证见[撤下记录](docs/agent-video-retirement.md)。后续概念研究题库继续保留。
 
 ## 本地开发与渲染
 

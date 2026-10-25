@@ -1,8 +1,80 @@
-# Agent 开发视频系列选题与资料依据
+# AI / Agent 概念视频：当前选题与资料依据
 
-调研与访问日期：2026-10-24（北京时间）。
+更新与核验：2026-10-25（北京时间）。
 
-状态：用户已认可本系列选题，并要求先登记 GitHub issue、后续分批制作；A01–A16 是建议的学习顺序，不占用现有 EP 期号。本文保留选题时的建议设计；实际制作与示例结果以下面的当期工程和 issue 为准，未启动选题的演示仍是待实施方案。
+用户已明确转向以**Skill、MCP、Subagent、Goal等AI概念**为入口，讲机制、设计意图与取舍，并授权关闭过浅选题。Goal已确认是“目标驱动的Agent”。旧16期主线＋4项深入方向的制作顺序作废，上一版六个API/工单实战单元草案撤回；不再按基础接线逐条开拍。
+
+**最新媒体处置：**用户进一步要求删除A01/EP.22与A02/EP.28两期试片；两期发布内容和制作工程退出当前树，取代此前保留旧媒体的决定。历史制作、QA与负面反馈通过删除前Git提交追溯；11项概念研究候选不变。范围及待完成的部署核验见[撤下记录](agent-video-retirement.md)。
+
+详细依据与复盘见[当前策划](agent-development-value-review.md)，实时跟踪见[系列总览 #130](https://github.com/linhongcun/video-studio/issues/130)。以下是重写后的编辑研究候选，不是11支视频的固定排期，也不是用户已逐项认可的新标题或效果。
+
+## 优先研究池
+
+| 候选 | 要解开的问题 | 必须超越的浅层讲法 |
+|---|---|---|
+| [Agent Skills #139](https://github.com/linhongcun/video-studio/issues/139) | Skill解决的不是再写一段提示词，而是怎样把可复用的工作方法打包、发现，并在有限上下文中按需使用。 | 名称/描述供发现与路由，完整指令在激活时加载，参考资料和脚本按需要读取；说明渐进加载为何影响上下文占用与触发质量。 |
+| [MCP #138](https://github.com/linhongcun/video-studio/issues/138) | MCP究竟统一了哪层契约，哪些复杂性仍要由Host、Server与业务系统承担？ | 以同一外部能力的接入变化，展开Host/Client/Server、能力发现、请求/结果与数据访问职责。 |
+| [Subagent #146](https://github.com/linhongcun/video-studio/issues/146) | 委派为何可能提高表现，又为何可能增加费用、丢失关键信息或制造文件冲突？ | 沿任务说明→子任务上下文→工具/环境→结果返回解释委派，区分角色名称、独立模型调用、上下文边界与权限边界。 |
+| [Goal #248](https://github.com/linhongcun/video-studio/issues/248) | 谁凭什么判定目标完成？ | 目标/约束/计划/反馈分离，执行者与评估者、真实证据及继续和停止语义，超过while循环。 |
+
+建议先研究Skills，再看MCP、Subagent、Goal。每项先用一个有解释力的对照检验内容密度，不能只堆术语或重放操作流程。区别是切入点，必须进入机制和取舍。
+
+## 后续研究与储备
+
+| 候选 | 当前问题 | 研究优先级 |
+|---|---|---|
+| [Context Engineering #135](https://github.com/linhongcun/video-studio/issues/135) | 上下文工程如何在每次调用中选择、组织、更新真正相关的信息，而不只是把更多资料塞给模型？ | 后续深入研究 |
+| [Agent Harness #149](https://github.com/linhongcun/video-studio/issues/149) | 运行系统怎样组织模型、上下文、工具、会话状态与验证反馈，而不只是把读文件、改代码、跑测试重放一遍？ | 后续深入研究 |
+| [Agent Memory #137](https://github.com/linhongcun/video-studio/issues/137) | 记忆的难点在写什么、何时召回、怎样更新纠错和遗忘；不能只演示跨会话读写一个偏好。 | 后续储备；先审独立增量 |
+| [Durable Execution #140](https://github.com/linhongcun/video-studio/issues/140) | 长任务中的模型决策、持久状态和外部副作用怎样协调，为什么保存检查点不等于安全恢复？ | 后续储备；先审与既有幂等/事务系列的增量 |
+| [Prompt Injection / Guardrails #142](https://github.com/linhongcun/video-studio/issues/142) | 外部内容、模型指令与真实执行权限之间的信任边界在哪里，各类Guardrails到底能限制什么？ | 后续深入研究 |
+| [Agent Evals #144](https://github.com/linhongcun/video-studio/issues/144) | 评估Agent时，最终环境状态、执行轨迹和模型评分分别能证明什么？ | 后续深入研究 |
+| [Context Compaction #147](https://github.com/linhongcun/video-studio/issues/147) | 有损上下文压缩可能遗漏后续所需信息时，如何保留目标、约束和证据入口，避免把摘要误当成完整事实？ | 后续储备；与上下文、记忆片交叉审读 |
+
+## 旧选题处置
+
+原20项为**1项完成历史＋9项撤题＋10项重构开放**；新增Goal后共11项开放候选。A/B编号保留作身份，旧前置链不再约束拍摄顺序。
+
+| 旧项 | 当前处理与内容去向 |
+|---|---|
+| [A01 #131](https://github.com/linhongcun/video-studio/issues/131) | 保留completed制作历史；V3/v0.54.3曾上线，现已按用户要求撤下，发布内容与相关工程删除，不再作为在线课程。 |
+| [#132](https://github.com/linhongcun/video-studio/issues/132) | not_planned；与A01重复，独立增量不足；工具请求、应用执行和结果回传作为后续概念的必要前置简述，不再把接线本身单独做一期。A02 V1/EP.28/v0.59.0曾上线，用户反馈价值不足；关闭表示取消独立重制，后续用户要求将原片和工程一并删除，不表示完成了改进或用户认可。上一版“真实模型＋工具循环”重拍建议同时撤回。 |
+| [#133](https://github.com/linhongcun/video-studio/issues/133) | not_planned；自由文本/JSON/Schema/业务校验的基础接续不足以构成本系列独立一期；必要契约放在具体概念使用处解释，不以字段校验教程撑起单集。 |
+| [#134](https://github.com/linhongcun/video-studio/issues/134) | not_planned；最小循环、继续/结束分支与步数限制偏基础接线，退出独立制作；目标驱动的Agent将另建Goal选题，研究目标、证据、评估器和终止语义，不把旧循环改标题后继续。 |
+| [#136](https://github.com/linhongcun/video-studio/issues/136) | not_planned；原计划主要解释检索→拼上下文→生成的基础RAG流程，退出独立制作；检索选择、证据时效和上下文预算按后续概念需要解释。此决定不代表RAG整体没有研究深度。 |
+| [#141](https://github.com/linhongcun/video-studio/issues/141) | not_planned；保存参数→等待批准→执行的基础审批流程不独立成片；保留实际权限、批准范围与执行边界的必要讨论。 |
+| [#143](https://github.com/linhongcun/video-studio/issues/143) | not_planned；原计划侧重沿模型/工具日志排查常见故障，退出独立制作；执行轨迹作为检验概念和定位差异的证据，纳入评估与运行架构讨论。 |
+| [#145](https://github.com/linhongcun/video-studio/issues/145) | not_planned；通用token、请求数与等待时间优化技巧不独立成片；具体开销必须结合上下文选择、委派与运行预算取舍解释。 |
+| [#148](https://github.com/linhongcun/video-studio/issues/148) | not_planned；不再为MCP与Skills基础区别及组合使用另拍第三支重复对比片；该issue中Skills over MCP扩展的有价值部分并入两支主片，保留发现/分发、加载/执行、宿主支持、完整性与信任边界，不能用“一个给工具、一个给方法”作绝对划分。 |
+| [#150](https://github.com/linhongcun/video-studio/issues/150) | not_planned；撤回以工单应用整合为终点的基础开发课程主线；把已讲功能再次串起来不保证新增机制理解或判断力。后续各概念按最能解释机制的例子设计，不强制套同一个退款工单。 |
+
+其余十个旧issue已按上方研究范围重写，旧内容折叠为历史。该次仅处理策划与记录；随后本轮按用户要求删除两期，未制作或重渲替代视频。线上删除效果以撤下记录的实际部署核验为准。
+
+## 内容与证据要求
+
+- 面向已会基本编程的观众，用清楚场景或对照解释概念，不补一整套API接线前置课。
+- 每项有出现原因、机制、近似方案差异与代价/失效边界；去掉热门标题后仍应值得观看。
+- 代码、协议报文、交互和图解服务于论证，不把可运行工程设为所有概念片的统一门槛。涉及实际行为和性能时运行验证，示意与实测分别标注。
+- 重新核验第一方资料、发布日期、产品/宿主/协议适用范围；不从官方文档存在推出“最热门”，也不从厂商案例推出普遍收益。
+- 用户观看反馈、内容审读、技术QA与发布检查分别记载。当前新方向尚无成片效果结论。
+
+## 本轮一手资料
+
+访问2026-10-25（北京时间）；下方旧S01–S19仍可检索，版本与兼容性以当前核验和开工实测为准。
+
+- [Agent Skills规范](https://agentskills.io/specification)：渐进加载和技能包结构。
+- [MCP 2026-07-28规范](https://modelcontextprotocol.io/specification/2026-07-28)：无状态核心与逐请求能力协商，不能沿用旧初始化/会话叙事。
+- [Skills over MCP](https://modelcontextprotocol.io/extensions/skills/overview)：可选扩展的发现与获取，不自动等于激活/执行；支持情况依宿主。
+- [Claude Code Subagents](https://code.claude.com/docs/en/sub-agents)：上下文、权限、fork与环境隔离的区别，限该产品实例。
+- [Claude Code Goal](https://code.claude.com/docs/en/goal)：评估者只读对话证据，不独立运行环境检查；Goal不是统一标准。
+- [Context Engineering](https://www.anthropic.com/research/effective-context-engineering-for-ai-agents)、[Managed Agents架构](https://www.anthropic.com/research/managed-agents)、[Agent Evals](https://www.anthropic.com/research/demystifying-evals-for-ai-agents)：后续机制研究的原始工程资料。
+
+## 原始2026-10-24题库与资料档案
+
+**以下仅保留研究及决策历史，原系列名、学习顺序、前置、演示和待排期状态均被上方当前安排取代。** 当时用户认可原题库，不代表对本次新命题或A02成片的认可；原“其余18项待排期”等数量不得用于当前状态判断。A01/A02媒体和QA仅通过删除前固定Git提交查阅，当前课程与工程已移除；撤题与删除均不改写历史。
+
+<details>
+<summary>展开原16期主线＋4项深入方向及S01–S19资料索引（历史方案）</summary>
 
 ## 系列定位与资料使用
 
@@ -22,7 +94,7 @@
 
 2026-10-24 用户已认可选题并要求先登记 issue，后续分批制作。系列总览：[#130](https://github.com/linhongcun/video-studio/issues/130)。以下 20 个选题均已建单，创建时为待排期；后续进度以 GitHub issue 的实际状态为准。
 
-用户随后要求先做一期看效果，A01 / EP.22 已制作并按反馈更新至 V3，当前成片与检查入口见 [制作说明](../episodes-codex/agent-intro-v3/README.md)；发布及线上核验见 #131。2026-10-25用户要求拉取最新代码后继续下一期，已启动A02 / EP.28；[本期工程](../episodes-codex/agent-tool-execution/README.md)重新核验官方资料，实际本地HTTP演示有权限查询1次、无权限拒绝0次，模型侧为固定fixture。成片及上线状态以#132为准，其余18项继续待用户后续安排。
+用户随后要求先做一期看效果，A01 / EP.22 已制作并按反馈更新至 V3，当前成片与检查入口见 [制作说明](https://github.com/linhongcun/video-studio/blob/321e8e8c1b4ad34a6ea09eed2bb5cf369d9ab6dd/episodes-codex/agent-intro-v3/README.md)；发布及线上核验见 #131。2026-10-25用户要求拉取最新代码后继续下一期，已启动A02 / EP.28；[本期工程](https://github.com/linhongcun/video-studio/blob/321e8e8c1b4ad34a6ea09eed2bb5cf369d9ab6dd/episodes-codex/agent-tool-execution/README.md)重新核验官方资料，实际本地HTTP演示有权限查询1次、无权限拒绝0次，模型侧为固定fixture。成片及上线状态以#132为准，其余18项继续待用户后续安排。
 
 | 学习编号 | 选题 issue |
 |---|---|
@@ -337,3 +409,5 @@ MCP Tasks、Computer Use、A2A 和特定框架比较可以进入储备池。先�
 [S17]: https://developers.openai.com/cookbook/examples/agents_sdk/building_reliable_agents_memory_compaction
 [S18]: https://modelcontextprotocol.io/extensions/skills/overview
 [S19]: https://www.anthropic.com/research/managed-agents
+
+</details>

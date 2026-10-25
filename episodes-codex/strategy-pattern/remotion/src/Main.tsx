@@ -1,7 +1,8 @@
-import React from 'react';
+import React,{useLayoutEffect,useRef} from 'react';
 import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {shots,Shot} from './data';
-import {C,FONT} from './theme';
+import {C,FONT,MONO} from './theme';
+import javaCard from './java-card.json';
 import {at,beat} from './motion';
 import {Heading,Note,Reset,Text,Frame,Path,clamp,lerp} from './objects';
 declare const __HAS_VOICE_AUDIO__:boolean;
@@ -55,20 +56,79 @@ const AmountTravel:React.FC<{points:[number,number][];p:number;text:string;color
  return <><Path points={points} p={p} color={color}/><div style={{position:'absolute',left:x-90,top:y-22,width:180,height:44,border:'2px solid '+color,borderRadius:9,background:C.bg,opacity,boxSizing:'border-box'}}><Text x={8} y={0} w={160} size={29} center color={color}>{text}</Text></div></>;
 };
 
+const CheckoutUI:React.FC<{s:Shot;f:number}>=({s,f})=>{
+ const progress=beat(s,f,'campaign'),changed=progress>0,done=progress>=.99;
+ const price=changed?(done?'80元':'计算中'):'90元';
+ const accent=(which:Pricing)=>which===(changed?'campaign':'member')?C.gold:C.edge;
+ return <><Heading>换一种优惠，结算怎样照常继续？</Heading>
+  <Frame x={180} y={315} w={1560} h={492} label="结算页 · 教学示意" color={C.blue}/>
+  <Text x={235} y={390} w={610} size={27} color={C.muted}>商品清单</Text>
+  <Text x={235} y={439} w={610} size={39} weight={700}>示例商品 × 1</Text>
+  <Text x={235} y={509} w={610} size={29} color={C.muted}>商品原价</Text>
+  <Text x={235} y={558} w={610} size={70} color={C.blue} weight={750}>100元</Text>
+  <Text x={235} y={705} w={610} size={26} color={C.muted}>本例每次只选一种优惠，不叠加</Text>
+  <div style={{position:'absolute',left:900,top:385,width:2,height:360,background:C.edge}}/>
+  <Text x={960} y={380} w={705} size={29}>选择本次定价办法</Text>
+  {(['member','campaign'] as Pricing[]).map((which,i)=>{const selected=which===(changed?'campaign':'member');return <div key={which} style={{position:'absolute',left:960,top:438+i*92,width:705,height:75,border:'2px solid '+accent(which),background:selected?C.gold+'09':C.bg,borderRadius:12,boxSizing:'border-box'}}>
+   <div style={{position:'absolute',left:24,top:24,width:23,height:23,border:'2px solid '+(selected?C.gold:C.muted),borderRadius:20,boxSizing:'border-box'}}>{selected&&<div style={{position:'absolute',left:4,top:4,width:11,height:11,borderRadius:12,background:C.gold}}/>}</div>
+   <Text x={67} y={13} w={420} size={31} color={selected?C.gold:C.text}>{which==='member'?'会员优惠 · 九折':'活动优惠 · 八折'}</Text>
+   {changed&&which==='campaign'&&progress<.5&&<div style={{position:'absolute',right:22,top:18,color:C.gold,fontSize:25}}>已改选</div>}
+  </div>;})}
+  <Text x={960} y={664} w={300} size={30} color={C.muted}>本次应付</Text>
+  <Text x={1280} y={649} w={385} size={56} color={C.gold} center weight={750}>{price}</Text>
+  <Note>{changed?(done?'页面改选活动后，应付80元；接下来展开背后的设计':'改选后先重新计算，不沿用会员90元结果'):'先看用户在结算页做什么，再进入内部职责'}</Note>
+ </>;
+};
+
+const RoleDiagram:React.FC<{s:Shot;f:number}>=({s,f})=>{
+ const progress=beat(s,f,'roles'),started=f>=at(s,1,0);
+ const current=!started?'none':progress<.22?'client':progress<.47?'context':progress<.7?'strategy':'concrete';
+ const ink=(which:string)=>current===which?C.gold:C.teal;
+ return <><Heading>对照结构图，把各方职责逐一对上</Heading>
+  <Text x={160} y={267} w={1580} size={27} color={C.muted} center>同一个结算功能 · 业务对象与代码角色对应</Text>
+  <Path points={[[490,520],[650,520]]} color={current==='client'?C.gold:C.edge}/>
+  <Path points={[[1130,520],[1200,520],[1200,420],[1310,420]]} color={current==='context'?C.gold:C.edge}/>
+  <Path points={[[1365,644],[1365,578],[1420,578],[1420,517]]} color={current==='concrete'?C.gold:C.edge} dashed/>
+  <Path points={[[1635,644],[1635,578],[1660,578],[1660,517]]} color={current==='concrete'?C.gold:C.edge} dashed/>
+  <Frame x={150} y={390} w={340} h={260} color={ink('client')} label="选择方"/>
+  <Text x={174} y={457} w={292} size={29}>决定本次采用谁</Text>
+  <Text x={174} y={548} w={292} size={24} color={C.muted}>Client · main</Text>
+  <Frame x={650} y={390} w={480} h={260} color={ink('context')} label="结算上下文"/>
+  <Text x={678} y={451} w={424} size={30}>读取原价
+委托定价，显示应付</Text>
+  <Text x={678} y={554} w={424} size={25} color={C.muted}>Context · Checkout</Text>
+  <Frame x={1310} y={330} w={450} h={187} color={ink('strategy')} label="抽象定价约定"/>
+  <Text x={1334} y={391} w={402} size={29}>原价 → 应付金额</Text>
+  <Text x={1334} y={447} w={402} size={24} color={C.muted}>Strategy · PricingStrategy</Text>
+  <Frame x={1240} y={644} w={260} h={151} color={ink('concrete')} label="会员定价"/>
+  <Text x={1260} y={704} w={220} size={30} color={C.text}>负责九折</Text>
+  <Text x={1260} y={752} w={220} size={21} color={C.muted}>MemberPricing</Text>
+  <Frame x={1510} y={644} w={260} h={151} color={ink('concrete')} label="活动定价"/>
+  <Text x={1530} y={704} w={220} size={30} color={C.text}>负责八折</Text>
+  <Text x={1530} y={752} w={220} size={21} color={C.muted}>CampaignPricing</Text>
+  <Text x={494} y={477} w={152} size={22} color={C.muted} center>配置</Text>
+  <Text x={1138} y={438} w={165} size={22} color={C.muted} center>按约定使用</Text>
+  <Note color={started?C.teal:C.muted}>{!started?'先认清结构，再沿同一关系看一次计算':current==='client'?'选择方配置本次采用谁，不承担九折或八折细节':current==='context'?'结算通过共同约定使用所选策略':current==='strategy'?'抽象策略说明各方共同依赖的定价约定':'具体策略各自计算；接下来先选会员，看一次委托'}</Note>
+ </>;
+};
+
+const JavaCodeCard:React.FC=()=>{
+ const ref=useRef<HTMLPreElement>(null),card=javaCard as {title?:string;subtitle?:string;lines:string[]};
+ useLayoutEffect(()=>{const e=ref.current;if(e&&(e.scrollWidth>e.clientWidth+2||e.scrollHeight>e.clientHeight+2))console.error('COPYFIT Java key-code card',e.scrollWidth,e.clientWidth,e.scrollHeight,e.clientHeight);},[]);
+ return <AbsoluteFill data-java-card style={{background:C.bg,color:C.text,fontFamily:FONT}}>
+  <Text x={130} y={55} w={1300} size={25} color={C.muted}>设计模式 · 策略模式</Text><Text x={1690} y={55} w={150} size={25}>IT小村</Text>
+  <Text x={130} y={124} w={1660} size={47} weight={750}>{card.title??'Java关键代码 · 节选'} <span style={{color:C.gold}}> · {card.subtitle??'暂停查看'}</span></Text>
+  <pre ref={ref} data-fit style={{position:'absolute',left:150,top:217,width:1620,height:750,margin:0,padding:'15px 22px',boxSizing:'border-box',borderLeft:'3px solid '+C.teal,background:C.surface,fontFamily:MONO,fontSize:26,lineHeight:1.24,whiteSpace:'pre',overflow:'hidden'}}>{card.lines.join('\n')}</pre>
+  <Text x={130} y={999} w={1660} size={25} color={C.muted} center>同一原价100元，会员90元、活动80元 · 本例优惠二选一</Text>
+ </AbsoluteFill>;
+};
+
 const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  const kind=s.visualType;
- if(kind==='same-task'){
-  const p=beat(s,f,'member'),q=beat(s,f,'campaign');
-  return <><Heading>换优惠，结算流程怎样照常走？</Heading>
-   <Text x={210} y={394} w={520} size={31} center color={C.muted}>同一笔示例订单 · 原价</Text><Text x={210} y={460} w={520} size={83} center color={C.blue} weight={750}>100元</Text>
-   <Text x={1040} y={382} w={680} size={47} alpha={p}>会员九折 → <span style={{color:C.gold}}>90元</span></Text>
-   <Text x={1040} y={536} w={680} size={47} alpha={q}>活动八折 → <span style={{color:C.gold}}>80元</span></Text>
-   <Note alpha={q}>同一项结算任务，不同的定价办法</Note>
-  </>;
- }
+ if(kind==='checkout-ui')return <CheckoutUI s={s} f={f}/>;
  if(kind==='mixed-pricing'){
   const p=beat(s,f,'details'),q=beat(s,f,'maintenance');
-  return <><Heading>共同步骤与定价细节，先写在同一处</Heading>
+  return <><Heading>结算页背后，共同步骤与定价细节先写在同一处</Heading>
    <Settlement mixed={p>.1} scope={q>.2} focus={q>.2?'pricing':undefined}/>
    <Note alpha={q}>维护一种定价办法时，也要进入这段共同流程</Note>
   </>;
@@ -92,15 +152,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
    <Note alpha={q}>接收的都是原价，交回的都是应付金额；结果可以不同</Note>
   </>;
  }
- if(kind==='choose-strategy'){
-  const choosing=beat(s,f,'selection'),chosen=choosing>.5;
-  return <><Heading>{f<at(s,1,0)?'两种策略准备好了，再选择本次采用谁':'选择环节在流程外侧，这次采用会员策略'}</Heading>
-   {f>=at(s,1,.03)&&<Selection waiting={!chosen} pricing="member" active={choosing>.1&&choosing<.99}/>}
-   <Settlement delegate suppressPricing={!chosen}/>
-   {chosen?<><Contract/><CurrentPricing pricing="member" pending active={choosing<.99}/></>:<PreparedPricing/>}
-   <Note>选择只决定本次采用谁，应付金额尚未计算</Note>
-  </>;
- }
+ if(kind==='role-structure')return <RoleDiagram s={s} f={f}/>;
  if(kind==='member-delegation'){
   const request=beat(s,f,'request'),calculation=beat(s,f,'calculation'),returned=beat(s,f,'returned'),used=beat(s,f,'used');
   const computed=calculation>=.99,done=returned>=.99;
@@ -157,10 +209,11 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
 
 const ShotView:React.FC<{shot:Shot;captions:boolean}>=({shot:s,captions})=>{
  const f=useCurrentFrame(),sub=s.subtitles?.find(v=>f>=v.from&&f<=(v.to??v.from+(v.duration??1)-1));
+ if(Number.isInteger(s.javaCardFrom)&&f>=s.javaCardFrom)return <JavaCodeCard/>;
  return <AbsoluteFill style={{background:C.bg,color:C.text,fontFamily:FONT,overflow:'hidden'}}>
   <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 88% 3%, #173B5544, transparent 62%)'}}/>
   <Text x={130} y={54} w={1450} size={25} color={C.muted}>设计模式 · {s.chapterTitle??'同一流程，不同策略'}</Text><Text x={1690} y={54} w={150} size={25}>IT小村</Text>
-  <Text x={130} y={108} w={1650} size={23} color={C.blue}>示例订单 · 原价100元 · 每次只选一种定价办法</Text>
+  <Text x={130} y={108} w={1650} size={23} color={C.blue}>{s.visualType==='checkout-ui'?'结算功能 · 教学示意':'示例订单 · 原价100元 · 每次只选一种定价办法'}</Text>
   <Scene s={s} f={f}/>
   {captions&&sub&&<div data-subtitle style={{position:'absolute',left:130,right:130,top:925,minHeight:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:39,fontWeight:500,lineHeight:1.4,textAlign:'center',background:C.bg+'F8',borderRadius:12,padding:'7px 15px',boxSizing:'border-box'}}>{sub.text}</div>}
  </AbsoluteFill>;

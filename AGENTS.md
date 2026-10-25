@@ -74,7 +74,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 | `docs/` | 下面这些手册。制作说明模板是 `docs/knoll-props.template.md` |
 | `site/` | Astro 站点。`site/package.json` 的 `version` 是三段式版本号 |
 
-2026-10-25 清理已被替代的旧工程，记录见 [docs/repository-cleanup.md](docs/repository-cleanup.md)。当前制作入口以各期 `meta.json.sourcePath` 为准；Agent 为 `agent-intro-v3/`，其拼接仍依赖 `agent-intro-v2/video.mp4`，不要删掉该输入。下架隔离级别和 Agent 第一版通过 Git 历史追溯。
+2026-10-25 清理已被替代的旧工程，记录见 [docs/repository-cleanup.md](docs/repository-cleanup.md)。当前制作入口以各期 `meta.json.sourcePath` 为准。用户随后明确要求删除两期Agent试片：A01/EP.22与A02/EP.28的发布目录及相关制作工程一并移除，原先保护`agent-intro-v2/video.mp4`拼接依赖的说明随第三版删除而失效。后续仍推进Skills、MCP、Subagent、Goal等11项概念研究候选；删除前工程与检查通过固定Git提交追溯。当前删除范围与发布验证见[撤下记录](docs/agent-video-retirement.md)，不从历史恢复这两期为现行课程。
 
 ## 手册
 

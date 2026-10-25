@@ -1,51 +1,49 @@
 # 设计模式 D02 · 观察者模式
 
-制作 issue 为 [#164](https://github.com/linhongcun/video-studio/issues/164)，系列总览为 [#161](https://github.com/linhongcun/video-studio/issues/161)。先解释语言无关的设计关系：变化来源、订阅者、共同通知约定与可调整的订阅集合；具体语言实现仅作配套图文拓展。当前真实音轨为12镜24句、5章、4979帧，约2分46秒；思想/动态预检、正式成片、本地站点及实际上线核验均通过，首发v0.58.0；见[发布记录](release.md)，不预记用户已观看认可。
+制作issue [#164](https://github.com/linhongcun/video-studio/issues/164)，系列总览 [#161](https://github.com/linhongcun/video-studio/issues/161)。首发v0.58.0；用户随后要求改为“先产品操作、再结构逐节点、最后Java关键代码”的讲解流程，并明确保留原案例。本次不换订单故事，不引入购物车或支付渠道，不把思想课改成语法课。
 
-## 配音与装配
+## 本次修订
 
-Python 工具环境为 `/workspace/.venvs/video-studio/bin/python`，已具有 numpy、scipy 和 soundfile。音色冰糖、模型 mimo-v2.5-tts；用共享工具生成逐句候选并裁掉隔离尾词“好。”，不进行合成后变速。口播稿通过审读且明确冻结后才请求 TTS。
+同一程序内的订单17仍由待付款变已付款，再变已发货；接收方仍是订单摘要和变化记录，摘要取消后保留历史已付款/停止接收，下一次仅记录收到已发货。
+
+- 01商家订单详情教学页实际点击“标记为已付款”，看到来源状态、摘要和记录依次联动；不执行真实支付。
+- 02从相同已付款结果展开Order来源、OrderObserver共同约定、SummaryObserver/ChangeLogObserver具体观察者，逐节点解释职责。契约是结构关系，不是中间转发服务。
+- 03明确回看本次付款前，再从空名单演出登记；05–06解释01同一次付款的机制。08用可见关闭X说明摘要退出的生命周期理由，后续取消和发货沿原思想主线。
+- 片尾单独5秒Java静默关键代码卡，注明节选/暂停，完整可运行程序和八项编译运行检查见`demo-java/`。角色名与结构相同，不逐行讲语法。
+
+12镜24句仅5句重配，19句复用旧take。body5178帧，静默尾卡150帧，总5328帧/177.6秒，1920×1080/30fps。配音选用与声学边界见`voice/flow-reuse-provenance.json`、`voice/flow-candidate-audit.json`；完整能力限制如实记录，不声称逐字ASR、完整听辨或理解实验。
+
+## 历史与复用
+
+`revisions/flow-ui-java/baseline/source/`保存26份旧生产源，`baseline/voice-archive.json`及同目录保存旧音轨、时序与QA；旧takes原位保留。旧视频实体为`baseline/video.mp4`，SHA为`76f38c9675e7ecf57520df1212cfac78093d6e24eaf534a38ed8c07a6e8c0c08`，不靠新清单追认旧成片。旧版完整制作说明在`baseline/source/README.md`，历史发布在`release.md`的既有记录。
+
+三比例封面及poster沿用原字节，七份完整SHA见`revisions/flow-ui-java/cover-reuse.json`，已与Git基线e2a0add逐字节比较。标题与案例未换，不重生成封面。
+
+## 实际生产入口
+
+Python工具环境`/workspace/.venvs/video-studio/bin/python`。正文继续用共享prep/build/assemble/place/onset工具，不复制裁尾/起音/铺轨算法。`revisions/flow-ui-java/voiced-body/`保存追加Java卡前的实际有声body；新增卡段由共享`episodes-codex/_shared/append_java_endcard.py`明确声明，旧句界和字幕不伸入代码卡。
+
+只读核验Java尾卡及保存body（仓库根）：
 
 ```sh
-/workspace/.venvs/video-studio/bin/python episodes/_shared/voice/prep.py --dir episodes-codex/observer-pattern
-/workspace/.venvs/video-studio/bin/python episodes/_shared/voice/gen.py --dir episodes-codex/observer-pattern --jobs jobs-production.json
-/workspace/.venvs/video-studio/bin/python episodes-codex/observer-pattern/voice/signal-audit.py
-/workspace/.venvs/video-studio/bin/python episodes/_shared/voice/build.py --dir episodes-codex/observer-pattern
-/workspace/.venvs/video-studio/bin/python episodes-codex/_shared/assemble_sentence_episode.py episodes-codex/observer-pattern
-/workspace/.venvs/video-studio/bin/python episodes/_shared/place_v2.py --dir episodes-codex/observer-pattern --mode whole
-/workspace/.venvs/video-studio/bin/python episodes/_shared/label_onset_strict.py --dir episodes-codex/observer-pattern
-/workspace/.venvs/video-studio/bin/python episodes-codex/_shared/check_sentence_episode.py episodes-codex/observer-pattern
+/workspace/.venvs/video-studio/bin/python episodes-codex/_shared/append_java_endcard.py verify episodes-codex/observer-pattern
 ```
 
-上述生成入口只在制作和明确重建时运行；已发布输入的复核使用只读检查，`place_v2` 加 `--no-copy`，报告写到临时目录，不重写清单追认旧媒体。新 take 不覆盖旧 take，选段写在 `voice/picks.json`，文本与声学检查见 `voice/substitutions.md`、`voice/candidate-audit.json` 和 `voice/audio-qa.json`。
+Remotion类型检查和关键无字幕预演（本期`remotion/`目录）：
 
-本轮24句均选择首轮a候选，文本/48kHz转换逐样本一致，共享裁尾检查无硬警报、候选与归一后整轨均无≥0.50秒句内低信号标记；没有合成后变速。整轨−16.0 LUFS，4倍采样真峰值−2.2 dBTP，whole铺轨最大偏移0帧，三个句首术语窗口全部通过。配音SHA-256为 `6a8c262ee470a7da2228658de027fa95a236ecd275534ca5aab9e6d06d06ffde`。
+```sh
+npx tsc --noEmit
+TMPDIR=/workspace/observer-tmp npm run qa -- out/flow-ui-java-preflight --shots=01,02,03,08,09,12 --no-captions --ranges=01:03,08:09
+```
 
-本轮没有可用 ASR 模型库、模型缓存或音频转写工具，未执行逐字 ASR、发音听辨或全片人工听辨。`words.json` 的兼容字符字段仅为句包络；只有句首起音按共享 `onset_rule.py` 测量，不能将其描述成内部词级时间或已验证读音。完整能力边界见 `voice/runtime-readiness.json`。
+末镜`javaCardFrom`是镜内body终点，`meta.javaEndCard.from`是全局5178。Main在该处切到纯Java卡，禁旧字幕/旧header；`motion.at`末句使用body终点，150帧静默卡不延长原正文动作。卡片逐字读取`src/java-card.json.lines`，不自行重写源码节选。
+
+关键产品/结构与关闭预演见`remotion/out/flow-ui-java-preflight/frames.json`；右侧Java职责映射补强只改卡函数，正文其余源完全相同，定向卡预演见`out/flow-ui-java-card-final/frames.json`。实际检查范围与源差异证明见`qa-flow-ui-java-editor.json`；独立报告按实际完成补齐，不把“渲染成功”当作已讲清。
 
 ## 冻结与正式编码
 
-以下冻结命令从**仓库根目录**运行；先确认独立动态预检通过、全部生产负责人停写。共享冻结器要求placeholders目录存在。本轮实际清单为119项，包含选定takes、分镜、音轨、渲染源码和共享依赖。
+正式完整渲染由root在负责人停写、动态和卡片独立预检闭合后启动。本编辑只生产预演，不提前全片编码。编码前后核对同一份冻结输入，不能在输出后重写清单认可未被采用的新源码。使用当期`package.json`的`npm run render`、短路径TMPDIR及共享渲染锁，成片仍需完整解码/帧数/响度和实际状态/卡首中末检查。
 
-```sh
-mkdir -p episodes-codex/observer-pattern/remotion/src/placeholders
-/workspace/.venvs/video-studio/bin/python episodes-codex/_shared/freeze_sentence_episode.py episodes-codex/observer-pattern
-```
+站点接入直接复制本轮`article.mdx`，SVG采用原生`font-size`/`text-anchor`/`stroke-width`属性，不再派生`article-site.mdx`。五视频章id保持`why/subscribe/notify/unsubscribe/boundary`，Java图文入口为`#java`。站点历史firstRelease/publishedAt保留，实际版本与媒体/部署结果由root更新release及线上报告。平台未新发。
 
-读取冻结成功结果后，再从**本期remotion目录**单独启动编码；不要把渲染放在一个前置失败后仍会继续的独立shell行里。本轮输出为`../video.mp4`，日志和混音报告位于`out/`。
-
-```sh
-set -e
-mkdir -p /workspace/obs-tmp
-PATH=/workspace/.venvs/video-studio/bin:$PATH TMPDIR=/workspace/obs-tmp flock /tmp/video-studio-render.lock npm run render
-```
-
-首次误启动因工作目录错误而立即中止，未采用其输出；正确冻结后重新从头编码，实际记录见`qa-render-environment.json`，相关教训为L034。编码完成后只读核对清单并运行共享`check_encoded_episode.py`，不重新冻结去追认旧输出。
-
-## 检查与交付
-
-文稿审查、实际连续动画预演、源冻结、正式 MP4 复核与上线核验各自记录实际执行范围。冻结后任何生产输入修改须先停止受影响编码，再重新检查和冻结；生产清单不能在编码完成后重写来追认未被采用的源码。站点只接入检查通过的同一份 MP4、JPG 和必要文本数据，不复制制作 WAV、PNG 或 Remotion 工程。
-
-GitHub 主干合并、Release、Pages 部署及线上完整 SHA 检查在现行持续授权内完成，成功后以 completed 关闭 #164；外部平台没有新发授权。实际版本、部署与线上结论以后续 `release.md` 为准，不将制作检查写成用户观看认可或初学者学习效果测量。
-
-站点图文使用`article-site.mdx`：它由冻结`article.mdx`仅转换原生SVG属性名，原文/派生SHA与转换次数记录在`site-article-derivation.json`。这项发布格式修复不改变已编码119项输入，不重渲视频；实际网页验证见`site-svg-correction.json`，具体教训L035。
+本轮实际冻结入口：从仓库根执行`python3 episodes-codex/observer-pattern/freeze.py`，编码前后只读复核加`--verify`。它委托新增pattern-flow共享包装，保留旧共享检查器，显式验证真实有声正文与Java静默尾卡派生，并纳入源码、Java、正文快照、旧媒体参照和复用依据。

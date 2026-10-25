@@ -15,7 +15,7 @@ const input=fs.existsSync(root+'/storyboard.json')?root+'/storyboard.json':path.
 const data=JSON.parse(fs.readFileSync(input,'utf8')),shots=data.scenes.flatMap(s=>s.shots);
 let offset=0;for(const s of shots){s.from=offset;offset+=s.durationInFrames;}
 const {events}=await import(pathToFileURL(path.resolve('src/motion.ts')).href);
-const sourceSha256=Object.fromEntries(['../storyboard.json','../covers.json','src/Main.tsx','src/motion.ts','src/data.ts','src/objects.tsx','src/primitives.tsx','src/theme.ts','src/Cover.tsx'].filter(p=>fs.existsSync(p)).map(p=>[p,crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex')]));
+const sourceSha256=Object.fromEntries(['../storyboard.json','../covers.json','src/Main.tsx','src/java-card.json','src/motion.ts','src/data.ts','src/objects.tsx','src/primitives.tsx','src/theme.ts','src/Cover.tsx'].filter(p=>fs.existsSync(p)).map(p=>[p,crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex')]));
 fs.mkdirSync(out,{recursive:true});
 const serveUrl=await bundle({entryPoint:path.resolve('src/index.ts'),enableCaching:false,webpackOverride:c=>({...c,resolve:{...c.resolve,alias:{...c.resolve?.alias,'@storyboard':input,'@covers':root+'/covers.json'},modules:[path.resolve('node_modules'),'node_modules']},plugins:[...(c.plugins??[]),new webpack.DefinePlugin({__HAS_VOICE_AUDIO__:false})]})});
 const browser=await openBrowser('chrome',{browserExecutable:'/usr/bin/chromium',logLevel:'error'}),samples=[],clips=[],copyfit=[];

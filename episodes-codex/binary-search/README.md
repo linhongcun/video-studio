@@ -27,3 +27,5 @@ python3 episodes-codex/binary-search/freeze.py --verify
 旧报告快照和来源身份在`revisions/approach-first/before/`、`baseline.json`、`baseline-identity.json`；原版实际Git基线e38fa923保留。局部拼接实际读取ignored `remotion/out/approach-baseline/`，缓存存在不是权威：video/voice/storyboard按baseline.json的完整Git路径取出并核对完整SHA，src快照也逐文件对Git字节验证后才能使用。只恢复明确媒体/数据以作复用，不恢复已删除的旧工程或旧依赖。新清单记录这些实际输入；缺缓存时先按已记录Git来源重建它们，或选择当前完整渲染流程，不能改清单认可别的缓存。
 
 旧静帧与失败布局证据保留原目录/原SHA，布局修后再采的证据独立标识。本轮没有逐字ASR、全片人工听辨或新手学习效果实验；技术/视觉验收和用户观看反馈分开记录。站点、实际版本与线上完整SHA统一见批次发布记录。
+
+本轮已随[v0.60.1](https://github.com/linhongcun/video-studio/releases/tag/v0.60.1)发布，PR #246、Release后手动部署40150838653及正式完整SHA核验通过。具体五片媒体身份、历史issue状态与检查范围统一见[本轮发布记录](../../docs/leetcode-derivation-20261025/release.md)。旧版release/QA保留其原始历史含义，不代表当前成片身份。
