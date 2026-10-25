@@ -73,6 +73,19 @@ const Scene=({s,f}:{s:Shot;f:number})=>{
   const preview=phase(s,f,0,.1,.8),target=preview>=1;
   return <><Head kicker="LeetCode 206 · 题目目标预览" title="原节点不变，让连接全部反向" sub="要求：不交换值，不新建节点，返回反转后的头"/><g opacity={1-preview}><Board/></g><g opacity={preview}><Board links={[-1,1,2]}/></g><Step label="返回原节点 3 · 它是新的入口" alpha={p} color={C.teal}/><Note alpha={q}>{target?'目标：3 → 2 → 1 → None':'先看输出目标，还未开始执行算法'}</Note></>;
  }
+ if(t==='derive-order'){
+  const visit=phase(s,f,0,.05,.75),goals=phase(s,f,0,.4,.88),inspectionAlpha=phase(s,f,1,.02,.08);
+  const move=phase(s,f,1,.4,.62),arrived=move===0||move===1,current=move===1?3:2,needed=current-1;
+  const currentX=mix(X[2],X[3],move),neededX=mix(X[1],X[2],move);
+  return <><Head kicker="思路推导 · 恢复原链" title="原链向后访问，目标却要指回刚走过的节点" sub="先分析需要记住什么 · 原 next 还没有修改"/><Board/>
+   <g opacity={visit}><T x={1040} y={337} anchor="middle" size={31} color={C.gold}>原连接的访问顺序：1 → 2 → 3</T><path d="M 620 377 H 1380" pathLength={1} stroke={C.gold} strokeWidth={3} strokeDasharray="1" strokeDashoffset={1-visit} fill="none" markerEnd={visit>.95?'url(#gold-head)':undefined}/></g>
+   <g opacity={goals} data-analysis-goal="unapplied-back-links">{[[2,1],[3,2]].map(([from,to])=><path key={from} d={`M ${X[from]-28} 630 V 675 H ${X[to]+28} V 630`} stroke={C.teal} strokeWidth={3} strokeDasharray="9 7" fill="none" markerEnd="url(#teal-head)"/>)}<T x={960} y={735} anchor="middle" size={28} color={C.muted}>虚线只标目标中的回指关系</T></g>
+   <g opacity={inspectionAlpha} data-analysis-needed-entrance={needed}>
+    <rect x={currentX-114} y={461} width={228} height={160} rx={24} fill="none" stroke={C.gold} strokeWidth={3}/><rect x={neededX-118} y={457} width={236} height={168} rx={27} fill="none" stroke={C.teal} strokeWidth={3}/>
+    <g opacity={arrived?1:0}><T x={neededX} y={794} anchor="middle" size={31} color={C.teal}>需要记住 {needed}</T><T x={currentX} y={849} anchor="middle" size={31} color={C.gold}>走到 {current} 时，要指回 {needed}</T></g>
+   </g><Note color={C.muted}>这里只分析做法，正式处理仍从原链开始</Note>
+  </>;
+ }
  if(t==='save')return <><Head kicker="开始执行 · 恢复原链" title="改掉连接前，先保住后半段入口" sub="回到输入：1 → 2 → 3 → None"/><Board spot={1} spotAlpha={p} saved={2} savedAlpha={q*.7}/><Step label="修改 1.next 之前，怎样还能访问到 2？" alpha={q}/><Note alpha={q}>要保存的是原后继的入口，不是复制一个新节点</Note></>;
  if(t==='roles'){
   const prevOn=cue(s,f,'前驱指针',0),curOn=cue(s,f,'当前指针',1);

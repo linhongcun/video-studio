@@ -83,9 +83,31 @@ const Scene=({s,f}:{s:Shot;f:number})=>{
  if(t==='substring'){
   return <><Head title="abc 是合法候选，还能找到更长的吗？" sub="前三个字符连续且互不重复 · 示例候选长度是 3"/><Board left={0} right={7} best={0} showSet={false} showStats={false} showPointers={false} windowAlpha={0} windowColor={C.text}/><rect x={x(0)-78} y={388} width={2*170+156} height={168} rx={18} fill={C.teal+'0E'} stroke={C.teal} strokeWidth={3}/><T x={x(1)} y={584} color={C.teal} size={24} anchor="middle">连续片段 abc</T><g opacity={p}><T x={655} y={789} size={43} color={C.teal} anchor="middle">候选长度：3</T></g><g opacity={q}><T x={1295} y={789} size={36} color={C.gold} anchor="middle">继续寻找更长的合法片段</T></g><Note alpha={q}>最后只返回最长长度</Note></>;
  }
+ if(t==='naive-recheck'){
+  const second=f>=at(s,1,.02),start=second?1:0,read=phase(s,f,second?1:0,.04,.76);
+  const end=Math.min(3,start+Math.floor(read*(4-start))),repeated=end===3;
+  const firstHistory=second||read>=.99,trace=TEXT.slice(start,end+1).split('').join(' → ');
+  return <><Head kicker="思路推导 · 还没有选定做法" title="每个起点重来，会反复检查同一段" sub={second?'从下标 1 重来：刚看过的 b、c 又要检查':'先从下标 0 逐个尝试，遇到重复就停'}/><Board left={start} right={end} best={0} showSet={false} showStats={false} showPointers={false} pending={repeated?3:-1} duplicate={repeated?1:-1} windowColor={repeated?C.red:C.teal} regionLabel={repeated?'待检验片段 · 有重复':'正在尝试的连续片段'}/>
+   <T x={250} y={760} size={25} color={C.muted}>检查记录 · 仍是同一份原字符串</T>
+   <T x={250} y={815} size={34} color={firstHistory?C.muted:repeated?C.red:C.teal} mono>起点 0：{firstHistory?'a → b → c → b · 重复停止':trace}</T>
+   {second&&<T x={250} y={868} size={34} color={C.gold} mono>起点 1：{trace}{repeated?' · 再次重复停止':''}</T>}
+   <Note color={C.gold} alpha={q}>能否保留已检查过的部分，减少重扫？</Note>
+  </>;
+ }
+ if(t==='reuse-contiguous'){
+  const second=f>=at(s,1,.03),move=phase(s,f,1,.03,.5),invalidStart=Math.min(1,Math.floor(phase(s,f,0,.04,.6)*2));
+  const start=second?mix(1,2,move):invalidStart,valid=second&&move>=1;
+  const hole=phase(s,f,0,.55,.82)*(1-q);
+  return <><Head kicker="思路推导 · 回看不同起点" title="重复限制，告诉我们哪些起点能排除" sub="固定到下标 3 · 两份 b 在原下标 1 和 3"/><Board left={start} right={3} best={0} showSet={false} showStats={false} showPointers={false} pending={valid?-1:3} duplicate={valid?-1:1} duplicateAlpha={second?1-move:1} windowColor={valid?C.teal:C.red} regionLabel={valid?'从最早合法起点 2 保留连续 cb':'待检验片段 · 包含两份 b'}/>
+   <T x={960} y={705} anchor="middle" size={31} color={C.red} alpha={hole}>不能只挖掉中间的旧 b：a · c b 不再连续</T>
+   {[['起点 0：abcb ×',C.red],['起点 1：bcb ×',C.red],['起点 2：cb ✓',C.teal]].map(([label,color],i)=><T key={label} x={450+i*510} y={795} anchor="middle" size={31} color={color} alpha={i===2?(valid?1:0):1}>{label}</T>)}
+   <T x={960} y={858} anchor="middle" size={30} color={C.teal} alpha={q}>保留连续片段，再记下它有哪些字符，避免从头重查</T>
+   <Note color={C.muted} alpha={q}>这是思路推导；下一步重回空区间，正式执行</Note>
+  </>;
+ }
  if(t==='window'){
   const term=f>=Number(s.cueFrames?.labels?.['滑动窗口']??0);
-  return <><Head title="左右边界，圈住连续的一段" sub={term?'滑动窗口 · 初态为空，从下标 0 开始':'先用左右边界确定位置'}/><Board left={0} right={-1} best={0} setAlpha={q}/><T x={960} y={374} size={36} color={C.teal} anchor="middle">{term?'滑动窗口':''}</T><Note alpha={q}>位置看边界，是否出现过看集合</Note></>;
+  return <><Head kicker="正式执行 · 分析结束，重回空区间" title="左右边界，圈住连续的一段" sub={term?'滑动窗口 · 初态为空，从下标 0 开始':'按刚才的推导，保留连续合法片段'}/><Board left={0} right={-1} best={0} setAlpha={q}/><T x={960} y={374} size={36} color={C.teal} anchor="middle">{term?'滑动窗口':''}</T><Note alpha={q}>位置看边界，是否出现过看集合</Note></>;
  }
  if(t==='grow'){
   const progress=clamp((f-at(s,0,.04))/Math.max(1,at(s,0,.94)-at(s,0,.04))),z=segment(progress,3),state=insert(0,z.index-1,z.index,z.progress,z.index+1);

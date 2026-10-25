@@ -27,7 +27,7 @@
 | [Durable Execution #140](https://github.com/linhongcun/video-studio/issues/140) | 长任务中的模型决策、持久状态和外部副作用怎样协调，为什么保存检查点不等于安全恢复？ | 后续储备；先审与既有幂等/事务系列的增量 |
 | [Prompt Injection / Guardrails #142](https://github.com/linhongcun/video-studio/issues/142) | 外部内容、模型指令与真实执行权限之间的信任边界在哪里，各类Guardrails到底能限制什么？ | 后续深入研究 |
 | [Agent Evals #144](https://github.com/linhongcun/video-studio/issues/144) | 评估Agent时，最终环境状态、执行轨迹和模型评分分别能证明什么？ | 后续深入研究 |
-| [Context Compaction #147](https://github.com/linhongcun/video-studio/issues/147) | 上下文压缩必然丢信息时，如何保留目标、约束和证据入口，避免把摘要误当成完整事实？ | 后续储备；与上下文、记忆片交叉审读 |
+| [Context Compaction #147](https://github.com/linhongcun/video-studio/issues/147) | 有损上下文压缩可能遗漏后续所需信息时，如何保留目标、约束和证据入口，避免把摘要误当成完整事实？ | 后续储备；与上下文、记忆片交叉审读 |
 
 ## 旧选题处置
 
