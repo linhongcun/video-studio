@@ -7,9 +7,21 @@ if '--verify' in sys.argv:
  print(f'{len(m)} frozen inputs unchanged.');raise SystemExit(0)
 subprocess.run([sys.executable,str(ROOT/'episodes-codex/_shared/freeze_sentence_episode.py'),str(EP)],check=True)
 m=json.loads((EP/'source-sha256.json').read_text())
-extra=[EP/n for n in ['solution.py','solution.json','build_draft.py','prepare_code_endcard.py','freeze.py','remotion/scripts/qa.mjs','remotion/scripts/covers.mjs']]
+extra=[EP/n for n in ['solution.py','solution.json','build_draft.py','prepare_code_endcard.py','freeze.py','remotion/scripts/qa.mjs','remotion/scripts/covers.mjs','render_stack_primer.py']]
 extra += [p for p in (EP/'research').rglob('*') if p.is_file() and p.suffix in ['.py','.json','.md']]
-extra += [ROOT/'docs/leetcode-batch-next/prepare_audio.py',ROOT/'docs/leetcode-batch-next/approved-scripts.json']
+# This revision uses a separate thin voice orchestrator, not the initial batch.
+extra += [ROOT/'docs/daily-temperatures-stack-primer'/n for n in
+          ['prepare_audio.py','editorial-approval.json','stack-reference.json']]
+extra += [EP/'voice/stack-primer-provenance.json', EP/'voice/frame-phase-alignment.json', EP/'revisions/stack-primer-before/baseline.json']
+# The shared splice tool pins all actual old/new pictures, source snapshots and
+# selected takes. Add its final plan only after review/clip generation, never
+# rewrite a freeze to claim old media used a different visual source.
+plan_path=EP/'stack-primer-remix-plan.json'
+if plan_path.is_file():
+ plan=json.loads(plan_path.read_text());extra += [plan_path]
+ extra += [EP/rel for rel in plan['inputSHA256']]
+ review=EP/plan['visualReview']
+ if review.is_file():extra.append(review)
 for p in extra:m[os.path.relpath(p,EP)]=hashlib.sha256(p.read_bytes()).hexdigest()
 (EP/'source-sha256.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
 print(f'{len(m)} actual production inputs frozen.')
