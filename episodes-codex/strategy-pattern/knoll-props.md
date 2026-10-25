@@ -1,17 +1,11 @@
-# 制作说明：策略模式设计思想版
+# D01保留原例的流程调整 · 制作说明
 
-当前11镜22句、四章，完整重排为语言无关的职责与协作，实际时长由自然配音和必要动作停留决定。旧v0.54.4语法版的报告与时序存于revisions/v0.54.4，媒体/音轨/工程由不可变tag恢复；不复用旧版已通过的思想结论。
+2026-10-25。原100元会员90/活动80、单选不叠加保留。11镜22句中5句新配、17句沿用，另150帧静默Java节选；总帧按storyboard/words与javaEndCard。旧源、时序及媒体身份在revisions/flow-ui-java/baseline。
 
-## 内容与来源
+01以结算UI教学示意进入，读取原价、选择优惠、查看应付；改选活动先计算中、后80元。02进入背后程序，03–04分离具体定价并保留共同约定。05稀疏结构逐一对应Client/main、Checkout上下文、PricingStrategy约定与两个具体策略；接口不当作一次计算。06选择会员后沿共同步骤委托、收90元才继续；07清旧结果、重用100元改活动得80元。08–11保留协作、维护边界、成本与回扣。
 
-按script/plan及visual-direction构图：稳定结算流程、独立定价策略、外侧选择，原价100元先会员90元，再重置选活动80元。共同业务约定允许不同实现替换，结算把变化的定价交给所选策略；图示对象和数据保持不同身份。无代码、语言标识、函数参数、分单位或密集类图。首术语策略模式在04第一句，以共享声学起音显示至少63帧。
+首现策略模式cue仍为04第一句，唯一算法是共享onset_rule。Java卡静默，标节选/暂停；Main在javaCardFrom关闭旧字幕与页眉，motion.at用此作为正文末端。卡JSON来自真实Java源并逐行验证，正文不口播语法。金额单位为元，精度/舍入政策见demo-java说明。
 
-共享实现仍用episodes/_shared/voice与episodes-codex/_shared的prep/gen/build/assemble/place/strict/check，不另写配音整轨、起音或混音算法。新take后缀idea，必要idea2；旧beginner/a/b/c保留。字幕逐字对应真实录音源文本，词兼容包络不冒充逐字识别。
+依赖来自当前保留的strategy-pattern/remotion/node_modules，需按lock确认。预演用npm run qa，核无字幕有效props与实际输出、COPYFIT、事件相邻帧和跨镜接续。01/02/05/06需新画面，旧正文只有证明local时序与像素一致才复用，否则重渲。负责人全部停写后由根任务冻结，短TMPDIR与共享锁正式编码；本代理不发版。
 
-## 预检、编码与复核
-
-npx tsc检查后，用既有qa.mjs生成全11镜真实时序无字幕预演和关键03/06/07连续片及05/08状态图。报告记录最终props、源SHA、provisional:false和COPYFIT；人员实际查看关键中间态。共同流程与策略来回动作完整，尤其06结果返回后继续、07先重置再替换、08关系回收、09前提限定。
-
-生产源停写、思想与动态预检闭合后冻结，再以短TMPDIR=/workspace/strategy-tmp和/tmp/video-studio-render.lock执行原npm run render；共享Wallpaper混音目标-16LUFS。三尺寸原封面短文案仍符合‘把变化的规则独立出来’，复用完整SHA相同原件，不重复制作。
-
-最终执行冻结核对、shared check_encoded、完整解码/PTS、实际成片字幕与过程复核，再复制同一媒体接入网站。保留slug/四章ID/firstRelease，合并Release后部署并以canonical普通GET流式完整核对视频/海报/VTT及章目录/系列/RSS/更新日志；通过后completed关闭#163。能力限制如实记录，不将独立审读当作新手实验或用户认可。平台未新发。
+图文主章why/delegate/change/boundary保留，Java锚点java，SVG用原生属性。媒体解码、源SHA、音轨/字幕、实际状态与线上字节检查由对应报告记录，不冒称逐字ASR、听辨或用户学习效果。

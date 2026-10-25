@@ -1,0 +1,91 @@
+{
+  "strategy": "Render shots01-07 and silent Java end card with current sources; reuse exact-local-equivalent accepted old shots08-11body; trim by integer frame index; concatenate decoded video frames and encode one continuous video; use only complete new WAV audio.",
+  "fps": 30,
+  "width": 1920,
+  "height": 1080,
+  "durationInFrames": 4778,
+  "segments": [
+    {
+      "kind": "new-remotion",
+      "shotRange": [
+        "01",
+        "07"
+      ],
+      "newFrameRangeInclusive": [
+        0,
+        2935
+      ],
+      "durationInFrames": 2936
+    },
+    {
+      "kind": "reuse-baseline-video-only",
+      "shotRange": [
+        "08",
+        "11body"
+      ],
+      "oldFrameRangeInclusive": [
+        2718,
+        4409
+      ],
+      "newFrameRangeInclusive": [
+        2936,
+        4627
+      ],
+      "durationInFrames": 1692
+    },
+    {
+      "kind": "new-remotion",
+      "name": "Java key-code end card",
+      "newFrameRangeInclusive": [
+        4628,
+        4777
+      ],
+      "durationInFrames": 150
+    }
+  ],
+  "reusedVideo": {
+    "file": "revisions/flow-ui-java/baseline/video.mp4",
+    "sha256": "9293cf4d66319a44ac7808f5f75d8bdd1da3a3cec627b8da4d57f802466a1a57",
+    "proof": "revisions/flow-ui-java/tail-reuse-proof.json",
+    "proofSha256": "e589c8734950a59c5990fa91937ec1841a74bf7f71a30bdc0555d660fad908fe",
+    "audioMapped": false
+  },
+  "audio": {
+    "file": "remotion/public/audio/voice.wav",
+    "sha256": "f4b35cc7317f47c6eb9154683f66823336c2ef3b0428a5d04f338abe3b8b0761",
+    "policy": "Full new assembled WAV includes 150 silent Java-card frames; no old narration/BGM reused."
+  },
+  "entryPoint": "cd remotion && TMPDIR=/workspace/pattern-tmp npm run render",
+  "voiceEntryPoint": "npm run render:voice",
+  "dryRunEntryPoint": "npm run render:voice -- --plan-only",
+  "fallbackEntryPoint": "npm run render:voice:full && npm run render:mix",
+  "postRenderChecks": [
+    "Exact4778 frames,1920x1080@30fps",
+    "New frame2935→2936 seam matches actual scene07end→08start",
+    "New frame4627→4628 seam matches recap end→Java card; no old subtitles on code card",
+    "Complete new narration audio alignment and final mix report",
+    "All frozen source and plan hashes unchanged"
+  ],
+  "inputSha256": {
+    "storyboard.json": "310618d863c655fd2194bb5d119bde88ddbb5f2dd9094454c66793fcb3911dfd",
+    "covers.json": "3786148749837bcb85b4a19c907c2f2d41a91910c62c128a8ff4af7dc0d161a3",
+    "remotion/public/audio/voice.wav": "f4b35cc7317f47c6eb9154683f66823336c2ef3b0428a5d04f338abe3b8b0761",
+    "revisions/flow-ui-java/baseline/video.mp4": "9293cf4d66319a44ac7808f5f75d8bdd1da3a3cec627b8da4d57f802466a1a57",
+    "revisions/flow-ui-java/baseline/storyboard.json": "38bcfffb1994ca6e4e155db8c9018df1d076e8fd65f20836adaba27bf9ffcac5",
+    "revisions/flow-ui-java/tail-reuse-proof.json": "e589c8734950a59c5990fa91937ec1841a74bf7f71a30bdc0555d660fad908fe",
+    "remotion/package.json": "97ec420b30d007077136bdef471c772d414acd0346d66162403c58d78b22fbc9",
+    "remotion/package-lock.json": "0088a871e561759953ac9d71bd7f68820867a32ecb3269007c941f65f99f9ba8",
+    "remotion/remotion.config.ts": "76ad0e86aa1baf7fd24917a5e1e606562456cad163fd7268701e10cb4b2c1209",
+    "remotion/scripts/render-flow.mjs": "6f405f335729f850e7789f86060868a660d1b8882132df98d009c51652a1254b",
+    "remotion/src/Cover.tsx": "f702de7f2aec556b75434fdd8e39db03f4c5c8e2efa710562d884850a1186705",
+    "remotion/src/Main.tsx": "1c1450067023361f1f2602d93f23df2de8ed99b846066a59af7b6608e584fd9d",
+    "remotion/src/Root.tsx": "fb8630ec2dc2dc3b7318d9f6fa86f2486d518ffb817b6718b5410d8db713b5b4",
+    "remotion/src/data.ts": "f8c1a22684b7d2dab48d3ee042246435e8c622512d87bcc804a3b3a43e578441",
+    "remotion/src/index.ts": "f9bc4e836a064aca9c58a681e1dc779b62a4d82894450e8e15d5cdd05840e36e",
+    "remotion/src/java-card.json": "6a6c7c819b8030d9fa88cf1c8430b3329bab7f7e524980b2a50a9b54c35ea7b3",
+    "remotion/src/motion.ts": "9f3e48385d01415fe662ecb1da88379c162a4da3a76a79d4a5f0712aae47d753",
+    "remotion/src/objects.tsx": "5b777c2b83b5b163531059b86a6fffaeb7281ef97b9013fec26e774d758c2c1b",
+    "remotion/src/primitives.tsx": "775f42c15d08151adfb1587151e7f0b4250c2d92ee7815ba9b6b6dc88538535b",
+    "remotion/src/theme.ts": "bc9aca854a2c7573092b6ecee8a6c4d26dbc0b0f58cb576ee9032114a9dc5791"
+  }
+}
