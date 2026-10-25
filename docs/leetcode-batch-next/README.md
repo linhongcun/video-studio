@@ -1,6 +1,6 @@
 # LeetCode三片批量制作
 
-状态：三片正式媒体、独立视觉及本地网站验收全部通过，正在合并/Release/Pages发布。已整合v0.68.4及最新d515f0d4上线证据；尚无本批生产HTTPS通过声明。
+状态：三片已按v0.69.0合并、Release、部署并通过线上完整核验；#80/#84/#86已completed关闭。
 
 | issue | 题号 / 内部排序 | 标题 | 帧数 / 时长 |
 | --- | --- | --- | --- |
@@ -31,3 +31,9 @@
 本地网站实际3次build/2次日期/2次历史回归，前两次问题与第三次通过完整留档：第一次Perm不可见HTML注释不兼容MDX，第二次精确整数毫秒首卡仍有原生cue。仅修站点派生注释及共享VTT附录结束边界，不重编码媒体。最终6组视口、24章seek、84句字幕数据、30卡采样（精确/+.0001等均0cue）、播放/CC/代码/source/date/媒体HTTP SHA通过，旧LC.70/206另各一次卡首短检通过。仅3份VTT各一个末cue提前1ms，其余42份字节保持。
 
 根任务实际查看三手机页面、排列桌面页面与三个唯一浏览器解码代码卡；独立站点代理看全部12路径。重复同字节图片的查看工具呈现差异通过三组像素/字节完全相同与实际代码墨迹核实，不误改无问题视频。发布前又同步d515f0d4，只有旧观察者QA JSON增入canonical，产品输入不变；保留真实build/browser旧基线与receipt，另以新主干核验786份旧canonical，不重复构建/交互，见qa-preservation-final.json。
+
+## 实际发布收尾
+
+[内容PR #306](https://github.com/linhongcun/video-studio/pull/306)合并`6b1c3705b229cef18e0823f350518dda6143199c`，附注tag/Release v0.69.0后手动Pages 40198237161成功，run head与tag commit相同。2026-10-25T21:39:05.600725+08:00，28次完整HTTP响应核验通过：三视频/海报的production/canonical/tag/HTTPS全文SHA一致，字幕、四章、代码与日期身份正确；本Release条目仅关联这三片。旧两份实际改变的VTT另以小HTTP响应验证，未重取旧视频；旧Agent八URL仍404。全部786份其他canonical保持最新上游，详见online-verification.json/md与publication.json。
+
+三个制作issue均已completed关闭，旧平台勾选未伪称执行。本轮没有新视频用户观看反馈或学习效果测量。后续证明提交只归档这些实际证据，不再发版、重渲或部署。
