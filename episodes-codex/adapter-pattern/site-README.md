@@ -13,3 +13,9 @@
 5. 根发布revision Release并完成其后Pages部署，再运行`python3 episodes-codex/adapter-pattern/site-verify-online.py`：11个普通canonical GET，完整视频流SHA不保存远端媒体；核对poster/VTT/章节/Java与源码/三期目录/系列/资料库/RSS/真实revision条目。Agent首页入口使用正确`learn/#agent`，不是series入口。报告分别保存revisionRelease、firstRelease、publishedAt和updatedAt，不把修订版本当首发版本。
 
 本地短静音播放、包络或页面检查不代表全片听辨、ASR、用户认可或学习效果测量。旧v0.63已收到纠正性观看反馈；新修订检查未执行前不预写通过。构建日志保留原始gzip与只去尾空格的可读副本。
+
+本轮v0.64.1实际完成全套初验后，在正文截图发现三处中文句号位于粗体闭合符前、后接中文正文，导致CommonMark把`**`当成文字显示。为保持184项冻结生产输入不变，集成工具仅窄匹配两条收益与wrapper边界句各一次，把句号移到粗体外，自动生成`site-article.mdx`。原稿与派生稿去掉粗体标记后逐字相同；原稿/派生稿SHA、三处diff见`qa-site-article-derivation.json`。复制清单的文章行显式标识`isSiteDerived`与`rawSourceFile`，未来完整集成自动重复同一处理。
+
+首次全套检查与截图原字节归档在`revisions/business-boundary-v2/site-initial-check/`，并保留原路径映射。格式修正使用`--article-only`同步文章；随后`node episodes-codex/adapter-pattern/site-format-qa.cjs`仅追加一次构建、两视口三处strong/无裸标记/#java/源码链接/无溢出定验，记录在`qa-site-format-correction.json`与`qa-site-format/`。该定验逐项证明播放器HTML、目录HTML、JSON-LD、字幕、metadata、storyboard、媒体、海报与源路径不变，因此明确复用首次8次seek/20条字幕及Java卡检查，没有把它们重标为第二次新运行。两次输入指纹均保留在当前浏览器与格式修正报告。
+
+当前交付汇总见`qa-site-review.md`、`qa-site-static.json`与`qa-site-visual-review.json`。本地共执行2次构建（全套初验1次、格式定验1次）、历史路径回归1次。线上核验仍待根完成Release及Pages后执行，不以本地构建时GitHub API回退链接视为Release已通过。

@@ -27,7 +27,7 @@ EXPECTED_CUES=CONFIG['shotCount']*2
 SB=json.loads((EP/'storyboard.json').read_text())
 MANIFEST=json.loads((HERE/'qa-site-copy-manifest.json').read_text())
 assert META['firstRelease']==PUBLISHED_BASELINE['firstRelease']=='v0.63.0'
-assert MANIFEST['revisionRelease']=='v'+VERSION
+assert MANIFEST['revisionRelease']==META['revisionRelease']=='v'+VERSION
 assert META['firstRelease']==MANIFEST['metadata']['firstRelease']
 assert META['publishedAt']==MANIFEST['metadata']['publishedAt']==PUBLISHED_BASELINE['publishedAt']
 assert META['sourcePath']=='episodes-codex/adapter-pattern/remotion'

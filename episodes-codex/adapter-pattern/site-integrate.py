@@ -4,6 +4,7 @@ firstRelease v0.63.0 and publishedAt are immutable. The release is only the new
 revision identity; root selects it after synchronizing main and checking tags.
 """
 import argparse
+import difflib
 from datetime import datetime,date
 import hashlib
 import json
@@ -26,6 +27,27 @@ def sha(path):
         for chunk in iter(lambda:f.read(262144),b''):d.update(chunk)
     return d.hexdigest()
 
+def prepare_site_article():
+    source=HERE/'article.mdx';raw=source.read_bytes();text=raw.decode('utf-8')
+    frozen=json.loads((HERE/'source-sha256.json').read_text())
+    assert frozen['article.mdx']==hashlib.sha256(raw).hexdigest(),'Frozen article changed before site derivation'
+    fixes=[
+        ('**按业务需要定义自己的约定。**','**按业务需要定义自己的约定**。'),
+        ('**把外部接口细节留在接入边界。**','**把外部接口细节留在接入边界**。'),
+        ('**有一层包装，也不自动等于适配器。**','**有一层包装，也不自动等于适配器**。'),
+    ]
+    original=text;changes=[]
+    for old,new in fixes:
+        assert text.count(old)==1,('Exact format span count changed',old)
+        changes.append({'before':old,'after':new,'count':1,'sourceLine':original[:original.index(old)].count(chr(10))+1})
+        text=text.replace(old,new)
+    assert original.replace('**','')==text.replace('**',''),'Only strong marker placement may change'
+    target=HERE/'site-article.mdx';target.write_bytes(text.encode('utf-8'))
+    assert source.read_bytes()==raw,'Never rewrite the frozen source article'
+    report={'checkedAtBeijing':datetime.now(ZoneInfo('Asia/Shanghai')).isoformat(),'kind':'site-only-strong-punctuation-format','sourceFile':'article.mdx','sourceSha256':hashlib.sha256(raw).hexdigest(),'derivedFile':'site-article.mdx','derivedSha256':sha(target),'replacementCount':3,'changes':changes,'unifiedDiff':list(difflib.unified_diff(original.splitlines(),text.splitlines(),fromfile='article.mdx',tofile='site-article.mdx',lineterm='')),'textIgnoringStrongMarkersIdentical':True,'frozenSourceUnchanged':True}
+    (HERE/'qa-site-article-derivation.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+    return target,report
+
 def protected_episodes():
     rows=[]
     for slug in ['strategy-pattern','observer-pattern','agent-skills','monty-hall']:
@@ -40,7 +62,7 @@ def other_metadata():
     return [{'path':str(p.relative_to(ROOT)),'sha256':sha(p)} for p in sorted((ROOT/'episodes').glob('*/meta.json')) if p.parent.name!=SLUG]
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--approved',action='store_true');parser.add_argument('--release',required=True);parser.add_argument('--updated-at');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--approved',action='store_true');parser.add_argument('--release',required=True);parser.add_argument('--updated-at');parser.add_argument('--article-only',action='store_true',help='After full media/site QA, sync only the exact site format derivative');args=parser.parse_args()
     assert args.approved,'Wait for formal media QA before integrating the revision'
     version=json.loads((ROOT/'site/package.json').read_text())['version'];assert re.fullmatch(r'\d+\.\d+\.\d+',version)
     assert args.release=='v'+version,'Use root final revision release identity'
@@ -58,13 +80,30 @@ if __name__=='__main__':
     assert sum(len(sh.get('subtitles',[])) for scene in sb['scenes'] for sh in scene['shots'])==config['shotCount']*2
     for name in FILES:assert (HERE/name).is_file(),f'Missing checked source: {name}'
     video_sha=sha(HERE/'video.mp4');render=json.loads((HERE/'render-result.json').read_text());assert video_sha in json.dumps(render),'Video differs from formal encoded report'
-    article=(HERE/'article.mdx').read_text();assert not re.search(r'\b(fontSize|textAnchor|strokeWidth)=',article),'Article SVG requires native presentation attributes'
+    article_path,derivation=prepare_site_article()
+    article=article_path.read_text();assert not re.search(r'\b(fontSize|textAnchor|strokeWidth)=',article),'Article SVG requires native presentation attributes'
     assert '{#java}' in article
     java_source=card_source['sourceFile'];assert java_source.startswith('demo-java/') and java_source.endswith('.java') and (HERE/java_source).is_file()
     assert '/adapter-pattern/'+java_source in article,'Link the complete Java source used by the card'
     assert '/adapter-pattern/demo-java/AdapterDemo.java' in article,'Link the retained Java contract/implementation dependency'
-    for name in FILES:shutil.copyfile(HERE/name,OUT/name);assert sha(HERE/name)==sha(OUT/name)
-    meta=dict(current);meta.update(title=config['title'],updatedAt=updated,
+    source_files={name:('site-article.mdx' if name=='article.mdx' else name) for name in FILES}
+    if args.article_only:
+        manifest_path=HERE/'qa-site-copy-manifest.json';manifest=json.loads(manifest_path.read_text())
+        assert manifest['revisionRelease']==args.release
+        preserved={name:sha(OUT/name) for name in FILES+['meta.json'] if name!='article.mdx'}
+        prior_article_sha=sha(OUT/'article.mdx');assert prior_article_sha in [derivation['sourceSha256'],derivation['derivedSha256']]
+        shutil.copyfile(article_path,OUT/'article.mdx');assert sha(OUT/'article.mdx')==derivation['derivedSha256']
+        assert all(sha(OUT/name)==digest for name,digest in preserved.items())
+        assert before==protected_episodes() and before_metadata==other_metadata()
+        entry=next(row for row in manifest['files'] if row['file']=='article.mdx')
+        entry.update(sourceFile=f'episodes-codex/{SLUG}/site-article.mdx',rawSourceFile=f'episodes-codex/{SLUG}/article.mdx',sha256=derivation['derivedSha256'],bytes=(OUT/'article.mdx').stat().st_size,isSiteDerived=True)
+        manifest['siteArticleDerivation']=derivation
+        manifest['articleOnlyFormatSync']={'checkedAtBeijing':datetime.now(ZoneInfo('Asia/Shanghai')).isoformat(),'priorCanonicalArticleSha256':prior_article_sha,'allNonArticleCanonicalFilesUnchanged':True,'preservedSha256':preserved}
+        manifest_path.write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+        print(json.dumps({'status':'passed','scope':'article-format-only','revisionRelease':args.release,'sourceArticleSha256':derivation['sourceSha256'],'siteArticleSha256':derivation['derivedSha256'],'changes':3,'otherCanonicalFilesUnchanged':True},ensure_ascii=False))
+        raise SystemExit(0)
+    for name in FILES:shutil.copyfile(HERE/source_files[name],OUT/name);assert sha(HERE/source_files[name])==sha(OUT/name)
+    meta=dict(current);meta.update(title=config['title'],updatedAt=updated,revisionRelease=args.release,
         summary='沿订单17的发货提醒，先按业务需求组织通知约定，再看适配器怎样转换委托，以及外部SDK升级时哪些调整留在集成边界，理解符合业务表达与隔离外部变化的收益。',
         description='保留同一发货提醒案例，讲适配器如何让已有通知能力按业务约定使用，并用外部SDK升级前后对照说明维护边界。业务语义不变、所需能力仍满足时，技术差异可局部化；适配器可承担防腐转换职责，不能凭包装名称判断模式。',
         finalVideoFrames=frames,targetDuration=frames/fps,javaEndCard=card)
@@ -75,7 +114,7 @@ if __name__=='__main__':
     assert before_metadata==other_metadata(),'Other episode metadata changed'
     report={'status':'passed','checkedAtBeijing':datetime.now(ZoneInfo('Asia/Shanghai')).isoformat(),'executedBy':'Codex adapter revision site agent','mode':'published-episode-revision','release':args.release,'revisionRelease':args.release,
         'metadataBefore':current,'metadata':meta,'historyFieldsPreserved':HISTORY,'previousPublishedSite':'revisions/business-boundary-v2/previous-site','previousEpisodesPreserved':before,'otherMetadataPreserved':before_metadata,
-        'javaSource':java_source,'files':[{'file':name,'sourceFile':f'episodes-codex/{SLUG}/{name}','sha256':sha(OUT/name),'bytes':(OUT/name).stat().st_size} for name in FILES],
+        'javaSource':java_source,'siteArticleDerivation':derivation,'files':[{'file':name,'sourceFile':f'episodes-codex/{SLUG}/{source_files[name]}','sha256':sha(OUT/name),'bytes':(OUT/name).stat().st_size,**({'rawSourceFile':f'episodes-codex/{SLUG}/article.mdx','isSiteDerived':True} if name=='article.mdx' else {})} for name in FILES],
         'scope':'Only approved D03 revision artifacts copied. Debut/date and existing identities retained; D01/D02/Skills/P04 core files and every other metadata file preserved byte-for-byte.'}
     (HERE/'qa-site-copy-manifest.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'status':'passed','revisionRelease':args.release,'firstRelease':meta['firstRelease'],'publishedAt':meta['publishedAt'],'updatedAt':updated,'frames':frames,'videoSha256':video_sha,'otherEpisodesUnchanged':True},ensure_ascii=False))
