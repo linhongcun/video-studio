@@ -243,6 +243,9 @@
 
 - **合并后的最终树检查（D01/D02）：**本轮候选v0.60.3在合并前最后fetch时尚未占用；另一任务PR #252随后先合入撤下Agent试片及学习目录变更，并将已有tag v0.60.3指向f7f2df5。本批PR #253合并8e97948后，打标签前的“检查分支与实际主干整树相等”断言拦截了差异，因此未移动旧tag或误发Release。568项冻结输入和两片媒体保持，改用下一可用修订号v0.60.4，按实际合并后的36片目录重建网站并复核。旧候选证据与新最终证据分别归档；最终v0.60.4精确tag/Release后部署及13项线上完整核验通过，见[批次记录](pattern-flow-ui-java/release.md)。
 
+
+- **D03新一期的并行版本处理（已按v0.63.0发布）：**适配器模式原候选v0.62.0验收期间，Skills先占用该版本。核对本期尚未进入旧发布标签后，保留Skills的v0.62.0及其主干内容，把906cbad1提交对应的24份旧本地站点候选归档到`episodes-codex/adapter-pattern/qa-site-candidates/v0.62.0-906cbad1/`，显式仅将未发布D03的首发字段与候选版本顺延为v0.63.0。随后按当前完整树重建39个发布页/5个方向，双视口8次章节跳转、24句字幕、Java/SVG及设计模式三期导航本地检查通过；166项冻结输入和媒体保持，未重配音或重编码。旧候选与新验收证据分别保留，见[归档记录](../episodes-codex/adapter-pattern/qa-site-candidate-archive.json)、[版本核对](../episodes-codex/adapter-pattern/site-version-collision.json)和[当前网站检查](../episodes-codex/adapter-pattern/qa-site-browser.json)。最终[PR #264](https://github.com/linhongcun/video-studio/pull/264)合并ab49ce850a11a77695173cff5444aebdcdf68ec1，v0.63.0附注tag/Release及Release后Pages40158697480对应本次整合结果；北京时间2026-10-25 11:38:39，完整重跑11项canonical GET的媒体/海报、24字幕/4章、Java/源码、三期导航与实际发布条目核验通过，#165已completed关闭、#161同步3完成20待安排。线上检查曾因QA工具错误断言首页入口而中止，原失败摘要保留，仅改工具后重跑通过，未改站点或媒体，见[实际线上结果](../episodes-codex/adapter-pattern/qa-site-online.json)。这些发布核验不代表D03用户已经观看认可。
+
 ## L030 把设计模式讲成了特定语言的语法课
 
 - **案例：**2026-10-25，用户观看策略模式v0.54.4后指出，多处讲函数、参数等内容，偏向语法；设计模式应强调不绑定语言的思想，并要求修复视频、更新经验和教训。

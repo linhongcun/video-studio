@@ -1,0 +1,31 @@
+{
+  "sources": [
+    {
+      "id": "S2",
+      "repository": "httpwg/http-core",
+      "commit": "bde37f634681bd5462568b73aa722af9c9a3ef5e",
+      "path": "rfc9110.xml",
+      "blobSha": "08e100400c819548ea4aec262e2d4d78d18321fa",
+      "url": "https://github.com/httpwg/http-core/blob/bde37f634681bd5462568b73aa722af9c9a3ef5e/rfc9110.xml",
+      "accessedAtBeijing": "2026-10-25",
+      "readScope": "section 15.3.3 / 202 Accepted, source lines8578–8599",
+      "text": "<section title=\"202 Accepted\" anchor=\"status.202\">\n  <iref primary=\"true\" item=\"202 Accepted (status code)\" x:for-anchor=\"\"/>\n  <x:anchor-alias value=\"202 (Accepted)\"/>\n<t>\n   The 202 (Accepted) status code indicates that the request\n   has been accepted for processing, but the processing has not been\n   completed. The request might or might not eventually be acted upon, as it\n   might be disallowed when processing actually takes place. There is no\n   facility in HTTP for re-sending a status code from an asynchronous\n   operation.\n</t>\n<t>\n   The 202 response is intentionally noncommittal. Its purpose is to\n   allow a server to accept a request for some other process (perhaps a\n   batch-oriented process that is only run once per day) without\n   requiring that the user agent's connection to the server persist\n   until the process is completed. The representation sent with this\n   response ought to describe the request's current status and point to\n   (or embed) a status monitor that can provide the user with an estimate of\n   when the request will be fulfilled.\n</t>\n</section>"
+    },
+    {
+      "id": "S1",
+      "repository": "spring-projects/spring-framework",
+      "commit": "7bdf9c86f8657029567067051b7c6bd47b4ae67e",
+      "path": "spring-core/src/main/java/org/springframework/core/task/support/TaskExecutorAdapter.java",
+      "blobSha": "38be515d885c408159cfba4382fe52169bf118d0",
+      "url": "https://github.com/spring-projects/spring-framework/blob/7bdf9c86f8657029567067051b7c6bd47b4ae67e/spring-core/src/main/java/org/springframework/core/task/support/TaskExecutorAdapter.java",
+      "accessedAtBeijing": "2026-10-25",
+      "readScope": "complete source file, with focus on Javadoc, held Executor and delegation/exception conversion",
+      "text": "/**\n * Adapter that takes a JDK {@code java.util.concurrent.Executor} and\n * exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it.\n * Also detects an extended {@code java.util.concurrent.ExecutorService}, adapting\n * the {@link org.springframework.core.task.AsyncTaskExecutor} interface accordingly.\n *\n * @author Juergen Hoeller\n * @since 3.0\n * @see java.util.concurrent.Executor\n * @see java.util.concurrent.ExecutorService\n * @see java.util.concurrent.Executors\n */\npublic class TaskExecutorAdapter implements AsyncTaskExecutor {\n\n\tprivate final Executor concurrentExecutor;\n\n\tprivate @Nullable TaskDecorator taskDecorator;\n\n\n\t/**\n\t * Create a new TaskExecutorAdapter,\n\t * using the given JDK concurrent executor.\n\t * @param concurrentExecutor the JDK concurrent executor to delegate to\n\t */\n\tpublic TaskExecutorAdapter(Executor concurrentExecutor) {\n\t\tAssert.notNull(concurrentExecutor, \"Executor must not be null\");\n\t\tthis.concurrentExecutor = concurrentExecutor;\n\t}\n\n\n\tpublic void execute(Runnable task) {\n\t\ttry {\n\t\t\tdoExecute(this.concurrentExecutor, this.taskDecorator, task);\n\t\t}\n\t\tcatch (RejectedExecutionException ex) {\n\t\t\tthrow new TaskRejectedException(this.concurrentExecutor, task, ex);\n\t\t}\n\t}\n\n\t@Override\n\tpublic Future<?> submit(Runnable task) {\n\t\ttry {\n\t\t\tif (this.taskDecorator == null &&\n\t\t\t\t\tthis.concurrentExecutor instanceof ExecutorService executorService) {"
+    }
+  ],
+  "limits": [
+    "RFC202 supports accepted-is-not-completed semantics; mock VendorSdk QUEUED is a project-defined contract, not an assertion that this SDK uses HTTP202.",
+    "Spring demonstrates one official adapter implementation. Not a universal requirement that all GoF adapters hold composition members.",
+    "No GoF book full-text or Refactoring.Guru new body was read in this task."
+  ]
+}

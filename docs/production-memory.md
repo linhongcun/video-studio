@@ -12,7 +12,7 @@
 
 ## 用户明确的质量偏好
 
-- 2026-10-25用户在撤下两期旧Agent视频后，授权自选最有把握的一期努力做好。本次选择[Agent Skills / #139](https://github.com/linhongcun/video-studio/issues/139)，制作与站点slug为agent-skills、内部EP.31。以团队API兼容审查贯穿，讲发现/渐进加载、参考资料读取与脚本工具执行双路径、索引开销和宿主保留边界；不把基础接线撑成一期，也不伪造无Skill失败/有Skill成功对照。12镜24句4章、5648帧约3分8秒，正常配音；原定EP30遇主干并行使用，先停止编码、仅同步身份后以同一声音/句界/画面重新冻结。新成片制作侧与独立实际MP4复核已通过，本地站点验证已通过，GitHub发行与线上核验收尾进行中，尚无用户观看结论。完整依据、预检修订和能力范围见[本期记录](../episodes-codex/agent-skills/README.md)。
+- 2026-10-25用户在撤下两期旧Agent视频后，授权自选最有把握的一期努力做好。本次选择[Agent Skills / #139](https://github.com/linhongcun/video-studio/issues/139)，制作与站点slug为agent-skills、内部EP.31。以团队API兼容审查贯穿，讲发现/渐进加载、参考资料读取与脚本工具执行双路径、索引开销和宿主保留边界；不把基础接线撑成一期，也不伪造无Skill失败/有Skill成功对照。12镜24句4章、5648帧约3分8秒，正常配音；原定EP30遇主干并行使用，先停止编码、仅同步身份后以同一声音/句界/画面重新冻结。新成片制作侧与独立实际MP4复核已通过，本地站点验证通过，已通过PR #263按v0.62.0合并发布，Release后部署40157863039成功；20个普通canonical GET完整媒体/字幕/章节/入口与更新日志核验通过，原两期旧页和视频仍404，尚无用户观看结论。完整依据、预检修订和能力范围见[本期记录](../episodes-codex/agent-skills/README.md)。
 
 - **LC.70楼梯场景修后认可（v0.61.1）：**2026-10-25，用户实际观看v0.61.1后表示“这次看着就对味了”，认可楼梯“生动形象”，并表示前两阶走法数相加的关系“看得清清楚楚”。这支持本片用原题楼梯、实际脚步和对应位置的计数呈现推导；记录为对场景表达与递推关系清晰度的定性认可，不扩写为完整Python卡、全部数学细节、其他题目均被认可或量化学习效果。后续类似题目优先让已有场景的对象、动作和结果参与推导，按题目设计，不机械照搬楼梯画面。见S004、L041及[本轮记录](climbing-stairs-scene/README.md)。
 
@@ -54,6 +54,9 @@
 
 
 - **设计模式最新观看反馈（v0.60.4上线后，2026-10-25）：**用户表示“这次有这么一个背景铺垫，看这视频就好多了。”记录为本轮背景铺垫改善观看清晰度的正向反馈；后续在适合的内容中先交代功能、操作与目标，再讲结构和机制，沿用原例并按内容调整。用户没有逐片指定，不推断D01/D02均完整观看，不扩大为Java卡、全部细节或量化学习效果已经认可。已补入S017和L037。
+
+
+- **两期明确认可与下一期（2026-10-25）：**用户随后明确表示“现在这两期设计模式看着好多了”，授权自选最有把握的下一模式制作。这补充了此前未逐片指定的观看范围，记为对D01/D02当前表达的定性认可，不扩大为学习效果测量。本次先从干净main同步ff730833，再选既有D03适配器/#165，slug adapter-pattern、EP31；通过商家发送发货提醒讲业务通知约定、适配器与外部服务的协作，保持已受理不等于已送达。本期12镜24句、5271帧/175.7秒，166项冻结输入、Java12组行为、独立真实动态/正式MP4与音轨一致性均通过；已整合LC70及Skills新主干，保留Skills的v0.62.0；D03旧未发布候选的24份站点文件按906cbad1归档，仅将本期首发候选顺延为v0.63.0。当前39个发布页、5个学习方向重建通过，1440/390双视口8次章节跳转、24句字幕、Java卡/正文入口、两张原生SVG和设计模式三期导航均通过本地验收；166项冻结输入与原媒体保持，不重做配音或编码。现已由[PR #264](https://github.com/linhongcun/video-studio/pull/264)合并ab49ce850a11a77695173cff5444aebdcdf68ec1，附注tag及[Release v0.63.0](https://github.com/linhongcun/video-studio/releases/tag/v0.63.0)发布后，[Pages 40158697480](https://github.com/linhongcun/video-studio/actions/runs/40158697480)成功。北京时间2026-10-25 11:38:39.015827，整套11项canonical普通GET通过，完整视频SHA25bf61a8521517af488b45cf13b66b27d94b4fd963738ca14b19c3176d4a8fe7/9,539,380字节、海报、24字幕/4章、Java/源码、三期导航、系列/资料库/RSS及真实Release条目均核验一致。首次线上脚本因首页Agent入口断言误写为series/agent/而中止，首次失败摘要保留；仅修QA工具后完整重跑通过，站点和媒体未改。#165已completed关闭，#161同步3项完成/20项待安排；D03尚无用户观看反馈，不扩大为学习效果测量。实际范围见[本期QA](../episodes-codex/adapter-pattern/qa-final.md)、[当前网站检查](../episodes-codex/adapter-pattern/qa-site-browser.json)、[线上核验](../episodes-codex/adapter-pattern/qa-site-online.json)、[首次检查记录](../episodes-codex/adapter-pattern/qa-site-online-attempt-1.json)、[版本处理](../episodes-codex/adapter-pattern/site-version-collision.json)和[开工记录](../episodes-codex/adapter-pattern/startup.json)。
 
 ## 趣味推理系列的当前安排
 
