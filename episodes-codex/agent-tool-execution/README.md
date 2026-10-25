@@ -14,6 +14,8 @@
 
 编码前再次同步`e38fa9236fbc340f834581302320494d2a1c1ce7`，只新增LC三片上线收尾文档，无本期制作输入交集，站点版本仍为0.57.0。最终发版前仍须重新核对最新主干与版本标签。
 
+发布前进一步整合`28b347dbf0399a0c094f1a7023f10501472506f2` / v0.57.1的赛马短版与最新规则纠正，128本期冻结输入交集为空、完整SHA保持。为保留上游新资产重新构建全站；A02/A01页面及本期视频、海报、VTT与原实测构建逐字节一致，因此复用已有两视口16次跳转结果，不重做无关视频或浏览器检查。实际范围见[同步记录](upstream-sync.json)和site-qa。
+
 ## 资料、实测与能力边界
 
 - [research.md](research.md)：2026-10-25（北京时间）重新联网读取官方Function calling、Agents SDK工具/授权说明及OWASP；Responses自定义function字段锁定官方SDK源码，SDK只作契约参考。
@@ -72,6 +74,6 @@ python3 episodes-codex/_shared/extract_encoded_samples.py episodes-codex/agent-t
 
 ## 接入与发布
 
-只将检查通过的同一MP4、JPG和发布所需数据接入`episodes/agent-tool-execution/`；WAV、PNG原稿、制作源码留本目录。精确章节使用冻结帧号除以fps，VTT与原旁白逐字一致。站点两视口实际播放/seek/字幕检查和线上完整SHA另记site-integration及release。
+只将检查通过的同一MP4、JPG和发布所需数据接入`episodes/agent-tool-execution/`；WAV、PNG原稿、制作源码留本目录。精确章节使用冻结帧号除以fps，VTT与原旁白逐字一致。站点两视口实际播放/seek/字幕检查见site-integration与site-qa；Release、部署及线上完整SHA的实际收尾记录在制作issue #132。
 
 按GitHub站点持续授权完成PR、Release与Release后部署，核对真实标签内容、线上完整媒体/字幕/海报/章节和更新日志，再以completed关闭#132。并行任务可能推进版本，拟定版本不是最终发布身份；已有标签绝不移动。平台不新发。配乐Kevin MacLeod《Wallpaper》，CC BY 4.0，沿用项目署名。
