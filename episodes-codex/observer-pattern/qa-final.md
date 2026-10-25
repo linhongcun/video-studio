@@ -1,6 +1,6 @@
 # D02观察者模式：成片与交付核对
 
-2026-10-25（北京时间）。执行：Codex根任务、独立编稿/资料/配音/动画/质检/站点代理。制作issue[#164](https://github.com/linhongcun/video-studio/issues/164)，内部EP.28。成片与本地站点检查已通过，拟首发v0.58.0；真实上线结果在完成后另记，未预写用户已观看认可。
+2026-10-25（北京时间）。执行：Codex根任务、独立编稿/资料/配音/动画/质检/站点代理。制作issue[#164](https://github.com/linhongcun/video-studio/issues/164)，内部EP.28。成片、本地站点与实际上线检查已通过，已首发v0.58.0；发布结果见release.md，未预写用户已观看认可。
 
 ## 讲解与资料
 
@@ -36,3 +36,5 @@
 站点采用检查通过的同一MP4/JPG和必要文本，语言实现不作视频前置。本地最终构建保留36发布页，1440/390两视口播放、24句字幕、5章共10次精确seek（最大误差6.67e-7秒）及D01→D02路径通过。MDX的SVG属性兼容问题只在文章发布派生稿修复，原冻结文章/119清单和音视频保持；新稿SHA912cfa031af60323873553689ab218316355cfe6d19582a17d93abaa1ac3b708，与站点副本一致。第二次定向build及两图四视口组合真实DOM/截图通过，原整套媒体检查保留且未重跑。站点报告为site-copy-manifest.json、site-browser-check.json、site-svg-correction.json，L035记录具体问题；本地GitHub Releases抓取曾降级外链，实际新Release条目仍由生产部署后的普通GET严格核验。GitHub持续发布授权适用；外部平台未新发。
 
 本轮没有逐字ASR、发音听辨、全片人工听辨/播放或初学者实验。声学包络、编码相关、静态采样与机器检查均按各自范围记录，不替代这些未执行能力，也不写成用户认可。
+
+实际上线：PR #236合并530ddc75…，附注tag/Release v0.58.0后Pages40147093346成功。北京时间2026-10-25 08:35:41首轮9个canonical GET的媒体完整SHA、海报、24字幕、5章、SVG属性、D01↔D02及真实Release条目通过，#164已completed关闭，#161同步。详见release.md及site-online-verification.json。

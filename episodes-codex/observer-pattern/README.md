@@ -1,6 +1,6 @@
 # 设计模式 D02 · 观察者模式
 
-制作 issue 为 [#164](https://github.com/linhongcun/video-studio/issues/164)，系列总览为 [#161](https://github.com/linhongcun/video-studio/issues/161)。先解释语言无关的设计关系：变化来源、订阅者、共同通知约定与可调整的订阅集合；具体语言实现仅作配套图文拓展。当前真实音轨为12镜24句、5章、4979帧，约2分46秒；思想/动态预检、正式成片与本地站点检查已通过，真实发布状态见release.md，不预记用户已观看认可。
+制作 issue 为 [#164](https://github.com/linhongcun/video-studio/issues/164)，系列总览为 [#161](https://github.com/linhongcun/video-studio/issues/161)。先解释语言无关的设计关系：变化来源、订阅者、共同通知约定与可调整的订阅集合；具体语言实现仅作配套图文拓展。当前真实音轨为12镜24句、5章、4979帧，约2分46秒；思想/动态预检、正式成片、本地站点及实际上线核验均通过，首发v0.58.0；见[发布记录](release.md)，不预记用户已观看认可。
 
 ## 配音与装配
 
