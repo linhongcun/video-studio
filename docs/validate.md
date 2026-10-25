@@ -16,6 +16,28 @@ python3 episodes-codex/degradation/verify-freeze.py
 
 独立句级装配工程的通用入口与字段见 [episodes-codex/_shared/README.md](../episodes-codex/_shared/README.md)。其装配、检查、冻结、编码检查分别承担不同阶段，不将某一期的入口假定为全系列统一入口。
 
+## 参考资料：渲染前与发布前
+
+新片从调研起准备 `references.json`，随脚本和配套文章同步定稿。正式编码前从仓根只读检查来源字段、核验记录与文章链接：
+
+```sh
+node site/scripts/check-references.mjs --sources EPDIR
+```
+
+`EPDIR` 指 `episodes-codex/<slug>`。缺来源、未核验或缺少证据时先修正，不启动昂贵的正文编码；字段通过并不表示工具已经阅读原文或确认论点真实，技术审稿仍须逐项核对。
+
+采用新期默认入口时，`python3 episodes-codex/_shared/render_with_references.py EPDIR --verify` 复核本期来源、冻结输入与最终媒体，并只写QA报告。不要对已编码工程重跑会改写输入的准备步骤来追认通过。
+
+成片和资料文件接入 `episodes/<slug>/` 后，从仓根检查最终交付：
+
+```sh
+npm --prefix site run check:references
+```
+
+站点 `build` 在复制媒体前自动执行同一项。检查资料JSON、文章链接、附录记录、发布元数据的区间和最终帧数，以及实际MP4与记录的完整SHA；新片只有文章出处、空资料标题或过期媒体记录时不能发布。完整解码、原生字幕首卡边界、资料可读性及播放器控件遮挡仍按[成片审](qa.md#成片审)实际检查。
+
+`site/scripts/reference-legacy.json` 固定登记本次流程接入前45片的slug和原视频SHA，仅未接入附录且实际MP4仍与基线字节相同的旧片可分批暂缓。已开始接入附录的旧片、旧slug重制或更换MP4后均须完整检查，不能通过扩大名单或重写基线SHA绕过。检查命令不改写资料、媒体或冻结清单，失败后不能靠重写哈希追认未使用的输入。
+
 ## 冻结与媒体身份
 
 `audioSha256` 是实际 `voice.wav` 的全文 SHA-256；`scriptSha256` 的输入可能是整份脚本或旁白提取文本，必须按该期装配实现核对。当前 EP.14 的 `check-inputs.py` 比较整份 `script.md`，历史 fixture 的旁白哈希定义不同。
