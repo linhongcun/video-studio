@@ -4,9 +4,12 @@
 Uses ordinary canonical GETs with the inherited proxy and default CA trust.
 Hashes complete remote media streams without saving or retaining their bodies.
 No cache-busting query, Range, forced-cache headers, retries, or UI claims.
+Optional connector evidence replaces only the Release API HTTP GET, retaining
+the actual provenance and reporting nine site GETs plus one independent read.
 """
 from __future__ import annotations
 
+import argparse
 import hashlib
 import json
 import re
@@ -33,6 +36,7 @@ SITE = ROOT / 'episodes' / SLUG
 DIST = ROOT / 'site/dist'
 PAGE_URL = BASE + 'episodes/' + SLUG + '/'
 RELEASE_URL = REPO_URL + '/releases/tag/' + RELEASE
+RELEASE_API_URL = 'https://api.github.com/repos/linhongcun/video-studio/releases/tags/' + RELEASE
 
 
 def sha_file(path: Path) -> str:
@@ -41,6 +45,28 @@ def sha_file(path: Path) -> str:
         for chunk in iter(lambda: stream.read(256 * 1024), b''):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def validate_release(release):
+    assert release['tag_name'] == RELEASE and release['html_url'] == RELEASE_URL
+    assert release['draft'] is False and release['prerelease'] is False and release.get('published_at')
+    assert PAGE_URL in release['body'], 'The published Release must identify the delivered lesson'
+
+
+def load_release_evidence(path):
+    """Read the parent's actual connector response, never synthesize a GET."""
+    raw = path.read_bytes()
+    envelope = json.loads(raw)
+    release = envelope['payload']
+    assert isinstance(release, dict), 'Connector evidence payload must be the actual Release object'
+    provenance = {key: value for key, value in envelope.items() if key != 'payload'}
+    assert provenance, 'Connector evidence must retain its retrieval provenance'
+    validate_release(release)
+    return release, {'transport': 'independent-github-connector-evidence',
+                     'evidenceFile': str(path.resolve()),
+                     'evidenceFileSHA256': hashlib.sha256(raw).hexdigest(),
+                     'provenance': provenance,
+                     'connectorCallPerformedByVerifier': False}
 
 
 @dataclass
@@ -164,6 +190,14 @@ def check_episode(page, meta, expected_chapters, expected_frames, fps):
 
 
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--release-api-json', type=Path,
+                        help='Parent-recorded GitHub connector envelope with actual payload and retrieval provenance.')
+    args = parser.parse_args()
+    release_from_connector, release_evidence = (None, None)
+    if args.release_api_json is not None:
+        # Validate the supplied independent evidence before making any site GET.
+        release_from_connector, release_evidence = load_release_evidence(args.release_api_json)
     facts = load_facts()
     check_local_delivery(facts)
     meta = facts['meta']
@@ -236,10 +270,8 @@ def main():
         assert [link.attrs['href'] for link in lesson_links] == expected_links
         rss = get('rss', BASE + 'rss.xml').decode('utf-8')
         assert PAGE_URL in rss and meta['title'] in rss and '趣味推理 P03' in rss
-        release = json.loads(get('github-release', 'https://api.github.com/repos/linhongcun/video-studio/releases/tags/' + RELEASE))
-        assert release['tag_name'] == RELEASE and release['html_url'] == RELEASE_URL
-        assert release['draft'] is False and release['prerelease'] is False and release.get('published_at')
-        assert PAGE_URL in release['body'], 'The published Release must identify the delivered lesson'
+        release = release_from_connector if release_evidence is not None else json.loads(get('github-release', RELEASE_API_URL))
+        validate_release(release)
         changelog = Page(get('changelog', BASE + 'changelog/').decode('utf-8')).root
         entries = [node for node in changelog.find_all('li')
                    if node.find_all('a', href=RELEASE_URL)]
@@ -255,6 +287,11 @@ def main():
                   'localCandidateSiteVersion': 'v' + version, 'deployedSiteVersion': deployed_version,
                   'versionScope': 'The P03 debut Release and deployment-wide version are separate identities; all P03 bytes, current sentence/chapter facts and exact live puzzle directory remain strict.',
                   'canonicalQueriesAdded': False, 'remoteMediaSaved': False,
+                  'canonicalGetCount': len(results), 'siteCanonicalGetCount': 9,
+                  'directReleaseApiGetCount': 0 if release_evidence is not None else 1,
+                  'independentConnectorReleaseReadCount': 1 if release_evidence is not None else 0,
+                  'releaseApiTransport': 'independent-github-connector-evidence' if release_evidence is not None else 'direct-canonical-http-get',
+                  'releaseApiEvidence': release_evidence,
                   'fullVideoStreamHashed': True, 'captionsExactBytesMatch': True,
                   'subtitleCount': subtitle_count, 'shotCount': len(shots),
                   'results': results, 'chapters': expected_chapters,
@@ -263,10 +300,12 @@ def main():
                   'githubRelease': {'id': release['id'], 'tag': release['tag_name'],
                                     'url': release['html_url'], 'publishedAt': release['published_at']},
                   'scope': 'Canonical HTTP delivery, complete media hashes, exact VTT and chapter data, anchors, source, series, directory, RSS and actual Release entry. Browser behavior is recorded separately; no claim of full human listening or measured learning outcomes.'}
-        assert len(results) == 10, 'Expected ten first-attempt canonical GETs'
+        assert len(results) == (9 if release_evidence is not None else 10), 'Unexpected first-attempt canonical GET count'
         for directory in (PRODUCTION, SITE):
             (directory / 'online-verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
         print(json.dumps({'status': 'passed', 'canonicalGetCount': len(results), 'release': RELEASE,
+                          'independentConnectorReleaseReadCount': 1 if release_evidence is not None else 0,
+                          'releaseApiTransport': report['releaseApiTransport'],
                           'deployedSiteVersion': deployed_version,
                           'videoSha256': results[0]['sha256'],
                           'report': str(PRODUCTION / 'online-verification.json')}, ensure_ascii=False))
@@ -274,6 +313,8 @@ def main():
         failure = {'status': 'failed', 'checkedAtUTC': datetime.now(timezone.utc).isoformat(),
                    'release': RELEASE, 'firstRelease': FIRST_RELEASE,
                    'error': str(error), 'completedGetCount': len(results),
+                   'releaseApiTransport': 'independent-github-connector-evidence' if release_evidence is not None else 'direct-canonical-http-get',
+                   'releaseApiEvidence': release_evidence,
                    'canonicalQueriesAdded': False, 'remoteMediaSaved': False, 'results': results}
         failure_path = PRODUCTION / 'online-verification-failed.json'
         failure_path.write_text(json.dumps(failure, ensure_ascii=False, indent=2) + '\n')
