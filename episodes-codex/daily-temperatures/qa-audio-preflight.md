@@ -9,3 +9,11 @@
 - 源轨实际EBU128测量为−16.0 LUFS／−2.2 dBTP，0个满幅PCM削波；build记录无内部dropout，最大相邻句响度差0.3 LU。程序卡5172..5321完整150帧／5秒，240000个源voice样本全零，正文字幕最后5171帧、最后发言边界5126.59625帧。这里的零PCM指源voice，不能预先声称最终AAC含BGM混音静音。
 
 初次fdbd5c78声轨是未编码中间装配，相关build/SB/params/manifest保存在 `revisions/stack-primer-phase-alignment/`；本报告不将其当作最终身份。旧4538帧声音及媒体QA保留在 `revisions/stack-primer-before/`。本轮没有重跑算法大穷举，没有ASR、逐句人耳全听或新成片媒体通过声明；原程序/trace核心7项与封面/代码卡字节保留证据可复用，research.md仅追加本轮说明。完整数值与SHA见JSON。
+
+## 190项冻结与默认资料卡入口的范围补充
+
+音频范围复用 **PASS**：原165清单精确保存在 `revisions/stack-primer-top-marker-before/source-sha256.json`；现190清单SHA256 `e54764b15f88c50219a9cd4275f5b64339aa4539fea909a2b5bc57fb7910235b` 全项匹配，新增25、删除0、既有变更6项（文章、package、StackPrimer、freeze、QA脚本与正文render包装）。其中StackPrimer只修正运动中栈顶标记的指向，其余接入资料卡默认入口、实际clip/旧基线和共享实现。
+
+原20个直接证据中19个字节不变，唯画面remix-plan重新绑定了视觉源及实际媒体依赖；其正文5322帧、voice.wav及所有tail调整为0保持。全部32句的96个raw/WAV/txt身份和7共享实现全保持，不再执行cut或声学预检。源voice、words、SB、params、起音及句文件与前述通过身份相同；有效证据映射在JSON的scopeRebindHistory／activeAudioSourceScope，顶层原始QA身份完整保留。
+
+正文仍为5322帧，Python卡仍5172..5321。资料卡另从5322起150帧、最终5472帧；源voice与正文SB不延长，也不要求资料卡有新增音频包。本附录只批准音频范围复用，最终编码媒体及资料卡实际检查另见独立媒体QA。

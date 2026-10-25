@@ -186,7 +186,8 @@ class Verify:
         return parsed
 
     def get(self, relative, expected=200):
-        url = BASE + relative + ('&' if '?' in relative else '?') + 'verify=' + self.tag
+        assert '?' not in relative
+        url = BASE + relative
         request = urllib.request.Request(url, headers={'User-Agent': 'video-studio-daily-stack-primer-verification', 'Cache-Control': 'no-cache'})
         try:
             with urllib.request.urlopen(request, timeout=90) as response:
@@ -237,15 +238,38 @@ def verify(args, run):
         assert meta['draft'] is False and meta['series'] == 'leetcode' and meta['sourcePath'] == f'episodes-codex/{slug}/remotion'
         assert meta['title'] == read(production / 'episode-config.json')['title']
         assert iso(meta['updatedAt']) > iso(original['updatedAt'])
-        fps, frames, card = sb['meta']['fps'], sb['meta']['finalVideoFrames'], sb['meta']['unvoicedEndCard']
-        assert fps == 30 and frames == meta['finalVideoFrames'] and frames > 150
-        assert card['durationInFrames'] == 150 and card['from'] + 150 == frames
+        rendered = read(production / 'render-result.json')
+        publication = rendered['publicationMetadata']
+        fps, frames, body_frames, card = sb['meta']['fps'], meta.get('finalVideoFrames', publication['finalVideoFrames']), sb['meta']['finalVideoFrames'], sb['meta']['unvoicedEndCard']
+        appendix = meta['referenceAppendix']
+        assert fps == 30 and frames == meta['finalVideoFrames'] and frames > body_frames
+        assert card['durationInFrames'] == 150 and card['from'] + 150 == body_frames
+        assert publication == {'finalVideoFrames': frames, 'referenceAppendix': appendix}
+        assert appendix['kind'] == 'references' and appendix['from'] == body_frames and appendix['durationInFrames'] == 150 and appendix['from'] + 150 == frames
+        references, receipt = read(canonical / appendix['sources']), read(canonical / appendix['manifest'])
+        reference_media = read(canonical / 'reference-appendix-media-check.json')
+        assert receipt['bodyFrames'] == body_frames and receipt['finalVideoFrames'] == frames
+        assert len(receipt['appendix']['pages']) == 1 and receipt['appendix']['framesPerPage'] == 150
+        assert receipt['inputs']['referencesSHA256'] == sha((canonical / appendix['sources']).read_bytes())
+        assert receipt['inputs']['bodySHA256'] == sha((production / 'remotion/out/body.mp4').read_bytes())
+        assert reference_media['passed'] is True and reference_media['bodySHA256'] == receipt['inputs']['bodySHA256']
+        assert reference_media['outputSHA256'] == receipt['outputSHA256']
+        assert all(reference_media[key] is True for key in ['bodyDecodedFramesAndTimestampsEqual', 'outputVideoTimelineContinuous', 'audioPacketsAndTimingEqual'])
+        reference_evidence = []
+        for relative in sorted({source['verification']['evidence'] for source in references['sources']}):
+            current = (ROOT / relative).read_bytes()
+            assert current == blob(tagged, relative)
+            reference_evidence.append({'path': relative, 'sha256': sha(current)})
+        checker = ROOT / 'site/scripts/check-references.mjs'
+        assert checker.read_bytes() == blob(tagged, 'site/scripts/check-references.mjs')
+        check_code = "import {pathToFileURL} from 'node:url'; const {checkEpisode}=await import(pathToFileURL(process.argv[2])); console.log(JSON.stringify(checkEpisode(process.argv[1])));"
+        checked_references = json.loads(subprocess.check_output(['node', '--input-type=module', '-e', check_code, str(canonical), str(checker)], text=True))
+        assert checked_references['slug'] == SLUG and checked_references['sourceCount'] == len(references['sources'])
         expected, chapter_plan = captions(sb), chapters(sb)
         assert expected and len(chapter_plan) == len({chapter['id'] for chapter in chapter_plan}) == 4
         assert all(cue['end'] <= card['from'] / fps for cue in expected)
-        rendered = read(production / 'render-result.json')
         assert rendered['frames'] == frames and sha((production / 'render-result.json').read_bytes()) == sha(blob(tagged, f'episodes-codex/{slug}/render-result.json'))
-        for name in ['meta.json', 'article.mdx', 'script.md', 'storyboard.json', meta['video'], 'cover-16x9.jpg', 'cover-4x3.jpg', 'cover-3x4.jpg']:
+        for name in ['meta.json', 'article.mdx', 'script.md', 'storyboard.json', meta['video'], 'cover-16x9.jpg', 'cover-4x3.jpg', 'cover-3x4.jpg', appendix['sources'], appendix['manifest'], 'reference-appendix-media-check.json']:
             assert sha((canonical / name).read_bytes()) == sha(blob(tagged, f'episodes/{slug}/{name}'))
             if name != 'meta.json':
                 assert sha((canonical / name).read_bytes()) == sha((production / name).read_bytes())
@@ -257,6 +281,7 @@ def verify(args, run):
         local_movie = (canonical / meta['video']).read_bytes()
         assert sha(local_movie) != sha(blob(baseline, f'episodes/{slug}/{meta["video"]}')), 'Revised movie not delivered'
         assert sha(local_movie) == rendered['sha256'] and len(local_movie) == rendered['bytes']
+        assert receipt['outputSHA256'] == sha(local_movie)
         qa_media = next(row for row in qa['media'] if row['slug'] == slug)
         assert qa_media['videoSha256'] == sha(local_movie) and qa_media['frames'] == frames and qa_media['cues'] == len(expected)
         media = []
@@ -290,12 +315,18 @@ def verify(args, run):
         assert solution in [block.strip() for block in document.code_blocks]
         source = f'https://github.com/{REPO}/tree/main/{meta["sourcePath"]}'
         assert source in document.links and {chapter['id'] for chapter in chapter_plan} <= document.ids
+        for reference in references['sources']:
+            for label in ['organization', 'title', 'version']:
+                assert reference[label] in document.text
+            for url in [reference['url'], reference['verification'].get('sourceUrl')]:
+                if url:
+                    assert url in document.links
         payloads = [json.loads(attrs['data-chapters']) for _, attrs in document.attrs if 'data-chapters' in attrs]
         assert len(payloads) == 1 and [{key: chapter[key] for key in ['id', 'start']} for chapter in payloads[0]] == chapter_plan
         videos = [attrs for element, attrs in document.attrs if element == 'video']
         assert len(videos) == 1 and 'controls' in videos[0] and videos[0]['poster'].endswith(f'episodes/{slug}/{meta["poster"]}')
         assert any(element == 'track' and attrs.get('kind') == 'captions' and attrs['src'].endswith(vtt_path) for element, attrs in document.attrs)
-        episode_reports.append({'slug': slug, 'problemNumber': meta['problemNumber'], 'frames': frames, 'fps': fps, 'cues': len(actual), 'chapters': chapter_plan, 'cardFrames': 150, 'firstRelease': meta['firstRelease'], 'dates': {key: meta[key] for key in ['createdAt', 'updatedAt', 'publishedAt']}, 'media': media, 'captionsSHA256': sha(vtt), 'source': source, 'completePythonExact': True})
+        episode_reports.append({'slug': slug, 'problemNumber': meta['problemNumber'], 'frames': frames, 'bodyFrames': body_frames, 'fps': fps, 'cues': len(actual), 'chapters': chapter_plan, 'cardFrames': 150, 'referenceAppendix': appendix, 'referenceSourceIds': [ref['id'] for ref in references['sources']], 'referenceEvidence': reference_evidence, 'referenceReceiptSHA256': sha((canonical / appendix['manifest']).read_bytes()), 'referenceMediaCheckSHA256': sha((canonical / 'reference-appendix-media-check.json').read_bytes()), 'firstRelease': meta['firstRelease'], 'dates': {key: meta[key] for key in ['createdAt', 'updatedAt', 'publishedAt']}, 'media': media, 'captionsSHA256': sha(vtt), 'source': source, 'completePythonExact': True})
     run.stage = 'Existing lesson home/learning/series/library/RSS and this revision Release only'
     home, learning, library, series = [Document(run.get(relative).decode()) for relative in ['', 'learn/', 'library/', 'series/leetcode/']]
     assert args.revision_tag in home.footer and '/video-studio/learn/#algorithms' in home.links
@@ -323,7 +354,7 @@ def verify(args, run):
             'annotatedTag': {'tagObjectSha': ref['object']['sha'], 'commit': tagged}, 'deployment': deployment_record,
             'episodes': episode_reports, 'retained': retained, 'httpRecords': run.http_records, 'apiRecords': run.api_records,
             'changelogAssociatedOnlyDailyTemperatures': True,
-            'limits': ['Only this revised film/video and its poster/VTT/page/entry routes are fetched. Other canonical bytes remain fixed through complete local/tag/baseline Git identities; no old online media are downloaded.', 'Actual player/CC/seek and viewed screenshots are recorded in local qa-site. This verifier checks serialized delivery, not full listening, ASR or learning outcomes.', 'Original createdAt/publishedAt/firstRelease and title remain fixed; current updatedAt and supplied tag/run identify the revision. The already-closed issue is not mutated.']}
+            'limits': ['Only this revised film/video and its poster/VTT/page/entry routes are fetched. Other canonical bytes remain fixed through complete local/tag/baseline Git identities; no old online media are downloaded.', 'Actual player/CC/seek and viewed screenshots are recorded in local qa-site. This verifier checks serialized delivery, final media identity and reference receipts/article links. Reference-card first/middle/last pause and fullscreen are measured locally; original-source meaning review, full listening, ASR and learning outcomes are separate.', 'Original createdAt/publishedAt/firstRelease and title remain fixed; current updatedAt and supplied tag/run identify the revision. The already-closed issue is not mutated.']}
 
 
 
@@ -346,7 +377,7 @@ def main():
         write(OUT / 'online-verification.json', result)
         write(OUT / 'deployment.json', result['deployment'])
         count, total = len(run.http_records), sum(item['bytes'] for item in run.http_records)
-        (OUT / 'online-verification.md').write_text(f'# 每日温度栈入门修订：生产核验\n\n实际检查{result["checkedAtUTC"]}，显式{args.revision_tag}及Release后手动run{args.deployment_run}的真实head通过，身份取tag提交而非以后main。完整MP4/海报与制作、canonical和tag SHA一致，真实SB字幕/四章/严格代码卡边界、全文Python/source/原生控件与日期字段正确。标题、ep35/LC739、创建/首次公开日期及首发v0.69.0保持，仅updatedAt表示实质修改。\n\n其他canonical完整SHA及算法链保持，主页算法方向/学习入口/系列/库/RSS和本次修订Release自身li只关联Daily通过。只取本次修改片媒体，不下载旧视频。实际HTTP响应{count}次、{total}字节；逐次成败见attempts，部署见deployment.json。本地实际播放器/截图范围另见qa-site；不声称全片听辨、ASR或学习效果，原已关闭issue历史保持。\n')
+        (OUT / 'online-verification.md').write_text(f'# 每日温度栈入门修订：生产核验\n\n实际检查{result["checkedAtUTC"]}，显式{args.revision_tag}及Release后手动run{args.deployment_run}的真实head通过，身份取tag提交而非以后main。完整MP4/海报与制作、canonical和tag SHA一致，真实SB字幕/四章/严格代码卡边界、单页150帧资料附录、来源清单/制作与tag回执/图文完整资料链接、全文Python/source/原生控件与日期字段正确。标题、ep35/LC739、创建/首次公开日期及首发v0.69.0保持，仅updatedAt表示实质修改。\n\n其他canonical完整SHA及算法链保持，主页算法方向/学习入口/系列/库/RSS和本次修订Release自身li只关联Daily通过。只取本次修改片媒体，不下载旧视频。实际HTTP响应{count}次、{total}字节；逐次成败见attempts，部署见deployment.json。本地实际播放器/截图范围另见qa-site；不声称全片听辨、ASR或学习效果，原已关闭issue历史保持。\n')
         attempt.update(status='passed', finishedAtUTC=now(), seconds=round(time.monotonic() - started, 3), stage='all checks completed', httpRecords=run.http_records, apiRecords=run.api_records)
         print(json.dumps({'status': 'passed', 'revisionTag': args.revision_tag, 'HTTPResponses': count, 'bytes': total, 'media': [{'slug': item['slug'], 'videoSHA256': item['media'][0]['sha256']} for item in result['episodes']]}, ensure_ascii=False, indent=2))
     except Exception as error:

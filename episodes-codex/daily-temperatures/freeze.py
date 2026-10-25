@@ -22,6 +22,12 @@ if plan_path.is_file():
  extra += [EP/rel for rel in plan['inputSHA256']]
  review=EP/plan['visualReview']
  if review.is_file():extra.append(review)
+# Default reference appendix is required for this replaced MP4.
+extra += [EP/'references.json', EP/'reference-appendix-plan.json', ROOT/'episodes-codex/_shared/render_with_references.py',
+          ROOT/'episodes-codex/_shared/append_references.py',
+          ROOT/'episodes-codex/_shared/requirements-reference-appendix.txt',
+          ROOT/'site/scripts/check-references.mjs']
+extra += [ROOT/s['verification']['evidence'] for s in json.loads((EP/'references.json').read_text())['sources']]
 for p in extra:m[os.path.relpath(p,EP)]=hashlib.sha256(p.read_bytes()).hexdigest()
 (EP/'source-sha256.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
 print(f'{len(m)} actual production inputs frozen.')
