@@ -1,0 +1,71 @@
+diff --git a/episodes-codex/bloom-filter/qa-revisions/query-link-state-v1/Main.tsx b/episodes-codex/bloom-filter/remotion/src/Main.tsx
+index 50ea07e7..f532ca6b 100644
+--- a/episodes-codex/bloom-filter/qa-revisions/query-link-state-v1/Main.tsx
++++ b/episodes-codex/bloom-filter/remotion/src/Main.tsx
+@@ -39,12 +39,19 @@ const heads:Record<string,[string,string,string]>={
+  maintenance:['省下查询需要什么条件','数据新增了，标记也要一起维护','先展示未同步的危险，再把新增001正确加入标记。'],
+ };
+ const Meaning=({left,right}:any)=><><T x={550} y={787} size={39} anchor="middle" color={C.teal}>{left}</T><T x={1350} y={787} size={37} anchor="middle" color={C.muted}>{right}</T></>;
+-const QueryFooter=({label,color=C.teal,shown=false,pass=false,dbResult='',records=M.catalogInitially,unsafe=false}:any)=><>
+- {shown&&status(label,color,1,674,1020)}
+- <Arrow x1={1215} y1={787} x2={1270} y2={787} color={pass?C.blue:C.edge} dashed={!pass}/>
+- {!pass&&shown&&<path d="M1232 766L1252 808M1252 766L1232 808" stroke={unsafe?C.red:C.muted} strokeWidth={4}/>}
+- <Directory records={records} active={pass} result={dbResult} unsafe={unsafe}/>
+-</>;
++const QueryFooter=({label,color=C.teal,shown=false,pass=false,blocked=false,idlePhase='waiting',dbResult='',records=M.catalogInitially,unsafe=false}:any)=>{
++ if(pass&&blocked)throw new Error('A query link cannot dispatch and block at once.');
++ if(blocked&&!shown)throw new Error('An explicit rejection needs its visible result.');
++ const phase=blocked?'blocked':pass?'dispatch':idlePhase;
++ return <g data-query-link={phase}>
++  {shown&&status(label,color,1,674,1020)}
++  <g data-query-route="true">
++   <Arrow x1={1215} y1={787} x2={1270} y2={787} color={pass?C.blue:C.edge} dashed={!pass}/>
++   {blocked&&<path data-reject-mark="true" d="M1232 766L1252 808M1252 766L1232 808" stroke={unsafe?C.red:C.muted} strokeWidth={4}/>}
++  </g>
++  <Directory records={records} active={pass} result={dbResult} unsafe={unsafe}/>
++ </g>;
++};
+ const Missing=({s,f}:any)=>{
+  const [a,b]=sentenceSpan(s,0),[c,d]=sentenceSpan(s,1);
+  const trip1=progress(f,a+(b-a)*.03,a+(b-a)*.38),back1=progress(f,a+(b-a)*.45,a+(b-a)*.68);
+@@ -86,7 +93,7 @@ const Insert=({s,f,item,base}:any)=>{
+ };
+ const Reject=({s,f}:any)=>{
+  const steps=run(s,f,1,M.expected.negative001.checked,.04,.65),done=steps.every(v=>v.arrived),fail=done?M.expected.negative001.stopsAt:undefined;
+- return <><HashSlots item={N} checked={arrived(steps)} failedAt={fail} active={steps.find(v=>v.active)?.slot??-1} mode="算位置"/>{traces(steps)}<BitArray ones={normal} focus={focus(steps)} zeroFocus={fail===undefined?[]:[fail]} label="16位 · 教学示例"/><QueryFooter shown={done} label="位置2是0 → 排除001" color={C.red} dbResult={done?'这次不查库':''}/></>;
++ return <><HashSlots item={N} checked={arrived(steps)} failedAt={fail} active={steps.find(v=>v.active)?.slot??-1} mode="算位置"/>{traces(steps)}<BitArray ones={normal} focus={focus(steps)} zeroFocus={fail===undefined?[]:[fail]} label="16位 · 教学示例"/><QueryFooter shown={done} blocked={done} label="位置2是0 → 排除001" color={C.red} dbResult={done?'这次不查库':''}/></>;
+ };
+ const WhyZero=({s,f}:any)=>{
+  const steps=run(s,f,0,A.positions,.08,.86),done=steps.every(v=>v.arrived),[c,d]=sentenceSpan(s,1);
+@@ -94,7 +101,7 @@ const WhyZero=({s,f}:any)=>{
+ };
+ const FalsePositive=({s,f}:any)=>{
+  const steps=run(s,f,0,F.positions,.10,.90),done=steps.every(v=>v.arrived),[c,d]=sentenceSpan(s,1),pass=done&&f>=c+(d-c)*.22,confirmed=f>=c+(d-c)*.66;
+- return <><HashSlots item={F} checked={arrived(steps)} active={steps.find(v=>v.active)?.slot??-1} mode="算位置"/>{traces(steps)}<BitArray ones={normal} focus={focus(steps)} label="16位 · 教学示例"/><QueryFooter shown={done} label="三位全1 → 可能存在067" color={C.gold} pass={pass} dbResult={confirmed?'确认：没有067':pass?'查询真实记录…':''}/>{pass&&!confirmed&&<circle cx={mix(1215,1270,progress(f,c+(d-c)*.22,c+(d-c)*.50))} cy={787} r={8} fill={C.blue}/>}</>;
++ return <><HashSlots item={F} checked={arrived(steps)} active={steps.find(v=>v.active)?.slot??-1} mode="算位置"/>{traces(steps)}<BitArray ones={normal} focus={focus(steps)} label="16位 · 教学示例"/><QueryFooter shown={done} blocked={false} idlePhase={done?'eligible':'waiting'} label="三位全1 → 可能存在067" color={C.gold} pass={pass} dbResult={confirmed?'确认：没有067':pass?'查询真实记录…':''}/>{pass&&!confirmed&&<circle cx={mix(1215,1270,progress(f,c+(d-c)*.22,c+(d-c)*.50))} cy={787} r={8} fill={C.blue}/>}</>;
+ };
+ const Shared=({s,f}:any)=>{
+  const [a,b]=sentenceSpan(s,0),[c,d]=sentenceSpan(s,1),steps=stages(f,a+(b-a)*.04,a+(b-a)*.9,F.positions),explain=1-progress(f,c+(d-c)*.05,c+(d-c)*.48);
+@@ -106,7 +113,7 @@ const Shared=({s,f}:any)=>{
+ const Gate=({s,f}:any)=>{
+  const [a,b]=sentenceSpan(s,0),[c,d]=sentenceSpan(s,1),switchAt=a+(b-a)*.48,negative=f<switchAt,item=negative?N:F;
+  const steps=negative?stages(f,a+(b-a)*.02,a+(b-a)*.40,M.expected.negative001.checked):stages(f,switchAt,b-(b-a)*.04,F.positions),done=steps.every(v=>v.arrived),pass=!negative&&done;
+- return <><HashSlots item={item} checked={arrived(steps)} active={steps.find(v=>v.active)?.slot??-1} failedAt={negative&&done?2:undefined} mode="独立查询"/>{traces(steps)}<BitArray ones={normal} focus={focus(steps)} zeroFocus={negative&&done?[2]:[]} label="16位 · 同一套判断规则"/><QueryFooter shown={done} label={negative?'001：看到0，先排除':'067：全1，继续查真实记录'} color={negative?C.red:C.gold} pass={pass} dbResult={negative?'不查库':f>=c+(d-c)*.35?'确认：没有067':pass?'继续确认…':''}/></>;
++ return <><HashSlots item={item} checked={arrived(steps)} active={steps.find(v=>v.active)?.slot??-1} failedAt={negative&&done?2:undefined} mode="独立查询"/>{traces(steps)}<BitArray ones={normal} focus={focus(steps)} zeroFocus={negative&&done?[2]:[]} label="16位 · 同一套判断规则"/><QueryFooter shown={done} blocked={negative&&done} label={negative?'001：看到0，先排除':'067：全1，继续查真实记录'} color={negative?C.red:C.gold} pass={pass} dbResult={negative?'不查库':f>=c+(d-c)*.35?'确认：没有067':pass?'继续确认…':''}/></>;
+ };
+ const Capacity=({s,f}:any)=>{
+  const [a,b]=sentenceSpan(s,0),[c,d]=sentenceSpan(s,1),recover=progress(f,d-34,d-4),extra=Array.from({length:M.bitCount},(_,i)=>i).filter(i=>!normal.includes(i)),grow=Math.floor(progress(f,a+(b-a)*.08,b-(b-a)*.08)*extra.length),ones=recover===1?normal:[...normal,...extra.slice(0,grow)];
+@@ -115,11 +122,11 @@ const Capacity=({s,f}:any)=>{
+ const BadDelete=({s,f}:any)=>{
+  const [c,d]=sentenceSpan(s,1),reset=f>=s.durationInFrames-20,erase=stages(f,c+(d-c)*.02,c+(d-c)*.40,A.positions),query=stages(f,c+(d-c)*.45,c+(d-c)*.76,M.expected.wrongDeletion205.checked),querying=f>=c+(d-c)*.43&&!reset,item=querying?B:A;
+  const ones=reset?normal:normal.filter(i=>!arrived(erase).includes(i)),error=querying&&query.every(v=>v.arrived),activeSteps=querying?query:erase,records=reset||f<c?M.catalogInitially:['sku205'];
+- return <><HashSlots item={item} checked={querying?arrived(query):[]} failedAt={error?3:undefined} active={activeSteps.find(v=>v.active)?.slot??-1} mode={reset?'原状态':querying?'错误查询':'错误清位'}/>{!reset&&traces(activeSteps,C.red)}<BitArray ones={ones} focus={reset?[]:focus(activeSteps)} zeroFocus={error?[3]:[]} label={reset?'反例结束 · 位图与目录均恢复':'错误删除反例 · 不支持直接清位'}/><QueryFooter shown={reset||error||f<c} label={reset?'已恢复101 / 205的原始状态':error?'205仍在目录，却被位置3的0错拦':'先看共享位，不能按编号直接清零'} color={reset?C.teal:C.red} records={records} dbResult={reset?'收录状态已恢复':error?'205真实存在':'目录仍有205'} unsafe={!reset}/></>;
++ return <><HashSlots item={item} checked={querying?arrived(query):[]} failedAt={error?3:undefined} active={activeSteps.find(v=>v.active)?.slot??-1} mode={reset?'原状态':querying?'错误查询':'错误清位'}/>{!reset&&traces(activeSteps,C.red)}<BitArray ones={ones} focus={reset?[]:focus(activeSteps)} zeroFocus={error?[3]:[]} label={reset?'反例结束 · 位图与目录均恢复':'错误删除反例 · 不支持直接清位'}/><QueryFooter shown={reset||error||f<c} blocked={error} idlePhase={reset?'reset':'waiting'} label={reset?'已恢复101 / 205的原始状态':error?'205仍在目录，却被位置3的0错拦':'先看共享位，不能按编号直接清零'} color={reset?C.teal:C.red} records={records} dbResult={reset?'收录状态已恢复':error?'205真实存在':'目录仍有205'} unsafe={!reset}/></>;
+ };
+ const Maintenance=({s,f}:any)=>{
+  const [a,b]=sentenceSpan(s,0),[c,d]=sentenceSpan(s,1),stale=run(s,f,0,M.expected.negative001.checked,.12,.78),write=run(s,f,1,N.positions,.04,.75),writing=f>=c,done=writing&&write.every(v=>v.arrived),ones=writing?Array.from(new Set([...normal,...arrived(write)])).sort((x:any,y:any)=>x-y):normal,current=writing?write:stale,error=!writing&&stale.every(v=>v.arrived);
+- return <><HashSlots item={N} checked={arrived(current)} failedAt={error?2:undefined} active={current.find(v=>v.active)?.slot??-1} mode={writing?'同步标记':'未同步查询'}/>{traces(current,writing?C.gold:C.red)}<BitArray ones={ones} focus={focus(current)} zeroFocus={error?[2]:[]} label={done?'标记已同步 · 正确维护后用于拦截':writing?'新增001：按同一规则置位':'未同步反例 · 目录新增001，位图仍旧'}/><QueryFooter shown={done||error||writing} label={done?'正确维护：零位可排除，全1再确认':writing?'正在同步标记，暂不执行拦截':'危险：旧标记的0不能证明目录不存在'} color={done?C.teal:writing?C.gold:C.red} records={[...M.catalogInitially,N.key]} pass={done} dbResult={done?'确认：001存在':writing?'已收录001':'001已在目录'} unsafe={!done}/></>;
++ return <><HashSlots item={N} checked={arrived(current)} failedAt={error?2:undefined} active={current.find(v=>v.active)?.slot??-1} mode={writing?'同步标记':'未同步查询'}/>{traces(current,writing?C.gold:C.red)}<BitArray ones={ones} focus={focus(current)} zeroFocus={error?[2]:[]} label={done?'标记已同步 · 正确维护后用于拦截':writing?'新增001：按同一规则置位':'未同步反例 · 目录新增001，位图仍旧'}/><QueryFooter shown={done||error||writing} blocked={error} idlePhase={writing?'writing':'waiting'} label={done?'正确维护：零位可排除，全1再确认':writing?'正在同步标记，暂不执行拦截':'危险：旧标记的0不能证明目录不存在'} color={done?C.teal:writing?C.gold:C.red} records={[...M.catalogInitially,N.key]} pass={done} dbResult={done?'确认：001存在':writing?'已收录001':'001已在目录'} unsafe={!done}/></>;
+ };
+ export const Scene=({s,f}:any)=>{
+  const type=s.visualType,[chapter,title,sub]=heads[type]??heads.missing;let content:any,state:any={},note='教学示例 · 16位 / 3路哈希不代表产品内部实现或性能数据';

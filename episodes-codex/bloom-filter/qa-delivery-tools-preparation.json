@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "status": "prepared-awaiting-final-media",
+  "checkedAtUTC": "2026-10-25T23:26:09.703701+00:00",
+  "checks": [
+    {
+      "command": [
+        "python3",
+        "episodes-codex/bloom-filter/sync_site.py",
+        "--help"
+      ],
+      "exitCode": 0,
+      "syntaxParsed": true
+    },
+    {
+      "command": [
+        "python3",
+        "episodes-codex/bloom-filter/verify_published.py",
+        "--help"
+      ],
+      "exitCode": 0,
+      "syntaxParsed": true
+    },
+    {
+      "command": [
+        "python3",
+        "episodes-codex/bloom-filter/sync_site.py",
+        "--publish"
+      ],
+      "exitCode": 2,
+      "expected": "Rejected before any site creation when final reviewed media identity is missing",
+      "stderr": "usage: sync_site.py [-h] [--publish]\n                    [--reviewed-video-sha256 REVIEWED_VIDEO_SHA256]\n                    [--release RELEASE] [--published-at PUBLISHED_AT]\nsync_site.py: error: --publish requires --reviewed-video-sha256 after completed final-media QA\n"
+    }
+  ],
+  "inputSHA256": {
+    "sync_site.py": "891826d8d46361cc54e410da2d9eac5d8114060d942ec5a4e90529ac297c132c",
+    "verify_published.py": "35cc982ddecd62edc12f1df6bc8d04de57e306f5361e6cb44f9c19e418e37530",
+    "meta.draft.json": "c665b7778fd1033440a651737fed7a48975de66ace748a0dd1d7687904c75b69"
+  },
+  "siteDirectoryCreated": false,
+  "productionMetadataDraft": true,
+  "limitations": [
+    "Actual media validation/copy waits for final reviewed render and complete receipts.",
+    "No public network GET or browser QA executed by these prepared tools."
+  ],
+  "candidateRelease": "v0.71.0; publisher must explicitly pass and recheck final site version"
+}

@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "bitCount": 16,
+  "hashCount": 3,
+  "hash": {
+    "algorithm": "SHA-256",
+    "template": "{seed}:{key}",
+    "encoding": "UTF-8",
+    "seeds": [
+      0,
+      1,
+      2
+    ],
+    "digestBytes": "first 8 bytes, big-endian unsigned integer",
+    "modulus": 16,
+    "scope": "Teaching implementation, not Redis or Guava internals and not a probability benchmark."
+  },
+  "items": [
+    {
+      "key": "sku101",
+      "display": "101",
+      "role": "inserted",
+      "positions": [
+        3,
+        14,
+        15
+      ]
+    },
+    {
+      "key": "sku205",
+      "display": "205",
+      "role": "inserted",
+      "positions": [
+        0,
+        3,
+        12
+      ]
+    },
+    {
+      "key": "sku001",
+      "display": "001",
+      "role": "absent-negative",
+      "positions": [
+        12,
+        2,
+        15
+      ]
+    },
+    {
+      "key": "sku067",
+      "display": "067",
+      "role": "absent-positive",
+      "positions": [
+        14,
+        0,
+        15
+      ]
+    }
+  ],
+  "catalogInitially": [
+    "sku101",
+    "sku205"
+  ],
+  "snapshots": {
+    "empty": [],
+    "after101": [
+      3,
+      14,
+      15
+    ],
+    "after205": [
+      0,
+      3,
+      12,
+      14,
+      15
+    ],
+    "wronglyCleared101": [
+      0,
+      12
+    ],
+    "afterCorrectlyAdding001": [
+      0,
+      2,
+      3,
+      12,
+      14,
+      15
+    ]
+  },
+  "expected": {
+    "negative001": {
+      "checked": [
+        12,
+        2
+      ],
+      "stopsAt": 2,
+      "result": false,
+      "catalogContains": false
+    },
+    "known101": {
+      "checked": [
+        3,
+        14,
+        15
+      ],
+      "result": true,
+      "meaning": "possibly present"
+    },
+    "positive067": {
+      "checked": [
+        14,
+        0,
+        15
+      ],
+      "result": true,
+      "catalogContains": false,
+      "classification": "false positive"
+    },
+    "wrongDeletion205": {
+      "checked": [
+        0,
+        3
+      ],
+      "stopsAt": 3,
+      "result": false,
+      "catalogContains": true,
+      "classification": "invalid clear causes false negative"
+    },
+    "stale001": {
+      "result": false,
+      "catalogContains": true,
+      "classification": "out-of-sync gate is unsafe"
+    },
+    "afterCorrectlyAdding001": {
+      "result": true,
+      "catalogContains": true
+    }
+  },
+  "limits": [
+    "No production false-positive-rate measurement from these four keys.",
+    "No false negatives assumes every relevant insertion is reflected and no destructive bit clearing.",
+    "Ordinary Bloom filters do not store per-key membership ownership of a set bit."
+  ]
+}
