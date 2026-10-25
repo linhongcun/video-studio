@@ -21,11 +21,13 @@ OUT = Path(__file__).resolve().parent
 BASE = 'https://linhongcun.github.io/video-studio/'
 REPOSITORY = 'linhongcun/video-studio'
 BASELINE_COMMIT = 'e38fa9236fbc340f834581302320494d2a1c1ce7'
+UPSTREAM_COMMIT = 'fcbf3e162743b59d23334b0df0d691460ee4889d'
 REVISION_DATE = '2026-10-25'
 SPECS = [('two-sum', 1, 28), ('longest-substring', 3, 40),
          ('binary-search', 704, 30), ('reverse-linked-list', 206, 30),
          ('container-most-water', 11, 44)]
 ALGORITHM_SLUGS = ['container-most-water', 'longest-substring', 'binary-search', 'two-sum', 'reverse-linked-list', 'climbing-stairs']
+TASK_SHARED_PATHS = ['episodes-codex/_shared/remix_approach.py', 'episodes-codex/_shared/test_remix_approach.py', 'episodes-codex/_template/README.md']
 
 
 
@@ -37,8 +39,8 @@ def read_json(path):
     return json.loads(path.read_text())
 
 
-def git_bytes(relative):
-    return subprocess.check_output(['git', 'show', BASELINE_COMMIT + ':' + relative], cwd=ROOT)
+def git_bytes(relative, commit=BASELINE_COMMIT):
+    return subprocess.check_output(['git', 'show', commit + ':' + relative], cwd=ROOT)
 
 
 def original_meta(slug):
@@ -56,6 +58,38 @@ def preserve_climbing_stairs():
         assert sha((ROOT / relative).read_bytes()) == expected, relative
         files[relative] = expected
     return {'baselineCommit': BASELINE_COMMIT, 'allCanonicalFilesSHA256': files}
+
+
+def preserve_upstream():
+    excluded = [prefix + slug for slug, *_ in SPECS for prefix in ['episodes/', 'episodes-codex/']] + TASK_SHARED_PATHS
+    paths = ['episodes', 'episodes-codex'] + [':(exclude)' + path for path in excluded]
+    changed = subprocess.check_output(['git', 'diff', '--no-ext-diff', '--name-only', UPSTREAM_COMMIT, '--', *paths], cwd=ROOT, text=True)
+    assert not changed.strip(), 'Non-task upstream episode content changed: ' + changed
+    extra = subprocess.check_output(['git', 'ls-files', '--others', '--exclude-standard', '--', *paths], cwd=ROOT, text=True)
+    assert not extra.strip(), 'Unexpected non-task episode content: ' + extra
+    names = subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', UPSTREAM_COMMIT, '--', 'episodes', 'episodes-codex'], cwd=ROOT, text=True).splitlines()
+    names = [name for name in names if name not in TASK_SHARED_PATHS and not any(name.startswith(prefix + slug + '/') for slug, *_ in SPECS for prefix in ['episodes/', 'episodes-codex/'])]
+    meta_paths = [name for name in names if re.fullmatch(r'episodes/[^/]+/meta\.json', name)]
+    actual_slugs = sorted(path.parent.name for path in (ROOT / 'episodes').glob('*/meta.json') if path.parent.name not in [spec[0] for spec in SPECS])
+    assert actual_slugs == sorted(relative.split('/')[1] for relative in meta_paths)
+    episodes = []
+    for relative in meta_paths:
+        slug = relative.split('/')[1]
+        meta = json.loads(git_bytes(relative, UPSTREAM_COMMIT))
+        expected_files = sorted(name for name in names if name.startswith(f'episodes/{slug}/'))
+        # Ignored local node_modules/caches in historical canonical trees are
+        # outside the published tracked content checked by git diff above.
+        assert sha((ROOT / relative).read_bytes()) == sha(git_bytes(relative, UPSTREAM_COMMIT)), slug
+        episodes.append({'slug': slug, 'title': meta['title'], 'series': meta.get('series'), 'frames': meta.get('finalVideoFrames'), 'fileCount': len(expected_files), 'metaSha256': sha((ROOT / relative).read_bytes())})
+    return {'baselineCommit': UPSTREAM_COMMIT, 'trackedCanonicalAndProductionFiles': len(names),
+            'exactTrackedBytesUnchanged': True, 'taskSharedFilesExcluded': TASK_SHARED_PATHS, 'canonicalEpisodes': episodes}
+
+
+def expected_recent_hrefs():
+    metas = [read_json(path) for path in sorted((ROOT / 'episodes').glob('*/meta.json'))]
+    metas = [meta for meta in metas if not meta.get('draft') and not meta.get('archived')]
+    metas.sort(key=lambda meta: (str(meta['publishedAt']), meta.get('ep', 0), meta.get('lessonOrder', 0)), reverse=True)
+    return [f'/video-studio/episodes/{meta["slug"]}/' for meta in metas[:6]]
 
 
 class Page(HTMLParser):
@@ -144,6 +178,7 @@ def main():
         inputs.append((slug, problem, count, chapter_ids, directory, meta, sb))
     assert sum(record[2] for record in inputs) == 172
     retained = preserve_climbing_stairs()
+    upstream = preserve_upstream()
     tag = 'v' + read_json(ROOT / 'site/package.json')['version']
     assert all(record[5]['firstRelease'] != tag for record in inputs), 'Use the actual patch tag, not a historical debut'
     release = gh_api(f'repos/{REPOSITORY}/releases/tags/{tag}')
@@ -243,13 +278,14 @@ def main():
     retained.update(files=retained_files, captionsSha256=sha(climb_vtt), captionCount=24, pageAccessible=True)
     puzzle_dir = ROOT / 'episodes/horse-racing'
     puzzle_meta = read_json(puzzle_dir / 'meta.json')
-    assert puzzle_meta['finalVideoFrames'] == 8976
+    assert puzzle_meta == json.loads(git_bytes('episodes/horse-racing/meta.json', UPSTREAM_COMMIT)), 'Keep latest-main P01 metadata'
     puzzle_video = get('episodes/horse-racing/' + puzzle_meta['video'])
     assert sha(puzzle_video) == sha((puzzle_dir / puzzle_meta['video']).read_bytes()) == sha((ROOT / 'episodes-codex/horse-racing' / puzzle_meta['video']).read_bytes())
+    assert sha(puzzle_video) == sha(git_bytes('episodes/horse-racing/' + puzzle_meta['video'], UPSTREAM_COMMIT))
     puzzle_page = Page(get('episodes/horse-racing/').decode())
     assert puzzle_meta['title'] in puzzle_page.text and 'P01' in puzzle_page.text
     assert any(element == 'video' and 'controls' in attrs for element, attrs in puzzle_page.attributes)
-    preserved_p01 = {'frames': 8976, 'videoSha256': sha(puzzle_video), 'bytes': len(puzzle_video), 'pageAccessible': True}
+    preserved_p01 = {'baselineCommit': UPSTREAM_COMMIT, 'frames': puzzle_meta['finalVideoFrames'], 'videoSha256': sha(puzzle_video), 'bytes': len(puzzle_video), 'pageAccessible': True}
     home, library, series = (Page(get(path).decode()) for path in ['', 'library/', 'series/leetcode/'])
     assert 'IT小村' in home.text and tag in home.text
     assert any(link.endswith('/learn/') for link in home.links) and any(link.endswith('/library/') for link in home.links)
@@ -259,8 +295,8 @@ def main():
         assert f'LC.{problem}' in library.text and f'LC.{problem}' in series.text
     assert '/video-studio/learn/#algorithms' in home.links
     assert '/video-studio/episodes/container-most-water/' in home.links
-    for slug in ['two-sum', 'reverse-linked-list', 'binary-search']:
-        assert f'/video-studio/episodes/{slug}/' in home.links
+    for href in expected_recent_hrefs():
+        assert href in home.links, 'Latest upstream lesson disappeared from home: ' + href
     learning = Page(get('learn/').decode())
     assert 'algorithms' in learning.ids and '/video-studio/series/leetcode/' in learning.links
     rss = ET.fromstring(get('rss.xml'))
@@ -283,7 +319,7 @@ def main():
               'method': 'Actual complete HTTPS GETs and SHA-256; exact frozen caption text/frame timing; published HTML chapter payloads, source, native player, learning entry/library/series/RSS/changelog; actual GitHub Release and post-Release Pages run APIs.',
               'release': {key: release[key] for key in ['tag_name', 'html_url', 'published_at', 'target_commitish']},
               'deployment': {key: deployment[key] for key in ['id', 'html_url', 'head_sha', 'event', 'head_branch', 'path', 'status', 'conclusion', 'created_at', 'updated_at']},
-              'episodes': episode_reports, 'httpRecords': http_records, 'retainedClimbingStairs': retained, 'preservedP01': preserved_p01,
+              'episodes': episode_reports, 'httpRecords': http_records, 'retainedClimbingStairs': retained, 'preservedP01': preserved_p01, 'retainedUpstream': upstream,
               'originalFirstReleases': {record[0]: record[5]['firstRelease'] for record in inputs},
               'annotatedTag': {'tagObjectSha': tag_ref['object']['sha'], 'commit': tagged_commit},
               'allFiveInLibrarySeriesRSSAndPatchChangelog': True, 'homeAlgorithmDirectionAndStartAvailable': True,
@@ -294,7 +330,7 @@ def main():
     rows = '\n'.join(f'| {episode["label"]} {episode["slug"]} | {episode["frames"]} | {episode["captions"]} | 4 | 5 |' for episode in episode_reports)
     deployment_record = {key: deployment[key] for key in ['id', 'html_url', 'head_sha', 'event', 'head_branch', 'path', 'status', 'conclusion', 'created_at', 'updated_at']}
     (OUT / 'deployment.json').write_text(json.dumps(deployment_record, ensure_ascii=False, indent=2) + '\n')
-    (OUT / 'online-verification.md').write_text(f'# 五片思路推导修订：生产站核验\n\n实际检查：{report["checkedAtUTC"]}，补丁版本{tag}，结果通过。\n\n五片完整MP4和海报的制作、canonical与实际HTTPS响应完整SHA相同。线上VTT与已检验dist逐字节相同，172句逐句文字/时间均对应冻结分镜，5秒代码卡内无cue。\n\n| 视频 | 帧数 | 字幕句数 | 章节 | 程序卡秒数 |\n| --- | ---: | ---: | ---: | ---: |\n{rows}\n\n首发版本/日期保留，本次按实际新补丁Release核验。每页四章、源码、原生控件及资料库/算法系列/RSS可访问；首页算法方向及入门入口可达，保留最近6条的原排序规则。本次Release正文显式关联五片完整URL，线上该Release自己的li恰好关联这五条算法修订。\n\nLC.70全部9个canonical文件与Git基线逐字节保持，线上视频/海报/VTT一致，P01保留8976帧新尾段完整媒体。Release后实际手动Pages运行[{deployment["id"]}]({deployment["html_url"]})成功。完整SHA、HTTP记录与部署API状态见[机器报告](online-verification.json)、[部署记录](deployment.json)。\n\n本记录是完整传输与文档核验；实际播放器交互/截图、成片声学/动态另见各自报告，不声称全片听辨、逐字ASR、外部平台投稿或学习效果。\n')
+    (OUT / 'online-verification.md').write_text(f'# 五片思路推导修订：生产站核验\n\n实际检查：{report["checkedAtUTC"]}，补丁版本{tag}，结果通过。\n\n五片完整MP4和海报的制作、canonical与实际HTTPS响应完整SHA相同。线上VTT与已检验dist逐字节相同，172句逐句文字/时间均对应冻结分镜，5秒代码卡内无cue。\n\n| 视频 | 帧数 | 字幕句数 | 章节 | 程序卡秒数 |\n| --- | ---: | ---: | ---: | ---: |\n{rows}\n\n首发版本/日期保留，本次按实际新补丁Release核验。每页四章、源码、原生控件及资料库/算法系列/RSS可访问；首页算法方向及入门入口可达，保留最近6条的原排序规则。本次Release正文显式关联五片完整URL，线上该Release自己的li恰好关联这五条算法修订。\n\nLC.70全部9个canonical文件与Git基线逐字节保持，线上视频/海报/VTT一致，P01按最新上游基线{UPSTREAM_COMMIT}保留{preserved_p01["frames"]}帧短版完整媒体；其余{len(upstream["canonicalEpisodes"])}个非本任务canonical目录及上游制作输入保持。Release后实际手动Pages运行[{deployment["id"]}]({deployment["html_url"]})成功。完整SHA、HTTP记录与部署API状态见[机器报告](online-verification.json)、[部署记录](deployment.json)。\n\n本记录是完整传输与文档核验；实际播放器交互/截图、成片声学/动态另见各自报告，不声称全片听辨、逐字ASR、外部平台投稿或学习效果。\n')
     print(json.dumps({'status': report['status'], 'version': tag, 'deploymentRun': deployment['id'],
                       'episodes': [{'slug': entry['slug'], 'videoSha256': entry['files'][0]['sha256']} for entry in episode_reports]}, ensure_ascii=False, indent=2))
 

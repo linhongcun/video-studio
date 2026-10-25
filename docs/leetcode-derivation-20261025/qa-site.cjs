@@ -19,6 +19,9 @@ const base = process.env.QA_SITE_BASE || `http://127.0.0.1:${port}/video-studio/
 assert.ok(base.endsWith('/'), 'QA_SITE_BASE must end with a slash');
 const siteVersion = JSON.parse(fs.readFileSync(path.join(site, 'package.json'), 'utf8')).version;
 const baselineCommit = 'e38fa9236fbc340f834581302320494d2a1c1ce7';
+// Later upstream work was merged before delivery. Preserve its short P01 and
+// every other episode, while retaining the original LC.70 baseline separately.
+const upstreamCommit = 'fcbf3e162743b59d23334b0df0d691460ee4889d';
 const revisionDate = '2026-10-25';
 const specifications = [
   {slug: 'two-sum', ep: 25, problem: 1, sentences: 28},
@@ -37,8 +40,36 @@ const epHref = (slug) => `/video-studio/episodes/${slug}/`;
 const listFiles = (dir) => fs.readdirSync(dir, {withFileTypes: true}).flatMap((entry) => entry.isDirectory()
   ? listFiles(path.join(dir, entry.name)) : [path.join(dir, entry.name)]);
 
-const baselineBytes = (relative) => cp.execFileSync('git', ['show', `${baselineCommit}:${relative}`], {cwd: root, maxBuffer: 64 * 1024 * 1024});
+const baselineBytes = (relative, commit = baselineCommit) => cp.execFileSync('git', ['show', `${commit}:${relative}`], {cwd: root, maxBuffer: 64 * 1024 * 1024});
 const baselineJson = (relative) => JSON.parse(baselineBytes(relative).toString('utf8'));
+const upstreamJson = (relative) => JSON.parse(baselineBytes(relative, upstreamCommit).toString('utf8'));
+const taskSharedPaths = ['episodes-codex/_shared/remix_approach.py', 'episodes-codex/_shared/test_remix_approach.py', 'episodes-codex/_template/README.md'];
+const taskOwned = (name) => specifications.some(({slug}) => name.startsWith(`episodes/${slug}/`) || name.startsWith(`episodes-codex/${slug}/`)) || taskSharedPaths.includes(name);
+function preservedUpstream() {
+  const paths = ['episodes', 'episodes-codex',
+    ...specifications.flatMap(({slug}) => [`:(exclude)episodes/${slug}`, `:(exclude)episodes-codex/${slug}`]),
+    ...taskSharedPaths.map((name) => `:(exclude)${name}`)];
+  const changed = cp.execFileSync('git', ['diff', '--no-ext-diff', '--name-only', upstreamCommit, '--', ...paths], {cwd: root, encoding: 'utf8'}).trim();
+  assert.equal(changed, '', 'Upstream episode content changed outside the five revisions and their shared production helper');
+  const extra = cp.execFileSync('git', ['ls-files', '--others', '--exclude-standard', '--', ...paths], {cwd: root, encoding: 'utf8'}).trim();
+  assert.equal(extra, '', 'Unexpected non-task episode content was added');
+  const names = cp.execFileSync('git', ['ls-tree', '-r', '--name-only', upstreamCommit, '--', 'episodes', 'episodes-codex'], {cwd: root, encoding: 'utf8'}).trim().split(/\r?\n/).filter((name) => name && !taskOwned(name));
+  const metaPaths = names.filter((name) => /^episodes\/[^/]+\/meta\.json$/.test(name));
+  const actualSlugs = fs.readdirSync(path.join(root, 'episodes')).filter((slug) => fs.existsSync(path.join(root, 'episodes', slug, 'meta.json')) && !specifications.some((spec) => spec.slug === slug)).sort();
+  assert.deepEqual(actualSlugs, metaPaths.map((name) => name.split('/')[1]).sort());
+  const canonicalEpisodes = metaPaths.map((relative) => {
+    const slug = relative.split('/')[1], meta = upstreamJson(relative);
+    const expectedFiles = names.filter((name) => name.startsWith(`episodes/${slug}/`)).sort();
+    // git diff and ls-files above check tracked bytes and nonignored additions.
+    // Historical canonical trees can contain ignored local node_modules caches;
+    // installing those is neither a published content change nor a rollback.
+    const metaSha256 = sha(baselineBytes(relative, upstreamCommit));
+    assert.equal(fileSha(path.join(root, relative)), metaSha256);
+    return {slug, title: meta.title, series: meta.series, frames: meta.finalVideoFrames, draft: !!meta.draft, archived: !!meta.archived, video: meta.video, poster: meta.poster, fileCount: expectedFiles.length, metaSha256};
+  });
+  return {baselineCommit: upstreamCommit, trackedCanonicalAndProductionFiles: names.length, exactTrackedBytesUnchanged: true,
+    taskSharedFilesExcluded: taskSharedPaths, canonicalEpisodes};
+}
 function preservedCanonical(slug) {
   const prefix = `episodes/${slug}/`;
   const names = cp.execFileSync('git', ['ls-tree', '-r', '--name-only', baselineCommit, '--', prefix], {cwd: root, encoding: 'utf8'}).trim().split(/\r?\n/).filter(Boolean);
@@ -52,13 +83,22 @@ function preservedCanonical(slug) {
 }
 function retainedInputs() {
   const climb = preservedCanonical('climbing-stairs');
+  const upstream = preservedUpstream();
   const puzzle = readJson(path.join(root, 'episodes/horse-racing/meta.json'));
-  assert.equal(puzzle.finalVideoFrames, 8976, 'Keep the updated P01 proof ending');
-  assert.equal(puzzle.firstRelease, 'v0.55.0');
+  const upstreamPuzzle = upstreamJson('episodes/horse-racing/meta.json');
+  assert.deepEqual(puzzle, upstreamPuzzle, 'Keep the actual latest-main P01 metadata');
   const puzzleVideo = fileSha(path.join(root, 'episodes/horse-racing', puzzle.video));
+  assert.equal(puzzleVideo, sha(baselineBytes(`episodes/horse-racing/${puzzle.video}`, upstreamCommit)), 'Keep the actual latest-main P01 media');
   assert.equal(puzzleVideo, fileSha(path.join(root, 'episodes-codex/horse-racing', puzzle.video)));
-  return {climbingStairs: {baselineCommit, allCanonicalFilesSHA256: climb},
-    P01: {frames: puzzle.finalVideoFrames, metaSha256: fileSha(path.join(root, 'episodes/horse-racing/meta.json')), videoSha256: puzzleVideo}};
+  return {climbingStairs: {baselineCommit, allCanonicalFilesSHA256: climb}, upstream,
+    P01: {baselineCommit: upstreamCommit, frames: puzzle.finalVideoFrames, metaSha256: fileSha(path.join(root, 'episodes/horse-racing/meta.json')), videoSha256: puzzleVideo}};
+}
+
+function expectedRecentHrefs() {
+  return fs.readdirSync(path.join(root, 'episodes')).filter((slug) => fs.existsSync(path.join(root, 'episodes', slug, 'meta.json')))
+    .map((slug) => readJson(path.join(root, 'episodes', slug, 'meta.json'))).filter((meta) => !meta.draft && !meta.archived)
+    .sort((a, b) => String(b.publishedAt).localeCompare(String(a.publishedAt)) || b.ep - a.ep || (b.lessonOrder ?? 0) - (a.lessonOrder ?? 0))
+    .slice(0, 6).map((meta) => epHref(meta.slug));
 }
 
 function inputsFor(spec) {
@@ -130,9 +170,8 @@ const fingerprintFiles = (files) => sha([...files].sort().map((file) => `${path.
 function inputFingerprint(episodes) {
   // Include historical canonical inputs and top-level Astro configuration: a
   // browser retry must not silently reuse a regression from another checkout.
-  const canonicalRoot = path.join(root, 'episodes');
-  const canonicalFiles = fs.readdirSync(canonicalRoot).filter((slug) => fs.existsSync(path.join(canonicalRoot, slug, 'meta.json')))
-    .flatMap((slug) => listFiles(path.join(canonicalRoot, slug)));
+  const canonicalFiles = cp.execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '--', 'episodes'], {cwd: root, encoding: 'utf8'})
+    .trim().split(/\r?\n/).filter(Boolean).map((relative) => path.join(root, relative));
   const files = [
     ...listFiles(path.join(site, 'src')), ...listFiles(path.join(site, 'scripts')),
     ...fs.readdirSync(site, {withFileTypes: true}).filter((e) => e.isFile()).map((e) => path.join(site, e.name)),
@@ -258,8 +297,7 @@ async function checkEntries(context, width) {
   assert.ok(await page.locator('a.track-algorithms[href="/video-studio/learn/#algorithms"]').count() > 0);
   assert.ok(await page.locator(`a.start-link[href="${epHref('container-most-water')}"]`).count() > 0);
   const recentHrefs = await page.locator('.recent a.card').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
-  assert.equal(recentHrefs.length, 6);
-  for (const slug of ['two-sum', 'reverse-linked-list', 'binary-search']) assert.ok(recentHrefs.includes(epHref(slug)));
+  assert.deepEqual(recentHrefs, expectedRecentHrefs(), 'Keep the current published-date order, including new upstream lessons');
   await page.goto(new URL('learn/', base).href, {waitUntil: 'networkidle'});
   assert.equal(await page.locator('#algorithms').count(), 1);
   assert.ok(await page.locator('a[href="/video-studio/series/leetcode/"]').count() > 0);
@@ -307,6 +345,15 @@ async function checkEntries(context, width) {
   retained.climbingStairs.builtVTTSha256 = fileSha(path.join(dist, 'episodes/climbing-stairs/captions.vtt'));
   assert.equal(retained.climbingStairs.builtVTTSha256, oldClimbQA.captions.sha256);
   assert.equal(fileSha(path.join(dist, 'episodes/horse-racing/video.mp4')), retained.P01.videoSha256);
+  retained.upstream.builtMedia = retained.upstream.canonicalEpisodes.filter((episode) => !episode.draft).map((episode) => {
+    const files = [episode.video, episode.poster].filter(Boolean).map((name) => {
+      const digest = fileSha(path.join(root, 'episodes', episode.slug, name));
+      assert.equal(fileSha(path.join(dist, 'episodes', episode.slug, name)), digest, `${episode.slug}: upstream media changed during build`);
+      return {name, sha256: digest};
+    });
+    assert.ok(fs.existsSync(path.join(dist, 'episodes', episode.slug, 'index.html')));
+    return {slug: episode.slug, files};
+  });
   const preview = process.env.QA_SITE_BASE ? null : cp.spawn(process.execPath, [path.join(site, 'node_modules/astro/astro.js'), 'preview', '--host', '127.0.0.1', '--port', String(port)], {cwd: site, stdio: 'ignore'});
   let browser;
   const browserChecks = [], siteEntries = [], screenshots = [];
@@ -337,7 +384,7 @@ async function checkEntries(context, width) {
     const releaseWarning = fs.readFileSync(path.join(output, 'build.log'), 'utf8').split(/\r?\n/).filter((line) => line.includes('[changelog]'));
     report.localReleaseFetch = {warnings: releaseWarning, newPatchReleaseNotPublishedDuringLocalQA: true};
     fs.writeFileSync(path.join(__dirname, 'qa-site.json'), JSON.stringify(report, null, 2) + '\n');
-    fs.writeFileSync(path.join(__dirname, 'qa-site.md'), `# 五片思路推导修订：网站检查\n\n执行者：${report.executor}；实际检查时间：${report.checkedAtUTC}。结果：通过，修订版本v${siteVersion}。\n\n同一最终站点完成一次构建、一次历史学习路径回归，五页各1440/390两视口共10组实际章节跳转、字幕加载、短暂静音播放与暂停；原首发版本和发布日期保留，updatedAt为${revisionDate}。\n\n| 课程 | 帧数 | 秒数 | 章节 | 精确字幕句数 | 程序卡秒数 |\n| --- | ---: | ---: | ---: | ---: | ---: |\n${rows}\n\n20章共40次实际seek、172句VTT逐句与起止时间、代码卡三个采样零cue、完整程序、源码和媒体完整HTTP SHA均通过。六集算法顺序及五片资料库/系列/RSS入口正确。首页保留原首发日期和最近6条规则；算法方向与入门链接可达，不能声称五片均是首页近期卡。\n\nLC.70全部9个canonical文件逐字节对Git基线${baselineCommit}保持，构建媒体和VTT相同；P01保留8976帧新尾段及其完整媒体。详情见[机器记录](qa-site.json)。\n\n每页每视口仅约1秒静音程序卡播放检查，不声称全片听辨、ASR、算法证明、新手实验或用户认可。截图已捕获，模型实际视觉复核另记范围。构建中的Release抓取提示：${releaseWarning.length ? releaseWarning.join('；') : '未记录失败提示'}。本地不预记新补丁Release/生产更新日志通过；实际Release后HTTPS核验另行完成。\n`);
+    fs.writeFileSync(path.join(__dirname, 'qa-site.md'), `# 五片思路推导修订：网站检查\n\n执行者：${report.executor}；实际检查时间：${report.checkedAtUTC}。结果：通过，修订版本v${siteVersion}。\n\n同一最终站点完成一次构建、一次历史学习路径回归，五页各1440/390两视口共10组实际章节跳转、字幕加载、短暂静音播放与暂停；原首发版本和发布日期保留，updatedAt为${revisionDate}。\n\n| 课程 | 帧数 | 秒数 | 章节 | 精确字幕句数 | 程序卡秒数 |\n| --- | ---: | ---: | ---: | ---: | ---: |\n${rows}\n\n20章共40次实际seek、172句VTT逐句与起止时间、代码卡三个采样零cue、完整程序、源码和媒体完整HTTP SHA均通过。六集算法顺序及五片资料库/系列/RSS入口正确。首页保留原首发日期和最近6条规则；算法方向与入门链接可达，不能声称五片均是首页近期卡。\n\nLC.70全部9个canonical文件逐字节对Git基线${baselineCommit}保持，构建媒体和VTT相同；P01按最新上游基线${upstreamCommit}保留${retained.P01.frames}帧短版及其完整媒体；其余${retained.upstream.canonicalEpisodes.length}个非本任务canonical目录与上游输入保持，已发布媒体在同次构建中逐字节复制。详情见[机器记录](qa-site.json)。\n\n每页每视口仅约1秒静音程序卡播放检查，不声称全片听辨、ASR、算法证明、新手实验或用户认可。截图已捕获，模型实际视觉复核另记范围。构建中的Release抓取提示：${releaseWarning.length ? releaseWarning.join('；') : '未记录失败提示'}。本地不预记新补丁Release/生产更新日志通过；实际Release后HTTPS核验另行完成。\n`);
     console.log(JSON.stringify({status: report.status, report: path.relative(root, path.join(__dirname, 'qa-site.json')), browserCases: browserChecks.length, siteEntries, media: report.media}, null, 2));
   } finally {
     if (browser) await browser.close(); if (preview) preview.kill('SIGTERM');
