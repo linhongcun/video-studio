@@ -23,15 +23,19 @@
 
 ## 实际编译与只读复核
 
+本轮另外增加[AdapterUpgradeDemo.java](AdapterUpgradeDemo.java)，实际对照SDK V1与V2，但保留原`AdapterDemo.java`和`VerifyAdapter.java`全部字节。升级示例复用原文件中的`Notifier`、`Submission`和`ShipmentReminder`，需与原文件共同编译；不是单独下载新文件即可编译的孤立程序。下面的验证命令统一处理完整依赖。
+
 从仓根运行：
 
 ```sh
 python3 episodes-codex/adapter-pattern/demo-java/verify.py
 ```
 
-默认仅在临时目录编译、运行和逐行核对代码卡，不写源码、卡或已有结果。审读并有意改变源后，才使用显式`--write-artifacts`更新卡及结果；写入发生在编译与行为检查成功之后。实际工具链、源码/验证器/来源记录SHA、命令、stdout和12项结果见[verified-results.json](verified-results.json)。
+默认仅在临时目录编译、运行和逐行核对代码卡，不写源码、卡或已有结果。审读并有意改变源后，才使用显式`--write-artifacts`更新卡及结果；写入发生在编译与行为检查成功之后。实际工具链、源码/验证器/来源记录SHA、命令、stdout和原12组＋升级8组、共20组结果见[verified-results.json](verified-results.json)。验证器用完整SHA额外保护原V1源和原检查器没有被本轮改动。
 
 本机为OpenJDK21.0.12.1，`jdk.compiler`模块可用；验证器实际以`java --module jdk.compiler/com.sun.tools.javac.Main`编译完整程序及独立[VerifyAdapter.java](VerifyAdapter.java)，再运行两者。不会用D01/D02记录替代本例Java验证。
+
+升级示例和独立[VerifyAdapterUpgrade.java](VerifyAdapterUpgrade.java)也一起实际编译、运行。升级8组检查相同业务调用与两套SDK分别各调用一次、明确拒绝、六种输入提前拒绝、嵌套回执或状态缺失、未知状态、受理凭据缺失、通信异常前后不确定结果/cause/不重试、Unicode字段和连续提交独立结果。
 
 12组可观察行为为：正常受理与原ticket；明确拒绝；SDK失败cause；SDK先受理再丢回包且不重试；null回执；null/空白状态；可达未知状态；QUEUED缺ticket；六种非法输入委托前拒绝；Unicode/字段/凭据精确映射；两次独立提交；业务使用者接入独立Notifier替身并原样传播未确认。验证器拥有自己的SDK Probe，通过捕获实际Payload与调用次数检查行为。
 
@@ -39,9 +43,19 @@ python3 episodes-codex/adapter-pattern/demo-java/verify.py
 
 ## 暂停代码卡与完整源
 
-实际卡源为`remotion/src/java-card.json`，标题明确“Java关键代码 · 节选”，从完整Java的两个标记区间提取：目标约定与适配器，以及main外部创建接线和一次调用。每一显示行都有源行号、移除缩进和完整源码SHA，可由只读验证器核对；不是一屏完整可复制编译程序。
+实际卡源为`remotion/src/java-card.json`，标题明确“Java关键代码 · 节选”，本轮改从`AdapterUpgradeDemo.java`的四个标记区间提取，共15行：实现业务目标并持有SDK、send内转换并委托、外部两种创建接线、同一业务使用者调用。分段空行仅用于排版，每一非空行都有源行号、移除缩进和完整源码SHA，可由只读验证器核对；不是一屏完整可复制编译程序。
 
-卡片省略外层类/import、业务返回和SDK DTO/异常定义、参数/无效回执防护帮助方法、ShipmentReminder/FakeVendorSdk完整类及main打印。关键的实现接口、持有、参数转换、委托、已知结果映射和异常翻译仍可见。正文先讲职责与协作，卡片供暂停阅读，不逐行口播语法。
+卡片用真实上下文注释标出各段，省略外层类/import、SDK DTO/异常定义、完整构造器、send头部/校验/异常处理和`toSubmission`定义。后者在完整源中明确处理ENQUEUED/DECLINED、原凭据和未知失败，不由代码卡的短帮助方法名代替说明。原Notifier/ShipmentReminder完整定义仍在未修改的AdapterDemo中。正文先讲职责与协作，卡片供暂停阅读，不逐行口播语法。
+
+## SDK升级为何可以局部处理
+
+业务从一开始就使用自己需要的通知约定，不必等发生不兼容事故才建立这条边界。本例V1使用`Payload(target,body)`及`RawReceipt(QUEUED,ticket)`；V2使用`Envelope(destination,content)`，返回多一层`ReplyV2(receipt=ReceiptV2(ENQUEUED,reference))`。V2转换者处理新格式与状态词，仍给业务`Submission(ACCEPTED,Q17)`。这些全是假想SDK定义，不是某个厂商或HTTP的通用状态。
+
+两版本在Java中是各自独立的验证请求，不是页面第二次发送，也不是同一不可变业务对象自动热切换。main的接线不同，后面同一`useBusiness(Notifier)`调用和同一个`ShipmentReminder`类保持不变。更换SDK仍可能需要维护SDK依赖、配置、创建接线、转换规则和验证，不能说全项目零变化。
+
+这一局部隔离成立的前提是业务语义仍然相同，而且新SDK仍能实现它。如果新SDK只确认参数合法、没有受理确认，或只接受内部用户ID而没有从本例接收者转换的能力，就不能继续假报同一受理保证，也不能靠改字段名隐藏业务变化。
+
+适配器可以承担防腐边界中的转换职责，但不自动等于完整防腐层；ACL关注保护领域模型及语义，包一层同接口转发也不足以判定为适配器。最新Microsoft官方ACL文档、Spring适配器和JDK wrapper对照的实际读取范围、固定commit、原文和限制见[本轮证据](../sources/business-boundary-evidence.json)。
 
 ## 实际阅读的一手来源
 

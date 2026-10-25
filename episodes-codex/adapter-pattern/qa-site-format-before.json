@@ -1,0 +1,45 @@
+{
+  "status": "format-issue-diagnosed",
+  "sourceArticleSha256": "4f2e09feb138a15ad96b613a8f34a64cd8b1f384fb45a6501ce529425323f35b",
+  "actualBuiltArticleTextContainingLiteralStrongMarkers": [
+    "**按业务需要定义自己的约定。**发货提醒需要表达的是“提交收件人和正文，拿到受理结果”。业务代码可以用这份清楚的约定，不必照着供应方的字段、参数对象和状态码来写。",
+    "**把外部接口细节留在接入边界。**供应方以后更改请求格式或回执包装时，优先在这一层调整，让业务流程少跟着变化。",
+    "**有一层包装，也不自动等于适配器。**还要看它是否将外部用法转换成目标使用方需要的约定。OpenJDK也存在保持原有InputStream约定的包装；这说明“持有另一个对象并委托”本身不足以判定模式。5"
+  ],
+  "sourceStrongLines": [
+    {
+      "line": 18,
+      "text": "1. **按业务需要定义自己的约定。**发货提醒需要表达的是“提交收件人和正文，拿到受理结果”。业务代码可以用这份清楚的约定，不必照着供应方的字段、参数对象和状态码来写。"
+    },
+    {
+      "line": 19,
+      "text": "2. **把外部接口细节留在接入边界。**供应方以后更改请求格式或回执包装时，优先在这一层调整，让业务流程少跟着变化。"
+    },
+    {
+      "line": 36,
+      "text": "业务方依赖的是自己的通知约定。适配器履行它，同时持有外部服务对象，把外部用法转换成业务需要的用法。这就是本例的**对象适配器**关系。[^spring][^jdk]"
+    },
+    {
+      "line": 115,
+      "text": "假设外部服务推出V2：输入字段改名，回执又多包了一层。这是**开发变更对照**，不是在开头那次请求中热换服务，也不是再给订单17发一条提醒。"
+    },
+    {
+      "line": 130,
+      "text": "这里隔离的是**业务需要与结果含义不变时的外部格式变化**。新增适配器、外部依赖、创建接线和测试仍要维护。如果新服务不再满足业务需要，或者业务目标本身变了，上层也可能需要调整；不能把一次格式升级的局部修改，扩大成所有升级都零影响。"
+    },
+    {
+      "line": 136,
+      "text": "但**适配器不等于完整防腐层**。适配器是一种把已有接口转换成目标约定的设计关系；防腐层是保护业务模型的架构目的，可能包含适配器、外观或更完整的语义转换。本例主要演示通知接口的技术约定与格式隔离，没有展示一整套生产领域模型的语义治理，也没有把业务规则搬到适配器里。"
+    },
+    {
+      "line": 138,
+      "text": "**有一层包装，也不自动等于适配器。**还要看它是否将外部用法转换成目标使用方需要的约定。OpenJDK也存在保持原有InputStream约定的包装；这说明“持有另一个对象并委托”本身不足以判定模式。[^wrapper]"
+    },
+    {
+      "line": 142,
+      "text": "静默卡提示暂停查看。下面15行与卡片同源，只展示关键类内片段、V2委托和外部接线，省略了完整构造、转换辅助函数、校验和异常处理；**这些节选不是可独立运行的完整程序**。"
+    }
+  ],
+  "cause": "Strong closing markers immediately after a punctuation character and before a nonpunctuation character are not right-flanking CommonMark delimiters.",
+  "proposedScope": "Move the final full stop outside strong markers in only the affected three spans. Preserve the frozen article; create a tracked site-only derivative if root approves."
+}

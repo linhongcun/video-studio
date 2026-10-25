@@ -1,0 +1,160 @@
+{
+  "accessedOn": "2026-10-25",
+  "executedBy": "Codex pattern_java",
+  "method": "Read official fixed-commit GitHub source over allowed normal proxy hosts. Full Azure document read; focused ranges of the other downloaded complete files read. No production files were changed during the initial read-only phase.",
+  "sources": [
+    {
+      "id": "azure-acl",
+      "repository": "MicrosoftDocs/architecture-center",
+      "commit": "b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a",
+      "commitDate": "2026-10-24T05:02:08Z",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/anti-corruption-layer.md",
+      "publicUrl": "https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/anti-corruption-layer.md",
+      "sha256": "2c2f1586eb46629a57470c70ef645bfaf60428125654171780dfcfdf2380e48a",
+      "readRanges": [
+        [
+          1,
+          106
+        ]
+      ],
+      "quotes": [
+        {
+          "lines": [
+            13,
+            13
+          ],
+          "text": "Implement a facade or adapter layer between different subsystems that don't share the same semantics."
+        },
+        {
+          "lines": [
+            35,
+            35
+          ],
+          "text": "Communication between subsystem A and the anti-corruption layer always uses the data model and architecture of subsystem A."
+        },
+        {
+          "lines": [
+            87,
+            87
+          ],
+          "text": "the core purpose of an anti-corruption layer is to protect the domain model"
+        }
+      ],
+      "adopted": "Business-facing communication can use the business model; external-facing calls use the external model. An adapter can provide translation at a protective boundary.",
+      "limits": "Adapter and anti-corruption layer are not synonyms. ACL is a domain-protection architectural purpose and can contain an adapter or facade. This example does not claim to implement a complete production ACL. Document discussion of latency, maintenance and semantic differences also applies; no blanket need for an ACL for every wrapper."
+    },
+    {
+      "id": "spring-adapter",
+      "repository": "spring-projects/spring-framework",
+      "commit": "7bdf9c86f8657029567067051b7c6bd47b4ae67e",
+      "url": "https://raw.githubusercontent.com/spring-projects/spring-framework/7bdf9c86f8657029567067051b7c6bd47b4ae67e/spring-core/src/main/java/org/springframework/core/task/support/TaskExecutorAdapter.java",
+      "publicUrl": "https://github.com/spring-projects/spring-framework/blob/7bdf9c86f8657029567067051b7c6bd47b4ae67e/spring-core/src/main/java/org/springframework/core/task/support/TaskExecutorAdapter.java",
+      "sha256": "4b450a253fcfad5879f88fd12603269efb9ee116a8fd0a5103142e2be38beff0",
+      "readRanges": [
+        [
+          32,
+          61
+        ],
+        [
+          84,
+          97
+        ],
+        [
+          133,
+          149
+        ]
+      ],
+      "quotes": [
+        {
+          "lines": [
+            34,
+            35
+          ],
+          "text": "Adapter that takes a JDK {@code java.util.concurrent.Executor} and exposes a Spring {@link org.springframework.core.task.TaskExecutor} for it."
+        }
+      ],
+      "adopted": "Actual target interface implementation, held Executor, constructor wiring, delegation and defined exception translation support a concrete object-adapter example.",
+      "limits": "A pinned main-branch read snapshot, not a stable-release recommendation or universal notification/failure semantics. Rejected execution does not justify translating notification uncertainty to rejection."
+    },
+    {
+      "id": "jdk-as-iterator",
+      "repository": "openjdk/jdk21u",
+      "commit": "54f2095960f01d957f2335cafa0defb956e13a2c",
+      "url": "https://raw.githubusercontent.com/openjdk/jdk21u/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/util/Enumeration.java",
+      "publicUrl": "https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/util/Enumeration.java",
+      "sha256": "205a0dbd43d32dbd0907507b11ca6568210430ac301d8327df7bc9c91978c42f",
+      "readRanges": [
+        [
+          44,
+          50
+        ],
+        [
+          85,
+          127
+        ]
+      ],
+      "quotes": [
+        {
+          "lines": [
+            91,
+            93
+          ],
+          "text": "This method is intended to help adapt code that produces {@code Enumeration} instances to code that consumes {@code Iterator} instances."
+        }
+      ],
+      "adopted": "Adaptation is about the consumer target contract and delegation, with unavailable remove capability remaining unsupported.",
+      "limits": "Anonymous class captures the outer Enumeration rather than explicitly declaring a delegate field. Source interfaces need not be called a vendor SDK, nor must a historical upgrade crisis trigger the design."
+    },
+    {
+      "id": "jdk-wrapper-counterexample",
+      "repository": "openjdk/jdk21u",
+      "commit": "54f2095960f01d957f2335cafa0defb956e13a2c",
+      "url": "https://raw.githubusercontent.com/openjdk/jdk21u/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/io/FilterInputStream.java",
+      "publicUrl": "https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/io/FilterInputStream.java",
+      "sha256": "3085bbf184ba9d25cf22b7c39d825184ca6bb13cac42842006376c4c99bb0825",
+      "readRanges": [
+        [
+          28,
+          75
+        ]
+      ],
+      "quotes": [
+        {
+          "lines": [
+            29,
+            31
+          ],
+          "text": "A {@code FilterInputStream} wraps some other input stream, which it uses as its basic source of data, possibly transforming the data along the way or providing additional functionality."
+        }
+      ],
+      "adopted": "Wrapping/holding/delegating alone is not sufficient to identify an adapter: this official wrapper preserves the InputStream contract.",
+      "limits": "The source does not declare a GoF classification. The conclusion is about an insufficient structural test, not a claim that the file formally defines all wrappers or decorators."
+    }
+  ],
+  "conclusions": [
+    "Business may proactively define a stable Notifier contract and adapt external SDKs to it; the story need not start with a legacy-interface accident.",
+    "An adapter can provide translation at an anti-corruption boundary; it is not automatically a full ACL and not every wrapper is an adapter.",
+    "With unchanged and still-realizable business semantics, SDK input/receipt format changes can be localized to integration mapping, dependencies/configuration and external creation/wiring. The business caller source can stay unchanged.",
+    "Technical adaptation cannot invent unavailable delivery, idempotency, cancellation or recipient-lookup capabilities, or hide a changed definition of acceptance."
+  ],
+  "exampleUpgrade": {
+    "kind": "explicitly fictional teaching SDK, no external network",
+    "v1": {
+      "input": "Payload(target,body)",
+      "output": "RawReceipt(status=QUEUED,ticket=Q17)"
+    },
+    "v2": {
+      "input": "Envelope(destination,content)",
+      "output": "ReplyV2(receipt=ReceiptV2(state=ENQUEUED,reference=Q17))"
+    },
+    "businessResult": "Submission(ACCEPTED,Q17), accepted only; delivery unconfirmed",
+    "executionBoundary": "V1 and V2 demo calls are independent verification requests. The video upgrade comparison is a later static development change, not a second UI send or a live hot swap.",
+    "changed": "V2 SDK contract/substitute, adapter conversion and external wiring; validation and tests maintained",
+    "preserved": "Original AdapterDemo.java and VerifyAdapter.java bytes, including Notifier/Submission/ShipmentReminder and all 12 original checks"
+  },
+  "limits": [
+    "GoF full book and full JLS not read for this revision.",
+    "No Oracle/Azure Learn website policy bypass; Microsoft official GitHub source was accessible and used directly.",
+    "No claim of measured beginner learning, complete production ACL, true vendor implementation or actual delivery."
+  ]
+}
