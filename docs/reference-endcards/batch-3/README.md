@@ -21,3 +21,7 @@ NGINX资料保留Using nginx as HTTP load balancer与HTTP Health Checks，区分
 ## 本地验收
 
 6项引用独立核对共8次成功完整GET、6个固定URL；12张实际MP4的正文末帧和卡首/中/末帧均逐张查看通过。6个浏览器场景、153项断言、24个精确暂停点、三次桌面1倍速尾段到ended、三页手机原生全屏、三次完整本地MP4 GET/SHA与12次出处点击通过，9张浏览器截图实际查看；见qa-independent.json、qa-browser.json。手机小窗的原生控件覆盖限制与模拟视口/静音播放范围如实保留，未声称真机、逐字ASR或全片听辨。local-verification.json上线前预检已通过，早期位置写法不一致的失败记录保留，修正后真实DOM核验通过。
+
+## 发布与线上核验
+
+[PR #339](https://github.com/linhongcun/video-studio/pull/339)合并为`950e8225f82f83b02e0529bfdc94634cb723e724`，附注标签和[Release v0.70.4](https://github.com/linhongcun/video-studio/releases/tag/v0.70.4)对应实际验收树。[Release后Pages 40242724829](https://github.com/linhongcun/video-studio/actions/runs/40242724829)完整构建与部署成功。13次普通canonical完整GET核对三片完整视频/海报SHA、VTT全文与原时序、章节/日期/源码入口、原题/短引/位置及更新日志真实Release通过，见[线上记录](online-verification.json)。远程媒体仅流式计算完整SHA，未下载落盘。上线前保留并行8e8f465a经验文档，五个上游变更路径与346项冻结输入交集为空，见upstream-check.json；本批无正文重制或平台新发。
