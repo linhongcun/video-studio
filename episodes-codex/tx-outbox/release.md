@@ -4,7 +4,7 @@
 
 当前视频完整SHA-256：`4a27553f8e60c53702425e3523f1c4c6f0728d6688c8c78320f18fb09d89f0e4`；原混合AAC逐字节保持。正式媒体/预演/fresh复现的实际范围见[本轮QA](qa-mysql-identity.json)。图标来源为Devicon，原始SVG、MIT notice和品牌说明见[共享素材](../_shared/database-identity/source.json)，不称官方授权素材。
 
-拟随v0.56.5合并主干、Release后部署；线上完整文件、字幕、章节、封面与日志通过后关闭#230。只上GitHub站点，不预写用户观看认可。
+拟随v0.57.2合并主干、Release后部署；线上完整文件、字幕、章节、封面与日志通过后关闭#230。只上GitHub站点，不预写用户观看认可。
 
 ## 历史发布记录
 

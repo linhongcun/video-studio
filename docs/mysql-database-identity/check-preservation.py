@@ -1,6 +1,6 @@
 """Check original narration/timeline, frozen inputs, copies and unrelated movies."""
 from pathlib import Path
-import argparse,hashlib,json,subprocess
+import argparse,hashlib,json,subprocess,tempfile
 P=argparse.ArgumentParser();P.add_argument('--encoded',action='store_true');P.add_argument('--upstream');P.add_argument('--report',required=True);A=P.parse_args()
 R=Path(__file__).resolve().parents[2];I=json.loads((Path(__file__).parent/'index.json').read_text());BASE=I['baselineCommit'];sha=lambda b:hashlib.sha256(b).hexdigest()
 def blob(path,ref=BASE):return subprocess.check_output(['git','show',f'{ref}:{path}'],cwd=R)
@@ -17,7 +17,9 @@ for slug in I['selected']:
   v=(d/'video.mp4').read_bytes();old=next(x for x in I['originalMovies'] if x['slug']==slug);e=json.loads((d/'render-result.json').read_text())
   assert sha(v)!=old['sha256'] and sha(v)==e['sha256'] and v==(R/'episodes'/slug/'video.mp4').read_bytes(),slug
   probe=['ffprobe','-v','error','-select_streams','a:0','-show_entries','stream=start_time,duration,time_base,start_pts,duration_ts','-of','json']
-  before=json.loads(subprocess.check_output(probe+['-i','pipe:0'],input=blob(f'episodes/{slug}/video.mp4')))['streams'][0]
+  with tempfile.TemporaryDirectory() as temp:
+   previous=Path(temp)/'original.mp4';previous.write_bytes(blob(f'episodes/{slug}/video.mp4'))
+   before=json.loads(subprocess.check_output(probe+[str(previous)]))['streams'][0]
   after=json.loads(subprocess.check_output(probe+[str(d/'video.mp4')]))['streams'][0]
   assert before==after,(slug,'audio container timing',before,after)
   row.update({'sha256':e['sha256'],'frames':e['frames'],'siteCopyMatched':True,'audioContainerTimingPreserved':True,'audioTiming':after})
