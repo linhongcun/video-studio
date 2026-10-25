@@ -91,3 +91,14 @@
 ## 核验取舍
 
 本片不使用任何未测量的固定延迟、报文大小、市场占比或性能加速数字。TCP重传、拥塞控制、关闭连接、DNS递归全过程、JavaScript阻塞、证书链细节留在本片范围外；这些省略不改变本次正常路径的各层职责。第09镜是同一次第三次ACK的解释回看，不算第四次握手。第16镜展示版本与复用边界，不把它们混入主线的同一次HTTP/1.1请求。
+
+## 2026-10-25 片尾参考资料补充核验
+
+本轮重新GET并读取下列固定正文，日期2026-10-25（北京时间）。正式站点本轮不可达的事实、实际HTTP 200响应、全文SHA及逐论点短引分别记于[本片证据](../../docs/reference-endcards/batch-2/sources-http-request.json)。历史正文与旧访问记录保留，不以旧状态冒充本轮核验。
+
+- R1 MDN Web Docs，《Populating the page: how browsers work》（持续维护文档 · 2026-10-25核验）：<https://github.com/mdn/content/blob/9945c1ccba85d04624c7608c48b61e2eed98d579/files/en-us/web/performance/guides/how_browsers_work/index.md>。实读Navigation／DNS lookup；Parsing／Building the DOM tree／Preload scanner／Building the CSSOM tree；Render／Style／Layout／Paint；对应：浏览器先查找地址；HTML可以边接收边解析，并发现样式、脚本和图片等其他资源；DOM与CSSOM参与渲染，布局确定位置与尺寸，绘制形成屏幕像素。
+- R2 IETF HTTP WG，《HTTP Semantics》（RFC 9110 · 2022）：<https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9110.xml>。实读§4.2.2 https URI Scheme；§4.3 Authoritative Access；§7.2 Host and :authority；§8.3 Content-Type；§9.3.1 GET；§15.3.1 200 OK；对应：URL中的主机、路径和端口职责不同，HTTPS未写端口时默认使用443；GET请求取得目标资源的表示，200表示请求成功，Content-Type说明表示的媒体类型。
+- R3 IETF，《Transmission Control Protocol (TCP)》（RFC 9293 · 2022）：<https://github.com/wesley-eddy/rfc9293bis/blob/3baedef270170d063c66ef995fca1f72281a3912/rfc9293.xml>。实读§2.2 TCP Interfaces；§3.4.1 Initial Sequence Number Selection；§3.5 Establishing a Connection及图6；对应：TCP提供可靠、有序的字节流；双方交换并相互确认各自的初始序号；三次握手中第二报文合并SYN与ACK；SYN占一个序号，纯ACK不占序号，服务端收到最终有效ACK后建立连接。
+- R4 IETF TLS WG，《The Transport Layer Security (TLS) Protocol Version 1.3》（RFC 9846 · 2026）：<https://github.com/tlswg/tls13-spec/blob/c728b4efb4c12159371279227df6464541eafb58/rfc9846.md>。实读§2 Protocol Overview；§4 Handshake Protocol；§4.4 Authentication Messages；§5.2 Record Payload Protection；对应：TLS在握手中完成必要认证、密码参数协商与共享密钥材料建立，随后用流量密钥保护应用数据；TLS 1.3记录保护使用AEAD；证书身份与握手协商出的流量密钥承担不同职责。
+
+RFC9293本轮改用署名编辑Wesley M. Eddy公开仓库中的rfc9293.xml，固定commit 3baedef270170d063c66ef995fca1f72281a3912；XML的RFC编号、2022-08日期、TCPM与编辑姓名、§3.4.1、§3.5和图6均已核对。这是作者保留的原始发布XML，不是工作组组织仓库，也不是9293bis草案。原第三方全文镜像记录继续作为历史制作来源。MDN的旧TLS延迟数字不采用；RFC9110仅支撑语义，不冒充RFC9112的完整HTTP/1.1报文语法。

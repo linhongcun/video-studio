@@ -1,0 +1,1193 @@
+{
+  "meta": {
+    "title": "一致性哈希：多加一台机器，为什么只改部分数据的归属？",
+    "episode": 38,
+    "episodePart": "工程算法 EA01",
+    "slug": "consistent-hashing",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5881,
+    "finalVideoFrames": 5881,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "同一组缓存键与固定哈希值贯穿取余对照和哈希环；干净全屏canvas；同色表示同一物理机器，节点位置稳定，顺时针后继查找与局部接管由连续动作解释；虚拟节点明确为另一组示意落点。",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户授权从工程算法选题自选最有信心一期制作精品。本期EA01/#295，只讲稳定映射的动机、哈希环的局部变化与虚拟节点的作用及限制；代码和额外边界在文章。完成检查后沿用GitHub网站发布授权，无外部平台新发。",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "示例 · 哈希空间0至99；十个固定示意键，不代表普遍迁移比例或产品性能实测",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "一致性哈希：多加一台机器，为什么只改部分数据的归属？",
+      "description": "从同一组十个键出发，先看取余分片扩容为什么改动很多映射，再沿哈希环追踪查找、回绕与新节点接管，最后解释虚拟节点改善分布的理由和边界。",
+      "titleLines": [
+        "扩容一台",
+        "只换一部分",
+        "一致性哈希"
+      ],
+      "eyebrow": "为什么不必重算所有归属？",
+      "footer": "固定旧位置，让新节点只接一段",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "content": {
+            "x": 180,
+            "w": 1590
+          },
+          "watermarkZone": {
+            "x": 180,
+            "y": 104
+          },
+          "textBoxes": [
+            {
+              "x": 180,
+              "y": 104,
+              "w": 840,
+              "h": 44
+            },
+            {
+              "x": 180,
+              "y": 230,
+              "w": 875,
+              "h": 58
+            },
+            {
+              "x": 180,
+              "y": 330,
+              "w": 875,
+              "h": 390
+            },
+            {
+              "x": 180,
+              "y": 806,
+              "w": 875,
+              "h": 46
+            },
+            {
+              "x": 1090,
+              "y": 250,
+              "w": 680,
+              "h": 610
+            }
+          ]
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "content": {
+            "x": 315,
+            "w": 810
+          },
+          "watermarkZone": {
+            "x": 405,
+            "y": 75
+          },
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918,
+          "composition": "Complete 3:4 composition centered at x=315, scale=0.75; important content stays above y=918.",
+          "textBoxes": [
+            {
+              "x": 405,
+              "y": 75,
+              "w": 630,
+              "h": 29.25
+            },
+            {
+              "x": 405,
+              "y": 142.5,
+              "w": 630,
+              "h": 34.5
+            },
+            {
+              "x": 405,
+              "y": 206.25,
+              "w": 630,
+              "h": 271.5
+            },
+            {
+              "x": 405,
+              "y": 510,
+              "w": 630,
+              "h": 315
+            },
+            {
+              "x": 405,
+              "y": 855,
+              "w": 630,
+              "h": 33
+            }
+          ]
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "content": {
+            "x": 120,
+            "w": 840
+          },
+          "watermarkZone": {
+            "x": 120,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 120,
+              "y": 100,
+              "w": 840,
+              "h": 39
+            },
+            {
+              "x": 120,
+              "y": 190,
+              "w": 840,
+              "h": 46
+            },
+            {
+              "x": 120,
+              "y": 275,
+              "w": 840,
+              "h": 362
+            },
+            {
+              "x": 120,
+              "y": 680,
+              "w": 840,
+              "h": 420
+            },
+            {
+              "x": 120,
+              "y": 1140,
+              "w": 840,
+              "h": 44
+            }
+          ]
+        }
+      },
+      "poster": {
+        "file": "cover-16x9.jpg",
+        "sameAs": "16x9"
+      }
+    },
+    "discussionQuestion": "扩容时，为什么不应让机器总数决定每一个键的新去向？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening."
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "remap",
+      "chapterId": "remap",
+      "title": "扩容为何改去向",
+      "from": 0,
+      "durationInFrames": 1938,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "remap",
+          "visualType": "expansion",
+          "from": 0,
+          "durationInFrames": 348,
+          "narration": "为了容纳更多缓存数据，我们准备给三台缓存，再加一台。可路由规则一改，一批旧键却被分到了别处。",
+          "subtitles": [
+            {
+              "text": "为了容纳更多缓存数据，我们准备给三台缓存，再加一台。",
+              "from": 0,
+              "to": 183,
+              "duration": 184
+            },
+            {
+              "text": "可路由规则一改，一批旧键却被分到了别处。",
+              "from": 184,
+              "to": 347,
+              "duration": 164
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-expansion-1",
+              "wavStart": 9.0,
+              "wavEnd": 170.59,
+              "localStart": 9.0,
+              "localEnd": 170.59
+            },
+            {
+              "id": "01-expansion-2",
+              "wavStart": 184.09,
+              "wavEnd": 324.32,
+              "localStart": 184.09,
+              "localEnd": 324.32
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              184
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 9.0,
+            "wavTo": 324.32,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "首帧显示“缓存扩容：3台→4台”、应用读取同一批缓存键、已保存值的A/B/C缓存；D以“待接入”加入。两条原读取路径开始指向不同缓存，目的位置显示“未找到”，原值仍留在旧处。标题与冲突在2秒内可见，暂不出现环或解法。",
+          "direction": "首帧显示“缓存扩容：3台→4台”、应用读取同一批缓存键、已保存值的A/B/C缓存；D以“待接入”加入。两条原读取路径开始指向不同缓存，目的位置显示“未找到”，原值仍留在旧处。标题与冲突在2秒内可见，暂不出现环或解法。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "remap",
+          "visualType": "hash",
+          "from": 348,
+          "durationInFrames": 353,
+          "narration": "先把缓存键交给固定的哈希算法，算出一个数字。同一个键，用同一套算法，总会得到同一个结果。",
+          "subtitles": [
+            {
+              "text": "先把缓存键交给固定的哈希算法，算出一个数字。",
+              "from": 0,
+              "to": 154,
+              "duration": 155
+            },
+            {
+              "text": "同一个键，用同一套算法，总会得到同一个结果。",
+              "from": 155,
+              "to": 352,
+              "duration": 198
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-hash-1",
+              "wavStart": 348.32,
+              "wavEnd": 490.33,
+              "localStart": 0.3199999999999932,
+              "localEnd": 142.32999999999998
+            },
+            {
+              "id": "02-hash-2",
+              "wavStart": 503.83,
+              "wavEnd": 677.6,
+              "localStart": 155.82999999999998,
+              "localEnd": 329.6
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              155
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 348.32,
+            "wavTo": 677.6,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "从原记录中提取同一个键，经同一“哈希”运算区得到56；再次输入同一键，结果仍为56。值与键各自保留，56是计算结果而非缓存值或节点编号。",
+          "direction": "从原记录中提取同一个键，经同一“哈希”运算区得到56；再次输入同一键，结果仍为56。值与键各自保留，56是计算结果而非缓存值或节点编号。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "remap",
+          "visualType": "modulo",
+          "from": 701,
+          "durationInFrames": 422,
+          "narration": "有三台缓存时，可以用哈希值除以三的余数，选择零、一、二号。比如五十六除以三余二，就交给二号的C缓存。",
+          "subtitles": [
+            {
+              "text": "有三台缓存时，可以用哈希值除以三的余数，选择零、一、二号。",
+              "from": 0,
+              "to": 228,
+              "duration": 229
+            },
+            {
+              "text": "比如五十六除以三余二，就交给二号的C缓存。",
+              "from": 229,
+              "to": 421,
+              "duration": 193
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-modulo-1",
+              "wavStart": 701.6,
+              "wavEnd": 917.29,
+              "localStart": 0.6000000000000227,
+              "localEnd": 216.28999999999996
+            },
+            {
+              "id": "03-modulo-2",
+              "wavStart": 930.79,
+              "wavEnd": 1099.54,
+              "localStart": 229.78999999999996,
+              "localEnd": 398.53999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              229
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 701.6,
+            "wavTo": 1099.54,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "只保留56及A/B/C；节点下方编号依次为0、1、2。56除以3的计算逐步落定为余2，唯一路径到C；缓存中该键与对应值同位，不复制请求。",
+          "direction": "只保留56及A/B/C；节点下方编号依次为0、1、2。56除以3的计算逐步落定为余2，唯一路径到C；缓存中该键与对应值同位，不复制请求。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "remap",
+          "visualType": "remap",
+          "from": 1123,
+          "durationInFrames": 404,
+          "narration": "加上D以后，除数变成四，同一个五十六就改去零号的A。沿着同一条规则计算，这十个示例键里，有八个改变了去向。",
+          "subtitles": [
+            {
+              "text": "加上D以后，除数变成四，同一个五十六就改去零号的A。",
+              "from": 0,
+              "to": 199,
+              "duration": 200
+            },
+            {
+              "text": "沿着同一条规则计算，这十个示例键里，有八个改变了去向。",
+              "from": 200,
+              "to": 403,
+              "duration": 204
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-remap-1",
+              "wavStart": 1123.54,
+              "wavEnd": 1310.08,
+              "localStart": 0.5399999999999636,
+              "localEnd": 187.07999999999993
+            },
+            {
+              "id": "04-remap-2",
+              "wavStart": 1323.58,
+              "wavEnd": 1503.28,
+              "localStart": 200.57999999999993,
+              "localEnd": 380.28
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              200
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 1123.54,
+            "wavTo": 1503.28,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "原A/B/C位置不变，D=3进入；除数3改为4，56÷4余0，原C路径与新A路径按先后对照。再展开10个哈希值的前后去向，以逐项变化显示8个改变，不能一屏先铺全表。",
+          "direction": "原A/B/C位置不变，D=3进入；除数3改为4，56÷4余0，原C路径与新A路径按先后对照。再展开10个哈希值的前后去向，以逐项变化显示8个改变，不能一屏先铺全表。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "remap",
+          "visualType": "miss",
+          "from": 1527,
+          "durationInFrames": 411,
+          "narration": "旧值还在原来的缓存里，新的去向却未必找得到。于是系统得迁移这份数据，或者在未命中时，再从数据库读取。",
+          "subtitles": [
+            {
+              "text": "旧值还在原来的缓存里，新的去向却未必找得到。",
+              "from": 0,
+              "to": 192,
+              "duration": 193
+            },
+            {
+              "text": "于是系统得迁移这份数据，或者在未命中时，再从数据库读取。",
+              "from": 193,
+              "to": 410,
+              "duration": 218
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-miss-1",
+              "wavStart": 1527.28,
+              "wavEnd": 1706.85,
+              "localStart": 0.2799999999999727,
+              "localEnd": 179.8499999999999
+            },
+            {
+              "id": "05-miss-2",
+              "wavStart": 1720.35,
+              "wavEnd": 1914.74,
+              "localStart": 193.3499999999999,
+              "localEnd": 387.74
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              193
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 1527.28,
+            "wavTo": 1914.74,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "聚焦56，旧值留C；新查询到A后明确返回“未找到”，再接数据库读取与新缓存回填的淡色待处理路径。先表现找不到，再出现需迁移/重建，不将旧值消失或自动搬到A。",
+          "direction": "聚焦56，旧值留C；新查询到A后明确返回“未找到”，再接数据库读取与新缓存回填的淡色待处理路径。先表现找不到，再出现需迁移/重建，不将旧值消失或自动搬到A。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "ring",
+      "chapterId": "ring",
+      "title": "固定位置顺时针定位",
+      "from": 1938,
+      "durationInFrames": 1646,
+      "shots": [
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "ring",
+          "visualType": "goal",
+          "from": 1938,
+          "durationInFrames": 462,
+          "narration": "我们真正希望的是，新缓存接走一部分键，其余键尽量保持原去向。要做到这一点，就得换一种定位办法，避免台数一变，映射跟着大改。",
+          "subtitles": [
+            {
+              "text": "我们真正希望的是，新缓存接走一部分键，其余键尽量保持原去向。",
+              "from": 0,
+              "to": 222,
+              "duration": 223
+            },
+            {
+              "text": "要做到这一点，就得换一种定位办法，避免台数一变，映射跟着大改。",
+              "from": 223,
+              "to": 461,
+              "duration": 239
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-goal-1",
+              "wavStart": 1938.74,
+              "wavEnd": 2147.63,
+              "localStart": 0.7400000000000091,
+              "localEnd": 209.6300000000001
+            },
+            {
+              "id": "06-goal-2",
+              "wavStart": 2161.13,
+              "wavEnd": 2376.73,
+              "localStart": 223.1300000000001,
+              "localEnd": 438.73
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              223
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 1938.74,
+            "wavTo": 2376.73,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "从56局部缩回A/B/C与待加入D；撤去取余计算，保留“新增容量”目标。只让部分键的候选路径指向D，其余保留原去向，显示为设计目标而非已实现结果。",
+          "direction": "从56局部缩回A/B/C与待加入D；撤去取余计算，保留“新增容量”目标。只让部分键的候选路径指向D，其余保留原去向，显示为设计目标而非已实现结果。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "ring",
+          "visualType": "ring",
+          "from": 2400,
+          "durationInFrames": 453,
+          "narration": "一致性哈希，把键和缓存节点都放进同一个固定编号空间。这里用零到九十九，首尾相接画成一个环，先把A、B、C放在固定位置。",
+          "subtitles": [
+            {
+              "text": "一致性哈希，把键和缓存节点都放进同一个固定编号空间。",
+              "from": 0,
+              "to": 185,
+              "duration": 186
+            },
+            {
+              "text": "这里用零到九十九，首尾相接画成一个环，先把A、B、C放在固定位置。",
+              "from": 186,
+              "to": 452,
+              "duration": 267
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-ring-1",
+              "wavStart": 2400.73,
+              "wavEnd": 2573.02,
+              "localStart": 0.7300000000000182,
+              "localEnd": 173.01999999999998
+            },
+            {
+              "id": "07-ring-2",
+              "wavStart": 2586.52,
+              "wavEnd": 2829.36,
+              "localStart": 186.51999999999998,
+              "localEnd": 429.3600000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "一致性哈希": 1
+            },
+            "sentences": [
+              0,
+              186
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 2400.73,
+            "wavTo": 2829.36,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先建立固定0..99编号线，再让99后的方向连续接回0，形成顺时针环；A20/B50/C85依次进入。56从同一哈希输出落到环上，旧节点与键的坐标此后固定。",
+          "direction": "先建立固定0..99编号线，再让99后的方向连续接回0，形成顺时针环；A20/B50/C85依次进入。56从同一哈希输出落到环上，旧节点与键的坐标此后固定。",
+          "elements": [
+            {
+              "id": "label07_0",
+              "type": "text",
+              "text": "一致性哈希",
+              "cueText": "一致性哈希",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "07-ring-1",
+                "asrFrame": null,
+                "onsetLocal": 1.7300000000000182,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "ring",
+          "visualType": "lookup",
+          "from": 2853,
+          "durationInFrames": 356,
+          "narration": "把这个键算到五十六，再沿顺时针找第一个节点。先遇到八十五位置的C，它就负责这个键。",
+          "subtitles": [
+            {
+              "text": "把这个键算到五十六，再沿顺时针找第一个节点。",
+              "from": 0,
+              "to": 180,
+              "duration": 181
+            },
+            {
+              "text": "先遇到八十五位置的C，它就负责这个键。",
+              "from": 181,
+              "to": 355,
+              "duration": 175
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-lookup-1",
+              "wavStart": 2853.36,
+              "wavEnd": 3021.37,
+              "localStart": 0.36000000000012733,
+              "localEnd": 168.3699999999999
+            },
+            {
+              "id": "08-lookup-2",
+              "wavStart": 3034.87,
+              "wavEnd": 3185.96,
+              "localStart": 181.8699999999999,
+              "localEnd": 332.96000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              181
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 2853.36,
+            "wavTo": 3185.96,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保持整环方向参照，聚焦56至85一段；路径从56起沿顺时针推进，经过70但此时没有D，最后在C85停止。56原点始终保留，归属由连接体现，不能把键的哈希坐标移到85。",
+          "direction": "保持整环方向参照，聚焦56至85一段；路径从56起沿顺时针推进，经过70但此时没有D，最后在C85停止。56原点始终保留，归属由连接体现，不能把键的哈希坐标移到85。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "ring",
+          "visualType": "wrap",
+          "from": 3209,
+          "durationInFrames": 375,
+          "narration": "如果键落在九十五，前面没有节点，就绕过零继续找。第一个遇到的是二十位置的A，所以仍有确定的去向。",
+          "subtitles": [
+            {
+              "text": "如果键落在九十五，前面没有节点，就绕过零继续找。",
+              "from": 0,
+              "to": 173,
+              "duration": 174
+            },
+            {
+              "text": "第一个遇到的是二十位置的A，所以仍有确定的去向。",
+              "from": 174,
+              "to": 374,
+              "duration": 201
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-wrap-1",
+              "wavStart": 3209.96,
+              "wavEnd": 3369.6,
+              "localStart": 0.9600000000000364,
+              "localEnd": 160.5999999999999
+            },
+            {
+              "id": "09-wrap-2",
+              "wavStart": 3383.1,
+              "wavEnd": 3560.43,
+              "localStart": 174.0999999999999,
+              "localEnd": 351.42999999999984
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              174
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 3209.96,
+            "wavTo": 3560.43,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "环与节点位置不变，转焦95；方向路径从95到99，跨0继续到20，停在A。零点以可辨识刻度标出，旧56路径退为上下文。",
+          "direction": "环与节点位置不变，转焦95；方向路径从95到99，跨0继续到20，停在A。零点以可辨识刻度标出，旧56路径退为上下文。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "insert",
+      "chapterId": "insert",
+      "title": "新节点仅接管局部",
+      "from": 3584,
+      "durationInFrames": 836,
+      "shots": [
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "insert",
+          "visualType": "insert",
+          "from": 3584,
+          "durationInFrames": 394,
+          "narration": "现在，把新缓存D放到七十，A、B、C都不挪位置。五十之后、七十及以前的键，会先遇到D，其他位置仍找回原节点。",
+          "subtitles": [
+            {
+              "text": "现在，把新缓存D放到七十，A、B、C都不挪位置。",
+              "from": 0,
+              "to": 158,
+              "duration": 159
+            },
+            {
+              "text": "五十之后、七十及以前的键，会先遇到D，其他位置仍找回原节点。",
+              "from": 159,
+              "to": 393,
+              "duration": 235
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-insert-1",
+              "wavStart": 3584.43,
+              "wavEnd": 3729.6,
+              "localStart": 0.4299999999998363,
+              "localEnd": 145.5999999999999
+            },
+            {
+              "id": "10-insert-2",
+              "wavStart": 3743.1,
+              "wavEnd": 3954.52,
+              "localStart": 159.0999999999999,
+              "localEnd": 370.52
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              159
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 3584.43,
+            "wavTo": 3954.52,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "缩回同一环；A20/B50/C85不动，D70进入。先示出原C负责的(50,85]，再只把(50,70]着D色；56路径缩短至D，78继续C。该镜只改变归属，不画值迁移完成。",
+          "direction": "缩回同一环；A20/B50/C85不动，D70进入。先示出原C负责的(50,85]，再只把(50,70]着D色；56路径缩短至D，78继续C。该镜只改变归属，不画值迁移完成。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "insert",
+          "visualType": "local",
+          "from": 3978,
+          "durationInFrames": 442,
+          "narration": "同样这十个键，现在只有五十六和六十四改去D，其余八个保持不变。改变的是这段范围的归属，数据怎样搬过去，仍要另外安排。",
+          "subtitles": [
+            {
+              "text": "同样这十个键，现在只有五十六和六十四改去D，其余八个保持不变。",
+              "from": 0,
+              "to": 229,
+              "duration": 230
+            },
+            {
+              "text": "改变的是这段范围的归属，数据怎样搬过去，仍要另外安排。",
+              "from": 230,
+              "to": 441,
+              "duration": 212
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-local-1",
+              "wavStart": 3978.52,
+              "wavEnd": 4194.73,
+              "localStart": 0.5199999999999818,
+              "localEnd": 216.72999999999956
+            },
+            {
+              "id": "11-local-2",
+              "wavStart": 4208.23,
+              "wavEnd": 4396.42,
+              "localStart": 230.22999999999956,
+              "localEnd": 418.4200000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              230
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 3978.52,
+            "wavTo": 4396.42,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "相同十键逐一恢复，只有56/64归属由C变D；其余八条保留。显示“8/10→2/10”的本例对照时必须带“本例改去向数量”，原值以待迁移标识保留，不能视为复制完成。",
+          "direction": "相同十键逐一恢复，只有56/64归属由C变D；其余八条保留。显示“8/10→2/10”的本例对照时必须带“本例改去向数量”，原值以待迁移标识保留，不能视为复制完成。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "vnodes",
+      "chapterId": "vnodes",
+      "title": "虚拟节点与边界",
+      "from": 4420,
+      "durationInFrames": 1461,
+      "shots": [
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "vnodes",
+          "visualType": "imbalance",
+          "from": 4420,
+          "durationInFrames": 433,
+          "narration": "不过，节点只占一个位置时，分到的区间可能很不均匀。虚拟节点，就是让同一台缓存，在环上拥有多个分散的位置。",
+          "subtitles": [
+            {
+              "text": "不过，节点只占一个位置时，分到的区间可能很不均匀。",
+              "from": 0,
+              "to": 198,
+              "duration": 199
+            },
+            {
+              "text": "虚拟节点，就是让同一台缓存，在环上拥有多个分散的位置。",
+              "from": 199,
+              "to": 432,
+              "duration": 234
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-imbalance-1",
+              "wavStart": 4420.42,
+              "wavEnd": 4606.28,
+              "localStart": 0.42000000000007276,
+              "localEnd": 186.27999999999975
+            },
+            {
+              "id": "12-imbalance-2",
+              "wavStart": 4619.78,
+              "wavEnd": 4829.56,
+              "localStart": 199.77999999999975,
+              "localEnd": 409.5600000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "虚拟节点": 198
+            },
+            "sentences": [
+              0,
+              199
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 4420.42,
+            "wavTo": 4829.56,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保留加入D后的环，按本例范围展示A35、B30、C15、D20的空间长度；该数字标“编号空间长度”，不叫请求数/内存用量。先聚焦长短差异，再引入“一个物理节点→多个虚拟位置”的关系。",
+          "direction": "保留加入D后的环，按本例范围展示A35、B30、C15、D20的空间长度；该数字标“编号空间长度”，不叫请求数/内存用量。先聚焦长短差异，再引入“一个物理节点→多个虚拟位置”的关系。",
+          "elements": [
+            {
+              "id": "label12_0",
+              "type": "text",
+              "text": "虚拟节点",
+              "cueText": "虚拟节点",
+              "appearFrame": 198,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "12-imbalance-2",
+                "asrFrame": null,
+                "onsetLocal": 200.77999999999975,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "vnodes",
+          "visualType": "vnodes",
+          "from": 4853,
+          "durationInFrames": 473,
+          "narration": "换一个示例，A、B、C各占三个分散位置，新增D也在三处接管小区间。这些虚拟位置，仍对应同一台缓存，并不是增加了更多机器。",
+          "subtitles": [
+            {
+              "text": "换一个示例，A、B、C各占三个分散位置，新增D也在三处接管小区间。",
+              "from": 0,
+              "to": 253,
+              "duration": 254
+            },
+            {
+              "text": "这些虚拟位置，仍对应同一台缓存，并不是增加了更多机器。",
+              "from": 254,
+              "to": 472,
+              "duration": 219
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-vnodes-1",
+              "wavStart": 4853.56,
+              "wavEnd": 5094.45,
+              "localStart": 0.5600000000004002,
+              "localEnd": 241.44999999999982
+            },
+            {
+              "id": "13-vnodes-2",
+              "wavStart": 5107.95,
+              "wavEnd": 5302.7,
+              "localStart": 254.94999999999982,
+              "localEnd": 449.6999999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              254
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 4853.56,
+            "wavTo": 5302.7,
+            "holdFrames": 23,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确显示“另一套虚拟节点示例”，前一套环淡出后才出现A5/38/72、B15/48/82、C28/60/94；用同字母和细连线建立多个位置→同一缓存映射。D10/34/88分步插入，局部接管(5,10]、(28,34]、(82,88]，其余token原地保留；不叠满全部位置标签。",
+          "direction": "明确显示“另一套虚拟节点示例”，前一套环淡出后才出现A5/38/72、B15/48/82、C28/60/94；用同字母和细连线建立多个位置→同一缓存映射。D10/34/88分步插入，局部接管(5,10]、(28,34]、(82,88]，其余token原地保留；不叠满全部位置标签。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "14",
+          "scriptShot": 14,
+          "chapterId": "vnodes",
+          "visualType": "recap",
+          "from": 5326,
+          "durationInFrames": 555,
+          "narration": "它能缓解分配倾斜，却不能保证完全平均，也不能分散单个热点键。所以，一致性哈希让扩容时尽量少改去向，实际搬迁和请求负载，还得分别处理。",
+          "subtitles": [
+            {
+              "text": "它能缓解分配倾斜，却不能保证完全平均，也不能分散单个热点键。",
+              "from": 0,
+              "to": 228,
+              "duration": 229
+            },
+            {
+              "text": "所以，一致性哈希让扩容时尽量少改去向，实际搬迁和请求负载，还得分别处理。",
+              "from": 229,
+              "to": 554,
+              "duration": 326
+            }
+          ],
+          "voice": [
+            {
+              "id": "14-recap-1",
+              "wavStart": 5326.7,
+              "wavEnd": 5542.45,
+              "localStart": 0.6999999999998181,
+              "localEnd": 216.44999999999982
+            },
+            {
+              "id": "14-recap-2",
+              "wavStart": 5555.95,
+              "wavEnd": 5820.47,
+              "localStart": 229.94999999999982,
+              "localEnd": 494.47000000000025
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              229
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 9d58bde7 + words.json 5e014a2b + script.md 3095da4f",
+            "wavFrom": 5326.7,
+            "wavTo": 5820.47,
+            "holdFrames": 60,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "从虚拟位置收回“固定位置→新增节点接走局部→其余保留去向”的稀疏机制关系；一个热点键的多次请求仍汇到单个负责节点，仅作为限制短暂出现。最后落回开头的缓存扩容目标，品牌停留；无长证明或代码卡。",
+          "direction": "从虚拟位置收回“固定位置→新增节点接走局部→其余保留去向”的稀疏机制关系；一个热点键的多次请求仍汇到单个负责节点，仅作为限制短暂出现。最后落回开头的缓存扩容目标，品牌停留；无长证明或代码卡。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}
