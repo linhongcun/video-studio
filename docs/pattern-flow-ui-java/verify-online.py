@@ -103,9 +103,13 @@ try:
     for e in episodes:
         assert BASE+'episodes/'+e['slug']+'/' in rss
         assert '/video-studio/episodes/'+e['slug']+'/' in library
+    for name,document in [('home',home),('library',library),('rss',rss)]:
+        for retired in ['agent-intro','agent-tool-execution']:
+            assert '/episodes/'+retired+'/' not in document,(name,'retired Agent entry restored',retired)
+    assert '/video-studio/series/agent/' not in home
     changelog=get('changelog',BASE+'changelog/').decode('utf8');assert 'https://github.com/linhongcun/video-studio/releases/tag/v'+VERSION in changelog
     now=datetime.now(timezone.utc)
-    report={'status':'passed','checkedAtUTC':now.isoformat(),'checkedAtBeijing':now.astimezone(ZoneInfo('Asia/Shanghai')).isoformat(),'executedBy':'Codex pattern revision site agent','revisionRelease':'v'+VERSION,'canonicalQueriesAdded':False,'remoteMediaSaved':False,'fullVideoStreamsHashed':True,'results':RESULTS,'episodes':episodes,'scope':'Full canonical media and caption byte equality, all caption timing, exact chapters/anchors, Java article entry and empty-caption card range, both preserved release histories, source/series/library/RSS and actual Release link. Browser Java-card pause/decoded frame evidence is local and recorded separately.'}
+    report={'status':'passed','checkedAtUTC':now.isoformat(),'checkedAtBeijing':now.astimezone(ZoneInfo('Asia/Shanghai')).isoformat(),'executedBy':'Codex pattern revision site agent','revisionRelease':'v'+VERSION,'canonicalQueriesAdded':False,'remoteMediaSaved':False,'fullVideoStreamsHashed':True,'retiredAgentEntryLinksAbsent':True,'results':RESULTS,'episodes':episodes,'scope':'Full canonical media and caption byte equality, all caption timing, exact chapters/anchors, Java article entry and empty-caption card range, both preserved release histories, source/series/library/RSS and actual Release link. Browser Java-card pause/decoded frame evidence is local and recorded separately.'}
     (HERE/'online-verification.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'status':'passed','canonicalGetCount':len(RESULTS),'revisionRelease':'v'+VERSION,'episodes':[{'slug':e['slug'],'frames':e['frames'],'cueCount':e['subtitleCueCount']} for e in episodes],'report':str(HERE/'online-verification.json')},ensure_ascii=False))
 except Exception as exc:
