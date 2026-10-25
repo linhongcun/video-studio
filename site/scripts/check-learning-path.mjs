@@ -176,12 +176,12 @@ assert.equal(preview.epLabel(binaryAlgorithm), 'LC.704');
 const batchAlgorithmSlugs = ['two-sum', 'reverse-linked-list', 'climbing-stairs'];
 const algorithmSlugs = [algorithmSlug, nextAlgorithmSlug, binaryAlgorithmSlug, ...batchAlgorithmSlugs];
 const algorithmChain = algorithmSlugs.map((slug) => lessons.find((e) => e.slug === slug));
-// Keep the original six lessons' identity/release fixtures, while allowing
-// later metadata (including hidden drafts) to extend preview navigation.
-const previewAlgorithms = Array.from(lessons.filter((e) => e.series === 'leetcode')).sort(preview.compareLessons);
-const previewAlgorithmSlugs = slugs(previewAlgorithms);
+// Keep the six historical identities fixed, while preview navigation also
+// includes later reservations. Published navigation must filter those drafts.
+const previewAlgorithmChain = lessons.filter((e) => e.series === 'leetcode').sort(preview.compareLessons);
+const previewAlgorithmSlugs = slugs(previewAlgorithmChain);
 assert.deepEqual(previewAlgorithmSlugs.slice(0, algorithmSlugs.length), algorithmSlugs,
-  'The historical algorithm order must remain intact');
+  'Later algorithm lessons must preserve the six historical lesson identities and order');
 const batchAlgorithms = algorithmChain.slice(3);
 const batchRelease = batchAlgorithms[0]?.firstRelease;
 assert.ok(batchRelease, 'The algorithm batch needs a shared first release');
@@ -191,32 +191,31 @@ for (const [i, e] of algorithmChain.entries()) {
   assert.equal(e.ep, 22 + i);
   assert.equal(e.problemNumber, [11, 3, 704, 1, 206, 70][i]);
   assert.equal(preview.epLabel(e), `LC.${e.problemNumber}`);
-  const nav = preview.seriesNav(e);
-  assert.equal(nav.prev?.slug, algorithmSlugs[i - 1], `${e.slug}: incorrect previous algorithm`);
-  assert.equal(nav.next?.slug, previewAlgorithmSlugs[i + 1], `${e.slug}: incorrect next algorithm`);
-  assert.equal(liveLessons.some((live) => live.slug === e.slug), !e.draft);
   if (i >= 3) {
     assert.equal(e.firstRelease, batchRelease, 'All three new algorithms debut together');
     if (complete) assert.equal(e.draft, false, `${e.slug} is not published yet`);
   }
 }
 assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'leetcode').episodes), previewAlgorithmSlugs);
-for (const [i, e] of previewAlgorithms.entries()) {
+for (const [i, e] of previewAlgorithmChain.entries()) {
   assert.ok(Number.isInteger(e.problemNumber) && e.problemNumber > 0, `${e.slug}: missing problem number`);
   assert.equal(preview.epLabel(e), `LC.${e.problemNumber}`);
   const nav = preview.seriesNav(e);
-  assert.equal(nav.prev?.slug, previewAlgorithmSlugs[i - 1]);
-  assert.equal(nav.next?.slug, previewAlgorithmSlugs[i + 1]);
+  assert.equal(nav.prev?.slug, previewAlgorithmSlugs[i - 1], `${e.slug}: incorrect previous algorithm`);
+  assert.equal(nav.next?.slug, previewAlgorithmSlugs[i + 1], `${e.slug}: incorrect next algorithm`);
+  assert.equal(nav.prevCross, undefined, `${e.slug}: algorithms must not inherit another series`);
+  assert.equal(nav.nextCross, undefined, `${e.slug}: algorithms must not lead into another series`);
   assert.equal(liveLessons.some((live) => live.slug === e.slug), !e.draft,
-    `${e.slug}: draft visibility must be independent of preview navigation`);
+    `${e.slug}: published loader must exclude reserved drafts`);
 }
-const liveAlgorithmSlugs = previewAlgorithms.filter((e) => !e.draft).map((e) => e.slug);
+const liveAlgorithmSlugs = previewAlgorithmChain.filter((e) => !e.draft).map((e) => e.slug);
 assert.deepEqual(slugs(published.getSeries().find((s) => s.id === 'leetcode').episodes), liveAlgorithmSlugs);
 for (const [i, slug] of liveAlgorithmSlugs.entries()) {
   const nav = published.seriesNav(liveLessons.find((e) => e.slug === slug));
   assert.equal(nav.prev?.slug, liveAlgorithmSlugs[i - 1]);
   assert.equal(nav.next?.slug, liveAlgorithmSlugs[i + 1]);
 }
+console.log(`Algorithm navigation passed: ${previewAlgorithmSlugs.length} preview lessons, ${liveAlgorithmSlugs.length} published; drafts excluded from production.`);
 // A debut tag can contain several lessons. Explicit links narrow patches or
 // updates, while an "新增" entry keeps every lesson associated with that tag.
 const batchEps = batchAlgorithms.map((e) => e.ep);
@@ -277,6 +276,17 @@ console.log('Shared debut release passed: the algorithm tag selects all three ne
 if (process.argv.includes('--built')) {
   const dist = path.join(site, 'dist');
   const text = (rel) => fs.readFileSync(path.join(dist, rel), 'utf8');
+  const draftAlgorithms = previewAlgorithmChain.filter((e) => e.draft);
+  for (const draft of draftAlgorithms) {
+    assert.equal(fs.existsSync(path.join(dist, `episodes/${draft.slug}`)), false,
+      `${draft.slug}: draft page, captions and media must be absent from the build`);
+    for (const rel of ['index.html', 'learn/index.html', 'library/index.html',
+      'series/leetcode/index.html', 'rss.xml',
+      ...liveAlgorithmSlugs.map((slug) => `episodes/${slug}/index.html`)]) {
+      assert.equal(text(rel).includes(`/episodes/${draft.slug}/`), false,
+        `${draft.slug}: draft link leaked into ${rel}`);
+    }
+  }
   const route = `episodes/${algorithmSlug}/`;
   const publishedIndex = text('index.html');
   if (algorithm.draft) {
