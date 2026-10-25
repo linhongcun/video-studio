@@ -25,4 +25,4 @@ research-math.md、verify_math.py与article.mdx保存数学来源和完整严证
 
 ## 发布
 
-按既有GitHub持续授权完成检查后合并、Release、部署并核对完整线上媒体/字幕/六章；本次修订版本v0.56.5，实际结果见release.md。#205在核验后completed关闭，其他九题和外部平台不在本次范围。
+按既有GitHub持续授权完成检查后合并、Release、部署并核对完整线上媒体/字幕/六章；本次修订版本v0.57.1，实际结果见release.md。#205在核验后completed关闭，其他九题和外部平台不在本次范围。

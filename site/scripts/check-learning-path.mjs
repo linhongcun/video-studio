@@ -173,11 +173,50 @@ assert.ok(binaryAlgorithm, 'The binary-search lesson must be available in previe
 assert.equal(binaryAlgorithm.ep, 24);
 assert.equal(binaryAlgorithm.problemNumber, 704);
 assert.equal(preview.epLabel(binaryAlgorithm), 'LC.704');
-assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'leetcode').episodes), [algorithmSlug, nextAlgorithmSlug, binaryAlgorithmSlug]);
-assert.equal(preview.seriesNav(nextAlgorithm).prev.slug, algorithmSlug);
-assert.equal(preview.seriesNav(nextAlgorithm).next.slug, binaryAlgorithmSlug);
-assert.equal(preview.seriesNav(binaryAlgorithm).prev.slug, nextAlgorithmSlug);
-assert.equal(preview.seriesNav(binaryAlgorithm).next, undefined, 'Algorithms must not lead into an unrelated learning direction');
+const batchAlgorithmSlugs = ['two-sum', 'reverse-linked-list', 'climbing-stairs'];
+const algorithmSlugs = [algorithmSlug, nextAlgorithmSlug, binaryAlgorithmSlug, ...batchAlgorithmSlugs];
+const algorithmChain = algorithmSlugs.map((slug) => lessons.find((e) => e.slug === slug));
+const batchAlgorithms = algorithmChain.slice(3);
+const batchRelease = batchAlgorithms[0]?.firstRelease;
+assert.ok(batchRelease, 'The algorithm batch needs a shared first release');
+for (const [i, e] of algorithmChain.entries()) {
+  assert.ok(e, `Missing algorithm metadata for ${algorithmSlugs[i]}`);
+  assert.equal(e.series, 'leetcode');
+  assert.equal(e.ep, 22 + i);
+  assert.equal(e.problemNumber, [11, 3, 704, 1, 206, 70][i]);
+  assert.equal(preview.epLabel(e), `LC.${e.problemNumber}`);
+  const nav = preview.seriesNav(e);
+  assert.equal(nav.prev?.slug, algorithmSlugs[i - 1], `${e.slug}: incorrect previous algorithm`);
+  assert.equal(nav.next?.slug, algorithmSlugs[i + 1], `${e.slug}: incorrect next algorithm`);
+  assert.equal(liveLessons.some((live) => live.slug === e.slug), !e.draft);
+  if (i >= 3) {
+    assert.equal(e.firstRelease, batchRelease, 'All three new algorithms debut together');
+    if (complete) assert.equal(e.draft, false, `${e.slug} is not published yet`);
+  }
+}
+assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'leetcode').episodes), algorithmSlugs);
+const liveAlgorithmSlugs = algorithmChain.filter((e) => !e.draft).map((e) => e.slug);
+assert.deepEqual(slugs(published.getSeries().find((s) => s.id === 'leetcode').episodes), liveAlgorithmSlugs);
+for (const [i, slug] of liveAlgorithmSlugs.entries()) {
+  const nav = published.seriesNav(liveLessons.find((e) => e.slug === slug));
+  assert.equal(nav.prev?.slug, liveAlgorithmSlugs[i - 1]);
+  assert.equal(nav.next?.slug, liveAlgorithmSlugs[i + 1]);
+}
+// A debut tag can contain several lessons. Explicit links narrow patches or
+// updates, while an "新增" entry keeps every lesson associated with that tag.
+const batchEps = batchAlgorithms.map((e) => e.ep);
+const assertBatchSelection = (release, expected) => assert.deepEqual(
+  slugs(episodesForRelease(release, lessons)).sort(), [...expected].sort());
+assertBatchSelection({tag: batchRelease, kind: '新增', eps: batchEps}, batchAlgorithmSlugs);
+const singleBatchLink = parseEpisodeSlugs('https://linhongcun.github.io/video-studio/episodes/two-sum/');
+assertBatchSelection({tag: batchRelease, kind: '新增', eps: batchEps, episodeSlugs: singleBatchLink}, batchAlgorithmSlugs);
+const multipleBatchLinks = parseEpisodeSlugs('[链表](https://linhongcun.github.io/video-studio/episodes/reverse-linked-list/)\nhttps://linhongcun.github.io/video-studio/episodes/climbing-stairs/#code\nhttps://linhongcun.github.io/video-studio/episodes/reverse-linked-list/');
+assert.deepEqual(Array.from(multipleBatchLinks), ['reverse-linked-list', 'climbing-stairs']);
+for (const kind of ['修正', '更新']) {
+  assertBatchSelection({tag: batchRelease, kind, eps: batchEps, episodeSlugs: singleBatchLink}, ['two-sum']);
+  assertBatchSelection({tag: batchRelease, kind, eps: batchEps, episodeSlugs: multipleBatchLinks}, ['reverse-linked-list', 'climbing-stairs']);
+  assertBatchSelection({tag: 'v0.56.3', kind, eps: batchEps, episodeSlugs: multipleBatchLinks}, []);
+}
 assert.deepEqual(slugs(episodesForRelease({tag: binaryAlgorithm.firstRelease, kind: '新增', eps: [24]}, lessons)), [binaryAlgorithmSlug]);
 assert.deepEqual(slugs(episodesForRelease({tag: binaryAlgorithm.firstRelease, kind: '新增', eps: [24], episodeSlugs: parseEpisodeSlugs('https://linhongcun.github.io/video-studio/episodes/binary-search/')}, lessons)), [binaryAlgorithmSlug]);
 assert.deepEqual(slugs(episodesForRelease({tag: nextAlgorithm.firstRelease, kind: '新增', eps: [23]}, lessons)), [nextAlgorithmSlug]);
@@ -203,8 +242,9 @@ assert.deepEqual(slugs(episodesForRelease({tag: agentLesson.firstRelease, kind: 
 assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.3', kind: '修正', eps: [5], episodeSlugs: parseEpisodeSlugs('https://linhongcun.github.io/video-studio/episodes/cdn/')}, lessons)), ['cdn']);
 assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.4', kind: '修正', eps: [22], episodeSlugs: parseEpisodeSlugs('https://linhongcun.github.io/video-studio/episodes/container-most-water/')}, lessons)), [algorithmSlug]);
 assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.5', kind: '修正', eps: [12]}, lessons)), ['idempotency'], 'Old EP-only releases must retain their fallback');
-console.log('Learning paths passed: historical EP.21 sequence and releases preserved; LC.11 has an independent series, display number and release identity.');
+console.log('Learning paths passed: historical EP.21 sequence and releases preserved; six LeetCode lessons have an independent ordered series, display numbers and release identities.');
 console.log('Explicit canonical release links passed: same-EP patches select only the linked course; debut gates and legacy EP fallback preserved.');
+console.log('Shared debut release passed: the algorithm tag selects all three new lessons; patch/update URLs select one or several explicit lessons.');
 
 if (process.argv.includes('--built')) {
   const dist = path.join(site, 'dist');
@@ -284,6 +324,7 @@ if (puzzle) {
   assert.equal(learning.getTrackForSeries('puzzles')?.id, 'puzzles', 'Puzzles have their own learning direction');
   assert.equal(tracks.find((track) => track.id === 'puzzles')?.start.slug, 'horse-racing', 'Puzzles start with the published horse-racing lesson');
   assert.equal(published.seriesNav(puzzle).prev, undefined, 'The first puzzle must not inherit a technical prerequisite');
+  assert.equal(published.seriesNav(puzzle).next, undefined, 'The puzzle must not lead into another learning direction');
 }
 console.log(`${tracks.length} learning directions passed: every published lesson has one home; independent directions remain outside the systems path.`);
 
