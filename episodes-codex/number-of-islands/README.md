@@ -1,5 +1,7 @@
 # 岛屿数量：怎样保证一座岛只数一次？
 
+已按持续授权合并并发布[网站版本v0.66.0](https://linhongcun.github.io/video-studio/episodes/number-of-islands/)，Release后Pages40179672105成功，线上39次完整HTTPS核验通过、#82已completed关闭。实际发布、失败过程与能力范围见[交付记录](../../docs/number-of-islands/README.md)。
+
 选自现有[issue #82](https://github.com/linhongcun/video-studio/issues/82)，独立算法系列LC.200，内部排序EP34。开工同步与并行身份预留见startup.json；片内仅展示题号。当前真实配音和分镜已装配，后续阶段以实际QA/发布报告为准，不将本说明当作通过凭据。
 
 ## 内容与依据
