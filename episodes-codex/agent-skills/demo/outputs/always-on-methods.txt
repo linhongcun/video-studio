@@ -1,0 +1,56 @@
+---
+name: api-compat-review
+description: Review a proposed JSON API request-contract change for backward compatibility with an existing client. Use when a task asks whether old clients can still omit fields after a request schema changes. Check the team's required-field rule and report the evidence and scope.
+---
+
+# API 请求兼容审查
+
+目的：按团队约定审查请求字段变更，不根据“新增字段”四个字直接判定兼容。
+
+1. 确认旧契约、新契约及一份真实或明确标注的旧客户端请求。缺输入时先说明缺口。
+2. 阅读 [必填字段兼容规则](references/request-fields.md)。区分新增可选字段与新增必填字段。
+3. 使用宿主允许的命令执行工具运行 `scripts/check_fields.py`，传入旧契约、新契约与旧请求。脚本由工具执行；不要把 Markdown 指令当作已执行的结果。
+4. 根据工具返回的 `newRequiredFields`、`oldClientValidation` 和 `verdict` 输出结论，指出触发规则的字段。
+5. 必须保留限制：本脚本只检查简化请求契约的必填字段变化，不是完整 OpenAPI 兼容性分析；不证明实际服务或所有客户端都已验证。
+
+命令形式（路径相对本技能目录）：
+
+```sh
+python3 scripts/check_fields.py --before OLD.json --after NEW.json --client-request CLIENT.json
+```
+
+结论格式：兼容性判断、关键字段、旧请求结果、依据与未检查范围。不要输出未经实际运行的“检查通过”。
+
+
+# 团队规则：旧客户端不改代码还能否发送原请求
+
+本例只讨论同一请求端点的 JSON 对象字段。数据、端点和规则均为合成教学示例。
+
+## R1 新增可选字段
+
+若新字段不在 `required` 中，旧客户端省略它仍能通过本例的必填字段校验。
+
+## R2 新增必填约束
+
+新增字段或已有可选字段进入 `required` 后，旧客户端可能没有提供该字段。即使它只是“新增一个字段”，也可能破坏旧请求。
+
+审查须分别给出两种证据：
+
+- 契约级证据：新 `required` 集合相对旧集合增加了哪些字段。
+- 请求级证据：指定旧请求是否缺少新必填字段。一个样例通过不能证明所有旧客户端都兼容。
+
+## 范围
+
+检查器不分析响应字段、类型收窄、枚举、格式、认证、默认值、状态码语义或服务实际行为。新增可选字段在本例通过，只能称“通过已检查的必填字段规则”，不能称“完全兼容”。
+
+
+---
+name: release-notes
+description: Write release notes from a supplied change list. Use when preparing a version announcement or changelog; this skill does not review API backward compatibility.
+---
+
+# 发布说明
+
+按用户可观察的变化组织版本说明，分别写新增、修复和已知限制。每项保留对应变更来源，删除没有实际完成的宣传性结论。
+
+这是发现阶段的无关候选。本演示不会激活这份正文；不能把它画成随 API 审查一起进入模型上下文。

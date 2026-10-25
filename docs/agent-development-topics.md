@@ -4,15 +4,19 @@
 
 用户已明确转向以**Skill、MCP、Subagent、Goal等AI概念**为入口，讲机制、设计意图与取舍，并授权关闭过浅选题。Goal已确认是“目标驱动的Agent”。旧16期主线＋4项深入方向的制作顺序作废，上一版六个API/工单实战单元草案撤回；不再按基础接线逐条开拍。
 
-**最新媒体处置：**用户进一步要求删除A01/EP.22与A02/EP.28两期试片；两期发布内容和制作工程退出当前树，取代此前保留旧媒体的决定。历史制作、QA与负面反馈通过删除前Git提交追溯；11项概念研究候选不变。范围及待完成的部署核验见[撤下记录](agent-video-retirement.md)。
+**最新媒体处置：**用户进一步要求删除A01/EP.22与A02/EP.28两期试片；两期发布内容和制作工程退出当前树，取代此前保留旧媒体的决定。历史制作、QA与负面反馈通过删除前Git提交追溯；11项概念研究候选不变。范围及已完成的部署核验见[撤下记录](agent-video-retirement.md)。
 
 详细依据与复盘见[当前策划](agent-development-value-review.md)，实时跟踪见[系列总览 #130](https://github.com/linhongcun/video-studio/issues/130)。以下是重写后的编辑研究候选，不是11支视频的固定排期，也不是用户已逐项认可的新标题或效果。
+
+## 首片已上线
+
+用户随后授权自选最有把握的一期制作，已选择[Skills #139](https://github.com/linhongcun/video-studio/issues/139)。新EP.31 / agent-skills为12镜24句、约3分8秒；以接口兼容审查解释方法包、渐进加载、资料读取与脚本执行、上下文开销。已按v0.62.0合并上线，独立成片、本地站点与20个普通canonical GET核验通过，尚无用户观看结论。其他10项继续作为研究候选，原两期仍保持撤下。实际状态见[本期记录](../episodes-codex/agent-skills/README.md)，下方研究设计不再解释为全部未启动。
 
 ## 优先研究池
 
 | 候选 | 要解开的问题 | 必须超越的浅层讲法 |
 |---|---|---|
-| [Agent Skills #139](https://github.com/linhongcun/video-studio/issues/139) | Skill解决的不是再写一段提示词，而是怎样把可复用的工作方法打包、发现，并在有限上下文中按需使用。 | 名称/描述供发现与路由，完整指令在激活时加载，参考资料和脚本按需要读取；说明渐进加载为何影响上下文占用与触发质量。 |
+| [Agent Skills #139 · 已上线](https://github.com/linhongcun/video-studio/issues/139) | Skill解决的不是再写一段提示词，而是怎样把可复用的工作方法打包、发现，并在有限上下文中按需使用。 | 名称/描述供发现与路由，完整指令在激活时加载，参考资料和脚本按需要读取；说明渐进加载为何影响上下文占用与触发质量。 |
 | [MCP #138](https://github.com/linhongcun/video-studio/issues/138) | MCP究竟统一了哪层契约，哪些复杂性仍要由Host、Server与业务系统承担？ | 以同一外部能力的接入变化，展开Host/Client/Server、能力发现、请求/结果与数据访问职责。 |
 | [Subagent #146](https://github.com/linhongcun/video-studio/issues/146) | 委派为何可能提高表现，又为何可能增加费用、丢失关键信息或制造文件冲突？ | 沿任务说明→子任务上下文→工具/环境→结果返回解释委派，区分角色名称、独立模型调用、上下文边界与权限边界。 |
 | [Goal #248](https://github.com/linhongcun/video-studio/issues/248) | 谁凭什么判定目标完成？ | 目标/约束/计划/反馈分离，执行者与评估者、真实证据及继续和停止语义，超过while循环。 |
