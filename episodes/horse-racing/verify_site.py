@@ -24,14 +24,19 @@ def digest(path: Path) -> str:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--base', default='http://127.0.0.1:4331/video-studio/')
-    parser.add_argument('--tail-only', action='store_true',
-                        help='Check the replaced ending and unchanged prefix; keep the original full-site QA report.')
+    modes = parser.add_mutually_exclusive_group()
+    modes.add_argument('--tail-only', action='store_true',
+                       help='Check the self-contained proof ending and its unchanged prefix.')
+    modes.add_argument('--short-ending', action='store_true',
+                       help='Check the short methods-only ending and keep earlier QA reports.')
     args = parser.parse_args()
+    localized = args.tail_only or args.short_ending
     base = args.base.rstrip('/') + '/'
     episode = Path(__file__).resolve().parent
     repo = episode.parents[1]
     dist = repo / 'site/dist'
-    out = episode / ('out/site-qa-ending' if args.tail_only else 'out/site-qa')
+    output_name = 'site-qa-short-ending' if args.short_ending else 'site-qa-ending' if args.tail_only else 'site-qa'
+    out = episode / 'out' / output_name
     out.mkdir(parents=True, exist_ok=True)
     meta = json.loads((episode / 'meta.json').read_text())
     storyboard = json.loads((episode / 'storyboard.json').read_text())
@@ -52,27 +57,38 @@ def main() -> None:
     assert frame == meta['finalVideoFrames']
     prefix = None
     tail_from = 0
-    if args.tail_only:
-        baseline = repo / 'episodes-codex/horse-racing/revisions/self-contained-ending/before/storyboard.json'
+    if localized:
+        revision = 'short-ending' if args.short_ending else 'self-contained-ending'
+        baseline_name = 'before-storyboard.json' if args.short_ending else 'before/storyboard.json'
+        baseline = repo / 'episodes-codex/horse-racing/revisions' / revision / baseline_name
+        prefix_limit = 15 if args.short_ending else 17
         old_storyboard = json.loads(baseline.read_text())
         old_shots, old_from = [], 0
         for scene in old_storyboard['scenes']:
             for shot in scene['shots']:
                 old_shots.append({'shot': shot, 'from': old_from})
                 old_from += shot['durationInFrames']
-        old_prefix = [entry for entry in old_shots if int(entry['shot']['id']) <= 17]
-        new_prefix = [entry for entry in current_shots if int(entry['shot']['id']) <= 17]
+        old_prefix = [entry for entry in old_shots if int(entry['shot']['id']) <= prefix_limit]
+        new_prefix = [entry for entry in current_shots if int(entry['shot']['id']) <= prefix_limit]
         def prefix_facts(entry):
             shot = entry['shot']
             return {'id': shot['id'], 'from': entry['from'],
                     'durationInFrames': shot['durationInFrames'], 'chapterId': shot['chapterId'],
                     'narration': shot['narration'], 'subtitles': shot['subtitles']}
         assert [prefix_facts(entry) for entry in new_prefix] == [prefix_facts(entry) for entry in old_prefix]
-        assert len(old_prefix) == 17
+        assert len(old_prefix) == prefix_limit
         tail_from = sum(entry['shot']['durationInFrames'] for entry in old_prefix)
         tail_chapters = [chapter for chapter in expected_chapters if chapter['frame'] >= tail_from]
-        assert tail_chapters and tail_chapters[0]['id'] == 'lower-bound'
+        expected_tail_id = 'answer' if args.short_ending else 'lower-bound'
+        assert tail_chapters and tail_chapters[0]['id'] == expected_tail_id
         assert tail_chapters[0]['frame'] == tail_from
+        if args.short_ending:
+            config = json.loads((repo / 'episodes-codex/horse-racing/episode-config.json').read_text())
+            plan = json.loads((repo / 'episodes-codex/horse-racing/plan.json').read_text())
+            assert len(current_shots) == config['shotCount'] == len(plan)
+            assert current_shots[-1]['shot']['chapterId'] == 'answer'
+            assert all(chapter['id'] != 'lower-bound' for chapter in expected_chapters)
+            assert not any(term in ''.join(expected_subtitles) for term in ('证明', '文章', '图文'))
         prefix = {'shotCount': len(old_prefix), 'frames': tail_from,
                   'subtitleCount': sum(len(entry['shot']['subtitles']) for entry in old_prefix),
                   'timingAndTextUnchanged': True}
@@ -89,6 +105,9 @@ def main() -> None:
     html = (built_episode / 'index.html').read_text()
     for chapter in expected_chapters:
         assert f'id="{chapter["id"]}"' in html, f'Missing article anchor: {chapter}'
+    if args.short_ending:
+        assert html.count('id="lower-bound"') == 1, 'Keep the article-only proof anchor'
+        assert 'data-seek="lower-bound"' not in html, 'Do not link the article proof to a removed video chapter'
     assert 'horse-racing' in (dist / 'rss.xml').read_text()
     assert '趣味推理' in (dist / 'series/puzzles/index.html').read_text()
     assert 'series/puzzles' in (dist / 'learn/index.html').read_text()
@@ -116,6 +135,10 @@ def main() -> None:
             actual_chapters = page.locator('#player').evaluate('(el) => JSON.parse(el.dataset.chapters)')
             assert [chapter['id'] for chapter in actual_chapters] == [chapter['id'] for chapter in expected_chapters]
             assert [chapter['start'] for chapter in actual_chapters] == [chapter['start'] for chapter in expected_chapters]
+            if args.short_ending:
+                assert page.locator('#lower-bound').count() == 1
+                assert page.locator('[data-seek="lower-bound"]').count() == 0
+                assert page.locator('#player [data-id="lower-bound"]').count() == 0
             page.wait_for_function('document.querySelector("video").readyState >= 1')
             video_info = page.locator('video').evaluate('''video => {
                 video.muted = true;
@@ -128,7 +151,7 @@ def main() -> None:
             page.wait_for_function('document.querySelector("track").readyState === 2')
             assert page.locator('video').evaluate('v => v.textTracks[0].cues.length') == len(expected_subtitles)
             seek_checks = []
-            chapters_to_seek = tail_chapters if args.tail_only else expected_chapters
+            chapters_to_seek = tail_chapters if localized else expected_chapters
             for chapter in chapters_to_seek:
                 selector = '.chip' if width < 768 else '.ch'
                 page.locator(f'{selector}[data-id="{chapter["id"]}"]').click()
@@ -146,7 +169,7 @@ def main() -> None:
             article_seek = page.locator('video').evaluate('video => video.currentTime')
             target_start = next(chapter['start'] for chapter in expected_chapters if chapter['id'] == target_id)
             assert abs(article_seek - target_start) < 0.2
-            playback_from = tail_from / fps if args.tail_only else 0
+            playback_from = tail_from / fps if localized else 0
             page.locator('video').evaluate('async (video, start) => {video.currentTime = start; await video.play();}', playback_from)
             page.wait_for_timeout(350)
             playback = page.locator('video').evaluate('video => ({time: video.currentTime, paused: video.paused, error: video.error?.code ?? null})')
@@ -155,7 +178,7 @@ def main() -> None:
             # The existing mobile player releases its sticky state three seconds
             # after pause. Capture the normal page only after that transition.
             page.wait_for_function('!document.querySelector(".vwrap").classList.contains("stuck")')
-            if args.tail_only:
+            if localized:
                 page.locator('video').evaluate('(video, time) => {video.currentTime = time;}', min(playback_from + 3, frame / fps - 1))
                 page.wait_for_function('!document.querySelector("video").seeking')
             overflow = page.evaluate('document.documentElement.scrollWidth > innerWidth + 1')
@@ -163,8 +186,14 @@ def main() -> None:
             page.evaluate('scrollTo(0,0)')
             screenshot = out / f'episode-{width}.png'
             page.screenshot(path=str(screenshot), full_page=False)
+            last_frame_screenshot = None
+            if args.short_ending:
+                page.locator('video').evaluate('(video, time) => {video.currentTime = time;}', (frame - 1) / fps)
+                page.wait_for_function('!document.querySelector("video").seeking')
+                last_frame_screenshot = out / f'ending-last-{width}.png'
+                page.locator('video').screenshot(path=str(last_frame_screenshot))
             home_overflow = None
-            if not args.tail_only:
+            if not localized:
                 page.goto(base, wait_until='networkidle')
                 assert page.locator('a.track-puzzles').count() == 1
                 assert page.locator('a.track-puzzles').get_attribute('href').endswith('/learn/#puzzles')
@@ -187,16 +216,18 @@ def main() -> None:
                             'captionCount': len(expected_subtitles),
                             'chapterCount': len(expected_chapters), 'horizontalOverflow': overflow,
                             'homeHorizontalOverflow': home_overflow, 'runtimeErrors': errors,
-                            'failedResponses': bad_responses, 'screenshot': str(screenshot.relative_to(repo))})
+                            'failedResponses': bad_responses, 'screenshot': str(screenshot.relative_to(repo)),
+                            'lastFrameScreenshot': str(last_frame_screenshot.relative_to(repo)) if last_frame_screenshot else None})
             context.close()
         browser.close()
     report = {'checkedAtUtc': datetime.now(timezone.utc).isoformat(), 'base': base,
-              'scope': 'Changed ending and unchanged prefix with actual Chromium controls; original full-site navigation QA retained separately.' if args.tail_only else 'Built files and actual Chromium UI, not a learning-outcome experiment or full audiovisual review.',
+              'scope': 'Changed ending and unchanged prefix with actual Chromium controls; earlier QA reports retained separately.' if localized else 'Built files and actual Chromium UI, not a learning-outcome experiment or full audiovisual review.',
               'mediaSHA256': hashes, 'frames': frame, 'fps': fps,
               'subtitleCount': len(expected_subtitles), 'chapters': expected_chapters,
-              'unchangedPrefix': prefix, 'tailOnly': args.tail_only,
+              'unchangedPrefix': prefix, 'tailOnly': args.tail_only, 'shortEnding': args.short_ending,
               'viewports': results, 'status': 'passed'}
-    report_path = episode / ('qa-site-ending.json' if args.tail_only else 'qa-site.json')
+    report_name = 'qa-site-short-ending.json' if args.short_ending else 'qa-site-ending.json' if args.tail_only else 'qa-site.json'
+    report_path = episode / report_name
     report_path.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'status': 'passed', 'viewports': [r['viewport'] for r in results],
                       'frames': frame, 'captions': len(expected_subtitles), 'chapters': len(expected_chapters)}, ensure_ascii=False))
