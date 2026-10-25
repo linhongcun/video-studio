@@ -34,14 +34,18 @@ if __name__ == '__main__':
     assert config['episode'] == 28 and config['slug'] == SLUG
     files = ['article.mdx', 'script.md', 'research.md', 'pronunciation.md', 'storyboard.json',
              'words.json', 'captions.srt', 'video.mp4', 'cover-16x9.jpg', 'cover-4x3.jpg', 'cover-3x4.jpg']
+    source_files = {name: ('article-site.mdx' if name == 'article.mdx' else name) for name in files}
     for name in files:
-        assert (HERE / name).is_file(), f'Missing checked source: {name}'
+        assert (HERE / source_files[name]).is_file(), f'Missing checked source: {source_files[name]}'
+    derivation = json.loads((HERE / 'site-article-derivation.json').read_text())
+    assert digest(HERE / 'article.mdx') == derivation['baselineSha256']
+    assert digest(HERE / 'article-site.mdx') == derivation['derivedSha256']
     video_sha = digest(HERE / 'video.mp4')
     assert video_sha in json.dumps(result), 'Current video must match the encoded-media report'
     OUT.mkdir(parents=True, exist_ok=True)
     for name in files:
-        shutil.copyfile(HERE / name, OUT / name)
-        assert digest(HERE / name) == digest(OUT / name)
+        shutil.copyfile(HERE / source_files[name], OUT / name)
+        assert digest(HERE / source_files[name]) == digest(OUT / name)
     today = datetime.now(ZoneInfo('Asia/Shanghai')).date().isoformat()
     metadata = {
         'slug': SLUG, 'ep': 28, 'episodePart': '设计模式 D02', 'lessonOrder': 2,
@@ -60,7 +64,8 @@ if __name__ == '__main__':
         'checkedAtBeijing': datetime.now(ZoneInfo('Asia/Shanghai')).isoformat(), 'status': 'passed',
         'executedBy': 'Codex observer_site agent', 'release': args.release,
         'approvedProductionMediaCopied': True, 'frames': frames, 'fps': fps,
-        'files': [{'file': name, 'bytes': (OUT / name).stat().st_size, 'sha256': digest(OUT / name)} for name in files],
+        'articleDerivation': derivation,
+        'files': [{'file': name, 'sourceFile': source_files[name], 'bytes': (OUT / name).stat().st_size, 'sha256': digest(OUT / name)} for name in files],
         'metadata': metadata,
         'scope': 'Publishing artifact copies are byte-identical. Production WAV, PNG and source code stay in episodes-codex.'
     }

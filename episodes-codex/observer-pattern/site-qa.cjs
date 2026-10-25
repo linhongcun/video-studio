@@ -31,7 +31,7 @@ assert.equal(meta.title, json(path.join(__dirname, 'episode-config.json')).title
 const manifest = json(path.join(__dirname, 'site-copy-manifest.json'));
 for (const f of manifest.files) {
   assert.equal(fileHash(path.join(canonical, f.file)), f.sha256);
-  assert.equal(fileHash(path.join(__dirname, f.file)), f.sha256);
+  assert.equal(fileHash(path.join(__dirname, f.sourceFile || f.file)), f.sha256);
 }
 for (const e of fs.readdirSync(canonical, {withFileTypes: true})) {
   assert.equal(e.isDirectory(), false); assert.ok(!/\.(wav|png|tsx?|jsx?)$/i.test(e.name));
@@ -45,6 +45,9 @@ for (const scene of sb.scenes) {
   }
 }
 assert.equal(offset, frames); assert.equal(expectedCues.length, sb.scenes.flatMap((s) => s.shots).length * 2);
+const derivation = json(path.join(__dirname, 'site-article-derivation.json'));
+assert.equal(fileHash(path.join(__dirname, 'article.mdx')), derivation.baselineSha256);
+assert.equal(fileHash(path.join(__dirname, 'article-site.mdx')), derivation.derivedSha256);
 const videoSha = fileHash(path.join(canonical, meta.video)), posterSha = fileHash(path.join(canonical, meta.poster));
 const source = `https://github.com/linhongcun/video-studio/tree/main/${meta.sourcePath}`;
 const parseTime = (s) => s.split(':').reduce((a, b) => a * 60 + Number(b), 0);

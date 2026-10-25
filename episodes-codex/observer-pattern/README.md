@@ -1,6 +1,6 @@
 # 设计模式 D02 · 观察者模式
 
-制作 issue 为 [#164](https://github.com/linhongcun/video-studio/issues/164)，系列总览为 [#161](https://github.com/linhongcun/video-studio/issues/161)。先解释语言无关的设计关系：变化来源、订阅者、共同通知约定与可调整的订阅集合；具体语言实现仅作配套图文拓展。当前真实音轨为12镜24句、5章、4979帧，约2分46秒；配音装配通过不代表动画、成片或上线已经通过，发布状态以后续记录为准。
+制作 issue 为 [#164](https://github.com/linhongcun/video-studio/issues/164)，系列总览为 [#161](https://github.com/linhongcun/video-studio/issues/161)。先解释语言无关的设计关系：变化来源、订阅者、共同通知约定与可调整的订阅集合；具体语言实现仅作配套图文拓展。当前真实音轨为12镜24句、5章、4979帧，约2分46秒；思想/动态预检、正式成片与本地站点检查已通过，真实发布状态见release.md，不预记用户已观看认可。
 
 ## 配音与装配
 
@@ -47,3 +47,5 @@ PATH=/workspace/.venvs/video-studio/bin:$PATH TMPDIR=/workspace/obs-tmp flock /t
 文稿审查、实际连续动画预演、源冻结、正式 MP4 复核与上线核验各自记录实际执行范围。冻结后任何生产输入修改须先停止受影响编码，再重新检查和冻结；生产清单不能在编码完成后重写来追认未被采用的源码。站点只接入检查通过的同一份 MP4、JPG 和必要文本数据，不复制制作 WAV、PNG 或 Remotion 工程。
 
 GitHub 主干合并、Release、Pages 部署及线上完整 SHA 检查在现行持续授权内完成，成功后以 completed 关闭 #164；外部平台没有新发授权。实际版本、部署与线上结论以后续 `release.md` 为准，不将制作检查写成用户观看认可或初学者学习效果测量。
+
+站点图文使用`article-site.mdx`：它由冻结`article.mdx`仅转换原生SVG属性名，原文/派生SHA与转换次数记录在`site-article-derivation.json`。这项发布格式修复不改变已编码119项输入，不重渲视频；实际网页验证见`site-svg-correction.json`，具体教训L035。

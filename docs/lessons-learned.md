@@ -260,13 +260,20 @@
 - **下次：**冻结与正式编码分开调用，先读取成功结果再启动后一步；批量前置命令使用明确工作目录和失败即停。新工程还要检查共享入口要求的输出目录，不根据预演成功推断冻结器一定可运行。
 - **验证：**停止误启动任务后从仓根单独冻结，119项完整SHA逐一通过，再从remotion目录用`set -e`、短TMPDIR和共享锁启动新编码。修前日志、实际源身份及后续成片检查保留在[环境记录](../episodes-codex/observer-pattern/qa-render-environment.json)，没有靠补写清单认可先前尝试。
 
+## L035 MDX中的SVG属性没有按预期生效
+
+- **案例：**2026-10-25，D02观察者模式站点审查。构建成功、页面无溢出，但实际图文SVG里React风格的fontSize/textAnchor/strokeWidth被原样输出，浏览器未采用；标题字号退回16px，共同约定文字从x215向右起笔而未居中。
+- **原因：**把Remotion/React的属性习惯直接用于Astro的MDX内联SVG；源文本和无溢出检查不能证明目标渲染器采用了样式。
+- **下次：**面向网页的内联SVG使用目标渲染器认可的原生font-size/text-anchor/stroke-width，并实际看窄屏和桌面图，核对computed样式与文字范围。不要把这个格式转换扩大到仍由React渲染的视频源码。
+- **验证：**保留已编码119项清单及原文章字节，生成只变28个属性名的站点派生稿并单独记录SHA；不重渲无影响视频。两图在1440/390视口真实字号、middle锚点、线宽和全部文字范围检查通过，独立站点代理实际看4图，根任务另看两张窄屏图。见[派生记录](../episodes-codex/observer-pattern/site-article-derivation.json)与[实际网页复核](../episodes-codex/observer-pattern/site-svg-correction.json)。先前10次seek/24cue检查按原范围保留，没有为此重复整套媒体检查。
+
 ## 如何继续追加
 
 
 保留已有编号，新增下一条，不把经验写成泛泛口号。建议格式：
 
 ```markdown
-## L035 简短的问题名称
+## L036 简短的问题名称
 
 
 - 案例：日期、期数/版本、发生阶段和实际现象。
