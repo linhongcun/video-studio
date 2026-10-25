@@ -66,6 +66,46 @@ const Process=({nums=MAIN_NUMS,target=9,current,entries,need,calc=1,query=0,feed
 };
 const Scene=({s,f}:{s:Shot;f:number})=>{
  const t=s.visualType,p=phase(s,f),q=phase(s,f,1);
+ if(t==='approach-pairs'){
+  const second=f>=Number(s.cueFrames?.sentences?.[1]??s.durationInFrames*.5);
+  const current=second?2:1,candidate=second&&q>=.52?1:0;
+  const trialProgress=second?(candidate===0?clamp(q/.42):clamp((q-.52)/.42)):p;
+  const tests=second?[['3 + 8 = 11',true],['3 + 11 = 14',candidate===1||trialProgress>.7],['8 + 11 = 19',candidate===1&&trialProgress>.7]]:[['3 + 8 = 11',trialProgress>.7]];
+  const start=ax(current,MAIN_NUMS.length),end=ax(candidate,MAIN_NUMS.length);
+  return <><Head kicker="先从题目条件入手" title="最直接：拿两个位置，逐个相加试试" sub="方法推导 · 每来一个新数，看看哪些先前位置能与它配对"/>
+   <ArrayView current={current} visited={current-1}/>
+   <rect x={end-78} y={375} width={156} height={142} rx={20} fill="none" stroke={C.blue} strokeWidth={4}/>
+   <path d={`M ${start} 585 C ${start} 647, ${end} 647, ${end} 585`} pathLength={1} strokeDasharray="1" strokeDashoffset={1-trialProgress} fill="none" stroke={C.blue} strokeWidth={3}/>
+   <g opacity={clamp((trialProgress-.4)/.3)}><T x={660} y={724} size={53} anchor="middle" color={C.gold} mono>{`${MAIN_NUMS[candidate]} + ${MAIN_NUMS[current]} = ${MAIN_NUMS[candidate]+MAIN_NUMS[current]}`}</T>
+    <T x={660} y={795} size={33} anchor="middle" color={C.muted}>和不等于目标 9，还得继续找</T></g>
+   <g data-approach="candidate-pair-trials"><rect x={1275} y={302} width={510} height={462} rx={22} fill={C.surface} stroke={C.edge} strokeWidth={2}/>
+    <T x={1310} y={352} size={29} color={C.blue}>这里尝试过的数对</T>
+    {tests.map(([label,shown],i)=><g key={String(label)} opacity={shown?1:0}><T x={1530} y={444+i*86} anchor="middle" size={36} mono>{String(label)}</T><T x={1530} y={481+i*86} anchor="middle" size={24} color={C.muted}>不等于目标 9</T></g>)}
+    <T x={1530} y={729} size={25} anchor="middle" color={C.muted}>前面有几格，就可能尝试几对</T>
+   </g>
+   <Note>换到下一个数，又可能扫描许多先前位置</Note>
+  </>;
+ }
+ if(t==='approach-complement')return <><Head kicker="把要找的东西先确定下来" title="当前值固定，另一个值已经确定" sub="方法推导 · 假设走到下标 3 的 6；此时先前有 3、8、11"/>
+  <ArrayView current={3} visited={2} pair={q>=.7?[0]:[]} unvisitedLabel/>
+  <path d="M 157 345 V 318 H 693 V 345" fill="none" stroke={C.teal} strokeWidth={2}/><T x={425} y={301} anchor="middle" size={26} color={C.teal}>先前位置 0、1、2</T>
+  <g opacity={p}><T x={660} y={673} size={29} anchor="middle" color={C.muted}>目标减去当前值，就是需要的另一个值</T><T x={660} y={759} size={62} anchor="middle" color={C.gold} mono>9 − 6 = 3</T></g>
+  <g opacity={q} data-approach="complement-query"><rect x={1275} y={302} width={510} height={462} rx={22} fill={C.surface} stroke={C.edge} strokeWidth={2}/>
+   <T x={1530} y={361} anchor="middle" size={28} color={C.muted}>新的问题只有一个</T><T x={1530} y={470} anchor="middle" size={43} color={C.gold}>先前出现过 3 吗？</T><T x={1530} y={545} anchor="middle" size={31} color={C.muted}>若出现过，它在哪个下标？</T><T x={1530} y={658} anchor="middle" size={44} color={C.teal} alpha={q>=.7?1:0}>这里是下标 0</T>
+  </g>
+  <Note>不用再猜另一个数，只需查询已确定的需要值</Note>
+ </>;
+ if(t==='approach-choice'){
+  const introduced=f>=Number(s.cueFrames?.labels?.['哈希表']??s.cueFrames?.sentences?.[1]??0);
+  const reset=phase(s,f,1,.3,.74),official=reset>=1;
+  const entries=official?[]:[{value:3,index:0,alpha:p*(1-reset)},{value:8,index:1,alpha:p*(1-reset)},{value:11,index:2,alpha:p*(1-reset)}];
+  return <><Head kicker={official?'正式执行 · 从头开始':'让记录回答刚才的问题'} title={official?'方法选定，清空记录从头执行':'按值留下位置，下一次就能查询'} sub={introduced?'哈希表 · 按数值查询先前下标':'方法推导 · 需要的记录是“数值 → 先前下标”'}/>
+   <ArrayView current={official?0:3} visited={official?-1:2}/>
+   <HashTable entries={entries} introduced={introduced} highlight={introduced&&!official?3:null} hitAlpha={1-reset}/>
+   {!official?<g opacity={1-reset}><T x={660} y={702} size={41} anchor="middle" color={C.gold}>需要数值 3，就查询它的先前下标</T><T x={660} y={778} size={32} anchor="middle" color={C.teal}>记住数值和位置，供后面的数使用</T></g>:<g><T x={660} y={701} size={42} anchor="middle" color={C.gold}>空表 · 当前下标 0，数值 3</T><T x={660} y={779} size={32} anchor="middle" color={C.teal}>先查需要的值，没查到才记录当前值</T></g>}
+   <Note color={official?C.teal:C.muted}>{official?'下面从第一个数开始，完整执行一遍':'这里在推导记录方式，下一步清空后正式执行'}</Note>
+  </>;
+ }
  if(t==='problem')return <><Head kicker="LeetCode 1 · 先看题目" title="两数相加等于 9，选哪两格？" sub="输入示例 · 整数数组 [3,8,11,6,15] · 目标 9"/><ArrayView wide showIndex={q>0} indexAlpha={q}/><T x={960} y={768} size={42} anchor="middle" color={C.gold}>选两个数，让它们相加等于目标</T><Note color={C.gold} alpha={q}>必须选两个不同下标 · 同一格不能用两次</Note></>;
  if(t==='output')return <><Head kicker="LeetCode 1 · 题目要求" title="返回这两格的下标，不是数值" sub="下标从 0 开始 · 数值 3 + 6 = 9"/><ArrayView wide pair={[0,3]} pairAlpha={p}/><T x={960} y={754} size={56} anchor="middle" color={C.teal} mono alpha={p}>返回 [0, 3]</T><T x={960} y={832} size={29} anchor="middle" color={C.muted} alpha={q}>恰好一组答案 · 返回 [3, 0] 也可以</T><Note>两个不同位置可以存放相同的值</Note></>;
  if(t==='lookup'){

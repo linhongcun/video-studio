@@ -7,12 +7,12 @@
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "durationInFrames": 5129,
-    "finalVideoFrames": 5129,
+    "durationInFrames": 5980,
+    "finalVideoFrames": 5980,
     "draft": false,
     "provisionalTiming": false,
     "pendingAudio": false,
-    "timingSource": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
+    "timingSource": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
     "onsetRule": {
       "module": "episodes/_shared/onset_rule.py",
       "checker": "episodes/_shared/label_onset_strict.py",
@@ -21,8 +21,8 @@
         2
       ]
     },
-    "style": "干净全屏canvas；同一字符串abcbadea；合法窗口与待加入字符分开；无序集合与位置分开；先消重再加入；当前与历史最长分开；无装饰进度条；正文两处关键行；片尾完整Python5秒可暂停。 开头先交代输入、限制、目标、返回值与候选例子，再进入算法；不假定见过题目。",
-    "visualRevision": 2,
+    "style": "干净全屏canvas；同一字符串abcbadea；合法窗口与待加入字符分开；无序集合与位置分开；先消重再加入；当前与历史最长分开；无装饰进度条；正文两处关键行；片尾完整Python5秒可暂停。 开头先交代输入、限制、目标、返回值与候选例子，再进入算法；不假定见过题目。 解法选择前置：先逐起点尝试发现重扫，再由重复和连续条件推出保留已有合法段，05才命名滑动窗口与引入集合；思路推导和从空区间正式执行明确分开。",
+    "visualRevision": 3,
     "visualDirection": "visual-direction.md",
     "userScope": "用户授权自选下一道LeetCode制作精品，按持续授权检查后合并发布GitHub网站；不含外部平台。",
     "palette": {
@@ -191,7 +191,7 @@
     "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
     "unvoicedEndCard": {
       "kind": "full-python-solution",
-      "from": 4979,
+      "from": 5830,
       "durationInFrames": 150,
       "codeSource": "solution.py",
       "displaySource": "solution.json",
@@ -199,7 +199,7 @@
       "codeSourceSha256": "c80663cfede2547827b8b846d220179f92cb28cad9c11aebe9e0326bad8effcb",
       "displaySourceSha256": "388bfbe203d30d05e99e1a14982e624e6d8d5a6ab5d8518964c97218a6a6c424"
     },
-    "revisionNote": "Explain the problem before the method; later narration retained; five-second complete Python appendix."
+    "revisionNote": "Problem, then derivation of the method choice, then named algorithm; complete Python five-second appendix."
   },
   "assets": {
     "new": [],
@@ -212,9 +212,9 @@
     {
       "id": "goal",
       "chapterId": "goal",
-      "title": "重复出现时，先看清问题",
+      "title": "从题意找到入手点",
       "from": 0,
-      "durationInFrames": 1187,
+      "durationInFrames": 2038,
       "shots": [
         {
           "id": "01",
@@ -262,7 +262,7 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
             "wavFrom": 9.0,
             "wavTo": 262.6,
             "holdFrames": 20,
@@ -327,7 +327,7 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
             "wavFrom": 283.6,
             "wavTo": 546.64,
             "holdFrames": 20,
@@ -337,8 +337,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "abc标为合法候选，长度3且不是整题答案；可逐步对比abcb重复无效，不能将3标答案；输出最长长度（待求），03后才引入滑动窗口。",
-          "direction": "abc标为合法候选，长度3且不是整题答案；可逐步对比abcb重复无效，不能将3标答案；输出最长长度（待求），03后才引入滑动窗口。",
+          "scriptVisual": "abc标为合法候选，长度3且不是整题答案；可逐步对比abcb重复无效，不能将3标答案；输出最长长度（待求），05才引入滑动窗口。",
+          "direction": "abc标为合法候选，长度3且不是整题答案；可逐步对比abcb重复无效，不能将3标答案；输出最长长度（待求），05才引入滑动窗口。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -350,38 +350,168 @@
           "id": "03",
           "scriptShot": 3,
           "chapterId": "goal",
-          "visualType": "window",
+          "visualType": "naive-recheck",
           "from": 567,
-          "durationInFrames": 325,
-          "narration": "滑动窗口，就是左右边界圈住的一段连续字符。旁边的集合只记有哪些字符，位置仍由边界记录。",
+          "durationInFrames": 341,
+          "narration": "最直接的办法，是从每个起点向右尝试，碰到重复就停。换一个起点又会重看相同字符，能不能保留已经检查过的那一段？",
           "subtitles": [
             {
-              "text": "滑动窗口，就是左右边界圈住的一段连续字符。",
+              "text": "最直接的办法，是从每个起点向右尝试，碰到重复就停。",
               "from": 0,
-              "to": 160,
-              "duration": 161
+              "to": 161,
+              "duration": 162
+            },
+            {
+              "text": "换一个起点又会重看相同字符，能不能保留已经检查过的那一段？",
+              "from": 162,
+              "to": 340,
+              "duration": 179
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-naive-recheck-1",
+              "wavStart": 567.64,
+              "wavEnd": 718.97,
+              "localStart": 0.6399999999999864,
+              "localEnd": 151.97000000000003
+            },
+            {
+              "id": "03-naive-recheck-2",
+              "wavStart": 729.47,
+              "wavEnd": 887.76,
+              "localStart": 162.47000000000003,
+              "localEnd": 320.76
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              162
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 567.64,
+            "wavTo": 887.76,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "思路推导，尚未执行算法。先从下标0逐格尝试a、b、c，到新b重复停；再从下标1重来，b、c又检查一遍，到新b再停。下方是明确标记的检查记录，不是另一份输入。原字符串和下标固定，不出现集合、左右变量或滑动窗口名称。",
+          "direction": "思路推导，尚未执行算法。先从下标0逐格尝试a、b、c，到新b重复停；再从下标1重来，b、c又检查一遍，到新b再停。下方是明确标记的检查记录，不是另一份输入。原字符串和下标固定，不出现集合、左右变量或滑动窗口名称。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "goal",
+          "visualType": "reuse-contiguous",
+          "from": 908,
+          "durationInFrames": 459,
+          "narration": "旧的重复字符还在时，从零或一开始的片段都不合法，也不能挖掉中间一格。最早可从二开始，保留后面的连续片段，再记下已有字符，就能避免反复从头检查。",
+          "subtitles": [
+            {
+              "text": "旧的重复字符还在时，从零或一开始的片段都不合法，也不能挖掉中间一格。",
+              "from": 0,
+              "to": 214,
+              "duration": 215
+            },
+            {
+              "text": "最早可从二开始，保留后面的连续片段，再记下已有字符，就能避免反复从头检查。",
+              "from": 215,
+              "to": 458,
+              "duration": 244
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-reuse-contiguous-1",
+              "wavStart": 908.76,
+              "wavEnd": 1112.6,
+              "localStart": 0.7599999999999909,
+              "localEnd": 204.5999999999999
+            },
+            {
+              "id": "04-reuse-contiguous-2",
+              "wavStart": 1123.1,
+              "wavEnd": 1346.74,
+              "localStart": 215.0999999999999,
+              "localEnd": 438.74
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              215
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 908.76,
+            "wavTo": 1346.74,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "继续思路推导，固定右端下标3。依次检查起点0的abcb与起点1的bcb，都含原下标1/3两份b；红字说明仅挖掉中间旧b会变成不连续的a·cb。第二句起点移到最早合法的2，保留连续cb，并提出记下已有字符的用途，不预先显示集合或正式左右变量。此状态只是分析结果，下镜明确重置为空区间正式执行。",
+          "direction": "继续思路推导，固定右端下标3。依次检查起点0的abcb与起点1的bcb，都含原下标1/3两份b；红字说明仅挖掉中间旧b会变成不连续的a·cb。第二句起点移到最早合法的2，保留连续cb，并提出记下已有字符的用途，不预先显示集合或正式左右变量。此状态只是分析结果，下镜明确重置为空区间正式执行。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "goal",
+          "visualType": "window",
+          "from": 1367,
+          "durationInFrames": 376,
+          "narration": "滑动窗口，就是刚才这样移动边界保留连续片段，现在从空区间正式执行。旁边的集合只记有哪些字符，位置仍由边界记录。",
+          "subtitles": [
+            {
+              "text": "滑动窗口，就是刚才这样移动边界保留连续片段，现在从空区间正式执行。",
+              "from": 0,
+              "to": 211,
+              "duration": 212
             },
             {
               "text": "旁边的集合只记有哪些字符，位置仍由边界记录。",
-              "from": 161,
-              "to": 324,
+              "from": 212,
+              "to": 375,
               "duration": 164
             }
           ],
           "voice": [
             {
-              "id": "03-window-1",
-              "wavStart": 567.64,
-              "wavEnd": 718.0,
-              "localStart": 0.6399999999999864,
-              "localEnd": 151.0
+              "id": "05-window-1",
+              "wavStart": 1367.74,
+              "wavEnd": 1568.92,
+              "localStart": 0.7400000000000091,
+              "localEnd": 201.92000000000007
             },
             {
-              "id": "03-window-2",
-              "wavStart": 728.5,
-              "wavEnd": 871.1,
-              "localStart": 161.5,
-              "localEnd": 304.1
+              "id": "05-window-2",
+              "wavStart": 1579.42,
+              "wavEnd": 1722.03,
+              "localStart": 212.42000000000007,
+              "localEnd": 355.03
             }
           ],
           "cueFrames": {
@@ -390,13 +520,13 @@
             },
             "sentences": [
               0,
-              161
+              212
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 567.64,
-            "wavTo": 871.1,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 1367.74,
+            "wavTo": 1722.03,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -404,11 +534,11 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "边界框、左右指针、集合成员区（无顺序）逐步揭示，初态空。",
-          "direction": "边界框、左右指针、集合成员区（无顺序）逐步揭示，初态空。",
+          "scriptVisual": "明确“正式执行 · 分析结束，重回空区间”；滑动窗口术语按首句真实起音出现，边界框和左右指针此时才揭示，第二句再出无序集合成员区。初态为空，不沿用分析得到的cb。",
+          "direction": "明确“正式执行 · 分析结束，重回空区间”；滑动窗口术语按首句真实起音出现，边界框和左右指针此时才揭示，第二句再出无序集合成员区。初态为空，不沿用分析得到的cb。",
           "elements": [
             {
-              "id": "label03_0",
+              "id": "label05_0",
               "type": "text",
               "text": "滑动窗口",
               "cueText": "滑动窗口",
@@ -419,9 +549,9 @@
               "h": 80,
               "fontSize": 52,
               "cueOnset": {
-                "sentence": "03-window-1",
+                "sentence": "05-window-1",
                 "asrFrame": null,
-                "onsetLocal": 1.6399999999999864,
+                "onsetLocal": 2.240000000000009,
                 "rule": "pause/acoustic sentence onset",
                 "delay": 0
               }
@@ -434,11 +564,11 @@
           }
         },
         {
-          "id": "04",
-          "scriptShot": 4,
+          "id": "06",
+          "scriptShot": 6,
           "chapterId": "goal",
           "visualType": "grow",
-          "from": 892,
+          "from": 1743,
           "durationInFrames": 295,
           "narration": "右边依次读入前三个字符，加入集合。此时没有重复，当前长度和最长记录都是三。",
           "subtitles": [
@@ -457,18 +587,18 @@
           ],
           "voice": [
             {
-              "id": "04-grow-1",
-              "wavStart": 892.1,
-              "wavEnd": 1012.72,
-              "localStart": 0.10000000000002274,
-              "localEnd": 120.72000000000003
+              "id": "06-grow-1",
+              "wavStart": 1743.03,
+              "wavEnd": 1863.64,
+              "localStart": 0.029999999999972715,
+              "localEnd": 120.6400000000001
             },
             {
-              "id": "04-grow-2",
-              "wavStart": 1023.22,
-              "wavEnd": 1166.28,
-              "localStart": 131.22000000000003,
-              "localEnd": 274.28
+              "id": "06-grow-2",
+              "wavStart": 1874.14,
+              "wavEnd": 2017.2,
+              "localStart": 131.1400000000001,
+              "localEnd": 274.20000000000005
             }
           ],
           "cueFrames": {
@@ -479,9 +609,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 892.1,
-            "wavTo": 1166.28,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 1743.03,
+            "wavTo": 2017.2,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -504,15 +634,15 @@
       "id": "shrink",
       "chapterId": "shrink",
       "title": "为什么左边要连续移动",
-      "from": 1187,
+      "from": 2038,
       "durationInFrames": 1046,
       "shots": [
         {
-          "id": "05",
-          "scriptShot": 5,
+          "id": "07",
+          "scriptShot": 7,
           "chapterId": "shrink",
           "visualType": "duplicate",
-          "from": 1187,
+          "from": 2038,
           "durationInFrames": 226,
           "narration": "第四个字符已经在集合里出现。先别加入，让左边开始收缩。",
           "subtitles": [
@@ -531,18 +661,18 @@
           ],
           "voice": [
             {
-              "id": "05-duplicate-1",
-              "wavStart": 1187.28,
-              "wavEnd": 1263.88,
-              "localStart": 0.2799999999999727,
-              "localEnd": 76.88000000000011
+              "id": "07-duplicate-1",
+              "wavStart": 2038.2,
+              "wavEnd": 2114.8,
+              "localStart": 0.20000000000004547,
+              "localEnd": 76.80000000000018
             },
             {
-              "id": "05-duplicate-2",
-              "wavStart": 1274.38,
-              "wavEnd": 1353.12,
-              "localStart": 87.38000000000011,
-              "localEnd": 166.1199999999999
+              "id": "07-duplicate-2",
+              "wavStart": 2125.3,
+              "wavEnd": 2204.04,
+              "localStart": 87.30000000000018,
+              "localEnd": 166.03999999999996
             }
           ],
           "cueFrames": {
@@ -553,9 +683,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 1187.28,
-            "wavTo": 1353.12,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 2038.2,
+            "wavTo": 2204.04,
             "holdFrames": 59,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -573,11 +703,11 @@
           }
         },
         {
-          "id": "06",
-          "scriptShot": 6,
+          "id": "08",
+          "scriptShot": 8,
           "chapterId": "shrink",
           "visualType": "remove-first",
-          "from": 1413,
+          "from": 2264,
           "durationInFrames": 277,
           "narration": "先移除最左边的字符，再把左边界右移一格。红色的旧字符还在，重复并没有解除。",
           "subtitles": [
@@ -596,18 +726,18 @@
           ],
           "voice": [
             {
-              "id": "06-remove-first-1",
-              "wavStart": 1413.12,
-              "wavEnd": 1556.2,
-              "localStart": 0.11999999999989086,
-              "localEnd": 143.20000000000005
+              "id": "08-remove-first-1",
+              "wavStart": 2264.04,
+              "wavEnd": 2407.13,
+              "localStart": 0.03999999999996362,
+              "localEnd": 143.1300000000001
             },
             {
-              "id": "06-remove-first-2",
-              "wavStart": 1566.7,
-              "wavEnd": 1669.66,
-              "localStart": 153.70000000000005,
-              "localEnd": 256.6600000000001
+              "id": "08-remove-first-2",
+              "wavStart": 2417.63,
+              "wavEnd": 2520.58,
+              "localStart": 153.6300000000001,
+              "localEnd": 256.5799999999999
             }
           ],
           "cueFrames": {
@@ -618,9 +748,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 1413.12,
-            "wavTo": 1669.66,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 2264.04,
+            "wavTo": 2520.58,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -638,11 +768,11 @@
           }
         },
         {
-          "id": "07",
-          "scriptShot": 7,
+          "id": "09",
+          "scriptShot": 9,
           "chapterId": "shrink",
           "visualType": "remove-old",
-          "from": 1690,
+          "from": 2541,
           "durationInFrames": 235,
           "narration": "继续移除现在最左边的旧字符。再检查，候选字符终于不在集合里了。",
           "subtitles": [
@@ -661,18 +791,18 @@
           ],
           "voice": [
             {
-              "id": "07-remove-old-1",
-              "wavStart": 1690.66,
-              "wavEnd": 1776.37,
-              "localStart": 0.6600000000000819,
-              "localEnd": 86.36999999999989
+              "id": "09-remove-old-1",
+              "wavStart": 2541.58,
+              "wavEnd": 2627.29,
+              "localStart": 0.5799999999999272,
+              "localEnd": 86.28999999999996
             },
             {
-              "id": "07-remove-old-2",
-              "wavStart": 1786.87,
-              "wavEnd": 1904.17,
-              "localStart": 96.86999999999989,
-              "localEnd": 214.17000000000007
+              "id": "09-remove-old-2",
+              "wavStart": 2637.79,
+              "wavEnd": 2755.09,
+              "localStart": 96.78999999999996,
+              "localEnd": 214.09000000000015
             }
           ],
           "cueFrames": {
@@ -683,9 +813,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 1690.66,
-            "wavTo": 1904.17,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 2541.58,
+            "wavTo": 2755.09,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -703,11 +833,11 @@
           }
         },
         {
-          "id": "08",
-          "scriptShot": 8,
+          "id": "10",
+          "scriptShot": 10,
           "chapterId": "shrink",
           "visualType": "insert",
-          "from": 1925,
+          "from": 2776,
           "durationInFrames": 308,
           "narration": "这时才把新字符加入，右边界落到它的位置。窗口变成连续的两个字符，最长记录仍是三。",
           "subtitles": [
@@ -726,18 +856,18 @@
           ],
           "voice": [
             {
-              "id": "08-insert-1",
-              "wavStart": 1925.17,
-              "wavEnd": 2064.36,
-              "localStart": 0.17000000000007276,
-              "localEnd": 139.36000000000013
+              "id": "10-insert-1",
+              "wavStart": 2776.09,
+              "wavEnd": 2915.28,
+              "localStart": 0.09000000000014552,
+              "localEnd": 139.2800000000002
             },
             {
-              "id": "08-insert-2",
-              "wavStart": 2074.86,
-              "wavEnd": 2212.08,
-              "localStart": 149.86000000000013,
-              "localEnd": 287.0799999999999
+              "id": "10-insert-2",
+              "wavStart": 2925.78,
+              "wavEnd": 3063.0,
+              "localStart": 149.7800000000002,
+              "localEnd": 287.0
             }
           ],
           "cueFrames": {
@@ -748,10 +878,10 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 1925.17,
-            "wavTo": 2212.08,
-            "holdFrames": 20,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 2776.09,
+            "wavTo": 3063.0,
+            "holdFrames": 21,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
           "frame": "canvas",
@@ -773,15 +903,15 @@
       "id": "best",
       "chapterId": "best",
       "title": "窗口会缩小，最长要记住",
-      "from": 2233,
+      "from": 3084,
       "durationInFrames": 1612,
       "shots": [
         {
-          "id": "09",
-          "scriptShot": 9,
+          "id": "11",
+          "scriptShot": 11,
           "chapterId": "best",
           "visualType": "extend-best",
-          "from": 2233,
+          "from": 3084,
           "durationInFrames": 254,
           "narration": "继续向右扩展，接下来的字符都不重复。窗口一路增长到五，记住这个最长位置。",
           "subtitles": [
@@ -800,18 +930,18 @@
           ],
           "voice": [
             {
-              "id": "09-extend-best-1",
-              "wavStart": 2233.08,
-              "wavEnd": 2332.38,
-              "localStart": 0.07999999999992724,
-              "localEnd": 99.38000000000011
+              "id": "11-extend-best-1",
+              "wavStart": 3084.0,
+              "wavEnd": 3183.3,
+              "localStart": 0.0,
+              "localEnd": 99.30000000000018
             },
             {
-              "id": "09-extend-best-2",
-              "wavStart": 2342.88,
-              "wavEnd": 2466.76,
-              "localStart": 109.88000000000011,
-              "localEnd": 233.76000000000022
+              "id": "11-extend-best-2",
+              "wavStart": 3193.8,
+              "wavEnd": 3317.68,
+              "localStart": 109.80000000000018,
+              "localEnd": 233.67999999999984
             }
           ],
           "cueFrames": {
@@ -822,9 +952,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 2233.08,
-            "wavTo": 2466.76,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 3084.0,
+            "wavTo": 3317.68,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -842,11 +972,11 @@
           }
         },
         {
-          "id": "10",
-          "scriptShot": 10,
+          "id": "12",
+          "scriptShot": 12,
           "chapterId": "best",
           "visualType": "duplicate-again",
-          "from": 2487,
+          "from": 3338,
           "durationInFrames": 238,
           "narration": "最后一个字符又与窗口里的旧字符相同。右边先停下，左边再次逐格收缩。",
           "subtitles": [
@@ -865,18 +995,18 @@
           ],
           "voice": [
             {
-              "id": "10-duplicate-again-1",
-              "wavStart": 2487.76,
-              "wavEnd": 2594.35,
-              "localStart": 0.7600000000002183,
-              "localEnd": 107.34999999999991
+              "id": "12-duplicate-again-1",
+              "wavStart": 3338.68,
+              "wavEnd": 3445.28,
+              "localStart": 0.6799999999998363,
+              "localEnd": 107.2800000000002
             },
             {
-              "id": "10-duplicate-again-2",
-              "wavStart": 2604.85,
-              "wavEnd": 2704.6,
-              "localStart": 117.84999999999991,
-              "localEnd": 217.5999999999999
+              "id": "12-duplicate-again-2",
+              "wavStart": 3455.78,
+              "wavEnd": 3555.52,
+              "localStart": 117.7800000000002,
+              "localEnd": 217.51999999999998
             }
           ],
           "cueFrames": {
@@ -887,9 +1017,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 2487.76,
-            "wavTo": 2704.6,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 3338.68,
+            "wavTo": 3555.52,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -907,11 +1037,11 @@
           }
         },
         {
-          "id": "11",
-          "scriptShot": 11,
+          "id": "13",
+          "scriptShot": 13,
           "chapterId": "best",
           "visualType": "shrink-again",
-          "from": 2725,
+          "from": 3576,
           "durationInFrames": 287,
           "narration": "这次依次移除前三个字符，直到旧的重复字符离开。每移一步，都同步从集合中删除对应字符。",
           "subtitles": [
@@ -930,18 +1060,18 @@
           ],
           "voice": [
             {
-              "id": "11-shrink-again-1",
-              "wavStart": 2725.6,
-              "wavEnd": 2858.44,
-              "localStart": 0.599999999999909,
-              "localEnd": 133.44000000000005
+              "id": "13-shrink-again-1",
+              "wavStart": 3576.52,
+              "wavEnd": 3709.36,
+              "localStart": 0.5199999999999818,
+              "localEnd": 133.36000000000013
             },
             {
-              "id": "11-shrink-again-2",
-              "wavStart": 2868.94,
-              "wavEnd": 2991.31,
-              "localStart": 143.94000000000005,
-              "localEnd": 266.30999999999995
+              "id": "13-shrink-again-2",
+              "wavStart": 3719.86,
+              "wavEnd": 3842.23,
+              "localStart": 143.86000000000013,
+              "localEnd": 266.23
             }
           ],
           "cueFrames": {
@@ -952,9 +1082,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 2725.6,
-            "wavTo": 2991.31,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 3576.52,
+            "wavTo": 3842.23,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -972,11 +1102,11 @@
           }
         },
         {
-          "id": "12",
-          "scriptShot": 12,
+          "id": "14",
+          "scriptShot": 14,
           "chapterId": "best",
           "visualType": "keep-best",
-          "from": 3012,
+          "from": 3863,
           "durationInFrames": 266,
           "narration": "加入最后一个字符后，当前窗口长度只剩三。答案仍是之前记下的五，而不是最后的窗口长度。",
           "subtitles": [
@@ -995,18 +1125,18 @@
           ],
           "voice": [
             {
-              "id": "12-keep-best-1",
-              "wavStart": 3012.31,
-              "wavEnd": 3123.23,
-              "localStart": 0.30999999999994543,
-              "localEnd": 111.23000000000002
+              "id": "14-keep-best-1",
+              "wavStart": 3863.23,
+              "wavEnd": 3974.15,
+              "localStart": 0.2300000000000182,
+              "localEnd": 111.15000000000009
             },
             {
-              "id": "12-keep-best-2",
-              "wavStart": 3133.73,
-              "wavEnd": 3257.7,
-              "localStart": 121.73000000000002,
-              "localEnd": 245.69999999999982
+              "id": "14-keep-best-2",
+              "wavStart": 3984.65,
+              "wavEnd": 4108.62,
+              "localStart": 121.65000000000009,
+              "localEnd": 245.6199999999999
             }
           ],
           "cueFrames": {
@@ -1017,9 +1147,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 3012.31,
-            "wavTo": 3257.7,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 3863.23,
+            "wavTo": 4108.62,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -1037,11 +1167,11 @@
           }
         },
         {
-          "id": "13",
-          "scriptShot": 13,
+          "id": "15",
+          "scriptShot": 15,
           "chapterId": "best",
           "visualType": "why-safe",
-          "from": 3278,
+          "from": 4129,
           "durationInFrames": 245,
           "narration": "为什么不会漏掉更长的一段？保留旧重复字符的那些起点都不合法，继续往右才可能消除重复。",
           "subtitles": [
@@ -1060,18 +1190,18 @@
           ],
           "voice": [
             {
-              "id": "13-why-safe-1",
-              "wavStart": 3278.7,
-              "wavEnd": 3340.74,
-              "localStart": 0.6999999999998181,
-              "localEnd": 62.73999999999978
+              "id": "15-why-safe-1",
+              "wavStart": 4129.62,
+              "wavEnd": 4191.67,
+              "localStart": 0.6199999999998909,
+              "localEnd": 62.67000000000007
             },
             {
-              "id": "13-why-safe-2",
-              "wavStart": 3351.24,
-              "wavEnd": 3502.84,
-              "localStart": 73.23999999999978,
-              "localEnd": 224.84000000000015
+              "id": "15-why-safe-2",
+              "wavStart": 4202.17,
+              "wavEnd": 4353.76,
+              "localStart": 73.17000000000007,
+              "localEnd": 224.76000000000022
             }
           ],
           "cueFrames": {
@@ -1082,9 +1212,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 3278.7,
-            "wavTo": 3502.84,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 4129.62,
+            "wavTo": 4353.76,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -1102,11 +1232,11 @@
           }
         },
         {
-          "id": "14",
-          "scriptShot": 14,
+          "id": "16",
+          "scriptShot": 16,
           "chapterId": "best",
           "visualType": "complexity",
-          "from": 3523,
+          "from": 4374,
           "durationInFrames": 322,
           "narration": "两个边界都只向右，每个位置最多加入和移除各一次。集合操作平均是常数时间，所以整体平均是线性时间。",
           "subtitles": [
@@ -1125,18 +1255,18 @@
           ],
           "voice": [
             {
-              "id": "14-complexity-1",
-              "wavStart": 3523.84,
-              "wavEnd": 3680.82,
-              "localStart": 0.8400000000001455,
-              "localEnd": 157.82000000000016
+              "id": "16-complexity-1",
+              "wavStart": 4374.76,
+              "wavEnd": 4531.74,
+              "localStart": 0.7600000000002183,
+              "localEnd": 157.73999999999978
             },
             {
-              "id": "14-complexity-2",
-              "wavStart": 3691.32,
-              "wavEnd": 3824.81,
-              "localStart": 168.32000000000016,
-              "localEnd": 301.80999999999995
+              "id": "16-complexity-2",
+              "wavStart": 4542.24,
+              "wavEnd": 4675.73,
+              "localStart": 168.23999999999978,
+              "localEnd": 301.72999999999956
             }
           ],
           "cueFrames": {
@@ -1147,9 +1277,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 3523.84,
-            "wavTo": 3824.81,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 4374.76,
+            "wavTo": 4675.73,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -1172,15 +1302,15 @@
       "id": "code",
       "chapterId": "code",
       "title": "把过程写进完整程序",
-      "from": 3845,
+      "from": 4696,
       "durationInFrames": 1284,
       "shots": [
         {
-          "id": "15",
-          "scriptShot": 15,
+          "id": "17",
+          "scriptShot": 17,
           "chapterId": "code",
           "visualType": "code-shrink",
-          "from": 3845,
+          "from": 4696,
           "durationInFrames": 262,
           "narration": "检查重复要用循环，不能只判断一次。只要仍有重复，就删除左端字符并继续右移。",
           "subtitles": [
@@ -1199,18 +1329,18 @@
           ],
           "voice": [
             {
-              "id": "15-code-shrink-1",
-              "wavStart": 3845.81,
-              "wavEnd": 3953.08,
-              "localStart": 0.8099999999999454,
-              "localEnd": 108.07999999999993
+              "id": "17-code-shrink-1",
+              "wavStart": 4696.73,
+              "wavEnd": 4804.01,
+              "localStart": 0.7299999999995634,
+              "localEnd": 108.01000000000022
             },
             {
-              "id": "15-code-shrink-2",
-              "wavStart": 3963.58,
-              "wavEnd": 4086.91,
-              "localStart": 118.57999999999993,
-              "localEnd": 241.90999999999985
+              "id": "17-code-shrink-2",
+              "wavStart": 4814.51,
+              "wavEnd": 4937.83,
+              "localStart": 118.51000000000022,
+              "localEnd": 241.82999999999993
             }
           ],
           "cueFrames": {
@@ -1221,9 +1351,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 3845.81,
-            "wavTo": 4086.91,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 4696.73,
+            "wavTo": 4937.83,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -1241,12 +1371,12 @@
           }
         },
         {
-          "id": "16",
-          "scriptShot": 16,
+          "id": "18",
+          "scriptShot": 18,
           "chapterId": "code",
           "visualType": "code-best",
-          "from": 4107,
-          "durationInFrames": 282,
+          "from": 4958,
+          "durationInFrames": 281,
           "narration": "重复消除后才加入新字符，并更新最长长度。每个右端都记一次，最后返回历史最大值。",
           "subtitles": [
             {
@@ -1258,24 +1388,24 @@
             {
               "text": "每个右端都记一次，最后返回历史最大值。",
               "from": 133,
-              "to": 281,
-              "duration": 149
+              "to": 280,
+              "duration": 148
             }
           ],
           "voice": [
             {
-              "id": "16-code-best-1",
-              "wavStart": 4107.91,
-              "wavEnd": 4230.29,
-              "localStart": 0.9099999999998545,
-              "localEnd": 123.28999999999996
+              "id": "18-code-best-1",
+              "wavStart": 4958.83,
+              "wavEnd": 5081.21,
+              "localStart": 0.8299999999999272,
+              "localEnd": 123.21000000000004
             },
             {
-              "id": "16-code-best-2",
-              "wavStart": 4240.79,
-              "wavEnd": 4368.03,
-              "localStart": 133.78999999999996,
-              "localEnd": 261.02999999999975
+              "id": "18-code-best-2",
+              "wavStart": 5091.71,
+              "wavEnd": 5218.95,
+              "localStart": 133.71000000000004,
+              "localEnd": 260.9499999999998
             }
           ],
           "cueFrames": {
@@ -1286,9 +1416,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 4107.91,
-            "wavTo": 4368.03,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 4958.83,
+            "wavTo": 5218.95,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -1306,54 +1436,54 @@
           }
         },
         {
-          "id": "17",
-          "scriptShot": 17,
+          "id": "19",
+          "scriptShot": 19,
           "chapterId": "code",
           "visualType": "edge",
-          "from": 4389,
-          "durationInFrames": 303,
+          "from": 5239,
+          "durationInFrames": 304,
           "narration": "空字符串没有字符，答案就是零。所有字符都相同时，每次收缩后只留一个，答案就是一。",
           "subtitles": [
             {
               "text": "空字符串没有字符，答案就是零。",
               "from": 0,
-              "to": 114,
-              "duration": 115
+              "to": 115,
+              "duration": 116
             },
             {
               "text": "所有字符都相同时，每次收缩后只留一个，答案就是一。",
-              "from": 115,
-              "to": 302,
+              "from": 116,
+              "to": 303,
               "duration": 188
             }
           ],
           "voice": [
             {
-              "id": "17-edge-1",
-              "wavStart": 4389.03,
-              "wavEnd": 4493.79,
-              "localStart": 0.02999999999974534,
-              "localEnd": 104.78999999999996
+              "id": "19-edge-1",
+              "wavStart": 5239.95,
+              "wavEnd": 5344.71,
+              "localStart": 0.9499999999998181,
+              "localEnd": 105.71000000000004
             },
             {
-              "id": "17-edge-2",
-              "wavStart": 4504.29,
-              "wavEnd": 4671.13,
-              "localStart": 115.28999999999996,
-              "localEnd": 282.1300000000001
+              "id": "19-edge-2",
+              "wavStart": 5355.21,
+              "wavEnd": 5522.05,
+              "localStart": 116.21000000000004,
+              "localEnd": 283.0500000000002
             }
           ],
           "cueFrames": {
             "labels": {},
             "sentences": [
               0,
-              115
+              116
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 4389.03,
-            "wavTo": 4671.13,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 5239.95,
+            "wavTo": 5522.05,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -1371,11 +1501,11 @@
           }
         },
         {
-          "id": "18",
-          "scriptShot": 18,
+          "id": "20",
+          "scriptShot": 20,
           "chapterId": "code",
           "visualType": "closing",
-          "from": 4692,
+          "from": 5543,
           "durationInFrames": 437,
           "narration": "记住三步：右边探索，左边消重，保留最长。完整程序放在片尾，感兴趣可以暂停查看。",
           "subtitles": [
@@ -1394,18 +1524,18 @@
           ],
           "voice": [
             {
-              "id": "18-closing-1",
-              "wavStart": 4692.13,
-              "wavEnd": 4820.87,
-              "localStart": 0.13000000000010914,
-              "localEnd": 128.8699999999999
+              "id": "20-closing-1",
+              "wavStart": 5543.05,
+              "wavEnd": 5671.79,
+              "localStart": 0.0500000000001819,
+              "localEnd": 128.78999999999996
             },
             {
-              "id": "18-closing-2",
-              "wavStart": 4831.37,
-              "wavEnd": 4933.92,
-              "localStart": 139.3699999999999,
-              "localEnd": 241.92000000000007
+              "id": "20-closing-2",
+              "wavStart": 5682.29,
+              "wavEnd": 5784.84,
+              "localStart": 139.28999999999996,
+              "localEnd": 241.84000000000015
             }
           ],
           "cueFrames": {
@@ -1416,9 +1546,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 9969646f + words.json db8aeb01 + script.md ed6dda3d",
-            "wavFrom": 4692.13,
-            "wavTo": 4933.92,
+            "source": "voice.wav b6069207 + words.json 3a44cebe + script.md 808bda67",
+            "wavFrom": 5543.05,
+            "wavTo": 5784.84,
             "holdFrames": 195,
             "holdReason": "Original closing retained; final5 seconds show a complete static Python solution without narration/captions."
           },
