@@ -5,6 +5,7 @@ as a compressed stream. Narration comes from the verified PCM insertion; the
 shared mixer then lays one continuous music track across the whole result.
 """
 from pathlib import Path
+import argparse
 import hashlib
 import json
 import subprocess
@@ -12,6 +13,12 @@ import sys
 
 D = Path(__file__).resolve().parent
 ROOT = D.parents[1]
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--profile', choices=('methods', 'tradeoffs'), help='Require the assembled profile; omitted means read its frozen metadata.')
+args = parser.parse_args()
+if args.profile == 'methods':
+    archived_commit = json.loads((D / 'revisions/tradeoffs-before/baseline.json').read_text())['commit']
+    parser.error(f'The historical methods profile supports narration assembly only. Reproduce its original Methods.tsx from fixed Git commit {archived_commit}; the current visual source is tradeoffs v3.')
 OUT = D / 'remotion/out'
 OUT.mkdir(parents=True, exist_ok=True)
 
@@ -24,18 +31,23 @@ def sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-run([sys.executable, D / 'freeze.py', '--verify'])
 sb = json.loads((D / 'storyboard.json').read_text())
-baseline = json.loads((D / 'revisions/methods-before/baseline.json').read_text())
+profile = sb['meta']['assemblyProfile']
+profile_name = profile['name']
+assert profile_name == 'tradeoffs', 'Historical methods visuals are archived; use the fixed Git commit recorded in revisions/tradeoffs-before/baseline.json to reproduce that video.'
+assert args.profile is None or args.profile == profile_name, 'Assembled storyboard has another profile.'
+run([sys.executable, D / 'freeze.py', '--verify', '--profile', profile_name])
+baseline_dir = D / profile['baseline']
+baseline = json.loads((baseline_dir / 'baseline.json').read_text())
 added = [shot for scene in sb['scenes'] for shot in scene['shots'] if shot['id'] in ['16', '17']]
 assert [s['id'] for s in added] == ['16', '17']
 start = baseline['insertFrame']
 count = sum(s['durationInFrames'] for s in added)
 total = sb['meta']['durationInFrames']
 assert added[0]['from'] == start and total == baseline['totalFrames'] + count
-old = D / 'revisions/methods-before/video.mp4'
+old = baseline_dir / 'video.mp4'
 assert sha(old) == baseline['files']['video.mp4']
-clip = OUT / 'methods-insert.mp4'
+clip = OUT / f'{profile_name}-insert.mp4'
 render = ['npx', 'remotion', 'render', 'src/index.ts', 'Main', str(clip),
           f'--frames={start}-{start + count - 1}', '--muted', '--codec=h264',
           '--crf=18', '--concurrency=2', '--browser-executable=/usr/bin/chromium',
@@ -64,11 +76,11 @@ run([sys.executable, ROOT / 'episodes/_shared/music/mix_bgm.py',
      '--in', voice_video, '--bgm', ROOT / 'episodes/_shared/music/Wallpaper.mp3',
      '--mode', 'constant', '--below', '12', '--out', D / 'video.mp4',
      '--report', D / 'mix-report.json'])
-run([sys.executable, D / 'freeze.py', '--verify'])
-report = dict(insertFrame=start, addedFrames=count, originalFrames=baseline['totalFrames'],
+run([sys.executable, D / 'freeze.py', '--verify', '--profile', profile_name])
+report = dict(assemblyProfile=profile, insertFrame=start, addedFrames=count, originalFrames=baseline['totalFrames'],
               finalFrames=total, originalVideoSha256=sha(old),
               insertedVideoSha256=sha(clip), finalVideoSha256=sha(D / 'video.mp4'),
               renderCommand=render, spliceCommand=[str(a) for a in splice],
               scope='Only two new shots rendered. Original pictures decoded/re-encoded; not lossless stream copy. Original narration PCM preserved before final continuous music mix.')
-(D / 'methods-splice-result.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+(D / profile['spliceResult']).write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
 print(json.dumps(report, ensure_ascii=False, indent=2))

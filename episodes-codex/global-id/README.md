@@ -1,7 +1,17 @@
 # EP.20《分布式 ID：两个订单，怎么撞成同一个号了？》
 
 
-## 当前方案定位补充（2026-10-25）
+## 当前顺序与取舍修订（2026-10-25）
+
+用户观看上一轮补充后认为，开头先说“雪花只是一种”突兀，要求UUID→Redis自增→雪花逐项讲述，并补充每项实际优缺点。本轮16直接从随机UUIDv4本地生成进入，再说明非递增作为MySQL InnoDB主键的分散插入、缓存与页分裂代价；17演Redis共同计数、异步复制未到达的主从切换回退重号，再切换到事先可靠预留1001—1200号段、停号隔离旧主后放弃旧段从1201继续的条件方案。最后才过渡到原雪花详细讲解，去掉开头的三方案总览及提前点名雪花。
+
+本轮新小段8句1227帧40.9秒，替换上一轮5句24.7秒；全片5646帧188.2秒，17镜38句8章。原15镜局部画面和30句人声PCM继续从不可变methods-before基线精确复用。上一轮实际成片和165项冻结输入已按固定Git `2ca6e1e0661bbb2b9683f7909de5c0949272ec04`核验并保存文稿/QA快照于revisions/tradeoffs-before，当前启动主干为`9834e2cd84b1081f8ab41ade369cf46b8b6ddf62`。
+
+当前执行使用assembly-profiles.json选择tradeoffs：共享voice prep/gen/build的--dir为`episodes-codex/global-id/revisions/tradeoffs-insert`，随后运行`assemble-methods.py --profile tradeoffs`。预检通过后用`freeze.py --profile tradeoffs`冻结，`freeze.py --verify --profile tradeoffs`只读核对，再运行`render-methods.py --profile tradeoffs`局部渲染并重混。methods只支持历史时序装配；旧视觉/成片须从固定提交复现，当前renderer明确拒绝拿新视觉重渲旧profile。
+
+本轮依据与实际检查见research.md、tradeoffs-reuse-proof.json及qa-tradeoffs-*报告。UUID只讨论随机v4，文章说明v7的时间布局；页分裂仅作页空间不足时的机制示例，不声称每条必分裂。跳号是有可靠号段记录与旧主停止发号前提的治理思路，非Redis默认功能或任意固定加N的唯一性保证。未做逐字ASR或人工逐字听辨，不声称其通过。
+
+## 上一轮方案定位补充（2026-10-25，历史）
 
 用户指出只有雪花算法会让观众误以为它就是分布式ID。当前在原06/07之间新增16-options、17-redis两镜5句：先点明多种实现，再用随机UUID本地生成与Redis共同计数器取号作简短示例，保留碰撞概率/随机源与故障回退边界，最后回到雪花主线。新增741帧24.7秒，全片5160帧172秒，17镜35句7章；标题、slug、创建/首发时间保持，按实质内容修改更新修改时间。
 
