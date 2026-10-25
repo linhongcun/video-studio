@@ -306,18 +306,28 @@ def main():
     bridge_dir = ROOT / 'episodes/bridge-torch'
     bridge_meta = read_json(bridge_dir / 'meta.json')
     assert bridge_meta == json.loads(git_bytes('episodes/bridge-torch/meta.json', UPSTREAM_COMMIT))
+    bridge_rendered = read_json(ROOT / 'episodes-codex/bridge-torch/render-result.json')
+    assert bridge_rendered['frames'] == bridge_meta['finalVideoFrames']
     bridge_files = []
     for filename in [bridge_meta['video'], bridge_meta['poster']]:
         relative = 'episodes/bridge-torch/' + filename
         body = get(relative)
-        assert sha(body) == sha((bridge_dir / filename).read_bytes()) == sha((ROOT / 'episodes-codex/bridge-torch' / filename).read_bytes()) == sha(git_bytes(relative, UPSTREAM_COMMIT))
+        assert sha(body) == sha((bridge_dir / filename).read_bytes()) == sha(git_bytes(relative, UPSTREAM_COMMIT))
+        if filename == bridge_meta['video']:
+            # P02's production MP4 is not tracked or present in a fresh checkout.
+            # Its tracked render result and unchanged canonical Git bytes are
+            # the authoritative identity; do not recreate a local media copy.
+            assert sha(body) == bridge_rendered['sha256']
+            assert len(body) == bridge_rendered['bytes']
+        else:
+            assert sha(body) == sha((ROOT / 'episodes-codex/bridge-torch' / filename).read_bytes())
         bridge_files.append({'path': relative, 'sha256': sha(body), 'bytes': len(body)})
     bridge_html = get('episodes/bridge-torch/').decode()
     bridge_page = Page(bridge_html)
     assert bridge_meta['title'] in bridge_page.text and 'P02' in bridge_page.text
     assert any(element == 'video' and 'controls' in attrs for element, attrs in bridge_page.attributes)
     assert actual_pager_hrefs(bridge_html) == expected_series_pager('bridge-torch')
-    upstream['preservedP02'] = {'frames': bridge_meta['finalVideoFrames'], 'files': bridge_files, 'pageAccessible': True, 'pagerHrefs': actual_pager_hrefs(bridge_html)}
+    upstream['preservedP02'] = {'frames': bridge_meta['finalVideoFrames'], 'files': bridge_files, 'videoExpectation': 'Complete HTTPS/canonical/latest-upstream Git bytes and tracked production render-result SHA/bytes/frames; production MP4 is absent and was not recreated.', 'pageAccessible': True, 'pagerHrefs': actual_pager_hrefs(bridge_html)}
     home, library, series = (Page(get(path).decode()) for path in ['', 'library/', 'series/leetcode/'])
     assert 'IT小村' in home.text and tag in home.text
     assert any(link.endswith('/learn/') for link in home.links) and any(link.endswith('/library/') for link in home.links)
