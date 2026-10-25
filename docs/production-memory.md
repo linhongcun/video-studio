@@ -28,7 +28,7 @@
 
 ## 工程算法首期制作（EA01）
 
-2026-10-25，用户先要求只调研、建issue，登记[首批9题总览#294](https://github.com/linhongcun/video-studio/issues/294)；随后明确授权自选最有把握的一题制作精品。选择[一致性哈希#295](https://github.com/linhongcun/video-studio/issues/295)，EP38/consistent-hashing，制作PR#304。14镜28句5881帧正文加150帧资料卡，最终约3分21秒；同一十键比较取余与环，虚拟节点另设示例。同步保留三条LeetCode/v0.69.0、三片参考资料/v0.69.1及b83a0b04默认资料流程；正文146输入和媒体保持证明独立保留，当前编排157输入、来源预检、默认render和构建gate已通过。现已完成实际成片、资料卡与网页验收，实际合并/部署/线上摘要结果以本期release.md收尾证据为准，不预记用户认可；其他8题待安排，本期无外部平台投稿。
+2026-10-25，用户先要求只调研、建issue，登记[首批9题总览#294](https://github.com/linhongcun/video-studio/issues/294)；随后明确授权自选最有把握的一题制作精品。选择[一致性哈希#295](https://github.com/linhongcun/video-studio/issues/295)，EP38/consistent-hashing，制作PR#304。14镜28句5881帧正文加150帧资料卡，最终约3分21秒；同一十键比较取余与环，虚拟节点另设示例。同步保留三条LeetCode/v0.69.0、三片参考资料/v0.69.1、b83a0b04默认资料流程、观察者模式v0.69.2及第二批参考资料v0.69.3；正文146输入和媒体保持证明独立保留，当前编排157输入、来源预检、默认render和构建gate已通过。PR#304已合并至751def7a，正式发布v0.70.0，Release后Pages成功；北京时间23:21的10项canonical GET核验通过，线上完整视频SHA、海报/字幕、四章和更新日志一致，实际证据见[本期发布记录](../episodes-codex/consistent-hashing/release.md)。正式页面双视口短播放、四章seek和首卡暂停也实测通过；制作issue#295以completed关闭，总览#294为1完成8待安排。技术检查不表示用户已观看认可，本期无外部平台投稿。
 
 ## 用户明确的质量偏好
 
