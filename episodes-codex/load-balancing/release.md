@@ -1,3 +1,13 @@
+# 数据库身份修订（#230）
+
+一台服务器忙不过来，怎么办？：保留原配音、字幕与3186帧时长，给真实库角色增加MySQL识别标记，内部记录与提交范围保持。
+
+当前视频完整SHA-256：`3a6e0bc31c9d51c49412af3d2d17d03f418528d8ece057e7079ea05261389163`；原混合AAC逐字节保持。正式媒体/预演/fresh复现的实际范围见[本轮QA](qa-mysql-identity.json)。图标来源为Devicon，原始SVG、MIT notice和品牌说明见[共享素材](../_shared/database-identity/source.json)，不称官方授权素材。
+
+拟随v0.58.1合并主干、Release后部署；线上完整文件、字幕、章节、封面与日志通过后关闭#230。只上GitHub站点，不预写用户观看认可。
+
+## 历史发布记录
+
 # EP.06 站点发布记录
 
 2026-10-24 19:53:36（北京时间），按用户持续授权发布[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)，只上GitHub站点，保留历史平台投稿。

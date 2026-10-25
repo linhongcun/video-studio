@@ -1,4 +1,5 @@
 import React from 'react';
+import {createDatabaseIdentity} from '../../../_shared/database-identity';
 import {C,FONT,MONO} from './theme';
 import {Txt,Chip,Line,MovingChip,ease,lerp} from './primitives';
 export {Txt,Chip,Line,MovingChip,ease,lerp};
@@ -13,6 +14,7 @@ export const Coordinator=({state,color=C.blue,visible=true,detail='协调者 · 
  <div style={{background:C.bg,border:`2px solid ${color}`,borderRadius:12,height:52,display:'flex',justifyContent:'center',alignItems:'center',fontSize:27,color}}>{state}</div>
 </div>;
 export type Mode='empty'|'working'|'prepared'|'committed'|'rejected'|'aborted';
+const DatabaseMark=createDatabaseIdentity(React);
 export const Participant=({kind,mode='empty',durable=false,alpha=1,pulse=0,wait=false}:{kind:'order'|'stock';mode?:Mode;durable?:boolean;alpha?:number;pulse?:number;wait?:boolean})=>{
  const order=kind==='order',x=order?180:1140,w=600;
  const done=mode==='committed',pending=mode==='prepared'||mode==='working';
@@ -20,7 +22,7 @@ export const Participant=({kind,mode='empty',durable=false,alpha=1,pulse=0,wait=
  const value=order?(pending||done?'8124':'—'):(done?'3':'4');
  const state=done?(order?'订单已保存':'库存已保存'):(mode==='rejected'?'本地处理拒绝':mode==='aborted'?(order?'无本单记录':'原库存未改变'):pending?(mode==='prepared'?(durable?'准备就绪 · 等最终决定':'正在可靠保存本地状态'):'修改已就位 · 等准备完成'):(order?'尚无本单记录':'已保存库存'));
  return <div style={{position:'absolute',left:x,top:524,width:w,height:250,textAlign:'center',fontFamily:FONT,opacity:alpha,borderTop:`2px solid ${color}`,borderBottom:`1px solid ${C.edge}`,background:`linear-gradient(180deg,${color}${pulse>0?'18':'08'},transparent)`}}>
-  <div style={{position:'absolute',left:0,right:0,top:-30,fontSize:24,color:C.muted,background:C.bg}}>{order?'订单库 · 记录 8124':'库存库 · 商品 7042 · 已保存值'}</div>
+  <div style={{position:'absolute',left:0,right:0,top:-44,height:44,fontSize:24,color:C.muted,background:C.bg,display:'flex',alignItems:'center',justifyContent:'center',gap:10}}><DatabaseMark size={44}/><span>{order?'订单库 · 记录 8124':'库存库 · 商品 7042 · 已保存值'}</span></div>
   <div style={{fontFamily:MONO,fontWeight:700,fontSize:order?92:100,color:!order&&pending?C.text:color,lineHeight:'130px',height:130}}>{value}</div>
   <div style={{fontSize:28,color,lineHeight:1.5}}>{state}</div>
   {!order&&pending&&!wait&&!wait&&<div style={{marginTop:15,fontSize:26,color:C.gold}}>本次拟改为 3 · 尚未确认</div>}

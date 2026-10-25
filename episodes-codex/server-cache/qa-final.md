@@ -1,5 +1,15 @@
 # EP.08 本地成片复核
 
+## 当前：MySQL数据库身份修订（#230）
+
+当前正式成片SHA-256：`eacd015f1b38c34e32a0b89e0b0efd16fecf07de84d30649d9d36e692c8c258f`，3491帧，1920×1080/30fps。库名旁增加数据库圆柱与MySQL识别图标；内部记录、原字幕、分镜、数值、相机及原混合AAC保持。原AAC完整SHA为`c97c4abea09532b91ebc203c198616dec2eaad7d9328ad08201623e5e1fec56c`，与新片提取流逐字节一致；完整解码、格式与冻结输入检查通过。
+
+独立执行者`/root/tx_saga`从正式新MP4实际查看[533, 1700]帧，真实范围见[本轮QA](qa-mysql-identity.json)及[独立报告](../../docs/mysql-database-identity/final-review-server-cache.json)；预演和fresh构建另有记录，不将它们冒称全片人工听看或用户已认可。发布状态见[本期发布记录](release.md)。
+
+## 修订前历史检查
+
+以下段落保留修订前检查的原始范围，历史媒体与输入由[Git索引](revisions/mysql-identity-before.json)追溯；不能将旧SHA对应的检查冒记为本次重新执行。
+
 执行者：Codex制作代理 `/root/remake_ep08_09`；2026-10-24。当前交付为本地冻结成片，站点接入由root统一执行。
 
 ## 实际媒体
