@@ -1,6 +1,6 @@
 # D03适配器：主动业务约定与升级隔离修订
 
-2026-10-25，用户实际观看v0.63.0后认为内容复杂、像被迫兼容，要求讲日常主动统一业务用法、隔离外部接口升级两个收益。本轮保留订单17提醒，已完成新文稿/程序/声音/真实动态与184项冻结，正式成片、完整解码、独立编码帧和AAC一致性检查已通过；网站本地验收通过，修订尚未正式发布。修前实际证据见revisions/business-boundary-v2/baseline及固定v0.63.0 Git历史。
+2026-10-25，用户实际观看v0.63.0后认为内容复杂、像被迫兼容，要求讲日常主动统一业务用法、隔离外部接口升级两个收益。本轮保留订单17提醒，已完成新文稿/程序/声音/真实动态与184项冻结，正式成片、完整解码、独立编码帧和AAC一致性检查已通过；网站本地验收通过，v0.64.1已正式发布并完成线上核验。修前实际证据见revisions/business-boundary-v2/baseline及固定v0.63.0 Git历史。
 
 ## 内容与资料
 
@@ -32,4 +32,8 @@
 
 实际浏览发现三处中文句号在粗体结束标记内、紧接后文导致CommonMark未闭合；保留初验与原截图，只在站点派生稿把句号移出粗体，原文字序与184冻结源保持。第二次build仅定验两个视口的三段strong/无裸标记/Java与无溢出；前后player、目录、JSONLD、VTT、meta、SB、视频、海报及源码路径同SHA，按明确不变范围复用原8seek/20cue，不声称重新播放。原文4f2e09fe…f35b，派生5c011029…ae65；完整三处diff在qa-site-format-correction.json。根实际看7张网站图，独立site执行者查看范围另记。
 
-当前候选v0.64.1，firstRelease和publishedAt保留v0.63.0/2026-10-25，updatedAt与revisionRelease更新。Release后Pages和线上完整SHA仍待实际执行，不预填通过。本期本轮尚无用户观看结论；D01/D02认可不延伸为本修订已获认可。仅GitHub站点，外部平台未新发。
+当前候选v0.64.1，firstRelease和publishedAt保留v0.63.0/2026-10-25，updatedAt与revisionRelease更新。该阶段本地未预填线上通过，实际结果见下方最终上线记录。本期本轮尚无用户观看结论；D01/D02认可不延伸为本修订已获认可。仅GitHub站点，外部平台未新发。
+
+## 最终上线结果
+
+PR #272合并d90867fb47dd0b4ddb42310bfd3a08e0b1e1e150，附注tag/Release v0.64.1精确对应验收树；首发v0.63.0和原发布日期保持。Release后Pages40176457473成功。北京时间2026-10-25 16:29:20.004207，11个普通canonical GET通过新媒体/海报完整SHA、20句VTT/四章、Java/依赖源码、三期导航、系列/资料库/RSS及真实Release条目。#165已在此后以completed关闭，#161同步修订和3完成/20待安排。实际证据见本轮release.md/release.json/deployment.json/qa-site-online.json；新版尚无用户观看反馈。
