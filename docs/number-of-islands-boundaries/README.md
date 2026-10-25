@@ -21,3 +21,5 @@
 [PR #282](https://github.com/linhongcun/video-studio/pull/282)已合并为40adfbf4f6a266a8b2a189e89dc5496146f0b199，附注tag及[Release v0.67.1](https://github.com/linhongcun/video-studio/releases/tag/v0.67.1)发布后，[Pages40187760204](https://github.com/linhongcun/video-studio/actions/runs/40187760204)成功。线上首次核验10次完整HTTPS、9,322,681字节全部通过；新MP4/海报全文SHA、28句VTT、四章、完整Python/源码/算法入口及本次Release条目一致，实际记录见[线上报告](online-verification.md)。原issue82保持completed关闭，不重开或改动未执行的平台清单。
 
 新内容约1:20开始明确展示左/上边界。原始用户反馈与v66检查范围保留，尚无用户观看本次修订的结论。
+
+归档时已整合并行主干11dd6fbb的分布式ID命名修订与v0.68.0日期版本功能，保留本片createdAt/updatedAt及站点最新版本，未回滚其他视频元数据。本片MP4全文SHA与151生产输入不变。上述线上记录严格绑定当时实际v0.67.1/Pages40187760204，不把后续主干当作该历史发布身份。
