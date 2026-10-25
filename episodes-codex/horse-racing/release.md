@@ -10,3 +10,13 @@
 整合后95页构建、1440/390两视口32字幕/6章/末章与末帧、文章独立证明可读性和14项完整副本SHA均通过；本次合并后发布Release，再触发Pages构建部署，避免重复中间部署。实际PR、标签、部署、线上完整媒体/字幕/章节与issue收尾结果完成后补齐。平台新发不在范围。
 
 v0.55.0与v0.56.4的媒体和检查可通过Git标签与revisions/self-contained-ending追溯；前者主体曾获用户认可，后者证明篇幅已被明确否定，不能继续写成“尚未观看”。
+
+## 实际发布进度
+
+[PR #233](https://github.com/linhongcun/video-studio/pull/233)已合并，附注tag v0.57.1实际指向7d1d6f63b0cfe7ba824aca851c0724b523d5d7e3；已核对该树的版本、5618帧、首发v0.55.0及完整视频SHA。
+
+[Release v0.57.1](https://github.com/linhongcun/video-studio/releases/tag/v0.57.1)发布于北京时间2026-10-25 08:16:38（UTC 00:16:38Z），随后于00:16:41Z手动触发[Pages部署40146065288](https://github.com/linhongcun/video-studio/actions/runs/40146065288)。合并提交跳过中间自动部署，Release后的正式工作流执行完整站点构建与部署。构建于00:19:08Z完成，部署于00:19:28Z成功，实际运行记录在short-ending/deployment.json。
+
+北京时间2026-10-25 08:21:11，首轮10个canonical普通GET全部通过：完整视频11077352字节与d3082f22…3cc87740e完整SHA、海报完整SHA、32句VTT逐字节、6章的精确帧/秒及锚点、无证明视频章或旁白入口、文章原proof锚点与正文、源码/系列/学习目录/RSS，以及v0.57.1实际修正条目。全量媒体只流式计算SHA，未保存远程媒体、未加查询/Range/强制缓存头，也未盲目重试。完整证据见online-verification.json及本修订同字节副本。
+
+#205已在上述检查后以completed再次关闭，#204同步3分07秒与v0.57.1；其余九题仍待安排。此次只上本站，平台未新发。本轮短版尚无用户观看反馈。
