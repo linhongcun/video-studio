@@ -122,14 +122,14 @@ try:
     for name,document in [('home',home),('library',library),('rss',rss)]:
         for retired in ['agent-intro','agent-tool-execution']:assert '/episodes/'+retired+'/' not in document,(name,'retired Agent entry restored')
     if ACTIVE_AGENTS:
-        assert '/video-studio/series/agent/' in home
+        assert '/video-studio/learn/#agent' in home,'Published Agent track must remain reachable from the home direction entry'
         for active in ACTIVE_AGENTS:
             assert '/episodes/'+active+'/' in library and '/episodes/'+active+'/' in rss
-    else:assert '/video-studio/series/agent/' not in home
+    else:assert '/video-studio/learn/#agent' not in home
     changelog=get('changelog',BASE+'changelog/').decode('utf8');assert 'https://github.com/linhongcun/video-studio/releases/tag/v'+VERSION in changelog
     now=datetime.now(timezone.utc)
-    report={'status':'passed','checkedAtUTC':now.isoformat(),'checkedAtBeijing':now.astimezone(ZoneInfo('Asia/Shanghai')).isoformat(),'executedBy':'Codex adapter site agent','release':'v'+VERSION,'firstRelease':META['firstRelease'],'publishedAt':META['publishedAt'],'ep':META['ep'],'canonicalQueriesAdded':False,'remoteMediaSaved':False,'fullVideoStreamHashed':True,'results':RESULTS,'chapters':expected_chapters,'finalVideoFrames':FRAMES,'fps':FPS,'durationSeconds':FRAMES/FPS,'subtitleCueCount':len(cues),'lastCueEnd':max(c['end'] for c in cues),'javaEndCard':CARD,'source':source,'javaSource':java_source,'directoryChecks':directory_checks,'retiredAgentEntryLinksAbsent':True,'currentAgentSlugs':ACTIVE_AGENTS,'scope':'Canonical media and caption byte equality, exact subtitle and chapter data, Java article/source entry and empty-caption card range, D01/D02 affected directory/pager, series/library/RSS and actual Release link. Browser pause/decoded frame evidence is local and separate.'}
+    report={'status':'passed','checkedAtUTC':now.isoformat(),'checkedAtBeijing':now.astimezone(ZoneInfo('Asia/Shanghai')).isoformat(),'executedBy':'Codex adapter site agent','release':'v'+VERSION,'firstRelease':META['firstRelease'],'publishedAt':META['publishedAt'],'ep':META['ep'],'canonicalQueriesAdded':False,'remoteMediaSaved':False,'fullVideoStreamHashed':True,'results':RESULTS,'chapters':expected_chapters,'finalVideoFrames':FRAMES,'fps':FPS,'durationSeconds':FRAMES/FPS,'subtitleCueCount':len(cues),'lastCueEnd':max(c['end'] for c in cues),'javaEndCard':CARD,'source':source,'javaSource':java_source,'directoryChecks':directory_checks,'retiredAgentEntryLinksAbsent':True,'currentAgentSlugs':ACTIVE_AGENTS,'currentAgentHomeEntry':'/video-studio/learn/#agent' if ACTIVE_AGENTS else None,'scope':'Canonical media and caption byte equality, exact subtitle and chapter data, Java article/source entry and empty-caption card range, D01/D02 affected directory/pager, series/library/RSS and actual Release link. Browser pause/decoded frame evidence is local and separate.'}
     (HERE/'qa-site-online.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps({'status':'passed','canonicalGetCount':len(RESULTS),'release':'v'+VERSION,'frames':FRAMES,'cueCount':24,'report':str(HERE/'qa-site-online.json')},ensure_ascii=False))
 except Exception as exc:
-    print(json.dumps({'status':'failed','completedGetCount':len(RESULTS),'error':str(exc),'results':RESULTS},ensure_ascii=False,indent=2));raise
+    failure={'status':'failed','checkedAtUTC':datetime.now(timezone.utc).isoformat(),'completedGetCount':len(RESULTS),'error':repr(exc),'results':RESULTS};(HERE/('qa-site-online-failed-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'.json')).write_text(json.dumps(failure,ensure_ascii=False,indent=2)+'\n');print(json.dumps(failure,ensure_ascii=False,indent=2));raise
