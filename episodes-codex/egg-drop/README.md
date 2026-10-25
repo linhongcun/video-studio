@@ -2,7 +2,7 @@
 
 内部EP33，趣味推理P05，对应#209。制作在此目录，发布数据在episodes/egg-drop/，站点读取后者。开工基线和主干隐藏草稿预留见startup.json及PR #270；真实交付状态另记qa-final.md/release.md，不把制作检查写成用户观看认可。
 
-已按[Release v0.67.0](https://github.com/linhongcun/video-studio/releases/tag/v0.67.0)上线：[观看视频与文章](https://linhongcun.github.io/video-studio/episodes/egg-drop/)。制作PR #279、Release后Pages40181102180及线上核验通过，#209已completed关闭；完整身份见[发布记录](release.md)。P05尚无用户观看反馈。
+已按[Release v0.67.0](https://github.com/linhongcun/video-studio/releases/tag/v0.67.0)上线：[观看视频与文章](https://linhongcun.github.io/video-studio/episodes/egg-drop/)。制作PR #279、Release后Pages40181102180及线上核验通过，#209已completed关闭；完整身份见[发布记录](release.md)。用户后续指出方法选择动机不清，见[观看反馈](feedback.md)。
 
 本片兑现“怎样保证14次以内找到最高安全楼层”：先建立两枚相同阈值鸡蛋、未碎可复用/碎后消耗，再解释最后一枚为何要逐层查。固定10层晚碎的19次引出剩余预算；从14次倒推14、27、39的递减间隔，100层封顶。完整F31实例走8次，最后两枚都碎且答案唯一仍成功。严格最优性、完整边界和容量递推只在文章，视频无附录口头入口、代码卡或额外证明尾段。
 
