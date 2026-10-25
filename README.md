@@ -12,13 +12,9 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 
 ## 已上线剧集
 
-剧集信息来自各期的 `episodes/<slug>/meta.json`（`draft: false`）。期号按 2026-10-21 新排期（[#91](https://github.com/linhongcun/video-studio/issues/91)）：EP.01–21 已重制；原 EP.16 隔离级别（`db-isolation`）已下架（`draft: true`，源文件保留）。第 9 至 14 期演示网页已改为深色页身（v0.45.0）；EP.15 索引在 v0.45.1 更新为订单表查找动画；EP.16 事务在 v0.45.2 更新为逐步展示修改、提交和回滚的动画；EP.17 锁在 v0.45.3 更新为加锁读取、等待后重新检查库存的动画。v0.45.4 重制 EP.18–21，分别用昵称复制、按用户分片、号码字段与持久待办事件展示主从复制、分库分表、全局 ID 和跨服务一致性。以上均只更新站点，不重发平台。
+剧集信息来自各期的 `episodes/<slug>/meta.json`。当前制作入口由 `sourcePath` 指向 `episodes-codex/`；EP.01–21 已完成重制，完整版本记录见 [Releases](https://github.com/linhongcun/video-studio/releases) 和 [制作记忆](docs/production-memory.md)。已下架的隔离级别旧片和被替代工程已从工作树清理，仍可通过 Git 历史恢复，详见 [清理记录](docs/repository-cleanup.md)。
 
-2026-10-24 用户批准 EP.17 合并及 GitHub 站点发布，并持续授权后续视频制作和质量检查完成后自主合并、上线，有反馈再修正发布，不再逐次等待确认。该授权适用于 GitHub 主干、Release 和本站；平台新发仍需单独授权。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
-
-v0.48.0 已将 EP.01–14 的上一轮 Cursor 重制版全部替换为本轮 Codex 版：160镜、320句新配音，逐期重写脚本与主体动画，补齐章节导航和字幕。制作与检查见[本轮批次记录](docs/codex-remake-ep01-14.md)，当前源码由各期 `sourcePath` 指向 `episodes-codex/`。只上本站，历史平台投稿保留。
-
-v0.50.3 更新 EP.05 CDN：在地图上演示临近边缘节点取图，并结合动作介绍CDN、边缘节点和回源；修订与实际检查见[本次记录](docs/cdn-map-terms-revision.md)。
+GitHub 主干、Release 和站点沿用用户持续授权，完成制作与检查后自主发布；平台新发另行授权。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
 
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
@@ -73,32 +69,22 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 ## 目录结构
 
 ```
-AGENTS.md                 给 coding agent 的入口
-docs/                     RULES、pipeline、knoll-props.template.md、examples/knoll-props.degradation.md
-episodes-codex/db-index/  EP.15 索引重制工程、配音与公开资料
-episodes-codex/_template/ 开新期的说明（按当前选题和授权推进）
+AGENTS.md                   项目入口
+docs/                      规范、制作手册、经验与检查记录
+episodes-codex/
+   <slug>/                  当前制作工程，以 meta.json.sourcePath 为准
+     remotion/              动画、逐期封面与渲染命令
+     voice/、voice.wav      配音原稿和选定素材
+     source-sha256.json     冻结输入清单
+   _shared/                 句级装配、冻结、编码检查与流程导航
+   _template/               新期入口
 episodes/
-  <slug>/                 站点内容。每期一个目录
-    meta.json             期号、标题、简介、标签、publishedAt、series（site/src/content/series.json）、updatedAt、platforms（站点渲染 bilibili / douyin；不再新写 kuaishou）、draft、legacy
-    script.md             旁白稿
-    article.mdx           站点文章
-    pronunciation.md      读音表
-    storyboard.json       分镜
-    covers.json           重制期封面（本期 Remotion 经 @covers 读取）
-    words.json            词级时间与配音 SHA-256（重制期）
-    video.mp4             成片
-    cover-16x9.jpg 等     平台封面
-    remotion/             本期 Remotion 工程
-  _shared/
-    branding/             水印规范 spec.json（重制期 Main.tsx 未挂 ChannelBranding）
-    cover/                旧的共享封面工程（没有顶层 cover 节点的期不要用）
-    music/                mix_bgm.py 与 Wallpaper
-    theme/pageTheme.ts    演示页身 pageBg / pageInk
-    tts/                  mimo_say.py（冰糖）
-    onset_rule.py         起音规则（EP.06 起）。期目录不要另存一份
-site/                     Astro 站点（GitHub Pages）
-covers/cover-spec.json    仅共享封面工程使用的期
+   <slug>/                  站点发布内容：meta、文章、分镜、字幕、MP4、JPG
+   _shared/                 共享配音、起音、混音、主题和有效回归样本
+site/                      Astro 站点（GitHub Pages）
 ```
+
+发布目录不另存旧动画工程、WAV 或 PNG 原稿；幕后源码链接由 `meta.json.sourcePath` 指向制作工程。Agent 当前入口为 `agent-intro-v3/`，第二版成片仍是其拼接输入，保留 `agent-intro-v2/`。
 
 ## 本地开发与渲染
 
@@ -111,23 +97,15 @@ npm run build     # 构建到 site/dist
 npm run preview   # 预览构建结果
 ```
 
-重制期渲染（`episodes/degradation/remotion/package.json` 没有 `typecheck` 和 `still`）：
+制作与渲染从当前期的 `episodes-codex/<slug>/README.md` 进入。例如：
 
 ```sh
-cd episodes/degradation/remotion && npm ci
-npm run render      # out/voice.mp4，再混 BGM 得到 ../video.mp4
+cd episodes-codex/degradation/remotion && npm ci
+npm run render
+npm run covers
 ```
 
-封面、静帧和共享封面工程的适用条件见 [docs/render.md](docs/render.md)。现行 4:3 安全区是 x 315..1125、y < 918，且不得出现 `COPYFIT`。以前写的「16:9 在 x280–1640、y>900 不放字；3:4 的 y<144 与 y>1224」不再作为闸门。
-
-共享封面命令只用于分镜顶层有 `cover`，或 slug 在 `covers/cover-spec.json` 中的期：
-
-```sh
-cd episodes/_shared/cover && npm ci
-npm run covers -- <slug>
-```
-
-`degradation` 两种都不是，不要对它运行 `npm run covers`。
+WAV、PNG 等制作原稿留在制作工程；站点使用检查通过的 MP4 与 JPG。冻结、封面和静帧检查见 [docs/render.md](docs/render.md)。
 
 ## 版本规则
 

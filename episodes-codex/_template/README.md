@@ -8,6 +8,8 @@
 
 ## 最短路径
 
+先按根AGENTS的“开工前同步”检查工作区并同步最新主干，记录基线、删除/移动和依赖变化，再复制现行工程。当前机的旧node_modules缓存或软链不代表删除后的工程仍可从零构建；至少在保留的当前制作目录按锁文件安装依赖，其他新期再共享该有效位置。
+
 参考当前制作工程 `episodes-codex/db-lock/`、`episodes-codex/db-transaction/`（已认可的第二版），以及本轮各期 README。创建 `episodes-codex/<slug>/`；站点目录仍为 `episodes/<slug>/`。只复用配音、冻结和渲染基础设施，按本期主题重新设计动作，镜数与时长不照搬前一期。
 
 1. 实际读取核心公开资料，按 [docs/research-template.md](../../docs/research-template.md) 记录主张、访问日期和边界。先确认观众需要的前置概念；术语与支线按本期范围取舍。
@@ -19,3 +21,5 @@
 7. 将检查通过的同一份媒体接入站点，保留历史元数据并设置 `sourcePath` 指向本期 Codex 工程；文章章节锚点、真实章节起点与冻结字幕均须构建及浏览器核验。按 [publish.md](../../docs/publish.md) 合并、Release、部署，核对线上完整 SHA 后关闭本次制作 issue，更新案例记录。GitHub 已有持续授权，平台发布另行授权。
 
 历史 EP.14 的20镜/5152帧回归输入固定在 `episodes/_shared/tests/fixtures/`，旧制作说明保留在 `docs/examples/`；不要用已更换为新片的 live 站点目录重跑旧golden。
+
+算法题的顺序为题意→入手分析与选择依据→方法名称→完整过程→5秒Python卡。独立审稿分别复述“题目要什么”与“为何选择此法”，不能把两项合成一个题意检查；无需固定先讲暴力。见L039。

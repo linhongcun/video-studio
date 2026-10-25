@@ -52,13 +52,13 @@ gh workflow run deploy.yml --ref main
 
 下面每条命令都在仓库或本机工具里，发布前已核对：`sha256sum`、`cut`、`site/package.json` 的 `npm ci` 与 `npm run build`、`git tag`、`git push`，以及 `gh release create`、`gh workflow run`、`gh run list`、`gh run cancel`、`gh run watch`。工作流文件是 `.github/workflows/deploy.yml`，含 `workflow_dispatch`。
 
-1. 把制作目录 `episodes-codex/<slug>/` 中检查通过并冻结的 `video.mp4`、`cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg` 及站点所需数据复制到 `episodes/<slug>/`。若用户已观看批准，使用同一份批准文件，不重新生成未经观看的替代品；按持续授权自主发布时使用完成检查的冻结文件。站点只读 `episodes/<slug>/`。保存各文件完整 SHA-256，并在部署后核对完整值；以下 sha8 只便于展示：
+1. 把制作目录 `episodes-codex/<slug>/` 中检查通过并冻结的 `video.mp4`、`cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg` 及站点所需数据复制到 `episodes/<slug>/`。配音 WAV、制作 PNG 和完整制作工程保留在制作目录；站点所需的 meta、article、script、storyboard 等数据仍随发布同步，幕后说明链接需要的脚本和研究资料继续保留。若用户已观看批准，使用同一份批准文件，不重新生成未经观看的替代品；按持续授权自主发布时使用完成检查的冻结文件。站点只读 `episodes/<slug>/`。保存各文件完整 SHA-256，并在部署后核对完整值；以下 sha8 只便于展示：
 
 ```sh
 sha256sum <file> | cut -c1-8
 ```
 
-2. 改 `site/package.json` 的 `version`：只改成片或文章升修订号；新一期或站点功能升次版本号。改该期 `meta.json`：`draft` 设为 `false`，写上 `publishedAt`；重发或只改站点时更新 `updatedAt`。制作入口迁到 `episodes-codex/` 时，将 `sourcePath` 设为对应仓库相对目录（如 `episodes-codex/db-replication/remotion`），让页面“源码”指向当前工程；未设置时兼容原来的 `episodes/<slug>/remotion`。本地先构建通过：
+2. 改 `site/package.json` 的 `version`：只改成片或文章升修订号；新一期或站点功能升次版本号。改该期 `meta.json`：`draft` 设为 `false`，写上 `publishedAt`；重发或只改站点时更新 `updatedAt`。将 `sourcePath` 明确设为对应当前制作目录（如 `episodes-codex/db-replication/remotion`），让页面“源码”指向当前工程。旧制作目录已清理，不依赖缺省旧路径。本地先构建通过：
 
 ```sh
 cd site

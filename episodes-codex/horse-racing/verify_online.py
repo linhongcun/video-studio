@@ -23,7 +23,8 @@ from zoneinfo import ZoneInfo
 BASE = 'https://linhongcun.github.io/video-studio/'
 REPO_URL = 'https://github.com/linhongcun/video-studio'
 SLUG = 'horse-racing'
-RELEASE = 'v0.55.0'
+FIRST_RELEASE = 'v0.55.0'
+RELEASE = 'v0.57.1'
 PRODUCTION = Path(__file__).resolve().parent
 ROOT = PRODUCTION.parents[1]
 SITE = ROOT / 'episodes' / SLUG
@@ -126,7 +127,10 @@ def check_episode(page, meta, expected_chapters, expected_frames, fps):
     assert root.find_all('a', href=source_url), 'Missing current production source link'
     player = one(root.find_all('section', id='player'), 'player')
     chapters = json.loads(player.attrs['data-chapters'])
-    assert len(chapters) == len(expected_chapters) == 6
+    assert len(chapters) == len(expected_chapters) and expected_chapters
+    assert all(chapter['id'] != 'lower-bound' for chapter in chapters), 'Article-only proof leaked into video chapters'
+    assert len(root.find_all('h2', id='lower-bound')) == 1, 'The complete article proof must remain available'
+    assert not root.find_all('a', **{'data-seek': 'lower-bound'}), 'Article proof must not seek to a removed video chapter'
     for actual, expected in zip(chapters, expected_chapters):
         assert actual['id'] == expected['id']
         assert actual['start'] == expected['frame'] / fps
@@ -156,15 +160,23 @@ def check_episode(page, meta, expected_chapters, expected_frames, fps):
 def main():
     meta = json.loads((SITE / 'meta.json').read_text())
     storyboard = json.loads((SITE / 'storyboard.json').read_text())
+    config = json.loads((PRODUCTION / 'episode-config.json').read_text())
+    plan = json.loads((PRODUCTION / 'plan.json').read_text())
+    voice_sentences = json.loads((PRODUCTION / 'voice/sents.json').read_text())
+    render = json.loads((PRODUCTION / 'render-result.json').read_text())
     version = json.loads((ROOT / 'site/package.json').read_text())['version']
-    # P01's debut stays v0.55.0 even when a concurrent course or later patch
-    # changes the deployment's overall site version or total number of pages.
+    # P01's debut remains fixed, while this check targets the ending revision.
+    # Concurrent courses may advance the deployment-wide version independently.
     assert version_tuple(version) >= version_tuple(RELEASE), ('Local baseline predates P01', version)
-    assert meta['firstRelease'] == RELEASE and meta['draft'] is False
+    assert meta['firstRelease'] == FIRST_RELEASE and meta['draft'] is False
     assert meta['slug'] == SLUG and meta['ep'] == 24
     assert meta['series'] == 'puzzles' and meta['episodePart'] == '趣味推理 P01'
     assert meta['sourcePath'] == 'episodes-codex/horse-racing/remotion'
     fps = storyboard['meta']['fps']
+    shots = [shot for scene in storyboard['scenes'] for shot in scene['shots']]
+    assert len(shots) == config['shotCount'] == len(plan)
+    assert [shot['id'] for shot in shots] == [shot['id'] for shot in plan]
+    assert [shot['chapterId'] for shot in shots] == [shot['chapterId'] for shot in plan]
     expected_chapters, expected_subtitles = [], []
     offset = 0
     for scene in storyboard['scenes']:
@@ -174,13 +186,21 @@ def main():
         for shot in scene['shots']:
             expected_subtitles.extend(sub['text'] for sub in shot['subtitles'])
             offset += shot['durationInFrames']
-    assert offset == meta['finalVideoFrames'] == 6327
-    assert fps == 30 and len(expected_chapters) == 6 and len(expected_subtitles) == 36
+    assert offset == meta['finalVideoFrames'] == storyboard['meta']['finalVideoFrames'] == render['frames']
+    assert offset == storyboard['meta']['durationInFrames'] and fps == 30
+    planned_chapters = list(dict.fromkeys(shot['chapterId'] for shot in plan))
+    assert [chapter['id'] for chapter in expected_chapters] == planned_chapters
+    assert 'lower-bound' not in planned_chapters and planned_chapters[-1] == 'answer'
+    assert expected_subtitles == [sentence['text'] for sentence in voice_sentences]
+    assert not any(term in ''.join(expected_subtitles) for term in ('证明', '文章', '图文')), 'Removed proof or article handoff remains in the video narration'
+    subtitle_count = len(expected_subtitles)
+    assert subtitle_count > 0
+    assert sha_file(SITE / meta['video']) == render['sha256'], 'Video differs from final render report'
     vtt_path = DIST / 'episodes' / SLUG / 'captions.vtt'
     if vtt_path.is_dir():
         vtt_path = vtt_path / 'index.html'
     expected_vtt = vtt_path.read_bytes()
-    assert expected_vtt.decode('utf-8').count('-->') == 36
+    assert expected_vtt.decode('utf-8').count('-->') == subtitle_count
     cue_texts = [block.split('\n', 1)[1]
                  for block in expected_vtt.decode('utf-8').strip().split('\n\n')[1:]]
     assert cue_texts == expected_subtitles, 'Local built VTT must match all frozen narration sentences'
@@ -223,7 +243,7 @@ def main():
                 expected_size=(SITE / filename).stat().st_size, keep_body=False)
         captions = get('captions', PAGE_URL + 'captions.vtt',
                        expected_sha=sha_file(vtt_path), expected_size=len(expected_vtt))
-        assert captions == expected_vtt and captions.decode('utf-8').count('-->') == 36
+        assert captions == expected_vtt and captions.decode('utf-8').count('-->') == subtitle_count
         episode = Page(get('episode', PAGE_URL).decode('utf-8'))
         source_url = check_episode(episode, meta, expected_chapters, offset, fps)
         home = Page(get('home', BASE).decode('utf-8')).root
@@ -251,20 +271,21 @@ def main():
         changelog = Page(get('changelog', BASE + 'changelog/').decode('utf-8')).root
         entries = [node for node in changelog.find_all('li')
                    if node.find_all('a', href=RELEASE_URL)]
-        entry = one(entries, 'Actual v0.55.0 changelog entry')
+        entry = one(entries, f'Actual {RELEASE} changelog entry')
         assert meta['title'] in entry.text() and '趣味推理 P01' in entry.text()
         assert entry.find_all('a', href='/video-studio/episodes/horse-racing/')
-        assert any(has_class(node, 'k-add') and node.text() == '新增' for node in entry.find_all('span'))
+        assert any(has_class(node, 'k-fix') and node.text() == '修正' for node in entry.find_all('span'))
         checked_at = datetime.now(timezone.utc)
         report = {'status': 'passed', 'checkedAtUTC': checked_at.isoformat(),
                   'checkedAtBeijing': checked_at.astimezone(ZoneInfo('Asia/Shanghai')).isoformat(),
                   'executedBy': 'Codex P01 canonical delivery verification',
-                  'release': RELEASE, 'p01FirstRelease': RELEASE,
+                  'release': RELEASE, 'p01FirstRelease': FIRST_RELEASE,
                   'localCandidateSiteVersion': 'v' + version, 'deployedSiteVersion': deployed_version,
-                  'versionScope': 'P01 first release is fixed independently of the deployment-wide version and unrelated course count; all P01 bytes and chapter/directory assertions remain exact.',
+                  'versionScope': 'P01 debut, the verified ending-revision Release, and the deployment-wide version are separate identities; all P01 bytes, current sentence/chapter facts and directory assertions remain exact.',
                   'canonicalQueriesAdded': False, 'remoteMediaSaved': False,
                   'fullVideoStreamHashed': True, 'captionsExactBytesMatch': True,
-                  'subtitleCount': 36, 'results': results, 'chapters': expected_chapters,
+                  'subtitleCount': subtitle_count, 'shotCount': len(shots),
+                  'results': results, 'chapters': expected_chapters,
                   'finalVideoFrames': offset, 'durationSeconds': offset / fps,
                   'sourceUrl': source_url, 'independentSeries': 'puzzles',
                   'githubRelease': {'id': release['id'], 'tag': release['tag_name'],
@@ -278,7 +299,8 @@ def main():
                           'report': str(PRODUCTION / 'online-verification.json')}, ensure_ascii=False))
     except Exception as error:
         failure = {'status': 'failed', 'checkedAtUTC': datetime.now(timezone.utc).isoformat(),
-                   'release': RELEASE, 'error': str(error), 'completedGetCount': len(results),
+                   'release': RELEASE, 'p01FirstRelease': FIRST_RELEASE,
+                   'error': str(error), 'completedGetCount': len(results),
                    'canonicalQueriesAdded': False, 'remoteMediaSaved': False, 'results': results}
         failure_path = PRODUCTION / 'online-verification-failed.json'
         failure_path.write_text(json.dumps(failure, ensure_ascii=False, indent=2) + '\n')

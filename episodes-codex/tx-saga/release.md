@@ -1,3 +1,15 @@
+# 数据库身份修订（#230）
+
+Saga：扣款成功，缺货了怎么办？：保留原配音、字幕与3478帧时长，给真实库角色增加MySQL识别标记，内部记录与提交范围保持。
+
+当前视频完整SHA-256：`4a1876028bbb659919712fae3c4f25bfcdb77983fd22e0ca087c1f98800be0c3`；原混合AAC逐字节保持。正式媒体/预演/fresh复现的实际范围见[本轮QA](qa-mysql-identity.json)。图标来源为Devicon，原始SVG、MIT notice和品牌说明见[共享素材](../_shared/database-identity/source.json)，不称官方授权素材。
+
+[PR #235](https://github.com/linhongcun/video-studio/pull/235)已合并，随[v0.58.1](https://github.com/linhongcun/video-studio/releases/tag/v0.58.1)发布；[Release后Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40147968820)成功。线上10支完整视频SHA、字幕、章节、封面、源链接与实际更新日志核验通过，#230已以completed关闭。仅更新GitHub站点，用户对新版的观看反馈后续另记。
+
+[实际线上证据](../../docs/mysql-database-identity/online-verification.json)。
+
+## 历史发布记录
+
 # v0.51.0：EP.21 · Saga全局流程与缩放导航
 
 14镜28句，3478帧，约115.9秒。成片完整SHA256：`934ec09f2f47d4b021f869375c952bb39a333dbdb4bfec91324705c7137b281c`。

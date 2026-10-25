@@ -1,5 +1,5 @@
-# EP.21 · Saga：发布副本
+# Saga：扣款成功，缺货了怎么办？
 
-本站读取本目录。当前流程导航修订为v0.51.0；14镜28句、3478帧，视频完整SHA`934ec09f2f47d4b021f869375c952bb39a333dbdb4bfec91324705c7137b281c`。
-实际制作、冻结输入和检查见[当前工程](../../episodes-codex/tx-saga/README.md)与[成片QA](../../episodes-codex/tx-saga/qa-final.md)。
-只上GitHub站点，原v0.47.0版本通过制作目录的revisions/v0.47.0.json追溯。
+本站发布目录。现行制作、配音和检查入口：[制作工程](../../episodes-codex/tx-saga/README.md)。
+
+源码位置由 `meta.json.sourcePath` 指定；WAV、PNG 原稿和冻结输入保存在制作目录。已被替代的旧工程通过 Git 历史追溯，清理范围见 [仓库清理记录](../../docs/repository-cleanup.md)。
