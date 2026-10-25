@@ -33,3 +33,5 @@ ffmpeg -nostdin -y -i out/voice-stair-scene.mp4 -i ../revisions/stair-scene/inpu
 最终只采用新画面与原AAC，丢弃Remotion中间文件音轨。正式音量重新测量，记录mix-report.json与revisions/stair-scene/final-ebur128.txt；共享check_encoded_episode.py检查完整解码/帧数/音轨，extract_encoded_samples.py --samples qa-motion-scene-fixed.json比较实际正式MP4与修后字幕预演。原npm run render仍可重新合成全片声音，但其输出不应声称逐字节等于本次复用原AAC的发布文件。
 
 三尺寸封面由npm run covers生成；这轮换成同题楼梯、人物和最后一/两阶弧线，安全区/标题位置原样。发布只复制已验MP4/JPG与必要站点数据，不复制WAV、PNG或制作工程。实际版本、部署、线上完整SHA见本轮发布记录。
+
+本轮已随[v0.61.1](https://github.com/linhongcun/video-studio/releases/tag/v0.61.1)发布，PR #260、Release后单次手动部署40156242220及首次28响应线上核验通过。原制作issue #81保持历史completed，本轮未重复关闭；实际媒体、tag和部署身份统一见[发布记录](../../docs/climbing-stairs-scene/release.md)。交付证据提交晚于媒体tag，不变更成片或网站构建输入。
