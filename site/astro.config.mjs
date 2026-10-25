@@ -73,6 +73,7 @@ export default defineConfig({
   site: 'https://linhongcun.github.io',
   base: '/video-studio/',
   trailingSlash: 'always',
+  redirects: {'/tags/全局唯一ID/': '/video-studio/tags/分布式ID/'},
   integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick/.test(p)}), mdx({remarkPlugins: [remarkHeadingId], rehypePlugins: [rehypeReaderHeadings, rehypeSummary], syntaxHighlight: false})],
   vite: {
     plugins: [headingIdPre()],

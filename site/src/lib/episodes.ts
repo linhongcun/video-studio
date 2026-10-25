@@ -13,9 +13,9 @@ const articles = import.meta.glob('../../../episodes/*/article.mdx', {eager: tru
 export type Chapter = {id: string; title: string; start: number; frame: number; fmStart?: number; inArticle?: boolean};
 export type Episode = {
   slug: string; ep: number; problemNumber?: number; episodePart?: string; lessonOrder?: number; firstRelease?: string; title: string; summary: string; duration: number; tags: string[];
-  date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
+  createdAt: string; updatedAt: string; publishedAt?: string; date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
   draft: boolean; legacy: boolean; archived: boolean; replacedBy?: string[]; related: {slug: string; label?: string}[];
-  learningGuide?: {slug: string; label: string}; series?: string; description?: string; updated?: string; platforms: Platform[]; readMin: number; sourcePath: string;
+  learningGuide?: {slug: string; label: string}; series?: string; description?: string; platforms: Platform[]; readMin: number; sourcePath: string;
 };
 export type Platform = {id: string; label: string; url: string};
 /** 平台链接：只渲染 meta.json platforms 里写了真实 URL 的平台，没写的不显示（绝不拼猜） */
@@ -182,19 +182,20 @@ export function getEpisodes({includeArchived = false}: {includeArchived?: boolea
     .filter((slug) => SHOW_DRAFTS || !readMeta(slug).draft)
     .map((slug) => {
       const meta = readJson(path.join(EP_DIR, slug, 'meta.json'));
+      const dates = episodeDates(meta);
       const mod = articles[`../../../episodes/${slug}/article.mdx`];
       const fm = mod?.frontmatter ?? {};
       const {chapters, duration, fps} = computeChapters(slug, fm.chapters);
       return {
         slug, ep: meta.ep ?? 0, problemNumber: meta.problemNumber, episodePart: meta.episodePart, lessonOrder: meta.lessonOrder, firstRelease: meta.firstRelease, learningGuide: meta.learningGuide, replacedBy: meta.replacedBy, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
-        tags: meta.tags ?? [], date: meta.publishedAt, poster: meta.poster, video: meta.video,
+        tags: meta.tags ?? [], ...dates, date: dates.publishedAt ?? dates.createdAt, poster: meta.poster, video: meta.video,
         duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, archived: !!meta.archived, related: meta.related ?? [],
-        series: meta.series, description: meta.description, updated: meta.updatedAt && meta.updatedAt > meta.publishedAt ? meta.updatedAt : undefined,
+        series: meta.series, description: meta.description,
         platforms: platformsOf(meta), readMin: readingMinutes(slug),
         sourcePath: meta.sourcePath ?? `episodes/${slug}/remotion`,
       };
     })
-    .sort((a, b) => String(b.date).localeCompare(String(a.date)) || compareLessons(b, a));
+    .sort((a, b) => Date.parse(dateIso(b.date)) - Date.parse(dateIso(a.date)) || compareLessons(b, a));
   return includeArchived ? cache : cache.filter((e) => !e.archived);
 }
 
@@ -228,11 +229,48 @@ export const tagHref = (t: string) => `${BASE}tags/${encodeURIComponent(t)}/`;
 export const epHref = (slug: string) => `${BASE}episodes/${slug}/`;
 export const asset = (slug: string, f: string) => `${BASE}episodes/${slug}/${f}`;
 
-/** 日期：构建时计算（北京时间）。“10月16日”；7 天内（含发布当天）标 NEW */
+/** 历史日期保留日精度；新时间必须明确时区，避免构建机器改变内容版本。 */
+export function dateIso(d: string): string {
+  if (typeof d === 'string') {
+    const day = d.slice(0, 10);
+    const parsed = new Date(`${day}T00:00:00Z`);
+    const validDay = Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === day;
+    if (validDay && /^\d{4}-\d{2}-\d{2}$/.test(d)) return `${d}T00:00:00+08:00`;
+    if (validDay && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(d) && Number.isFinite(Date.parse(d))) return d;
+  }
+  throw new Error(`无效的剧集时间：${d}；请使用 YYYY-MM-DD 或含时区的 ISO 8601 时间`);
+}
+
+export function episodeDates(meta: {createdAt?: string; updatedAt?: string; publishedAt?: string; draft?: boolean}) {
+  // 兼容尚未迁移的历史元数据；显式字段写入后不在构建时刷新。
+  const createdAt = meta.createdAt ?? meta.publishedAt;
+  const updatedAt = meta.updatedAt ?? createdAt;
+  if (!createdAt || !updatedAt) throw new Error('剧集缺少创建或修改时间');
+  if (meta.publishedAt) dateIso(meta.publishedAt);
+  else if (!meta.draft) throw new Error('已发布剧集缺少首次公开时间 publishedAt');
+  if (Date.parse(dateIso(updatedAt)) < Date.parse(dateIso(createdAt)))
+    throw new Error(`剧集修改时间 ${updatedAt} 早于创建时间 ${createdAt}`);
+  return {createdAt, updatedAt, publishedAt: meta.publishedAt};
+}
+
+const shanghaiDate = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Asia/Shanghai', year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+});
+const dateParts = (d: string) => Object.fromEntries(shanghaiDate.formatToParts(new Date(dateIso(d))).map((p) => [p.type, p.value]));
+export const fmtVersion = (d: string) => {
+  const p = dateParts(d);
+  return `${p.year}-${p.month}-${p.day}${d.length > 10 ? ` ${p.hour}:${p.minute}:${p.second}` : ''} 版`;
+};
+export const fmtDate = (d: string) => {
+  const p = dateParts(d);
+  return `${p.year}年${Number(p.month)}月${Number(p.day)}日${d.length > 10 ? ` ${p.hour}:${p.minute}:${p.second}` : ''}`;
+};
+export const fmtDateShort = (d: string) => {const p = dateParts(d); return `${Number(p.month)}月${Number(p.day)}日`;};
+
+/** NEW 根据首发日期计算，内容修改不会变成新一期。 */
 const BUILD_DAY = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
-const dayDiff = (d: string) => Math.round((Date.parse(BUILD_DAY) - Date.parse(String(d).slice(0, 10))) / 864e5);
-export const fmtDate = (d: string) => { const [y, m, dd] = String(d).slice(0, 10).split('-').map(Number); return `${y}年${m}月${dd}日`; };
-export const fmtDateShort = (d: string) => { const [, m, dd] = String(d).slice(0, 10).split('-').map(Number); return `${m}月${dd}日`; };
+const dayDiff = (d: string) => {const p = dateParts(d); return Math.round((Date.parse(BUILD_DAY) - Date.parse(`${p.year}-${p.month}-${p.day}`)) / 864e5);};
 /** NEW：7 天内发布，且最多标最近 NEW_MAX 期（目前日更，全站都在 7 天内，不加上限会每张卡都是 NEW） */
 export const NEW_DAYS = 7, NEW_MAX = 3;
 export const isNew = (d: string, slug?: string) => {

@@ -37,7 +37,7 @@ GitHub 主干、Release 和站点沿用用户持续授权，完成制作与检�
 | 17 | 数据库 | 两个人抢最后一件货，听谁的？ | [db-lock](https://linhongcun.github.io/video-studio/episodes/db-lock/) | 2026-10-15 |
 | 18 | 数据库 | 刚改的昵称，怎么又变回去了？ | [db-replication](https://linhongcun.github.io/video-studio/episodes/db-replication/) | 2026-10-15 |
 | 19 | 分布式 | 订单太多，一个数据库装不下怎么办？ | [db-sharding](https://linhongcun.github.io/video-studio/episodes/db-sharding/) | 2026-10-15 |
-| 20 | 分布式 | 两个订单，怎么撞成同一个号了？ | [global-id](https://linhongcun.github.io/video-studio/episodes/global-id/) | 2026-10-15 |
+| 20 | 分布式 | 分布式 ID：两个订单，怎么撞成同一个号了？ | [global-id](https://linhongcun.github.io/video-studio/episodes/global-id/) | 2026-10-15 |
 | 21 · 入门 | 分布式 | 什么是分布式事务？ | [distributed-tx-intro](https://linhongcun.github.io/video-studio/episodes/distributed-tx-intro/) | 2026-10-24 |
 | 21 · 2PC | 分布式 | 两阶段提交，两个库怎么共同确认？ | [tx-2pc](https://linhongcun.github.io/video-studio/episodes/tx-2pc/) | 2026-10-24 |
 | 21 · TCC | 分布式 | TCC：先预留，再确认 | [tx-tcc](https://linhongcun.github.io/video-studio/episodes/tx-tcc/) | 2026-10-24 |
