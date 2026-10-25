@@ -12,4 +12,4 @@
 
 实际验证：44项Node测试、12项Python真实CLI/媒体保真测试、全站构建、10片帧数与日期/RSS/学习路径检查通过。独立复核13页49个实际编码采样帧，13张页面证据见evidence。全帧与原声保真由生产报告证明，独立审读未重复跑全片声音或声称全片听辨；播放器与上线核验分别按实际报告记录。
 
-证据入口：startup.json、sources-core.json、sources-extra.json、sources-algorithms.json、input-change-review.json、qa-independent.json、media-results.json、delivery.json；测试/构建日志见tests-node.log、tests-python.log、build.log。播放器报告、线上完整SHA和发布身份完成后另记。仅GitHub站点，无平台重发，不表示用户已观看认可或粉丝量提升。
+证据入口：startup.json、sources-core.json、sources-extra.json、sources-algorithms.json、input-change-review.json、qa-independent.json、media-results.json、delivery.json；测试/构建日志见tests-node.log、tests-python.log、build.log。播放器已完成20个视口场景、10次桌面1倍速尾段播放至结束、13页手机原生全屏，23张截图经实际查看；725项断言、104个暂停点、20次本地完整视频GET/SHA及46次出处点击通过，见qa-browser.json。390px内嵌小窗和原生控件覆盖部分代码卡补充说明的限制如实记录，完整代码正文可见；手机全屏资料完整。上线前local-verification.json已通过，线上完整SHA和发布身份完成后另记。仅GitHub站点，无平台重发，不表示用户已观看认可或粉丝量提升。

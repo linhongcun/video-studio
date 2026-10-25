@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify eight original-title reference appendices after Pages deployment.
+"""Verify published original-title reference appendices after Pages deployment.
 
 Example (replace all identities with the actual release):
   python3 docs/reference-endcards/original-titles/verify-online.py \
@@ -34,8 +34,6 @@ REPORT = Path(__file__).with_name('online-verification.json')
 DIST = ROOT / 'site/dist'
 BASE = 'https://linhongcun.github.io/video-studio/'
 REPO = 'linhongcun/video-studio'
-TARGETS = ('browser-cache', 'cdn', 'consistent-hashing', 'cookie-session',
-           'dns', 'http-request', 'https', 'observer-pattern')
 PRESENTATION = 'original-title-quote'
 CHUNK = 256 * 1024
 
@@ -68,12 +66,40 @@ def read_json(path):
     return json.loads(path.read_text(encoding='utf-8'))
 
 
+def published_targets():
+    """Discover declarations; an incomplete published declaration must fail."""
+    targets = []
+    for meta_path in sorted((ROOT / 'episodes').glob('*/meta.json')):
+        meta = read_json(meta_path)
+        if meta.get('draft') is True:
+            continue
+        refs_path = meta_path.with_name('references.json')
+        if 'referenceAppendix' not in meta and not refs_path.exists():
+            continue
+        require(isinstance(meta.get('referenceAppendix'), dict) and bool(meta['referenceAppendix']),
+                f'{meta_path.parent.name}: published references lack an appendix declaration')
+        require(refs_path.is_file(), f'{meta_path.parent.name}: appendix declares missing references.json')
+        targets.append(meta_path.parent.name)
+    require(bool(targets), 'no published reference appendices found')
+    return targets
+
+
 def git_file(commit, path):
     return command(['git', 'show', f'{commit}:{path}'])
 
 
 def date_iso(value):
     return value + 'T00:00:00+08:00' if re.fullmatch(r'\d{4}-\d{2}-\d{2}', value) else value
+
+
+def visible_text(value):
+    """Allow only MDX's observed smart quotes and visible whitespace changes.
+
+    Original references and receipt strings still match exactly; this compares
+    rendered article text without removing or rewriting any words.
+    """
+    return re.sub(r'\s+', ' ', value.translate(str.maketrans({'‘': "'", '’': "'",
+                                                           '“': '"', '”': '"'}))).strip()
 
 
 class Page(HTMLParser):
@@ -83,6 +109,7 @@ class Page(HTMLParser):
         self.chapters, self.json_ld, self.words, self.h1, self.headings = [], [], [], [], []
         self._script, self._script_text, self._hidden, self._h1 = False, [], 0, False
         self._heading, self._heading_text = None, []
+        self._heading_control = False
         self.feed(body.decode('utf-8'))
         self.text = re.sub(r'\s+', ' ', ' '.join(self.words)).strip()
         self.title = re.sub(r'\s+', ' ', ''.join(self.h1)).strip()
@@ -103,12 +130,16 @@ class Page(HTMLParser):
             self._h1 = True
         if tag in ('h2', 'h3'):
             self._heading, self._heading_text = {'tag': tag, 'id': attrs.get('id')}, []
+        if self._heading is not None and tag == 'a' and 'data-pagefind-ignore' in attrs:
+            self._heading_control = True
         if tag in ('script', 'style'):
             self._hidden += 1
         if tag == 'script' and attrs.get('type') == 'application/ld+json':
             self._script, self._script_text = True, []
 
     def handle_endtag(self, tag):
+        if tag == 'a':
+            self._heading_control = False
         if self._heading is not None and tag == self._heading['tag']:
             self.headings.append({**self._heading, 'title': re.sub(
                 r'\s+', ' ', ''.join(self._heading_text)).strip()})
@@ -129,7 +160,7 @@ class Page(HTMLParser):
             self.words.append(text)
             if self._h1:
                 self.h1.append(text)
-            if self._heading is not None:
+            if self._heading is not None and not self._heading_control:
                 self._heading_text.append(text)
 
 
@@ -215,9 +246,9 @@ def expected_chapters(storyboard, fm):
 
 
 def article_reference_heading(article):
-    for match in re.finditer(r'^##\s+(.+?)(?:\s+\{#([^}]+)\})?\s*$', article, re.M):
+    for match in re.finditer(r'^#{2,3}\s+(.+?)(?:\s+\{#([^}]+)\})?\s*$', article, re.M):
         title, anchor = match.groups()
-        if title in ('公开来源与核验范围', '适用边界与来源') or '参考资料' in title:
+        if title in ('公开来源与核验范围', '适用边界与来源', '资料与阅读范围') or '参考资料' in title:
             return {'title': title, 'id': anchor}
     raise VerificationError('article reference heading missing')
 
@@ -245,7 +276,7 @@ def verify_page(body, expected):
         if 'quotation' in source:
             original_text.extend((source['quotation']['text'], source['quotation']['locator']))
         for text in original_text:
-            require(re.sub(r'\s+', ' ', text).strip() in page.text,
+            require(visible_text(text) in visible_text(page.text),
                     f'{meta["slug"]}: original reference text or locator missing: {text}')
         for url in (source['url'], source['verification']['sourceUrl']):
             require(url in page.links, f'{meta["slug"]}: reference link missing: {url}')
@@ -269,6 +300,7 @@ def verify_page(body, expected):
             'referenceLinksVerified': True, 'referenceHeading': reference_heading,
             'originalReferenceTitles': [s['title'] for s in expected['references']['sources']],
             'exactQuotationsAndLocatorsVerified': True,
+            'renderedTextComparison': 'Whitespace folding and MDX smart quotation marks only; no words removed or paraphrased.',
             'sourceUrl': source_url}
 
 
@@ -439,7 +471,7 @@ def main():
               'mode': 'local-only' if args.local_only else 'post-release-online',
               'networkChecksExecuted': False,
               'canonicalQueriesAdded': False, 'remoteMediaSaved': False,
-              'scope': 'Eight migrated episodes; original reference titles/quotes/locators, full media hashes and VTT, preserved body/code-card fingerprints and chapters/dates, explicit tag/Release/Pages identity. Browser interaction is reviewed separately.',
+              'scope': 'Discover all published reference appendices; verify original titles/quotes/locators, full media hashes and VTT, preserved body/code-card fingerprints and chapters/dates, explicit tag/Release/Pages identity. Browser interaction is reviewed separately.',
               'httpGets': [], 'githubChecks': [], 'localChecks': [], 'episodes': []}
     if report_path.exists():
         try:
@@ -500,17 +532,26 @@ def main():
             require(args.version is None or args.version == 'v' + working_version,
                     'explicit local version differs from working package')
             report['workingVersion'] = 'v' + working_version
+        targets = published_targets()
+        report.update(targetEpisodes=targets, expectedEpisodeCount=len(targets),
+                      expectedCanonicalGetCount=len(targets) * 4 + 1)
         expected_episodes = []
-        for folder in TARGETS:
+        for folder in targets:
             expected, local_check = local_expectation(folder, args.commit)
             expected_episodes.append(expected)
             report['localChecks'].append(local_check)
         report['referenceSourceCount'] = sum(c['referenceSourceCount'] for c in report['localChecks'])
         report['referencePageCount'] = sum(c['referencePageCount'] for c in report['localChecks'])
+        report['scope'] = (f'{len(targets)} published episodes, {report["referenceSourceCount"]} sources, '
+                           f'{report["referencePageCount"]} reference pages; original titles/quotes/locators, '
+                           'full media hashes and VTT, preserved body/code-card fingerprints and chapters/dates, '
+                           'explicit tag/Release/Pages identity. Browser interaction is reviewed separately.')
 
         if args.local_only:
             report.update(status='passed', networkChecksExecuted=False,
-                          scope='Built local episode pages, references, receipts, original chapters/dates, and VTT. No tag/Release/deployment/online checks executed.')
+                          scope=f'{len(targets)} built local episode pages, {report["referenceSourceCount"]} sources and '
+                                f'{report["referencePageCount"]} reference pages; receipts, original chapters/dates, '
+                                'body/code-card fingerprints and full VTT. No tag/Release/deployment/online checks executed.')
             return 0
 
         report['networkChecksExecuted'] = True
@@ -565,7 +606,7 @@ def main():
         changelog = Page(get('changelog', BASE + 'changelog/'))
         require(release_url in changelog.links and args.version in changelog.text,
                 'actual Release entry is missing from online changelog')
-        require(len(report['httpGets']) == len(TARGETS) * 4 + 1, 'unexpected canonical GET count')
+        require(len(report['httpGets']) == len(targets) * 4 + 1, 'unexpected canonical GET count')
         report.update(status='passed', fullVideoStreamHashed=True, changelogReleasePresent=True,
                       canonicalFullGetCount=len(report['httpGets']))
     except Exception as exc:

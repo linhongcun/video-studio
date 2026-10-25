@@ -28,8 +28,6 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[3]
 OUT = Path(__file__).resolve().parent
-SLUGS = ("browser-cache", "cdn", "consistent-hashing", "cookie-session", "dns",
-         "http-request", "https", "observer-pattern")
 PRESENTATION = "original-title-quote"
 VIEWPORTS = (("desktop", {"width": 1440, "height": 1000}),
              ("mobile", {"width": 390, "height": 844}))
@@ -45,6 +43,18 @@ def digest(data):
 
 def dump(path, value):
     path.write_text(json.dumps(value, ensure_ascii=False, indent=2) + "\n")
+
+
+def published_targets():
+    """Include every public declaration, including a broken/missing sources file."""
+    targets = []
+    for path in sorted((ROOT / "episodes").glob("*/meta.json")):
+        meta = read(path)
+        if not meta.get("draft") and not meta.get("archived") and (
+                meta.get("referenceAppendix") is not None or (path.parent / "references.json").exists()):
+            targets.append(path.parent.name)
+    assert targets, "No published reference appendices found"
+    return tuple(targets)
 
 
 def chapters(storyboard, frontmatter):
@@ -87,7 +97,10 @@ def reference_pages(manifest, fps):
 
 
 def normalized(text):
-    return re.sub(r"\s+", " ", text).strip()
+    # Astro's typography renders source ASCII apostrophes as U+2019. Compare
+    # only equivalent quote glyphs/visible whitespace, preserving every word.
+    return re.sub(r"\s+", " ", text.translate(str.maketrans({
+        "‘": "'", "’": "'", "“": '"', "”": '"'}))).strip()
 
 
 def critical_pages(slugs):
@@ -162,6 +175,7 @@ def run_case(browser, base_url, slug, viewport_name, viewport, run_dir, critical
     baseline = read(prod / "revisions/original-titles/baseline.json")
     manifest = read(ep / meta["referenceAppendix"]["manifest"])
     media = read(ep / "reference-appendix-media-check.json")
+    old_media = read(prod / "revisions/original-titles/before-reference-appendix-media-check.json")
     refs = read(ep / meta["referenceAppendix"]["sources"])
     storyboard = read(ep / "storyboard.json")
     fps = storyboard["meta"]["fps"]
@@ -183,16 +197,20 @@ def run_case(browser, base_url, slug, viewport_name, viewport, run_dir, critical
           and manifest.get("quotations") == quotations,
           {"presentation": manifest.get("presentation"), "sourceTitles": manifest.get("sourceTitles"),
            "quotations": manifest.get("quotations")})
+    expected_body_sha = baseline.get("recoveredBodySHA256", baseline["originalBodySHA256"])
+    preserved_keys = ("bodyFrameMD5RowsSHA256", "audioPacketCount", "audioPacketPayloadAndTimingSHA256",
+                      "decodedAudioPCM", "audioStreamEndsAtOriginalEndpointSeconds")
     check("complete original body retained before new appendix", manifest["bodyFrames"] == baseline["bodyFrames"]
-          and manifest["inputs"]["bodySHA256"] == baseline["originalBodySHA256"]
+          and manifest["inputs"]["bodySHA256"] == expected_body_sha
           and media.get("passed") is True
           and media.get("bodyDecodedFramesAndTimestampsEqual") is True
           and media.get("audioPacketsAndTimingEqual") is True
           and media.get("outputVideoTimelineContinuous") is True
-          and media.get("bodySHA256") == baseline["originalBodySHA256"]
-          and media.get("outputSHA256") == manifest["outputSHA256"],
+          and media.get("bodySHA256") == expected_body_sha
+          and media.get("outputSHA256") == manifest["outputSHA256"]
+          and all(media.get(key) is not None and media[key] == old_media.get(key) for key in preserved_keys),
           {"bodyFrames": manifest["bodyFrames"], "bodySHA256": manifest["inputs"]["bodySHA256"],
-           "mediaProof": media}, {"bodyFrames": baseline["bodyFrames"], "bodySHA256": baseline["originalBodySHA256"]})
+           "mediaProof": media}, {"bodyFrames": baseline["bodyFrames"], "bodySHA256": expected_body_sha})
     check("appendix pages and metadata cover final frame", len(pages) == (len(refs["sources"])+1)//2
           and pages[-1]["endFrame"] == meta["finalVideoFrames"]
           and meta["referenceAppendix"]["from"] == manifest["bodyFrames"]
@@ -292,11 +310,11 @@ def run_case(browser, base_url, slug, viewport_name, viewport, run_dir, critical
                 screenshot = run_dir / f"{slug}-desktop-reference-page-{reference_page['number']}.png"
                 page.screenshot(path=str(screenshot))
                 case["screenshots"].append(str(screenshot.relative_to(ROOT)))
-            if meta.get("javaEndCard"):
-                card = meta["javaEndCard"]
-                check("original Java card precedes reference pages", card["from"] + card["durationInFrames"] == manifest["bodyFrames"], card)
+            card = meta.get("javaEndCard") or storyboard["meta"].get("unvoicedEndCard")
+            if card:
+                check("original independent code card precedes reference pages", card["from"] + card["durationInFrames"] == manifest["bodyFrames"], card)
                 painted = page.evaluate(SEEK, (card["from"] + card["durationInFrames"]/2)/fps)
-                screenshot = run_dir / f"{slug}-desktop-preserved-java-card.png"
+                screenshot = run_dir / f"{slug}-desktop-preserved-code-card.png"
                 page.screenshot(path=str(screenshot))
                 case["preservedCodeCard"] = {"metadata": card, "painted": painted,
                                               "screenshot": str(screenshot.relative_to(ROOT))}
@@ -367,7 +385,9 @@ def run_case(browser, base_url, slug, viewport_name, viewport, run_dir, critical
         overflow = page.evaluate("({viewport:document.documentElement.clientWidth,page:document.documentElement.scrollWidth,body:document.body.scrollWidth})")
         check("no horizontal page overflow", overflow["page"] <= overflow["viewport"]+1 and overflow["body"] <= overflow["viewport"]+1, overflow)
         if viewport_name == "mobile" and any(s == slug for s, _ in critical):
-            page.locator("#article a").filter(has_text="固定原文").last.scroll_into_view_if_needed() if page.locator("#article a").filter(has_text="固定原文").count() else None
+            fixed_links = page.locator("#article a").filter(has_text="固定原文")
+            if fixed_links.count():
+                fixed_links.last.scroll_into_view_if_needed()
             screenshot = run_dir / f"{slug}-mobile-reference-article.png"
             page.screenshot(path=str(screenshot))
             case["screenshots"].append(str(screenshot.relative_to(ROOT)))
@@ -390,7 +410,8 @@ def run_case(browser, base_url, slug, viewport_name, viewport, run_dir, critical
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base-url", required=True)
-    parser.add_argument("--slugs", nargs="+", choices=SLUGS, default=SLUGS)
+    targets = published_targets()
+    parser.add_argument("--slugs", nargs="+", choices=targets, default=targets)
     parser.add_argument("--output-dir", type=Path, default=OUT)
     args = parser.parse_args()
     now = datetime.now(ZoneInfo("Asia/Shanghai"))
@@ -405,7 +426,7 @@ def main():
               "limitations": ["Local built-site Chromium checks; deployment identity is checked separately.",
                   "Mobile cases use Chromium viewport emulation, not a physical device or iOS Safari.",
                   "Citation links were activated with native clicks and navigation prevented; this does not claim canonical external destinations were fetched.",
-                  "The eight actual 1x plays run once on desktop, crossing the new appendix and reaching ended; mobile uses painted seeks and fullscreen, not duplicate continuous plays.",
+                  "Actual 1x plays run once per episode on desktop, crossing the new appendix and reaching ended; mobile uses painted seeks and fullscreen, not duplicate continuous plays.",
                   "Playback was muted; these checks do not claim human audio listening or ASR.",
                   "390px embedded video remains a small viewing area and native controls can cover its lower area; the complete reference card is inspected separately in actual native fullscreen at 844x390.",
                   "Original body/code-card retention uses the recorded complete decoded-frame and AAC/PCM comparisons; this UI run does not relabel them as newly repeated media comparisons."]}
@@ -425,6 +446,8 @@ def main():
         "Every actual reference page is inspected with native controls; small embedded mobile playback and native fullscreen are distinct observations.",
         "Only the reference appendix changes; existing narration, dynamics and speech-listening checks are not repeated or relabeled."]
     ranked = critical_pages(args.slugs)
+    report["targets"] = list(args.slugs)
+    report["textComparison"] = "Visible whitespace and curly/straight quotation glyphs are equivalent after Astro typography; no words or punctuation are omitted. Receipt bindings remain exact original text."
     report["criticalReferencePages"] = ranked
     critical = {(p["slug"], p["page"]) for p in ranked}
     with sync_playwright() as playwright:
