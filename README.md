@@ -6,7 +6,7 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 
 - 线上站点：https://linhongcun.github.io/video-studio/
 - 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。不发快手，不发 X。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
-- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式 / LeetCode · 算法可视化 / Agent 开发 / 设计模式 / 趣味推理）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
+- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式 / LeetCode · 算法可视化 / Agent 开发 / 设计模式 / 趣味推理 / 工程算法）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
 - 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
@@ -59,6 +59,10 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 ## 趣味推理
 
 独立系列从经典智力题出发，先交代完整题意，再用连续动画呈现每次比较、排除和信息变化。首期为[P01《25匹马赛跑：怎样用7场找出前三名？》](https://linhongcun.github.io/video-studio/episodes/horse-racing/)，18镜、约3分31秒；用同一组赛果展示“三匹确定更快”的排除见证，配套文章补充任意六场自适应策略的严格下界。制作与实际检查见[本期工程](episodes-codex/horse-racing/README.md)，后续选题见[首批10题总览 #204](https://github.com/linhongcun/video-studio/issues/204)。
+
+## 工程算法
+
+从扩容、故障和容量约束等真实系统问题出发，研究算法解决了什么、怎样工作，以及维护成本和适用边界。首批选题见[系列总览 #294](https://github.com/linhongcun/video-studio/issues/294)，首期为[EA01 一致性哈希](https://linhongcun.github.io/video-studio/episodes/consistent-hashing/)，约3分21秒（含5秒参考资料卡）；[制作与检查](episodes-codex/consistent-hashing/README.md)保留同一组十键的取余/哈希环对比、虚拟位置与迁移边界。其他选题待后续安排，候选不作为已上线内容。
 
 ## 制作流程
 
