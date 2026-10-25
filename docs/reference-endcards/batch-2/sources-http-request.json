@@ -1,0 +1,254 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-2",
+  "episode": "http-request",
+  "baselineCommit": "b83a0b0413612c9474cbb6ef73ee87acd5d53db2",
+  "checkedAt": "2026-10-25",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex references_audit",
+  "scope": "片尾主来源的逐论点正文核验，不表示渲染、发布或线上核验。",
+  "sources": [
+    {
+      "id": "http-mdn-browser",
+      "canonicalUrl": "https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/How_browsers_work",
+      "canonicalAccess": {
+        "status": "unavailable",
+        "bodyReviewed": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "repository": "mdn/content",
+      "commit": "9945c1ccba85d04624c7608c48b61e2eed98d579",
+      "repositoryFile": "files/en-us/web/performance/guides/how_browsers_work/index.md",
+      "fixedSourceUrl": "https://github.com/mdn/content/blob/9945c1ccba85d04624c7608c48b61e2eed98d579/files/en-us/web/performance/guides/how_browsers_work/index.md",
+      "retrievedUrl": "https://raw.githubusercontent.com/mdn/content/9945c1ccba85d04624c7608c48b61e2eed98d579/files/en-us/web/performance/guides/how_browsers_work/index.md",
+      "provenance": "MDN Web Docs官方内容仓库。",
+      "retrieval": {
+        "status": 200,
+        "bytes": 21422,
+        "sha256": "07b10af00b15a72bda36eb38ebdee77ceab7b2dfa44a4546b1a84ca44d0c570d",
+        "checkedAtUTC": "2026-10-25T14:55:12.541857+00:00"
+      },
+      "checkedAt": "2026-10-25",
+      "verificationStatus": "verified",
+      "excerpts": [
+        {
+          "startLine": 1,
+          "endLine": 5,
+          "text": "---\ntitle: \"Populating the page: how browsers work\"\nshort-title: How browsers work\nslug: Web/Performance/Guides/How_browsers_work\npage-type: guide"
+        },
+        {
+          "startLine": 29,
+          "endLine": 35,
+          "text": "### DNS lookup\n\nThe first step when navigating to a web page is locating the page's assets. If you navigate to `https://example.com`, the HTML page is located on a server with an IP address `93.184.216.34`. The first time you visit this site, a DNS lookup happens.\n\nYour browser requests a DNS lookup, which is eventually fielded by a name server that responds with an IP address. After this initial request, the IP address will likely be cached. This speeds up subsequent requests because the IP address can be retrieved from the cache instead of the name server.\n\nDNS lookups usually only need to be done once per hostname for a page load. However, DNS lookups must be done for each unique hostname the requested page references. If your fonts, images, scripts, ads, and metrics all have different hostnames, a DNS lookup is needed for each one."
+        },
+        {
+          "startLine": 101,
+          "endLine": 105,
+          "text": "## Parsing\n\nOnce the browser receives the first chunk of data, it can begin parsing the information received. {{glossary('parse', 'Parsing')}} is the step the browser takes to turn the data it receives over the network into the {{glossary('DOM')}} and {{glossary('CSSOM')}}, which is used by the renderer to paint a page to the screen.\n\nThe DOM is the browser's internal representation of the markup. The DOM is also exposed and can be manipulated through various JavaScript APIs."
+        },
+        {
+          "startLine": 117,
+          "endLine": 124,
+          "text": "![The DOM tree for our sample code, showing all the nodes, including text nodes.](dom.gif)\n\nWhen the parser finds non-blocking resources, such as an image, the browser will request those resources and continue parsing. Parsing can continue when a CSS file is encountered, but `<script>` elements — particularly those without an [`async`](/en-US/docs/Web/JavaScript/Reference/Statements/async_function) or `defer` attribute — block rendering and pause the parsing of HTML. Though the browser's preload scanner mitigates render blocking, large scripts can still cause a significant bottleneck.\n\n### Preload scanner\n\nBuilding the DOM tree occupies the main thread. The _preload scanner_ parses the available content and requests high-priority resources like CSS, JavaScript, and web fonts. Thanks to the preload scanner, we don't have to wait until the parser finds a reference to an external resource to request it. It retrieves resources in the background so that, by the time the main HTML parser reaches the requested assets, they may already be in flight or downloaded, thereby reducing blockages.\n"
+        },
+        {
+          "startLine": 136,
+          "endLine": 140,
+          "text": "### Building the CSSOM tree\n\nThe second step in the critical rendering path is processing CSS and building the CSSOM tree. The CSS object model is similar to the DOM. The DOM and CSSOM are both trees. They are independent data structures. The browser converts CSS rules into a style map; this includes a tree of nodes with parent, child, and sibling relationships based on the CSS selectors.\n\nAs with HTML, the browser converts the received CSS rules into something it can work with. Hence, it repeats the HTML-to-object process, but for the CSS."
+        },
+        {
+          "startLine": 159,
+          "endLine": 165,
+          "text": "## Render\n\nRendering steps include style, layout, paint, and in some cases compositing. The CSSOM and DOM trees created in the parsing step are combined into a render tree, which is then used to compute the layout of every visible element painted to the screen. In some cases, content can be promoted to its own layer and composited, improving performance by painting portions of the screen on the GPU instead of the CPU, freeing up the main thread.\n\n### Style\n\nThe third step in the critical rendering path is combining the DOM and CSSOM into a render tree. The computed style tree, or render tree, construction starts with the root of the DOM tree, traversing each visible node."
+        },
+        {
+          "startLine": 171,
+          "endLine": 175,
+          "text": "### Layout\n\nThe fourth step in the critical rendering path is running layout on the render tree to compute each node's geometry. _Layout_ is the process by which the dimensions and location of all the nodes in the render tree are determined, plus the determination of the size and position of each object on the page. _Reflow_ is any subsequent size and position determination of any part of the page or the entire document.\n\nOnce the render tree is built, layout commences. The render tree identifies which nodes are displayed (even if invisible) along with their computed styles, but not the nodes' dimensions or location. To determine the exact size and position of each object, the browser starts at the root of the render tree and traverses it."
+        },
+        {
+          "startLine": 181,
+          "endLine": 183,
+          "text": "### Paint\n\nThe last step in the critical rendering path is painting the individual nodes to the screen, the first occurrence of which is called the [first Meaningful Paint](/en-US/docs/Glossary/First_meaningful_paint). In the painting or rasterization phase, the browser converts each box calculated in the layout phase to actual pixels on the screen. Painting involves drawing every visual part of an element to the screen, including text, colors, borders, shadows, and replaced elements like buttons and images. The browser needs to do this super quickly."
+        }
+      ],
+      "excludedClaims": [
+        "不采用MDN文中的旧式TLS握手往返数、14KB、16.67ms或无实测性能数值。"
+      ]
+    },
+    {
+      "id": "http-rfc9110",
+      "canonicalUrl": "https://www.rfc-editor.org/rfc/rfc9110.html",
+      "canonicalAccess": {
+        "status": "unavailable",
+        "bodyReviewed": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "repository": "httpwg/http-core",
+      "commit": "3cdfb4df4dc47e75e9642efc99ab699a0495d883",
+      "repositoryFile": "rfc9110.xml",
+      "fixedSourceUrl": "https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9110.xml",
+      "retrievedUrl": "https://raw.githubusercontent.com/httpwg/http-core/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9110.xml",
+      "provenance": "IETF HTTP工作组公开仓库中的RFC9110发布XML。",
+      "retrieval": {
+        "status": 200,
+        "bytes": 601561,
+        "sha256": "22797e1c392d3a08cca9dca4d8affd7f3461fe574b333658c97b397627efb4d1",
+        "checkedAtUTC": "2026-10-25T14:55:12.541857+00:00"
+      },
+      "checkedAt": "2026-10-25",
+      "verificationStatus": "verified",
+      "excerpts": [
+        {
+          "startLine": 45,
+          "endLine": 45,
+          "text": "  <title>HTTP Semantics</title>"
+        },
+        {
+          "startLine": 85,
+          "endLine": 85,
+          "text": "  <date year=\"2022\" month=\"June\"/>"
+        },
+        {
+          "startLine": 1095,
+          "endLine": 1105,
+          "text": "</sourcecode>\n<t>\n   The origin server for an \"https\" URI is identified by the\n   <x:ref>authority</x:ref> component, which includes a host identifier\n   (<xref target=\"URI\" x:fmt=\",\" x:sec=\"3.2.2\"/>)\n   and optional port number (<xref target=\"URI\" x:fmt=\",\" x:sec=\"3.2.3\"/>).\n   If the port subcomponent is empty or not given, TCP port 443\n   (the reserved port for HTTP over TLS) is the default.\n   The origin determines who has the right to respond authoritatively to\n   requests that target the identified resource, as defined in\n   <xref target=\"https.origin\"/>."
+        },
+        {
+          "startLine": 3356,
+          "endLine": 3368,
+          "text": "<section title=\"Content-Type\" anchor=\"field.content-type\">\n  <x:anchor-alias value=\"header.content-type\"/>\n  <iref primary=\"true\" item=\"Fields\" subitem=\"Content-Type\" x:for-anchor=\"\"/><iref primary=\"true\" item=\"Header Fields\" subitem=\"Content-Type\" x:for-anchor=\"\"/><iref primary=\"true\" item=\"Content-Type header field\" x:for-anchor=\"\"/>\n  <x:anchor-alias value=\"Content-Type\"/>\n<t>\n   The \"Content-Type\" header field indicates the media type of the\n   associated representation: either the representation enclosed in\n   the message content or the <x:ref>selected representation</x:ref>, as determined by the\n   message semantics.  The indicated media type defines both the data format\n   and how that data is intended to be processed by a recipient, within the\n   scope of the received message semantics, after any content codings\n   indicated by <x:ref>Content-Encoding</x:ref> are decoded.\n</t>"
+        },
+        {
+          "startLine": 4657,
+          "endLine": 4662,
+          "text": "<t>\n   The GET method requests transfer of a current\n   <x:ref>selected representation</x:ref> for the\n   <x:ref>target resource</x:ref>.\n   A successful response reflects the quality of \"sameness\" identified by\n   the target URI (<xref target=\"URI\" section=\"1.2.2\"/>). Hence,"
+        },
+        {
+          "startLine": 8484,
+          "endLine": 8492,
+          "text": "<section title=\"200 OK\" anchor=\"status.200\">\n  <iref primary=\"true\" item=\"200 OK (status code)\" x:for-anchor=\"\"/>\n  <x:anchor-alias value=\"200 (OK)\"/>\n<t>\n   The 200 (OK) status code indicates that the request has\n   succeeded. The content sent in a 200 response depends on the request\n   method. For the methods defined by this specification, the intended meaning\n   of the content can be summarized as:\n</t>"
+        }
+      ]
+    },
+    {
+      "id": "tcp-rfc9293",
+      "canonicalUrl": "https://www.rfc-editor.org/rfc/rfc9293.html",
+      "canonicalAccess": {
+        "status": "unavailable",
+        "bodyReviewed": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "repository": "wesley-eddy/rfc9293bis",
+      "commit": "3baedef270170d063c66ef995fca1f72281a3912",
+      "repositoryFile": "rfc9293.xml",
+      "fixedSourceUrl": "https://github.com/wesley-eddy/rfc9293bis/blob/3baedef270170d063c66ef995fca1f72281a3912/rfc9293.xml",
+      "retrievedUrl": "https://raw.githubusercontent.com/wesley-eddy/rfc9293bis/3baedef270170d063c66ef995fca1f72281a3912/rfc9293.xml",
+      "provenance": "RFC9293署名编辑Wesley M. Eddy的公开仓库wesley-eddy/rfc9293bis，实读rfc9293.xml原始发布XML；不是IETF组织仓库，也不是同仓的draft-eddy-tcpm-rfc9293bis.xml草案。",
+      "retrieval": {
+        "status": 200,
+        "bytes": 521195,
+        "sha256": "f1e1de545db91fcd07cba806570df56ef8534bd97717dccd534ac92f37cacc98",
+        "checkedAtUTC": "2026-10-25T14:55:12.541857+00:00"
+      },
+      "checkedAt": "2026-10-25",
+      "verificationStatus": "verified",
+      "excerpts": [
+        {
+          "startLine": 1,
+          "endLine": 11,
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<rfc xmlns:xi=\"http://www.w3.org/2001/XInclude\" version=\"3\" category=\"std\" consensus=\"true\" docName=\"draft-ietf-tcpm-rfc793bis-28\" indexInclude=\"true\" ipr=\"pre5378Trust200902\" number=\"9293\" obsoletes=\"793, 879, 2873, 6093, 6429, 6528, 6691\" prepTime=\"2022-08-17T11:58:47\" scripts=\"Common,Latin\" sortRefs=\"true\" submissionType=\"IETF\" symRefs=\"false\" tocDepth=\"3\" tocInclude=\"true\" updates=\"1011, 1122, 5961\" xml:lang=\"en\">\n  <link href=\"https://datatracker.ietf.org/doc/draft-ietf-tcpm-rfc793bis-28\" rel=\"prev\"/>\n  <link href=\"https://dx.doi.org/10.17487/rfc9293\" rel=\"alternate\"/>\n  <link href=\"urn:issn:2070-1721\" rel=\"alternate\"/>\n  <front>\n    <title abbrev=\"TCP\">Transmission Control Protocol (TCP)</title>\n    <seriesInfo name=\"STD\" value=\"7\" stream=\"IETF\"/>\n    <seriesInfo name=\"RFC\" value=\"9293\" stream=\"IETF\"/>\n    <author fullname=\"Wesley M. Eddy\" initials=\"W.\" surname=\"Eddy\" role=\"editor\">\n      <organization abbrev=\"MTI Systems\" showOnFrontPage=\"true\">MTI Systems</organization>"
+        },
+        {
+          "startLine": 19,
+          "endLine": 21,
+          "text": "    <date month=\"08\" year=\"2022\"/>\n    <area>Transport</area>\n    <workgroup>TCPM</workgroup>"
+        },
+        {
+          "startLine": 386,
+          "endLine": 390,
+          "text": "      <section numbered=\"true\" toc=\"include\" removeInRFC=\"false\" pn=\"section-2.2\">\n        <name slugifiedName=\"name-key-tcp-concepts\">Key TCP Concepts</name>\n        <t indent=\"0\" pn=\"section-2.2-1\">TCP provides a reliable, in-order, byte-stream service to applications.</t>\n        <t indent=\"0\" pn=\"section-2.2-2\">The application byte-stream is conveyed over the network via TCP segments,\nwith each TCP segment sent as an Internet Protocol (IP) datagram.</t>"
+        },
+        {
+          "startLine": 1435,
+          "endLine": 1458,
+          "text": "  For a connection to be established or initialized, the two TCP peers must\n  synchronize on each other's initial sequence numbers.  This is done in\n  an exchange of connection-establishing segments carrying a control bit\n  called \"SYN\" (for synchronize) and the initial sequence numbers.  As a\n  shorthand, segments carrying the SYN bit are also called \"SYNs\".\n  Hence, the solution requires a suitable mechanism for picking an\n  initial sequence number and a slightly involved handshake to exchange\n  the ISNs.\n</t>\n          <t indent=\"0\" pn=\"section-3.4.1-9\">\n  The synchronization requires each side to send its own initial\n  sequence number and to receive a confirmation of it in acknowledgment\n  from the remote TCP peer.  Each side must also receive the remote peer's\n  initial sequence number and send a confirming acknowledgment.\n</t>\n          <artwork name=\"\" type=\"\" align=\"left\" alt=\"\" pn=\"section-3.4.1-10\">\n    1) A --&gt; B  SYN my sequence number is X\n    2) A &lt;-- B  ACK your sequence number is X\n    3) A &lt;-- B  SYN my sequence number is Y\n    4) A --&gt; B  ACK your sequence number is Y\n</artwork>\n          <t indent=\"0\" pn=\"section-3.4.1-11\">\n  Because steps 2 and 3 can be combined in a single message this is\n  called the three-way (or three message) handshake (3WHS)."
+        },
+        {
+          "startLine": 1657,
+          "endLine": 1687,
+          "text": "        <figure anchor=\"handshake\" align=\"left\" suppress-title=\"false\" pn=\"figure-6\">\n          <name slugifiedName=\"name-basic-three-way-handshake-f\">Basic Three-Way Handshake for Connection Synchronization</name>\n          <artwork name=\"\" type=\"\" align=\"left\" alt=\"\" pn=\"section-3.5-4.1\">\n    TCP Peer A                                           TCP Peer B\n\n1.  CLOSED                                               LISTEN\n\n2.  SYN-SENT    --&gt; &lt;SEQ=100&gt;&lt;CTL=SYN&gt;               --&gt; SYN-RECEIVED\n\n3.  ESTABLISHED &lt;-- &lt;SEQ=300&gt;&lt;ACK=101&gt;&lt;CTL=SYN,ACK&gt;  &lt;-- SYN-RECEIVED\n\n4.  ESTABLISHED --&gt; &lt;SEQ=101&gt;&lt;ACK=301&gt;&lt;CTL=ACK&gt;       --&gt; ESTABLISHED\n\n5.  ESTABLISHED --&gt; &lt;SEQ=101&gt;&lt;ACK=301&gt;&lt;CTL=ACK&gt;&lt;DATA&gt; --&gt; ESTABLISHED\n</artwork>\n        </figure>\n        <t indent=\"0\" pn=\"section-3.5-5\">\n  In line 2 of <xref target=\"handshake\" format=\"default\" sectionFormat=\"of\" derivedContent=\"Figure 6\"/>, TCP Peer A begins by sending a SYN segment\n  indicating that it will use sequence numbers starting with sequence\n  number 100.  In line 3, TCP Peer B sends a SYN and acknowledges the SYN it\n  received from TCP Peer A.  Note that the acknowledgment field indicates TCP Peer\n  B is now expecting to hear sequence 101, acknowledging the SYN that\n  occupied sequence 100.\n</t>\n        <t indent=\"0\" pn=\"section-3.5-6\">\n  At line 4, TCP Peer A responds with an empty segment containing an ACK for\n  TCP Peer B's SYN; and in line 5, TCP Peer A sends some data.  Note that the\n  sequence number of the segment in line 5 is the same as in line 4\n  because the ACK does not occupy sequence number space (if it did, we\n  would wind up ACKing ACKs!).\n</t>"
+        },
+        {
+          "startLine": 1720,
+          "endLine": 1726,
+          "text": "        <t indent=\"0\" pn=\"section-3.5-11\">\n  The principal reason for the three-way handshake is to prevent old\n  duplicate connection initiations from causing confusion.  To deal with\n  this, a special control message, reset, is specified.  If the\n  receiving TCP peer is in a  non-synchronized state (i.e., SYN-SENT,\n  SYN-RECEIVED), it returns to LISTEN on receiving an acceptable reset.\n  If the TCP peer is in one of the synchronized states (ESTABLISHED,"
+        }
+      ],
+      "versionEvidence": {
+        "rfcNumber": 9293,
+        "year": 2022,
+        "month": "08",
+        "editor": "Wesley M. Eddy",
+        "workgroup": "TCPM",
+        "publishedXml": true,
+        "draftFileUsed": false
+      }
+    },
+    {
+      "id": "tls-rfc9846",
+      "canonicalUrl": "https://www.rfc-editor.org/rfc/rfc9846.html",
+      "canonicalAccess": {
+        "status": "unavailable",
+        "bodyReviewed": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "repository": "tlswg/tls13-spec",
+      "commit": "c728b4efb4c12159371279227df6464541eafb58",
+      "repositoryFile": "rfc9846.md",
+      "fixedSourceUrl": "https://github.com/tlswg/tls13-spec/blob/c728b4efb4c12159371279227df6464541eafb58/rfc9846.md",
+      "retrievedUrl": "https://raw.githubusercontent.com/tlswg/tls13-spec/c728b4efb4c12159371279227df6464541eafb58/rfc9846.md",
+      "provenance": "IETF TLS工作组公开仓库中的rfc9846.md。",
+      "retrieval": {
+        "status": 200,
+        "bytes": 297659,
+        "sha256": "84da8cf41f1a6e4d94717d766d3e0fb47590348273f0f7cc63a366c0639233f3",
+        "checkedAtUTC": "2026-10-25T14:55:12.541857+00:00"
+      },
+      "checkedAt": "2026-10-25",
+      "verificationStatus": "verified",
+      "excerpts": [
+        {
+          "startLine": 1,
+          "endLine": 17,
+          "text": "---\ntitle: The Transport Layer Security (TLS) Protocol Version 1.3\nabbrev: TLS\nnumber: 9846\ndocname: draft-ietf-tls-rfc8446bis-14\nsubmissiontype: IETF\nconsensus: true\ncategory: std\nupdates: 5705, 6066\nobsoletes: 5077, 5246, 6961, 7627, 8422, 8446\nv: 3\nlang: en\nipr: pre5378Trust200902\ndate: 2026-07\narea: SEC\nworkgroup: tls\nstand_alone: yes"
+        },
+        {
+          "startLine": 693,
+          "endLine": 705,
+          "text": "# Protocol Overview\n\nThe cryptographic parameters used by the secure channel are produced by the\nTLS handshake protocol. This sub-protocol of TLS is used by the client\nand server when first communicating with each other.\nThe handshake protocol allows peers to negotiate a protocol version,\nselect cryptographic algorithms, authenticate each other (with\nclient authentication being optional), and establish shared secret keying material.\nOnce the handshake is complete, the peers use the established keys\nto protect the application-layer traffic.\n\nA failure of the handshake or other protocol error triggers the\ntermination of the connection, optionally preceded by an alert message"
+        },
+        {
+          "startLine": 767,
+          "endLine": 780,
+          "text": "The handshake can be thought of as having three phases (indicated\nin the diagram above):\n\n- Key Exchange: Establish shared keying material and select the\n   cryptographic parameters. Everything after this phase is\n   encrypted.\n\n- Server Parameters: Establish other handshake parameters\n   (whether the client is authenticated, application-layer protocol support, etc.).\n\n- Authentication: Authenticate the server (and, optionally, the client)\n   and provide key confirmation and handshake integrity.\n\nIn the Key Exchange phase, the client sends the ClientHello"
+        },
+        {
+          "startLine": 3819,
+          "endLine": 3828,
+          "text": "## Record Payload Protection\n\nThe record protection functions translate a TLSPlaintext structure into a\nTLSCiphertext structure. The deprotection functions reverse the process. In TLS 1.3,\nas opposed to previous versions of TLS, all ciphers are modeled as\n\"Authenticated Encryption with Associated Data\" (AEAD) {{RFC5116}}.\nAEAD functions provide a unified encryption and authentication\noperation which turns plaintext into authenticated ciphertext and\nback again. Each encrypted record consists of a plaintext header followed\nby an encrypted body, which itself contains a type and optional padding."
+        },
+        {
+          "startLine": 3914,
+          "endLine": 3923,
+          "text": "To decrypt and verify, the cipher takes as input the key, nonce,\nadditional data, and the AEADEncrypted value. The output is either the plaintext\nor an error indicating that the decryption failed. There is no separate\nintegrity check. Symbolically,\n\n     plaintext of encrypted_record =\n         AEAD-Decrypt(peer_write_key, nonce, additional_data, AEADEncrypted)\n\nIf the decryption fails, the receiver MUST terminate the connection\nwith a \"bad_record_mac\" alert."
+        }
+      ],
+      "versionEvidence": {
+        "rfcNumber": 9846,
+        "date": "2026-07",
+        "obsoletesIncludes": 8446
+      }
+    }
+  ]
+}
