@@ -118,7 +118,7 @@ passed = (
 )
 rms_db = lambda data: float(20*np.log10(np.sqrt(np.mean(data**2))+1e-20))
 report = {
-    'revision': 'adapter-pattern-first-release', 'episode': D.name,
+    'revision': 'adapter-pattern-business-boundary-v2', 'episode': D.name,
     'checkedAtUTC': datetime.now(timezone.utc).isoformat(), 'executor': '/root/observer_voice',
     'comparisonScript': 'check-encoded-voice.py',
     'comparisonScriptSHA256': sha(Path(__file__).resolve()),

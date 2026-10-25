@@ -1,8 +1,8 @@
 # D03 适配器模式：正式调研与事实映射
 
-访问日期：**2026-10-25（北京时间）**。开工基线`ff730833e37e39edf9962ad414b0f325755adc73`。通过允许访问的官方GitHub源读取正文，没有绕过当前网络限制访问其他站点。未取得GoF经典书籍全文，不声称读过相关完整章节；此前Refactoring.Guru记录不当作本次重读。
+访问日期：**2026-10-25（北京时间）**。首发开工基线`ff730833e37e39edf9962ad414b0f325755adc73`；用户观看v0.63.0后的本轮修订从最新主干`5a5594fb`开始。通过允许访问的官方GitHub源读取正文，没有绕过当前网络限制访问其他站点。未取得GoF经典书籍全文，不声称读过相关完整章节；此前Refactoring.Guru记录不当作本次重读。
 
-本期唯一问题：**已有通知服务的使用方式与业务目标约定不兼容时，怎样把原有能力接进业务，同时保留请求和结果的含义？** 用商家向订单17买家发送一条发货提醒展开，不固定为真实短信/邮件供应方，不把教学UI当作真实产品源码证据。
+本轮唯一问题：**为什么在日常接入外部接口时主动包一层，让外部能力符合业务自己的约定，并隔离外部格式升级？** 用户指出首发讲法复杂且像被迫包装，因此本轮10镜20句先讲两项收益，再以原订单17提醒演一次去回和一次升级对照。规则/结果边界继续正确，但不再抢占主线；不固定真实短信/邮件供应方，不把教学UI当作真实产品源码证据。
 
 ## 实际阅读来源
 
@@ -12,6 +12,8 @@
 | S2 | [HTTPwg官方RFC9110 XML](https://github.com/httpwg/http-core/blob/bde37f634681bd5462568b73aa722af9c9a3ef5e/rfc9110.xml#L8578)，标准日期2022-06；读取快照commit `bde37f634681bd5462568b73aa722af9c9a3ef5e`（2025-11-14T08:08:17Z） | editor实际读§15.3.3/202 Accepted源码8578–8599行。接受处理不等于处理完成，请求最终可能不被执行；结果可以指向状态监控。用于核对“受理≠完成”语义边界 | 教学VendorSdk的QUEUED由本项目契约定义，不能因语义类似就声称它实现HTTP202。没有用RFC替自造SDK编造官方规范 |
 | S3 | [OpenJDK21 Enumeration.asIterator](https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/util/Enumeration.java#L85)与[Iterator可选remove](https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/util/Iterator.java#L76)，jdk-21.0.8+9，commit `54f2095960f01d957f2335cafa0defb956e13a2c`（2025-07-09） | pattern_java取得并读完整源，editor另复读Enumeration28–129和Iterator58–105行。API注释说明将产出Enumeration的代码接到消费Iterator的代码；匿名Iterator真实委托原实例，remove仍抛不支持。支持适配使用约定与缺失能力不自动补齐的边界例 | 原Enumeration在asIterator后再直接遍历的语义未定义；匿名类捕获外部实例，不说它显式定义了持有字段。这里只参考设计关系，不把旧接口推荐为新业务API，不在视频展开遍历 |
 | S4 | [Spring官方HandlerAdapter](https://github.com/spring-projects/spring-framework/blob/7bdf9c86f8657029567067051b7c6bd47b4ae67e/spring-webmvc/src/main/java/org/springframework/web/servlet/HandlerAdapter.java)与[HttpRequestHandlerAdapter](https://github.com/spring-projects/spring-framework/blob/7bdf9c86f8657029567067051b7c6bd47b4ae67e/spring-webmvc/src/main/java/org/springframework/web/servlet/mvc/HttpRequestHandlerAdapter.java)，同S1主干快照 | editor实际读完整源。共同SPI使DispatcherServlet不用包含具体handler类型的代码，具体适配器检查支持类型后委托handleRequest。用于交叉核对统一使用约定与实际委托 | 这里handler经每次参数传入，没有显式保存adaptee字段；不拿它证明本片“持有SDK对象”的结构，也不照搬框架全流程 |
+| S5 | [Microsoft官方Anti-Corruption Layer文档源](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/anti-corruption-layer.md)，commit `b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a`（2026-10-24），Frontmatter ms.date为2026-05-28 | pattern_java本轮实际读完整106行；editor另通过GitHub connector重读完整正文。说明可用facade/adapter层转换通信，业务侧继续用自己的数据模型，核心目的是保护领域模型；还讨论维护、延迟与语义差异的适用范围 | Adapter不是ACL同义词。文档对没有显著语义差异的系统也有限制，不能把一层技术字段包装就宣称为完整领域防腐架构；本例只演示保护业务用法、把外部细节留边界的作用，业务规则仍在业务方 |
+| S6 | [OpenJDK21 FilterInputStream](https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/io/FilterInputStream.java#L28)，同S3固定commit | pattern_java本轮实际读28–75行：官方说wraps另一个输入流，仍沿InputStream约定工作。用于挑战“只要持有/包装另一个对象就是Adapter”的不足判断标准 | 源码未给出GoF分类；本例只证明wrapper结构本身不充分，不能据此给所有包装/装饰/代理下结论 |
 
 本次editor来源URL、Git blob SHA、短摘录与读取范围保存在[`sources/editor-evidence.json`](sources/editor-evidence.json)。S1 blob为`38be515d885c408159cfba4382fe52169bf118d0`，S2 blob为`08e100400c819548ea4aec262e2d4d78d18321fa`；blob SHA与commit SHA含义不同，不混写。S4通过同次主干完整读取，不以类名独自判断设计意图。
 
@@ -25,36 +27,47 @@ pattern_java另实际读取同一OpenJDK21固定commit的InputStreamReader、Exc
 
 这些是实际阅读与版本记录，不是本片已完成动态/成片检查，也不声称读过完整JLS或全部Spring文档。
 
+本轮业务边界来源、实际完整文件SHA/范围/短引和采用限制见[`sources/business-boundary-evidence.json`](sources/business-boundary-evidence.json)。S5文件SHA256为`2c2f1586eb46629a57470c70ef645bfaf60428125654171780dfcfdf2380e48a`，Git blob为`5c75242fdf4cc3c264d6a80145eef3159c02692d`，二者不要混同。
+
 ## 关键短引
 
 - S1：`Adapter that takes a JDK java.util.concurrent.Executor ... exposes a Spring ... TaskExecutor`；字段`private final Executor concurrentExecutor`；真实调用`concurrentExecutor.execute(...)`。转换后仍委托原对象，不是仅改名。
 - S2：`accepted for processing, but the processing has not been completed`；`might or might not eventually be acted upon`。已接受处理不能推出最终完成。
 - S3：`adapt code that produces Enumeration instances to code that consumes Iterator instances`；默认remove抛`UnsupportedOperationException`。适配不是自动创造原实例没有的操作。
 
+- S5：`Communication ... always uses the data model and architecture of subsystem A`；`core purpose ... protect the domain model`。支持业务保有自身表达和边界保护目的，不支持把Adapter等同完整ACL。
+- S6：`wraps some other input stream`，仍为InputStream使用约定。只凭包装/委托不够识别适配器，必须核对目标约定和转换意图。
+
 ## 片内事实与证据映射
 
 | 使用位置 | 事实/设计关系 | 证据与范围 |
 |---|---|---|
-| 01–02 | 订单17发货提醒的产品操作、业务需要受理结果，与外部格式不同 | 本项目自造教学示例，所有输入标示例；没有真实外发或真实厂商架构断言 |
-| 03–04 | Client依赖Target；本例Adapter履行Target并持有Adaptee；契约不是运行中继 | S1/S3/S4交叉核对与本例实际源码；本片采用对象适配器，不声明所有适配器都采用同一种组合实现 |
-| 05–06 | 同一recipient/text转换成target/body后，真正委托SDK | demo源码及12组行为验证捕获字段与调用次数；正文不讲Java语法 |
-| 07–08 | QUEUED/Q17→ACCEPTED/Q17，回同一产品页已受理/等待回执 | 本例契约+实际运行；S2仅支持接受不等于完成的标准边界，不证明SDK使用HTTP202 |
-| 09 | 明确拒绝可映射拒绝；通信异常/未知不能改成确定接受或拒绝 | 本例SendFailure政策、受理后丢包等实际验证；SDK异常cause保留，无自动重试 |
-| 10–12 | 业务目标约定不变时隔离服务使用细节，装配/配置仍需改；额外转换层有成本 | 对本例依赖/代码关系的设计分析；不声称普遍提高性能或零修改，S3作缺失能力辅助例 |
+| 01–02 | 主动按业务定义收件人/正文→受理结果的约定，把外部细节集中到边界 | S1/S5支持消费方目标/保护自身模型，原订单17教学例给出具体业务约定；不等一次旧接口事故才设计 |
+| 03 | Client依赖Target，Adapter履行Target并持有服务；Target不是运行中转 | S1/S3/S4与V1源实际关系；本片对象适配器，不声明所有实现必须组合持有 |
+| 04–06 | 同次V1请求先转入参并调用服务，再转结果回UI；Q17原样保留 | 原AdapterDemo/VerifyAdapter字节保持，原12组运行继续通过；完整去回未省略为纯概念口号 |
+| 07–08 | 外部输入改为destination/content，回执多包一层，V2Adapter/创建接线变，业务类型/调用保持 | 新AdapterUpgradeDemo/VerifyAdapterUpgrade与新增8组实际验证；独立V2测试不当作页面第二次提交，版本变化不在运行中热插 |
+| 09 | 保护业务自己的规则/用法有防腐作用，仍有维护和能力前提 | S5原文及本例依赖边界；不声称完整ACL，不把业务规则搬到转换层，不把所有wrapper叫Adapter |
+| 10 | 两项收益回扣：业务定约定、集中外部差异与升级影响 | 对本例结构与已验证变化范围的设计分析；只在业务需要/含义保持且可实现时隔离本次格式变化，不保证所有升级无影响 |
+| 页面短标签/图文扩展 | 受理不等于送达，技术未知不能当确定拒绝，未补出可靠送达能力 | 原V1十二组和V2八组边界验证；S2支持接受不等于处理完成，但SDK协议是教学自定义，不能说用了HTTP202 |
 
-## 教学SDK冻结契约与实际运行
+## V1/V2例子的实际变化范围
 
-- 提醒目标只要求**提交并返回受理结果**，不承诺送达。
-- `ShipmentReminder`只使用`Notifier`，不解释供应方DTO或原状态。
-- `NotificationAdapter`持有`VendorSdk`，将`recipient/text`原值对应到`Payload(target,body)`，每次提交只委托一次。
-- 明确`QUEUED`且有非空ticket时返回`ACCEPTED`和同一编号；明确`REJECTED`返回业务拒绝和空reference。
-- null/空/未知回执或QUEUED缺编号属于未确认，抛`SendFailure`；供应方技术异常转换并保存cause。不能把“调用没拿到回包”当作“供应方必定没收到”。无自动重试、去重或投递事务承诺。
-- `FakeVendorSdk`无网络，只模拟协议结果；它不真的排队/投递提醒，不能被当成真实服务能力证据。
+| 项目 | V1 | V2/保留情况 |
+|---|---|---|
+| 输入 | Payload(target,body) | Envelope(destination,content) |
+| 回执 | RawReceipt(status=QUEUED,ticket=Q17) | ReplyV2(receipt=ReceiptV2(state=ENQUEUED,reference=Q17)) |
+| 业务结果 | Submission(ACCEPTED,Q17) | 同一含义和编号，均未确认送达 |
+| 业务约定/使用者 | Notifier/Submission/ShipmentReminder | 直接复用原AdapterDemo的类型，原业务类字节不变 |
+| 变化 | 原NotificationAdapter与外部接线 | 新NotificationAdapterV2及服务创建/接线；维护请求、嵌套结果和错误映射 |
 
-[`demo-java/AdapterDemo.java`](demo-java/AdapterDemo.java)与独立[`VerifyAdapter.java`](demo-java/VerifyAdapter.java)已由pattern_java在OpenJDK21实际编译运行，12类行为场景通过，卡片21行逐字来自完整源。实际结果、编译命令和源码SHA见[`demo-java/verified-results.json`](demo-java/verified-results.json)。这证明所选实现行为，不是消息真实送达、视频已经教懂或用户已观看的结论。
+[`demo-java/AdapterDemo.java`](demo-java/AdapterDemo.java)和原[`VerifyAdapter.java`](demo-java/VerifyAdapter.java)完整字节保留。新[`AdapterUpgradeDemo.java`](demo-java/AdapterUpgradeDemo.java)需要与原文件共同编译，以复用既有业务类型；新增[`VerifyAdapterUpgrade.java`](demo-java/VerifyAdapterUpgrade.java)检查V2。统一运行的实际结果见[`demo-java/verified-results.json`](demo-java/verified-results.json)：Java21下原12组＋升级8组共20组通过；当前卡片15行与新源节选同源，不再沿用首发21行错误防护主体。
 
-## 叙事、图文与不进入主片的支线
+V1/V2教学SDK无网络、无真实外发。程序中两版本是各自独立的测试请求；视频07–08只是后来升级的静态开发对照，不再次发送提醒。测试同时覆盖空/未知嵌套回执、缺编号、技术失败前后未确认、字段/编号精确保留、不暗中重试等；它们保证当前示例行为，不作真实供应方保证。
 
-01先看一次产品操作和已受理目标，02明确回到接入前，避免在正在运行的请求中“现造”适配器。03逐角色、04模式名，05再回看同一次提交；运行路径Client→Adapter→SDK，返回原路，Target只作契约依赖。页面/结构/Java保持同一对象、收件人、正文和Q17。
+## 当前叙事与能力边界
 
-拒绝与未知只作一段语义规则，不再发第二条；第二SDK、复杂异常恢复、回执查询或消息中间件不展开。Java关键节选只连接角色与实现，完整代码放图文复查，正文不变成语言课。转换的意义和限制在视频闭环，图文只补字段与证据。实际动态/媒体检查另行记录，不用资料阅读或Java运行替代。
+产品操作→两项主动收益→四角色→一次完整运行→后来一次升级隔离→简短防腐作用/成本→两收益回收。原来接口对不上、拒绝/未知及能力限制的连续解释不再构成视频主线。Target仍只表示契约，真实消息沿业务方→适配器→服务、结果原路返回；Java后置，不逐行教语法。
+
+“主动包装”本身不等于Adapter，必须有目标约定、把已有接口转换到该用法的意图和委托。完整ACL是保护领域模型的架构目的，可使用Adapter/Facade等，更可能包含业务语义转换；本片主要演示接口技术细节的边界隔离。没有语义冲突时不因一层薄包装就自称完整ACL。
+
+旧受理/送达、拒绝/未知、异常保留与无自动重试规则仍在Java和文章扩展中；目标约定/服务能力不足时，上层也可能变化。资料阅读、编译运行、动态和正式媒体检查分开记录，不预写新稿用户认可、完整听辨、ASR或新手实验结果。

@@ -1,7 +1,7 @@
 {
   "status": "passed",
   "executedBy": "Codex pattern_java",
-  "checkedAtBeijing": "2026-10-25T10:35:59.491431+08:00",
+  "checkedAtBeijing": "2026-10-25T15:21:14.406106+08:00",
   "compiler": "javac 21.0.12.1",
   "runtime": "openjdk version \"21.0.12.1\" 2026-08-18\nOpenJDK Runtime Environment (build 21.0.12.1+1-1-deb13u1-Debian)\nOpenJDK 64-Bit Server VM (build 21.0.12.1+1-1-deb13u1-Debian, mixed mode, sharing)",
   "compileCommand": [
@@ -13,22 +13,33 @@
     "-d",
     "<temporary build>",
     "AdapterDemo.java",
-    "VerifyAdapter.java"
+    "VerifyAdapter.java",
+    "AdapterUpgradeDemo.java",
+    "VerifyAdapterUpgrade.java"
   ],
   "runCommands": [
     "java -cp <temporary build> AdapterDemo",
-    "java -cp <temporary build> VerifyAdapter"
+    "java -cp <temporary build> VerifyAdapter",
+    "java -cp <temporary build> AdapterUpgradeDemo",
+    "java -cp <temporary build> VerifyAdapterUpgrade"
   ],
   "sources": {
     "AdapterDemo.java": "16752e4035fc5ff488f60d2683383bb43cf20ccfc74de7deff4fde7fa297f125",
     "VerifyAdapter.java": "afa0de7686dd42d7cab98d0a29057056c4a2d54ca20e02d0787a1989abc616c4",
-    "verify.py": "8ebdcca8b188dc48b8c294a6863a1037ccd93f60efb86a4d479106b044dc8898",
-    "source-review.json": "abaf7b420c8e2ee414da922dcab03140484ab196294ef2be2da8b3d471109529"
+    "AdapterUpgradeDemo.java": "00dfd9dbf790623bb74127ea845c85aac9c2d3bda782bec654ebf602aa394338",
+    "VerifyAdapterUpgrade.java": "7cf7a0f05b97f269130f574d5d191315a2bed3dcdbbdc86423bae99ce11bf5a3",
+    "verify.py": "6df0d461a960385f91d7f0cbce0a000073980770f237208b8c14c647a62d5905",
+    "source-review.json": "abaf7b420c8e2ee414da922dcab03140484ab196294ef2be2da8b3d471109529",
+    "business-boundary-evidence.json": "f65c79d4f83a2e0fde2ca78fa4c5fbade4c954c100b7edb6343c6bbd3a8337d6"
   },
-  "cardSha256": "3f3a298efe19e883d4b79fdc2aa910ee2980f963774101514643bd70b8ccfc04",
-  "cardLineCount": 21,
-  "longestCardLineCharacters": 89,
-  "allDisplayedLinesMatchSource": true,
+  "cardSha256": "43573532b964b6e518823f5dbe168ae30febb312a64bf330668f64297f4cf066",
+  "preservedV1Sources": {
+    "AdapterDemo.java": "16752e4035fc5ff488f60d2683383bb43cf20ccfc74de7deff4fde7fa297f125",
+    "VerifyAdapter.java": "afa0de7686dd42d7cab98d0a29057056c4a2d54ca20e02d0787a1989abc616c4"
+  },
+  "cardLineCount": 15,
+  "longestCardLineCharacters": 79,
+  "allDisplayedNonblankLinesMatchSource": true,
   "demoStdout": "教学模拟，不会外发\n订单17发货提醒：ACCEPTED/Q17\n已受理，等待送达回执；并非已送达",
   "results": {
     "passed": true,
@@ -52,5 +63,25 @@
     "11. two submissions delegate independently without cached result or silent deduplication",
     "12. client works with independent Notifier doubles and preserves unknown failure"
   ],
+  "upgradeDemoStdout": "教学模拟，不会外发；V1/V2是两次独立验证\nV1=ACCEPTED/Q17\nV2=ACCEPTED/Q17\n业务调用相同；ACCEPTED仅表示受理，未确认送达",
+  "upgradeResults": {
+    "passed": true,
+    "behaviorCases": 8,
+    "bothVersionsResult": "ACCEPTED/Q17",
+    "independentVersionRequests": true,
+    "automaticRetry": false,
+    "realExternalSend": false
+  },
+  "upgradeBehaviorMatrix": [
+    "1. same unchanged business call receives ACCEPTED/Q17 from both independently invoked SDK versions",
+    "2. V2 DECLINED maps to the same REJECTED and empty business reference",
+    "3. six invalid V2 business inputs fail before delegation",
+    "4. null V2 wrapper, nested receipt and missing states are unconfirmed",
+    "5. unknown V2 state, including V1 QUEUED, cannot silently imply acceptance",
+    "6. V2 ENQUEUED needs a nonblank original reference",
+    "7. V2 failures before and after simulated acceptance preserve unknown outcome and cause without retry",
+    "8. V2 Unicode fields and reference stay exact; consecutive calls have independent results"
+  ],
+  "totalBehaviorCases": 20,
   "scope": "Complete local Java program and contract behavior, plus exact source excerpt. No real vendor/network delivery, video-quality or learning-effect claim."
 }
