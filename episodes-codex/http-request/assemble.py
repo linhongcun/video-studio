@@ -2,7 +2,7 @@
 
 No ASR or inferred word timestamps: each sentence is one timing token. Only
 sentence-initial cues may be synchronized with the shared acoustic onset rule.
-The official Whisper model is unavailable under this environment's network policy.
+This assembly does not perform ASR or human listening; see voice/substitutions.md for the current capability record.
 """
 from pathlib import Path
 import hashlib
@@ -111,20 +111,20 @@ for (n, slug, body), ws in zip(sections, words_shots):
                 timing=dict(source=source,wavFrom=ws['speechStartFrame'],wavTo=ws['speechEndFrame'],
                             holdFrames=0,
                             holdReason='Whole audio stays at frame zero; natural pauses are already in the waveform.'),
-                frame=('browser' if (D.name=='http-request' and int(n) in [1,2,9,10,11]) or int(n)==1 else 'canvas'), camera=None,boxShot=False,mapShot=False,
+                frame=('browser' if (int(n) in config['browserShots'] if 'browserShots' in config else slug in {'hook', 'url', 'paint'}) else 'canvas'), camera=None,boxShot=False,mapShot=False,
                 scriptVisual=visual,direction=visual,elements=elements,animations=[],
                 transition=dict(type='cut',durationInFrames=0))
     shots.append(shot)
 save(D/'voice/cues.json', cues)
 save(D/'voice/cue_tests.json', [[c['shot'],c['cue']] for c in cues])
 covers = json.loads((D/'covers.json').read_text()) if (D/'covers.json').exists() else {}
-sb = dict(meta=dict(title=config['title'],episode=config['ep'],slug=D.name+'-codex-v1',
+sb = dict(meta=dict(title=config['title'],episode=config['ep'],slug=D.name+'-codex-v2',
                     width=1920,height=1080,fps=30,durationInFrames=words['durationFrames'],finalVideoFrames=words['durationFrames'],
                     draft=True,provisionalTiming=False,pendingAudio=False,
                     timingSource=source,
                     onsetRule=dict(module='episodes/_shared/onset_rule.py',checker='episodes/_shared/label_onset_strict.py',window=[-6,2]),
                     style='Progressive reveal, continuous objects and causal motion; one example, dark page body, browser chrome only for an actual page; no metaphor.',
-                    visualRevision=1,visualDirection='visual-direction.md',
+                    visualRevision=2,visualDirection='visual-direction.md',
                     palette=dict(bg='#0F172A',text='#E5E7EB'),
                     sampleDataLabel='教学示意 · 示例数据',
                     boxShots=[],mapShots=[],devtoolsShots=[],covers=covers,

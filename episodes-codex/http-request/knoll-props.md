@@ -1,48 +1,39 @@
-# EP.01 http-request-codex-v1 浏览器输入网址后发生了什么？
+# EP.01 HTTP请求：技术细节版制作说明
 
-依据：storyboard.json 43563d31；covers.json bf5e8028。冻结副本为storyboard.43563d31.json，freeze.py写入时逐字节复制。
-script 37741cd9 / voice f503e22b / words fafecb46 / cues 7c79d498 / shot_frames b71d07cc；3417帧，12镜。画面1920×1080、30fps，封面16:9、4:3、3:4。
+本轮由用户观看反馈触发（#283），17镜34句，5406帧/180.2秒，1920×1080、30fps。沿同一shop.example/products/42商品页，四段总览中建连接展开TCP与TLS。
 
-## 相对上一制作轮次的变化
+真实配音SHA-256：`60d4b10d0e57abea68918ed576086721c50ddcb50cdef422956707b229e0f53a`；脚本SHA-256：`fae264f755fd010023d2a9d76ff271d2ea8e3a30638b860d5e6ed78df30f8ff1`。声音不变速；只记录句级真实边界与声学起音，不声称逐字ASR或人工听辨。
 
-全片新配音、新分镜、新主题动画与封面，必须全量渲染。上一轮视频不作为来源；本轮不使用实物比喻，不将全流程图套进浏览器。
+## 当前实现
 
-## Knoll必读
+Main.tsx读取冻结分镜并以整轨从0帧播放。Scenes.tsx按production.json的slug定位画面；句首cue启动术语标题，第二句边界驱动后续动作。导航由五个具体阶段组成，TCP/TLS用括组归入四段总览的建连接。HTTP/1.1请求与响应是两处报文节选，明确为TLS解密后的教学明文。
 
-Main.tsx读取冻结分镜时序；Scenes.tsx按production.json中的本期镜序执行主题动作。Primitives.tsx只提供文字、逻辑节点、传输路径和真网页。网页使用深色pageBg/pageInk；没有DevTools。角色位置尽量保持，当前步骤才揭示。句首术语标签由cueFrames驱动，不靠估算句内字时序。
+三次握手沿固定两端逐镜保留：SYN seq1000；SYN+ACK seq5000 ack1001；ACK seq1001 ack5001。客户端收到第二次有效报文时进入已建立，服务端收到第三次才进入。09明确为同一第三次报文的解释回看。资源请求复用原连接，样式先返回、图片延续到布局绘制时才补齐。DOM/CSSOM节点对应原商品页标题/价格/按钮。
 
-cueOnset、timing、scriptVisual、direction、assets为检查/制作字段，渲染不直接读取；渲染读取from、durationInFrames、subtitles、cueFrames与production.json。strike本期不用。
+## 时序
 
-## 画面类型与时间轴
+|镜|slug|起帧|帧数|画面类型|
+|---|---|---:|---:|---|
+|01|hook|0|233|browser|
+|02|overview|233|386|canvas|
+|03|url|619|285|canvas|
+|04|dns|904|272|canvas|
+|05|tcp|1176|245|canvas|
+|06|syn|1421|292|canvas|
+|07|synack|1713|389|canvas|
+|08|ack|2102|297|canvas|
+|09|why-third|2399|248|canvas|
+|10|tls|2647|312|canvas|
+|11|request|2959|345|canvas|
+|12|response|3304|264|canvas|
+|13|resources|3568|360|canvas|
+|14|parse|3928|336|canvas|
+|15|paint|4264|337|browser|
+|16|variants|4601|371|canvas|
+|17|recap|4972|434|canvas|
 
-| 镜 | id | frame | 绝对起帧 | 帧数 |
-|---|---|---|---|---|
-| 1 | 01 | browser | 0 | 229 |
-| 2 | 02 | browser | 229 | 253 |
-| 3 | 03 | canvas | 482 | 305 |
-| 4 | 04 | canvas | 787 | 274 |
-| 5 | 05 | canvas | 1061 | 274 |
-| 6 | 06 | canvas | 1335 | 244 |
-| 7 | 07 | canvas | 1579 | 226 |
-| 8 | 08 | canvas | 1805 | 307 |
-| 9 | 09 | browser | 2112 | 310 |
-| 10 | 10 | browser | 2422 | 305 |
-| 11 | 11 | browser | 2727 | 310 |
-| 12 | 12 | canvas | 3037 | 380 |
+## 冻结与出片
 
-## 页型与接续
+所有写入方停写、真实动态复核闭合后执行freeze.py；该入口写入storyboard快照、public分镜占位和source-sha256.json。再运行preflight.py、共享whole铺轨检查和label_onset_strict.py。正式产物由remotion/package.json的render脚本先编码H.264、再经共享mix_bgm.py混到−16LUFS；audit_encoded.py逐文件复核冻结清单、帧数、全解码、音量并抽编码帧，实际视觉仍需独立查看。
 
-只有实际网页使用Page组件，地址栏是保留示例网址。其余为全屏讲解画布；无窗口标签、无假应用窗。当前对象的来源和结果通过路径运动、状态变更、渐进绘制表达，分镜direction与visual-direction.md逐镜对应。
-
-## 术语与同步
-
-- 镜04 dnsLabel：域名解析，[130,175,1660,77]，字号57，本镜第1帧入场；对「域名解析」句首声学起音1.23帧。
-- 镜06 requestLabel：HTTP请求，[130,175,1660,77]，字号57，本镜第1帧入场；对「HTTP请求」句首声学起音1.32帧。
-
-## 封面
-
-三个尺寸均由本期Cover生成，正文、图示、品牌说明在textBoxes记录；4:3内容严格落在x315..1125与y<918，水印单独放在右上。poster取3:4。封面标题和图示来自production.json，位置来自covers.json。
-
-## 讨论与下期
-
-boxShots=[]，无讨论题，不编下一期预告。末镜品牌为IT小村 · 原创。
+封面三尺寸由covers脚本读取production和covers.json产生。4:3内容在x315..1125、y<918；本轮只上站点，历史平台链接保持。修前输入/技术检查以revisions/technical-depth-v2/与Git基线追溯，新版检查不能改写用户否定旧版深度的反馈。
