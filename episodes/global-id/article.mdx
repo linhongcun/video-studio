@@ -1,9 +1,10 @@
 ---
 title: 分布式 ID：两个订单，怎么撞成同一个号了？
-summary: 独立分片各自自增，编号可能重复。用时间、生成器编号与同毫秒序号解释雪花算法，并说明编号唯一、时间和状态处理的前提。
+summary: 分布式 ID 有多种实现：简述随机 UUID 与 Redis 自增，再用时间、生成器编号与同毫秒序号解释雪花算法，并说明各自的唯一性前提。
 chapters:
   - { id: hook, title: 两笔订单同一个号 }
   - { id: local, title: 本表自增为何不够 }
+  - { id: methods, title: 分布式 ID 不只有雪花 }
   - { id: snowflake, title: 三部分如何区分 }
   - { id: conditions, title: 不重复需要前提 }
   - { id: recap, title: 三种差异各管什么 }
@@ -20,7 +21,16 @@ related: ["db-sharding", "distributed-tx"]
 
 MySQL的AUTO_INCREMENT能为记录自动生成编号，官方示例配合主键约束使用。约束保障的是所在表，独立分片之间不会自动交换“某个号已经被使用”的信息。[^auto][^current]
 
-可以规划不同起点和步长，也可以采用独立发号服务、号段或UUID等方案。本期只讲雪花算法一条主线，不暗示自增永远不能用于分布式设计。
+也可以统一规划不同起点和步长等生成规则，不能把本表自增的局限理解为自增永远不能用于分布式设计。
+
+## 分布式 ID 不只有雪花 {#methods}
+
+分布式 ID 有很多实现方式，雪花算法只是其中一种经典方案。先认识另外两种思路：
+
+- **随机 UUID（UUIDv4）：**各节点可以在本地生成编号，不必每次请求中心发号服务。它依靠随机性让碰撞概率很低，而非承诺数学上的绝对不重复；需要采用可靠的随机源和正确实现。UUID 还有其他版本，不能把所有 UUID 都理解成纯随机数。[^uuid]
+- **Redis 自增：**多个节点向同一个计数器执行 `INCR`，利用原子递增集中分配编号。这种做法服务于分布式应用，但取号本身有一个共同的计数来源；多个独立计数器各自从一开始，仍可能撞号。还要防止计数器被重置、过期或因故障恢复而回退：持久化与主从切换的配置会影响数据丢失风险，原子递增本身不保证故障后永不重复。[^incr][^persistence][^replication]
+
+这些是不同的生成方式与取舍，不是雪花算法的别名。下面聚焦雪花算法，解释它怎样让不同生成器分别生成编号。
 
 ## 三部分如何区分 {#snowflake}
 
@@ -59,10 +69,14 @@ JavaScript的Number安全整数最大值为`9007199254740991`。本片17位示�
 
 ## 参考资料
 
-以下官方正文及原始代码均于2026-10-24实际核验；2010—2012原实现标为仅参考，详细主张和适用范围见research.md。
+原有官方正文及原始代码于2026-10-24实际核验；本轮 UUID 与 Redis 官方资料于2026-10-25实际核验。2010—2012原实现标为仅参考，详细主张和适用范围见research.md。
 
 [^auto]: [MySQL 8.4 Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html)
 [^current]: [Apache ShardingSphere Key Generate Algorithm](https://shardingsphere.apache.org/document/current/en/user-manual/common-config/builtin-algorithm/keygen/)
 [^original]: [Twitter archived IdWorker.scala，仅参考](https://github.com/twitter-archive/snowflake/blob/snowflake-2010/src/main/scala/com/twitter/service/snowflake/IdWorker.scala)
 [^implementation]: [Apache ShardingSphere SnowflakeKeyGenerateAlgorithm.java](https://github.com/apache/shardingsphere/blob/master/infra/algorithm/type/key-generator/type/snowflake/src/main/java/org/apache/shardingsphere/infra/algorithm/keygen/snowflake/SnowflakeKeyGenerateAlgorithm.java)
 [^number]: [MDN Number.MAX_SAFE_INTEGER](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER)；[MDN BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt)
+[^uuid]: [RFC 9562（2024）§5.4 UUIDv4](https://www.rfc-editor.org/rfc/rfc9562.html#section-5.4)、[§6.4 分布式生成](https://www.rfc-editor.org/rfc/rfc9562.html#section-6.4)、[§6.8 唯一性与 §6.9 随机源](https://www.rfc-editor.org/rfc/rfc9562.html#section-6.8)
+[^incr]: [Redis INCR：原子递增与计数器模式](https://redis.io/docs/latest/commands/incr/)
+[^persistence]: [Redis persistence：RDB 与 AOF 的数据丢失窗口](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/)
+[^replication]: [Redis replication：异步复制与故障转移的数据丢失风险](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/)

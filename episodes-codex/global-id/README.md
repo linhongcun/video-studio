@@ -1,4 +1,24 @@
-# EP.20《两个订单，怎么撞成同一个号了？》
+# EP.20《分布式 ID：两个订单，怎么撞成同一个号了？》
+
+
+## 当前方案定位补充（2026-10-25）
+
+用户指出只有雪花算法会让观众误以为它就是分布式ID。当前在原06/07之间新增16-options、17-redis两镜5句：先点明多种实现，再用随机UUID本地生成与Redis共同计数器取号作简短示例，保留碰撞概率/随机源与故障回退边界，最后回到雪花主线。新增741帧24.7秒，全片5160帧172秒，17镜35句7章；标题、slug、创建/首发时间保持，按实质内容修改更新修改时间。
+
+制作基线`11dd6fbb0109c6e18321e8bc2ecb5e65516e98f7`，原媒体与声音存于`revisions/methods-before/`。上一轮仅改文章命名，导致旧105项冻结清单中article一项与原编码输入不同；104项声音和视觉等来源仍一致，已在baseline.json如实记录。旧清单不回写。原30句PCM前后段精确复用，原15镜局部数据完全不变，全局时间只平移741帧；见methods-reuse-proof.json与qa-methods-technical.json。
+
+当前复现入口：
+
+```sh
+/workspace/.venvs/video-studio/bin/python episodes/_shared/voice/prep.py --dir episodes-codex/global-id/revisions/methods-insert
+/workspace/.venvs/video-studio/bin/python episodes/_shared/voice/gen.py --dir episodes-codex/global-id/revisions/methods-insert
+/workspace/.venvs/video-studio/bin/python episodes/_shared/voice/build.py --dir episodes-codex/global-id/revisions/methods-insert
+/workspace/.venvs/video-studio/bin/python episodes-codex/global-id/assemble-methods.py
+```
+
+已有选定takes会被复用。新增镜头预检通过后调用freeze.py，再以freeze.py --verify只读核对，运行render-methods.py：只渲染新增镜头，原编码画面由FFmpeg解码重编码拼接，使用完整人声及共享混音的连续配乐，不声称无损流拷贝。原成片全量render入口仍用于原理复现，当前交付按render-methods.py与实际splice报告追溯。新增术语起音、原声复用与最终媒体检查按本轮QA记录；未做逐字ASR或人工逐字听辨，不声称其通过。
+
+以下为原15镜制作记录，保留历史参数，不作为当前帧数。
 
 对应重制 issue [#72](https://github.com/linhongcun/video-studio/issues/72)。从两个独立订单表各自生成42开始，用时间、生成器的机器编号和同毫秒序号说明雪花算法；保留条件错误仍撞号的反例。片尾接EP.21《下单成功了，库存怎么没扣？》。
 
