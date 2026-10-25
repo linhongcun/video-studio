@@ -48,17 +48,29 @@ CDN 还可能提供动态内容传输优化等能力，但它不会自动修复�
 
 片尾主要依据以下三项资料，核验于2026-10-25（北京时间）。正式链接与本轮实读的官方仓库固定版本分别列出。Cloudflare资料用于核验公开产品实现，片中地图与节点仍是教学示例，不表示所有CDN采用同样调度方式或缓存层级。
 
-**[R1] Cloudflare：《Content Delivery Network (CDN) Reference Architecture》（官方文档 · 2026-10-25核验）**。CDN在多个网络位置缓存源站内容，可用副本能减少获取内容的回源请求；Cloudflare的Anycast由BGP路由，并考虑处理容量；片中地图直线长度不等于实际网络路由或时延测量；标准缓存未命中可继续取源，真实部署也可有多级缓存；片中一层边缘与源站是教学简化。实读章节：How a CDN tackles web application challenges；Routing requests to CDN nodes；Tiered Cache及流量示例。
+**[R1] Cloudflare：《Content Delivery Network (CDN) Reference Architecture》（官方文档 · 2026-10-25核验）**。
 
-[正式链接](https://developers.cloudflare.com/reference-architecture/architectures/cdn/) · [本轮实读的固定正文](https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/reference-architecture/architectures/cdn.mdx)。
+> Edge nodes within the Cloudflare network cache content from the origin server and are able to respond to requests via a cached copy.
 
-**[R2] IETF HTTP WG：《HTTP Caching》（RFC 9111 · 2022）**。响应存储和复用受请求匹配、缓存指令及新鲜度等条件限制，不是取到内容就能永久共享；缓存不能直接复用时可通过条件请求验证或获取新响应；不能把过期副本一直当成新内容使用；共享缓存与私有缓存有不同边界；不带字段列表的private禁止共享缓存存储该响应，no-store限制存储。实读章节：§2 Overview；§3 Storing Responses in Caches；§4/§4.2/§4.3复用、新鲜度与验证；§5.2.2响应缓存指令；Caching of Sensitive Information。
+原文位置：Cloudflare CDN architecture and design。
 
-[正式链接](https://www.rfc-editor.org/rfc/rfc9111.html) · [本轮实读的固定正文](https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml)。
+[正式文档](https://developers.cloudflare.com/reference-architecture/architectures/cdn/) · [固定原文](https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/reference-architecture/architectures/cdn.mdx)。
 
-**[R3] Cloudflare：《Cloudflare cache responses》（官方文档 · 2026-10-25核验）**。Cloudflare将从缓存找到资源与未命中后取源区分为不同状态，命中可用副本与回源是不同请求路径；过期内容可能重新取源或条件验证；不适合缓存的内容也可能直接取源，未命中不是所有回源的唯一原因。实读章节：HIT；MISS；EXPIRED；STALE；REVALIDATED；DYNAMIC。
+**[R2] IETF HTTP WG：《HTTP Caching》（RFC 9111 · 2022）**。
 
-[正式链接](https://developers.cloudflare.com/cache/concepts/cache-responses/) · [本轮实读的固定正文](https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/cache/concepts/cache-responses.mdx)。
+> When a response is fresh, it can be used to satisfy subsequent requests without contacting the origin server, thereby improving efficiency.
+
+原文位置：§4.2 Freshness。
+
+[正式文档](https://www.rfc-editor.org/rfc/rfc9111.html) · [固定原文](https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml)。
+
+**[R3] Cloudflare：《Cloudflare cache responses》（官方文档 · 2026-10-25核验）**。
+
+> The response is eligible for cache but was not present in Cloudflare's cache at request time, so it was served from the origin web server.
+
+原文位置：MISS · line 29。
+
+[正式文档](https://developers.cloudflare.com/cache/concepts/cache-responses/) · [固定原文](https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/cache/concepts/cache-responses.mdx)。
 
 Cloudflare架构页标注审阅日期2022-12-02；上面的2026-10-25是本轮核验日期。它说明网络路由和节点容量参与选择，不能据地图直线长度推算真实时延，也不构成固定加速倍数保证。
 

@@ -32,13 +32,17 @@ class RenderWithReferences(unittest.TestCase):
         self.remotion = self.directory/'remotion'
         self.remotion.mkdir()
         self.evidence = self.directory/'evidence.md'
-        self.evidence.write_text('Synthetic integration-test evidence, not a published reference.\n')
+        self.evidence.write_text('Synthetic integration-test evidence, not a published reference.\n'
+                                 'Reference-render integration fixture\n')
         self.references = {
-            'schemaVersion': 1, 'episode': self.directory.name, 'checkedAt': '2026-10-25',
+            'schemaVersion': 1, 'presentation': 'original-title-quote',
+            'episode': self.directory.name, 'checkedAt': '2026-10-25',
             'sources': [{'id': 'R1', 'organization': 'Synthetic test fixture',
                          'title': 'Reference-render integration fixture', 'version': '2026',
                          'url': 'https://example.com/synthetic-reference', 'sections': '§1',
                          'supports': ['Synthetic supported claim, not actual video content'],
+                         'titleEvidence': {'locator': 'Fixture original title, line 2',
+                                           'evidence': str(self.evidence.relative_to(ROOT))},
                          'verification': {'status': 'verified', 'checkedAt': '2026-10-25',
                                           'evidence': str(self.evidence.relative_to(ROOT))}}],
         }
@@ -72,7 +76,8 @@ subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i',
     def freeze(self):
         files = [self.directory/name for name in ('references.json', 'article.mdx', 'evidence.md', 'storyboard.json')]
         files += [self.remotion/'package.json', self.remotion/'make-body.py', WRAPPER,
-                  SHARED/'append_references.py', SHARED/'requirements-reference-appendix.txt',
+                  SHARED/'append_references_original.py', SHARED/'append_references.py',
+                  SHARED/'requirements-reference-appendix.txt',
                   ROOT/'episodes/_shared/theme/pageTheme.ts', ROOT/'site/scripts/check-references.mjs']
         write(self.directory/'source-sha256.json', {os.path.relpath(p, self.directory): sha(p) for p in files})
 
@@ -116,6 +121,11 @@ subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i',
         self.assertEqual(receipt['appendix']['durationInFrames'], 150)
         self.assertEqual(receipt['finalVideoFrames'], 156)
         self.assertEqual(receipt['outputSHA256'], sha(self.directory/'video.mp4'))
+        self.assertEqual(receipt['presentation'], 'original-title-quote')
+        self.assertEqual(receipt['sourceTitles'], [{'id': 'R1', 'title': 'Reference-render integration fixture'}])
+        self.assertEqual(receipt['quotations'], [])
+        self.assertEqual(receipt['inputs']['generatorSHA256'], sha(SHARED/'append_references_original.py'))
+        self.assertEqual(receipt['dependencies']['oldEngineSHA256'], sha(SHARED/'append_references.py'))
         self.assertEqual(rendered['publicationMetadata']['referenceAppendix']['from'], 6)
         self.assertEqual(rendered['publicationMetadata']['finalVideoFrames'], 156)
         self.assertTrue(media['bodyDecodedFramesAndTimestampsEqual'])

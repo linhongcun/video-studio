@@ -44,10 +44,32 @@ function https(value) {
   try { return nonempty(value) && new URL(value).protocol === 'https:'; } catch { return false; }
 }
 
+function checkTextEvidence(repoRoot, record, text, label) {
+  require(record && typeof record === 'object' && !Array.isArray(record)
+    && nonempty(record.locator), `${label}: original-text evidence needs a locator`);
+  const file = within(repoRoot, record.evidence, `${label} evidence`);
+  const raw = fs.readFileSync(file, 'utf8');
+  let texts = [raw];
+  if (path.extname(file).toLowerCase() === '.json') {
+    // JSON evidence may escape quotation marks and newlines. Compare decoded
+    // source strings, not their serialization. This does not re-read the URL or
+    // independently determine whether the recorded title/quotation is genuine.
+    texts = [];
+    const visit = (value) => {
+      if (typeof value === 'string') texts.push(value);
+      else if (Array.isArray(value)) value.forEach(visit);
+      else if (value && typeof value === 'object') Object.values(value).forEach(visit);
+    };
+    visit(JSON.parse(raw));
+  }
+  require(texts.some((value) => value.includes(text)), `${label}: exact original text missing from evidence record`);
+}
+
 export function checkSources(episodeDir, {repoRoot = ROOT, sources = 'references.json', slug = path.basename(episodeDir)} = {}) {
   const refsFile = within(episodeDir, sources, 'references');
   const refs = read(refsFile);
   require(refs.schemaVersion === 1 && refs.episode === slug, 'reference schema/episode differs');
+  require(refs.presentation === 'original-title-quote', 'references must use original-title-quote presentation');
   require(validDate(refs.checkedAt), 'reference checkedAt must be a real YYYY-MM-DD date');
   require(Array.isArray(refs.sources) && refs.sources.length > 0, 'reference sources must not be empty');
   const article = fs.readFileSync(within(episodeDir, 'article.mdx', 'article'), 'utf8');
@@ -55,6 +77,8 @@ export function checkSources(episodeDir, {repoRoot = ROOT, sources = 'references
   for (const source of refs.sources) {
     for (const key of ['id', 'organization', 'title', 'version', 'sections'])
       require(nonempty(source[key]), `source ${source.id ?? '?'} missing ${key}`);
+    require(!Object.hasOwn(source, 'displayTitle') && !Object.hasOwn(source, 'displaySupport'),
+      `${source.id}: displayTitle/displaySupport cannot replace original titles or quotations`);
     require(!ids.has(source.id), `duplicate source id ${source.id}`);
     ids.add(source.id);
     require(https(source.url), `${source.id}: source URL must use HTTPS`);
@@ -64,6 +88,11 @@ export function checkSources(episodeDir, {repoRoot = ROOT, sources = 'references
     require(verification?.status === 'verified' && validDate(verification.checkedAt),
       `${source.id}: source must be verified with a real checkedAt date`);
     within(repoRoot, verification.evidence, `${source.id} verification evidence`);
+    checkTextEvidence(repoRoot, source.titleEvidence, source.title, `${source.id} original title`);
+    if (Object.hasOwn(source, 'quotation')) {
+      require(source.quotation && nonempty(source.quotation.text), `${source.id}: quotation needs original text`);
+      checkTextEvidence(repoRoot, source.quotation, source.quotation.text, `${source.id} quotation`);
+    }
     for (const url of [source.url, verification.sourceUrl].filter((value) => value !== undefined)) {
       require(https(url) && article.includes(url), `${source.id}: complete source link missing from article: ${url}`);
     }
@@ -86,6 +115,15 @@ export function checkEpisode(episodeDir, {repoRoot = ROOT} = {}) {
   const media = read(within(episodeDir, 'reference-appendix-media-check.json', 'appendix media check'));
   require(receipt.schemaVersion === 1 && receipt.episode === slug && receipt.appendix?.kind === 'references',
     'appendix receipt schema/episode differs');
+  require(receipt.presentation === refs.presentation, 'rendered appendix presentation differs from original-title mode');
+  require(Array.isArray(receipt.sourceTitles) && receipt.sourceTitles.length === refs.sources.length
+    && receipt.sourceTitles.every((entry, index) => entry.id === refs.sources[index].id
+      && entry.title === refs.sources[index].title), 'rendered appendix original source titles differ');
+  const quotations = refs.sources.filter((source) => Object.hasOwn(source, 'quotation'))
+    .map((source) => ({id: source.id, ...source.quotation}));
+  require(Array.isArray(receipt.quotations) && receipt.quotations.length === quotations.length
+    && receipt.quotations.every((entry, index) => ['id', 'text', 'locator', 'evidence']
+      .every((key) => entry[key] === quotations[index][key])), 'rendered appendix original quotations differ');
   const end = appendix.from + appendix.durationInFrames;
   require(integer(meta.finalVideoFrames) && meta.finalVideoFrames === end
     && receipt.bodyFrames === appendix.from && receipt.finalVideoFrames === end

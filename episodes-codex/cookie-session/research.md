@@ -26,3 +26,7 @@
 - R2 OWASP，《Session Management Cheat Sheet》（持续维护文档 · 2026-10-25核验）：<https://github.com/OWASP/CheatSheetSeries/blob/cec51594b191eec97ec36f93d1e08c7945dfe598/cheatsheets/Session_Management_Cheat_Sheet.md>。实读Session ID Entropy；Session ID Content (or Value)；Expire and Max-Age Attributes；Session Expiration；对应：会话编号应不可预测、无业务含义且不包含敏感账户数据；编号含义与关联状态由服务器保存；会话过期或退出时服务端必须使会话失效，只删除浏览器Cookie不能替代服务端撤销。
 
 Security属性、浏览器恢复与其他会话机制属于文章边界说明；片尾只映射视频里的编号传递、服务器查找及有效性检查，不把这些文章拓展记为视频已经展开。
+
+## 2026-10-25 原题与原文短引核验
+
+按最新要求，片尾采用文献原标题及可核对的完整原句，不再用displayTitle／displaySupport概括替代题名。内部supports保持为论点映射，不能冒充原文。本轮13份去重固定正文实际GET记录、题名位置与各句原文见[统一证据](../../docs/reference-endcards/original-titles/sources-core.json)；本片sources的titleEvidence与quotation均指向该记录。XML仅解析实体和内联标记、合并排版空白；DNS的Markdown粗体标记按可见正文还原，不删改词句。旧canonical访问与其他历史来源记录继续保留。

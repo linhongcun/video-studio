@@ -34,7 +34,7 @@ python3 episodes-codex/egg-drop/freeze.py --verify
 
 从remotion/运行本期npm run render，完整编码使用/tmp/video-studio-render.lock及有空间的短TMPDIR。正式媒体另核完整解码、连续PTS、同尺寸关键帧保真、独立实际画面及全轨/逐句选定音源覆盖，不把数值一致性冒充ASR或人工听辨。
 
-## 默认参考资料入口与本轮主体复用
+## 首版参考资料与主体复用（历史阶段记录）
 
 默认`npm run render`现调用共享`render_with_references.py`：先检查references.json、文章链接和当前冻结输入，再真实执行`render:body`（原Remotion画面、人声及共享混音，输出out/body.mp4），最后自动追加每页5秒的资料卡。完整重建仍从真实源码渲染主体，不把本轮已验收MP4复制当作默认渲染。
 
@@ -56,3 +56,16 @@ root已于2026-10-25T15:11:08.084554+00:00完成当前185项严格冻结与共�
 正式媒体通过后才接入站点、升实际可用版本并检查双视口、24句字幕、四章、普通文章锚点和独立五课目录。按持续授权合并、附注tag/Release、Release后Pages和线上完整摘要核验；全部完成后以completed关闭#209，将#204更新为完成5题。外部平台投稿不在此授权内。
 
 修订交付助手按当前发布任务显式传--release，首发firstRelease保留。sync_site.py的实际文件表还包含references.json及两份附录receipt；verify_site.py传实际本地--base，verify_online.py传真实Release证据路径。原章节／24句字幕／创建及首次公开时间保留，updatedAt采用实际append完成时刻的毫秒值；不使用站点构建时间。新证据写对应修订目录，不覆盖首发或已验收正文报告。
+
+
+## 原始题名与原文短引：当前资料入口
+
+本次沿用最新二分开头修订后的5569帧主体及其真实生产输入，只修订参考资料的呈现。主体不可变MP4位于 `revisions/reference-endcards/body/video.mp4`，SHA为`b43510f3196f92964d21a3b854941a65f4af33fffd2484c171ca518f9f747c66`；不能从早于本次开头修订的主干、旧帧数或旧冻结清单恢复来替代它。修前当前输入与回执另保存在 `revisions/original-titles/`，不覆盖原169项主体、13项首版append或185项默认交付阶段的历史证据。
+
+当前 `references.json` 使用 `presentation: original-title-quote`，保留来源完整原始题名与原语言；短引为连续逐字原文并带位置，内部 `supports` 不作为原文上屏。新器每页最多2项、默认5秒，最终帧数和哈希以新回执为准。来源新核验见 `docs/reference-endcards/original-titles/sources-algorithms.json`，本轮进度见 [原题名修订](../../docs/reference-endcards/original-titles/README.md)。
+
+本期当前冻结入口仍为 `freeze.py`，保留最新配音组合、原20句/新4句来源、mini、分镜、源码、数学与主体档案依赖，同时冻结新原题名生成器、未改字节的旧媒体引擎、默认wrapper、发布检查器、Pillow版本锁、主题、当前资料/文章/package和三类证据路径：`verification.evidence`、`titleEvidence.evidence`及可选`quotation.evidence`。旧主体时代文章/研究的修前快照也分别保留，不以当前新引用段追认原主体来源。
+
+从 `remotion/` 执行 `npm run check:references`；全部输入停写后按本期 `freeze.py` 冻结，以 `freeze.py --verify` 只读核对。默认 `npm run render` 仍经共享wrapper生成完整主体到`out/body.mp4`并自动调用新器追加，`render:body`保留现有Remotion画面、人声和共享混音流程。本轮不执行该正文编码流程，只从上述已验收主体路径生成新资料尾卡；可直接给新器明确指定该`--body`，不得把含旧附录的最终`video.mp4`当成主体重复追加。可选`render:references`已改为新器，面向已准备好的`out/body.mp4`，前置检查当前资料与冻结。
+
+`append_freeze.py`和`revisions/reference-endcards/append-source-sha256.json`保持旧append13阶段原字节；其`--verify`只适用于旧输入字节，当前资料已更新时不把它当成本轮检查，也不重写它追认新输入。本轮使用当前`freeze.py --verify`及新器媒体回执核对，接齐新的根级回执和`render-result.json.publicationMetadata`后执行`npm run verify:references`。原旁白/24句字幕/words/SB仍表示5569帧主体，实际查看所有新资料页及精确首卡、桌面/手机暂停和全屏；旧QA按原主体保真范围复用，不预记当前附录已通过或已上线。

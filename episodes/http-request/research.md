@@ -102,3 +102,7 @@
 - R4 IETF TLS WG，《The Transport Layer Security (TLS) Protocol Version 1.3》（RFC 9846 · 2026）：<https://github.com/tlswg/tls13-spec/blob/c728b4efb4c12159371279227df6464541eafb58/rfc9846.md>。实读§2 Protocol Overview；§4 Handshake Protocol；§4.4 Authentication Messages；§5.2 Record Payload Protection；对应：TLS在握手中完成必要认证、密码参数协商与共享密钥材料建立，随后用流量密钥保护应用数据；TLS 1.3记录保护使用AEAD；证书身份与握手协商出的流量密钥承担不同职责。
 
 RFC9293本轮改用署名编辑Wesley M. Eddy公开仓库中的rfc9293.xml，固定commit 3baedef270170d063c66ef995fca1f72281a3912；XML的RFC编号、2022-08日期、TCPM与编辑姓名、§3.4.1、§3.5和图6均已核对。这是作者保留的原始发布XML，不是工作组组织仓库，也不是9293bis草案。原第三方全文镜像记录继续作为历史制作来源。MDN的旧TLS延迟数字不采用；RFC9110仅支撑语义，不冒充RFC9112的完整HTTP/1.1报文语法。
+
+## 2026-10-25 原题与原文短引核验
+
+按最新要求，片尾采用文献原标题及可核对的完整原句，不再用displayTitle／displaySupport概括替代题名。内部supports保持为论点映射，不能冒充原文。本轮13份去重固定正文实际GET记录、题名位置与各句原文见[统一证据](../../docs/reference-endcards/original-titles/sources-core.json)；本片sources的titleEvidence与quotation均指向该记录。XML仅解析实体和内联标记、合并排版空白；DNS的Markdown粗体标记按可见正文还原，不删改词句。旧canonical访问与其他历史来源记录继续保留。

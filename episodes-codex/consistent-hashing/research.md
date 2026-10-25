@@ -68,3 +68,15 @@
 - 文稿中的计算表是可复算的教学内容，不等于TTS、程序运行、真实动态、成片或初学者理解已经通过。
 - 视频不声称提升多少吞吐、节省多少内存、迁移多少字节；键数、数据大小、请求频率与机器容量是不同指标。
 - 不讨论共识、主节点选举或强一致协议；名称中的“一致性”不能解释成自动的数据副本一致性。
+
+## 原题名与引用语段校订（2026-10-25）
+
+本轮只校订参考资料的题名与显示原句，未重写技术讲解。实际重新GET四项中属于本片的官方固定正文，完整响应SHA、题名原文和逐字短引见[核验记录](../../docs/reference-endcards/original-titles/sources-extra.json)。旧资料读取记录保留，不追改为新访问。
+
+- R1 原题：Module ngx_http_upstream_module；定位：hash directive, consistent parameter paragraph；实际固定正文：https://github.com/nginx/nginx.org/blob/34f63eb329ff52623cec453cd8f7539f9a5f8606/xml/en/docs/http/ngx_http_upstream_module.xml。
+  - 原句（130字符）：The method ensures that only a few keys will be remapped to different servers when a server is added to or removed from the group.
+
+- R2 原题：Dynamo；定位：Multiple Tokens per Physical Node (vnodes), paragraph 2；实际固定正文：https://github.com/apache/cassandra/blob/76550e931481e965ae3283d8cf4a59c320d74c55/doc/modules/cassandra/pages/architecture/dynamo.adoc。
+  - 原句（101字符）：Virtual nodes solve the problem by assigning multiple tokens in the token ring to each physical node.
+
+- 已核实R2是Apache Cassandra 5.0文档的AsciiDoc首题`= Dynamo`，不是Amazon论文。历史关于未通读Amazon原论文的记录仍成立；没有为本次片尾替换资料身份。

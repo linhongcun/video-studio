@@ -20,3 +20,7 @@
 
 - R1 IETF HTTP WG，HTTP Caching（RFC 9111 · 2022）：<https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml>。实读§2 Overview；§4 Constructing Responses from Caches；§4.2 Freshness；§5.2.2.1 max-age；支撑：缓存复用须满足目标、请求方法、请求字段与缓存指令等条件；新鲜度判定为freshness_lifetime > current_age；示例60秒期限在60秒时已不再新鲜。
 - R2 MDN Web Docs，HTTP caching（持续维护文档 · 2026-10-25核验）：<https://github.com/mdn/content/blob/b13e73fdf1fedcb837aebdd842f1a9a6adc76e10/files/en-us/web/http/guides/caching/index.md>。实读Types of caches／Private caches；Fresh and stale based on age；Validation；Don’t cache；支撑：浏览器HTTP缓存属于私有缓存；新鲜响应可省去获取对应资源的网络请求；no-cache要求复用前验证，no-store要求不存储；不要将HTTP缓存与浏览器的其他缓存机制混同。
+
+## 2026-10-25 原题与原文短引核验
+
+按最新要求，片尾采用文献原标题及可核对的完整原句，不再用displayTitle／displaySupport概括替代题名。内部supports保持为论点映射，不能冒充原文。本轮13份去重固定正文实际GET记录、题名位置与各句原文见[统一证据](../../docs/reference-endcards/original-titles/sources-core.json)；本片sources的titleEvidence与quotation均指向该记录。XML仅解析实体和内联标记、合并排版空白；DNS的Markdown粗体标记按可见正文还原，不删改词句。旧canonical访问与其他历史来源记录继续保留。

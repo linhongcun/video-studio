@@ -36,3 +36,7 @@
 - R2 MDN Web Docs，DNS（持续维护文档 · 2026-10-25核验）：<https://github.com/mdn/content/blob/632359b60e58a4f5b2a69020dd79d0ecf38d4dbb/files/en-us/glossary/dns/index.md>。实读DNS正文定义与DNS lookup段落；支撑：DNS把方便记忆的域名与IP地址等资源关联，查地址是页面加载前的一步。
 
 校正原笔记的章节定位：递归／迭代模式、递归解析器及权威服务器在RFC9499 §6；TTL在§5，§4是DNS事务术语。示例规范RFC2606／5737保留早期资料“仅参考”，本轮不标重新实读。
+
+## 2026-10-25 原题与原文短引核验
+
+按最新要求，片尾采用文献原标题及可核对的完整原句，不再用displayTitle／displaySupport概括替代题名。内部supports保持为论点映射，不能冒充原文。本轮13份去重固定正文实际GET记录、题名位置与各句原文见[统一证据](../../docs/reference-endcards/original-titles/sources-core.json)；本片sources的titleEvidence与quotation均指向该记录。XML仅解析实体和内联标记、合并排版空白；DNS的Markdown粗体标记按可见正文还原，不删改词句。旧canonical访问与其他历史来源记录继续保留。

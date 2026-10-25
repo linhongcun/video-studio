@@ -1,0 +1,32 @@
+---
+title: "同一个网页，第二次打开为什么快这么多？"
+summary: "只追踪同一张图片：第一次取得、按规则保存，再在允许的期限内直接复用。"
+chapters: []
+related: ["cdn", "server-cache"]
+---
+
+页面包含许多独立资源。本片只追踪一张图片，不把整页说成只发一次请求。第一次取得时，本地没有可用副本，需要从网站接收图片；允许缓存的响应可以与缓存规则一起保存。
+
+再次需要相应资源时，浏览器检查存储的响应是否适用于当前请求，以及缓存规则是否允许直接使用。示例允许60秒内复用，时间快进到20秒时仍满足条件，图片就从本地进入页面，省下这张图片的一次网络请求与内容传输。60秒是教学设置，没有统一的“所有图片缓存60秒”规则。[^caching]
+
+期限到达便不再属于新鲜响应；示例的60秒期限，在年龄达到60秒时就已结束。到期不等于自动删除，更不等于一定重新下载全部内容。缓存可能联系网站重新验证：例如使用ETag发出条件请求，资源未变时服务器可返回304，浏览器继续使用已有内容；资源已变则取得新响应。这种重新验证仍有网络往返，和有效期内直接使用本地响应不同。[^validation]
+
+`no-cache`要求成功验证后才能复用，不等于禁止存储；`no-store`才要求不存储相应请求/响应。请求指令、Vary、刷新方式与浏览器具体策略都可能影响结果。浏览器私有HTTP缓存、后退前进缓存、Service Worker缓存以及服务器侧缓存，也不是同一机制。[^mdn]
+
+[^caching]: [RFC 9111](https://www.rfc-editor.org/rfc/rfc9111.html)，2022，实际阅读§2、§4、§4.2、§5.2.2，访问于2026-10-24。
+[^validation]: [RFC 9110 §15.4.5](https://www.rfc-editor.org/rfc/rfc9110.html#name-304-not-modified)，2022，304响应不含内容，访问于2026-10-24。
+[^mdn]: [MDN HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching)，实际阅读Private caches、ETag/If-None-Match与no-cache/no-store相关章节，访问于2026-10-24。
+
+## 片尾参考资料
+
+本次于2026-10-25（北京时间）核对以下负责工作组或MDN官方仓库的固定正文；各项分别提供正式链接与本轮实读版本，便于核查。
+
+**[R1] IETF HTTP WG：《HTTP Caching》（RFC 9111 · 2022）**。缓存复用须满足目标、请求方法、请求字段与缓存指令等条件；新鲜度判定为freshness_lifetime > current_age；示例60秒期限在60秒时已不再新鲜。实读章节：§2 Overview；§4 Constructing Responses from Caches；§4.2 Freshness；§5.2.2.1 max-age。
+
+[正式链接](https://www.rfc-editor.org/rfc/rfc9111.html) · [本轮实读的固定正文](https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml)。
+
+**[R2] MDN Web Docs：《HTTP caching》（持续维护文档 · 2026-10-25核验）**。浏览器HTTP缓存属于私有缓存；新鲜响应可省去获取对应资源的网络请求；no-cache要求复用前验证，no-store要求不存储；不要将HTTP缓存与浏览器的其他缓存机制混同。实读章节：Types of caches／Private caches；Fresh and stale based on age；Validation；Don’t cache。
+
+[正式链接](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching) · [本轮实读的固定正文](https://github.com/mdn/content/blob/b13e73fdf1fedcb837aebdd842f1a9a6adc76e10/files/en-us/web/http/guides/caching/index.md)。
+
+片尾选取以上两项与正文主线直接相关的资料；304和缓存指令的进一步说明保留在文章，不为增加引用数量列入片尾。

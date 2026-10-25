@@ -47,3 +47,7 @@
 - AWS仓库元数据显示archived=true，默认分支archived，最后push2023-06-15；canonical本轮未取得。因此保留旧稿2026-10-24记录、不将归档源当现行文档、不作为本轮卡片主依据。
 - 本轮还读取Cloudflare默认缓存行为页，确认产品默认受规则影响；没有把其概述当成所有Origin Cache Control配置的统一保证。最终用RFC9111与缓存状态页交叉约束存储、复用、过期验证和私人响应边界。
 - 本轮未重新读取Natural Earth、MDN旧链接等历史素材。原地图许可、公有领域依据、GeoJSON SHA、节点/路径示例与性能边界均照旧，未把旧日志日期改成本轮在线核验。
+
+## 2026-10-25 原题与原文短引核验
+
+按最新要求，片尾采用文献原标题及可核对的完整原句，不再用displayTitle／displaySupport概括替代题名。内部supports保持为论点映射，不能冒充原文。本轮13份去重固定正文实际GET记录、题名位置与各句原文见[统一证据](../../docs/reference-endcards/original-titles/sources-core.json)；本片sources的titleEvidence与quotation均指向该记录。XML仅解析实体和内联标记、合并排版空白；DNS的Markdown粗体标记按可见正文还原，不删改词句。旧canonical访问与其他历史来源记录继续保留。

@@ -42,3 +42,7 @@
 - R3 MDN Web Docs，Transport Layer Security (TLS)（持续维护文档 · 2026-10-25核验）：<https://github.com/mdn/content/blob/c49748a0ce4fdf77427e29cb6edbca8953a514e7/files/en-us/web/security/defenses/transport_layer_security/index.md>。实读TLS概览的Encryption／Integrity／Authentication；TLS handshake；Server authentication；支撑：TLS提供传输中的保密、完整性与认证；网站证书将公钥关联到域名；这些保护面向客户端与服务端之间的连接，不作为商品信誉或服务端存储安全的保证。
 
 固定TLS正文头部实际列出number 9846、date 2026-07及obsoletes包含8446，故本轮片尾与文章统一引用RFC9846；RFC8446仅保留为历史参考。MDN的TLS版本文字未作为最新RFC编号的证据。
+
+## 2026-10-25 原题与原文短引核验
+
+按最新要求，片尾采用文献原标题及可核对的完整原句，不再用displayTitle／displaySupport概括替代题名。内部supports保持为论点映射，不能冒充原文。本轮13份去重固定正文实际GET记录、题名位置与各句原文见[统一证据](../../docs/reference-endcards/original-titles/sources-core.json)；本片sources的titleEvidence与quotation均指向该记录。XML仅解析实体和内联标记、合并排版空白；DNS的Markdown粗体标记按可见正文还原，不删改词句。旧canonical访问与其他历史来源记录继续保留。
