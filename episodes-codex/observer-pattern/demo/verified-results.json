@@ -1,0 +1,97 @@
+{
+  "checkedAt": "2026-10-25T08:01:28.423147+08:00",
+  "runtime": "3.12.14",
+  "language": "Python",
+  "implementationSha256": "41a2d93e551c81c45dfe9e3a1afdcfc0134c2d811d757c557eead957e9c47b9c",
+  "scope": "Educational single-process, single-thread example; policies are not pattern-wide guarantees.",
+  "cases": [
+    {
+      "case": "video-story",
+      "first": {
+        "order": "已付款",
+        "summary": "已付款",
+        "changeRecordCount": 1,
+        "changeRecords": [
+          [
+            "17",
+            "已付款"
+          ]
+        ],
+        "recipients": [
+          "摘要",
+          "变化记录"
+        ]
+      },
+      "second": {
+        "order": "已发货",
+        "summary": "已付款",
+        "summarySubscribed": false,
+        "changeRecordCount": 2,
+        "changeRecords": [
+          [
+            "17",
+            "已付款"
+          ],
+          [
+            "17",
+            "已发货"
+          ]
+        ],
+        "recipients": [
+          "变化记录"
+        ]
+      }
+    },
+    {
+      "case": "zero-observers",
+      "state": "已付款",
+      "notifications": 0
+    },
+    {
+      "case": "no-replay-and-no-change",
+      "notifications": 1
+    },
+    {
+      "case": "synchronous-insertion-order",
+      "trace": [
+        "开始修改",
+        "摘要完成",
+        "变化记录完成",
+        "修改返回"
+      ]
+    },
+    {
+      "case": "snapshot-unsubscribe-during-event",
+      "trace": [
+        [
+          "摘要",
+          "已付款"
+        ],
+        [
+          "变化记录",
+          "已付款"
+        ],
+        [
+          "摘要",
+          "已发货"
+        ]
+      ]
+    },
+    {
+      "case": "listener-error-propagates",
+      "trace": [
+        "摘要失败",
+        "示例接收者故障"
+      ],
+      "orderRemains": "已付款",
+      "laterListenerCalled": false,
+      "rollback": false,
+      "retry": false
+    },
+    {
+      "case": "reentrant-change-rejected",
+      "orderRemains": "已付款"
+    }
+  ],
+  "passed": true
+}
