@@ -2,7 +2,7 @@
 
 制作目录consistent-hashing，对应#295。本说明在实际配音装配后写入，正式冻结和媒体验收另行执行，不把临时预演当成正式成片。
 
-script `3095da4f3233f04ba9d621732825fbced8181cf72a94f30df6299bf1a6d82486`；voice `9d58bde7c1606a04419c6f3c4efb7776a62389294b28c5aa522c3aa6f7788466`；words `5e014a2b4772acba74c2e43f3176dbe18cdac333ef3b6ac9c56816efdd7cdc1c`；storyboard `b5b2b600fc4cec145e1d7965b3d6ea21744db535d53dbda8c25fdeb7fd49d231`。14镜28句4章，5881帧／30fps／1920×1080，约196.033333秒，无代码尾卡。
+script `3095da4f3233f04ba9d621732825fbced8181cf72a94f30df6299bf1a6d82486`；voice `9d58bde7c1606a04419c6f3c4efb7776a62389294b28c5aa522c3aa6f7788466`；words `5e014a2b4772acba74c2e43f3176dbe18cdac333ef3b6ac9c56816efdd7cdc1c`；storyboard `93909f1a0d1625d3bb1dbe2754073448507c85a9a5489ca02841efd7cc632831`。封面元数据同步证明见qa-cover-metadata-sync.json，真实scenes/音轨/字幕不变。14镜28句4章，5881帧／30fps／1920×1080，约196.033333秒，无代码尾卡。
 
 ## 实际输入和基础设施
 

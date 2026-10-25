@@ -48,18 +48,34 @@ async function go(page, rel) {
 try {
   fs.mkdirSync(evidenceDir, {recursive: true});
   const meta = readJson(path.join(episodeDir, 'meta.json'));
+  const delivery = readJson(path.join(sourceDir, 'delivery-copy.json'));
   assert.equal(meta.draft, false, 'Final site QA requires the publishable frozen episode');
   assert.equal(meta.ep, 38);
   assert.equal(meta.series, 'engineering-algorithms');
   assert.ok(meta.createdAt && meta.updatedAt && meta.publishedAt);
   assert.equal(meta.sourcePath, 'episodes-codex/consistent-hashing/remotion');
+  assert.equal(meta.createdAt, delivery.metadataPreserved.createdAt);
+  assert.equal(meta.updatedAt, delivery.metadataPreserved.updatedAt);
+  assert.deepEqual(meta, delivery.metadata);
+  assert.equal(hash(path.join(episodeDir, 'meta.json')), delivery.files['meta.json'].sha256);
+  report.files['meta.json'] = delivery.files['meta.json'];
   const storyboard = readJson(path.join(episodeDir, 'storyboard.json'));
   const fps = storyboard.meta?.fps ?? 30;
   const expectedDuration = (meta.finalVideoFrames ?? storyboard.meta.finalVideoFrames) / fps;
   assert.ok(Number.isFinite(expectedDuration) && expectedDuration > 0);
   const expectedCaptions = storyboard.scenes.flatMap((scene) => scene.shots.flatMap((shot) => (shot.subtitles ?? []).map((subtitle) => subtitle.text)));
-  assert.ok(expectedCaptions.length, 'Frozen narration captions must exist');
-  for (const file of ['meta.json', 'article.mdx', 'script.md', 'storyboard.json', meta.video, meta.poster, 'cover-4x3.jpg', 'cover-3x4.jpg']) {
+  assert.equal(expectedCaptions.length, 28, 'All 28 frozen narration captions must exist');
+  const expectedCues = storyboard.scenes.flatMap((scene) => scene.shots.flatMap((shot) => shot.subtitles.map((subtitle) => ({
+    text: subtitle.text,
+    start: Number(((shot.from + subtitle.from) / fps).toFixed(3)),
+    end: Number(((shot.from + subtitle.to + 1) / fps).toFixed(3)),
+  }))));
+  const expectedChapters = storyboard.scenes.map((scene) => ({id: scene.chapterId, start: scene.from / fps}));
+  assert.equal(expectedChapters.length, 4);
+  const articleSource = fs.readFileSync(path.join(sourceDir, 'article.mdx'), 'utf8');
+  const expectedPython = articleSource.match(/```python\s*\n([\s\S]*?)```/)?.[1].trim();
+  assert.ok(expectedPython, 'The article must retain its complete Python example');
+  for (const file of ['article.mdx', 'script.md', 'research.md', 'storyboard.json', meta.video, meta.poster, 'cover-4x3.jpg', 'cover-3x4.jpg']) {
     const published = path.join(episodeDir, file);
     const source = path.join(sourceDir, file);
     assert.ok(fs.existsSync(published), `Missing published ${file}`);
@@ -86,7 +102,7 @@ try {
     assert.equal(await page.locator(`a[href="https://github.com/linhongcun/video-studio/tree/main/${meta.sourcePath}"]`).count(), 1);
     assert.equal(await page.locator('.pager').count(), 0, 'The first independent engineering lesson must not inherit unrelated previous/next lessons');
     const chapters = await page.locator('#player').evaluate((element) => JSON.parse(element.dataset.chapters));
-    assert.ok(chapters.length > 0);
+    assert.deepEqual(chapters.map(({id, start}) => ({id, start})), expectedChapters);
     assert.equal(chapters[0].start, 0);
     for (let i = 0; i < chapters.length; i++) {
       assert.ok(chapters[i].start < expectedDuration);
@@ -103,9 +119,12 @@ try {
     result.media = media;
     await page.locator('video').evaluate((video) => { video.textTracks[0].mode = 'showing'; });
     await page.waitForFunction(() => document.querySelector('video').textTracks[0]?.cues?.length > 0);
-    const cueTexts = await page.locator('video').evaluate((video) => [...video.textTracks[0].cues].map((cue) => cue.text));
+    const browserCues = await page.locator('video').evaluate((video) => [...video.textTracks[0].cues].map((cue) => ({text: cue.text, start: cue.startTime, end: cue.endTime})));
+    const cueTexts = browserCues.map((cue) => cue.text);
     assert.deepEqual(cueTexts, expectedCaptions, 'Native browser captions differ from frozen narration');
+    assert.deepEqual(browserCues, expectedCues, 'Native caption times differ from the frozen 30fps subtitle boundaries');
     result.captionCount = cueTexts.length;
+    result.browserCues = browserCues;
 
     await page.locator('video').focus();
     await page.keyboard.press('k');
@@ -140,6 +159,30 @@ try {
     await page.locator('.reading-links a[href="#article"]').click();
     await page.waitForFunction(() => location.hash === '#article');
     assert.ok((await page.locator('#article').innerText()).length > 200);
+    assert.equal(await page.locator('#article figure svg').count(), 2);
+    result.articleDiagrams = await page.locator('#article figure svg').evaluateAll((svgs) => svgs.map((svg) => ({
+      title: svg.querySelector('title')?.textContent,
+      description: svg.querySelector('desc')?.textContent,
+      viewBox: svg.getAttribute('viewBox'),
+      width: svg.getBoundingClientRect().width,
+      height: svg.getBoundingClientRect().height,
+    })));
+    for (const diagram of result.articleDiagrams) assert.ok(diagram.title && diagram.description && diagram.width > 0 && diagram.height > 0);
+    result.svgRendering = await page.locator('#article figure svg').evaluateAll((svgs) => {
+      const title = svgs[0].querySelector('text');
+      const arc = svgs[0].querySelector('path[stroke="#fbbf24"]');
+      const token = svgs[1].querySelector('g[font-size="25"] text');
+      return {
+        firstLabelFont: getComputedStyle(title).fontSize,
+        firstLabelAnchor: getComputedStyle(title).textAnchor,
+        takeoverArcStroke: getComputedStyle(arc).strokeWidth,
+        tokenLabelFont: token ? getComputedStyle(token).fontSize : null,
+        tokenLabelAnchor: token ? getComputedStyle(token).textAnchor : null,
+      };
+    });
+    assert.deepEqual(result.svgRendering, {firstLabelFont: '24px', firstLabelAnchor: 'middle', takeoverArcStroke: '14px', tokenLabelFont: '25px', tokenLabelAnchor: 'middle'});
+    assert.equal((await page.locator('#article .cb pre code').innerText()).trim(), expectedPython);
+    result.pythonMatchesFrozenArticle = true;
     const imageFailures = await page.locator('#article img').evaluateAll((images) => images.filter((image) => !image.complete || !image.naturalWidth).map((image) => image.src));
     assert.deepEqual(imageFailures, []);
     const toc = page.locator('details.toc');
@@ -147,11 +190,22 @@ try {
       if (!(await toc.evaluate((element) => element.open))) await toc.locator('summary').click();
     }
     const firstToc = page.locator('[data-toc]').first();
+    assert.equal(await page.locator('[data-toc]').count(), 4);
     const targetId = await firstToc.getAttribute('data-toc');
     await firstToc.click();
     await page.waitForFunction((id) => location.hash === `#${id}`, targetId);
     result.articleTarget = targetId;
     result.screenshots.push(await screenshot(page, `article-${viewport.width}.png`));
+    for (let i = 0; i < 2; i++) {
+      const figure = page.locator('#article figure').nth(i);
+      await figure.scrollIntoViewIfNeeded();
+      const output = path.join(evidenceDir, `diagram-${i + 1}-${viewport.width}.png`);
+      await figure.screenshot({path: output, animations: 'disabled'});
+      result.screenshots.push(path.relative(root, output));
+    }
+    const code = page.locator('#article .cb');
+    await code.scrollIntoViewIfNeeded();
+    result.screenshots.push(await screenshot(page, `code-${viewport.width}.png`));
     await page.locator('[data-open-course]').click();
     assert.equal(await page.locator('#course-directory').evaluate((element) => element.open), true);
     const courseLinks = await page.locator('#course-directory nav a').evaluateAll((links) => links.map((link) => ({href: link.getAttribute('href'), current: link.getAttribute('aria-current')})));
@@ -171,7 +225,7 @@ try {
     result.screenshots.push(await screenshot(page, `learn-${viewport.width}.png`));
     await go(page, 'series/engineering-algorithms/');
     assert.equal(await page.locator('h1').innerText(), '工程算法');
-    assert.equal(await page.locator(`a[href="/video-studio/episodes/${slug}/"]`).count(), 1);
+    assert.equal(await page.locator(`.lesson-list .lesson[href="/video-studio/episodes/${slug}/"]`).count(), 1);
     result.seriesDimensions = await noPageOverflow(page, 'series');
 
     await go(page, 'library/?track=engineering');
