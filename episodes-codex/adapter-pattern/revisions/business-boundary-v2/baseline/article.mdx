@@ -1,0 +1,199 @@
+---
+title: 适配器模式：接口对不上，怎样接入新服务？
+summary: 从商家发送一条发货提醒开始，分清业务所需约定与外部服务的使用方式，再看适配器如何转换、委托和返回。接入已有能力时，也要守住已受理与已送达的含义。
+chapters:
+  - { id: why, title: 先看一次发货提醒 }
+  - { id: roles, title: 从同一对象展开结构 }
+  - { id: roundtrip, title: 跟着同一次请求走个来回 }
+  - { id: boundary, title: 转换的收益与边界 }
+related: []
+---
+
+## 先看一次发货提醒 {#why}
+
+商家打开十七号订单的详情。订单已经发货，需要给买家提交一条发货提醒：
+
+| 本次教学示例 | 内容 |
+|---|---|
+| 订单 | 17，已发货 |
+| 收件人 | `buyer17@shop.example` |
+| 提醒正文 | 订单17已发货 |
+| 页面操作 | 发送发货提醒 |
+| 提交后的页面结果 | 已受理 · 等待送达回执 · Q17 |
+
+点击后，页面显示“已受理·等待送达回执”。界面和通知服务都是**教学模拟，不发送真实消息**，没有核验某家商用产品的内部架构。Q17是本例受理编号，不是送达凭据。
+
+接入一个新服务时，常见障碍是：**它有需要的能力，使用方式却和业务方要求的约定不一样。** 本例业务方提供收件人和提醒正文，需要取得提交后的受理结果；新服务接受另一种参数组织，也用自己的状态表达结果。
+
+先区分两个视角：**接入服务时的开发视角**用于分析约定差异、安排结构；**结构接好后的运行视角**用于跟踪一次请求。后文沿开头同一次提交看去程与回程，没有再次发送提醒。
+
+### 两边到底哪里对不上
+
+具体字段与名称在这里复查，视频正文只用中文说明职责：
+
+| 业务方需要的目标约定 | 已有服务自己的约定 |
+|---|---|
+| `send(recipient, text)` | `deliver(Payload(target, body))` |
+| 收件人、提醒正文两个业务输入 | 接收目标、消息内容的服务参数对象 |
+| `Submission(ACCEPTED, reference)`或明确拒绝 | `RawReceipt("QUEUED", ticket)`或`REJECTED` |
+| 技术失败/无法确认时显式失败 | 服务可能抛通信异常，也可能返回未知/无效状态 |
+
+在本例中，左右两边都能完成**提交消息并报告受理情况**，但不能直接混用格式或结果。适配器解决的是这种使用约定的不兼容，不是替服务创造新的消息能力。官方Spring的适配器源码和OpenJDK的接口适配例子，都能看到“按目标接口使用已有对象，再把工作委托过去”的设计关系。[^spring][^jdk]
+
+## 从同一对象展开结构 {#roles}
+
+把刚才的产品对象对应到结构，逐个看职责：
+
+| 角色 | 本例名字 | 负责什么 |
+|---|---|---|
+| 业务方（Client） | `ShipmentReminder` | 按自己的通知约定提交订单17的发货提醒 |
+| 目标约定（Target） | `Notifier` | 规定业务怎样提交，以及受理结果/失败的含义 |
+| 适配器（Adapter） | `NotificationAdapter` | 履行目标约定，持有已有服务，转换请求与返回并委托执行 |
+| 已有服务（Adaptee） | `VendorSdk` | 按自己的参数和返回规则处理请求 |
+
+`VendorSdk`表示假想供应方原本的约定；`FakeVendorSdk`只是为了本地教学而做的替身。它没有网络调用，也没有真的给买家发送消息。适配器没有把目标接口强加到供应方接口上。
+
+<figure style={{ margin: '1.5rem 0', maxWidth: '100%' }} aria-label="业务方依赖目标约定，适配器实现约定并持有外部服务的结构关系">
+<svg viewBox="0 0 460 510" width="100%" style={{ maxWidth: '460px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="adapter-structure-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="adapter-structure-title">目标是契约，适配器履行契约并持有已有服务；这是结构图</title>
+  <defs><marker id="adapter-structure-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10" fill="none" stroke="#7DB5FF" stroke-width="1.5" /></marker></defs>
+  <rect width="460" height="510" rx="16" fill="#0F172A" />
+  <text x="22" y="32" fill="#94A3B8" font-size="18">结构关系 · 不表示请求依次经过每个框</text>
+  <path d="M112 240 V115 H226" fill="none" stroke="#7DB5FF" stroke-width="2" marker-end="url(#adapter-structure-arrow)" />
+  <path d="M332 240 V170" fill="none" stroke="#7DB5FF" stroke-width="2" stroke-dasharray="7 6" marker-end="url(#adapter-structure-arrow)" />
+  <rect x="226" y="60" width="212" height="110" rx="12" fill="#223146" stroke="#FFCC70" />
+  <text x="244" y="90" fill="#FFCC70" font-size="22">目标通知约定</text>
+  <text x="244" y="120" fill="#E5E7EB" font-size="20">Notifier</text>
+  <text x="244" y="150" fill="#94A3B8" font-size="16">契约，不是执行模块</text>
+  <text x="22" y="205" fill="#94A3B8" font-size="16">蓝线：依赖目标　虚线：履行目标约定</text>
+  <rect x="22" y="240" width="180" height="120" rx="12" fill="#182F48" stroke="#7DB5FF" />
+  <text x="36" y="272" fill="#7DB5FF" font-size="23">业务方</text>
+  <text x="36" y="303" fill="#E5E7EB" font-size="16">ShipmentReminder</text>
+  <text x="36" y="337" fill="#E5E7EB" font-size="18">提交发货提醒</text>
+  <rect x="226" y="240" width="212" height="120" rx="12" fill="#14342F" stroke="#56E4D3" />
+  <text x="244" y="272" fill="#56E4D3" font-size="23">适配器</text>
+  <text x="244" y="303" fill="#E5E7EB" font-size="16">NotificationAdapter</text>
+  <text x="244" y="337" fill="#E5E7EB" font-size="18">转换并委托</text>
+  <path d="M332 360 V410" fill="none" stroke="#7DB5FF" stroke-width="2" marker-end="url(#adapter-structure-arrow)" />
+  <text x="345" y="392" fill="#94A3B8" font-size="16">持有并委托</text>
+  <rect x="226" y="410" width="212" height="80" rx="12" fill="#182F48" stroke="#7DB5FF" />
+  <text x="244" y="441" fill="#7DB5FF" font-size="23">已有服务</text>
+  <text x="244" y="473" fill="#E5E7EB" font-size="20">VendorSdk</text>
+</svg>
+<figcaption>业务方依赖目标约定，适配器履行它并持有服务。目标约定不接收、排队或转发消息。</figcaption>
+</figure>
+
+这里采用的是**对象适配器**：适配器持有现有服务对象，接到业务调用后再委托它。这个选择不意味着所有适配器模式都必须采用同一种语言写法或同一种持有形式。[^spring][^jdk]
+
+本例目标约定的业务含义始终是“提交提醒，取得受理结果”。如果一开始要求的是“保证买家已经收到”，而服务只能排队受理，就不是仅靠格式转换能够满足的约定。
+
+## 跟着同一次请求走个来回 {#roundtrip}
+
+结构接好以后，回看开头那一次提交。**运行时请求从业务方直接进入适配器，再到它持有的服务；Target不是中间的一次执行。**
+
+<figure style={{ margin: '1.5rem 0', maxWidth: '100%' }} aria-label="同一请求从业务方到适配器再到服务，结果沿原路返回">
+<svg viewBox="0 0 460 510" width="100%" style={{ maxWidth: '460px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="adapter-call-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="adapter-call-title">实际运行只有业务方、适配器和已有服务三方，目标契约不作为执行中继</title>
+  <defs><marker id="adapter-call-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10" fill="none" stroke="#56E4D3" stroke-width="1.5" /></marker></defs>
+  <rect width="460" height="510" rx="16" fill="#0F172A" />
+  <text x="22" y="32" fill="#94A3B8" font-size="18">机制回看 · 同一次提交 · Q17不变</text>
+  <rect x="20" y="60" width="110" height="60" rx="10" fill="#182F48" stroke="#7DB5FF" />
+  <text x="75" y="98" text-anchor="middle" fill="#7DB5FF" font-size="22">业务方</text>
+  <rect x="175" y="60" width="110" height="60" rx="10" fill="#14342F" stroke="#56E4D3" />
+  <text x="230" y="98" text-anchor="middle" fill="#56E4D3" font-size="22">适配器</text>
+  <rect x="330" y="60" width="110" height="60" rx="10" fill="#182F48" stroke="#7DB5FF" />
+  <text x="385" y="98" text-anchor="middle" fill="#7DB5FF" font-size="22">已有服务</text>
+  <path d="M75 120 V450 M230 120 V450 M385 120 V450" fill="none" stroke="#334155" stroke-width="1.5" stroke-dasharray="6 6" />
+  <path d="M75 190 H230 M230 265 H385 M385 340 H230 M230 415 H75" fill="none" stroke="#56E4D3" stroke-width="2" />
+  <path d="M220 184 L230 190 L220 196 M375 259 L385 265 L375 271 M240 334 L230 340 L240 346 M85 409 L75 415 L85 421" fill="none" stroke="#56E4D3" stroke-width="2" />
+  <text x="84" y="172" fill="#E5E7EB" font-size="17">按业务约定提交</text>
+  <text x="239" y="247" fill="#E5E7EB" font-size="17">转换入参后委托</text>
+  <text x="239" y="322" fill="#E5E7EB" font-size="17">已排队 · Q17</text>
+  <text x="84" y="397" fill="#E5E7EB" font-size="17">已受理 · Q17</text>
+  <text x="22" y="485" fill="#FFCC70" font-size="17">回原页面：已受理 · 等待送达回执</text>
+</svg>
+<figcaption>两次向右是请求与委托，两次向左是原结果和转换后的业务结果。只有一条教学消息，没有第二次发送。</figcaption>
+</figure>
+
+### 去程：转换以后，还要真正委托
+
+业务方按`Notifier`约定提交收件人和正文。适配器把`recipient`对应到`target`，把`text`对应到`body`；值仍是同一地址和“订单17已发货”，没有交换、截断或暗中改写。
+
+随后适配器调用它持有的`VendorSdk`。转换不是把字段改个名后就宣布结束：**实际提交的工作仍交给已有服务。** 本例源码用教学替身执行这次调用，没有真实外发。
+
+### 回程：结果的格式与含义都要对应
+
+服务的模拟回执是`QUEUED`、`ticket=Q17`。按本例服务约定，它表示已经接受提交、后续处理尚未完成。适配器将它转为`Submission(ACCEPTED, "Q17")`，业务方才有依据让页面显示“已受理 · 等待送达回执”。
+
+| 位置 | 同一次提交的可观察结果 |
+|---|---|
+| 模拟服务返回 | 已排队，受理编号Q17 |
+| 适配器返回业务 | 已受理，原编号Q17 |
+| 产品页反馈 | 已受理 · 等待送达回执 |
+| 目前不能推出 | 买家已经收到提醒 |
+
+“已排队”是教学SDK回执约定的意义，不表示这段本地程序真的创建了消息队列或后台投递任务。RFC9110的202状态也明确区分接受处理与完成，甚至指出请求最终可能不被执行；这里用它核对语义边界，**没有声称教学SDK使用HTTP202**。[^http202]
+
+## 转换的收益与边界 {#boundary}
+
+### 不把未知翻成确定结果
+
+主链受理完成后，视频用短规则说明另外两种边界，未再发一条消息：
+
+- 服务**明确拒绝**时，本例返回业务拒绝，不返回已受理。
+- 技术异常、超时、未知状态或无效回包，都可能让业务方**无法确认是否已受理**。不能吞掉异常后伪装成已受理，也不能一律当作确定拒绝。
+
+例如，服务可能已经记录了请求，回包时却发生通信问题。调用方没拿到结果，不等于服务没有接到请求。本例用`SendFailure`把“没有确认结果”交给调用方，并保留原技术异常原因；**不会自动重试**，也不承诺撤销、去重或恰好一次投递。这些是本例的明确选择，需要具体实现，不能仅凭“使用了适配器”就获得。[^demo]
+
+服务如果没有送达确认能力，把`QUEUED`重命名为`DELIVERED`并不会产生一份送达事实。额外回执查询或可靠投递机制需要另行设计；本片不将它们塞入主线。OpenJDK的接口适配例子也显示：适配以后，底层没有提供的某些操作仍可能明确不支持。[^jdk]
+
+### 哪些变化留在适配器，哪些还得改
+
+共同业务约定保持不变时，外部服务的入参、返回状态和失败表达可以集中在适配器里处理。本例的`ShipmentReminder`本来就按`Notifier`写好，不需要理解SDK的参数对象和原始状态。
+
+但这不等于项目零改动。新的适配器需要实现和测试；**创建对象、把适配器接给业务方、选择服务和填写配置**的位置仍要调整。若业务目标或消息含义改变，也应重新评估目标约定，不能为了宣称“调用方不改”而改变结果承诺。
+
+如果双方约定已经一致、直接使用服务足够清楚，适配器未必值得增加。引入它以后，还多了一层需要阅读和维护的转换，应测试入参、已知返回以及失败/未知边界。选模式是为了处理真实的不兼容关系，不是为每个服务都增加一个包装。
+
+### Java关键代码与完整程序 {#java}
+
+片尾给出5秒独立静默卡，提示“暂停查看”和“关键节选”。以下与卡片同源，连接结构角色与一次使用；**它省略了完整程序的外围定义，不能单独复制就运行**。
+
+```java
+interface Notifier { Submission send(String recipient, String text) throws SendFailure; }
+static final class NotificationAdapter implements Notifier {
+    private final VendorSdk sdk;
+    NotificationAdapter(VendorSdk sdk) { this.sdk = Objects.requireNonNull(sdk); }
+    public Submission send(String recipient, String text) throws SendFailure {
+        requireInputs(recipient, text);
+        try {
+            RawReceipt raw = requireReceipt(sdk.deliver(new Payload(recipient, text)));
+            return switch (raw.status()) {
+                case "QUEUED" -> new Submission(Status.ACCEPTED, raw.ticket());
+                case "REJECTED" -> new Submission(Status.REJECTED, "");
+                default -> throw new SendFailure("受理结果未确认：未知回执状态");
+            };
+        } catch (VendorFailure ex) {
+            throw new SendFailure("受理结果未确认：SDK通信异常", ex);
+        }
+    }
+}
+// main内：SDK为教学模拟，不外发
+Notifier notifier = new NotificationAdapter(new FakeVendorSdk());
+Submission result = new ShipmentReminder(notifier).send("buyer17@shop.example");
+```
+
+完整源见[AdapterDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/AdapterDemo.java)，验证入口见[verify.py](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/verify.py)，实际[编译运行记录](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/verified-results.json)保留了源码SHA、卡片逐行映射与12组行为检查。此次使用OpenJDK21，未作真实消息外发。[^demo]
+
+`FakeVendorSdk`是教学替身，不能用它的确定返回证明真实网络不会超时。完整验证覆盖明确拒绝、服务受理后丢失回包、原始异常保留、空/未知回执、受理编号缺失、非法输入、精确字段传递、独立重复调用和业务方仅依赖目标约定等，范围以实际报告为准。
+
+阅读已有项目时，可以寻找：业务方需要的目标契约是什么、已有服务的契约哪里不同、谁负责转换、是否真正委托原对象、结果和异常是否保留业务含义。只有一个名叫Adapter的类，或只看到一层包装，都不足以代替这些关系。
+
+### 资料与实际阅读范围
+
+以下公开正文与源文件访问于**2026-10-25（北京时间）**。固定commit是本次阅读快照，不一概称为最新版本；没有用页脚版权年推定更新时间。未取得GoF经典书籍全文，不声称已读其章节；此前Refactoring.Guru访问不当作本次重新阅读。
+
+[^spring]: [Spring官方TaskExecutorAdapter完整源码](https://github.com/spring-projects/spring-framework/blob/7bdf9c86f8657029567067051b7c6bd47b4ae67e/spring-core/src/main/java/org/springframework/core/task/support/TaskExecutorAdapter.java)，主干快照提交于2026-10-24。实际读Javadoc、目标接口、持有Executor、委托和异常转换；支持一个对象适配器实例，不推荐照搬其任务执行API到通知业务。详见本期研究S1。
+[^jdk]: [OpenJDK21 Enumeration.asIterator](https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/util/Enumeration.java#L85)及[Iterator的可选remove约定](https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/util/Iterator.java#L76)，固定版本jdk-21.0.8+9，2025-07-09快照。前者把产出Enumeration的代码接到消费Iterator的代码，实际委托原实例；remove仍不支持。匿名类捕获外部实例，不冒称它显式定义了一个持有字段；不把可选能力强塞进本例通知接口。研究S3。
+[^http202]: [HTTPwg官方RFC9110 XML，§15.3.3/202 Accepted](https://github.com/httpwg/http-core/blob/bde37f634681bd5462568b73aa722af9c9a3ef5e/rfc9110.xml#L8578)，标准日期2022-06，读取快照2025-11-14。只支持接受处理不等于处理完成的边界，不证明本例SDK实现了HTTP协议。研究S2。
+[^demo]: 本项目[完整Java教学实现及12组实际验证](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/adapter-pattern/demo-java)。受理状态/编号、错误映射与次数属于本例契约和运行证据，不是适配器模式统一提供的保证，也不证明消息真实送达或观众已掌握设计思想。

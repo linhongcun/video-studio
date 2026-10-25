@@ -22,6 +22,18 @@ from common import cut, load
 sha = lambda path: hashlib.sha256(path.read_bytes()).hexdigest()
 baseline = json.loads((V/'generation-baseline.json').read_text())
 assert sha(D/'script.md') == baseline['scriptSHA256'], 'Script changed after TTS input freeze'
+assert sha(D/'plan.json') == baseline['planSHA256'], 'Plan changed after TTS input freeze'
+assert sha(D/'episode-config.json') == baseline['episodeConfigSHA256'], 'Config changed after TTS input freeze'
+assert sha(D/'covers.json') == baseline['coversSHA256'], 'Covers changed after TTS input freeze'
+archive = D/'revisions/business-boundary-v2/baseline'
+archive_manifest = json.loads((archive/'baseline-manifest.json').read_text())
+archived_files = {**archive_manifest['sourceFiles'], **archive_manifest['previousVoiceFiles']}
+for name, expected in archived_files.items():
+    assert sha(archive/name) == expected, ('Old archive changed', name)
+old_takes = {name: expected for name, expected in archive_manifest['previousVoiceFiles'].items()
+             if name.startswith('voice/takes/')}
+for name, expected in old_takes.items():
+    assert sha(D/name) == expected, ('Historical take changed', name)
 sentences = json.loads((V/'sents.json').read_text())
 assert sha(V/'sents.json') == baseline['sentencesSHA256'], 'Sentence inputs changed after TTS freeze'
 rows = []
@@ -30,7 +42,7 @@ failures = []
 signal_flags = []
 for sentence in sentences:
     candidates = []
-    for sidecar in sorted((V/'takes').glob(sentence['id']+'-*.txt.json')):
+    for sidecar in sorted((V/'takes').glob(sentence['id']+'-'+baseline['takePrefix']+'*.txt.json')):
         stem = sidecar.name.removesuffix('.txt.json')
         variant = stem.removeprefix(sentence['id']+'-')
         audio = V/'takes'/(stem+'.wav')
@@ -72,7 +84,7 @@ for sentence in sentences:
         continue
     def hard_warnings(item):
         return [w for w in item['warnings'] if w != 'at least 0.50 seconds internal low signal']
-    candidates.sort(key=lambda x:(len(hard_warnings(x)),len(x['warnings']),x.get('maxInnerSilenceSeconds',99) if x['warnings'] else 0,x['take']!='a',x['take']))
+    candidates.sort(key=lambda x:(len(hard_warnings(x)),len(x['warnings']),x.get('maxInnerSilenceSeconds',99) if x['warnings'] else 0,x['take']!=baseline['preferredTake'],x['take']))
     selected = candidates[0]
     picks[sentence['id']] = selected['take']
     if hard_warnings(selected):
@@ -84,9 +96,12 @@ for sentence in sentences:
     rows.append(dict(id=sentence['id'],selectedTake=selected['take'],candidates=candidates))
 
 report=dict(checkedOn='2026-10-25（北京时间）',executor='/root/observer_voice',
+    revision='business-boundary-v2',
     scope='Frozen text, PCM conversion and shared common.cut signal checks only. No ASR, speech understanding, pronunciation verdict or human listening.',
     expectedSentences=len(sentences),completeSentences=len(rows),candidateCount=sum(len(x['candidates']) for x in rows),
     scriptSHA256=sha(D/'script.md'),sentencesSHA256=sha(V/'sents.json'),
+    archivedFilesChecked=len(archived_files),archivedFilesUnchanged=True,
+    historicalLiveTakeFilesChecked=len(old_takes),historicalLiveTakeFilesUnchanged=True,
     commonImplementationSHA256=sha(ROOT/'episodes/_shared/voice/common.py'),
     thresholds=dict(windowSeconds=.01,activePeakThreshold=.005,innerLowSignalWarningSeconds=.50,minimumIsolatedTailSeconds=.12),
     failures=failures,signalReviewFlags=signal_flags,rows=rows)
