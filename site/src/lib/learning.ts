@@ -1,7 +1,7 @@
 import {BASE, getSeries, type Episode, type Series} from './episodes';
 
 export type LearningTrack = {
-  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles';
+  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles' | 'engineering';
   title: string;
   eyebrow: string;
   description: string;
@@ -68,6 +68,16 @@ const definitions: TrackDefinition[] = [
     outcome: '理解哪些信息已经足够作出判断，能解释每一次选择和排除的依据。',
     audience: '无需编程基础，喜欢逻辑推理、想把解题过程看明白的学习者。',
     seriesIds: ['puzzles'],
+  },
+  {
+    id: 'engineering',
+    number: '06',
+    title: '工程算法',
+    eyebrow: '从系统问题理解算法',
+    description: '从扩容、故障和容量约束出发，用连续过程理解工程系统怎样分配数据、协调节点和作出选择。',
+    outcome: '看清算法如何解决具体问题，理解它依赖的条件、维护成本与适用边界。',
+    audience: '会基本编程，希望理解后端与分布式系统实现原理的开发者。',
+    seriesIds: ['engineering-algorithms'],
   },
 ];
 
