@@ -322,12 +322,19 @@ def verify(args, run):
     assert source_link in page.links and set(chapters) <= page.ids
     payloads = [json.loads(attrs['data-chapters']) for _, attrs in page.attributes if 'data-chapters' in attrs]
     assert len(payloads) == 1 and [item['id'] for item in payloads[0]] == chapters
-    chapter_links = {attrs['data-id']: attrs for element, attrs in page.attributes
-                     if element == 'a' and 'data-id' in attrs and 'data-start' in attrs}
-    for item, expected_chapter in zip(payloads[0], chapter_plan):
+    chapter_links = [attrs for element, attrs in page.attributes
+                     if element == 'a' and 'data-id' in attrs and 'data-start' in attrs]
+    assert len(chapter_links) == 2 * len(chapter_plan), 'Both desktop and mobile chapter controls must exist'
+    for index, (item, expected_chapter) in enumerate(zip(payloads[0], chapter_plan)):
         assert abs(item['start'] - expected_chapter['start']) < .001
-        assert abs(float(chapter_links[item['id']]['data-start']) - item['start']) < .001
-        assert chapter_links[item['id']]['href'] == '#' + item['id']
+        links = [attrs for attrs in chapter_links if attrs['data-id'] == item['id']]
+        assert len(links) == 2
+        assert {attrs['class'] for attrs in links} == {'ch', 'chip'}
+        for attrs in links:
+            assert abs(float(attrs['data-start']) - item['start']) < .001
+            assert int(attrs['data-index']) == index
+            expected_href = '#' + item['id'] if item.get('inArticle') else '#player'
+            assert attrs['href'] == expected_href
     videos = [attrs for element, attrs in page.attributes if element == 'video']
     assert len(videos) == 1 and 'controls' in videos[0]
     assert videos[0]['poster'].endswith(f'episodes/{SLUG}/{meta["poster"]}')
