@@ -9,3 +9,9 @@
 - 冻结生产输入在发布记录写入前后逐项全文SHA一致。未执行逐字ASR或完整人工听辨，文件核验不冒充完整观看或听辨。
 
 本次按用户观看旧版后的反馈返工，自主上线不表示用户已观看或认可新版。旧v0.48.0资料见[历史快照](revisions/v0.48.0/README.md)。
+
+## v0.69.3 · 第二批片尾参考资料
+
+2026-10-25补充可暂停的片尾参考资料，并在文章提供完整出处和对应知识点；默认制作入口已接入参考资料流程。原正文全部解码帧/时间戳、AAC包/时间戳与PCM保持，不重新配音或整条渲染。
+
+[PR #333](https://github.com/linhongcun/video-studio/pull/333)、[Release v0.69.3](https://github.com/linhongcun/video-studio/releases/tag/v0.69.3)及Release后Pages40205865861均完成，完整线上媒体/海报SHA、VTT、原章节与来源链接核验通过；完整记录见[第二批](../../docs/reference-endcards/batch-2/README.md)。原正文基线及追加回执见revisions/reference-endcards。只上GitHub站点，无平台重发。
