@@ -175,7 +175,7 @@ def check_rss_first_publication(body, meta):
     return value
 
 
-def check_episode(page, meta, expected_chapters, expected_frames, fps):
+def check_episode(page, meta, expected_chapters, expected_frames, fps, references=None):
     root = page.root
     assert one(root.find_all('title'), 'page title').text() == meta['title'] + ' · IT小村'
     assert one(root.find_all('h1'), 'lesson heading').text() == meta['title']
@@ -222,7 +222,41 @@ def check_episode(page, meta, expected_chapters, expected_frames, fps):
     assert ld['dateCreated'] == dates['dateCreatedISO']
     assert ld['uploadDate'] == dates['uploadDateISO']
     assert ld['dateModified'] == dates['dateModifiedISO']
+    if references is not None:
+        appendix = meta['referenceAppendix']
+        assert appendix['kind'] == 'references'
+        assert appendix['from'] + appendix['durationInFrames'] == expected_frames
+        assert all(chapter['frame'] < appendix['from'] for chapter in expected_chapters)
+        article = one(root.find_all(id='article'), 'article with complete reference links')
+        for reference in references['sources']:
+            urls = {reference['url'], reference['verification'].get('sourceUrl')}
+            for url in urls - {None}:
+                assert article.find_all('a', href=url), ('Missing complete article reference link', reference['id'], url)
     return source_url
+
+
+def check_caption_body_range(captions, facts):
+    """Keep every native cue strictly before the first reference-card frame."""
+    timings = re.findall(rb'^(\d{2}:\d{2}:\d{2}\.\d{3}) --> (\d{2}:\d{2}:\d{2}\.\d{3})$',
+                         captions, re.MULTILINE)
+    assert len(timings) == len(facts['subtitles'])
+    body_frames, fps = facts['body_frames'], facts['fps']
+    assert facts['appendix']['from'] == body_frames
+
+    def milliseconds(stamp):
+        hours, minutes, seconds = stamp.decode('ascii').split(':')
+        whole, fraction = seconds.split('.')
+        return ((int(hours) * 60 + int(minutes)) * 60 + int(whole)) * 1000 + int(fraction)
+
+    previous_end = -1
+    for start, end in timings:
+        start_ms, end_ms = milliseconds(start), milliseconds(end)
+        assert 0 <= start_ms < end_ms and previous_end <= start_ms
+        assert end_ms * fps < body_frames * 1000, 'Caption must end before the first reference-card frame'
+        previous_end = end_ms
+    return {'cueCount': len(timings), 'lastCueEndMilliseconds': previous_end,
+            'bodyFrames': body_frames, 'appendixFrom': facts['appendix']['from'],
+            'allCuesEndBeforeReferenceAppendix': True}
 
 
 def main():
@@ -240,10 +274,15 @@ def main():
         # Validate the supplied independent evidence before making any site GET.
         release_from_connector, release_evidence = load_release_evidence(args.release_api_json, release_tag)
     facts = load_facts()
-    check_local_delivery(facts, release_tag)
+    delivery = check_local_delivery(facts, release_tag)
     meta = facts['meta']
     expected_chapters, expected_subtitles = facts['chapters'], facts['subtitles']
     offset, fps, shots = facts['frames'], facts['fps'], facts['shots']
+    body_frames, appendix = facts['body_frames'], facts['appendix']
+    assert appendix['from'] == body_frames
+    assert offset == body_frames + appendix['durationInFrames']
+    assert meta['updatedAt'] == facts['appendix_completed_at_ms']
+    assert all(0 <= sub['from'] < sub['to'] <= body_frames for sub in expected_subtitles)
     subtitle_count = len(expected_subtitles)
     version = json.loads((ROOT / 'site/package.json').read_text())['version']
     # The debut tag identifies P05; concurrent courses may advance the whole site.
@@ -252,6 +291,10 @@ def main():
     vtt_path = DIST / 'episodes' / SLUG / 'captions.vtt'
     expected_vtt_bytes = expected_vtt(facts)
     assert vtt_path.read_bytes() == expected_vtt_bytes
+    caption_body_range = check_caption_body_range(expected_vtt_bytes, facts)
+    reference_artifacts = {name: {'sha256': sha_file(SITE / name), 'bytes': (SITE / name).stat().st_size}
+                           for name in ('references.json', 'reference-appendix.json',
+                                        'reference-appendix-media-check.json')}
     results = []
     context = ssl.create_default_context()
 
@@ -286,11 +329,13 @@ def main():
         for name, filename in (('video', meta['video']), ('poster', meta['poster'])):
             get(name, PAGE_URL + filename, expected_sha=sha_file(SITE / filename),
                 expected_size=(SITE / filename).stat().st_size, keep_body=False)
+        assert results[0]['sha256'] == facts['reference_receipt']['outputSHA256']
         captions = get('captions', PAGE_URL + 'captions.vtt',
                        expected_sha=sha_file(vtt_path), expected_size=len(expected_vtt_bytes))
         assert captions == expected_vtt_bytes and captions.decode('utf-8').count('-->') == subtitle_count
+        assert check_caption_body_range(captions, facts) == caption_body_range
         episode = Page(get('episode', PAGE_URL).decode('utf-8'))
-        source_url = check_episode(episode, meta, expected_chapters, offset, fps)
+        source_url = check_episode(episode, meta, expected_chapters, offset, fps, facts['references'])
         home = Page(get('home', BASE).decode('utf-8')).root
         assert home.find_all('a', href='/video-studio/learn/#puzzles'), 'Missing homepage puzzle direction'
         assert home.find_all('a', href='/video-studio/episodes/egg-drop/'), 'Missing homepage P05 lesson'
@@ -340,12 +385,25 @@ def main():
                   'releaseApiEvidence': release_evidence,
                   'fullVideoStreamHashed': True, 'captionsExactBytesMatch': True,
                   'subtitleCount': subtitle_count, 'shotCount': len(shots),
+                  'deliveryFileCount': len(delivery['filesSHA256']),
                   'results': results, 'chapters': expected_chapters,
+                  'bodyVideoFrames': body_frames, 'captionBodyRange': caption_body_range,
                   'finalVideoFrames': offset, 'durationSeconds': offset / fps,
+                  'referenceAppendix': appendix,
+                  'referenceAppendixEvidence': {
+                      'sourceIds': facts['reference_receipt']['appendix']['sourceIds'],
+                      'bodySHA256': facts['reference_receipt']['inputs']['bodySHA256'],
+                      'finalVideoSHA256': facts['reference_receipt']['outputSHA256'],
+                      'mediaCheckPassed': facts['reference_media_check']['passed'],
+                      'appendCompletedAtUTC': facts['appendix_completed_at'],
+                      'metadataCompletedAtMilliseconds': facts['appendix_completed_at_ms'],
+                      'localPublishedArtifacts': reference_artifacts,
+                      'artifactTransport': 'Local published files verified before canonical requests; these three JSON files were not fetched online.',
+                      'onlineBinding': 'The full canonical video stream hash matches the appendix-bound published final video, and complete source links were checked in the canonical article.'},
                   'sourceUrl': source_url, 'independentSeries': 'puzzles',
                   'githubRelease': {'id': release['id'], 'tag': release['tag_name'],
                                     'url': release['html_url'], 'publishedAt': release['published_at']},
-                  'scope': 'Canonical HTTP delivery, complete media hashes, exact VTT and chapter data, anchors, source, series, directory, RSS and actual Release entry. Browser behavior is recorded separately; no claim of full human listening or measured learning outcomes.'}
+                  'scope': 'Canonical HTTP delivery, complete appendix-bound final media hashes, exact body-only VTT and original chapter data, complete article reference links, anchors, source, series, directory, RSS and actual Release entry. The three reference JSON artifacts are local evidence, not additional online GETs. Browser pause/fullscreen behavior is recorded separately; no claim of full human listening or measured learning outcomes.'}
         assert len(results) == (9 if release_evidence is not None else 10), 'Unexpected first-attempt canonical GET count'
         for directory in (QA_OUTPUT, REVISION_DIR):
             directory.mkdir(parents=True, exist_ok=True)

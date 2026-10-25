@@ -14,9 +14,9 @@ from playwright.sync_api import sync_playwright
 
 from sync_site import (PRODUCTION, ROOT, SITE, DIST, SLUG, FIRST_RELEASE, REVISION,
                        REVISION_DIR, QA_OUTPUT, load_facts, check_local_delivery,
-                       puzzle_slugs, release_version)
+                       puzzle_slugs, release_version, sha_file)
 from verify_online import (Page, check_episode, content_dates, check_date_times,
-                           check_rss_first_publication)
+                           check_rss_first_publication, check_caption_body_range)
 
 
 def main():
@@ -31,11 +31,13 @@ def main():
     assert release_version('v' + json.loads((ROOT / 'site/package.json').read_text())['version']) >= release_version(args.release)
     meta, chapters = facts['meta'], facts['chapters']
     dates = content_dates(meta)
-    frames, fps = facts['frames'], facts['fps']
+    frames, body_frames, fps = facts['frames'], facts['body_frames'], facts['fps']
     duration = frames / fps
     built = DIST / 'episodes' / SLUG
-    source = check_episode(Page((built / 'index.html').read_text()), meta, chapters, frames, fps)
+    source = check_episode(Page((built / 'index.html').read_text()), meta, chapters, frames, fps,
+                           references=facts['references'])
     rss_first_publication = check_rss_first_publication((DIST / 'rss.xml').read_text(), meta)
+    caption_body_range = check_caption_body_range((built / 'captions.vtt').read_bytes(), facts)
     expected_links = ['/video-studio/episodes/' + slug + '/' for slug in puzzle_slugs()]
     assert SLUG in puzzle_slugs() and 'monty-hall' in puzzle_slugs()
     output = QA_OUTPUT
@@ -55,6 +57,8 @@ def main():
             response = page.goto(base + 'episodes/' + SLUG + '/', wait_until='networkidle')
             assert response.status == 200
             assert page.locator('h1').inner_text() == meta['title']
+            footer_version = page.locator('footer .footer-bottom .num').inner_text()
+            assert footer_version == 'v' + json.loads((ROOT / 'site/package.json').read_text())['version']
             assert page.locator('header.eh time[aria-label="当前版本"]').is_visible()
             detail_dates = page.locator('header.eh').evaluate('(e)=>Array.from(e.querySelectorAll("time"),t=>({datetime:t.dateTime,text:t.textContent,role:t.getAttribute("aria-label")}))')
             assert page.locator('header.eh time[aria-label="当前版本"]').inner_text() == dates['versionLabel']
@@ -79,6 +83,7 @@ def main():
                 assert cue['text'] == sub['text']
                 assert abs(cue['start'] - sub['from'] / fps) <= 0.00051
                 assert abs(cue['end'] - sub['to'] / fps) <= 0.00051
+            assert all(cue['end'] < facts['appendix']['from'] / fps for cue in cues)
             seek_checks = []
             for chapter in chapters:
                 selector = '.chip' if width < 768 else '.ch'
@@ -142,6 +147,41 @@ def main():
             page.wait_for_function('document.querySelector("video").ended')
             ended = video.evaluate('v=>({time:v.currentTime,ended:v.ended,error:v.error?.code??null})')
             assert ended['ended'] and ended['error'] is None
+            # The reference card is part of the final MP4, beyond the immutable
+            # body/storyboard. Check actual pause/fullscreen and native cue state.
+            video.evaluate('(v,t)=>{v.pause();v.currentTime=t;v.textTracks[0].mode="showing";}', facts['appendix']['from'] / fps)
+            page.wait_for_function('!document.querySelector("video").seeking')
+            page.wait_for_function('document.querySelector("video").textTracks[0].activeCues.length===0')
+            appendix_boundary_state = video.evaluate('v=>({time:v.currentTime,paused:v.paused,activeCues:v.textTracks[0].activeCues.length})')
+            appendix_time = (facts['appendix']['from'] + facts['appendix']['durationInFrames'] / 2) / fps
+            video.evaluate('(v,t)=>{v.pause();v.currentTime=t;v.textTracks[0].mode="showing";}', appendix_time)
+            page.wait_for_function('!document.querySelector("video").seeking')
+            page.wait_for_function('document.querySelector("video").textTracks[0].activeCues.length===0')
+            appendix_state = video.evaluate('v=>({time:v.currentTime,paused:v.paused,activeCues:v.textTracks[0].activeCues.length,error:v.error?.code??null})')
+            assert appendix_state['paused'] and appendix_state['activeCues'] == 0 and appendix_state['error'] is None
+            appendix_shot = output / f'reference-card-paused-{width}.png'
+            video.screenshot(path=str(appendix_shot))
+            # A real click supplies the browser's fullscreen user activation.
+            page.evaluate('''() => {const b=document.createElement('button');b.id='qa-reference-fullscreen';
+                b.textContent='QA fullscreen';b.style='position:fixed;left:0;top:0;z-index:2147483647';
+                b.onclick=()=>document.querySelector('video').requestFullscreen();document.body.append(b);}''')
+            page.locator('#qa-reference-fullscreen').click()
+            page.wait_for_function('document.fullscreenElement===document.querySelector("video")')
+            fullscreen_state = video.evaluate('v=>({fullscreen:document.fullscreenElement===v,paused:v.paused,activeCues:v.textTracks[0].activeCues.length})')
+            assert fullscreen_state == {'fullscreen': True, 'paused': True, 'activeCues': 0}
+            fullscreen_shot = output / f'reference-card-fullscreen-{width}.png'
+            page.screenshot(path=str(fullscreen_shot))
+            page.evaluate('document.exitFullscreen()')
+            page.wait_for_function('!document.fullscreenElement')
+            page.locator('#qa-reference-fullscreen').evaluate('e=>e.remove()')
+            reference_links = []
+            for reference in facts['references']['sources']:
+                urls = dict.fromkeys([reference['url'], reference.get('verification', {}).get('sourceUrl', reference['url'])])
+                for url in urls:
+                    links = page.locator('#article a')
+                    count = links.evaluate_all('(ns,u)=>ns.filter(a=>a.href===u).length', url)
+                    assert count > 0, ('Missing complete article reference URL', url)
+                    reference_links.append({'sourceId': reference['id'], 'url': url, 'articleLinkCount': count})
             page.wait_for_function('!document.querySelector(".vwrap").classList.contains("stuck")')
             page.locator('#why-fourteen').scroll_into_view_if_needed()
             page.locator('#why-fourteen').evaluate('e=>e.scrollIntoView({block:"start"})')
@@ -201,15 +241,20 @@ def main():
             library_card.screenshot(path=str(library_card_shot))
             assert not page.evaluate('document.documentElement.scrollWidth>innerWidth+1')
             assert not errors and not failed, (errors, failed)
-            results.append({'viewport': [width, height], 'video': info, 'chapters': seek_checks,
+            results.append({'viewport': [width, height], 'footerVersion': footer_version,
+                'video': info, 'chapters': seek_checks,
                 'allArticleChapterSeeksPassed': True, 'captions': len(cues), 'activeCaptionChecked': sample['text'],
                 'playback': playback, 'endingPlayback': ending_playback, 'ended': ended,
                 'revisedOpeningShotPlayback': opening_checks,
                 'detailDates': detail_dates, 'homeCardDates': home_card_dates, 'libraryCardDates': library_card_dates,
+                'referenceAppendix': {'declaration': facts['appendix'], 'pause': appendix_state,
+                    'boundary': appendix_boundary_state, 'fullscreen': fullscreen_state,
+                    'articleLinks': reference_links, 'linksScope': 'Actual rendered article hrefs; no new external source GET.',
+                    'allCaptionEndsBeforeAppendix': True},
                 'horizontalOverflow': False, 'articleOnlyAppendixReadable': True, 'appendixVideoJump': False,
                 'runtimeErrors': errors, 'failedResponses': failed, 'footnotes': footnote_geometry,
                 'budgetTableRows': actual_budgets, 'exampleEventRows': actual_example, 'thresholdRows': actual_bounds,
-                'screenshots': [str(p.relative_to(ROOT)) for p in (first_shot, last_shot, proof_shot, certificate_shot, footnote_shot, home_card_shot, library_card_shot, *opening_screenshots)]})
+                'screenshots': [str(p.relative_to(ROOT)) for p in (first_shot, last_shot, proof_shot, certificate_shot, footnote_shot, home_card_shot, library_card_shot, appendix_shot, fullscreen_shot, *opening_screenshots)]})
             # Persist real measurements at each completed viewport so a later
             # viewport failure cannot erase an earlier result or invite backfill.
             (output / f'qa-site-viewport-{width}.json').write_text(json.dumps({
@@ -223,7 +268,15 @@ def main():
               'release': args.release, 'firstRelease': FIRST_RELEASE, 'revision': REVISION,
               'contentDates': dates, 'rssFirstPublication': rss_first_publication,
               'base': base, 'candidateVersion': json.loads((ROOT / 'site/package.json').read_text())['version'],
-              'builtHtmlPageCount': len(list(DIST.rglob('*.html'))), 'frames': frames, 'fps': fps,
+              'builtHtmlPageCount': len(list(DIST.rglob('*.html'))), 'frames': frames,
+              'bodyVideoFrames': body_frames, 'referenceAppendix': facts['appendix'],
+              'bodyVideoSHA256': facts['reference_receipt']['inputs']['bodySHA256'],
+              'captionBodyRange': caption_body_range,
+              'referenceArtifactsSHA256': {name: sha_file(SITE / name) for name in
+                  ('references.json', 'reference-appendix.json', 'reference-appendix-media-check.json')},
+              'appendixCompletedAtRaw': facts['appendix_completed_at'],
+              'appendixCompletedAtMetadataPrecision': facts['appendix_completed_at_ms'],
+              'playerAssertionsExecutedAgain': True, 'fps': fps,
               'subtitleCount': len(facts['subtitles']), 'shotCount': len(facts['shots']), 'chapters': chapters,
               'sourceUrl': source, 'puzzleDirectory': puzzle_slugs(),
               'deliveryFileCount': len(manifest['filesSHA256']), 'mediaSHA256': {n: manifest['filesSHA256'][n] for n in (meta['video'],meta['poster'])},
@@ -232,7 +285,7 @@ def main():
     REVISION_DIR.mkdir(parents=True, exist_ok=True)
     for directory in (output, REVISION_DIR):
         (directory / 'qa-site.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
-        (directory / 'qa-site.md').write_text(f"P05 {REVISION} site QA passed at 1440×1000 and390×844. Current delivery {args.release}; debut {FIRST_RELEASE}.\n\n{frames} frames / {fps} fps; {len(facts['subtitles'])} captions; {len(chapters)} chapters. Dynamic chapter/article seeks, complete caption text/timing, revised03/04 playback, start/end playback, last frame, natural end, ordinary proof/bounds anchors, tables, footnotes and puzzle navigation passed. Actual data and screenshot paths are in qa-site.json.\n\nScope: browser and delivery checks only; not a full audiovisual review or measured learning outcome.\n")
+        (directory / 'qa-site.md').write_text(f"P05 {REVISION} site QA passed at 1440×1000 and 390×844. Current delivery {args.release}; debut {FIRST_RELEASE}.\n\nBody {body_frames} frames; final {frames} frames / {fps} fps; {len(facts['subtitles'])} body-only captions; {len(chapters)} original chapters. Dynamic chapter/article seeks, complete caption text/timing, revised03/04 playback, start/end playback, last frame, natural end, ordinary proof/bounds anchors, tables, footnotes and puzzle navigation passed. Actual reference-card pause/fullscreen, no active captions at its boundary or middle, and complete article source hrefs passed. Actual data and screenshot paths are in qa-site.json.\n\nScope: browser and delivery checks only; not a full audiovisual review, new source-website access or measured learning outcome.\n")
     (SITE / 'qa-site-binary-opening.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'status': 'passed', 'viewports': [[1440,1000],[390,844]], 'frames': frames,
                       'captions': len(facts['subtitles']), 'chapters': len(chapters), 'pages': report['builtHtmlPageCount']}, ensure_ascii=False))

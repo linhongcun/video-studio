@@ -55,6 +55,22 @@ else:
                    for suffix in ['.raw.wav', '.wav', '.txt.json']]
     extras += [p for p in (D / 'remotion/scripts').rglob('*')
                if p.is_file() and '__pycache__' not in p.parts and p.suffix != '.pyc']
+    # For future fresh-body renders; this branch is not run to bless the
+    # already encoded 169-input body during an append-only repair.
+    extras += [D/'references.json', ROOT/'episodes-codex/_shared/render_with_references.py',
+               ROOT/'episodes-codex/_shared/append_references.py',
+               ROOT/'episodes-codex/_shared/requirements-reference-appendix.txt',
+               ROOT/'site/scripts/check-references.mjs']
+    # Current default-render/delivery wiring is separate from the immutable
+    # pre-append body169 and append13 input receipts. Do not relabel either.
+    appendix = D/'revisions/reference-endcards'
+    extras += [D/'append_freeze.py', appendix/'append-source-sha256.json']
+    extras += [appendix/'body'/name for name in [
+        'video.mp4','source-sha256.json','identity.json','words.json','storyboard.json',
+        'render-result.json','mix-report.json','input-snapshots/freeze.py',
+        'input-snapshots/remotion/package.json']]
+    refs = json.loads((D/'references.json').read_text())
+    extras += [ROOT/source['verification']['evidence'] for source in refs['sources']]
     for path in extras:
         manifest[os.path.relpath(path, D)] = digest(path)
     (D / 'source-sha256.json').write_text(json.dumps(dict(sorted(manifest.items())),
