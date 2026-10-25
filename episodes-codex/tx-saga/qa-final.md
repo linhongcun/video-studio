@@ -1,5 +1,15 @@
 # EP.21 · Saga：流程导航版最终成片检查
 
+## 当前：MySQL数据库身份修订（#230）
+
+当前正式成片SHA-256：`4a1876028bbb659919712fae3c4f25bfcdb77983fd22e0ca087c1f98800be0c3`，3478帧，1920×1080/30fps。库名旁增加数据库圆柱与MySQL识别图标；内部记录、原字幕、分镜、数值、相机及原混合AAC保持。原AAC完整SHA为`989a01ee4630f1fc03698a778ed9d2ce04dfc095c572eabc97edfa3a963096be`，与新片提取流逐字节一致；完整解码、格式与冻结输入检查通过。
+
+独立执行者`/root/tx_outbox`从正式新MP4实际查看[1846, 2642]帧，真实范围见[本轮QA](qa-mysql-identity.json)及[独立报告](../../docs/mysql-database-identity/final-review-tx-saga.json)；预演和fresh构建另有记录，不将它们冒称全片人工听看或用户已认可。发布状态见[本期发布记录](release.md)。
+
+## 修订前历史检查
+
+以下段落保留修订前检查的原始范围，历史媒体与输入由[Git索引](revisions/mysql-identity-before.json)追溯；不能将旧SHA对应的检查冒记为本次重新执行。
+
 2026-10-24。《Saga：扣款成功，缺货了怎么办？》本次站点发布v0.51.0，14镜28句、4章、3478帧，画面115.933333秒。完整媒体SHA256：`934ec09f2f47d4b021f869375c952bb39a333dbdb4bfec91324705c7137b281c`，8,744,157 bytes。
 
 ## 反馈与实际修改

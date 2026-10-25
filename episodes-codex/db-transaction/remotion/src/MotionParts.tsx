@@ -1,6 +1,8 @@
 import React from 'react';
 import {C,FONT,MONO} from './theme';
 import {Shot} from './data';
+import {createDatabaseIdentity} from '../../../_shared/database-identity';
+const DatabaseMark=createDatabaseIdentity(React);
 export const clamp=(v:number)=>Math.max(0,Math.min(1,v));
 export const linear=(f:number,start:number,len=24)=>clamp((f-start)/Math.max(1,len));
 export const ease=(v:number)=>{v=clamp(v);return v*v*(3-2*v)};
@@ -29,4 +31,4 @@ export const Operate:React.FC<{f:number;start:number;len?:number;x:number;y:numb
  </>};
 export const Scope:React.FC<{p:number;x?:number;y?:number;w?:number;h?:number;label?:string;opacity?:number}>=({p,x=370,y=330,w=1180,h=380,label='同一数据库',opacity=1})=><>
  <Path d={`M${x+80} ${y}H${x+28}Q${x} ${y} ${x} ${y+28}V${y+h-28}Q${x} ${y+h} ${x+28} ${y+h}H${x+w-28}Q${x+w} ${y+h} ${x+w} ${y+h-28}V${y+28}Q${x+w} ${y} ${x+w-28} ${y}H${x+w-80}`} p={p} color={C.teal} width={2} opacity={opacity*.55}/>
- <Text x={960} y={y-27} center size={27} color={C.teal} opacity={go(p,0,1)*opacity}>{label}</Text></>;
+ <div style={{position:'absolute',left:960,top:y-37,height:44,display:'inline-flex',alignItems:'center',gap:12,transform:'translateX(-50%)',opacity:go(p,0,1)*opacity,color:C.teal,fontSize:27,fontWeight:600,lineHeight:1.35,whiteSpace:'nowrap'}}><DatabaseMark size={44}/><span>{label}</span></div></>;

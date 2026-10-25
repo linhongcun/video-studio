@@ -2,13 +2,16 @@ import React from 'react';
 import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {C,FONT} from './theme';
 import {Shot,VIDEO,shots} from './data';
+import {createDatabaseIdentity} from '../../../_shared/database-identity';
+const DatabaseMark=createDatabaseIdentity(React);
+const DatabaseRole:React.FC<{children:React.ReactNode}>=({children})=><span style={{display:'inline-block',position:'relative'}}><DatabaseMark size={44} style={{position:'absolute',right:'calc(100% + 12px)',top:'50%',transform:'translateY(-50%)'}}/>{children}</span>;
 declare const __HAS_VOICE_AUDIO__:boolean;
 const clamp=(v:number)=>Math.max(0,Math.min(1,v));
 const go=(f:number,a:number,n=35)=>{const p=clamp((f-a)/Math.max(1,n));return p*p*(3-2*p)};
 const mix=(a:number,b:number,p:number)=>a+(b-a)*p;
 const Text:React.FC<{children:React.ReactNode;x?:number;y?:number;size?:number;color?:string;alpha?:number;center?:boolean}>=({children,x=130,y=180,size=48,color=C.text,alpha=1,center=false})=><div style={{position:'absolute',left:x,top:y,color,fontSize:size,fontWeight:600,whiteSpace:'nowrap',lineHeight:1.3,opacity:alpha,transform:center?'translateX(-50%)':undefined}}>{children}</div>;
 const Data:React.FC<{role:string;value:string;x:number;y?:number;color?:string;alpha?:number;scale?:number;state?:string;old?:string}>=({role,value,x,y=500,color=C.text,alpha=1,scale=1,state='',old})=><div data-record={role} data-value={value} style={{position:'absolute',left:x-240,top:y-150,width:480,height:315,textAlign:'center',opacity:alpha,transform:`scale(${scale})`,transformOrigin:'center'}}>
- <div style={{fontSize:37,color,fontWeight:650}}>{role}</div><div style={{fontSize:22,color:C.muted,marginTop:13}}>用户 7042 · 昵称</div>
+ <div style={{fontSize:37,color,fontWeight:650}}>{role==='主库'||role==='从库'?<DatabaseRole>{role}</DatabaseRole>:role}</div><div style={{fontSize:22,color:C.muted,marginTop:13}}>用户 7042 · 昵称</div>
  <div style={{fontSize:96,fontWeight:700,lineHeight:1.3,color,marginTop:17}}>{value}</div>
  <div style={{margin:'12px 40px 0',height:2,background:color,opacity:.45}}/>
  {state&&<div style={{fontSize:25,color:state.includes('待')?C.gold:C.muted,marginTop:17}}>{state}</div>}
@@ -30,7 +33,7 @@ const Scene:React.FC<{shot:Shot}>=({shot:s})=>{
   <Text>同一个用户，同一条昵称记录</Text><Data role="本次教学记录" value="阿青" x={mix(960,650,want)}/><Text x={mix(1400,1280,want)} y={460} center size={90} color={C.gold} alpha={want}>青禾</Text><Text x={1280} y={610} center size={27} color={C.muted} alpha={want}>这次想改成</Text>
  </>}
  if(id===3){const at=s.cueFrames?.sourceLabel??1,p=go(f,15,55),request=go(f,s1+10,60);return <>
-  {f>=at&&<Text size={58} color={C.teal}>主库</Text>}<Data role="接收本次修改" value="阿青" x={mix(960,470,p)} color={C.gold}/>
+  {f>=at&&<Text size={58} color={C.teal}><DatabaseRole>主库</DatabaseRole></Text>}<Data role="接收本次修改" value="阿青" x={mix(960,470,p)} color={C.gold}/>
   <Route x1={1020} y1={560} x2={700} y2={510} p={request} color={C.gold}/><Move text="修改昵称" x1={1080} y1={560} x2={700} y2={510} p={request}/>
   <Result alpha={request}>本例：修改先到主库</Result>
  </>}
