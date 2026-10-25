@@ -35,12 +35,24 @@ def previous_episodes():
     return rows
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--approved',action='store_true');parser.add_argument('--release',required=True);parser.add_argument('--published-at');args=parser.parse_args()
+    parser=argparse.ArgumentParser(description=__doc__);parser.add_argument('--approved',action='store_true');parser.add_argument('--release',required=True);parser.add_argument('--published-at');parser.add_argument('--replace-unpublished-candidate',help='Exact old release identity of this unpublished D03 candidate only');args=parser.parse_args()
     assert args.approved,'Wait for root formal media approval before integration'
     version=json.loads((ROOT/'site/package.json').read_text())['version'];assert re.fullmatch(r'\d+\.\d+\.\d+',version)
     assert args.release=='v'+version,'Use root final release identity, not the provisional plan'
     published=args.published_at or datetime.now(ZoneInfo('Asia/Shanghai')).date().isoformat();date.fromisoformat(published)
     before=previous_episodes()
+    transition=None
+    if (OUT/'meta.json').exists():
+        existing=json.loads((OUT/'meta.json').read_text())
+        if existing.get('firstRelease')!=args.release:
+            assert args.replace_unpublished_candidate==existing.get('firstRelease'),'Explicit old unpublished D03 candidate identity is required'
+            archived=json.loads((HERE/'qa-site-candidate-archive.json').read_text())
+            assert archived['candidateRelease']==args.replace_unpublished_candidate
+            assert sha(OUT/'meta.json')==archived['oldMetaSha256'],'Current old candidate metadata differs from its committed archive'
+            assert existing['slug']==SLUG and existing['lessonOrder']==3 and existing['sourcePath']=='episodes-codex/adapter-pattern/remotion'
+            transition={'slug':SLUG,'from':existing['firstRelease'],'to':args.release,'authority':'Root explicitly confirmed the old candidate was never released and its tag belongs to parallel Skills; only new D03 is replaced.','archive':archived['archive'],'oldMetaSha256':archived['oldMetaSha256']}
+        else:assert not args.replace_unpublished_candidate,'Replacement is only for a different unpublished candidate identity'
+    else:assert not args.replace_unpublished_candidate,'No existing candidate to replace'
     config=json.loads((HERE/'episode-config.json').read_text());sb=json.loads((HERE/'storyboard.json').read_text());assert config['slug']==SLUG
     frames=sb['meta'].get('finalVideoFrames',sb['meta']['durationInFrames']);fps=sb['meta']['fps'];card=sb['meta']['javaEndCard']
     assert fps==30 and card['kind']=='java-design-pattern' and card['durationInFrames']==150 and card['from']+150==frames
@@ -59,7 +71,7 @@ if __name__=='__main__':
     (OUT/'meta.json').write_text(json.dumps(meta,ensure_ascii=False,indent=2)+'\n')
     assert all(p.is_file() and p.suffix.lower() not in ['.wav','.png','.ts','.tsx','.js','.jsx'] for p in OUT.iterdir())
     assert before==previous_episodes(),'D01/D02 publishing data changed during new episode integration'
-    report={'status':'passed','checkedAtBeijing':datetime.now(ZoneInfo('Asia/Shanghai')).isoformat(),'executedBy':'Codex adapter site agent','release':args.release,'metadata':meta,'previousEpisodesPreserved':before,
+    report={'status':'passed','checkedAtBeijing':datetime.now(ZoneInfo('Asia/Shanghai')).isoformat(),'executedBy':'Codex adapter site agent','release':args.release,'unpublishedCandidateTransition':transition,'metadata':meta,'previousEpisodesPreserved':before,
             'files':[{'file':name,'sourceFile':f'episodes-codex/{SLUG}/{name}','sha256':sha(OUT/name),'bytes':(OUT/name).stat().st_size} for name in FILES],
             'scope':'Only approved D03 publishing artifacts copied. D01/D02 publishing metadata and core artifacts are byte-identical to their current pre-integration state; no production WAV/PNG/source tree copied.'}
     (HERE/'qa-site-copy-manifest.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')

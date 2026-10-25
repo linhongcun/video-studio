@@ -11,3 +11,5 @@
 5. Release之后Pages工作流成功，再运行`python3 episodes-codex/adapter-pattern/site-verify-online.py`：11个普通canonical GET，完整视频流SHA而不保存远端媒体；海报/VTT/章节、Java及源码入口、D01/D02更新后的目录、系列/资料库/RSS/真实Release条目，继续核对已撤下Agent入口不恢复。
 
 本地浏览器的短静音播放不代表全片听辨、ASR、用户认可或学习效果测量。未执行的检查不预填通过。构建日志保存原始gzip和只清尾空格的可读副本。
+
+候选首发冲突时，先从已提交候选精确归档旧QA输出/路径/SHA和旧meta。只有根任务明确确认尚未发布的新D03，可传`--replace-unpublished-candidate <旧候选版本>`受控替换首发身份；不用于已发布课程的改版。Agent系列按当前真实已发布内容检查，允许新Skills，继续排除已退两期，不机械要求Agent系列为空。
