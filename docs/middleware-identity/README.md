@@ -1,4 +1,4 @@
-# 缓存与消息中间件身份标记（#271，本地检查完成）
+# 缓存与消息中间件身份标记（#271，v0.64.2已上线）
 
 基线为 `f5327fdf90dea765d6e1d2f086fcd1a1789970ff`。本轮只给实际中间件对象补产品身份，保留原机制、配音、字幕、分镜与导航时序、封面；不把通用机制改成某个产品的定义。发版号在最终整合最新主干后确定。
 
@@ -35,3 +35,5 @@ python3 docs/middleware-identity/verify-site.py --live --report /workspace/.vide
 本次8523帧从新冻结源重绘，5031帧复用旧解码画面；保留原AAC流。缓存一致性全帧有标识增量，直接CRF20；其他片按连续受影响镜头组合CRF1中间片、与旧解码画面拼接后统一CRF20。不把图像重新编码说成数学无损，见[渲染计划](render-plan.json)。新依赖仅复用当前相同锁包图，并用干净安装/输入复制复现两个代表PNG，见[fresh检查](fresh-build.json)。
 
 发布前同步包含D03的v0.64.1重制与LC200预留，所有484冻结输入交集为零；本批顺延v0.64.2，不覆盖旧tag。四选中页面在相同版本下与UI实播构建字节相同，最终除精确版本号外也逐字节一致；既有0.64.1八次实播按实际版本保留，最终0.64.2媒体/字幕/章节/封面核验通过。见[协作审计](prepublish-upstream-audit.json)。旧全库检查把preview算法链硬写成六课，新增draft LC200后失效；生产导航原本已正确隔离，现只修检查器并显式检查预览完整七课、公开六课与构建草稿隔离，[完整检查](learning-path-final.log)通过。
+
+[PR #275](https://github.com/linhongcun/video-studio/pull/275)已合并，附注tag指向`768c23c0df976ec2247cd4d07d7f188bf4c34624`；[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.64.2)后[Pages部署40178059672](https://github.com/linhongcun/video-studio/actions/runs/40178059672)成功。[线上核验](online-verification.json)通过，#271以completed关闭；[发布凭据](release.json)记录各片完整SHA。本批尚无用户观看反馈。
