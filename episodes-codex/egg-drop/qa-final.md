@@ -66,4 +66,4 @@ fresh完整编码退出0；完整解码、格式、响度与133输入前后核�
 ## 能力边界
 
 
-ASRPerformed、semanticListeningPerformed、wordAlignmentPerformed、fullHumanListeningPerformed均为false；全片连续实时观看和新手理解实验也未执行。模型、源树、声源字节复现、DOM与抽样动态只支持各自范围，不证明所有发音／像素、完整人工审听或学习效果。P05尚无用户观看结论，P04的认可不迁移为本片认可；本次未做P05外部平台投稿。
+ASRPerformed、semanticListeningPerformed、wordAlignmentPerformed、fullHumanListeningPerformed均为false；全片连续实时观看和新手理解实验也未执行。模型、源树、声源字节复现、DOM与抽样动态只支持各自范围，不证明所有发音／像素、完整人工审听或学习效果。发布时P05尚无用户观看结论；后续用户已反馈方法动机不清，见feedback.md。P04的认可不迁移为本片认可；本次未做P05外部平台投稿。
