@@ -8,6 +8,6 @@
 
 当前状态：10镜20句、4332帧/144.4秒已完成制作、正式编码和独立成片复核。音频20份原始转换PCM、文本与选段对应、共享裁尾和正文前缀/静默尾检查通过；无逐字ASR或完整人工听辨。219张原预演、83张澄清定验、17张Outbox定验均无COPYFIT；独立实际查看78个关键状态和连续04–07小样108个2fps解码帧，无阻塞。三比例封面重出并实际查看，Java完整程序8类行为重验通过，173项生产输入冻结并只读复核通过。
 
-本轮对应重制issue为[#292](https://github.com/linhongcun/video-studio/issues/292)。发布前已再fetch到ef1dc4cd/v0.68.3，上游是另一片global-id修订及文档/版本更新，与173项冻结输入无交集；待无媒体读取时整合主干，版本按实际最新主干与标签选择，不预占或移动已有版本。
+本轮对应重制issue为[#292](https://github.com/linhongcun/video-studio/issues/292)。发布前已再fetch到ef1dc4cd/v0.68.3，上游是另一片global-id修订及文档/版本更新，与173项冻结输入无交集；在媒体检查结束后整合主干，实际版本按最新主干与标签选择，未预占或移动已有版本。
 
-当前检查报告：`qa-voice-mq.json`、`qa-mq-preflight-independent.json`、`qa-mq-preflight-root.json`。旧站点QA归档于`revisions/mq-practice/legacy-published-reports/`，新发布同步真实render/mix/source身份，避免新版旁挂旧177.6秒报告。正式成片完整SHA为`f92a0211c6402b661231bacc137a459de4dcf9a4d0b40d9ff905fc53c0de6c33`，全解码、AAC、4332帧、−16.0LUFS/−3.8dBTP通过。独立正式复核81个采样含20句字幕和尾卡首中末，root另看8个实际帧，无阻塞。已整合最新主干ef1dc4cd且173冻结项保持，候选v0.68.4未被远端标签占用；当前接入站点构建，真实上线结果完成后追加。
+当前检查报告：`qa-voice-mq.json`、`qa-mq-preflight-independent.json`、`qa-mq-preflight-root.json`。旧站点QA归档于`revisions/mq-practice/legacy-published-reports/`，新发布同步真实render/mix/source身份，避免新版旁挂旧177.6秒报告。正式成片完整SHA为`f92a0211c6402b661231bacc137a459de4dcf9a4d0b40d9ff905fc53c0de6c33`，全解码、AAC、4332帧、−16.0LUFS/−3.8dBTP通过。独立正式复核81个采样含20句字幕和尾卡首中末，root另看8个实际帧，无阻塞。已整合最新主干ef1dc4cd且173冻结项保持，最终以v0.68.4发布，[PR #293](https://github.com/linhongcun/video-studio/pull/293)合并42d49c74，附注tag精确对应同一整树。Release后[Pages40195977106](https://github.com/linhongcun/video-studio/actions/runs/40195977106)成功，9项线上GET核验正式视频、海报、VTT完整SHA及20条字幕/5章/原链接/课程导航/RSS/更新日志。实际核验时间2026-10-25T21:09:17.662178+08:00，#292随后completed关闭。网站56项独立静态检查通过；无本环境浏览器交互或完整人工听辨/逐字ASR声明。
