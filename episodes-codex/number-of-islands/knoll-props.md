@@ -28,3 +28,6 @@
 渲染读取：Main按storyboard的visualType、真实durationInFrames、cueFrames.sentences/labels与subtitles驱动；代码卡从solution.json取行。本文与script画面说明是作者合同，不假称引擎会自动执行其中每句话。04第二句与06第一句的标签使用真实句首起音、完整至少63帧。
 
 封面三尺寸按covers.json；4:3重要内容在x315..1125、y918上方，poster为cover-16x9.jpg。实际文字裁切、运动中间态、三封面JPG/PNG、成片解码/响度、网站播放与线上SHA由各闸门另记录。尚未完成逐字ASR或全片人工听辨时如实注明。
+
+## 用户边界反馈窄修
+仅新录06第二句，保留28句合同。真实trace12左、13上均越界，明确不读取/不标记/不入栈，14才完成首格；06 opt-in画箭头止于网格边框，其他默认绘制等价。原v66媒体与QA在revisions/boundary-before保留。

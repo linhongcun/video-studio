@@ -1,14 +1,9 @@
-# LC.200正式成片复核
+# LC.200边界反馈修订成片复核
 
-当前结论：制作、独立成片与本地网页检查通过，已通过PR277合并并发布附注tag/Release v0.66.0；Release后Pages40179672105成功，线上39次完整HTTPS核验通过后#82已completed关闭。网站精确首卡CC问题仅修网站VTT，成片SHA保持；实际线上与发布证据见docs/number-of-islands/。
+当前制作侧与独立复核通过；本地网页与发布结果以docs/number-of-islands-boundaries实际记录为准。原v66报告保存在revisions/boundary-before/qa-final.md，不用新结果覆盖用户反馈前的身份与范围。
 
-14镜28句、四章、5783帧/30fps，192.768秒，1920×1080；AAC48kHz，实测−16.0LUFS/−3.8dBTP，完整解码通过。新MP4 9,306,666字节，完整SHA-256 `4c2389bee3dc407e66873c6a2bd061ab6eb8f153f96146651fdfcce7ef0bb44d`。从本期新配音完整编码并混音，没有套用旧片AAC或旧画面。
+用户指出首格左/上为何跳过未说明，本轮仅改06第二句与边界可见动画。151项冻结；其他27句take/程序/trace/封面保持，13镜局部时序全等，整体仅+62帧，末卡仍150帧。正式新06为487帧，其他画面按splice-plan复用，整轨新配音与BGM重新混音；splice-result记录实际输入/输出全文SHA。
 
-- 官方题意与Python容器资料5源实际读取；同一26行Python与AST观测版经独立并查集完整分区验证65,852组通过，输入保持。实际99事件trace逐字节供动画读取。
-- 实计时预检接受120个动态时点，唯一08状态说明阻塞已在正式编码前修复；旧源与失败图、局部差异与复采分别保留。封面六张PNG/JPG及声明poster实际打开，三比例/4:3安全区通过。音源、裁尾、28句铺轨、2处首次术语起音分别审核通过。
-- 独立实际打开40个正式成片关键帧：题意→推导→命名、正式重置、先标记再入栈、seen但仍待展开、栈空但当前未完、三次component_done与扫描结束返回，均与真实trace一致；3181已采用修正文案。见qa-video-independent.md/json。
-- 92唯一真实编码帧与94份接受的同尺寸captioned预览比较，max MAE3.267953/255<8；只支持采样像素保真，不能代替独立状态/动态审查。见qa-media-samples.json。
-- 全部5783个视频PTS严格为n/30；末卡5633..5782共150帧，完整26行/缩进/return实际打开且无正文字幕，全部150帧保持静态（保留H264压缩微差）。voice卡段240000样本全零；最终MP4该段另有BGM，不把它误记为全音轨静默。见qa-media-independent.md/json。
-- 编码前闸门、143冻结输入和新旧局部源差异证据分别见preflight-gate.json、source-sha256.json和revisions/。开工与编码/网站前持续同步，保留其它课程、旧Agent删除和并行身份预留，没有冻结输入交集。
+新MP4 SHA-256 67bf3a409bae9ab78e845cdf21b456953958d92ef5f2d671676e7729bdb248c6，8787142字节，5845帧、1080p30、AAC48kHz，194.837秒；完整解码、实测−16.0LUFS/−3.9dBTP通过。真实06预检26点、最终实际20点确认四向/两次越界/两个拼接处；95唯一帧/96比较maxMAE3.266261<8。全部PTS及5695..5844末150帧/return实际复核通过。
 
-执行者：Codex制作与独立derive_container/derive_production_audit/derive_reverse复核。技术结果及实际选定视觉帧范围按各报告记录；没有逐字ASR、全片人工听辨、逐帧实时播放或初学者学习效果实验，也没有新片用户观看认可。按持续授权只交付GitHub网站，LC200不在其它选题的一次性平台投稿授权内。
+当前证据为qa-boundary-preflight、qa-boundary-audio、qa-boundary-video、qa-boundary-media及qa-media-samples；旧通用报告仍保留其v66具体SHA与适用范围。本轮算法与来源验证按旧不变SHA复用，未重跑65k案例。未声称ASR、全片人工听辨或新的用户认可。
