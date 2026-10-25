@@ -24,7 +24,7 @@
 
 ## 工程算法首期制作（EA01）
 
-2026-10-25，用户先要求只调研、建issue，登记[首批9题总览#294](https://github.com/linhongcun/video-studio/issues/294)；随后明确授权自选最有把握的一题制作精品。选择[一致性哈希#295](https://github.com/linhongcun/video-studio/issues/295)，EP38/consistent-hashing，制作PR#304。已同步d515f0d4开工并整合46395cfb的LeetCode三片/v0.69.0，保留EP35–37及最新字幕边界修复。14镜28句、5881帧约3分16秒，正常冰糖配音；取余与环共用十个示例键，虚拟节点另设预配置示例，动画读取同一model.json并按physicalId区分虚拟位置和物理缓存。当前完成文稿、配音、模型、真实时序预演与封面检查，正式编码/网站交付结果以本期release.md后续证据为准，不预记用户认可。其余8题继续待安排；当前任务不包含外部平台投稿。
+2026-10-25，用户先要求只调研、建issue，登记[首批9题总览#294](https://github.com/linhongcun/video-studio/issues/294)；随后明确授权自选最有把握的一题制作精品。选择[一致性哈希#295](https://github.com/linhongcun/video-studio/issues/295)，EP38/consistent-hashing，制作PR#304。14镜28句5881帧正文加150帧资料卡，最终约3分21秒；同一十键比较取余与环，虚拟节点另设示例。同步保留三条LeetCode/v0.69.0、三片参考资料/v0.69.1及b83a0b04默认资料流程；正文146输入和媒体保持证明独立保留，当前编排157输入、来源预检、默认render和构建gate已通过。现已完成实际成片、资料卡与网页验收，实际合并/部署/线上摘要结果以本期release.md收尾证据为准，不预记用户认可；其他8题待安排，本期无外部平台投稿。
 
 ## 用户明确的质量偏好
 

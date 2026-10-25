@@ -145,7 +145,7 @@ def main():
     parser.add_argument('--publish', action='store_true', help='Write the site copy only after final media review')
     parser.add_argument('--published-at', help='Actual first-publication ISO timestamp with timezone; defaults to invocation time')
     parser.add_argument('--appendix-artifacts', type=Path, default=D / 'revisions/reference-endcards')
-    parser.add_argument('--body-render-result', type=Path, default=D / 'body-render-result.json')
+    parser.add_argument('--body-render-result', type=Path, default=D / 'revisions/reference-endcards/body-render-result.json')
     args = parser.parse_args()
     original_meta, verification = validate(args.appendix_artifacts.resolve(), args.body_render_result.resolve())
     if not args.publish:

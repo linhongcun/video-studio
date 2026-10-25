@@ -1,8 +1,8 @@
 # EA01 一致性哈希：最终交付与正文检查
 
-最终视频已按最新[RULES出处要求](../../docs/RULES.md)追加150帧、5秒资料卡：**6031帧，201.033333秒，10,338,139字节，SHA-256 `855461d25d2f05407676541e7b3ef498a6067eeac871d7d94be68e11be1ba9da`**。R1 NGINX与R2 Cassandra是已实际核验的核心资料，完整出处/论点对应见references.json与原文章。
+最终视频已按最新[RULES出处要求](../../docs/RULES.md)追加150帧、5秒资料卡：**6031帧，201.033333秒，10,338,139字节，SHA-256 `12aae6e323046bc6bd22aa593de69916f4c17314b2d08199108857df0f545d89`**。R1 NGINX与R2 Cassandra是已实际核验的核心资料，完整出处/论点对应见references.json与原文章。
 
-共享追加工具的完整解码对比证明原5881帧画面/PTS逐帧相同，原AAC所有包/PTS及完整PCM相同；不重配音、不改146个正文输入。正文媒体可从Git `c80faaefa7750dd8facebc0dc65658ca56400a4d:episodes/consistent-hashing/video.mp4`恢复。新增生成输入/输出见reference-inputs-sha256.json与revisions/reference-endcards，最终尾边界/网页资料卡复核见qa-reference-independent与最新qa-site-appendix报告。
+共享追加工具的完整解码对比证明原5881帧画面/PTS逐帧相同，原AAC所有包/PTS及完整PCM相同；不重配音；原146个正文输入按旧清单和package快照验证，未重新编码正文。默认渲染编排现纳入157项当前清单，见freeze_with_references.py与qa-reference-render-entry.json。正文媒体可从Git `c80faaefa7750dd8facebc0dc65658ca56400a4d:episodes/consistent-hashing/video.mp4`恢复。新增生成输入/输出见reference-inputs-sha256.json与revisions/reference-endcards，最终尾边界/网页资料卡复核见qa-reference-independent与最新qa-site-appendix报告。
 
 下方保留原正文的真实检查范围，避免把旧报告中的5a54624a…媒体身份误当成追加后的整体视频。
 
@@ -17,3 +17,6 @@
 - 网站：122页/45课程，1440与390两视口实际播放；28条原生cue及毫秒时间、4章精确seek、2图、Python、TOC、六方向及新系列/首页/资料库/RSS通过。SVG属性在站点AST层规范，手机figure默认边距移除；冻结文章与视频不变，旧策略/适配器图双视口回归通过。
 
 本地验收完成；合并、Release、Release后Pages与线上canonical GET证据见release.md和online-verification.json的实际结果。技术检查不表示用户已经观看认可，未执行外部平台投稿。
+
+
+最新默认流程已整合b83a0b04：新source evidence改为真实仓内路径、原说明保留details；卡片显示字段与PNG逐字节不变，正文/AAC指纹和卡片解码指纹与独立审过的版本匹配。当前最终媒体中点另经实际查看，157项默认入口及全站check:references构建检查通过，最终157项AAC来源复核通过。历史8554…报告保留其真实范围，转接证明见reference-inputs-sha256.json。

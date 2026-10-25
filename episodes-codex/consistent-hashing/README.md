@@ -54,3 +54,16 @@ python3 episodes-codex/consistent-hashing/freeze.py --verify
 ```
 
 首次追加使用同一命令的`append`动作，只编码资料卡，不重做正文。网站meta用6031帧及referenceAppendix，分镜/words保持正文5881帧，字幕严格退出在卡首之前。最终网站来源与媒体一致性由`sync_site.py`的双身份检查及交付清单验证。
+
+
+## 当前默认入口与冻结
+
+本期在发布前同步了b83a0b04的新默认流程。原正文146项清单原字节保留；旧package在body-remotion-package.json中仅作历史输入重定位，所有145个其余输入原路径摘要相同。当前生产清单157项包含新编排与资料来源，编码前不冻结video/生成receipt/render-result。
+
+```sh
+python3 episodes-codex/consistent-hashing/freeze_with_references.py --verify
+PATH=/workspace/.venvs/video-studio/bin:$PATH npm --prefix episodes-codex/consistent-hashing/remotion run render
+PATH=/workspace/.venvs/video-studio/bin:$PATH npm --prefix episodes-codex/consistent-hashing/remotion run verify:references
+```
+
+当前默认render会先检查来源/冻结，渲染out/body.mp4再自动附资料卡；verify:references只检查现有整体，不重新渲染。本轮已编码正文按原真实146输入保留，调用默认流程只读verify闭合当前交付，不假称正文采用后来更新的编排重新渲染。
