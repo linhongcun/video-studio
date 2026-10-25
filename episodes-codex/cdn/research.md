@@ -30,3 +30,20 @@
 - 地图上只画大陆轮廓，不画行政边界。位置、调度和路径为示例，不暗示具体CDN部署或真实测量。地图的相对地域帮助理解临近服务点；“近”不能只看直线距离，需结合实际网络路径、时延与调度。
 - 新词引入：CDN与内容分发网络并列，边缘节点与请求检查动作对应，回源与本例未命中后的长路径对应；没有新增DNS/Anycast/分层机制讲解。
 - 独立事实预审remake_ep06_07本轮重新读取AWS交付流程、RFC9111与Cloudflare缓存正文，确认本例未命中回源、命中可复用短返及过期/私人边界；该独立来源复核与主制作实际读取原资料的记录分开，不把源审当成新片观看通过。
+
+## 参考资料片尾补充核验（2026-10-25）
+
+本轮只在旧文后追加，原访问日期和地图许可记录保持。详细响应SHA、短引与版本检查见[docs/reference-endcards/batch-2/sources-cdn.json](../../docs/reference-endcards/batch-2/sources-cdn.json)；片尾清单见[references.json](references.json)，可读说明见[references.md](references.md)。
+
+实际HTTP GET取得官方Cloudflare生产分支固定commit `ec32a21c71d1aa8747ef270e180ef0d31e5231f6` 的CDN架构与缓存状态正文，以及HTTP工作组固定commit `3cdfb4df4dc47e75e9642efc99ab699a0495d883` 的RFC9111正文；三项均为200完整响应。正式站点访问均返回会话代理Tunnel 403，未记为成功读取。
+
+- R1 Cloudflare / Content Delivery Network (CDN) Reference Architecture：支持CDN在多个网络位置缓存源站内容，可用副本能减少获取内容的回源请求。；Cloudflare的Anycast由BGP路由，并考虑处理容量；片中地图直线长度不等于实际网络路由或时延测量。；标准缓存未命中可继续取源，真实部署也可有多级缓存；片中一层边缘与源站是教学简化。。正式链接：https://developers.cloudflare.com/reference-architecture/architectures/cdn/；本轮实读：https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/reference-architecture/architectures/cdn.mdx。
+
+- R2 IETF HTTP WG / HTTP Caching：支持响应存储和复用受请求匹配、缓存指令及新鲜度等条件限制，不是取到内容就能永久共享。；缓存不能直接复用时可通过条件请求验证或获取新响应；不能把过期副本一直当成新内容使用。；共享缓存与私有缓存有不同边界；不带字段列表的private禁止共享缓存存储该响应，no-store限制存储。。正式链接：https://www.rfc-editor.org/rfc/rfc9111.html；本轮实读：https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml。
+
+- R3 Cloudflare / Cloudflare cache responses：支持Cloudflare将从缓存找到资源与未命中后取源区分为不同状态，命中可用副本与回源是不同请求路径。；过期内容可能重新取源或条件验证；不适合缓存的内容也可能直接取源，未命中不是所有回源的唯一原因。。正式链接：https://developers.cloudflare.com/cache/concepts/cache-responses/；本轮实读：https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/cache/concepts/cache-responses.mdx。
+
+- 版本区别：Cloudflare架构页reviewed=2022-12-02，本轮固定源取自2026-10-25的production提交；不把核验日写成页面发布日期。旧/cache/reference/cdn-reference-architecture.mdx只是跳转壳，已沿external_link实读真正架构正文，没有引用213字节占位文件。
+- AWS仓库元数据显示archived=true，默认分支archived，最后push2023-06-15；canonical本轮未取得。因此保留旧稿2026-10-24记录、不将归档源当现行文档、不作为本轮卡片主依据。
+- 本轮还读取Cloudflare默认缓存行为页，确认产品默认受规则影响；没有把其概述当成所有Origin Cache Control配置的统一保证。最终用RFC9111与缓存状态页交叉约束存储、复用、过期验证和私人响应边界。
+- 本轮未重新读取Natural Earth、MDN旧链接等历史素材。原地图许可、公有领域依据、GeoJSON SHA、节点/路径示例与性能边界均照旧，未把旧日志日期改成本轮在线核验。
