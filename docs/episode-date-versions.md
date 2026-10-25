@@ -4,14 +4,14 @@
 
 ## 基线与历史回填
 
-开工时工作区干净，已 fetch 并快进整合最新 `origin/main`，基线为 `17effcf6c18e4277d13178960f065ea82c904f6d`。本次仅修改站点、元数据和维护规则，无视频制作输入或媒体变更；站点依赖按当前 `site/package-lock.json` 执行 `npm ci` 安装。
+开工时工作区干净，已 fetch 并快进整合最新 `origin/main`，基线为 `17effcf6c18e4277d13178960f065ea82c904f6d`。发布前再次同步并整合 `1aad9cc230fdd88a` 所在主干（完整 SHA 见本次合并记录），保留新增的 LC.200 成片修订与 EP.20 命名更新；本次日期功能仅修改站点、元数据和维护规则，无视频制作输入或媒体变更；站点依赖按当前 `site/package-lock.json` 执行 `npm ci` 安装。
 
 42 期历史元数据均无 `createdAt`，其中 36 期有 `updatedAt`。回填保留所有原有字段值、首发时间和已知修改日期，不使用本机文件 mtime、构建时间或今天作为历史时间。
 
 - 40 期创建日期采用现有 `publishedAt`，与最早元数据 Git 记录的北京时间日期一致。
 - `circuit-breaker` 的创建日期为 `2026-10-13`：[4180090c](https://github.com/linhongcun/video-studio/commit/4180090c) 中已有元数据；首发日期后来修正为 `2026-10-14`，仍保留。
 - `distributed-tx` 的创建日期为 `2026-10-15`：[0757369c](https://github.com/linhongcun/video-studio/commit/0757369c) 中已存在草稿；首发日期仍为 `2026-10-16`。
-- 无修改日期的 `agent-skills`、`bridge-torch`、`egg-drop`、`monty-hall`、`number-of-islands`、`water-jug`，初始化 `updatedAt = createdAt`。上述历史数据均仅有日精度，不补造时分秒。
+- 无修改日期的 `agent-skills`、`bridge-torch`、`egg-drop`、`monty-hall`、`number-of-islands`、`water-jug`，初始化 `updatedAt = createdAt`；发布前主干已为 `number-of-islands` 增加同日修改时间，整合时优先保留该上游记录。上述历史数据均仅有日精度，不补造时分秒。
 
 当前制作目录可能在重做时才建立，不能拿 `sourcePath` 的首个提交作为该期创建时间。例如 `cache-consistency` 于 [ac7bf34f](https://github.com/linhongcun/video-studio/commit/ac7bf34f) 已在 10 月 16 日存在，当前制作工程到 10 月 24 日才建立。
 

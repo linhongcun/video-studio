@@ -46,8 +46,11 @@ const Scene=({s,f}:{s:Shot;f:number})=>{
   return <><Head kicker="正式开始 · 清空演示标记" title="原地图不变，从第一行第一列开始" sub="岛数归零，已归属与待展开记录都清空，再逐行扫描"/><IslandMap snapshot={current} showScan={true} focusCells={!second?[[0,0]]:[]}/><StatePanel s={current} stackTitle="待展开的位置" lines={second?['发现新岛起点','岛数先加一','再标记为已归属','还没有看完四周']:['恢复原始海陆地图','正式岛数：0','归属标记：空','待展开位置：空']}/><Note>先归属，再放入待展开；同一块以后就不会重复加入</Note></>;
  }
  if(t==='stack-rule'){
-  const current=second?eventSequence([5,6,7,8,9,10,11,14],q):eventSequence([4,5],p),introduced=f>=Number(s.cueFrames?.labels?.['栈']??sentence(s,0));
-  return <><Head kicker="把待展开位置记下来" title="后放的先取出，先标记再放入" sub="先放右边，再放下面；下面这一块留在顶部"/><IslandMap snapshot={current} showScan/><StatePanel s={current} stackTitle={introduced?'栈 · 后放先看':'待展开的位置'} lines={['先归属，不等于展开','右边(1,2)先放','下面(2,1)后放','下一次先取顶部']}/><Note color={C.gold}>标记只表示已经归属，不表示四周已经看完</Note></>;
+  const secondFrames=s.durationInFrames-sentence(s,1),boundaryHold=Math.max(32,Math.floor(secondFrames*.20)),finishHold=Math.max(12,Math.floor(secondFrames*.08)),leadFrames=Math.max(1,secondFrames-2*boundaryHold-finishHold),local=f-sentence(s,1);
+  const current=!second?eventSequence([4,5],p):local<leadFrames?eventSequence([5,6,7,8,9,10,11],local/leadFrames):local<leadFrames+boundaryHold?event(12):local<leadFrames+2*boundaryHold?event(13):event(14),introduced=f>=Number(s.cueFrames?.labels?.['栈']??sentence(s,0));
+  const boundary=current.index===12||current.index===13;
+  const title=current.index===12?'向左检查：越出地图边界，直接跳过':current.index===13?'向上检查：越出地图边界，直接跳过':second&&current.index===14?'四个方向都看完，再处理栈顶':'后放的先取出，先标记再放入';
+  return <><Head kicker="把待展开位置记下来" title={title} sub={second?'右、下先标记入栈；左、上检查地图边界':'先放右边，再放下面；下面这一块留在顶部'}/><IslandMap snapshot={current} showScan showBoundary/><StatePanel s={current} stackTitle={introduced?'栈 · 后放先看':'待展开的位置'} lines={second?['右：陆地，标记入栈','下：陆地，标记入栈','左：越界，直接跳过','上：越界，直接跳过']:['先归属，不等于展开','右边(1,2)先放','下面(2,1)后放','下一次先取顶部']}/><Note color={boundary?C.red:C.gold}>{second?'越界→跳过，不标记、不入栈':'标记只表示已经归属，不表示四周已经看完'}</Note></>;
  }
  if(t==='take-down'){
   const current=second?eventSequence([16,17,18,22],q):eventSequence([14,15,16],p);
