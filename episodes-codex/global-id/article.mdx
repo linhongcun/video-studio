@@ -1,10 +1,11 @@
 ---
 title: 分布式 ID：两个订单，怎么撞成同一个号了？
-summary: 分布式 ID 有多种实现：简述随机 UUID 与 Redis 自增，再用时间、生成器编号与同毫秒序号解释雪花算法，并说明各自的唯一性前提。
+summary: 依次认识随机 UUID、Redis 自增和雪花算法：看本地生成与索引写入的取舍、主从切换为何可能重号及可靠号段跳号的前提，再展开雪花的三字段组合。
 chapters:
   - { id: hook, title: 两笔订单同一个号 }
   - { id: local, title: 本表自增为何不够 }
-  - { id: methods, title: 分布式 ID 不只有雪花 }
+  - { id: uuid, title: "UUID：方便生成，主键有代价" }
+  - { id: redis, title: "Redis：递增取号，切换要防回退" }
   - { id: snowflake, title: 三部分如何区分 }
   - { id: conditions, title: 不重复需要前提 }
   - { id: recap, title: 三种差异各管什么 }
@@ -15,7 +16,7 @@ related: ["db-sharding", "distributed-tx"]
 
 接上期，订单分到多个数据库。两个独立表都可能从相同起点继续编号，各自在本表内正常，却产生相同订单号。本期订单、相对时间、生成器编号均为教学示例，不代表真实事故。
 
-这就是**分布式 ID**要解决的问题：多个节点分别生成编号时，怎样避免在约定范围内重复。“全局唯一”描述的是唯一性的范围与要求；雪花算法是生成分布式 ID 的一种方案，本期沿用它来解释具体机制。[^current]
+这就是**分布式 ID**要解决的问题：多个节点生成编号时，怎样避免在约定范围内重复。“全局唯一”描述的是唯一性的范围与要求。下面依次看几种生成方式，了解它们怎样取号，以及各自需要付出什么代价。[^current]
 
 ## 本表自增为何不够 {#local}
 
@@ -23,14 +24,27 @@ MySQL的AUTO_INCREMENT能为记录自动生成编号，官方示例配合主键�
 
 也可以统一规划不同起点和步长等生成规则，不能把本表自增的局限理解为自增永远不能用于分布式设计。
 
-## 分布式 ID 不只有雪花 {#methods}
+## UUID：方便生成，主键有代价 {#uuid}
 
-分布式 ID 有很多实现方式，雪花算法只是其中一种经典方案。先认识另外两种思路：
+先看随机版本的 UUID，也就是 **UUIDv4**。各节点可以在本地生成，不必每次请求中心发号服务；可靠的随机源与正确实现能让碰撞概率很低。它没有按生成顺序递增的保证。[^uuid]
 
-- **随机 UUID（UUIDv4）：**各节点可以在本地生成编号，不必每次请求中心发号服务。它依靠随机性让碰撞概率很低，而非承诺数学上的绝对不重复；需要采用可靠的随机源和正确实现。UUID 还有其他版本，不能把所有 UUID 都理解成纯随机数。[^uuid]
-- **Redis 自增：**多个节点向同一个计数器执行 `INCR`，利用原子递增集中分配编号。这种做法服务于分布式应用，但取号本身有一个共同的计数来源；多个独立计数器各自从一开始，仍可能撞号。还要防止计数器被重置、过期或因故障恢复而回退：持久化与主从切换的配置会影响数据丢失风险，原子递增本身不保证故障后永不重复。[^incr][^persistence][^replication]
+这个特点会影响数据库写入。在 MySQL 的 InnoDB 引擎中，主键通常就是存放行数据的聚簇索引。直接用随机 UUIDv4 做主键，连续生成的新值可能落到不同的索引叶子页，写入局部性较差；页空间不足时还可能触发分裂，带来额外的维护和读写开销。索引本身仍按主键顺序组织，随机的是新值的插入位置。[^clustered][^physical][^uuid]
 
-这些是不同的生成方式与取舍，不是雪花算法的别名。下面聚焦雪花算法，解释它怎样让不同生成器分别生成编号。
+按主键顺序插入通常更有利于 InnoDB 写入，表超出缓冲池时尤其值得关注。具体代价仍受表大小、缓存、并发和索引设计影响，本片不提供统一的性能倍数或“一次插入就一定分裂”的结论。[^bulk]
+
+UUID 不只有随机版本。UUIDv7 把时间放在高位，设计上有利于时间排序和索引局部性；它也不是跨机器业务顺序的严格全序。这里对“不递增”的讨论限定于前面介绍的随机 UUIDv4。[^uuid-order]
+
+## Redis：递增取号，切换要防回退 {#redis}
+
+再看 Redis 自增。多个节点向**同一个计数器**执行 `INCR`，通过原子递增集中分配编号；在计数状态正常保留的运行区间内，可以依次取到1001、1002这样的号码。计数器和数字均为教学示例。[^incr]
+
+主从切换有一个常见的坑：Redis 默认异步复制，旧主已经返回给客户端的计数更新，可能还没到达副本。例如，旧主已发出1001、1002，副本却只保存到1000；旧主故障后，这个副本升为新主，再次递增就可能重新发出1001。`INCR` 的原子性保障单次递增，异步复制的丢写窗口仍需要另行处理。[^replication][^sentinel]
+
+一种治理办法是**事先可靠预留号段，切换时放弃旧号段并跳号**。为说明条件，假设在旧主使用1001—1200之前，已通过另一份可靠记录原子地预留到1200；切换时先暂停发号并停止、隔离旧主，再放弃整个旧号段，将下一号推进到1201。即便副本只保留1000，也不回头重用旧号段中的1001、1002。
+
+这里的1200是**事先预留的上界**，不是事故发生后随意挑选的数字。可靠记录必须能承受本次故障，不能和同一个 Redis 计数器一起回退；恢复和重新预留也必须互斥。跳过的范围要覆盖旧主可能已发出的号码，无法确认边界时应暂停核对。单纯“切换后固定加一个数”、只查看已落库的业务记录，或只开启某个持久化选项，都不能直接推出没有重复。号段示例是基于丢写风险推导的发号设计条件，并非 Redis 或 Sentinel 自动提供的保证。[^replication][^persistence][^sentinel]
+
+集中发号还要维护计数器、网络与故障恢复，不能让key被重置、过期或被独立计数器重复使用。接下来看看各生成器可以在本地组合编号的雪花算法。
 
 ## 三部分如何区分 {#snowflake}
 
@@ -65,11 +79,19 @@ JavaScript的Number安全整数最大值为`9007199254740991`。本片17位示�
 
 本片想说明的是：本地自增只看到自己，跨分片要统一设计编号范围和生成规则。雪花算法通过时间、生成器身份和序号分工，在前提得到正确维护时，让各处可分别生成不冲突的编号。
 
+这几种方式各有适用的取舍：
+
+| 生成方式 | 主要收益 | 需要承担的代价或前提 |
+|---|---|---|
+| 随机 UUIDv4 | 节点本地生成，不必逐次向中心取号 | 依赖可靠随机源；值不按生成顺序递增，直接作 InnoDB 主键需考虑随机插入代价 |
+| Redis 自增 | 同一计数器原子递增，取号机制直接 | 依赖共同计数源及网络；异步复制下切换可能重号，恢复与跳号需有可靠边界 |
+| 雪花算法 | 各生成器按规则独立生成整数，时间字段提供顺序趋势 | 维护生成器身份、时钟与序号状态；不能据此推断严格的全局业务顺序 |
+
 下一期：下单成功了，库存怎么没扣？
 
 ## 参考资料
 
-原有官方正文及原始代码于2026-10-24实际核验；本轮 UUID 与 Redis 官方资料于2026-10-25实际核验。2010—2012原实现标为仅参考，详细主张和适用范围见research.md。
+原有官方正文及原始代码于2026-10-24实际核验；本轮 UUID、Redis 与 MySQL InnoDB 官方资料于2026-10-25实际核验。2010—2012原实现标为仅参考，详细主张和适用范围见research.md。
 
 [^auto]: [MySQL 8.4 Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html)
 [^current]: [Apache ShardingSphere Key Generate Algorithm](https://shardingsphere.apache.org/document/current/en/user-manual/common-config/builtin-algorithm/keygen/)
@@ -80,3 +102,8 @@ JavaScript的Number安全整数最大值为`9007199254740991`。本片17位示�
 [^incr]: [Redis INCR：原子递增与计数器模式](https://redis.io/docs/latest/commands/incr/)
 [^persistence]: [Redis persistence：RDB 与 AOF 的数据丢失窗口](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/)
 [^replication]: [Redis replication：异步复制与故障转移的数据丢失风险](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/)
+[^uuid-order]: [RFC 9562（2024）§2.1 索引局部性](https://www.rfc-editor.org/rfc/rfc9562.html#section-2.1)、[§5.7 UUIDv7](https://www.rfc-editor.org/rfc/rfc9562.html#section-5.7)、[§6.11 排序](https://www.rfc-editor.org/rfc/rfc9562.html#section-6.11)
+[^clustered]: [MySQL 8.4 §17.6.2.1 Clustered and Secondary Indexes](https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html)
+[^physical]: [MySQL 8.4 §17.6.2.2 The Physical Structure of an InnoDB Index](https://dev.mysql.com/doc/refman/8.4/en/innodb-physical-structure.html)、[Glossary：fill factor与页分裂](https://dev.mysql.com/doc/refman/8.4/en/glossary.html#glos_fill_factor)
+[^bulk]: [MySQL 8.4 §10.5.5 Bulk Data Loading for InnoDB Tables](https://dev.mysql.com/doc/refman/8.4/en/optimizing-innodb-bulk-data-loading.html)
+[^sentinel]: [Redis Sentinel：故障切换与异步复制的数据丢失窗口](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/)

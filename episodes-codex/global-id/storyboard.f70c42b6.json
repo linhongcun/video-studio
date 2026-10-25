@@ -1,0 +1,1508 @@
+{
+  "meta": {
+    "title": "分布式 ID：两个订单，怎么撞成同一个号了？",
+    "episode": 20,
+    "slug": "global-id-tradeoffs-v3",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5646,
+    "finalVideoFrames": 5646,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "Present UUIDv4 first with unordered primary-key tradeoffs, then Redis centralized counters with asynchronous-replication/failover and fenced durable range-allocation boundaries; only then introduce Snowflake fields.",
+    "visualRevision": 3,
+    "visualDirection": "visual-direction.md",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "示例数据 · 字段示意",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "两个订单，怎么撞成同一个号了？",
+      "description": "两个本地自增编号冲突，如何生成跨库可区分的订单号。",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "content": {
+            "x": 130,
+            "w": 1660
+          },
+          "watermarkZone": {
+            "x": 130,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 130,
+              "y": 205,
+              "w": 1660,
+              "h": 297
+            },
+            {
+              "x": 130,
+              "y": 495,
+              "w": 1660,
+              "h": 54
+            },
+            {
+              "x": 130,
+              "y": 595,
+              "w": 1660,
+              "h": 245
+            }
+          ]
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "content": {
+            "x": 315,
+            "w": 810
+          },
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918,
+          "watermarkZone": {
+            "x": 315,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 315,
+              "y": 205,
+              "w": 810,
+              "h": 222
+            },
+            {
+              "x": 315,
+              "y": 495,
+              "w": 810,
+              "h": 44
+            },
+            {
+              "x": 315,
+              "y": 595,
+              "w": 810,
+              "h": 245
+            },
+            {
+              "x": 315,
+              "y": 875,
+              "w": 810,
+              "h": 33
+            }
+          ]
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "content": {
+            "x": 110,
+            "w": 860
+          },
+          "watermarkZone": {
+            "x": 110,
+            "y": 110
+          },
+          "textBoxes": [
+            {
+              "x": 110,
+              "y": 230,
+              "w": 860,
+              "h": 265
+            },
+            {
+              "x": 110,
+              "y": 570,
+              "w": 860,
+              "h": 44
+            },
+            {
+              "x": 110,
+              "y": 700,
+              "w": 860,
+              "h": 460
+            }
+          ]
+        }
+      },
+      "poster": {
+        "file": "poster.jpg",
+        "sameAs": "3x4"
+      }
+    },
+    "nextEpisode": {
+      "episode": 21,
+      "title": "下单成功了，库存怎么没扣？",
+      "teaser": "下期，下单成功了，库存怎么没扣？"
+    },
+    "audioReview": "No automatic ASR available. Measured TTS sentence onsets and boundaries; no claim of word alignment or independent full listening.",
+    "assemblyProfile": {
+      "baseline": "revisions/methods-before",
+      "insertion": "revisions/tradeoffs-insert",
+      "script": "script.md",
+      "sentenceCounts": {
+        "16-options": 3,
+        "17-redis": 5
+      },
+      "visualRevision": 3,
+      "archives": [
+        "revisions/tradeoffs-before"
+      ],
+      "chapters": [
+        {
+          "id": "uuid",
+          "title": "UUID：方便生成，主键有代价",
+          "shots": [
+            "16"
+          ]
+        },
+        {
+          "id": "redis",
+          "title": "Redis：递增取号，切换要防回退",
+          "shots": [
+            "17"
+          ]
+        }
+      ],
+      "style": "Present UUIDv4 first with unordered primary-key tradeoffs, then Redis centralized counters with asynchronous-replication/failover and fenced durable range-allocation boundaries; only then introduce Snowflake fields.",
+      "name": "tradeoffs",
+      "configSource": "assembly-profiles.json",
+      "proof": "tradeoffs-reuse-proof.json",
+      "spliceResult": "tradeoffs-splice-result.json"
+    },
+    "methodsInsertion": {
+      "fromFrame": 1574,
+      "durationInFrames": 1227,
+      "profile": "tradeoffs",
+      "narrationSource": "revisions/tradeoffs-insert/voice.wav",
+      "baseline": "revisions/methods-before/baseline.json"
+    }
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "hook",
+      "chapterId": "hook",
+      "title": "两笔订单同一个号",
+      "from": 0,
+      "durationInFrames": 460,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "hook",
+          "from": 0,
+          "durationInFrames": 225,
+          "narration": "两笔不同的订单，怎么拿到了同一个订单号？一查这个号，结果竟然有两笔。",
+          "subtitles": [
+            {
+              "text": "两笔不同的订单，怎么拿到了同一个订单号？",
+              "from": 0,
+              "to": 129,
+              "duration": 130
+            },
+            {
+              "text": "一查这个号，结果竟然有两笔。",
+              "from": 130,
+              "to": 224,
+              "duration": 95
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-hook-1",
+              "wavStart": 9.0,
+              "wavEnd": 119.51,
+              "localStart": 9.0,
+              "localEnd": 119.51
+            },
+            {
+              "id": "01-hook-2",
+              "wavStart": 130.01,
+              "wavEnd": 204.64,
+              "localStart": 130.01,
+              "localEnd": 204.64
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              9,
+              130
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 9.0,
+            "wavTo": 204.64,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "首帧两笔订单各带42，第二个42沿轨迹抵达统一查询结果，两条冲突标红。",
+          "direction": "首帧两笔订单各带42，第二个42沿轨迹抵达统一查询结果，两条冲突标红。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "hook",
+          "from": 225,
+          "durationInFrames": 235,
+          "narration": "接着上期，订单已经分到不同的库里。现在，这两张订单表，各自给新订单编号。",
+          "subtitles": [
+            {
+              "text": "接着上期，订单已经分到不同的库里。",
+              "from": 0,
+              "to": 100,
+              "duration": 101
+            },
+            {
+              "text": "现在，这两张订单表，各自给新订单编号。",
+              "from": 101,
+              "to": 234,
+              "duration": 134
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-shards-1",
+              "wavStart": 225.64,
+              "wavEnd": 315.85,
+              "localStart": 0.6399999999999864,
+              "localEnd": 90.85000000000002
+            },
+            {
+              "id": "02-shards-2",
+              "wavStart": 326.35,
+              "wavEnd": 439.01,
+              "localStart": 101.35000000000002,
+              "localEnd": 214.01
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              101
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 225.64,
+            "wavTo": 439.01,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "从一个结果分出库甲库乙两处逻辑表，只显示当前一条订单；不模拟设备或应用窗口。",
+          "direction": "从一个结果分出库甲库乙两处逻辑表，只显示当前一条订单；不模拟设备或应用窗口。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "local",
+      "chapterId": "local",
+      "title": "本表自增为何不够",
+      "from": 460,
+      "durationInFrames": 1114,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "local",
+          "from": 460,
+          "durationInFrames": 321,
+          "narration": "自增编号，就是新记录进来时，编号继续往后增加。配合主键这样的唯一约束，它管的是本表的编号。",
+          "subtitles": [
+            {
+              "text": "自增编号，就是新记录进来时，编号继续往后增加。",
+              "from": 0,
+              "to": 161,
+              "duration": 162
+            },
+            {
+              "text": "配合主键这样的唯一约束，它管的是本表的编号。",
+              "from": 162,
+              "to": 320,
+              "duration": 159
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-autoinc-1",
+              "wavStart": 460.01,
+              "wavEnd": 611.62,
+              "localStart": 0.009999999999990905,
+              "localEnd": 151.62
+            },
+            {
+              "id": "03-autoinc-2",
+              "wavStart": 622.12,
+              "wavEnd": 760.02,
+              "localStart": 162.12,
+              "localEnd": 300.02
+            }
+          ],
+          "cueFrames": {
+            "autoLabel": 1,
+            "sentences": [
+              0,
+              162
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 460.01,
+            "wavTo": 760.02,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "自增ID标签在句首起音出现；一条记录进入库甲，表内41向42变化，边界明确只在本表。",
+          "direction": "自增ID标签在句首起音出现；一条记录进入库甲，表内41向42变化，边界明确只在本表。",
+          "elements": [
+            {
+              "id": "autoLabel",
+              "type": "text",
+              "text": "自增 ID",
+              "cueText": "自增编号",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 180,
+              "w": 500,
+              "h": 80,
+              "fontSize": 58,
+              "cueOnset": {
+                "sentence": "03-autoinc-1",
+                "asrFrame": null,
+                "onsetLocal": 2.259999999999991,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "local",
+          "from": 781,
+          "durationInFrames": 226,
+          "narration": "看库甲，前一个编号是四十一。再来一笔订单，得到四十二。",
+          "subtitles": [
+            {
+              "text": "看库甲，前一个编号是四十一。",
+              "from": 0,
+              "to": 105,
+              "duration": 106
+            },
+            {
+              "text": "再来一笔订单，得到四十二。",
+              "from": 106,
+              "to": 225,
+              "duration": 120
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-first-1",
+              "wavStart": 781.02,
+              "wavEnd": 876.97,
+              "localStart": 0.01999999999998181,
+              "localEnd": 95.97000000000003
+            },
+            {
+              "id": "04-first-2",
+              "wavStart": 887.47,
+              "wavEnd": 962.77,
+              "localStart": 106.47000000000003,
+              "localEnd": 181.76999999999998
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              106
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 781.02,
+            "wavTo": 962.77,
+            "holdFrames": 0,
+            "naturalGapFrames": 44,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "只聚焦库甲，41退为上一笔参照，新订单获得42沿路径落入记录。",
+          "direction": "只聚焦库甲，41退为上一笔参照，新订单获得42沿路径落入记录。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "local",
+          "from": 1007,
+          "durationInFrames": 274,
+          "narration": "可库乙的前一个编号，也恰好是四十一。它也发出四十二，两边放到一起，就撞号了。",
+          "subtitles": [
+            {
+              "text": "可库乙的前一个编号，也恰好是四十一。",
+              "from": 0,
+              "to": 121,
+              "duration": 122
+            },
+            {
+              "text": "它也发出四十二，两边放到一起，就撞号了。",
+              "from": 122,
+              "to": 273,
+              "duration": 152
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-collision-1",
+              "wavStart": 1007.77,
+              "wavEnd": 1118.93,
+              "localStart": 0.7699999999999818,
+              "localEnd": 111.93000000000006
+            },
+            {
+              "id": "05-collision-2",
+              "wavStart": 1129.43,
+              "wavEnd": 1260.99,
+              "localStart": 122.43000000000006,
+              "localEnd": 253.99
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              122
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 1007.77,
+            "wavTo": 1260.99,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "库甲缩为上下文，库乙41变42；两份42沿路径聚到共同查询，一样的号下面出现不同订单。",
+          "direction": "库甲缩为上下文，库乙41变42；两份42沿路径聚到共同查询，一样的号下面出现不同订单。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "local",
+          "from": 1281,
+          "durationInFrames": 293,
+          "narration": "每张表里的唯一约束，不会自动替别的表查重。订单号若要跨库使用，就得统一考虑所有生成位置。",
+          "subtitles": [
+            {
+              "text": "每张表里的唯一约束，不会自动替别的表查重。",
+              "from": 0,
+              "to": 135,
+              "duration": 136
+            },
+            {
+              "text": "订单号若要跨库使用，就得统一考虑所有生成位置。",
+              "from": 136,
+              "to": 292,
+              "duration": 157
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-global-1",
+              "wavStart": 1281.99,
+              "wavEnd": 1406.68,
+              "localStart": 0.9900000000000091,
+              "localEnd": 125.68000000000006
+            },
+            {
+              "id": "06-global-2",
+              "wavStart": 1417.18,
+              "wavEnd": 1553.46,
+              "localStart": 136.18000000000006,
+              "localEnd": 272.46000000000004
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              136
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 1281.99,
+            "wavTo": 1553.46,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先突出两个表各自的唯一边界，再将两笔订单移到同一跨库范围，重复42保持可追踪。",
+          "direction": "先突出两个表各自的唯一边界，再将两笔订单移到同一跨库范围，重复42保持可追踪。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "uuid",
+      "chapterId": "uuid",
+      "title": "UUID：方便生成，主键有代价",
+      "from": 1574,
+      "durationInFrames": 453,
+      "shots": [
+        {
+          "id": "16",
+          "scriptShot": 16,
+          "chapterId": "uuid",
+          "from": 1574,
+          "durationInFrames": 453,
+          "narration": "UUID 的随机版本，各节点就能在本地生成，碰撞概率很低。但它不递增，直接用作 MySQL 主键，插入位置会比较分散。这会影响索引页的缓存利用，还可能增加页分裂。",
+          "subtitles": [
+            {
+              "text": "UUID 的随机版本，各节点就能在本地生成，碰撞概率很低。",
+              "from": 0,
+              "to": 168,
+              "duration": 169
+            },
+            {
+              "text": "但它不递增，直接用作 MySQL 主键，插入位置会比较分散。",
+              "from": 169,
+              "to": 320,
+              "duration": 152
+            },
+            {
+              "text": "这会影响索引页的缓存利用，还可能增加页分裂。",
+              "from": 321,
+              "to": 452,
+              "duration": 132
+            }
+          ],
+          "voice": [
+            {
+              "id": "16-options-1",
+              "wavStart": 1583.0,
+              "wavEnd": 1732.94,
+              "localStart": 9.0,
+              "localEnd": 158.94000000000005
+            },
+            {
+              "id": "16-options-2",
+              "wavStart": 1743.44,
+              "wavEnd": 1885.25,
+              "localStart": 169.44000000000005,
+              "localEnd": 311.25
+            },
+            {
+              "id": "16-options-3",
+              "wavStart": 1895.75,
+              "wavEnd": 2006.45,
+              "localStart": 321.75,
+              "localEnd": 432.45000000000005
+            }
+          ],
+          "cueFrames": {
+            "uuidLabel": 8,
+            "sentences": [
+              9,
+              169,
+              321
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 1583.0,
+            "wavTo": 2006.45,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "The complete assembled PCM is placed unchanged; pauses exist in the audio."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "直接介绍随机UUID，不先出现雪花名称或方案总览。两个节点先后生成较大和较小的有效UUIDv4示例，显示本地发号与低碰撞；第二句把相同编号的前缀映射到MySQL InnoDB主键索引的不同叶页；第三句只在示意页已满时演页分裂，并提示随机插入的缓存局部性代价。",
+          "direction": "直接介绍随机UUID，不先出现雪花名称或方案总览。两个节点先后生成较大和较小的有效UUIDv4示例，显示本地发号与低碰撞；第二句把相同编号的前缀映射到MySQL InnoDB主键索引的不同叶页；第三句只在示意页已满时演页分裂，并提示随机插入的缓存局部性代价。",
+          "elements": [
+            {
+              "id": "uuidLabel",
+              "type": "text",
+              "text": "UUID",
+              "cueText": "UUID",
+              "appearFrame": 8,
+              "x": 130,
+              "y": 180,
+              "w": 800,
+              "h": 80,
+              "fontSize": 58,
+              "cueOnset": {
+                "sentence": "16-options-1",
+                "asrFrame": null,
+                "onsetLocal": 10.0,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "redis",
+      "chapterId": "redis",
+      "title": "Redis：递增取号，切换要防回退",
+      "from": 2027,
+      "durationInFrames": 774,
+      "shots": [
+        {
+          "id": "17",
+          "scriptShot": 17,
+          "chapterId": "redis",
+          "from": 2027,
+          "durationInFrames": 774,
+          "narration": "Redis 自增，让各节点从同一个计数器取号，正常时编号递增。但复制是异步的，主从切换后，计数可能回退，造成重复发号。一个处理思路是跳号，越过旧主可能用过的整个号段。前提是号段上界有可靠记录，且旧主已停止发号。接下来，详细看雪花算法。",
+          "subtitles": [
+            {
+              "text": "Redis 自增，让各节点从同一个计数器取号，正常时编号递增。",
+              "from": 0,
+              "to": 182,
+              "duration": 183
+            },
+            {
+              "text": "但复制是异步的，主从切换后，计数可能回退，造成重复发号。",
+              "from": 183,
+              "to": 364,
+              "duration": 182
+            },
+            {
+              "text": "一个处理思路是跳号，越过旧主可能用过的整个号段。",
+              "from": 365,
+              "to": 513,
+              "duration": 149
+            },
+            {
+              "text": "前提是号段上界有可靠记录，且旧主已停止发号。",
+              "from": 514,
+              "to": 679,
+              "duration": 166
+            },
+            {
+              "text": "接下来，详细看雪花算法。",
+              "from": 680,
+              "to": 773,
+              "duration": 94
+            }
+          ],
+          "voice": [
+            {
+              "id": "17-redis-1",
+              "wavStart": 2027.45,
+              "wavEnd": 2200.36,
+              "localStart": 0.4500000000000455,
+              "localEnd": 173.36000000000013
+            },
+            {
+              "id": "17-redis-2",
+              "wavStart": 2210.86,
+              "wavEnd": 2381.83,
+              "localStart": 183.86000000000013,
+              "localEnd": 354.8299999999999
+            },
+            {
+              "id": "17-redis-3",
+              "wavStart": 2392.33,
+              "wavEnd": 2531.39,
+              "localStart": 365.3299999999999,
+              "localEnd": 504.3899999999999
+            },
+            {
+              "id": "17-redis-4",
+              "wavStart": 2541.89,
+              "wavEnd": 2696.8900000000003,
+              "localStart": 514.8899999999999,
+              "localEnd": 669.8900000000003
+            },
+            {
+              "id": "17-redis-5",
+              "wavStart": 2707.3900000000003,
+              "wavEnd": 2779.58,
+              "localStart": 680.3900000000003,
+              "localEnd": 752.5799999999999
+            }
+          ],
+          "cueFrames": {
+            "redisLabel": 1,
+            "sentences": [
+              0,
+              183,
+              365,
+              514,
+              680
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 2027.45,
+            "wavTo": 2779.58,
+            "holdFrames": 0,
+            "naturalGapFrames": 21,
+            "holdReason": "The complete assembled PCM is placed unchanged; pauses exist in the audio."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先演共同计数器1000→1001→1002，返回两节点；第二句显示旧主1002但异步复制尚未到达、从节点1000，旧主故障停发后从节点升主，再次加一重发1001。第三句切到事先可靠预留号段的治理方案示意，旧号段1001—1200，独立可靠记录上界1200，旧主停发/隔离；新主越过整个旧号段后下一号1201。第四句强调上界记录和停止旧主的条件，不把任意加固定数说成保证。末句才出现雪花算法名称并接回原07详解。",
+          "direction": "先演共同计数器1000→1001→1002，返回两节点；第二句显示旧主1002但异步复制尚未到达、从节点1000，旧主故障停发后从节点升主，再次加一重发1001。第三句切到事先可靠预留号段的治理方案示意，旧号段1001—1200，独立可靠记录上界1200，旧主停发/隔离；新主越过整个旧号段后下一号1201。第四句强调上界记录和停止旧主的条件，不把任意加固定数说成保证。末句才出现雪花算法名称并接回原07详解。",
+          "elements": [
+            {
+              "id": "redisLabel",
+              "type": "text",
+              "text": "Redis",
+              "cueText": "Redis",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 180,
+              "w": 800,
+              "h": 80,
+              "fontSize": 58,
+              "cueOnset": {
+                "sentence": "17-redis-1",
+                "asrFrame": null,
+                "onsetLocal": 1.4500000000000455,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "snowflake",
+      "chapterId": "snowflake",
+      "title": "三部分如何区分",
+      "from": 2801,
+      "durationInFrames": 1474,
+      "shots": [
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "snowflake",
+          "from": 2801,
+          "durationInFrames": 307,
+          "narration": "雪花算法，是一种把编号分成几部分来生成的做法。这里看时间、生成器的机器编号，以及同一毫秒内的序号。",
+          "subtitles": [
+            {
+              "text": "雪花算法，是一种把编号分成几部分来生成的做法。",
+              "from": 0,
+              "to": 134,
+              "duration": 135
+            },
+            {
+              "text": "这里看时间、生成器的机器编号，以及同一毫秒内的序号。",
+              "from": 135,
+              "to": 306,
+              "duration": 172
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-snowflake-1",
+              "wavStart": 2801.46,
+              "wavEnd": 2925.8,
+              "localStart": 0.4600000000000364,
+              "localEnd": 124.79999999999995
+            },
+            {
+              "id": "07-snowflake-2",
+              "wavStart": 2936.3,
+              "wavEnd": 3087.83,
+              "localStart": 135.29999999999995,
+              "localEnd": 286.8299999999999
+            }
+          ],
+          "cueFrames": {
+            "snowLabel": 1,
+            "sentences": [
+              0,
+              135
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 2801.46,
+            "wavTo": 3087.83,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "雪花算法标签按句首起音出现；三段字段依次进入，时间青色、机器金色、序号蓝色。",
+          "direction": "雪花算法标签按句首起音出现；三段字段依次进入，时间青色、机器金色、序号蓝色。",
+          "elements": [
+            {
+              "id": "snowLabel",
+              "type": "text",
+              "text": "雪花算法",
+              "cueText": "雪花算法",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 180,
+              "w": 500,
+              "h": 80,
+              "fontSize": 58,
+              "cueOnset": {
+                "sentence": "07-snowflake-1",
+                "asrFrame": null,
+                "onsetLocal": 1.4600000000000364,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "snowflake",
+          "from": 3108,
+          "durationInFrames": 262,
+          "narration": "不在同一毫秒，时间部分就可以不同。先看相同的机器编号和序号，只让时间向前走一步。",
+          "subtitles": [
+            {
+              "text": "不在同一毫秒，时间部分就可以不同。",
+              "from": 0,
+              "to": 102,
+              "duration": 103
+            },
+            {
+              "text": "先看相同的机器编号和序号，只让时间向前走一步。",
+              "from": 103,
+              "to": 261,
+              "duration": 159
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-time-1",
+              "wavStart": 3108.83,
+              "wavEnd": 3201.02,
+              "localStart": 0.8299999999999272,
+              "localEnd": 93.01999999999998
+            },
+            {
+              "id": "08-time-2",
+              "wavStart": 3211.52,
+              "wavEnd": 3349.89,
+              "localStart": 103.51999999999998,
+              "localEnd": 241.88999999999987
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              103
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 3108.83,
+            "wavTo": 3349.89,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保持机器007和序号000原位，时间4000000000变4000000001，两个组合结果随之不同。",
+          "direction": "保持机器007和序号000原位，时间4000000000变4000000001，两个组合结果随之不同。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "snowflake",
+          "from": 3370,
+          "durationInFrames": 308,
+          "narration": "如果同一毫秒，两台机器各生成一个编号呢？时间虽然相同，但它们使用不同的机器编号，结果就能分开。",
+          "subtitles": [
+            {
+              "text": "如果同一毫秒，两台机器各生成一个编号呢？",
+              "from": 0,
+              "to": 138,
+              "duration": 139
+            },
+            {
+              "text": "时间虽然相同，但它们使用不同的机器编号，结果就能分开。",
+              "from": 139,
+              "to": 307,
+              "duration": 169
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-workers-1",
+              "wavStart": 3370.89,
+              "wavEnd": 3498.83,
+              "localStart": 0.8899999999998727,
+              "localEnd": 128.82999999999993
+            },
+            {
+              "id": "09-workers-2",
+              "wavStart": 3509.33,
+              "wavEnd": 3657.95,
+              "localStart": 139.32999999999993,
+              "localEnd": 287.9499999999998
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              139
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 3370.89,
+            "wavTo": 3657.95,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "两行字段逐步出现，共用同一时间；甲机器007与乙机器009被聚焦，产生两个不同整数。",
+          "direction": "两行字段逐步出现，共用同一时间；甲机器007与乙机器009被聚焦，产生两个不同整数。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "snowflake",
+          "from": 3678,
+          "durationInFrames": 292,
+          "narration": "同一台机器，在同一毫秒里还要生成第二个编号。那就让序号继续增加，把这两次请求区分开。",
+          "subtitles": [
+            {
+              "text": "同一台机器，在同一毫秒里还要生成第二个编号。",
+              "from": 0,
+              "to": 159,
+              "duration": 160
+            },
+            {
+              "text": "那就让序号继续增加，把这两次请求区分开。",
+              "from": 160,
+              "to": 291,
+              "duration": 132
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-sequence-1",
+              "wavStart": 3678.95,
+              "wavEnd": 3828.44,
+              "localStart": 0.9499999999998181,
+              "localEnd": 150.44000000000005
+            },
+            {
+              "id": "10-sequence-2",
+              "wavStart": 3838.94,
+              "wavEnd": 3949.16,
+              "localStart": 160.94000000000005,
+              "localEnd": 271.15999999999985
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              160
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 3678.95,
+            "wavTo": 3949.16,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "时间4000000000和机器007固定，序号000转001，结果16777216000028672变16777216000028673；最后一位高亮。",
+          "direction": "时间4000000000和机器007固定，序号000转001，结果16777216000028672变16777216000028673；最后一位高亮。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "snowflake",
+          "from": 3970,
+          "durationInFrames": 305,
+          "narration": "这几部分按固定规则组合，成为一个整数。画面把字段拆开，是为了看清来源，不是直接拼接十进制数字。",
+          "subtitles": [
+            {
+              "text": "这几部分按固定规则组合，成为一个整数。",
+              "from": 0,
+              "to": 115,
+              "duration": 116
+            },
+            {
+              "text": "画面把字段拆开，是为了看清来源，不是直接拼接十进制数字。",
+              "from": 116,
+              "to": 304,
+              "duration": 189
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-combine-1",
+              "wavStart": 3970.16,
+              "wavEnd": 4076.34,
+              "localStart": 0.15999999999985448,
+              "localEnd": 106.34000000000015
+            },
+            {
+              "id": "11-combine-2",
+              "wavStart": 4086.84,
+              "wavEnd": 4254.59,
+              "localStart": 116.84000000000015,
+              "localEnd": 284.59000000000015
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              116
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 3970.16,
+            "wavTo": 4254.59,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "三段从分散位置汇合为一行，再压入一个完整整数；明示字段示意，避免误读为十进制拼接。",
+          "direction": "三段从分散位置汇合为一行，再压入一个完整整数；明示字段示意，避免误读为十进制拼接。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "conditions",
+      "chapterId": "conditions",
+      "title": "不重复需要前提",
+      "from": 4275,
+      "durationInFrames": 649,
+      "shots": [
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "conditions",
+          "from": 4275,
+          "durationInFrames": 301,
+          "narration": "不过，机器编号不能重复，时间往回走时要按实现处理。同一毫秒里的序号用完，也不能直接绕回继续发。",
+          "subtitles": [
+            {
+              "text": "不过，机器编号不能重复，时间往回走时要按实现处理。",
+              "from": 0,
+              "to": 163,
+              "duration": 164
+            },
+            {
+              "text": "同一毫秒里的序号用完，也不能直接绕回继续发。",
+              "from": 164,
+              "to": 300,
+              "duration": 137
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-conditions-1",
+              "wavStart": 4275.59,
+              "wavEnd": 4429.3099999999995,
+              "localStart": 0.5900000000001455,
+              "localEnd": 154.30999999999995
+            },
+            {
+              "id": "12-conditions-2",
+              "wavStart": 4439.8099999999995,
+              "wavEnd": 4555.02,
+              "localStart": 164.80999999999995,
+              "localEnd": 280.02
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              164
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 4275.59,
+            "wavTo": 4555.02,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "一次只进入一项条件：生成器编号不同、时间正确处理、序号不复用；不同时常驻大表。",
+          "direction": "一次只进入一项条件：生成器编号不同、时间正确处理、序号不复用；不同时常驻大表。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "conditions",
+          "from": 4576,
+          "durationInFrames": 348,
+          "narration": "如果机器编号被重复使用，又碰上相同时间和序号，就仍可能撞号。这些条件需要正确维护，不是用了这个名字就自动安全。",
+          "subtitles": [
+            {
+              "text": "如果机器编号被重复使用，又碰上相同时间和序号，就仍可能撞号。",
+              "from": 0,
+              "to": 185,
+              "duration": 186
+            },
+            {
+              "text": "这些条件需要正确维护，不是用了这个名字就自动安全。",
+              "from": 186,
+              "to": 347,
+              "duration": 162
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-counterexample-1",
+              "wavStart": 4576.02,
+              "wavEnd": 4751.780000000001,
+              "localStart": 0.01999999999998181,
+              "localEnd": 175.7800000000002
+            },
+            {
+              "id": "13-counterexample-2",
+              "wavStart": 4762.280000000001,
+              "wavEnd": 4903.110000000001,
+              "localStart": 186.2800000000002,
+              "localEnd": 327.1100000000001
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              186
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 4576.02,
+            "wavTo": 4903.110000000001,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "两行字段的三部分完全相同，两个完整整数共同变红；反例只展示编号配置被重复使用。",
+          "direction": "两行字段的三部分完全相同，两个完整整数共同变红；反例只展示编号配置被重复使用。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "recap",
+      "chapterId": "recap",
+      "title": "三种差异各管什么",
+      "from": 4924,
+      "durationInFrames": 409,
+      "shots": [
+        {
+          "id": "14",
+          "scriptShot": 14,
+          "chapterId": "recap",
+          "from": 4924,
+          "durationInFrames": 409,
+          "narration": "时间区分不同毫秒，机器编号区分不同生成器，序号区分同一毫秒里的连续请求。在这些前提得到正确维护时，各处才能分别生成不冲突的编号。",
+          "subtitles": [
+            {
+              "text": "时间区分不同毫秒，机器编号区分不同生成器，序号区分同一毫秒里的连续请求。",
+              "from": 0,
+              "to": 220,
+              "duration": 221
+            },
+            {
+              "text": "在这些前提得到正确维护时，各处才能分别生成不冲突的编号。",
+              "from": 221,
+              "to": 408,
+              "duration": 188
+            }
+          ],
+          "voice": [
+            {
+              "id": "14-recap-1",
+              "wavStart": 4924.110000000001,
+              "wavEnd": 5135.42,
+              "localStart": 0.11000000000012733,
+              "localEnd": 211.42000000000007
+            },
+            {
+              "id": "14-recap-2",
+              "wavStart": 5145.92,
+              "wavEnd": 5312.07,
+              "localStart": 221.92000000000007,
+              "localEnd": 388.07000000000016
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              221
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 4924.110000000001,
+            "wavTo": 5312.07,
+            "holdFrames": 0,
+            "naturalGapFrames": 20,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "沿同一行字段逐段聚焦三种区分方式，再让两份不同结果分开落位，不把所有解释同时堆屏。",
+          "direction": "沿同一行字段逐段聚焦三种区分方式，再让两份不同结果分开落位，不把所有解释同时堆屏。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "next",
+      "chapterId": "next",
+      "title": "下一期",
+      "from": 5333,
+      "durationInFrames": 313,
+      "shots": [
+        {
+          "id": "15",
+          "scriptShot": 15,
+          "chapterId": "next",
+          "from": 5333,
+          "durationInFrames": 313,
+          "narration": "订单编号分开了，可订单和库存落在两个库里，下单成功，库存却没扣，又该怎么办？下一期，我们接着看。",
+          "subtitles": [
+            {
+              "text": "订单编号分开了，可订单和库存落在两个库里，下单成功，库存却没扣，又该怎么办？",
+              "from": 0,
+              "to": 219,
+              "duration": 220
+            },
+            {
+              "text": "下一期，我们接着看。",
+              "from": 220,
+              "to": 312,
+              "duration": 93
+            }
+          ],
+          "voice": [
+            {
+              "id": "15-next-1",
+              "wavStart": 5333.07,
+              "wavEnd": 5542.64,
+              "localStart": 0.06999999999970896,
+              "localEnd": 209.64000000000033
+            },
+            {
+              "id": "15-next-2",
+              "wavStart": 5553.14,
+              "wavEnd": 5600.66,
+              "localStart": 220.14000000000033,
+              "localEnd": 267.65999999999985
+            }
+          ],
+          "cueFrames": {
+            "sentences": [
+              0,
+              220
+            ]
+          },
+          "timing": {
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 5333.07,
+            "wavTo": 5600.66,
+            "holdFrames": 0,
+            "naturalGapFrames": 45,
+            "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "旧字段退出，只保留订单已创建、库存未扣两处状态，轨迹在中间断开，引出下一期后品牌停留。",
+          "direction": "旧字段退出，只保留订单已创建、库存未扣两处状态，轨迹在中间断开，引出下一期后品牌停留。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}
