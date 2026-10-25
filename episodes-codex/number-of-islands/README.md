@@ -1,6 +1,6 @@
 # 岛屿数量：怎样保证一座岛只数一次？
 
-本轮左上边界反馈已完成制作侧修订，网页/发布状态见[边界修订记录](../../docs/number-of-islands-boundaries/README.md)。仅新渲染06，复现按splice-boundary.py和splice-plan.json；原通用render入口仍可重建完整画面，但本次实际交付使用有证据的局部复用流程。
+本轮左上边界反馈已按v0.67.1合并上线，Release后Pages40187760204及10次线上完整核验通过，证据见[边界修订记录](../../docs/number-of-islands-boundaries/README.md)。仅新渲染06，复现按splice-boundary.py和splice-plan.json；原通用render入口仍可重建完整画面，但本次实际交付使用有证据的局部复用流程。
 
 已按持续授权合并并发布[网站版本v0.66.0](https://linhongcun.github.io/video-studio/episodes/number-of-islands/)，Release后Pages40179672105成功，线上39次完整HTTPS核验通过、#82已completed关闭。实际发布、失败过程与能力范围见[交付记录](../../docs/number-of-islands/README.md)。
 
