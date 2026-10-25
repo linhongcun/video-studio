@@ -137,8 +137,9 @@ try:
     assert ld['name'] == META['title']
     assert ld['contentUrl'] == video_url
     assert ld['embedUrl'] == PAGE_URL
-    home = get('home', BASE).decode('utf-8')
-    assert 'data-series="design-patterns"' in home
+    home = get('home', BASE, expected_sha=sha_file(DIST / 'index.html')).decode('utf-8')
+    # Home lists only the six recent episodes; verify the exact built page here.
+    # The design-pattern course entry and ordering are checked on its series page below.
     assert VERSION in home
     series = get('series', BASE + 'series/design-patterns/').decode('utf-8')
     assert '/video-studio/episodes/observer-pattern/' in series and META['title'] in series
