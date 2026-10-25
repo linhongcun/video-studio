@@ -15,4 +15,8 @@ D02全片重新渲染。03先保留已付款/一条记录承接口头回看说�
 
 三尺寸原封面按原字节复用，文章以原生SVG属性与Java小节直接同字节接入；firstRelease、发布日期、源码入口与系列顺序保持。未执行全片人工听辨、逐字ASR或初学者实验；本轮无用户观看认可结论，外部平台未新发。旧版完整QA保留在Git开工基线e2a0add及原修订记录中，不将旧版检查移记为本轮通过。
 
-本地网站统一一次build与历史回归通过，1440/390各两页共4例、18次实际章节seek及播放；两片22/24句字幕完整匹配，Java区在已加载showing轨道中三点均0活动cue，实际解码后暂停成功。站点代理实际看8图，根另看6图，保留38已发布页与两期首发历史。当前制作的source-sha256、render-result和mix-report亦已同字节同步发布目录。详见本批site-browser-check.json、site-production-reports-sync.json及site-root-visual-review.json。
+本地网站统一一次build与历史回归通过，1440/390各两页共4例、18次实际章节seek及播放；两片22/24句字幕完整匹配，Java区在已加载showing轨道中三点均0活动cue，实际解码后暂停成功。首候选站点代理实际看8图、根另看6图，保留当时38已发布页与两期首发历史。当前制作的source-sha256、render-result和mix-report亦已同字节同步发布目录。详见本批site-browser-check.json、site-production-reports-sync.json及site-root-visual-review.json。
+
+PR #253合并期间，PR #252先撤下两期Agent试片并占用v0.60.3，最终树保护检查因此停止原发版。按新实际主干重建v0.60.4并重新执行四浏览器用例/18seek及新历史回归，36片/4方向通过，未恢复Agent；本期媒体及全部冻结源保持。旧站点候选完整归档，当前站点代理实际新看6图，根新看3张变化截图，另3张与已看候选逐字节相同，明确沿用有限视觉证据；不把旧构建结论换名为新检查。
+
+实际发布完成：v0.60.4附注tag指向bb9b4e9782ed4b7b2d12a8fac9fd478193febfb8，Release后部署40152819279成功；2026-10-25T10:04:31.360708+08:00的13项普通canonical GET完整视频/海报SHA、字幕、章节及真实更新日志均通过，#164已completed关闭。详见[本轮发布](../../docs/pattern-flow-ui-java/release.md)。
