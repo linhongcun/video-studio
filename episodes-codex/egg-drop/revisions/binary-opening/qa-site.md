@@ -1,5 +1,3 @@
-P05 binary-opening site QA passed at 1440×1000 and 390×844. Current delivery v0.70.1; debut v0.67.0.
+# P05最终站点v0.70.2
 
-Body 5569 frames; final 5719 frames / 30 fps; 24 body-only captions; 4 original chapters. Dynamic chapter/article seeks, complete caption text/timing, revised03/04 playback, start/end playback, last frame, natural end, ordinary proof/bounds anchors, tables, footnotes and puzzle navigation passed. Actual reference-card pause/fullscreen, no active captions at its boundary or middle, and complete article source hrefs passed. Actual data and screenshot paths are in qa-site.json.
-
-Scope: browser and delivery checks only; not a full audiovisual review, new source-website access or measured learning outcome.
+通过。重新完整构建和参考资料／学习链／日期检查；完整P05页面只改唯一页脚版本，17件、字幕及JS/CSS引用精确相同，复用已归档v0.70.1当前CSS下的真实完整两视口操作，未声称再次执行。详见qa-site-v0702-identity.json。

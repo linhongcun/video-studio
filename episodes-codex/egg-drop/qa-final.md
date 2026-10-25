@@ -99,3 +99,5 @@
 ## 检查边界
 
 `ASRPerformed=false`、`semanticListeningPerformed=false`、`fullHumanListeningPerformed=false`、`fullRealtimeWatchingPerformed=false`；未做词级 ASR 对齐、新手实验或学习效果实验。真实句窗与样本、纯源比较、浏览器 DOM、实际小样和最终媒体是不同证据范围。首发报告保持原执行时间与原源身份；本轮只为上述已执行范围给出通过结论。用户尚未观看并认可新版，暂不声明「理解已改善」。
+
+最终发布候选为v0.70.2：整合每日温度更新后重新构建和共享门槛通过；完整P05页面只改唯一页脚，17件、VTT、JS/CSS相同，明确复用已实际完成的v0.70.1当前CSS完整双视口检查。旧版本均仅本地候选，未作为P05公开Release。
