@@ -1,4 +1,5 @@
 import React from 'react';
+import {createDatabaseIdentity} from '../../../_shared/database-identity';
 import {C, FONT, MONO} from './theme';
 
 export const clamp = (n: number) => Math.max(0, Math.min(1, n));
@@ -68,17 +69,18 @@ export const MovingChip: React.FC<{
   <Chip x={lerp(x1, x2, p)} y={lerp(y1, y2, p) - arc * Math.sin(Math.PI * p)}
     width={width} color={color} alpha={alpha} size={25}>{children}</Chip>;
 
+const DatabaseMark=createDatabaseIdentity(React);
 export const LocalBoundary: React.FC<{
   x: number; y: number; w: number; h: number; p?: number;
-  label?: string; color?: string; alpha?: number;
-}> = ({x, y, w, h, p = 1, label = '同一笔本地事务', color = C.gold, alpha = 1}) => <>
+  label?: string; color?: string; alpha?: number; database?: boolean;
+}> = ({x, y, w, h, p = 1, label = '同一笔本地事务', color = C.gold, alpha = 1, database = false}) => <>
   <svg width={1920} height={1080} style={{position: 'absolute', inset: 0,
     opacity: alpha, pointerEvents: 'none'}}>
     <path d={`M${x + 40} ${y}H${x + 20}Q${x} ${y} ${x} ${y + 20}V${y + h - 20}Q${x} ${y + h} ${x + 20} ${y + h}H${x + w - 20}Q${x + w} ${y + h} ${x + w} ${y + h - 20}V${y + 20}Q${x + w} ${y} ${x + w - 20} ${y}H${x + w - 40}`}
       fill="none" stroke={color} strokeWidth={2} pathLength={1}
       strokeDasharray={1} strokeDashoffset={1 - clamp(p)}/>
   </svg>
-  <div style={{position:'absolute',left:x+w/2,top:y-20,transform:'translateX(-50%)',fontSize:24,color,opacity:alpha,background:C.bg,padding:'0 12px',lineHeight:1.35,whiteSpace:'nowrap'}}>{label}</div>
+  <div style={{position:'absolute',left:x+w/2,top:y-(database?24:20),transform:'translateX(-50%)',fontSize:24,color,opacity:alpha,background:C.bg,padding:'0 12px',lineHeight:1.35,whiteSpace:'nowrap',...(database?{display:'inline-flex',alignItems:'center',gap:10,height:40}:{})}}>{database&&<DatabaseMark size={40}/>}<span>{label}</span></div>
 </>;
 
 export const RuleLine: React.FC<{children: React.ReactNode; alpha?: number; color?: string}> =

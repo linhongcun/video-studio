@@ -24,9 +24,9 @@ export const Stock=({x=1400,y=405,value=4,state='原库存',color=C.text,alpha=1
  {detail&&<div style={{fontSize:23,color:C.muted,lineHeight:1.6,marginTop:13}}>{detail}</div>}
  {units&&typeof value==='number'&&<div style={{display:'flex',gap:13,justifyContent:'center',marginTop:22}}>{Array.from({length:Math.max(4,value)},(_,n)=>n).map(n=><div key={n} style={{width:27,height:8,borderRadius:5,background:n<value?color:C.edge}}/>)}</div>}
 </div>;
-export const SplitBoundaries=({left='订单库 · 独立提交',right='库存库 · 独立提交',colorLeft=C.edge,colorRight=C.edge,p=1}:{left?:string;right?:string;colorLeft?:string;colorRight?:string;p?:number})=><>
- <LocalBoundary x={235} y={365} w={570} h={385} label={left} color={colorLeft} p={p}/>
- <LocalBoundary x={1115} y={365} w={570} h={385} label={right} color={colorRight} p={p}/>
+export const SplitBoundaries=({left='订单库 · 独立提交',right='库存库 · 独立提交',colorLeft=C.edge,colorRight=C.edge,p=1,leftDatabase=true,rightDatabase=true}:{left?:string;right?:string;colorLeft?:string;colorRight?:string;p?:number;leftDatabase?:boolean;rightDatabase?:boolean})=><>
+ <LocalBoundary x={235} y={365} w={570} h={385} label={left} color={colorLeft} p={p} database={leftDatabase}/>
+ <LocalBoundary x={1115} y={365} w={570} h={385} label={right} color={colorRight} p={p} database={rightDatabase}/>
 </>;
 export const Cross=({x,y,alpha=1,color=C.red}:{x:number;y:number;alpha?:number;color?:string})=><svg style={{position:'absolute',inset:0,pointerEvents:'none',opacity:alpha}} width={1920} height={1080}><path d={`M${x-17} ${y-17}L${x+17} ${y+17}M${x+17} ${y-17}L${x-17} ${y+17}`} stroke={color} strokeWidth={5} strokeLinecap="round"/></svg>;
 export const Check=({x,y,alpha=1,color=C.teal}:{x:number;y:number;alpha?:number;color?:string})=><svg style={{position:'absolute',inset:0,pointerEvents:'none',opacity:alpha}} width={1920} height={1080}><path d={`M${x-17} ${y}L${x-4} ${y+14}L${x+22} ${y-15}`} stroke={color} strokeWidth={5} strokeLinecap="round" fill="none"/></svg>;

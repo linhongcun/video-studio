@@ -1,5 +1,15 @@
 # EP.21 · 2PC：流程导航版最终成片检查
 
+## 当前：MySQL数据库身份修订（#230）
+
+当前正式成片SHA-256：`7c919e72f48096b3d6bf71b79be02a791955b64de41d3fdff9e37c26f6b107b6`，3398帧，1920×1080/30fps。库名旁增加数据库圆柱与MySQL识别图标；内部记录、原字幕、分镜、数值、相机及原混合AAC保持。原AAC完整SHA为`fe8b5cd9775c31496618367c7e4213ed9a1ea6ef65a8cf3acb4ca810266a350e`，与新片提取流逐字节一致；完整解码、格式与冻结输入检查通过。
+
+独立执行者`/root/tx_outbox`从正式新MP4实际查看[488, 896]帧，真实范围见[本轮QA](qa-mysql-identity.json)及[独立报告](../../docs/mysql-database-identity/final-review-tx-2pc.json)；预演和fresh构建另有记录，不将它们冒称全片人工听看或用户已认可。发布状态见[本期发布记录](release.md)。
+
+## 修订前历史检查
+
+以下段落保留修订前检查的原始范围，历史媒体与输入由[Git索引](revisions/mysql-identity-before.json)追溯；不能将旧SHA对应的检查冒记为本次重新执行。
+
 2026-10-24。《两阶段提交，两个库怎么共同确认？》本次站点发布v0.51.0，14镜28句、4章、3398帧，画面113.266667秒。完整媒体SHA256：`7f3666ea053489b4d6b5b65fb1afed67fabc287d61ca1a97624b49d37271b7ca`，8,767,182 bytes。
 
 ## 反馈与实际修改
