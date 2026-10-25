@@ -150,8 +150,16 @@ def render_cards(doc: dict, directory: Path, width: int, height: int,
         xy = lambda x, y: (round(x * scale), round(y * scale))
         draw.text(xy(116, 58), doc.get('heading', '参考资料'),
                   font=font(60, True), fill=colors['ink'])
-        draw.text(xy(119, 145), '本片主要依据 · 可核查来源',
-                  font=font(28), fill=colors['muted'])
+        # Native player controls cover the lower part of a paused/ended video.
+        # Keep the pause instruction and access date above the source cards.
+        hint = '本片主要依据 · 可暂停阅读 · 完整链接见配套图文'
+        access = f"资料核验：{doc['checkedAt']}"
+        if draw.textlength(hint, font=font(28)) > (1330 - 119 - 60) * scale:
+            raise ValueError('COPYFIT reference reading hint overlaps access date')
+        if draw.textlength(access, font=font(25)) > (1808 - 1330) * scale:
+            raise ValueError('COPYFIT reference access date is too wide')
+        draw.text(xy(119, 145), hint, font=font(28), fill=colors['muted'])
+        draw.text(xy(1330, 147), access, font=font(25), fill=colors['muted'])
         page_label = f'{page_index + 1} / {len(pages)}'
         draw.text(xy(1698, 90), page_label, font=font(30), fill=colors['muted'])
         for index, ref in enumerate(refs):
@@ -177,10 +185,6 @@ def render_cards(doc: dict, directory: Path, width: int, height: int,
             if draw.textlength(support, font=font(28)) > 1480 * scale:
                 raise ValueError(f"COPYFIT claim needs a shorter displaySupport: {ref['id']}")
             draw.text(xy(263, top + 151), support, font=font(28), fill=colors['muted'])
-        draw.text(xy(119, 973), '可暂停阅读 · 完整链接见配套图文',
-                  font=font(29), fill=colors['ink'])
-        access = f"资料核验：{doc['checkedAt']}"
-        draw.text(xy(1330, 975), access, font=font(25), fill=colors['muted'])
         path = directory / f'references-{page_index + 1:02}.png'
         image.save(path)
         paths.append(path)
