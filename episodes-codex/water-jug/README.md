@@ -33,3 +33,7 @@ python3 episodes-codex/water-jug/freeze.py --verify
 状态按(3升壶,5升壶)书写，终态(3,4)满足本期目标，总水为7升；力扣365的两壶总量4升是不同目标，不能混用。图中的数字由合法操作推算，是讲解标注，不是给原壶增加刻度；两条抽象容量条按同一像素/升比例绘制，不模拟拟真器具。
 
 实际制作、成片、本地与线上交付结果分别记录在qa-final.md及release.md。完成GitHub持续授权范围内的检查、合并、Release和Pages，并核对完整线上文件后关闭#207、更新#204；外部平台发布需另行授权。尚未执行的检查与用户观看结论不得预写通过。
+
+## 已交付版本
+
+v0.61.0已通过PR #256合并上线，4977帧约2分46秒。Pages40153856609成功后，完整线上视频/海报、24条字幕、四章及新增日志核验通过，#207已completed关闭。GitHub CLI/API后段401由现有connector能力完成替代核验，媒体未变；9站点canonical GET和1份独立Release记录分别计数。实际SHA、范围、能力限制与出处见qa-final.md、release.md、online-verification.json。
