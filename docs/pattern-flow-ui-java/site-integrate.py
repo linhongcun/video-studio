@@ -17,7 +17,7 @@ SPECS={
     'strategy-pattern':{'ep':23,'lessonOrder':1,'firstRelease':'v0.52.0','publishedAt':'2026-10-24','summary':'从同一100元订单的结算操作出发，展开结算、定价策略和选择的职责，理解共同约定与委托，最后对照简短Java实现。'},
     'observer-pattern':{'ep':28,'lessonOrder':2,'firstRelease':'v0.58.0','publishedAt':'2026-10-25','summary':'从订单页面的一次状态操作出发，展开来源、订阅名单和观察者的职责，跟着通知与取消订阅理解协作，再对照简短Java实现。'},
 }
-FILES=['article.mdx','script.md','research.md','pronunciation.md','storyboard.json','words.json','captions.srt','video.mp4','cover-16x9.jpg','cover-4x3.jpg','cover-3x4.jpg']
+FILES=['article.mdx','script.md','research.md','pronunciation.md','storyboard.json','words.json','captions.srt','video.mp4','cover-16x9.jpg','cover-4x3.jpg','cover-3x4.jpg','source-sha256.json','render-result.json','mix-report.json']
 HISTORY_KEYS=['slug','ep','episodePart','lessonOrder','series','publishedAt','firstRelease','sourcePath','platforms','productionIssue','video','poster']
 
 def sha(path):
