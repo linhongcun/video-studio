@@ -1,11 +1,11 @@
-# EP.01 站点发布记录
+# EP.01 本次站点交付
 
-2026-10-24 19:53:36（北京时间），按用户持续授权发布[v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)，只上GitHub站点，保留历史平台投稿。
+北京时间2026-10-25 19:53:15完成线上核验。当前内容通过[PR #288](https://github.com/linhongcun/video-studio/pull/288)合并，提交f1fe833c70ee0a6c9e3296ba2710b77f05a34823；附注tag及[Release v0.68.2](https://github.com/linhongcun/video-studio/releases/tag/v0.68.2)已发布，Release后[Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40190399664)成功，head与tag一致。
 
-- 媒体[PR](https://github.com/linhongcun/video-studio/pull/151)，合并提交 `81ced01a028827ddff1c66138e2d718031ddfdc1`；Release后再次[部署](https://github.com/linhongcun/video-studio/actions/runs/40091595906)。
-- 成片3417帧，完整SHA-256：`b4ee185f76679508900c0294b85195fc5a89f22d955d65863e4fb44db7e40820`。
-- 本地制作检查、冻结输入、实际编码抽帧、站点构建及浏览器验证见本期QA和批次记录。
-- 线上canonical视频、海报完整SHA与字节数、VTT逐字节、HTML章节/标题/源码入口，以及首页版本、更新日志实际Release链接均已核验。
-- [完整线上证明](../../docs/codex-remake-ep01-14/online.json)保留逐项GET结果；检查不冒充完整人工播放、逐字ASR或独立完整听辨。
+原标题、URL、创建与首发时间、历史平台链接保持；实际内容修改时间为2026-10-25T19:38:59+08:00。当前成片5406帧/180.2秒，9,161,920字节，完整SHA-256 `593c528daae0aca8540d9daa34e53455fce6776fcdc330ff3ff705564234a1c6`。
 
-按持续授权自主发布不表示用户已经观看认可。后续反馈应重新冻结受影响输入并检查、发布。
+- 114生产输入、14句首cue、完整解码、−16.0LUFS/−3.8dBTP，以及独立真实动态和31个正式MP4时点通过；范围见qa-final.md。
+- 最新站点构建、42条日期与课程路径检查通过。双视口34条原生字幕和28次章节/正文seek、播放ended、海报与日期标识通过；整合EP20时通过严格SHA证明复用不变检查，定向验证最终v0.68.2页面。
+- 正式首轮9次完整HTTPS GET共9,691,106字节，线上MP4/海报完整SHA、34条字幕逐句时序、七章精确起点/锚点、源入口、日期版、RSS首发、目录/库/首页及本Release自己的更新日志条目一致。实际报告见[线上证据](../../docs/http-request-depth/online-verification.json)。
+
+[#283](https://github.com/linhongcun/video-studio/issues/283)已在上述核验后以completed关闭。只上GitHub站点，平台未新发。未执行逐字ASR、完整人工听辨或初学者实验，不把独立检查和上线写成用户已经观看认可本次修改。修前v0.48.0交付记录保存在revisions/technical-depth-v2/release.md。
