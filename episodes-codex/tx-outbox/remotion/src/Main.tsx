@@ -5,7 +5,9 @@ import {C,FONT} from './theme';
 import {at,eventAt} from './motion';
 import {createBranchNavigator} from '../../../_shared/branch-map';
 import {outboxNavigation} from './branch-map';
+import {createMiddlewareIdentity} from '../../../_shared/middleware-identity';
 const BranchNavigator=createBranchNavigator(React);
+const MiddlewareMark=createMiddlewareIdentity(React);
 import {Title,Reset,Note,Record,Event,Stock,Cross,Check,Txt,Chip,Line,LocalBoundary,MovingChip,ease} from './objects';
 declare const __HAS_VOICE_AUDIO__:boolean;
 const phase=(s:Shot,f:number,i:number,a=.08,b=.7)=>ease(f,at(s,i,a),at(s,i,b)-at(s,i,a));
@@ -14,7 +16,7 @@ const local=(color=C.gold,label='订单库 · 同一笔本地事务',p=1)=><Loca
 const order=(state='已记录',color=C.teal,exists=true,x=520,y=405,width=480,alpha=1)=><Record x={x} y={y} width={width} label="订单记录" value={exists?'8124':'—'} state={state} color={color} alpha={alpha}/>;
 const pending=(state='待发送',color=C.gold,exists=true,x=1400,y=405,width=480,alpha=1)=><Record x={x} y={y} width={width} label="扣库存的待办" value={exists?'E8124':'—'} state={state} color={color} alpha={alpha}/>;
 const sender=({stopped=false,recovered=false}:{stopped?:boolean;recovered?:boolean})=><><Chip x={960} y={340} width={340} color={stopped?C.red:recovered?C.teal:C.blue}>{stopped?'发送程序停止':recovered?'发送程序恢复':'后台发送程序'}</Chip>{stopped&&<Cross x={960} y={520}/>}</>;
-const queue=(received=true,duplicate=false)=><><Txt x={1480} y={350} center size={27} color={C.muted}>消息队列</Txt><div style={{position:'absolute',left:1260,top:405,width:440,height:330,borderTop:`2px solid ${C.edge}`,borderBottom:`2px solid ${C.edge}`}}/>{received&&<Event x={1480} y={440} state="已接收" color={C.teal}/ >}{duplicate&&<Event x={1480} y={590} state="同一通知 · 再次到达" color={C.gold}/>}</>;
+const queue=(received=true,duplicate=false)=><><Txt x={1480} y={350} center size={27} color={C.muted}><span style={{display:'inline-flex',alignItems:'center',gap:10}}><MiddlewareMark kind="kafka" size={44}/><span>消息队列</span><span style={{fontSize:20}}>Kafka 示例</span></span></Txt><div style={{position:'absolute',left:1260,top:405,width:440,height:330,borderTop:`2px solid ${C.edge}`,borderBottom:`2px solid ${C.edge}`}}/>{received&&<Event x={1480} y={440} state="已接收" color={C.teal}/ >}{duplicate&&<Event x={1480} y={590} state="同一通知 · 再次到达" color={C.gold}/>}</>;
 const consumerBoundary=(done:boolean,label='库存库 · 同一笔本地事务')=><LocalBoundary database x={975} y={345} w={780} h={425} color={done?C.teal:C.gold} label={label}/>;
 const consumerPair=(value:number,mark:string,color=C.gold)=><><Stock value={value} state={value===3?'本单已扣 1 件':'原库存'} color={color}/><Record x={1560} y={415} width={320} label="唯一处理标记" value={mark==='无标记'?'—':'E8124'} state={mark} color={color} small/></>;
 const incoming=(s:Shot,f:number,i:number,a=.04,b=.57,text='同一通知')=>{const p=phase(s,f,i,a,b);return <><Line x1={600} y1={515} x2={975} y2={515} p={p} color={C.blue}/><MovingChip x1={640} y1={482} x2={915} y2={482} p={p} width={260} color={C.blue}>{text}</MovingChip></>;};

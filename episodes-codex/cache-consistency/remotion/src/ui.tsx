@@ -1,7 +1,9 @@
 import React,{useLayoutEffect,useRef} from 'react';
 import {C,FONT,MONO} from './theme';
 import {createDatabaseIdentity} from '../../../_shared/database-identity';
+import {createMiddlewareIdentity} from '../../../_shared/middleware-identity';
 const DatabaseMark=createDatabaseIdentity(React);
+const MiddlewareMark=createMiddlewareIdentity(React);
 export const clamp=(v:number)=>Math.min(1,Math.max(0,v));
 export const go=(f:number,a:number,n=30)=>{const t=clamp((f-a)/n);return t*t*(3-2*t)};
 export const mix=(a:number,b:number,p:number)=>a+(b-a)*p;
@@ -12,8 +14,8 @@ export const Txt:React.FC<TextProps>=({children,x=130,y=160,size=50,color=C.text
  return <div ref={ref} style={{position:'absolute',left:x,top:y,width:w,color,fontSize:size,opacity:alpha,fontWeight:600,lineHeight:1.35,whiteSpace:'nowrap',transform:center?'translateX(-50%)':undefined,textAlign:center?'center':undefined}}>{children}</div>
 };
 export const Result:React.FC<{children:React.ReactNode;alpha?:number;color?:string}>=({children,alpha=1,color=C.teal})=><Txt x={960} y={782} size={38} center color={color} alpha={alpha} w={1660}>{children}</Txt>;
-export const Record:React.FC<{x:number;label:string;database?:boolean;value?:number|string;detail?:string;color?:string;alpha?:number;focus?:number;empty?:boolean}>=({x,label,database=false,value,detail='',color=C.text,alpha=1,focus=0,empty=false})=><div data-record={label} data-value={value} style={{position:'absolute',left:x-195,top:325,width:390,height:365,textAlign:'center',opacity:alpha,transform:`scale(${1+.05*focus})`,transformOrigin:'center'}}>
- <div style={{fontSize:33,color:focus?color:C.muted}}><span style={{position:'relative'}}>{database&&<DatabaseMark size={44} style={{position:'absolute',right:'calc(100% + 10px)',top:'50%',transform:'translateY(-50%)'}}/>}{label}</span></div>
+export const Record:React.FC<{x:number;label:string;database?:boolean;cache?:'redis';value?:number|string;detail?:string;color?:string;alpha?:number;focus?:number;empty?:boolean}>=({x,label,database=false,cache,value,detail='',color=C.text,alpha=1,focus=0,empty=false})=><div data-record={label} data-value={value} style={{position:'absolute',left:x-195,top:325,width:390,height:365,textAlign:'center',opacity:alpha,transform:`scale(${1+.05*focus})`,transformOrigin:'center'}}>
+ <div style={{fontSize:33,color:focus?color:C.muted}}><span style={{position:'relative'}}>{database&&<DatabaseMark size={44} style={{position:'absolute',right:'calc(100% + 10px)',top:'50%',transform:'translateY(-50%)'}}/>}{cache==='redis'&&<MiddlewareMark kind="redis" size={44} style={{position:'absolute',right:'calc(100% + 10px)',top:'50%',transform:'translateY(-50%)'}}/>}{label}</span></div>
  <div style={{height:160,marginTop:30,fontFamily:MONO,fontSize:value==='等待'?62:112,lineHeight:1.3,color:empty?C.muted:color}}>{empty?'—':value??''}</div>
  <div style={{position:'absolute',left:22,right:22,top:245,borderTop:`2px solid ${focus?color:C.edge}`}}/>
  <div style={{position:'absolute',top:266,left:-25,right:-25,fontSize:27,color:empty?C.muted:color}}>{detail}</div>
