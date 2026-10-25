@@ -1,3 +1,3 @@
-# 实际送模与配音范围
+# 单调栈前置铺垫修订
 
-本片均为本期新生成a候选；送模文字取voice/sents.json，句尾好。是共享build裁去的抛弃尾。字幕保持script.md原句；本记录不表示逐字ASR或全片人工听辨。
+正常冰糖语速，28句原选中take按text+tts及raw/WAV/文本完整SHA复用，仅4句基础铺垫为新take。实际来源见stack-primer-provenance.json。共享gen/build/cut/onset/place处理声音，不使用旧成片AAC拼人声。不声称逐字ASR或全片人工听辨。
