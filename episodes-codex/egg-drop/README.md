@@ -36,4 +36,4 @@ python3 episodes-codex/egg-drop/freeze.py --verify
 
 正式媒体通过后才接入站点、升实际可用版本并检查双视口、24句字幕、四章、普通文章锚点和独立五课目录。按持续授权合并、附注tag/Release、Release后Pages和线上完整摘要核验；全部完成后以completed关闭#209，将#204更新为完成5题。外部平台投稿不在此授权内。
 
-修订交付的三个助手均需显式--release，例如当前候选v0.68.3；首发firstRelease始终保留v0.67.0。sync_site.py --publish只同步14项发布文件，verify_site.py再传实际本地--base，verify_online.py传真实Release connector证据路径。新证据写revisions/binary-opening及out/binary-opening-site，不覆盖首发报告。创建／首次公开日期保留，修改时间按真实视频完成值与现行ISO毫秒精度记录，不改题目标题、slug或链接。
+修订交付的三个助手均需显式--release，例如当前候选v0.68.4；首发firstRelease始终保留v0.67.0。sync_site.py --publish只同步14项发布文件，verify_site.py再传实际本地--base，verify_online.py传真实Release connector证据路径。新证据写revisions/binary-opening及out/binary-opening-site，不覆盖首发报告。创建／首次公开日期保留，修改时间按真实视频完成值与现行ISO毫秒精度记录，不改题目标题、slug或链接。
