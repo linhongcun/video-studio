@@ -128,7 +128,10 @@ try:
     assert '/video-studio/episodes/strategy-pattern/' in directory
     pager = re.search(r'<nav[^>]*class="pager(?: [^"]*)?"[^>]*>(.*?)</nav>', page, re.S).group(1)
     assert '/video-studio/episodes/strategy-pattern/' in pager
-    assert offset == META['finalVideoFrames']
+    appendix = META.get('referenceAppendix', {})
+    assert appendix.get('from') == offset
+    assert offset + appendix.get('durationInFrames', 0) == META['finalVideoFrames']
+    assert '资料与阅读范围' in page and 'Observer design pattern' in page
     ld_text = re.search(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>', page, re.S).group(1)
     ld = json.loads(html.unescape(ld_text))
     assert ld['name'] == META['title']
@@ -154,7 +157,8 @@ try:
               'release': 'v' + VERSION, 'canonicalQueriesAdded': False,
               'remoteMediaSaved': False, 'fullVideoStreamHashed': True,
               'results': results, 'chapters': expected_chapters,
-              'finalVideoFrames': offset, 'durationSeconds': offset / FPS,
+              'coreVideoFrames': offset, 'finalVideoFrames': META['finalVideoFrames'],
+              'referenceAppendix': appendix, 'durationSeconds': META['finalVideoFrames'] / FPS,
               'sourceUrl': source_url,
               'seriesOrder': ['strategy-pattern', SLUG],
               'subtitleCueCount': get_cue_count, 'javaCaptionBoundaries': java_boundaries,

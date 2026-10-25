@@ -1,7 +1,7 @@
-# Java尾卡的WebVTT边界复核
+# Java与参考卡并存的WebVTT边界复核
 
-实际执行仓库已有VTT边界检查器中的runtime提取方法，分别运行修改前与修改后的真实共享buildVtt。生产源码只增加unvoicedEndCard之后的javaEndCard回退，未修改冻结视频或发布输入，未运行全站构建。
+实际合并冲突只涉及共享buildVtt。保留原Java支持与上游发布元数据referenceAppendix支持，选择顺序为unvoicedEndCard、javaEndCard、referenceAppendix。前一候选报告已原字节归档到revisions/observer-first/candidate-v0.69.1。
 
-45个剧集目录逐条比较字幕文本、起点和终点；42份VTT完整字节保持，改变仅出现在adapter-pattern、observer-pattern、strategy-pattern的实际Java尾卡边界。新冻结观察者20条字幕仅末句终点由143.067秒改为143.066秒，严格早于4292/30＝143.066666…秒的Java首帧；其余文本和时序保持。6个真实函数输入场景覆盖整毫秒、分数毫秒、普通字幕、无尾卡、无效尾卡与已有尾卡优先级。
+复用已有runtime提取方法，执行真实本地、上游与合并后三份loader。对当前45个剧集目录，原代码卡路径输出与本地方保持，reference-only路径与上游保持；相对本地方43份完整字节不变，2份只涉及上游参考卡边界。新冻结观察者加后置参考卡fixture时，20句文本与起点保持，末句143.066秒结束，严格早于Java首帧143.066666…秒，不因更晚参考卡覆盖边界。
 
-完整SHA、逐条差异与实际范围见同名JSON。没有浏览器原生activeCues观察，不以生成器检查冒充实际播放或线上验收。
+8个真实函数输入场景覆盖原6项以及reference-only和Java-plus-reference。完整双来源SHA、目录逐项结果与旧证明身份见JSON。未修改视频或发布输入，未构建站点；未观察浏览器native activeCues，未把fixture当成已生产参考卡。

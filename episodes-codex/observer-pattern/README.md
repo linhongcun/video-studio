@@ -17,3 +17,17 @@ Java附录用共享append_java_endcard.py append/verify，必须指定--body-dir
 预演使用remotion内npm run qa；关键采样入口由motion.events提供，需检查新动机、合并通知的完整收发、关闭与下一次通知、短应用映射到模式回收及Java卡边界。所有写入者停写、预检通过、冻结核对成功后才允许npm run render，使用短TMPDIR和共享渲染锁。正式成片用check_encoded_episode.py核对完整解码、帧数、音频、响度和冻结输入。
 
 site-integrate.py直接复制当前文稿和通过验收的媒体，保留slug、创建与首发身份，仅更新内容修改时间、时长、描述和revisionIssue。verify-online.py检查线上完整视频/海报/VTT、20句、5章、模式主线和真正Release条目。实际交付见docs/observer-pattern-first/README.md及本期release.md；平台未新发，不预写用户观看认可。
+
+## 按最新规范追加参考资料（最终发布媒体）
+
+完整讲解与Java原理卡仍为video.mp4：4442帧/148.07秒、SHA23b49bf1…beb64be7，181项冻结输入与旧检查保持。新增一张参考资料卡由共享episodes-codex/_shared/append_references.py单独生成150帧，输出video-with-references.mp4：4592帧/153.07秒、SHA5b98a0bc…cea67d0。只有后者用于发布，site-integrate.py明确记录其到episodes/observer-pattern/video.mp4的字节复制映射；原render-result.json是核心报告，发布映射改用render-result-final.json。不要用核心帧数检查器把派生文件与4442帧的分镜误比。
+
+references.json的两项资料分别支持模式主体和唯一实战镜，来源正文/日期沿用同日已保存证据，不冒称重新联网。完整链接及论点映射已在原article.mdx脚注中，因此保持原冻结文章不改。生成器、字体、主题、资料清单和核心媒体SHA都在revisions/observer-first/reference-appendix/reference-appendix.json中记录，独立媒体校验保存全部4442解码帧/PTS、AAC包/时间戳和PCM完全一致的证明；参考段无新增音频包，原音频在原端点结束。
+
+从仓根追加：
+
+```sh
+/workspace/.venvs/video-studio/bin/python episodes-codex/_shared/append_references.py append --body episodes-codex/observer-pattern/video.mp4 --references episodes-codex/observer-pattern/references.json --output episodes-codex/observer-pattern/video-with-references.mp4 --artifacts episodes-codex/observer-pattern/revisions/observer-first/reference-appendix
+```
+
+只读重核把append改为verify；不同输入的新制作必须另建输出和artifact目录，不覆盖已检查派生文件。正式参考卡独立抽4441/4442/4517/4591四帧及全尺寸PNG，机构、资料名/版本、暂停提示和正文/附录边界通过；原47核心状态检查按全前缀保真继续适用。完整检查见qa-observer-first-references-independent.json及reference-appendix-media-check.json。Java字幕边界在4292帧优先，后面的4442帧参考卡不覆盖它。
