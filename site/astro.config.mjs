@@ -30,6 +30,33 @@ function remarkHeadingId() {
   };
 }
 
+// Raw MDX SVG is rendered as native markup. Normalize React-style property
+// names on SVG JSX nodes so browsers apply the intended text and strokes.
+// Walking JSX nodes leaves fenced code examples and article source untouched.
+function remarkSvgAttributes() {
+  const attributes = new Map([
+    ['textAnchor', 'text-anchor'], ['dominantBaseline', 'dominant-baseline'],
+    ['fontSize', 'font-size'], ['fontFamily', 'font-family'], ['fontWeight', 'font-weight'],
+    ['strokeWidth', 'stroke-width'], ['strokeLinecap', 'stroke-linecap'],
+    ['strokeLinejoin', 'stroke-linejoin'], ['strokeDasharray', 'stroke-dasharray'],
+    ['strokeDashoffset', 'stroke-dashoffset'], ['markerEnd', 'marker-end'],
+    ['markerStart', 'marker-start'], ['markerMid', 'marker-mid'],
+    ['fillRule', 'fill-rule'], ['clipRule', 'clip-rule'],
+  ]);
+  return (tree) => {
+    const walk = (node, insideSvg = false) => {
+      const jsx = node.type === 'mdxJsxFlowElement' || node.type === 'mdxJsxTextElement';
+      const svg = insideSvg || (jsx && node.name === 'svg');
+      if (jsx && svg) for (const attribute of node.attributes ?? []) {
+        if (attribute.type === 'mdxJsxAttribute' && attributes.has(attribute.name))
+          attribute.name = attributes.get(attribute.name);
+      }
+      for (const child of node.children ?? []) walk(child, svg);
+    };
+    walk(tree);
+  };
+}
+
 // 制作稿里的用途提示不作为读者标题；保留原始文章与既有锚点。
 function rehypeReaderHeadings() {
   return (tree) => {
@@ -74,7 +101,7 @@ export default defineConfig({
   base: '/video-studio/',
   trailingSlash: 'always',
   redirects: {'/tags/全局唯一ID/': '/video-studio/tags/分布式ID/'},
-  integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick/.test(p)}), mdx({remarkPlugins: [remarkHeadingId], rehypePlugins: [rehypeReaderHeadings, rehypeSummary], syntaxHighlight: false})],
+  integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick/.test(p)}), mdx({remarkPlugins: [remarkHeadingId, remarkSvgAttributes], rehypePlugins: [rehypeReaderHeadings, rehypeSummary], syntaxHighlight: false})],
   vite: {
     plugins: [headingIdPre()],
     server: {fs: {allow: [fileURLToPath(new URL('..', import.meta.url))]}},
