@@ -1,0 +1,20 @@
+--- v1/Main.tsx
++++ v2/Main.tsx
+@@ -71,7 +71,7 @@
+   </>;
+  }
+  if(kind==='register-interest'){
+-  const p=beat(s,f,'summary'),q=beat(s,f,'record'),before=f<at(s,1,0);
++  const p=beat(s,f,'summary'),q=beat(s,f,'record'),before=f<termAt(s,'订阅');
+   return <><Heading>{before?'接下来，把接收需求与订单变化分开':f>=termAt(s,'订阅')?'订阅：接收方登记意愿，来源保留当前名单':'接收方登记意愿，来源保留当前名单'}</Heading>
+    <Diagram direct={before} contract={false} summaryMember={before||p>=.99} recordMember={before||q>=.99} showPaths={before}/>
+    {!before&&p>.0&&p<.99&&<Notification points={reverse(SummaryPath)} p={p} text="摘要登记" registration/>}
+@@ -114,7 +114,7 @@
+   return <><Heading>{f<termAt(s,'取消订阅')?'两个模块都收到后，再看摘要怎样退出':'取消订阅：摘要退出名单，变化记录仍然保留'}</Heading>
+    <PaidDiagram stopped={stopped} summaryMember={!stopped} focus={p>0&&!stopped?'list':undefined}/>
+    {p>0&&!stopped&&<Notification points={reverse(SummaryPath)} p={p} text="摘要退出" registration/>}
+-   <Note>{q>.1?'摘要保留最后收到的已付款，之后不再接收变化':p>0?'取消登记过程中，本次订单仍是已付款':'承接前次结果，本镜尚未发生下一次订单变化'}</Note>
++   <Note>{stopped?'摘要保留最后收到的已付款，之后不再接收变化':p>0?'取消登记过程中，本次订单仍是已付款':'承接前次结果，本镜尚未发生下一次订单变化'}</Note>
+   </>;
+  }
+  if(kind==='notify-remaining'){
