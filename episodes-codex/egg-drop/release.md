@@ -1,0 +1,26 @@
+# P05两枚鸡蛋：v0.67.0已交付
+
+[观看视频与文章](https://linhongcun.github.io/video-studio/episodes/egg-drop/)。内部EP33／趣味推理P05，12镜24句、四章、5257帧／30fps，画面时长175.2333秒，约2分55秒。由固定10层晚碎的19次引出剩余预算，构造14、27、39等递减间隔并在100层封顶，完整F31实例用8次确定最高安全31层。实际8次与保证最多14次分开；严格最优性与完整边界只留文章，视频简短结束，无证明尾段或文章口头转介。本期只发布GitHub站点。
+
+## 发布身份
+
+- [制作PR #279](https://github.com/linhongcun/video-studio/pull/279)合并提交`549ac45b53e078547fe53ef2c7f8677f0a918db5`。
+- [v0.67.0附注tag及Release](https://github.com/linhongcun/video-studio/releases/tag/v0.67.0)精确指向该提交；tag对象`0522b4e316963c33b2363e643fcb8fc71b41708d`，Release id423291635，UTC2026-10-25T09:32:49Z发布。没有移动既有tag。
+- [Release后Pages40181102180](https://github.com/linhongcun/video-studio/actions/runs/40181102180)成功，head同上。build 09:33:00Z—09:35:01Z，deploy 09:35:04Z—09:35:35Z，均晚于Release发布。生产合并带[skip ci]，随后手动工作流完成安装、构建、上传与部署。
+- EP33已由PR #270预留。编码前整合37e096c2／v0.64.1，发布前发现LC200已先发v0.66.0，完整整合2da29e20和后续仅文档的3b6b2020，保留全部并行课程与退役Agent删除。旧未发布v0.65.0本地候选、截图、原日志、关键HTML及报告原样归档`qa-site-candidates/v0.65.0-4aa95321`，首发元数据顺延v0.67.0后重新构建、回归和双视口验站点。133项冻结输入与同一视频完整SHA保持，没有重配音或重编码；版本在发布元数据，不是片内身份变更。详见upstream-before-release.json及qa-final.md。
+
+## 线上核验
+
+北京时间`2026-10-25T17:36:27.059304+08:00`，首轮9次普通站点canonical GET全部通过：完整视频／海报SHA与字节、24句VTT逐字节、四章0/755/1676/3443帧定位、正文普通锚点／源码、独立五课目录、首页／系列／学习／RSS及实际v0.67.0新增日志一致。另1份真实Release由GitHub connector独立读取，保留原响应与来源；报告分别记9次站点GET和1份connector证据，没有冒充10次本地HTTP GET。
+
+- 视频9,546,440字节，SHA256：`f5876353b2d2f4b8f6709e59a6091edfd2ab1ae5303e239751e1b9eca42b9179`。
+- 海报141,760字节，SHA256：`52a090fddae73acf16ee1523f90e190c840b54e91896649634dfe84aaad79bb6`。
+- VTT2,737字节，SHA256：`fe9af436254cff99d6d412662d1429bfca64b429bd3536fd670ddbd8a45430cf`。
+
+核验无cache-bust、Range、强制缓存或站点重试，未保存远端媒体。见[线上报告](online-verification.json)、[真实Release](release-connector.json)、[附注tag](release-tag.json)和[部署证据](deployment.json)。核验后，[制作issue #209](https://github.com/linhongcun/video-studio/issues/209)已以completed关闭；[总览#204](https://github.com/linhongcun/video-studio/issues/204)同步完成5题、剩余5题待安排，见[issue收尾](issue-completion.json)。
+
+## 检查范围
+
+两路线各101阈值与独立107规模DP、五稿双审、原声完整shared build字节复现、5257帧源树、487点实际DOM、无字幕独立137阶段、6封面、正式视频全解码／连续PTS／147点同网格保真、独立实际MP4 52点和root原尺寸5图、全轨与24句音源，以及1440/390站点播放阅读的实际范围见[成片检查](qa-final.md)。原失败、修复和各次证据保留；133冻结输入在正式编码、媒体检查和最终合并后复验保持。
+
+未执行ASR、发音／语义听辨、完整人工审听、全片连续实时观看或初学者实验。来源、模型、DOM和抽样检查不扩写为这些未做检查或学习效果。P05尚无用户观看反馈，P04认可不迁移为本片认可；本期未执行外部平台投稿。

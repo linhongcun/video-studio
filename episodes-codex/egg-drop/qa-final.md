@@ -1,6 +1,6 @@
 # P05两枚鸡蛋：成片检查
 
-文稿、正式成片、声音及两视口本地站点检查通过，133项冻结输入编码后保持。内部EP33／趣味推理P05，首发计划v0.67.0；GitHub上线核验与issue收尾仍待执行，实际身份另记release.md，不把本地通过写成已上线。
+文稿、正式成片、声音及两视口本地站点检查通过，133项冻结输入编码及合并后保持。内部EP33／趣味推理P05已按v0.67.0发布，Release后Pages成功；线上9次普通站点GET与1份独立Release证据核验通过，#209已completed关闭、#204完成5题。实际身份与能力范围见release.md。
 
 ## 内容与冻结身份
 
@@ -12,7 +12,7 @@
 - storyboard及placeholder SHA256：`504f4706df184c178e37b1027f73f320b232fb65beeaccf48b927dad3ca7eeec`。
 - 原声SHA256：`2ea3e8b68eee14f11b6c5699bb865fe17d2c92f25a82d6e2cdcc249086b6ef2c`。
 
-root独立完成freeze、verify，visual另verify成功后才渲染；编码后仍须核对同一清单，见qa-preflight.json。
+root独立完成freeze、verify，visual另verify成功后才渲染；编码与合并后已再次核对同一清单，见qa-preflight.json。
 
 ## 资料、文稿与数学
 
@@ -42,7 +42,7 @@ root独立完成freeze、verify，visual另verify成功后才渲染；编码后�
 
 三尺寸实际封面DOM0违规，制作及root均实看PNG／JPG六文件，固定三行标题、楼体／双蛋及14／27／39计划间隔可读，4:3保留居中竖构图。初版间距问题和修正单独归档。后续主体Building虽改，Cover只import纯Egg；该导出函数字节相同，其余七份声明依赖SHA相同，故保留原六图及其原渲染来源身份。**复用证明没有把旧图改称新源重渲染，也未替换原封面QA的旧Building摘要。** 见qa-covers.json、qa-covers-root-view.json、cover-source-reuse.json。
 
-干净基线7e0172a2开工，EP33由PR270隐藏草稿预留。片段读取期间只fetch，生产读取停止后才整合37e096c2；507条变化与133冻结输入交集为空，23项renderer依赖保持。既有P04反馈、课程／站点v0.64.1和旧平台一次性发布记录均保留；P05仍只在GitHub授权内。v0.65.0当时未占，发版前须再查，见startup.json、upstream-before-encoding.json。
+干净基线7e0172a2开工，EP33由PR270隐藏草稿预留。片段读取期间只fetch，生产读取停止后才整合37e096c2；507条变化与133冻结输入交集为空，23项renderer依赖保持。既有P04反馈、课程／站点v0.64.1和旧平台一次性发布记录均保留；P05仍只在GitHub授权内。v0.65.0当时未占，后续发布前复核见下段；开工与编码前事实见startup.json、upstream-before-encoding.json。
 
 
 发布前再次fetch发现LC200已先按v0.66.0上线。旧v0.65.0本地候选、全部QA/截图/原日志和关键HTML已按原身份归档qa-site-candidates/v0.65.0-4aa95321，未发布该候选；完整整合2da29e20，396条变化与133输入交集0，合入后133逐项复验通过，视频仍同一完整SHA。包/锁与同一导航helper的并行变更分别保留上游逻辑及两项LC标签不变量，本期只顺延发布元数据为v0.67.0，再以当前完整树重新构建/双视口检验；没有重配音或重新编码，见upstream-before-release.json。
@@ -55,13 +55,13 @@ fresh完整编码退出0；完整解码、格式、响度与133输入前后核�
 
 实际音轨全轨／24句与双声道检查通过。premix与原WAV全轨相关0.99997660、句最低0.99995866、偏移0；最终人声＋Wallpaper模型全轨相关0.99984716、句最低0.99975040，固定偏移95样本约1.98ms、句间变化0。句窗人声高BGM实测11.77973dB（生产报告12.0dB）。全部8,411,200源样本与24句完整覆盖，AAC尾比原声多960样本，对齐后还余865；原声单增益诊断与完整构建复现来源原字节保留，133项前后均一致，见qa-audio-content.md/json。
 
-## 本地站点与待完成交付
+## 本地站点与线上交付
 
 14项发布副本与制作文件一致，site及锁版本0.67.0；实际构建111HTML、Pagefind41页。1440×1000与390×844实际Chromium核对24句VTT文本／时间／activeCue、四章0/755/1676/3443帧、四处正文seek、首尾播放／最后帧／自然ended通过。why-fourteen/bounds为普通文章锚点，不跳视频；8次事件、12预算和5关键边界表逐格与数学报告相符，脚注长链接换行、页面无横向溢出，表格自身横滚。五课趣味推理目录独立；其他课程及新上线islands与上游当前meta/video保持一致。root实际看桌面／手机首屏、手机末帧／预算表／脚注五图，所看范围无阻塞。见qa-site.json及后续补充阅读／构建身份记录。
 
 共享学习路径回归首次因旧六算法常数不允许新增islands隐藏草稿而失败，网页未把草稿公开。根保留历史六课身份／发布批次断言，将preview与live导航分别按全算法元数据检查，并断言draft不进入live；仅改site/scripts/check-learning-path.mjs，未改课程、媒体或133冻结输入。同一构建上node检查--built已实际通过，原失败与新通过日志分别保留。最终v0.67.0构建／八张浏览器图及共享回归日志另按原字节保留于qa-site-evidence/v0.67.0；本轮上游已发布七道算法课。
 
-制作PR／实际合并SHA、唯一附注tag／Release、Release后Pages、线上完整媒体／海报／VTT／章节／目录／真实日志核验待完成，之后再以completed关闭#209并将#204更新完成5题。v0.67.0目前仍是待发布版本。
+[制作PR #279](https://github.com/linhongcun/video-studio/pull/279)已合并549ac45b53e078547fe53ef2c7f8677f0a918db5，附注tag／Release v0.67.0精确指向同一提交；Release在09:32:49Z发布，之后Pages40181102180的build与deploy均成功，head同上。北京时间2026-10-25 17:36:27.059304，首轮9次普通站点canonical GET完成完整视频／海报SHA及字节、24句VTT逐字节、四章0/755/1676/3443帧、普通文章锚点／源码、五课目录／首页／系列／学习／RSS和真实v0.67.0新增日志核验。另1份真实Release通过GitHub connector独立取得，未冒充本地HTTP GET。无cache-bust、Range、强制缓存、站点重试或远端媒体保存。核验后#209已completed关闭，#204更新完成5题、剩余5题。见online-verification.json、release-connector.json、release-tag.json、deployment.json和issue-completion.json。
 
 ## 能力边界
 
