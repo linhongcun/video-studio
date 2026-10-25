@@ -152,7 +152,7 @@ def frozen_snapshot():
     return actual
 
 
-def main():
+def main(output_path=None):
     before = frozen_snapshot()
     reference_path = EPISODE/'voice.wav'
     premix_path = EPISODE/'remotion/out/voice.mp4'
@@ -251,7 +251,9 @@ def main():
             'Final loudnorm/alimiter may cause a fixed small delay; the actual delay is reported separately.',
             'Waveform/source matching cannot determine spoken words, numerical pronunciation or human understanding.',
             'The two-source regression checks this constant-mode known-music mix; it is not blind source separation.'])
-    (EPISODE/'qa-encoded-voice-content.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
+    target = output_path or EPISODE/'qa-encoded-voice-content.json'
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print(json.dumps(dict(passed=result['passed'],frames=words['durationFrames'],unmixedOffset=unmixed['sampleOffset'],
         unmixedWholeCorrelation=unmixed['whole']['correlation'],unmixedMinimumSentenceCorrelation=unmixed['minimumSentenceCorrelation'],
         mixedOffset=mix_lag,mixedKnownSourceCorrelation=whole_fit['reconstructedCorrelation'],
@@ -275,6 +277,7 @@ def selftest():
 if __name__=='__main__':
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--selftest',action='store_true')
+    parser.add_argument('--output', type=Path, help='Write this actual check to separate revision evidence.')
     args=parser.parse_args()
     if args.selftest:selftest()
-    else:main()
+    else:main(args.output)

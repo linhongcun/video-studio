@@ -18,8 +18,8 @@ export const sceneState=(s:any,f:number)=>{
  switch(s.visualType){
   case 'challenge':mode='题目 · 安全界限固定但未知';break;
   case 'rules':mode='规则示意 · 不属于后面的解题局';trials=[trialFor(40,1,20),trialFor(40,1,60)];break;
-  case 'fixed-ten-plan':if(f<cues(s).second){mode='比较方案 · 虚线是计划，尚未试蛋';planned=TEN_POINTS;extraFloors=[10,20];}else{mode='思考分支起点：10安全、20碎；第1枚已碎，已用2次';world=seeded('skip-last-hypothesis',12,[10,20]);focus={low:10,high:20,amount:ease(clamp((f-cues(s).second)/40))};trials=[trialFor(12,2,15)];}break;
-  case 'late-break-cost':mode='假设分支 · 前9次均未碎，已知90楼安全';world=fixedTenBefore;focus={low:90,high:100,amount:ease(clamp(f/60))};trials=[trialFor(99,1,100)];break;
+  case 'binary-limit':mode='失败思考分支 · 重新从两枚蛋、0次开始，尝试连续对半';world=emptyWorld('binary-limit-hypothesis');trials=[trialFor(12,1,50),trialFor(12,2,25)];extraFloors=[50];break;
+  case 'late-break-cost':if(f<cues(s).second){mode='另看固定间隔计划 · 重新从两枚蛋、0次规划';world=emptyWorld('fixed-ten-plan-revision');planned=TEN_POINTS;extraFloors=[10,20];}else{mode='晚碎假设起点：前9次均未碎，已知90楼安全';world=fixedTenBefore;focus={low:90,high:100,amount:ease(clamp((f-cues(s).second)/40))};trials=[trialFor(99,1,100)];}break;
   case 'shrinking-gaps':mode='回看刚才的晚碎分支 · 已完成结果';world=fixedTenAfter;focus={low:90,high:100,amount:1};planned=[91,92,93,94,95,96,97,98,99];break;
   case 'first-fourteen':mode='预算推演① · 假设第1次在14楼碎';world=emptyWorld('budget-break14');focus={low:0,high:14,amount:1};trials=[trialFor(13,1,14)];extraFloors=[1,13];break;
   case 'next-twenty-seven':mode='另一分支起点：14楼没碎，两枚可用';world=seeded('budget-break27',26,[14]);focus={low:14,high:27,amount:1};planned=[27];trials=[trialFor(26,1,27)];extraFloors=[15,26];break;

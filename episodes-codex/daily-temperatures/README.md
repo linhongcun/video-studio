@@ -2,8 +2,9 @@
 
 ## 当前交付状态
 
-真实配音与分镜已冻结，145项输入逐项核对；正式成片4538帧/151.267秒，完整SHA `11f6bbfae10e05670285f7c5733369268b07d4d89ef5a25ec2821b8745a66df4`。算法、审稿、真实动态及六封面、正式MP4独立视觉与媒体检查均已通过，最后150帧为5秒完整Python暂停卡。实际范围与能力限制见`qa-preflight.md`、`qa-audio-preflight.md`、`qa-final.md`与`qa-media-independent.md`。网站发布状态统一见[批次记录](../../docs/leetcode-batch-next/README.md)。本轮未发外部平台，尚无新片用户观看结论。
+用户观看v0.69.0后指出默认懂单调栈，现先补栈的同端操作、后放先取、底顶，再演不升与维护，之后才命名。新增4句、复用28句；正文5322帧，最终含参考资料5472帧/182.4秒，Python与参考资料卡各150帧/5秒。190项生产输入核对通过。实际最终视频SHA256：`f3aa4f315770896ef3b3d15d8ad3d38ed5602d07528d9fcc20300bad3d6b3a3b`。实际动态、声音、正式MP4独立视觉与媒体检查均通过，能力范围见当前QA；网站及发布状态见[修订记录](../../docs/daily-temperatures-stack-primer/README.md)。尚无修后用户认可，无逐字ASR或全片人工听辨。旧片/旧QA完整保留于`revisions/stack-primer-before/`。
 
+现行正式渲染从`remotion/`运行`npm run render`，默认共享入口生成正文和参考资料附录。旧版算法/封面保持，源卡片操作来自真实Python append/pop概念演示，与解题trace分开。
 以下保留阶段1制作交接记录，开发占位分镜和未生成配音的说明只适用于当时，不是当前状态。
 
 开工基线8d037aa3e05ce1ed992df6b758b9b2227dd8b18b，issue #80，内部EP35，片内只标LC.739。root已从clean最新主干创建codex/leetcode-batch-next，当前独立锁图已npm ci；不依赖被删除工程。计划批次firstRelease v0.69.0，实际发布由root完成。

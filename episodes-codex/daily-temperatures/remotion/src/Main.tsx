@@ -3,6 +3,7 @@ import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {Shot,shots,MAIN,EQUALITY,PLAYBACK,TraceCase,TraceEvent,Beat,STORYBOARD} from './data';
 import {C,FONT,MONO} from './theme';
 import {CodeCard} from './CodeCard';
+import {StackPrimer,OrderPrimer} from './StackPrimer';
 declare const __HAS_VOICE_AUDIO__:boolean;
 
 const clamp=(n:number)=>Math.max(0,Math.min(1,n));
@@ -127,6 +128,8 @@ function Weather({c=MAIN,pb=state(MAIN,34),allVisible=false,showAnswers=true,sho
 }
 
 const HEADS:Record<string,[string,string]>={
+ 'stack-basics':['同一端，加入和取出','只演示这些日期怎样保存；先不计算等待天数'],
+ monotone:['这些待解决日的温度，怎样排列？','先把刚取出的第5天放回；原输入没有排序'],
  problem:['每天要等多久，才会更暖？','连续八天的气温 · 只看未来第一个严格更高的温度'],
  output:['返回等待天数','日期之间的距离，就是这一天的答案'],
  repeat:['每天往后找，重复在哪里？','先查看，再留下还没等到答案的天'],
@@ -144,7 +147,7 @@ const HEADS:Record<string,[string,string]>={
 };
 function Scene({shot:s}:{shot:Shot}){
  const f=useCurrentFrame(),t=s.visualType,p=phase(s,f),q=phase(s,f,1);
- const title=HEADS[t]??['每日温度',''];
+ const title=t==='stack-basics'&&f>=(s.cueFrames?.labels?.['栈']??at(s,1,0))?['栈：后放的先取','左侧是栈底；右侧是栈顶，加入和取出都在这里']:t==='monotone'&&f>=(s.cueFrames?.labels?.['单调']??at(s,1,0))?['单调：从栈底到栈顶不升','这里选择温度不升的顺序，允许相等']:HEADS[t]??['每日温度',''];
  const chapter=({problem:'先看题目要什么',derive:'为什么这样保存',walk:'按天走完整过程',code:'写回程序'} as any)[s.chapterId];
  if(s.codeCardFrom!==undefined&&f>=s.codeCardFrom)return <CodeCard/>;
  const pbCfg=PLAYBACK[t];
@@ -162,6 +165,8 @@ function Scene({shot:s}:{shot:Shot}){
    equality:pb.event.id<4?'30 = 30，没有严格更暖；两天都要保留':'31更暖，先解决第2天，再解决第1天',
   };
   body=<><Weather c={c} pb={pb} showPending showZeros={finishing}/><Note color={finishing?C.teal:C.gold}>{notes[t]}</Note></>;
+ } else if(t==='stack-basics'||t==='monotone'){
+  body=<><Weather allVisible current={4} focus={[2,3,4]} showAnswers={false}/><StackPrimer shot={s} frame={f}/></>;
  } else if(t==='problem'){
   const scanning=Math.min(3,Math.floor(q*4)),look=[3,4,5,6][scanning];
   body=<><Weather allVisible current={2} focus={[2]} showAnswers={false} scan={look}/><Note color={C.gold}>第三天之后，哪一天第一次比35更高？</Note></>;
@@ -171,11 +176,11 @@ function Scene({shot:s}:{shot:Shot}){
   const from=q>.01?3:2,step=Math.min(from===2?3:1,Math.floor((q>.01?q:p)*(from===2?4:2))),look=(from===2?[3,4,5,6]:[4,5])[step];
   body=<><Weather allVisible current={from} focus={q>.6?[2,3,4]:[from]} scan={look} showAnswers={false}/><g opacity={p}><path d={`M ${xpos(3,8)} 778 H ${xpos(6,8)}`} stroke={C.gold} strokeWidth={3} strokeDasharray="8 8"/><T x={930} y={830} anchor="middle" color={C.gold}>又看到了同样的后几天</T></g><Note>按日期前进，把问题留给新来的一天</Note></>;
  } else if(t==='order'){
-  const pb=playback(s,f,MAIN,15,[[0,.16,16],[0,.48,18],[0,.75,19],[1,.08,21],[1,.4,22]]);
-  body=<><Weather pb={pb} allVisible showPending stackNamed={false} showAnswers={false}/><Note color={C.gold}>{pb.event.id>=22?'连最近的35都不够暖，更早留下的也不能解决':'温度更暖就解决最近的一天，再回头看下一个'}</Note></>;
+  const pb=playback(s,f,MAIN,15,[[0,.10,16],[0,.26,17],[0,.42,18],[0,.56,19],[0,.72,20],[0,.85,21],[1,.10,22],[1,.55,23]]);
+  body=<><Weather pb={state(MAIN,23)} current={5} focus={pb.event.previous!==null&&pb.event.previous!==undefined?[pb.event.previous]:[]} allVisible showAnswers={false}/><OrderPrimer playback={pb}/></>;
  } else if(t==='name'){
   const named=f>=(s.cueFrames?.labels?.['单调栈']??at(s,1,0));
-  body=<><Weather pb={state(MAIN,15)} current={4} showPending stackNamed={named} showAnswers={false} allVisible focus={[2,3,4]}/><T x={1410} y={788} size={32} color={C.gold} opacity={p}>35 ≥ 31 ≥ 30</T><Note color={named?C.teal:C.gold}>{named?'单调栈 · 存下标，末尾先检查，解决后移出':'从早到晚温度不升，最近一天在末尾'}</Note></>;
+  body=<><Weather pb={state(MAIN,23)} current={5} showPending stackNamed={named} showAnswers={false} allVisible focus={[2,5]}/><T x={1410} y={788} size={32} color={C.gold} opacity={p}>35 ≥ 32</T><Note color={named?C.teal:C.gold}>{named?'单调栈 · 存下标，末尾先检查，解决后移出':'只动末尾，并保持温度从底到顶不升'}</Note></>;
  } else if(t==='earliest'){
   const look=[3,4,5,6][Math.min(3,Math.floor(q*4))];
   body=<><Weather pb={state(MAIN,34)} allVisible current={2} focus={[2]} scan={look} span={q>.8?{from:2,to:6,p:clamp((q-.8)*5),label:'此前没解决，第一次更暖就是现在'}:undefined}/><Note color={C.teal}>第4、5、6天都不更暖 → 第7天第一次满足</Note></>;

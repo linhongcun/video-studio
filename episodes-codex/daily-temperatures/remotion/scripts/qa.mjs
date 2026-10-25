@@ -16,7 +16,7 @@ const explicit=(process.env.QA_FRAMES??'').split(',').filter(Boolean).map(Number
 const additional=(process.env.QA_EXTRA_FRAMES??'').split(',').filter(Boolean).map(Number);
 const inputProps={hideSubtitles:process.env.QA_HIDE_SUBTITLES==='1'||proof};
 const allSourceFiles=dir=>fs.readdirSync(dir,{withFileTypes:true}).flatMap(entry=>entry.isDirectory()?allSourceFiles(path.join(dir,entry.name)):[path.join(dir,entry.name)]);
-const sourceFiles=[input,root+'/covers.json',root+'/solution.py',root+'/solution.json',root+'/research/trace.json',...allSourceFiles(path.resolve('src')),...['qa.mjs','covers.mjs'].map(x=>path.resolve('scripts',x)),path.resolve('remotion.config.ts'),path.resolve('package.json'),path.resolve('package-lock.json'),repo+'/episodes/_shared/theme/pageTheme.ts'];
+const sourceFiles=[input,root+'/covers.json',root+'/solution.py',root+'/solution.json',root+'/research/trace.json',root+'/research/stack-primer-operations.json',...allSourceFiles(path.resolve('src')),...['qa.mjs','covers.mjs'].map(x=>path.resolve('scripts',x)),path.resolve('remotion.config.ts'),path.resolve('package.json'),path.resolve('package-lock.json'),repo+'/episodes/_shared/theme/pageTheme.ts'];
 const hash=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
 const sourceSHA=Object.fromEntries(sourceFiles.map(p=>[path.relative(repo,p),hash(p)]));
 const serveUrl=await bundle({entryPoint:path.resolve('src/index.ts'),enableCaching:false,webpackOverride:c=>({...c,resolve:{...c.resolve,alias:{...c.resolve?.alias,'@storyboard':input,'@covers':root+'/covers.json'},modules:[path.resolve('node_modules'),'node_modules']},plugins:[...(c.plugins??[]),new webpack.DefinePlugin({__HAS_VOICE_AUDIO__:false})]})});
@@ -39,7 +39,7 @@ try {
  manifest.clips=[];
  for(const clip of clips){
   const first=shots.find(s=>String(s.id).startsWith(clip.from)),last=shots.find(s=>String(s.id).startsWith(clip.to));
-  const range=process.env.QA_RANGE?process.env.QA_RANGE.split(',').map(Number):[first.from,last.from+last.durationInFrames-1],file=out+'/'+clip.name+'.mp4';
+  const range=process.env.QA_RANGE?process.env.QA_RANGE.split(',').map(Number):(clip.frameRange??[first.from,last.from+last.durationInFrames-1]),file=out+'/'+clip.name+'.mp4';
   const clipInputProps={...inputProps,hideSubtitles:true};
   const selected=await selectComposition({serveUrl,id:'Main',browserExecutable,puppeteerInstance:browser,inputProps:clipInputProps});
   const clipComposition={...selected,props:{...selected.props,hideSubtitles:true}};
