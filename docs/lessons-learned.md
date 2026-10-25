@@ -349,7 +349,8 @@
 - **案例：**2026-10-25，用户实际观看D03适配器模式v0.63.0后指出内容复杂，听起来像是接口对不上才不得已包装；要求把日常主动封装的两个收益讲明白：符合业务约定、隔离外部接口升级对业务的影响。此前的程序、动态、成片及发布检查不能代替这项观看反馈。
 - **原因与稿内依据：**编辑复盘核对[修前脚本](../episodes-codex/adapter-pattern/revisions/business-boundary-v2/baseline/script.md)：02–04从双方约定不兼容进入，07–09较多展开受理、送达与未知结果，外部变化隔离只在10镜简述。必要的准确性边界占据了主线篇幅，却没有充分展示业务主动设计使用约定和持续隔离外部变化的日常价值，容易让观众把模式理解成临时兼容补丁。
 - **下次：**保留订单17发货提醒，用“业务需要怎样使用 → 适配器转换并委托 → 外部接口升级时改哪里”讲两个收益；让业务语义不变、已有能力仍满足需求成为局部隔离的明确前提。核心准确性留在主线，复杂异常与能力边界按理解需要取舍；不因讲简明就混淆受理与送达，也不以长段故障细节代替价值解释。适配器可承担防腐边界中的转换，但不能把任意wrapper都称作Adapter，或把一个适配器等同完整防腐层。
-- **当前验证范围：**已记录用户的实际观看反馈并核对旧稿，旧源、旧配音与技术证据按[基线清单](../episodes-codex/adapter-pattern/revisions/business-boundary-v2/baseline/baseline-manifest.json)保留；没有删除或改写旧检查去认可新版。新的主线、升级前后修改范围及讲解清晰度仍待后续审稿、实际制作和检查，当前只把改法记入项目记忆，不预写成功或新的用户认可。
+- **实际修正与检查：**旧源、旧配音与技术证据按[基线清单](../episodes-codex/adapter-pattern/revisions/business-boundary-v2/baseline/baseline-manifest.json)保留，没有删除或改写旧检查去认可新版。本轮以10镜20句把两个日常收益前置，先按业务需要定通知约定，再演同一次去回与后来的V1/V2格式升级，实际证明业务语义/能力仍满足时，原业务约定和调用可保持、转换与创建接线负责变化；保留维护和能力限制。正文3861帧加Java150帧，共4011帧/133.7秒；20组Java、184项冻结、独立预演36帧另7PNG/6封面、独立正式32帧覆盖16条字幕及根另13帧、完整20句音轨和PTS/DTS/AAC检查通过。网站40课/5方向初验8seek/20cue、Java与SVG/源码依赖通过，三处CommonMark粗体在站点派生稿定向修正后再定验；2build/1history，player/VTT/meta/SB/媒体同SHA，复用不变行为而未声称seek重跑，根实际看7站点图。实际范围见[本轮QA](../episodes-codex/adapter-pattern/qa-final.md)与[站点定验](../episodes-codex/adapter-pattern/qa-site-format-correction.json)。
+- **最终发布与范围：**[PR #272](https://github.com/linhongcun/video-studio/pull/272)合并d90867fb47dd0b4ddb42310bfd3a08e0b1e1e150，附注tag/Release为v0.64.1，首发v0.63.0不变；Release后Pages40176457473成功，北京时间2026-10-25 16:29:20.004207的11项canonical GET核对新媒体/海报、20字幕/4章、Java/源码依赖、导航及真实发布条目通过，见[发布记录](../episodes-codex/adapter-pattern/revisions/business-boundary-v2/release.json)与[线上结果](../episodes-codex/adapter-pattern/qa-site-online.json)。新媒体SHA为f86d48b9…6528852，7,152,478字节，−16.0LUFS/−3.8dBTP。上述检查不是用户已观看认可新版或学习效果测量，v0.63.0负面反馈与其真实技术历史继续保留。
 
 ## 如何继续追加
 
