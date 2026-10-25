@@ -49,11 +49,22 @@ HTTPS，在网页通信外加上安全传输保护。但在发送密码之前，
 
 ## 适用边界与来源
 
-[MDN：传输层安全](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Transport_Layer_Security)：保护的是端点之间的传输，不能推出网站商业信誉、服务端存储安全。（访问于2026-10-24）
+本次于2026-10-25（北京时间）核对以下负责工作组或MDN官方仓库的固定正文；各项分别提供正式链接与本轮实读版本，便于核查。
 
-[RFC 9110（2022）HTTPS与证书验证](https://www.rfc-editor.org/rfc/rfc9110.html#section-4.3.4)：安全连接不是用户登录认证；证书有效不证明网站商品真实。（访问于2026-10-24）
+**[R1] IETF TLS WG：《The Transport Layer Security (TLS) Protocol Version 1.3》（RFC 9846 · 2026）**。握手协商密钥并完成认证；TLS 1.3记录使用AEAD解密并验证；验证失败时拒绝记录并终止连接；握手内部并非先完成证书再开始全部密钥交换。实读章节：§2 Protocol Overview；§4 Handshake Protocol；§5.2 Record Payload Protection。
 
-[RFC 8446（2018，仅参考）TLS1.3](https://www.rfc-editor.org/rfc/rfc8446.html)：为密码学流程补充原始标准；片中不展示TLS1.2的RSA传钥，不说全程所有元数据都隐藏。（访问于2026-10-24）
+[正式链接](https://www.rfc-editor.org/rfc/rfc9846.html) · [本轮实读的固定正文](https://github.com/tlswg/tls13-spec/blob/c728b4efb4c12159371279227df6464541eafb58/rfc9846.md)。
 
+**[R2] IETF HTTP WG：《HTTP Semantics》（RFC 9110 · 2022）**。HTTPS客户端须核验服务身份与目标源站是否匹配，证书核验用于防冒充。实读章节：§4.3.4 https Certificate Verification。
 
-本片按理解顺序分解身份核验与密钥协商，并非TLS消息的逐条时序；保护以端点及密钥未失陷、身份验证成功为前提。
+[正式链接](https://www.rfc-editor.org/rfc/rfc9110.html) · [本轮实读的固定正文](https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9110.xml)。
+
+**[R3] MDN Web Docs：《Transport Layer Security (TLS)》（持续维护文档 · 2026-10-25核验）**。TLS提供传输中的保密、完整性与认证；网站证书将公钥关联到域名；这些保护面向客户端与服务端之间的连接，不作为商品信誉或服务端存储安全的保证。实读章节：TLS概览的Encryption／Integrity／Authentication；TLS handshake；Server authentication。
+
+[正式链接](https://developer.mozilla.org/en-US/docs/Web/Security/Defenses/Transport_Layer_Security) · [本轮实读的固定正文](https://github.com/mdn/content/blob/c49748a0ce4fdf77427e29cb6edbca8953a514e7/files/en-us/web/security/defenses/transport_layer_security/index.md)。
+
+TLS工作组本轮实读正文头部明确列出RFC编号9846、日期2026-07以及替代8446的关系；MDN中的版本号文字不作为最新RFC编号的证据。
+
+[RFC 8446](https://www.rfc-editor.org/rfc/rfc8446.html)（2018，仅参考；原访问日期2026-10-24）保留为原稿的历史来源，当前片尾与本次机制核验以RFC9846固定正文为依据。
+
+本片按理解顺序分解身份核验与密钥协商，并非TLS消息的逐条时序；传输保护以端点及密钥未失陷、身份验证成功为前提，不表示商品信誉或服务端存储安全已获保证。

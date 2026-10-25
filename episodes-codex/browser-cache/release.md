@@ -9,3 +9,9 @@
 - [完整线上证明](../../docs/codex-remake-ep01-14/online.json)保留逐项GET结果；检查不冒充完整人工播放、逐字ASR或独立完整听辨。
 
 按持续授权自主发布不表示用户已经观看认可。后续反馈应重新冻结受影响输入并检查、发布。
+
+## v0.69.1 · 片尾参考资料
+
+2026-10-25为原正文追加5秒可暂停参考资料卡，配套文章提供完整来源及对应知识点。原正文全量解码帧/时间戳、原AAC包/时间戳和PCM保持；新片尾、原生字幕结束、播放器暂停与手机全屏按实际范围复核。
+
+[PR #330](https://github.com/linhongcun/video-studio/pull/330)、[Release v0.69.1](https://github.com/linhongcun/video-studio/releases/tag/v0.69.1)及Release后Pages40200401923已完成；完整线上媒体/海报SHA、VTT、原章节和来源链接核验通过。实际证据见[首批记录](../../docs/reference-endcards/batch-1/README.md)，本期追加输入与原正文基线在revisions/reference-endcards。仅GitHub站点，无平台重发。

@@ -1,54 +1,54 @@
-# D02 观察者模式：正式调研
+# D02 观察者模式：MQ实战修订调研
 
-访问日期：**2026-10-25（北京时间）**。本期基于最新主干`1834450`开工。实际通过公共网页工具读取以下正文及所列段落；不是仅依赖搜索摘要或旧issue。没有取得或声称读完GoF书籍全文，不采用搜索到的疑似整书镜像。
+访问日期：**2026-10-25（北京时间）**。制作基线`9834e2cd84b1081f8ab41ade369cf46b8b6ddf62`；本次按用户最新反馈改写实际视频，将主要篇幅从手写订阅名单、取消订阅移到跨服务MQ发布订阅与消费。旧同进程版来源与制作结果仍由Git基线和`revisions/mq-practice/baseline/`追溯，不能把旧成片检查直接记为本轮通过。
 
-本期视频问题：**订单状态改变时，怎样让需要它的模块自行接收通知，而不把各模块的具体处理写进订单？** 先讲订阅关系、共同通知约定、各自反应及退出生命周期；Python实现后置图文可选附录。
+问题：**订单状态改变后，怎样让摘要与变化记录各自响应？跨服务项目通常怎样实现，又要承担哪些交付与一致性问题？**
 
-## 已读来源与采用范围
+## 实际取得与阅读范围
 
-| 编号 | 来源、日期 | 实际阅读与支持主张 | 限定 |
+来源由Tinyfish `fetch_content`取得公开正文。本编辑实际阅读以下正文或指定章节，未只采用其他代理摘要。没有阅读GoF书籍全文，没有用市场占比数据证明“所有项目都用MQ”。两份临时取回文件的身份如下，正文SHA按UTF-8原文计算：
+
+- RabbitMQ与Outbox：`revisions/mq-practice/research-rabbitmq-outbox.json`，完整SHA-256 `cb742536cd64bc30d11861aed681ec729e51a6015195854217fb66baf7cfec68`，独立审稿代理取回，本编辑随后读取。
+- Microsoft：`revisions/mq-practice/research-observer-pubsub.json`，完整SHA-256 `14f768fbc12a65ca5398ea67e225cbdb4c10fef45f1745958fb90559fde49215`，本编辑取回并读取。网页有通用授权提示，但本次工具实际返回公开正文及元数据；没有访问账户私有内容。
+
+| ID | 公开来源 | 本次实际阅读 | 采用主张与限定 |
 |---|---|---|---|
-| S1 | [Cornell CS2112：Design patterns，Observer pattern节](https://courses.cs.cornell.edu/cs2112/2022fa/lectures/patterns/index.html)，2022秋课程路径；正文未标单独更新日 | 生产者按登记集合推送事件，接收方收到后做自己的工作；两方通过事件约定交互。正文Observer节及MVC末段均已读 | 大学课程一手教学资料；文中Java写法不进入本期视频，不借“同时提供”断言并行执行 |
-| S2 | [Microsoft：Observer design pattern](https://learn.microsoft.com/en-us/dotnet/standard/events/observer-design-pattern)，页面更新2026-06-02 | 已读概述、适用/替代方案、C#来源/接收者/取消订阅示例及入口。来源可以有零、一或多个观察者，维护订阅关系并通知；可以取消订阅 | `.NET`接口不规定一般通知顺序；示例里的锁、类型和初始数据补发属于其实现，不能推广为模式统一要求 |
-| S3 | [Microsoft：Observer design pattern best practices](https://learn.microsoft.com/en-us/dotnet/standard/events/observer-design-pattern-best-practices)，页面更新2026-06-02 | 已读全文：单独通知数据、生命周期、额外契约、异常与并发注意。额外保证应明确记录；接口没有统一通知顺序 | `.NET`建议不等同于所有Observer实现；不将其`OnError`与“接收者抛错”的处置混成同一机制 |
-| S4 | [Node.js：Events](https://nodejs.org/api/events.html)，本次页面v26.12.1；动态文档未标整页发布日期 | 已读Events概述、Asynchronous vs. synchronous、emit及removeListener：EventEmitter同步按注册顺序调用；通知开始后移除监听不改变当前发射的原名单，后续生效 | 仅用于核对“事件不一定异步”及对照具体契约；没有把Node行为称为本片Python的官方保证。尝试v24.19.0固定文档地址未能取得正文，不声称已读该版本 |
-| S5 | [Refactoring.Guru：Observer](https://refactoring.guru/design-patterns/observer)，未标发布日期 | 已读Intent、Problem、Solution、Structure、How to implement、Pros/Cons及Relations。辅助核对动态订阅/取消与共同通知约定；既有通知约定不变时，新增接收方无需改来源的具体通知流程 | 专业教学辅助资料，不当作原始规范。其“random order”措辞不能上升为模式保证：S2无顺序规定、S4存在确定顺序，两者已交叉核对。生活类比和密集类图不进入视频 |
-| S6 | [UBC CPSC310：Design Patterns](https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/)，正文未标更新日（导航为26W1） | 实际读Design Pattern Process：先找变化、痛点、机制，再判断成本；用于编辑审查 | **该页没有Observer正文**。只支持选择设计的分析方法，不拿它证明Observer订阅机制，也不从学期导航推断页面更新日期 |
-| S7 | [Azure Architecture Center：Publisher-Subscriber pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber)，页面更新2026-03-06 | 已读Solution、Problems/considerations与When to use。这里讨论带中介的异步消息、故障处理、投递保证及重复消息，说明这些需要具体消息设施和契约 | 这是分布式发布订阅体系的官方说明，用于与本片同进程观察关系辨析；不能将其异步、持久化或故障隔离能力直接归给Observer这个设计思想 |
+| M1 | [Microsoft Observer design pattern](https://learn.microsoft.com/en-us/dotnet/standard/events/observer-design-pattern) | 概述、When to apply、角色清单、When to consider alternatives；不声称逐行审阅整段C#/VB机场代码 | 来源、观察者、订阅与通知职责；文档本身明确单应用简单通知可使用标准事件。接口与通知顺序属于具体实现，不定义所有语言或分布式消息系统 |
+| M2 | [Azure Publisher-Subscriber pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) | Context/problem、Solution、Problems/considerations、When to use及其不适用项 | 中间件向各订阅输出通道路由，已有产品优于从零构造；独立订阅、故障隔离、重复消息、事件契约、背压和最终一致性边界。不能把所有MQ产品当作同一套投递语义 |
+| R1 | [RabbitMQ Publish/Subscribe](https://www.rabbitmq.com/tutorials/tutorial-three-python) | 全文，重点Exchanges、Temporary queues、Bindings及完整客户端 | 发布者→交换机→各绑定队列，一对多业务订阅与同队列竞争不同。**教程实际用exclusive临时队列和auto_ack=True**，无绑定可丢弃；这里只借用拓扑，不能照搬为离线可靠保留方案 |
+| R2 | [RabbitMQ Work Queues](https://www.rabbitmq.com/tutorials/tutorial-two-python) | 全文，重点Round-robin、Message acknowledgment、Message durability | 一个业务队列多个worker分担；处理完成再确认；持久队列与持久消息配合，持久标记单独仍不够，较强交付需要发布确认；不把任务内容当成本例事件命令 |
+| R3 | [Consumer Acknowledgements and Publisher Confirms](https://www.rabbitmq.com/docs/confirms) | Are Publisher Confirms Related...、Consumer Acknowledgement Modes...、When Consumers Fail...、When Will Published Messages...、Publisher Confirms and Guaranteed Delivery | 发布确认与消费确认正交；手动确认下连接/通道关闭导致未确认投递重新入队，检测不可用需要时间；可重复投递。可路由持久消息进入持久队列后确认需落盘；**无法路由的消息也可能获发布确认**，不能把一个ACK当作业务送达证明 |
+| R4 | [RabbitMQ Reliability Guide](https://www.rabbitmq.com/docs/reliability) | 全文 | 数据安全是broker、发布者和消费者共同责任；持久化、确认、连接恢复、路由检查、重投幂等、故障监控。普通等待超时不是本片重投触发条件，也不宣称绝对不丢或恰好一次业务效果 |
+| O1 | [Transactional outbox — microservices.io](https://microservices.io/patterns/data/transactional-outbox.html) | 全文Context、Problem、Solution、Result context | 业务变更与待发事件在同一本地事务保存，再由relay发送；relay也可能重复发布，消费者仍需幂等。不是消费者ACK就补上数据库与发消息之间的原子性 |
 
-S1–S4与S7为大学/厂商一手资料；S5仅辅助解释；S6仅编辑框架。Microsoft网页虽然顶部有通用授权提示，本次可见正文与示例已经实际取得；没有访问任何账号私有内容。没有以页脚版权年推定内容新旧。
+Microsoft M1元数据`updated_at`为2026-06-02，M2为2026-06-03；`ms.date`与更新时间是不同字段，本文不混作同一发布日期。RabbitMQ使用本次动态文档，不沿用旧研究“4.4”版本断言。Outbox页面未标更新日，不以页脚推断日期。
 
-## 进入视频与图文的事实映射
+正文UTF-8 SHA-256，顺序对应M1、M2、R1、R2、R3、R4、O1：
 
-| 主张 | 依据 | 本例如何落实 |
+```text
+M1 aea66f0646c714c5eded6ee1e1aa3cc329f4cab71003c2ea8ca76178878d6d57
+M2 205f97029405f88777655b3e888c433f6357eb122151c57f6877d77490d1e1ff
+R1 6d3490ac8fae6e6601d0339feba15eeccd83faee9232d9c719f6e72fa5fccec0
+R2 1b9b6e5a8622f2c3b11860c6a493c21faccc705ace0aee731da2cf10c2dba5c0
+R3 cda7a48c5878a98cb9bdc18f35fdea0e16f124d16a09e6b716097ec05a798893
+R4 ab76e738a47874e1321027acddeb8bdd174f9a6f26b82c49cd0aed2db6cbedd3
+O1 37541a9166191d6678d2404deecbe57bbb61a6209d3b9264e1740cab12cd1852
+```
+
+## 片中事实与例子映射
+
+| 镜头 | 主张 | 依据和例子限制 |
 |---|---|---|
-| 接收方随需求加入/离开，来源不必写死每个接收方的具体处理 | S1、S2、S5 | 来源只维护订阅名单；摘要负责展示，变化记录负责追加；共同约定不变的范围内增减名单 |
-| 订阅不是传来一段新业务逻辑给来源，来源通过共同通知约定联系接收方 | S1、S2、S5 | 通知包含订单号与新状态；订单不掌握摘要怎样显示或记录怎样保存 |
-| 来源先有变化，再向当前登记者推送；接收者自行响应 | S1、S2及本例运行 | 十七号订单从待付款改为已付款，然后两方各自响应；通知不是让两个接收者彼此调用 |
-| 取消订阅须真实影响后续通知 | S2、S3、S4及运行记录 | 摘要退出后取消；已发货变化只到变化记录，摘要灰显停止接收并保留旧值 |
-| 顺序、同步/异步、错误处理须看实现 | S2、S3、S4 | 本例同步按登记顺序；动画依次通知，不暗示所有观察者模式都这样保证 |
-| 来源仍依赖通知约定和接收者引用，不是“完全没有依赖” | S1、S2、S5 | 变化的是具体接收者集合；通知数据/契约变了仍可能需要各方调整 |
-| 生命周期与追踪成本值得权衡，简单稳定的单接收方可直接处理 | S2替代方案、S3、S6及本例设计分析 | 视频说明订阅关系要维护、调用路径需追踪，不宣称加模式总会更好 |
-| 本片不提供跨服务可靠送达、事务原子性或自动重试 | S2/S3限定契约、S7与本例代码 | 视频只作边界提醒；图文明确本例异常可中断剩余通知且状态不回滚 |
+| 01–02 | 来源变化，已登记接收者按共同约定各自响应 | M1；订单17、摘要、记录是自建功能例子，01不执行真实付款，02只是同进程原理 |
+| 03–04 | 跨服务常借助消息中间件；一个业务订阅一条输出路径 | M2、R1；是部署与工程判断，不是行业占比。明确切换为RabbitMQ教学部署，不从商家界面推断真实架构 |
+| 05 | 各消费自己的事件，业务完成再手动确认；契约不变时可增加订阅方 | R1–R4、M2；不是所有MQ统一用ACK删除，也不宣称新增订阅不需配置 |
+| 06 | 记录离线时自身队列保留待处理，摘要继续处理 | M2、R2、R4；已建立且适当配置的持久队列、持久消息与确认路径，不能用R1临时队列代替 |
+| 07 | 恢复消费；业务已成功、ACK未送达、断连检测后重投；同事件需要幂等 | R3、R4；同事件编号`e17-1`，订单号不是唯一事件键。幂等是效果定义，编号去重是本例方法，去重状态与业务效果需原子提交 |
+| 08 | 数据库更新与发事件存在双写缺口；Outbox衔接；消费者结果可短暂滞后 | O1、M2；另一个边界示意，不接成07的同事件新故障；Outbox不能消除重复和全部一致性成本 |
+| 09–10 | 同进程可用框架事件，跨服务可用MQ；学习思想与工程保证分别看 | M1 alternatives、M2 use/avoid；不说观察者模式无人使用，也不说所有跨服务任务都应引入MQ |
 
-“先改变本单状态再通知”“订单号+新状态”“依次”“无变化不通知”等是**本例明确选择**，不是所有Observer的统一规则。公共事实与例子输入分开：订单17及三种状态均标教学示例，不冒充真实业务数据或普遍业务状态机。
+## 明确不作的保证
 
-## 贯穿示例与运行证据
+不承诺全局处理顺序、跨服务原子提交、绝对不丢、自动无限重试或恰好一次业务处理。消费者可能读到旧状态；最终收敛需发布/消费/重试/对账真正成功。共同契约变化、队列配置与新增订阅方的实现成本没有消失。
 
-- 同一进程中的**十七号订单**，本例只演示待付款→已付款→已发货，不讨论真实支付/物流网络。
-- 两类接收者：**订单摘要**（显示最后接收状态）、**变化记录**（每次接收追加订单号与新状态）。不用“统计数量”制造状态分类或订单总数歧义。
-- 首次变化：双方已登记，来源更新为已付款，依次通知摘要与记录。记录追加“订单17 已付款”。
-- 摘要退出并取消订阅，随后订单改为已发货，只有变化记录追加“订单17 已发货”。摘要保留已付款只是最后接收值，画面要明确停止接收，不能表示仍在实时显示。
-- 可选代码：[demo/observer.py](demo/observer.py)；约定：[demo/README.md](demo/README.md)；实际运行器：[demo/verify.py](demo/verify.py)；结果：[demo/verified-results.json](demo/verified-results.json)。Python3.12.14实际运行7类行为场景通过，完整源码SHA在结果中。
-
-运行验证包括：同一主线、零接收者、订阅不补发与相同状态不发、同步次序、通知中取消对下一次生效、接收者异常中断、重入修改拒绝。异常与重入只在图文说明，不加入主视频支线。本例单线程无并发保证；当前通知名单快照、同步顺序、异常传播、源状态不回滚与无重试，均是实现选择。
-
-这些记录证明示例的指定行为，不证明视频已经教会初学者；独立编辑审读、无字幕过程及实际成片检查另行完成。
-
-## 编辑重点与不进入主视频的内容
-
-三个问题以同一因果链回答：先展示订单直接掌握接收方工作的维护痛点；再用订阅名单和共同通知分开职责；最后用退出和第二次变化证明名单有作用，并交代成本。主要章节先有口头衔接，再启动新动作。
-
-核心名词限来源、订阅者/观察者与订阅关系。不要在同一屏堆Subject、Observable、Publisher、Subscriber、Listener同义词。不要把一对多扇出图画成并行计算，也不把订阅名单画成处理数据的独立业务执行者。
-
-视频不展示语言语法、完整实现、异常恢复分支、重入、线程安全或Rx运算符。读项目的线索是找到来源维护的登记关系、统一通知点、各接收方的响应和退出清理，不能只凭`subscribe`或`emit`的名字贴模式标签。策略模式选择一个可替换做法完成同一任务；观察者是向当前多个接收方报告变化，两者意图不同，辨析可放图文。
+保留现有`demo-java/ObserverDemo.java`仅作同进程观察者原理对照，片尾静默5秒；旧程序中的取消订阅与发货行为可以在完整示例中复查，但本次不再占主要视频时长，也不将其运行结果当作RabbitMQ集成测试。媒体、配音、动态及实际站点结果由本轮制作检查另记。
