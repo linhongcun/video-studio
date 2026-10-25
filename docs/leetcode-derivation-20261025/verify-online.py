@@ -21,7 +21,7 @@ OUT = Path(__file__).resolve().parent
 BASE = 'https://linhongcun.github.io/video-studio/'
 REPOSITORY = 'linhongcun/video-studio'
 BASELINE_COMMIT = 'e38fa9236fbc340f834581302320494d2a1c1ce7'
-UPSTREAM_COMMIT = '057b9d0d293ff58f410129860b71b742340e5dd1'
+UPSTREAM_COMMIT = '00635e6487a77550625bd62b90b216503fd79746'
 REVISION_DATE = '2026-10-25'
 SPECS = [('two-sum', 1, 28), ('longest-substring', 3, 40),
          ('binary-search', 704, 30), ('reverse-linked-list', 206, 30),
