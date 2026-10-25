@@ -27,3 +27,12 @@
 - 公开来源：https://www.rfc-editor.org/rfc/rfc5737.html
 - 实读§3–4：203.0.113.0/24属于文档示例地址块，不是本片真实测得的服务地址。
 - 访问日期：2026-10-24（北京时间）。只用于选择示例，不把它当成可公开连接的真实网站地址。
+
+## 2026-10-25 片尾参考资料补充核验
+
+本轮对照`references.json`／`references.md`读取资料正文，实际读取日期为2026-10-25（北京时间）。正式文档站点均被会话代理以Tunnel 403拒绝，因此改读负责工作组或MDN官方GitHub仓库固定commit；不沿用2026-10-24的访问记录冒充本轮联网结果。原文节选、完整SHA与可达性记录见[本批证据](../../docs/reference-endcards/batch-1/source-verification.json)。
+
+- R1 IETF DNSOP，DNS Terminology（RFC 9499 · 2024）：<https://github.com/ietf-wg-dnsop/draft-ietf-dnsop-rfc8499bis/blob/e3a5137460722f7b391707e9e95f971e00df4dc5/rfc9499.xml>。实读§4 DNS Transactions；§5 Resource Records（TTL）；§6 DNS Servers and Clients（迭代、递归、权威与缓存）；支撑：递归解析器代查，迭代查询按转介继续；权威服务器提供负责区域的记录；TTL约束记录可以缓存的时间，缓存也可能提前移除。
+- R2 MDN Web Docs，DNS（持续维护文档 · 2026-10-25核验）：<https://github.com/mdn/content/blob/632359b60e58a4f5b2a69020dd79d0ecf38d4dbb/files/en-us/glossary/dns/index.md>。实读DNS正文定义与DNS lookup段落；支撑：DNS把方便记忆的域名与IP地址等资源关联，查地址是页面加载前的一步。
+
+校正原笔记的章节定位：递归／迭代模式、递归解析器及权威服务器在RFC9499 §6；TTL在§5，§4是DNS事务术语。示例规范RFC2606／5737保留早期资料“仅参考”，本轮不标重新实读。
