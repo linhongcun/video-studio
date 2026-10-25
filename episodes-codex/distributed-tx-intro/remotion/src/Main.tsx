@@ -5,6 +5,7 @@ import {C,FONT} from './theme';
 import {at,eventAt,navigationMotion} from './motion';
 import {createBranchNavigator} from '../../../_shared/branch-map';
 import {navigationSpec} from './branch-map';
+import {ProductScene} from './ProductScene';
 import {Title,Note,Reset,Order,Stock,SplitBoundaries,Cross,Check,Txt,Chip,Line,LocalBoundary,MovingChip,ease,lerp} from './objects';
 declare const __HAS_VOICE_AUDIO__:boolean;
 const BranchNavigator=createBranchNavigator(React);
@@ -20,25 +21,8 @@ const RecordRow=({done,alpha=1}:{done:boolean;alpha?:number})=><div style={{posi
 
 const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  const t=s.visualType;
- if(t==='hook'){
-  const q=phase(s,f,0,.02,.32);
-  return <><Title>一笔订单，两个结果？</Title>
-   <Order exists state="已记录" color={C.teal}/><Stock value={4} state="尚未扣减" color={C.gold}/>
-   <Line x1={805} y1={530} x2={1115} y2={530} p={q} color={C.red} dashed/>
-   <Cross x={960} y={530} alpha={phase(s,f,0,.36,.55)}/>
-   <Chip x={960} y={705} width={420} color={C.gold} alpha={phase(s,f,0,.5,.75)}>整单成功？还不能确认</Chip>
-   <Note alpha={phase(s,f,1,.05,.4)}>订单已记录，不等于整笔业务已成功</Note></>;
- }
- if(t==='business-goal'){
-  const p=phase(s,f,1,.06,.6);
-  return <><Title>同一笔订单，要满足两个条件</Title>
-   <Order exists state="目标：订单确认" color={C.teal}/>
-   <Line x1={805} y1={530} x2={1115} y2={530} p={p} color={C.teal}/>
-   <MovingChip x1={860} y1={495} x2={1050} y2={495} p={p} width={220} color={C.teal}>购买 1 件</MovingChip>
-   <Stock value={4} state="当前库存" detail="目标：扣减后为 3" color={C.text}/>
-   <Chip x={1400} y={722} width={350} color={C.teal} alpha={p}>目标值 3 · 尚未执行</Chip>
-   <Note alpha={p}>示例规则：确认本单之前，库存安排也要落实</Note></>;
- }
+ if(t==='hook')return <ProductScene mode="opening" frame={f}/>;
+ if(t==='business-goal')return <ProductScene mode="mapping" frame={f}/>;
  if(t==='scope'){
   const p=phase(s,f,1);
   return <><Title>先只看这两步</Title><Order exists state="记下订单" color={C.text}/><Stock state="扣减库存" color={C.text}/>
@@ -48,7 +32,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
  }
  if(t==='local-intro'){
   const p=phase(s,f,0),q=phase(s,f,1);
-  return <>{local(p)}<Order pending state="待提交" color={C.gold}/><Stock value={4} state="原库存：4" detail="拟改为 3 · 尚未提交" color={C.gold} alpha={q}/>
+  return <><Reset>机制对照 · 回到提交之前：本单待提交，库存 4</Reset>{local(p)}<Order pending state="待提交" color={C.gold}/><Stock value={4} state="原库存：4" detail="拟改为 3 · 尚未提交" color={C.gold} alpha={q}/>
    <Note alpha={q}>两处修改，交给同一笔事务管理</Note></>;
  }
  if(t==='local-commit'){
@@ -228,7 +212,8 @@ const ShotView:React.FC<{shot:Shot;captions:boolean}>=({shot:s,captions})=>{
   <div style={{position:'absolute',inset:0,background:'radial-gradient(ellipse at 85% 5%, #173B5555, transparent 62%)'}}/>
   <Txt x={100} y={54} size={24} color={C.muted}>分布式 · 概念入门</Txt>
   <Txt x={1700} y={54} size={25}>IT小村</Txt><Txt x={1650} y={103} center width={420} size={19} color={C.muted}>示例数据 · 订单 8124</Txt>
-  <BranchNavigator spec={navigationSpec(s,f)} shotId={s.id} frame={f} durationInFrames={s.durationInFrames} foreground={term?<Title color={C.teal} alpha={f>=cue(s,term)?1:0}>{term}</Title>:undefined}><Scene s={s} f={f}/></BranchNavigator>
+  {s.id==='01'?<Scene s={s} f={f}/>:<div style={{position:'absolute',inset:0,opacity:s.id==='20'?1-ease(f,167,11):1}}><BranchNavigator spec={navigationSpec(s,f)} shotId={s.id} frame={f} durationInFrames={s.durationInFrames} foreground={term?<Title color={C.teal} alpha={f>=cue(s,term)?1:0}>{term}</Title>:undefined}><Scene s={s} f={f}/></BranchNavigator></div>}
+  {s.id==='20'&&f>=167&&<div style={{position:'absolute',inset:0,opacity:ease(f,178,11)}}><ProductScene mode="return" frame={f-167}/></div>}
   {s.visualType==='bridge'&&<Txt x={960} y={885} center size={23} color={C.muted} alpha={phase(s,f,1,.04,.5)}>IT小村 · 原创</Txt>}
   {captions&&sub&&<div data-subtitle style={{position:'absolute',left:130,right:130,top:925,minHeight:100,display:'flex',alignItems:'center',justifyContent:'center',fontSize:40,fontWeight:500,lineHeight:1.4,textAlign:'center',background:`${C.bg}F8`,borderRadius:12,padding:'7px 15px',boxSizing:'border-box'}}>{sub.text}</div>}
  </AbsoluteFill>;
