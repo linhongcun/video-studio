@@ -305,6 +305,7 @@ if (process.argv.includes('--built')) {
 // direction, but must never imply that another direction is a prerequisite.
 const learning = learningRuntime(published);
 const tracks = learning.getLearningTracks();
+const hasPublishedAgent = liveLessons.some((lesson) => lesson.series === 'agent');
 const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
 const directionForSeries = {
   request: 'systems', cache: 'systems', peak: 'systems', database: 'systems', distributed: 'systems',
@@ -334,8 +335,15 @@ for (const track of tracks) {
   }
 }
 assert.equal(tracks.find((t) => t.id === 'systems')?.start.slug, 'http-request', 'System fundamentals should start with the request');
-assert.equal(tracks.some((t) => t.id === 'agent'), false, 'The empty Agent direction must not advertise a removed starting lesson');
-assert.equal(learning.getTrackForSeries('agent'), undefined, 'The future Agent series must remain hidden until a new lesson is published');
+const agentTrack = tracks.find((track) => track.id === 'agent');
+if (hasPublishedAgent) {
+  assert.ok(agentTrack, 'New published Agent lessons need their own learning direction');
+  assert.equal(retiredAgentSlugs.includes(agentTrack.start.slug), false, 'A new Agent direction must not start with a retired lesson');
+  assert.equal(learning.getTrackForSeries('agent')?.id, 'agent');
+} else {
+  assert.equal(agentTrack, undefined, 'An empty Agent direction must not advertise a removed starting lesson');
+  assert.equal(learning.getTrackForSeries('agent'), undefined, 'The future Agent series must remain hidden until a new lesson is published');
+}
 assert.equal(tracks.find((t) => t.id === 'algorithms')?.start.slug, algorithmSlug);
 assert.equal(tracks.find((t) => t.id === 'patterns')?.start.slug, 'strategy-pattern', 'Design patterns must start with the published strategy lesson');
 assert.equal(learning.getTrackForSeries('design-patterns')?.id, 'patterns', 'Design patterns have their own learning direction');
@@ -365,8 +373,8 @@ if (process.argv.includes('--built')) {
       assert.equal(page.includes(`/episodes/${slug}/`), false, `${slug} leaked into ${name}`);
     }
   }
-  assert.equal(fs.existsSync(path.join(dist, 'series/agent/index.html')), false, 'An empty Agent series must not produce a catalog page');
-  assert.equal(learn.includes('id="agent"'), false, 'The learning page must not advertise an empty Agent direction');
+  assert.equal(fs.existsSync(path.join(dist, 'series/agent/index.html')), hasPublishedAgent, 'The Agent catalog page must exist only when new Agent lessons are published');
+  assert.equal(learn.includes('id="agent"'), hasPublishedAgent, 'The learning page must expose Agent only when its series has published lessons');
   for (const href of ['/video-studio/learn/', '/video-studio/library/']) {
     assert.ok(home.includes(`href="${href}"`), `Home must expose ${href}`);
   }
