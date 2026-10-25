@@ -13,13 +13,16 @@ const sourceDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(sourceDir, '../..');
 const slug = 'consistent-hashing';
 const episodeDir = path.join(root, 'episodes', slug);
-const base = new URL(process.argv[2] ?? 'http://127.0.0.1:4321/video-studio/');
+const appendixOnly = process.argv.includes('--appendix-only');
+const base = new URL(process.argv.slice(2).find((argument) => /^https?:\/\//.test(argument)) ?? 'http://127.0.0.1:4321/video-studio/');
 assert.ok(base.pathname.endsWith('/'), 'The base URL must end with /');
-const evidenceDir = path.join(sourceDir, 'qa-site-evidence');
-const reportFile = path.join(sourceDir, 'qa-site-browser.json');
+const evidenceDir = path.join(sourceDir, appendixOnly ? 'qa-site-reference-evidence' : 'qa-site-evidence');
+const reportFile = path.join(sourceDir, appendixOnly ? 'qa-site-reference-browser.json' : 'qa-site-browser.json');
 const report = {
   checkedAt: new Date().toISOString(), base: base.href, slug, passed: false,
-  scope: 'Built local site in real Chromium; muted playback, captions, all chapter seeks, article, directions and catalog at two viewports.',
+  scope: appendixOnly
+    ? 'Reference-appendix regression in real Chromium at two viewports: final duration, all 28 caption boundaries, four original chapter seeks, first/middle/last reference-card pauses and both article source links. Unchanged reading/navigation retain their earlier full QA.'
+    : 'Built local site in real Chromium; muted playback, captions, all chapter seeks, article, directions and catalog at two viewports.',
   limitations: ['Browser playback and screenshots do not establish full-film listening or teaching quality.'],
   files: {}, viewports: [], errors: [],
 };
@@ -61,6 +64,21 @@ try {
   report.files['meta.json'] = delivery.files['meta.json'];
   const storyboard = readJson(path.join(episodeDir, 'storyboard.json'));
   const fps = storyboard.meta?.fps ?? 30;
+  const bodyFrames = storyboard.meta.finalVideoFrames;
+  const appendix = meta.referenceAppendix;
+  assert.equal(appendix.kind, 'references');
+  assert.equal(appendix.from, bodyFrames);
+  assert.equal(appendix.durationInFrames, 150);
+  assert.equal(meta.finalVideoFrames, bodyFrames + appendix.durationInFrames);
+  const references = readJson(path.join(episodeDir, appendix.sources));
+  const receipt = readJson(path.join(episodeDir, appendix.manifest));
+  assert.equal(references.sources.length, 2);
+  assert.equal(receipt.finalVideoFrames, meta.finalVideoFrames);
+  assert.equal(receipt.bodyFrames, bodyFrames);
+  assert.equal(receipt.outputSHA256, hash(path.join(episodeDir, meta.video)));
+  report.referenceSources = references.sources.map(({id, organization, title, url}) => ({id, organization, title, url}));
+  report.bodyFrames = bodyFrames;
+  report.finalFrames = meta.finalVideoFrames;
   const expectedDuration = (meta.finalVideoFrames ?? storyboard.meta.finalVideoFrames) / fps;
   assert.ok(Number.isFinite(expectedDuration) && expectedDuration > 0);
   const expectedCaptions = storyboard.scenes.flatMap((scene) => scene.shots.flatMap((shot) => (shot.subtitles ?? []).map((subtitle) => subtitle.text)));
@@ -68,16 +86,18 @@ try {
   const expectedCues = storyboard.scenes.flatMap((scene) => scene.shots.flatMap((shot) => shot.subtitles.map((subtitle) => ({
     text: subtitle.text,
     start: Number(((shot.from + subtitle.from) / fps).toFixed(3)),
-    end: Number(((shot.from + subtitle.to + 1) / fps).toFixed(3)),
+    end: shot.from + subtitle.to + 1 === appendix.from
+      ? (Math.ceil(appendix.from / fps * 1000) - 1) / 1000
+      : Number(((shot.from + subtitle.to + 1) / fps).toFixed(3)),
   }))));
   const expectedChapters = storyboard.scenes.map((scene) => ({id: scene.chapterId, start: scene.from / fps}));
   assert.equal(expectedChapters.length, 4);
   const articleSource = fs.readFileSync(path.join(sourceDir, 'article.mdx'), 'utf8');
   const expectedPython = articleSource.match(/```python\s*\n([\s\S]*?)```/)?.[1].trim();
   assert.ok(expectedPython, 'The article must retain its complete Python example');
-  for (const file of ['article.mdx', 'script.md', 'research.md', 'storyboard.json', meta.video, meta.poster, 'cover-4x3.jpg', 'cover-3x4.jpg']) {
+  for (const [file, detail] of Object.entries(delivery.files).filter(([file]) => file !== 'meta.json')) {
     const published = path.join(episodeDir, file);
-    const source = path.join(sourceDir, file);
+    const source = path.join(sourceDir, detail.source ?? file);
     assert.ok(fs.existsSync(published), `Missing published ${file}`);
     assert.ok(fs.existsSync(source), `Missing production ${file}`);
     assert.equal(hash(published), hash(source), `Production and published ${file} differ`);
@@ -123,6 +143,7 @@ try {
     const cueTexts = browserCues.map((cue) => cue.text);
     assert.deepEqual(cueTexts, expectedCaptions, 'Native browser captions differ from frozen narration');
     assert.deepEqual(browserCues, expectedCues, 'Native caption times differ from the frozen 30fps subtitle boundaries');
+    assert.ok(browserCues.every((cue) => cue.end < appendix.from / fps), 'Body captions must end before the first reference-card frame');
     result.captionCount = cueTexts.length;
     result.browserCues = browserCues;
 
@@ -144,6 +165,26 @@ try {
       assert.equal(await button.getAttribute('aria-current'), 'true');
       result.chapterSeeks.push({id: chapters[i].id, expected: chapters[i].start, actual: await page.locator('video').evaluate((video) => video.currentTime)});
     }
+    result.referenceCardPauses = [];
+    for (const offset of [0, Math.floor(appendix.durationInFrames / 2), appendix.durationInFrames - 1]) {
+      const frame = appendix.from + offset;
+      const pause = await page.locator('video').evaluate(async (video, time) => {
+        video.pause();
+        const presented = new Promise((resolve) => video.requestVideoFrameCallback((_, metadata) => resolve({mediaTime: metadata.mediaTime, presentedFrames: metadata.presentedFrames})));
+        const seeked = new Promise((resolve) => video.addEventListener('seeked', resolve, {once: true}));
+        video.currentTime = time;
+        await seeked;
+        return {time: video.currentTime, paused: video.paused, presented: await presented};
+      }, frame / fps);
+      await page.waitForFunction(() => !document.querySelector('video').textTracks[0].activeCues?.length);
+      pause.activeCues = await page.locator('video').evaluate((video) => [...video.textTracks[0].activeCues].map((cue) => cue.text));
+      assert.equal(pause.paused, true);
+      assert.deepEqual(pause.activeCues, []);
+      const output = path.join(evidenceDir, `references-${offset}-${viewport.width}.png`);
+      await page.locator('video').screenshot({path: output, animations: 'disabled'});
+      result.screenshots.push(path.relative(root, output));
+      result.referenceCardPauses.push({frame, offset, expectedTime: frame / fps, ...pause, screenshot: path.relative(root, output)});
+    }
     await page.locator('video').evaluate(async (video) => {
       const cue = video.textTracks[0].cues[0];
       video.currentTime = (cue.startTime + cue.endTime) / 2;
@@ -155,6 +196,18 @@ try {
     await page.evaluate(() => scrollTo(0, 0));
     result.episodeDimensions = await noPageOverflow(page, 'episode');
     result.screenshots.push(await screenshot(page, `episode-${viewport.width}.png`));
+
+    if (appendixOnly) {
+      assert.ok((await page.locator('.meta').innerText()).includes('视频 3:21'));
+      const articleLinks = await page.locator('#article a[href]').evaluateAll((links) => links.map((link) => link.href));
+      result.referenceLinks = references.sources.map((reference) => ({id: reference.id, url: reference.url, present: articleLinks.includes(new URL(reference.url).href)}));
+      assert.ok(result.referenceLinks.every((reference) => reference.present));
+      assert.deepEqual(pageErrors, [], 'Unexpected browser JavaScript errors');
+      result.pageErrors = pageErrors;
+      result.passed = true;
+      await context.close();
+      continue;
+    }
 
     await page.locator('.reading-links a[href="#article"]').click();
     await page.waitForFunction(() => location.hash === '#article');
@@ -183,6 +236,9 @@ try {
     assert.deepEqual(result.svgRendering, {firstLabelFont: '24px', firstLabelAnchor: 'middle', takeoverArcStroke: '14px', tokenLabelFont: '25px', tokenLabelAnchor: 'middle'});
     assert.equal((await page.locator('#article .cb pre code').innerText()).trim(), expectedPython);
     result.pythonMatchesFrozenArticle = true;
+    const articleLinks = await page.locator('#article a[href]').evaluateAll((links) => links.map((link) => link.href));
+    result.referenceLinks = references.sources.map((reference) => ({id: reference.id, url: reference.url, present: articleLinks.includes(new URL(reference.url).href)}));
+    assert.ok(result.referenceLinks.every((reference) => reference.present), 'Both reference-card sources need full links in the article');
     const imageFailures = await page.locator('#article img').evaluateAll((images) => images.filter((image) => !image.complete || !image.naturalWidth).map((image) => image.src));
     assert.deepEqual(imageFailures, []);
     const toc = page.locator('details.toc');

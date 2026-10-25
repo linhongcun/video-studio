@@ -62,7 +62,7 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 ## 工程算法
 
-从扩容、故障和容量约束等真实系统问题出发，研究算法解决了什么、怎样工作，以及维护成本和适用边界。首批选题见[系列总览 #294](https://github.com/linhongcun/video-studio/issues/294)，当前从[EA01 一致性哈希 #295](https://github.com/linhongcun/video-studio/issues/295)开始制作；已发布课程以站点目录为准，候选选题不作为已上线内容。
+从扩容、故障和容量约束等真实系统问题出发，研究算法解决了什么、怎样工作，以及维护成本和适用边界。首批选题见[系列总览 #294](https://github.com/linhongcun/video-studio/issues/294)，首期为[EA01 一致性哈希](https://linhongcun.github.io/video-studio/episodes/consistent-hashing/)，约3分21秒（含5秒参考资料卡）；[制作与检查](episodes-codex/consistent-hashing/README.md)保留同一组十键的取余/哈希环对比、虚拟位置与迁移边界。其他选题待后续安排，候选不作为已上线内容。
 
 ## 制作流程
 

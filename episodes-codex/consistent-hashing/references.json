@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "episode": "consistent-hashing",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-25",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "NGINX",
+      "title": "Module ngx_http_upstream_module — hash directive",
+      "version": "持续维护文档 · 核验2026-10-25",
+      "url": "https://nginx.org/en/docs/http/ngx_http_upstream_module.html#hash",
+      "supports": [
+        "NGINX普通hash方法在节点增减后可能重新映射大量键；consistent参数改用Ketama一致性哈希，以减少键重映射。",
+        "减少缓存节点变化造成的键重映射，有助于保留缓存命中；本片8/10与2/10仅为教学样本，不是NGINX实测比例。"
+      ],
+      "sections": "hash指令：普通哈希的成员变更影响；consistent参数、Ketama与缓存命中率说明",
+      "displayTitle": "hash … consistent：减少缓存键重映射",
+      "displaySupport": "节点增减时减少键重映射，帮助保留缓存命中",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "evidence": "research.md对应R1：本轮通过TinyFish实际提取并阅读官方hash节，核对may result in remapping most of the keys、only a few keys will be remapped及a higher cache hit ratio原文；已记录功能引入版本不是页面日期、示例并非产品实测的边界。"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Apache Cassandra",
+      "title": "Dynamo — Consistent Hashing using a Token Ring; Multiple Tokens per Physical Node (vnodes)",
+      "version": "5.0文档 · 核验2026-10-25",
+      "url": "https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html",
+      "supports": [
+        "节点与键映射到token环，按同一方向顺时针查找负责节点；保留旧位置并插入新节点，只改变新节点前驱至新位置的局部归属。",
+        "虚拟节点为同一物理节点分配多个token位置，使新增节点能够从多个环邻居取得较小数据区间；多个位置不等于增加物理机器或复制数据。",
+        "更多token存在维护与修复代价，虚拟节点不保证任意键分布和请求负载完全均匀；本片仅演示单归属模型，未复现Cassandra多副本协议。"
+      ],
+      "sections": "Dataset Partitioning: Consistent Hashing；Consistent Hashing using a Token Ring；Multiple Tokens per Physical Node (vnodes)",
+      "displayTitle": "Token Ring 与虚拟节点（vnodes）",
+      "displaySupport": "固定环顺时针定位；同一物理节点可拥有多个分散位置",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "evidence": "research.md对应R2：本轮通过TinyFish实际读取取余问题、Token Ring、Multiple Tokens per Physical Node及token维护代价相关正文；页面元数据dcterms.identifier为5.0，正文未标发布日期；核对顺时针、multiple tokens及维护代价短引，并保留原页多副本语境与本片单归属简化模型的区别。"
+      }
+    }
+  ]
+}
