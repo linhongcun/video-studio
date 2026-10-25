@@ -27,6 +27,20 @@ export const NeighborArrow=({from,to,geometry:g=MAP,color=C.gold,alpha=1,blocked
   {blocked?<g transform={`translate(${end.x} ${end.y})`}><path d="M -8 -8 L 8 8 M 8 -8 L -8 8" stroke={color} strokeWidth={4} strokeLinecap="round"/></g>:<path d="M -11 -7 L 0 0 L -11 7" transform={`translate(${end.x} ${end.y}) rotate(${angle})`} stroke={color} strokeWidth={4} strokeLinecap="round" strokeLinejoin="round" fill="none"/>}
  </g>;
 };
+/** Boundary checks stop at the actual grid edge; no outside cell is drawn. */
+const BoundaryArrow=({from,to,geometry:g=MAP}:{from:Cell;to:Cell;geometry?:MapGeometry})=>{
+ const rows=GRID.length,cols=GRID[0].length,a=center(from,g);
+ const dx=to[1]<0?-1:to[1]>=cols?1:0,dy=to[0]<0?-1:to[0]>=rows?1:0;
+ if((dx===0&&dy===0)||(dx!==0&&dy!==0))return null;
+ const end={x:dx<0?g.x:dx>0?g.x+cols*g.cell:a.x,y:dy<0?g.y:dy>0?g.y+rows*g.cell:a.y};
+ const start={x:a.x+dx*g.cell*.16,y:a.y+dy*g.cell*.16},angle=Math.atan2(dy,dx)*180/Math.PI;
+ const direction=dx<0?'left':dx>0?'right':dy<0?'up':'down';
+ return <g data-boundary-check={direction} data-boundary-effect="skip-without-state-change">
+  <path d={`M ${start.x} ${start.y} L ${end.x} ${end.y}`} stroke={C.red} strokeWidth={4} strokeLinecap="round" fill="none"/>
+  <path d="M -10 -6 L 0 0 L -10 6" transform={`translate(${end.x} ${end.y}) rotate(${angle})`} stroke={C.red} strokeWidth={3.5} strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+  <path d={`M ${end.x-dy*14} ${end.y+dx*14} L ${end.x+dy*14} ${end.y-dx*14}`} stroke={C.red} strokeWidth={4} strokeLinecap="round"/>
+ </g>;
+};
 export const DiagonalGap=({from,to,geometry:g=MAP,alpha=1}: {from:Cell;to:Cell;geometry?:MapGeometry;alpha?:number})=>{
  const a=center(from,g),b=center(to,g),x=(a.x+b.x)/2,y=(a.y+b.y)/2;
  return <g opacity={alpha} data-diagonal-not-connected={`${from.join(',')}->${to.join(',')}`}>
@@ -35,8 +49,8 @@ export const DiagonalGap=({from,to,geometry:g=MAP,alpha=1}: {from:Cell;to:Cell;g
  </g>;
 };
 /** Terrain is immutable; only ownership/state overlays change. */
-export const IslandMap=({geometry:g=MAP,snapshot=INITIAL,previewComponents=false,previewIds,showScan=false,showState=true,showCoordinates=true,showGrid=true,showNeighbor=true,focusCells=[],showNumbers=false}: {
- geometry?:MapGeometry;snapshot?:TraceEvent;previewComponents?:boolean;previewIds?:number[];showScan?:boolean;showState?:boolean;showCoordinates?:boolean;showGrid?:boolean;showNeighbor?:boolean;focusCells?:Cell[];showNumbers?:boolean;
+export const IslandMap=({geometry:g=MAP,snapshot=INITIAL,previewComponents=false,previewIds,showScan=false,showState=true,showCoordinates=true,showGrid=true,showNeighbor=true,showBoundary=false,focusCells=[],showNumbers=false}: {
+ geometry?:MapGeometry;snapshot?:TraceEvent;previewComponents?:boolean;previewIds?:number[];showScan?:boolean;showState?:boolean;showCoordinates?:boolean;showGrid?:boolean;showNeighbor?:boolean;showBoundary?:boolean;focusCells?:Cell[];showNumbers?:boolean;
 })=>{
  const scan=showScan?scanAt(snapshot):null,cols=GRID[0].length,rows=GRID.length;
  const color=(cell:Cell)=>{const id=componentAt(cell);return (previewComponents||previewIds?.includes(id)||contains(snapshot.seen,cell))&&id?ISLAND_COLORS[id]:ISLAND_COLORS[0];};
@@ -61,5 +75,6 @@ export const IslandMap=({geometry:g=MAP,snapshot=INITIAL,previewComponents=false
   })}
   {scan&&<g data-outer-scan={displayCell(scan)}>{(()=>{const p=center(scan,g),d=g.cell*.49,k=21;return <><path d={`M ${p.x-d} ${p.y-d+k} v -${k} h ${k} M ${p.x+d-k} ${p.y-d} h ${k} v ${k} M ${p.x+d} ${p.y+d-k} v ${k} h -${k} M ${p.x-d+k} ${p.y+d} h -${k} v -${k}`} stroke={C.blue} strokeWidth={4} fill="none"/><circle cx={p.x-d} cy={p.y-d} r={5} fill={C.blue}/></>;})()}</g>}
   {showNeighbor&&snapshot.from&&snapshot.cell&&snapshot.reason!=='boundary'&&['neighbor_check','mark','push'].includes(snapshot.action)&&<NeighborArrow from={snapshot.from} to={snapshot.cell} geometry={g} color={snapshot.reason==='water'||snapshot.reason==='boundary'?C.red:snapshot.reason==='seen'?C.gold:C.text} blocked={snapshot.reason==='water'||snapshot.reason==='boundary'||snapshot.reason==='seen'}/>}
+  {showBoundary&&snapshot.action==='neighbor_check'&&snapshot.reason==='boundary'&&snapshot.from&&snapshot.cell&&<BoundaryArrow from={snapshot.from} to={snapshot.cell} geometry={g}/>}
  </g>;
 };

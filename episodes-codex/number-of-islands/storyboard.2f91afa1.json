@@ -1,0 +1,1204 @@
+{
+  "meta": {
+    "title": "岛屿数量：怎样保证一座岛只数一次？",
+    "episode": 34,
+    "episodePart": "LeetCode 200",
+    "slug": "number-of-islands",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5845,
+    "finalVideoFrames": 5845,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "原题海陆地图贯穿：固定4×5地形、四邻共享海岸与斜角海水间隙直接参与推导；先题意、再从避免重复推得整座归属与保留分支，随后命名迭代DFS和栈。陆地颜色/海岸不改，归属标记、待展开与当前检查分开；真实trace右下左上/LIFO先下，正式扫描前明确重置。中文行列从1开始、代码0下标显式映射。正文仅一处代码区域，末独立150帧完整Python卡可暂停；无假应用窗、装饰进度条、无关比喻或证明尾巴。 首格仍逐项检查右下左上：06明确左、上越界跳过，不绘制网格外海水格，不标记、不入栈。",
+    "visualRevision": 2,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户认可LC70原题场景与动作推导后，要求自选有把握的下一道LeetCode题制作；选定既有issue82/LC200。完成资料、动态、配音、成片和网站检查后按持续授权合并并发布GitHub网站，外部平台投稿未授权。",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "教学示例 · 4行5列 · 7块陆地 · 3座岛",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "岛屿数量：怎样保证一座岛只数一次？",
+      "description": "同一张海陆地图，沿四邻找完一座再继续，三座岛各数一次。",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "content": {
+            "x": 180,
+            "w": 1560
+          },
+          "watermarkZone": {
+            "x": 180,
+            "y": 104
+          },
+          "textBoxes": [
+            {
+              "x": 180,
+              "y": 104,
+              "w": 820,
+              "h": 42
+            },
+            {
+              "x": 180,
+              "y": 220,
+              "w": 820,
+              "h": 54
+            },
+            {
+              "x": 180,
+              "y": 306,
+              "w": 840,
+              "h": 282
+            },
+            {
+              "x": 180,
+              "y": 700,
+              "w": 820,
+              "h": 70
+            },
+            {
+              "x": 1100,
+              "y": 330,
+              "w": 660,
+              "h": 480
+            },
+            {
+              "x": 1100,
+              "y": 856,
+              "w": 660,
+              "h": 42
+            }
+          ]
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "content": {
+            "x": 120,
+            "w": 840
+          },
+          "watermarkZone": {
+            "x": 120,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 120,
+              "y": 100,
+              "w": 840,
+              "h": 38
+            },
+            {
+              "x": 120,
+              "y": 214,
+              "w": 840,
+              "h": 52
+            },
+            {
+              "x": 120,
+              "y": 310,
+              "w": 840,
+              "h": 258
+            },
+            {
+              "x": 120,
+              "y": 650,
+              "w": 840,
+              "h": 460
+            },
+            {
+              "x": 120,
+              "y": 1150,
+              "w": 840,
+              "h": 44
+            }
+          ]
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "content": {
+            "x": 315,
+            "w": 810
+          },
+          "watermarkZone": {
+            "x": 405,
+            "y": 75
+          },
+          "textBoxes": [
+            {
+              "x": 405.0,
+              "y": 75.0,
+              "w": 630.0,
+              "h": 28.5
+            },
+            {
+              "x": 405.0,
+              "y": 160.5,
+              "w": 630.0,
+              "h": 39.0
+            },
+            {
+              "x": 405.0,
+              "y": 232.5,
+              "w": 630.0,
+              "h": 193.5
+            },
+            {
+              "x": 405.0,
+              "y": 487.5,
+              "w": 630.0,
+              "h": 345.0
+            },
+            {
+              "x": 405.0,
+              "y": 862.5,
+              "w": 630.0,
+              "h": 33.0
+            }
+          ],
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918,
+          "composition": "Full original 3:4 sea/land layout centered at x315, scale0.75; bottom key line ends at895.5, above918."
+        }
+      },
+      "poster": {
+        "file": "cover-16x9.jpg",
+        "sameAs": "16x9"
+      }
+    },
+    "discussionQuestion": "怎样先找完一整座岛，再继续扫描，保证同一座只计数一次？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "unvoicedEndCard": {
+      "kind": "full-python-solution",
+      "from": 5695,
+      "durationInFrames": 150,
+      "codeSource": "solution.py",
+      "displaySource": "solution.json",
+      "title": "完整 Python 解法",
+      "codeSourceSha256": "844388d14016202d9c62e4d9c4b63e159365b7c03250e6555472dea3cec59cb6",
+      "displaySourceSha256": "d483016307f5bd5930edfc8db8e879dc80eec8205237efbd6a631a8548eb8839"
+    },
+    "revisionNote": "Problem, then derivation of the method choice, then named algorithm; complete Python five-second appendix."
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "problem",
+      "chapterId": "problem",
+      "title": "先看海陆地图要数什么",
+      "from": 0,
+      "durationInFrames": 817,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "problem",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 395,
+          "narration": "给你一张地图，一代表陆地，零代表海水，上下左右连成的一片陆地算一座岛。题目要数出岛屿的数量，返回一个整数。",
+          "subtitles": [
+            {
+              "text": "给你一张地图，一代表陆地，零代表海水，上下左右连成的一片陆地算一座岛。",
+              "from": 0,
+              "to": 264,
+              "duration": 265
+            },
+            {
+              "text": "题目要数出岛屿的数量，返回一个整数。",
+              "from": 265,
+              "to": 394,
+              "duration": 130
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 255.48,
+              "localStart": 9.0,
+              "localEnd": 255.48
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 265.98,
+              "wavEnd": 374.4,
+              "localStart": 265.98,
+              "localEnd": 374.4
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              265
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 9.0,
+            "wavTo": 374.4,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一帧直接是原题海陆地图：4×5薄坐标网格嵌在海面上，绿色陆地有连续海岸线和浅沙色岸边；陆地不是数字方框。标题“这张地图有几座岛？”，静态图例“1 陆地 · 0 海水”，只沿共享边缘展示四邻的短连接。画面行列从1开始，顶端列1–5、左侧行1–4清楚；不出现搜索方法、栈或归属标记。输入地图固定11000/11000/00100/00011，海面静止，无装饰波浪或进度条。",
+          "direction": "第一帧直接是原题海陆地图：4×5薄坐标网格嵌在海面上，绿色陆地有连续海岸线和浅沙色岸边；陆地不是数字方框。标题“这张地图有几座岛？”，静态图例“1 陆地 · 0 海水”，只沿共享边缘展示四邻的短连接。画面行列从1开始，顶端列1–5、左侧行1–4清楚；不出现搜索方法、栈或归属标记。输入地图固定11000/11000/00100/00011，海面静止，无装饰波浪或进度条。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "problem",
+          "visualType": "example",
+          "from": 395,
+          "durationInFrames": 422,
+          "narration": "这张四行五列的地图里，有七块陆地，却只有三座岛。左上四块连成一座，单独的一块和右下两块各成一座，斜角相碰不算相连。",
+          "subtitles": [
+            {
+              "text": "这张四行五列的地图里，有七块陆地，却只有三座岛。",
+              "from": 0,
+              "to": 161,
+              "duration": 162
+            },
+            {
+              "text": "左上四块连成一座，单独的一块和右下两块各成一座，斜角相碰不算相连。",
+              "from": 162,
+              "to": 421,
+              "duration": 260
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-example-1",
+              "wavStart": 395.4,
+              "wavEnd": 547.38,
+              "localStart": 0.39999999999997726,
+              "localEnd": 152.38
+            },
+            {
+              "id": "02-example-2",
+              "wavStart": 557.88,
+              "wavEnd": 796.08,
+              "localStart": 162.88,
+              "localEnd": 401.08000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              162
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 395.4,
+            "wavTo": 796.08,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "同一地图，先强调7块陆地，再沿真实连通海岸依次圈出左上4块、中央1块、右下2块，题意结果3。只在两个斜角接近处局部放大海水间隙，以四邻短线与斜向禁连细线说明相邻边才连接；不造陆桥、不画实际不存在的可走路径。题意答案预览明确标记，不当成搜索计数已执行。",
+          "direction": "同一地图，先强调7块陆地，再沿真实连通海岸依次圈出左上4块、中央1块、右下2块，题意结果3。只在两个斜角接近处局部放大海水间隙，以四邻短线与斜向禁连细线说明相邻边才连接；不造陆桥、不画实际不存在的可走路径。题意答案预览明确标记，不当成搜索计数已执行。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "derive",
+      "chapterId": "derive",
+      "title": "先想怎样避免重复",
+      "from": 817,
+      "durationInFrames": 850,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "derive",
+          "visualType": "derive-component",
+          "from": 817,
+          "durationInFrames": 338,
+          "narration": "如果每发现一块陆地就加一，左上同一座岛就会被算四遍。我们需要先认出整座岛并留下标记，再去找还没归属的陆地。",
+          "subtitles": [
+            {
+              "text": "如果每发现一块陆地就加一，左上同一座岛就会被算四遍。",
+              "from": 0,
+              "to": 155,
+              "duration": 156
+            },
+            {
+              "text": "我们需要先认出整座岛并留下标记，再去找还没归属的陆地。",
+              "from": 156,
+              "to": 337,
+              "duration": 182
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-derive-component-1",
+              "wavStart": 817.08,
+              "wavEnd": 962.56,
+              "localStart": 0.08000000000004093,
+              "localEnd": 145.55999999999995
+            },
+            {
+              "id": "03-derive-component-2",
+              "wavStart": 973.06,
+              "wavEnd": 1134.15,
+              "localStart": 156.05999999999995,
+              "localEnd": 317.1500000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              156
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 817.08,
+            "wavTo": 1134.15,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "标明“思路分析”，聚焦同一左上岛四块陆地：四个独立计数提示被共同海岸边界收成“同一座，只加1”；不执行完整错误算法或把错误计数放入正式岛数。第二句沿相接陆地铺出同一归属轮廓并保持原地形，推得需要记住已经属于这座岛的格；术语和正式栈均不出现。",
+          "direction": "标明“思路分析”，聚焦同一左上岛四块陆地：四个独立计数提示被共同海岸边界收成“同一座，只加1”；不执行完整错误算法或把错误计数放入正式岛数。第二句沿相接陆地铺出同一归属轮廓并保持原地形，推得需要记住已经属于这座岛的格；术语和正式栈均不出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "derive",
+          "visualType": "derive-search",
+          "from": 1155,
+          "durationInFrames": 512,
+          "narration": "从一块新陆地出发，只沿上下左右找相邻陆地，有分岔就记住还没继续看的位置。深度优先搜索，也叫DFS，就是先沿一条分支继续找，再回来处理留下的分支。",
+          "subtitles": [
+            {
+              "text": "从一块新陆地出发，只沿上下左右找相邻陆地，有分岔就记住还没继续看的位置。",
+              "from": 0,
+              "to": 217,
+              "duration": 218
+            },
+            {
+              "text": "深度优先搜索，也叫DFS，就是先沿一条分支继续找，再回来处理留下的分支。",
+              "from": 218,
+              "to": 511,
+              "duration": 294
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-derive-search-1",
+              "wavStart": 1155.15,
+              "wavEnd": 1363.27,
+              "localStart": 0.15000000000009095,
+              "localEnd": 208.26999999999998
+            },
+            {
+              "id": "04-derive-search-2",
+              "wavStart": 1373.77,
+              "wavEnd": 1646.44,
+              "localStart": 218.76999999999998,
+              "localEnd": 491.44000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "深度优先搜索": 217
+            },
+            "sentences": [
+              0,
+              218
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 1155.15,
+            "wavTo": 1646.44,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "仍标“思路分析”，在左上岛上依四邻展示从新陆地向相邻陆地延伸，并把另一待走分岔保留为小空心入口；海岸始终表示连通范围，不跨海。先有“沿一支走、记另一支、回来”的动作，第二句真实句首起音才显明“深度优先搜索 · DFS”标签，完整保持至少63帧；不使用词内推测起音。结束清楚提示“下面恢复原图，正式开始”。",
+          "direction": "仍标“思路分析”，在左上岛上依四邻展示从新陆地向相邻陆地延伸，并把另一待走分岔保留为小空心入口；海岸始终表示连通范围，不跨海。先有“沿一支走、记另一支、回来”的动作，第二句真实句首起音才显明“深度优先搜索 · DFS”标签，完整保持至少63帧；不使用词内推测起音。结束清楚提示“下面恢复原图，正式开始”。",
+          "elements": [
+            {
+              "id": "label04_0",
+              "type": "text",
+              "text": "深度优先搜索",
+              "cueText": "深度优先搜索",
+              "appearFrame": 217,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "04-derive-search-2",
+                "asrFrame": null,
+                "onsetLocal": 219.76999999999998,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "search",
+      "chapterId": "search",
+      "title": "沿四邻找完一座再继续",
+      "from": 1667,
+      "durationInFrames": 2720,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "search",
+          "visualType": "seed",
+          "from": 1667,
+          "durationInFrames": 379,
+          "narration": "现在清空演示标记，从原地图第一行第一列开始，逐行寻找新岛。发现第一块未归属的陆地，岛数加一，先把它标为已归属。",
+          "subtitles": [
+            {
+              "text": "现在清空演示标记，从原地图第一行第一列开始，逐行寻找新岛。",
+              "from": 0,
+              "to": 199,
+              "duration": 200
+            },
+            {
+              "text": "发现第一块未归属的陆地，岛数加一，先把它标为已归属。",
+              "from": 200,
+              "to": 378,
+              "duration": 179
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-seed-1",
+              "wavStart": 1667.44,
+              "wavEnd": 1857.14,
+              "localStart": 0.44000000000005457,
+              "localEnd": 190.1400000000001
+            },
+            {
+              "id": "05-seed-2",
+              "wavStart": 1867.64,
+              "wavEnd": 2025.68,
+              "localStart": 200.6400000000001,
+              "localEnd": 358.68000000000006
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              200
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 1667.44,
+            "wavTo": 2025.68,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "显式从分析恢复原地图：地形不动，清空全部归属/已展开/待处理，正式岛数从0开始。第一句给逐行扫描方向和第一行第一列扫描框；第二句按实际trace的新岛事件岛数0→1、seed先归属再加入待展开位置。待展开区暂称“待展开”，不提前显示术语“栈”；seed已归属但尚未展开，不能直接使用完成图标。",
+          "direction": "显式从分析恢复原地图：地形不动，清空全部归属/已展开/待处理，正式岛数从0开始。第一句给逐行扫描方向和第一行第一列扫描框；第二句按实际trace的新岛事件岛数0→1、seed先归属再加入待展开位置。待展开区暂称“待展开”，不提前显示术语“栈”；seed已归属但尚未展开，不能直接使用完成图标。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "search",
+          "visualType": "stack-rule",
+          "from": 2046,
+          "durationInFrames": 487,
+          "narration": "栈把待展开的位置按后放先看的顺序保存，标记只表示已经归属，不代表已经看完周围。四个方向都要检查，右边和下面先标记入栈，左边和上边越出地图边界，就直接跳过。",
+          "subtitles": [
+            {
+              "text": "栈把待展开的位置按后放先看的顺序保存，标记只表示已经归属，不代表已经看完周围。",
+              "from": 0,
+              "to": 242,
+              "duration": 243
+            },
+            {
+              "text": "四个方向都要检查，右边和下面先标记入栈，左边和上边越出地图边界，就直接跳过。",
+              "from": 243,
+              "to": 486,
+              "duration": 244
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-stack-rule-1",
+              "wavStart": 2046.68,
+              "wavEnd": 2279.47,
+              "localStart": 0.6800000000000637,
+              "localEnd": 233.4699999999998
+            },
+            {
+              "id": "06-stack-rule-2",
+              "wavStart": 2289.97,
+              "wavEnd": 2512.13,
+              "localStart": 243.9699999999998,
+              "localEnd": 466.1300000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "栈": 1
+            },
+            "sentences": [
+              0,
+              243
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 2046.68,
+            "wavTo": 2512.13,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一句句首真实起音才将“待展开”明确命名为“栈 · 后放先看”，至少完整显示63帧；示意当前seed从栈顶取出后检查四邻。第二句严格按trace右、下顺序：先把第一行第二列标为已归属再push，随后第二行第一列标记再push；栈顶为后放的(2行,1列)，底部保留(1行,2列)。两处归属标记不能冒充已经展开；随后真实事件12检查左、13检查上，箭头止于网格边界，明确“越界→跳过，不标记、不入栈”，14才结束首格展开。边框外不画海水格或可访问格，地图陆地颜色和岸线保持。",
+          "direction": "第一句句首真实起音才将“待展开”明确命名为“栈 · 后放先看”，至少完整显示63帧；示意当前seed从栈顶取出后检查四邻。第二句严格按trace右、下顺序：先把第一行第二列标为已归属再push，随后第二行第一列标记再push；栈顶为后放的(2行,1列)，底部保留(1行,2列)。两处归属标记不能冒充已经展开；随后真实事件12检查左、13检查上，箭头止于网格边界，明确“越界→跳过，不标记、不入栈”，14才结束首格展开。边框外不画海水格或可访问格，地图陆地颜色和岸线保持。",
+          "elements": [
+            {
+              "id": "label06_0",
+              "type": "text",
+              "text": "栈",
+              "cueText": "栈",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "06-stack-rule-1",
+                "asrFrame": null,
+                "onsetLocal": 1.6800000000000637,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "search",
+          "visualType": "take-down",
+          "from": 2533,
+          "durationInFrames": 397,
+          "narration": "后放入的下面这一块先取出，接着发现它右边第二行第二列的陆地。先标记再放进待处理的位置，第一行第二列还留着，稍后才展开。",
+          "subtitles": [
+            {
+              "text": "后放入的下面这一块先取出，接着发现它右边第二行第二列的陆地。",
+              "from": 0,
+              "to": 206,
+              "duration": 207
+            },
+            {
+              "text": "先标记再放进待处理的位置，第一行第二列还留着，稍后才展开。",
+              "from": 207,
+              "to": 396,
+              "duration": 190
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-take-down-1",
+              "wavStart": 2533.76,
+              "wavEnd": 2730.11,
+              "localStart": 0.7600000000002183,
+              "localEnd": 197.11000000000013
+            },
+            {
+              "id": "07-take-down-2",
+              "wavStart": 2740.61,
+              "wavEnd": 2909.51,
+              "localStart": 207.61000000000013,
+              "localEnd": 376.5100000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              207
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 2533.76,
+            "wavTo": 2909.51,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "按trace先pop第二行第一列，当前检查光圈从seed移动到该陆地，栈底第一行第二列留在原身份；然后检查右邻第二行第二列。先给该格归属标记，再把其坐标追加到栈顶；本镜结束新格仍待展开，栈底(1行,2列)一直可辨。路线在陆地相邻边上运动，箭头不穿文字，入栈与标记先后不合并。",
+          "direction": "按trace先pop第二行第一列，当前检查光圈从seed移动到该陆地，栈底第一行第二列留在原身份；然后检查右邻第二行第二列。先给该格归属标记，再把其坐标追加到栈顶；本镜结束新格仍待展开，栈底(1行,2列)一直可辨。路线在陆地相邻边上运动，箭头不穿文字，入栈与标记先后不合并。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "search",
+          "visualType": "skip-seen",
+          "from": 2930,
+          "durationInFrames": 391,
+          "narration": "来到第二行第二列，向上又遇见第一行第二列，但它早有归属，不再放入。最后回头处理那块待展开的陆地，栈空了，第一座岛才找完。",
+          "subtitles": [
+            {
+              "text": "来到第二行第二列，向上又遇见第一行第二列，但它早有归属，不再放入。",
+              "from": 0,
+              "to": 210,
+              "duration": 211
+            },
+            {
+              "text": "最后回头处理那块待展开的陆地，栈空了，第一座岛才找完。",
+              "from": 211,
+              "to": 390,
+              "duration": 180
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-skip-seen-1",
+              "wavStart": 2930.51,
+              "wavEnd": 3130.98,
+              "localStart": 0.5100000000002183,
+              "localEnd": 200.98000000000002
+            },
+            {
+              "id": "08-skip-seen-2",
+              "wavStart": 3141.48,
+              "wavEnd": 3300.75,
+              "localStart": 211.48000000000002,
+              "localEnd": 370.75
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              211
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 2930.51,
+            "wavTo": 3300.75,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先pop第二行第二列，四邻按右/下/左/上实际顺序检查，右/下水、左已归属，上邻第一行第二列已归属却仍在栈中，标注“已归属，仍待展开”；不重复push且原栈项不消失。第二句才pop并展开第一行第二列，检查后栈空，给首岛完整边界与“这一座已找完”；当前/待展开/归属三种状态始终分开。",
+          "direction": "先pop第二行第二列，四邻按右/下/左/上实际顺序检查，右/下水、左已归属，上邻第一行第二列已归属却仍在栈中，标注“已归属，仍待展开”；不重复push且原栈项不消失。第二句才pop并展开第一行第二列，检查后栈空，给首岛完整边界与“这一座已找完”；当前/待展开/归属三种状态始终分开。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "search",
+          "visualType": "resume-scan",
+          "from": 3321,
+          "durationInFrames": 330,
+          "narration": "回到逐行扫描，第一座岛的其余陆地都已有标记，直接跳过。直到第三行第三列出现新陆地，岛数才从一变成二。",
+          "subtitles": [
+            {
+              "text": "回到逐行扫描，第一座岛的其余陆地都已有标记，直接跳过。",
+              "from": 0,
+              "to": 143,
+              "duration": 144
+            },
+            {
+              "text": "直到第三行第三列出现新陆地，岛数才从一变成二。",
+              "from": 144,
+              "to": 329,
+              "duration": 186
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-resume-scan-1",
+              "wavStart": 3321.75,
+              "wavEnd": 3454.98,
+              "localStart": 0.75,
+              "localEnd": 133.98000000000002
+            },
+            {
+              "id": "09-resume-scan-2",
+              "wavStart": 3465.48,
+              "wavEnd": 3630.79,
+              "localStart": 144.48000000000002,
+              "localEnd": 309.78999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              144
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 3321.75,
+            "wavTo": 3630.79,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "外层扫描恢复在原逐行位置，依trace明确跳过水和首岛seen格，不再次沿首岛扩展；扫描框沿第一行剩余格、第二行、第三行前两格到第三行第三列。该格尚未归属，才count1→2并先标记seed再push；原首岛地形和归属边界保留，栈不是与地图同步向右滑动的进度条。",
+          "direction": "外层扫描恢复在原逐行位置，依trace明确跳过水和首岛seen格，不再次沿首岛扩展；扫描框沿第一行剩余格、第二行、第三行前两格到第三行第三列。该格尚未归属，才count1→2并先标记seed再push；原首岛地形和归属边界保留，栈不是与地图同步向右滑动的进度条。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "search",
+          "visualType": "water-boundary",
+          "from": 3651,
+          "durationInFrames": 339,
+          "narration": "这块陆地的上下左右都是海水，向四周都走不通。虽然第四行第四列就在斜角方向，也不能把它算进这座岛。",
+          "subtitles": [
+            {
+              "text": "这块陆地的上下左右都是海水，向四周都走不通。",
+              "from": 0,
+              "to": 159,
+              "duration": 160
+            },
+            {
+              "text": "虽然第四行第四列就在斜角方向，也不能把它算进这座岛。",
+              "from": 160,
+              "to": 338,
+              "duration": 179
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-water-boundary-1",
+              "wavStart": 3651.79,
+              "wavEnd": 3801.39,
+              "localStart": 0.7899999999999636,
+              "localEnd": 150.38999999999987
+            },
+            {
+              "id": "10-water-boundary-2",
+              "wavStart": 3811.89,
+              "wavEnd": 3969.03,
+              "localStart": 160.88999999999987,
+              "localEnd": 318.0300000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              160
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 3651.79,
+            "wavTo": 3969.03,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "pop第三行第三列，按右/下/左/上依次检查四块海水，四条邻接提示止于水边。第二句聚焦其与第四行第四列之间的斜角海水间隙，虚线只作“斜向不连接”的说明且带断口，不当实际遍历轨迹；右下岛不标记、不入栈，第二座栈空后完成，岛数保持2。",
+          "direction": "pop第三行第三列，按右/下/左/上依次检查四块海水，四条邻接提示止于水边。第二句聚焦其与第四行第四列之间的斜角海水间隙，虚线只作“斜向不连接”的说明且带断口，不当实际遍历轨迹；右下岛不标记、不入栈，第二座栈空后完成，岛数保持2。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "search",
+          "visualType": "third-island",
+          "from": 3990,
+          "durationInFrames": 397,
+          "narration": "继续扫描到第四行第四列，再把岛数加到三，向右找到最后一块相连陆地。两块陆地归为同一座，地图也扫描完了，返回三。",
+          "subtitles": [
+            {
+              "text": "继续扫描到第四行第四列，再把岛数加到三，向右找到最后一块相连陆地。",
+              "from": 0,
+              "to": 212,
+              "duration": 213
+            },
+            {
+              "text": "两块陆地归为同一座，地图也扫描完了，返回三。",
+              "from": 213,
+              "to": 396,
+              "duration": 184
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-third-island-1",
+              "wavStart": 3990.03,
+              "wavEnd": 4193.11,
+              "localStart": 0.03000000000020009,
+              "localEnd": 203.10999999999967
+            },
+            {
+              "id": "11-third-island-2",
+              "wavStart": 4203.61,
+              "wavEnd": 4366.2,
+              "localStart": 213.60999999999967,
+              "localEnd": 376.1999999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              213
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 3990.03,
+            "wavTo": 4366.2,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "扫描先越过第三行其余水与第四行前三格水，到第四行第四列才count2→3；该seed先标记入栈、pop后检查右邻第四行第五列，标记后push并pop，过程按trace完成，不能同时瞬移变色。第二句栈空、扫描越过已归属的最后一格后到结束；原图三片连续海岸轮廓分别对应岛1/2/3，7块陆地始终原位，返回整数3。",
+          "direction": "扫描先越过第三行其余水与第四行前三格水，到第四行第四列才count2→3；该seed先标记入栈、pop后检查右邻第四行第五列，标记后push并pop，过程按trace完成，不能同时瞬移变色。第二句栈空、扫描越过已归属的最后一格后到结束；原图三片连续海岸轮廓分别对应岛1/2/3，7块陆地始终原位，返回整数3。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "code",
+      "chapterId": "code",
+      "title": "把归属规则写进程序",
+      "from": 4387,
+      "durationInFrames": 1458,
+      "shots": [
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "code",
+          "visualType": "complexity",
+          "from": 4387,
+          "durationInFrames": 443,
+          "narration": "每块陆地最多放入和取出一次，每次只检查四个方向，所以时间随地图格数增长。标记和待处理位置最多保存整张地图的陆地，因此额外空间也和格数同阶。",
+          "subtitles": [
+            {
+              "text": "每块陆地最多放入和取出一次，每次只检查四个方向，所以时间随地图格数增长。",
+              "from": 0,
+              "to": 210,
+              "duration": 211
+            },
+            {
+              "text": "标记和待处理位置最多保存整张地图的陆地，因此额外空间也和格数同阶。",
+              "from": 211,
+              "to": 442,
+              "duration": 232
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-complexity-1",
+              "wavStart": 4387.2,
+              "wavEnd": 4587.76,
+              "localStart": 0.1999999999998181,
+              "localEnd": 200.76000000000022
+            },
+            {
+              "id": "12-complexity-2",
+              "wavStart": 4598.26,
+              "wavEnd": 4809.11,
+              "localStart": 211.26000000000022,
+              "localEnd": 422.1099999999997
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              211
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 4387.2,
+            "wavTo": 4809.11,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "承接“扫描结束，看看需要多少工作”：同一4×5地图显示20个外层检查位置与7块陆地各一次入/出栈的累计示意，不能把4×7画成总执行事件数或声称海水只检查一次。旁注m行×n列，时间O(mn)；第二句显示seen和栈上界O(mn)，不声明本例最大栈长度就是最坏一般上界。图中地形保留；复杂度不是新术语cue，不播英文公式。",
+          "direction": "承接“扫描结束，看看需要多少工作”：同一4×5地图显示20个外层检查位置与7块陆地各一次入/出栈的累计示意，不能把4×7画成总执行事件数或声称海水只检查一次。旁注m行×n列，时间O(mn)；第二句显示seen和栈上界O(mn)，不声明本例最大栈长度就是最坏一般上界。图中地形保留；复杂度不是新术语cue，不播英文公式。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "code",
+          "visualType": "implementation",
+          "from": 4830,
+          "durationInFrames": 390,
+          "narration": "写成程序，先标记已归属，再把位置放进栈，才能避免从不同方向重复加入。岛数只在外层扫描遇到新岛时加一，展开邻居时不增加。",
+          "subtitles": [
+            {
+              "text": "写成程序，先标记已归属，再把位置放进栈，才能避免从不同方向重复加入。",
+              "from": 0,
+              "to": 207,
+              "duration": 208
+            },
+            {
+              "text": "岛数只在外层扫描遇到新岛时加一，展开邻居时不增加。",
+              "from": 208,
+              "to": 389,
+              "duration": 182
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-implementation-1",
+              "wavStart": 4830.11,
+              "wavEnd": 5028.3,
+              "localStart": 0.10999999999967258,
+              "localEnd": 198.30000000000018
+            },
+            {
+              "id": "13-implementation-2",
+              "wavStart": 5038.8,
+              "wavEnd": 5199.83,
+              "localStart": 208.80000000000018,
+              "localEnd": 369.8299999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              208
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 4830.11,
+            "wavTo": 5199.83,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "正文唯一代码区域：第一句只高亮源程序seen.add((nr,nc))然后stack.append((nr,nc))，地图对应已经归属但仍待展开的第一行第二列，明确seen表示归属。第二句用另一短节选展示外层新岛分支islands += 1与seed标记/建栈，邻居展开无加一，代码整屏最多当前两处稀疏节选，不把完整26行塞正文。首次程序坐标补清映射：“地图(行1,列2) ↔ Python(row=0,col=1)，下标从0开始”；不改变地图行列标签。",
+          "direction": "正文唯一代码区域：第一句只高亮源程序seen.add((nr,nc))然后stack.append((nr,nc))，地图对应已经归属但仍待展开的第一行第二列，明确seen表示归属。第二句用另一短节选展示外层新岛分支islands += 1与seed标记/建栈，邻居展开无加一，代码整屏最多当前两处稀疏节选，不把完整26行塞正文。首次程序坐标补清映射：“地图(行1,列2) ↔ Python(row=0,col=1)，下标从0开始”；不改变地图行列标签。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "14",
+          "scriptShot": 14,
+          "chapterId": "code",
+          "visualType": "closing",
+          "from": 5220,
+          "durationInFrames": 625,
+          "narration": "这七块陆地最终分成三座岛，关键是每次先把同一座完整找出来。地形始终没改，变的只是归属标记和待处理位置，完整Python程序可以暂停查看。",
+          "subtitles": [
+            {
+              "text": "这七块陆地最终分成三座岛，关键是每次先把同一座完整找出来。",
+              "from": 0,
+              "to": 198,
+              "duration": 199
+            },
+            {
+              "text": "地形始终没改，变的只是归属标记和待处理位置，完整Python程序可以暂停查看。",
+              "from": 199,
+              "to": 474,
+              "duration": 276
+            }
+          ],
+          "voice": [
+            {
+              "id": "14-closing-1",
+              "wavStart": 5220.83,
+              "wavEnd": 5409.0,
+              "localStart": 0.8299999999999272,
+              "localEnd": 189.0
+            },
+            {
+              "id": "14-closing-2",
+              "wavStart": 5419.5,
+              "wavEnd": 5649.95,
+              "localStart": 199.5,
+              "localEnd": 429.9499999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              199
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 51a1874d + words.json 8ed35b10 + script.md 17ec0e46",
+            "wavFrom": 5220.83,
+            "wavTo": 5649.95,
+            "holdFrames": 195,
+            "holdReason": "Final5 seconds show a complete static Python solution without narration/captions."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回到原海陆地图与三座岛边界，计数3，短回收“发现新岛加1 → 四邻扩展并标记 → 再继续扫描”；不追加完整证明尾巴或新题预告。最后在真实音轨结束后硬切独立150帧/5秒完整Python静态卡，读取唯一solution.json，含完整26行与接口/两层扫描/四邻/seen-before-push/return；明确暂停阅读，无旁白、正文字幕或装饰进度条。",
+          "direction": "回到原海陆地图与三座岛边界，计数3，短回收“发现新岛加1 → 四邻扩展并标记 → 再继续扫描”；不追加完整证明尾巴或新题预告。最后在真实音轨结束后硬切独立150帧/5秒完整Python静态卡，读取唯一solution.json，含完整26行与接口/两层扫描/四邻/seen-before-push/return；明确暂停阅读，无旁白、正文字幕或装饰进度条。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "codeCardFrom": 475
+        }
+      ]
+    }
+  ]
+}
