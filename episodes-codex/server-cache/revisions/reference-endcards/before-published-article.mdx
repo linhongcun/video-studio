@@ -1,0 +1,32 @@
+---
+title: "数据库明明有数据，为什么还要再存一份？"
+summary: "跟着同一商品的重复读取，看看服务端缓存怎样减少数据库访问，以及它什么时候可能不划算。"
+related:
+  - browser-cache
+  - cache-consistency
+chapters:
+  - id: cache
+    title: "先看临时副本，再决定是否回源"
+  - id: lifecycle
+    title: "临时数据必须有生命周期"
+---
+
+商品页反复打开，查的可能始终是同一个商品、同一项价格。如果每次都向数据库发相同查询，重复读取也要消耗数据库处理能力。视频用商品7042、价格199元演示；所有数值和请求次数都是教学设计。
+
+## 先看临时副本，再决定是否回源 {#cache}
+
+服务端缓存把常用数据临时留在服务器这一侧。它可以在应用进程内，也可以由多个应用实例共享。这里谈的是服务端数据副本，与上一期浏览器是否复用HTTP响应不是同一层。[Microsoft缓存指南](https://learn.microsoft.com/en-us/azure/architecture/best-practices/caching)说明了本地缓存与共享缓存的区别，访问于2026-10-24。
+
+本片采用一种常见的按需填充流程：先找缓存；没有才去数据库取；拿到结果后填回缓存，再交给调用方。下一次找到同一份数据时，可以省掉这次数据库读取。[Cache-Aside官方说明](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)给出了这个顺序，访问于2026-10-24。
+
+这里没有承诺“数据库变快了”。缓存命中改变的是请求走过的路径，省掉部分重复访问；数据库原记录仍然保留。
+
+## 临时数据必须有生命周期 {#lifecycle}
+
+缓存容量有限，条目可能到期或被清理。未命中时重新查源并填充，是正常流程。数据库更新以后，旧副本如何失效则是另一项工作，下一期继续沿同一商品说明。[Redis官方缓存参考](https://redis.io/docs/latest/develop/reference/client-side-caching/)具体讨论了本地复用、失效消息和旧值问题，访问于2026-10-24；该文的产品实现细节不代表全部缓存。
+
+## 缓存不是越多越好
+
+如果数据经常重复读取、变化相对少，缓存更容易被复用；如果每次都读不同内容，多一次检查和填充也有开销。命中率、内存成本、允许的陈旧程度、缓存不可用时的回源压力，都要结合实际系统评估。视频没有提供固定的提速倍数。
+
+首次未命中有额外访问成本，也见[AWS缓存模式白皮书](https://docs.aws.amazon.com/whitepapers/latest/database-caching-strategies-using-redis/caching-patterns.html)，访问于2026-10-24，较旧材料仅参考。不要把教学动画的计数当作基准测试。
