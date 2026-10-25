@@ -98,11 +98,28 @@ Content-Type: text/html
 
 ## 公开来源与核验范围 {#sources}
 
-以下均访问于2026-10-25（北京时间）。本轮通过公开仓库实际读取正文；规范入口与读取方式、短引、镜号和取舍逐条记录于制作目录的research.md。
+片尾核心资料核验于2026-10-25（北京时间）。以下列出对应知识点，以及正式文档和本次核对的固定版本。
 
-- [MDN：浏览器如何工作](https://github.com/mdn/content/blob/main/files/en-us/web/performance/guides/how_browsers_work/index.md)：本片使用解析与渲染说明，不采用其中旧式TLS往返数字。
-- [RFC 9110：HTTP语义](https://github.com/httpwg/http-core/blob/main/rfc9110.xml)与[RFC 9112：HTTP/1.1](https://github.com/httpwg/http-core/blob/main/rfc9112.xml)（2022）：URI、端口、方法、状态及消息格式。
-- [RFC 9293：TCP全文镜像](https://github.com/ze-software/ze/blob/4de24d43d2b871de07b4a71ea6eef72a576f2cd8/rfc/full/rfc9293.txt)（2022）：§3.4.1与§3.5、图6与图8支持序号交换和三次握手的解释。
-- [TLSWG：TLS1.3当前发布源](https://github.com/tlswg/tls13-spec/blob/main/rfc9846.md)（文首标注RFC9846、2026年7月，取代RFC8446）：认证、共享密钥材料及记录保护的职责。
-- [RFC 9111：HTTP缓存](https://github.com/httpwg/http-core/blob/main/rfc9111.xml)、[RFC 9113：HTTP/2发布源](https://github.com/httpwg/http2-spec/blob/main/draft-ietf-httpbis-http2bis.xml)、[RFC 9114：HTTP/3](https://github.com/quicwg/base-drafts/blob/main/rfc9114.md)（2022）：缓存复用、并发流和QUIC边界。
-- [RFC 2606全文镜像](https://github.com/scateu/communication-standard-collection/blob/4595ecfcd666836b2cfc4cc3a04d291b4ef01d50/RFC/rfc2606.txt)（1999，仅参考）与[RFC 5737全文镜像](https://github.com/aws/s2n-quic/blob/d20f8fad59aab4815ad901c06b5730608ff7dd24/specs/www.rfc-editor.org/rfc/rfc5737.txt)（2010，仅参考）：只用于选择`.example`域名与文档专用IP地址，不作为当前协议机制的主论证。
+**[R1] MDN Web Docs：《Populating the page: how browsers work》（持续维护文档 · 2026-10-25核验）**。浏览器先查找地址；HTML可以边接收边解析，并发现样式、脚本和图片等其他资源；DOM与CSSOM参与渲染，布局确定位置与尺寸，绘制形成屏幕像素。
+
+[正式文档](https://developer.mozilla.org/en-US/docs/Web/Performance/Guides/How_browsers_work) · [核对的固定版本](https://github.com/mdn/content/blob/9945c1ccba85d04624c7608c48b61e2eed98d579/files/en-us/web/performance/guides/how_browsers_work/index.md)。
+
+**[R2] IETF HTTP WG：《HTTP Semantics》（RFC 9110 · 2022）**。URL中的主机、路径和端口职责不同，HTTPS未写端口时默认使用443；GET请求取得目标资源的表示，200表示请求成功，Content-Type说明表示的媒体类型。
+
+[正式文档](https://www.rfc-editor.org/rfc/rfc9110.html) · [核对的固定版本](https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9110.xml)。
+
+**[R3] IETF：《Transmission Control Protocol (TCP)》（RFC 9293 · 2022）**。TCP提供可靠、有序的字节流；双方交换并相互确认各自的初始序号；三次握手中第二报文合并SYN与ACK；SYN占一个序号，纯ACK不占序号，服务端收到最终有效ACK后建立连接。
+
+[正式文档](https://www.rfc-editor.org/rfc/rfc9293.html) · [核对的固定版本](https://github.com/wesley-eddy/rfc9293bis/blob/3baedef270170d063c66ef995fca1f72281a3912/rfc9293.xml)。
+
+**[R4] IETF TLS WG：《The Transport Layer Security (TLS) Protocol Version 1.3》（RFC 9846 · 2026）**。TLS在握手中完成必要认证、密码参数协商与共享密钥材料建立，随后用流量密钥保护应用数据；TLS 1.3记录保护使用AEAD；证书身份与握手协商出的流量密钥承担不同职责。
+
+[正式文档](https://www.rfc-editor.org/rfc/rfc9846.html) · [核对的固定版本](https://github.com/tlswg/tls13-spec/blob/c728b4efb4c12159371279227df6464541eafb58/rfc9846.md)。
+
+### 补充阅读
+
+- [RFC 9112：HTTP/1.1](https://github.com/httpwg/http-core/blob/main/rfc9112.xml)（2022）：请求行、Host、响应状态行和连接复用的具体报文规则。
+- [RFC 9111：HTTP缓存](https://github.com/httpwg/http-core/blob/main/rfc9111.xml)、[RFC 9113：HTTP/2](https://github.com/httpwg/http2-spec/blob/main/draft-ietf-httpbis-http2bis.xml)、[RFC 9114：HTTP/3](https://github.com/quicwg/base-drafts/blob/main/rfc9114.md)（2022）：缓存复用、并发流和QUIC边界。
+- [RFC 2606](https://github.com/scateu/communication-standard-collection/blob/4595ecfcd666836b2cfc4cc3a04d291b4ef01d50/RFC/rfc2606.txt)（1999，仅参考）与[RFC 5737](https://github.com/aws/s2n-quic/blob/d20f8fad59aab4815ad901c06b5730608ff7dd24/specs/www.rfc-editor.org/rfc/rfc5737.txt)（2010，仅参考）：仅用于选择文档示例域名与IP地址。
+
+以上补充资料保留原访问记录：2026-10-25（北京时间）。MDN的旧式TLS往返数字不用于本片；TCP握手采用RFC9293的序号交换与确认规则，TLS身份和密钥依据单独的TLS1.3标准。

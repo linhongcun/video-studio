@@ -1,0 +1,325 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-2",
+  "episode": "cdn",
+  "baselineCommit": "b83a0b0413612c9474cbb6ef73ee87acd5d53db2",
+  "checkedAt": "2026-10-25",
+  "checkedAtBeijing": "2026-10-25T23:00:32.053253+08:00",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex workflow_docs CDN source author",
+  "scope": "CDN片尾资料的实际原文、完整响应SHA、逐论点短引及适用边界；不代表渲染、人工听辨、用户观看或上线核验。",
+  "sources": [
+    {
+      "id": "cdn-architecture",
+      "organization": "Cloudflare",
+      "title": "Content Delivery Network (CDN) Reference Architecture",
+      "version": "官方文档 · 2026-10-25核验",
+      "canonicalUrl": "https://developers.cloudflare.com/reference-architecture/architectures/cdn/",
+      "canonicalAccess": {
+        "id": "cloudflare-cdn-canonical",
+        "url": "https://developers.cloudflare.com/reference-architecture/architectures/cdn/",
+        "status": "unavailable",
+        "verifiedBody": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "repository": "cloudflare/cloudflare-docs",
+      "commit": "ec32a21c71d1aa8747ef270e180ef0d31e5231f6",
+      "repositoryFile": "src/content/docs/reference-architecture/architectures/cdn.mdx",
+      "fixedSourceUrl": "https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/reference-architecture/architectures/cdn.mdx",
+      "retrievedUrl": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/reference-architecture/architectures/cdn.mdx",
+      "retrieval": {
+        "status": 200,
+        "bytes": 35192,
+        "sha256": "4a281ae24e3576bbccdf4ad776a3853df8d136cb95beb4d4deb1b364317f5b16"
+      },
+      "publication": {
+        "reviewed": "2022-12-02",
+        "dateMeaning": "页面frontmatter的reviewed字段，不将本轮核验日期当作发布日期。"
+      },
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-25",
+      "checkedAtBeijing": "2026-10-25T23:00:32.053253+08:00",
+      "method": "实际HTTP GET读取官方仓库固定commit完整响应，核对标题/版本与逐论点原文；canonical正文访问失败单独记录。",
+      "supports": [
+        "CDN在多个网络位置缓存源站内容，可用副本能减少获取内容的回源请求。",
+        "Cloudflare的Anycast由BGP路由，并考虑处理容量；片中地图直线长度不等于实际网络路由或时延测量。",
+        "标准缓存未命中可继续取源，真实部署也可有多级缓存；片中一层边缘与源站是教学简化。"
+      ],
+      "shots": [
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "11",
+        "12"
+      ],
+      "limitations": [
+        "这里只以Cloudflare公开实现核验节点选择及缓存路径，不说所有CDN均采用Anycast或相同层级。",
+        "BGP路由和容量说明不是最低时延保证，不由直线地图推导物理路径、跳数或性能倍数。",
+        "本轮不采用页面中HTTP/1.x连接数量、网络覆盖比例或Argo性能统计等无关主张。"
+      ],
+      "excerpts": [
+        {
+          "startLine": 71,
+          "endLine": 83,
+          "text": "A CDN helps address the challenges customers face around latency, performance, availability, redundancy, security, and costs. A CDN's core goal is to decrease latency and increase performance for websites and applications by caching content as close as possible to end users or those accessing the content.\n\nCDNs decrease latency and increase performance by having many data center locations across the globe that cache the content from the origin. The goal is to have content cached as close as possible to users, so content is cached at the edge of the CDN provider's network.\n\n### Impacts\n\n- **Improved website load time**: Instead of every client making a request to the origin server, which could be located a considerable distance away, the request is routed to a local server that responds with cached content, thus decreasing latency and increasing overall performance. Regardless of where the origin server and clients are located, performance will be more consistent for all users, as the CDN will serve locally cached content when possible.\n\n- **Increased content availability and redundancy:** Because every client request no longer needs to be sent to the origin server, CDNs provide not only performance benefits, but also availability and redundancy. Requests are load balanced over local servers with cached content; these servers respond to local requests, significantly decreasing overall load on the origin server. The origin server only is contacted when needed (when content is not cached or for dynamic non-cacheable content).\n\n- **Improved website security:** A CDN acts as a reverse proxy and sits in front of origin servers. Thus it can provide enhanced security such as DDoS mitigation, improvements to security certificates, and other optimizations.\n\n- **Reduced bandwidth costs:** Because CDNs use cached content to respond to requests, the number of requests sent to the origin server is reduced, thus also reducing associated bandwidth costs."
+        },
+        {
+          "startLine": 85,
+          "endLine": 104,
+          "text": "### Routing requests to CDN nodes\n\nAn important difference in some CDN implementations is how they route traffic to the respective local CDN nodes. Routing requests to CDN nodes can be done via two different methods:\n\n**DNS unicast routing**\n\nIn this method, recursive DNS queries redirect requests to CDN nodes; the client’s DNS resolver forwards requests to the CDN’s authoritative nameserver. CDNs based on DNS unicast routing are not ideal in that clients may be geographically dispersed from the DNS resolver. Decisions on closest-proximity CDN nodes are based on the client's DNS server instead of client’s IP address. Also, if any changes are needed for the DNS response, there is a dependency on DNS time to live (TTL) expiration.\n\nFurther, since DNS routing uses unicast addresses, traffic is routed directly to a specific node, creating possible concerns when there are traffic spikes, as in a DDoS attack.\n\nAnother challenge with DNS-based CDNs is that DNS is not very graceful upon failover. Typically a new session or application must be started for the DNS resolver with a different IP address to take over.\n\n**Anycast routing**\n\nThe Cloudflare CDN, which is discussed in more detail in the next section, uses anycast routing. Anycast allows for nodes on a network to have the same IP address. The same IP address is announced from multiple nodes in different locations, and client redirection is handled via the Internet’s routing protocol, BGP.\n\nUsing an anycast-based CDN has several advantages:\n\n- Incoming traffic is routed to the nearest data center with the capacity to process the requests efficiently.\n- Availability and redundancy is inherently provided. Since multiple nodes have the same IP address, if one node were to fail, requests are simply routed to another node in close proximity."
+        },
+        {
+          "startLine": 135,
+          "endLine": 143,
+          "text": "### Tiered Cache\n\nOnce a site is onboarded, standard caching is configured by default. With standard caching, each data center acts as a direct reverse proxy for the origin servers. A cache miss in any data center results in a request being sent to the origin server from the ingress data center.\n\nAlthough standard caching works, it is not the most optimal design — cached content closer to the client may already exist in other Cloudflare data centers, and origin servers are sometimes unnecessarily overloaded as a result. Thus, it is best to enable Tiered Cache, which is included with every Cloudflare plan. With Tiered Cache, certain data centers are reverse proxies to the origin for other data centers, resulting in more cache hits and faster response times.\n\nTiered Cache leverages the scale of Cloudflare’s network to minimize requests to customer origins. When a request comes into a Cloudflare data center, if the requested content is not locally cached, other Cloudflare data centers are checked for the cached content.\n\nCloudflare data centers have shorter distances and faster paths between them than the connections between data centers and customer origin servers, optimizing the response to the client with a significant improvement in cache hit ratio. The Cloudflare CDN leverages Argo Smart Routing data to determine the best upper tier data centers to use for Tiered Cache. Argo Smart Routing can also be enabled as an add-on to provide the fastest paths between data centers and origin servers for cache misses and other types of dynamic traffic."
+        },
+        {
+          "startLine": 165,
+          "endLine": 173,
+          "text": "| First request received in Data Center 1 results in cache miss, as request had not been made previously by any client.                                                                                                                                                                                                                         | Second request by a different client received in Data Center 3 results in cache miss, as request had not been made previously by any client served by Data Center 3. |\n| No cached content found, so Data Center 1 checks with its upper tier data center to request a copy of the content.                                                                                                                                                                                                                            | No cached content found, so Data Center 3 checks with the upper tier data center to request a copy of the content.                                                   |\n| Upper tier data center also does not have content cached locally, so it makes a request to the origin server for content. Upon receiving the content, the upper tier data center caches it locally and relays the content to the requesting lower tier data center. The lower tier data center caches the content and responds to the client. | Cached content found at the upper tier data center. Data Center 3 retrieves and caches this content locally and responds to the client.                              |\n\nIn Figure 4, the top end user traffic flow displays the traffic flow when a client request is received by a data center closest to the client, Data Center 1. Since there is nothing locally cached on the ingress data center and tiered caching is enabled, a request is sent to the upper tier data center to request a copy of the content to cache. Because the upper tier data center also does not have the content cached, it sends the request to the origin server, caches the received content upon response, and responds to the lower tier data center with the cached content. The lower tier data center caches the content and responds to the client.\n\nNotice that when a new request for the same content is made to another data center (bottom end user traffic flow), Data Center 3, the content is not locally cached; however, the content is retrieved from the upper tier data center, where it was cached from the first request for the same content.\n\nWith the upper tier data center returning the cached content for the second request, the trip to the origin server is prevented, resulting in higher cache hit ratios, faster response times, saved bandwidth cost between the Cloudflare network and the origin server, and reduced load on the origin server responding to requests."
+        }
+      ]
+    },
+    {
+      "id": "cdn-rfc9111",
+      "organization": "IETF HTTP WG",
+      "title": "HTTP Caching",
+      "version": "RFC 9111 · 2022",
+      "canonicalUrl": "https://www.rfc-editor.org/rfc/rfc9111.html",
+      "canonicalAccess": {
+        "id": "rfc9111-canonical",
+        "url": "https://www.rfc-editor.org/rfc/rfc9111.html",
+        "status": "unavailable",
+        "verifiedBody": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "repository": "httpwg/http-core",
+      "commit": "3cdfb4df4dc47e75e9642efc99ab699a0495d883",
+      "repositoryFile": "rfc9111.xml",
+      "fixedSourceUrl": "https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml",
+      "retrievedUrl": "https://raw.githubusercontent.com/httpwg/http-core/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml",
+      "retrieval": {
+        "status": 200,
+        "bytes": 103119,
+        "sha256": "800d7f7c39dbe9b580c5d1bac28bd6328e396d66608a25c8bc9c1f78b6da5a25"
+      },
+      "publication": {
+        "year": 2022,
+        "month": "June"
+      },
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-25",
+      "checkedAtBeijing": "2026-10-25T23:00:32.053253+08:00",
+      "method": "实际HTTP GET读取官方仓库固定commit完整响应，核对标题/版本与逐论点原文；canonical正文访问失败单独记录。",
+      "supports": [
+        "响应存储和复用受请求匹配、缓存指令及新鲜度等条件限制，不是取到内容就能永久共享。",
+        "缓存不能直接复用时可通过条件请求验证或获取新响应；不能把过期副本一直当成新内容使用。",
+        "共享缓存与私有缓存有不同边界；不带字段列表的private禁止共享缓存存储该响应，no-store限制存储。"
+      ],
+      "shots": [
+        "4",
+        "6",
+        "7",
+        "9",
+        "10",
+        "12"
+      ],
+      "limitations": [
+        "private这里引用不带字段列表的形式，不能泛化为任意qualified private字段列表。",
+        "标准允许特定条件下使用stale响应，过期不等于必须立即删除或一定重新下载全部内容。"
+      ],
+      "excerpts": [
+        {
+          "startLine": 125,
+          "endLine": 131,
+          "text": "<t anchor=\"shared.and.private.caches\">\n   A <x:dfn>shared cache</x:dfn> is a cache that stores responses for reuse\n   by more than one user; shared caches are usually (but not always) deployed\n   as a part of an intermediary. A <x:dfn>private cache</x:dfn>, in contrast,\n   is dedicated to a single user; often, they are deployed as a component of\n   a user agent.\n</t>"
+        },
+        {
+          "startLine": 292,
+          "endLine": 308,
+          "text": "<section title=\"Storing Responses in Caches\" anchor=\"response.cacheability\">\n<t>\n   A cache &MUST-NOT; store a response to a request unless:\n</t>\n<ul>\n  <li><t>the request method is understood by the cache;</t></li>\n  <li><t>the response status code is final (see\n         <xref target=\"status.codes\"/>);</t></li>\n  <li><t>if the response status code is 206 or 304, or the must-understand cache directive (see <xref\n         target=\"cache-response-directive.must-understand\"/>) is present: the cache understands the response status code;</t></li>\n  <li><t>the no-store cache directive is not present in the response\n         (see <xref target=\"cache-response-directive.no-store\"/>);</t></li>\n  <li><t>if the cache is shared: the private response directive is either not\n         present or allows a shared cache to store a modified response;\n         see <xref target=\"cache-response-directive.private\" />);</t></li>\n  <li><t>if the cache is shared: the <x:ref>Authorization</x:ref> header field\n         is not present in the request"
+        },
+        {
+          "startLine": 493,
+          "endLine": 517,
+          "text": "<section title=\"Constructing Responses from Caches\" anchor=\"constructing.responses.from.caches\">\n<t>\n   When presented with a request, a cache &MUST-NOT; reuse a stored response\n   unless:\n</t>\n<ul>\n   <li><t>the presented target URI (<xref target=\"target.resource\"/>) and\n   that of the stored response match, and</t></li>\n   <li><t>the request method associated with the stored response allows it to\n   be used for the presented request, and</t></li>\n   <li><t>request header fields nominated by the stored response (if any)\n   match those presented (see <xref target=\"caching.negotiated.responses\"\n   />), and</t></li>\n   <li><t>the stored response does not contain the no-cache directive\n   (<xref target=\"cache-response-directive.no-cache\"/>), unless it is\n   successfully validated (<xref target=\"validation.model\"/>), and</t></li>\n   <li><t>the stored response is one of the following:</t>\n     <ul>\n        <li>fresh (see <xref target=\"expiration.model\" />), or</li>\n        <li>allowed to be served stale (see <xref\n        target=\"serving.stale.responses\" />), or</li>\n        <li>successfully validated (see <xref target=\"validation.model\"\n        />).</li>\n     </ul>\n   </li>"
+        },
+        {
+          "startLine": 633,
+          "endLine": 656,
+          "text": "<section title=\"Freshness\" anchor=\"expiration.model\">\n<iref item=\"fresh\" />\n<iref item=\"stale\" />\n<t>\n   A <x:dfn>fresh</x:dfn> response is one whose age has not yet exceeded its\n   freshness lifetime. Conversely, a <x:dfn>stale</x:dfn>\n   response is one where it has.\n</t>\n<iref item=\"freshness lifetime\" />\n<iref item=\"explicit expiration time\" />\n<iref item=\"heuristic expiration time\" />\n<t>\n   A response's <x:dfn>freshness lifetime</x:dfn> is the length of time\n   between its generation by the origin server and its expiration time. An\n   <x:dfn>explicit expiration time</x:dfn> is the time at which the origin\n   server intends that a stored response can no longer be used by a cache\n   without further validation, whereas a <x:dfn>heuristic expiration\n   time</x:dfn> is assigned by a cache when no explicit expiration time is\n   available.\n</t>\n<iref item=\"age\" />\n<t>\n   A response's <x:dfn>age</x:dfn> is the time that has passed since it was\n   generated by, or successfully validated with, the origin server."
+        },
+        {
+          "startLine": 910,
+          "endLine": 921,
+          "text": "<section title=\"Validation\" anchor=\"validation.model\">\n<t>\n   When a cache has one or more stored responses for a requested URI, but\n   cannot serve any of them (e.g., because they are not fresh, or one cannot\n   be chosen; see <xref target=\"caching.negotiated.responses\"/>), it can use\n   the conditional request mechanism (<xref target=\"conditional.requests\"/>) in the forwarded request to\n   give the next inbound server an opportunity to choose a valid stored\n   response to use, updating the stored metadata in the process, or to replace\n   the stored response(s) with a new response. This process is known as\n   <x:dfn>validating</x:dfn> or <x:dfn>revalidating</x:dfn> the stored\n   response.\n</t>"
+        },
+        {
+          "startLine": 1545,
+          "endLine": 1558,
+          "text": "<section title=\"no-store\" anchor=\"cache-response-directive.no-store\">\n   <iref item=\"no-store (cache directive)\" primary=\"true\" />\n<t>\n   The no-store response directive indicates that a cache &MUST-NOT; store\n   any part of either the immediate request or the response and &MUST-NOT; use\n   the response to satisfy any other request.\n</t>\n<t>\n   This directive applies to both private and shared caches. \"MUST NOT\n   store\" in this context means that the cache &MUST-NOT; intentionally store\n   the information in non-volatile storage and &MUST; make a best-effort\n   attempt to remove the information from volatile storage as promptly as\n   possible after forwarding it.\n</t>"
+        },
+        {
+          "startLine": 1580,
+          "endLine": 1598,
+          "text": "<section title=\"private\" anchor=\"cache-response-directive.private\">\n   <iref item=\"private (cache directive)\" primary=\"true\" />\n<t>\n   Argument syntax:\n</t>\n<ul empty=\"true\">\n  <li>#<x:ref>field-name</x:ref></li>\n</ul>\n<t>\n   The unqualified private response directive indicates that\n   a shared cache &MUST-NOT; store the response (i.e., the response is\n   intended for a single user).\n   It also indicates that a private cache &MAY; store the response, subject\n   to the constraints defined in <xref target=\"response.cacheability\"/>, even if\n   the response would not otherwise be heuristically cacheable by a private\n   cache.\n</t>\n<t>\n   If a qualified private response directive is present, with an argument that"
+        },
+        {
+          "startLine": 1970,
+          "endLine": 1985,
+          "text": "\n<section title=\"Caching of Sensitive Information\" anchor=\"caching.of.sensitive.information\">\n<t>\n   Implementation and deployment flaws (often led to by the misunderstanding of cache\n   operation) might lead to the caching of sensitive information (e.g.,\n   authentication credentials) that is thought to be private, exposing it to\n   unauthorized parties.\n</t>\n<t>\n   Note that the Set-Cookie response header field <xref target=\"COOKIE\"/>\n   does not inhibit caching; a cacheable response with a Set-Cookie header\n   field can be (and often is) used to satisfy subsequent requests to caches.\n   Servers that wish to control caching of these responses are encouraged to\n   emit appropriate Cache-Control response header fields.\n</t>\n</section>"
+        }
+      ],
+      "articleOnlySupports": [
+        "Set-Cookie本身不自动禁止HTTP缓存，服务器仍应设置适当Cache-Control；带Cookie不等于共享副本天然安全。"
+      ]
+    },
+    {
+      "id": "cdn-cache-responses",
+      "organization": "Cloudflare",
+      "title": "Cloudflare cache responses",
+      "version": "官方文档 · 2026-10-25核验",
+      "canonicalUrl": "https://developers.cloudflare.com/cache/concepts/cache-responses/",
+      "canonicalAccess": {
+        "id": "cloudflare-responses-canonical",
+        "url": "https://developers.cloudflare.com/cache/concepts/cache-responses/",
+        "status": "unavailable",
+        "verifiedBody": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "repository": "cloudflare/cloudflare-docs",
+      "commit": "ec32a21c71d1aa8747ef270e180ef0d31e5231f6",
+      "repositoryFile": "src/content/docs/cache/concepts/cache-responses.mdx",
+      "fixedSourceUrl": "https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/cache/concepts/cache-responses.mdx",
+      "retrievedUrl": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/cache/concepts/cache-responses.mdx",
+      "retrieval": {
+        "status": 200,
+        "bytes": 9762,
+        "sha256": "261e6e29bc3e9e54a6dbacb213ad2a6aaf8bb8882609d18b624455fd3dd84ef3"
+      },
+      "publication": {
+        "date": "页面未标发布日期；本轮读取production固定commit"
+      },
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-25",
+      "checkedAtBeijing": "2026-10-25T23:00:32.053253+08:00",
+      "method": "实际HTTP GET读取官方仓库固定commit完整响应，核对标题/版本与逐论点原文；canonical正文访问失败单独记录。",
+      "supports": [
+        "Cloudflare将从缓存找到资源与未命中后取源区分为不同状态，命中可用副本与回源是不同请求路径。",
+        "过期内容可能重新取源或条件验证；不适合缓存的内容也可能直接取源，未命中不是所有回源的唯一原因。"
+      ],
+      "shots": [
+        "4",
+        "5",
+        "7",
+        "9",
+        "11"
+      ],
+      "limitations": [
+        "状态名是Cloudflare产品实现说明，片中没有把CF-Cache-Status当作所有CDN的通用枚举。",
+        "STALE/UPDATING/Origin Cache Control与配置相关，不承诺过期都阻塞回源或所有内容默认缓存。"
+      ],
+      "excerpts": [
+        {
+          "startLine": 23,
+          "endLine": 29,
+          "text": "## HIT\n\nThe resource was found in Cloudflare's cache.\n\n## MISS\n\nThe response is eligible for cache but was not present in Cloudflare's cache at request time, so it was served from the origin web server. Responses that Cloudflare chooses not to cache return [`BYPASS`](#bypass) instead of `MISS`."
+        },
+        {
+          "startLine": 43,
+          "endLine": 49,
+          "text": "## EXPIRED\n\nThe resource was found in Cloudflare's cache but was expired and served from the origin web server.\n\n## STALE\n\nThe resource was served from Cloudflare's cache but was expired. Cloudflare could not contact the origin web server to retrieve an updated resource."
+        },
+        {
+          "startLine": 71,
+          "endLine": 77,
+          "text": "If you expected a URL to be cached but see `BYPASS`, refer to [Investigate uncached responses](/cache/troubleshooting/investigating-uncached-responses/#bypass--origin-response-is-not-cacheable) for a step-by-step diagnostic.\n\n## REVALIDATED\n\nThe origin confirmed the cached resource was unchanged via a conditional request (`If-Modified-Since` or `If-None-Match`), and the response is served from Cloudflare's cache. This status reflects the synchronous validation path — the request waits for the origin to respond before being served.\n\nWith [asynchronous `stale-while-revalidate`](/cache/concepts/revalidation/#asynchronous-revalidation), most revalidations now return `UPDATING` or `HIT` instead. `REVALIDATED` is seen in the following situations: `stale-while-revalidate` is not set; or directives like `must-revalidate` or `no-cache` (with [Origin Cache Control](/cache/concepts/cache-control/) enabled) prevent stale content from being served."
+        },
+        {
+          "startLine": 83,
+          "endLine": 93,
+          "text": "## DYNAMIC\n\nCloudflare determined at request time that the asset is not eligible for cache, so the request went to the origin web server without a cache lookup.\n\nThis typically happens when:\n\n* The requested asset is not one of the [default cached file extensions](/cache/concepts/default-cache-behavior/#default-cached-file-extensions) (for example, HTML or JSON) and no rule instructs Cloudflare to cache it.\n* A [Cache Rule](/cache/how-to/cache-rules/) with the **Bypass cache** setting matches the request. The legacy `Cache Level: Bypass` option in [Configuration Rules](/rules/configuration-rules/) or [Page Rules](/rules/page-rules/) behaves the same way.\n* [Development Mode](/cache/reference/development-mode/) is enabled on the zone, which suspends cache for three hours.\n\nUse [Cache Rules](/cache/how-to/cache-rules/) to change what content Cloudflare caches. Once the request is treated as eligible for cache, the `CF-Cache-Status` header will reflect the response-time cache decision (`HIT`, `MISS`, `EXPIRED`, `REVALIDATED`, `BYPASS`, and so on) — refer to [BYPASS](#bypass) for the case where the origin response is ultimately not cacheable."
+        }
+      ]
+    }
+  ],
+  "repositoryVersionChecks": {
+    "cloudflare": {
+      "full_name": "cloudflare/cloudflare-docs",
+      "default_branch": "production",
+      "archived": false,
+      "pushed_at": "2026-10-25T04:07:55Z"
+    },
+    "cloudflareFixedCommit": "ec32a21c71d1aa8747ef270e180ef0d31e5231f6",
+    "cloudflareCommitAuthorDate": "2026-10-25T00:35:29Z",
+    "httpwg": {
+      "full_name": "httpwg/http-core",
+      "default_branch": "main",
+      "archived": false,
+      "pushed_at": "2025-11-14T08:08:24Z"
+    }
+  },
+  "resolvedReferenceStub": {
+    "oldRepositoryFile": "src/content/docs/cache/reference/cdn-reference-architecture.mdx",
+    "bytes": 213,
+    "sha256": "806927aac5965106a5f939d2c7c2b7e9728ee26f5f48bab03c6998d2bcdd6773",
+    "external_link": "/reference-architecture/architectures/cdn/",
+    "actualBodyRepositoryFile": "src/content/docs/reference-architecture/architectures/cdn.mdx"
+  },
+  "additionalReadNotSelectedForCard": [
+    {
+      "title": "Default cache behavior",
+      "url": "https://developers.cloudflare.com/cache/concepts/default-cache-behavior/",
+      "actualRead": {
+        "id": "cloudflare-default",
+        "repositoryFile": "src/content/docs/cache/concepts/default-cache-behavior.mdx",
+        "url": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/cache/concepts/default-cache-behavior.mdx",
+        "status": 200,
+        "bytes": 6469,
+        "sha256": "aea84e657fdbaaa238c2e931fcdc21adb96e419625142892cc7ef8d8ccdebe0b"
+      },
+      "canonicalAccess": {
+        "id": "cloudflare-default-canonical",
+        "url": "https://developers.cloudflare.com/cache/concepts/default-cache-behavior/",
+        "status": "unavailable",
+        "verifiedBody": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "reason": "已读当前正文，但缓存指令的具体产品行为受Origin Cache Control和规则影响；本轮选RFC9111与cache responses支撑主线，不把默认页的摘要泛化为全部部署。"
+    }
+  ],
+  "excludedSource": {
+    "organization": "AWS",
+    "title": "How CloudFront delivers content",
+    "canonicalUrl": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowCloudFrontWorks.html",
+    "canonicalAccess": {
+      "id": "aws-canonical",
+      "url": "https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowCloudFrontWorks.html",
+      "status": "unavailable",
+      "verifiedBody": false,
+      "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+    },
+    "repositoryMetadata": {
+      "full_name": "awsdocs/amazon-cloudfront-developer-guide",
+      "default_branch": "archived",
+      "archived": true,
+      "pushed_at": "2023-06-15T20:28:48Z"
+    },
+    "notSelectedForCard": true,
+    "reason": "官方开源文档仓库已经归档，默认分支archived、最后push为2023；本轮未取得canonical正文，也未把归档仓库冒充现行CloudFront文档。原稿2026-10-24访问记录照旧保留，不改成本轮成功访问。"
+  },
+  "historicalMaterial": "Natural Earth地图、公有领域许可、固定GeoJSON与原访问日期沿用原制作记录；本轮未重新GET，不列入片尾技术主依据。",
+  "appendOnlyArticle": {
+    "originalSHA256": "8041560dc42a52c69e58000c4ca89fb5fdaad86ad8c345760d15a791b364b6ed",
+    "originalBytes": 3432,
+    "scope": "在原全文后新增参考资料节，frontmatter、正文、原脚注及历史访问日期字节保持。"
+  },
+  "appendOnlyResearch": {
+    "originalSHA256": "ce830bf0ff09fe36d5c5d49f0111447a6ca1478233f7b9d1b18165d53fe9aa05",
+    "originalBytes": 3731
+  }
+}

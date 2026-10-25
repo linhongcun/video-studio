@@ -1,0 +1,7 @@
+# Java与参考卡并存的WebVTT边界复核
+
+实际合并冲突只涉及共享buildVtt。保留原Java支持与上游发布元数据referenceAppendix支持，选择顺序为unvoicedEndCard、javaEndCard、referenceAppendix。前一候选报告已原字节归档到revisions/observer-first/candidate-v0.69.1。
+
+复用已有runtime提取方法，执行真实本地、上游与合并后三份loader。对当前45个剧集目录，原代码卡路径输出与本地方保持，reference-only路径与上游保持；相对本地方43份完整字节不变，2份只涉及上游参考卡边界。新冻结观察者加后置参考卡fixture时，20句文本与起点保持，末句143.066秒结束，严格早于Java首帧143.066666…秒，不因更晚参考卡覆盖边界。
+
+8个真实函数输入场景覆盖原6项以及reference-only和Java-plus-reference。完整双来源SHA、目录逐项结果与旧证明身份见JSON。未修改视频或发布输入，未构建站点；未观察浏览器native activeCues，未把fixture当成已生产参考卡。
