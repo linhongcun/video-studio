@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "reviewDateFromEnvironment": "2026-10-25",
+  "taskContext": {
+    "workspace": "/workspace/video-studio",
+    "demoRoot": "/workspace/video-studio/episodes-codex/agent-skills/demo",
+    "assignment": "Root-agent delegated local API compatibility review",
+    "fullProductHostAutomaticRoutingTest": false,
+    "networkRequestsMadeForReview": false
+  },
+  "skillSelection": {
+    "initialEvidence": "outputs/catalog.json: skill names and descriptions only",
+    "selectedSkill": "api-compat-review",
+    "selectedSkillFile": "skills/api-compat-review/SKILL.md",
+    "reason": "The task asks whether an existing client can still omit a field after a request-contract change, matching this skill's catalog description.",
+    "otherSkillBodiesRead": false,
+    "checkerSourceReadIntoModelContext": false,
+    "executionNote": "Python executed scripts/check_fields.py; execution is distinct from manually reading its source into model context."
+  },
+  "filesReadIntoModelContext": [
+    "outputs/catalog.json",
+    "skills/api-compat-review/SKILL.md",
+    "skills/api-compat-review/references/request-fields.md",
+    "fixtures/before.json",
+    "fixtures/after-required.json",
+    "fixtures/after-optional.json",
+    "fixtures/old-client-request.json"
+  ],
+  "discoveryCommand": {
+    "command": "rg --files /workspace/video-studio/episodes-codex/agent-skills/demo -g SKILL.md",
+    "cwd": "/workspace/video-studio",
+    "exitCode": 0,
+    "result": "Listed api-compat-review/SKILL.md and release-notes/SKILL.md paths; only the selected skill body was opened."
+  },
+  "readCommands": {
+    "cwd": "/workspace/video-studio",
+    "allExitCodes": 0,
+    "commands": [
+      "cat /workspace/video-studio/episodes-codex/agent-skills/demo/outputs/catalog.json",
+      "cat /workspace/video-studio/episodes-codex/agent-skills/demo/skills/api-compat-review/SKILL.md",
+      "cat /workspace/video-studio/episodes-codex/agent-skills/demo/skills/api-compat-review/references/request-fields.md",
+      "cat /workspace/video-studio/episodes-codex/agent-skills/demo/fixtures/before.json",
+      "cat /workspace/video-studio/episodes-codex/agent-skills/demo/fixtures/after-required.json",
+      "cat /workspace/video-studio/episodes-codex/agent-skills/demo/fixtures/after-optional.json",
+      "cat /workspace/video-studio/episodes-codex/agent-skills/demo/fixtures/old-client-request.json"
+    ],
+    "orderNote": "Catalog was read first; selection preceded reading the selected SKILL.md. Rule and four fixtures were read in a parallel batch after the SKILL.md."
+  },
+  "inputs": {
+    "endpoint": {"method": "POST", "path": "/orders"},
+    "beforeRequired": ["sku", "quantity"],
+    "afterRequiredRequired": ["sku", "quantity", "channel"],
+    "afterOptionalRequired": ["sku", "quantity"],
+    "oldClientRequest": {"sku": "SKU-7", "quantity": 1}
+  },
+  "executions": [
+    {
+      "case": "after-required",
+      "command": "python3 scripts/check_fields.py --before ../../fixtures/before.json --after ../../fixtures/after-required.json --client-request ../../fixtures/old-client-request.json",
+      "cwd": "/workspace/video-studio/episodes-codex/agent-skills/demo/skills/api-compat-review",
+      "exitCode": 0,
+      "toolOutputChunkId": "ca0b04",
+      "stdoutAsJson": {
+        "example": true,
+        "endpoint": {"method": "POST", "path": "/orders"},
+        "checkedRule": "R2: newly required request fields can break old clients",
+        "newRequiredFields": ["channel"],
+        "oldClientValidation": {
+          "before": "accepted_by_example_required_field_validator",
+          "after": "rejected_by_example_required_field_validator",
+          "missingRequiredFields": ["channel"]
+        },
+        "verdict": "breaking_required_field_change",
+        "scope": "Synthetic JSON object required-field check only; no HTTP call, full OpenAPI analysis, or universal compatibility claim."
+      },
+      "outputSummary": "channel became required; the supplied old request was accepted before and rejected after because channel is absent.",
+      "compatibilityConclusion": "Incompatible with this supplied old request under the checked required-field rule.",
+      "ruleBasis": "R2: adding a required constraint can break old requests."
+    },
+    {
+      "case": "after-optional",
+      "command": "python3 scripts/check_fields.py --before ../../fixtures/before.json --after ../../fixtures/after-optional.json --client-request ../../fixtures/old-client-request.json",
+      "cwd": "/workspace/video-studio/episodes-codex/agent-skills/demo/skills/api-compat-review",
+      "exitCode": 0,
+      "toolOutputChunkId": "b0c2a7",
+      "stdoutAsJson": {
+        "example": true,
+        "endpoint": {"method": "POST", "path": "/orders"},
+        "checkedRule": "R2: newly required request fields can break old clients",
+        "newRequiredFields": [],
+        "oldClientValidation": {
+          "before": "accepted_by_example_required_field_validator",
+          "after": "accepted_by_example_required_field_validator",
+          "missingRequiredFields": []
+        },
+        "verdict": "passes_checked_required_field_rules",
+        "scope": "Synthetic JSON object required-field check only; no HTTP call, full OpenAPI analysis, or universal compatibility claim."
+      },
+      "outputSummary": "channel is optional; no required field was added, and the supplied old request was accepted before and after.",
+      "compatibilityConclusion": "The supplied old request passes the checked required-field rules; this is not a complete compatibility determination.",
+      "ruleBasis": "R1: an omitted optional field does not fail this example's required-field validation. The checker retains its R2 label in stdout for both comparisons."
+    }
+  ],
+  "scopeAndLimitations": [
+    "Contracts, endpoint, request and rules are synthetic teaching examples.",
+    "Only simplified JSON request-object required-field changes and one specified old request were checked.",
+    "A local validator rejection is not an observed HTTP response or proof of production service behavior.",
+    "Response fields, type narrowing, enums, formats, authentication, defaults, status-code semantics and full OpenAPI compatibility were not analyzed.",
+    "One accepted request does not prove that all old clients remain compatible.",
+    "This delegated review is not a complete product-host automatic skill-routing test.",
+    "No claim is made about general accuracy improvement or routing reliability across all hosts."
+  ],
+  "artifactsWrittenByThisReview": [
+    "outputs/agent-review.json",
+    "outputs/agent-review.md"
+  ],
+  "businessScriptsEdited": false,
+  "commitsCreated": false
+}

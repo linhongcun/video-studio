@@ -1,0 +1,141 @@
+{
+  "example": true,
+  "executionMode": "deterministic local loader and Python subprocesses; no LLM request",
+  "task": "审查创建订单接口把新增 channel 设为必填后，既有客户端请求是否还能通过必填字段校验。",
+  "meaning": "Actual file I/O, byte sizes and check results. Context stages are illustrative host payloads, not measured model inputs or automatic activation.",
+  "events": [
+    {
+      "phase": "discover",
+      "hostReadFiles": [
+        {
+          "path": "skills/api-compat-review/SKILL.md",
+          "utf8Bytes": 1494,
+          "sha256": "69f45fc4cea6b00f7d8a25775bd1e789fd2e6cc3432fae3a453e1b2a0a9081cb"
+        },
+        {
+          "path": "skills/release-notes/SKILL.md",
+          "utf8Bytes": 523,
+          "sha256": "bfbe5088d419377fbe73a1b9297dadc58d7cd9739979cc63c93ae97ea914430e"
+        }
+      ],
+      "contextPayload": "outputs/catalog.json",
+      "visibleContent": "name and description only"
+    },
+    {
+      "phase": "activate",
+      "choice": "explicit host selection in this deterministic demonstration; not measured model routing",
+      "skill": "api-compat-review",
+      "readIntoContext": {
+        "path": "skills/api-compat-review/SKILL.md",
+        "utf8Bytes": 1494,
+        "sha256": "69f45fc4cea6b00f7d8a25775bd1e789fd2e6cc3432fae3a453e1b2a0a9081cb"
+      }
+    },
+    {
+      "phase": "read-reference",
+      "readIntoContext": {
+        "path": "skills/api-compat-review/references/request-fields.md",
+        "utf8Bytes": 1004,
+        "sha256": "7d8d51b9c36418edf0bd4149d23c456f98473333970345dc793d09d3fe8c6532"
+      }
+    },
+    {
+      "phase": "tool-execution",
+      "branch": "optional-control",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "skills/api-compat-review/scripts/check_fields.py",
+        "--before",
+        "fixtures/before.json",
+        "--after",
+        "fixtures/after-optional.json",
+        "--client-request",
+        "fixtures/old-client-request.json"
+      ],
+      "exitCode": 0,
+      "stderr": "",
+      "scriptIdentity": {
+        "path": "skills/api-compat-review/scripts/check_fields.py",
+        "utf8Bytes": 3375,
+        "sha256": "d0e1bd1a23edf00afa37198e4b9cb86b32252748ab64c9372b54c7be0aa2effa"
+      },
+      "scriptSourceReadIntoContext": false,
+      "businessServiceCalled": false,
+      "result": {
+        "path": "outputs/review-optional.json",
+        "utf8Bytes": 563,
+        "sha256": "842bac10f59968e21299fba606d210c76e70f4c8009e2d8a4ae2d77fad483ee5"
+      }
+    },
+    {
+      "phase": "tool-execution",
+      "branch": "required-main",
+      "argv": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "skills/api-compat-review/scripts/check_fields.py",
+        "--before",
+        "fixtures/before.json",
+        "--after",
+        "fixtures/after-required.json",
+        "--client-request",
+        "fixtures/old-client-request.json"
+      ],
+      "exitCode": 0,
+      "stderr": "",
+      "scriptIdentity": {
+        "path": "skills/api-compat-review/scripts/check_fields.py",
+        "utf8Bytes": 3375,
+        "sha256": "d0e1bd1a23edf00afa37198e4b9cb86b32252748ab64c9372b54c7be0aa2effa"
+      },
+      "scriptSourceReadIntoContext": false,
+      "businessServiceCalled": false,
+      "result": {
+        "path": "outputs/review.json",
+        "utf8Bytes": 596,
+        "sha256": "fa0b1683ceca3f739fe12d3a3f3de4c658e3d181108d984afe9be2e58588b322"
+      }
+    }
+  ],
+  "contextPayloadStages": [
+    {
+      "stage": "discovery",
+      "content": "two candidates' name/description",
+      "addedUtf8Bytes": 555,
+      "cumulativeAddedUtf8Bytes": 555
+    },
+    {
+      "stage": "activation",
+      "content": "selected SKILL.md",
+      "addedUtf8Bytes": 1494,
+      "cumulativeAddedUtf8Bytes": 2049
+    },
+    {
+      "stage": "reference",
+      "content": "selected compatibility rule",
+      "addedUtf8Bytes": 1004,
+      "cumulativeAddedUtf8Bytes": 3053
+    },
+    {
+      "stage": "tool-result",
+      "content": "required-field check result; not script source",
+      "addedUtf8Bytes": 596,
+      "cumulativeAddedUtf8Bytes": 3649
+    }
+  ],
+  "unselectedBodyNotAddedToContext": "skills/release-notes/SKILL.md",
+  "scriptSourceNotAddedToContext": "skills/api-compat-review/scripts/check_fields.py",
+  "alwaysOnComparison": {
+    "profile": "one deliberately always-on method bundle: both skills and the compatibility reference",
+    "file": {
+      "path": "outputs/always-on-methods.txt",
+      "utf8Bytes": 3025,
+      "sha256": "13778d23e30d496eb45d5a137ad4401afdc35f3a984c2a3a163cdf96d935ee8a"
+    },
+    "initialMethodUtf8Bytes": 3025,
+    "afterSameMainToolResultUtf8Bytes": 3621,
+    "progressiveCumulativeAddedUtf8Bytes": 3649,
+    "progressiveMinusAlwaysOnAfterSameResultUtf8Bytes": 28,
+    "notClaimed": "not a token count, price comparison, performance gain, or proof that all prompts are always-on; progressive loading need not minimize total bytes"
+  },
+  "retention": "No claim that loaded instructions disappear after a task. Actual context retention and compaction depend on the host."
+}
