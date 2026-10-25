@@ -10,6 +10,7 @@ import json
 import re
 import ssl
 import urllib.request
+from html.parser import HTMLParser
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -78,6 +79,17 @@ try:
     get_cue_count = captions.count(b' --> ')
     assert get_cue_count == sum(len(shot['subtitles']) for scene in SB['scenes'] for shot in scene['shots'])
     page = get('episode', PAGE_URL).decode('utf-8')
+    class NativeSvgTextParser(HTMLParser):
+        def __init__(self):
+            super().__init__()
+            self.text_attributes = []
+        def handle_starttag(self, tag, attrs):
+            if tag == 'text':
+                self.text_attributes.append(dict(attrs))
+    svg_parser = NativeSvgTextParser()
+    svg_parser.feed(page)
+    assert any(a.get('x') == '215' and a.get('text-anchor') == 'middle' and a.get('font-size') == '17' for a in svg_parser.text_attributes), 'Published SVG contract native attributes missing'
+    assert any(a.get('font-size') == '23' for a in svg_parser.text_attributes), 'Published SVG heading font missing'
     chapters = json.loads(html.unescape(re.search(r'data-chapters="([^"]+)"', page).group(1)))
     expected_chapters = []
     offset = 0
@@ -136,6 +148,7 @@ try:
               'seriesOrder': ['strategy-pattern', SLUG],
               'subtitleCueCount': get_cue_count,
               'previousNextPath': 'D01 → D02',
+              'articleSvgNativeAttributes': {'contractAnchor': 'middle', 'contractFontSize': '17', 'headingFontSize': '23'},
               'scope': 'Published artifact byte equality, exact chapter and anchor data, source link, series, RSS and Release entry; browser behavior is recorded separately.'}
     (Path(__file__).resolve().parent / 'site-online-verification.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
     print(json.dumps({'status': 'passed', 'canonicalGetCount': len(results), 'release': 'v' + VERSION,
