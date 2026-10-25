@@ -1,16 +1,13 @@
-# 制作说明 · LC.739 每日温度
+# LC.739 栈入门修订 · 制作说明
 
-阶段：内容及源码审稿，未生成配音或媒体，不可发布。内部EP35，片内只展示LC.739；计划批次首发v0.69.0，实际发布身份由root收尾。
+本轮因用户实际观看后指出默认懂单调栈而返工。旧版v0.69.0完整基线在revisions/stack-primer-before，baseline.json记录46395cfb基线及旧video/voice/storyboard/source摘要。内部EP35、片内LC.739、标题与slug保持。
 
-- 唯一代码：solution.py；展示：solution.json；文章代码逐字同源。
-- 真实数据：research/verify_solution.py执行唯一代码，research/trace.json保存完整事件；Main/data只安排事件顺序。
-- 镜头：14镜28句4章；script.md是旁白真源，plan.json提供章节与句首术语挂词。
-- 占位时序：build_draft.py只用于文稿排布；meta.provisionalTiming、pendingAudio、draft均为true，不保存伪造voice或words。
-- 片尾：最后150帧完整静态Python卡，固定36字号，提示暂停；正式配音后由prepare_code_endcard.py声明真实卡起点。
-- 封面：covers.json三尺寸布局，Cover.tsx绘制相同气温子例；4:3内容区位于315..1125且底边<918。
-- 共享实现：TTS、整轨、起音、混音继续用episodes/_shared与episodes-codex/_shared；没有复制或修改共享算法。
-- 资产：全部程序化SVG，未使用第三方图片、音效或天气服务；教学示例不代表真实预报。
+创作范围是16镜32句：03后新增04 stack-basics、05 monotone，旧04/05成为06 order、07 name，原06–14顺延08–16。原28句逐字不变，只有04/05四句需要新TTS。四章ID保持。script/plan/config已锁稿交独立审读，真实起音由root共享装配处理。
 
-后续在root授权后生成voice，做句级装配、共享铺轨和起音核对，再以真实时序独立检查连续事件与跨镜。全部写入停止后冻结输入；渲染使用flock /tmp/video-studio-render.lock与TMPDIR=/workspace/daily-tmp，再做成片与站点检查。
+新增StackPrimer.tsx只服务两镜概念示意；真实append/pop五步数据来自research/make_stack_primer_operations.py生成的stack-primer-operations.json。它不解每日温度、不计算天数。原算法solution.py/solution.json/trace.json不变，完整Python卡和三比例封面保持。
 
-ASR、全片人工听辨、实际视频及封面检查在本阶段均未执行，不能记为通过。算法验证和TypeScript类型检查只支持相应范围，不替代编辑、动态或声音复核。
+06 OrderPrimer使用实际算法trace完整演出30出、31出、35留、32进，07承接35≥32，不暗中回滚。旧Weather/PLAYBACK尽量逐字保留，其他12镜的源码和局部时序保留，供root以共享remix_approach及旧基线做复用证明与局部编码，不重录原28句。
+
+本执行者只创作稿件、源组件与必要文档，不生成TTS，不写真实storyboard/words/voice，不调用freeze，不跑build_draft，不渲染正式媒体。当前真实SB仍是旧14镜基线；root后续负责配音、句级装配、真实时序、冻结及局部正式编码。新镜需要独立动态和成片检查，旧检查不预先追认新源。
+
+全部新图形程序化SVG，不使用第三方实物图或天气服务。代码卡固定36字号，最后150帧静态并提示暂停。新术语栈、单调、单调栈分别在04、05、07第二句句首起音后才显示；ASR、人耳或用户观看效果均按实际执行记录。

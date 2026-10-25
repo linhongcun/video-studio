@@ -16,7 +16,9 @@
 - 封面：三尺寸6张实际PNG/JPG查看，安全区/字形边界均通过；旧封面、标签及物理身份预检失败保留在qa-revisions。
 - 网站：122页/45课程，1440与390两视口实际播放；28条原生cue及毫秒时间、4章精确seek、2图、Python、TOC、六方向及新系列/首页/资料库/RSS通过。SVG属性在站点AST层规范，手机figure默认边距移除；冻结文章与视频不变，旧策略/适配器图双视口回归通过。
 
-本地验收完成；合并、Release、Release后Pages与线上canonical GET证据见release.md和online-verification.json的实际结果。技术检查不表示用户已经观看认可，未执行外部平台投稿。
+本地验收及GitHub站点交付已完成：PR#304合并至751def7a，发布v0.70.0，Release后Pages成功；10项普通canonical GET核验通过，线上完整MP4、海报与VTT字节一致，四章、入口及实际Release更新日志齐全。合并、Release、部署与线上证据见release.md、publication-evidence.json和online-verification.json。技术检查不表示用户已经观看认可，未执行外部平台投稿。
 
 
 最新默认流程已整合b83a0b04：新source evidence改为真实仓内路径、原说明保留details；卡片显示字段与PNG逐字节不变，正文/AAC指纹和卡片解码指纹与独立审过的版本匹配。当前最终媒体中点另经实际查看，157项默认入口及全站check:references构建检查通过，最终157项AAC来源复核通过。历史8554…报告保留其真实范围，转接证明见reference-inputs-sha256.json。
+
+正式部署后双视口轻量浏览器实测通过：实际短播放、四章点击seek、首卡原生字幕为空；见qa-online-browser.json。该检查不扩展为实体手机或全片听辨结论。
