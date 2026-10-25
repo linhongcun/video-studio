@@ -1,0 +1,948 @@
+{
+  "reviewer": "Codex independent observer_audit agent",
+  "reviewedAtUtc": "2026-10-25T13:40:09.160599+00:00",
+  "status": "pass-for-editorial-source-static-and-continuous-media-sampling",
+  "blockingFindings": [],
+  "scope": "Read final Main/motion/storyboard, then actually viewed6contact sheets containing34selected real no-caption frames across all10shots. Original render batch has149frames; only34were visually reviewed here, not the entire batch. No production source edits.",
+  "productionIdentity": {
+    "preflightManifest": "remotion/out/observer-first-preflight/frames.json",
+    "preflightManifestSha256": "797e3dbb7e1f675d1673e7bc14b3d0d85d2f21f181b88f933ca44fa3f62d85f2",
+    "sourceFilesMatchRenderManifest": {
+      "../storyboard.json": {
+        "sha256": "61f6a5ccff8e0b999dac1f8befaa289dddbfebba60416e72000c83c79bb55104",
+        "match": true
+      },
+      "../covers.json": {
+        "sha256": "7ababb04cbb96dfd35cf768f9a572d875397f58da789c442887091034e457377",
+        "match": true
+      },
+      "src/Main.tsx": {
+        "sha256": "65512bf00d054f5f568eef8320b2898ba00619431dfb8604b033c5945585b647",
+        "match": true
+      },
+      "src/java-card.json": {
+        "sha256": "b82006ec8fef3094339c8d728427561dcd58c8a74cf60dc3e08537e086919183",
+        "match": true
+      },
+      "src/motion.ts": {
+        "sha256": "f165dfa44675cafe15bdc286b331f6abaf47f3c31ed52f65a67540646fe44fd4",
+        "match": true
+      },
+      "src/data.ts": {
+        "sha256": "f8c1a22684b7d2dab48d3ee042246435e8c622512d87bcc804a3b3a43e578441",
+        "match": true
+      },
+      "src/objects.tsx": {
+        "sha256": "a38964a7db96fb107b8f958a921a408c829bde101376009c86906135379e3df2",
+        "match": true
+      },
+      "src/primitives.tsx": {
+        "sha256": "775f42c15d08151adfb1587151e7f0b4250c2d92ee7815ba9b6b6dc88538535b",
+        "match": true
+      },
+      "src/theme.ts": {
+        "sha256": "bc9aca854a2c7573092b6ecee8a6c4d26dbc0b0f58cb576ee9032114a9dc5791",
+        "match": true
+      },
+      "src/Cover.tsx": {
+        "sha256": "5e5b8a55dd28fb81a540942b7e307c527bf381da2c812b8446e76d87484a2935",
+        "match": true
+      }
+    },
+    "sampleManifest": "revisions/observer-first/qa-independent/preflight-sample-manifest.json",
+    "sampleManifestSha256": "988fa5affaa6a3c1df6d29ae73cc624bcd3dd48c94bbb88b0571a7bba92cc2b6",
+    "copyfitReportedByRenderer": []
+  },
+  "userGoal": {
+    "result": "pass",
+    "patternBodySeconds": 129.53333333333333,
+    "patternBodyPercent": 90.54,
+    "onlyMqShot": "09",
+    "mqSeconds": 13.533333333333333,
+    "mqBodyPercent": 9.46,
+    "explicitlyReviewed": "01–08 teach product motivation, contract/roles, registration, notification, receiver-owned response, unsubscribe and follow-up behavior, benefits and costs.09is one brief cross-service application mapping;10returns to Observer responsibilities and adjustable subscription. No ACK, outage, retry, idempotency or Outbox branch is introduced."
+  },
+  "findings": [
+    {
+      "check": "Motivation and direct-call tradeoff",
+      "result": "pass",
+      "evidence": "02local87shows concrete display/history details embedded in order flow;198names Observer;323separates source notification from response details.08local460explicitly permits simple fixed direct calls. Motivation is conditional on changing recipients, not a blanket rejection of direct calls."
+    },
+    {
+      "check": "Roles and shared contract",
+      "result": "pass",
+      "evidence": "03local284/364maps same order, summary and history to source/concrete observers andOrderObservercontract. Contract uses structural dependency/implementation lines and explicit结构约定，非消息中转label; no notification passes through an invented broker actor."
+    },
+    {
+      "check": "Explicit replay and subscription",
+      "result": "pass",
+      "evidence": "04local167still preserves paid result with建立接收关系header;168explicitly changes to付款前/emptylist/pendingpayment,369has two registered receivers while order remains pending. Reset is labelled and not a second payment."
+    },
+    {
+      "check": "State first, delivery before effect",
+      "result": "pass",
+      "evidence": "05local59pending→60paid,108notification traveling while both receivers are old,255summary receipt still old display→275updated summary,290record notification traveling→329receipt still empty record→360one appended paid fact. Sequence preserves causal order and receiver-owned effects."
+    },
+    {
+      "check": "Cancellation and next change",
+      "result": "pass",
+      "evidence": "06local146visible close action,161cancellation term,274summary removed and markedstopped/historicalpaid.07local61source shipped while record still onlypaid,199record receipt before append,258two historicalfacts. Summary never updates to shipped or receives an event after removal."
+    },
+    {
+      "check": "Benefit, costs and retained dependency",
+      "result": "pass",
+      "evidence": "08local165compares recipient results;378maintains subscription lifecycle,460shows direct-call alternative. Shared contract remains displayed, so source is not described as completely decoupled."
+    },
+    {
+      "check": "MQ stays a brief application",
+      "result": "pass",
+      "evidence": "09local0/324/376explicitly says应用映射/不是原例继续执行, uses同一订单已发货and independent subscriber paths, shows roles rather than reliability machinery. No return toACK/retry/fault tutorial. It does not claim GoFObserveris literally replaced byMQ."
+    },
+    {
+      "check": "Conclusion and brief code",
+      "result": "pass",
+      "evidence": "10local0/354returns to original in-process finalstate: source shipped, summary stopped atpaid, record holdspaid+shipped.392/541show a separateJavaexcerpt card with role mapping and noMQrecap. Main learning goal ends onObservercore."
+    },
+    {
+      "check": "Continuous05–07 causal sequence and cross-shot state preservation",
+      "result": "pass",
+      "evidence": "Actually viewed78decoded2fpsframes across38.666667s of final-source05–07clip; source-first update, delivery-before-effect, closing/cancellation, only-record shipment, historical stopped summary, and both cross-shot boundaries preserve intended causality. SeecontinuousMotionfor exact scope and source identities."
+    }
+  ],
+  "actualViewedSamples": [
+    {
+      "sheet": "revisions/observer-first/qa-independent/preflight-01.jpg",
+      "sheetSha256": "ba9479a73e24b41e1c2ac0e5bb8b37a8960bbae4fcee801a54bfb9817d862785",
+      "frames": [
+        {
+          "shot": "01",
+          "local": 0,
+          "global": 0,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/01-0.png",
+          "originalSha256": "17c5666676f180637b0bf5b5199f43a5a6f40b24c86efd62ad036ca0062755a4"
+        },
+        {
+          "shot": "01",
+          "local": 220,
+          "global": 220,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/01-220.png",
+          "originalSha256": "274ff1cefef083add889d391cd56812b44018686e2fad804032c2f372862c5e6"
+        },
+        {
+          "shot": "02",
+          "local": 87,
+          "global": 500,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/02-87.png",
+          "originalSha256": "308eba03f87c2e75f12e7b76c4a9c71dfa3edea24d5f4bcbcceec5560a83fae4"
+        },
+        {
+          "shot": "02",
+          "local": 198,
+          "global": 611,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/02-198.png",
+          "originalSha256": "f54bf7e6f227bc23b2ea41522f91891c3cf392bc9aec80c75a9183ae13b7c487"
+        },
+        {
+          "shot": "02",
+          "local": 323,
+          "global": 736,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/02-323.png",
+          "originalSha256": "4607bf924f036845684c25200078026d7a5c7c6bc3014da701254d9c666c776f"
+        },
+        {
+          "shot": "03",
+          "local": 284,
+          "global": 1147,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/03-284.png",
+          "originalSha256": "a0536d5a098df2780ff55fc0a025824ed85a6d4e9abd74e6d2f372c785e8312e"
+        }
+      ]
+    },
+    {
+      "sheet": "revisions/observer-first/qa-independent/preflight-02.jpg",
+      "sheetSha256": "b68e0bfe2dadf31089855e1a9f7d7d964e2e8e0a681b37e4fd78e23c7ea9b55a",
+      "frames": [
+        {
+          "shot": "03",
+          "local": 364,
+          "global": 1227,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/03-364.png",
+          "originalSha256": "208df46aa4d8b7b3efc02517e88c3010bbe680903da86b82d2712332c5d5fcf1"
+        },
+        {
+          "shot": "04",
+          "local": 167,
+          "global": 1573,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/04-167.png",
+          "originalSha256": "20f2f483e1eb0dc5b6fed3a7b866c9a47ad4e1663eb0a12e0c0c6c768cac6b6c"
+        },
+        {
+          "shot": "04",
+          "local": 168,
+          "global": 1574,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/04-168.png",
+          "originalSha256": "7137de7323caaa94b0adb7a51c721cc639fb2d434bc818aa6b381daf788a7732"
+        },
+        {
+          "shot": "04",
+          "local": 369,
+          "global": 1775,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/04-369.png",
+          "originalSha256": "ad5785fa8885181b5defcd9dd0fa67a650e2c339e63dffe7f558bc212f6ce7f6"
+        },
+        {
+          "shot": "05",
+          "local": 59,
+          "global": 1896,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/05-59.png",
+          "originalSha256": "e28b8b062c6e37a830e7a5220a33acd366ba63dec2a7ad428bccb5a22efe3bb7"
+        },
+        {
+          "shot": "05",
+          "local": 60,
+          "global": 1897,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/05-60.png",
+          "originalSha256": "e22e152eb4ef6b55e3fbc868475a4ef4469db51fa6fd7c0d8e8e8e661ad2c517"
+        }
+      ]
+    },
+    {
+      "sheet": "revisions/observer-first/qa-independent/preflight-03.jpg",
+      "sheetSha256": "f2a8ecc1315c7d4479e71cae562f5af5b115d3738da6a99aecd2b241a6291a5c",
+      "frames": [
+        {
+          "shot": "05",
+          "local": 108,
+          "global": 1945,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/05-108.png",
+          "originalSha256": "5a5bfbdc438dcbf0bf9d43348c840c82eba0d792de4ea1a354ed2528e3d0cc7c"
+        },
+        {
+          "shot": "05",
+          "local": 255,
+          "global": 2092,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/05-255.png",
+          "originalSha256": "0b42a3bdb077768926563afb3c4d57fcea890b43ed36bf81699f7682de1c1c76"
+        },
+        {
+          "shot": "05",
+          "local": 275,
+          "global": 2112,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/05-275.png",
+          "originalSha256": "5904faea0a27d68f36b4b7c9982c4cdf06e4cc5efdf16bc505eecef8575e45e2"
+        },
+        {
+          "shot": "05",
+          "local": 290,
+          "global": 2127,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/05-290.png",
+          "originalSha256": "f636a5d65e61ff41c8fb40346c3dc5f959d3b2c502a4af0da0cb6054a628d200"
+        },
+        {
+          "shot": "05",
+          "local": 329,
+          "global": 2166,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/05-329.png",
+          "originalSha256": "1273e755c00456a83a76485431d2f1a855b32e12547c9c1a2941ea46d5cb0042"
+        },
+        {
+          "shot": "05",
+          "local": 360,
+          "global": 2197,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/05-360.png",
+          "originalSha256": "62a6b23d744f0b6f7818c8e890c7f44783e2ef2128aa1cc265f3ea2d24ed3884"
+        }
+      ]
+    },
+    {
+      "sheet": "revisions/observer-first/qa-independent/preflight-04.jpg",
+      "sheetSha256": "c8126c9c10439fb43f9bb6e7ed2010c78413e08cb0b6557c59a510f737d1532e",
+      "frames": [
+        {
+          "shot": "06",
+          "local": 146,
+          "global": 2431,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/06-146.png",
+          "originalSha256": "35805a45f0d8ac5a8333a2968f9180a872b5d35724070d088fceca47428a60da"
+        },
+        {
+          "shot": "06",
+          "local": 161,
+          "global": 2446,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/06-161.png",
+          "originalSha256": "0231248e54a0d603070e3aaf74ec52edefd45e7b5c8f91765399a2a03d7d6d42"
+        },
+        {
+          "shot": "06",
+          "local": 274,
+          "global": 2559,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/06-274.png",
+          "originalSha256": "71139c35871884ff5d150ec3d297e22b48bb0315d9a96b50039d32594664ee95"
+        },
+        {
+          "shot": "07",
+          "local": 61,
+          "global": 2683,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/07-61.png",
+          "originalSha256": "96c3b26b6e752aca67c2a7d4d264a7036c682c690e71cfe271abff647334503e"
+        },
+        {
+          "shot": "07",
+          "local": 199,
+          "global": 2821,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/07-199.png",
+          "originalSha256": "2796859a552d22cc94c78c386ced2b5ea5f04dd7e3ed9afc582fc780862e39c2"
+        },
+        {
+          "shot": "07",
+          "local": 258,
+          "global": 2880,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/07-258.png",
+          "originalSha256": "478db225c1af821f4262fb6b2117ffa0e71eda56861a7ff6a06b59df8c1ab432"
+        }
+      ]
+    },
+    {
+      "sheet": "revisions/observer-first/qa-independent/preflight-05.jpg",
+      "sheetSha256": "08644ea4594315034da777ab3bfe61261c9840d1f0c31b2d46a6909b88c9abaf",
+      "frames": [
+        {
+          "shot": "08",
+          "local": 165,
+          "global": 3162,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/08-165.png",
+          "originalSha256": "44de6b57aa9db4bb3e5250ecbfeec662b6d7df326f18ccbb16d00483a9ddccd1"
+        },
+        {
+          "shot": "08",
+          "local": 378,
+          "global": 3375,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/08-378.png",
+          "originalSha256": "d0aae5b949fa5878add218b45b737d0b139978f64423f41206b7d20bfa738fe8"
+        },
+        {
+          "shot": "08",
+          "local": 460,
+          "global": 3457,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/08-460.png",
+          "originalSha256": "b857d5474e7ad06daaa4d3c9df54c8647c77ea7e373931d6e6f7a895c600ce1d"
+        },
+        {
+          "shot": "09",
+          "local": 0,
+          "global": 3494,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/09-0.png",
+          "originalSha256": "43ecdb98e2c6aa8de1b4b61169f2029833ac24ff90592252bc7534501537f94b"
+        },
+        {
+          "shot": "09",
+          "local": 324,
+          "global": 3818,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/09-324.png",
+          "originalSha256": "f03af144829dd1f1d96889ae89406fcb9861f3c3f3ee4770d1a6c16de34f9296"
+        },
+        {
+          "shot": "09",
+          "local": 376,
+          "global": 3870,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/09-376.png",
+          "originalSha256": "2212c788ca46e002cc117316eaaa8c115da493096fd581912a058206e6d2953e"
+        }
+      ]
+    },
+    {
+      "sheet": "revisions/observer-first/qa-independent/preflight-06.jpg",
+      "sheetSha256": "26aa267e6811a6a773bdc355e894e2b2b9e8de0a3a3dd3e9c095d5f817f87e03",
+      "frames": [
+        {
+          "shot": "10",
+          "local": 0,
+          "global": 3900,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/10-0.png",
+          "originalSha256": "049eba50cc39f67c6ead35b64db28dff75c021e61ccb0c8a01e0908c0761b06f"
+        },
+        {
+          "shot": "10",
+          "local": 354,
+          "global": 4254,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/10-354.png",
+          "originalSha256": "bfbaf1a39cc84478d8f768337c040963aeec44db79c6ae5ec6e0b266929edae8"
+        },
+        {
+          "shot": "10",
+          "local": 392,
+          "global": 4292,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/10-392.png",
+          "originalSha256": "70a5beb46b2fcb02f3b4faf4b8ac34272d5a55700dba909dc4c568c8ba0120c6"
+        },
+        {
+          "shot": "10",
+          "local": 541,
+          "global": 4441,
+          "originalFile": "/workspace/video-studio/episodes-codex/observer-pattern/remotion/out/observer-first-preflight/10-541.png",
+          "originalSha256": "70a5beb46b2fcb02f3b4faf4b8ac34272d5a55700dba909dc4c568c8ba0120c6"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Read final source and visually reviewed34selected preflight frames plus78decoded continuous-media frames at2fps; not all149preflightframes or all1160continuousframes, and not real-time playback.",
+    "No voice listening, word-levelASR, formal finalfullMP4, deployed website or mobile review is included in this preflight.",
+    "Renderer reportedCOPYFIT=[]for149stills; this report does not relabel all149as manually viewed or infer audience comprehension."
+  ],
+  "continuousMotion": {
+    "source": "remotion/out/observer-first-motion/05-07-continuous.mp4",
+    "sha256": "708bdc2da7308b2d3ee1a7ea016cca5d2ee8ebf0c80cbc67d3872b6cda18c0f7",
+    "metadata": {
+      "programs": [],
+      "stream_groups": [],
+      "streams": [
+        {
+          "width": 960,
+          "height": 540,
+          "r_frame_rate": "30/1",
+          "nb_frames": "1160",
+          "side_data_list": [
+            {}
+          ]
+        }
+      ],
+      "format": {
+        "duration": "38.666667"
+      }
+    },
+    "renderManifestSha256": "22d9817b38e3f68a257bff67a8473d25f5b9c918281005d7aaaacc5ccc3671b3",
+    "renderSourceSha256": {
+      "../storyboard.json": "61f6a5ccff8e0b999dac1f8befaa289dddbfebba60416e72000c83c79bb55104",
+      "../covers.json": "7ababb04cbb96dfd35cf768f9a572d875397f58da789c442887091034e457377",
+      "src/Main.tsx": "65512bf00d054f5f568eef8320b2898ba00619431dfb8604b033c5945585b647",
+      "src/java-card.json": "b82006ec8fef3094339c8d728427561dcd58c8a74cf60dc3e08537e086919183",
+      "src/motion.ts": "f165dfa44675cafe15bdc286b331f6abaf47f3c31ed52f65a67540646fe44fd4",
+      "src/data.ts": "f8c1a22684b7d2dab48d3ee042246435e8c622512d87bcc804a3b3a43e578441",
+      "src/objects.tsx": "a38964a7db96fb107b8f958a921a408c829bde101376009c86906135379e3df2",
+      "src/primitives.tsx": "775f42c15d08151adfb1587151e7f0b4250c2d92ee7815ba9b6b6dc88538535b",
+      "src/theme.ts": "bc9aca854a2c7573092b6ecee8a6c4d26dbc0b0f58cb576ee9032114a9dc5791",
+      "src/Cover.tsx": "5e5b8a55dd28fb81a540942b7e307c527bf381da2c812b8446e76d87484a2935"
+    },
+    "globalFrameRange": [
+      1837,
+      2996
+    ],
+    "actualSelectedFramesViewed": 78,
+    "method": "Single ffmpeg decode pass; every15th actual decoded frame at30fps, n=0,15,...1155 (2fps), viewed on5contact sheets. This is sampled motion analysis, not every-frame or real-time playback.",
+    "evidence": "revisions/observer-first/qa-independent/continuous-2fps-manifest.json",
+    "evidenceSha256": "2174b75ef5a6be70940e7268d5ec674cdf94ac5422a615743418ce20ff90779c",
+    "sheets": [
+      {
+        "path": "revisions/observer-first/qa-independent/continuous-2fps-01.jpg",
+        "sha256": "c308e34a2721bb8ce1fd271789796f693f6fcf68c6820318c64c2472973bdac4",
+        "samples": [
+          {
+            "shot": "05",
+            "globalFrame": 1837,
+            "clipFrame": 0,
+            "clipSeconds": 0.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1852,
+            "clipFrame": 15,
+            "clipSeconds": 0.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1867,
+            "clipFrame": 30,
+            "clipSeconds": 1.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1882,
+            "clipFrame": 45,
+            "clipSeconds": 1.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1897,
+            "clipFrame": 60,
+            "clipSeconds": 2.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1912,
+            "clipFrame": 75,
+            "clipSeconds": 2.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1927,
+            "clipFrame": 90,
+            "clipSeconds": 3.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1942,
+            "clipFrame": 105,
+            "clipSeconds": 3.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1957,
+            "clipFrame": 120,
+            "clipSeconds": 4.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1972,
+            "clipFrame": 135,
+            "clipSeconds": 4.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 1987,
+            "clipFrame": 150,
+            "clipSeconds": 5.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2002,
+            "clipFrame": 165,
+            "clipSeconds": 5.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2017,
+            "clipFrame": 180,
+            "clipSeconds": 6.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2032,
+            "clipFrame": 195,
+            "clipSeconds": 6.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2047,
+            "clipFrame": 210,
+            "clipSeconds": 7.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2062,
+            "clipFrame": 225,
+            "clipSeconds": 7.5
+          }
+        ]
+      },
+      {
+        "path": "revisions/observer-first/qa-independent/continuous-2fps-02.jpg",
+        "sha256": "521d1b8177659a5d88c53bc2ed861453caec55ab58bc62c3259e9f902af3bfa7",
+        "samples": [
+          {
+            "shot": "05",
+            "globalFrame": 2077,
+            "clipFrame": 240,
+            "clipSeconds": 8.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2092,
+            "clipFrame": 255,
+            "clipSeconds": 8.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2107,
+            "clipFrame": 270,
+            "clipSeconds": 9.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2122,
+            "clipFrame": 285,
+            "clipSeconds": 9.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2137,
+            "clipFrame": 300,
+            "clipSeconds": 10.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2152,
+            "clipFrame": 315,
+            "clipSeconds": 10.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2167,
+            "clipFrame": 330,
+            "clipSeconds": 11.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2182,
+            "clipFrame": 345,
+            "clipSeconds": 11.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2197,
+            "clipFrame": 360,
+            "clipSeconds": 12.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2212,
+            "clipFrame": 375,
+            "clipSeconds": 12.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2227,
+            "clipFrame": 390,
+            "clipSeconds": 13.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2242,
+            "clipFrame": 405,
+            "clipSeconds": 13.5
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2257,
+            "clipFrame": 420,
+            "clipSeconds": 14.0
+          },
+          {
+            "shot": "05",
+            "globalFrame": 2272,
+            "clipFrame": 435,
+            "clipSeconds": 14.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2287,
+            "clipFrame": 450,
+            "clipSeconds": 15.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2302,
+            "clipFrame": 465,
+            "clipSeconds": 15.5
+          }
+        ]
+      },
+      {
+        "path": "revisions/observer-first/qa-independent/continuous-2fps-03.jpg",
+        "sha256": "323e347b0731c8a3732dea37b979fbcd01efb0feef74684232b625e537e905e4",
+        "samples": [
+          {
+            "shot": "06",
+            "globalFrame": 2317,
+            "clipFrame": 480,
+            "clipSeconds": 16.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2332,
+            "clipFrame": 495,
+            "clipSeconds": 16.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2347,
+            "clipFrame": 510,
+            "clipSeconds": 17.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2362,
+            "clipFrame": 525,
+            "clipSeconds": 17.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2377,
+            "clipFrame": 540,
+            "clipSeconds": 18.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2392,
+            "clipFrame": 555,
+            "clipSeconds": 18.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2407,
+            "clipFrame": 570,
+            "clipSeconds": 19.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2422,
+            "clipFrame": 585,
+            "clipSeconds": 19.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2437,
+            "clipFrame": 600,
+            "clipSeconds": 20.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2452,
+            "clipFrame": 615,
+            "clipSeconds": 20.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2467,
+            "clipFrame": 630,
+            "clipSeconds": 21.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2482,
+            "clipFrame": 645,
+            "clipSeconds": 21.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2497,
+            "clipFrame": 660,
+            "clipSeconds": 22.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2512,
+            "clipFrame": 675,
+            "clipSeconds": 22.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2527,
+            "clipFrame": 690,
+            "clipSeconds": 23.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2542,
+            "clipFrame": 705,
+            "clipSeconds": 23.5
+          }
+        ]
+      },
+      {
+        "path": "revisions/observer-first/qa-independent/continuous-2fps-04.jpg",
+        "sha256": "01c536fc3d4f771971dcceca2c986a57dcc934c51f5a041a0a42ff58c6c940a8",
+        "samples": [
+          {
+            "shot": "06",
+            "globalFrame": 2557,
+            "clipFrame": 720,
+            "clipSeconds": 24.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2572,
+            "clipFrame": 735,
+            "clipSeconds": 24.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2587,
+            "clipFrame": 750,
+            "clipSeconds": 25.0
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2602,
+            "clipFrame": 765,
+            "clipSeconds": 25.5
+          },
+          {
+            "shot": "06",
+            "globalFrame": 2617,
+            "clipFrame": 780,
+            "clipSeconds": 26.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2632,
+            "clipFrame": 795,
+            "clipSeconds": 26.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2647,
+            "clipFrame": 810,
+            "clipSeconds": 27.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2662,
+            "clipFrame": 825,
+            "clipSeconds": 27.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2677,
+            "clipFrame": 840,
+            "clipSeconds": 28.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2692,
+            "clipFrame": 855,
+            "clipSeconds": 28.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2707,
+            "clipFrame": 870,
+            "clipSeconds": 29.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2722,
+            "clipFrame": 885,
+            "clipSeconds": 29.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2737,
+            "clipFrame": 900,
+            "clipSeconds": 30.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2752,
+            "clipFrame": 915,
+            "clipSeconds": 30.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2767,
+            "clipFrame": 930,
+            "clipSeconds": 31.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2782,
+            "clipFrame": 945,
+            "clipSeconds": 31.5
+          }
+        ]
+      },
+      {
+        "path": "revisions/observer-first/qa-independent/continuous-2fps-05.jpg",
+        "sha256": "97537447a9f712336faf0b7f36ca70ccac2d5a16d1f0638b2be226e1c2dd03b7",
+        "samples": [
+          {
+            "shot": "07",
+            "globalFrame": 2797,
+            "clipFrame": 960,
+            "clipSeconds": 32.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2812,
+            "clipFrame": 975,
+            "clipSeconds": 32.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2827,
+            "clipFrame": 990,
+            "clipSeconds": 33.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2842,
+            "clipFrame": 1005,
+            "clipSeconds": 33.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2857,
+            "clipFrame": 1020,
+            "clipSeconds": 34.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2872,
+            "clipFrame": 1035,
+            "clipSeconds": 34.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2887,
+            "clipFrame": 1050,
+            "clipSeconds": 35.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2902,
+            "clipFrame": 1065,
+            "clipSeconds": 35.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2917,
+            "clipFrame": 1080,
+            "clipSeconds": 36.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2932,
+            "clipFrame": 1095,
+            "clipSeconds": 36.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2947,
+            "clipFrame": 1110,
+            "clipSeconds": 37.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2962,
+            "clipFrame": 1125,
+            "clipSeconds": 37.5
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2977,
+            "clipFrame": 1140,
+            "clipSeconds": 38.0
+          },
+          {
+            "shot": "07",
+            "globalFrame": 2992,
+            "clipFrame": 1155,
+            "clipSeconds": 38.5
+          }
+        ]
+      }
+    ],
+    "observations": [
+      "0–2s: source changes pending→paid while summary/record still hold old state.",
+      "3–9.5s: paid notification moves along summary path; summary updates only after receipt.",
+      "10–12s: next notification travels to record, then one paid fact appears; original source and recipient identities remain stable.",
+      "14.5–15s:05→06returns to same product page with source/summary paid and one record; no event/state reset.",
+      "19.5–24.5s: visible close action precedes cancellation and removal, then summary is markedstopped/historicalpaid while record remains active.",
+      "26–28.5s:06→07preserves stopped summary and current record membership; same order becomes shipped.",
+      "29.5–33.5s: shipped notification travels only to record path; summary never receives or updates.",
+      "35–38.5s: record holds paid+shipped, summary stays at lastreceivedpaid/stopped; source remains shipped."
+    ],
+    "result": "pass",
+    "blockingFindings": []
+  }
+}

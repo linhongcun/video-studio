@@ -1,0 +1,1 @@
+Candidate v0.69.1 was never published by this task. Another task occupied that tag for HTTPS/DNS/browser-cache references before this task merged. Old static/build/copy evidence remains scoped to this candidate. Observer media and181 frozen production inputs remain unchanged; final release uses the next free patch after latest main integration.
