@@ -17,3 +17,7 @@ NGINX资料保留Using nginx as HTTP load balancer与HTTP Health Checks，区分
 站点只追加公开资料段，原文章全文、frontmatter、锚点、章节/源码入口与首发身份保持，仅更新实质修改时间和最终媒体范围。全站构建通过，现有13片附录完整验证，其余33片只有固定基线SHA未变时暂缓，未扩大豁免。来源/实际编码独立复核、播放器和线上核验按各自真实报告记录，未执行的完整听辨/逐字ASR不冒称通过；仅GitHub站点，不重发平台，不表示用户已观看认可或关注量已提升。
 
 证据：startup.json、sources-*.json、production-entry-check.json、delivery.json、单期revisions/reference-endcards的baseline及完整media-check；独立审查、浏览器与上线记录完成后另记。
+
+## 本地验收
+
+6项引用独立核对共8次成功完整GET、6个固定URL；12张实际MP4的正文末帧和卡首/中/末帧均逐张查看通过。6个浏览器场景、153项断言、24个精确暂停点、三次桌面1倍速尾段到ended、三页手机原生全屏、三次完整本地MP4 GET/SHA与12次出处点击通过，9张浏览器截图实际查看；见qa-independent.json、qa-browser.json。手机小窗的原生控件覆盖限制与模拟视口/静音播放范围如实保留，未声称真机、逐字ASR或全片听辨。local-verification.json上线前预检已通过，早期位置写法不一致的失败记录保留，修正后真实DOM核验通过。
