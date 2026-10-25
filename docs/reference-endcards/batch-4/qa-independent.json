@@ -1,0 +1,975 @@
+{
+  "schemaVersion": 1,
+  "task": "reference-endcards-batch-4-independent-review",
+  "baseCommit": "3156d84542f97bc5e73610c6ec82a6850f83d752",
+  "checkedAtUTC": "2026-10-25T23:18:17.166345+00:00",
+  "checkedAtBeijing": "2026-10-26T07:18:17.166452+08:00",
+  "executedBy": "Codex appendix_implementation independent reviewer",
+  "status": "passed-source-and-encoded-reference-cards",
+  "passed": true,
+  "scope": "Fresh full GETs of official fixed repository bodies, exact original titles/continuous verbatim quotations and raw evidence lines, topic-specific claim boundaries, protected input identities and 12 actually viewed final-encoded frames. No product or source-author files changed.",
+  "sourceSelectionCount": 6,
+  "referencePageCount": 3,
+  "actualEncodedFramesViewed": 12,
+  "issues": [],
+  "sourceReviews": [
+    {
+      "episode": "message-queue",
+      "sourceStatus": "passed-independent-get-and-original-text",
+      "sourceCount": 2,
+      "referencesSHA256": "43ed14a3b85a0590b964868338d65a072e03564cc30de0726392f3e7778595ce",
+      "evidencePath": "docs/reference-endcards/batch-4/sources-message-queue.json",
+      "evidenceSHA256": "697876bd79686f37a4478c2fea83a58eee1ec6abf2b81d42ad2f9c12d9ff5eb7",
+      "retrievals": [
+        {
+          "id": "R1",
+          "sourceId": "confirms",
+          "title": "Consumer Acknowledgements and Publisher Confirms",
+          "retrievedUrl": "https://raw.githubusercontent.com/rabbitmq/rabbitmq-website/29cb9ecf131223ad9b7faf61921ac3683008f722/docs/confirms.md",
+          "finalUrl": "https://raw.githubusercontent.com/rabbitmq/rabbitmq-website/29cb9ecf131223ad9b7faf61921ac3683008f722/docs/confirms.md",
+          "httpStatus": 200,
+          "method": "GET",
+          "fullResponseRead": true,
+          "bytes": 31197,
+          "sha256": "861abccf819fddcdaddd661255914d867d6ed511a9ff19311bfef73d0907b127",
+          "recordedSHA256": "861abccf819fddcdaddd661255914d867d6ed511a9ff19311bfef73d0907b127",
+          "shaMatches": true,
+          "independentCheckedAt": "2026-10-26T07:11:16.400782+08:00",
+          "actualOriginalTitles": [
+            {
+              "kind": "frontmatter title",
+              "text": "Consumer Acknowledgements and Publisher Confirms"
+            },
+            {
+              "kind": "Markdown H1",
+              "text": "Consumer Acknowledgements and Publisher Confirms"
+            }
+          ],
+          "companionGETs": [],
+          "originalTitleExactlyMatched": true,
+          "titleEvidenceExcerpt": {
+            "startLine": 2,
+            "endLine": 2,
+            "actualOriginalExcerpt": "title: Consumer Acknowledgements and Publisher Confirms",
+            "matchesRecordedExcerpt": true
+          },
+          "quotation": {
+            "text": "The two features, however, are entirely orthogonal and unaware of each other.",
+            "locator": "The Basics · #relation",
+            "evidence": "docs/reference-endcards/batch-4/sources-message-queue.json"
+          },
+          "continuousOriginalQuotationMatched": true,
+          "quotationNormalization": "Only original formatting whitespace, XML/HTML markup and Markdown inline formatting removed; words, case and punctuation retained.",
+          "quotationEvidenceExcerpt": {
+            "startLine": 72,
+            "endLine": 72,
+            "actualOriginalExcerpt": "The two features, however, are entirely orthogonal and unaware of each other.",
+            "matchesRecordedExcerpt": true
+          },
+          "claimEvidenceExcerpts": [
+            {
+              "startLine": 64,
+              "endLine": 77,
+              "actualOriginalExcerpt": "### Are Publisher Confirms Related to Consumer Delivery Acknowledgements? {#relation}\n\n[Publisher confirms](#publisher-confirms) and [consumer delivery acknowledgements](#consumer-acknowledgements)\nare very similar features that solve similar problems in different contexts:\n\n1. Consumer acknowledgements, as the name suggests, cover RabbitMQ communication with consumers\n2. Publisher confirms cover publisher communication with RabbitMQ\n\nThe two features, however, are entirely orthogonal and unaware of each other.\n\n**Publisher confirms are not aware of consumers**: they only cover publisher's interactions\nwith node it is connected to, and the queue (or [stream](./streams)) leader replica.\n\n**Consumer acknowledgements are not aware of publishers**: their goal is to confirm",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 129,
+              "endLine": 146,
+              "actualOriginalExcerpt": "a confirmation mechanism that allows consumers to acknowledge deliveries\nto the node they are connected to. Whether the mechanism is used is decided\nat the time consumer subscribes.\n\nDepending on the acknowledgement mode used, RabbitMQ can consider a message to be\nsuccessfully delivered either immediately after it is sent out (written to a TCP socket)\nor when an explicit (\"manual\") client acknowledgement is received. Manually sent\nacknowledgements can be positive or negative and use one of the following protocol methods:\n\n * `basic.ack` is used for positive acknowledgements\n * `basic.nack` is used for negative acknowledgements (note: this is a [RabbitMQ extension to AMQP 0-9-1](./nack))\n * `basic.reject` is used for negative acknowledgements but has one limitation compared to `basic.nack`\n\nHow these methods are exposed in client library APIs will be discussed below.\n\nPositive acknowledgements simply instruct RabbitMQ to record a message as delivered and can be discarded.\nNegative acknowledgements with `basic.reject` have the same effect. The difference\nis primarily in the semantics: positive acknowledgements assume",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 520,
+              "endLine": 535,
+              "actualOriginalExcerpt": "### When Consumers Fail or Lose Connection: Automatic Requeueing {#automatic-requeueing}\n\nWhen manual acknowledgements are used, any delivery\n(message) that was not acked is automatically requeued when\nthe channel (or connection) on which the delivery happened\nis closed. This includes TCP connection loss by clients,\nconsumer application (process) failures, and channel-level\nprotocol exceptions (covered below).\n\nNote that it takes a period of time to [detect an unavailable client](./heartbeats).\n\nDue to this behavior, consumers must be prepared to handle redeliveries and otherwise\nbe implemented with [idempotence](https://en.wikipedia.org/wiki/Idempotence) in mind.\nRedeliveries will have a special boolean property, `redeliver`, set to `true`\nby RabbitMQ. For first time deliveries it will be set to `false`. Note that\na consumer can receive a message that was previously delivered to another consumer.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 605,
+              "endLine": 619,
+              "actualOriginalExcerpt": "### When Will Published Messages Be Confirmed by the Broker? {#when-publishes-are-confirmed}\n\nFor unroutable messages, the broker will issue a confirm\nonce the exchange verifies a message won't route to any queue\n(returns an empty list of queues). If the message is also\npublished as mandatory, the `basic.return` is sent\nto the client before `basic.ack`. The same\nis true for negative acknowledgements (`basic.nack`).\n\nFor routable messages, the `basic.ack` is sent when a\nmessage has been accepted by all the queues. For persistent\nmessages routed to durable queues, this <strong>means persisting\nto disk</strong>. For [quorum queues](./quorum-queues),\nthis means that a quorum replicas have accepted and confirmed\nthe message to the elected leader.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 621,
+              "endLine": 625,
+              "actualOriginalExcerpt": "### Ack Latency for Persistent Messages {#publisher-confirms-latency}\n\n`basic.ack` for a persistent message routed to a\ndurable queue will be sent after persisting the message to\ndisk. The RabbitMQ message store persists messages to disk in",
+              "matchesRecordedExcerpt": true
+            }
+          ],
+          "canonicalIndependentlyFetched": false,
+          "quotationCharacters": 77
+        },
+        {
+          "id": "R2",
+          "sourceId": "reliability",
+          "title": "Reliability Guide",
+          "retrievedUrl": "https://raw.githubusercontent.com/rabbitmq/rabbitmq-website/29cb9ecf131223ad9b7faf61921ac3683008f722/docs/reliability.md",
+          "finalUrl": "https://raw.githubusercontent.com/rabbitmq/rabbitmq-website/29cb9ecf131223ad9b7faf61921ac3683008f722/docs/reliability.md",
+          "httpStatus": 200,
+          "method": "GET",
+          "fullResponseRead": true,
+          "bytes": 13916,
+          "sha256": "25d54e926d450a8676a93ba6282f4eb8456ab60db3242ac6333f14871d3e07e4",
+          "recordedSHA256": "25d54e926d450a8676a93ba6282f4eb8456ab60db3242ac6333f14871d3e07e4",
+          "shaMatches": true,
+          "independentCheckedAt": "2026-10-26T07:11:16.476701+08:00",
+          "actualOriginalTitles": [
+            {
+              "kind": "frontmatter title",
+              "text": "Reliability Guide"
+            },
+            {
+              "kind": "Markdown H1",
+              "text": "Reliability Guide"
+            }
+          ],
+          "companionGETs": [],
+          "originalTitleExactlyMatched": true,
+          "titleEvidenceExcerpt": {
+            "startLine": 2,
+            "endLine": 2,
+            "actualOriginalExcerpt": "title: Reliability Guide",
+            "matchesRecordedExcerpt": true
+          },
+          "quotation": {
+            "text": "Therefore consumer applications will need to perform deduplication or handle incoming messages in an idempotent manner.",
+            "locator": "Data Safety on the Publisher Side",
+            "evidence": "docs/reference-endcards/batch-4/sources-message-queue.json"
+          },
+          "continuousOriginalQuotationMatched": true,
+          "quotationNormalization": "Only original formatting whitespace, XML/HTML markup and Markdown inline formatting removed; words, case and punctuation retained.",
+          "quotationEvidenceExcerpt": {
+            "startLine": 178,
+            "endLine": 179,
+            "actualOriginalExcerpt": "etc). Therefore consumer applications will need to perform\ndeduplication or handle incoming messages in an idempotent manner.",
+            "matchesRecordedExcerpt": true
+          },
+          "claimEvidenceExcerpts": [
+            {
+              "startLine": 97,
+              "endLine": 120,
+              "actualOriginalExcerpt": "to indicate to the server that it has received and/or processed a delivery\nand to allow the server to indicate the same thing to the\npublisher. They are known as consumer acknowledgements and publisher confirms.\n\nWhile TCP ensures that packets have been delivered to connection peer, and will\nretransmit until they are, that only handles failures at the network\nlayer. Acknowledgements and confirms indicate that messages have been\nreceived **and acted upon** by the peer application.\nAn acknowledgement signals both the receipt of a message, and a transfer of ownership where\nthe receiver assumes full responsibility for it.\n\nAcknowledgements therefore have semantics. A consuming application\nshould not acknowledge messages until it has done whatever it needs to\ndo with them: recorded them in a data store, forwarded them on, or performed\nany other operation. Once it does so, the broker is free\nto mark the delivery for deletion.\n\nSimilarly, the broker will confirm messages once it has taken\nresponsibility for them. The details are covered in the [Acknowledgements and Confirms guide](./confirms).\n\nUse of acknowledgements guarantees **at least once**\ndelivery. Without acknowledgements, message loss is possible\nduring publish and consume operations and\nonly **at most once** delivery is guaranteed.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 171,
+              "endLine": 179,
+              "actualOriginalExcerpt": "## Data Safety on the Publisher Side {#publisher-side}\n\nWhen using confirms, producers recovering from a channel or connection\nfailure should retransmit any messages for which an acknowledgement\nhas not been received from the broker. There is a possibility of\nmessage duplication here, because the broker might have sent a\nconfirmation that never reached the producer (due to network failures,\netc). Therefore consumer applications will need to perform\ndeduplication or handle incoming messages in an idempotent manner.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 205,
+              "endLine": 222,
+              "actualOriginalExcerpt": "## Data Safety on the Consumer Side {#consumer-side}\n\nIn the event of network failure (or a node failure), messages can be\n[redelivered](./consumers#message-properties), and consumers must be prepared to handle\ndeliveries they have seen in the past. It is recommended that consumer implementation\nis designed to be idempotent rather than to explicitly\nperform deduplication.\n\nIf a message is delivered to a consumer and then requeued, either [automatically](./confirms#automatic-requeueing) by\nRabbitMQ or by the same or different consumer, RabbitMQ will set the `redelivered` flag on\nit when it is delivered again. This is a hint that a consumer **may** have seen\nthis message before. This is not guaranteed as the original delivery might have not made it to any consumers\ndue to a network or consumer application failure.\n\nIf the `redelivered` flag is not set then it is guaranteed that the message has not been seen\nbefore. Therefore if a consumer finds it more expensive to deduplicate\nmessages or process them in an idempotent manner, it can do this only\nfor messages with the `redelivered` flag set.",
+              "matchesRecordedExcerpt": true
+            }
+          ],
+          "canonicalIndependentlyFetched": false,
+          "quotationCharacters": 119
+        }
+      ],
+      "scope": "Independent fresh full GET and original-title/continuous-quote/raw-line review; visual final-media review pending."
+    },
+    {
+      "episode": "rate-limit",
+      "sourceStatus": "passed-independent-get-and-original-text",
+      "sourceCount": 2,
+      "referencesSHA256": "5f81c5c21c4d984a0c123c737df72d0d05a7d38083a5549d82c585961429a550",
+      "evidencePath": "docs/reference-endcards/batch-4/sources-rate-limit.json",
+      "evidenceSHA256": "db78827d80f230aaa09b954fc7676e875ea2a1506092c291161b20fe37f002e8",
+      "retrievals": [
+        {
+          "id": "R1",
+          "sourceId": "rate-limit-envoy-local",
+          "title": "Local rate limit",
+          "retrievedUrl": "https://raw.githubusercontent.com/envoyproxy/envoy/83297dad103f3dbd6320d0b29cd1e7781cf45305/docs/root/configuration/http/http_filters/local_rate_limit_filter.rst",
+          "finalUrl": "https://raw.githubusercontent.com/envoyproxy/envoy/83297dad103f3dbd6320d0b29cd1e7781cf45305/docs/root/configuration/http/http_filters/local_rate_limit_filter.rst",
+          "httpStatus": 200,
+          "method": "GET",
+          "fullResponseRead": true,
+          "bytes": 7861,
+          "sha256": "7db0308c39cb772046dc9e604df049ae591871926ea2252a7bcdf695bc178bdf",
+          "recordedSHA256": "7db0308c39cb772046dc9e604df049ae591871926ea2252a7bcdf695bc178bdf",
+          "shaMatches": true,
+          "independentCheckedAt": "2026-10-26T07:13:55.656144+08:00",
+          "actualOriginalTitles": [
+            {
+              "kind": "reStructuredText document heading",
+              "text": "Local rate limit"
+            }
+          ],
+          "companionGETs": [
+            {
+              "url": "https://raw.githubusercontent.com/envoyproxy/envoy/83297dad103f3dbd6320d0b29cd1e7781cf45305/api/envoy/type/v3/token_bucket.proto",
+              "httpStatus": 200,
+              "fullResponseRead": true,
+              "bytes": 1585,
+              "sha256": "267a27afdc735fa581a83d8186361dede7c8b32b076fb185851833c811c7f1e5",
+              "recordedSHA256": "267a27afdc735fa581a83d8186361dede7c8b32b076fb185851833c811c7f1e5",
+              "sourceFile": "api/envoy/type/v3/token_bucket.proto",
+              "sourceExcerpts": [
+                {
+                  "startLine": 18,
+                  "endLine": 38,
+                  "actualOriginalExcerpt": "// [#protodoc-title: Token bucket]\n\n// Configures a token bucket, typically used for rate limiting.\nmessage TokenBucket {\n  option (udpa.annotations.versioning).previous_message_type = \"envoy.type.TokenBucket\";\n\n  // The maximum tokens that the bucket can hold. This is also the number of tokens that the bucket\n  // initially contains. A value of 0 means the bucket will always be empty and all requests will\n  // be rate limited (i.e., always reject).\n  uint32 max_tokens = 1 [(validate.rules).uint32 = {gte: 0}];\n\n  // The number of tokens added to the bucket during each fill interval. If not specified, defaults\n  // to a single token.\n  google.protobuf.UInt32Value tokens_per_fill = 2 [(validate.rules).uint32 = {gt: 0}];\n\n  // The fill interval that tokens are added to the bucket. During each fill interval\n  // ``tokens_per_fill`` are added to the bucket. The bucket will never contain more than\n  // ``max_tokens`` tokens.\n  google.protobuf.Duration fill_interval = 3 [(validate.rules).duration = {\n    required: true\n    gt {}",
+                  "matchesRecordedExcerpt": true
+                }
+              ],
+              "includeBinding": null,
+              "checkedAt": "2026-10-26T07:13:55.330005+08:00"
+            },
+            {
+              "url": "https://raw.githubusercontent.com/envoyproxy/envoy/83297dad103f3dbd6320d0b29cd1e7781cf45305/api/envoy/extensions/filters/http/local_ratelimit/v3/local_rate_limit.proto",
+              "httpStatus": 200,
+              "fullResponseRead": true,
+              "bytes": 10444,
+              "sha256": "9843b677a5a90595ab1d595c9f1765c1cdf620b5beefb6ea57ea215c8bab5e83",
+              "recordedSHA256": "9843b677a5a90595ab1d595c9f1765c1cdf620b5beefb6ea57ea215c8bab5e83",
+              "sourceFile": "api/envoy/extensions/filters/http/local_ratelimit/v3/local_rate_limit.proto",
+              "sourceExcerpts": [
+                {
+                  "startLine": 31,
+                  "endLine": 55,
+                  "actualOriginalExcerpt": "  // This field allows for a custom HTTP response status code to the downstream client when\n  // the request has been rate limited.\n  // Defaults to 429 (TooManyRequests).\n  //\n  // .. note::\n  //   If this is set to < 400, 429 will be used instead.\n  type.v3.HttpStatus status = 2;\n\n  // The token bucket configuration to use for rate limiting requests that are processed by this\n  // filter. Each request processed by the filter consumes a single token. If the token is available,\n  // the request will be allowed. If no tokens are available, the request will receive the configured\n  // rate limit status.\n  //\n  // .. note::\n  //   It's fine for the token bucket to be unset for the global configuration since the rate limit\n  //   can be applied at a the virtual host or route level. Thus, the token bucket must be set\n  //   for the per route configuration otherwise the config will be rejected.\n  //\n  // .. note::\n  //   When using per route configuration, the bucket becomes unique to that route.\n  //\n  // .. note::\n  //   In the current implementation the token bucket's :ref:`fill_interval\n  //   <envoy_v3_api_field_type.v3.TokenBucket.fill_interval>` must be >= 50ms to avoid too aggressive\n  //   refills.",
+                  "matchesRecordedExcerpt": true
+                },
+                {
+                  "startLine": 108,
+                  "endLine": 116,
+                  "actualOriginalExcerpt": "  // If set to true, a token bucket is allocated for each connection.\n  // Thus the rate limits are applied per connection thereby allowing\n  // one to rate limit requests on a per connection basis.\n  // If unspecified, the default value is false.\n  bool local_rate_limit_per_downstream_connection = 11;\n\n  // Enables the local cluster level rate limiting, iff this is set explicitly. For example,\n  // given an Envoy gateway that contains N Envoy instances and a rate limit rule X tokens\n  // per second. If this is set, the total rate limit of whole gateway will always be X tokens",
+                  "matchesRecordedExcerpt": true
+                }
+              ],
+              "includeBinding": null,
+              "checkedAt": "2026-10-26T07:13:55.652462+08:00"
+            }
+          ],
+          "originalTitleExactlyMatched": true,
+          "titleEvidenceExcerpt": null,
+          "quotation": {
+            "text": "If the local rate limit token bucket is checked, and there are no tokens available, a 429 response is returned (the response is configurable).",
+            "locator": "Opening behavior description (lines 15–16)",
+            "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+          },
+          "continuousOriginalQuotationMatched": true,
+          "quotationNormalization": "Only original formatting whitespace, XML/HTML markup and Markdown inline formatting removed; words, case and punctuation retained.",
+          "quotationEvidenceExcerpt": null,
+          "claimEvidenceExcerpts": [
+            {
+              "startLine": 3,
+              "endLine": 4,
+              "actualOriginalExcerpt": "Local rate limit\n================",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 10,
+              "endLine": 23,
+              "actualOriginalExcerpt": "The HTTP local rate limit filter applies a :ref:`token bucket\n<envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.token_bucket>` rate\nlimit when the request's route or virtual host has a per filter\n:ref:`local rate limit configuration <envoy_v3_api_msg_extensions.filters.http.local_ratelimit.v3.LocalRateLimit>`.\n\nIf the local rate limit token bucket is checked, and there are no tokens available, a 429 response is returned\n(the response is configurable). The local rate limit filter then sets the\n:ref:`x-envoy-ratelimited<config_http_filters_router_x-envoy-ratelimited>` response header. :ref:`Additional response headers\n<envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.response_headers_to_add>` can be\nconfigured to be returned.\n\n:ref:`Request headers\n<envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.request_headers_to_add_when_not_enforced>` can be\nconfigured to be added to forwarded requests to the upstream when the local rate limit filter is enabled but not enforced.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 25,
+              "endLine": 40,
+              "actualOriginalExcerpt": "Depending on the value of the config :ref:`local_rate_limit_per_downstream_connection <envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.local_rate_limit_per_downstream_connection>`,\nthe token bucket is either shared across all workers or on a per connection basis. This results in the local rate limits being applied either per Envoy process or per downstream connection.\nBy default the rate limits are applied per Envoy process.\n\nRetry-After header\n------------------\n\nWhen :ref:`enable_retry_after_header\n<envoy_v3_api_field_extensions.filters.http.local_ratelimit.v3.LocalRateLimit.enable_retry_after_header>`\nis enabled and the filter enforces a 429 response, the response includes ``Retry-After`` using the\n``delay-seconds`` form. The delay is the number of seconds until the next token is available in the\nbucket that rejected the request, clamped to at least one second.\nIf ``response_headers_to_add`` sets a ``Retry-After`` header, the filter does not overwrite it.\n\nThe header is not emitted for an upstream-generated 429 response, when rate limiting is not\nenforced, or when a custom status other than 429 is configured. The option is disabled by default.",
+              "matchesRecordedExcerpt": true
+            }
+          ],
+          "canonicalIndependentlyFetched": false,
+          "quotationCharacters": 142
+        },
+        {
+          "id": "R2",
+          "sourceId": "rate-limit-mdn-429",
+          "title": "429 Too Many Requests",
+          "retrievedUrl": "https://raw.githubusercontent.com/mdn/content/87ca9db1ebe56eb20c1f20b91fca43955d8f0e26/files/en-us/web/http/reference/status/429/index.md",
+          "finalUrl": "https://raw.githubusercontent.com/mdn/content/87ca9db1ebe56eb20c1f20b91fca43955d8f0e26/files/en-us/web/http/reference/status/429/index.md",
+          "httpStatus": 200,
+          "method": "GET",
+          "fullResponseRead": true,
+          "bytes": 2072,
+          "sha256": "9d00420fcbd41b38a4016031ec5df0c13f8a495295d38b4c0b3487c60c5bbe8b",
+          "recordedSHA256": "9d00420fcbd41b38a4016031ec5df0c13f8a495295d38b4c0b3487c60c5bbe8b",
+          "shaMatches": true,
+          "independentCheckedAt": "2026-10-26T07:13:55.901890+08:00",
+          "actualOriginalTitles": [
+            {
+              "kind": "frontmatter title",
+              "text": "429 Too Many Requests"
+            }
+          ],
+          "companionGETs": [],
+          "originalTitleExactlyMatched": true,
+          "titleEvidenceExcerpt": null,
+          "quotation": {
+            "text": "Implementations of rate limiting vary; restrictions may be server-wide or per resource.",
+            "locator": "Opening discussion (line 14)",
+            "evidence": "docs/reference-endcards/batch-4/sources-rate-limit.json"
+          },
+          "continuousOriginalQuotationMatched": true,
+          "quotationNormalization": "Only original formatting whitespace, XML/HTML markup and Markdown inline formatting removed; words, case and punctuation retained.",
+          "quotationEvidenceExcerpt": null,
+          "claimEvidenceExcerpts": [
+            {
+              "startLine": 1,
+              "endLine": 15,
+              "actualOriginalExcerpt": "---\ntitle: 429 Too Many Requests\nslug: Web/HTTP/Reference/Status/429\npage-type: http-status-code\nspec-urls: https://www.rfc-editor.org/info/rfc6585/#section-4\nsidebar: http\n---\n\nThe HTTP **`429 Too Many Requests`** [client error response](/en-US/docs/Web/HTTP/Reference/Status#client_error_responses) status code indicates the client has sent too many requests in a given amount of time.\nThis mechanism of asking the client to slow down the rate of requests is commonly called \"{{glossary(\"rate limit\", \"rate limiting\")}}\".\n\nA {{HTTPHeader(\"Retry-After\")}} header may be included to this response to indicate how long a client should wait before making the request again.\n\nImplementations of rate limiting vary; restrictions may be server-wide or per resource.\nTypically, rate-limiting restrictions are based on a client's IP but can be specific to users or authorized applications if requests are authenticated or contain a {{Glossary(\"cookie\")}}.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 25,
+              "endLine": 38,
+              "actualOriginalExcerpt": "### Response containing Retry-After header\n\nThe following request is being sent repeatedly in a loop by a client that is misconfigured:\n\n```http\nGET /reports/mdn HTTP/1.1\nHost: example.com\n```\n\nIn this example, server-wide rate limiting is active when a client exceeds a set threshold of requests per minute.\nA 429 response is returned with a {{HTTPHeader(\"Retry-After\")}} header that indicates requests will be allowed for this client again after 3600 seconds (60 minutes):\n\n```http\nHTTP/1.1 429 Too Many Requests",
+              "matchesRecordedExcerpt": true
+            }
+          ],
+          "canonicalIndependentlyFetched": false,
+          "quotationCharacters": 87
+        }
+      ],
+      "scope": "Independent fresh full GET and original-title/continuous-quote/raw-line review; visual final-media review pending."
+    },
+    {
+      "episode": "circuit-breaker",
+      "sourceStatus": "passed-independent-get-and-original-text",
+      "sourceCount": 2,
+      "referencesSHA256": "31cd8ef2931e493fb41da72f7fc76479402d6b2c1d501278b35430c4d88beadf",
+      "evidencePath": "docs/reference-endcards/batch-4/sources-circuit-breaker.json",
+      "evidenceSHA256": "47268f75afed976128490dce3cfde9f26c452b0b67ac500b398231d731730f6a",
+      "retrievals": [
+        {
+          "id": "R1",
+          "sourceId": "circuit-breaker-pattern",
+          "title": "Circuit Breaker Pattern",
+          "retrievedUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/circuit-breaker.md",
+          "finalUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/circuit-breaker.md",
+          "httpStatus": 200,
+          "method": "GET",
+          "fullResponseRead": true,
+          "bytes": 25769,
+          "sha256": "29baeab9e19c54c9fdae01dfa4c431bae0c6811e0c5267a1d6c8c78267b8146e",
+          "recordedSHA256": "29baeab9e19c54c9fdae01dfa4c431bae0c6811e0c5267a1d6c8c78267b8146e",
+          "shaMatches": true,
+          "independentCheckedAt": "2026-10-26T07:12:17.110998+08:00",
+          "actualOriginalTitles": [
+            {
+              "kind": "frontmatter title",
+              "text": "Circuit Breaker Pattern"
+            },
+            {
+              "kind": "Markdown H1",
+              "text": "Circuit Breaker pattern"
+            }
+          ],
+          "companionGETs": [],
+          "originalTitleExactlyMatched": true,
+          "titleEvidenceExcerpt": {
+            "startLine": 2,
+            "endLine": 2,
+            "actualOriginalExcerpt": "title: Circuit Breaker Pattern",
+            "matchesRecordedExcerpt": true
+          },
+          "quotation": {
+            "text": "A limited number of requests from the application are allowed to pass through and invoke the operation.",
+            "locator": "Solution / Half-Open · line 45",
+            "evidence": "docs/reference-endcards/batch-4/sources-circuit-breaker.json"
+          },
+          "continuousOriginalQuotationMatched": true,
+          "quotationNormalization": "Only original formatting whitespace, XML/HTML markup and Markdown inline formatting removed; words, case and punctuation retained.",
+          "quotationEvidenceExcerpt": {
+            "startLine": 45,
+            "endLine": 45,
+            "actualOriginalExcerpt": "- **Half-Open:** A limited number of requests from the application are allowed to pass through and invoke the operation. If these requests are successful, the circuit breaker assumes that the fault that caused the failure is fixed, and the circuit breaker switches to the **Closed** state. The failure counter is reset. If any request fails, the circuit breaker assumes that the fault is still present, so it reverts to the **Open** state. It restarts the time-out timer so that the system can recover from the failure.",
+            "matchesRecordedExcerpt": true
+          },
+          "claimEvidenceExcerpts": [
+            {
+              "startLine": 19,
+              "endLine": 25,
+              "actualOriginalExcerpt": "Unanticipated events can create faults that take longer to fix. These faults can range in severity from a partial loss of connectivity to a complete service failure. In these situations, an application shouldn't continually retry an operation that's unlikely to succeed. Instead, the application should quickly recognize the failed operation and handle the failure accordingly.\n\nIf a service is busy, failure in one part of the system might lead to cascading failures. For example, you can configure an operation that invokes a service to implement a time-out. If the service fails to respond within this period, the operation replies with a failure message.\n\nHowever, this strategy can block concurrent requests to the same operation until the time-out period expires. These blocked requests might hold critical system resources, such as memory, threads, and database connections. This problem can exhaust resources, which might fail other unrelated parts of the system that need to use the same resources.\n\nIn these situations, an operation should fail immediately and only attempt to invoke the service if it's likely to succeed. To resolve this problem, set a shorter time-out. But ensure that the time-out is long enough for the operation to succeed most of the time.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 34,
+              "endLine": 48,
+              "actualOriginalExcerpt": "A circuit breaker acts as a proxy for operations that might fail. The proxy should monitor the number of recent failures and use this information to decide whether to allow the operation to proceed or to return an exception immediately.\n\nYou can implement the proxy as a state machine that includes the following states. These states mimic the functionality of an electrical circuit breaker:\n\n- **Closed:** The request from the application is routed to the operation. The proxy maintains a count of the number of recent failures. If the call to the operation is unsuccessful, the proxy increments this count. If the number of recent failures exceeds a specified threshold within a given time period, the proxy is placed into the **Open** state and starts a time-out timer. When the timer expires, the proxy is placed into the **Half-Open** state.\n\n  > [!NOTE]\n  > During the time-out, the system tries to fix the problem that caused the failure before it allows the application to attempt the operation again.\n\n- **Open:** The request from the application fails immediately and an exception is returned to the application.\n\n- **Half-Open:** A limited number of requests from the application are allowed to pass through and invoke the operation. If these requests are successful, the circuit breaker assumes that the fault that caused the failure is fixed, and the circuit breaker switches to the **Closed** state. The failure counter is reset. If any request fails, the circuit breaker assumes that the fault is still present, so it reverts to the **Open** state. It restarts the time-out timer so that the system can recover from the failure.\n\n  > [!NOTE]\n  > The **Half-Open** state helps prevent a recovering service from suddenly being flooded with requests. As a service recovers, it might be able to support a limited volume of requests until the recovery is complete. But while recovery is in progress, a flood of work can cause the service to time out or fail again.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 56,
+              "endLine": 65,
+              "actualOriginalExcerpt": "The failure counter for the **Closed** state is time based. It automatically resets at periodic intervals. This design helps prevent the circuit breaker from entering the **Open** state if it experiences occasional failures. The failure threshold triggers the **Open** state only when a specified number of failures occur during a specified interval.\n\nThe success counter for the **Half-Open** state records the number of successful attempts to invoke the operation. The circuit breaker reverts to the **Closed** state after a specified number of successful, consecutive operation invocations. If any invocation fails, the circuit breaker enters the **Open** state immediately and the success counter resets the next time it enters the **Half-Open** state.\n\n> [!NOTE]\n> System recovery is based on external operations, such as restoring or restarting a failed component or repairing a network connection.\n\nThe Circuit Breaker pattern provides stability while the system recovers from a failure and minimizes the impact on performance. It can help maintain the response time of the system. This pattern quickly rejects a request for an operation that's likely to fail, rather than waiting for the operation to time out or never return. If the circuit breaker raises an event each time it changes state, this information can help monitor the health of the protected system component or alert an administrator when a circuit breaker switches to the **Open** state.\n\nYou can customize and adapt this pattern to different types of failures. For example, you can apply an increasing time-out timer to a circuit breaker. You can place the circuit breaker in the **Open** state for a few seconds initially. If the failure isn't resolved, increase the time-out to a few minutes and adjust accordingly. In some cases, rather than returning a failure and raising an exception, the **Open** state can return a default value that's meaningful to the application.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 76,
+              "endLine": 82,
+              "actualOriginalExcerpt": "- **Exception handling:** An application that invokes an operation through a circuit breaker must be able to handle the exceptions if the operation is unavailable. Exception management is based on the application. For example, an application might temporarily degrade its functionality, invoke an alternative operation to try to perform the same task or obtain the same data, or report the exception to the user and ask them to try again later.\n\n- **Types of exceptions:** The reasons for a request failure can vary in severity. For example, a request might fail because a remote service crashes and requires several minutes to recover, or because an overloaded service causes a time-out. A circuit breaker might be able to examine the types of exceptions that occur and adjust its strategy based on the nature of these exceptions. For example, it might require a larger number of time-out exceptions to trigger the circuit breaker to the **Open** state compared to the number of failures caused by the unavailable service.\n\n- **Monitoring:** A circuit breaker should provide clear observability into both failed and successful requests so that operations teams can assess system health. Use distributed tracing for end-to-end visibility across services.\n\n- **Recoverability:** You should configure the circuit breaker to match the likely recovery pattern of the operation that it protects. For example, if the circuit breaker remains in the **Open** state for a long period, it can raise exceptions even if the reason for the failure is resolved. Similarly, a circuit breaker can fluctuate and reduce the response times of applications if it switches from the **Open** state to the **Half-Open** state too quickly.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 103,
+              "endLine": 103,
+              "actualOriginalExcerpt": "- **Inappropriate time-outs on external services:** A circuit breaker might not fully protect applications from failures in external services that have long time-out periods. If the time-out is too long, a thread that runs a circuit breaker might be blocked for an extended period before the circuit breaker indicates that the operation failed. During this time, many other application instances might also try to invoke the service through the circuit breaker and tie up numerous threads before they all fail.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 119,
+              "endLine": 123,
+              "actualOriginalExcerpt": "- You need to manage access to local private resources in an application, such as in-memory data structures. In this environment, a circuit breaker adds overhead to your system.\n\n- You need to use it as a substitute for handling exceptions in the business logic of your applications.\n- Well-known retry algorithms are sufficient and your dependencies are designed to handle retry mechanisms. In this scenario, a circuit breaker in your application might add unnecessary complexity to your system.\n- Waiting for a circuit breaker to reset might introduce unacceptable delays.",
+              "matchesRecordedExcerpt": true
+            }
+          ],
+          "canonicalIndependentlyFetched": false,
+          "quotationCharacters": 103
+        },
+        {
+          "id": "R2",
+          "sourceId": "retry-pattern",
+          "title": "Retry pattern",
+          "retrievedUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry-content.md",
+          "finalUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry-content.md",
+          "httpStatus": 200,
+          "method": "GET",
+          "fullResponseRead": true,
+          "bytes": 12141,
+          "sha256": "619b34a5b1eaf6508715080192feb9fcd85447d402f29816e9f3ffaf294f91a8",
+          "recordedSHA256": "619b34a5b1eaf6508715080192feb9fcd85447d402f29816e9f3ffaf294f91a8",
+          "shaMatches": true,
+          "independentCheckedAt": "2026-10-26T07:12:17.407957+08:00",
+          "actualOriginalTitles": [
+            {
+              "kind": "frontmatter title",
+              "text": "Retry pattern"
+            }
+          ],
+          "companionGETs": [
+            {
+              "url": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry.yml",
+              "httpStatus": 200,
+              "fullResponseRead": true,
+              "bytes": 726,
+              "sha256": "245b362e50caeafa0da00807bc5edcf3dbdbf5279ed8ead60ff1fe784b67666a",
+              "recordedSHA256": "245b362e50caeafa0da00807bc5edcf3dbdbf5279ed8ead60ff1fe784b67666a",
+              "sourceFile": "docs/patterns/retry.yml",
+              "sourceExcerpts": [],
+              "includeBinding": {
+                "startLine": 17,
+                "endLine": 18,
+                "actualOriginalExcerpt": "content: |\n  [!include[](retry-content.md)]",
+                "matchesRecordedExcerpt": true
+              },
+              "checkedAt": "2026-10-26T07:12:17.407373+08:00"
+            }
+          ],
+          "originalTitleExactlyMatched": true,
+          "titleEvidenceExcerpt": {
+            "startLine": 3,
+            "endLine": 3,
+            "actualOriginalExcerpt": "  title: Retry pattern",
+            "matchesRecordedExcerpt": true
+          },
+          "quotation": {
+            "text": "For some noncritical operations, it's better to fail fast rather than retry several times and affect the throughput of the application.",
+            "locator": "Issues and considerations / Impact on performance · line 44",
+            "evidence": "docs/reference-endcards/batch-4/sources-circuit-breaker.json"
+          },
+          "continuousOriginalQuotationMatched": true,
+          "quotationNormalization": "Only original formatting whitespace, XML/HTML markup and Markdown inline formatting removed; words, case and punctuation retained.",
+          "quotationEvidenceExcerpt": {
+            "startLine": 44,
+            "endLine": 44,
+            "actualOriginalExcerpt": "The retry policy should be tuned to match the business requirements of the application and the nature of the failure. For some noncritical operations, it's better to fail fast rather than retry several times and affect the throughput of the application. For example, in an interactive web application accessing a remote service, it's better to fail after a smaller number of retries with only a short delay between retry attempts, and display a suitable message to the user (for example, &quot;please try again later&quot;). For a batch application, it might be more appropriate to increase the number of retry attempts with an exponentially increasing delay between attempts.",
+            "matchesRecordedExcerpt": true
+          },
+          "claimEvidenceExcerpts": [
+            {
+              "startLine": 44,
+              "endLine": 48,
+              "actualOriginalExcerpt": "The retry policy should be tuned to match the business requirements of the application and the nature of the failure. For some noncritical operations, it's better to fail fast rather than retry several times and affect the throughput of the application. For example, in an interactive web application accessing a remote service, it's better to fail after a smaller number of retries with only a short delay between retry attempts, and display a suitable message to the user (for example, &quot;please try again later&quot;). For a batch application, it might be more appropriate to increase the number of retry attempts with an exponentially increasing delay between attempts.\n\nAn aggressive retry policy with minimal delay between attempts, and a large number of retries, could further degrade a busy service that's running close to or at capacity. This retry policy could also affect the responsiveness of the application if it's continually trying to perform a failing operation.\n\nIf a request still fails after a significant number of retries, it's better for the application to prevent further requests going to the same resource and report a failure immediately. When the period expires, the application can tentatively allow one or more requests through to see whether they're successful. For more information about this strategy, see [Circuit Breaker pattern](./circuit-breaker.md).",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 50,
+              "endLine": 62,
+              "actualOriginalExcerpt": "### Idempotency\n\nConsider whether the operation is idempotent. If so, it's inherently safe to retry. Otherwise, retries could cause the operation to be executed more than once, with unintended side effects. For example, a service might receive the request, process the request successfully, but fail to send a response. At that point, the retry logic might re-send the request, assuming that the first request wasn't received. For consumers that process redelivered messages, see the [Idempotent Consumer pattern](./idempotent-consumer.md).\n\nFor server-side handling of repeated HTTP requests, see [HTTP method semantics and idempotency](../best-practices/api-implementation.md#preserve-http-method-semantics-and-implement-idempotency).\n\n### Exception type\n\nA request to a service can fail for various reasons raising different exceptions depending on the nature of the failure. Some exceptions indicate a failure that can be resolved quickly, while others indicate that the failure is longer lasting. It's useful for the retry policy to adjust the time between retry attempts based on the type of the exception.\n\n### Transaction consistency\n\nConsider how retrying an operation that's part of a transaction will affect the overall transaction consistency. Fine tune the retry policy for transactional operations to maximize the chance of success and reduce the need to undo all the transaction steps.",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 66,
+              "endLine": 72,
+              "actualOriginalExcerpt": "- Ensure that all retry code is fully tested against various failure conditions. Check that it doesn't severely affect the performance or reliability of the application, cause excessive load on services and resources, or generate race conditions or bottlenecks.\n\n- Implement retry logic only where the full context of a failing operation is understood. For example, if a task that contains a retry policy invokes another task that also contains a retry policy, this extra layer of retries can add long delays to the processing. It might be better to configure the lower-level task to fail fast and report the reason for the failure back to the task that invoked it. This higher-level task can then handle the failure based on its own policy.\n\n- Log all connectivity failures that cause a retry so that underlying problems with the application, services, or resources can be identified.\n\n- Investigate the faults that are most likely to occur for a service or a resource to discover if they're likely to be long lasting or terminal. If they are, it's better to handle the fault as an exception. The application can report or log the exception, and then try to continue either by invoking an alternative service (if one is available), or by offering degraded functionality. For more information on how to detect and handle long-lasting faults, see the [Circuit Breaker pattern](./circuit-breaker.md).",
+              "matchesRecordedExcerpt": true
+            },
+            {
+              "startLine": 80,
+              "endLine": 82,
+              "actualOriginalExcerpt": "- When a fault is likely to be long lasting, because this can affect the responsiveness of an application. The application might be wasting time and resources trying to repeat a request that's likely to fail.\n- For handling failures that aren't due to transient faults, such as internal exceptions caused by errors in the business logic of an application.\n- As an alternative to addressing scalability issues in a system. If an application experiences frequent busy faults, it's often a sign that the service or resource being accessed should be scaled up.",
+              "matchesRecordedExcerpt": true
+            }
+          ],
+          "canonicalIndependentlyFetched": false,
+          "quotationCharacters": 135
+        }
+      ],
+      "scope": "Independent fresh full GET and original-title/continuous-quote/raw-line review; visual final-media review pending."
+    }
+  ],
+  "episodes": [
+    {
+      "episode": "message-queue",
+      "passed": true,
+      "sourceCount": 2,
+      "claimAssessments": [
+        {
+          "claim": "Publisher confirms and consumer delivery acknowledgements cover different communication peers; broker acceptance/receipt is not business completion. Manual consumer acknowledgements are application signals, so this example sends them after successful business work.",
+          "basis": "Fresh confirms.md lines64–77 and129–146; reliability.md lines97–114."
+        },
+        {
+          "claim": "In manual mode, unacknowledged deliveries requeue when a channel/connection closes; detection takes time. Redelivery does not prove business work was never performed, so the application needs idempotency/deduplication.",
+          "basis": "Fresh confirms.md lines520–535; reliability.md lines171–179 and205–222."
+        },
+        {
+          "claim": "Reliable-storage interpretation is conditional on routed persistent messages and durable queues; even unroutable messages can receive confirms. No exact-once, infinite capacity or permanent no-loss guarantee is inferred.",
+          "basis": "Fresh confirms.md lines605–625, reliability data-safety/fault boundaries, and the unchanged script explicitly states durability/routing prerequisites."
+        }
+      ],
+      "protectedOriginalInputs": [
+        {
+          "path": "episodes-codex/message-queue/script.md",
+          "sha256": "a3dc3a89536255fc97af05774d8b88c1c6103f88262492cf4f1390d08f9bb61b",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/message-queue/words.json",
+          "sha256": "f809080d8917ee001477dd2657b5158d1616603a99703d0dfb4232ba6dede201",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/message-queue/storyboard.json",
+          "sha256": "1519c52918045e9063731cd6e496532fefc6ee7171f05e18e0eec04337c18de2",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/message-queue/voice.wav",
+          "sha256": "321a6fb40e680de2101802af64fd6e79f16dc20acde7c4176994c30754dc6a5e",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/message-queue/captions.srt",
+          "sha256": "74542ea8e02dfc33d8bbee0eb966d519aa5192b50843800f018856282ff06e5f",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/message-queue/remotion/src/Main.tsx",
+          "sha256": "cf49c84739d8c78293746bff2edf4041c95aea5c1a40b46fd533aeff32d92aaf",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/message-queue/remotion/src/Root.tsx",
+          "sha256": "fb8630ec2dc2dc3b7318d9f6fa86f2486d518ffb817b6718b5410d8db713b5b4",
+          "matchesBaseCommit": true
+        }
+      ],
+      "publicationIdentity": [
+        {
+          "file": "references.json",
+          "sha256": "43ed14a3b85a0590b964868338d65a072e03564cc30de0726392f3e7778595ce",
+          "productionAndPublicationIdentical": true
+        },
+        {
+          "file": "reference-appendix.json",
+          "sha256": "488b0caebcc449e9d193fb9a6bdaf4b95cbec255c3e00c61cfea4165af25c080",
+          "productionAndPublicationIdentical": true
+        },
+        {
+          "file": "reference-appendix-media-check.json",
+          "sha256": "64c91de32b3349553f801aa76af7f8d4a4fc5879885adb1fdb13537a0a4635a2",
+          "productionAndPublicationIdentical": true
+        },
+        {
+          "file": "video.mp4",
+          "sha256": "be26d33d08f7b73b44f0af0b570871f98692120bf4518f12500d26b3e3d6675b",
+          "productionAndPublicationIdentical": true
+        }
+      ],
+      "originalPublicationMetadataPreserved": true,
+      "publishedMetaSHA256": "328079cedf3bed60f99630b496ce17d364e6f41253ab266c36cd9fe9958e3b24",
+      "publishedArticleSHA256": "39bd7a618b817175966cc819aef339a45197ec04ae8f5c7cc0411a4b90ba352c",
+      "articleOriginalTitlesQuotesLocatorsAndLinksPresent": true,
+      "productionMediaCheck": {
+        "path": "episodes-codex/message-queue/reference-appendix-media-check.json",
+        "sha256": "64c91de32b3349553f801aa76af7f8d4a4fc5879885adb1fdb13537a0a4635a2",
+        "readPassedReceipt": true,
+        "fullPreservationChecksExecutedByProduction": true,
+        "bodyFrames": 3100,
+        "finalFrames": 3250,
+        "outputSHA256": "be26d33d08f7b73b44f0af0b570871f98692120bf4518f12500d26b3e3d6675b"
+      },
+      "actualEncodedFrameReview": {
+        "episode": "message-queue",
+        "video": "episodes-codex/message-queue/video.mp4",
+        "videoSHA256": "be26d33d08f7b73b44f0af0b570871f98692120bf4518f12500d26b3e3d6675b",
+        "bodyFrames": 3100,
+        "finalFrames": 3250,
+        "fps": "30",
+        "pages": 1,
+        "sampledFrames": [
+          {
+            "frame": 3099,
+            "label": "body-last",
+            "path": "docs/reference-endcards/batch-4/qa-independent/message-queue/003099-body-last.jpg",
+            "sha256": "c84f9ae7a5eafb912f0c38a6170044f0a98dcef12fafbaeff2e564f1d2447348"
+          },
+          {
+            "frame": 3100,
+            "label": "page-1-first",
+            "path": "docs/reference-endcards/batch-4/qa-independent/message-queue/003100-page-1-first.jpg",
+            "sha256": "e74fbd7fb49045af422b06adbe50395e36d9d4f098a68b7509ad8aa42e351925"
+          },
+          {
+            "frame": 3175,
+            "label": "page-1-middle",
+            "path": "docs/reference-endcards/batch-4/qa-independent/message-queue/003175-page-1-middle.jpg",
+            "sha256": "34acecb1d489f1732589ada099bc21eab94e8d2988b8f36d3c1afa01e8950c76"
+          },
+          {
+            "frame": 3249,
+            "label": "page-1-last",
+            "path": "docs/reference-endcards/batch-4/qa-independent/message-queue/003249-page-1-last.jpg",
+            "sha256": "0711fa7cb15518b894ffc10b09c3628a6fa096033dba7340b38fc14ddb5e4045"
+          }
+        ],
+        "contactSheet": "docs/reference-endcards/batch-4/qa-independent/message-queue/contact-sheet.jpg",
+        "contactSheetSHA256": "85c1947a8f0473dfd62800eaa7aad66ae56750737fa7b9175f0b3506a3a64f82",
+        "extraction": "Actual final H.264 decoded frames selected by exact integer frame index. No source-render substitute, no audio recheck.",
+        "visualReview": {
+          "executedBy": "Codex appendix_implementation independent reviewer",
+          "viewedAtBeijing": "2026-10-26T07:18:17.190982+08:00",
+          "tool": "view_image",
+          "actuallyViewedImagePaths": [
+            "docs/reference-endcards/batch-4/qa-independent/message-queue/003099-body-last.jpg",
+            "docs/reference-endcards/batch-4/qa-independent/message-queue/003100-page-1-first.jpg",
+            "docs/reference-endcards/batch-4/qa-independent/message-queue/003175-page-1-middle.jpg",
+            "docs/reference-endcards/batch-4/qa-independent/message-queue/003249-page-1-last.jpg"
+          ],
+          "bodyLastFrame": "Original lifecycle overview and final capacity/fault-boundary subtitle remain visible before the appendix cut.",
+          "cardFrames": "Exact complete titles Consumer Acknowledgements and Publisher Confirms / Reliability Guide; complete 77/119-character verbatim sentences and original locators visible at first/middle/last. No clipping or original body subtitle remains.",
+          "originalTitlesAndWholeQuotesReadable": true,
+          "noClippingOrInsertedOmissions": true,
+          "noOldBodySubtitleOnCards": true,
+          "stableCardLayoutAcrossReviewedFrames": true,
+          "nativePlayerControlsNotInspectedHere": true
+        }
+      }
+    },
+    {
+      "episode": "rate-limit",
+      "passed": true,
+      "sourceCount": 2,
+      "claimAssessments": [
+        {
+          "claim": "A checked token bucket without available tokens rejects a request; 429 is the Envoy default and can be configured. Local scope can be per process or per connection, not automatically a fleet-wide budget.",
+          "basis": "Fresh Envoy local_rate_limit_filter.rst lines10–28 and local_rate_limit.proto lines31–55,108–116."
+        },
+        {
+          "claim": "max_tokens, tokens_per_fill and fill_interval configure capacity, replenishment quantity and time independently. Admission consumes a token; replenishment follows time. This bounds rate/bursts, not the number of unfinished concurrent requests. Capacity2/refill1 each second are teaching settings, not measured backend capacity or universal defaults.",
+          "basis": "Fresh token_bucket.proto lines18–38 and local_rate_limit.proto lines39–43; unchanged script explicitly distinguishes rate/burst control from a concurrency counter."
+        },
+        {
+          "claim": "Retry-After is optional/configurable; rate limits may be server-wide/per-resource/per-user. A busy message alone is not proof of HTTP429, and passing admission or retrying later does not ensure ticket/business success or fairness.",
+          "basis": "Fresh Envoy RST lines29–40 and MDN429 lines9–15; source and original script retain these boundaries."
+        }
+      ],
+      "protectedOriginalInputs": [
+        {
+          "path": "episodes-codex/rate-limit/script.md",
+          "sha256": "c7cd134141107c5434dd9db48252918e4aad3f7f999d59d59558c005c52c7f70",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/rate-limit/words.json",
+          "sha256": "29b86a0e60b7796646a5ae1c977cec3fc2ac8430aa2b4ec2cbbec838e4be0305",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/rate-limit/storyboard.json",
+          "sha256": "81255aa3d4105ffefddbfd7d17c110473afcedc16cb00c6f0bbad61ce32068ab",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/rate-limit/voice.wav",
+          "sha256": "526f932efc94d7c7f7f72aa5212f6ea36d68d5d6481e7fd40c3b336616f8b82f",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/rate-limit/captions.srt",
+          "sha256": "6f70633ecfd0690a657a99ea46195591102bcc676285d34d6fc493cad1827d4e",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/rate-limit/remotion/src/Main.tsx",
+          "sha256": "13e9a5a0ebab7c2f8da160cc5b92756a8cc2e2ebb6873cc1ecc46568fccf85f6",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/rate-limit/remotion/src/Root.tsx",
+          "sha256": "fb8630ec2dc2dc3b7318d9f6fa86f2486d518ffb817b6718b5410d8db713b5b4",
+          "matchesBaseCommit": true
+        }
+      ],
+      "publicationIdentity": [
+        {
+          "file": "references.json",
+          "sha256": "5f81c5c21c4d984a0c123c737df72d0d05a7d38083a5549d82c585961429a550",
+          "productionAndPublicationIdentical": true
+        },
+        {
+          "file": "reference-appendix.json",
+          "sha256": "8b1314eb8356ce2fe626a90108e018130426272248989c3f53e426a8510b25d0",
+          "productionAndPublicationIdentical": true
+        },
+        {
+          "file": "reference-appendix-media-check.json",
+          "sha256": "4ccb9e8cc93992cc3ee0a092c6ab4716507881507974a4091265dd84be591ae5",
+          "productionAndPublicationIdentical": true
+        },
+        {
+          "file": "video.mp4",
+          "sha256": "f2456beffd2f18c0d0b5d99c5f681c7f1a6b291356881933c1a6421a32f49868",
+          "productionAndPublicationIdentical": true
+        }
+      ],
+      "originalPublicationMetadataPreserved": true,
+      "publishedMetaSHA256": "26623e4dfa81d37d893e72babbf9f7bacf053fe10349bb9f4b6c64b263d7dd18",
+      "publishedArticleSHA256": "87996b24523f07f0c89f003ae062e84f2b52830c7f50b59139c4a922db37e7db",
+      "articleOriginalTitlesQuotesLocatorsAndLinksPresent": true,
+      "productionMediaCheck": {
+        "path": "episodes-codex/rate-limit/reference-appendix-media-check.json",
+        "sha256": "4ccb9e8cc93992cc3ee0a092c6ab4716507881507974a4091265dd84be591ae5",
+        "readPassedReceipt": true,
+        "fullPreservationChecksExecutedByProduction": true,
+        "bodyFrames": 3271,
+        "finalFrames": 3421,
+        "outputSHA256": "f2456beffd2f18c0d0b5d99c5f681c7f1a6b291356881933c1a6421a32f49868"
+      },
+      "actualEncodedFrameReview": {
+        "episode": "rate-limit",
+        "video": "episodes-codex/rate-limit/video.mp4",
+        "videoSHA256": "f2456beffd2f18c0d0b5d99c5f681c7f1a6b291356881933c1a6421a32f49868",
+        "bodyFrames": 3271,
+        "finalFrames": 3421,
+        "fps": "30",
+        "pages": 1,
+        "sampledFrames": [
+          {
+            "frame": 3270,
+            "label": "body-last",
+            "path": "docs/reference-endcards/batch-4/qa-independent/rate-limit/003270-body-last.jpg",
+            "sha256": "cd480a56286aa1bc04e0c1f5ca6a8fa8ab839be9c548dc4e901d279b7c71bb1d"
+          },
+          {
+            "frame": 3271,
+            "label": "page-1-first",
+            "path": "docs/reference-endcards/batch-4/qa-independent/rate-limit/003271-page-1-first.jpg",
+            "sha256": "c9515afcc48bb282949c7afc721637da522bd3aa1b5289177cb425dc82a75376"
+          },
+          {
+            "frame": 3346,
+            "label": "page-1-middle",
+            "path": "docs/reference-endcards/batch-4/qa-independent/rate-limit/003346-page-1-middle.jpg",
+            "sha256": "74fb2422be62805dccee4202ab2c2f01975b56add3d27dfb88fc1e8683da29e7"
+          },
+          {
+            "frame": 3420,
+            "label": "page-1-last",
+            "path": "docs/reference-endcards/batch-4/qa-independent/rate-limit/003420-page-1-last.jpg",
+            "sha256": "ed89a9ee793c0913f4f5ef3f0acfb7128aca03971fbf8953b0709e1ef4085b0b"
+          }
+        ],
+        "contactSheet": "docs/reference-endcards/batch-4/qa-independent/rate-limit/contact-sheet.jpg",
+        "contactSheetSHA256": "171f9594dd66558d31bfa96e85b308a732be6b29486464176c88224523336d3a",
+        "extraction": "Actual final H.264 decoded frames selected by exact integer frame index. No source-render substitute, no audio recheck.",
+        "visualReview": {
+          "executedBy": "Codex appendix_implementation independent reviewer",
+          "viewedAtBeijing": "2026-10-26T07:18:17.345598+08:00",
+          "tool": "view_image",
+          "actuallyViewedImagePaths": [
+            "docs/reference-endcards/batch-4/qa-independent/rate-limit/003270-body-last.jpg",
+            "docs/reference-endcards/batch-4/qa-independent/rate-limit/003271-page-1-first.jpg",
+            "docs/reference-endcards/batch-4/qa-independent/rate-limit/003346-page-1-middle.jpg",
+            "docs/reference-endcards/batch-4/qa-independent/rate-limit/003420-page-1-last.jpg"
+          ],
+          "bodyLastFrame": "Original admission-boundary outro and final backend-protection subtitle remain visible before the reference cut.",
+          "cardFrames": "Exact original titles Local rate limit / 429 Too Many Requests; complete 142/87-character source sentences with the configurable-response caveat and original locators visible throughout reviewed card frames.",
+          "originalTitlesAndWholeQuotesReadable": true,
+          "noClippingOrInsertedOmissions": true,
+          "noOldBodySubtitleOnCards": true,
+          "stableCardLayoutAcrossReviewedFrames": true,
+          "nativePlayerControlsNotInspectedHere": true
+        }
+      }
+    },
+    {
+      "episode": "circuit-breaker",
+      "passed": true,
+      "sourceCount": 2,
+      "claimAssessments": [
+        {
+          "claim": "Recent failures can trigger Open, which stops calling the protected operation and fails fast; shared waiting resources can otherwise spread a dependency fault.",
+          "basis": "Fresh circuit-breaker.md lines19–25 and34–45."
+        },
+        {
+          "claim": "The wait timer permits Half-Open limited probes; it does not prove a remote fault is gone. Failed probes return to Open; success criteria govern normal calling. Actual recovery depends on external repair operations.",
+          "basis": "Fresh circuit-breaker.md lines38–61; the selected intact Half-Open sentence is from line45."
+        },
+        {
+          "claim": "Caller-specific degradation/fail-fast may suit noncritical work, but circuit breaking is not a substitute for business exception/transaction handling. Retry idempotency and transaction consistency remain necessary.",
+          "basis": "Fresh circuit-breaker.md lines76–82,119–123; retry-content.md lines44–62 and66–82."
+        }
+      ],
+      "protectedOriginalInputs": [
+        {
+          "path": "episodes-codex/circuit-breaker/script.md",
+          "sha256": "24aca8bdd83e743ff0e83c64006443231c3b6352dda51599584b73ba479cf3b2",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/circuit-breaker/words.json",
+          "sha256": "2e272e37df6d8cd7956a7457c9c9edba1a3fccd16b6b76c3d2c64ad8f6cbb4d7",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/circuit-breaker/storyboard.json",
+          "sha256": "3474a88b436999c56cfc5f2c4dc6787d646e4ba57b43a2d1472a0cc0a49f0a3d",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/circuit-breaker/voice.wav",
+          "sha256": "61263118fb4202ad6f16d400fa464f91712986b7b1a128e8b14621d285f47568",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/circuit-breaker/captions.srt",
+          "sha256": "ecd4a2e39d47377bdec81b884f57a3c7993e2489c7b481b0216be46d8dbd7db9",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/circuit-breaker/remotion/src/Main.tsx",
+          "sha256": "0391666884f45f3c19c77b1642997a609cfcdbb5590c5832048c2ba094933ceb",
+          "matchesBaseCommit": true
+        },
+        {
+          "path": "episodes-codex/circuit-breaker/remotion/src/Root.tsx",
+          "sha256": "fb8630ec2dc2dc3b7318d9f6fa86f2486d518ffb817b6718b5410d8db713b5b4",
+          "matchesBaseCommit": true
+        }
+      ],
+      "publicationIdentity": [
+        {
+          "file": "references.json",
+          "sha256": "31cd8ef2931e493fb41da72f7fc76479402d6b2c1d501278b35430c4d88beadf",
+          "productionAndPublicationIdentical": true
+        },
+        {
+          "file": "reference-appendix.json",
+          "sha256": "ebc7996a44836065a0ad10a55f7bb5341fc8b7acb1e171045272db9458a1e474",
+          "productionAndPublicationIdentical": true
+        },
+        {
+          "file": "reference-appendix-media-check.json",
+          "sha256": "d12db0a3b03253cf7233b7a45aef87ad181bc22f6f176af731e2c0483b99461c",
+          "productionAndPublicationIdentical": true
+        },
+        {
+          "file": "video.mp4",
+          "sha256": "857f50aa98a42f763a0889e2e2744881d7ed77fea73a83da439f65e68974f25d",
+          "productionAndPublicationIdentical": true
+        }
+      ],
+      "originalPublicationMetadataPreserved": true,
+      "publishedMetaSHA256": "fa346741bf51c223966f63159181b0298b95da7dd918fee0dc5e34eaa6ef8681",
+      "publishedArticleSHA256": "3d5aeba1dd45e8f9933fc712101b8745c4f8c2bbb1a2e281bb0a525d55e77872",
+      "articleOriginalTitlesQuotesLocatorsAndLinksPresent": true,
+      "productionMediaCheck": {
+        "path": "episodes-codex/circuit-breaker/reference-appendix-media-check.json",
+        "sha256": "d12db0a3b03253cf7233b7a45aef87ad181bc22f6f176af731e2c0483b99461c",
+        "readPassedReceipt": true,
+        "fullPreservationChecksExecutedByProduction": true,
+        "bodyFrames": 2926,
+        "finalFrames": 3076,
+        "outputSHA256": "857f50aa98a42f763a0889e2e2744881d7ed77fea73a83da439f65e68974f25d"
+      },
+      "actualEncodedFrameReview": {
+        "episode": "circuit-breaker",
+        "video": "episodes-codex/circuit-breaker/video.mp4",
+        "videoSHA256": "857f50aa98a42f763a0889e2e2744881d7ed77fea73a83da439f65e68974f25d",
+        "bodyFrames": 2926,
+        "finalFrames": 3076,
+        "fps": "30",
+        "pages": 1,
+        "sampledFrames": [
+          {
+            "frame": 2925,
+            "label": "body-last",
+            "path": "docs/reference-endcards/batch-4/qa-independent/circuit-breaker/002925-body-last.jpg",
+            "sha256": "be388b15a2bf5f6c4380da15649e0216de40e47be59973d2dd7371f236ac1996"
+          },
+          {
+            "frame": 2926,
+            "label": "page-1-first",
+            "path": "docs/reference-endcards/batch-4/qa-independent/circuit-breaker/002926-page-1-first.jpg",
+            "sha256": "4bbfb40a074849e6dcc72aba33e11d83499e8c7c1f5f7e114cdc9400b9bbc4cc"
+          },
+          {
+            "frame": 3001,
+            "label": "page-1-middle",
+            "path": "docs/reference-endcards/batch-4/qa-independent/circuit-breaker/003001-page-1-middle.jpg",
+            "sha256": "5f796b4a3cb1ac17a597fde8434c909f4b2d59fb5727f43ec35dd921c222bb89"
+          },
+          {
+            "frame": 3075,
+            "label": "page-1-last",
+            "path": "docs/reference-endcards/batch-4/qa-independent/circuit-breaker/003075-page-1-last.jpg",
+            "sha256": "b1f9d2c678b0c5921af87231047fabe1bce464b90a678364568b3a35e879f77f"
+          }
+        ],
+        "contactSheet": "docs/reference-endcards/batch-4/qa-independent/circuit-breaker/contact-sheet.jpg",
+        "contactSheetSHA256": "eb41c45bec6c3fe3f74bb40e948faa29b118373e6a471006be3c92543e93d68b",
+        "extraction": "Actual final H.264 decoded frames selected by exact integer frame index. No source-render substitute, no audio recheck.",
+        "visualReview": {
+          "executedBy": "Codex appendix_implementation independent reviewer",
+          "viewedAtBeijing": "2026-10-26T07:18:17.497871+08:00",
+          "tool": "view_image",
+          "actuallyViewedImagePaths": [
+            "docs/reference-endcards/batch-4/qa-independent/circuit-breaker/002925-body-last.jpg",
+            "docs/reference-endcards/batch-4/qa-independent/circuit-breaker/002926-page-1-first.jpg",
+            "docs/reference-endcards/batch-4/qa-independent/circuit-breaker/003001-page-1-middle.jpg",
+            "docs/reference-endcards/batch-4/qa-independent/circuit-breaker/003075-page-1-last.jpg"
+          ],
+          "bodyLastFrame": "Original Closed/Open/Half-Open overview, failed-probe return path, separate no-protection teaching comparison and final external-repair subtitle remain visible before the appendix cut.",
+          "cardFrames": "Exact original titles Circuit Breaker Pattern / Retry pattern; complete 103/135-character quotations, their original locators and all punctuation visible. No abbreviated/translated replacement title or residual body subtitle appears.",
+          "originalTitlesAndWholeQuotesReadable": true,
+          "noClippingOrInsertedOmissions": true,
+          "noOldBodySubtitleOnCards": true,
+          "stableCardLayoutAcrossReviewedFrames": true,
+          "nativePlayerControlsNotInspectedHere": true
+        }
+      }
+    }
+  ],
+  "limits": {
+    "canonicalWebsiteBodiesIndependentlyFetched": false,
+    "canonicalScope": "Only official pinned raw-repository sources are independently GET-fetched; unavailable/unread canonical sites are not called successful.",
+    "productionMediaChecks": "Root production full-frame/PTS/AAC/PCM receipts are identity-checked below; these full checks are not independently rerun.",
+    "fullManualVideoPlayback": false,
+    "wordLevelASR": false,
+    "manualListening": false,
+    "browserAndReleaseVerification": "Separate root/browser tasks; not claimed in this source/card QA."
+  },
+  "successfulIndependentGETCountIncludingSupportingDocuments": 9,
+  "uniqueFixedURLsIndependentlyFetched": 9,
+  "protectedOriginalInputCount": 21,
+  "finishedAtBeijing": "2026-10-26T07:18:17.616750+08:00"
+}

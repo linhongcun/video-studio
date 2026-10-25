@@ -17,3 +17,7 @@ RabbitMQ原文区分publisher confirm和consumer ack，手动确认/断连重入
 新旧追加器、全局发布门禁与锁文件保持。小批次公开拷贝和QA入口复用既有实现，历史脚本字节不改。全站构建通过：16片附录验证，其余30片只在固定媒体SHA未变时暂缓，未扩大豁免；本批帧数和日期/RSS检查通过。未重复整片声音解码、没有ASR或全片人工听辨，生产full媒体保真与独立视觉、浏览器检查分别记录。仅GitHub站点，不重发平台，不预记用户观看认可或传播效果。
 
 证据：startup.json、sources-*.json、production-entry-check.json、delivery.json、validation.json与单期revisions/reference-endcards基线/receipt/media-check。独立来源和实际帧、播放器、本地上线及线上报告按各自真实执行另记。
+
+## 本地验收
+
+独立完整GET核验6条引用及9份官方固定文件，原题、原句和定位行号均通过；12张实际MP4的正文末帧/卡首中末帧逐张实看通过。浏览器6场景153项断言、24精确暂停点、3次桌面1倍速尾段到结束、3页手机原生全屏、3次完整MP4 GET/SHA与12次出处点击通过，9张截图实际view_image。详见qa-independent.json和qa-browser.json。模拟手机/静音播放与原生小窗限制如实记录，不声称真机、ASR或全片听辨；本地上线预检已通过。
