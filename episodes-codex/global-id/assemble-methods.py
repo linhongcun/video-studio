@@ -1,10 +1,11 @@
-"""Insert the separately built methods narration without changing old PCM.
+"""Insert the selected narration profile without changing the original PCM.
 
-Run after the shared voice tools have built revisions/methods-insert/voice.wav.
+Run after the shared voice tools have built the selected insertion voice.wav.
 The original 30 sentences and all old shot-local timings are reused exactly.
 This is episode-specific assembly, not another TTS, onset, or mixing algorithm.
 """
 from pathlib import Path
+import argparse
 import copy
 import hashlib
 import json
@@ -18,9 +19,43 @@ import numpy as np
 
 D = Path(__file__).resolve().parent
 ROOT = D.parents[1]
-BASE = D / 'revisions/methods-before'
-INSERT = D / 'revisions/methods-insert'
-FPS, SR, SAMPLES_PER_FRAME, INSERT_AT = 30, 48000, 1600, 1574
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--profile', choices=('methods', 'tradeoffs'), default='tradeoffs')
+parser.add_argument('--config', type=Path, help='Optional profile JSON; relative paths are episode-relative.')
+args = parser.parse_args()
+PROFILE_DEFAULTS = {
+    'methods': dict(
+        baseline='revisions/methods-before', insertion='revisions/methods-insert',
+        sentenceCounts={'16-options': 2, '17-redis': 3}, visualRevision=2,
+        chapters=[dict(id='methods', title='分布式ID不止雪花', shots=['16', '17'])],
+        style='Progressive local collision example, short methods overview, then Snowflake fields and conditional uniqueness.'),
+    'tradeoffs': dict(
+        baseline='revisions/methods-before', insertion='revisions/tradeoffs-insert', script='script.md',
+        sentenceCounts={'16-options': 3, '17-redis': 5}, visualRevision=3,
+        archives=['revisions/tradeoffs-before'],
+        chapters=[dict(id='uuid', title='UUID：本地生成与主键代价', shots=['16']),
+                  dict(id='redis', title='Redis：集中取号与故障恢复', shots=['17'])],
+        style='Present UUIDv4 first with unordered primary-key tradeoffs, then Redis centralized counters with asynchronous-replication/failover and fenced durable range-allocation boundaries; only then introduce Snowflake fields.'),
+}
+profile = copy.deepcopy(PROFILE_DEFAULTS[args.profile])
+config_path = args.config or D / 'assembly-profiles.json'
+if not config_path.is_absolute():
+    config_path = D / config_path
+if config_path.exists():
+    config_data = json.loads(config_path.read_text())
+    selected = config_data.get('profiles', {}).get(args.profile, config_data.get(args.profile, config_data))
+    assert selected.get('name', args.profile) == args.profile
+    profile.update(selected)
+    profile['configSource'] = str(config_path.relative_to(D))
+else:
+    assert args.config is None, f'Missing explicit profile config: {config_path}'
+    profile['configSource'] = 'assemble-methods.py:PROFILE_DEFAULTS'
+profile.update(name=args.profile)
+profile.setdefault('proof', f'{args.profile}-reuse-proof.json')
+profile.setdefault('spliceResult', f'{args.profile}-splice-result.json')
+BASE = D / profile['baseline']
+INSERT = D / profile['insertion']
+FPS, SR, SAMPLES_PER_FRAME = 30, 48000, 1600
 sys.path.insert(0, str(ROOT / 'episodes/_shared'))
 from onset_rule import Rule
 sys.path.insert(0, str(ROOT / 'episodes/_shared/voice'))
@@ -67,7 +102,7 @@ def shift_word_shot(shot, offset):
 baseline = read(BASE / 'baseline.json')
 for rel, expected in baseline['files'].items():
     assert sha(BASE / rel) == expected, f'Archived baseline changed: {rel}'
-assert baseline['insertFrame'] == INSERT_AT
+INSERT_AT = baseline['insertFrame']
 old_sb = read(BASE / 'storyboard.json')
 old_words = read(BASE / 'words.json')
 old_build = read(BASE / 'voice/build.json')
@@ -95,7 +130,28 @@ total_frames = old_frames + insert_frames
 samples = np.frombuffer(pcm, '<i2').astype(float) / 32767
 rule = Rule(samples, SR)
 
-script = (D / 'script.md').read_text()
+if 'script' in profile:
+    script_path = D / profile['script']
+    script = script_path.read_text()
+elif args.profile == 'methods':
+    # Explicit historical reproduction never borrows the current tradeoffs text.
+    # Prefer the archived complete script; otherwise materialize the original
+    # baseline plus the historical insertion into a current output file.
+    archived_script = D / 'revisions/tradeoffs-before/script.md'
+    if archived_script.exists():
+        script_path = archived_script
+        script = script_path.read_text()
+    else:
+        original_script = (BASE / 'script.md').read_text()
+        insert_script = (INSERT / 'script.md').read_text()
+        insert_sections = insert_script[insert_script.index('### 16 '):].rstrip() + '\n\n'
+        assert '\n### 07 ' in original_script
+        script = original_script.replace('\n### 07 ', '\n' + insert_sections + '### 07 ', 1)
+        script_path = D / 'assembly-script-methods.md'
+        script_path.write_text(script)
+else:
+    raise AssertionError('The current profile must select its script explicitly.')
+profile['script'] = str(script_path.relative_to(D))
 sections = {}
 for number, slug, body in re.findall(r'### (\d+) ([\w-]+)\n(.*?)(?=\n### |\Z)', script, re.S):
     sections[f'{int(number):02d}-{slug}'] = {
@@ -104,7 +160,8 @@ for number, slug, body in re.findall(r'### (\d+) ([\w-]+)\n(.*?)(?=\n### |\Z)', 
         'visual': re.search(r'^画面：(.*)$', body, re.M)[1],
     }
 new_rows = copy.deepcopy(insert_build['sentences'])
-assert [r['shot'] for r in new_rows] == ['16-options'] * 2 + ['17-redis'] * 3
+expected_new_shots = [shot for shot, count in profile['sentenceCounts'].items() for _ in range(count)]
+assert [r['shot'] for r in new_rows] == expected_new_shots
 for row in new_rows:
     for key in ('startFrame', 'endFrame'):
         row[key] += INSERT_AT
@@ -121,7 +178,7 @@ for row in old_rows:
         for key in ('startSample', 'endSample'):
             row[key] += insert_frames * SAMPLES_PER_FRAME
 rows = sorted(old_rows + new_rows, key=lambda r: r['startSample'])
-assert len({r['id'] for r in rows}) == len(rows) == 35
+assert len({r['id'] for r in rows}) == len(rows) == len(old_rows) + len(expected_new_shots)
 for index, row in enumerate(rows):
     if index:
         row['gapBefore'] = round((row['startSample'] - rows[index - 1]['endSample']) / SR, 4)
@@ -176,12 +233,12 @@ word_shots = [shift_word_shot(s, insert_frames if s['startFrame'] >= INSERT_AT e
               for s in old_words['shots']]
 word_shots = sorted(word_shots + new_word_shots, key=lambda s: s['startFrame'])
 words = copy.deepcopy(old_words)
-words.update(scriptSha256=sha(D / 'script.md'), audioSha256=sha(D / 'voice.wav'),
+words.update(script=profile['script'], scriptSha256=sha(script_path), audioSha256=sha(D / 'voice.wav'),
              durationFrames=total_frames, shots=word_shots,
              onsetTable=[dict(shot=s['id'], sentence=s['sentences'][0]['id'], onsetFrame=s['onsetFrame'],
                               source='acoustic sentence onset') for s in word_shots])
 save(D / 'words.json', words)
-source = f"voice.wav SHA256={sha(D / 'voice.wav')} + words.json SHA256={sha(D / 'words.json')} + script.md SHA256={sha(D / 'script.md')}"
+source = f"voice.wav SHA256={sha(D / 'voice.wav')} + words.json SHA256={sha(D / 'words.json')} + {profile['script']} SHA256={sha(script_path)}"
 
 new_shots, new_cues = [], []
 for ws in new_word_shots:
@@ -202,7 +259,8 @@ for ws in new_word_shots:
                      cueOnset=dict(sentence=sentence['id'], asrFrame=None, onsetLocal=onset,
                                    rule='pause/acoustic sentence onset', delay=0))]
     new_cues.append(dict(shot=ws['id'], cue=term, sentence=sentence['id'], onsetFrame=sentence['onsetFrame']))
-    new_shots.append(dict(id=str(section['number']), scriptShot=section['number'], chapterId='methods',
+    chapter_id = next(chapter['id'] for chapter in profile['chapters'] if str(section['number']) in chapter['shots'])
+    new_shots.append(dict(id=str(section['number']), scriptShot=section['number'], chapterId=chapter_id,
                           **{'from': start}, durationInFrames=duration, narration=section['narration'],
                           subtitles=subtitles,
                           voice=[dict(id=s['id'], wavStart=s['startFrame'], wavEnd=s['endFrame'],
@@ -216,12 +274,14 @@ for ws in new_word_shots:
                           scriptVisual=section['visual'], direction=section['visual'], elements=elements,
                           animations=[], transition=dict(type='cut', durationInFrames=0)))
 sb = copy.deepcopy(old_sb)
-sb['meta'].update(title='分布式 ID：两个订单，怎么撞成同一个号了？', slug='global-id-methods-v2',
+sb['meta'].update(title='分布式 ID：两个订单，怎么撞成同一个号了？', slug=f'global-id-{args.profile}-v{profile["visualRevision"]}',
                   durationInFrames=total_frames, finalVideoFrames=total_frames,
-                  timingSource=source, visualRevision=2,
+                  timingSource=source, visualRevision=profile['visualRevision'], style=profile['style'],
+                  assemblyProfile=profile,
                   methodsInsertion=dict(fromFrame=INSERT_AT, durationInFrames=insert_frames,
-                                        narrationSource='revisions/methods-insert/voice.wav',
-                                        baseline='revisions/methods-before/baseline.json'))
+                                        profile=args.profile,
+                                        narrationSource=str((INSERT / 'voice.wav').relative_to(D)),
+                                        baseline=str((BASE / 'baseline.json').relative_to(D))))
 scenes = []
 for scene in sb['scenes']:
     if scene['from'] >= INSERT_AT:
@@ -237,8 +297,13 @@ for scene in sb['scenes']:
         shot['timing']['source'] = source
     scenes.append(scene)
     if scene['id'] == 'local':
-        scenes.append(dict(id='methods', chapterId='methods', title='分布式ID不止雪花',
-                           **{'from': INSERT_AT}, durationInFrames=insert_frames, shots=new_shots))
+        for chapter in profile['chapters']:
+            chapter_shots = [shot for shot in new_shots if shot['id'] in chapter['shots']]
+            assert chapter_shots, chapter['id']
+            scenes.append(dict(id=chapter['id'], chapterId=chapter['id'], title=chapter['title'],
+                               **{'from': chapter_shots[0]['from']},
+                               durationInFrames=sum(shot['durationInFrames'] for shot in chapter_shots),
+                               shots=chapter_shots))
 sb['scenes'] = scenes
 save(D / 'storyboard.json', sb)
 old_cues = read(BASE / 'voice/cues.json')
@@ -274,7 +339,8 @@ old_shots = [shot for scene in old_sb['scenes'] for shot in scene['shots']]
 current_shots = {shot['id']: shot for scene in sb['scenes'] for shot in scene['shots']}
 for old_shot in old_shots:
     assert shot_local_data(old_shot) == shot_local_data(current_shots[old_shot['id']]), old_shot['id']
-save(D / 'methods-reuse-proof.json', dict(
+save(D / profile['proof'], dict(
+    assemblyProfile=profile,
     baselineCommit=baseline['commit'], insertionFrame=INSERT_AT, insertedFrames=insert_frames,
     oldFrames=old_frames, totalFrames=total_frames, oldSentenceCount=len(old_rows), newSentenceCount=len(new_rows),
     baselineVoiceSHA256=sha(BASE / 'voice.wav'), insertionVoiceSHA256=sha(INSERT / 'voice.wav'),

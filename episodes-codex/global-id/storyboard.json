@@ -2,16 +2,16 @@
   "meta": {
     "title": "分布式 ID：两个订单，怎么撞成同一个号了？",
     "episode": 20,
-    "slug": "global-id-methods-v2",
+    "slug": "global-id-tradeoffs-v3",
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "durationInFrames": 5160,
-    "finalVideoFrames": 5160,
+    "durationInFrames": 5646,
+    "finalVideoFrames": 5646,
     "draft": false,
     "provisionalTiming": false,
     "pendingAudio": false,
-    "timingSource": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
+    "timingSource": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
     "onsetRule": {
       "module": "episodes/_shared/onset_rule.py",
       "checker": "episodes/_shared/label_onset_strict.py",
@@ -20,8 +20,8 @@
         2
       ]
     },
-    "style": "Progressive ID generation: local collisions; moving time, unique generator identity and sequence fields; BigInt exact results; conditional uniqueness; no physical metaphor.",
-    "visualRevision": 2,
+    "style": "Present UUIDv4 first with unordered primary-key tradeoffs, then Redis centralized counters with asynchronous-replication/failover and fenced durable range-allocation boundaries; only then introduce Snowflake fields.",
+    "visualRevision": 3,
     "visualDirection": "visual-direction.md",
     "palette": {
       "bg": "#0F172A",
@@ -154,10 +154,45 @@
       "teaser": "下期，下单成功了，库存怎么没扣？"
     },
     "audioReview": "No automatic ASR available. Measured TTS sentence onsets and boundaries; no claim of word alignment or independent full listening.",
+    "assemblyProfile": {
+      "baseline": "revisions/methods-before",
+      "insertion": "revisions/tradeoffs-insert",
+      "script": "script.md",
+      "sentenceCounts": {
+        "16-options": 3,
+        "17-redis": 5
+      },
+      "visualRevision": 3,
+      "archives": [
+        "revisions/tradeoffs-before"
+      ],
+      "chapters": [
+        {
+          "id": "uuid",
+          "title": "UUID：方便生成，主键有代价",
+          "shots": [
+            "16"
+          ]
+        },
+        {
+          "id": "redis",
+          "title": "Redis：递增取号，切换要防回退",
+          "shots": [
+            "17"
+          ]
+        }
+      ],
+      "style": "Present UUIDv4 first with unordered primary-key tradeoffs, then Redis centralized counters with asynchronous-replication/failover and fenced durable range-allocation boundaries; only then introduce Snowflake fields.",
+      "name": "tradeoffs",
+      "configSource": "assembly-profiles.json",
+      "proof": "tradeoffs-reuse-proof.json",
+      "spliceResult": "tradeoffs-splice-result.json"
+    },
     "methodsInsertion": {
       "fromFrame": 1574,
-      "durationInFrames": 741,
-      "narrationSource": "revisions/methods-insert/voice.wav",
+      "durationInFrames": 1227,
+      "profile": "tradeoffs",
+      "narrationSource": "revisions/tradeoffs-insert/voice.wav",
       "baseline": "revisions/methods-before/baseline.json"
     }
   },
@@ -220,7 +255,7 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
             "wavFrom": 9.0,
             "wavTo": 204.64,
             "holdFrames": 0,
@@ -284,7 +319,7 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
             "wavFrom": 225.64,
             "wavTo": 439.01,
             "holdFrames": 0,
@@ -358,7 +393,7 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
             "wavFrom": 460.01,
             "wavTo": 760.02,
             "holdFrames": 0,
@@ -442,7 +477,7 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
             "wavFrom": 781.02,
             "wavTo": 962.77,
             "holdFrames": 0,
@@ -506,7 +541,7 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
             "wavFrom": 1007.77,
             "wavTo": 1260.99,
             "holdFrames": 0,
@@ -570,7 +605,7 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
             "wavFrom": 1281.99,
             "wavTo": 1553.46,
             "holdFrames": 0,
@@ -593,60 +628,74 @@
       ]
     },
     {
-      "id": "methods",
-      "chapterId": "methods",
-      "title": "分布式ID不止雪花",
+      "id": "uuid",
+      "chapterId": "uuid",
+      "title": "UUID：方便生成，主键有代价",
       "from": 1574,
-      "durationInFrames": 741,
+      "durationInFrames": 453,
       "shots": [
         {
           "id": "16",
           "scriptShot": 16,
-          "chapterId": "methods",
+          "chapterId": "uuid",
           "from": 1574,
-          "durationInFrames": 372,
-          "narration": "分布式 ID 有很多实现方式，雪花算法只是其中一种经典方案。UUID 的随机版本，让各节点在本地生成编号，碰撞概率很低。",
+          "durationInFrames": 453,
+          "narration": "UUID 的随机版本，各节点就能在本地生成，碰撞概率很低。但它不递增，直接用作 MySQL 主键，插入位置会比较分散。这会影响索引页的缓存利用，还可能增加页分裂。",
           "subtitles": [
             {
-              "text": "分布式 ID 有很多实现方式，雪花算法只是其中一种经典方案。",
+              "text": "UUID 的随机版本，各节点就能在本地生成，碰撞概率很低。",
               "from": 0,
-              "to": 186,
-              "duration": 187
+              "to": 168,
+              "duration": 169
             },
             {
-              "text": "UUID 的随机版本，让各节点在本地生成编号，碰撞概率很低。",
-              "from": 187,
-              "to": 371,
-              "duration": 185
+              "text": "但它不递增，直接用作 MySQL 主键，插入位置会比较分散。",
+              "from": 169,
+              "to": 320,
+              "duration": 152
+            },
+            {
+              "text": "这会影响索引页的缓存利用，还可能增加页分裂。",
+              "from": 321,
+              "to": 452,
+              "duration": 132
             }
           ],
           "voice": [
             {
               "id": "16-options-1",
               "wavStart": 1583.0,
-              "wavEnd": 1751.24,
+              "wavEnd": 1732.94,
               "localStart": 9.0,
-              "localEnd": 177.24
+              "localEnd": 158.94000000000005
             },
             {
               "id": "16-options-2",
-              "wavStart": 1761.74,
-              "wavEnd": 1925.45,
-              "localStart": 187.74,
-              "localEnd": 351.45000000000005
+              "wavStart": 1743.44,
+              "wavEnd": 1885.25,
+              "localStart": 169.44000000000005,
+              "localEnd": 311.25
+            },
+            {
+              "id": "16-options-3",
+              "wavStart": 1895.75,
+              "wavEnd": 2006.45,
+              "localStart": 321.75,
+              "localEnd": 432.45000000000005
             }
           ],
           "cueFrames": {
-            "uuidLabel": 186,
+            "uuidLabel": 8,
             "sentences": [
               9,
-              187
+              169,
+              321
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
             "wavFrom": 1583.0,
-            "wavTo": 1925.45,
+            "wavTo": 2006.45,
             "holdFrames": 0,
             "naturalGapFrames": 20,
             "holdReason": "The complete assembled PCM is placed unchanged; pauses exist in the audio."
@@ -655,24 +704,24 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "先以本地生成、集中取号、雪花算法三条路径说明只是常见示例；雪花标出经典方案之一。第二句起音出现UUID标签，聚焦两个节点各自在本地生成不同的完整UUID示例，说明碰撞概率很低，不能当作数学上的绝对唯一。",
-          "direction": "先以本地生成、集中取号、雪花算法三条路径说明只是常见示例；雪花标出经典方案之一。第二句起音出现UUID标签，聚焦两个节点各自在本地生成不同的完整UUID示例，说明碰撞概率很低，不能当作数学上的绝对唯一。",
+          "scriptVisual": "直接介绍随机UUID，不先出现雪花名称或方案总览。两个节点先后生成较大和较小的有效UUIDv4示例，显示本地发号与低碰撞；第二句把相同编号的前缀映射到MySQL InnoDB主键索引的不同叶页；第三句只在示意页已满时演页分裂，并提示随机插入的缓存局部性代价。",
+          "direction": "直接介绍随机UUID，不先出现雪花名称或方案总览。两个节点先后生成较大和较小的有效UUIDv4示例，显示本地发号与低碰撞；第二句把相同编号的前缀映射到MySQL InnoDB主键索引的不同叶页；第三句只在示意页已满时演页分裂，并提示随机插入的缓存局部性代价。",
           "elements": [
             {
               "id": "uuidLabel",
               "type": "text",
               "text": "UUID",
               "cueText": "UUID",
-              "appearFrame": 186,
+              "appearFrame": 8,
               "x": 130,
               "y": 180,
               "w": 800,
               "h": 80,
               "fontSize": 58,
               "cueOnset": {
-                "sentence": "16-options-2",
+                "sentence": "16-options-1",
                 "asrFrame": null,
-                "onsetLocal": 188.74,
+                "onsetLocal": 10.0,
                 "rule": "pause/acoustic sentence onset",
                 "delay": 0
               }
@@ -683,69 +732,106 @@
             "type": "cut",
             "durationInFrames": 0
           }
-        },
+        }
+      ]
+    },
+    {
+      "id": "redis",
+      "chapterId": "redis",
+      "title": "Redis：递增取号，切换要防回退",
+      "from": 2027,
+      "durationInFrames": 774,
+      "shots": [
         {
           "id": "17",
           "scriptShot": 17,
-          "chapterId": "methods",
-          "from": 1946,
-          "durationInFrames": 369,
-          "narration": "Redis 自增，也能让各节点从同一个计数器取号。递增是原子的，但要防止故障恢复后计数回退。下面，我们就聚焦雪花算法。",
+          "chapterId": "redis",
+          "from": 2027,
+          "durationInFrames": 774,
+          "narration": "Redis 自增，让各节点从同一个计数器取号，正常时编号递增。但复制是异步的，主从切换后，计数可能回退，造成重复发号。一个处理思路是跳号，越过旧主可能用过的整个号段。前提是号段上界有可靠记录，且旧主已停止发号。接下来，详细看雪花算法。",
           "subtitles": [
             {
-              "text": "Redis 自增，也能让各节点从同一个计数器取号。",
+              "text": "Redis 自增，让各节点从同一个计数器取号，正常时编号递增。",
               "from": 0,
-              "to": 124,
-              "duration": 125
+              "to": 182,
+              "duration": 183
             },
             {
-              "text": "递增是原子的，但要防止故障恢复后计数回退。",
-              "from": 125,
-              "to": 267,
-              "duration": 143
+              "text": "但复制是异步的，主从切换后，计数可能回退，造成重复发号。",
+              "from": 183,
+              "to": 364,
+              "duration": 182
             },
             {
-              "text": "下面，我们就聚焦雪花算法。",
-              "from": 268,
-              "to": 368,
-              "duration": 101
+              "text": "一个处理思路是跳号，越过旧主可能用过的整个号段。",
+              "from": 365,
+              "to": 513,
+              "duration": 149
+            },
+            {
+              "text": "前提是号段上界有可靠记录，且旧主已停止发号。",
+              "from": 514,
+              "to": 679,
+              "duration": 166
+            },
+            {
+              "text": "接下来，详细看雪花算法。",
+              "from": 680,
+              "to": 773,
+              "duration": 94
             }
           ],
           "voice": [
             {
               "id": "17-redis-1",
-              "wavStart": 1946.45,
-              "wavEnd": 2060.51,
+              "wavStart": 2027.45,
+              "wavEnd": 2200.36,
               "localStart": 0.4500000000000455,
-              "localEnd": 114.51000000000022
+              "localEnd": 173.36000000000013
             },
             {
               "id": "17-redis-2",
-              "wavStart": 2071.01,
-              "wavEnd": 2204.23,
-              "localStart": 125.01000000000022,
-              "localEnd": 258.23
+              "wavStart": 2210.86,
+              "wavEnd": 2381.83,
+              "localStart": 183.86000000000013,
+              "localEnd": 354.8299999999999
             },
             {
               "id": "17-redis-3",
-              "wavStart": 2214.73,
-              "wavEnd": 2293.05,
-              "localStart": 268.73,
-              "localEnd": 347.0500000000002
+              "wavStart": 2392.33,
+              "wavEnd": 2531.39,
+              "localStart": 365.3299999999999,
+              "localEnd": 504.3899999999999
+            },
+            {
+              "id": "17-redis-4",
+              "wavStart": 2541.89,
+              "wavEnd": 2696.8900000000003,
+              "localStart": 514.8899999999999,
+              "localEnd": 669.8900000000003
+            },
+            {
+              "id": "17-redis-5",
+              "wavStart": 2707.3900000000003,
+              "wavEnd": 2779.58,
+              "localStart": 680.3900000000003,
+              "localEnd": 752.5799999999999
             }
           ],
           "cueFrames": {
             "redisLabel": 1,
             "sentences": [
               0,
-              125,
-              268
+              183,
+              365,
+              514,
+              680
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 1946.45,
-            "wavTo": 2293.05,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 2027.45,
+            "wavTo": 2779.58,
             "holdFrames": 0,
             "naturalGapFrames": 21,
             "holdReason": "The complete assembled PCM is placed unchanged; pauses exist in the audio."
@@ -754,8 +840,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "两个节点依次向同一个Redis计数器取号，请求抵达后原子加一，分别返回1001与1002。第二句提示防止故障恢复时计数回退；第三句回到三种方案并聚焦雪花算法，接回原三字段讲解。",
-          "direction": "两个节点依次向同一个Redis计数器取号，请求抵达后原子加一，分别返回1001与1002。第二句提示防止故障恢复时计数回退；第三句回到三种方案并聚焦雪花算法，接回原三字段讲解。",
+          "scriptVisual": "先演共同计数器1000→1001→1002，返回两节点；第二句显示旧主1002但异步复制尚未到达、从节点1000，旧主故障停发后从节点升主，再次加一重发1001。第三句切到事先可靠预留号段的治理方案示意，旧号段1001—1200，独立可靠记录上界1200，旧主停发/隔离；新主越过整个旧号段后下一号1201。第四句强调上界记录和停止旧主的条件，不把任意加固定数说成保证。末句才出现雪花算法名称并接回原07详解。",
+          "direction": "先演共同计数器1000→1001→1002，返回两节点；第二句显示旧主1002但异步复制尚未到达、从节点1000，旧主故障停发后从节点升主，再次加一重发1001。第三句切到事先可靠预留号段的治理方案示意，旧号段1001—1200，独立可靠记录上界1200，旧主停发/隔离；新主越过整个旧号段后下一号1201。第四句强调上界记录和停止旧主的条件，不把任意加固定数说成保证。末句才出现雪花算法名称并接回原07详解。",
           "elements": [
             {
               "id": "redisLabel",
@@ -789,14 +875,14 @@
       "id": "snowflake",
       "chapterId": "snowflake",
       "title": "三部分如何区分",
-      "from": 2315,
+      "from": 2801,
       "durationInFrames": 1474,
       "shots": [
         {
           "id": "07",
           "scriptShot": 7,
           "chapterId": "snowflake",
-          "from": 2315,
+          "from": 2801,
           "durationInFrames": 307,
           "narration": "雪花算法，是一种把编号分成几部分来生成的做法。这里看时间、生成器的机器编号，以及同一毫秒内的序号。",
           "subtitles": [
@@ -816,15 +902,15 @@
           "voice": [
             {
               "id": "07-snowflake-1",
-              "wavStart": 2315.46,
-              "wavEnd": 2439.8,
+              "wavStart": 2801.46,
+              "wavEnd": 2925.8,
               "localStart": 0.4600000000000364,
               "localEnd": 124.79999999999995
             },
             {
               "id": "07-snowflake-2",
-              "wavStart": 2450.3,
-              "wavEnd": 2601.83,
+              "wavStart": 2936.3,
+              "wavEnd": 3087.83,
               "localStart": 135.29999999999995,
               "localEnd": 286.8299999999999
             }
@@ -837,9 +923,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 2315.46,
-            "wavTo": 2601.83,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 2801.46,
+            "wavTo": 3087.83,
             "holdFrames": 0,
             "naturalGapFrames": 20,
             "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
@@ -881,7 +967,7 @@
           "id": "08",
           "scriptShot": 8,
           "chapterId": "snowflake",
-          "from": 2622,
+          "from": 3108,
           "durationInFrames": 262,
           "narration": "不在同一毫秒，时间部分就可以不同。先看相同的机器编号和序号，只让时间向前走一步。",
           "subtitles": [
@@ -901,15 +987,15 @@
           "voice": [
             {
               "id": "08-time-1",
-              "wavStart": 2622.83,
-              "wavEnd": 2715.02,
+              "wavStart": 3108.83,
+              "wavEnd": 3201.02,
               "localStart": 0.8299999999999272,
               "localEnd": 93.01999999999998
             },
             {
               "id": "08-time-2",
-              "wavStart": 2725.52,
-              "wavEnd": 2863.89,
+              "wavStart": 3211.52,
+              "wavEnd": 3349.89,
               "localStart": 103.51999999999998,
               "localEnd": 241.88999999999987
             }
@@ -921,9 +1007,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 2622.83,
-            "wavTo": 2863.89,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 3108.83,
+            "wavTo": 3349.89,
             "holdFrames": 0,
             "naturalGapFrames": 20,
             "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
@@ -945,7 +1031,7 @@
           "id": "09",
           "scriptShot": 9,
           "chapterId": "snowflake",
-          "from": 2884,
+          "from": 3370,
           "durationInFrames": 308,
           "narration": "如果同一毫秒，两台机器各生成一个编号呢？时间虽然相同，但它们使用不同的机器编号，结果就能分开。",
           "subtitles": [
@@ -965,15 +1051,15 @@
           "voice": [
             {
               "id": "09-workers-1",
-              "wavStart": 2884.89,
-              "wavEnd": 3012.83,
+              "wavStart": 3370.89,
+              "wavEnd": 3498.83,
               "localStart": 0.8899999999998727,
               "localEnd": 128.82999999999993
             },
             {
               "id": "09-workers-2",
-              "wavStart": 3023.33,
-              "wavEnd": 3171.95,
+              "wavStart": 3509.33,
+              "wavEnd": 3657.95,
               "localStart": 139.32999999999993,
               "localEnd": 287.9499999999998
             }
@@ -985,9 +1071,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 2884.89,
-            "wavTo": 3171.95,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 3370.89,
+            "wavTo": 3657.95,
             "holdFrames": 0,
             "naturalGapFrames": 20,
             "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
@@ -1009,7 +1095,7 @@
           "id": "10",
           "scriptShot": 10,
           "chapterId": "snowflake",
-          "from": 3192,
+          "from": 3678,
           "durationInFrames": 292,
           "narration": "同一台机器，在同一毫秒里还要生成第二个编号。那就让序号继续增加，把这两次请求区分开。",
           "subtitles": [
@@ -1029,15 +1115,15 @@
           "voice": [
             {
               "id": "10-sequence-1",
-              "wavStart": 3192.95,
-              "wavEnd": 3342.44,
+              "wavStart": 3678.95,
+              "wavEnd": 3828.44,
               "localStart": 0.9499999999998181,
               "localEnd": 150.44000000000005
             },
             {
               "id": "10-sequence-2",
-              "wavStart": 3352.94,
-              "wavEnd": 3463.16,
+              "wavStart": 3838.94,
+              "wavEnd": 3949.16,
               "localStart": 160.94000000000005,
               "localEnd": 271.15999999999985
             }
@@ -1049,9 +1135,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 3192.95,
-            "wavTo": 3463.16,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 3678.95,
+            "wavTo": 3949.16,
             "holdFrames": 0,
             "naturalGapFrames": 20,
             "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
@@ -1073,7 +1159,7 @@
           "id": "11",
           "scriptShot": 11,
           "chapterId": "snowflake",
-          "from": 3484,
+          "from": 3970,
           "durationInFrames": 305,
           "narration": "这几部分按固定规则组合，成为一个整数。画面把字段拆开，是为了看清来源，不是直接拼接十进制数字。",
           "subtitles": [
@@ -1093,15 +1179,15 @@
           "voice": [
             {
               "id": "11-combine-1",
-              "wavStart": 3484.16,
-              "wavEnd": 3590.34,
+              "wavStart": 3970.16,
+              "wavEnd": 4076.34,
               "localStart": 0.15999999999985448,
               "localEnd": 106.34000000000015
             },
             {
               "id": "11-combine-2",
-              "wavStart": 3600.84,
-              "wavEnd": 3768.59,
+              "wavStart": 4086.84,
+              "wavEnd": 4254.59,
               "localStart": 116.84000000000015,
               "localEnd": 284.59000000000015
             }
@@ -1113,9 +1199,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 3484.16,
-            "wavTo": 3768.59,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 3970.16,
+            "wavTo": 4254.59,
             "holdFrames": 0,
             "naturalGapFrames": 20,
             "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
@@ -1139,14 +1225,14 @@
       "id": "conditions",
       "chapterId": "conditions",
       "title": "不重复需要前提",
-      "from": 3789,
+      "from": 4275,
       "durationInFrames": 649,
       "shots": [
         {
           "id": "12",
           "scriptShot": 12,
           "chapterId": "conditions",
-          "from": 3789,
+          "from": 4275,
           "durationInFrames": 301,
           "narration": "不过，机器编号不能重复，时间往回走时要按实现处理。同一毫秒里的序号用完，也不能直接绕回继续发。",
           "subtitles": [
@@ -1166,15 +1252,15 @@
           "voice": [
             {
               "id": "12-conditions-1",
-              "wavStart": 3789.59,
-              "wavEnd": 3943.31,
+              "wavStart": 4275.59,
+              "wavEnd": 4429.3099999999995,
               "localStart": 0.5900000000001455,
               "localEnd": 154.30999999999995
             },
             {
               "id": "12-conditions-2",
-              "wavStart": 3953.81,
-              "wavEnd": 4069.02,
+              "wavStart": 4439.8099999999995,
+              "wavEnd": 4555.02,
               "localStart": 164.80999999999995,
               "localEnd": 280.02
             }
@@ -1186,9 +1272,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 3789.59,
-            "wavTo": 4069.02,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 4275.59,
+            "wavTo": 4555.02,
             "holdFrames": 0,
             "naturalGapFrames": 20,
             "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
@@ -1210,7 +1296,7 @@
           "id": "13",
           "scriptShot": 13,
           "chapterId": "conditions",
-          "from": 4090,
+          "from": 4576,
           "durationInFrames": 348,
           "narration": "如果机器编号被重复使用，又碰上相同时间和序号，就仍可能撞号。这些条件需要正确维护，不是用了这个名字就自动安全。",
           "subtitles": [
@@ -1230,15 +1316,15 @@
           "voice": [
             {
               "id": "13-counterexample-1",
-              "wavStart": 4090.02,
-              "wavEnd": 4265.780000000001,
+              "wavStart": 4576.02,
+              "wavEnd": 4751.780000000001,
               "localStart": 0.01999999999998181,
               "localEnd": 175.7800000000002
             },
             {
               "id": "13-counterexample-2",
-              "wavStart": 4276.280000000001,
-              "wavEnd": 4417.110000000001,
+              "wavStart": 4762.280000000001,
+              "wavEnd": 4903.110000000001,
               "localStart": 186.2800000000002,
               "localEnd": 327.1100000000001
             }
@@ -1250,9 +1336,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 4090.02,
-            "wavTo": 4417.110000000001,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 4576.02,
+            "wavTo": 4903.110000000001,
             "holdFrames": 0,
             "naturalGapFrames": 20,
             "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
@@ -1276,14 +1362,14 @@
       "id": "recap",
       "chapterId": "recap",
       "title": "三种差异各管什么",
-      "from": 4438,
+      "from": 4924,
       "durationInFrames": 409,
       "shots": [
         {
           "id": "14",
           "scriptShot": 14,
           "chapterId": "recap",
-          "from": 4438,
+          "from": 4924,
           "durationInFrames": 409,
           "narration": "时间区分不同毫秒，机器编号区分不同生成器，序号区分同一毫秒里的连续请求。在这些前提得到正确维护时，各处才能分别生成不冲突的编号。",
           "subtitles": [
@@ -1303,15 +1389,15 @@
           "voice": [
             {
               "id": "14-recap-1",
-              "wavStart": 4438.110000000001,
-              "wavEnd": 4649.42,
+              "wavStart": 4924.110000000001,
+              "wavEnd": 5135.42,
               "localStart": 0.11000000000012733,
               "localEnd": 211.42000000000007
             },
             {
               "id": "14-recap-2",
-              "wavStart": 4659.92,
-              "wavEnd": 4826.07,
+              "wavStart": 5145.92,
+              "wavEnd": 5312.07,
               "localStart": 221.92000000000007,
               "localEnd": 388.07000000000016
             }
@@ -1323,9 +1409,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 4438.110000000001,
-            "wavTo": 4826.07,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 4924.110000000001,
+            "wavTo": 5312.07,
             "holdFrames": 0,
             "naturalGapFrames": 20,
             "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
@@ -1349,14 +1435,14 @@
       "id": "next",
       "chapterId": "next",
       "title": "下一期",
-      "from": 4847,
+      "from": 5333,
       "durationInFrames": 313,
       "shots": [
         {
           "id": "15",
           "scriptShot": 15,
           "chapterId": "next",
-          "from": 4847,
+          "from": 5333,
           "durationInFrames": 313,
           "narration": "订单编号分开了，可订单和库存落在两个库里，下单成功，库存却没扣，又该怎么办？下一期，我们接着看。",
           "subtitles": [
@@ -1376,15 +1462,15 @@
           "voice": [
             {
               "id": "15-next-1",
-              "wavStart": 4847.07,
-              "wavEnd": 5056.64,
+              "wavStart": 5333.07,
+              "wavEnd": 5542.64,
               "localStart": 0.06999999999970896,
               "localEnd": 209.64000000000033
             },
             {
               "id": "15-next-2",
-              "wavStart": 5067.14,
-              "wavEnd": 5114.66,
+              "wavStart": 5553.14,
+              "wavEnd": 5600.66,
               "localStart": 220.14000000000033,
               "localEnd": 267.65999999999985
             }
@@ -1396,9 +1482,9 @@
             ]
           },
           "timing": {
-            "source": "voice.wav SHA256=58aeddf049f4d997ea9b27f75f29cb1615174568c7ac4176ace392ee5d2a34a9 + words.json SHA256=7184a65cdd439ada255ea11601032f3091dfce381cff54496cab4bf13b61edda + script.md SHA256=06aa70e85f4b02fad65a0e2315eda8223e90300cc0ad47fd02f9945c2ffff73e",
-            "wavFrom": 4847.07,
-            "wavTo": 5114.66,
+            "source": "voice.wav SHA256=2844a7f91e826e26a627287204948747d6c3c8fb0837889f326e2f88773de17f + words.json SHA256=693ae66afc19820967b69584deed0418aa64d41bf292c6f9794918215fd06aa4 + script.md SHA256=91a9eb30e2daab9dbdc27c1e6013ecf9db55754c51677eeee1fb0b692cd60860",
+            "wavFrom": 5333.07,
+            "wavTo": 5600.66,
             "holdFrames": 0,
             "naturalGapFrames": 45,
             "holdReason": "Whole audio track is placed unchanged; pauses already exist in the track."
