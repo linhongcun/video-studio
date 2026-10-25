@@ -1,0 +1,64 @@
+{
+  "checkedAt": "2026-10-25T22:36:15+08:00",
+  "baselineCommit": "1dacf6089c3515ddb77f8514180e21d7e5e3e7bc",
+  "scope": "Production workflow only: new-episode source preparation, default automatic reference appendix, and build enforcement. No episode media, timing, narration or public article content changed.",
+  "defaultEntry": "python3 episodes-codex/_shared/render_with_references.py EPISODE_DIRECTORY",
+  "preflight": "node site/scripts/check-references.mjs --sources EPISODE_DIRECTORY",
+  "publishGate": "npm --prefix site run check:references",
+  "checks": {
+    "nodeRegression": {
+      "executor": "Codex reference_gate and root",
+      "command": "node --test site/scripts/check-references.test.mjs",
+      "tests": 25,
+      "passed": true
+    },
+    "renderEntryIntegration": {
+      "executor": "Codex reference_gate",
+      "command": "python3 -m unittest discover -s episodes-codex/_shared -p test_render_with_references.py",
+      "tests": 5,
+      "passed": true,
+      "actualMediaFixture": {
+        "bodyFrames": 6,
+        "existingCodeCardFrom": 4,
+        "referenceFrames": 150,
+        "finalFrames": 156
+      },
+      "coverage": [
+        "Missing sources fail before body starts",
+        "Changed frozen input fails before body starts",
+        "Recursive render command fails",
+        "Code card precedes references; real encoded outputs and metadata agree",
+        "Verify detects stale publication metadata without rendering body"
+      ]
+    },
+    "siteBuild": {
+      "command": "npm --prefix site run build",
+      "passed": true,
+      "validatedAppendices": 3,
+      "unchangedLegacyDeferred": 42
+    },
+    "existingFreezes": {
+      "dns": 104,
+      "https": 103,
+      "browser-cache": 90,
+      "passed": true
+    },
+    "episodeChanges": []
+  },
+  "legacyPolicy": {
+    "baselineCommit": "1dacf6089c3515ddb77f8514180e21d7e5e3e7bc",
+    "baselinePublicCount": 45,
+    "scope": "Only fixed historical slug and exact original video SHA can defer; new videos or replacement media must include references."
+  },
+  "files": {
+    "episodes-codex/_shared/render_with_references.py": "0cb387b8e0cb7f2dc8d814783e53691e45fc650a083f17a4f6e07d883a16eb3d",
+    "episodes-codex/_template/references.example.json": "232a5a68950a9a57703b98c451b5f43d2bd9ece0f880136d093518e7b38c232c",
+    "episodes-codex/_template/reference-scripts.json": "d69a2dbb651d92fb0f51fa1012a30afb06cb16b85170b4968ce3f3143a2227c8",
+    "site/scripts/check-references.mjs": "bf0c9cf5ec5b6983f89c36c905069a3057fe5d06e36d0f69ffd53452f363ced1",
+    "site/scripts/reference-legacy.json": "e445f80c91f5b65e58b140bf880418bc301d1a5935548f33e38297a742f44580"
+  },
+  "limits": [
+    "Automatic validation checks recorded sources, artifacts and media identity; reading the source and inspecting player legibility remain required.",
+    "The pending template intentionally fails until actual source review and evidence are supplied."
+  ]
+}

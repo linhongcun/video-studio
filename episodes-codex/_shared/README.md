@@ -1,6 +1,30 @@
 # 独立短片的句级装配与检查
 
-本目录服务本批`tx-2pc`、`tx-tcc`、`tx-saga`、`tx-outbox`。不修改既有冻结工程，不复制共享TTS、裁尾、铺轨、起音或混音算法。现行规则在`docs/RULES.md`；脚本和文章需先经技术复核，动画按真实音轨复验后才冻结编码。
+本目录包含句级装配、检查与参考资料附录工具，下方旧命令保留各自适用范围。不修改既有冻结工程，不复制共享TTS、裁尾、铺轨、起音或混音算法。现行规则在`docs/RULES.md`；脚本和文章需先经技术复核，动画按真实音轨复验后才冻结编码。
+
+## 新期的固定参考资料流程
+
+新制作或重制的视频从调研起准备本期 `references.json`、原文证据和文章出处；默认入口必须覆盖参考资料附录。[新期模板](../_template/README.md)提供待填写JSON、package脚本片段及冻结清单示例。不要把复制旧工程的 `render` 命令当作已接入新流程。
+
+```sh
+node site/scripts/check-references.mjs --sources episodes-codex/your-episode
+python3 episodes-codex/_shared/render_with_references.py episodes-codex/your-episode
+```
+
+入口先只读检查来源/文章链接及本期实际 `source-sha256.json`，再调用本期 `npm run render:body`；该命令应把完整正文和已有代码卡混音到 `remotion/out/body.mp4`。随后复用未改动的 `append_references.py`，默认每页5秒、最多3项、提示暂停阅读，生成最终 `video.mp4`。资料不全或冻结失效时应在正文渲染前失败。
+
+资料清单、文章、证据、package脚本、默认入口、追加器/依赖锁、资料预检代码与实际主题都随本期输入冻结；最终视频和生成回执不作为编码前输入。Pillow按 `requirements-reference-appendix.txt` 安装，字体及编码环境按实际生成回执记录。该流程不复制配音、混音或起音算法，不改已经发布的冻结追加器。
+
+生成的两份附录回执放在 `revisions/reference-endcards/`，并复制到本期根目录；`render-result.json` 提供最终SHA和 `publicationMetadata`。发布时复制最终视频、文章、来源及两份回执，按该metadata片段填写 `meta.referenceAppendix`、`meta.finalVideoFrames`，正文分镜和 `words.json` 继续描述实际正文范围。
+
+```sh
+python3 episodes-codex/_shared/render_with_references.py episodes-codex/your-episode --verify
+npm --prefix site run check:references
+```
+
+`--verify` 只读核对冻结与媒体，按帮助信息写QA报告；不重写冻结或重渲正文。发布构建在复制媒体之前自动执行同一附录检查：新视频和更换媒体的旧视频缺附录时阻断；只在固定基线名单且媒体字节未变的未处理旧片允许继续分批。来源原文是否真正支持结论、资料卡可读性、原生字幕和暂停/手机全屏效果仍须实际复核。
+
+以下句级装配示例原用于`tx-2pc`、`tx-tcc`、`tx-saga`、`tx-outbox`正文；不要把正文检查器的帧数规则直接用于追加参考资料后的最终媒体。
 
 各片输入：`episode-config.json`（标题、part、slug、镜数、风格、示例、范围、讨论题）、`plan.json`（镜号/slug/章节/visualType/句首cue）、`script.md`（每镜两句完整旁白）、`voice/build.json`、`voice.wav`和封面配置。镜头顺序、数字、术语范围按当期内容，不能照搬旧期参数。
 
