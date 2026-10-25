@@ -15,7 +15,8 @@ from playwright.sync_api import sync_playwright
 from sync_site import (PRODUCTION, ROOT, SITE, DIST, SLUG, FIRST_RELEASE, REVISION,
                        REVISION_DIR, QA_OUTPUT, load_facts, check_local_delivery,
                        puzzle_slugs, release_version)
-from verify_online import Page, check_episode
+from verify_online import (Page, check_episode, content_dates, check_date_times,
+                           check_rss_first_publication)
 
 
 def main():
@@ -29,11 +30,12 @@ def main():
     manifest = check_local_delivery(facts, args.release)
     assert release_version('v' + json.loads((ROOT / 'site/package.json').read_text())['version']) >= release_version(args.release)
     meta, chapters = facts['meta'], facts['chapters']
+    dates = content_dates(meta)
     frames, fps = facts['frames'], facts['fps']
     duration = frames / fps
     built = DIST / 'episodes' / SLUG
     source = check_episode(Page((built / 'index.html').read_text()), meta, chapters, frames, fps)
-    assert SLUG in (DIST / 'rss.xml').read_text()
+    rss_first_publication = check_rss_first_publication((DIST / 'rss.xml').read_text(), meta)
     expected_links = ['/video-studio/episodes/' + slug + '/' for slug in puzzle_slugs()]
     assert SLUG in puzzle_slugs() and 'monty-hall' in puzzle_slugs()
     output = QA_OUTPUT
@@ -53,6 +55,9 @@ def main():
             response = page.goto(base + 'episodes/' + SLUG + '/', wait_until='networkidle')
             assert response.status == 200
             assert page.locator('h1').inner_text() == meta['title']
+            assert page.locator('header.eh time[aria-label="当前版本"]').is_visible()
+            detail_dates = page.locator('header.eh').evaluate('(e)=>Array.from(e.querySelectorAll("time"),t=>({datetime:t.dateTime,text:t.textContent,role:t.getAttribute("aria-label")}))')
+            assert page.locator('header.eh time[aria-label="当前版本"]').inner_text() == dates['versionLabel']
             directory = page.locator('#course-directory a').evaluate_all('(nodes) => nodes.map(a => a.getAttribute("href"))')
             assert directory == expected_links
             actual_chapters = page.locator('#player').evaluate('(el) => JSON.parse(el.dataset.chapters)')
@@ -174,6 +179,11 @@ def main():
             assert page.locator('a.track-puzzles').count() == 1
             assert page.locator('a.track-puzzles').get_attribute('href').endswith('/learn/#puzzles')
             assert page.locator(f'a.card[href="/video-studio/episodes/{SLUG}/"]').count() == 1
+            home_card = page.locator(f'a.card[href="/video-studio/episodes/{SLUG}/"]')
+            check_date_times(Page(home_card.inner_html()).root, dates)
+            home_card_dates = home_card.locator('time').evaluate_all('(ns)=>ns.map(t=>({datetime:t.dateTime,text:t.textContent}))')
+            home_card_shot = output / f'home-card-dates-{width}.png'
+            home_card.screenshot(path=str(home_card_shot))
             assert not page.evaluate('document.documentElement.scrollWidth>innerWidth+1')
             page.goto(base + 'series/puzzles/', wait_until='networkidle')
             assert page.locator('.lesson-list a.lesson').evaluate_all('(ns)=>ns.map(a=>a.getAttribute("href"))') == expected_links
@@ -183,15 +193,23 @@ def main():
             assert page.locator('select[name="track"]').input_value() == 'puzzles'
             visible = page.locator('#library-grid li:not([hidden]) a[data-series]')
             assert sorted(visible.evaluate_all('(ns)=>ns.map(a=>a.getAttribute("href"))')) == sorted(expected_links)
+            library_card = visible.filter(has=page.locator(f'img[src$="/{SLUG}/{meta["poster"]}"]'))
+            assert library_card.count() == 1
+            check_date_times(Page(library_card.inner_html()).root, dates)
+            library_card_dates = library_card.locator('time').evaluate_all('(ns)=>ns.map(t=>({datetime:t.dateTime,text:t.textContent}))')
+            library_card_shot = output / f'library-card-dates-{width}.png'
+            library_card.screenshot(path=str(library_card_shot))
+            assert not page.evaluate('document.documentElement.scrollWidth>innerWidth+1')
             assert not errors and not failed, (errors, failed)
             results.append({'viewport': [width, height], 'video': info, 'chapters': seek_checks,
                 'allArticleChapterSeeksPassed': True, 'captions': len(cues), 'activeCaptionChecked': sample['text'],
                 'playback': playback, 'endingPlayback': ending_playback, 'ended': ended,
                 'revisedOpeningShotPlayback': opening_checks,
+                'detailDates': detail_dates, 'homeCardDates': home_card_dates, 'libraryCardDates': library_card_dates,
                 'horizontalOverflow': False, 'articleOnlyAppendixReadable': True, 'appendixVideoJump': False,
                 'runtimeErrors': errors, 'failedResponses': failed, 'footnotes': footnote_geometry,
                 'budgetTableRows': actual_budgets, 'exampleEventRows': actual_example, 'thresholdRows': actual_bounds,
-                'screenshots': [str(p.relative_to(ROOT)) for p in (first_shot, last_shot, proof_shot, certificate_shot, footnote_shot, *opening_screenshots)]})
+                'screenshots': [str(p.relative_to(ROOT)) for p in (first_shot, last_shot, proof_shot, certificate_shot, footnote_shot, home_card_shot, library_card_shot, *opening_screenshots)]})
             # Persist real measurements at each completed viewport so a later
             # viewport failure cannot erase an earlier result or invite backfill.
             (output / f'qa-site-viewport-{width}.json').write_text(json.dumps({
@@ -203,6 +221,7 @@ def main():
         browser.close()
     report = {'status': 'passed', 'checkedAtUTC': datetime.now(timezone.utc).isoformat(),
               'release': args.release, 'firstRelease': FIRST_RELEASE, 'revision': REVISION,
+              'contentDates': dates, 'rssFirstPublication': rss_first_publication,
               'base': base, 'candidateVersion': json.loads((ROOT / 'site/package.json').read_text())['version'],
               'builtHtmlPageCount': len(list(DIST.rglob('*.html'))), 'frames': frames, 'fps': fps,
               'subtitleCount': len(facts['subtitles']), 'shotCount': len(facts['shots']), 'chapters': chapters,

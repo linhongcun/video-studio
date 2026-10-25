@@ -17,10 +17,12 @@ import ssl
 import urllib.request
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from html.parser import HTMLParser
 from pathlib import Path
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo
+import xml.etree.ElementTree as ET
 
 from sync_site import (FIRST_RELEASE, REVISION, REVISION_DIR, QA_OUTPUT, load_facts,
                        check_local_delivery, expected_vtt, puzzle_slugs, release_version)
@@ -143,11 +145,45 @@ def deployed_site_version(root):
     return value
 
 
+def content_dates(meta):
+    assert meta['createdAt'] == meta['publishedAt'] == '2026-10-25', 'Keep historical creation/publication precision'
+    updated = datetime.fromisoformat(meta['updatedAt'].replace('Z', '+00:00'))
+    assert updated.tzinfo is not None and len(meta['updatedAt']) > 10
+    beijing = updated.astimezone(ZoneInfo('Asia/Shanghai'))
+    return {'createdAt': meta['createdAt'], 'publishedAt': meta['publishedAt'], 'updatedAt': meta['updatedAt'],
+            'versionLabel': beijing.strftime('%Y-%m-%d %H:%M:%S') + ' 版',
+            'createdDisplay': '2026年10月25日',
+            'updatedDisplay': f'{beijing.year}年{beijing.month}月{beijing.day}日 ' + beijing.strftime('%H:%M:%S'),
+            'dateCreatedISO': '2026-10-25T00:00:00+08:00',
+            'uploadDateISO': '2026-10-25T00:00:00+08:00', 'dateModifiedISO': meta['updatedAt']}
+
+
+def check_date_times(node, dates):
+    current = one(node.find_all('time', **{'aria-label': '当前版本'}), 'date edition')
+    assert current.attrs['datetime'] == dates['updatedAt'] and current.text() == dates['versionLabel']
+    assert any(t.attrs.get('datetime') == dates['createdAt'] and t.text() == dates['createdDisplay']
+               for t in node.find_all('time')), 'Missing historical creation display'
+    assert any(t.attrs.get('datetime') == dates['updatedAt'] and t.text() == dates['updatedDisplay']
+               for t in node.find_all('time')), 'Missing actual content modification display'
+
+
+def check_rss_first_publication(body, meta):
+    items = ET.fromstring(body).findall('./channel/item')
+    item = one([item for item in items if item.findtext('link') == PAGE_URL], 'P05 RSS identity')
+    value = item.findtext('pubDate')
+    assert parsedate_to_datetime(value) == datetime.fromisoformat(content_dates(meta)['uploadDateISO'])
+    return value
+
+
 def check_episode(page, meta, expected_chapters, expected_frames, fps):
     root = page.root
     assert one(root.find_all('title'), 'page title').text() == meta['title'] + ' · IT小村'
     assert one(root.find_all('h1'), 'lesson heading').text() == meta['title']
     assert f"EP.{meta['ep']:02d} · {meta['episodePart']}" in root.text()
+    assert one(root.find_all('link', rel='canonical'), 'canonical link').attrs['href'] == PAGE_URL
+    dates = content_dates(meta)
+    heading = one([node for node in root.find_all('header') if has_class(node, 'eh')], 'episode heading')
+    check_date_times(heading, dates)
     source_url = REPO_URL + '/tree/main/' + meta['sourcePath']
     assert root.find_all('a', href=source_url), 'Missing current production source link'
     player = one(root.find_all('section', id='player'), 'player')
@@ -183,6 +219,9 @@ def check_episode(page, meta, expected_chapters, expected_frames, fps):
     assert ld['contentUrl'] == PAGE_URL + meta['video']
     assert ld['embedUrl'] == PAGE_URL
     assert ld['duration'] == f'PT{int(expected_frames / fps) // 60}M{int(expected_frames / fps) % 60}S'
+    assert ld['dateCreated'] == dates['dateCreatedISO']
+    assert ld['uploadDate'] == dates['uploadDateISO']
+    assert ld['dateModified'] == dates['dateModifiedISO']
     return source_url
 
 
@@ -255,6 +294,9 @@ def main():
         home = Page(get('home', BASE).decode('utf-8')).root
         assert home.find_all('a', href='/video-studio/learn/#puzzles'), 'Missing homepage puzzle direction'
         assert home.find_all('a', href='/video-studio/episodes/egg-drop/'), 'Missing homepage P05 lesson'
+        card = one([node for node in home.find_all('a', href='/video-studio/episodes/egg-drop/')
+                    if has_class(node, 'card')], 'P05 home card')
+        check_date_times(card, content_dates(meta))
         deployed_version = deployed_site_version(home)
         assert version_tuple(deployed_version) >= version_tuple(release_tag), ('Deployed site predates P05', deployed_version)
         series = Page(get('series', BASE + 'series/puzzles/').decode('utf-8')).root
@@ -272,6 +314,7 @@ def main():
         assert [link.attrs['href'] for link in lesson_links] == expected_links
         rss = get('rss', BASE + 'rss.xml').decode('utf-8')
         assert PAGE_URL in rss and meta['title'] in rss and '趣味推理 P05' in rss
+        rss_first_publication = check_rss_first_publication(rss, meta)
         release = release_from_connector if release_evidence is not None else json.loads(get('github-release', release_api_url))
         validate_release(release, release_tag)
         changelog = Page(get('changelog', BASE + 'changelog/').decode('utf-8')).root
@@ -286,6 +329,7 @@ def main():
                   'checkedAtBeijing': checked_at.astimezone(ZoneInfo('Asia/Shanghai')).isoformat(),
                   'executedBy': 'Codex P05 canonical delivery verification',
                   'release': release_tag, 'firstRelease': FIRST_RELEASE, 'revision': REVISION,
+                  'contentDates': content_dates(meta), 'rssFirstPublication': rss_first_publication,
                   'localCandidateSiteVersion': 'v' + version, 'deployedSiteVersion': deployed_version,
                   'versionScope': 'P05 debut, current binary-opening correction Release, and deployment-wide version are distinct; media bytes, dynamic sentence/chapter facts and puzzle directory remain exact.',
                   'canonicalQueriesAdded': False, 'remoteMediaSaved': False,
