@@ -1,0 +1,8 @@
+import storyboard from '@storyboard';
+export type Subtitle={text:string;from:number;to?:number;duration?:number};
+export type Shot={id:string;durationInFrames:number;narration?:string;subtitles?:Subtitle[];cueFrames?:Record<string,any>;from:number;[key:string]:any};
+let offset=0;
+export const shots:Shot[]=(storyboard.scenes??[]).flatMap((scene:any)=>(scene.shots??[]).map((shot:any)=>({...shot,chapterTitle:scene.title}))).map((s:any)=>{
+ const item={...s,id:String(s.id).padStart(2,'0'),from:offset};offset+=s.durationInFrames;return item;
+});
+export const VIDEO={width:1920,height:1080,fps:30,durationInFrames:offset};
