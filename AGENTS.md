@@ -6,6 +6,8 @@
 
 本仓没有 `share/RULES.md`。2026-10-16 那份团队规范里的冲突条已经写进 `docs/RULES.md` 的废止节。旧工程和旧站规划已清理，不要从 Git 历史恢复「比喻优先」和「发布含快手」。
 
+2026-10-25用户进一步强调：参考资料附录必须从新片制作流程中默认生成，避免上线后返工补齐。开新期按[新期模板](episodes-codex/_template/README.md)准备 `references.json`，调研、脚本、分镜、冻结和渲染同步接入；正式编码前检查来源清单，发布前检查实际附录。存量暂缓仅限已登记、视频SHA仍为基线字节且尚未接入附录的旧片；旧slug后续重制或换片也必须带齐，不得扩大豁免名单。
+
 ## 开工前同步
 
 2026-10-25用户明确要求：开始单期或批量制作之前，先拉取最新代码，避免重构、删除和流程更新造成冲突。先检查工作区状态并保护未提交工作，fetch最新主干，再从最新`origin/main`建立制作分支或整合到现有分支；不要覆盖其他人的改动。同步后重新读取已更新手册，核对本次涉及的删除/移动、共享脚本、源码入口和锁文件，再复制工程或改代码。记录基线SHA、同步结果和依赖位置。
@@ -41,7 +43,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 | 角色 | 谁 | 做什么 |
 |---|---|---|
 | 导演 | Nolan | 定选题和主线；和质检一起审成片。维护 `AGENTS.md`、`docs/RULES.md`、`docs/pipeline.md`，审并合并 PR |
-| 编剧、分镜 | 宫崎（Hayao Miyazaki） | 调研输入、`script.md`、`article.mdx`、`pronunciation.md`、`storyboard.json`、`covers.json` |
+| 编剧、分镜 | 宫崎（Hayao Miyazaki） | 调研输入、`references.json`、`script.md`、`article.mdx`、`pronunciation.md`、`storyboard.json`、`covers.json` |
 | 制作 | Knoll（John Knoll） | 配音、Remotion、渲染、封面、站点 PR、Release、deploy |
 | 质检 | Deming | 冻结后的预检，以及成片审 |
 | 运营 | Tim Cook | 抖音（头条同步）、B站、视频号发布；平台链接私信 Knoll（站点维护者）和 Nolan |
@@ -53,12 +55,12 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 
 按这个顺序，前一步没有产物就不要做下一步：
 
-1. 配音与分镜冻结：把 SHA-256 写进 `words.json` 和 `storyboard.json` 的 `meta.timingSource`。
-2. Deming 预检：起音窗口、COPYFIT、封面 4:3 安全区。见 [docs/validate.md](docs/validate.md)。
-3. 渲染 `video.mp4` 和封面。见 [docs/render.md](docs/render.md)。
-4. 完成成片复核，记录执行者、检查结果与能力限制。
+1. 资料、配音与分镜冻结：核验核心来源，冻结 `references.json` 及附录生成输入；把配音 SHA-256 写进 `words.json` 和 `storyboard.json` 的 `meta.timingSource`。
+2. Deming 预检：来源清单、起音窗口、COPYFIT、封面 4:3 安全区。正式编码前通过 `node site/scripts/check-references.mjs --sources EPDIR`。见 [docs/validate.md](docs/validate.md)。
+3. 通过本期默认入口渲染正文、参考资料附录和封面，不能只交付未加附录的正文。见 [docs/render.md](docs/render.md)。
+4. 完成成片复核，检查实际资料卡、字幕边界及播放器暂停/全屏，记录执行者、检查结果与能力限制。
 5. 按 STATUS 的持续授权确认 GitHub 站点发布范围，无需逐期索取 widget 批准。
-6. 合并主干、发布 Release、部署站点，并核对线上完整 SHA、字幕、章节、海报及更新日志。见 [docs/publish.md](docs/publish.md)。平台仅在另行明确授权后发布。
+6. 站点构建先通过参考资料检查；新片缺少资料、实际附录或一致的媒体记录时停止发布。再合并主干、发布 Release、部署站点，并核对线上完整 SHA、字幕、章节、海报及更新日志。见 [docs/publish.md](docs/publish.md)。平台仅在另行明确授权后发布。
 7. 视频制作完成、合并上线且核验通过后，将对应制作或重制 issue 以 `completed` 关闭；这是发布收尾的一部分，无需另行确认。
 
 ## 目录地图
