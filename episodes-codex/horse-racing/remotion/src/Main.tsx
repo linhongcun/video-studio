@@ -3,7 +3,6 @@ import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
 import {GROUPS,HORSES,Shot,shots} from './data';
 import {C,FONT} from './theme';
 import {useLayoutAudit} from './LayoutAudit';
-import {LowerBoundScene} from './LowerBound';
 import {Arrow,Board,CHAMPIONS,FINALISTS,FasterProof,Head,Node,Note,RETAINED,T,across,at,clamp,ease,mix,nodeXY,phase,steps} from './primitives';
 declare const __HAS_VOICE_AUDIO__:boolean;
 
@@ -32,7 +31,6 @@ const rankLabels=(ids:string[],positions:Record<string,{x:number;y:number}>,reve
 
 const Scene=({s,f}:{s:Shot;f:number})=>{
  const t=s.visualType,p=phase(s,f),q=phase(s,f,1);
- if(Number(s.id)>=18)return <LowerBoundScene s={s} f={f}/>;
  if(t==='hook'){
   const take=phase(s,f,0,.13,.88),positions:Record<string,{x:number;y:number}>={};
   HORSES.forEach(h=>{positions[h.id]={x:340+h.col*170,y:355+h.row*98};});
@@ -185,23 +183,15 @@ const Scene=({s,f}:{s:Shot;f:number})=>{
    <g opacity={sum}><T x={960} y={858} size={64} color={C.teal} anchor="middle" weight={760}>5 + 1 + 1 = 7 场</T></g>
   </>;
  }
- if(t==='why-safe'){
-  const progress=across(s,f,.07,.86),z=steps(progress,3),examples=[{target:'丁1',names:['甲1','乙1','丙1']},{target:'丙2',names:['甲1','乙1','丙1']},{target:'乙3',names:['甲1','乙1','乙2']}],example=examples[z.index],reveal=Math.min(3,z.progress*4),fade=flag(z.progress,.86,1),alpha={...alphaStage(4),[example.target]:mix(1,.14,fade)};
-  return <><Head kicker="证明回看 · 安全排除" title="为什么没有漏掉更快的马？" sub="每次排除前，都有至少三匹已经确定比它更快"/>
-   <ProofRelations names={example.names} target={example.target} reveal={reveal}/><Board alpha={alpha} colors={{...colorMap(example.names.slice(0,Math.ceil(reveal)),C.gold),[example.target]:C.red}}/>
-   <FasterProof names={example.names} target={example.target} reveal={reveal} conclusion={fade>.5}/>
-   <Note color={C.gold}>排除有依据，留下的候选覆盖所有前三可能</Note>
-  </>;
- }
  throw new Error('Unknown horse-racing visualType: '+t);
 };
 
 const ShotView=({s,hideSubtitles=false,auditLayout=false}:{s:Shot;hideSubtitles?:boolean;auditLayout?:boolean})=>{
- const f=useCurrentFrame(),subtitle=(s.subtitles??[]).find(item=>f>=item.from&&f<(item.to!==undefined?item.to+1:item.from+(item.duration??0)));
+ const f=useCurrentFrame(),legacyResult=s.visualType==='seven'?{...s,durationInFrames:377}:s,sceneFrame=s.visualType==='seven'?Math.min(f,376):f,shortEnd=s.visualType==='seven'&&f>=377,subtitle=(s.subtitles??[]).find(item=>f>=item.from&&f<(item.to!==undefined?item.to+1:item.from+(item.duration??0)));
  useLayoutAudit(auditLayout,'main',s.from+f);
  return <AbsoluteFill style={{background:C.bg,fontFamily:FONT}}><svg data-audit-scene="true" width="1920" height="1080" viewBox="0 0 1920 1080" style={{position:'absolute',inset:0}}>
   <defs><radialGradient id="horse-bg"><stop offset="0" stopColor="#173B55" stopOpacity=".32"/><stop offset="1" stopColor={C.bg} stopOpacity="0"/></radialGradient></defs><ellipse cx="1420" cy="280" rx="950" ry="700" fill="url(#horse-bg)"/>
-  <Scene s={s} f={f}/><T x={1790} y={92} size={25} color={C.muted} anchor="end">IT小村</T>
+  <Scene s={legacyResult} f={sceneFrame}/>{shortEnd&&<T x={960} y={915} size={25} color={C.muted} anchor="middle">IT小村 · 原创</T>}<T x={1790} y={92} size={25} color={C.muted} anchor="end">IT小村</T>
  </svg>{!hideSubtitles&&subtitle&&<div data-subtitle="true" style={{position:'absolute',left:200,right:200,bottom:65,textAlign:'center',fontSize:31,lineHeight:1.45,fontWeight:500,color:C.text,textShadow:'0 2px 5px #0F172A',whiteSpace:'pre-wrap'}}>{subtitle.text}</div>}</AbsoluteFill>;
 };
 export const Main=({hideSubtitles=false,auditLayout=false}:{hideSubtitles?:boolean;auditLayout?:boolean})=><AbsoluteFill>{__HAS_VOICE_AUDIO__&&<Audio src={staticFile('audio/voice.wav')}/>} {shots.map(s=><Sequence key={s.id} from={s.from} durationInFrames={s.durationInFrames}><ShotView s={s} hideSubtitles={hideSubtitles} auditLayout={auditLayout}/></Sequence>)}</AbsoluteFill>;
