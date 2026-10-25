@@ -21,3 +21,5 @@
 发布前再整合b83a0b04的默认参考资料流程：20条上游路径与181项核心冻结输入无交集。保留新版来源/成片门禁及旧视频固定字节基线；本期2项来源预检、全站4片附录/41片旧媒体暂缓均通过。合并树重新构建成功，最终HTML/VTT与94项验收对应字节一致，未重复已通过的检查，也未重渲正文。详见qa-observer-first-upstream-reference-gate.json。
 
 实际Chromium补查：桌面/手机竖屏内嵌均能以原生控件暂停，Java和参考卡无残留字幕。root另以受信任click进入真实Fullscreen API，实际查看桌面/手机横屏四张卡截图，参考内容完整。手机暂停控件仍会覆盖Java底部注释/页脚、字较小；完整实现可在文章查看。手机原生全屏按钮坐标尝试未成功，保留错误尝试，不把模拟视口或API检查写成真机UI通过；无媒体阻塞。见两份qa-observer-first-browser/fullscreen-api报告。
+
+正式交付：PR [#331](https://github.com/linhongcun/video-studio/pull/331)于86929ae71ea26dcddeb069b4f5d2cc5671c2d5b9合并，实际整树与验收分支742881ba一致，附注tag及[v0.69.2 Release](https://github.com/linhongcun/video-studio/releases/tag/v0.69.2)均指向该提交。Release后[Pages 40205012192](https://github.com/linhongcun/video-studio/actions/runs/40205012192)成功，自动push部署40204996101仅由本任务取消并以该手动运行替代。2026-10-25T23:07:26.140981+08:00，11项canonical普通GET全部通过，完整视频流SHA `5b98a0bca7135d78d44dfff8774274b441fbd4cfd4c4714481a34caa0cea67d0`、海报/VTT、20句/5章精确时点、3片Java字幕边界、正文主题/源码/系列导航/RSS与真实Release日志一致；未添加缓存查询或保存远端媒体。#305仅在此后以completed关闭。最终4592帧/153.07秒，正文90.54%模式、13.53秒MQ，Java和参考卡各5秒。仅GitHub站点；没有用户新版观看认可、全片人工听辨、逐字ASR或真机验证声明。
