@@ -37,7 +37,13 @@ npm run preview
 
 版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。第21期常见实现独立短片与旧合集归档本次版本为 v0.47.0；EP.01–14 Codex重制与章节首帧定位版本为 v0.48.0；EP.21四片的全局流程与缩放导航修订为v0.51.0，保留至v0.50.5的协作主干；实际版本以该文件及 Release 为准。
 
-1. 改 `meta.json`：`draft: false`，写上 `publishedAt`。重发或只改站点时更新 `updatedAt`。
+### 视频时间与版本
+
+每期 `meta.json` 同时维护 `createdAt` 与 `updatedAt`。首次建立该期时将两者设为实际创建时间；首次公开时另写 `publishedAt`，供 RSS 和首发排序使用。持续修改沿用该期 slug、标题和链接，保留 `createdAt`、`publishedAt`，只在视频或配套讲解发生实质内容修改时更新 `updatedAt`。纯站点主题、导航、部署或平台链接调整不改这两个内容时间。
+
+对外使用修改时间的北京时间版本标识，如“2026-10-25 版”；同日多版用带时分秒的标识。新时间写含时区的 ISO 8601 值（如 `2026-10-25T15:30:00+08:00`），历史数据可保留有证据的 `YYYY-MM-DD`，不以构建时间、文件 mtime 或今天的日期补造历史。历史时间迁移应记明证据及精度。版本名不继续累加“重制版”“V2”；站点三段版本号、提交 SHA 和冻结媒体清单仍用于准确追溯，已有 Release、QA 等历史记录不批量改名。
+
+1. 改 `meta.json`：`draft: false`，首次公开才写 `publishedAt`；按上节维护 `createdAt` 与 `updatedAt`，重发不重置创建和首发时间。
 2. 开 PR，合并进 `main`。推到 `main` 会跑 `.github/workflows/deploy.yml`，部署 GitHub Pages。这次构建发生在 Release 之前，`/changelog/` 还不会带上新版本。新版本要等第 4 步，在 Release 发出后再手动部署一次。命令顺序见「站点发版清单」。
 3. 打与 `version` 同名的 tag，并发布 GitHub Release。更新日志页 `site/src/lib/releases.ts` 在构建时读 `https://api.github.com/repos/linhongcun/video-studio/releases`。
 4. Release 发出后在 `main` 上再跑一次部署。这一次构建才能读到刚发出的 Release，`/changelog/` 才会带上新版本。工作流注释里的命令是：
@@ -58,7 +64,7 @@ gh workflow run deploy.yml --ref main
 sha256sum <file> | cut -c1-8
 ```
 
-2. 改 `site/package.json` 的 `version`：只改成片或文章升修订号；新一期或站点功能升次版本号。改该期 `meta.json`：`draft` 设为 `false`，写上 `publishedAt`；重发或只改站点时更新 `updatedAt`。将 `sourcePath` 明确设为对应当前制作目录（如 `episodes-codex/db-replication/remotion`），让页面“源码”指向当前工程。旧制作目录已清理，不依赖缺省旧路径。本地先构建通过：
+2. 改 `site/package.json` 的 `version`：只改成片或文章升修订号；新一期或站点功能升次版本号。改该期 `meta.json`：`draft` 设为 `false`，首次公开才写 `publishedAt`；按[视频时间与版本](#视频时间与版本)维护两个内容时间，重发保留 `createdAt` 与 `publishedAt`，实质内容修改才更新 `updatedAt`。将 `sourcePath` 明确设为对应当前制作目录（如 `episodes-codex/db-replication/remotion`），让页面“源码”指向当前工程。旧制作目录已清理，不依赖缺省旧路径。本地先构建通过：
 
 ```sh
 cd site
