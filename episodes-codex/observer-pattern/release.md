@@ -1,23 +1,20 @@
-# D02观察者模式：v0.58.0上线记录
+# observer-pattern：v0.60.4实际发布
 
-[观看视频与配套图文](https://linhongcun.github.io/video-studio/episodes/observer-pattern/)。2026-10-25（北京时间），内部EP.28 / 设计模式D02。按用户已有GitHub持续发布授权完成，只上站点，外部平台未新发。
+本期修订随PR #253/#254合并并上线，首发身份保持；对应#164已completed关闭。完整批次记录见[本轮发布](../../docs/pattern-flow-ui-java/release.md)。
 
-## 交付身份
 
-- [PR #236](https://github.com/linhongcun/video-studio/pull/236)已合并，主干/附注tag实际目标为`530ddc75e14d9d0d5b1d2e01363969a9ab027266`；[Release v0.58.0](https://github.com/linhongcun/video-studio/releases/tag/v0.58.0)发布于北京时间08:32:24。
-- [Release后Pages部署40147093346](https://github.com/linhongcun/video-studio/actions/runs/40147093346)为workflow_dispatch，head同上述提交，完整构建和部署成功。合并使用skip ci避免重复自动部署，Release后仍执行完整部署工作流。
-- 标签中已核对0.58.0、firstRelease v0.58.0、EP.28、4979帧及实际检查视频，生产/发布目录与已验收feature分支树一致。见[tag身份](tag-identity.json)与[真实部署](deployment.json)。
+本轮保留D01的100元会员90/活动80单选和D02的订单17/摘要/变化记录，只调整功能操作→结构职责→原机制协作→Java暂停节选的顺序。每片5句新配、17/19句复用；正文讲语言无关思想。两期媒体SHA、冻结输入、原URL、首发版本、日期和封面保持可追溯。
 
-12镜24句/5章，画面165.9667秒，容器165.973秒，约2分46秒。视频8,536,404字节，完整SHA-256：`76f38c9675e7ecf57520df1212cfac78093d6e24eaf534a38ed8c07a6e8c0c08`。1080p30fps/AAC48k，−16.0LUFS/−3.7dBTP；119项已编码输入保持。实际检查范围见[qa-final](qa-final.md)。
+- 内容PR [#253](https://github.com/linhongcun/video-studio/pull/253)合并8e97948；最终发版PR [#254](https://github.com/linhongcun/video-studio/pull/254)合并bb9b4e9782ed4b7b2d12a8fac9fd478193febfb8。
+- [v0.60.4 Release](https://github.com/linhongcun/video-studio/releases/tag/v0.60.4)与附注tag确切指向bb9b4e9782ed4b7b2d12a8fac9fd478193febfb8，整树同最终检查分支10f75487。tag内D014778帧、firstRelease v0.52.0；D025328帧、firstRelease v0.58.0。
+- [Release后Pages部署40152819279](https://github.com/linhongcun/video-studio/actions/runs/40152819279)完成成功，工作流head与tag相同。
+- 2026-10-25T10:04:31.360708+08:00，首轮13个canonical普通GET全部200；完整视频流/海报SHA与本地一致，22/24句字幕全文/时间、4/5章及锚点、Java图文入口与卡区、源码/课程目录/首页/全部内容/RSS与真实Release链接通过。未加缓存查询，不保存远端媒体。
+- #163/#164已再次以completed关闭，#161同步；其余21项待安排。外部平台未新发。
 
-## 同步与发布范围
+D01视频SHA-256：791a9696b561a8a815167b4e0eb45ed1251bcc3931d5759a5269e2964a808613。
 
-从干净主干先拉取1834450，重读上游清理/规范并在本期锁文件真实安装依赖；后续整合e38fa92、7d1d6f6/v0.57.1及28b347d上线记录，保留其他视频与最新手册。渲染输入与上游变更无交集，只解决网站版本为新的0.58.0；不改已有标签、不重渲无影响内容。
+D02视频SHA-256：6a8435f5fe3c51e1e7bd61b8b83af3dd52457f15884ff4074bbb8721f4279a6f。
 
-主片以订单17两次变化解释订阅、共同通知约定、各自响应与取消后的行为，没有语法教学。图文SVG属性按网页渲染器转换为发布派生稿，原冻结文章不变，正文事实/音视频/字幕均不改。修前与修后、派生SHA和定向范围分别保留，见site-article-derivation.json及site-svg-correction.json。开工/渲染启动错误记L034，SVG兼容问题记L035，S017更新本片应用及D01用户定性认可。
+并行PR #252先撤下Agent试片并占用v0.60.3。合并后整树检查拦截差异，旧tag未动；旧候选46项证据按提交原字节归档，最终站点按新主干重新构建/四浏览器例/18seek验收为36片、4方向。之后仅QA脚本允许未来新Agent课的变更，补跑当前回归、确认整个dist指纹不变，未重做音视频或浏览器检查。见merge-race-rebuild.json、candidates/v0.60.3/archive-path-map.json及postbuild-regression-update.json。
 
-## 实际线上核验
-
-北京时间`2026-10-25T08:35:41.637130+08:00`，首轮9个canonical普通GET全部200，无缓存查询参数，完整视频流计算SHA且未保存远端媒体。视频/海报/24句VTT与本地发布稿相同；5章起点0/769/1715/2962/3674，源码、目录、D01↔D02、首页、系列、RSS和真实v0.58.0 Release条目通过；线上SVG原生字体/居中属性亦已核对。完整记录见[site-online-verification.json](site-online-verification.json)。本地Release抓取降级的限制已由本次生产条目检查闭合。
-
-核验通过后[#164](https://github.com/linhongcun/video-studio/issues/164)以completed关闭，系列[#161](https://github.com/linhongcun/video-studio/issues/161)保持open，D01/D02完成、其余21项待安排。本片尚无用户观看结论；没有逐字ASR、完整听辨或新手学习实验声明。
+资料、Java实际运行、独立动态与正式MP4、信号和网站检查均按实际范围记录；没有逐字ASR、全片人工听辨、初学者实验或本轮用户观看认可结论。S017/L029/L032/L037已同步实际证据与限制。

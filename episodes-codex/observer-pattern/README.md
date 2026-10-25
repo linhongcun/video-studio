@@ -1,5 +1,7 @@
 # 设计模式 D02 · 观察者模式
 
+**当前已上线v0.60.4。** 本轮媒体与网站/线上检查通过，#164已completed关闭；原例、首发与URL保留。见[发布记录](release.md)。
+
 制作issue [#164](https://github.com/linhongcun/video-studio/issues/164)，系列总览 [#161](https://github.com/linhongcun/video-studio/issues/161)。首发v0.58.0；用户随后要求改为“先产品操作、再结构逐节点、最后Java关键代码”的讲解流程，并明确保留原案例。本次不换订单故事，不引入购物车或支付渠道，不把思想课改成语法课。
 
 ## 本次修订
