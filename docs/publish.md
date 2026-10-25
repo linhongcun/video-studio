@@ -64,6 +64,8 @@ gh workflow run deploy.yml --ref main
 sha256sum <file> | cut -c1-8
 ```
 
+新制作或重制视频同时复制本期 `references.json`、`reference-appendix.json`、`reference-appendix-media-check.json` 及文章出处。使用最终 `video.mp4`，不能把 `remotion/out/body.mp4` 当成发布成片。按 `render-result.json.publicationMetadata` 填写 `meta.referenceAppendix` 和 `meta.finalVideoFrames`，核对实际MP4完整SHA与附录回执一致；正文分镜和 `words.json` 保留各自真实范围。
+
 2. 改 `site/package.json` 的 `version`：只改成片或文章升修订号；新一期或站点功能升次版本号。改该期 `meta.json`：`draft` 设为 `false`，首次公开才写 `publishedAt`；按[视频时间与版本](#视频时间与版本)维护两个内容时间，重发保留 `createdAt` 与 `publishedAt`，实质内容修改才更新 `updatedAt`。将 `sourcePath` 明确设为对应当前制作目录（如 `episodes-codex/db-replication/remotion`），让页面“源码”指向当前工程。旧制作目录已清理，不依赖缺省旧路径。本地先构建通过：
 
 ```sh
@@ -71,6 +73,8 @@ cd site
 npm ci
 npm run build
 ```
+
+构建在复制媒体前自动执行 `check:references`。新视频缺来源或实际参考附录、回执SHA/帧数不一致时必须修复后再发布。固定历史基线只允许媒体字节未变的未处理存量暂缓，同slug换片也须补齐；不得通过扩大存量名单绕过检查。机器检查不代替实际阅读来源和查看播放器暂停/全屏效果。
 
 3. 保留各机器已有的主作者身份，不从 `git log` 抄邮箱。按 [AGENTS.md 的提交署名约定](../AGENTS.md#提交署名)，本机 Codex 制作的变更加 `Co-authored-by: Codex <codex@openai.com>`；Cursor 制作的变更加 `Co-authored-by: Cursor Agent <cursoragent@cursor.com>`。只添加实际参与工具的署名，不强制另一工具的独立提交添加自己的署名。Squash 合并保留本次变更实际贡献者已有的全部联合署名，不相互覆盖，不修改机器的全局 Git 配置。
 

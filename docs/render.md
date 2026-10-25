@@ -2,7 +2,22 @@
 
 制作工程在 `episodes-codex/<slug>/`，站点发布副本在 `episodes/<slug>/`。按当期 README、`remotion/package.json` 和 `source-sha256.json` 执行；参考实现为 [EP.14 当前工程](../episodes-codex/degradation/README.md)。旧期制作工程已清理，不从站点目录重新渲染。
 
-## 正片
+## 新片默认入口
+
+新片从调研阶段准备 `references.json`，并按[新期模板](../episodes-codex/_template/README.md)接入默认附录流程。正式编码前先做来源预检；正文命令写为本期的 `render:body`，输出独立的 `remotion/out/body.mp4`，其中保留已设计的完整代码卡（如有）。默认入口随后调用共享资料追加器生成最终 `video.mp4`，不允许只交付 `render:body` 产物。
+
+```sh
+node site/scripts/check-references.mjs --sources EPDIR
+python3 episodes-codex/_shared/render_with_references.py EPDIR
+```
+
+入口先检查资料，再只读核对本期 `source-sha256.json`，随后执行 `npm run render:body` 和共享追加器；具体参数与文件约定以[共享入口](../episodes-codex/_shared/README.md)为准。资料清单、文章、实际核验记录、入口及追加器源码、实际调用的 `site/scripts/check-references.mjs` 和所用配置随本期实际输入冻结，产出的receipt和MP4不作为编码前输入冻结。附录两份receipt复制到制作目录根，其中 `reference-appendix.json` 记录起点、分页和完整区间；`render-result.json` 记录输出SHA、最终帧数及 `publicationMetadata`。接入站点时复制清单和receipt，按该metadata片段填写 `meta.referenceAppendix`、`meta.finalVideoFrames`，不改写正文的旁白、分镜或 `words.json`。来源尚未核验时应在渲染前失败，避免先做完正文再补片尾。
+
+已完成生成后可用 `python3 episodes-codex/_shared/render_with_references.py EPDIR --verify` 复核资料、冻结和最终媒体；此模式只写QA报告，不重新渲染正文或重写冻结清单。
+
+默认每页5秒并提示暂停，实际检查所有资料页和首/中/末帧、字幕结束及播放器暂停/手机全屏；提示与核验日期避开原生底部控件。正文、代码卡和参考资料分别计时，不额外延长旁白或覆盖代码卡。
+
+## 现行旧期正文入口参考
 
 以下命令使用当前 EP.14 的实际入口。运行前先完成 [校验](validate.md) 与冻结核对；换期应先读该期 README。
 
