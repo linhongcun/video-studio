@@ -21,3 +21,7 @@ RabbitMQ原文区分publisher confirm和consumer ack，手动确认/断连重入
 ## 本地验收
 
 独立完整GET核验6条引用及9份官方固定文件，原题、原句和定位行号均通过；12张实际MP4的正文末帧/卡首中末帧逐张实看通过。浏览器6场景153项断言、24精确暂停点、3次桌面1倍速尾段到结束、3页手机原生全屏、3次完整MP4 GET/SHA与12次出处点击通过，9张截图实际view_image。详见qa-independent.json和qa-browser.json。模拟手机/静音播放与原生小窗限制如实记录，不声称真机、ASR或全片听辨；本地上线预检已通过。
+
+## 发布与线上核验
+
+[PR #341](https://github.com/linhongcun/video-studio/pull/341)合并为`8e6f3c7b8d9124679b25a5c75b91c9889b01423c`，附注标签和[Release v0.70.5](https://github.com/linhongcun/video-studio/releases/tag/v0.70.5)对应实际验收树。[Release后Pages 40244313897](https://github.com/linhongcun/video-studio/actions/runs/40244313897)完整构建与部署成功。13次普通canonical完整GET核对三片整条视频/海报SHA、VTT全文及原时序、章节/日期/源码入口、原题/短引/位置与更新日志真实Release通过，见[线上记录](online-verification.json)。远程媒体仅流式计算完整SHA，未下载落盘。仅GitHub站点，无平台重发或本版用户观看结论。
