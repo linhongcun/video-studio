@@ -19,3 +19,5 @@
 最终候选已顺延到未占用的v0.69.2，并整合1dacf608的首批参考资料上线证据。发布复制映射明确使用video-with-references.mp4→episodes/video.mp4，render-result-final.json→发布render-result.json；原video.mp4与render-result.json保留4442帧核心身份，source-sha256的181项只声明核心。新参考清单/receipt/media-check另行随发布同步，metadata.finalVideoFrames4592优先，storyboard/words仍为核心范围。check-frames.mjs已核对4592实际帧；核心冻结仍通过。
 
 发布前再整合b83a0b04的默认参考资料流程：20条上游路径与181项核心冻结输入无交集。保留新版来源/成片门禁及旧视频固定字节基线；本期2项来源预检、全站4片附录/41片旧媒体暂缓均通过。合并树重新构建成功，最终HTML/VTT与94项验收对应字节一致，未重复已通过的检查，也未重渲正文。详见qa-observer-first-upstream-reference-gate.json。
+
+实际Chromium补查：桌面/手机竖屏内嵌均能以原生控件暂停，Java和参考卡无残留字幕。root另以受信任click进入真实Fullscreen API，实际查看桌面/手机横屏四张卡截图，参考内容完整。手机暂停控件仍会覆盖Java底部注释/页脚、字较小；完整实现可在文章查看。手机原生全屏按钮坐标尝试未成功，保留错误尝试，不把模拟视口或API检查写成真机UI通过；无媒体阻塞。见两份qa-observer-first-browser/fullscreen-api报告。
