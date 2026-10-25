@@ -141,8 +141,13 @@ export function computeChapters(slug: string, fm: any[] = []) {
 export function buildVtt(slug: string) {
   if (!fs.existsSync(path.join(EP_DIR, slug, 'storyboard.json'))) return 'WEBVTT\n';
   const {fps, scenes} = shotPlan(slug);
-  const ts = (f: number) => {
-    const s = f / fps;
+  const card = readJson(path.join(EP_DIR, slug, 'storyboard.json')).meta?.unvoicedEndCard;
+  const cardFrom = Number.isInteger(card?.from) && card.from >= 0
+    && Number.isInteger(card?.durationInFrames) && card.durationInFrames > 0 ? card.from : undefined;
+  const ts = (f: number, cueEnd = false) => {
+    // Rounding up an appendix boundary keeps the last native cue active on its
+    // first frame. Only that exact end boundary is floored to milliseconds.
+    const s = cueEnd && f === cardFrom ? Math.floor(f / fps * 1000) / 1000 : f / fps;
     const hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = (s % 60).toFixed(3).padStart(6, '0');
     return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${ss}`;
   };
@@ -155,7 +160,7 @@ export function buildVtt(slug: string) {
       Number.isInteger(s.from) && Number.isInteger(s.to) && s.from >= 0 && s.to >= s.from && s.to < dur
       && (i === 0 || s.from > subs[i - 1].to));
     if (timed) {
-      subs.forEach((s: any) => cues.push(`${ts(from + s.from)} --> ${ts(from + s.to + 1)}\n${s.text}`));
+      subs.forEach((s: any) => cues.push(`${ts(from + s.from)} --> ${ts(from + s.to + 1, true)}\n${s.text}`));
       continue;
     }
     const total = subs.reduce((a: number, s: any) => a + n(s.text), 0);
@@ -164,7 +169,7 @@ export function buildVtt(slug: string) {
       const a = Math.round((t / total) * audioFrames);
       t += n(s.text);
       const b = i === subs.length - 1 ? audioFrames + 6 : Math.round((t / total) * audioFrames) - 1;
-      cues.push(`${ts(from + a)} --> ${ts(from + b + 1)}\n${s.text}`);
+      cues.push(`${ts(from + a)} --> ${ts(from + b + 1, true)}\n${s.text}`);
     });
   }
   return `WEBVTT\n\n${cues.join('\n\n')}\n`;

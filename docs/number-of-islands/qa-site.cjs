@@ -203,7 +203,7 @@ async function capture(page, width, theme, name, screenshots) {
 async function checkPage(context, e, width, theme, options, screenshots) {
   const page = await context.newPage(), errors = []; page.on('pageerror', (error) => errors.push(error.message));
   const response = await page.goto(new URL(`episodes/${slug}/`, options.base).href, {waitUntil: 'networkidle'}); assert.equal(response.status(), 200);
-  await page.evaluate(() => document.fonts.ready); assert.equal(await page.locator('h1').innerText(), e.meta.title);
+  await page.evaluate(() => document.fonts.ready); assert.equal(await page.locator('.eh h1').innerText(), e.meta.title);
   assert.ok((await page.locator('footer').innerText()).includes(options.revisionTag)); assert.ok((await page.locator('.eh .meta').innerText()).includes(e.displayDuration));
   assert.ok(await page.getByText('LC.200', {exact: false}).count() > 0); assert.equal(await page.locator('.pl').count(), 0);
   assert.ok(await page.locator(`a[href="${e.expectedSource}"]`).count() > 0);
@@ -226,7 +226,7 @@ async function checkPage(context, e, width, theme, options, screenshots) {
   const vtt = await responseVtt.body(), cues = parseVtt(vtt); assert.equal(cues.length, e.cues.length); assert.deepEqual(cues.map((c) => c.text), e.cues.map((c) => c.text));
   for (let i = 0; i < cues.length; i++) for (const key of ['start', 'end']) assert.ok(Math.abs(cues[i][key] - e.cues[i][key]) < .001);
   assert.equal(sha(vtt), fileSha(path.join(dist, 'episodes', slug, 'captions.vtt')));
-  assert.ok(cues.every((c) => c.end <= e.card.from / e.fps));
+  assert.ok(cues.every((c) => c.end <= e.card.from / e.fps), 'Serialized cues must not extend into the code card');
   const httpMedia = [];
   if (width === 1440) for (const [name, expected] of [[e.meta.video, e.videoSha256], [e.meta.poster, e.posterSha256]]) {
     const asset = await context.request.get(new URL(`episodes/${slug}/${name}`, options.base).href); assert.equal(asset.status(), 200);
@@ -239,7 +239,15 @@ async function checkPage(context, e, width, theme, options, screenshots) {
   await seek(page, 0); const openingPlayback = await playTo(page, 4); assert.ok(openingPlayback.playingEvent && openingPlayback.advancedSeconds >= .5 && openingPlayback.paused && !openingPlayback.mediaError);
   const opening = await capture(page, width, theme, 'islands-opening', screenshots);
   await video.evaluate((v) => {v.textTracks[0].mode = 'showing';}); const silentSamples = [];
-  for (const offset of [.1, 2.5, 4.8]) {await seek(page, e.card.from / e.fps + offset); assert.equal(await video.evaluate((v) => v.textTracks[0].activeCues.length), 0); silentSamples.push({time: await video.evaluate((v) => v.currentTime), activeCues: 0});}
+  for (const offset of [0, .0001, .1, 2.5, 4.8]) {
+    const requested = e.card.from / e.fps + offset; await seek(page, requested);
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))));
+    const sample = await video.evaluate((v, requested) => ({requested, currentTime: v.currentTime, activeCues: v.textTracks[0].activeCues.length,
+      cues: [...v.textTracks[0].activeCues].map((cue) => ({text: cue.text, start: cue.startTime, end: cue.endTime}))}), requested);
+    silentSamples.push(sample);
+    fs.writeFileSync(path.join(output, `native-card-boundary-${width}.json`), JSON.stringify({width, exactCardStart: e.card.from / e.fps, samples: silentSamples}, null, 2) + '\n');
+    assert.equal(sample.activeCues, 0, `Native CC remains active at ${requested}`);
+  }
   await seek(page, e.card.from / e.fps + 1); const cardPlayback = await playTo(page, e.card.from / e.fps + 2);
   assert.ok(cardPlayback.playingEvent && cardPlayback.advancedSeconds >= .5 && cardPlayback.paused && !cardPlayback.mediaError); assert.equal(await video.evaluate((v) => v.textTracks[0].activeCues.length), 0);
   await video.evaluate((v, modes) => {[...v.textTracks].forEach((t, i) => {t.mode = modes[i];});}, media.defaultCaptionModes);
@@ -290,15 +298,17 @@ async function run(options) {
       options.stage = `browser ${width} ${theme}`; const context = await browser.newContext({viewport: {width, height: 900}, colorScheme: theme}); browserChecks.push(await checkPage(context, e, width, theme, options, screenshots)); siteEntries.push({width, ...await checkEntries(context, options)}); await context.close();
     }
     const releaseWarnings = fs.readFileSync(path.join(output, 'build.log'), 'utf8').split(/\r?\n/).filter((line) => line.includes('[changelog]'));
+    const previousBlockedBuild = fs.existsSync(path.join(__dirname, 'before-card-boundary-fix/site-qa/build-receipt.json'));
+    const buildRuns = previousBlockedBuild ? 2 : 1;
     const report = {status: 'passed', checkedAtUTC: new Date().toISOString(), executor: 'Codex derive_site agent', revisionTag: options.revisionTag, preservationBaseline: options.preservationBase, revisionDate: options.revisionDate,
       checkoutHeadAtRun: git(['rev-parse', 'HEAD']).trim(), helperSha256: fileSha(__filename), inputFingerprint: input,
-      build: {passed: true, runs: 1, reusedForBrowserResume: options.reuseBuild, log: 'docs/number-of-islands/site-qa/build.log'}, historicalRegression: {passed: true, runs: 1, log: 'docs/number-of-islands/site-qa/learning-path.log'},
+      build: {passed: true, runs: buildRuns, finalInputBuildRuns: 1, previousBlockedBuildRuns: buildRuns - 1, rebuildReason: previousBlockedBuild ? 'Real site VTT input changed to stop the native cue before the exact appendix boundary; first build evidence is archived.' : null, reusedForBrowserResume: options.reuseBuild, log: 'docs/number-of-islands/site-qa/build.log'}, historicalRegression: {passed: true, runs: buildRuns, log: 'docs/number-of-islands/site-qa/learning-path.log'},
       media: [{slug, frames: e.frames, fps: e.fps, narrationCues: e.cues.length, videoSha256: e.videoSha256, posterSha256: e.posterSha256, coverSha256: e.covers, cardFrames: 150, cardFrom: e.card.from, productionInputs: e.productionInputs, publishedInternalEp: e.publishedInternalEp, productionInternalEp: e.productionInternalEp}], retained, browserChecks, siteEntries,
       screenshots: screenshots.map((file) => ({path: path.relative(root, file), sha256: fileSha(file)})), actualScreenshotReviewPending: true,
       localReleaseFetch: {warnings: releaseWarnings, newReleaseChangelogRequiresPostReleaseVerification: true},
       limits: [`Two actual browser viewports, eight chapter clicks/seeks, ${e.cues.length} exact VTT cues, native CC activation, real muted opening playback to about 4s and about 1s card playback per viewport. This is not full-video listening or ASR.`, 'Screenshots and actual browser-decoded frames were captured; model visual inspection must be recorded separately after viewing.', 'Other canonical tracked files and all six previously published LeetCode file SHA identities are preserved; no assumption is made about their untracked production MP4s.', 'The new lesson firstRelease/publishedAt are bound to this release; all older lesson identities are retained. Release-specific changelog and real production delivery are checked only after publishing with explicit revision/deployment identity.']};
     fs.writeFileSync(path.join(__dirname, 'qa-site.json'), JSON.stringify(report, null, 2) + '\n');
-    fs.writeFileSync(path.join(__dirname, 'qa-site.md'), `# LC.200 岛屿数量：网站检查\n\n实际检查：${report.checkedAtUTC}；首次发布${options.revisionTag}，结果通过。一次构建和一次历史回归；1440亮色/390暗色两组，四章共8次真实点击/seek。${e.cues.length}句VTT逐字与真实SB帧时一致，正式片${e.frames}帧/${(e.frames / e.fps).toFixed(3)}秒。原生CC激活后恢复默认；每视口实际播放开头约4秒、代码卡约1秒再暂停。150帧/5秒代码卡三个位置无cue，完整Python/文章/源码同源，完整MP4与海报HTTP SHA一致，三封面canonical与production相同。\n\n此前6条算法完整canonical SHA及所有非任务canonical与${options.preservationBase}保持，当前已发布媒体在同次构建中逐字节复制；P04、Agent Skills、Adapter均保留，撤下的旧两期Agent没有恢复。首页算法方向、学习入口、七片系列、资料库及RSS可达。新片firstRelease为本次显式tag，内部ep从最终meta读取，不把暂定编号当影片题号。\n\n实际截图/浏览器解码帧已捕获，模型视觉复核待实际打开后另记。构建Release提示：${releaseWarnings.length ? releaseWarnings.join('；') : '未记录失败提示'}。新片自身Release/changelog及生产HTTPS待发布后核验，不预记通过；不声称全片听辨、ASR或观众学习效果。详见[机器报告](qa-site.json)。\n`);
+    fs.writeFileSync(path.join(__dirname, 'qa-site.md'), `# LC.200 岛屿数量：网站检查\n\n实际检查：${report.checkedAtUTC}；首次发布${options.revisionTag}，结果通过。${buildRuns}次真实构建和${buildRuns}次历史回归（首轮因首卡原生CC阻塞，修正站点VTT后重建）；1440亮色/390暗色两组，四章共8次真实点击/seek。${e.cues.length}句VTT逐字与真实SB帧时一致，正式片${e.frames}帧/${(e.frames / e.fps).toFixed(3)}秒。原生CC激活后恢复默认；每视口实际播放开头约4秒、代码卡约1秒再暂停。150帧/5秒代码卡精确首卡、+0.0001秒与中末卡五个采样无cue，完整Python/文章/源码同源，完整MP4与海报HTTP SHA一致，三封面canonical与production相同。\n\n此前6条算法完整canonical SHA及所有非任务canonical与${options.preservationBase}保持，当前已发布媒体在同次构建中逐字节复制；P04、Agent Skills、Adapter均保留，撤下的旧两期Agent没有恢复。首页算法方向、学习入口、七片系列、资料库及RSS可达。新片firstRelease为本次显式tag，内部ep从最终meta读取，不把暂定编号当影片题号。\n\n实际截图/浏览器解码帧已捕获，模型视觉复核待实际打开后另记。构建Release提示：${releaseWarnings.length ? releaseWarnings.join('；') : '未记录失败提示'}。新片自身Release/changelog及生产HTTPS待发布后核验，不预记通过；不声称全片听辨、ASR或观众学习效果。详见[机器报告](qa-site.json)。\n`);
 
     console.log(JSON.stringify({status: report.status, revisionTag: options.revisionTag, browserCases: browserChecks.length, seeks: browserChecks.reduce((n, row) => n + row.seeks.length, 0), report: 'docs/number-of-islands/qa-site.json'}, null, 2));
     return report;
