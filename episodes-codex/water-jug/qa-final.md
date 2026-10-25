@@ -1,6 +1,6 @@
 # P03量水题：成片检查
 
-正式媒体与本地网页检查通过；上线状态按本期release.md记录。此结论限实际执行的数学、源码、抽样动态、信号与播放器检查，不代表用户已观看或学习效果已测量。
+正式媒体、本地网页与GitHub上线核验通过；发布身份按本期release.md记录。此结论限实际执行的数学、源码、抽样动态、信号与播放器检查，不代表用户已观看或学习效果已测量。
 
 ## 内容与制作身份
 
@@ -23,7 +23,7 @@
 
 ## 网页与交付
 
-14项发布副本逐字节/SHA一致，site及锁版本0.61.0，实际构建99个HTML、Pagefind36页；共享学习路径检查通过，退役Agent内容保持删除。1440×1000和390×844真实Chromium核对24句VTT文本/时间与activeCue、四章和正文跳转、开头/末镜播放、最后帧和自然ended；首页/学习方向/系列/内容库均为三课趣味推理目录。proof与lc365为普通文章锚点，不出现视频seek；16态表及长来源脚注窄屏可读、无横向溢出。站点制作独立实看截图，根另view桌面/手机首屏、手机末帧/证书表/脚注五图，未见阻塞。见qa-site.json/md、qa-site-build.json、qa-site-reading.json及qa-site-root-view.json。部署后将执行canonical完整媒体SHA、字幕/章节及真实Release日志检查，尚未执行的线上结果不预写通过。
+14项发布副本逐字节/SHA一致，site及锁版本0.61.0，实际构建99个HTML、Pagefind36页；共享学习路径检查通过，退役Agent内容保持删除。1440×1000和390×844真实Chromium核对24句VTT文本/时间与activeCue、四章和正文跳转、开头/末镜播放、最后帧和自然ended；首页/学习方向/系列/内容库均为三课趣味推理目录。proof与lc365为普通文章锚点，不出现视频seek；16态表及长来源脚注窄屏可读、无横向溢出。站点制作独立实看截图，根另view桌面/手机首屏、手机末帧/证书表/脚注五图，未见阻塞。见qa-site.json/md、qa-site-build.json、qa-site-reading.json及qa-site-root-view.json。Release后Pages40153856609完整部署成功。北京时间10:22:14首轮9个普通站点canonical GET全部通过，完整视频/海报SHA、VTT逐字节、四章/正文锚点、独立三课目录、RSS及实际v0.61.0新增日志一致；另1份真实Release由GitHub connector独立读取，含文件SHA与来源，不冒充本地HTTP请求。原生GitHub CLI/API在部署观察阶段返回401，未改身份或代理，改用可用connector确认部署及Release。报告见online-verification.json、release-connector.json和deployment.json。#207核验后已completed关闭，总览#204已完成3题。
 
 ## 能力边界
 
