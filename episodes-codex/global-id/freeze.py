@@ -8,6 +8,7 @@ import wave
 D = Path(__file__).resolve().parent
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--verify', action='store_true', help='Read-only check of the frozen manifest and inputs.')
+parser.add_argument('--profile', choices=('methods', 'tradeoffs'), help='Require the already assembled profile; never reassemble inputs.')
 args = parser.parse_args()
 def digest(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
@@ -16,18 +17,23 @@ def save(path, obj):
 
 sb = json.loads((D/'storyboard.json').read_text())
 words = json.loads((D/'words.json').read_text())
+profile = sb['meta'].get('assemblyProfile', {'name': 'methods', 'baseline': 'revisions/methods-before',
+                                          'insertion': 'revisions/methods-insert', 'proof': 'methods-reuse-proof.json'})
+profile_name = profile['name']
+assert args.profile is None or args.profile == profile_name, 'Assembled storyboard has another profile.'
+script_rel = words.get('script', 'script.md')
 total_frames = sb['meta']['durationInFrames']
 assert sb['meta']['finalVideoFrames'] == words['durationFrames'] == total_frames
 assert total_frames > 0
 assert words['audioSha256'] == digest(D/'voice.wav')
-assert words['scriptSha256'] == digest(D/'script.md')
+assert words['scriptSha256'] == digest(D/script_rel)
 assert (D/'voice.wav').read_bytes() == (D/'remotion/public/audio/voice.wav').read_bytes()
 assert not (D/'remotion/public/audio/voice.wav').is_symlink()
 assert sb['meta']['covers'] == json.loads((D/'covers.json').read_text())
 with wave.open(str(D/'voice.wav')) as wav:
     assert (wav.getnchannels(), wav.getsampwidth(), wav.getframerate()) == (1, 2, 48000)
     assert wav.getnframes() == total_frames * 1600
-for rel in ('voice.wav', 'words.json', 'script.md'):
+for rel in ('voice.wav', 'words.json', script_rel):
     assert digest(D/rel) in sb['meta']['timingSource'], f'Missing complete timing-source SHA: {rel}'
 build = json.loads((D/'voice/build.json').read_text())
 assert build['summary']['frames'] == total_frames
@@ -53,7 +59,7 @@ if args.verify:
         assert digest(D/rel) == expected, rel
     assert (D/f'storyboard.{sha8}.json').read_bytes() == raw
     assert (D/'remotion/src/placeholders/storyboard.json').read_bytes() == raw
-    print(f'Verified {len(manifest)} frozen inputs; {total_frames} frames; storyboard {sha8}.')
+    print(f'Verified {profile_name}: {len(manifest)} frozen inputs; {total_frames} frames; storyboard {sha8}.')
     raise SystemExit(0)
 (D/f'storyboard.{sha8}.json').write_bytes(raw)
 (D/'remotion/src/placeholders').mkdir(parents=True,exist_ok=True)
@@ -64,7 +70,7 @@ files = [
     'article.mdx','research.md','pronunciation.md','captions.srt',
     'voice/picks.json','voice/params.json','voice/sents.json','voice/build.json',
     'voice/cues.json','voice/shot_frames.json',
-    'voice/cue_tests.json','methods-reuse-proof.json',
+    'voice/cue_tests.json',profile['proof'],script_rel,
     'remotion/remotion.config.ts','remotion/tsconfig.json','remotion/package.json',
     'remotion/package-lock.json','remotion/public/audio/voice.wav',
     '../../episodes/_shared/theme/pageTheme.ts',
@@ -77,10 +83,12 @@ files = [
 for rel in ('render-methods.py', 'splice-plan-methods.json'):
     if (D/rel).is_file():
         files.append(rel)
-# Both the archival baseline and separately built insertion are actual inputs
-# of assemble-methods.py. Keep the earlier manifest discrepancy as recorded in
-# baseline.json; these snapshots do not retroactively change the old freeze.
-for folder in ('revisions/methods-before', 'revisions/methods-insert'):
+# Freeze exactly the selected insertion and its provenance. Historical methods
+# inputs stay untouched and are only selected by an explicit methods profile.
+config_source = profile.get('configSource', '')
+if config_source and ':' not in config_source:
+    files.append(config_source)
+for folder in dict.fromkeys([profile['baseline'], profile['insertion'], *profile.get('archives', [])]):
     files += [str(p.relative_to(D)) for p in sorted((D/folder).rglob('*'))
               if p.is_file() and '__pycache__' not in p.parts]
 files += [str(p.relative_to(D)) for p in sorted((D/'remotion/src').rglob('*')) if p.is_file()]
@@ -89,4 +97,4 @@ picks = json.loads((D/'voice/picks.json').read_text())
 for sid,take in picks.items():
     files.extend([f'voice/takes/{sid}-{take}.wav',f'voice/takes/{sid}-{take}.txt.json'])
 save(D/'source-sha256.json',{rel:digest(D/rel) for rel in dict.fromkeys(files)})
-print(f'Frozen storyboard {sha8}; {len(dict.fromkeys(files))} actual inputs; {total_frames} frames.')
+print(f'Frozen {profile_name}: storyboard {sha8}; {len(dict.fromkeys(files))} actual inputs; {total_frames} frames.')

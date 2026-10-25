@@ -1,0 +1,112 @@
+{
+  "assemblyProfile": {
+    "baseline": "revisions/methods-before",
+    "insertion": "revisions/tradeoffs-insert",
+    "script": "script.md",
+    "sentenceCounts": {
+      "16-options": 3,
+      "17-redis": 5
+    },
+    "visualRevision": 3,
+    "archives": [
+      "revisions/tradeoffs-before"
+    ],
+    "chapters": [
+      {
+        "id": "uuid",
+        "title": "UUID：方便生成，主键有代价",
+        "shots": [
+          "16"
+        ]
+      },
+      {
+        "id": "redis",
+        "title": "Redis：递增取号，切换要防回退",
+        "shots": [
+          "17"
+        ]
+      }
+    ],
+    "style": "Present UUIDv4 first with unordered primary-key tradeoffs, then Redis centralized counters with asynchronous-replication/failover and fenced durable range-allocation boundaries; only then introduce Snowflake fields.",
+    "name": "tradeoffs",
+    "configSource": "assembly-profiles.json",
+    "proof": "tradeoffs-reuse-proof.json",
+    "spliceResult": "tradeoffs-splice-result.json"
+  },
+  "insertFrame": 1574,
+  "addedFrames": 1227,
+  "originalFrames": 4419,
+  "finalFrames": 5646,
+  "originalVideoSha256": "14bd428ea60068a454310759cbf329e80e33a3f5aef6deed3761c8bce21da471",
+  "insertedVideoSha256": "197a8271744b170933a8a56d8869a2d09f20545fe14a56c937130e60bd13ffd1",
+  "finalVideoSha256": "61a93773ea3590dcd20bb0ffdf3f83b28b0ef980685b704ceff6264f641ccd69",
+  "renderCommand": [
+    "npx",
+    "remotion",
+    "render",
+    "src/index.ts",
+    "Main",
+    "/workspace/video-studio/episodes-codex/global-id/remotion/out/tradeoffs-insert.mp4",
+    "--frames=1574-2800",
+    "--muted",
+    "--codec=h264",
+    "--crf=18",
+    "--concurrency=2",
+    "--browser-executable=/usr/bin/chromium",
+    "--bundle-cache=false"
+  ],
+  "spliceCommand": [
+    "ffmpeg",
+    "-y",
+    "-v",
+    "warning",
+    "-threads",
+    "2",
+    "-i",
+    "/workspace/video-studio/episodes-codex/global-id/revisions/methods-before/video.mp4",
+    "-threads",
+    "2",
+    "-i",
+    "/workspace/video-studio/episodes-codex/global-id/remotion/out/tradeoffs-insert.mp4",
+    "-threads",
+    "2",
+    "-i",
+    "/workspace/video-studio/episodes-codex/global-id/revisions/methods-before/video.mp4",
+    "-i",
+    "/workspace/video-studio/episodes-codex/global-id/voice.wav",
+    "-filter_complex_threads",
+    "1",
+    "-filter_complex",
+    "[0:v]trim=end_frame=1574,settb=1/30,setpts=PTS-STARTPTS[a];[1:v]trim=end_frame=1227,settb=1/30,setpts=PTS-STARTPTS[b];[2:v]trim=start_frame=1574:end_frame=4419,settb=1/30,setpts=PTS-STARTPTS[c];[a][b][c]concat=n=3:v=1:a=0,fps=30[v]",
+    "-map",
+    "[v]",
+    "-map",
+    "3:a:0",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "veryfast",
+    "-crf",
+    "20",
+    "-pix_fmt",
+    "yuv420p",
+    "-threads",
+    "2",
+    "-r",
+    "30",
+    "-video_track_timescale",
+    "90000",
+    "-frames:v",
+    "5646",
+    "-c:a",
+    "aac",
+    "-b:a",
+    "192k",
+    "-ar",
+    "48000",
+    "-t",
+    "188.2",
+    "/workspace/video-studio/episodes-codex/global-id/remotion/out/voice.mp4"
+  ],
+  "scope": "Only two new shots rendered. Original pictures decoded/re-encoded; not lossless stream copy. Original narration PCM preserved before final continuous music mix."
+}
