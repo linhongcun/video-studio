@@ -145,9 +145,9 @@ export function buildVtt(slug: string) {
   const cardFrom = Number.isInteger(card?.from) && card.from >= 0
     && Number.isInteger(card?.durationInFrames) && card.durationInFrames > 0 ? card.from : undefined;
   const ts = (f: number, cueEnd = false) => {
-    // Rounding up an appendix boundary keeps the last native cue active on its
-    // first frame. Only that exact end boundary is floored to milliseconds.
-    const s = cueEnd && f === cardFrom ? Math.floor(f / fps * 1000) / 1000 : f / fps;
+    // Native cues can remain active when their end equals the first card frame.
+    // Only that exact end uses the greatest millisecond strictly before it.
+    const s = cueEnd && f === cardFrom ? (Math.ceil(f / fps * 1000) - 1) / 1000 : f / fps;
     const hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = (s % 60).toFixed(3).padStart(6, '0');
     return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${ss}`;
   };

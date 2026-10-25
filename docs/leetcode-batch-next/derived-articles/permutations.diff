@@ -23,7 +23,7 @@
  
  从空排列开始选1，第二位检查1时发现它已使用，跳过并选2。第三位同样跳过1、2，选择3，得到123。
  
-@@ -35,7 +35,7 @@
+@@ -35,11 +35,11 @@
  
  **已使用只针对当前排列。** 某个数字在123里用过，不妨碍它出现在132里；即便同一趟搜索，退回并撤销以后也可以重新选择。`used[i]`记录的是输入下标i当前是否在`path`中。
  
@@ -31,6 +31,20 @@
 +## 为什么保存副本 {#code}
  
  `path`是持续追加、弹出的工作列表。直接`ans.append(path)`会让结果引用同一个会变化的列表；之后撤销会影响所谓的“答案”。[Python文档](https://docs.python.org/3/library/stdtypes.html#mutable-sequence-types)说明`copy()`创建浅副本，而`pop()`默认移除末项。本题元素为整数，因此复制列表本身足以保留每份独立结果。
+ 
+-<!-- SOLUTION:START solution.py -->
++{/* SOLUTION:START solution.py */}
+ ```python
+ class Solution:
+     def permute(self, nums: list[int]) -> list[list[int]]:
+@@ -64,7 +64,7 @@
+         dfs()
+         return ans
+ ```
+-<!-- SOLUTION:END -->
++{/* SOLUTION:END */}
+ 
+ ## 为什么不重不漏
  
 @@ -80,4 +80,4 @@
  

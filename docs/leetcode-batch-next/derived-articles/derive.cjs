@@ -37,6 +37,10 @@ function transform(slug, source, sb) {
     assert.ok(source.includes('chapters:\n' + chapters.map((chapter) => `  - id: ${chapter.id}\n    title: ${chapter.title}\n`).join('')));
   }
   plan.headings.forEach((heading, i) => replace(`\n## ${heading}\n`, `\n## ${heading} {#${plan.ids[i]}}\n`, `Connect ${plan.ids[i]} to the existing section`));
+  if (slug === 'permutations') {
+    replace('<!-- SOLUTION:START solution.py -->', '{/* SOLUTION:START solution.py */}', 'Convert the invisible generated-code start marker to valid MDX comment syntax');
+    replace('<!-- SOLUTION:END -->', '{/* SOLUTION:END */}', 'Convert the invisible generated-code end marker to valid MDX comment syntax');
+  }
   replace(plan.remove, '', 'Remove an obsolete production-stage statement');
   assert.deepEqual(text.match(/^```[\s\S]*?^```/gm), source.match(/^```[\s\S]*?^```/gm), 'Code fences must be byte-identical');
   return {text, chapters, edits};
@@ -69,7 +73,7 @@ function proofFor(slug, files, source, derived, diff, result) {
     transformPath: relative(__filename),
     chapters: result.chapters,
     exactEdits: result.edits,
-    scope: ['Only the listed chapter frontmatter, four existing H2 anchors, and obsolete production-stage text change.', 'All explanation, examples, Python code, remaining headings and production source bytes are preserved.', 'Times come from actual storyboard frames; the derived frontmatter contains no estimated start values.'],
+    scope: ['Only the listed chapter frontmatter, four existing H2 anchors, invisible MDX comment syntax and obsolete production-stage text change.', 'All explanation, examples, Python code, remaining headings and production source bytes are preserved.', 'Times come from actual storyboard frames; the derived frontmatter contains no estimated start values.'],
   };
 }
 function prepare(slug) {

@@ -12,6 +12,7 @@ from zoneinfo import ZoneInfo
 import argparse
 import hashlib
 import json
+import math
 import os
 import re
 import subprocess
@@ -218,6 +219,7 @@ def verify(args, run):
     baseline = git('rev-parse', args.preservation_base + '^{commit}', text=True).strip()
     qa = read(OUT / 'qa-site.json')
     assert qa['status'] == 'passed' and qa['revisionTag'] == args.revision_tag and qa['preservationBaseline'] == baseline and set(qa['slugs']) == set(args.slugs)
+    assert qa['actualScreenshotReviewPending'] is False and qa['visualReview']['status'] == 'passed'
     run.stage = 'All non-batch canonical identities'
     retained = preserved(baseline, tagged, args.slugs)
     episode_reports = []
@@ -267,7 +269,11 @@ def verify(args, run):
         assert len(actual) == len(expected)
         for have, wanted in zip(actual, expected):
             assert have['text'] == wanted['text']
-            assert abs(have['start'] - wanted['start']) < .001 and abs(have['end'] - wanted['end']) < .001
+            assert abs(have['start'] - wanted['start']) < .001
+            if wanted['end'] == card['from'] / fps:
+                assert abs(have['end'] - (math.ceil(card['from'] / fps * 1000) - 1) / 1000) < 1e-9
+            else:
+                assert abs(have['end'] - wanted['end']) < .001
         assert all(cue['end'] <= card['from'] / fps for cue in actual)
         document = Document(run.get(f'episodes/{slug}/').decode())
         assert meta['title'] in document.text and f'LC.{meta["problemNumber"]}' in document.text and args.revision_tag in document.footer
@@ -287,6 +293,35 @@ def verify(args, run):
         assert len(videos) == 1 and 'controls' in videos[0] and videos[0]['poster'].endswith(f'episodes/{slug}/{meta["poster"]}')
         assert any(element == 'track' and attrs.get('kind') == 'captions' and attrs['src'].endswith(vtt_path) for element, attrs in document.attrs)
         episode_reports.append({'slug': slug, 'problemNumber': meta['problemNumber'], 'frames': frames, 'fps': fps, 'cues': len(actual), 'chapters': chapter_plan, 'cardFrames': 150, 'firstRelease': meta['firstRelease'], 'dates': {key: meta[key] for key in ['createdAt', 'updatedAt', 'publishedAt']}, 'media': media, 'captionsSHA256': sha(vtt), 'source': source, 'completePythonExact': True, 'articleDerivation': article_derivation})
+    run.stage = 'Two retained films: only corrected VTT endpoints, no old movie downloads'
+    boundary_audit = read(OUT / 'site-qa/vtt-boundary-audit.json')
+    assert set(boundary_audit['changed']) == {'climbing-stairs', 'reverse-linked-list', 'permutations'}
+    assert boundary_audit['generatedBuiltVTTMatched'] is True and boundary_audit['unchangedCount'] == 42
+    local_boundaries = read(OUT / 'site-qa/retained-card-boundaries.json')
+    assert local_boundaries['status'] == 'passed' and {row['slug'] for row in local_boundaries['rows']} == {'climbing-stairs', 'reverse-linked-list'}
+    assert all(not sample['activeCues'] for row in local_boundaries['rows'] for sample in row['samples'])
+    retained_caption_checks = []
+    for slug in ['climbing-stairs', 'reverse-linked-list']:
+        relative = f'episodes/{slug}/captions.vtt'
+        online = run.get(relative)
+        assert online == (ROOT / 'site/dist' / relative).read_bytes()
+        audit = next(row for row in boundary_audit['rows'] if row['slug'] == slug)
+        original = (OUT / f'site-qa/vtt-boundary-before/{slug}.vtt').read_bytes()
+        assert sha(online) == audit['correctedSHA256'] and sha(original) == audit['previousSHA256']
+        before, after = vtt_cues(original), vtt_cues(online)
+        assert len(before) == len(after) and len(audit['changes']) == 1
+        changed = []
+        sb = read(ROOT / 'episodes' / slug / 'storyboard.json')
+        boundary = sb['meta']['unvoicedEndCard']['from'] / sb['meta']['fps']
+        endpoint = (math.ceil(boundary * 1000) - 1) / 1000
+        for i, (old, new) in enumerate(zip(before, after)):
+            assert old['text'] == new['text'] and old['start'] == new['start']
+            if old['end'] != new['end']:
+                assert abs(old['end'] - boundary) < 1e-9 and abs(new['end'] - endpoint) < 1e-9
+                assert abs(old['end'] - new['end'] - .001) < 1e-9
+                changed.append(i + 1)
+        assert changed == [audit['changes'][0]['cue']]
+        retained_caption_checks.append({'slug': slug, 'bytes': len(online), 'sha256': sha(online), 'onlyChangedCue': changed[0], 'previousEndpoint': boundary, 'publishedEndpoint': endpoint, 'allTextStartsAndOtherEndsUnchanged': True})
     run.stage = 'Batch home/learning/series/library/RSS and this release only'
     home, learning, library, series = [Document(run.get(relative).decode()) for relative in ['', 'learn/', 'library/', 'series/leetcode/']]
     assert args.revision_tag in home.footer and '/video-studio/learn/#algorithms' in home.links
@@ -312,7 +347,7 @@ def verify(args, run):
     return {'status': 'passed', 'checkedAtUTC': now(), 'revisionTag': args.revision_tag, 'preservationBaseline': baseline, 'slugs': args.slugs,
             'release': {key: release[key] for key in ['tag_name', 'html_url', 'published_at', 'target_commitish']},
             'annotatedTag': {'tagObjectSha': ref['object']['sha'], 'commit': tagged}, 'deployment': deployment_record,
-            'episodes': episode_reports, 'retained': retained, 'httpRecords': run.http_records, 'apiRecords': run.api_records,
+            'episodes': episode_reports, 'retained': retained, 'retainedCaptionBoundaryChecks': retained_caption_checks, 'localRetainedNativeCCScope': local_boundaries['scope'], 'httpRecords': run.http_records, 'apiRecords': run.api_records,
             'changelogAssociatedExactlyThreeFilms': True, 'retiredAgentURLsStill404': True,
             'limits': ['Only three changed films are downloaded; other canonical identities are preserved through complete Git/local bytes. No redundant old-media HTTP downloads.', 'Serialized HTTP/VTT/HTML checks complement the actual local player/CC/seek/screenshot evidence. No complete listening, ASR or measured learning outcome is claimed.', 'Reserved createdAt and firstRelease are retained; explicit ISO updatedAt/publishedAt are checked independently. Publication identity comes from the supplied tag/run, not future main.']}
 
