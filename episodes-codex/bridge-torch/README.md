@@ -41,10 +41,12 @@ npm run covers
 
 `QA_FRAMES`可指定全片帧号，`QA_HIDE_SUBTITLES=1`关闭旁白字幕，`QA_CLIPS`指定连续区间；实际输出与源SHA记录在各次samples.json。正式`npm run render`仅在冻结与独立预检通过后启动；多人共享`/tmp/video-studio-render.lock`，TMPDIR使用有空间的短路径。混音前输出`remotion/out/voice.mp4`，最终成片为本目录`video.mp4`。
 
-当前真实人声为6025帧（200.8333秒，约3分21秒）、32句、4章，正常语速。并行制作期间保留已上线的观察者EP28/v0.58.0，本期非口播身份顺延EP29、首发计划v0.60.0；全部原人声与句窗复用，见voice/metadata-sync-ep29.json、upstream-before-encoding.json和upstream-before-release.json。
+当前真实人声为6025帧（200.8333秒，约3分21秒）、32句、4章，正常语速。并行制作期间保留已上线的观察者EP28/v0.58.0，本期非口播身份顺延EP29，最终首发v0.60.0；全部原人声与句窗复用，见voice/metadata-sync-ep29.json、upstream-before-encoding.json和upstream-before-release.json。
 
 数学核验、预检、实际编码、响度和网页证据按真实执行范围记录，不用生成参数代替输出检查。正式媒体与发布结果见`qa-final.md`及`release.md`，其中未完成的检查不得预写通过。
 
 ## 发布范围
 
 按已有持续授权完成GitHub主干、Release与Pages交付，核验线上完整视频/海报SHA、字幕、章节和真实更新日志后，以`completed`关闭#206并同步#204。外部平台未获本次授权。已发布与用户已观看认可分别记录。
+
+当前已按v0.60.0完成PR #243、附注tag/Release与Pages交付，首轮10次线上核验通过，#206已completed关闭。实际媒体、检查边界与证据见[交付记录](release.md)。

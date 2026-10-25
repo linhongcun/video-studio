@@ -324,7 +324,12 @@ if (puzzle) {
   assert.equal(learning.getTrackForSeries('puzzles')?.id, 'puzzles', 'Puzzles have their own learning direction');
   assert.equal(tracks.find((track) => track.id === 'puzzles')?.start.slug, 'horse-racing', 'Puzzles start with the published horse-racing lesson');
   assert.equal(published.seriesNav(puzzle).prev, undefined, 'The first puzzle must not inherit a technical prerequisite');
-  assert.equal(published.seriesNav(puzzle).next, undefined, 'The puzzle must not lead into another learning direction');
+  const puzzleChain = liveLessons.filter((lesson) => lesson.series === 'puzzles').sort(published.compareLessons);
+  for (const [index, lesson] of puzzleChain.entries()) {
+    const nav = published.seriesNav(lesson);
+    assert.equal(nav.prev?.slug, puzzleChain[index - 1]?.slug, 'Puzzles must follow their own published lesson order');
+    assert.equal(nav.next?.slug, puzzleChain[index + 1]?.slug, 'The last puzzle must not lead into another learning direction');
+  }
 }
 console.log(`${tracks.length} learning directions passed: every published lesson has one home; independent directions remain outside the systems path.`);
 

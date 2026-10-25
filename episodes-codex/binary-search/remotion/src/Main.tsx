@@ -58,9 +58,36 @@ const Scene=({s,f}:{s:Shot;f:number})=>{
   return <><Head kicker="LeetCode 704 · 先看题目" title="在有序数组里，找一个数的位置" sub="输入示例 · 从小到大，所有值互不重复"/><Target/><Board showIndex={false} showRange={false} showPointers={false} spot={spot} spotAlpha={p<1?1:.3}/><T x={960} y={758} anchor="middle" size={42} color={C.gold}>目标 13 在哪里？</T><Note alpha={q}>找到它的位置，而不是重新排列数组</Note></>;
  }
  if(t==='output')return <><Head kicker="LeetCode 704 · 题目要求" title="返回位置，不是返回这个数" sub="下标从 0 开始 · 本例的值 13，对应下标 6"/><Target/><Board showPointers={false} showRange={false} mark={6} markAlpha={p}/><Result value={6} alpha={p}/><Note alpha={q} color={C.gold}>如果目标不存在，返回 −1</Note></>;
- if(t==='method'){
+ if(t==='ordered-clue'){
+  const ordered=f>=Number(s.cueFrames?.sentences?.[1]??s.durationInFrames*.5);
+  const checking=phase(s,f,0,.02,.86),proving=phase(s,f,1,.06,.5),exclude=phase(s,f,1,.59,.89);
+  const focus=ordered?Math.min(3,Math.floor(proving*4)):Math.min(2,Math.floor(checking*3));
+  return <><Head kicker="从题意寻找线索 · 思路推导" title={ordered?'七小于十三，左边整段都不可能':'逐格查找，能用上已经排好的顺序吗？'} sub="同一个有序数组 · 先分析可利用的信息，还未开始正式查找"/><Target/>
+   {ordered&&<Compare alpha={phase(s,f,1,.02,.2)}>1 ≤ 3 ≤ 5 ≤ 7 &lt; 13</Compare>}
+   <Board showPointers={false} showRange={false} alive={NUMS.map((_,i)=>ordered&&i<=3?1-exclude:1)} spot={focus} spotAlpha={ordered?1:checking<1?1:.25}/>
+   {!ordered&&<g><path d={`M ${x(0)} 685 H ${x(Math.min(2,Math.floor(checking*3)))}`} stroke={C.gold} strokeWidth={3}/><T x={960} y={767} anchor="middle" size={35} color={C.gold}>一格一格检查，尚未利用有序</T></g>}
+   {ordered&&<g opacity={proving}><path d={`M ${x(0)-63} 680 H ${x(3)+63}`} stroke={C.teal} strokeWidth={3}/><T x={(x(0)+x(3))/2} y={741} anchor="middle" size={33} color={C.teal}>这4格都 ≤ 7，因此都 &lt; 13</T></g>}
+   <Note color={ordered?C.teal:C.muted}>{ordered?'有序信息让一次比较能够排除一整段':'接着问：一次比较，能不能否定更多位置？'}</Note></>;
+ }
+ if(t==='balanced-choice'){
+  const isMiddle=f>=at(s,0,.57),choice=isMiddle?3:0;
   const introduced=f>=Number(s.cueFrames?.labels?.['二分查找']??s.cueFrames?.sentences?.[1]??0);
-  return <><Head kicker="开始解题" title="每次，只检查当前范围的中点" sub={introduced?'二分查找 · 先比较，再排除不可能的一半':'题意清楚了，再减少查找次数'}/><Target/><Board mid={introduced?3:-1} midAlpha={q}/><Note alpha={q} color={C.gold}>偶数个候选时，选中间靠左的一格</Note></>;
+  const leave=phase(s,f,1,.04,.26),arrive=phase(s,f,1,.4,.76);
+  const switchAlpha=isMiddle?phase(s,f,0,.57,.75):1-phase(s,f,0,.43,.56),groupAlpha=switchAlpha*(1-leave);
+  const leftCount=choice,rightCount=7-choice;
+  return <><Head kicker="再分析：选哪一格来比较" title="为什么选中间，而不是最边上？" sub={introduced?'二分查找 · 先有选择依据，再从全范围正式执行':'同一批8个候选 · 比较值不相等时，只需保留可能的一侧'}/>
+   <g opacity={groupAlpha}>
+    {choice>0&&<rect x={x(0)-79} y={447} width={x(choice-1)-x(0)+158} height={204} rx={20} fill={C.teal+'0A'} stroke={C.teal} strokeWidth={2}/>}
+    <rect x={x(choice+1)-79} y={447} width={x(7)-x(choice+1)+158} height={204} rx={20} fill={C.blue+'0A'} stroke={C.blue} strokeWidth={2}/>
+   </g>
+   <Board showPointers={false} showRange={false} spot={choice} spotAlpha={1-leave}/>
+   <g opacity={groupAlpha}><T x={x(choice)} y={397} anchor="middle" size={28} color={C.gold}>比较这一格</T><path d={`M ${x(choice)} 410 V 444 m -8 -9 l 8 9 l 8 -9`} stroke={C.gold} strokeWidth={3} fill="none"/>
+    <T x={choice===0?x(0):((x(0)+x(choice-1))/2)} y={726} anchor="middle" size={33} color={leftCount?C.teal:C.muted}>左侧 {leftCount} 格</T>
+    <T x={(x(choice+1)+x(7))/2} y={726} anchor="middle" size={33} color={C.blue}>右侧 {rightCount} 格</T>
+    <T x={960} y={807} anchor="middle" size={35} color={isMiddle?C.teal:C.gold}>{isMiddle?'两侧最多4格，比留下7格更均衡':'最边上的格：若目标在右边，还可能剩7格'}</T>
+   </g>
+   <g opacity={arrive}><T x={960} y={755} anchor="middle" size={43} color={C.teal}>二分查找</T><T x={960} y={818} anchor="middle" size={31} color={C.muted}>推导结束 · 恢复全部8格，从头正式执行</T></g>
+   <Note>{introduced?'下一镜：从完整范围开始计算和检查中点':'这里只比较位置选择，分组不是实际排除结果'}</Note></>;
  }
  if(t==='first-mid')return <><Head title="7 比 13 小，能排除哪一段？" sub="中点下标：(0 + 7) ÷ 2 = 3.5 → 3"/><Target/><Compare alpha={q}>7 &lt; 13</Compare><Board mid={3} spot={3} spotAlpha={p}/><Note alpha={q} color={C.gold}>先看顺序能保证什么，再移动边界</Note></>;
  if(t==='why-safe'){
