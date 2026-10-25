@@ -46,7 +46,7 @@ def load_facts():
     render = read_json(PRODUCTION / 'render-result.json')
     meta = read_json(SITE / 'meta.json')
     assert config['slug'] == meta['slug'] == SLUG
-    assert config['episode'] == meta['ep'] == 31
+    assert config['episode'] == meta['ep'] == 32
     assert config['episodePart'] == meta['episodePart'] == '趣味推理 P04'
     assert config['title'] == meta['title']
     assert meta['series'] == 'puzzles'

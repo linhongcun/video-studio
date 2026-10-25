@@ -28,8 +28,8 @@ from sync_site import load_facts, check_local_delivery, expected_vtt, puzzle_slu
 BASE = 'https://linhongcun.github.io/video-studio/'
 REPO_URL = 'https://github.com/linhongcun/video-studio'
 SLUG = 'monty-hall'
-FIRST_RELEASE = 'v0.62.0'
-RELEASE = 'v0.62.0'
+FIRST_RELEASE = 'v0.64.0'
+RELEASE = 'v0.64.0'
 PRODUCTION = Path(__file__).resolve().parent
 ROOT = PRODUCTION.parents[1]
 SITE = ROOT / 'episodes' / SLUG

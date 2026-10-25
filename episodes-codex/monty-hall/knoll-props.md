@@ -1,17 +1,17 @@
-# EP31 · monty-hall-v1 · 按初选对错看清换门结果
+# EP32 · monty-hall-v1 · 按初选对错看清换门结果
 
 依据真实声音装配后的storyboard.json与covers.json；不是临时原型。全部画面为1920×1080／30fps全屏canvas，14镜28句、5507帧。
 
 ## 输入身份
 
-- script.md：`d85df3de248aae721977d4396145c96a5d25ff01053fbe8884bf8b0c00e0c12a`。
+- script.md：`ca94595ec4ff984f70a0ffb76d9ce619bb72bdf82eb0f1e1ef6d54399920767f`。
 - plan.json：`7bc40e7c8b4580d9e15edb59dd7af2a09d41be85704c3cc73f980b03d4efffcf`。
 - voice.wav：`c12883686897cef1f983aae434ef02745ac9b9bf27660c95160658d41ab2eee6`。
-- words.json：`bb0761a5925be30ebb2e04a9931742b27c32639c12eb94a9fc2c96c47d27034a`。
-- storyboard.json：`61abcd34a14ac43af4a8dfb32746fba108982dfc8d2a37cc3060601437e08303`。
+- words.json：`6558a6110cdac5b3f24a0e0748c961d1c898e0d93b333ab63053811dd2b65671`。
+- storyboard.json：`6a76466dade4dede42921bb2197b1caad04ba2b3e755565ba54afa18428a23b4`。
 - covers.json：`16281b06f2fc498d34d42b2057bf9bf3e824e4704229a1ae48d46f01d5e215a9`。
 - voice/cues.json：`978db83bbec4b517ec6e4e4a715ebcdf55007431ca35a38410d67cb507c8df8e`。
-- voice/shot_frames.json：`57af8488b2ce77d04d0636a58f55ef064fafe9113c20769b6e866e28b008bf13`。
+- voice/shot_frames.json：`b33f2b6354881b3a3111a842b8b10fbd99460703bd80dc06eb7c39fa4580f17d`。
 
 音轨、public实体副本、句级区间与字幕来源见qa-voice.md。词兼容字段是整句包络，两个真实句首cue为02的主持人与14第二句的每次都换；内部开门／切换／揭奖不冒充逐字ASR对齐。
 
@@ -57,3 +57,7 @@
 discussionQuestion = 主持人知道奖品位置且只开空门时，为什么换门获胜正好对应初选错误？
 
 nextEpisode缺省，不编下一期。末镜仅原有三情景结果与始终保留／始终换门概率，保留IT小村 · 原创，短停后结束；不追加证明或文章口头入口。
+
+## 发布身份修订
+
+并行专题先使用EP31，本期制作期号顺延为EP32。实际首发版本见站点metadata与release.md，发布版本不参与画面。旧142清单、原始TTS来源与未发布候选保留在identity-revision及retired候选目录；不以新清单追认旧编码。28句旁白、选定takes、WAV与所有可视字段保持，新的canonical来源经过精确对比、重新冻结并完整重编码。复用证明见voice/metadata-sync.json。

@@ -21,7 +21,10 @@ else:
     sys.argv = [str(ROOT/'episodes-codex/_shared/freeze_sentence_episode.py'), str(D)]
     runpy.run_path(sys.argv[0], run_name='__main__')
     manifest = json.loads((D/'source-sha256.json').read_text())
-    extra = [Path(__file__).resolve(), D/'assemble.py', D/'research-math.md', D/'verify_math.py']
+    extra = [Path(__file__).resolve(), D/'assemble.py', D/'research-math.md', D/'verify_math.py',
+             D/'voice/input-provenance.json', D/'voice/metadata-sync.json']
+    # Preserve original generation/retired identity evidence instead of rewriting it.
+    extra += [p for p in (D/'identity-revision').rglob('*') if p.is_file()]
     extra += [p for p in (D/'remotion/scripts').rglob('*')
               if p.is_file() and '__pycache__' not in p.parts and p.suffix != '.pyc']
     for p in extra:

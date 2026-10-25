@@ -1,6 +1,6 @@
 # P04 三门问题：一手资料实际阅读
 
-核验/访问日期：2026-10-25（北京时间）。对应[#208](https://github.com/linhongcun/video-studio/issues/208)，slug `monty-hall`，趣味推理P04、内部EP.31。
+核验/访问日期：2026-10-25（北京时间）。对应[#208](https://github.com/linhongcun/video-studio/issues/208)，slug `monty-hall`，趣味推理P04、内部EP.32。
 
 主任务已同步最新主干并创建`codex/monty-hall`。本任务实际核对基线`4a00d8a0f84b0d20eb1a87fbd6fb87a6b870a6f0`及该分支，不切分支、不提交、不执行外部代码。
 

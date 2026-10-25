@@ -29,3 +29,13 @@
 编码检查助手verify_encoded_voice.py已准备，按实际配置动态读取句数和冻结输入数；待正式媒体稳定后才运行。它核对整轨和每句波形、声道、延迟、增益及已知BGM贡献，不能替代语义听辨。当前实际183.57秒短于Wallpaper，助手的无需循环前提与当前总长相容，正式运行仍会检查实际样本长度。
 
 机器证据：voice/qa-candidates.json、voice/qa-takes-a.json、voice/qa-candidate-comparison.json、voice/qa-audio-inputs.json、voice/qa-critical-inputs.json、voice/loudness.txt、voice/place_v2.json、label-onset-strict.txt、qa-timing.json。首轮临时build与picks另保留为voice/build-a.json、voice/picks-a.json；它们不代表最终媒体。生成、裁尾、铺轨及起音复用共享实现，未修改共享或旧期。
+
+## EP31原生成身份与EP32当前身份
+
+并发发布的Skills先占EP31／v0.62.0后，本片顺延为EP32、计划v0.63.0。root确认旧候选结束并退休隔离，先核对旧142项冻结源，再归档旧身份文件于identity-revision/ep31；旧候选不作为新输入的正式成片。当前完整script SHA为`ca94595ec4ff984f70a0ffb76d9ce619bb72bdf82eb0f1e1ef6d54399920767f`，config为`2ec59ce43e62e1c4259fe073a390155f212cebc6903e4dbfbaa2b8c9df676b94`。
+
+本次没有调用TTS或prep。按root指令用原31份候选、原25a／3b选择重新执行共享build、assemble、whole铺轨、起音及句级检查；128个原声音输入／选段文件的完整SHA逐项保持，WAV、全部28句PCM、句窗和声学起音、14镜时序精确相同，仍为5507帧和`c1288368…ab2eee6`。原生成时间`2026-10-25T02:53:20.903138+00:00`、原script SHA `d85df3de…0c12a`及原voice/input-provenance.json、voice/script-narration-sha256.json均保留原字节；后者明确是历史TTS输入摘要，当前canonical身份以words.json和voice/metadata-sync.json为准。新旧14段旁白和28句文本逐字相同，两种旁白摘要均精确匹配。
+
+新words SHA为`6558a6110cdac5b3f24a0e0748c961d1c898e0d93b333ab63053811dd2b65671`，唯一字段差异是顶层scriptSha256。新storyboard SHA为`6a76466dade4dede42921bb2197b1caad04ba2b3e755565ba54afa18428a23b4`；唯一非来源字段差异为meta.episode从31到32，其余15处变化只是全片及14镜的来源摘要。所有其他分镜字段精确相同，当前placeholder与分镜同字节，公开voice和双字幕副本一致。详细128项前后摘要、句窗、镜窗和字段差异见voice/metadata-sync.json。
+
+以上是原声音的精确复用与新身份装配证明，不是重新生成或新的语义听辨结论。后续由root对新canonical输入重新冻结并全片编码，正式媒体再进行实际波形一致性检查。
