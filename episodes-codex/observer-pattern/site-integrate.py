@@ -31,13 +31,13 @@ if __name__ == '__main__':
         assert sha(HERE/name) == sha(OUT/name)
     frames = sb['meta']['durationInFrames']
     metadata.update(
-        summary='简述观察者原理，重点演示跨服务MQ发布订阅：独立队列、消费确认、离线积压、重投幂等与一致性边界。',
-        description='保留订单17、摘要和变化记录案例，压缩手写观察者实现，重点说明实际项目怎样通过MQ实现跨服务事件通知，以及为何仍需设计可靠消费和业务一致性。',
-        tags=['设计模式','观察者模式','消息队列'],
-        related=['strategy-pattern','message-queue','idempotency','tx-outbox'],
+        summary='从订单变化讲清观察者的动机、角色、订阅通知和退出，理解职责分离与取舍，最后简述框架事件和MQ的实战对应。',
+        description='保留订单17、摘要和变化记录案例，以一次已付款通知和退出后的发货通知讲清观察者模式的共同约定、职责与协作；代码简述，MQ仅为短实战映射。',
+        tags=['设计模式','观察者模式','事件通知'],
+        related=['strategy-pattern'],
         updatedAt=datetime.now(ZoneInfo('Asia/Shanghai')).isoformat(timespec='seconds'),
         finalVideoFrames=frames, targetDuration=frames/30,
-        javaEndCard=sb['meta']['javaEndCard'], revisionIssue=292,
+        javaEndCard=sb['meta']['javaEndCard'], revisionIssue=305,
     )
     assert all(metadata.get(k) == v for k, v in original_identity.items())
     (OUT/'meta.json').write_text(json.dumps(metadata,ensure_ascii=False,indent=2)+'\n')

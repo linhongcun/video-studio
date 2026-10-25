@@ -1,5 +1,5 @@
-# MQ实战配音选段
+# 观察者主线修订配音
 
-01两句使用既有flow原take；其余18句使用本次mq，07第二句定义修正用mq2。MQ在送模文本中替换为M Q，字幕和脚本保留MQ。每句附抛弃尾“好。”，使用共享common.cut与voice/build.py裁尾，未复制裁音算法。选段以picks.json为准。
+01/03/04/06/07十句逐字复用原观察者版take，具体源stem、目标stem与完整WAV哈希见observer-first-reuse.json。02/05/08/09/10十句本次生成pattern take，输入冻结见observer-first-inputs.json。MQ只在09短实战段出现，送模替换为M Q，原字幕保留MQ。
 
-实际来源、格式、裁尾与内部低信号检查见qa-voice-mq。未执行逐字ASR或完整人工听辨，不把信号检查当作读音正确的证明。
+共享common.cut与voice/build.py负责抛弃尾“好。”和整轨，不复制裁尾或起音算法。实际来源与声学检查见本轮QA；没有完整人工听辨或逐字ASR声明。

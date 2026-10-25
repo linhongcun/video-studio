@@ -98,8 +98,10 @@ try:
     assert META['title'] in page
     assert 'EP.28 · 设计模式 D02' in page
     assert 'id="course-directory"' in page
-    assert 'MQ' in page and 'RabbitMQ' in page and '幂等' in page
-    assert '故障后积压、恢复与幂等' in page
+    assert '观察者模式' in page and 'OrderObserver' in page and '取消订阅' in page
+    assert '实战中的简短对应' in page
+    assert '来源变化，观察者各自响应' in page
+    assert '故障后积压、恢复与幂等' not in page
     directory = re.search(r'<nav[^>]*aria-label="设计模式课程目录"[^>]*>(.*?)</nav>', page, re.S).group(1)
     current_lesson = re.search(r'<a\b(?=[^>]*href="/video-studio/episodes/observer-pattern/")(?=[^>]*aria-current="page")[^>]*>', directory)
     assert current_lesson, 'current lesson missing from design patterns directory'

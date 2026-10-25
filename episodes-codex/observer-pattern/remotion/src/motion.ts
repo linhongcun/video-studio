@@ -1,5 +1,4 @@
 import type {Shot} from './data';
-
 export const at=(s:Shot,sentence:number,ratio:number)=>{
  const starts=s.cueFrames?.sentences??[9,Math.round(s.durationInFrames/2)];
  const a=Number(starts[sentence]??0),b=Number(starts[sentence+1]??Number(s.javaCardFrom??s.durationInFrames)-15);
@@ -8,40 +7,38 @@ export const at=(s:Shot,sentence:number,ratio:number)=>{
 type Window=[number,number,number];
 const WINDOWS:Record<string,Record<string,Window>>={
  'product-update':{click:[0,.04,.21],state:[0,.24,.39],summary:[0,.45,.62],record:[0,.67,.9]},
- 'observer-brief':{register:[0,.03,.25],state:[0,.29,.4],summary:[0,.45,.62],record:[0,.69,.88],roles:[1,.03,.9]},
- 'mq-practice':{local:[0,.04,.55],mq:[1,0,.26],queues:[1,.3,.7]},
- 'publish-route':{publish:[1,.03,.25],route:[1,.3,.68]},
- 'independent-consume':{summary:[0,.02,.2],summaryApply:[0,.23,.32],summaryAck:[0,.35,.48],record:[0,.15,.34],recordApply:[0,.37,.47],recordAck:[0,.54,.71],extend:[1,.08,.75]},
- 'offline-backlog':{summary:[0,.3,.5],summaryApply:[0,.52,.64],summaryAck:[0,.66,.84],durable:[1,.03,.65]},
- 'recover-idempotent':{recover:[0,.01,.1],record:[0,.14,.27],recordApply:[0,.3,.4],lostAck:[0,.4,.49],disconnect:[0,.51,.56],requeue:[0,.57,.64],redeliver:[0,.72,.93],dedup:[1,.02,.42],recordAck:[1,.55,.79]},
- 'consistency-boundary':{gap:[0,.16,.62],outbox:[1,.02,.4],delay:[1,.48,.91]},
- 'scope-choice':{mq:[0,.03,.83],local:[1,.04,.85]},
- 'practice-recap':{publish:[0,.03,.32],route:[0,.35,.58],response:[0,.62,.88],reliability:[1,.03,.9]},
+ 'why-observer':{cost:[0,.12,.75],separate:[1,.05,.55],receivers:[1,.6,.9]},
+ 'observer-roles':{expand:[0,.04,.16],source:[0,.17,.41],summary:[0,.43,.65],record:[0,.68,.91],contract:[1,0,.35]},
+ 'register-interest':{separate:[0,.05,.9],summary:[1,.04,.4],record:[1,.46,.83]},
+ 'notify-and-react':{state:[0,.06,.28],dispatch:[0,.4,.93],summary:[1,0,.17],summaryResponse:[1,.18,.26],record:[1,.32,.52],recordResponse:[1,.55,.66],responses:[1,.7,.93]},
+ 'unsubscribe-summary':{close:[0,.51,.92],cancel:[1,.03,.74],stopped:[1,.79,.97]},
+ 'notify-remaining':{state:[0,.06,.3],notify:[0,.46,.93],response:[1,.03,.33]},
+ 'benefits-and-cost':{review:[0,.04,.82],contract:[1,.02,.32],lifecycle:[1,.35,.63],direct:[1,.7,.93]},
+ 'mq-application':{mechanism:[0,.12,.85],publish:[1,.02,.3],subscribe:[1,.34,.66],responses:[1,.7,.93]},
+ 'observer-recap':{source:[0,.04,.4],responses:[0,.47,.9],relation:[1,.04,.92]},
 };
 export const beat=(s:Shot,f:number,key:string)=>{
- const window=WINDOWS[s.visualType]?.[key];
- if(!window)throw new Error('Unknown motion beat: '+s.visualType+'/'+key);
+ const window=WINDOWS[s.visualType]?.[key];if(!window)throw new Error('Unknown motion beat: '+s.visualType+'/'+key);
  const [sentence,start,end]=window,a=at(s,sentence,start),b=at(s,sentence,end),p=Math.max(0,Math.min(1,(f-a)/Math.max(1,b-a)));
  return p*p*(3-2*p);
 };
-const first=(s:Shot,key:string,limit=.99)=>{
- for(let f=0;f<s.durationInFrames;f++)if(beat(s,f,key)>=limit)return f;
+const first=(s:Shot,key:string,limit=.99,strict=false)=>{
+ for(let f=0;f<s.durationInFrames;f++)if(strict?beat(s,f,key)>limit:beat(s,f,key)>=limit)return f;
  return s.durationInFrames-1;
 };
-const EVENT_NAMES:Record<string,Record<string,string>>={
- 'product-update':{click:'product-mark-paid-click',state:'product-order-state-paid',summary:'product-summary-updated',record:'product-record-appended'},
- 'observer-brief':{register:'local-observers-registered',state:'local-source-paid',summary:'local-summary-notified',record:'local-record-notified'},
- 'mq-practice':{mq:'explicit-cross-service-mq-example',queues:'two-independent-subscription-queues-visible'},
- 'publish-route':{publish:'paid-event-published-to-exchange',route:'event-routed-to-both-queues'},
- 'independent-consume':{summary:'summary-received',summaryApply:'summary-effect-applied',summaryAck:'summary-acknowledged',record:'record-received',recordApply:'one-record-appended',recordAck:'record-acknowledged',extend:'new-subscriber-without-producer-call'},
- 'offline-backlog':{summary:'summary-consumes-while-record-offline',summaryApply:'summary-updated-record-still-pending',summaryAck:'summary-acked-record-retained',durable:'durability-assumptions-visible'},
- 'recover-idempotent':{recover:'record-service-recovered',record:'backlog-delivered',recordApply:'record-first-effect-applied',lostAck:'first-confirmation-lost',disconnect:'connection-loss-detected',requeue:'unacknowledged-event-requeued',redeliver:'same-event-redelivered',dedup:'duplicate-effect-skipped',recordAck:'redelivery-acknowledged'},
- 'consistency-boundary':{gap:'state-commit-publish-gap',outbox:'separate-outbox-design-example',delay:'asynchronous-result-delay'},
- 'scope-choice':{mq:'cross-service-selection',local:'local-event-framework-selection'},
- 'practice-recap':{publish:'recap-publish',route:'recap-subscribe',response:'recap-individual-response',reliability:'recap-delivery-idempotency-consistency'},
+export const events=(s:Shot):[string,number][]=>{
+ const after=(name:string,key:string,limit=.99,strict=false):[string,number]=>[name,first(s,key,limit,strict)];
+ const chosen:Record<string,()=>[string,number][]>= {
+  'product-update':()=>[after('product-mark-paid-click','click'),after('product-order-state-paid','state'),after('product-summary-updated','summary'),after('product-record-appended','record')],
+  'why-observer':()=>[after('embedded-handling-maintenance-cost','cost',.5),after('source-and-response-responsibilities-separated','separate'),after('receivers-own-handling','receivers')],
+  'observer-roles':()=>[after('same-product-objects-expand','expand'),after('source-role-explained','source'),after('summary-concrete-role-explained','summary'),after('record-concrete-role-explained','record'),['common-observer-contract-start',at(s,1,0)],after('common-observer-contract-visible','contract')],
+  'register-interest':()=>[['explicit-before-payment-replay',at(s,1,0)],['second-sentence-start',at(s,1,0)],after('summary-registration-start','summary',0,true),after('summary-in-membership','summary'),after('record-registration-start','record',0,true),after('record-in-membership','record')],
+  'notify-and-react':()=>[after('source-updated-before-notification','state'),after('summary-notification-start','dispatch',0,true),after('summary-notification-sent-partway','dispatch'),after('summary-received','summary'),after('summary-display-updated','summaryResponse'),after('record-notification-start','record',0,true),after('record-received','record'),after('record-appended-one-fact','recordResponse'),after('receivers-own-responses','responses')],
+  'unsubscribe-summary':()=>[after('product-close-summary-click','close'),after('summary-withdrawal-start','cancel',0,true),after('summary-removed-from-membership','cancel'),after('summary-stopped-last-value-preserved','stopped')],
+  'notify-remaining':()=>[after('same-order-now-shipped','state'),after('only-record-notification-start','notify',0,true),after('record-received-shipped','notify'),after('second-change-record-appended','response')],
+  'benefits-and-cost':()=>[after('two-notifications-recipient-comparison','review'),after('unchanged-common-contract','contract'),after('subscription-lifecycle-cost','lifecycle'),after('simple-stable-contact-can-call-directly','direct')],
+  'mq-application':()=>[after('one-brief-application-context','mechanism'),after('application-source-publishes-fact','publish'),after('application-two-independent-subscriptions','subscribe'),after('application-receivers-own-handling','responses')],
+  'observer-recap':()=>[after('back-to-pattern-source','source'),after('recap-observers-own-response','responses'),after('recap-adjustable-subscription-relation','relation')],
+ };
+ return [...(s.javaCardFrom!=null?[['java-card-start',Number(s.javaCardFrom)],['java-card-final',s.durationInFrames-1]] as [string,number][]:[]),...Object.entries(s.cueFrames?.labels??{}).map(([name,frame])=>['label:'+name,Number(frame)] as [string,number]),...(chosen[s.visualType]?.()??[])];
 };
-export const events=(s:Shot):[string,number][]=>[
- ...(s.javaCardFrom!=null?[['java-card-start',Number(s.javaCardFrom)],['java-card-final',s.durationInFrames-1]] as [string,number][]:[]),
- ...Object.entries(s.cueFrames?.labels??{}).map(([name,frame])=>['label:'+name,Number(frame)] as [string,number]),
- ...Object.entries(EVENT_NAMES[s.visualType]??{}).flatMap(([key,name])=>[[name+'-mid',first(s,key,.5)],[name,first(s,key)]] as [string,number][]),
-];

@@ -1,0 +1,944 @@
+{
+  "meta": {
+    "title": "观察者模式：订单变了，谁该收到通知？",
+    "episode": 28,
+    "episodePart": "设计模式 D02",
+    "slug": "observer-pattern",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 4332,
+    "finalVideoFrames": 4332,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "Product order17 operation; one compressed in-process observer explanation, then explicitly switch to a cross-service RabbitMQ pub/sub teaching example with independent queues, manual acknowledgement after processing, offline backlog, recovery, redelivery and idempotency. Separate failure-case replay from happy path, distinguish order commit versus event publication and eventual consumer visibility. Same order, summary and change-record roles; no payment execution, no assumed merchant architecture, no decorative progress; separate five-second silent local Java excerpt.",
+    "visualRevision": 3,
+    "visualDirection": "visual-direction.md",
+    "userScope": "User explicitly requests revising actual video to focus on practical MQ pub/sub use in cross-service notifications; keep observer principles and Java brief. Preserve original product/order17/summary/change-record case while changing teaching emphasis. Same-process event mechanisms still valid; MQ does not automatically guarantee delivery, exactly-once or strong consistency.",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "教学示例 · 订单17",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "观察者模式：订单变了，谁该收到通知？",
+      "description": "简述观察者思想，重点演示跨服务MQ发布订阅、故障积压与幂等。",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "content": {
+            "x": 130,
+            "w": 1660
+          },
+          "watermarkZone": {
+            "x": 130,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 130,
+              "y": 210,
+              "w": 1660,
+              "h": 230
+            },
+            {
+              "x": 130,
+              "y": 470,
+              "w": 1660,
+              "h": 80
+            },
+            {
+              "x": 130,
+              "y": 605,
+              "w": 1660,
+              "h": 205
+            },
+            {
+              "x": 130,
+              "y": 859,
+              "w": 1660,
+              "h": 45
+            }
+          ]
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "content": {
+            "x": 315,
+            "w": 810
+          },
+          "watermarkZone": {
+            "x": 315,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 315,
+              "y": 210,
+              "w": 810,
+              "h": 230
+            },
+            {
+              "x": 315,
+              "y": 470,
+              "w": 810,
+              "h": 80
+            },
+            {
+              "x": 315,
+              "y": 605,
+              "w": 810,
+              "h": 205
+            },
+            {
+              "x": 315,
+              "y": 859,
+              "w": 810,
+              "h": 45
+            }
+          ],
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "content": {
+            "x": 110,
+            "w": 860
+          },
+          "watermarkZone": {
+            "x": 110,
+            "y": 110
+          },
+          "textBoxes": [
+            {
+              "x": 110,
+              "y": 245,
+              "w": 860,
+              "h": 260
+            },
+            {
+              "x": 110,
+              "y": 555,
+              "w": 860,
+              "h": 80
+            },
+            {
+              "x": 110,
+              "y": 760,
+              "w": 860,
+              "h": 300
+            },
+            {
+              "x": 110,
+              "y": 1155,
+              "w": 860,
+              "h": 45
+            }
+          ]
+        }
+      },
+      "poster": {
+        "file": "poster.jpg",
+        "sameAs": "3x4"
+      }
+    },
+    "discussionQuestion": "摘要与变化记录都要收到同一事件时，为什么需要各自的订阅队列？记录服务恢复后收到重复事件，应如何避免重复业务效果？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "javaEndCard": {
+      "kind": "java-design-pattern",
+      "from": 4182,
+      "durationInFrames": 150
+    }
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "why",
+      "chapterId": "why",
+      "title": "从订单操作理解观察者",
+      "from": 0,
+      "durationInFrames": 793,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "why",
+          "visualType": "product-update",
+          "from": 0,
+          "durationInFrames": 413,
+          "narration": "商家在订单详情里，把十七号订单标为已付款，摘要和变化记录随即更新。一次状态变化，怎样让需要它的功能各自响应？",
+          "subtitles": [
+            {
+              "text": "商家在订单详情里，把十七号订单标为已付款，摘要和变化记录随即更新。",
+              "from": 0,
+              "to": 246,
+              "duration": 247
+            },
+            {
+              "text": "一次状态变化，怎样让需要它的功能各自响应？",
+              "from": 247,
+              "to": 412,
+              "duration": 166
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-product-update-1",
+              "wavStart": 9.0,
+              "wavEnd": 236.67,
+              "localStart": 9.0,
+              "localEnd": 236.67
+            },
+            {
+              "id": "01-product-update-2",
+              "wavStart": 247.17,
+              "wavEnd": 392.72,
+              "localStart": 247.17,
+              "localEnd": 392.72
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              247
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 9.0,
+            "wavTo": 392.72,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保留原商家订单教学页面、可见点击和状态联动。订单17待付款变已付款，摘要更新、记录新增；教学示意，不执行真实支付。",
+          "direction": "保留原商家订单教学页面、可见点击和状态联动。订单17待付款变已付款，摘要更新、记录新增；教学示意，不执行真实支付。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "why",
+          "visualType": "observer-brief",
+          "from": 413,
+          "durationInFrames": 380,
+          "narration": "观察者模式，先让接收方登记，订单变化后，按共同约定通知它们。摘要负责显示，变化记录负责留痕，订单不用掌握各方的处理细节。",
+          "subtitles": [
+            {
+              "text": "观察者模式，先让接收方登记，订单变化后，按共同约定通知它们。",
+              "from": 0,
+              "to": 174,
+              "duration": 175
+            },
+            {
+              "text": "摘要负责显示，变化记录负责留痕，订单不用掌握各方的处理细节。",
+              "from": 175,
+              "to": 379,
+              "duration": 205
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-observer-brief-1",
+              "wavStart": 413.72,
+              "wavEnd": 578.3,
+              "localStart": 0.7200000000000273,
+              "localEnd": 165.29999999999995
+            },
+            {
+              "id": "02-observer-brief-2",
+              "wavStart": 588.8,
+              "wavEnd": 772.77,
+              "localStart": 175.79999999999995,
+              "localEnd": 359.77
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "观察者模式": 1
+            },
+            "sentences": [
+              0,
+              175
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 413.72,
+            "wavTo": 772.77,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "压缩展示同一程序内的来源、订阅关系和共同约定。保留同一订单、摘要、记录的对象对应，逐个指出职责；这是理解原理的小例子，不展开取消与第二次发货。",
+          "direction": "压缩展示同一程序内的来源、订阅关系和共同约定。保留同一订单、摘要、记录的对象对应，逐个指出职责；这是理解原理的小例子，不展开取消与第二次发货。",
+          "elements": [
+            {
+              "id": "label02_0",
+              "type": "text",
+              "text": "观察者模式",
+              "cueText": "观察者模式",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "02-observer-brief-1",
+                "asrFrame": null,
+                "onsetLocal": 1.7200000000000273,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "subscribe",
+      "chapterId": "subscribe",
+      "title": "跨服务实战：用MQ承接通知",
+      "from": 793,
+      "durationInFrames": 776,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "subscribe",
+          "visualType": "mq-practice",
+          "from": 793,
+          "durationInFrames": 415,
+          "narration": "理解原理后，再看项目怎么落地：跨服务的订单通知，我们通常不会手写一套观察者名单。消息队列，也就是MQ，用发布订阅机制承接这类通知。",
+          "subtitles": [
+            {
+              "text": "理解原理后，再看项目怎么落地：跨服务的订单通知，我们通常不会手写一套观察者名单。",
+              "from": 0,
+              "to": 245,
+              "duration": 246
+            },
+            {
+              "text": "消息队列，也就是MQ，用发布订阅机制承接这类通知。",
+              "from": 246,
+              "to": 414,
+              "duration": 169
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-mq-practice-1",
+              "wavStart": 793.77,
+              "wavEnd": 1028.99,
+              "localStart": 0.7699999999999818,
+              "localEnd": 235.99
+            },
+            {
+              "id": "03-mq-practice-2",
+              "wavStart": 1039.49,
+              "wavEnd": 1187.69,
+              "localStart": 246.49,
+              "localEnd": 394.69000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "消息队列": 245
+            },
+            "sentences": [
+              0,
+              246
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 793.77,
+            "wavTo": 1187.69,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确切换部署范围，从同进程原理演示过渡到跨服务方案。句首消息队列起音出现术语及MQ。画出订单服务、消息中间件和两个独立订阅服务的简明总览，注明RabbitMQ实现示例；不是实测某家商家后台。",
+          "direction": "明确切换部署范围，从同进程原理演示过渡到跨服务方案。句首消息队列起音出现术语及MQ。画出订单服务、消息中间件和两个独立订阅服务的简明总览，注明RabbitMQ实现示例；不是实测某家商家后台。",
+          "elements": [
+            {
+              "id": "label03_0",
+              "type": "text",
+              "text": "消息队列",
+              "cueText": "消息队列",
+              "appearFrame": 245,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "03-mq-practice-2",
+                "asrFrame": null,
+                "onsetLocal": 247.49,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "subscribe",
+          "visualType": "publish-route",
+          "from": 1208,
+          "durationInFrames": 361,
+          "narration": "仍看这次订单变更，把内部流程展开成跨服务的教学示例。订单服务发布已付款事件，消息中间件将它路由到摘要和记录各自的队列。",
+          "subtitles": [
+            {
+              "text": "仍看这次订单变更，把内部流程展开成跨服务的教学示例。",
+              "from": 0,
+              "to": 157,
+              "duration": 158
+            },
+            {
+              "text": "订单服务发布已付款事件，消息中间件将它路由到摘要和记录各自的队列。",
+              "from": 158,
+              "to": 360,
+              "duration": 203
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-publish-route-1",
+              "wavStart": 1208.69,
+              "wavEnd": 1355.76,
+              "localStart": 0.6900000000000546,
+              "localEnd": 147.76
+            },
+            {
+              "id": "04-publish-route-2",
+              "wavStart": 1366.26,
+              "wavEnd": 1548.4,
+              "localStart": 158.26,
+              "localEnd": 340.4000000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              158
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 1208.69,
+            "wavTo": 1548.4,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "沿03总览聚焦这次订单17已付款事件：订单服务先更新，再发布事实事件，RabbitMQ交换机分别路由一份到摘要队列和记录队列。标示队列各属独立订阅；不能画成两业务竞争同一队列。事件不是付款指令。",
+          "direction": "沿03总览聚焦这次订单17已付款事件：订单服务先更新，再发布事实事件，RabbitMQ交换机分别路由一份到摘要队列和记录队列。标示队列各属独立订阅；不能画成两业务竞争同一队列。事件不是付款指令。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "notify",
+      "chapterId": "notify",
+      "title": "各自消费，处理成功后确认",
+      "from": 1569,
+      "durationInFrames": 406,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "notify",
+          "visualType": "independent-consume",
+          "from": 1569,
+          "durationInFrames": 406,
+          "narration": "两个服务分别消费自己队列里的事件，更新摘要或追加记录，处理成功后再确认。以后增加新的订阅方，订单服务仍按原约定发布事件，不必调用对方。",
+          "subtitles": [
+            {
+              "text": "两个服务分别消费自己队列里的事件，更新摘要或追加记录，处理成功后再确认。",
+              "from": 0,
+              "to": 221,
+              "duration": 222
+            },
+            {
+              "text": "以后增加新的订阅方，订单服务仍按原约定发布事件，不必调用对方。",
+              "from": 222,
+              "to": 405,
+              "duration": 184
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-independent-consume-1",
+              "wavStart": 1569.4,
+              "wavEnd": 1780.61,
+              "localStart": 0.40000000000009095,
+              "localEnd": 211.6099999999999
+            },
+            {
+              "id": "05-independent-consume-2",
+              "wavStart": 1791.11,
+              "wavEnd": 1954.45,
+              "localStart": 222.1099999999999,
+              "localEnd": 385.45000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              222
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 1569.4,
+            "wavTo": 1954.45,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "承接04两队列已有同一事件。摘要服务取自己一份、显示已付款、返回手动确认；记录服务取自己一份、追加事实、确认。确认箭头与事件方向相反，未处理前不能先确认。再虚线提示新增订阅方及事件约定不变的前提，不暗示无需配置或永远无需修改生产者。",
+          "direction": "承接04两队列已有同一事件。摘要服务取自己一份、显示已付款、返回手动确认；记录服务取自己一份、追加事实、确认。确认箭头与事件方向相反，未处理前不能先确认。再虚线提示新增订阅方及事件约定不变的前提，不暗示无需配置或永远无需修改生产者。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "unsubscribe",
+      "chapterId": "unsubscribe",
+      "title": "故障后积压、恢复与幂等",
+      "from": 1975,
+      "durationInFrames": 846,
+      "shots": [
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "unsubscribe",
+          "visualType": "offline-backlog",
+          "from": 1975,
+          "durationInFrames": 417,
+          "narration": "如果变化记录服务暂时离线，摘要仍可处理自己的消息，记录队列保留待处理事件。这依赖队列持久化等配置，不是画上一个MQ，就自动保证消息不丢。",
+          "subtitles": [
+            {
+              "text": "如果变化记录服务暂时离线，摘要仍可处理自己的消息，记录队列保留待处理事件。",
+              "from": 0,
+              "to": 211,
+              "duration": 212
+            },
+            {
+              "text": "这依赖队列持久化等配置，不是画上一个MQ，就自动保证消息不丢。",
+              "from": 212,
+              "to": 416,
+              "duration": 205
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-offline-backlog-1",
+              "wavStart": 1975.45,
+              "wavEnd": 2177.4,
+              "localStart": 0.4500000000000455,
+              "localEnd": 202.4000000000001
+            },
+            {
+              "id": "06-offline-backlog-2",
+              "wavStart": 2187.9,
+              "wavEnd": 2371.56,
+              "localStart": 212.9000000000001,
+              "localEnd": 396.55999999999995
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              212
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 1975.45,
+            "wavTo": 2371.56,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确标注故障情景回放，回到本次事件已路由但尚未消费的前提，再灰显记录服务离线。摘要照常消费并确认，记录队列待处理事件保持；不让离线服务收到消息。显示可靠性需配置：持久队列、持久消息、发布确认，重试与告警另行设计。",
+          "direction": "明确标注故障情景回放，回到本次事件已路由但尚未消费的前提，再灰显记录服务离线。摘要照常消费并确认，记录队列待处理事件保持；不让离线服务收到消息。显示可靠性需配置：持久队列、持久消息、发布确认，重试与告警另行设计。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "unsubscribe",
+          "visualType": "recover-idempotent",
+          "from": 2392,
+          "durationInFrames": 429,
+          "narration": "服务恢复后，再消费积压的事件；处理成功后，如果确认丢失，事件可能再次送达。幂等，就是让同一事件只产生一次业务效果，本例按事件编号去重。",
+          "subtitles": [
+            {
+              "text": "服务恢复后，再消费积压的事件；处理成功后，如果确认丢失，事件可能再次送达。",
+              "from": 0,
+              "to": 215,
+              "duration": 216
+            },
+            {
+              "text": "幂等，就是让同一事件只产生一次业务效果，本例按事件编号去重。",
+              "from": 216,
+              "to": 428,
+              "duration": 213
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-recover-idempotent-1",
+              "wavStart": 2392.56,
+              "wavEnd": 2598.16,
+              "localStart": 0.5599999999999454,
+              "localEnd": 206.15999999999985
+            },
+            {
+              "id": "07-recover-idempotent-2",
+              "wavStart": 2608.66,
+              "wavEnd": 2800.67,
+              "localStart": 216.65999999999985,
+              "localEnd": 408.6700000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "幂等": 215
+            },
+            "sentences": [
+              0,
+              216
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 2392.56,
+            "wavTo": 2800.67,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "服务恢复，消费记录队列中的事件e17并追加唯一记录；该次确认丢失，以可见断连并检测后重新入队再投递，不能画普通计时器自动重投。第二次相同e17经原子去重/业务事务逻辑跳过业务写入并确认，记录仍一条。编号仅教学示例，幂等正式术语按第二句句首起音入场。",
+          "direction": "服务恢复，消费记录队列中的事件e17并追加唯一记录；该次确认丢失，以可见断连并检测后重新入队再投递，不能画普通计时器自动重投。第二次相同e17经原子去重/业务事务逻辑跳过业务写入并确认，记录仍一条。编号仅教学示例，幂等正式术语按第二句句首起音入场。",
+          "elements": [
+            {
+              "id": "label07_0",
+              "type": "text",
+              "text": "幂等",
+              "cueText": "幂等",
+              "appearFrame": 215,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "07-recover-idempotent-2",
+                "asrFrame": null,
+                "onsetLocal": 217.65999999999985,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "一致性边界与机制选择",
+      "from": 2821,
+      "durationInFrames": 1511,
+      "shots": [
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "boundary",
+          "visualType": "consistency-boundary",
+          "from": 2821,
+          "durationInFrames": 440,
+          "narration": "再看一致性边界：订单已经更新，事件却没发出去，单靠消息队列不能解决。可以用本地消息表等方案衔接；多个服务的结果也不会同时更新，界面可能短暂滞后。",
+          "subtitles": [
+            {
+              "text": "再看一致性边界：订单已经更新，事件却没发出去，单靠消息队列不能解决。",
+              "from": 0,
+              "to": 224,
+              "duration": 225
+            },
+            {
+              "text": "可以用本地消息表等方案衔接；多个服务的结果也不会同时更新，界面可能短暂滞后。",
+              "from": 225,
+              "to": 439,
+              "duration": 215
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-consistency-boundary-1",
+              "wavStart": 2821.67,
+              "wavEnd": 3036.48,
+              "localStart": 0.6700000000000728,
+              "localEnd": 215.48000000000002
+            },
+            {
+              "id": "08-consistency-boundary-2",
+              "wavStart": 3046.98,
+              "wavEnd": 3240.85,
+              "localStart": 225.98000000000002,
+              "localEnd": 419.8499999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              225
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 2821.67,
+            "wavTo": 3240.85,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "独立一致性边界情景，不把它接成07同事件再次失败。展示订单更新成功、发布缺口、消费者尚无事件；再以本地事务框连接订单记录与待发事件表，并标示后续转发。该镜只解释方案入口，不展开Outbox全流程。最后显示来源已付款、摘要暂待更新再收敛，表达异步延迟。",
+          "direction": "独立一致性边界情景，不把它接成07同事件再次失败。展示订单更新成功、发布缺口、消费者尚无事件；再以本地事务框连接订单记录与待发事件表，并标示后续转发。该镜只解释方案入口，不展开Outbox全流程。最后显示来源已付款、摘要暂待更新再收敛，表达异步延迟。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "boundary",
+          "visualType": "scope-choice",
+          "from": 3261,
+          "durationInFrames": 431,
+          "narration": "所以，跨服务的一对多通知，重点掌握MQ的发布订阅和可靠消费。界面监听或同一程序里的模块联动，仍常用框架事件机制，不必为此引入消息队列。",
+          "subtitles": [
+            {
+              "text": "所以，跨服务的一对多通知，重点掌握MQ的发布订阅和可靠消费。",
+              "from": 0,
+              "to": 195,
+              "duration": 196
+            },
+            {
+              "text": "界面监听或同一程序里的模块联动，仍常用框架事件机制，不必为此引入消息队列。",
+              "from": 196,
+              "to": 430,
+              "duration": 235
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-scope-choice-1",
+              "wavStart": 3261.85,
+              "wavEnd": 3447.1,
+              "localStart": 0.849999999999909,
+              "localEnd": 186.0999999999999
+            },
+            {
+              "id": "09-scope-choice-2",
+              "wavStart": 3457.6,
+              "wavEnd": 3671.78,
+              "localStart": 196.5999999999999,
+              "localEnd": 410.7800000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              196
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 3261.85,
+            "wavTo": 3671.78,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "并列清楚的部署范围选择：跨服务业务事件走MQ发布订阅；同一进程界面监听/模块联动用框架事件。保留事件约定共同核心，不写所有项目必用MQ、不写观察者模式已经不用。",
+          "direction": "并列清楚的部署范围选择：跨服务业务事件走MQ发布订阅；同一进程界面监听/模块联动用框架事件。保留事件约定共同核心，不写所有项目必用MQ、不写观察者模式已经不用。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "boundary",
+          "visualType": "practice-recap",
+          "from": 3692,
+          "durationInFrames": 640,
+          "narration": "回到这次订单变化：先理解来源变化、订阅方各自响应，再按部署范围选择机制。代码只需看懂登记和通知；跨服务实战，更要关心消息投递、幂等和一致性。",
+          "subtitles": [
+            {
+              "text": "回到这次订单变化：先理解来源变化、订阅方各自响应，再按部署范围选择机制。",
+              "from": 0,
+              "to": 240,
+              "duration": 241
+            },
+            {
+              "text": "代码只需看懂登记和通知；跨服务实战，更要关心消息投递、幂等和一致性。",
+              "from": 241,
+              "to": 489,
+              "duration": 249
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-practice-recap-1",
+              "wavStart": 3692.78,
+              "wavEnd": 3922.64,
+              "localStart": 0.7800000000002001,
+              "localEnd": 230.63999999999987
+            },
+            {
+              "id": "10-practice-recap-2",
+              "wavStart": 3933.14,
+              "wavEnd": 4145.22,
+              "localStart": 241.13999999999987,
+              "localEnd": 453.22000000000025
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              241
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 8ea548e8 + words.json 94f00330 + script.md f1ee372f",
+            "wavFrom": 3692.78,
+            "wavTo": 4145.22,
+            "holdFrames": 36,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回收同一订单17已付款，两个服务分别获得结果；主线是来源变化、订阅方各自响应。轻量回顾投递/幂等/一致性三个工程关注点；末尾另附5秒静默Java关键节选卡提示暂停，明确卡为同进程原理示例，不能冒充RabbitMQ客户端实现。",
+          "direction": "回收同一订单17已付款，两个服务分别获得结果；主线是来源变化、订阅方各自响应。轻量回顾投递/幂等/一致性三个工程关注点；末尾另附5秒静默Java关键节选卡提示暂停，明确卡为同进程原理示例，不能冒充RabbitMQ客户端实现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "javaCardFrom": 490
+        }
+      ]
+    }
+  ]
+}
