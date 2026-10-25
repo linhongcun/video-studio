@@ -11,8 +11,8 @@ declare const __HAS_VOICE_AUDIO__:boolean;
 const phase=(s:Shot,f:number,i:number,a=.08,b=.67)=>ease(f,at(s,i,a),at(s,i,b)-at(s,i,a));
 const hit=(s:Shot,f:number,n:string)=>f>=eventAt(s,n);
 const cue=(s:Shot,n:string)=>Number(s.cueFrames?.labels?.[n]??1);
-const accountBoundary=(color=C.gold,label='账户库 · 本地提交')=><LocalBoundary x={215}y={350}w={610}h={402}color={color}label={label}/>;
-const stockBoundary=(color=C.gold,label='库存库 · 本地提交')=><LocalBoundary x={1095}y={350}w={610}h={402}color={color}label={label}/>;
+const accountBoundary=(color=C.gold,label='账户库 · 本地提交')=><LocalBoundary x={215}y={350}w={610}h={402}color={color}label={label}database/>;
+const stockBoundary=(color=C.gold,label='库存库 · 本地提交')=><LocalBoundary x={1095}y={350}w={610}h={402}color={color}label={label}database/>;
 const connect=(p:number,label:string,color=C.gold)=><><Line x1={825}y1={515}x2={1095}y2={515}p={p}color={color}/><MovingChip x1={900}y1={482}x2={1020}y2={482}p={p}width={235}color={color}>{label}</MovingChip></>;
 const refundPath=(p:number,label='退款 ＋200',color=C.gold)=><><Line x1={1220}y1={515}x2={825}y2={515}p={p}color={color}/><MovingChip x1={1170}y1={482}x2={920}y2={482}p={p}width={270}color={color}>{label}</MovingChip></>;
 const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{

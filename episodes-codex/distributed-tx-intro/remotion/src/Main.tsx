@@ -11,7 +11,7 @@ const BranchNavigator=createBranchNavigator(React);
 const phase=(s:Shot,f:number,i:number,a=.08,b=.67)=>ease(f,at(s,i,a),at(s,i,b)-at(s,i,a));
 const hit=(s:Shot,f:number,name:string)=>f>=eventAt(s,name);
 const cue=(s:Shot,name:string)=>Number(s.cueFrames?.labels?.[name]??1);
-const local=(p=1,color=C.gold,label='同一笔提交的范围')=><LocalBoundary x={235} y={365} w={1450} h={385} p={p} color={color} label={label}/>;
+const local=(p=1,color=C.gold,label='同一笔提交的范围')=><LocalBoundary x={235} y={365} w={1450} h={385} p={p} color={color} label={label} database/>;
 const request=(p:number,text='扣 1 件',color=C.gold,y=500)=> <>
  <Line x1={805} y1={y+30} x2={1115} y2={y+30} color={color} p={p}/>
  <MovingChip x1={860} y1={y} x2={1050} y2={y} p={p} color={color} width={220}>{text}</MovingChip>
@@ -119,7 +119,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
   const saved=hit(s,f,'remote-stock-committed'),lost=hit(s,f,'reply-lost'),unknown=hit(s,f,'caller-timeout-unknown');
   const w=navigationMotion.timeout,req=ease(f,w.request[0],w.request[1]-w.request[0]),reply=ease(f,w.reply[0],w.reply[1]-w.reply[0]);
   return <><Title>请求超时，结果可能仍然发生了</Title><Reset>新分支 · 订单已记录，库存从 4 开始</Reset>
-   <SplitBoundaries left="调用方看到的情况" right="库存库实际发生的情况" colorLeft={C.gold} colorRight={saved?C.teal:C.edge}/>
+    <SplitBoundaries left="调用方看到的情况" right="库存库实际发生的情况" colorLeft={C.gold} colorRight={saved?C.teal:C.edge} leftDatabase={false}/>
    <Order exists state={unknown?'等待超时 · 结果未知':'等待扣减回复'} color={C.gold}/>
    <Stock value={saved?3:4} state={saved?'已本地保存':'等待请求'} detail={saved?'调用方尚未拿到这个结果':''} color={saved?C.teal:C.text}/>
    {!saved&&request(req)}
@@ -132,7 +132,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
   const b=hit(s,f,'switch-to-already-executed-possibility'),q=phase(s,f,1);
   return <><Title>同一个超时，可能对应不同结果</Title>
    <Reset>{b?'可能 B · 已扣成 3，回复没有回来':'可能 A · 请求没有抵达，库存仍 4'}</Reset>
-   <SplitBoundaries left="调用方" right={b?'可能 B：已经执行':'可能 A：没有执行'} colorLeft={C.gold} colorRight={b?C.teal:C.muted}/>
+    <SplitBoundaries left="调用方" right={b?'可能 B：已经执行':'可能 A：没有执行'} colorLeft={C.gold} colorRight={b?C.teal:C.muted} leftDatabase={false}/>
    <Order exists state="超时 · 结果未知" color={C.gold}/><Stock value={b?3:4} state={b?'扣减已保存':'没有发生扣减'} color={b?C.teal:C.text}/>
    <Line x1={805} y1={530} x2={1115} y2={530} color={C.muted} dashed p={phase(s,f,0,.05,.35)}/><Cross x={960} y={530}/>
    <Chip x={960} y={705} width={450} color={C.gold} alpha={q}>调用方的观察：一样</Chip>
@@ -153,7 +153,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
   const done=hit(s,f,'stock-and-progress-local-commit'),stopped=hit(s,f,'process-interrupted-record-survives'),recovery=hit(s,f,'recovery-checks-record');
   return <><Title>让恢复有据可查</Title><Reset>回看正确写法 · 示例重置：库存 4，操作待保存</Reset>
    <Order x={450} exists state={recovery?'恢复后查证':'调用程序'} color={stopped&&!recovery?C.muted:C.text} alpha={(stopped&&!recovery)?0.35:1}/>
-   <LocalBoundary x={1040} y={355} w={700} h={420} color={done?C.teal:C.gold} label="库存变化和操作记录 · 同一笔本地提交"/>
+    <LocalBoundary x={1040} y={355} w={700} h={420} color={done?C.teal:C.gold} label="库存变化和操作记录 · 同一笔本地提交" database/>
    <Stock x={1400} y={395} value={done?3:4} state={done?'已扣 1 件':'尚未扣减'} color={done?C.teal:C.gold} units={false}/>
    <RecordRow done={done}/>
    <Chip x={700} y={705} width={450} color={stopped&&!recovery?C.red:C.blue} alpha={phase(s,f,1,.08,.25)}>{recovery?'程序恢复 · 查询记录':'程序中断'}</Chip>
@@ -166,7 +166,7 @@ const Scene:React.FC<{s:Shot;f:number}>=({s,f})=>{
   return <><Title>{reject?'重试，也要区分失败原因':'认出同一笔操作，效果只产生一次'}</Title>
    {reject?<><Reset>另一种结果 · 业务拒绝分支</Reset><Chip x={960} y={425} width={650} color={C.red}>业务规则不允许继续</Chip><Line x1={960} y1={490} x2={960} y2={625} p={phase(s,f,1,.2,.6)} color={C.red}/><Chip x={960} y={625} width={650} color={C.gold} alpha={phase(s,f,1,.45,.75)}>按约定失败收尾</Chip></>:<>
     <Order exists state="重送同一笔操作" color={C.gold}/>
-    <LocalBoundary x={1115} y={365} w={570} h={410} color={C.teal} label="已保存的库存与操作记录"/>
+     <LocalBoundary x={1115} y={365} w={570} h={410} color={C.teal} label="已保存的库存与操作记录" database/>
     <Stock value={3} state={done?'识别为已处理 · 仍是 3':'本单已扣过 1 件'} color={C.teal} units={false}/><RecordRow done/>
     <Line x1={805} y1={530} x2={1115} y2={530} p={p} color={C.gold}/>
     <MovingChip x1={890} y1={490} x2={1035} y2={490} p={p} color={C.gold} width={300}>8124-扣库存</MovingChip>
