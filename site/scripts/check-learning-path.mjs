@@ -227,18 +227,31 @@ assert.deepEqual(slugs(episodesForRelease({tag: algorithm.firstRelease, kind: '�
 assert.ok(!slugs(episodesForRelease({tag: 'v0.45.0', kind: '修正', eps: [11]}, lessons)).includes(algorithmSlug),
   'An old EP.11 release must not link to LeetCode problem 11');
 
-// Agent and LeetCode can share ep=22 without a patch linking both courses.
+// Historical URL fixtures are parser inputs, not active lesson links. Keep the
+// same-EP release contract covered independently of the retired Agent metadata.
 const agentSlug = 'agent-intro';
-const agentLesson = lessons.find((e) => e.slug === agentSlug);
-assert.ok(agentLesson);
+const retiredAgentSlugs = [agentSlug, 'agent-tool-execution'];
+const sameEpFixture = [
+  {slug: agentSlug, ep: 22, firstRelease: 'v0.50.0'},
+  {slug: 'fixture-independent-course', ep: 22, firstRelease: 'v0.49.0'},
+];
+for (const slug of retiredAgentSlugs) {
+  for (const rows of [lessons, all, liveLessons]) {
+    assert.equal(rows.some((e) => e.slug === slug), false, `${slug} must not remain in published, draft or archived metadata`);
+  }
+}
 const explicitAgentSlugs = parseEpisodeSlugs('[第22期](https://linhongcun.github.io/video-studio/episodes/agent-intro/)\n[同一页](https://linhongcun.github.io/video-studio/episodes/agent-intro/#ask)');
 assert.deepEqual(Array.from(explicitAgentSlugs), [agentSlug]);
 assert.deepEqual(Array.from(parseEpisodeSlugs('https://github.com/linhongcun/video-studio/tree/main/episodes/agent-intro/ https://example.com/episodes/agent-intro/ https://linhongcun.github.io/video-studio/episodes/agent-intro/video.mp4')), []);
 for (const kind of ['修正', '更新']) {
-  assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.5', kind, eps: [22], episodeSlugs: explicitAgentSlugs}, lessons)), [agentSlug]);
+  const release = {tag: 'v0.50.5', kind, eps: [22], episodeSlugs: explicitAgentSlugs};
+  assert.deepEqual(slugs(episodesForRelease(release, sameEpFixture)), [agentSlug], 'A canonical link must select only its same-EP fixture');
+  assert.deepEqual(slugs(episodesForRelease(release, lessons)), [], 'A retired lesson link must not fall back to the same-EP algorithm');
 }
-assert.deepEqual(slugs(episodesForRelease({tag: 'v0.49.1', kind: '修正', eps: [22], episodeSlugs: explicitAgentSlugs}, lessons)), [], 'An explicit link must retain the first-release gate');
-assert.deepEqual(slugs(episodesForRelease({tag: agentLesson.firstRelease, kind: '新增', eps: [22]}, lessons)), [agentSlug]);
+assert.deepEqual(slugs(episodesForRelease({tag: 'v0.49.1', kind: '修正', eps: [22], episodeSlugs: explicitAgentSlugs}, sameEpFixture)), [], 'An explicit link must retain the first-release gate');
+assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.0', kind: '新增', eps: [22]}, sameEpFixture)), [agentSlug]);
+assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.0', kind: '新增', eps: [22]}, lessons)), [], 'A retired debut must not acquire another course with the same EP');
+assert.deepEqual(slugs(episodesForRelease({tag: 'v0.59.0', kind: '更新', eps: [28], episodeSlugs: ['agent-tool-execution']}, lessons)), []);
 assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.3', kind: '修正', eps: [5], episodeSlugs: parseEpisodeSlugs('https://linhongcun.github.io/video-studio/episodes/cdn/')}, lessons)), ['cdn']);
 assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.4', kind: '修正', eps: [22], episodeSlugs: parseEpisodeSlugs('https://linhongcun.github.io/video-studio/episodes/container-most-water/')}, lessons)), [algorithmSlug]);
 assert.deepEqual(slugs(episodesForRelease({tag: 'v0.50.5', kind: '修正', eps: [12]}, lessons)), ['idempotency'], 'Old EP-only releases must retain their fallback');
@@ -293,7 +306,13 @@ if (process.argv.includes('--built')) {
 const learning = learningRuntime(published);
 const tracks = learning.getLearningTracks();
 const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
-assert.equal(tracks.length, puzzle ? 5 : 4, 'Every published learning direction must be available');
+const directionForSeries = {
+  request: 'systems', cache: 'systems', peak: 'systems', database: 'systems', distributed: 'systems',
+  agent: 'agent', leetcode: 'algorithms', 'design-patterns': 'patterns', puzzles: 'puzzles',
+};
+const expectedDirections = new Set(liveLessons.map((lesson) => directionForSeries[lesson.series]));
+assert.equal(expectedDirections.has(undefined), false, 'Every published series needs a known learning direction');
+assert.deepEqual(Array.from(tracks, (track) => track.id).sort(), [...expectedDirections].sort(), 'Only nonempty published learning directions must be available');
 assert.ok(learningRuntime(preview).getLearningTracks().every((track) => track.episodes.every((e) => !e.draft && !e.archived)),
   'Draft preview must not advertise unfinished lessons as published direction content');
 assert.equal(learning.getTrackForSeries(), undefined);
@@ -315,7 +334,8 @@ for (const track of tracks) {
   }
 }
 assert.equal(tracks.find((t) => t.id === 'systems')?.start.slug, 'http-request', 'System fundamentals should start with the request');
-assert.equal(tracks.find((t) => t.id === 'agent')?.start.slug, agentSlug, 'Agent development must start at its own introduction');
+assert.equal(tracks.some((t) => t.id === 'agent'), false, 'The empty Agent direction must not advertise a removed starting lesson');
+assert.equal(learning.getTrackForSeries('agent'), undefined, 'The future Agent series must remain hidden until a new lesson is published');
 assert.equal(tracks.find((t) => t.id === 'algorithms')?.start.slug, algorithmSlug);
 assert.equal(tracks.find((t) => t.id === 'patterns')?.start.slug, 'strategy-pattern', 'Design patterns must start with the published strategy lesson');
 assert.equal(learning.getTrackForSeries('design-patterns')?.id, 'patterns', 'Design patterns have their own learning direction');
@@ -339,6 +359,14 @@ if (process.argv.includes('--built')) {
   const home = readPage('index.html');
   const learn = readPage('learn/index.html');
   const library = readPage('library/index.html');
+  for (const slug of retiredAgentSlugs) {
+    assert.equal(fs.existsSync(path.join(dist, `episodes/${slug}`)), false, `${slug} page, captions and copied media must be absent from the build`);
+    for (const [name, page] of [['home', home], ['learn', learn], ['library', library], ['rss', readPage('rss.xml')]]) {
+      assert.equal(page.includes(`/episodes/${slug}/`), false, `${slug} leaked into ${name}`);
+    }
+  }
+  assert.equal(fs.existsSync(path.join(dist, 'series/agent/index.html')), false, 'An empty Agent series must not produce a catalog page');
+  assert.equal(learn.includes('id="agent"'), false, 'The learning page must not advertise an empty Agent direction');
   for (const href of ['/video-studio/learn/', '/video-studio/library/']) {
     assert.ok(home.includes(`href="${href}"`), `Home must expose ${href}`);
   }

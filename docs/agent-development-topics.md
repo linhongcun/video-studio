@@ -4,6 +4,8 @@
 
 用户已明确转向以**Skill、MCP、Subagent、Goal等AI概念**为入口，讲机制、设计意图与取舍，并授权关闭过浅选题。Goal已确认是“目标驱动的Agent”。旧16期主线＋4项深入方向的制作顺序作废，上一版六个API/工单实战单元草案撤回；不再按基础接线逐条开拍。
 
+**最新媒体处置：**用户进一步要求删除A01/EP.22与A02/EP.28两期试片；两期发布内容和制作工程退出当前树，取代此前保留旧媒体的决定。历史制作、QA与负面反馈通过删除前Git提交追溯；11项概念研究候选不变。范围及待完成的部署核验见[撤下记录](agent-video-retirement.md)。
+
 详细依据与复盘见[当前策划](agent-development-value-review.md)，实时跟踪见[系列总览 #130](https://github.com/linhongcun/video-studio/issues/130)。以下是重写后的编辑研究候选，不是11支视频的固定排期，也不是用户已逐项认可的新标题或效果。
 
 ## 优先研究池
@@ -35,8 +37,8 @@
 
 | 旧项 | 当前处理与内容去向 |
 |---|---|
-| [A01 #131](https://github.com/linhongcun/video-studio/issues/131) | 保留completed历史；EP.22当前V3/v0.54.3，不再新增相同基础课。 |
-| [#132](https://github.com/linhongcun/video-studio/issues/132) | not_planned；与A01重复，独立增量不足；工具请求、应用执行和结果回传作为后续概念的必要前置简述，不再把接线本身单独做一期。A02 V1/EP.28/v0.59.0已经上线，用户反馈价值不足；本次关闭的是后续独立重制计划，不表示完成了改进或用户认可。上一版“真实模型＋工具循环”重拍建议同时撤回。 |
+| [A01 #131](https://github.com/linhongcun/video-studio/issues/131) | 保留completed制作历史；V3/v0.54.3曾上线，现已按用户要求撤下，发布内容与相关工程删除，不再作为在线课程。 |
+| [#132](https://github.com/linhongcun/video-studio/issues/132) | not_planned；与A01重复，独立增量不足；工具请求、应用执行和结果回传作为后续概念的必要前置简述，不再把接线本身单独做一期。A02 V1/EP.28/v0.59.0曾上线，用户反馈价值不足；关闭表示取消独立重制，后续用户要求将原片和工程一并删除，不表示完成了改进或用户认可。上一版“真实模型＋工具循环”重拍建议同时撤回。 |
 | [#133](https://github.com/linhongcun/video-studio/issues/133) | not_planned；自由文本/JSON/Schema/业务校验的基础接续不足以构成本系列独立一期；必要契约放在具体概念使用处解释，不以字段校验教程撑起单集。 |
 | [#134](https://github.com/linhongcun/video-studio/issues/134) | not_planned；最小循环、继续/结束分支与步数限制偏基础接线，退出独立制作；目标驱动的Agent将另建Goal选题，研究目标、证据、评估器和终止语义，不把旧循环改标题后继续。 |
 | [#136](https://github.com/linhongcun/video-studio/issues/136) | not_planned；原计划主要解释检索→拼上下文→生成的基础RAG流程，退出独立制作；检索选择、证据时效和上下文预算按后续概念需要解释。此决定不代表RAG整体没有研究深度。 |
@@ -46,7 +48,7 @@
 | [#148](https://github.com/linhongcun/video-studio/issues/148) | not_planned；不再为MCP与Skills基础区别及组合使用另拍第三支重复对比片；该issue中Skills over MCP扩展的有价值部分并入两支主片，保留发现/分发、加载/执行、宿主支持、完整性与信任边界，不能用“一个给工具、一个给方法”作绝对划分。 |
 | [#150](https://github.com/linhongcun/video-studio/issues/150) | not_planned；撤回以工单应用整合为终点的基础开发课程主线；把已讲功能再次串起来不保证新增机制理解或判断力。后续各概念按最能解释机制的例子设计，不强制套同一个退款工单。 |
 
-其余十个旧issue已按上方研究范围重写，旧内容折叠为历史。此次仅处理策划与记录；没有制作新片、重渲旧片或更新线上媒体。
+其余十个旧issue已按上方研究范围重写，旧内容折叠为历史。该次仅处理策划与记录；随后本轮按用户要求删除两期，未制作或重渲替代视频。线上删除效果以撤下记录的实际部署核验为准。
 
 ## 内容与证据要求
 
@@ -69,7 +71,7 @@
 
 ## 原始2026-10-24题库与资料档案
 
-**以下仅保留研究及决策历史，原系列名、学习顺序、前置、演示和待排期状态均被上方当前安排取代。** 当时用户认可原题库，不代表对本次新命题或A02成片的认可；原“其余18项待排期”等数量不得用于当前状态判断。A01/A02媒体和QA详见各自工程，撤题不改写历史。
+**以下仅保留研究及决策历史，原系列名、学习顺序、前置、演示和待排期状态均被上方当前安排取代。** 当时用户认可原题库，不代表对本次新命题或A02成片的认可；原“其余18项待排期”等数量不得用于当前状态判断。A01/A02媒体和QA仅通过删除前固定Git提交查阅，当前课程与工程已移除；撤题与删除均不改写历史。
 
 <details>
 <summary>展开原16期主线＋4项深入方向及S01–S19资料索引（历史方案）</summary>
@@ -92,7 +94,7 @@
 
 2026-10-24 用户已认可选题并要求先登记 issue，后续分批制作。系列总览：[#130](https://github.com/linhongcun/video-studio/issues/130)。以下 20 个选题均已建单，创建时为待排期；后续进度以 GitHub issue 的实际状态为准。
 
-用户随后要求先做一期看效果，A01 / EP.22 已制作并按反馈更新至 V3，当前成片与检查入口见 [制作说明](../episodes-codex/agent-intro-v3/README.md)；发布及线上核验见 #131。2026-10-25用户要求拉取最新代码后继续下一期，已启动A02 / EP.28；[本期工程](../episodes-codex/agent-tool-execution/README.md)重新核验官方资料，实际本地HTTP演示有权限查询1次、无权限拒绝0次，模型侧为固定fixture。成片及上线状态以#132为准，其余18项继续待用户后续安排。
+用户随后要求先做一期看效果，A01 / EP.22 已制作并按反馈更新至 V3，当前成片与检查入口见 [制作说明](https://github.com/linhongcun/video-studio/blob/321e8e8c1b4ad34a6ea09eed2bb5cf369d9ab6dd/episodes-codex/agent-intro-v3/README.md)；发布及线上核验见 #131。2026-10-25用户要求拉取最新代码后继续下一期，已启动A02 / EP.28；[本期工程](https://github.com/linhongcun/video-studio/blob/321e8e8c1b4ad34a6ea09eed2bb5cf369d9ab6dd/episodes-codex/agent-tool-execution/README.md)重新核验官方资料，实际本地HTTP演示有权限查询1次、无权限拒绝0次，模型侧为固定fixture。成片及上线状态以#132为准，其余18项继续待用户后续安排。
 
 | 学习编号 | 选题 issue |
 |---|---|
