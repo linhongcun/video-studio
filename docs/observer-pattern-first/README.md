@@ -15,3 +15,5 @@
 站点已按当前锁fresh安装并一次构建通过，候选版本v0.69.1。123项独立静态验收核对5章0/1406/1837/2285/2997、20句VTT与143.066秒严格早于Java首卡、2:28展示、主题/角色/锚点/创建与首发身份/课程导航；生产/发布/dist视频全文SHA一致。原生字幕生成器补齐Java尾卡识别，45目录与6场景实际函数验证及其余44份已构建字幕复核通过，未改其他视频媒体或声音。真实线上结果另行补齐。
 
 发布前发生并行更新：另一任务先占用v0.69.1，已保留其HTTPS/DNS/浏览器缓存参考卡及元数据。原候选静态/HTML/拷贝报告按原字节归档candidate-v0.69.1，不把它写成已发布版。整合最新全技术视频片尾资料规范后，本片额外追加1页5秒参考卡，核心4442帧及音轨全部保持，最终发布源为video-with-references.mp4（4592帧/153.07秒，SHA5b98a0bc…cea67d0）。原181输入和核心SHA23b49bf1…beb64be7不变；附录单独receipt冻结资料、工具、字体和媒体身份。独立4个附录边界/首中末帧与全尺寸卡通过，两个原有文章脚注覆盖完整链接及对应论点。再次构建将采用下一个未占用修订号。
+
+最终候选已顺延到未占用的v0.69.2，并整合1dacf608的首批参考资料上线证据。发布复制映射明确使用video-with-references.mp4→episodes/video.mp4，render-result-final.json→发布render-result.json；原video.mp4与render-result.json保留4442帧核心身份，source-sha256的181项只声明核心。新参考清单/receipt/media-check另行随发布同步，metadata.finalVideoFrames4592优先，storyboard/words仍为核心范围。check-frames.mjs已核对4592实际帧；核心冻结仍通过。

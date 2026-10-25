@@ -11,3 +11,9 @@
 限制：没有全片人工听辨或逐字ASR；连续片2fps和关键帧采样不冒称逐帧观看，没有新手理解实验或用户认可声明。网页静态与线上结果另记，补齐Java尾卡的VTT边界识别不改声音、视频或字幕文字。
 
 当前报告入口：qa-observer-first-voice.json、qa-observer-first-preflight-independent.json、qa-observer-first-final-independent.json、qa-observer-first-final-root.json、render-result.json。拒绝版v0.68.4与旧证据保存在revisions/observer-first/baseline，不认可为本轮媒体。
+
+## 最终发布附录
+
+最新项目规范要求参考资料卡，已在上述4442帧核心后追加150帧，最终发布文件video-with-references.mp4为4592帧/153.07秒，完整SHA5b98a0bca7135d78d44dfff8774274b441fbd4cfd4c4714481a34caa0cea67d0。原video.mp4保留23b49bf1…beb64be7核心身份。共享append_references.py完全解码比较4442前缀帧/时间戳、所有AAC包/时间戳与PCM均一致；只编码新5秒资料卡，音频在原端点结束，不生成新配音。工具、资料、字体、主题、原媒体和输出SHA有单独receipt，181核心清单不改写。
+
+参考卡独立实际查看4441/4442/4517/4591及全尺寸PNG，两个来源的机构、完整标题/更新版本、暂停提示可读，M1支持主体、M2仅支持09镜；文章两脚注已提供完整链接和论点映射。候选v0.69.1因并行版本占用未发布，旧静态证据单独归档，新最终站点按v0.69.2构建与验收。最终报告render-result-final.json与发布视频匹配，核心render-result.json仍匹配原核心文件。
