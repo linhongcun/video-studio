@@ -1,6 +1,6 @@
 # P02成片检查
 
-当前正式媒体与本地站点已通过检查，等待GitHub与线上交付收尾。不是用户观看认可或学习效果测量。
+当前制作、本地站点与GitHub/Pages线上交付均已完成。不是用户观看认可或学习效果测量。
 
 ## 结果
 
@@ -19,9 +19,9 @@
 
 ## 站点与发版
 
-首发计划v0.60.0，GitHub站点持续授权范围内交付。保留最新观察者、A02和MySQL身份优化及新手册，402项上游变更与154冻结输入交集为0；只有包版本冲突，保留上游结构并顺延新一期版本，没有重配音或重渲。实际证据见upstream-before-encoding和upstream-before-release。
+首发v0.60.0，GitHub站点持续授权范围内交付。保留最新观察者、A02和MySQL身份优化及新手册，402项上游变更与154冻结输入交集为0；只有包版本冲突，保留上游结构并顺延新一期版本，没有重配音或重渲。实际证据见upstream-before-encoding和upstream-before-release。
 
-站点14项同SHA同步、v0.60.0构建102个HTML／Pagefind37页通过。修复来源脚注普通40位SHA在390px撑宽页面的问题，冻结文章/媒体不变；新4393预览实际完整重跑1440×1000与390×844，32字幕文本/时序/activeCue、4播放器章与4正文seek、首尾实际播放、最后帧和自然ended、P01/P02独立目录均通过，无运行时错误或横向溢出。根另实际查看桌面、390播放页面和修后390脚注。原失败与修复证据在qa-site-mobile-overflow-before、qa-site-footnotes-after、qa-site-reading与qa-site；上线核验后在release补真实结果。
+站点14项同SHA同步、v0.60.0构建102个HTML／Pagefind37页通过。修复来源脚注普通40位SHA在390px撑宽页面的问题，冻结文章/媒体不变；新4393预览实际完整重跑1440×1000与390×844，32字幕文本/时序/activeCue、4播放器章与4正文seek、首尾实际播放、最后帧和自然ended、P01/P02独立目录均通过，无运行时错误或横向溢出。根另实际查看桌面、390播放页面和修后390脚注。原失败与修复证据在qa-site-mobile-overflow-before、qa-site-footnotes-after、qa-site-reading与qa-site；北京时间2026-10-25T09:20:03.991836+08:00，Release后部署40149965870成功后的首轮10个canonical GET完整核验通过，详见release、online-verification与deployment。#206已completed关闭，#204已同步。
 
 ## 能力边界
 
