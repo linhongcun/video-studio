@@ -19,3 +19,5 @@ Release后手动[Pages运行40150838653](https://github.com/linhongcun/video-stu
 本地检查见[网站报告](qa-site.md)及各片qa-final-approach.md；实际Release和附注标签身份见[Release API](release-api.json)、[tag](tag.json)。原制作issue已在历史交付后completed关闭，本轮仅只读确认，未重新打开或重复关闭，见[实际状态](issue-state.json)。
 
 经验更新L039与现行RULES/pipeline：先从题目可利用的信息和关系推导选择依据，再引入方法名称及执行步骤；不机械追加暴力解或多解。P01简短结尾的最新用户要求继续保留，不恢复追加证明。实际技术/编辑验收不能表述为用户认可新版、全片人工听辨、逐字ASR或学习效果测量。
+
+交付证据合并前再次保留新主干5d79afde，包括事务入门v0.60.2和Agent策划反馈；六条算法canonical/production目录及各自冻结输入均无交集。本轮线上记录仍准确对应v0.60.1/8bef491d，不改写成后续部署或其他期媒体已验收。见[后续主干审计](postpublication-upstream-audit.json)。

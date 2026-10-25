@@ -36,3 +36,5 @@
 网站检查后再次同步00635e64，只增加P02发布证据及更新制作记忆，八条路径与六片冻结输入交集为空，没有改变站点实际页面/媒体/配置输入，沿用已完成构建。保留原057检查收据，不把广义文件指纹变化伪装成重新检查；见[发布前审计](prepublish-upstream-audit.json)。
 
 实际发布：PR #246合并`8bef491d`，附注tag/Release v0.60.1后手动Pages运行40150838653成功；2026-10-25T01:39:34.966422+00:00完成35次完整HTTPS GET，五份完整视频、海报、172句VTT、20章及该Release自己的更新日志条目均通过。第一次线上检查因核验器误以为P02制作MP4在fresh merge本机存在而中断，修正为canonical+Git基线+tracked render-result来源核对后，第二次完整核验通过；原失败记录保留。见[发布记录](release.md)、[线上核验](online-verification.md)与[实际尝试](online-verification-attempts.json)。原制作issue保持历史completed状态，本轮只读核实，没有重复关闭。
+
+交付证据合并前再次保留新主干5d79afde，包括事务入门v0.60.2和Agent策划反馈；六条算法canonical/production目录及各自冻结输入均无交集。本轮线上记录仍准确对应v0.60.1/8bef491d，不改写成后续部署或其他期媒体已验收。见[后续主干审计](postpublication-upstream-audit.json)。
