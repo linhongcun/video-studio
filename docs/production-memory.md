@@ -12,6 +12,8 @@
 
 ## 用户明确的质量偏好
 
+- 2026-10-25用户观看LC.70爬楼梯后明确指出，原题自带楼梯场景，视频却用数字节点代替真实走法，缺少生动形象的空间与动作，要求必须修改并更新经验教训。楼梯是题目本体，应演出人物上一阶/两阶、三种顺序和最后一步来源，再绑定方法数与滚动变量；旧“不画人物/拟真楼梯”约束撤回。此前保留LC.70只说明推导链已完整，不代表场景得到认可。本轮保留原24句/4779帧和5秒Python卡重做视觉，独立动态、正式成片、媒体、三尺寸封面和一次网站构建/两视口检查均通过，已由PR #260合并3da47c21并发布附注tag/Release v0.61.1，Release后手动部署40156242220成功；28次实际HTTPS核验首次通过，完整媒体/字幕/章节及本轮更新日志身份一致，见L041及[本轮记录](climbing-stairs-scene/README.md)。
+
 - 2026-10-25用户进一步明确“之前的那两期视频可以删除”，评价两期制作效果不佳。A01/EP.22（agent-intro）与A02/EP.28（agent-tool-execution）的发布内容、媒体和相关制作工程在本轮移除；前一轮保留旧媒体的编辑决定被此最新指令取代。#131的completed仅保留历史制作完成事实，不能继续视为在线课程；#132维持not_planned，不再重制。当前11项Skills/MCP/Subagent/Goal等研究候选不变，无新视频制作。已通过[PR #252](https://github.com/linhongcun/video-studio/pull/252)按v0.60.3合并发布，Release后部署40152148732成功；18个普通canonical GET核验通过，8个旧页面/媒体/字幕地址均404，保留课程代表媒体完整SHA及新更新日志正常。具体范围与实际证据见[撤下记录](agent-video-retirement.md)。历史工程与QA链接固定到删除前Git提交。
 
 - 2026-10-25用户进一步明确Agent系列方向：围绕Skills、MCP、Subagent、Goal等热门AI名词解释机制、设计原因、区别与取舍，认为基础接线、入门编码流程缺少观看价值；授权关闭过于简单、缺少深度的旧issue。Goal已确认指“目标驱动的Agent”。此前六个API/工单实战单元为未实施草案，现撤回；不要继续把可运行产物或关键接线作为所有概念片的硬性要求。已关闭9项`not_planned`（#132、#133、#134、#136、#141、#143、#145、#148、#150），重构原10项，并新建[Goal #248](https://github.com/linhongcun/video-studio/issues/248)。当前11项开放研究池优先研究[Skills #139](https://github.com/linhongcun/video-studio/issues/139)、[MCP #138](https://github.com/linhongcun/video-studio/issues/138)、[Subagent #146](https://github.com/linhongcun/video-studio/issues/146)、Goal #248；Harness #149、Context Engineering #135后续，其余5项储备。具体处置见[系列总览 #130](https://github.com/linhongcun/video-studio/issues/130)与[最新策划记录](agent-development-value-review.md)。研究优先级不是用户逐项批准片名、开拍或教学效果已验证；该轮未做新视频，A02独立重制计划终止；当时保留旧媒体的决定已被上述最新删除指令取代，见L040。

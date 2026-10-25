@@ -2,18 +2,16 @@ import React from 'react';
 import {AbsoluteFill} from 'remotion';
 import covers from '@covers';
 import {C,FONT,MONO} from './theme';
+import {Staircase,Hop,Walker,foot,StairGeometry} from './Staircase';
 export const coverSizes={'16x9':{width:1920,height:1080},'4x3':{width:1440,height:1080},'3x4':{width:1080,height:1440}};
 const Diagram=({x,y,width,height}:{x:number;y:number;width:number;height:number})=>{
- const gap=width/3,box=Math.min(170,gap*.72),cy=height*.48,cx=(i:number)=>gap*(i+.5);
- return <svg data-cover-diagram="true" style={{position:'absolute',left:x,top:y,width,height}} viewBox={`0 0 ${width} ${height}`}>
-  {[5,8,13].map((n,i)=><g key={n}>
-   <text x={cx(i)} y={cy-box*.83} textAnchor="middle" fontFamily={FONT} fontSize={Math.min(30,width*.038)} fill={C.muted}>第{i+4}阶</text>
-   <rect x={cx(i)-box/2} y={cy-box/2} width={box} height={box} rx={22} fill={C.surface} stroke={i===2?C.gold:C.teal} strokeWidth={3}/>
-   <text x={cx(i)} y={cy+box*.27} textAnchor="middle" fontFamily={MONO} fontSize={box*.65} fill={i===2?C.gold:C.teal}>{n}</text>
-  </g>)}
-  {[0,1].map((i)=><path key={i} d={`M ${cx(i)} ${cy+box*.53} C ${cx(i)} ${height*.91}, ${cx(2)} ${height*.91}, ${cx(2)} ${cy+box*.53}`} stroke={i?C.gold:C.teal} strokeWidth={3} fill="none"/>)}
-  <text x={width/2} y={height*.08} textAnchor="middle" fontFamily={MONO} fontSize={Math.min(44,width*.06)} fill={C.gold}>5 + 8 = 13</text>
-  <text x={width/2} y={height*.98} textAnchor="middle" fontFamily={FONT} fontSize={Math.min(28,width*.034)} fill={C.muted}>示例 · 方法数只依赖前两阶</text>
+ const g:StairGeometry={x:width*.08,baseY:height*.83,width:width*.27,rise:height*.18,steps:3};
+ const top=foot(g,3);
+ return <svg data-cover-diagram="literal-stairs" style={{position:'absolute',left:x,top:y,width,height}} viewBox={`0 0 ${width} ${height}`}>
+  <text x={width*.43} y={height*.085} textAnchor="middle" fontFamily={MONO} fontSize={Math.min(43,width*.062)} fill={C.gold}>5 + 8 = 13</text>
+  <Staircase geometry={g} counts={[5,8,13]} focus={{1:C.gold,2:C.teal,3:C.teal}} labelOffset={3} showOrigin={false} terminalLabel="终点" countSize={Math.min(31,width*.041)} numberSize={Math.min(23,width*.032)}/>
+  <Hop geometry={g} from={2} to={3} progress={1} color={C.teal} showWalker={false}/><Hop geometry={g} from={1} to={3} progress={1} color={C.gold} showWalker={false}/><Walker x={top.x} y={top.y} color={C.teal} scale={.95}/>
+  <text x={width*.5} y={height*.975} textAnchor="middle" fontFamily={FONT} fontSize={Math.min(26,width*.034)} fill={C.muted}>第4–6阶 · 前两阶的方法数相加</text>
  </svg>;
 };
 const Portrait=()=> <div style={{position:'absolute',inset:0,width:1080,height:1440,background:C.bg,color:C.text,fontFamily:FONT}}>
