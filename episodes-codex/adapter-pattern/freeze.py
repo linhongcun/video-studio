@@ -31,7 +31,8 @@ else:
     extras = [Path(__file__).resolve(), ROOT / 'episodes-codex/_shared/append_java_endcard.py',
               REVISION / 'baseline/baseline-manifest.json', D / 'check-encoded-voice.py',
               REVISION / 'previous-track/manifest.json']
-    for folder in [D / 'sources', D / 'demo-java', BODY, D / 'remotion/scripts']:
+    for folder in [D / 'sources', D / 'demo-java', BODY, D / 'remotion/scripts',
+                   REVISION / 'visual-preflight-v1', REVISION / 'visual-preflight-footer-fix']:
         extras += [path for path in folder.rglob('*') if path.is_file()
                    and not any(part in {'node_modules', 'out', '__pycache__'} for part in path.parts)
                    and path.suffix not in {'.class', '.pyc'}]

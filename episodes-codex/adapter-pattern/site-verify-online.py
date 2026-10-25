@@ -20,10 +20,16 @@ BASE='https://linhongcun.github.io/video-studio/'
 SLUG='adapter-pattern'
 VERSION=json.loads((ROOT/'site/package.json').read_text())['version']
 META=json.loads((EP/'meta.json').read_text())
+CONFIG=json.loads((HERE/'episode-config.json').read_text())
+PUBLISHED_BASELINE=json.loads((HERE/'revisions/business-boundary-v2/previous-site/published-meta/meta.json').read_text())
+CARD_SOURCE=json.loads((HERE/'remotion/src/java-card.json').read_text())
+EXPECTED_CUES=CONFIG['shotCount']*2
 SB=json.loads((EP/'storyboard.json').read_text())
 MANIFEST=json.loads((HERE/'qa-site-copy-manifest.json').read_text())
+assert META['firstRelease']==PUBLISHED_BASELINE['firstRelease']=='v0.63.0'
+assert MANIFEST['revisionRelease']=='v'+VERSION
 assert META['firstRelease']==MANIFEST['metadata']['firstRelease']
-assert META['publishedAt']==MANIFEST['metadata']['publishedAt']
+assert META['publishedAt']==MANIFEST['metadata']['publishedAt']==PUBLISHED_BASELINE['publishedAt']
 assert META['sourcePath']=='episodes-codex/adapter-pattern/remotion'
 assert META['lessonOrder']==3 and META['draft'] is False
 FPS=SB['meta']['fps'];FRAMES=META['finalVideoFrames'];CARD=SB['meta']['javaEndCard']
@@ -98,14 +104,16 @@ try:
     cues=[]
     for block in re.split(r'\r?\n\s*\r?\n',vtt.strip())[1:]:
         lines=block.splitlines();a,b=lines[0].split(' --> ');cues.append({'text':'\n'.join(lines[1:]),'start':seconds(a),'end':seconds(b)})
-    assert len(cues)==len(expected_cues)==24
+    assert len(cues)==len(expected_cues)==EXPECTED_CUES
     for actual,expected in zip(cues,expected_cues):
         assert actual['text']==expected['text'] and abs(actual['start']-expected['start'])<0.001 and abs(actual['end']-expected['end'])<0.001
     assert all(c['end']<=CARD['from']/FPS+0.001 for c in cues)
     assert META['title'] in page and 'id="java"' in page
     source='https://github.com/linhongcun/video-studio/tree/main/'+META['sourcePath']
-    java_source='https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/AdapterDemo.java'
-    assert source in html.unescape(page) and java_source in html.unescape(page)
+    java_files=list(dict.fromkeys([CARD_SOURCE['sourceFile'],'demo-java/AdapterDemo.java']))
+    java_sources=['https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/'+f for f in java_files]
+    assert source in html.unescape(page)
+    for java_source in java_sources:assert java_source in html.unescape(page)
     ld=json.loads(html.unescape(re.search(r'<script[^>]+type="application/ld\+json"[^>]*>(.*?)</script>',page,re.S).group(1)))
     assert ld['name']==META['title'] and ld['contentUrl']==url+META['video'] and ld['embedUrl']==url
     assert ld['uploadDate'].startswith(META['publishedAt'])
@@ -128,8 +136,8 @@ try:
     else:assert '/video-studio/learn/#agent' not in home
     changelog=get('changelog',BASE+'changelog/').decode('utf8');assert 'https://github.com/linhongcun/video-studio/releases/tag/v'+VERSION in changelog
     now=datetime.now(timezone.utc)
-    report={'status':'passed','checkedAtUTC':now.isoformat(),'checkedAtBeijing':now.astimezone(ZoneInfo('Asia/Shanghai')).isoformat(),'executedBy':'Codex adapter site agent','release':'v'+VERSION,'firstRelease':META['firstRelease'],'publishedAt':META['publishedAt'],'ep':META['ep'],'canonicalQueriesAdded':False,'remoteMediaSaved':False,'fullVideoStreamHashed':True,'results':RESULTS,'chapters':expected_chapters,'finalVideoFrames':FRAMES,'fps':FPS,'durationSeconds':FRAMES/FPS,'subtitleCueCount':len(cues),'lastCueEnd':max(c['end'] for c in cues),'javaEndCard':CARD,'source':source,'javaSource':java_source,'directoryChecks':directory_checks,'retiredAgentEntryLinksAbsent':True,'currentAgentSlugs':ACTIVE_AGENTS,'currentAgentHomeEntry':'/video-studio/learn/#agent' if ACTIVE_AGENTS else None,'scope':'Canonical media and caption byte equality, exact subtitle and chapter data, Java article/source entry and empty-caption card range, D01/D02 affected directory/pager, series/library/RSS and actual Release link. Browser pause/decoded frame evidence is local and separate.'}
+    report={'status':'passed','checkedAtUTC':now.isoformat(),'checkedAtBeijing':now.astimezone(ZoneInfo('Asia/Shanghai')).isoformat(),'executedBy':'Codex adapter site agent','release':'v'+VERSION,'revisionRelease':'v'+VERSION,'updatedAt':META['updatedAt'],'firstRelease':META['firstRelease'],'publishedAt':META['publishedAt'],'ep':META['ep'],'canonicalQueriesAdded':False,'remoteMediaSaved':False,'fullVideoStreamHashed':True,'results':RESULTS,'chapters':expected_chapters,'finalVideoFrames':FRAMES,'fps':FPS,'durationSeconds':FRAMES/FPS,'subtitleCueCount':len(cues),'lastCueEnd':max(c['end'] for c in cues),'javaEndCard':CARD,'source':source,'javaSources':java_sources,'directoryChecks':directory_checks,'retiredAgentEntryLinksAbsent':True,'currentAgentSlugs':ACTIVE_AGENTS,'currentAgentHomeEntry':'/video-studio/learn/#agent' if ACTIVE_AGENTS else None,'scope':'Canonical media and caption byte equality, exact subtitle and chapter data, Java article/source entry and empty-caption card range, D01/D02 affected directory/pager, series/library/RSS and actual Release link. Browser pause/decoded frame evidence is local and separate.'}
     (HERE/'qa-site-online.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
-    print(json.dumps({'status':'passed','canonicalGetCount':len(RESULTS),'release':'v'+VERSION,'frames':FRAMES,'cueCount':24,'report':str(HERE/'qa-site-online.json')},ensure_ascii=False))
+    print(json.dumps({'status':'passed','canonicalGetCount':len(RESULTS),'release':'v'+VERSION,'frames':FRAMES,'cueCount':len(cues),'report':str(HERE/'qa-site-online.json')},ensure_ascii=False))
 except Exception as exc:
     failure={'status':'failed','checkedAtUTC':datetime.now(timezone.utc).isoformat(),'completedGetCount':len(RESULTS),'error':repr(exc),'results':RESULTS};(HERE/('qa-site-online-failed-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')+'.json')).write_text(json.dumps(failure,ensure_ascii=False,indent=2)+'\n');print(json.dumps(failure,ensure_ascii=False,indent=2));raise
