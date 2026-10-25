@@ -13,3 +13,7 @@
 本次实际重新打开6张当前截图：Java解码卡、两张窄屏SVG、窄屏/桌面播放器及窄屏Java图文。范围与SHA见qa-site-visual-review.json；未声称其他图片新看、全片听辨、ASR、用户认可或学习实验。旧候选本地检查完整保留，当前没有复用旧build或浏览器结论。
 
 本机Release读取仍降级外链，未记成实际Release条目通过。Release之后Pages成功时，继续运行site-verify-online.py：11canonical普通GET、完整媒体流SHA、真实v0.63.0条目及新Skills保留/旧Agent不恢复。
+
+## Release后实际结果
+
+PR #264/v0.63.0与Pages40158697480已成功，11个普通GET于北京时间11:38:39.015827通过完整媒体/海报、24句VTT、四章、三期目录及真实Release条目。首次线上脚本的首页入口假设错误已单独保留，按真实learn/#agent修正后完整重跑通过；没有重建或修改站点和媒体。见release.md、qa-site-online.json、qa-site-online-attempt-1.json；#165已completed关闭。
