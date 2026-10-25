@@ -24,7 +24,7 @@ BASE = 'https://linhongcun.github.io/video-studio/'
 REPO_URL = 'https://github.com/linhongcun/video-studio'
 SLUG = 'horse-racing'
 FIRST_RELEASE = 'v0.55.0'
-RELEASE = 'v0.56.4'
+RELEASE = 'v0.56.5'
 PRODUCTION = Path(__file__).resolve().parent
 ROOT = PRODUCTION.parents[1]
 SITE = ROOT / 'episodes' / SLUG
@@ -128,6 +128,9 @@ def check_episode(page, meta, expected_chapters, expected_frames, fps):
     player = one(root.find_all('section', id='player'), 'player')
     chapters = json.loads(player.attrs['data-chapters'])
     assert len(chapters) == len(expected_chapters) and expected_chapters
+    assert all(chapter['id'] != 'lower-bound' for chapter in chapters), 'Article-only proof leaked into video chapters'
+    assert len(root.find_all('h2', id='lower-bound')) == 1, 'The complete article proof must remain available'
+    assert not root.find_all('a', **{'data-seek': 'lower-bound'}), 'Article proof must not seek to a removed video chapter'
     for actual, expected in zip(chapters, expected_chapters):
         assert actual['id'] == expected['id']
         assert actual['start'] == expected['frame'] / fps
@@ -187,7 +190,9 @@ def main():
     assert offset == storyboard['meta']['durationInFrames'] and fps == 30
     planned_chapters = list(dict.fromkeys(shot['chapterId'] for shot in plan))
     assert [chapter['id'] for chapter in expected_chapters] == planned_chapters
+    assert 'lower-bound' not in planned_chapters and planned_chapters[-1] == 'answer'
     assert expected_subtitles == [sentence['text'] for sentence in voice_sentences]
+    assert not any(term in ''.join(expected_subtitles) for term in ('证明', '文章', '图文')), 'Removed proof or article handoff remains in the video narration'
     subtitle_count = len(expected_subtitles)
     assert subtitle_count > 0
     assert sha_file(SITE / meta['video']) == render['sha256'], 'Video differs from final render report'
