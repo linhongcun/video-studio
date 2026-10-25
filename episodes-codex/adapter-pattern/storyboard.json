@@ -1,0 +1,1021 @@
+{
+  "meta": {
+    "title": "适配器模式：接口对不上，怎样接入新服务？",
+    "episode": 31,
+    "episodePart": "设计模式 D03",
+    "slug": "adapter-pattern",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5271,
+    "finalVideoFrames": 5271,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "Start with a merchant sending the shipping notice for example order17. Readable function UI, then stable business notification contract vs incompatible external SDK, role structure and two-way delegation/mapping. Same message/recipient through request/return. Interface node is structural, not a runtime relay. Object adapter implements target, holds adaptee, preserves accepted vs delivered and unknown error semantics. Language-independent body; separate5-second Java key-excerpt pause card. No real messages, no unrelated browser shell, no decorative progress.",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "Continue after user explicitly said both previous design-pattern episodes are clearer. Teach one object Adapter via corresponding merchant notification UI, incompatible business/SDK contracts, role-by-role structure, actual bidirectional delegation/mapping and boundaries. Separate developer integration view from replaying the same runtime submission. Preserve accepted versus delivered and unknown-error meaning. Language-independent body,5-second Java key excerpt only.",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "教学示例 · 订单17 · 不发送真实消息",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "适配器模式：接口对不上，怎样接入新服务？",
+      "description": "转换使用约定，委托已有能力，守住受理结果的含义。",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "content": {
+            "x": 130,
+            "w": 1660
+          },
+          "watermarkZone": {
+            "x": 130,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 130,
+              "y": 210,
+              "w": 1660,
+              "h": 270
+            },
+            {
+              "x": 130,
+              "y": 505,
+              "w": 1660,
+              "h": 70
+            },
+            {
+              "x": 130,
+              "y": 590,
+              "w": 1660,
+              "h": 210
+            },
+            {
+              "x": 130,
+              "y": 859,
+              "w": 1660,
+              "h": 45
+            }
+          ]
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "content": {
+            "x": 315,
+            "w": 810
+          },
+          "watermarkZone": {
+            "x": 315,
+            "y": 100
+          },
+          "textBoxes": [
+            {
+              "x": 315,
+              "y": 210,
+              "w": 810,
+              "h": 270
+            },
+            {
+              "x": 315,
+              "y": 469,
+              "w": 810,
+              "h": 70
+            },
+            {
+              "x": 315,
+              "y": 590,
+              "w": 810,
+              "h": 210
+            },
+            {
+              "x": 315,
+              "y": 859,
+              "w": 810,
+              "h": 45
+            }
+          ],
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "content": {
+            "x": 110,
+            "w": 860
+          },
+          "watermarkZone": {
+            "x": 110,
+            "y": 110
+          },
+          "textBoxes": [
+            {
+              "x": 110,
+              "y": 240,
+              "w": 860,
+              "h": 285
+            },
+            {
+              "x": 110,
+              "y": 565,
+              "w": 860,
+              "h": 70
+            },
+            {
+              "x": 110,
+              "y": 755,
+              "w": 860,
+              "h": 300
+            },
+            {
+              "x": 110,
+              "y": 1155,
+              "w": 860,
+              "h": 45
+            }
+          ]
+        }
+      },
+      "poster": {
+        "file": "poster.jpg",
+        "sameAs": "3x4"
+      }
+    },
+    "discussionQuestion": "外部服务只返回已受理，适配器能把它变成已送达吗？转换和创建接线分别放在哪里？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "javaEndCard": {
+      "kind": "java-design-pattern",
+      "from": 5121,
+      "durationInFrames": 150
+    }
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "why",
+      "chapterId": "why",
+      "title": "先看一次发货提醒",
+      "from": 0,
+      "durationInFrames": 810,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "why",
+          "visualType": "product-reminder",
+          "from": 0,
+          "durationInFrames": 399,
+          "narration": "商家在订单详情里，给十七号订单的买家发送发货提醒。结果只表示已受理，换了通知服务，这个流程怎样继续用？",
+          "subtitles": [
+            {
+              "text": "商家在订单详情里，给十七号订单的买家发送发货提醒。",
+              "from": 0,
+              "to": 182,
+              "duration": 183
+            },
+            {
+              "text": "结果只表示已受理，换了通知服务，这个流程怎样继续用？",
+              "from": 183,
+              "to": 398,
+              "duration": 216
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-product-reminder-1",
+              "wavStart": 9.0,
+              "wavEnd": 173.26,
+              "localStart": 9.0,
+              "localEnd": 173.26
+            },
+            {
+              "id": "01-product-reminder-2",
+              "wavStart": 183.76,
+              "wavEnd": 378.02,
+              "localStart": 183.76,
+              "localEnd": 378.02
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              183
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 9.0,
+            "wavTo": 378.02,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "商家订单详情教学页，订单17已发货，显示收件人buyer17@shop.example、正文“订单17已发货”和“发送发货提醒”按钮。光标点击后先短暂提交中，再显示“已受理·等待送达回执·Q17”，不出现已送达。界面标“教学示意·无真实外发”。这次操作是实际教学演示；02明确切入接入前的开发视角，05再回看同一提交，不重新点击或多发一条。首2秒出现主题与具体冲突。",
+          "direction": "商家订单详情教学页，订单17已发货，显示收件人buyer17@shop.example、正文“订单17已发货”和“发送发货提醒”按钮。光标点击后先短暂提交中，再显示“已受理·等待送达回执·Q17”，不出现已送达。界面标“教学示意·无真实外发”。这次操作是实际教学演示；02明确切入接入前的开发视角，05再回看同一提交，不重新点击或多发一条。首2秒出现主题与具体冲突。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "why",
+          "visualType": "incompatible-contracts",
+          "from": 399,
+          "durationInFrames": 411,
+          "narration": "接这个服务前，先看双方的约定为什么对不上。业务提供收件人和正文、接收受理结果，服务却用另一套入参和状态表达，直接对不上。",
+          "subtitles": [
+            {
+              "text": "接这个服务前，先看双方的约定为什么对不上。",
+              "from": 0,
+              "to": 133,
+              "duration": 134
+            },
+            {
+              "text": "业务提供收件人和正文、接收受理结果，服务却用另一套入参和状态表达，直接对不上。",
+              "from": 134,
+              "to": 410,
+              "duration": 277
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-incompatible-contracts-1",
+              "wavStart": 399.02,
+              "wavEnd": 522.91,
+              "localStart": 0.01999999999998181,
+              "localEnd": 123.90999999999997
+            },
+            {
+              "id": "02-incompatible-contracts-2",
+              "wavStart": 533.41,
+              "wavEnd": 789.74,
+              "localStart": 134.40999999999997,
+              "localEnd": 390.74
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              134
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 399.02,
+            "wavTo": 789.74,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "首句先说明时间视角转换，屏幕明确“接入前·开发视角”，再从同一页面对应的业务需求展开双方约定。此段没有正在执行的请求令牌，不将开发接线画成运行时热插入。左侧中文“收件人＋提醒正文→受理结果”，右侧中文“接收目标＋消息内容→已排队/拒绝”，格式不兼容的连接在中间留缺口；不伪造真实网络故障或报错，不将业务目标写成送达。正文图不出字段名，精确字段及枚举留Java卡/文章。",
+          "direction": "首句先说明时间视角转换，屏幕明确“接入前·开发视角”，再从同一页面对应的业务需求展开双方约定。此段没有正在执行的请求令牌，不将开发接线画成运行时热插入。左侧中文“收件人＋提醒正文→受理结果”，右侧中文“接收目标＋消息内容→已排队/拒绝”，格式不兼容的连接在中间留缺口；不伪造真实网络故障或报错，不将业务目标写成送达。正文图不出字段名，精确字段及枚举留Java卡/文章。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "roles",
+      "chapterId": "roles",
+      "title": "从同一对象展开结构",
+      "from": 810,
+      "durationInFrames": 856,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "roles",
+          "visualType": "roles-and-target",
+          "from": 810,
+          "durationInFrames": 383,
+          "narration": "问题在双方约定不兼容，接下来把各自的职责摆出来。业务方只按自己的通知约定提交，外部服务负责实际处理请求。",
+          "subtitles": [
+            {
+              "text": "问题在双方约定不兼容，接下来把各自的职责摆出来。",
+              "from": 0,
+              "to": 179,
+              "duration": 180
+            },
+            {
+              "text": "业务方只按自己的通知约定提交，外部服务负责实际处理请求。",
+              "from": 180,
+              "to": 382,
+              "duration": 203
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-roles-and-target-1",
+              "wavStart": 810.74,
+              "wavEnd": 980.09,
+              "localStart": 0.7400000000000091,
+              "localEnd": 170.09000000000003
+            },
+            {
+              "id": "03-roles-and-target-2",
+              "wavStart": 990.59,
+              "wavEnd": 1172.72,
+              "localStart": 180.59000000000003,
+              "localEnd": 362.72
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              180
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 810.74,
+            "wavTo": 1172.72,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先口头过渡，再逐个将原页面操作对应业务方ShipmentReminder；把业务所需方式对应目标通知约定Notifier；原服务对应VendorSdk。Target以契约外观与依赖线呈现，不能画成执行消息的方框；共同约定尚未实现的缺口等待04适配器接入。此时是接入前的结构分析，不表示01请求仍在等开发完成。",
+          "direction": "先口头过渡，再逐个将原页面操作对应业务方ShipmentReminder；把业务所需方式对应目标通知约定Notifier；原服务对应VendorSdk。Target以契约外观与依赖线呈现，不能画成执行消息的方框；共同约定尚未实现的缺口等待04适配器接入。此时是接入前的结构分析，不表示01请求仍在等开发完成。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "roles",
+          "visualType": "introduce-adapter",
+          "from": 1193,
+          "durationInFrames": 473,
+          "narration": "适配器模式，把已有服务的使用方式，转换成业务方需要的约定。本例的适配器遵守通知约定，并持有外部服务，转换后仍要真正调用它。",
+          "subtitles": [
+            {
+              "text": "适配器模式，把已有服务的使用方式，转换成业务方需要的约定。",
+              "from": 0,
+              "to": 225,
+              "duration": 226
+            },
+            {
+              "text": "本例的适配器遵守通知约定，并持有外部服务，转换后仍要真正调用它。",
+              "from": 226,
+              "to": 472,
+              "duration": 247
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-introduce-adapter-1",
+              "wavStart": 1193.72,
+              "wavEnd": 1409.38,
+              "localStart": 0.7200000000000273,
+              "localEnd": 216.3800000000001
+            },
+            {
+              "id": "04-introduce-adapter-2",
+              "wavStart": 1419.88,
+              "wavEnd": 1645.12,
+              "localStart": 226.8800000000001,
+              "localEnd": 452.1199999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "适配器模式": 1
+            },
+            "sentences": [
+              0,
+              226
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 1193.72,
+            "wavTo": 1645.12,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "按04句首cue出现完整“适配器模式”，在业务方与原服务之间引入NotificationAdapter，表现其遵守Notifier契约，内部持有VendorSdk引用。沿结构依赖/实现关系逐步高亮，不让业务方直接持有/调用服务，不把契约节点串成运行链；四角色可在结尾回收到同一结构。",
+          "direction": "按04句首cue出现完整“适配器模式”，在业务方与原服务之间引入NotificationAdapter，表现其遵守Notifier契约，内部持有VendorSdk引用。沿结构依赖/实现关系逐步高亮，不让业务方直接持有/调用服务，不把契约节点串成运行链；四角色可在结尾回收到同一结构。",
+          "elements": [
+            {
+              "id": "label04_0",
+              "type": "text",
+              "text": "适配器模式",
+              "cueText": "适配器模式",
+              "appearFrame": 1,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52,
+              "cueOnset": {
+                "sentence": "04-introduce-adapter-1",
+                "asrFrame": null,
+                "onsetLocal": 1.7200000000000273,
+                "rule": "pause/acoustic sentence onset",
+                "delay": 0
+              }
+            }
+          ],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "roundtrip",
+      "chapterId": "roundtrip",
+      "title": "跟着同一次请求走个来回",
+      "from": 1666,
+      "durationInFrames": 1570,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "roundtrip",
+          "visualType": "submit-through-target",
+          "from": 1666,
+          "durationInFrames": 412,
+          "narration": "结构接好了，再回看刚才那一次提交，走完整个来回。业务方按通知约定提交买家地址和提醒正文，接到请求的是适配器。",
+          "subtitles": [
+            {
+              "text": "结构接好了，再回看刚才那一次提交，走完整个来回。",
+              "from": 0,
+              "to": 186,
+              "duration": 187
+            },
+            {
+              "text": "业务方按通知约定提交买家地址和提醒正文，接到请求的是适配器。",
+              "from": 187,
+              "to": 411,
+              "duration": 225
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-submit-through-target-1",
+              "wavStart": 1666.12,
+              "wavEnd": 1843.22,
+              "localStart": 0.11999999999989086,
+              "localEnd": 177.22000000000003
+            },
+            {
+              "id": "05-submit-through-target-2",
+              "wavStart": 1853.72,
+              "wavEnd": 2057.02,
+              "localStart": 187.72000000000003,
+              "localEnd": 391.02
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              187
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 1666.12,
+            "wavTo": 2057.02,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一句先承接结构，明确仍是01同一次提交，不重新点击、不新增消息。业务方按目标约定将相同收件人和正文直接交给适配器；Target契约留在连线注解，令牌不经过契约节点。屏幕明确“机制回看·同一次提交”，来源产品UI缩为运行回放的“提交中”上下文，关注同一条请求；不是开始第二次实际发送。",
+          "direction": "第一句先承接结构，明确仍是01同一次提交，不重新点击、不新增消息。业务方按目标约定将相同收件人和正文直接交给适配器；Target契约留在连线注解，令牌不经过契约节点。屏幕明确“机制回看·同一次提交”，来源产品UI缩为运行回放的“提交中”上下文，关注同一条请求；不是开始第二次实际发送。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "roundtrip",
+          "visualType": "convert-and-delegate",
+          "from": 2078,
+          "durationInFrames": 426,
+          "narration": "适配器先把收件人和正文，转换成外部服务接收的格式。数据准备好后，它调用自己持有的外部服务，让本例的提交实际执行。",
+          "subtitles": [
+            {
+              "text": "适配器先把收件人和正文，转换成外部服务接收的格式。",
+              "from": 0,
+              "to": 187,
+              "duration": 188
+            },
+            {
+              "text": "数据准备好后，它调用自己持有的外部服务，让本例的提交实际执行。",
+              "from": 188,
+              "to": 425,
+              "duration": 238
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-convert-and-delegate-1",
+              "wavStart": 2078.02,
+              "wavEnd": 2255.51,
+              "localStart": 0.01999999999998181,
+              "localEnd": 177.51000000000022
+            },
+            {
+              "id": "06-convert-and-delegate-2",
+              "wavStart": 2266.01,
+              "wavEnd": 2483.97,
+              "localStart": 188.01000000000022,
+              "localEnd": 405.9699999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              188
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 2078.02,
+            "wavTo": 2483.97,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "适配器内部把业务的收件人/正文对应成服务接受的目标/内容，输入值保持buyer17@shop.example、“订单17已发货”，只改变协议形状。随后沿“持有的外部服务”路径真正调用VendorSdk，服务调用尚未返回前不得先显示受理。转换动作和服务执行是两步，不能只有标签重命名。",
+          "direction": "适配器内部把业务的收件人/正文对应成服务接受的目标/内容，输入值保持buyer17@shop.example、“订单17已发货”，只改变协议形状。随后沿“持有的外部服务”路径真正调用VendorSdk，服务调用尚未返回前不得先显示受理。转换动作和服务执行是两步，不能只有标签重命名。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "roundtrip",
+          "visualType": "map-acceptance",
+          "from": 2504,
+          "durationInFrames": 385,
+          "narration": "本例服务交回已排队和受理编号，后续处理还没有完成。适配器把它转换为业务方的已受理，并把同一编号带回去。",
+          "subtitles": [
+            {
+              "text": "本例服务交回已排队和受理编号，后续处理还没有完成。",
+              "from": 0,
+              "to": 190,
+              "duration": 191
+            },
+            {
+              "text": "适配器把它转换为业务方的已受理，并把同一编号带回去。",
+              "from": 191,
+              "to": 384,
+              "duration": 194
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-map-acceptance-1",
+              "wavStart": 2504.97,
+              "wavEnd": 2684.68,
+              "localStart": 0.9699999999997999,
+              "localEnd": 180.67999999999984
+            },
+            {
+              "id": "07-map-acceptance-2",
+              "wavStart": 2695.18,
+              "wavEnd": 2868.09,
+              "localStart": 191.17999999999984,
+              "localEnd": 364.09000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              191
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 2504.97,
+            "wavTo": 2868.09,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "模拟服务返回“已排队·受理编号Q17”，适配器接到以后才转换为“已受理·Q17”并回给业务方。队列只是返回语义，不模拟真实厂商内部实现/网络队列，不能画出手机已收到消息。编号同一实例回传，不另造新号。",
+          "direction": "模拟服务返回“已排队·受理编号Q17”，适配器接到以后才转换为“已受理·Q17”并回给业务方。队列只是返回语义，不模拟真实厂商内部实现/网络队列，不能画出手机已收到消息。编号同一实例回传，不另造新号。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "roundtrip",
+          "visualType": "accepted-ui",
+          "from": 2889,
+          "durationInFrames": 347,
+          "narration": "页面拿到受理编号，显示已受理，等待送达回执。适配器转换了约定，却不能把排队受理变成已经送达。",
+          "subtitles": [
+            {
+              "text": "页面拿到受理编号，显示已受理，等待送达回执。",
+              "from": 0,
+              "to": 154,
+              "duration": 155
+            },
+            {
+              "text": "适配器转换了约定，却不能把排队受理变成已经送达。",
+              "from": 155,
+              "to": 346,
+              "duration": 192
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-accepted-ui-1",
+              "wavStart": 2889.09,
+              "wavEnd": 3034.37,
+              "localStart": 0.09000000000014552,
+              "localEnd": 145.3699999999999
+            },
+            {
+              "id": "08-accepted-ui-2",
+              "wavStart": 3044.87,
+              "wavEnd": 3215.08,
+              "localStart": 155.8699999999999,
+              "localEnd": 326.0799999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              155
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 2889.09,
+            "wavTo": 3215.08,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "同一Q17结果抵达业务方后，回到01订单详情并标“同一次提交·Q17”；按钮已提交，状态从提交中变为“已受理·等待送达回执”，保留“订单17已发货”正文和同一收件人，不出现短信弹窗或送达勾。当前功能完成的是提交受理，不假装已经交付消息。",
+          "direction": "同一Q17结果抵达业务方后，回到01订单详情并标“同一次提交·Q17”；按钮已提交，状态从提交中变为“已受理·等待送达回执”，保留“订单17已发货”正文和同一收件人，不出现短信弹窗或送达勾。当前功能完成的是提交受理，不假装已经交付消息。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "转换的收益与边界",
+      "from": 3236,
+      "durationInFrames": 2035,
+      "shots": [
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "boundary",
+          "visualType": "rejection-and-unknown",
+          "from": 3236,
+          "durationInFrames": 463,
+          "narration": "这次受理过程走完，再看转换不能越过的边界。服务明确拒绝就返回拒绝，遇到超时等结果未知，不能假报已受理，也不能当作确定拒绝。",
+          "subtitles": [
+            {
+              "text": "这次受理过程走完，再看转换不能越过的边界。",
+              "from": 0,
+              "to": 139,
+              "duration": 140
+            },
+            {
+              "text": "服务明确拒绝就返回拒绝，遇到超时等结果未知，不能假报已受理，也不能当作确定拒绝。",
+              "from": 140,
+              "to": 462,
+              "duration": 323
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-rejection-and-unknown-1",
+              "wavStart": 3236.08,
+              "wavEnd": 3365.5,
+              "localStart": 0.07999999999992724,
+              "localEnd": 129.5
+            },
+            {
+              "id": "09-rejection-and-unknown-2",
+              "wavStart": 3376.0,
+              "wavEnd": 3678.16,
+              "localStart": 140.0,
+              "localEnd": 442.15999999999985
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              140
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 3236.08,
+            "wavTo": 3678.16,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "承接已经受理的主线结果，单独给短语义边界说明，明确这是规则说明，不再执行一次请求。服务明确拒绝→业务拒绝；技术异常/超时/未知→结果未定，不能伪造确定成功或确定拒绝。不演回执轮询、重试或第二家服务，不把已受理主线Q17改为拒绝。",
+          "direction": "承接已经受理的主线结果，单独给短语义边界说明，明确这是规则说明，不再执行一次请求。服务明确拒绝→业务拒绝；技术异常/超时/未知→结果未定，不能伪造确定成功或确定拒绝。不演回执轮询、重试或第二家服务，不把已受理主线Q17改为拒绝。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "boundary",
+          "visualType": "maintenance-scope",
+          "from": 3699,
+          "durationInFrames": 420,
+          "narration": "两边能配合后，再看哪些改动被隔离了。外部服务的格式细节留在适配器里，业务方按原约定提交，但创建、接线和配置仍要调整。",
+          "subtitles": [
+            {
+              "text": "两边能配合后，再看哪些改动被隔离了。",
+              "from": 0,
+              "to": 125,
+              "duration": 126
+            },
+            {
+              "text": "外部服务的格式细节留在适配器里，业务方按原约定提交，但创建、接线和配置仍要调整。",
+              "from": 126,
+              "to": 419,
+              "duration": 294
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-maintenance-scope-1",
+              "wavStart": 3699.16,
+              "wavEnd": 3814.93,
+              "localStart": 0.15999999999985448,
+              "localEnd": 115.92999999999984
+            },
+            {
+              "id": "10-maintenance-scope-2",
+              "wavStart": 3825.43,
+              "wavEnd": 4098.92,
+              "localStart": 126.42999999999984,
+              "localEnd": 399.9200000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              126
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 3699.16,
+            "wavTo": 4098.92,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "在原角色图上圈定适配器中的格式/状态转换；业务方依赖目标约定的边保持，外部服务引用仍持有。旁边清楚保留“创建/接线/配置需调整”的装配位置，不能用整图不改的动画宣称所有调用方完全无需改动。",
+          "direction": "在原角色图上圈定适配器中的格式/状态转换；业务方依赖目标约定的边保持，外部服务引用仍持有。旁边清楚保留“创建/接线/配置需调整”的装配位置，不能用整图不改的动画宣称所有调用方完全无需改动。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "boundary",
+          "visualType": "cost-and-simple-option",
+          "from": 4119,
+          "durationInFrames": 449,
+          "narration": "如果两套约定本来就一致，直接使用服务往往更简单。引入适配器，就多了一层要维护的转换，也要测试入参、返回结果和错误边界。",
+          "subtitles": [
+            {
+              "text": "如果两套约定本来就一致，直接使用服务往往更简单。",
+              "from": 0,
+              "to": 185,
+              "duration": 186
+            },
+            {
+              "text": "引入适配器，就多了一层要维护的转换，也要测试入参、返回结果和错误边界。",
+              "from": 186,
+              "to": 448,
+              "duration": 263
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-cost-and-simple-option-1",
+              "wavStart": 4119.92,
+              "wavEnd": 4295.14,
+              "localStart": 0.9200000000000728,
+              "localEnd": 176.14000000000033
+            },
+            {
+              "id": "11-cost-and-simple-option-2",
+              "wavStart": 4305.64,
+              "wavEnd": 4547.39,
+              "localStart": 186.64000000000033,
+              "localEnd": 428.3900000000003
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              186
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 4119.92,
+            "wavTo": 4547.39,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先展示约定原本一致时的一条直接连接，再回收新增适配器需要维护的入参、结果、错误三类边界。只是比较选型前提，不给第二服务或第二请求换故事。不得以性能/减少所有变更作无源承诺。",
+          "direction": "先展示约定原本一致时的一条直接连接，再回收新增适配器需要维护的入参、结果、错误三类边界。只是比较选型前提，不给第二服务或第二请求换故事。不得以性能/减少所有变更作无源承诺。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "boundary",
+          "visualType": "idea-recap",
+          "from": 4568,
+          "durationInFrames": 703,
+          "narration": "业务方依赖通知约定，适配器负责转换和委托，外部服务承担实际处理。让已有能力按业务需要的方式接入，同时守住结果的含义，就是本例的适配器模式。",
+          "subtitles": [
+            {
+              "text": "业务方依赖通知约定，适配器负责转换和委托，外部服务承担实际处理。",
+              "from": 0,
+              "to": 237,
+              "duration": 238
+            },
+            {
+              "text": "让已有能力按业务需要的方式接入，同时守住结果的含义，就是本例的适配器模式。",
+              "from": 238,
+              "to": 552,
+              "duration": 315
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-idea-recap-1",
+              "wavStart": 4568.39,
+              "wavEnd": 4796.27,
+              "localStart": 0.3900000000003274,
+              "localEnd": 228.27000000000044
+            },
+            {
+              "id": "12-idea-recap-2",
+              "wavStart": 4806.77,
+              "wavEnd": 5084.59,
+              "localStart": 238.77000000000044,
+              "localEnd": 516.5900000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              238
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 1fe1778d + words.json 938c391b + script.md f55d8fa7",
+            "wavFrom": 4568.39,
+            "wavTo": 5084.59,
+            "holdFrames": 36,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回到本次同一关系：业务方按目标约定→适配器转换和委托→持有的服务执行，返回受理结果；并回到订单17已受理等待回执。第一句逐个回收角色，第二句兑现怎样接入原业务。随后独立5秒Java关键节选，结构名称和正文一致、明示暂停/节选，全文及行为运行放图文。",
+          "direction": "回到本次同一关系：业务方按目标约定→适配器转换和委托→持有的服务执行，返回受理结果；并回到订单17已受理等待回执。第一句逐个回收角色，第二句兑现怎样接入原业务。随后独立5秒Java关键节选，结构名称和正文一致、明示暂停/节选，全文及行为运行放图文。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "javaCardFrom": 553
+        }
+      ]
+    }
+  ]
+}
