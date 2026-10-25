@@ -45,6 +45,12 @@ files += [D/'../../episodes/_shared'/f for f in [
     'onset_rule.py','voice/prep.py','voice/gen.py','voice/build.py','voice/common.py',
     'tts/mimo_say.py','theme/pageTheme.ts','music/mix_bgm.py','music/Wallpaper.mp3']]
 files += [D/'../_shared/branch-map/index.ts']
+# Include appendix inputs without changing the original voiced-body timing.
+# Final media frame counts live in reference-appendix.json and episode metadata.
+files += [D/'references.json', D/'references.md',
+    D/'../_shared/append_references.py',
+    D/'../_shared/requirements-reference-appendix.txt',
+    D/'../../docs/reference-endcards/batch-1/source-verification.json']
 # Keep parent references portable instead of writing workspace absolute paths.
 manifest = {os.path.relpath(p, D):sha(p) for p in sorted(set(files))}
 (D/'source-sha256.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
