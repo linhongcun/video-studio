@@ -1,0 +1,146 @@
+{
+  "title": "Java关键代码 · 节选",
+  "subtitle": "暂停查看",
+  "language": "Java",
+  "lines": [
+    "interface Notifier { Submission send(String recipient, String text) throws SendFailure; }",
+    "static final class NotificationAdapter implements Notifier {",
+    "    private final VendorSdk sdk;",
+    "    NotificationAdapter(VendorSdk sdk) { this.sdk = Objects.requireNonNull(sdk); }",
+    "    public Submission send(String recipient, String text) throws SendFailure {",
+    "        requireInputs(recipient, text);",
+    "        try {",
+    "            RawReceipt raw = requireReceipt(sdk.deliver(new Payload(recipient, text)));",
+    "            return switch (raw.status()) {",
+    "                case \"QUEUED\" -> new Submission(Status.ACCEPTED, raw.ticket());",
+    "                case \"REJECTED\" -> new Submission(Status.REJECTED, \"\");",
+    "                default -> throw new SendFailure(\"受理结果未确认：未知回执状态\");",
+    "            };",
+    "        } catch (VendorFailure ex) {",
+    "            throw new SendFailure(\"受理结果未确认：SDK通信异常\", ex);",
+    "        }",
+    "    }",
+    "}",
+    "// main内：SDK为教学模拟，不外发",
+    "Notifier notifier = new NotificationAdapter(new FakeVendorSdk());",
+    "Submission result = new ShipmentReminder(notifier).send(\"buyer17@shop.example\");"
+  ],
+  "sourceFile": "demo-java/AdapterDemo.java",
+  "sourceSha256": "16752e4035fc5ff488f60d2683383bb43cf20ccfc74de7deff4fde7fa297f125",
+  "excerptRanges": [
+    {
+      "from": 30,
+      "to": 47,
+      "removeIndent": 4
+    },
+    {
+      "from": 89,
+      "to": 91,
+      "removeIndent": 8
+    }
+  ],
+  "lineSources": [
+    {
+      "line": 30,
+      "removeIndent": 4
+    },
+    {
+      "line": 31,
+      "removeIndent": 4
+    },
+    {
+      "line": 32,
+      "removeIndent": 4
+    },
+    {
+      "line": 33,
+      "removeIndent": 4
+    },
+    {
+      "line": 34,
+      "removeIndent": 4
+    },
+    {
+      "line": 35,
+      "removeIndent": 4
+    },
+    {
+      "line": 36,
+      "removeIndent": 4
+    },
+    {
+      "line": 37,
+      "removeIndent": 4
+    },
+    {
+      "line": 38,
+      "removeIndent": 4
+    },
+    {
+      "line": 39,
+      "removeIndent": 4
+    },
+    {
+      "line": 40,
+      "removeIndent": 4
+    },
+    {
+      "line": 41,
+      "removeIndent": 4
+    },
+    {
+      "line": 42,
+      "removeIndent": 4
+    },
+    {
+      "line": 43,
+      "removeIndent": 4
+    },
+    {
+      "line": 44,
+      "removeIndent": 4
+    },
+    {
+      "line": 45,
+      "removeIndent": 4
+    },
+    {
+      "line": 46,
+      "removeIndent": 4
+    },
+    {
+      "line": 47,
+      "removeIndent": 4
+    },
+    {
+      "line": 89,
+      "removeIndent": 8
+    },
+    {
+      "line": 90,
+      "removeIndent": 8
+    },
+    {
+      "line": 91,
+      "removeIndent": 8
+    }
+  ],
+  "lineCount": 21,
+  "longestLineCharacters": 89,
+  "roleMapping": {
+    "业务使用者": "ShipmentReminder",
+    "业务通知约定": "Notifier",
+    "转换者": "NotificationAdapter",
+    "已有SDK": "VendorSdk",
+    "教学替身": "FakeVendorSdk"
+  },
+  "notice": "教学模拟，不会外发",
+  "scope": "Two exact excerpts: the business target and adapter, then main wiring. Not a complete standalone program.",
+  "omittedSections": [
+    "enclosing AdapterDemo class and imports",
+    "Submission/Status, SDK DTOs/contracts and exception classes",
+    "input and invalid-receipt validation helper definitions",
+    "ShipmentReminder and FakeVendorSdk class definitions",
+    "main output after the call"
+  ]
+}

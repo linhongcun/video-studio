@@ -177,7 +177,10 @@
 - **后续范围确认：**用户随后明确表示“现在这两期设计模式看着好多了”，并授权自选下一模式制作。此前“不推断两期均完整观看”的记录是当时原话范围；本次可记录对D01/D02当前表达的定性认可，仍不扩写成所有细节、全片听辨或学习收益已测量。下一期D03沿用先功能场景、再职责与协作的方向，按具体内容组织。
 
 
-- **D03适配器的应用：**先以订单17发货提醒的页面操作建立任务，再区分接入前的四角色结构与接好后的同一次运行，沿同一地址/正文/Q17演出转换、委托和回程。Target只表示契约，实际运行三方，已受理不当作送达，结果未知不当作确定拒绝；创建接线成本保留。12组Java、独立3片33时点/11状态/6封面、正式32帧（根另12帧）及全轨/24句AAC一致性通过。保留Skills的v0.62.0后，D03以v0.63.0完成39个发布页/5个方向重建与1440/390本地验收：8次章节跳转、24句字幕、Java卡/正文入口、原生SVG及三期目录导航通过，媒体不重做。[PR #264](https://github.com/linhongcun/video-studio/pull/264)合并ab49ce85后发布附注tag/Release v0.63.0，Release后Pages40158697480成功；北京时间2026-10-25 11:38:39，11项canonical GET完整媒体、海报、24字幕/4章、Java/源码、导航和真实Release条目核验通过，#165已completed关闭。实际证据见[本期QA](../episodes-codex/adapter-pattern/qa-final.md)、[网站检查](../episodes-codex/adapter-pattern/qa-site-browser.json)及[线上结果](../episodes-codex/adapter-pattern/qa-site-online.json)；D03尚无用户观看反馈，这些实际检查不是学习实验。
+- **D03首发时的应用与检查（v0.63.0）：**先以订单17发货提醒的页面操作建立任务，再区分接入前的四角色结构与接好后的同一次运行，沿同一地址/正文/Q17演出转换、委托和回程。Target只表示契约，实际运行三方，已受理不当作送达，结果未知不当作确定拒绝；创建接线成本保留。12组Java、独立3片33时点/11状态/6封面、正式32帧（根另12帧）及全轨/24句AAC一致性通过。保留Skills的v0.62.0后，D03以v0.63.0完成39个发布页/5个方向重建与1440/390本地验收：8次章节跳转、24句字幕、Java卡/正文入口、原生SVG及三期目录导航通过，媒体不重做。[PR #264](https://github.com/linhongcun/video-studio/pull/264)合并ab49ce85后发布附注tag/Release v0.63.0，Release后Pages40158697480成功；北京时间2026-10-25 11:38:39，11项canonical GET完整媒体、海报、24字幕/4章、Java/源码、导航和真实Release条目核验通过，首发核验后#165曾completed关闭。实际证据见[首发QA基线](../episodes-codex/adapter-pattern/revisions/business-boundary-v2/baseline/qa-final.md)、[首发网站检查](https://github.com/linhongcun/video-studio/blob/v0.63.0/episodes-codex/adapter-pattern/qa-site-browser.json)及[首发线上基线](../episodes-codex/adapter-pattern/revisions/business-boundary-v2/baseline/qa-site-online.json)；用户随后已实际观看D03/v0.63.0并指出主线复杂、日常收益不清，见下条及L042。这些旧检查保留为实现、局部表达与交付一致性证据，不能扩写为D03教学主线已讲清、已获认可或学习实验。
+
+
+- **D03后续观看反馈的限制：**用户明确要求以日常主动封装的两个收益重排：让已有服务符合业务约定，并在业务语义及所需能力仍满足时，把外部接口升级的技术变化隔离到集成边界。旧版虽演出了职责、转换与结果边界，仍被用户认为复杂且偏向被迫兼容；角色可复述、Java通过、动画和上线通过，不能证明这两个收益已经讲清。S017对D01/D02的既有支持范围保留，D03的改法只在项目记忆中列为待验证，不提前新增成功结论。Adapter与防腐作用的关系按L042保留条件，不推广为所有wrapper都是Adapter或Adapter等同完整防腐层。
 
 ## S018 批量共享准备与发布，逐片保留独立验收
 
