@@ -21,7 +21,7 @@ const siteVersion = JSON.parse(fs.readFileSync(path.join(site, 'package.json'), 
 const baselineCommit = 'e38fa9236fbc340f834581302320494d2a1c1ce7';
 // Later upstream work was merged before delivery. Preserve its short P01 and
 // every other episode, while retaining the original LC.70 baseline separately.
-const upstreamCommit = 'fcbf3e162743b59d23334b0df0d691460ee4889d';
+const upstreamCommit = '057b9d0d293ff58f410129860b71b742340e5dd1';
 const revisionDate = '2026-10-25';
 const specifications = [
   {slug: 'two-sum', ep: 25, problem: 1, sentences: 28},
@@ -99,6 +99,16 @@ function expectedRecentHrefs() {
     .map((slug) => readJson(path.join(root, 'episodes', slug, 'meta.json'))).filter((meta) => !meta.draft && !meta.archived)
     .sort((a, b) => String(b.publishedAt).localeCompare(String(a.publishedAt)) || b.ep - a.ep || (b.lessonOrder ?? 0) - (a.lessonOrder ?? 0))
     .slice(0, 6).map((meta) => epHref(meta.slug));
+}
+
+function expectedSeriesPager(slug) {
+  const current = readJson(path.join(root, 'episodes', slug, 'meta.json'));
+  const lessons = fs.readdirSync(path.join(root, 'episodes')).filter((name) => fs.existsSync(path.join(root, 'episodes', name, 'meta.json')))
+    .map((name) => readJson(path.join(root, 'episodes', name, 'meta.json'))).filter((meta) => !meta.draft && !meta.archived && meta.series === current.series)
+    .sort((a, b) => a.ep - b.ep || (a.lessonOrder ?? 0) - (b.lessonOrder ?? 0));
+  const index = lessons.findIndex((meta) => meta.slug === slug);
+  assert.ok(index >= 0);
+  return [lessons[index - 1], lessons[index + 1]].filter(Boolean).map((meta) => epHref(meta.slug));
 }
 
 function inputsFor(spec) {
@@ -310,9 +320,14 @@ async function checkEntries(context, width) {
   for (const e of specifications) assert.ok(items.some((item) => item.includes(`/episodes/${e.slug}/`) && item.includes(`LC.${e.problem}`)), `${e.slug}: missing RSS entry`);
   const p01 = await page.goto(new URL('episodes/horse-racing/', base).href, {waitUntil: 'networkidle'});
   assert.equal(p01.status(), 200); assert.equal(await page.locator('h1').innerText(), readJson(path.join(root, 'episodes/horse-racing/meta.json')).title);
-  assert.equal(await page.locator('.pager a').count(), 0, 'P01 must remain an independent direction');
+  const P01PagerHrefs = await page.locator('.pager a').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+  assert.deepEqual(P01PagerHrefs, expectedSeriesPager('horse-racing'), 'P01 must lead only to the next lesson in its current puzzles direction');
+  const p02 = await page.goto(new URL('episodes/bridge-torch/', base).href, {waitUntil: 'networkidle'});
+  assert.equal(p02.status(), 200); assert.equal(await page.locator('h1').innerText(), readJson(path.join(root, 'episodes/bridge-torch/meta.json')).title);
+  const P02PagerHrefs = await page.locator('.pager a').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+  assert.deepEqual(P02PagerHrefs, expectedSeriesPager('bridge-torch'), 'P02 must stay inside the puzzles direction');
   await page.close();
-  return {width, seriesHrefs, libraryHrefs, visibleAlgorithms: 6, homeAlgorithmDirectionAndStart: true, recentHrefs, allFiveReachableThroughDirectionAndLibrary: true, allFiveRSSItemsWithProblemNumbers: true, P01Preserved: true};
+  return {width, seriesHrefs, libraryHrefs, visibleAlgorithms: 6, homeAlgorithmDirectionAndStart: true, recentHrefs, allFiveReachableThroughDirectionAndLibrary: true, allFiveRSSItemsWithProblemNumbers: true, P01Preserved: true, P01PagerHrefs, P02Preserved: true, P02PagerHrefs};
 }
 
 (async () => {

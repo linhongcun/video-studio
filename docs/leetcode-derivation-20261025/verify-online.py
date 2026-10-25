@@ -21,7 +21,7 @@ OUT = Path(__file__).resolve().parent
 BASE = 'https://linhongcun.github.io/video-studio/'
 REPOSITORY = 'linhongcun/video-studio'
 BASELINE_COMMIT = 'e38fa9236fbc340f834581302320494d2a1c1ce7'
-UPSTREAM_COMMIT = 'fcbf3e162743b59d23334b0df0d691460ee4889d'
+UPSTREAM_COMMIT = '057b9d0d293ff58f410129860b71b742340e5dd1'
 REVISION_DATE = '2026-10-25'
 SPECS = [('two-sum', 1, 28), ('longest-substring', 3, 40),
          ('binary-search', 704, 30), ('reverse-linked-list', 206, 30),
@@ -90,6 +90,21 @@ def expected_recent_hrefs():
     metas = [meta for meta in metas if not meta.get('draft') and not meta.get('archived')]
     metas.sort(key=lambda meta: (str(meta['publishedAt']), meta.get('ep', 0), meta.get('lessonOrder', 0)), reverse=True)
     return [f'/video-studio/episodes/{meta["slug"]}/' for meta in metas[:6]]
+
+
+def expected_series_pager(slug):
+    current = read_json(ROOT / 'episodes' / slug / 'meta.json')
+    metas = [read_json(path) for path in sorted((ROOT / 'episodes').glob('*/meta.json'))]
+    lessons = [meta for meta in metas if not meta.get('draft') and not meta.get('archived') and meta.get('series') == current['series']]
+    lessons.sort(key=lambda meta: (meta.get('ep', 0), meta.get('lessonOrder', 0)))
+    index = next(index for index, lesson in enumerate(lessons) if lesson['slug'] == slug)
+    return [f'/video-studio/episodes/{lessons[position]["slug"]}/' for position in [index - 1, index + 1] if 0 <= position < len(lessons)]
+
+
+def actual_pager_hrefs(html):
+    matches = re.findall(r'<nav\b[^>]*class="[^"]*\bpager\b[^"]*"[^>]*>(.*?)</nav>', html, re.S)
+    assert len(matches) <= 1
+    return Page(matches[0]).links if matches else []
 
 
 class Page(HTMLParser):
@@ -282,10 +297,27 @@ def main():
     puzzle_video = get('episodes/horse-racing/' + puzzle_meta['video'])
     assert sha(puzzle_video) == sha((puzzle_dir / puzzle_meta['video']).read_bytes()) == sha((ROOT / 'episodes-codex/horse-racing' / puzzle_meta['video']).read_bytes())
     assert sha(puzzle_video) == sha(git_bytes('episodes/horse-racing/' + puzzle_meta['video'], UPSTREAM_COMMIT))
-    puzzle_page = Page(get('episodes/horse-racing/').decode())
+    puzzle_html = get('episodes/horse-racing/').decode()
+    puzzle_page = Page(puzzle_html)
     assert puzzle_meta['title'] in puzzle_page.text and 'P01' in puzzle_page.text
     assert any(element == 'video' and 'controls' in attrs for element, attrs in puzzle_page.attributes)
-    preserved_p01 = {'baselineCommit': UPSTREAM_COMMIT, 'frames': puzzle_meta['finalVideoFrames'], 'videoSha256': sha(puzzle_video), 'bytes': len(puzzle_video), 'pageAccessible': True}
+    assert actual_pager_hrefs(puzzle_html) == expected_series_pager('horse-racing')
+    preserved_p01 = {'baselineCommit': UPSTREAM_COMMIT, 'frames': puzzle_meta['finalVideoFrames'], 'videoSha256': sha(puzzle_video), 'bytes': len(puzzle_video), 'pageAccessible': True, 'pagerHrefs': actual_pager_hrefs(puzzle_html)}
+    bridge_dir = ROOT / 'episodes/bridge-torch'
+    bridge_meta = read_json(bridge_dir / 'meta.json')
+    assert bridge_meta == json.loads(git_bytes('episodes/bridge-torch/meta.json', UPSTREAM_COMMIT))
+    bridge_files = []
+    for filename in [bridge_meta['video'], bridge_meta['poster']]:
+        relative = 'episodes/bridge-torch/' + filename
+        body = get(relative)
+        assert sha(body) == sha((bridge_dir / filename).read_bytes()) == sha((ROOT / 'episodes-codex/bridge-torch' / filename).read_bytes()) == sha(git_bytes(relative, UPSTREAM_COMMIT))
+        bridge_files.append({'path': relative, 'sha256': sha(body), 'bytes': len(body)})
+    bridge_html = get('episodes/bridge-torch/').decode()
+    bridge_page = Page(bridge_html)
+    assert bridge_meta['title'] in bridge_page.text and 'P02' in bridge_page.text
+    assert any(element == 'video' and 'controls' in attrs for element, attrs in bridge_page.attributes)
+    assert actual_pager_hrefs(bridge_html) == expected_series_pager('bridge-torch')
+    upstream['preservedP02'] = {'frames': bridge_meta['finalVideoFrames'], 'files': bridge_files, 'pageAccessible': True, 'pagerHrefs': actual_pager_hrefs(bridge_html)}
     home, library, series = (Page(get(path).decode()) for path in ['', 'library/', 'series/leetcode/'])
     assert 'IT小村' in home.text and tag in home.text
     assert any(link.endswith('/learn/') for link in home.links) and any(link.endswith('/library/') for link in home.links)
