@@ -46,6 +46,23 @@ for row in json.loads((D/'voice/sents.json').read_text()):
 files += [D/'../../episodes/_shared'/f for f in [
     'onset_rule.py','voice/prep.py','voice/gen.py','voice/build.py','voice/common.py',
     'tts/mimo_say.py','theme/pageTheme.ts','music/mix_bgm.py','music/Wallpaper.mp3']]
+# Keep the original complete body's dependencies, including later identity work.
+ROOT = D.parents[1]
+files += [ROOT/'episodes-codex/_shared/freeze_middleware_identity.py']
+files += [path for path in (ROOT/'episodes-codex/_shared/middleware-identity').iterdir() if path.is_file()]
+# Original-title/quotation appendix inputs are separate from retained body history.
+files += [D/'references.json', D/'article.mdx', D/'remotion/package.json',
+    ROOT/'episodes-codex/_shared/append_references_original.py',
+    ROOT/'episodes-codex/_shared/append_references.py',
+    ROOT/'episodes-codex/_shared/render_with_references.py',
+    ROOT/'episodes-codex/_shared/requirements-reference-appendix.txt',
+    ROOT/'site/scripts/check-references.mjs',
+    ROOT/'episodes/_shared/theme/pageTheme.ts']
+for source in json.loads((D/'references.json').read_text())['sources']:
+    evidence_paths = [source['verification']['evidence'], source['titleEvidence']['evidence']]
+    if 'quotation' in source:
+        evidence_paths.append(source['quotation']['evidence'])
+    files.extend(ROOT/evidence for evidence in evidence_paths)
 # Keep parent references portable instead of writing workspace absolute paths.
 manifest = {os.path.relpath(p, D):sha(p) for p in sorted(set(files))}
 (D/'source-sha256.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')

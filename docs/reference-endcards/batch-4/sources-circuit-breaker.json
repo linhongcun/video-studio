@@ -1,0 +1,259 @@
+{
+  "schemaVersion": 1,
+  "presentation": "original-title-quote",
+  "batch": "reference-endcards-batch-4",
+  "episode": "circuit-breaker",
+  "baselineCommit": "3156d84542f97bc5e73610c6ec82a6850f83d752",
+  "checkedAt": "2026-10-26",
+  "checkedAtUTC": "2026-10-25T23:11:30.431312+00:00",
+  "checkedAtBeijing": "2026-10-26T07:11:30.431312+08:00",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex reference_workflow_docs source author",
+  "scope": "Two official original documents backed by three complete pinned raw GET responses: Circuit Breaker body, Retry body, and Retry title/include file. Author evidence only; independent source QA/media/production/deployment are not claimed.",
+  "originalInputIntegrity": {
+    "article.mdx": {
+      "bytes": 1993,
+      "sha256": "abc87f526fd3ccccb69f14bdecc9ec0f8a6d964eeed7bc9bd738f6258b9f8a64",
+      "preservation": "Original complete file remains byte-for-byte prefix; reference appendix only."
+    },
+    "research.md": {
+      "bytes": 3774,
+      "sha256": "7d1db65ef057fa9bafd58f579a3f5e429d61a9d84d04e392de94f91d80797b5b",
+      "preservation": "Original complete file remains byte-for-byte prefix; reference appendix only."
+    }
+  },
+  "sources": [
+    {
+      "id": "circuit-breaker-pattern",
+      "organization": "Microsoft",
+      "version": "Azure Architecture Center · 2026-10-26核验",
+      "canonicalUrl": "https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker",
+      "canonicalAccess": {
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker",
+        "method": "GET",
+        "requestedAtUTC": "2026-10-25T23:09:43.222841+00:00",
+        "status": "unavailable",
+        "bodyReviewed": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "repository": "MicrosoftDocs/architecture-center",
+      "repositoryFile": "docs/patterns/circuit-breaker.md",
+      "commit": "b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a",
+      "fixedSourceUrl": "https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/circuit-breaker.md",
+      "retrievedUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/circuit-breaker.md",
+      "retrieval": {
+        "url": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/circuit-breaker.md",
+        "method": "GET",
+        "requestedAtUTC": "2026-10-25T23:09:43.221019+00:00",
+        "status": 200,
+        "finalUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/circuit-breaker.md",
+        "bytes": 25769,
+        "sha256": "29baeab9e19c54c9fdae01dfa4c431bae0c6811e0c5267a1d6c8c78267b8146e",
+        "bodyReviewed": true
+      },
+      "checkedAt": "2026-10-26",
+      "documentPublishedAt": null,
+      "maintenanceDateAsShown": "02/05/2025",
+      "publicationDateNote": "ms.date is document-maintenance metadata. checkedAt is this actual access/review date, not original publication.",
+      "title": {
+        "text": "Circuit Breaker Pattern",
+        "locator": "frontmatter title · line 2",
+        "sourceFile": "docs/patterns/circuit-breaker.md",
+        "startLine": 2,
+        "endLine": 2,
+        "rawExcerpt": "title: Circuit Breaker Pattern",
+        "extractionMethod": "Exact frontmatter title uses capital Pattern; H1 on line 11 is Circuit Breaker pattern. Citation deliberately follows original metadata title; neither is our translation."
+      },
+      "quotations": [
+        {
+          "text": "A limited number of requests from the application are allowed to pass through and invoke the operation.",
+          "locator": "Solution / Half-Open · line 45",
+          "characters": 103,
+          "startLine": 45,
+          "endLine": 45,
+          "rawExcerpt": "- **Half-Open:** A limited number of requests from the application are allowed to pass through and invoke the operation. If these requests are successful, the circuit breaker assumes that the fault that caused the failure is fixed, and the circuit breaker switches to the **Closed** state. The failure counter is reset. If any request fails, the circuit breaker assumes that the fault is still present, so it reverts to the **Open** state. It restarts the time-out timer so that the system can recover from the failure.",
+          "normalization": "Select this intact complete original sentence as a literal substring; no word, punctuation, case, omission or translation changes."
+        }
+      ],
+      "supports": [
+        "等待下游响应的请求可占住共享资源并造成级联影响；熔断观察近期失败，达到配置条件后暂停可能失败的调用。",
+        "Closed放行并统计近期失败；Open快速返回；Half-Open仅允许少量试探，失败继续暂停、达到成功条件后恢复。",
+        "熔断参数要匹配服务恢复能力，业务自行处理不可用；系统恢复仍依赖外部修复，不保证网站永不故障。"
+      ],
+      "shots": [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "claimExcerpts": [
+        {
+          "sourceFile": "docs/patterns/circuit-breaker.md",
+          "startLine": 19,
+          "endLine": 25,
+          "text": "Unanticipated events can create faults that take longer to fix. These faults can range in severity from a partial loss of connectivity to a complete service failure. In these situations, an application shouldn't continually retry an operation that's unlikely to succeed. Instead, the application should quickly recognize the failed operation and handle the failure accordingly.\n\nIf a service is busy, failure in one part of the system might lead to cascading failures. For example, you can configure an operation that invokes a service to implement a time-out. If the service fails to respond within this period, the operation replies with a failure message.\n\nHowever, this strategy can block concurrent requests to the same operation until the time-out period expires. These blocked requests might hold critical system resources, such as memory, threads, and database connections. This problem can exhaust resources, which might fail other unrelated parts of the system that need to use the same resources.\n\nIn these situations, an operation should fail immediately and only attempt to invoke the service if it's likely to succeed. To resolve this problem, set a shorter time-out. But ensure that the time-out is long enough for the operation to succeed most of the time."
+        },
+        {
+          "sourceFile": "docs/patterns/circuit-breaker.md",
+          "startLine": 34,
+          "endLine": 48,
+          "text": "A circuit breaker acts as a proxy for operations that might fail. The proxy should monitor the number of recent failures and use this information to decide whether to allow the operation to proceed or to return an exception immediately.\n\nYou can implement the proxy as a state machine that includes the following states. These states mimic the functionality of an electrical circuit breaker:\n\n- **Closed:** The request from the application is routed to the operation. The proxy maintains a count of the number of recent failures. If the call to the operation is unsuccessful, the proxy increments this count. If the number of recent failures exceeds a specified threshold within a given time period, the proxy is placed into the **Open** state and starts a time-out timer. When the timer expires, the proxy is placed into the **Half-Open** state.\n\n  > [!NOTE]\n  > During the time-out, the system tries to fix the problem that caused the failure before it allows the application to attempt the operation again.\n\n- **Open:** The request from the application fails immediately and an exception is returned to the application.\n\n- **Half-Open:** A limited number of requests from the application are allowed to pass through and invoke the operation. If these requests are successful, the circuit breaker assumes that the fault that caused the failure is fixed, and the circuit breaker switches to the **Closed** state. The failure counter is reset. If any request fails, the circuit breaker assumes that the fault is still present, so it reverts to the **Open** state. It restarts the time-out timer so that the system can recover from the failure.\n\n  > [!NOTE]\n  > The **Half-Open** state helps prevent a recovering service from suddenly being flooded with requests. As a service recovers, it might be able to support a limited volume of requests until the recovery is complete. But while recovery is in progress, a flood of work can cause the service to time out or fail again."
+        },
+        {
+          "sourceFile": "docs/patterns/circuit-breaker.md",
+          "startLine": 56,
+          "endLine": 65,
+          "text": "The failure counter for the **Closed** state is time based. It automatically resets at periodic intervals. This design helps prevent the circuit breaker from entering the **Open** state if it experiences occasional failures. The failure threshold triggers the **Open** state only when a specified number of failures occur during a specified interval.\n\nThe success counter for the **Half-Open** state records the number of successful attempts to invoke the operation. The circuit breaker reverts to the **Closed** state after a specified number of successful, consecutive operation invocations. If any invocation fails, the circuit breaker enters the **Open** state immediately and the success counter resets the next time it enters the **Half-Open** state.\n\n> [!NOTE]\n> System recovery is based on external operations, such as restoring or restarting a failed component or repairing a network connection.\n\nThe Circuit Breaker pattern provides stability while the system recovers from a failure and minimizes the impact on performance. It can help maintain the response time of the system. This pattern quickly rejects a request for an operation that's likely to fail, rather than waiting for the operation to time out or never return. If the circuit breaker raises an event each time it changes state, this information can help monitor the health of the protected system component or alert an administrator when a circuit breaker switches to the **Open** state.\n\nYou can customize and adapt this pattern to different types of failures. For example, you can apply an increasing time-out timer to a circuit breaker. You can place the circuit breaker in the **Open** state for a few seconds initially. If the failure isn't resolved, increase the time-out to a few minutes and adjust accordingly. In some cases, rather than returning a failure and raising an exception, the **Open** state can return a default value that's meaningful to the application."
+        },
+        {
+          "sourceFile": "docs/patterns/circuit-breaker.md",
+          "startLine": 76,
+          "endLine": 82,
+          "text": "- **Exception handling:** An application that invokes an operation through a circuit breaker must be able to handle the exceptions if the operation is unavailable. Exception management is based on the application. For example, an application might temporarily degrade its functionality, invoke an alternative operation to try to perform the same task or obtain the same data, or report the exception to the user and ask them to try again later.\n\n- **Types of exceptions:** The reasons for a request failure can vary in severity. For example, a request might fail because a remote service crashes and requires several minutes to recover, or because an overloaded service causes a time-out. A circuit breaker might be able to examine the types of exceptions that occur and adjust its strategy based on the nature of these exceptions. For example, it might require a larger number of time-out exceptions to trigger the circuit breaker to the **Open** state compared to the number of failures caused by the unavailable service.\n\n- **Monitoring:** A circuit breaker should provide clear observability into both failed and successful requests so that operations teams can assess system health. Use distributed tracing for end-to-end visibility across services.\n\n- **Recoverability:** You should configure the circuit breaker to match the likely recovery pattern of the operation that it protects. For example, if the circuit breaker remains in the **Open** state for a long period, it can raise exceptions even if the reason for the failure is resolved. Similarly, a circuit breaker can fluctuate and reduce the response times of applications if it switches from the **Open** state to the **Half-Open** state too quickly."
+        },
+        {
+          "sourceFile": "docs/patterns/circuit-breaker.md",
+          "startLine": 103,
+          "endLine": 103,
+          "text": "- **Inappropriate time-outs on external services:** A circuit breaker might not fully protect applications from failures in external services that have long time-out periods. If the time-out is too long, a thread that runs a circuit breaker might be blocked for an extended period before the circuit breaker indicates that the operation failed. During this time, many other application instances might also try to invoke the service through the circuit breaker and tie up numerous threads before they all fail."
+        },
+        {
+          "sourceFile": "docs/patterns/circuit-breaker.md",
+          "startLine": 119,
+          "endLine": 123,
+          "text": "- You need to manage access to local private resources in an application, such as in-memory data structures. In this environment, a circuit breaker adds overhead to your system.\n\n- You need to use it as a substitute for handling exceptions in the business logic of your applications.\n- Well-known retry algorithms are sufficient and your dependencies are designed to handle retry mechanisms. In this scenario, a circuit breaker in your application might add unnecessary complexity to your system.\n- Waiting for a circuit breaker to reset might introduce unacceptable delays."
+        }
+      ]
+    },
+    {
+      "id": "retry-pattern",
+      "organization": "Microsoft",
+      "version": "Azure Architecture Center · 2026-10-26核验",
+      "canonicalUrl": "https://learn.microsoft.com/en-us/azure/architecture/patterns/retry",
+      "canonicalAccess": {
+        "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/retry",
+        "method": "GET",
+        "requestedAtUTC": "2026-10-25T23:09:43.223411+00:00",
+        "status": "unavailable",
+        "bodyReviewed": false,
+        "error": "<urlopen error Tunnel connection failed: 403 Forbidden>"
+      },
+      "repository": "MicrosoftDocs/architecture-center",
+      "repositoryFile": "docs/patterns/retry-content.md",
+      "commit": "b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a",
+      "fixedSourceUrl": "https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry-content.md",
+      "retrievedUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry-content.md",
+      "retrieval": {
+        "url": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry-content.md",
+        "method": "GET",
+        "requestedAtUTC": "2026-10-25T23:09:43.221839+00:00",
+        "status": 200,
+        "finalUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry-content.md",
+        "bytes": 12141,
+        "sha256": "619b34a5b1eaf6508715080192feb9fcd85447d402f29816e9f3ffaf294f91a8",
+        "bodyReviewed": true
+      },
+      "checkedAt": "2026-10-26",
+      "documentPublishedAt": null,
+      "maintenanceDateAsShown": "07/18/2024",
+      "publicationDateNote": "ms.date is document-maintenance metadata. checkedAt is this actual access/review date, not original publication.",
+      "title": {
+        "text": "Retry pattern",
+        "locator": "retry.yml / metadata.title · line 3",
+        "sourceFile": "docs/patterns/retry.yml",
+        "startLine": 3,
+        "endLine": 3,
+        "rawExcerpt": "  title: Retry pattern",
+        "extractionMethod": "Exact metadata.title Retry pattern in retry.yml; name field on line 14 has the same text. The companion file explicitly includes retry-content.md, which supplies the quoted body."
+      },
+      "quotations": [
+        {
+          "text": "For some noncritical operations, it's better to fail fast rather than retry several times and affect the throughput of the application.",
+          "locator": "Issues and considerations / Impact on performance · line 44",
+          "characters": 135,
+          "startLine": 44,
+          "endLine": 44,
+          "rawExcerpt": "The retry policy should be tuned to match the business requirements of the application and the nature of the failure. For some noncritical operations, it's better to fail fast rather than retry several times and affect the throughput of the application. For example, in an interactive web application accessing a remote service, it's better to fail after a smaller number of retries with only a short delay between retry attempts, and display a suitable message to the user (for example, &quot;please try again later&quot;). For a batch application, it might be more appropriate to increase the number of retry attempts with an exponentially increasing delay between attempts.",
+          "normalization": "Select this intact complete original sentence as a literal substring; no word, punctuation, case, omission or translation changes."
+        }
+      ],
+      "supports": [
+        "非关键操作可选择快速失败并给出合适反馈，避免反复重试牺牲应用吞吐或加重繁忙下游。",
+        "持续失败时可停止继续访问，等待后少量试探；故障性质、业务要求和实际测试决定策略。",
+        "重试事务操作要考虑一致性和副作用；运费险教学示例不表示可以跳过库存、支付等必要业务校验。"
+      ],
+      "shots": [
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "claimExcerpts": [
+        {
+          "sourceFile": "docs/patterns/retry-content.md",
+          "startLine": 44,
+          "endLine": 48,
+          "text": "The retry policy should be tuned to match the business requirements of the application and the nature of the failure. For some noncritical operations, it's better to fail fast rather than retry several times and affect the throughput of the application. For example, in an interactive web application accessing a remote service, it's better to fail after a smaller number of retries with only a short delay between retry attempts, and display a suitable message to the user (for example, &quot;please try again later&quot;). For a batch application, it might be more appropriate to increase the number of retry attempts with an exponentially increasing delay between attempts.\n\nAn aggressive retry policy with minimal delay between attempts, and a large number of retries, could further degrade a busy service that's running close to or at capacity. This retry policy could also affect the responsiveness of the application if it's continually trying to perform a failing operation.\n\nIf a request still fails after a significant number of retries, it's better for the application to prevent further requests going to the same resource and report a failure immediately. When the period expires, the application can tentatively allow one or more requests through to see whether they're successful. For more information about this strategy, see [Circuit Breaker pattern](./circuit-breaker.md)."
+        },
+        {
+          "sourceFile": "docs/patterns/retry-content.md",
+          "startLine": 50,
+          "endLine": 62,
+          "text": "### Idempotency\n\nConsider whether the operation is idempotent. If so, it's inherently safe to retry. Otherwise, retries could cause the operation to be executed more than once, with unintended side effects. For example, a service might receive the request, process the request successfully, but fail to send a response. At that point, the retry logic might re-send the request, assuming that the first request wasn't received. For consumers that process redelivered messages, see the [Idempotent Consumer pattern](./idempotent-consumer.md).\n\nFor server-side handling of repeated HTTP requests, see [HTTP method semantics and idempotency](../best-practices/api-implementation.md#preserve-http-method-semantics-and-implement-idempotency).\n\n### Exception type\n\nA request to a service can fail for various reasons raising different exceptions depending on the nature of the failure. Some exceptions indicate a failure that can be resolved quickly, while others indicate that the failure is longer lasting. It's useful for the retry policy to adjust the time between retry attempts based on the type of the exception.\n\n### Transaction consistency\n\nConsider how retrying an operation that's part of a transaction will affect the overall transaction consistency. Fine tune the retry policy for transactional operations to maximize the chance of success and reduce the need to undo all the transaction steps."
+        },
+        {
+          "sourceFile": "docs/patterns/retry-content.md",
+          "startLine": 66,
+          "endLine": 72,
+          "text": "- Ensure that all retry code is fully tested against various failure conditions. Check that it doesn't severely affect the performance or reliability of the application, cause excessive load on services and resources, or generate race conditions or bottlenecks.\n\n- Implement retry logic only where the full context of a failing operation is understood. For example, if a task that contains a retry policy invokes another task that also contains a retry policy, this extra layer of retries can add long delays to the processing. It might be better to configure the lower-level task to fail fast and report the reason for the failure back to the task that invoked it. This higher-level task can then handle the failure based on its own policy.\n\n- Log all connectivity failures that cause a retry so that underlying problems with the application, services, or resources can be identified.\n\n- Investigate the faults that are most likely to occur for a service or a resource to discover if they're likely to be long lasting or terminal. If they are, it's better to handle the fault as an exception. The application can report or log the exception, and then try to continue either by invoking an alternative service (if one is available), or by offering degraded functionality. For more information on how to detect and handle long-lasting faults, see the [Circuit Breaker pattern](./circuit-breaker.md)."
+        },
+        {
+          "sourceFile": "docs/patterns/retry-content.md",
+          "startLine": 80,
+          "endLine": 82,
+          "text": "- When a fault is likely to be long lasting, because this can affect the responsiveness of an application. The application might be wasting time and resources trying to repeat a request that's likely to fail.\n- For handling failures that aren't due to transient faults, such as internal exceptions caused by errors in the business logic of an application.\n- As an alternative to addressing scalability issues in a system. If an application experiences frequent busy faults, it's often a sign that the service or resource being accessed should be scaled up."
+        }
+      ],
+      "companionSources": [
+        {
+          "role": "Original document title and body include binding",
+          "repositoryFile": "docs/patterns/retry.yml",
+          "fixedSourceUrl": "https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry.yml",
+          "retrievedUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry.yml",
+          "retrieval": {
+            "url": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry.yml",
+            "method": "GET",
+            "requestedAtUTC": "2026-10-25T23:09:43.222403+00:00",
+            "status": 200,
+            "finalUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry.yml",
+            "bytes": 726,
+            "sha256": "245b362e50caeafa0da00807bc5edcf3dbdbf5279ed8ead60ff1fe784b67666a",
+            "bodyReviewed": true
+          },
+          "includeBinding": {
+            "startLine": 17,
+            "endLine": 18,
+            "rawExcerpt": "content: |\n  [!include[](retry-content.md)]"
+          }
+        }
+      ]
+    }
+  ],
+  "scopeBoundaries": [
+    "The three failures, shared processing positions, one illustrated probe and waiting interval are teaching examples, not universal or product default configuration.",
+    "Closed routes calls and observes failures; Open stops the protected calls; Half-Open limits probes. The unprotected waiting baseline is not labeled a circuit-breaker Closed state.",
+    "Open does not fix the downstream service. Failed probes return to Open; normal calls resume only after configured recovery conditions, not merely when a timer ends.",
+    "Optional shipping insurance may be explicitly unavailable in this teaching flow; inventory/payment and other required business validation must still pass. These sources do not establish the safety of skipping a real transaction requirement.",
+    "Retry is selected only for noncritical fail-fast, overload, tentative recovery and transaction-boundary context. This fixed video does not teach backoff algorithms or claim that every operation should retry.",
+    "Both sources are official Microsoft documents, not two independent experiments or corroborating runtime measurements.",
+    "Original 2026-10-24 AWS graceful-degradation research remains historical evidence and is not relabeled as a fresh GET or rewritten by this selected two-item appendix."
+  ]
+}

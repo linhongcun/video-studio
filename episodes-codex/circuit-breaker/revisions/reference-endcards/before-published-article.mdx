@@ -1,0 +1,31 @@
+---
+title: "一个服务出故障，为什么整个网站没跟着崩？"
+summary: "暂停失败调用，保住其他请求。"
+related: []
+chapters:
+  - id: stop
+    title: "暂停容易失败的调用"
+  - id: recover
+    title: "少量探测，再判断恢复"
+  - id: recap
+    title: "熔断不能替代业务校验或修复"
+---
+
+教学场景中，提交订单会调用可选的运费险服务。这个服务长时间不回应时，等待可能占住共享的处理资源；请求越积越多，其他功能也可能受影响。
+
+## 暂停容易失败的调用 {#stop}
+
+熔断器观察近期失败，达到预先设置的条件后暂停这条调用。新调用快速返回不可用，上层再决定合适的业务反馈。运费险为可选功能时，可以明确告知暂不可用，并继续符合条件的订单流程。
+
+## 少量探测，再判断恢复 {#recover}
+
+暂停一段时间后，只让有限请求尝试，避免恢复中的服务立即被全量流量压垮。探测失败则继续暂停，满足成功条件后恢复。视频中的三个失败处理位只是教学示意，不是通用生产阈值。
+
+## 熔断不能替代业务校验或修复 {#recap}
+
+库存和支付等必要条件失败时，不能假装成功。熔断减少无效等待与故障扩散机会，不负责修好服务本身，也不保证网站永不出故障。应用还要设置合适超时、隔离资源，监控状态并测试恢复过程。常见“关闭/打开/半开”的名称容易与停止放行相混淆，片中用“正常调用/暂停/少量探测”说明行为。
+
+## 公开资料
+
+- [Microsoft Azure Architecture Center — Circuit Breaker pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)，实际访问2026-10-24。
+- [AWS Well-Architected — graceful degradation](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html)，实际访问2026-10-24。
