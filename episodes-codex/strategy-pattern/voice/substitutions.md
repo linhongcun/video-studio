@@ -1,23 +1,25 @@
-# D01 设计思想版配音与选段
+# D01 产品交互与结构/Java修订配音
 
-2026-10-25（北京时间），本稿为11镜22句，以语言无关的职责分工、共同约定、策略替换和变化隔离为主线，重新录制。使用共享`prep.py`、`gen.py`和`common.load/common.cut`；冰糖自然适中配音，没有合成后的变速处理。继续使用`params.json`的4线程与声轨目标，整轨由装配代理另行制作，本次候选工作没有运行`build`、`assemble`或`place`。
+2026-10-25（北京时间）。本轮沿用原示例，按产品交互首屏、结构职责、原协作过程和Java短静卡重新编排。导演与独立概念审读通过、owner确认停写后，冻结全文脚本SHA-256为 `3c640014e51770d56d3608ff96719b347be964e17b11ef7f412716341492711d`。正文22句中，仅5句新合成；其余17句按完整旁白文本和送模文本精确匹配原选定take，原始WAV、48kHzWAV及文本侧录都保持完整字节。完整映射见 `flow-reuse-provenance.json`，新请求仅列在 `jobs-flow-ui-java.json`。
 
-## 文本和历史
+## 选段与保留
 
-概念稿通过根与独立审读后，冻结script SHA-256为`2544193fefb22aeb9b161c8c83f86910089066d1a1a3d3e51cad177e2928970d`。共享prep确认11镜22句、543字，输入文本没有英文口播。没有词语替换；字幕与旁白原文保持一致，每句追加的“好。”只是共享裁尾所需的隔离尾段。
+新候选后缀为 `flow`；原录音原位保留，没有覆盖或删除。已逐文件核对303个历史take相关文件，其SHA-256均与 `revisions/flow-ui-java/baseline/voice-archive.json` 一致。具体选择在 `picks.json`，送模文本及所有选中原始音频转换为48kHz的PCM逐样本一致。共享 `common.load/common.cut` 负责裁尾，新增审计器只核对来源与波形，不复制裁尾或起音算法。
 
-新候选统一后缀`idea`，仅一条补配为`idea2`。旧beginner/a/b/c候选均保留原位，234个旧录音、原始音频和文本文件的完整哈希逐项不变，基线见`idea-generation-baseline.json`。旧版由Git tag `v0.54.4`及`revisions/v0.54.4/`元数据保持可追溯。
+使用MiMo `mimo-v2.5-tts`、冰糖、自然适中的科普语气，未作词语替换或合成后变速。每句追加的“好。”仅用于共享隔离裁尾；字幕和旁白原文不改。原候选复用只表示录音字节与文本来源一致，不将其扩大为已完成语音识别或读音听辨。
 
-## 选择和信号检查
+候选信号标记为：[{"id": "07-swap-strategy-2", "take": "idea", "maxInnerSilenceSeconds": 0.55, "note": "Retained pause-review signal flag; not recognized speech or proof of a missing/incorrect word."}]。D01第07镜第二句保留原0.55秒低信号标记，不为消除自然停顿重配；归一后整轨没有达到0.50秒的句内标记。不存在裁尾/格式硬失败，详见 `flow-candidate-audit.json`。
 
-先每句生成一个候选。`05-choose-strategy-2-idea`的隔离尾段为0.11958秒，触发小于0.12秒的边界复核阈值；只补配这一句相同原文的`idea2`，隔离尾段为0.45225秒、句内低信号最长0.26秒。共23候选，最终21条`idea`加该句`idea2`，选择映射在`picks.json`。
+## 有声正文与Java静卡
 
-所选22条的送模文本与冻结文本匹配、48kHz单声道PCM16格式正确，原始音频转换为48kHz的结果逐样本一致。完整波形指标和来源哈希见`idea-candidate-audit.json`；摘要见`idea-audio-qa.json`。
+先用原共享build/assemble/whole/strict/check完成真正有声正文：4628帧。真实正文输入和WAV、words、storyboard、字幕已另存不可变 `revisions/flow-ui-java/voiced-body/`，不修改旧checker或伪标Python卡。
 
-保留两条句内低信号复核标记：`01-same-task-2-idea`为0.70秒，`07-swap-strategy-2-idea`为0.55秒。它们达到共享信号检查使用的0.50秒阈值，仍按原候选保留并明确记录；不为消除自然停顿无限重录，也不把这种标记称作已确认的错字或漏读，更不能写成零警报。
+新增 `episodes-codex/_shared/append_java_endcard.py` 只在正文后追加150帧、240,000样本全零PCM，并声明 `meta.javaEndCard.kind = java-design-pattern`。末镜 `javaCardFrom` 为镜内局部帧，meta的from为全局帧。最终4778帧/159.266667秒，完整voice SHA-256为 `f4b35cc7317f47c6eb9154683f66823336c2ef3b0428a5d04f338abe3b8b0761`。
 
-## 能力与后续范围
+Java验证器在临时副本对真实正文运行未改的原checker，再逐字段核对最终仅有声明的时长、哈希和尾卡派生字段改变；正文PCM前缀、旁白句界、所有字幕不变，静卡区无字幕且新增声轨全零。最终仍用原whole与strict检查，最大铺轨偏移0帧。详见期根 `qa-java-endcard.json`。`voice/build.json`/`qa-timing.json`描述有声正文；最终长度和卡边界以Java报告、words与storyboard为准。
 
-本次未找到可用音频识别工具、已安装ASR模型库或模型缓存，官方medium模型配置访问经会话代理返回403。未绕过网络限制；未执行ASR、发音/变调听辨或全片人工听辨。文本匹配、PCM一致性和波形信号检查不能证明实际读词正确，也不能证明讲解被听懂。
+最终纯人声测得-16.0LUFS、4倍采样真峰值-2.20dBTP；最终混音由正式渲染另测，不能将此当成正式MP4已检查。22份归一后逐句PCM与最终声轨相应切片全部一致，见 `audio-qa.json`。
 
-后续装配代理负责基于所选新候选建立整轨、真实句边界、声学起音、字幕、响度与最终解码证据。旧版的音轨与起音报告不是本稿已完成的检查。当前能力记录见`idea-runtime-readiness.json`。
+## 能力边界
+
+当前没有可用ASR包/模型或转写工具，未执行逐字ASR、发音/变调听辨或全片人工听辨。words兼容字符字段仍只是句包络，只有句首起音由共享声学规则测量。波形/PCM保真、文本来源和时序检查不能证明实际读词、发音或观众理解正确。正式动画、实际编码与上线仍须独立检查；后续AAC一致性只证明采用了本轮音轨，不代替听辨。

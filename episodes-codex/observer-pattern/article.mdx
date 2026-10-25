@@ -1,8 +1,8 @@
 ---
 title: 观察者模式：订单变了，谁该收到通知？
-summary: 同一订单变化后，摘要要显示，变化记录要留痕。跟着订阅、通知、取消订阅和下一次变化，理解来源怎样依照共同约定联系当前接收者，让各方分别承担响应职责。
+summary: 先在商家订单详情里操作一次付款状态，看到摘要与变化记录联动，再从同一对象展开观察者结构。沿登记、通知和取消解释职责，片尾Java关键代码连接思想与实现。
 chapters:
-  - { id: why, title: 订单变了，谁要跟着响应 }
+  - { id: why, title: 从产品操作展开结构 }
   - { id: subscribe, title: 先登记，再按共同约定通知 }
   - { id: notify, title: 跟着一次变化走一遍 }
   - { id: unsubscribe, title: 取消订阅后，再看下一次变化 }
@@ -10,20 +10,36 @@ chapters:
 related: []
 ---
 
-## 订单变了，谁要跟着响应 {#why}
+## 从产品操作展开结构 {#why}
 
-商家处理十七号订单。订单付款后，有两个地方关心这个变化：
+先看商家正在使用的订单详情页。十七号订单处于“待付款”，旁边打开订单摘要和变化记录。商家点击**“标记为已付款”**之后，订单先采用新状态，两个面板随后联动：
 
 - **订单摘要**要显示“已付款”。
 - **变化记录**要记下“订单17，已付款”这条事实。
 
-这里讨论同一程序内的教学示例。订单号17、状态路径和两个模块都是为解释关系而设定的，画面没有调用真实订单服务。变化记录只是一个接收者，按收到的消息留痕；它不是可靠投递设施，也不承担业务支付统计。
+这里是商家订单功能的教学重建，界面明确标“教学示意”。“标记为已付款”只在示例中改变订单状态，不执行真实付款，也没有核验任何真实商家后台的内部架构。订单号17、状态路径和两个模块仍沿用本片原案例。变化记录只是一个接收者，按收到的消息留痕；它不是可靠投递设施，也不承担业务支付统计。
 
 最直接的安排，是让订单处理知道“要通知摘要”“要通知记录”。只有少数稳定接收方时，这样做可以很清楚。但是，如果接收需求常变化，订单处理里的这份安排就要跟着改；它还可能接触各接收者怎样显示、怎样留痕的细节。
 
 我们要解决的问题是：**能否让接收者各自登记需要什么消息，再由订单依照共同约定通知，而把收到后的具体工作留给接收者？** 观察者模式关注的正是这种一对多的变化通知关系。[^cornell][^ms-observer]
 
+### 从刚才的界面，找到结构里的角色
+
+界面对象没有换。订单来源对应同一订单；摘要和变化记录对应刚才联动的两个面板。把它们展开成结构，逐个看职责：
+
+| 产品中的对象与关系 | 标准结构角色 | Java示例名 | 本例职责 |
+|---|---|---|---|
+| 订单及当前接收者名单 | 来源 | `Order` | 保存状态，维护名单，发生变化后通知 |
+| 接收变化的共同约定 | 观察者约定 | `OrderObserver` | 统一如何接收订单号与新状态 |
+| 摘要面板 | 具体观察者 | `SummaryObserver` | 更新自己的显示 |
+| 变化记录 | 具体观察者 | `ChangeLogObserver` | 追加自己收到的事实 |
+| 一次状态变化的数据 | 通知内容 | `OrderChange` | 本例的订单号和新状态 |
+
+共同约定是结构契约，不是夹在来源与接收者之间的转发服务。订单通过约定联系接收者，而显示和留痕仍由具体观察者负责。Java名称帮助和片尾代码一一对应；模式思想不限定为Java语法。[^cornell][^ms-observer]
+
 ## 先登记，再按共同约定通知 {#subscribe}
+
+看到一次联动和各自职责后，视频明确切到**“回看·本次付款前”**，解释这次联动之前如何建立联系。此时来源和摘要是待付款，变化记录为空，接收者名单尚未建立；这是同一次付款的机制回放，不是订单状态倒退，也不是再次付款。
 
 先让摘要和变化记录登记接收意愿。订单一侧维护一份**当前接收者名单**。这种登记关系叫作**订阅**。摘要和变化记录都是本例的**观察者**，订单是它们关心的变化来源。[^ms-observer]
 
@@ -39,23 +55,23 @@ related: []
 <svg viewBox="0 0 430 380" width="100%" style={{ maxWidth: '430px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="observer-roles-title" xmlns="http://www.w3.org/2000/svg">
   <title id="observer-roles-title">来源维护当前名单，订单摘要和变化记录分别承担响应职责</title>
   <rect width="430" height="380" rx="16" fill="#0F172A" />
-  <text x="22" y="32" fill="#94A3B8" fontSize="18">关系示意 · 本例两个接收者已订阅</text>
+  <text x="22" y="32" fill="#94A3B8" font-size="18">关系示意 · 本例两个接收者已订阅</text>
   <rect x="76" y="52" width="278" height="116" rx="12" fill="#182F48" stroke="#38BDF8" />
-  <text x="96" y="83" fill="#38BDF8" fontSize="23">订单来源</text>
-  <text x="96" y="112" fill="#E5E7EB" fontSize="18">维护订单状态</text>
-  <text x="96" y="140" fill="#E5E7EB" fontSize="17">当前名单：摘要、变化记录</text>
-  <path d="M215 168 V200 M112 200 H318 M112 200 V245 M318 200 V245" fill="none" stroke="#38BDF8" strokeWidth="2" />
+  <text x="96" y="83" fill="#38BDF8" font-size="23">订单来源</text>
+  <text x="96" y="112" fill="#E5E7EB" font-size="18">维护订单状态</text>
+  <text x="96" y="140" fill="#E5E7EB" font-size="17">当前名单：摘要、变化记录</text>
+  <path d="M215 168 V200 M112 200 H318 M112 200 V245 M318 200 V245" fill="none" stroke="#38BDF8" stroke-width="2" />
   <rect x="30" y="207" width="370" height="26" rx="5" fill="#0F172A" />
-  <text x="215" y="227" textAnchor="middle" fill="#E5E7EB" fontSize="17">共同约定：订单号＋新状态</text>
+  <text x="215" y="227" text-anchor="middle" fill="#E5E7EB" font-size="17">共同约定：订单号＋新状态</text>
   <rect x="22" y="245" width="182" height="100" rx="12" fill="#14342F" stroke="#2DD4BF" />
-  <text x="42" y="277" fill="#2DD4BF" fontSize="22">订单摘要</text>
-  <text x="42" y="307" fill="#E5E7EB" fontSize="18">自己更新显示</text>
-  <text x="42" y="331" fill="#94A3B8" fontSize="16">观察者</text>
+  <text x="42" y="277" fill="#2DD4BF" font-size="22">订单摘要</text>
+  <text x="42" y="307" fill="#E5E7EB" font-size="18">自己更新显示</text>
+  <text x="42" y="331" fill="#94A3B8" font-size="16">观察者</text>
   <rect x="226" y="245" width="182" height="100" rx="12" fill="#14342F" stroke="#2DD4BF" />
-  <text x="246" y="277" fill="#2DD4BF" fontSize="22">变化记录</text>
-  <text x="246" y="307" fill="#E5E7EB" fontSize="18">自己追加事实</text>
-  <text x="246" y="331" fill="#94A3B8" fontSize="16">观察者</text>
-  <text x="22" y="369" fill="#94A3B8" fontSize="15">连线说明订阅关系，不表示同时执行</text>
+  <text x="246" y="277" fill="#2DD4BF" font-size="22">变化记录</text>
+  <text x="246" y="307" fill="#E5E7EB" font-size="18">自己追加事实</text>
+  <text x="246" y="331" fill="#94A3B8" font-size="16">观察者</text>
+  <text x="22" y="369" fill="#94A3B8" font-size="15">连线说明订阅关系，不表示同时执行</text>
 </svg>
 <figcaption>名单属于来源维护的订阅关系；共同约定说明通知内容，不是额外的执行模块。</figcaption>
 </figure>
@@ -87,7 +103,7 @@ related: []
 
 ## 取消订阅后，再看下一次变化 {#unsubscribe}
 
-第一次通知结束后，关闭订单摘要。摘要不再需要后续消息，因此**取消订阅**，从来源的当前名单移除；变化记录继续保留。[^ms-observer][^ms-practices]
+第一次通知结束后，在界面点击摘要面板的关闭按钮。面板收起后，画面只保留标明“最后收到”的历史提示，不把它当作实时摘要。摘要不再需要后续消息，因此**取消订阅**，从来源的当前名单移除；变化记录继续保留。[^ms-observer][^ms-practices]
 
 同一订单接着从“已付款”变为“已发货”。来源再次先更新状态，再通知当前接收者。这次名单里只有变化记录：它追加“订单17，已发货”。摘要没有再收到消息。
 
@@ -101,23 +117,23 @@ related: []
 <svg viewBox="0 0 430 390" width="100%" style={{ maxWidth: '430px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="observer-unsubscribe-title" xmlns="http://www.w3.org/2000/svg">
   <title id="observer-unsubscribe-title">同一订单已经发货，名单只保留变化记录，摘要保存历史值并停止接收</title>
   <rect width="430" height="390" rx="16" fill="#0F172A" />
-  <text x="22" y="32" fill="#94A3B8" fontSize="18">示例 · 摘要已取消订阅</text>
+  <text x="22" y="32" fill="#94A3B8" font-size="18">示例 · 摘要已取消订阅</text>
   <rect x="76" y="52" width="278" height="112" rx="12" fill="#182F48" stroke="#38BDF8" />
-  <text x="96" y="83" fill="#38BDF8" fontSize="23">订单17 · 已发货</text>
-  <text x="96" y="114" fill="#E5E7EB" fontSize="18">当前名单：变化记录</text>
-  <text x="96" y="143" fill="#94A3B8" fontSize="16">先更新状态，再发送这次通知</text>
-  <path d="M292 164 V230" fill="none" stroke="#2DD4BF" strokeWidth="3" />
-  <path d="M286 222 L292 230 L298 222" fill="none" stroke="#2DD4BF" strokeWidth="2" />
-  <text x="307" y="199" fill="#2DD4BF" fontSize="16">仅此路径</text>
+  <text x="96" y="83" fill="#38BDF8" font-size="23">订单17 · 已发货</text>
+  <text x="96" y="114" fill="#E5E7EB" font-size="18">当前名单：变化记录</text>
+  <text x="96" y="143" fill="#94A3B8" font-size="16">先更新状态，再发送这次通知</text>
+  <path d="M292 164 V230" fill="none" stroke="#2DD4BF" stroke-width="3" />
+  <path d="M286 222 L292 230 L298 222" fill="none" stroke="#2DD4BF" stroke-width="2" />
+  <text x="307" y="199" fill="#2DD4BF" font-size="16">仅此路径</text>
   <rect x="22" y="230" width="182" height="122" rx="12" fill="#172033" stroke="#64748B" />
-  <text x="40" y="262" fill="#94A3B8" fontSize="22">订单摘要</text>
-  <text x="40" y="292" fill="#E5E7EB" fontSize="17">最后收到：已付款</text>
-  <text x="40" y="323" fill="#FBBF24" fontSize="18">已停止接收</text>
+  <text x="40" y="262" fill="#94A3B8" font-size="22">订单摘要</text>
+  <text x="40" y="292" fill="#E5E7EB" font-size="17">最后收到：已付款</text>
+  <text x="40" y="323" fill="#FBBF24" font-size="18">已停止接收</text>
   <rect x="226" y="230" width="182" height="122" rx="12" fill="#14342F" stroke="#2DD4BF" />
-  <text x="244" y="262" fill="#2DD4BF" fontSize="22">变化记录</text>
-  <text x="244" y="292" fill="#E5E7EB" fontSize="18">17 · 已付款</text>
-  <text x="244" y="323" fill="#E5E7EB" fontSize="18">17 · 已发货</text>
-  <text x="22" y="376" fill="#94A3B8" fontSize="15">摘要历史值保留，未再收到新消息</text>
+  <text x="244" y="262" fill="#2DD4BF" font-size="22">变化记录</text>
+  <text x="244" y="292" fill="#E5E7EB" font-size="18">17 · 已付款</text>
+  <text x="244" y="323" fill="#E5E7EB" font-size="18">17 · 已发货</text>
+  <text x="22" y="376" fill="#94A3B8" font-size="15">摘要历史值保留，未再收到新消息</text>
 </svg>
 <figcaption>同一订单继续变化，改变的是本次接收者名单；没有重新付款，也没有把已发货退回已付款。</figcaption>
 </figure>
@@ -147,15 +163,41 @@ related: []
 
 [策略模式](/video-studio/episodes/strategy-pattern/)关注同一任务的不同做法怎样被选择、替换和使用。本例的观察者模式关注同一来源变化后，当前接收者怎样分别响应：不是从摘要和记录中挑一个来替换另一个，而是按当前订阅关系通知需要接收的各方。相似的连线或命名不能代替设计意图判断。[^guru]
 
-### 可选实现：用一种语言复查上述关系
+### Java关键代码与完整运行示例 {#java}
 
-理解前面关系不需要先学任何语言。需要查看一种落地方式时，可以阅读仓库中的[完整 Python 示例](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo/observer.py)、[运行入口](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo/verify.py)和[实际行为记录](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo/verified-results.json)。
+片尾单独保留5秒静默代码卡，标明“暂停阅读”和“关键节选”；正文不逐行讲语法。下面与卡片同源，呈现共同观察者约定、来源内部的通知和一次订阅/取消使用。注释中的“Order内”和“main内”说明节选所属位置，**这段节选不是独立完整程序**。
 
-本例选定的政策是：单进程、单线程，不在订阅时补发历史；按通知开始时的接收者快照，依登记顺序同步处理。重复登记会被拒绝，状态没有变化就不发通知。取消订阅影响后续事件。
+```java
+record OrderChange(String orderId, String status) {}
+interface OrderObserver { void onChange(OrderChange change); }
 
-如果某个接收者抛错，本例会向外传播错误并停止后续通知；已经更新的订单状态不回滚，也没有自动重试。接收者在通知中再次修改来源状态会被拒绝。代码与验证结果说明的是这些具体选择，不是所有观察者都必须这样实现。
+// Order内：先改状态，再通知当前名单快照
+status = next;
+OrderChange change = new OrderChange(id, next);
 
-实际运行覆盖贯穿故事、零接收者、无状态变化、同步顺序、通知中取消、接收者异常和重入拒绝，共七个案例。[^demo]
+for (OrderObserver observer : List.copyOf(observers)) {
+    observer.onChange(change);
+}
+
+// main内：摘要显示，变化记录追加，各自响应
+Order order = new Order("17");
+SummaryObserver summary = new SummaryObserver();
+ChangeLogObserver log = new ChangeLogObserver();
+order.subscribe(summary);
+order.subscribe(log);
+order.changeStatus("已付款");
+order.unsubscribe(summary);
+order.changeStatus("已发货");
+// 摘要最后收到已付款，记录保留已付款、已发货
+```
+
+完整实现与上下文见[ObserverDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/ObserverDemo.java)，实际运行入口见[verify.py](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/verify.py)，[验证报告](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/verified-results.json)记录编译器、源码SHA、卡片节选映射和八类行为检查。此次在OpenJDK21实际编译、运行；没有使用已弃用的`java.util.Observer`来定义模式。
+
+主线结果仍是：订单当前已发货，摘要最后收到已付款且已取消，变化记录按顺序保留已付款、已发货。完整代码中，摘要与变化记录各自实现接收后的工作；卡片没有把这些工作搬进订单来源。
+
+本例选择单进程、单线程；不在订阅时补发历史，按通知开始时的接收者快照，依登记顺序同步处理。取消影响后续事件。接收者抛错时错误向外传播，停止后续通知；来源状态不回滚，没有自动重试；通知中再次修改来源会被拒绝。具体政策以源码与运行报告为准，不是所有观察者模式都必须如此。
+
+上一版[Python实现与七项行为记录](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/observer-pattern/demo)保留为历史可选参考，不再承担当前视频的代码展示。两种语言表达同一组职责，不以语言机制定义模式。[^demo]
 
 ### 资料与阅读范围
 
@@ -167,4 +209,4 @@ related: []
 [^node-events]: [Events — Node.js](https://nodejs.org/api/events.html)，动态文档，本次读取v26.12.1。仅用于说明一种具体事件实现的同步、注册顺序与取消语义，不把它当作模式的统一规则；对应研究S4。
 [^guru]: [Observer — Refactoring.Guru](https://refactoring.guru/design-patterns/observer)，页面未标发布日期，辅助解释来源。用于核对订阅、通知、适用与取舍，不当作官方API规范；对应研究S5。
 [^azure]: [Publisher-Subscriber pattern — Microsoft Azure Architecture Center](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber)，页面标更新2026-03-06。用于辨析分布式消息结构与投递保证另需实现；不说明本例具备中间件能力，对应研究S7。
-[^demo]: 本项目[示例与七项运行结果](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/observer-pattern/demo)。订单17和状态均为示例。程序运行验证具体行为，不证明观众已理解模式，也不代表实际支付、发货或跨服务执行。
+[^demo]: 本项目[当前Java示例与八项运行结果](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/observer-pattern/demo-java)及保留的[历史Python示例与七项运行结果](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/observer-pattern/demo)。订单17和状态均为示例。程序运行验证具体行为，不证明观众已理解模式，也不代表实际支付、发货或跨服务执行。
