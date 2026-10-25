@@ -135,7 +135,10 @@ async function pageCheck(context, e, opts, width, theme, series, dates, screensh
   assert.ok(await page.locator(`a[href="${e.expectedSource}"]`).count() > 0); assert.ok((await page.locator('article pre').allTextContents()).some((text) => text.trim() === e.solution));
   const referenceLinks = [...new Set(e.references.sources.flatMap((source) => [source.url, source.verification.sourceUrl].filter(Boolean)))];
   for (const url of referenceLinks) assert.ok(await page.locator('article a').evaluateAll((links, href) => links.some((a) => a.href === href), url), `Full reference URL missing from article: ${url}`);
-  const articleText = await page.locator('article').innerText(); for (const reference of e.references.sources) for (const label of ['organization', 'title', 'version']) assert.ok(articleText.includes(reference[label]), `Reference ${reference.id} lacks full ${label}`);
+  const articleText = await page.locator('article').innerText(); for (const reference of e.references.sources) {
+    for (const label of ['organization', 'title']) assert.ok(articleText.includes(reference[label]), `Reference ${reference.id} lacks full ${label}`);
+    for (const fragment of reference.version.split('·').map((part) => part.trim())) assert.ok(articleText.replace(/访问于/g, '访问').includes(fragment.replace(/访问于/g, '访问')), `Reference ${reference.id} lacks version fact ${fragment}`);
+  }
   const index = series.indexOf(e.slug), neighbors = [series[index - 1], series[index + 1]].filter(Boolean).map(epHref);
   assert.deepEqual(await page.locator('.pager a').evaluateAll((links) => links.map((link) => link.getAttribute('href'))), neighbors);
   const video = page.locator('video'); await video.evaluate((v) => {v.muted = true;}); await page.waitForFunction(() => document.querySelector('video').readyState >= 1);

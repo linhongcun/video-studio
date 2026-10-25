@@ -4,4 +4,10 @@
 
 4538帧/151.267秒，最后150帧完整Python暂停卡。正式视频完整SHA256：`11f6bbfae10e05670285f7c5733369268b07d4d89ef5a25ec2821b8745a66df4`。制作与发布副本、附注tag及线上完整文件一致，声音/程序/真实预演/实际MP4的检查范围见qa-final.md与qa-media-independent.md。
 
-网站实际3build/2日期/2历史检查，失败与修后记录保留；精确首卡原生字幕无cue。文章派生与全站VTT边界范围、最新主干保持、所有HTTP响应、发布及关闭issue证据统一见[批次](../../docs/leetcode-batch-next/README.md)。未发外部平台，尚无本片用户观看结论，不声称ASR或全片人工听辨。
+网站实际3build/2日期/2历史检查，失败与修后记录保留；精确首卡原生字幕无cue。文章派生与全站VTT边界范围、最新主干保持、所有HTTP响应、发布及关闭issue证据统一见[批次](../../docs/leetcode-batch-next/README.md)。首次交付时未发外部平台、尚无观看反馈；用户随后指出基础概念跳步，以下修订记录取代“尚无反馈”状态，不声称ASR或全片人工听辨。
+
+## 单调栈前置修订
+
+用户已观看旧版并指出默认观众懂单调栈。现先演栈的同端存取、后放先取、栈底/顶，再演温度不升与维护，最后合称单调栈。4句新增、28句take复用；Python仍5秒，新增默认5秒参考资料卡，最终5472帧/182.4秒。完整SHA256：`f3aa4f315770896ef3b3d15d8ad3d38ed5602d07528d9fcc20300bad3d6b3a3b`。190项生产输入、实际预演、独立最终MP4视觉/媒体与音源检查通过，原片/原QA在revisions/stack-primer-before。
+
+网站发布待核验，当前证据见[本轮修订](../../docs/daily-temperatures-stack-primer/README.md)。首发v0.69.0、slug/标题、createdAt/publishedAt保持，修后用户观看与学习效果尚未取得。

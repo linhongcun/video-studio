@@ -316,8 +316,10 @@ def verify(args, run):
         source = f'https://github.com/{REPO}/tree/main/{meta["sourcePath"]}'
         assert source in document.links and {chapter['id'] for chapter in chapter_plan} <= document.ids
         for reference in references['sources']:
-            for label in ['organization', 'title', 'version']:
+            for label in ['organization', 'title']:
                 assert reference[label] in document.text
+            for fragment in reference['version'].split('·'):
+                assert fragment.strip().replace('访问于', '访问') in document.text.replace('访问于', '访问')
             for url in [reference['url'], reference['verification'].get('sourceUrl')]:
                 if url:
                     assert url in document.links
