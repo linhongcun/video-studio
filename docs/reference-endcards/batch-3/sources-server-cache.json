@@ -1,0 +1,251 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-3",
+  "episode": "server-cache",
+  "baselineCommit": "4cadb5e9f433f52d6db1d0f40dca7bd3a6b7104e",
+  "checkedAt": "2026-10-26",
+  "checkedAtBeijing": "2026-10-26T06:49:11.093216+08:00",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex workflow_docs server-cache source author",
+  "scope": "Two original documents; three official raw bodies including the Microsoft title/composition entry. Title, continuous quotation, complete response SHA and claim mapping only; no media/freeze/ASR/listening/deployment claims.",
+  "sources": [
+    {
+      "id": "server-cache-cache-aside",
+      "episode": "server-cache",
+      "referenceId": "R1",
+      "organization": "Microsoft · Azure Architecture Center",
+      "title": "Cache-Aside Pattern",
+      "titleEvidence": {
+        "locator": "cache-aside.yml, metadata.title (line 3)",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json"
+      },
+      "canonicalUrl": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside",
+      "repository": "MicrosoftDocs/architecture-center",
+      "repositoryFile": "docs/patterns/cache-aside-content.md",
+      "commit": "b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a",
+      "fixedSourceUrl": "https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside-content.md",
+      "retrievedUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside-content.md",
+      "retrieval": {
+        "status": 200,
+        "bytes": 14318,
+        "sha256": "eb19852e710d924d98a39f386928ef1b0d763391f0e9e22a353ce818dd57881f"
+      },
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-26",
+      "checkedAtBeijing": "2026-10-26T06:49:11.093216+08:00",
+      "quotation": {
+        "text": "The application determines whether an item currently resides in the cache by attempting to read from the cache.",
+        "locator": "Solution, step 1 (line 19)",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json"
+      },
+      "quotationCharacters": 111,
+      "quotationMatchedExactly": true,
+      "supports": [
+        "应用先检查缓存，未命中再读取数据源、填回缓存并返回；命中时可复用临时副本，减少重复读取。",
+        "缓存可以在应用进程内，也可以由多个应用实例共享；Redis是原文给出的共享缓存实现示例。",
+        "条目过期或被清理后可能重新取源；命中少或复用少时额外缓存检查与填充可能得不偿失。",
+        "Cache-Aside不保证缓存与数据库始终一致，过期时间也不能证明数据库修改会立即反映到旧副本。"
+      ],
+      "shots": [
+        "01",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12"
+      ],
+      "limitations": [
+        "本片采用应用主动管理的cache-aside路径，不说所有缓存都使用同一填充协议。",
+        "原文Redis/.NET示例不等于缓存概念仅适用于该产品或语言；示例的五分钟设置不是通用TTL。",
+        "商品7042、价格199元和三次请求的读取次数是教学设计，不是文档压测或固定性能收益。"
+      ],
+      "publicationMetadata": {
+        "metadataMsDate": "09/11/2025",
+        "note": "页面元数据日期单独保留；本轮核验日与固定commit日期不冒充发布日期。"
+      },
+      "excerpts": [
+        {
+          "kind": "supporting-context",
+          "startLine": 5,
+          "endLine": 5,
+          "text": "Applications use a cache to improve performance for repeated access to information in a data store. But cached data can't always remain consistent with the data store. Applications should implement a strategy that keeps the data in the cache as up-to-date as possible. The strategy should also detect when cached data becomes stale and handle it appropriately."
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 19,
+          "endLine": 24,
+          "text": "1. The application determines whether an item currently resides in the cache by attempting to read from the cache.\n\n2. If the item isn't in the cache, also known as a *cache miss*, the application retrieves the item from the data store.\n3. The application adds the item to the cache and then returns it to the caller.\n\nWhen an application updates information, it writes the change to the data store and then invalidates the corresponding item in the cache. When the item is needed again, the Cache-Aside pattern retrieves the updated data from the data store and adds it to the cache."
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 30,
+          "endLine": 42,
+          "text": "- **Lifetime of cached data:** Many caches use an expiration policy to invalidate data and remove it from the cache if it isn't accessed for a set period. To make cache-aside effective, ensure that the expiration policy matches the pattern of access for applications that use the data. Don't make the expiration period too short because premature expiration can cause applications to continually retrieve data from the data store and add it to the cache. Similarly, don't make the expiration period so long that the cached data becomes stale. Caching works best for relatively static data or data that applications read frequently.\n\n- **Evicting data:** Most caches have a limited size compared to the data store where the data originates. If the cache exceeds its size limit, it evicts data. Most caches adopt a least-recently-used policy to select items for eviction, but some allow customization.\n\n- **Configuration:** You can configure cache behavior globally or per cached item. A single global eviction policy might not suit all items. If an item is expensive to retrieve, configure the cache item individually. In this situation, it makes sense to keep the item in the cache, even if it gets accessed less frequently than cheaper items.\n\n- **Priming the cache:** Many solutions prepopulate the cache with data that an application likely requires as part of the startup processing. The Cache-Aside pattern remains useful when some of this data expires or gets evicted.\n\n- **Consistency:** The Cache-Aside pattern doesn't guarantee consistency between the data store and the cache. For example, an external process can change an item in the data store at any time. This change doesn't appear in the cache until the item loads again. In a system that replicates data across data stores, frequent synchronization can make consistency challenging.\n\n- **Staleness after writes:** The Cache-Aside pattern invalidates the cached entry on write and repopulates it on the next read. Between the write and the next read, a reader can experience a cache miss or briefly see stale data. This behavior distinguishes the Cache-Aside pattern from write-through caching, which updates the data store and the cache in the same write operation so that readers see the new value immediately after a successful write. If read-heavy paths need read-after-write freshness, consider [write-through caching](../databases/architecture/write-through-caching-azure-sql-managed-redis.yml) instead.\n\n- **Local caching:** A cache can be local to an application instance and be stored in-memory. Cache-aside works well in this environment if an application repeatedly accesses the same data. But a local cache is private, so different application instances can each have a copy of the same cached data. This data can quickly become inconsistent between caches, so you might need to expire data in a private cache and refresh it more frequently. In these scenarios, consider using a shared or distributed caching mechanism."
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 54,
+          "endLine": 59,
+          "text": "This pattern might not be suitable when:\n\n- The data is sensitive or security related. Storing data in a cache might be inappropriate, especially when multiple applications or users share the cache. Always retrieve this type of data from the primary source.\n\n- The cached data set is static. If the data fits into the available cache space, prime the cache with the data on startup and apply a policy that prevents the data from expiring.\n- Most requests don't experience a cache hit. In this situation, the overhead of checking the cache and loading data into it might outweigh the benefits of caching."
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 76,
+          "endLine": 80,
+          "text": "\nThe following example uses the [StackExchange.Redis](https://github.com/StackExchange/StackExchange.Redis) client, which is a Redis client library written for .NET. To connect to an Azure Managed Redis instance, call the static `ConnectionMultiplexer.Connect` method and pass in the connection string. The method returns a `ConnectionMultiplexer` that represents the connection.\n\nOne way to share a `ConnectionMultiplexer` instance in your application is to have a static property that returns a connected instance, similar to the following example. This approach provides a thread-safe way to initialize only a single connected instance.\n"
+        }
+      ],
+      "canonicalAccess": {
+        "status": "not-requested",
+        "verifiedBody": false,
+        "reason": "本轮遵循GitHub等已允许目的地访问范围，正式页面未作新的成功访问记录。"
+      },
+      "titleDocument": {
+        "id": "cache-aside-title",
+        "repository": "MicrosoftDocs/architecture-center",
+        "repositoryFile": "docs/patterns/cache-aside.yml",
+        "commit": "b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a",
+        "retrievedUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside.yml",
+        "fixedSourceUrl": "https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside.yml",
+        "status": 200,
+        "bytes": 752,
+        "sha256": "0db2e1bd74a35bb014ac8da4ae66cfe931e39d934e10e23fef56bcf15069f0cd",
+        "excerpts": [
+          {
+            "kind": "original-title-and-composition",
+            "startLine": 1,
+            "endLine": 19,
+            "text": "### YamlMime:Architecture\nmetadata:\n  title: Cache-Aside Pattern\n  description: Learn how to load data on demand into a cache, which can improve performance and maintain consistency between cached data and the underlying data store.\n  ms.author: pnp\n  author: claytonsiemens77\n  ms.date: 09/11/2025\n  ms.topic: design-pattern\n  ms.subservice: cloud-fundamentals\n  ms.custom: arb-web\nazureCategories:\n  - web\nproducts:\n  - azure-managed-redis\nname: Cache-Aside pattern\nsummary: Learn how to load data on demand into a cache, which can improve performance and maintain consistency between cached data and the underlying data store.\nthumbnailUrl: /azure/architecture/browse/thumbs/cache-aside-diagram.png\ncontent: |\n  [!INCLUDE[](cache-aside-content.md)]"
+          }
+        ]
+      },
+      "titleMatchesMetadataExactly": true
+    },
+    {
+      "id": "server-cache-redis-expire",
+      "episode": "server-cache",
+      "referenceId": "R2",
+      "organization": "Redis",
+      "title": "EXPIRE",
+      "titleEvidence": {
+        "locator": "frontmatter title (line 74)",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json"
+      },
+      "canonicalUrl": "https://redis.io/docs/latest/commands/expire/",
+      "repository": "redis/docs",
+      "repositoryFile": "content/commands/expire.md",
+      "commit": "1406db84d01f1d6a07fe567cbdea4d051456a2d7",
+      "fixedSourceUrl": "https://github.com/redis/docs/blob/1406db84d01f1d6a07fe567cbdea4d051456a2d7/content/commands/expire.md",
+      "retrievedUrl": "https://raw.githubusercontent.com/redis/docs/1406db84d01f1d6a07fe567cbdea4d051456a2d7/content/commands/expire.md",
+      "retrieval": {
+        "status": 200,
+        "bytes": 10783,
+        "sha256": "8724f37add5b23122fc8f7b78e5c250888a0c2321850a463b0a80709cbe00f6b"
+      },
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-26",
+      "checkedAtBeijing": "2026-10-26T06:49:11.093216+08:00",
+      "quotation": {
+        "text": "After the timeout has expired, the key will automatically be deleted.",
+        "locator": "Opening paragraph (line 77)",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json"
+      },
+      "quotationCharacters": 69,
+      "quotationMatchedExactly": true,
+      "supports": [
+        "对已设置超时的Redis键，超时后键会过期；Redis通过访问时的惰性检查和主动检查处理到期键。",
+        "Redis键并非天然都带TTL，未设置过期的键可以持续存在，也可以显式删除或清除其TTL。",
+        "过期或删除后的数据读取仍需由应用的cache-aside逻辑决定是否重新读取数据库并回填；EXPIRE本身不定义数据库更新传播或强一致协议。"
+      ],
+      "shots": [
+        "05",
+        "06",
+        "10",
+        "12"
+      ],
+      "limitations": [
+        "EXPIRE只规定Redis键的超时语义，不保证缓存值和数据库强一致。",
+        "不能把条目过期画成数据库原记录删除；Redis键的主动/惰性清理也不是每个缓存实现的统一协议。",
+        "本片不讲EXPIRE调用代码，也不把该命令的since 1.0.0当作文档发布时间。"
+      ],
+      "publicationMetadata": {
+        "pageDate": "页面未标发布日期",
+        "commandSince": "1.0.0",
+        "sourceCommitAuthorDate": "2026-09-18T08:48:32Z",
+        "note": "since为功能版本，不是页面日期。"
+      },
+      "excerpts": [
+        {
+          "kind": "original-title",
+          "startLine": 69,
+          "endLine": 75,
+          "text": "linkTitle: EXPIRE\nrailroad_diagram: /images/railroad/expire.svg\nsince: 1.0.0\nsummary: Sets the expiration time of a key in seconds.\nsyntax_fmt: EXPIRE key seconds [NX | XX | GT | LT]\ntitle: EXPIRE\n---"
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 70,
+          "endLine": 91,
+          "text": "railroad_diagram: /images/railroad/expire.svg\nsince: 1.0.0\nsummary: Sets the expiration time of a key in seconds.\nsyntax_fmt: EXPIRE key seconds [NX | XX | GT | LT]\ntitle: EXPIRE\n---\nSet a timeout on `key`.\nAfter the timeout has expired, the key will automatically be deleted.\nA key with an associated timeout is often said to be _volatile_ in Redis\nterminology.\n\nThe timeout will only be cleared by commands that delete or overwrite the\ncontents of the key, including [`DEL`](/content/commands/del.md), [`SET`](/content/commands/set.md), [`GETSET`](/content/commands/getset.md) and all the `*STORE`\ncommands.\nThis means that all the operations that conceptually _alter_ the value stored at\nthe key without replacing it with a new one will leave the timeout untouched.\nFor instance, incrementing the value of a key with [`INCR`](/content/commands/incr.md), pushing a new value\ninto a list with [`LPUSH`](/content/commands/lpush.md), or altering the field value of a hash with [`HSET`](/content/commands/hset.md) are\nall operations that will leave the timeout untouched.\n\nThe timeout can also be cleared, turning the key back into a persistent key,\nusing the [`PERSIST`](/content/commands/persist.md) command."
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 217,
+          "endLine": 231,
+          "text": "### Appendix: Redis expires\n\n#### Keys with an expire\n\nNormally Redis keys are created without an associated time to live.\nThe key will simply live forever, unless it is removed by the user in an\nexplicit way, for instance using the [`DEL`](/content/commands/del.md) command.\n\nThe `EXPIRE` family of commands is able to associate an expire to a given key,\nat the cost of some additional memory used by the key.\nWhen a key has an expire set, Redis will make sure to remove the key when the\nspecified amount of time elapsed.\n\nThe key time to live can be updated or entirely removed using the `EXPIRE` and\n[`PERSIST`](/content/commands/persist.md) command (or other strictly related commands)."
+        },
+        {
+          "kind": "supporting-context",
+          "startLine": 256,
+          "endLine": 267,
+          "text": "#### How Redis expires keys\n\nRedis keys are expired in two ways: a passive way and an active way.\n\nA key is passively expired when a client tries to access it and the\nkey is timed out.\n\nHowever, this is not enough as there are expired keys that will never be\naccessed again.\nThese keys should be expired anyway, so periodically, Redis tests a few keys at\nrandom amongst the set of keys with an expiration.\nAll the keys that are already expired are deleted from the keyspace."
+        }
+      ],
+      "canonicalAccess": {
+        "status": "not-requested",
+        "verifiedBody": false,
+        "reason": "本轮遵循GitHub等已允许目的地访问范围，正式页面未作新的成功访问记录。"
+      },
+      "titleMatchesMetadataExactly": true
+    }
+  ],
+  "repositoryChecks": {
+    "selectedRedisDocs": {
+      "full_name": "redis/docs",
+      "default_branch": "main",
+      "archived": false,
+      "pushed_at": "2026-10-25T00:54:58Z"
+    },
+    "excludedLegacyRedisDocs": {
+      "full_name": "redis/redis-doc",
+      "default_branch": "master",
+      "archived": true,
+      "pushed_at": "2025-06-23T17:08:09Z"
+    }
+  },
+  "discovery": {
+    "obsoleteMicrosoftPath": "docs/patterns/cache-aside.md",
+    "obsoletePathRawAttemptStatus": 404,
+    "actualContentPath": "docs/patterns/cache-aside-content.md",
+    "actualTitleAndCompositionPath": "docs/patterns/cache-aside.yml",
+    "note": "The deleted path was not counted as a successful document read; actual content and title entry were fetched at the same current official commit."
+  },
+  "appendOnlyPreservation": {
+    "article": {
+      "originalBytes": 2781,
+      "originalSHA256": "553a2b9c558ed77fb5eb8a12fccd0371e5dc4c4e2c48087f3e7b940dc7a79db2",
+      "currentPrefixSHA256": "553a2b9c558ed77fb5eb8a12fccd0371e5dc4c4e2c48087f3e7b940dc7a79db2"
+    },
+    "research": {
+      "originalBytes": 2879,
+      "originalSHA256": "62958e57c91af20cbc27cfd32a2621f720c7a67eb11b3481884b3401f78604ee",
+      "currentPrefixSHA256": "62958e57c91af20cbc27cfd32a2621f720c7a67eb11b3481884b3401f78604ee"
+    }
+  },
+  "quotationMethod": "Both quotation strings are literal contiguous substrings of the decoded official source response. No words, punctuation, translation or ellipsis were added.",
+  "networkScope": "Inherited proxy and CA trust retained; this round only requested official GitHub/API URLs within the supported policy. No canonical-page access or bypass is claimed."
+}

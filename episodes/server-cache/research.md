@@ -21,3 +21,21 @@
 - 11–12：复用收益与额外开销取决于访问模式；原记录不因为缓存存在而消失。R1、R2。
 
 商品7042、199元、三次请求和示例计数没有外部统计含义，片中持续标“示例数据”。未使用未核验的性能数字。
+
+## 第三批片尾参考资料核验（2026-10-26）
+
+本轮在原文后追加，两项片尾资料采用原题名、连续逐字原句和独立定位。完整核验记录见[sources-server-cache.json](../../docs/reference-endcards/batch-3/sources-server-cache.json)；公开完整链接见[references.md](references.md)。原research表的访问日期和来源编号保留，本轮片尾编号独立记录于references.json。
+
+- R1 原题：Cache-Aside Pattern；位置：Solution, step 1 (line 19)；实读固定正文：https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside-content.md。
+  - 原句：The application determines whether an item currently resides in the cache by attempting to read from the cache.
+  - 完整正文SHA-256：`eb19852e710d924d98a39f386928ef1b0d763391f0e9e22a353ce818dd57881f`。
+
+- R2 原题：EXPIRE；位置：Opening paragraph (line 77)；实读固定正文：https://github.com/redis/docs/blob/1406db84d01f1d6a07fe567cbdea4d051456a2d7/content/commands/expire.md。
+  - 原句：After the timeout has expired, the key will automatically be deleted.
+  - 完整正文SHA-256：`8724f37add5b23122fc8f7b78e5c250888a0c2321850a463b0a80709cbe00f6b`。
+
+- Microsoft当前页面由cache-aside.yml入口的metadata.title与cache-aside-content.md组成，两个文件都在同一官方固定commit中实际GET读取。旧cache-aside.md路径已删除，未把404当成已取得的正文。
+- Redis采用当前未归档redis/docs官方仓库中的EXPIRE文档；旧redis/redis-doc仓库已归档，不作为本轮来源。since 1.0.0是命令引入版本，不能当文档发布日期。
+- 实读Microsoft Solution步骤1–3、Lifetime/Evicting/Consistency/Local caching及适用条件，确认本片命中/未命中/回填、共享与本地缓存及开销边界；该文明确不保证数据源与缓存一致。
+- Redis原文确认默认键可不带TTL、已设置超时的键会过期、到期处理含主动与访问时检查。EXPIRE不负责数据库更新传播，也不会自动替应用读取数据库和回填，因此固定TTL不证明强一致。
+- 本轮不重新GET旧稿canonical页或地图/产品图标素材，不把历史记录改成本轮新访问；没有改script、分镜、voice、冻结或媒体。
