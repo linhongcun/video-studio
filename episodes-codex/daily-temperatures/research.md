@@ -38,3 +38,7 @@
 新增04–05是有明确标签的保存规则示意。research/make_stack_primer_operations.py执行五次真正的append/pop并复制前后状态，生成stack-primer-operations.json：依次加入第3/4/5天、取出第5天、再放回第5天。它不运行第二份LeetCode解法，不计算等待天数，和未改的research/trace.json算法执行证据分开。
 
 本轮只新增四句，原28句与旧稿逐字匹配。当前真实storyboard/words/voice仍为旧基线，由root在稿件独审后复用原音源并装配新时序；本次源创作没有生成配音、重写真实计时或宣称新声画通过。原阶段1的未配音说明是当时检查范围，不能覆盖后来旧版已完成的实际媒体历史，也不能提前追认本轮修订。
+
+## 2026-10-25 原题与原文短引核验
+
+原资料卡将教程、章名、子节拼成了一个并非文献原题的字符串。本轮实际读取官方CPython v3.15.1标签对应commit `c37e74cb6bcdadcd5f46f289498f6b3298ddee61` 的`Doc/tutorial/datastructures.rst`：章节原题是`Data Structures`，`Using Lists as Stacks`只作为子节定位；完整LIFO句在139–140行。LeetCode题面本轮受代理限制，仅复用已保存的真实官方web返回及原日期，不编造新HTTP成功。[新证据](../../docs/reference-endcards/original-titles/sources-algorithms.json)保留原记录Git/blob SHA和逐字短引；算法、开头、配音与分镜不改。

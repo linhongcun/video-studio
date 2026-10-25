@@ -1,0 +1,57 @@
+{
+  "checkedAt": "2026-10-26T00:07:20+08:00",
+  "status": "passed-local-tests-build-and-static-checks",
+  "version": "0.70.3",
+  "tests": [
+    {
+      "command": "node --test site/scripts/check-references.test.mjs",
+      "passed": 44,
+      "failed": 0,
+      "log": "tests-node.log",
+      "logSHA256": "895c10604634069b4654b69b667d9ce51da534087c6ca01ebaed777dd51aff02"
+    },
+    {
+      "command": "python3 -m unittest discover -s episodes-codex/_shared/tests -p test_*references*.py -v (test_append_references, test_append_references_original, test_render_with_references)",
+      "passed": 12,
+      "failed": 0,
+      "log": "tests-python.log",
+      "logSHA256": "7839213afd3bc2dc70cd43b8e68a3c3aecb091bd74308710b6094b98cc4a166a"
+    }
+  ],
+  "build": {
+    "command": "npm run build",
+    "directory": "site",
+    "passed": true,
+    "log": "build.log",
+    "logSHA256": "603fe3c5f22eae36dce9819e3a28d1349fc751e8a83ae90ff7b4cefa4aaf571c",
+    "referenceOutputsVerified": 10,
+    "historicalUnchangedEpisodesDeferred": 36
+  },
+  "staticChecks": [
+    {
+      "command": "node site/scripts/check-frames.mjs [10 migrated slugs]",
+      "passed": true,
+      "episodes": 10
+    },
+    {
+      "command": "node site/scripts/check-episode-dates.mjs --built",
+      "passed": true,
+      "records": 46
+    },
+    {
+      "command": "node site/scripts/check-learning-path.mjs",
+      "passed": true
+    },
+    {
+      "command": "git diff --check",
+      "passed": true
+    },
+    {
+      "command": "python3 episodes/_shared/tests/secret_scan.py",
+      "passed": true,
+      "files": 15616
+    }
+  ],
+  "frozenInputEntries": 1371,
+  "scopeLimit": "These are local automated checks; source reading, actual encoded frames, browser controls, release and deployed full GETs have separate real reports."
+}

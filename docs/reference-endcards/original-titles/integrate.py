@@ -53,8 +53,12 @@ def main():
         elif slug=='browser-cache': marker=r'^## 片尾参考资料[^\n]*\n'
         else: marker=r'^## (?:片尾)?参考资料[^\n]*\n'
         a,b = re.search(marker,source,re.M),re.search(marker,current,re.M)
-        assert a and b,(slug,'Locate actual source section before copying')
-        current=current[:b.end()]+source[a.end():]
+        assert a,(slug,'Locate actual source section before copying')
+        if b:
+            current=current[:b.end()]+source[a.end():]
+        else:
+            assert slug=='egg-drop',(slug,'Existing reference section is required')
+            current=current.rstrip()+'\n\n'+source[a.start():]
         old_article=subprocess.check_output(['git','show',baseline['baseCommit']+f':episodes/{slug}/article.mdx'],cwd=ROOT,text=True)
         assert current.split('---',2)[:2]==old_article.split('---',2)[:2]
         assert re.findall(r'\{#([\w-]+)\}',current)==re.findall(r'\{#([\w-]+)\}',old_article)

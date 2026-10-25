@@ -69,8 +69,19 @@ else:
         'video.mp4','source-sha256.json','identity.json','words.json','storyboard.json',
         'render-result.json','mix-report.json','input-snapshots/freeze.py',
         'input-snapshots/remotion/package.json']]
+    # Preserve the current 5569-frame body's archived provenance while changing
+    # citation presentation. The immutable body169/append13 receipts stay intact.
+    extras += [D/'article.mdx', D/'remotion/package.json',
+               ROOT/'episodes-codex/_shared/append_references_original.py',
+               ROOT/'episodes/_shared/theme/pageTheme.ts',
+               D/'revisions/original-titles/before-article.mdx',
+               D/'revisions/original-titles/before-research.md']
     refs = json.loads((D/'references.json').read_text())
-    extras += [ROOT/source['verification']['evidence'] for source in refs['sources']]
+    for source in refs['sources']:
+        evidence_paths = [source['verification']['evidence'], source['titleEvidence']['evidence']]
+        if 'quotation' in source:
+            evidence_paths.append(source['quotation']['evidence'])
+        extras.extend(ROOT/evidence for evidence in evidence_paths)
     for path in extras:
         manifest[os.path.relpath(path, D)] = digest(path)
     (D / 'source-sha256.json').write_text(json.dumps(dict(sorted(manifest.items())),

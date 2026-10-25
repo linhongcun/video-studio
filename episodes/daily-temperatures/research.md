@@ -28,3 +28,17 @@
 待解决下标按日期递增，其气温从早到晚不升。新气温比末尾高时，末尾此前没有等到过更暖的一天，当前天就是它的第一个更暖；写日期差后移出。新气温小于或等于末尾时，末尾以及更早、更高或相等的待解决气温都不能被当前天解决，停止比较，再加入当前天。全部日期结束仍未解决的下标保持初始0。
 
 这只是算法与稿件证据；此阶段未配音、未做真实起音、未生成媒体、未完成动态独立检查、ASR或全片人工听辨，不能声称上述检查通过。
+
+## 2026-10-25 栈入门反馈修订
+
+用户实际观看v0.69.0后指出视频默认观众了解单调栈。本轮先解释同端加入/取出和后进先出，再解释本题选择温度从栈底到栈顶不升、允许相等，实际用32维护顺序，最后才命名单调栈。旧算法及媒体技术检查不等于这项基础已经讲懂。
+
+已实际读取[Python官方教程5.1.1 Using Lists as Stacks](https://docs.python.org/3/tutorial/datastructures.html#using-lists-as-stacks)，访问2026-10-25；其第83–100行支持后进先出、append从末尾加入和无下标pop从末尾取出。root保留实际web访问证据docs/daily-temperatures-stack-primer/stack-reference.json；本制作负责人也独立实际open同页。此来源不支持“所有单调栈都递减”的说法，本题不升方向仍由任务与停止依据推导。
+
+新增04–05是有明确标签的保存规则示意。research/make_stack_primer_operations.py执行五次真正的append/pop并复制前后状态，生成stack-primer-operations.json：依次加入第3/4/5天、取出第5天、再放回第5天。它不运行第二份LeetCode解法，不计算等待天数，和未改的research/trace.json算法执行证据分开。
+
+本轮只新增四句，原28句与旧稿逐字匹配。当前真实storyboard/words/voice仍为旧基线，由root在稿件独审后复用原音源并装配新时序；本次源创作没有生成配音、重写真实计时或宣称新声画通过。原阶段1的未配音说明是当时检查范围，不能覆盖后来旧版已完成的实际媒体历史，也不能提前追认本轮修订。
+
+## 2026-10-25 原题与原文短引核验
+
+原资料卡将教程、章名、子节拼成了一个并非文献原题的字符串。本轮实际读取官方CPython v3.15.1标签对应commit `c37e74cb6bcdadcd5f46f289498f6b3298ddee61` 的`Doc/tutorial/datastructures.rst`：章节原题是`Data Structures`，`Using Lists as Stacks`只作为子节定位；完整LIFO句在139–140行。LeetCode题面本轮受代理限制，仅复用已保存的真实官方web返回及原日期，不编造新HTTP成功。[新证据](../../docs/reference-endcards/original-titles/sources-algorithms.json)保留原记录Git/blob SHA和逐字短引；算法、开头、配音与分镜不改。

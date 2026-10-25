@@ -1,6 +1,6 @@
 # LC.739 每日温度
 
-## 当前交付状态
+## 栈前置修订交付状态（本轮引用格式修订前）
 
 用户观看v0.69.0后指出默认懂单调栈，现先补栈的同端操作、后放先取、底顶，再演不升与维护，之后才命名。新增4句、复用28句；正文5322帧，最终含参考资料5472帧/182.4秒，Python与参考资料卡各150帧/5秒。190项生产输入核对通过。实际最终视频SHA256：`f3aa4f315770896ef3b3d15d8ad3d38ed5602d07528d9fcc20300bad3d6b3a3b`。实际动态、声音、正式MP4独立视觉与媒体检查均通过，能力范围见当前QA；网站及发布状态见[修订记录](../../docs/daily-temperatures-stack-primer/README.md)。尚无修后用户认可，无逐字ASR或全片人工听辨。旧片/旧QA完整保留于`revisions/stack-primer-before/`。
 
@@ -33,3 +33,13 @@ root安排独立编辑与算法审稿，审稿闭合后才生成配音。后续�
 ## 制作海报补齐
 
 真实封面复核发现`covers.json`声明的竖版`poster.jpg`缺失，六张比例封面本身已通过。保留原阻塞记录于`revisions/missing-poster-before/`，仅执行`cp cover-3x4.jpg poster.jpg`补齐声明产物，二者逐字节相同。网站另由`episodes/daily-temperatures/meta.json`明确选择`cover-16x9.jpg`。新增竖版已独立实际查看，详见`qa-covers.md/json`；未重渲不变封面，未改覆盖源码、分镜、声音或其他冻结输入。
+
+## 原始题名与原文短引：当前参考资料入口
+
+本轮保留刚上线的栈前置讲解及完整Python卡：主体仍为5322帧，其中Python卡自5172帧开始150帧。仅将其后的资料卡迁移为 `presentation: original-title-quote`，显示真实完整原题名、原语言和带位置的连续原文短引，不把内部 `supports` 当作文献原句上屏。每页最多2项、默认5秒，最终帧数和区间按实际新回执计算。修前资料、文章、研究、冻结与回执已保存于 `revisions/original-titles/`；前节5472帧及SHA仅表示此前单页资料卡的历史结果，不预记新卡已验收。当前范围与后续发布见 [原题名修订](../../docs/reference-endcards/original-titles/README.md)。
+
+在本期 `remotion/` 运行 `npm run check:references`，所有生产输入停写后用本期 `freeze.py` 冻结，加 `--verify` 只读核对。冻结保留原句级、声音、程序、拼接计划和全部旧/新画面素材依赖，再录入新原题名生成器、未改字节的旧媒体引擎、wrapper、发布检查器、Pillow版本锁、主题、资料/文章/package，以及 `verification.evidence`、`titleEvidence.evidence` 和可选 `quotation.evidence` 的实际JSON文件。本轮资料证据在 `docs/reference-endcards/original-titles/sources-algorithms.json`，不覆盖旧证据。
+
+默认 `npm run render` 继续使用统一wrapper；其 `render:body` 必须保留 `python3 ../render_stack_primer.py`，不能机械替换为普通 `render:voice`→`render:mix`。该薄入口按 `stack-primer-remix-plan.json` 的真实原/新片段与PCM生成主体 `out/body.mp4`，wrapper随后用 `append_references_original.py`追加资料。本期拼接计划不消费文章或研究文件，package也维持原计划已核验的完整SHA；当前文献段落和新尾卡输入不冒充旧主体来源。
+
+本次只复用从最新5322帧主体恢复并核验的 `remotion/out/body.mp4`，单独生成资料尾卡，不重渲讲解、Python卡或重新混音，不从此前版本覆盖新的栈教学。最终视频为本期 `video.mp4`，附录记录在 `revisions/reference-endcards/`，交付副本在期根；接齐新回执及 `render-result.json.publicationMetadata` 后，运行 `npm run verify:references` 只读核对来源、冻结和最终媒体。原旁白、字幕、分镜及 `words.json` 仍表示5322帧主体，Python卡与参考资料起点分别核验；旧QA仅在原画面/声音确证保持的范围复用。实际查看每张新卡、精确首卡字幕以及桌面/手机暂停与全屏后再发布，不将自动检查当作人工听辨或用户观看认可。
