@@ -59,7 +59,7 @@
 
 - **LC.200边界反馈的适用边界：**用户随后指出首格左/上越界没有被说明，原S004检查不代表四向的跳过理由都讲清。本轮补一条旁白、在同一首格直接演出左/上箭头止于边框；48帧停留内归属、栈与计数保持，14事件才完成当前展开。定向真实预检与正式成片支持这次表达，见L045和[修订记录](number-of-islands-boundaries/README.md)；后续观看反馈单独记录，不把技术复验当作用户已认可。
 
-- **P05开头修订的有限验证：**用户指出方法动机缺口后，保留同一楼体与蛋身份，用50/25连续碎的失败分支回应二分，再明确另起固定10计划和晚碎假设。只替换两镜四句；原10镜4336局部帧完整SSR SVG精确相同，新150实际DOM和独立109无字幕解码阶段、修订正文MP4独立50时点与根4原图支持动作/状态/文字的检查范围。完整参考附录、附录后站点与上线仍待验证，见[当前QA](../episodes-codex/egg-drop/qa-final.md)。新版尚无用户观看结论；这些证据不反过来抹去首发方法动机不清的反馈，也不当作理解效果测量。
+- **P05开头修订的有限验证：**用户指出方法动机缺口后，保留同一楼体与蛋身份，用50/25连续碎的失败分支回应二分，再明确另起固定10计划和晚碎假设。只替换两镜四句；原10镜4336局部帧完整SSR SVG精确相同，新150实际DOM和独立109无字幕解码阶段、修订正文MP4独立50时点与根4原图支持动作/状态/文字的检查范围。一页静态参考附录的实际首/中/末卡、正文接点及附录后双视口站点检查亦通过；v0.70.2已公开Release，Release后Pages与9次canonical站点GET／1份独立Release证据核验通过，见[当前QA](../episodes-codex/egg-drop/qa-final.md)。新版尚无用户观看结论；这些证据不反过来抹去首发方法动机不清的反馈，也不当作理解效果测量。
 
 ## S005 先做关键小样，复验后再铺全片
 
@@ -81,7 +81,7 @@
 
 - **P05按实际处理链闭合来源（2026-10-25）：**原始cut与归一化／限幅后的原声做单一增益拟合时，两句低于临时诊断线，最低0.99055；[原诊断](../episodes-codex/egg-drop/voice/qa-source-pcm-linear-fit.json)保留，未降阈值或改配音。用同一选段／参数及未修改shared build[完整复现](../episodes-codex/egg-drop/voice/qa-source-pcm.json)后，WAV、元数据和24句资产逐字节一致，按实际非线性处理链闭合来源。封面另只import不变Egg，函数及其余七份依赖精确相同，才[复用原六图](../episodes-codex/egg-drop/cover-source-reuse.json)并保留原渲染身份。两项证明只支持来源／复用范围，不代替语义听辨，也不要求后续片机械重复本例诊断。
 
-- **P05混合新旧声源的精确范围：**二分入口只重配四句，经共享mini build生成新块，薄包装按整帧替换原921帧为1233帧，原前缀、后缀及20句PCM/WAV均逐字节保持，无整轨DSP。全局整数移位重算本地double曾产生14处SVG字符串尾差，原失败保留；在独立PCM/整数位移证明后直接保留基线localStart/localEnd，原规则4336帧重验通过。见[声源证明](../episodes-codex/egg-drop/revisions/binary-opening/qa-pcm-root.json)与[源复用审](../episodes-codex/egg-drop/revisions/binary-opening/qa-source-independent.md)。仅适用于实际未改的段和已核实位移，不推广为改词后也可复用旧声或绕过新片验收；这些正文来源证明不代替本次新增参考附录的媒体与站点验收。
+- **P05混合新旧声源的精确范围：**二分入口只重配四句，经共享mini build生成新块，薄包装按整帧替换原921帧为1233帧，原前缀、后缀及20句PCM/WAV均逐字节保持，无整轨DSP。全局整数移位重算本地double曾产生14处SVG字符串尾差，原失败保留；在独立PCM/整数位移证明后直接保留基线localStart/localEnd，原规则4336帧重验通过。见[声源证明](../episodes-codex/egg-drop/revisions/binary-opening/qa-pcm-root.json)与[源复用审](../episodes-codex/egg-drop/revisions/binary-opening/qa-source-independent.md)。仅适用于实际未改的段和已核实位移，不推广为改词后也可复用旧声或绕过新片验收。参考附录另经[全部5569正文帧/PTS与8703 AAC包/PCM精确保留](../episodes-codex/egg-drop/revisions/reference-endcards/reference-appendix-media-check.json)及实际卡/站点检查；最终185项默认入口与原169正文、13项追加输入分阶段记录，不追认为正文新渲染。
 
 ## S007 批准文件与线上文件保持一致
 
