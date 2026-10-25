@@ -180,10 +180,20 @@ class Verify:
         self.tag, self.stage, self.http_records, self.api_records = tag, 'starting', [], []
 
     def api(self, endpoint):
-        body = subprocess.check_output(['gh', 'api', endpoint], text=True)
-        parsed = json.loads(body)
-        self.api_records.append({'endpoint': endpoint, 'parsedJSON': True})
-        return parsed
+        for attempt in range(1, 4):
+            result = subprocess.run(['gh', 'api', endpoint], capture_output=True, text=True)
+            if result.returncode == 0:
+                parsed = json.loads(result.stdout)
+                self.api_records.append({'endpoint': endpoint, 'attempt': attempt, 'parsedJSON': True})
+                return parsed
+            unauthorized = re.search(r'HTTP\s+401\b', result.stderr or '') is not None
+            retry = unauthorized and attempt < 3
+            self.api_records.append({'endpoint': endpoint, 'attempt': attempt, 'exitCode': result.returncode,
+                                     'httpStatus': 401 if unauthorized else None,
+                                     'retryDelaySeconds': attempt if retry else None, 'parsedJSON': False})
+            if not retry:
+                raise RuntimeError(f'GitHub API read failed for {endpoint} on attempt {attempt}; exit {result.returncode}, HTTP401={unauthorized}')
+            time.sleep(attempt)
 
     def get(self, relative, expected=200):
         assert '?' not in relative
