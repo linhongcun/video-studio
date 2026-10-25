@@ -176,6 +176,12 @@ assert.equal(preview.epLabel(binaryAlgorithm), 'LC.704');
 const batchAlgorithmSlugs = ['two-sum', 'reverse-linked-list', 'climbing-stairs'];
 const algorithmSlugs = [algorithmSlug, nextAlgorithmSlug, binaryAlgorithmSlug, ...batchAlgorithmSlugs];
 const algorithmChain = algorithmSlugs.map((slug) => lessons.find((e) => e.slug === slug));
+// Keep the original six lessons' identity/release fixtures, while allowing
+// later metadata (including hidden drafts) to extend preview navigation.
+const previewAlgorithms = Array.from(lessons.filter((e) => e.series === 'leetcode')).sort(preview.compareLessons);
+const previewAlgorithmSlugs = slugs(previewAlgorithms);
+assert.deepEqual(previewAlgorithmSlugs.slice(0, algorithmSlugs.length), algorithmSlugs,
+  'The historical algorithm order must remain intact');
 const batchAlgorithms = algorithmChain.slice(3);
 const batchRelease = batchAlgorithms[0]?.firstRelease;
 assert.ok(batchRelease, 'The algorithm batch needs a shared first release');
@@ -187,15 +193,24 @@ for (const [i, e] of algorithmChain.entries()) {
   assert.equal(preview.epLabel(e), `LC.${e.problemNumber}`);
   const nav = preview.seriesNav(e);
   assert.equal(nav.prev?.slug, algorithmSlugs[i - 1], `${e.slug}: incorrect previous algorithm`);
-  assert.equal(nav.next?.slug, algorithmSlugs[i + 1], `${e.slug}: incorrect next algorithm`);
+  assert.equal(nav.next?.slug, previewAlgorithmSlugs[i + 1], `${e.slug}: incorrect next algorithm`);
   assert.equal(liveLessons.some((live) => live.slug === e.slug), !e.draft);
   if (i >= 3) {
     assert.equal(e.firstRelease, batchRelease, 'All three new algorithms debut together');
     if (complete) assert.equal(e.draft, false, `${e.slug} is not published yet`);
   }
 }
-assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'leetcode').episodes), algorithmSlugs);
-const liveAlgorithmSlugs = algorithmChain.filter((e) => !e.draft).map((e) => e.slug);
+assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'leetcode').episodes), previewAlgorithmSlugs);
+for (const [i, e] of previewAlgorithms.entries()) {
+  assert.ok(Number.isInteger(e.problemNumber) && e.problemNumber > 0, `${e.slug}: missing problem number`);
+  assert.equal(preview.epLabel(e), `LC.${e.problemNumber}`);
+  const nav = preview.seriesNav(e);
+  assert.equal(nav.prev?.slug, previewAlgorithmSlugs[i - 1]);
+  assert.equal(nav.next?.slug, previewAlgorithmSlugs[i + 1]);
+  assert.equal(liveLessons.some((live) => live.slug === e.slug), !e.draft,
+    `${e.slug}: draft visibility must be independent of preview navigation`);
+}
+const liveAlgorithmSlugs = previewAlgorithms.filter((e) => !e.draft).map((e) => e.slug);
 assert.deepEqual(slugs(published.getSeries().find((s) => s.id === 'leetcode').episodes), liveAlgorithmSlugs);
 for (const [i, slug] of liveAlgorithmSlugs.entries()) {
   const nav = published.seriesNav(liveLessons.find((e) => e.slug === slug));
