@@ -11,3 +11,5 @@
 Daily文章字节同源；Perm/Rain使用具备原稿快照、冻结SHA、精确diff和确定性transform的站点派生稿。制作源、431冻结输入、正式视频和封面保持验收身份。Perm两个不可见生成标记转MDX注释，讲解与Python代码未改。
 
 本地GitHub Release fetch真实失败并降级外链。本次Release自身li关联3新片、3视频/海报完整HTTPS及旧2小VTT实际发布仍需发布后的显式tag/run核验；当前未声称这些生产检查已通过。实际范围与所有截图SHA见qa-site.json，失败经过见qa-site-attempts.json。未声称全片听辨、ASR或学习效果。
+
+发布前证据同步：整合上游d515f0d4a136667766e5201217e6e5fb746ea861，仅新增旧观察者的QA JSON；网站实际输入与431媒体冻结项未变。原build/browser基线42d49c743bb48bf41c7c4151e5288ef32b53e8ce及receipt不改，保留实际3/2/2次数；另以新主干逐字节核验全部旧canonical，见qa-preservation-final.json，未重复构建或交互。

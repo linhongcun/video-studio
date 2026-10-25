@@ -218,7 +218,20 @@ def verify(args, run):
         assert comparison['status'] in ['ahead', 'identical']
     baseline = git('rev-parse', args.preservation_base + '^{commit}', text=True).strip()
     qa = read(OUT / 'qa-site.json')
-    assert qa['status'] == 'passed' and qa['revisionTag'] == args.revision_tag and qa['preservationBaseline'] == baseline and set(qa['slugs']) == set(args.slugs)
+    publication_preservation = qa.get('publicationPreservation')
+    qa_baseline = publication_preservation['baselineCommit'] if publication_preservation else qa['preservationBaseline']
+    assert qa['status'] == 'passed' and qa['revisionTag'] == args.revision_tag and qa_baseline == baseline and set(qa['slugs']) == set(args.slugs)
+    if publication_preservation:
+        evidence_path = publication_preservation['reportPath']
+        evidence_bytes = (ROOT / evidence_path).read_bytes()
+        assert sha(evidence_bytes) == publication_preservation['reportSHA256']
+        assert blob(tagged, evidence_path) == evidence_bytes
+        evidence = json.loads(evidence_bytes)
+        assert evidence['status'] == 'passed' and evidence['previousBaseline'] == qa['preservationBaseline']
+        assert evidence['upstreamCommit'] == baseline
+        assert evidence['siteInputPathsChanged'] == evidence['frozenInputPathsChanged'] == []
+        assert evidence['canonicalDelta'] == ['episodes/observer-pattern/online-verification.json']
+        git('merge-base', '--is-ancestor', baseline, tagged)
     assert qa['actualScreenshotReviewPending'] is False and qa['visualReview']['status'] == 'passed'
     run.stage = 'All non-batch canonical identities'
     retained = preserved(baseline, tagged, args.slugs)
