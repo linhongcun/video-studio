@@ -25,6 +25,6 @@ last['timing']['holdReason'] = f"Final{card['durationInFrames'] / sb['meta']['fp
 for field in ['codeSource', 'displaySource']:
     card[field + 'Sha256'] = hashlib.sha256((EP / card[field]).read_bytes()).hexdigest()
 sb['meta']['unvoicedEndCard'] = card
-sb['meta']['revisionNote'] = 'Problem first; ordered elimination with found and missing cases; five-second complete Python appendix.'
+sb['meta']['revisionNote'] = 'Problem, then derivation of the method choice, then named algorithm; complete Python five-second appendix.'
 (EP / 'storyboard.json').write_text(json.dumps(sb, ensure_ascii=False, indent=2) + '\n')
 print(f"Python card: frame{card['from']}..{card['from'] + card['durationInFrames'] - 1}")
