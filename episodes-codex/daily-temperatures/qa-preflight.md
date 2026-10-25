@@ -1,0 +1,7 @@
+# 当前真实计时预检：通过
+
+10支新短片已逐支实际解码，打开31个push起/中/末及2753/2754，新字幕2753另单图看。原失败处日期和已提交答案2/4清楚；标签只在固定栈槽按原p淡入，不再横穿答案行，仍连回原日期。审查者derive_container实际看了新产物；详细帧号和路径见qa-preflight.json及其中actualViewIndex。
+
+当前145项实文件全匹配，清单SHA `03e43fe75a83913c16285f6c73b815e829970c944d8a08c16b851cc0a55b89bb`；Main `35017dc73e3e4636458f0282c1f047863083eed07df57e2052bd3055ddeb0b2c`。current对照清单SHA `9d31c947a93f2becf5197f15579c5b80dc5d6d86d2a1b493bd3b50e767943548`。仅isPush真时源坐标等于目标且alpha=p；pop、事件、语音/时序不变。旧76点只复用不变语义；current清单6新源字幕图+10逐帧证明非push或绕过Weather的旧图，旧Main未追认为新源。
+
+原BLOCK、旧源与失败证据保存在revisions/push-label-results-before。原方法选择、状态/程序卡语义检查依不变范围保留，无未解决阻塞，可按当前源正式编码；最终新MP4另验。声音/封面另审，不声称全帧实时看完、ASR、人耳全听或重跑算法。
