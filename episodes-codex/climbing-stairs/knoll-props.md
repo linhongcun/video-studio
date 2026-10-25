@@ -34,3 +34,8 @@ Main读取storyboard的scenes/shots、durationInFrames、visualType、cueFrames.
 covers.json为三尺寸配置真源：16:9 1920×1080，3:4 1080×1440，4:3 1440×1080。4:3完整竖封在x315以0.75缩放，内容x405..1035，最下重要行y895.5<918。poster为cover-16x9.jpg。图中第4/5/6阶5/8/13表示教学示例方法数，最后两项合流，文案不超安全区。
 
 discussionQuestion：每步只上1或2阶，到终点的方法数为什么只需记住前两阶的计数？
+
+
+## 楼梯场景视觉返工
+
+2026-10-25用户否定数字框替代原题楼梯的表达。本轮只改视觉与封面，24句旁白、真实句级时序、4779帧和150帧完整Python卡保持。新场景与逐镜要求见visual-direction.md；先进行真实有字幕预演及无字幕连续动作复核，再正式编码。最终音频复用原已检验成片AAC，来源、完整身份与实际复核见revisions/stair-scene和本轮QA，不冒充新TTS或全片听辨。旧qa-final等保留历史，不作为新画面通过。
