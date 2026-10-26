@@ -21,6 +21,8 @@ SHOW_DRAFTS=1 npm run build
 
 ## 本地站点
 
+图文接入还需复制文章独有的 `article-sources.json`（若有）与 `article/` 中实际使用的图片和原文证据；不要只复制 `article.mdx`。执行 `npm --prefix site run check:articles`，核对引用模块、有效正文图与时间回看，要求见 [图文写作说明](article-style.md)。它由 `dev` 与 `build` 自动执行，未补齐时保持草稿，不修改旧媒体回执或冻结清单来绕过。
+
 `site/package.json`：
 
 ```sh
@@ -103,7 +105,7 @@ gh workflow run deploy.yml --ref main
 gh run watch <id>
 ```
 
-5. 打开 https://linhongcun.github.io/video-studio/ 。成片在 `/video-studio/episodes/<slug>/video.mp4`（`meta.json` 的 `video`）。核验实际线上文件的完整 SHA-256 与发布清单相同；有用户批准版时也必须与批准文件一致，不能只比较 sha8。`site/scripts/copy-assets.mjs` 只把 `video` 和 `poster` 拷进站点；线上海报用 `meta.poster` 的文件名（degradation 是 `cover-16x9.jpg`）。打开该期页面确认海报能显示。`cover-4x3.jpg` 和 `cover-3x4.jpg` 留在仓库里，用同一条 sha8 核对，它们不进 Pages。打开 `/changelog/`，确认新版本已经列出。
+5. 打开 https://linhongcun.github.io/video-studio/ 。成片在 `/video-studio/episodes/<slug>/video.mp4`（`meta.json` 的 `video`）。核验实际线上文件的完整 SHA-256 与发布清单相同；有用户批准版时也必须与批准文件一致，不能只比较 sha8。`site/scripts/copy-assets.mjs` 将 `video`、`poster` 及 `article/` 中的图片拷进站点，原文证据JSON/Markdown不进入public；线上海报用 `meta.poster` 的文件名（degradation 是 `cover-16x9.jpg`）。打开该期页面确认海报能显示。`cover-4x3.jpg` 和 `cover-3x4.jpg` 留在仓库里，用同一条 sha8 核对，它们不进 Pages。打开 `/changelog/`，确认新版本已经列出。
 
 6. 视频制作、合并上线和线上核验完成后，将对应制作或重制 issue 关闭，状态理由为 `completed`；用户已持续授权这一步，无需另问。关闭时保留事项的真实执行情况，不把尚未执行的平台发布勾成完成，也不因旧选题模板含平台事项而遗漏制作 issue 的收尾。
 

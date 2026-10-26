@@ -27,11 +27,17 @@ chapters:
 
 后续请求在符合 Cookie 的域、路径、Secure、SameSite 等发送条件时带上该编号。网站查询会话，确认它仍然有效，再根据关联账户查询订单；访问权限仍须另外正确检查。持久 HTTP 连接不是登录状态，不能仅因请求来自同一连接就认为身份相同。
 
+<SourceQuote sourceId="R1" supports="浏览器随对应请求发送包含会话ID的Cookie，表达仍认为用户已登录；服务器仍须核验。" />
+
+<Figure src="/video-studio/episodes/cookie-session/article/01.jpg" alt="网站按浏览器携带的编号甲查到阿青账户，并确认对应会话仍然有效" caption="教学示例：浏览器携带会话编号，服务器查找账户关联并检查有效性；编号本身不替代服务器校验。" seekTo={57} chapter="lookup" />
+
 这个例子不需要把密码保存在 Cookie 里，也不用每次重新提交密码。但会话编号一旦泄露，仍可能被他人拿来冒用。实际系统要配合 HTTPS、`Secure`、`HttpOnly`、适当的 `SameSite` 与跨站请求伪造防护；它们各管不同问题，不能互相替代。[OWASP 会话管理指南](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
 
 ## 有编号不代表一直有效 {#expire}
 
 会话可能因为超时、退出或管理操作而失效。浏览器即使仍带着旧编号，服务器也不能继续把它当作有效登录。退出通常同时让服务器会话失效、让浏览器删除对应 Cookie。只删浏览器 Cookie 不能代替服务器撤销。
+
+<SourceQuote sourceId="R2" supports="会话过期时，应用需要在客户端和服务端两侧主动使会话失效。" />
 
 关闭浏览器也不保证所有登录状态消失：会话恢复和 Cookie 持久化各有规则，服务器还应执行自己的有效期与撤销检查。
 
@@ -47,15 +53,11 @@ chapters:
 
 **[R1] MDN Web Docs：《Using HTTP cookies》（持续维护文档 · 2026-10-25核验）**。
 
-> The browser sends the cookie containing the session ID along with the corresponding request to indicate that it still thinks the user is signed in.
-
 原文位置：What cookies are used for · line 18。
 
 [正式文档](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Cookies) · [固定原文](https://github.com/mdn/content/blob/13ef67a4ffbdb929415dfa1b3d65ab1aa9ebe5da/files/en-us/web/http/guides/cookies/index.md)。
 
 **[R2] OWASP：《Session Management Cheat Sheet》（持续维护文档 · 2026-10-25核验）**。
-
-> When a session expires, the web application must take active actions to invalidate the session on both sides, client and server.
 
 原文位置：Session Expiration · line 313。
 

@@ -318,8 +318,18 @@ def verify(args, run):
         assert rendered['frames'] == frames and sha((production / 'render-result.json').read_bytes()) == sha(blob(tagged, f'episodes-codex/{slug}/render-result.json'))
         for name in ['meta.json', 'article.mdx', 'script.md', 'storyboard.json', meta['video'], 'cover-16x9.jpg', 'cover-4x3.jpg', 'cover-3x4.jpg', appendix['sources'], appendix['manifest'], 'reference-appendix-media-check.json']:
             assert sha((canonical / name).read_bytes()) == sha(blob(tagged, f'episodes/{slug}/{name}'))
-            if name != 'meta.json':
+            if name not in ['meta.json', 'article.mdx']:
                 assert sha((canonical / name).read_bytes()) == sha((production / name).read_bytes())
+        article_derivation = read(OUT / 'article-derivation.json')
+        assert article_derivation['status'] == 'passed' and article_derivation['frozenProductionArticleUnchanged'] is True
+        assert article_derivation['canonicalArticleSHA256'] == sha((canonical / 'article.mdx').read_bytes())
+        assert article_derivation['productionArticleSHA256'] == sha((production / 'article.mdx').read_bytes())
+        assert (OUT / 'article-derivation.json').read_bytes() == blob(tagged, 'docs/daily-derive/article-derivation.json')
+        assert article_derivation['sourceVideoSHA256'] == rendered['sha256']
+        figure = article_derivation['figure']
+        assert abs(figure['frame'] / fps - figure['seekTo']) < 1e-6
+        assert figure['sha256'] == sha((ROOT / figure['path']).read_bytes()) == sha(blob(tagged, figure['path']))
+        assert sha(run.get(figure['path'])) == figure['sha256']
         config = read(production / 'episode-config.json')
         for name in ['solution.py', 'solution.json', config['algorithmTrace']]:
             assert sha((production / name).read_bytes()) == sha(blob(baseline, f'episodes-codex/{slug}/{name}'))
@@ -370,12 +380,21 @@ def verify(args, run):
             for url in [reference['url'], reference['verification'].get('sourceUrl')]:
                 if url:
                     assert url in document.links
+        assert [attrs['data-source-quote'] for _, attrs in document.attrs if 'data-source-quote' in attrs] == ['R1', 'R2']
+        for reference in references['sources']:
+            assert reference['quotation']['text'] in document.text
+        image_path = '/video-studio/' + figure['path']
+        assert any(element == 'img' and attrs.get('src') == image_path and attrs.get('alt') for element, attrs in document.attrs)
+        assert image_path in document.links
+        seek_values = [float(attrs['data-seek-time']) for _, attrs in document.attrs if 'data-seek-time' in attrs]
+        assert len(seek_values) == 1 and abs(seek_values[0] - figure['seekTo']) < 1e-6
+        assert any(href.endswith('#player') and href.startswith('?t=') and abs(float(href[3:-7]) - figure['seekTo']) < 1e-6 for href in document.links)
         payloads = [json.loads(attrs['data-chapters']) for _, attrs in document.attrs if 'data-chapters' in attrs]
         assert len(payloads) == 1 and [{key: chapter[key] for key in ['id', 'start']} for chapter in payloads[0]] == chapter_plan
         videos = [attrs for element, attrs in document.attrs if element == 'video']
         assert len(videos) == 1 and 'controls' in videos[0] and videos[0]['poster'].endswith(f'episodes/{slug}/{meta["poster"]}')
         assert any(element == 'track' and attrs.get('kind') == 'captions' and attrs['src'].endswith(vtt_path) for element, attrs in document.attrs)
-        episode_reports.append({'slug': slug, 'problemNumber': meta['problemNumber'], 'frames': frames, 'bodyFrames': body_frames, 'fps': fps, 'cues': len(actual), 'chapters': chapter_plan, 'cardFrames': 150, 'methodCue': method_cue, 'basicsCues': basics_cues, 'referenceAppendix': appendix, 'referencePresentation': references['presentation'], 'bibliography': bibliography, 'referenceSourceIds': [ref['id'] for ref in references['sources']], 'referenceEvidence': reference_evidence, 'referenceReceiptSHA256': sha((canonical / appendix['manifest']).read_bytes()), 'referenceMediaCheckSHA256': sha((canonical / 'reference-appendix-media-check.json').read_bytes()), 'firstRelease': meta['firstRelease'], 'dates': {key: meta[key] for key in ['createdAt', 'updatedAt', 'publishedAt']}, 'media': media, 'captionsSHA256': sha(vtt), 'source': source, 'completePythonExact': True, 'methodNamedAfterProblemReasoning': True, 'firstMethodShot': 'name'})
+        episode_reports.append({'slug': slug, 'problemNumber': meta['problemNumber'], 'frames': frames, 'bodyFrames': body_frames, 'fps': fps, 'cues': len(actual), 'chapters': chapter_plan, 'cardFrames': 150, 'methodCue': method_cue, 'basicsCues': basics_cues, 'referenceAppendix': appendix, 'referencePresentation': references['presentation'], 'bibliography': bibliography, 'referenceSourceIds': [ref['id'] for ref in references['sources']], 'referenceEvidence': reference_evidence, 'referenceReceiptSHA256': sha((canonical / appendix['manifest']).read_bytes()), 'referenceMediaCheckSHA256': sha((canonical / 'reference-appendix-media-check.json').read_bytes()), 'firstRelease': meta['firstRelease'], 'dates': {key: meta[key] for key in ['createdAt', 'updatedAt', 'publishedAt']}, 'media': media, 'captionsSHA256': sha(vtt), 'source': source, 'completePythonExact': True, 'methodNamedAfterProblemReasoning': True, 'firstMethodShot': 'name', 'articleDerivation': article_derivation})
     run.stage = 'Existing lesson home/learning/series/library/RSS and this revision Release only'
     home, learning, library, series = [Document(run.get(relative).decode()) for relative in ['', 'learn/', 'library/', 'series/leetcode/']]
     assert args.revision_tag in home.footer and '/video-studio/learn/#algorithms' in home.links

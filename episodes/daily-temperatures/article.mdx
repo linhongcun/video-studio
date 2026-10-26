@@ -13,6 +13,8 @@ related: []
 
 LeetCode第739题给出按日排列的整数气温`temperatures`。对于每一天，找到**未来第一个气温严格更高的日子**，返回要等待的天数；未来没有这样的日子，则该位置返回`0`。输入有`1..100000`天，气温整数范围是`30..100`。[^problem]
 
+<SourceQuote sourceId="R1" supports="如果未来没有更暖的一天，原位置的答案保持0。" />
+
 这是为原来的每一天各算一个答案，既不是找整段最高温，也不是返回升高了几度。相等温度不算更暖。片中自选教学示例是：
 
 ```text
@@ -58,6 +60,8 @@ LeetCode第739题给出按日排列的整数气温`temperatures`。对于每一�
 
 Python列表用末尾的`append()`加入、用不带下标的`pop()`取出，正好实现这种同端操作。Python官方教程也以这种后进先出的方式说明栈。[^stack] 我们保存原日期的下标，原输入因此仍能提供气温，当前下标减旧下标则给出等待天数。
 
+<SourceQuote sourceId="R2" supports="栈采用后进先出规则：最后加入的元素最先取出；本题的温度顺序另由推导解释。" />
+
 前面的局部推导先说明为何这样保存和处理，视频随后明确重置到第1天，完整执行同一个输入并将答案写回原日期。
 
 ## 按天走完整过程 {#walk}
@@ -76,6 +80,8 @@ Python列表用末尾的`append()`加入、用不带下标的`pop()`取出，正
 | 第8天 | 33 | 比第7天凉，停止，加入第8天 | 无 |
 
 日期走完后，第7天和第8天仍在等待。答案数组最初全是0，只在找到更暖日期时改写，所以这两个位置自然保持0。
+
+<Figure src="/video-studio/episodes/daily-temperatures/article/01.jpg" alt="第7天的36首次超过第3天的35，原位答案写为等待4天" caption="教学示例：第3天的35到第7天的36才首次更暖，等待天数是7−3＝4，而不是温差；气温未指定单位。" seekTo={111.666667} chapter="walk" />
 
 ### 相等为什么必须保留
 
@@ -121,19 +127,15 @@ class Solution:
 
 [^stack]: [Python官方教程5.1.1：Using Lists as Stacks](https://docs.python.org/3/tutorial/datastructures.html#using-lists-as-stacks)，2026-10-25实际读取。它支持后进先出与append/pop末尾操作；本题选择温度不升及其正确性，由题目目标与本文推导说明。
 
-## 参考资料与对应论点 {#references}
+## 参考资料 {#references}
 
 **[R1] LeetCode：《739. Daily Temperatures》（题面访问于2026-10-25）**。
-
-> If there is no future day for which this is possible, keep answer[i] == 0 instead.
 
 原文位置：Description · captured L22。
 
 [正式文档](https://leetcode.com/problems/daily-temperatures/description/)。
 
 **[R2] Python Software Foundation：《Data Structures》（Python 3.15.1 · 访问2026-10-25）**。
-
-> The list methods make it very easy to use a list as a stack, where the last element added is the first element retrieved ("last-in, first-out").
 
 原文位置：Using Lists as Stacks · lines 139–140。
 

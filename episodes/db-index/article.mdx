@@ -26,11 +26,15 @@ related: ["server-cache", "db-transaction"]
 
 这里没有预设订单号已是主键或已有唯一索引，也没有“找到一条就停”的限制。记录增多时，需要检查的无关数据也可能增多。
 
+<SourceQuote sourceId="A1" supports="没有可用于条件的索引时，需要从首行开始读取整表寻找匹配记录；这不构成固定性能倍数的承诺。" />
+
 ## 3. 索引怎样帮助查找 {#index}
 
 **索引是帮助数据库查找的数据结构。** 示例给订单号建索引，把用于查找的订单号与找到对应记录所需的信息组织起来。查找时先利用索引缩小范围，再取得目标记录，而不必逐行查看所有订单。[^uses]
 
 画面中的有序列表和引导线只解释这一关系：**订单号 → 对应记录**。它不表示真实索引是一张平铺数组，图中的行号也不是磁盘地址。具体到 InnoDB 的普通二级索引，索引项保存索引列以及对应主键，数据库可以通过主键取得原记录。[^secondary]
+
+<Figure src="/video-studio/episodes/db-index/article/01.jpg" alt="订单号7042在索引中对应订单表第6行，箭头连接索引与订单记录" caption="教学示例：先在订单号索引中找到7042，再沿对应关系读取订单记录；图中的行位置不代表磁盘地址。" seekTo={90} chapter="index" />
 
 ## 4. 有索引也不一定更快 {#boundary}
 
@@ -75,8 +79,7 @@ related: ["server-cache", "db-transaction"]
 [^cost]: MySQL 官方手册 §10.3《Optimization and Indexes》：https://dev.mysql.com/doc/refman/8.4/en/optimization-indexes.html
 [^multi]: MySQL 官方手册 §10.3.6《Multiple-Column Indexes》：https://dev.mysql.com/doc/refman/8.4/en/multiple-column-indexes.html
 
-## 片尾参考资料
-
+### 视频采用的资料
 **[R1] How MySQL Uses Indexes**
 
 Oracle / MySQL · MySQL 8.4 Reference Manual · 实读2026-10-24

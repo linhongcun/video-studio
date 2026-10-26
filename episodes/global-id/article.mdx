@@ -34,6 +34,8 @@ MySQL的AUTO_INCREMENT能为记录自动生成编号，官方示例配合主键�
 
 UUID 不只有随机版本。UUIDv7 把时间放在高位，设计上有利于时间排序和索引局部性；它也不是跨机器业务顺序的严格全序。这里对“不递增”的讨论限定于前面介绍的随机 UUIDv4。[^uuid-order]
 
+<SourceQuote sourceId="A1" supports="UUIDv4使用随机或伪随机数据生成；这里对随机插入位置的讨论限定于该版本，不概括所有UUID。" />
+
 ## Redis：递增取号，切换要防回退 {#redis}
 
 再看 Redis 自增。多个节点向**同一个计数器**执行 `INCR`，通过原子递增集中分配编号；在计数状态正常保留的运行区间内，可以依次取到1001、1002这样的号码。计数器和数字均为教学示例。[^incr]
@@ -60,6 +62,8 @@ const text = id.toString(); // "16777216000028672"
 ```
 
 同一相对毫秒、机器编号9得到`16777216000036864`；机器编号7但序号1得到`16777216000028673`。这三者精确不同。字段范围、纪元、身份分配与运行状态仍要由实际系统正确维护。[^implementation]
+
+<Figure src="/video-studio/episodes/global-id/article/01.jpg" alt="时间4000000000、机器编号007与序号000指向组合整数16777216000028672" caption="教学示例：时间、生成器身份和序号通过位运算组合为整数；三段十进制展示只为说明字段来源，不是直接拼接。" seekTo={137} chapter="snowflake" />
 
 ## 不重复需要前提 {#conditions}
 
@@ -108,8 +112,7 @@ JavaScript的Number安全整数最大值为`9007199254740991`。本片17位示�
 [^bulk]: [MySQL 8.4 §10.5.5 Bulk Data Loading for InnoDB Tables](https://dev.mysql.com/doc/refman/8.4/en/optimizing-innodb-bulk-data-loading.html)
 [^sentinel]: [Redis Sentinel：故障切换与异步复制的数据丢失窗口](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/)
 
-## 片尾参考资料
-
+### 视频采用的资料
 以下列出实际视频主线采用的8项核心资料。技术正文和代码的既有实读日期分别为2026-10-24、2026-10-25（北京时间）；本轮整理保留原日期。RFC 9562 的完整题名、明确作者及 Sentinel 的完整题名于2026-10-26另补官方仓库证据；该补证不等于重新核验技术正文。原有参考资料与脚注全部保留。
 
 **[R1] Universally Unique IDentifiers (UUIDs)**

@@ -31,6 +31,8 @@ HTTPS，在网页通信外加上安全传输保护。但在发送密码之前，
 
 证书，把网站的公钥和域名等身份信息联系起来。浏览器会检查证书是否适用于这个域名，是否有效，以及信任关系。
 
+<SourceQuote sourceId="R2" supports="证书核验用于防止路径上的攻击者或控制名字解析的攻击者冒充服务器。" />
+
 ## 核验不过，不能当成正常连接
 
 如果证书不匹配或不被信任，浏览器会发出警告。随手忽略警告，可能破坏原本要建立的身份保护。
@@ -39,9 +41,15 @@ HTTPS，在网页通信外加上安全传输保护。但在发送密码之前，
 
 在握手过程中，双方会协商保护连接所需的密钥，也完成必要的身份核验。密钥不会作为普通明文直接放在网络上发送。
 
+<SourceQuote sourceId="R1" supports="TLS握手完成后，双方使用已建立的密钥保护应用层通信。" />
+
 ## 这次，密码先变成密文
 
 现在，登录请求先加密，再经过网络。中间观察到的是密文，网站这一端才能还原并处理请求。
+
+<SourceQuote sourceId="R3" supports="握手之后，HTTP头部和正文等消息都在加密与解密保护范围内。" />
+
+<Figure src="/video-studio/episodes/https/article/01.jpg" alt="浏览器先加密登录请求，网络路径上显示密文，网站端解密并验证" caption="教学示例：请求先加密再经过网络，网站端解密并验证后处理内容；传输保护不代表网站本身可信。" seekTo={75} chapter="encryption" />
 
 ## 返回的数据，也受到保护
 
@@ -55,13 +63,11 @@ HTTPS，在网页通信外加上安全传输保护。但在发送密码之前，
 
 不过，加密连接不代表网站卖的东西靠谱，也不代表网站不会滥用你交出的数据。密码到达网站以后，已经离开这段传输保护的边界。
 
-## 适用边界与来源
+## 参考资料
 
 本次于2026-10-25（北京时间）核对以下负责工作组或MDN官方仓库的固定正文；各项分别提供正式链接与本轮实读版本，便于核查。
 
 **[R1] IETF TLS WG：《The Transport Layer Security (TLS) Protocol Version 1.3》（RFC 9846 · 2026）**。
-
-> Once the handshake is complete, the peers use the established keys to protect the application-layer traffic.
 
 原文位置：§2 Protocol Overview。
 
@@ -69,15 +75,11 @@ HTTPS，在网页通信外加上安全传输保护。但在发送密码之前，
 
 **[R2] IETF HTTP WG：《HTTP Semantics》（RFC 9110 · 2022）**。
 
-> Certificate verification is used to prevent server impersonation by an on-path attacker or by an attacker that controls name resolution.
-
 原文位置：§4.3.4 https Certificate Verification。
 
 [正式文档](https://www.rfc-editor.org/rfc/rfc9110.html) · [固定原文](https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9110.xml)。
 
 **[R3] MDN Web Docs：《Transport Layer Security (TLS)》（持续维护文档 · 2026-10-25核验）**。
-
-> After the handshake, client and server use the secret key to encrypt and decrypt any messages, including HTTP headers as well as bodies.
 
 原文位置：TLS handshake · line 32。
 

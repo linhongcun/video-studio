@@ -17,20 +17,26 @@ chapters:
 
 熔断器观察近期失败，达到预先设置的条件后暂停这条调用。新调用快速返回不可用，上层再决定合适的业务反馈。运费险为可选功能时，可以明确告知暂不可用，并继续符合条件的订单流程。
 
+<SourceQuote sourceId="R2" supports="对某些非关键操作，快速失败可以避免多次重试影响应用吞吐；这不允许跳过必要业务条件。" />
+
+<Figure src="/video-studio/episodes/circuit-breaker/article/01.jpg" alt="运费险调用快速返回暂不可用，订单主流程继续校验，运费险功能明确不提供" caption="教学示例：熔断后向上层返回暂不可用，业务明确不提供运费险；库存等必要条件仍要校验，能否继续由业务规则决定。" seekTo={50} chapter="stop" />
+
 ## 少量探测，再判断恢复 {#recover}
 
 暂停一段时间后，只让有限请求尝试，避免恢复中的服务立即被全量流量压垮。探测失败则继续暂停，满足成功条件后恢复。视频中的三个失败处理位只是教学示意，不是通用生产阈值。
+
+<SourceQuote sourceId="R1" supports="半开状态只允许有限数量的应用请求通过并尝试操作。" />
 
 ## 熔断不能替代业务校验或修复 {#recap}
 
 库存和支付等必要条件失败时，不能假装成功。熔断减少无效等待与故障扩散机会，不负责修好服务本身，也不保证网站永不出故障。应用还要设置合适超时、隔离资源，监控状态并测试恢复过程。常见“关闭/打开/半开”的名称容易与停止放行相混淆，片中用“正常调用/暂停/少量探测”说明行为。
 
-## 公开资料
+## 参考资料
 
 - [Microsoft Azure Architecture Center — Circuit Breaker pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)，实际访问2026-10-24。
 - [AWS Well-Architected — graceful degradation](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html)，实际访问2026-10-24。
 
-## 参考资料
+### 核心来源与核验范围
 
 片尾精选以下两项官方资料，实际读取与核验于2026-10-26（北京时间）。保留原始题名与原文；运费险场景、处理位、失败次数和探测量均为教学示意，实际参数应按服务和业务条件设置。
 
@@ -39,8 +45,6 @@ chapters:
 Microsoft · Azure Architecture Center · 2026-10-26核验
 
 [正式文档](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)；[实读固定原文](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/circuit-breaker.md)。
-
-> A limited number of requests from the application are allowed to pass through and invoke the operation.
 
 原文位置：Solution / Half-Open · line 45。
 
@@ -51,8 +55,6 @@ Microsoft · Azure Architecture Center · 2026-10-26核验
 Microsoft · Azure Architecture Center · 2026-10-26核验
 
 [正式文档](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry)；[实读固定原文](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry-content.md)；[固定页面版本](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry.yml)。
-
-> For some noncritical operations, it's better to fail fast rather than retry several times and affect the throughput of the application.
 
 原文位置：Issues and considerations / Impact on performance · line 44。
 

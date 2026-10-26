@@ -19,9 +19,15 @@ chapters:
 
 本片用7042贯穿整个过程。示例先等队列确认可靠保存，再返回“已提交”；后台有空后接收任务，完成业务，最后发回处理确认。这两种确认的对象不同：前一个面向发送者，后一个面向处理者，不能相互替代。可靠保存仍依赖正确的消息、队列、路由和确认配置。[^confirm]
 
+<SourceQuote sourceId="R1" supports="文中的两种特性是发布确认与消费者确认，它们彼此独立，不能相互证明对方的处理结果。" />
+
+<Figure src="/video-studio/episodes/message-queue/article/01.jpg" alt="订单7042已由消息队列保存，页面显示已提交，后台处理仍未完成" caption="教学示例：先确认订单7042的任务已保存，再返回已提交；入队确认与后台业务完成是两个状态。" seekTo={31} chapter="enqueue" />
+
 ## 为什么同一任务还会再来 {#retry}
 
 在本片采用的手动确认模式下，消费者连接关闭时，未确认任务可以重新投递。确认丢失时，业务甚至可能早已成功。因此程序仍要能安全面对重复任务，例如对同一业务编号复用已完成结果，而不能看到消息就再执行一次扣款。[^reliability]
+
+<SourceQuote sourceId="R2" supports="消费者应用需要去重或以幂等方式处理收到的消息。" />
 
 ## 队列不能无限等待 {#recap}
 
@@ -40,8 +46,6 @@ chapters:
 
 RabbitMQ · 官方维护文档 · 2026-10-26核验
 
-> The two features, however, are entirely orthogonal and unaware of each other.
-
 原文位置：The Basics · #relation。
 
 [正式文档](https://www.rabbitmq.com/docs/confirms) · [固定原文](https://github.com/rabbitmq/rabbitmq-website/blob/29cb9ecf131223ad9b7faf61921ac3683008f722/docs/confirms.md)。
@@ -49,8 +53,6 @@ RabbitMQ · 官方维护文档 · 2026-10-26核验
 **[R2] Reliability Guide**
 
 RabbitMQ · 官方维护文档 · 2026-10-26核验
-
-> Therefore consumer applications will need to perform deduplication or handle incoming messages in an idempotent manner.
 
 原文位置：Data Safety on the Publisher Side。
 
