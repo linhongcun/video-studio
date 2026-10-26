@@ -44,6 +44,8 @@ related: [strategy-pattern]
 
 约定既包含接收方式，也包含字段的含义。如果来源和接收方对“已付款”理解不同，仅仅方法名或字段名相同也不足以协作。共同约定保持稳定，才有可能独立维护各方响应。
 
+<SourceQuote sourceId="M1" supports="观察者先登记订阅，随后接收来源的通知；各接收者保留各自响应的职责。" />
+
 ## 来源变化，观察者各自响应 {#notify}
 
 两方都已订阅后，跟着这次付款走一遍：
@@ -58,6 +60,8 @@ related: [strategy-pattern]
 本例选择先更新来源、再依登记次序同步通知，所以画面依次演出两方响应。这是示例实现的规则，观察者模式本身不统一规定通知顺序、同步或异步方式。通知出错后继续还是停止，也要看具体实现。[^observer]
 
 来源和观察者之间的联系没有消失：来源仍维护订阅关系，仍依赖共同约定。降低的是对具体接收方响应细节的依赖，不能概括成“完全没有依赖”。
+
+<Figure src="/video-studio/episodes/observer-pattern/article/01.jpg" alt="订单17已付款，来源通知当前摘要和变化记录，两个观察者分别更新显示与留痕" caption="教学示例：来源先改变，再通知当前观察者；摘要更新显示，变化记录追加事实。先后通知是本例实现规则。" seekTo={74} chapter="notify" />
 
 ## 退出订阅，再看下一次变化 {#unsubscribe}
 
@@ -99,25 +103,25 @@ related: [strategy-pattern]
 
 回到最初的问题：订单负责变化和通知，观察者负责各自响应。**用可增减的订阅关系连接双方，就是本片要讲清的观察者模式核心。**
 
-### 资料与阅读范围
+## 参考资料
 
 来源公开正文与实际访问记录见制作工程`research.md`。前次讲解编辑复用2026年10月25日已经取得并阅读的资料，其记录继续保留；本轮题名与引文核对的实际读取另列于下。所有订单、状态、界面和内部结构均为自建教学示例。
 
 [^observer]: [Observer design pattern](https://learn.microsoft.com/en-us/dotnet/standard/events/observer-design-pattern)。支持来源、观察者、共同约定、登记与退出关系；具体语言接口和顺序不是模式的统一语义。
 [^pubsub]: [Publisher-Subscriber Pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber)。仅用于末尾实战应用中的发布者、中间件和各订阅方关系；不把分布式消息结构字面等同于GoF观察者结构。
 
-#### 片尾原题名与逐字引用（2026-10-25核验）
+### 视频采用的资料（2026-10-25核验）
 
 以下保留资料原题与所引原句，机构、版本和具体位置分别注明。本轮核对了下列官方仓库固定版本，原有资料读取记录继续保留。
 
 **[M1] Observer design pattern**（Microsoft Learn（.NET）；官方文档 · 核验2026-10-25）。
 
-> The observer design pattern enables a subscriber to register with and receive notifications from a provider.
+该原句已在“先订阅，再按共同约定通知”一节展示。
 
 定位：Observer design pattern, opening paragraph。 [正式链接](https://learn.microsoft.com/en-us/dotnet/standard/events/observer-design-pattern) · [本轮实读固定正文](https://github.com/dotnet/docs/blob/244e976348b389933eacd12918abc272bed423b3/docs/standard/events/observer-design-pattern.md)。
 
 **[M2] Publisher-Subscriber Pattern**（Microsoft · Azure Architecture Center；官方文档 · 核验2026-10-25）。
 
-> Broadcast events asynchronously to multiple interested consumers through an intermediary, without coupling the senders to the receivers.
+<SourceQuote sourceId="M2" supports="通过中间件向多个消费者异步广播是发布订阅的特征；此处仅用于说明MQ实战对应，不等同于同进程观察者示例。" />
 
 定位：Publisher-Subscriber pattern, opening paragraph。 [正式链接](https://learn.microsoft.com/en-us/azure/architecture/patterns/publisher-subscriber) · [本轮实读固定正文](https://github.com/MicrosoftDocs/architecture-center/blob/a41f5d84c421591f415ad9b1b40f2b86b1d4fd4a/docs/patterns/publisher-subscriber.md)。

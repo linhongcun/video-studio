@@ -13,6 +13,8 @@ related: []
 
 LeetCode第1题给出一个整数数组`nums`和一个整数目标`target`。选取**两个不同下标**，让对应的两个值相加等于目标，返回这两个下标。题目保证恰好存在一组答案，两个下标按任意顺序返回都可以。[^problem]
 
+<SourceQuote sourceId="A1" supports="同一个元素不能重复使用；两个不同位置的相同数值仍然可以配对。" translation="可以假设每组输入恰好有一个解，并且同一个元素不能使用两次。" />
+
 本片自造的教学输入是`[3,8,11,6,15]`，目标为`9`。下标从0开始：
 
 | 下标 | 0 | 1 | 2 | 3 | 4 |
@@ -49,6 +51,8 @@ LeetCode第1题给出一个整数数组`nums`和一个整数目标`target`。选
 `need`可以是负数：目标9减去当前值11，得到−2。这是一个合法的数值查询，不是负下标访问，也不表示输入有错。
 
 遇到6时，表里已有数值3对应的下标0，因此立即返回`[0,3]`。当前的6没有继续写入，后面的15也不再访问。
+
+<Figure src="/video-studio/episodes/two-sum/article/01.jpg" alt="两数之和数组的原下标3当前值为6，哈希表中3映射下标0，返回下标对0、3" caption="教学示例：当前值6需要3，表中查到先前的3对应原下标0，直接返回[0,3]，后面的15不再访问。" seekTo={98.3} chapter="lookup" n={1} />
 
 ## 为什么不能先记录 {#distinct}
 
@@ -97,3 +101,37 @@ class Solution:
 [^problem]: LeetCode官方题面：[Two Sum](https://leetcode.com/problems/two-sum/description/)与[两数之和](https://leetcode.cn/problems/two-sum/description/)，访问日期2026-10-25（北京时间）。题面规定返回下标、不能重复使用同一元素、恰好一组答案、输出顺序不限。官方editorial未取得可核读正文，本期推导不归因于它。
 [^dict]: Python官方文档：[Mapping Types — dict](https://docs.python.org/3/builtins/stdtypes.html#mapping-types-dict)，访问日期2026-10-25（北京时间），用于字典键、成员判断与取值语义。
 [^complexity]: Python官方文档：[Time Complexity — dict / frozendict](https://docs.python.org/3/builtins/time-complexity.html#dict-frozendict)，访问日期2026-10-25（北京时间），区分平均、摊还与最坏复杂度。片中算法论证与示例为本期独立推导，实测范围见research.md。
+
+## 参考资料
+
+以下书目对应片尾简表，技术实读日期均为2026-10-25。本期算法与正确性论证为独立推导，不归因于未取得正文的官方题解。
+
+**[R1] Two Sum**
+
+LeetCode · LeetCode 1 · 实读2026-10-25
+
+[正式文档](https://leetcode.com/problems/two-sum/description/) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/two-sum/research.md#L7)
+
+对应知识点：返回和为目标的两个不同原下标；题目保证恰有一组有效答案，返回顺序不限。 不能重复使用同一个元素；来自不同位置的两个相同数值仍可组成答案。
+
+正文位置：官方题面 · 要求、示例与约束。
+
+**[R2] Built-in Types**
+
+Python Software Foundation · Python 3 documentation · 实读2026-10-25
+
+[正式文档](https://docs.python.org/3/builtins/stdtypes.html#mapping-types-dict) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/two-sum/research.md#L17) · [题名核对固定原文](https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/stdtypes.rst)
+
+对应知识点：字典按键进行成员测试、取值与赋值；对同一个键再次赋值会更新映射的值。 本片用数值映射先前原下标；画面表格便于阅读，不表示逐行线性扫描。
+
+正文位置：字典操作条目 · key in d、d[key]、d[key] = value。
+
+**[R3] Time complexity of operations on built-in types**
+
+Python Software Foundation · Python 3 documentation · 实读2026-10-25
+
+[正式文档](https://docs.python.org/3/builtins/time-complexity.html#dict-frozendict) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/two-sum/research.md#L25) · [题名核对固定原文](https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/time-complexity.rst)
+
+对应知识点：CPython字典操作的常数时间以平均成本及适当哈希分布等条件为前提，写入需考虑扩容的摊还成本。 大量碰撞时单次操作可退化为线性时间；据此得出本片遍历算法平均时间O(n)，不宣称无条件最坏O(n)。
+
+正文位置：dict / frozendict · 平均成本、哈希假设与摊还边界。

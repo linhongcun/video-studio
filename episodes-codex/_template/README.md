@@ -24,6 +24,10 @@
 6. 按下面的默认入口接通 `npm run render`：资料预检 → 正文及代码卡 → 参考资料 → 最终媒体。完成完整解码、媒体指标、实际编码中间态及跨镜接续复核，另外实际查看所有资料页和原生播放器的暂停/全屏效果。记录执行者、具体范围和能力边界。
 7. 将检查通过的同一份媒体、来源清单和附录回执接入站点，按实际渲染结果写入发布元数据；执行 `npm --prefix site run check:references`。新制作或重制的公开视频缺资料附录时，构建会阻止发布。文章章节、字幕及线上完整SHA仍按 [publish.md](../../docs/publish.md) 核验；平台授权范围保持原约定。
 
+## 配套图文起稿与接入
+
+从 [article.mdx](article.mdx) 复制骨架，按 [图文写作说明](../../docs/article-style.md) 替换所有占位内容。调研时核对原文、位置和对应论点，文稿中放置 `SourceQuote`；最终媒体生成后再选择实际关键帧，补 `Figure` 与准确时间，不把尚未生成的图记为已验收。至少一处核心原文与一幅有效配图，发布前运行 `npm --prefix site run check:articles` 并实际复核阅读和回看操作。文章独有来源可存 `article-sources.json`，随发布稿和 `article/` 图片、证据一起接入 `episodes/<slug>/`。
+
 ## 新期默认接入参考资料
 
 先将 [references.example.json](references.example.json) 复制为本期 `references.json`，填写本期slug、实际核验日期、真实来源、文档原始 `title`、`titleEvidence: {locator, evidence}`、`organization`、内部支持论点与仓内证据路径。有明确公开个人署名时另加非空字符串 `author`，没有时省略；不得用空值占位，也不从Git提交者或维护账号推断作者。署名依据保留于关联核验记录。`presentation` 使用 `title-author`，不填写 `displayTitle` 或 `displaySupport`。示例中的空字段和 `pending` 会使预检失败；只有实际读取并保存核验记录后，才能填写 `verified`。不能从上期复制一个已通过的资料清单。

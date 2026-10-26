@@ -44,6 +44,10 @@ MySQL默认复制是异步的。源在提交成功时，并不能据此确认某
 
 半同步提供的是等待指定副本收到并记录相关事件的确认，不代表这些事件已经在那个副本应用并提交。不能只因启用半同步，就直接从任意副本读取并声称“刚写入必定可见”。[^semi]
 
+<SourceQuote sourceId="A1" supports="文档把接收日志与执行日志中的事务分为不同职责；收到更改不等于已经应用。引文中的单应用线程限定于参数为0的情况。" />
+
+<Figure src="/video-studio/episodes/db-replication/article/01.jpg" alt="主库和从库均显示昵称青禾，从库标注本次更改已应用" caption="教学示例：这次昵称更改应用完成后，从库才显示“青禾”；此前收到日志与已更新可读数据是两个阶段。" seekTo={77} chapter="delay" />
+
 ## 刚改后要立即核对怎么读 {#route}
 
 本例的选择是：主库提交完成后，把紧接着核对刚才修改的**新查询定向到刚写入的同一个主库**，同时不使用旧缓存。这避免了此例中特定副本尚未追上的读取窗口；普通读取仍可按需求分给从库。它是依据数据去向作出的应用路由选择。[^scale]
@@ -65,8 +69,7 @@ MySQL默认复制是异步的。源在提交成功时，并不能据此确认某
 [^status]: [MySQL 8.4 §15.7.7.35 SHOW REPLICA STATUS](https://dev.mysql.com/doc/refman/8.4/en/show-replica-status.html)
 [^snapshot]: [MySQL 8.4 §17.7.2.3 Consistent Nonlocking Reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html)
 
-## 片尾参考资料
-
+### 视频采用的资料
 **[R1] Replication Implementation**
 
 Oracle / MySQL · MySQL 8.4 Reference Manual · 实读2026-10-24

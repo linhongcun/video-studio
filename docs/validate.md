@@ -38,6 +38,14 @@ npm --prefix site run check:references
 
 `site/scripts/reference-legacy.json` 固定登记本次流程接入前45片的slug和原视频SHA，仅未接入附录且实际MP4仍与基线字节相同的旧片可分批暂缓。已开始接入附录的旧片、旧slug重制或更换MP4后均须完整检查，不能通过扩大名单或重写基线SHA绕过。检查命令不改写资料、媒体或冻结清单，失败后不能靠重写哈希追认未使用的输入。
 
+## 图文发布检查
+
+```sh
+npm --prefix site run check:articles
+```
+
+按 [图文规范](RULES.md#配套图文) 检查全部当前文章，`build` 与 `dev` 同时接入此项。检查正文实际使用的 `SourceQuote`、逐字证据与出处字段，以及有效配图、图注、替代文本和截图时间。字段和文件通过后，仍需编辑审读确认短引支持对应论点、图片帮助解释，并在手机/桌面及亮暗主题查看实际页面，点击截图时间确认播放器定位。代码围栏中的示例、封面、无图注图片不计入最低要求。
+
 ## 冻结与媒体身份
 
 `audioSha256` 是实际 `voice.wav` 的全文 SHA-256；`scriptSha256` 的输入可能是整份脚本或旁白提取文本，必须按该期装配实现核对。当前 EP.14 的 `check-inputs.py` 比较整份 `script.md`，历史 fixture 的旁白哈希定义不同。

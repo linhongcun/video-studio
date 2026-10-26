@@ -36,6 +36,10 @@ Saga将一个业务流程拆成本地事务序列。每一步完成自己的提�
 
 这是业务上的收尾，不是抹除历史。现实的补偿还要考虑并发、手续费、部分退款或不可逆动作，不能把“补偿”泛化为直接将当前值覆写成旧快照。[^compensate]
 
+<SourceQuote sourceId="A1" supports="某一步失败时，Saga以补偿事务应对先前已提交步骤的效果；不是跨库抹去既有流水。" />
+
+<Figure src="/video-studio/episodes/tx-saga/article/01.jpg" alt="账户余额1000，原扣款负200与新退款正200流水并列保留，订单8124已取消" caption="教学示例：缺货后新增退款+200，使余额回到1000；原扣款-200流水仍保留，订单已取消。" seekTo={78} chapter="compensate" />
+
 ## 重试与适用边界 {#recover}
 
 同一退款R8124再次抵达，应认出此前结果，不能再增加200。退款结果与已处理标记要在本地事务内正确衔接，并对并发重复提供唯一约束、锁或等价保护。只先查一下内存，无法消除故障空档。[^safe]
@@ -53,8 +57,7 @@ Saga也不提供天然全局隔离：前一步已经提交的中间结果，可�
 
 [^safe]: [AWS Builders’ Library：Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，请求标识与业务修改原子处理，访问2026-10-24。
 
-## 片尾参考资料
-
+## 参考资料
 以下书目对应片尾简表。R1–R3沿用本片2026-10-24的技术实读记录；R4为2026-10-26补充核验，直接支持退款与已完成标记的本地原子保存边界。
 
 **[R1] Saga distributed transactions pattern**

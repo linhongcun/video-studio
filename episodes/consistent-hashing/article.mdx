@@ -22,6 +22,8 @@ related: ["db-sharding", "load-balancing", "server-cache"]
 
 旧值可能还保存在C，新请求却去了A。A没找到时，这个教学系统要从数据库读取并重建缓存，或者在切换前安排迁移。路由表变了，数据不会因此自动搬完。NGINX官方把减少成员变化造成的键重映射，直接联系到缓存命中率。[^nginx]
 
+<SourceQuote sourceId="R1" supports="该一致性哈希方法在成员加入或移除时减少改映射的键；具体比例由布局和数据决定。" />
+
 下面始终使用同十个**预设哈希值**，逐项按规则计算。它们不是对真实键运行某个产品哈希函数后的测量，也不代表普遍分布。
 
 | 哈希值h | `h % 3`负责节点 | `h % 4`负责节点 | 是否改变 |
@@ -76,7 +78,7 @@ related: ["db-sharding", "load-balancing", "server-cache"]
     <text x="310" y="240" textAnchor="middle" fill="#cbd5e1" fontSize="24">其余位置保留去向</text>
     <text x="320" y="444" textAnchor="middle" fill="#cbd5e1" fontSize="23">示例：56、64从C改归D；哈希位置不变</text>
   </svg>
-  <figcaption>示例环。金色区间左端50不包含，右端70包含；环上位置与真实数据搬迁是两件事。</figcaption>
+  <figcaption>教学示例：示例环。金色区间左端50不包含，右端70包含；环上位置与真实数据搬迁是两件事。</figcaption>
 </figure>
 
 ## 新节点只接管局部区间 {#insert}
@@ -103,6 +105,8 @@ related: ["db-sharding", "load-balancing", "server-cache"]
 
 **虚拟节点**让一个物理缓存拥有多个分散位置，每个位置仍映回同一台缓存。合理分散这些位置，可以让每台节点承接多个较小区间，让新增节点有机会从多个原节点接走数据。Cassandra官方同时提醒：更多token也会增加维护、修复等操作的成本。[^cassandra]
 
+<SourceQuote sourceId="R2" supports="虚拟节点为每个物理节点分配多个token位置。" />
+
 下面是**另一套预先配置的示例**，不是把前一个环无成本地改成此布局：
 
 <figure>
@@ -125,7 +129,7 @@ related: ["db-sharding", "load-balancing", "server-cache"]
     <rect x="454" y="226" width="147" height="62" rx="12" fill="#302248" stroke="#c084fc" strokeWidth="2" /><text x="528" y="266" textAnchor="middle" fill="#e2e8f0" fontSize="26">C缓存</text>
     <text x="320" y="328" textAnchor="middle" fill="#fbbf24" fontSize="24">另例：新D在10、34、88加入</text>
   </svg>
-  <figcaption>同一颜色的多个位置指向同一缓存。虚拟位置增加，并没有增加物理机器，也不自动复制数据。</figcaption>
+  <figcaption>教学示例：同一颜色的多个位置指向同一缓存。虚拟位置增加，并没有增加物理机器，也不自动复制数据。</figcaption>
 </figure>
 
 在该预设布局中，D分别接管`(5,10]`、`(28,34]`、`(82,88]`，原负责者依次为B、A、C。它表现“从多个原节点分担小段”的机制；这组手选位置没有证明随机分配、最优均衡或一般性能提升。
@@ -177,19 +181,15 @@ print(changed)  # [56, 64]
 [^cassandra]: Apache Cassandra，[Dynamo](https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html)。本次读取页面标识5.0，未标页面日期；包含token环、虚拟节点及维护代价，原页的多副本语境未被简化为本片的单归属模型。
 [^redis]: Redis，[Redis cluster specification：Key distribution model；Live reconfiguration](https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/)。正文未标最后更新日期，页面元数据modified_time为2026-09-21；固定槽、hash-tag例外和迁移职责依规范分别说明。
 
-#### 片尾原题名与逐字引用（2026-10-25核验）
+### 来源版本与核验范围（2026-10-25核验）
 
 以下保留资料原题与所引原句，机构、版本和具体位置分别注明。本轮核对了下列官方仓库固定版本，原有资料读取记录继续保留。
 
 **[R1] Module ngx_http_upstream_module**（NGINX；持续维护文档 · 核验2026-10-25）。
 
-> The method ensures that only a few keys will be remapped to different servers when a server is added to or removed from the group.
-
 定位：hash directive, consistent parameter paragraph。 [正式链接](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#hash) · [本轮实读固定正文](https://github.com/nginx/nginx.org/blob/34f63eb329ff52623cec453cd8f7539f9a5f8606/xml/en/docs/http/ngx_http_upstream_module.xml)。
 
 **[R2] Dynamo**（Apache Cassandra；5.0文档 · 核验2026-10-25）。
-
-> Virtual nodes solve the problem by assigning multiple tokens in the token ring to each physical node.
 
 定位：Multiple Tokens per Physical Node (vnodes), paragraph 2。 [正式链接](https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html) · [本轮实读固定正文](https://github.com/apache/cassandra/blob/76550e931481e965ae3283d8cf4a59c320d74c55/doc/modules/cassandra/pages/architecture/dynamo.adoc)。
 

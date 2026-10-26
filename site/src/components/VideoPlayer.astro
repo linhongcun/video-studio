@@ -93,6 +93,20 @@ const {src, poster, captions, chapters, stickyOnMobile = true, title = ''} = Ast
     video.addEventListener('play', () => window.dispatchEvent(new CustomEvent('vs:chapter', {detail: {id: chapters[idxAt(video.currentTime)].id, playing: true}})));
     video.addEventListener('pause', () => window.dispatchEvent(new CustomEvent('vs:chapter', {detail: {id: chapters[idxAt(video.currentTime)].id, playing: false}})));
     window.addEventListener('vs:seek', (e: any) => {
+      if (typeof e.detail?.time === 'number' && Number.isFinite(e.detail.time) && e.detail.time >= 0) {
+        const time = e.detail.time;
+        if (!vwrap.classList.contains('stuck')) root.scrollIntoView({block: 'start', behavior: reduce.matches ? 'auto' : 'smooth'});
+        const go = () => {
+          video.currentTime = Math.min(time, Number.isFinite(video.duration) ? video.duration : time);
+          video.play().catch(() => {});
+          const u = new URL(location.href); u.searchParams.delete('t'); u.hash = `t=${time}`;
+          history.replaceState(null, '', u);
+          live.textContent = `已跳转到视频 ${time.toFixed(1)} 秒`;
+          setCurrent(idxAt(time));
+        };
+        video.readyState >= 1 ? go() : video.addEventListener('loadedmetadata', go, {once: true});
+        return;
+      }
       const i = chapters.findIndex((c) => c.id === e.detail.id); if (i < 0) return;
       if (!vwrap.classList.contains('stuck')) root.scrollIntoView({block: 'start', behavior: reduce.matches ? 'auto' : 'smooth'});
       seek(i);

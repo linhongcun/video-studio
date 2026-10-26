@@ -44,7 +44,7 @@ related: ["consistent-hashing"]
       <text x="320" y="192" fill="#cbd5e1" font-size="23">格外是位置编号，格内是0或1</text>
     </g>
   </svg>
-  <figcaption>A、B都使用3号位，最后只留下一个1；位中没有保存谁写过、写过几次。</figcaption>
+  <figcaption>教学示例：A、B都使用3号位，最后只留下一个1；位中没有保存谁写过、写过几次。</figcaption>
 </figure>
 
 这正是它紧凑的原因，也是误判的来源：许多元素可以共享少量位置，而元素身份没有被完整保留下来。
@@ -72,6 +72,8 @@ C从未加入，但它也算到3号位，恰好读到1。这个1是A和B留下�
 
 因此，**0和1并不是同样确定的两种回答**。需要精确确认时，可能存在的结果仍要交给保存真实元素的结构判断。
 
+<SourceQuote sourceId="R1" supports="布隆过滤器可以确定排除不存在的元素，但对存在只能作估计；具体结论以标记维护正确为前提。" />
+
 ## 共享标记的边界与取舍 {#boundary}
 
 ### 不能按元素直接清零
@@ -89,6 +91,8 @@ C从未加入，但它也算到3号位，恰好读到1。这个1是A和B留下�
 这是**同一集合重新构造后的对照**，不是直接对旧数组换一套查询规则。它只说明C这次被排除，不能推断每个查询都会改善，或计算出线上误判率。
 
 位置也不是越多越好：更多选取意味着更多写入和检查，也可能让固定数组更拥挤。要把空间、预计元素数与选取次数一起选择；不同实现也可能从少量基础哈希派生多个位置。[^redis][^guava][^cassandra]
+
+<SourceQuote sourceId="R2" supports="布隆过滤器可以通过使用更多内存提高准确性；这段原文没有给出通用的内存倍数或参数。" />
 
 ### 可运行的小例子
 
@@ -138,12 +142,12 @@ assert not all(two[position("C", seed)] for seed in (22, 0))
 
 代码中的清零段是错误操作反例；两位置段从全0重建。需要完整复算和模型核对的读者可查看[完整示例源码](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/article-demo.py)。
 
-### 资料依据
+## 参考资料
 
 以下保留官方原题与固定正文版本。本次核对既有固定原文，原始读取记录与技术阅读范围另存研究文件；不以复读日期冒充文档发布日期。
 
-[^redis]: Redis，**Bloom filter**。[固定官方正文](https://github.com/redis/docs/blob/4fe762f8dab40f0b661207374378ed52113c9fe3/content/develop/data-types/probabilistic/bloom-filter.md)；[官网对应页](https://redis.io/docs/latest/develop/data-types/probabilistic/bloom-filter/)。核对2026-10-26。原文摘录：A Bloom filter can guarantee the absence of an item from a set, but it can only give an estimation about its presence. **编者说明：**本片采用最简单的单位置参数讲原理，不将其称为Redis默认配置。
+[^redis]: Redis，**Bloom filter**。[固定官方正文](https://github.com/redis/docs/blob/4fe762f8dab40f0b661207374378ed52113c9fe3/content/develop/data-types/probabilistic/bloom-filter.md)；[官网对应页](https://redis.io/docs/latest/develop/data-types/probabilistic/bloom-filter/)。核对2026-10-26。**编者说明：**本片采用最简单的单位置参数讲原理，不将其称为Redis默认配置。
 
 [^guava]: Google Guava，**BloomFilter.java**、**BloomFilterStrategies.java**。[固定类型与选k源码](https://github.com/google/guava/blob/5ae56d77e64305752b919ff2c96713f47ac0c94c/guava/src/com/google/common/hash/BloomFilter.java)；[固定置位/查询策略源码](https://github.com/google/guava/blob/5ae56d77e64305752b919ff2c96713f47ac0c94c/guava/src/com/google/common/hash/BloomFilterStrategies.java)。核对2026-10-26。**编者说明：**构造器要求位置次数大于0，选择次数的方法也保留下限1；这是源码依据，不把本文的SHA教学规则冒充Guava实际Murmur派生策略。
 
-[^cassandra]: Apache Cassandra，**Bloom Filters**。[固定官方正文](https://github.com/apache/cassandra/blob/05853eaeab006bd1e834331ac8b1dfdc464d1f31/doc/modules/cassandra/pages/managing/operating/bloom_filters.adoc)；[官网对应页](https://cassandra.apache.org/doc/latest/cassandra/managing/operating/bloom_filters.html)。核对2026-10-26。原文摘录：bloom filters can be made more accurate by allowing them to consume more RAM. **编者说明：**原文用于空间与准确性的工程取舍，不把具体产品默认值或内存倍数作为通用规律。
+[^cassandra]: Apache Cassandra，**Bloom Filters**。[固定官方正文](https://github.com/apache/cassandra/blob/05853eaeab006bd1e834331ac8b1dfdc464d1f31/doc/modules/cassandra/pages/managing/operating/bloom_filters.adoc)；[官网对应页](https://cassandra.apache.org/doc/latest/cassandra/managing/operating/bloom_filters.html)。核对2026-10-26。**编者说明：**原文用于空间与准确性的工程取舍，不把具体产品默认值或内存倍数作为通用规律。

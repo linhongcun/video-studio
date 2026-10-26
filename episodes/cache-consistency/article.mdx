@@ -19,9 +19,13 @@ chapters:
 
 本片讨论的是应用管理的服务端缓存。页面刷新后请求确实重新到达应用，但应用如果仍从缓存取出199，就会继续返回旧价格。这里不是浏览器缓存，也不是数据库主从延迟。[Redis官方参考](https://redis.io/docs/latest/develop/reference/client-side-caching/)用过时副本说明失效的必要性，访问于2026-10-24。
 
+<Figure src="/video-studio/episodes/cache-consistency/article/01.jpg" alt="同一商品7042的数据库价格已改为179，缓存副本仍是199" caption="教学示例：数据库原记录已经保存179，缓存中的旧副本仍为199；修改一份数据不会同步改好所有副本。" seekTo={25} chapter="stale" />
+
 ## 一种常见路径：写原记录，再删除对应缓存 {#invalidate}
 
 修改数据库成功后，使对应缓存失效。下一次读找不到这一项，再从数据库取179并填回缓存。原记录始终留在数据库里，删除副本不等于删除商品。[Microsoft Cache-Aside模式](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)说明了这条更新和重建路径，访问于2026-10-24。
+
+<SourceQuote sourceId="R1" supports="Cache-Aside更新路径先修改数据源，再使对应缓存条目失效。" />
 
 如果反过来先删缓存、后改数据库，两个动作之间插入的读取可能拿到数据库旧值，并重新填回缓存。随后原记录虽然更新，缓存却又旧了。视频把这组交错动作拉开给观众看，并没有赋予它固定耗时。
 
@@ -30,6 +34,8 @@ chapters:
 写数据库和删缓存通常不是一个跨系统原子操作。删除可能失败；并发读取也可能在不合适的时点携带旧结果回来。重试、失效消息、版本控制和业务侧核验的选择，要看系统约束。视频只用删除失败提示这个边界，不声称“先写后删”带来强一致。
 
 给缓存条目设置过期时间能限制该条目的使用期限，不能保证所有读都立刻看见最新值，也不能阻止错误逻辑重新填入旧数据。缓存策略应结合允许的新旧程度与成本选择，见[Microsoft缓存指南](https://learn.microsoft.com/en-us/azure/architecture/best-practices/caching)，访问于2026-10-24。
+
+<SourceQuote sourceId="R2" supports="已设置超时的Redis键在期限结束后会被删除；这不保证数据库更新立即传播。" />
 
 展示价格可以短暂陈旧，不代表交易时能盲目信任展示缓存。实际结算仍应在业务要求的权威数据和正确事务范围里核验；本片不替具体系统选择一致性方案。
 
@@ -41,8 +47,6 @@ chapters:
 
 Microsoft · Azure Architecture Center · 2026-10-26核验：[正式入口](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)；[固定原文](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside-content.md)；[同版本原题信息](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside.yml)。
 
-> When an application updates information, it writes the change to the data store and then invalidates the corresponding item in the cache.
-
 原句位置：Solution · cache-aside-content.md line 24。
 
 **编者说明：**该文档支持更新数据源后使缓存失效、未命中时重新填充，并在Example末尾说明先删后写的旧值回填窗口。Consistency条目明确该模式不保证数据源与缓存始终一致；删除失败及商品价格为本片教学示例。
@@ -50,8 +54,6 @@ Microsoft · Azure Architecture Center · 2026-10-26核验：[正式入口](http
 ### R2 · EXPIRE
 
 Redis · 官方命令参考 · 2026-10-26核验：[正式入口](https://redis.io/docs/latest/commands/expire/)；[固定原文](https://github.com/redis/docs/blob/4fe762f8dab40f0b661207374378ed52113c9fe3/content/commands/expire.md)。
-
-> After the timeout has expired, the key will automatically be deleted.
 
 原句位置：Opening description · line 77。
 

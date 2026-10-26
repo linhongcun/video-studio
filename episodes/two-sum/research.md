@@ -49,3 +49,11 @@
 ## 执行核验状态
 
 `research/verify_algorithm.py`已直接加载实际`solution.py`。值域-2..2、长度2..5、目标-4..4共35,100个枚举场景中，只将符合官方“恰一解”的7,465组计入实现核验，全部通过；零解或多解场景不冒充官方条件用例。另9个显式例及1个长度10,000例通过。核对了返回位置不同、目标和、输入不变，显示JSON及文章唯一Python块与执行源逐字相同。有限用例不能替代上面的证明，也不能证明动画、音轨或初学者理解已经合格；实际SHA与结果见`research/algorithm-verification.json`。
+
+## 片尾参考资料
+
+2026-10-26为已验收原片整理title-author清单，3项、一页5秒，只显示原题与作者或机构。R1 Two Sum、R2 Built-in Types、R3 Time complexity of operations on built-in types的技术阅读身份均保留为本片2026-10-25，不更改题面、字典语义、成本模型及独立算法证明。
+
+本轮只补核Python原题与出版机构：从官方CPython固定commit `c436e8d83597c6f8c1bc7e37812c98d46670c29a`完整GET `Doc/builtins/stdtypes.rst`、`Doc/builtins/time-complexity.rst`、`Doc/copyright.rst`，原题分别取第8行Built-in Types与第4行Time complexity of operations on built-in types。当前映射小节含dict及frozendict，故不把旧脚注缩写当成完整章节题名，也不将frozendict扩展进视频讲解。出版机构Python Software Foundation依据官方版权页，仅作为机构身份，不推定文献个人作者。旧技术读日为25日，题名／机构补核为26日；固定源SHA只代表26日实际取得的完整响应，不追记为25日原页hash。
+
+本轮没有请求LeetCode中英文题面或editorial，不把原先未取得的题解正文记为成功。片中算法正确性继续依据本期独立不变式证明与已有实际执行记录，而非官方题解。旧全文、脚注及锚点完整保留；完整标题、逐论点旧读记录、基线研究Git blob／SHA与26日元数据请求见[本轮证据](../../docs/reference-endcards/batch-9/sources-two-sum.json)，完整书目见[references.md](references.md)。
