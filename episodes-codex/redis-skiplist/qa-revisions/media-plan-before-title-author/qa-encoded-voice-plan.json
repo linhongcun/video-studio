@@ -1,0 +1,36 @@
+{
+  "status": "prepared-awaiting-authorized-freeze-and-final-render",
+  "preparedAtUTC": "2026-10-26T07:37:01.023000+00:00",
+  "scope": "EP40 Redis skiplist only; numerical provenance/encoded sound integrity, not semantic or ASR.",
+  "qaEntry": "qa-tools/check_encoded_voice.py",
+  "qaEntrySHA256": "9f00dda38eed78904a49d88041b41796c08f253404983df2280018b4d32c45f1",
+  "executionRequires": [
+    "Explicit complete expected final MP4 SHA",
+    "Explicit complete expected frozen-manifest SHA",
+    "Completed final body/premix/final media and three matching reference/render receipts"
+  ],
+  "dynamicExpectations": {
+    "bodyFrames": "actualSB == actualwords == sumshots == sourceframes",
+    "finalFrames": "actual matching render/appendix/media receipts",
+    "sentences": "actualbuild == voicesents ==2*configshotCount",
+    "frozenInputs": "Every entry in actual exact SHA-bound manifest, before and after"
+  },
+  "retainedNumericalCriteria": [
+    "-16 ±0.3 LUFS, truepeak <=-2dBTP",
+    "Pinned unchanged source/premix and known-BGM numerical checker algorithms",
+    "Actual every-sentence correlation, gain, coverage, delay/drift and channel checks",
+    "Body/final AAC payload/PTS/DTS/duration/size and decodedPCM identity",
+    "Preserve audited source low-level flags; allow no new encoded quiet interval beyond two10ms bins for specifically reviewed flags"
+  ],
+  "schemaAdaptation": "Uses this episode currentVoiceSHA256/voiceQAReportSHA256/pauseReviewSHA256 plus qa-voice.sourceAuditSHA256; does not require absent Bloom provenance aliases. Numeric criteria unchanged.",
+  "productionInputsModified": false,
+  "formalMediaQAExecuted": false,
+  "ASRPerformed": false,
+  "semanticListeningPerformed": false,
+  "fullHumanListeningPerformed": false,
+  "preparationVerification": {
+    "ASTSyntaxParsed": true,
+    "helpEntryExecuted": true,
+    "formalMediaQAExecuted": false
+  }
+}
