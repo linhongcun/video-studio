@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 1,
+  "batch": 9,
+  "episode": "reverse-linked-list",
+  "presentation": "title-author",
+  "baseCommit": "036ce88d416e08127f8135afb55d1d62044f30f6",
+  "assembledAtBeijing": "2026-10-26T19:39:48+08:00",
+  "checkedAt": "2026-10-25",
+  "timezone": "Asia/Shanghai",
+  "scope": "Two retained 2026-10-25 official-reading sources: English/Chinese problem description and the actually read Python assignment chapter. No fresh GET, editorial-body claim, new algorithm execution, media/freeze/release result or user acceptance is claimed.",
+  "historicalResearchRecord": {
+    "path": "episodes-codex/reverse-linked-list/research.md",
+    "baseCommit": "036ce88d416e08127f8135afb55d1d62044f30f6",
+    "gitBlob": "a2b8518e6fc70d8a54563dac326bcac0c9823d51",
+    "bytes": 5208,
+    "sha256": "5777c0ad31a49674655d49260daf5f3e947ab1aa7e05441834cf8f3e098998b9",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/reverse-linked-list/research.md",
+    "archivePath": "docs/reference-endcards/batch-9/reverse-linked-list-evidence/prior-research-036ce88d.md",
+    "fullOriginalText": "# LC.206 公开资料与独立推导\n\n访问日期：2026-10-25（北京时间）。制作选题为[issue #77](https://github.com/linhongcun/video-studio/issues/77)。以下区分题面、语言语义与本期独立证明；不把运行结果或资料阅读写成配音听辨、动画验收或用户认可。\n\n## R1 官方题面\n\n- 来源：[LeetCode 206. Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/description/)与[力扣206. 反转链表](https://leetcode.cn/problems/reverse-linked-list/description/)。\n- 实际获取：通过可用网页工具分别打开并读取中英文正文、三组输入输出及约束。图示链接存在，但本记录不将未单独打开的题面图片写成已经查看。\n- 页面日期：题面未标发表或更新时间，不以版权年份推断。\n- 支持主张：给定单链表的头节点，反转链表并返回反转后的链表；官方允许0..5000个节点，节点值范围-5000..5000。空链表是题面明确展示的合法输入。进阶提到迭代与递归两种实现，本期只讲迭代。\n- 短引：英文题面用“singly linked list”交代输入结构。\n- 用在：开头先解释节点、后继引用和头节点这一入口，目标是反转关系并返回新头；不是仅把值倒序打印。主片三节点输入为自选教学示例。\n\n## R2 Python引用与属性赋值\n\n- 来源：[Python Language Reference — Assignment statements](https://docs.python.org/3/reference/simple_stmts.html#assignment-statements)。\n- 实际获取：实际打开官方语法文档并读取名称绑定、属性赋值、右侧求值与多目标赋值部分。\n- 页面日期：所见页面显示2026-10-24更新；这是所见文档元数据，不表示链表算法的新发表日期，也不据此推断LeetCode运行时的小版本。\n- 支持主张：名称赋值重新绑定已有对象；属性目标赋值要求对象修改该属性，不会因为`cur.next = prev`而自动新建一个节点。右侧先求值，随后才进行相应赋值。\n- 用在：三引用的实际角色、先保存原后继再改写`next`、返回已反转前缀的新头。Python里的变量和对象引用是本期程序语义；不把它说成必须手工管理内存地址或释放节点。\n\n## 官方题解访问限制\n\n实际打开了[官方editorial地址](https://leetcode.com/problems/reverse-linked-list/editorial/)，工具只取得登录、导航与编辑器空壳，没有题解正文。因此不能写“已读官方迭代题解”。本期算法由独立不变式论证与实际程序执行核验支撑。\n\n## 本期独立正确性论证\n\n每轮开始时，`prev`是已经反转的前缀头，前缀尾指向空；`cur`是尚未处理后缀的头。两部分涵盖原来的所有节点，节点本身及其值不变。\n\n先用`nxt = cur.next`保存原后继，这是继续访问剩余后缀的入口。再用`cur.next = prev`将当前节点接到已反转前缀前方。最后令`prev = cur`、`cur = nxt`，反转部分增加一个节点，未处理后缀减少一个节点，不变式恢复。\n\n如果先覆盖`cur.next`，再通过这个已改写的属性找“原来的下一个”，便无法按原链继续。这应解释成丢失继续访问原后半段的入口，不能笼统地说后面的节点当场消失或被销毁；其他引用可能仍持有它们。\n\n处理完所有节点后，`cur`为空，`prev`就是原尾节点及整个反转链的头，必须返回它。原`head`变量不会自动重新绑定为新头。原链表为空时初始`prev`与`cur`都为空，直接返回空；单节点则仍返回同一节点。\n\n每节点只处理一次，每轮只做固定数量的引用读取和赋值，时间O(n)。只使用固定数量引用，不新建结果节点、数组或递归栈，额外空间O(1)，不包含题目输入的节点。\n\n## 自选三节点轨迹\n\n初始对象固定为1→2→3→空，头指向节点1，`prev`为空。\n\n| 轮次 | 保存原后继 | 改写当前出边 | 更新两段入口 |\n|---:|---|---|---|\n| 1 | `nxt`指向节点2 | 节点1→空 | `prev`到节点1，`cur`到节点2 |\n| 2 | `nxt`指向节点3 | 节点2→节点1 | `prev`到节点2，`cur`到节点3 |\n| 3 | `nxt`为空 | 节点3→节点2 | `prev`到节点3，`cur`为空 |\n\n结束时从返回的新头节点3访问到3→2→1→空。节点可在画面上保持原来的位置，只翻转出边和移动引用标签；不能通过交换节点值或重新排列数字来冒充原地反转。空引用可画在不同边界位置，但应清楚标记同一种空值，而不是凭空新建几个数据节点。\n\n## 执行核验状态\n\n`research/verify_algorithm.py`已直接加载实际`solution.py`。对长度0..7、节点值-1/0/1的全部3,280条短链，通过独立构造的对象验证返回身份、反向身份顺序、原值不变、没有环、尾部为空及没有新节点构造；另8个显式例与1条5,000节点最大长度链通过，包含官方空链/单节点及重复值。显示JSON及文章唯一Python块与执行源逐字相同。实际SHA与结果见`research/algorithm-verification.json`；有限执行不能代替上述一般论证，也不能证明动态画面或听辨已经通过。\n",
+    "gitBlobBytesMatched": true,
+    "gitObjectHashRecomputed": true
+  },
+  "originalArticleRecord": {
+    "path": "episodes-codex/reverse-linked-list/article.mdx",
+    "baseCommit": "036ce88d416e08127f8135afb55d1d62044f30f6",
+    "gitBlob": "056ca41a3bdc3daeb46a9509d83c36a94fa4b1d1",
+    "bytes": 7215,
+    "sha256": "3ac678192ceab522985a885dbf55dc7092c17f978237638132a9a0edced71c54",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/reverse-linked-list/article.mdx",
+    "archivePath": "docs/reference-endcards/batch-9/reverse-linked-list-evidence/prior-article-036ce88d.mdx",
+    "fullOriginalText": "---\ntitle: 反转链表：为什么要先保存下一个节点？\nsummary: 从原链访问顺序与目标回指推导逐个反转，再逐轮保存原后继、改变连接和移动入口，理解最后为什么返回前驱指针。\nchapters:\n  - { id: problem, title: 先弄懂要反转什么 }\n  - { id: save, title: 为什么必须先保存 }\n  - { id: reverse, title: 把三拍走完 }\n  - { id: code, title: 停止、返回与完整程序 }\nrelated: []\n---\n\n## 先弄懂要反转什么 {#problem}\n\nLeetCode 206给出一个单向链表的头节点，要求反转链表，返回反转后的头节点。本片先分析输入能怎样访问、目标要怎样连接，再得到逐个反转的做法，并说明为什么修改`next`之前必须先保存原来的下一个节点。\n\n一个节点有两个关键信息：一个值，以及引用下一个节点的`next`。单向链表只能沿`next`继续向后访问；`head`提供开始访问的入口，`None`表示没有节点。\n\n教学输入是三个原节点：`1 → 2 → 3 → None`，`head`指向原节点1。目标是把连接改为`3 → 2 → 1 → None`，返回原节点3。图中三个节点的位置始终固定，因此目标也可以从右向左读。反转的是引用关系，节点的值不交换，程序也不创建替代节点。\n\n例如，返回一个装着值3的新节点，再把原节点丢开，并不符合本片解法。正确结果必须仍然包含输入中的同一批节点，原节点1现在成为尾节点，它的`next`是`None`。\n\n## 为什么必须先保存 {#save}\n\n### 先从访问顺序与目标连接入手\n\n从`head`给出的入口沿原来的`next`访问，顺序是1、2、3。再看目标连接：节点2要指回节点1，节点3要指回节点2。要建立的反向连接，恰好指向原访问顺序中刚处理过的节点。\n\n因此可以沿原链逐个处理，把当前节点接到已经处理部分的前面，并记住这一段的新入口。最开始还没有处理任何节点，已完成段的入口为空；处理完节点1后，记住入口1，轮到节点2时就知道要指回1；处理完节点2后，记住新入口2，轮到节点3时同理。这样由目标关系得到需要记住的信息，之后才给这些访问入口取变量名。\n\n但这还没有解决继续访问原链的问题。把当前节点的`next`指向前面以后，就不能再用这条已改变的连接去找原后继，所以还要分析修改之前应保存什么。\n\n### 再分析改连接时会失去什么\n\n假设当前处理节点1。它的`next`原来指向节点2，我们希望把它改成指向空值，让节点1成为反转后链表的尾部。\n\n一旦执行这个修改，`1.next`就不能再用来访问节点2。这个问题是**丢失继续访问原后半段的入口**，不能笼统说成节点2和3立即被销毁；对象是否仍然存在还取决于其他引用。\n\n所以，修改之前要另存一个引用，指向原来的后继。它保存的是同一个节点的入口，不是复制节点或复制后半条链。\n\n三个变量各有固定职责：\n\n| 变量 | 中文角色 | 这一轮开始时指向什么 |\n| --- | --- | --- |\n| `prev` | 前驱指针 | 已经反转好的一段的头；最初为`None` |\n| `cur` | 当前指针 | 这一轮要修改`next`的节点；最初为`head` |\n| `nxt` | 临时指针 | 当前节点原来的后继，在修改前保存 |\n\n这里“前驱”是处理过程中的角色：它所指节点应该成为当前节点反转后的下一个节点。`prev`初始为空，因此处理节点1时，`1.next`被正确改为空。\n\n## 把三拍走完 {#reverse}\n\n每轮都按同一个顺序进行：先保存原后继，再反转当前节点的`next`，最后依次把`prev`移到当前节点、把`cur`移到保存的原后继。\n\n| 轮次 | 先保存原后继 | 再改变连接 | 最后移动并落定 |\n| --- | --- | --- | --- |\n| 第一轮 | `nxt`指向原节点2 | 原节点1的`next`改为`None` | `prev`指向1，`cur`指向2 |\n| 第二轮 | `nxt`指向原节点3 | 原节点2的`next`改为原节点1 | `prev`指向2，`cur`指向3 |\n| 第三轮 | `nxt`为`None` | 原节点3的`next`改为原节点2 | `prev`指向3，`cur`为`None` |\n\n每次循环开始时，`prev`指向已处理节点组成的反向链；`cur`指向尚待处理部分的第一个节点。保存`cur.next`后，即使切断当前节点原来的连接，仍可以通过`nxt`找到剩余部分。把当前节点接到`prev`前面，已完成段就增加一个节点；依次更新两个变量后，同样的关系在下一轮继续成立。\n\n因此，不能先反转`cur.next`再去保存它：那时读到的已经是新连接。也不能在反转前先把`cur`移走，否则处理对象就变了。四行更新的顺序具有实际含义。\n\n图里的两处`None`都表示同一个空值。它们只是为了让向左的尾部连接和向右的未处理终点更容易读，不是两个节点。\n\n## 停止、返回与完整程序 {#code}\n\n`cur`变为`None`，说明所有原节点都处理完了。此时反向链的入口在`prev`，所以返回`prev`。\n\n传入的`head`名称仍然引用原节点1；给`prev`或`cur`赋值不会自动把`head`改为新头。调用方应当接收返回值，例如将返回结果重新赋给自己的头变量。\n\n下面是片尾同源的完整Python程序。LeetCode已预定义节点类型及其`next`属性，提交代码直接使用题目传入的节点，因此不需要自行创建`ListNode`，也不需要导入类型名称。\n\n```python\nclass Solution:\n    def reverseList(self, head):\n        prev = None\n        cur = head\n\n        while cur:\n            nxt = cur.next\n            cur.next = prev\n            prev = cur\n            cur = nxt\n\n        return prev\n```\n\n空链表时，`cur`一开始就是`None`，循环不执行，返回的`prev`也是`None`。单节点链表只执行一轮，节点的`next`仍为空，返回的还是它自身。\n\n每个节点恰好处理一次，时间复杂度为`O(n)`；迭代过程只使用固定几个引用变量，额外空间为`O(1)`。这两个结论针对本片的迭代实现，不是递归实现的空间结论。\n\n本片输入是合法的无环单链表。程序验证应同时检查返回顺序、节点身份未替换、节点值未变化、尾部为空以及结果无环，不能只比较打印出的数值。\n\n## 资料与核验\n\n- [LeetCode 206：反转链表](https://leetcode.cn/problems/reverse-linked-list/description/)，官方题意、示例、空链及节点范围；访问于2026-10-25（北京时间）。\n- [LeetCode 206: Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/description/)，官方英文题意及迭代/递归扩展要求；访问于2026-10-25（北京时间）。\n- [Python语言参考：赋值语句](https://docs.python.org/3/reference/simple_stmts.html#assignment-statements)，名称重新绑定和对象属性赋值的区别；访问于2026-10-25（北京时间）。\n\n公开题面没有为本片这段自写迭代代码提供逐行背书；解法与正确性说明由上述过程推导。独立程序测试及其实际范围见制作目录的`research/algorithm-verification.json`，它不代替正确性论证或真实初学者实验。\n",
+    "gitBlobBytesMatched": true,
+    "gitObjectHashRecomputed": true
+  },
+  "verificationReuse": {
+    "technicalReadDate": "2026-10-25",
+    "recordedReadingScope": "访问日期：2026-10-25（北京时间）。制作选题为[issue #77](https://github.com/linhongcun/video-studio/issues/77)。以下区分题面、语言语义与本期独立证明；不把运行结果或资料阅读写成配音听辨、动画验收或用户认可。",
+    "newNetworkRequests": [],
+    "method": "Read retained full research/article/script; authenticate baseline complete bytes via Git blob and SHA256; map actual old source positions to specific claims.",
+    "limits": [
+      "题面、Python语言语义和本期独立算法证明分开；未读取到官方editorial正文。",
+      "本仓固定Git实读记录不是官方固定正文，旧记录SHA不代替官方响应SHA。",
+      "无26日题名或技术新GET，无个人作者推断，不根据文档更新元数据猜LeetCode运行时小版本。"
+    ]
+  },
+  "sources": [
+    {
+      "id": "reverse-linked-list-r1",
+      "referenceId": "R1",
+      "organization": "LeetCode",
+      "title": "Reverse Linked List",
+      "version": "LeetCode 206 · 官方题面（未标发布日期或更新时间）",
+      "canonicalUrl": "https://leetcode.com/problems/reverse-linked-list/description/",
+      "additionalUrls": [
+        "https://leetcode.cn/problems/reverse-linked-list/description/"
+      ],
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-25",
+      "verificationBasis": "existing-official-reading-record",
+      "originalRecord": {
+        "startLine": 5,
+        "endLine": 12,
+        "text": "## R1 官方题面\n\n- 来源：[LeetCode 206. Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/description/)与[力扣206. 反转链表](https://leetcode.cn/problems/reverse-linked-list/description/)。\n- 实际获取：通过可用网页工具分别打开并读取中英文正文、三组输入输出及约束。图示链接存在，但本记录不将未单独打开的题面图片写成已经查看。\n- 页面日期：题面未标发表或更新时间，不以版权年份推断。\n- 支持主张：给定单链表的头节点，反转链表并返回反转后的链表；官方允许0..5000个节点，节点值范围-5000..5000。空链表是题面明确展示的合法输入。进阶提到迭代与递归两种实现，本期只讲迭代。\n- 短引：英文题面用“singly linked list”交代输入结构。\n- 用在：开头先解释节点、后继引用和头节点这一入口，目标是反转关系并返回新头；不是仅把值倒序打印。主片三节点输入为自选教学示例。",
+        "claimText": "给定单链表的头节点，反转链表并返回反转后的链表；官方允许0..5000个节点，节点值范围-5000..5000。空链表是题面明确展示的合法输入。进阶提到迭代与递归两种实现，本期只讲迭代。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/reverse-linked-list/research.md#L5-L12",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-25既有实读记录research.md第7行：LeetCode 206.后的英文原题；article.mdx第98行同名题面交叉",
+        "evidence": "docs/reference-endcards/batch-9/sources-reverse-linked-list.json",
+        "record": {
+          "path": "episodes-codex/reverse-linked-list/research.md",
+          "line": 7,
+          "text": "- 来源：[LeetCode 206. Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/description/)与[力扣206. 反转链表](https://leetcode.cn/problems/reverse-linked-list/description/)。",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/reverse-linked-list/research.md#L7",
+          "basis": "2026-10-25实际官方阅读后记录的原题或实际被读章节题名，不自行摘要或翻译，不声称26日复读当前H1。"
+        }
+      },
+      "organizationEvidence": {
+        "basis": "既有记录明确为LeetCode/力扣官方中英文题面，正式域名leetcode.com与leetcode.cn；未明确个人署名，机构为LeetCode。",
+        "personalAuthor": "not-established; author field omitted"
+      },
+      "supports": [
+        "给定单链表的头节点，反转链表并返回反转后的链表；官方允许0..5000个节点，节点值范围-5000..5000。空链表是题面明确展示的合法输入。进阶提到迭代与递归两种实现，本期只讲迭代。"
+      ],
+      "sections": "中英文Description、三组输入输出、Constraints与迭代/递归进阶；不含官方editorial正文",
+      "shots": [
+        "01",
+        "02"
+      ],
+      "canonicalAccessThisRound": {
+        "status": "not-requested",
+        "newGet": false,
+        "currentH1Checked": false
+      },
+      "officialBodySHA256": null,
+      "hashScope": "research/article完整SHA只证明本仓历史实读记录身份，不冒充旧官方完整响应SHA。"
+    },
+    {
+      "id": "reverse-linked-list-r2",
+      "referenceId": "R2",
+      "organization": "Python Software Foundation",
+      "title": "Assignment statements",
+      "version": "Python 3 Language Reference（旧记录未注明小版本）",
+      "canonicalUrl": "https://docs.python.org/3/reference/simple_stmts.html#assignment-statements",
+      "additionalUrls": [],
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-25",
+      "verificationBasis": "existing-official-reading-record",
+      "originalRecord": {
+        "startLine": 14,
+        "endLine": 20,
+        "text": "## R2 Python引用与属性赋值\n\n- 来源：[Python Language Reference — Assignment statements](https://docs.python.org/3/reference/simple_stmts.html#assignment-statements)。\n- 实际获取：实际打开官方语法文档并读取名称绑定、属性赋值、右侧求值与多目标赋值部分。\n- 页面日期：所见页面显示2026-10-24更新；这是所见文档元数据，不表示链表算法的新发表日期，也不据此推断LeetCode运行时的小版本。\n- 支持主张：名称赋值重新绑定已有对象；属性目标赋值要求对象修改该属性，不会因为`cur.next = prev`而自动新建一个节点。右侧先求值，随后才进行相应赋值。\n- 用在：三引用的实际角色、先保存原后继再改写`next`、返回已反转前缀的新头。Python里的变量和对象引用是本期程序语义；不把它说成必须手工管理内存地址或释放节点。",
+        "claimText": "名称赋值重新绑定已有对象；属性目标赋值要求对象修改该属性，不会因为`cur.next = prev`而自动新建一个节点。右侧先求值，随后才进行相应赋值。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/reverse-linked-list/research.md#L14-L20",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-25既有实读记录research.md第16行：Python Language Reference —后的实际被读章节原题",
+        "evidence": "docs/reference-endcards/batch-9/sources-reverse-linked-list.json",
+        "record": {
+          "path": "episodes-codex/reverse-linked-list/research.md",
+          "line": 16,
+          "text": "- 来源：[Python Language Reference — Assignment statements](https://docs.python.org/3/reference/simple_stmts.html#assignment-statements)。",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/reverse-linked-list/research.md#L16",
+          "basis": "2026-10-25实际官方阅读后记录的原题或实际被读章节题名，不自行摘要或翻译，不声称26日复读当前H1。"
+        }
+      },
+      "organizationEvidence": {
+        "basis": "既有记录为Python官方语言参考docs.python.org，发布维护机构记Python Software Foundation；未明确个人署名，不从Git身份或语言历史作者推定当页作者。",
+        "personalAuthor": "not-established; author field omitted"
+      },
+      "supports": [
+        "名称赋值重新绑定已有对象；属性目标赋值要求对象修改该属性，不会因为`cur.next = prev`而自动新建一个节点。右侧先求值，随后才进行相应赋值。"
+      ],
+      "sections": "Assignment statements：名称绑定、属性赋值、右侧求值与多目标赋值部分",
+      "shots": [
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15"
+      ],
+      "canonicalAccessThisRound": {
+        "status": "not-requested",
+        "newGet": false,
+        "currentH1Checked": false
+      },
+      "officialBodySHA256": null,
+      "hashScope": "research/article完整SHA只证明本仓历史实读记录身份，不冒充旧官方完整响应SHA。"
+    }
+  ],
+  "excludedEditorial": {
+    "url": "https://leetcode.com/problems/reverse-linked-list/editorial/",
+    "recordLine": 24,
+    "recordText": "实际打开了[官方editorial地址](https://leetcode.com/problems/reverse-linked-list/editorial/)，工具只取得登录、导航与编辑器空壳，没有题解正文。因此不能写“已读官方迭代题解”。本期算法由独立不变式论证与实际程序执行核验支撑。",
+    "bodyRead": false,
+    "selected": false
+  },
+  "independentProof": {
+    "classification": "original independent derivation; not official editorial",
+    "recordStartLine": 26,
+    "recordEndLine": 37,
+    "text": "## 本期独立正确性论证\n\n每轮开始时，`prev`是已经反转的前缀头，前缀尾指向空；`cur`是尚未处理后缀的头。两部分涵盖原来的所有节点，节点本身及其值不变。\n\n先用`nxt = cur.next`保存原后继，这是继续访问剩余后缀的入口。再用`cur.next = prev`将当前节点接到已反转前缀前方。最后令`prev = cur`、`cur = nxt`，反转部分增加一个节点，未处理后缀减少一个节点，不变式恢复。\n\n如果先覆盖`cur.next`，再通过这个已改写的属性找“原来的下一个”，便无法按原链继续。这应解释成丢失继续访问原后半段的入口，不能笼统地说后面的节点当场消失或被销毁；其他引用可能仍持有它们。\n\n处理完所有节点后，`cur`为空，`prev`就是原尾节点及整个反转链的头，必须返回它。原`head`变量不会自动重新绑定为新头。原链表为空时初始`prev`与`cur`都为空，直接返回空；单节点则仍返回同一节点。\n\n每节点只处理一次，每轮只做固定数量的引用读取和赋值，时间O(n)。只使用固定数量引用，不新建结果节点、数组或递归栈，额外空间O(1)，不包含题目输入的节点。\n",
+    "textSHA256": "92bd90132308b561a23e84fd4b4eaaa847d82f4e4e1bfec83aca6a9dfd235df5",
+    "originalCodeAndExecutionRecordStatus": "Existing solution.py and algorithm-verification.json retain their original identity. No new algorithm test run or official-solution endorsement this task."
+  },
+  "publicationMetadata": {
+    "problemPage": "旧记录未标发表/更新时间；不依据版权年份推断。",
+    "pythonObservedLastUpdated": "2026-10-24",
+    "pythonMetadataRecordLine": 18,
+    "pythonMetadataRecordText": "- 页面日期：所见页面显示2026-10-24更新；这是所见文档元数据，不表示链表算法的新发表日期，也不据此推断LeetCode运行时的小版本。",
+    "scope": "页面元数据和实际访问日期不同，不据此推断LeetCode运行时小版本。"
+  },
+  "preservationRequirement": {
+    "basis": "Root batch9 immutable before/body capture; recorded here as a requirement, not independent media inspection.",
+    "body": {
+      "slug": "reverse-linked-list",
+      "bodyFrames": 5400,
+      "bodySHA256": "ff01bc263a8a22aad37a93f088190b74058fdac4d74663772ce4c0e9d87a6ae5",
+      "existingCodeCard": {
+        "kind": "full-python-solution",
+        "from": 5250,
+        "durationInFrames": 150,
+        "codeSource": "solution.py",
+        "displaySource": "solution.json",
+        "title": "完整 Python 解法",
+        "codeSourceSha256": "0630799bc33ec5f9206628031fa29c7bf9f637fa02b3d470619a97a0b535cc25",
+        "displaySourceSha256": "aeab65e0bdb0edc3ddea6653984d64e3e984131cfbedc593caf1dd9d0dc50a02"
+      },
+      "productionVideoInitiallyPresent": false
+    },
+    "originalPythonCodeCardMustRemain": true,
+    "sourceVideoInitiallyAbsent": "No video rebuilt by this source task; original published full MP4 identity is root body baseline.",
+    "notModifiedByThisTask": [
+      "solution.py",
+      "solution.json",
+      "storyboard.json",
+      "words.json",
+      "render-result.json",
+      "freeze/package/media/shared code"
+    ]
+  },
+  "selection": {
+    "selected": [
+      "R1",
+      "R2"
+    ],
+    "presentation": "title-author",
+    "maxItemsPerPage": 4,
+    "secondsPerPage": 5,
+    "renderedFields": [
+      "title",
+      "credit"
+    ],
+    "creditPolicy": "organization; no personal author declared",
+    "reason": "题面支撑输入、目标和合法范围；实际赋值章节支撑引用/属性更新语义，算法不变式和复杂度仍由本期独立推导支撑。"
+  }
+}
