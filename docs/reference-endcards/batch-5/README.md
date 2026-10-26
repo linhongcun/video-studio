@@ -23,3 +23,5 @@
 资料首帧的严格字幕检查拦截了索引片130.800秒边界浮点误差。网站现按整数帧先乘1000再除fps，末cue退到130.799；实际buildVtt七项回归与47份前后输出比较证明仅该cue减少1ms，其余46份字节相同，所有字幕文字/起点和视频保持，见vtt-boundary-correction.json。db-index原有chapters.txt按基线字节及站点既有规则校验，不误当新增覆盖或改写其起点。
 
 浏览器6个实际用例通过，3次桌面1x片尾播放抵达ended，3次手机原生全屏展示；Codex根执行者实际查看6张资料页截图，8项原题与机构完整可读、无字幕覆盖。模拟移动视口，不声称真机/iOS或人工全片听辨。见qa-browser.json。
+
+已合并[PR #346](https://github.com/linhongcun/video-studio/pull/346)，发布[v0.71.3](https://github.com/linhongcun/video-studio/releases/tag/v0.71.3)，[Pages 40291951904](https://github.com/linhongcun/video-studio/actions/runs/40291951904)成功；发布提交`8f97995ec92919df5de4a18d05738c3c31e06b37`。13项规范URL完整GET通过，三片MP4全量SHA与发布文件一致，海报、逐字节VTT、资料链接/原章节/日期、线上更新日志及tag/Release/部署身份通过。实际核验时间与完整响应证据见online-verification.json。累计20片已具备资料片尾；未发现本批专属未关闭issue。
