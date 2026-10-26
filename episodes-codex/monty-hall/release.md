@@ -30,3 +30,15 @@
 2026-10-25，用户观看v0.64.0后最初表示“云里雾里”，并指出主持人的规则一开始有点绕。随后用户自行确认：“你的视频制作其实没有问题，我确定了。我现在看懂了，更多的是这道题本来就比较奇奇怪怪的。”按最新结论记录本片制作获得认可、保留现版。先前疑问与后续澄清一起保留，不将未验证的编辑诊断写为已确认缺陷或据此启动返工；用户没有要求本轮重做。
 
 这是对本片制作与个人理解过程的定性反馈，不扩大为所有观众均能理解、规则完全无负担或量化教学效果，也不替代既有报告未执行的语义听辨等检查。
+
+<!-- batch-11-publication-archive:start -->
+## 存量片尾参考资料第十一批 · v0.77.1
+
+[PR #365](https://github.com/linhongcun/video-studio/pull/365)已合并，发布[v0.77.1](https://github.com/linhongcun/video-studio/releases/tag/v0.77.1)，[Pages 40345988177](https://github.com/linhongcun/video-studio/actions/runs/40345988177)成功；合并提交`51350cdd8a415363269cb4c64ff73bdf73f19e99`。2026-10-26T23:13:23+08:00完成17项规范URL完整GET和5次公开GitHub身份读取，四片完整MP4 SHA、海报、全文字幕、资料页、原章节/日期、更新日志与tag/Release/Pages身份一致。原存量累计42/47，当前站点含新增Redis为43/48有附录，分别记数。实际响应见online-verification.json。
+
+本期2项、1页，每页150帧5秒，原body5507帧→最终5657帧，完整SHA256 `d9b25b8d3e120648b5d7947b0c7f6bb9b096c2500ca8f785980031390b669a43`。原制作MP4与Git原片完整SHA相同。本期没有代码卡，原全部收尾/声画、数学源、原文章/研究/脚注与首发日期保持。
+
+各项实际阅读日期：R1 Lecture 11: Coincidences：2026-10-25；R2 The Monty Hall game：2026-10-25。六项资料均保留25日实际技术阅读；26日赛马补官网固定原题/明确作者，过桥补README题名并复用OEIS身份记录，量水核相同固定Doocs第三方镜像和组织名，三门只复核旧完整阅读记录、无新GET。未把元数据核验改写成新技术读，未引用未读论文或官方原站。
+
+当前675项输入与原606项均已实核，0缺件；末字幕仅按实际derived报告处理，源分镜/words保持。原选题议题早已关闭，未重关。完整证据留docs/reference-endcards/batch-11/，不迁移冻结材料。
+<!-- batch-11-publication-archive:end -->

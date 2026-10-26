@@ -20,3 +20,15 @@
 - [制作issue #206](https://github.com/linhongcun/video-studio/issues/206)已在核验后以completed关闭；[总览#204](https://github.com/linhongcun/video-studio/issues/204)同步为已完成2题，其余8题待后续安排。
 
 本地数学、真实动态、配音、154源冻结、实际成片与两视口范围见qa-final.md；线上、部署与收尾原始数据为online-verification.json、deployment.json及issue-completion.json。没有逐字ASR、全片人工听辨、完整实时观看或初学者实验，也不预写用户已观看认可本片。
+
+<!-- batch-11-publication-archive:start -->
+## 存量片尾参考资料第十一批 · v0.77.1
+
+[PR #365](https://github.com/linhongcun/video-studio/pull/365)已合并，发布[v0.77.1](https://github.com/linhongcun/video-studio/releases/tag/v0.77.1)，[Pages 40345988177](https://github.com/linhongcun/video-studio/actions/runs/40345988177)成功；合并提交`51350cdd8a415363269cb4c64ff73bdf73f19e99`。2026-10-26T23:13:23+08:00完成17项规范URL完整GET和5次公开GitHub身份读取，四片完整MP4 SHA、海报、全文字幕、资料页、原章节/日期、更新日志与tag/Release/Pages身份一致。原存量累计42/47，当前站点含新增Redis为43/48有附录，分别记数。实际响应见online-verification.json。
+
+本期2项、1页，每页150帧5秒，原body6025帧→最终6175帧，完整SHA256 `74427373de46c589979e1a0c473c4b18498bdc135651abf2a4ebd43b28725940`。原制作MP4未留存，以Git发布原片与保留render-result完整SHA/帧数一致捕获唯一body，未重建旧影片。本期没有代码卡，原全部收尾/声画、数学源、原文章/研究/脚注与首发日期保持。
+
+各项实际阅读日期：R1 The optimum crossing time for the Bridge and Torch problem, given that the crossing times for the group's members are given by the n-th partition in A026791.：2026-10-25；R2 Lantern & Bridge：2026-10-25。六项资料均保留25日实际技术阅读；26日赛马补官网固定原题/明确作者，过桥补README题名并复用OEIS身份记录，量水核相同固定Doocs第三方镜像和组织名，三门只复核旧完整阅读记录、无新GET。未把元数据核验改写成新技术读，未引用未读论文或官方原站。
+
+当前675项输入与原606项均已实核，0缺件；末字幕仅按实际derived报告处理，源分镜/words保持。原选题议题早已关闭，未重关。完整证据留docs/reference-endcards/batch-11/，不迁移冻结材料。
+<!-- batch-11-publication-archive:end -->

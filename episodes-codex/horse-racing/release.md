@@ -20,3 +20,15 @@ v0.55.0与v0.56.4的媒体和检查可通过Git标签与revisions/self-contained
 北京时间2026-10-25 08:21:11，首轮10个canonical普通GET全部通过：完整视频11077352字节与d3082f22…3cc87740e完整SHA、海报完整SHA、32句VTT逐字节、6章的精确帧/秒及锚点、无证明视频章或旁白入口、文章原proof锚点与正文、源码/系列/学习目录/RSS，以及v0.57.1实际修正条目。全量媒体只流式计算SHA，未保存远程媒体、未加查询/Range/强制缓存头，也未盲目重试。完整证据见online-verification.json及本修订同字节副本。
 
 #205已在上述检查后以completed再次关闭，#204同步3分07秒与v0.57.1；其余九题仍待安排。此次只上本站，平台未新发。本轮短版尚无用户观看反馈。
+
+<!-- batch-11-publication-archive:start -->
+## 存量片尾参考资料第十一批 · v0.77.1
+
+[PR #365](https://github.com/linhongcun/video-studio/pull/365)已合并，发布[v0.77.1](https://github.com/linhongcun/video-studio/releases/tag/v0.77.1)，[Pages 40345988177](https://github.com/linhongcun/video-studio/actions/runs/40345988177)成功；合并提交`51350cdd8a415363269cb4c64ff73bdf73f19e99`。2026-10-26T23:13:23+08:00完成17项规范URL完整GET和5次公开GitHub身份读取，四片完整MP4 SHA、海报、全文字幕、资料页、原章节/日期、更新日志与tag/Release/Pages身份一致。原存量累计42/47，当前站点含新增Redis为43/48有附录，分别记数。实际响应见online-verification.json。
+
+本期1项、1页，每页150帧5秒，原body5618帧→最终5768帧，完整SHA256 `a4837cc8760b8087ea38744092cf4cd6c66c29c744ef4d0ede56f0e33c31bdf0`。原制作MP4与Git原片完整SHA相同。本期没有代码卡，原全部收尾/声画、数学源、原文章/研究/脚注与首发日期保持。
+
+各项实际阅读日期：R1 Problem #055 – horse racing：2026-10-25。六项资料均保留25日实际技术阅读；26日赛马补官网固定原题/明确作者，过桥补README题名并复用OEIS身份记录，量水核相同固定Doocs第三方镜像和组织名，三门只复核旧完整阅读记录、无新GET。未把元数据核验改写成新技术读，未引用未读论文或官方原站。
+
+当前675项输入与原606项均已实核，0缺件；末字幕仅按实际derived报告处理，源分镜/words保持。原选题议题早已关闭，未重关。完整证据留docs/reference-endcards/batch-11/，不迁移冻结材料。
+<!-- batch-11-publication-archive:end -->

@@ -56,6 +56,6 @@
 
 | 批次 | 后续样式修订 |
 | --- | --- |
-| [1](../reference-endcards/batch-1/README.md) · [2](../reference-endcards/batch-2/README.md) · [3](../reference-endcards/batch-3/README.md) · [4](../reference-endcards/batch-4/README.md) · [5](../reference-endcards/batch-5/README.md) · [6](../reference-endcards/batch-6/README.md) · [7](../reference-endcards/batch-7/README.md) · [8](../reference-endcards/batch-8/README.md) · [9](../reference-endcards/batch-9/README.md) · [10](../reference-endcards/batch-10/README.md) | [原题核对](../reference-endcards/original-titles/README.md) · [原题与署名列表](../reference-endcards/title-author/README.md) |
+| [1](../reference-endcards/batch-1/README.md) · [2](../reference-endcards/batch-2/README.md) · [3](../reference-endcards/batch-3/README.md) · [4](../reference-endcards/batch-4/README.md) · [5](../reference-endcards/batch-5/README.md) · [6](../reference-endcards/batch-6/README.md) · [7](../reference-endcards/batch-7/README.md) · [8](../reference-endcards/batch-8/README.md) · [9](../reference-endcards/batch-9/README.md) · [10](../reference-endcards/batch-10/README.md) · [11](2026-10/reference-endcards-batch-11/README.md) | [原题核对](../reference-endcards/original-titles/README.md) · [原题与署名列表](../reference-endcards/title-author/README.md) |
 
 后续文档的存放、收尾与迁移要求见[文档维护规范](../RULES.md#文档维护)。

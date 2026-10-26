@@ -1,5 +1,15 @@
 # 项目制作记忆
 
+<!-- batch-11-publication-archive:start -->
+## 存量片尾参考资料第十一批（2026-10-26）
+
+赛马、过桥、量水、三门追加1/2/1/2项原题与作者/机构，共6项4页、各5秒，完整原收尾/音轨与数学源保持，未新增代码卡。六项资料均保留25日实际技术阅读；26日赛马补官网固定原题/明确作者，过桥补README题名并复用OEIS身份记录，量水核相同固定Doocs第三方镜像和组织名，三门只复核旧完整阅读记录、无新GET。未把元数据核验改写成新技术读，未引用未读论文或官方原站。
+
+675当前真实输入、606原声明全实核且0缺件；独立16实际尾帧逐图查看，原body全部帧/PTS/AAC/PCM完整保真由制作回执绑定。三片末VTT cue派生裁1ms、过桥字节相同，全文文本与其他时序不改；旧VTT/SB/words身份保留。Water新公开资料段长SHA仅补换行样式，源/冻结/影片不改；浏览器全屏/连续1x等实际范围见本批QA，不扩写为真机、全片人工听辨或新数学执行。
+
+[PR #365](https://github.com/linhongcun/video-studio/pull/365)已合并，发布[v0.77.1](https://github.com/linhongcun/video-studio/releases/tag/v0.77.1)，[Pages 40345988177](https://github.com/linhongcun/video-studio/actions/runs/40345988177)成功；合并提交`51350cdd8a415363269cb4c64ff73bdf73f19e99`。2026-10-26T23:13:23+08:00完成17项规范URL完整GET和5次公开GitHub身份读取，四片完整MP4 SHA、海报、全文字幕、资料页、原章节/日期、更新日志与tag/Release/Pages身份一致。原存量累计42/47，当前站点含新增Redis为43/48有附录，分别记数。实际响应见online-verification.json。 原#205–#208已关闭，仅只读核对，没有议题操作。来源/QA因冻结绑定继续原位保留；完成索引见[归档](archive/2026-10/reference-endcards-batch-11/README.md)。仅GitHub站点，无平台重发或新版观看认可。
+<!-- batch-11-publication-archive:end -->
+
 <!-- batch-10-publication-archive:start -->
 ## 存量片尾参考资料第十批（2026-10-26）
 

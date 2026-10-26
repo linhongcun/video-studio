@@ -27,3 +27,15 @@
 ## 用户观看反馈
 
 2026-10-25，用户实际观看本期v0.61.0，评价大小壶互倒动画“挺流畅”“挺准确”，并表示“整个视频就很清楚地说明了这个比较绕的逻辑”。记录为对本片动态表达与讲解清晰度的定性认可，与原有数学、媒体检查分开；不扩大为普遍学习效果、其他题目的效果保证，也不替代制作人员未执行的检查。可复用做法补入项目经验S004。
+
+<!-- batch-11-publication-archive:start -->
+## 存量片尾参考资料第十一批 · v0.77.1
+
+[PR #365](https://github.com/linhongcun/video-studio/pull/365)已合并，发布[v0.77.1](https://github.com/linhongcun/video-studio/releases/tag/v0.77.1)，[Pages 40345988177](https://github.com/linhongcun/video-studio/actions/runs/40345988177)成功；合并提交`51350cdd8a415363269cb4c64ff73bdf73f19e99`。2026-10-26T23:13:23+08:00完成17项规范URL完整GET和5次公开GitHub身份读取，四片完整MP4 SHA、海报、全文字幕、资料页、原章节/日期、更新日志与tag/Release/Pages身份一致。原存量累计42/47，当前站点含新增Redis为43/48有附录，分别记数。实际响应见online-verification.json。
+
+本期1项、1页，每页150帧5秒，原body4977帧→最终5127帧，完整SHA256 `0a76f12ba1b30aea345daf662fd6d68b6e46c7348554b3d2935e66e60df19cf8`。原制作MP4未留存，以Git发布原片与保留render-result完整SHA/帧数一致捕获唯一body，未重建旧影片。本期没有代码卡，原全部收尾/声画、数学源、原文章/研究/脚注与首发日期保持。
+
+各项实际阅读日期：R1 365. Water and Jug Problem：2026-10-25。六项资料均保留25日实际技术阅读；26日赛马补官网固定原题/明确作者，过桥补README题名并复用OEIS身份记录，量水核相同固定Doocs第三方镜像和组织名，三门只复核旧完整阅读记录、无新GET。未把元数据核验改写成新技术读，未引用未读论文或官方原站。
+
+当前675项输入与原606项均已实核，0缺件；末字幕仅按实际derived报告处理，源分镜/words保持。原选题议题早已关闭，未重关。完整证据留docs/reference-endcards/batch-11/，不迁移冻结材料。
+<!-- batch-11-publication-archive:end -->
