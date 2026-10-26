@@ -1,0 +1,66 @@
+---
+title: 刚改的昵称，怎么又变回去了？
+summary: 修改已在主库提交，刷新却从尚未应用更改的从库读取。追踪同一条昵称记录，分清写入结果、复制进度和读取去向。
+chapters:
+  - { id: hook, title: 保存成功却读回旧名字 }
+  - { id: roles, title: 主库和从库各在做什么 }
+  - { id: stale, title: 刷新为什么读到旧值 }
+  - { id: delay, title: 接收更改不等于应用完成 }
+  - { id: route, title: 刚改后要立即核对怎么读 }
+related: ["db-lock", "db-sharding"]
+---
+
+## 保存成功却读回旧名字 {#hook}
+
+同一条用户7042的记录，昵称由阿青改为青禾；所有昵称、编号与请求均为教学设计。视频演示一种可能的时序，不判断现实网站每次出现旧昵称的具体原因。
+
+上期处理同一条库存记录的冲突访问；本期换到数据有多个副本的情况。一次写入成功，不能单独说明另一次读取究竟去了哪里、读到了哪个版本。
+
+## 主库和从库各在做什么 {#roles}
+
+在本期选定的单主库结构里，应用把修改交给主库，再将部分普通读取分给从库。MySQL官方将这种结构作为适合读多写少工作负载的一种扩展方案；它不是所有数据库部署都必须使用的固定架构。[^scale]
+
+MySQL复制由源记录更改，副本请求相关日志并在本地重放。动画中的箭头只表示更改与请求的流向，不表示物理服务器设备，也不宣称源在所有实现中都是主动推送。[^impl]
+
+主库、从库是本期的职责标签，不等于从库天然拥有不可修改的所有权限配置。生产系统仍需按自己的权限、写入限制和故障策略配置。
+
+## 刷新为什么读到旧值 {#stale}
+
+本例先在主库提交青禾，程序收到成功后显示新昵称。复制尚未在从库应用时，刷新恰好读了仍存阿青的从库，就把旧值重新显示出来。主库并没有因此撤销刚才的修改。
+
+MySQL默认复制是异步的。源在提交成功时，并不能据此确认某个副本何时已经取得、处理了该事务。这里的“暂时不同”指本例的一段时间序列，没有承诺传播一定在固定几秒内完成。[^semi]
+
+## 接收更改不等于应用完成 {#delay}
+
+副本先接收更改，随后由应用线程执行相关事务。视频刻意保留“收到青禾、记录仍是阿青”的阶段；只有在本次更改应用完成后，后续查询才在该副本读到青禾。[^threads]
+
+因此，不应该仅凭“复制连接正常”“已经收到日志”就宣称刚写入的数据已经可从该副本读取。若复制中断或出错，恢复与追赶也需要额外处理，不能把视频的成功追赶示例当成无限故障下的保证。
+
+### 状态指标的边界
+
+`SHOW REPLICA STATUS`里的`Seconds_Behind_Source`可以辅助监控，但它并非任何环境下都精确表示副本落后主库多久。官方说明，接收线程落后而应用线程追上已接收内容时，该数值可能为0；因此0也不能单独证明已经读得到最新主库数据。视频不放假定的延迟秒数。[^status]
+
+### 半同步也不等于每次读取都新
+
+半同步提供的是等待指定副本收到并记录相关事件的确认，不代表这些事件已经在那个副本应用并提交。不能只因启用半同步，就直接从任意副本读取并声称“刚写入必定可见”。[^semi]
+
+## 刚改后要立即核对怎么读 {#route}
+
+本例的选择是：主库提交完成后，把紧接着核对刚才修改的**新查询定向到刚写入的同一个主库**，同时不使用旧缓存。这避免了此例中特定副本尚未追上的读取窗口；普通读取仍可按需求分给从库。它是依据数据去向作出的应用路由选择。[^scale]
+
+还要注意事务与缓存：如果查询沿用一个早已建立的REPEATABLE READ快照，即使连接到了主库，也可能继续看到那个快照。应在需要的位置使用适合的一致性策略，例如结束旧事务、建立新的查询上下文；不能把“主库”两个字当成忽略事务语义、客户端缓存或故障切换的保证。[^snapshot]
+
+视频只讲这条昵称记录的读取时序，没有并列讲GTID等待、读写路由中间件、会话粘滞或故障切换方案。生产实现要结合连接路由、事务边界、错误处理和一致性需求选择。
+
+下一期继续：订单太多，一个数据库装不下怎么办？
+
+## 参考资料
+
+以下均为2026-10-24实际核验的MySQL官方正文，逐项边界见本期research.md。
+
+[^impl]: [MySQL 8.4 §19.2 Replication Implementation](https://dev.mysql.com/doc/refman/8.4/en/replication-implementation.html)
+[^threads]: [MySQL 8.4 §19.2.3 Replication Threads](https://dev.mysql.com/doc/refman/8.4/en/replication-threads.html)
+[^scale]: [MySQL 8.4 §19.4.5 Using Replication for Scale-Out](https://dev.mysql.com/doc/refman/8.4/en/replication-solutions-scaleout.html)
+[^semi]: [MySQL 8.4 §19.4.10 Semisynchronous Replication](https://dev.mysql.com/doc/refman/8.4/en/replication-semisync.html)
+[^status]: [MySQL 8.4 §15.7.7.35 SHOW REPLICA STATUS](https://dev.mysql.com/doc/refman/8.4/en/show-replica-status.html)
+[^snapshot]: [MySQL 8.4 §17.7.2.3 Consistent Nonlocking Reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html)

@@ -1,0 +1,19 @@
+{
+  "name": "db-sharding-remake-video",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "render": "npm run render:voice && npm run render:mix",
+    "render:voice": "remotion render src/index.ts Main out/voice.mp4 --codec=h264 --crf=20 --concurrency=2 --browser-executable=/usr/bin/chromium --bundle-cache=false",
+    "render:mix": "python3 ../../../episodes/_shared/music/mix_bgm.py --in out/voice.mp4 --bgm ../../../episodes/_shared/music/Wallpaper.mp3 --mode constant --below 12 --out ../video.mp4 --report out/mix-report.json",
+    "covers": "node scripts/covers.mjs",
+    "stills": "node scripts/stills.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.534",
+    "typescript": "^7.0.2"
+  }
+}
