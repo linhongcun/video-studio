@@ -15,4 +15,6 @@
 
 候选背景、最终选定的纯背景文件与生成源码保存在`design/profile-backgrounds-20261026/`及`design/brand/it-village-background/`。本次只更新网站与品牌设计文件，没有更改平台账号资料或发片。
 
-发布与线上核验以最终归档记录为准。
+[PR #364](https://github.com/linhongcun/video-studio/pull/364)已合并为 `0cd74b3b`，附注tag与[Release v0.77.0](https://github.com/linhongcun/video-studio/releases/tag/v0.77.0)已发布，[Release后Pages 40339259076](https://github.com/linhongcun/video-studio/actions/runs/40339259076)于2026-10-26 22:31:17（北京时间）成功完成。独立实际复核1440浅色、390浅色、320深色与无JS系统浅色，六方向、两CTA及页脚链接可命中，景观清楚且不压文字。
+
+北京时间2026-10-26 22:32:33完成7项canonical线上核验：两张SVG完整SHA与发布源一致；首页、HTTP文章与更新日志返回200，景观标记与资源引用正确，页脚实际版本为v0.77.0，更新日志含本次Release正文与链接；两份实际CSS包含手动主题与无JS系统主题规则。完整结果见`online-verification.json`，部署与Release元数据见`deployment.json`、`release.json`。
