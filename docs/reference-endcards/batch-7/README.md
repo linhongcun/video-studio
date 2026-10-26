@@ -15,3 +15,7 @@
 一次全站构建通过（27片实际附录/21片固定未换原片），3片实际帧数、48日期/RSS、本地三片及6个浏览器场景通过。3次桌面1x结尾到ended、3次手机原生全屏、8张每页截图由root实际查看；长题名与作者完整，无原生字幕覆盖或控件遮字。模拟Chromium视口，不扩写为真机/iOS、全片人工听辨或新ASR。见validation.json及qa-browser.json。
 
 编码期间已再次fetch并快进上游EP40发布归档55830666，与三期全部冻结输入无交集，未重渲无影响媒体，见upstream-check.json。
+
+[PR #348](https://github.com/linhongcun/video-studio/pull/348)已合并，发布[v0.72.1](https://github.com/linhongcun/video-studio/releases/tag/v0.72.1)，[Pages40303351556](https://github.com/linhongcun/video-studio/actions/runs/40303351556)成功；提交`e770b29f8832d46d83833f037ffb28bea0e2541e`。2026-10-26T18:02:47+08:00完成13项规范URL完整GET，三片视频完整SHA、海报、VTT、资料页面/原章节/日期、更新日志及tag/Release/部署身份通过。原存量清单累计26/47完成；全站含新Redis跳表为27/48具备资料附录。无本批专属未关闭issue，实际响应见online-verification.json。
+
+正式线上首次身份读取遇gh临时凭据HTTP401，尚未获取站点文件；失败记录保留。仅本批线上脚本改为公开GitHub REST身份读取，原tag/Release/Pages断言不变，5份公开API响应200完整读取后13项站点规范URL完整GET通过；未重复已读媒体，也未改影片、冻结输入或历史QA。实际传输与首次失败记录见online-verification.json。
