@@ -1,0 +1,40 @@
+--- tool-before-frame-center.py
++++ /tmp/bloom-site-qa.py
+@@ -32,7 +32,7 @@
+ def git(*args): return subprocess.check_output(['git', *args], cwd=ROOT)
+ 
+ 
+-SEEK = """async ({time, fps}) => {
++SEEK = """async ({time, fps, expectedFrame}) => {
+   const v=document.querySelector('#player video'); v.pause();
+   const painted=new Promise((resolve,reject)=>{
+     const timer=setTimeout(()=>reject(new Error('No painted frame after seek')),8000);
+@@ -45,7 +45,7 @@
+   v.currentTime=time; await sought; const frame=await painted;
+   await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+   return {requestedTime:time,currentTime:v.currentTime,painted:frame,
+-    requestedFrame:Math.round(time*fps),paintedFrame:Math.round(frame.mediaTime*fps),
++    requestedFrame:expectedFrame,paintedFrame:Math.round(frame.mediaTime*fps),
+     paused:v.paused,readyState:v.readyState,error:v.error?.message??null,
+     activeCues:[...v.textTracks].flatMap(t=>[...(t.activeCues||[])].map(c=>c.text))};
+ }"""
+@@ -156,8 +156,8 @@
+         continuous=page.evaluate(PLAY_END,{'from':(body-15)/fps,'duration':meta['finalVideoFrames']/fps});case['appendixPlayback']=continuous
+         check(case,'1x playback crosses audio end and reaches video end',continuous['ended'] and continuous['error'] is None and any(x['time']>body/fps+.3 for x in continuous['samples']) and abs(continuous['currentTime']-meta['finalVideoFrames']/fps)<.01,continuous)
+         case['referencePauses']=[]
+-        for label,frame in [('first',body),('middle',body+meta['referenceAppendix']['durationInFrames']//2),('last',meta['finalVideoFrames']-1)]:
+-            paused=page.evaluate(SEEK,{'time':frame/fps,'fps':fps});paused.update(name=label,requestedFrame=frame);case['referencePauses'].append(paused)
++        for label,frame,offset in [('first-exact',body,0),('first-plus-0.1ms',body,.0001),('middle',body+meta['referenceAppendix']['durationInFrames']//2,.5/fps),('last',meta['finalVideoFrames']-1,.5/fps)]:
++            paused=page.evaluate(SEEK,{'time':frame/fps+offset,'fps':fps,'expectedFrame':frame});paused.update(name=label,requestedFrame=frame);case['referencePauses'].append(paused)
+             check(case,'painted reference '+label+' frame has no native caption',paused['paused'] and paused['paintedFrame']==frame and not paused['activeCues'] and paused['error'] is None,paused)
+             video.hover();screenshot(page,video,out,name+'-references-'+label,case)
+         # A genuine API request under a trusted click; no claim of clicking browser chrome.
+@@ -166,7 +166,7 @@
+         page.locator('#qa-enter-native-fullscreen').click()
+         page.wait_for_function("()=>document.fullscreenElement===document.querySelector('#player video')||window.__qaFullscreenError")
+         if viewport['width']==390: page.set_viewport_size({'width':844,'height':390})
+-        full_pause=page.evaluate(SEEK,{'time':(body+76)/fps,'fps':fps})
++        full_pause=page.evaluate(SEEK,{'time':(body+76.5)/fps,'fps':fps,'expectedFrame':body+76})
+         fullscreen=video.evaluate("v=>({active:document.fullscreenElement===v,enabled:document.fullscreenEnabled,error:window.__qaFullscreenError,rect:{width:v.getBoundingClientRect().width,height:v.getBoundingClientRect().height},viewport:{width:innerWidth,height:innerHeight}})")
+         fullscreen.update(pause=full_pause,invocation='QA-only button click invoking real video.requestFullscreen()',viewportSimulation='Headless landscape viewport, not physical rotation' if viewport['width']==390 else 'Desktop viewport');case['fullscreen']=fullscreen
+         check(case,'real native fullscreen API entered with paused reference frame',fullscreen['active'] and fullscreen['error'] is None and full_pause['paused'] and not full_pause['activeCues'],fullscreen)
