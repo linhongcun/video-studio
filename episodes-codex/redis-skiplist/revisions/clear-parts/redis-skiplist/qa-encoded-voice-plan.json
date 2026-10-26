@@ -1,0 +1,69 @@
+{
+  "status": "source-adapter-ready-awaiting-production-freeze-and-final-media-SHA",
+  "preparedAtUTC": "2026-10-26T10:40:37.173829+00:00",
+  "revision": "clear-parts",
+  "scope": "Current revision final/body AAC, source WAV, encoded premix and known constant BGM numerical integrity; historical source audit applicability only by exact source identity.",
+  "qaEntry": "qa-tools/check_encoded_voice.py",
+  "qaEntrySHA256": "50a9b90e145688558373e7321a733e171186349cca5ff08f95497b2e5720ffaf",
+  "productionSources": {
+    "script.md": "cc210675423ed7f64fc7c0bb5e7a79c20d49affb99a4ae72480262fe0f5105be",
+    "plan.json": "cffb707f74ea13f79eae1eae0856f568f97cd9729ac2d57d73c1e2063c8c10c8",
+    "storyboard.json": "f3fb33a8bfa184937f8fe882399ccaa7fa187773cf3c8b71e2dac9f995c69213",
+    "words.json": "e79c48fa931364d51ab855078abb9a1b3b9cac16e10f8881b5acc5fa19a609d5",
+    "voice.wav": "0c48b0538985b74cce8e31e8ed6f45196ae03d6b2cdc09886b26eba2b9932805",
+    "voice/input-provenance.json": "b2ad3e5cf253502ac6b61fbc6af6187017fb4d17815cad667fb860306447ee3e",
+    "remotion/src/Main.tsx": "9143612caa66bc936362f548dceb7fdc8b0ec7af200e62d0980697ca418fad6a"
+  },
+  "executionRequires": [
+    "Explicit producer completion notification and complete expected final MP4 SHA-256",
+    "Complete expected new frozen-manifest SHA-256",
+    "Completed local final/body/premix and matching default-render/reference receipts",
+    "Frozen exact voice-reuse receipt plus all four historical audit copies"
+  ],
+  "sourceReuseReceipt": {
+    "path": "qa-voice-reuse-provenance.json",
+    "sha256": "d259fc73f7799b6f6e2fc0e8f70f9e94b56e8159182f3c4be24d5b5c9cffd00f",
+    "newTTSRequestsMade": 0,
+    "voiceRebuilt": false,
+    "audioRepositioned": false,
+    "auditsAreHistorical": true
+  },
+  "retainedCheckers": {
+    "body": {
+      "path": "episodes-codex/_shared/check_encoded_episode.py",
+      "sha256": "183b01c300269dc2b5ad82ff7893552916405882556a6daf2f87c4dcd9d2db7a"
+    },
+    "numerical": {
+      "path": "episodes-codex/egg-drop/verify_encoded_voice.py",
+      "sha256": "0ca5ba05a0a0e7c8bbad4abd512a0b83d1667e69b6061af94822591841e1eac5"
+    }
+  },
+  "numericCriteriaUnchanged": true,
+  "requiredNumericalChecks": [
+    "Actual every-sentence source/premix correlation and gain",
+    "Actual final known-source music/voice reconstruction, channel checks and speech-window voice/music level",
+    "Actual source coverage, AAC padding, fixed delay and every-sentence drift",
+    "Body/final AAC payload, PTS, DTS, duration, size and decoded PCM identity",
+    "-16 ±0.3 LUFS and true peak <= -2dBTP",
+    "Retain specifically reviewed source-pause flags; no new encoded quiet interval beyond existing unchanged criteria"
+  ],
+  "dynamicExpectations": {
+    "bodyFrames": "actual SB == words == sum shots == copied source-audit frames",
+    "finalFrames": "actual matching render/appendix receipts",
+    "sentenceCount": "actual voice/build and sents; expected unchanged 20",
+    "frozenInputs": "Every exact authorized manifest entry before and after"
+  },
+  "preparationVerification": {
+    "ASTSyntaxParsed": true,
+    "helpEntryExecuted": true,
+    "sourceReuseAdapterReadOnlyExercise": true,
+    "exerciseUsedOnlyCandidateHistoricalAuditPathSet": true,
+    "fullManifestVerifyExecuted": false,
+    "formalMediaQAExecuted": false
+  },
+  "ASRPerformed": false,
+  "semanticListeningPerformed": false,
+  "fullHumanListeningPerformed": false,
+  "sourceFlagsPolicy": "Historical 5 source / 4 track flags retained, no erased warnings or fresh naturalness judgment.",
+  "encodedReusePolicy": "Compare previous versus current artifact bytes and record production provenance separately; byte equality alone is not evidence that an artifact was newly generated."
+}

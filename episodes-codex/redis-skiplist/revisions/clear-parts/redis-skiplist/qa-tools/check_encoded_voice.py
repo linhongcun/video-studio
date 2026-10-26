@@ -4,7 +4,9 @@
 Run only after final freeze/default render, with the exact authorized manifest
 and final MP4 SHA-256 passed explicitly. This imports the retained numerical
 checker unchanged, redirects only its episode/repository globals, and writes
-only new-episode QA reports. It neither recognizes speech nor listens.
+only this clear-parts revision's QA reports. Source audits are inherited only
+through an explicit exact-identity reuse receipt, not reported as fresh TTS or
+fresh source listening. It neither recognizes speech nor listens.
 """
 from __future__ import annotations
 
@@ -65,7 +67,8 @@ def frozen_snapshot(expected_manifest_sha):
     expected = read(MANIFEST)
     assert isinstance(expected, dict) and expected
     required_local = ['storyboard.json', 'words.json', 'episode-config.json', 'voice.wav',
-        'voice/build.json', 'voice/sents.json', 'voice/input-provenance.json']
+        'voice/build.json', 'voice/sents.json', 'voice/input-provenance.json',
+        'qa-voice-reuse-provenance.json']
     assert all(relative in expected for relative in required_local), 'Required source/timing input is not frozen'
     actual = {}
     for relative, digest in expected.items():
@@ -75,6 +78,56 @@ def frozen_snapshot(expected_manifest_sha):
         actual[relative] = sha(path)
         assert actual[relative] == digest, ('Frozen input changed', relative)
     return actual
+
+
+def reused_voice_source(manifest):
+    """Bind historical audits to unchanged actual sources; never re-label them."""
+    reuse_path = D / 'qa-voice-reuse-provenance.json'
+    reuse, provenance = read(reuse_path), read(D / 'voice/input-provenance.json')
+    assert reuse['schemaVersion'] == 1
+    assert reuse['status'] == 'passed-exact-voice-reuse-and-numeric-timing-preservation'
+    assert reuse['newTTSRequestsMade'] == 0 and provenance['newTTSRequestsMade'] == 0
+    assert reuse['voiceRebuilt'] is False and reuse['audioRepositioned'] is False
+    assert provenance['voiceRebuilt'] is False and provenance['audioRepositioned'] is False
+    assert reuse['all20NarrationSentenceTextsExact'] is True
+    assert reuse['all20PreparedTTSRequestStringsByteIdentical'] is True
+    assert provenance['sourceAuditReuse']['receipt'] == reuse_path.name
+    audits = reuse['sourceAuditReuse']['audits']
+    assert audits == provenance['sourceAuditReuse']['audits']
+    resolved = {}
+    for role in ['voiceTrackAudit', 'sourceTakeAudit', 'pauseReview', 'originalTimingAudit']:
+        row = audits[role]
+        copied, original = (D / row['path']).resolve(), (ROOT / row['originalPath']).resolve()
+        assert copied.is_relative_to(D / 'provenance/original') and original.is_relative_to(ROOT)
+        assert row['path'] in manifest, ('Historical source audit must be frozen', role)
+        assert sha(copied) == row['sha256'] == row['originalSHA256'] == sha(original)
+        resolved[role] = copied
+    for relative, digest in reuse['currentInputs'].items():
+        path = (D / relative).resolve()
+        assert path.is_relative_to(D) and sha(path) == digest
+    previous = (ROOT / reuse['originalDirectory']).resolve()
+    assert previous.is_relative_to(ROOT) and previous != D
+    for relative, row in reuse['byteIdenticalFiles'].items():
+        current, original = (D / relative).resolve(), (previous / relative).resolve()
+        assert current.is_relative_to(D) and original.is_relative_to(previous)
+        assert sha(current) == row['revisionSHA256'] == row['originalSHA256'] == sha(original)
+    for category in ['allOriginalTakesIncludingUnselectedCopied', 'allOriginalNormalizedSentenceAssetsCopied']:
+        assert reuse[category], category
+        for relative, digest in reuse[category].items():
+            # These two inventories use paths relative to voice/, unlike
+            # currentInputs and byteIdenticalFiles which are episode-relative.
+            current, original = (D / 'voice' / relative).resolve(), (previous / 'voice' / relative).resolve()
+            assert current.is_relative_to(D) and original.is_relative_to(previous)
+            assert sha(current) == digest == sha(original)
+    assert read(D / 'voice/sents.json') == read(previous / 'voice/sents.json')
+    assert sha(D / 'voice/build.json') == sha(previous / 'voice/build.json')
+    assert sha(D / 'voice.wav') == provenance['currentVoiceSHA256'] == sha(previous / 'voice.wav')
+    return read(resolved['voiceTrackAudit']), read(resolved['sourceTakeAudit']), provenance, resolved, {
+        'receipt': reuse_path.name, 'receiptSHA256': sha(reuse_path),
+        'originalTTSFullScriptSHA256': reuse['originalTTSFullScriptSHA256'],
+        'audits': audits, 'newTTSRequestsMade': 0, 'voiceRebuilt': False,
+        'audioRepositioned': False,
+        'interpretation': 'Historical source QA retained by exact source identity; fresh final-media numerical checks are performed below. No new source listening or TTS event.'}
 
 
 def expected_shape():
@@ -216,14 +269,13 @@ def main():
             'Actual visual review and browser/native VTT behavior are separate checks.']}
     save(REPORT, report)
     try:
-        source = read(D / 'qa-voice.json')
-        takes = read(D / 'qa-voice-takes.json')
-        provenance = read(D / 'voice/input-provenance.json')
+        source, takes, provenance, historical, reuse_binding = reused_voice_source(before)
+        report['historicalVoiceReuse'] = reuse_binding
         assert source['status'] == 'passed'
         assert takes['status'] in ['passed', 'needs-review']
-        assert provenance['voiceQAReportSHA256'] == sha(D / 'qa-voice.json')
-        assert source['sourceAuditSHA256'] == sha(D / 'qa-voice-takes.json')
-        assert source['scriptSHA256'] == provenance['scriptSHA256']
+        assert source['sourceAuditSHA256'] == sha(historical['sourceTakeAudit'])
+        assert source['scriptSHA256'] == provenance['originalApprovedTTSFullScriptSHA256']
+        assert source['scriptSHA256'] == reuse_binding['originalTTSFullScriptSHA256']
         # Preserve the actual approved TTS script identity. A later nonspoken
         # reference/prolog update may change the full file SHA; independently
         # require every current narration sentence to equal the frozen requests.
@@ -239,8 +291,8 @@ def main():
             'scope': 'Exact text equality, not ASR or spoken-word listening.'}
         assert source['voiceSHA256'] == provenance['currentVoiceSHA256'] == sha(D / 'voice.wav')
         assert source['frames'] == body_frames
-        assert source['sentences'] == takes['sentences'] == provenance['sentences'] == sentence_count
-        assert source['shots'] == provenance['shots'] == shot_count
+        assert source['sentences'] == takes['sentences'] == provenance['originalSentenceCount'] == sentence_count
+        assert source['shots'] == shot_count
         assert not takes['failures']
         # Preserve explicitly reviewed source-pause flags. This is narrow source
         # provenance handling; the retained encoded correlation/delay/drift/gain
@@ -249,12 +301,12 @@ def main():
         pause_review = None
         pause_ids = set()
         if warnings:
-            pause_path = D / source['sourcePauseReview']['path']
+            pause_path = historical['pauseReview']
             assert pause_path.resolve().is_relative_to(D)
             pause_sha = sha(pause_path)
-            assert pause_sha == source['sourcePauseReview']['sha256'] == provenance['pauseReviewSHA256']
+            assert pause_sha == source['sourcePauseReview']['sha256']
             pause_review = read(pause_path)
-            assert pause_review['sourceAuditSHA256'] == sha(D / 'qa-voice-takes.json')
+            assert pause_review['sourceAuditSHA256'] == sha(historical['sourceTakeAudit'])
             assert warnings == source['retainedSourceSignalFlags']
             assert pause_review['status'] == 'source-intervals-verified-awaiting-track-replay'
             assert source['sharedBuilderReplay']['status'] == 'passed'
@@ -336,12 +388,13 @@ def main():
             bodyFrames=body_frames, finalFrames=final_frames, sentences=sentence_count, shots=shot_count,
             numericalReport={'path': numerical_path.name, 'sha256': sha(numerical_path), 'result': numerical},
             sourceProvenance={'voiceSHA256': source['voiceSHA256'],
-                'sourceReportSHA256': sha(D / 'qa-voice.json'),
-                'selectedTakesReportSHA256': sha(D / 'qa-voice-takes.json'),
+                'historicalSourceReportSHA256': sha(historical['voiceTrackAudit']),
+                'historicalSelectedTakesReportSHA256': sha(historical['sourceTakeAudit']),
                 'inputProvenanceSHA256': sha(D / 'voice/input-provenance.json'),
-                'selectedRawConversionAndSharedCutPassed': True,
-                'assembledSharedBuilderReplayPassed': source['sharedBuilderReplay']['status'] == 'passed',
-                'sourceMeasurements': source['measurements']},
+                'historicalSelectedRawConversionAndSharedCutPassed': True,
+                'historicalAssembledSharedBuilderReplayPassed': source['sharedBuilderReplay']['status'] == 'passed',
+                'historicalSourceMeasurements': source['measurements'],
+                'applicability': 'Exact copied raw/take/normalized sentence/full WAV identity, not a new build/cut/listen.'},
             bodyFinalAAC={'equal': True, 'packetCount': len(final_packets),
                 'packetRowsSHA256': hashlib.sha256(json.dumps(final_packets, sort_keys=True).encode()).hexdigest(),
                 'fieldsCompared': ['pts_time', 'dts_time', 'duration_time', 'size', 'data_hash']},
