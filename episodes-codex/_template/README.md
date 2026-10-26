@@ -28,6 +28,8 @@
 
 从 [article.mdx](article.mdx) 复制骨架，按 [图文写作说明](../../docs/article-style.md) 替换所有占位内容。调研时核对原文、位置和对应论点，文稿中放置 `SourceQuote`；编码前按已定分镜时序写好并启用 `Figure` 图位（路径、预定秒数、章节、图注和alt），随文章、已有文章独有来源和实读证据一起冻结；最终媒体生成后只生成并核验截图，不把尚未生成的图记为已验收。实际选图需改时间或文稿时，保留冻结制作稿，只做记录前后SHA及差异的站点发布派生稿；新增来源、证据和图片也记录各自SHA。至少一处核心原文与一幅有效配图，发布前运行 `npm --prefix site run check:articles` 并实际复核阅读和回看操作。文章独有来源可存 `article-sources.json`，随发布稿和 `article/` 图片、证据一起接入 `episodes/<slug>/`。
 
+`SourceQuote` 的写法与来源数据保持不变，后续新期自动共享段末「原文」入口和按需浮层，不逐篇另写交互。默认折叠仍须通过真实调用与原文证据检查；实际查看桌面悬停/点击、手机点按、键盘及关闭操作、长面板与来源链接，边界和降级要求见 [写作说明](../../docs/article-style.md#接入与验收)。
+
 ## 新期默认接入参考资料
 
 先将 [references.example.json](references.example.json) 复制为本期 `references.json`，填写本期slug、实际核验日期、真实来源、文档原始 `title`、`titleEvidence: {locator, evidence}`、`organization`、内部支持论点与仓内证据路径。有明确公开个人署名时另加非空字符串 `author`，没有时省略；不得用空值占位，也不从Git提交者或维护账号推断作者。署名依据保留于关联核验记录。`presentation` 使用 `title-author`，不填写 `displayTitle` 或 `displaySupport`。示例中的空字段和 `pending` 会使预检失败；只有实际读取并保存核验记录后，才能填写 `verified`。不能从上期复制一个已通过的资料清单。
