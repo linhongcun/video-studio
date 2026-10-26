@@ -32,6 +32,8 @@ TCP向应用提供可靠、有序的字节流。双方各自维护发送方向�
 
 新建连接时，双方需要交换初始序号，并确认对方收到。本例采用不带应用数据的最简三次握手，数字均是教学选择：
 
+<SourceQuote sourceId="R3" supports="TCP双方都要收到对方的初始序号，并发送相应确认。" />
+
 | 次序 | 方向 | 报文中的关键字段 | 这一步完成什么 |
 |---|---|---|---|
 | 第一次 | 浏览器 → 服务端 | SYN, seq=1000 | 告诉对方客户端的初始序号 |
@@ -41,6 +43,8 @@ TCP向应用提供可靠、有序的字节流。双方各自维护发送方向�
 `ack`是期望收到的下一个序号。SYN本身占用一个序号，因此收到序号1000的SYN后，确认号是1001；收到序号5000的SYN后，确认号是5001。第三次这里是纯ACK，不占用序号空间，因此客户端后续第一段数据仍可以从1001开始。
 
 双方进入“已建立”的时刻也不同：客户端收到有效SYN+ACK后，可以进入已建立状态并发送最终ACK；服务端收到这个有效ACK后，才进入已建立状态。图中报文还在途中时，服务端仍在等待确认。
+
+<Figure src="/video-studio/episodes/http-request/article/01.jpg" alt="TCP三次握手图，显示SYN、SYN加ACK和最终ACK的序号与确认号" caption="教学示例：浏览器以最终ACK确认服务端的起始序号，服务端收到后进入已建立状态；序号1000与5000均为示例。" seekTo={78} chapter="tcp" />
 
 ### 为什么还要第三次
 
@@ -56,6 +60,8 @@ TCP解决字节流传输的可靠与有序；它本身不提供网页内容加�
 
 本次选择证书认证的常规新建连接：浏览器核验证书及目标网站身份，双方完成密钥协商。证书中的身份信息和公钥不等于后续直接加密所有网页数据的流量密钥。图中只抽取“身份验证、密钥、受保护的数据”三个职责，不冒充完整的TLS报文序列。
 
+<SourceQuote sourceId="R4" supports="TLS握手完成后，双方使用已建立的密钥保护应用层流量。" />
+
 连接恢复、预共享密钥及0-RTT会改变握手细节，所以不能说每一次HTTPS请求都会重新发送证书或重新协商整套连接。QUIC还以另一种方式集成TLS，见后面的版本边界。
 
 ## 看一次具体的HTTP/1.1请求和响应 {#exchange}
@@ -70,6 +76,8 @@ Host: shop.example
 
 `GET`是方法，`/products/42`是请求目标，`HTTP/1.1`是版本；`Host`提供目标主机信息。不能把域名说成只在DNS阶段出现，也不能把上述文本行直接当作HTTP/2或HTTP/3的线上格式。
 
+<SourceQuote sourceId="R2" supports="GET请求传输目标资源当前选定的表示。" />
+
 服务端可以返回成功状态和HTML内容。下面只节选状态行与内容类型字段，省略其他字段和消息定界细节：
 
 ```http
@@ -82,6 +90,8 @@ Content-Type: text/html
 ## 收到HTML后，浏览器还在继续工作 {#render}
 
 浏览器不必等全部资源到齐才开始解析。HTML解析产生DOM；样式规则形成CSSOM，参与计算元素的样式。随后布局确定可见元素的位置和大小，绘制形成像素，必要时还有图层合成。
+
+<SourceQuote sourceId="R1" supports="浏览器收到第一块数据后即可开始解析；并非等待整个页面下载完毕。" />
 
 解析和预加载扫描还会发现样式、图片等资源，触发更多请求。网络下载、解析与渲染可以交叠；页面先出现、图片随后补齐，并不表示前面步骤都要从头再来。首次出现内容也不等于脚本、图片等全部工作已经结束。
 
@@ -96,13 +106,11 @@ Content-Type: text/html
 
 因此，三次握手解释的是本例TCP连接如何建立。要让商品页真正出现，还需要安全协商、HTTP交换和浏览器处理；观察“页面慢”，也需要分清等待发生在哪一段，不能只凭空白页就认定是某一个协议出了问题。
 
-## 公开来源与核验范围 {#sources}
+## 参考资料 {#sources}
 
 片尾核心资料核验于2026-10-25（北京时间）。以下列出对应知识点，以及正式文档和本次核对的固定版本。
 
 **[R1] MDN Web Docs：《Populating the page: how browsers work》（持续维护文档 · 2026-10-25核验）**。
-
-> Once the browser receives the first chunk of data, it can begin parsing the information received.
 
 原文位置：Parsing · line 103。
 
@@ -110,23 +118,17 @@ Content-Type: text/html
 
 **[R2] IETF HTTP WG：《HTTP Semantics》（RFC 9110 · 2022）**。
 
-> The GET method requests transfer of a current selected representation for the target resource.
-
 原文位置：§9.3.1 GET。
 
 [正式文档](https://www.rfc-editor.org/rfc/rfc9110.html) · [固定原文](https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9110.xml)。
 
 **[R3] IETF：《Transmission Control Protocol (TCP)》（RFC 9293 · 2022）**。
 
-> Each side must also receive the remote peer's initial sequence number and send a confirming acknowledgment.
-
 原文位置：§3.4.1 · lines 1445–1448。
 
 [正式文档](https://www.rfc-editor.org/rfc/rfc9293.html) · [固定原文](https://github.com/wesley-eddy/rfc9293bis/blob/3baedef270170d063c66ef995fca1f72281a3912/rfc9293.xml)。
 
 **[R4] IETF TLS WG：《The Transport Layer Security (TLS) Protocol Version 1.3》（RFC 9846 · 2026）**。
-
-> Once the handshake is complete, the peers use the established keys to protect the application-layer traffic.
 
 原文位置：§2 Protocol Overview。
 

@@ -21,9 +21,15 @@ chapters:
 
 视频用轮流分配作示例。同一条请求只交给一个被选实例，实例生成的结果经入口返回对应浏览器。实际系统也可按连接数、权重等条件选择，不能从示意图推断所有系统都会平均分配。[^lb]
 
+<SourceQuote sourceId="R1" supports="NGINX在没有另行配置负载均衡方法时默认轮询；这不是所有系统的统一算法。" />
+
 ## 检查故障，再决定分配 {#health}
 
 故障处理是另一项关键工作。主动健康检查发送专门的探测请求，被动检查则观察真实交易的失败；两者不要混为一谈。视频选择主动检查来说明：示例配置要求连续两次失败才暂时停用，修复后连续两次成功才恢复。次数是教学配置，不是通用默认值，发现故障也不是瞬时完成。NGINX官方文档所述主动检查属于Plus功能，其开源版支持被动检查。[^health]
+
+<SourceQuote sourceId="R2" supports="NGINX Plus会停止向标为不健康的实例分配客户端请求，直到该实例再次通过健康检查。" />
+
+<Figure src="/video-studio/episodes/load-balancing/article/01.jpg" alt="应用乙连续两次健康检查失败后暂停接收新请求，应用甲和丙保持可用" caption="教学示例：应用乙连续两次探测失败后暂停接收新请求；两次是本例配置，不是统一默认值。" seekTo={68.3} chapter="health" />
 
 ## 共享瓶颈与失败请求 {#limits}
 
@@ -38,15 +44,11 @@ chapters:
 
 **[R1] NGINX：《Using nginx as HTTP load balancer》（维护文档 · 2026-10-26核验）**。
 
-> When the load balancing method is not specifically configured, it defaults to round-robin.
-
 原文位置：Default load balancing configuration。
 
 [正式文档](https://nginx.org/en/docs/http/load_balancing.html) · [固定原文](https://github.com/nginx/nginx.org/blob/a8e5cbef9776c487521e2903ffcf5d2fcb111eeb/xml/en/docs/http/load_balancing.xml)。
 
 **[R2] NGINX：《HTTP Health Checks》（维护文档 · 2026-10-26核验）**。
-
-> The server is marked as unhealthy, and NGINX Plus does not send client requests to it until it once again passes a health check.
 
 原文位置：Active Health Checks。
 

@@ -30,6 +30,8 @@ related: ["db-transaction", "idempotency", "tx-2pc", "tx-tcc", "tx-saga", "tx-ou
 
 这个例子只建立共同提交边界，不重新展开锁、并发控制和不同隔离级别。它也不包含发邮件等普通数据库事务无法直接撤销的外部副作用。
 
+<SourceQuote sourceId="A1" supports="事务把多个步骤归入一个全做或全不做的操作；两个独立本地事务并不会因此自动获得共同提交。" />
+
 ## 拆开以后，边界变了 {#split}
 
 现在订单和库存在各自管理的数据库中，并且由两笔独立事务提交。订单库保存了订单，库存库却处理失败；回滚库存库的事务，不会替另一边撤销已经提交的订单。两边各自正确，仍可能留下不满足整体业务规则的结果。[^saga]
@@ -39,6 +41,8 @@ related: ["db-transaction", "idempotency", "tx-2pc", "tx-tcc", "tx-saga", "tx-ou
 业务工程中，Saga、可靠消息等也常被放入“分布式事务方案”的讨论。它们解决跨系统一致性和故障收尾，但**不因此拥有与单个数据库事务相同的全局原子性和隔离**。例如有些框架会先在本地提交，再处理全局结果；中间数据能否被普通读看见，也需要查看具体机制。[^seata]
 
 因此，本片用“独立提交边界”帮助判断问题。几个服务共同调用一个受控事务资源，和两个独立资源分别提交，不能仅按服务个数画等号。若确实能把相关修改放回同一笔受控本地事务，应先评估这种更简单的安排，而不是为了使用分布式事务刻意拆分。
+
+<Figure src="/video-studio/episodes/distributed-tx-intro/article/01.jpg" alt="订单库已记录订单8124，库存库显示可用库存4及本单等待处理" caption="教学示例：订单库已记录8124，但库存仍待本单处理；跨库业务需要协调这两个独立操作的结果。" seekTo={80} chapter="split" />
 
 ## 最棘手的是结果未知 {#uncertain}
 
@@ -85,8 +89,7 @@ related: ["db-transaction", "idempotency", "tx-2pc", "tx-tcc", "tx-saga", "tx-ou
 [^compensate]: [Azure：Compensating Transaction pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)，Context and problem、Solution与Problems and considerations，访问日期2026-10-24。
 [^seata]: [Apache Seata：What Is Seata?](https://seata.apache.org/docs/overview/what-is-seata/)，AT Overall mechanism与Read isolation，访问日期2026-10-24。
 
-## 片尾参考资料
-
+## 参考资料
 以下书目对应视频片尾简表。技术实读日期保留为2026-10-24；本文列明完整原题、发布机构及对应知识点。
 
 **[R1] Transactions**

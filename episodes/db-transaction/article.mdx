@@ -23,6 +23,8 @@ related: ["db-index", "db-lock"]
 
 以 MySQL 8.4.0 所属长期支持系列的 InnoDB 为例，默认自动提交状态下，每个成功语句通常各自确认；并不是数据库完全没有事务，而是两条语句没有被合成**同一笔多语句事务**。[^auto]
 
+<SourceQuote sourceId="A1" supports="自动提交开启时，每条SQL语句各自形成事务；要让两步修改共同收尾，需要把它们放进同一笔事务。" />
+
 ## 放进同一笔事务 {#transaction}
 
 显式开始事务后，扣款和入账可以属于同一个边界。**提交**确认本事务的修改；**回滚**则取消本事务的修改。[^control]
@@ -30,6 +32,8 @@ related: ["db-index", "db-lock"]
 画面中的金色“本次修改·待确认”表示当前事务自身看到的修改，小号“已确认”原值保留为参照。提交时两处新值共同成为确认结果；回滚时撤除本次修改，原值重新成为主体。这些视觉位置不是内存和磁盘的物理分层，也不表示修改在提交前完全没有写入任何存储。
 
 当前事务能看到自己前面语句的修改，与其他会话此刻读到什么，是两个问题。其他事务还可能使用旧快照；因此视频没有宣称“提交后所有会话马上看到同一个新值”。[^read]
+
+<Figure src="/video-studio/episodes/db-transaction/article/01.jpg" alt="提交完成后，付款方余额800与收款方余额700均标记为已确认" caption="教学示例：扣款后的800与收款后的700在本笔事务提交后共同成为已确认结果。" seekTo={68} chapter="transaction" />
 
 ## 失败后撤销整笔 {#rollback}
 
@@ -77,8 +81,7 @@ related: ["db-index", "db-lock"]
 [^isolation]: §17.7.2.1《Transaction Isolation Levels》：https://dev.mysql.com/doc/refman/8.4/en/innodb-transaction-isolation-levels.html
 [^acid]: §17.2《InnoDB and the ACID Model》：https://dev.mysql.com/doc/refman/8.4/en/mysql-acid.html
 
-## 片尾参考资料
-
+### 视频采用的资料
 片尾精选以下四篇实际用于本片主线的 MySQL 官方手册，访问日期均为 **2026-10-24（北京时间）**。本轮沿用当时的正文阅读记录；其他拓展资料与上方七条脚注继续保留。
 
 **[R1] autocommit, Commit, and Rollback**

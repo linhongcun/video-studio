@@ -7,6 +7,7 @@ import ChapterHeading3 from '../../../components/ChapterHeading3.astro';
 import CodeBlock from '../../../components/CodeBlock.astro';
 import Callout from '../../../components/Callout.astro';
 import Figure from '../../../components/Figure.astro';
+import SourceQuote from '../../../components/SourceQuote.astro';
 import Steps from '../../../components/Steps.astro';
 import Summary from '../../../components/Summary.astro';
 import BehindTheScenes from '../../../components/BehindTheScenes.astro';
@@ -47,7 +48,7 @@ const jsonLd = {
   dateCreated: dateIso(e.createdAt), dateModified: dateIso(e.updatedAt),
   publisher: {'@type': 'Organization', name: 'IT小村工作室', url: abs(BASE)},
 };
-const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blockquote: Callout, Figure, Callout, Steps, Summary, CodeBlock};
+const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blockquote: Callout, Figure, SourceQuote, Callout, Steps, Summary, CodeBlock};
 ---
 <BaseLayout title={e.title} description={(e as any).description ?? e.summary} ogImage={asset(e.slug, e.poster)} ogType="video.other" jsonLd={jsonLd} noIndex={e.archived}>
   <div class="container">
@@ -113,6 +114,9 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
   // 正文“▶ 从这里看”→ 播放器；播放器当前章节 → 按钮文案“▶ 正在播放”
   document.querySelectorAll<HTMLAnchorElement>('[data-seek]').forEach((a) => a.addEventListener('click', (ev) => {
     ev.preventDefault(); window.dispatchEvent(new CustomEvent('vs:seek', {detail: {id: a.dataset.seek}}));
+  }));
+  document.querySelectorAll<HTMLAnchorElement>('[data-seek-time]').forEach((a) => a.addEventListener('click', (ev) => {
+    ev.preventDefault(); window.dispatchEvent(new CustomEvent('vs:seek', {detail: {time: Number(a.dataset.seekTime)}}));
   }));
   window.addEventListener('vs:chapter', (ev: any) => {
     document.querySelectorAll<HTMLAnchorElement>('.chh [data-seek]').forEach((a) => {
@@ -185,6 +189,9 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 .prose a,.prose :not(pre)>code{overflow-wrap:anywhere}
 .prose .footnotes{overflow-wrap:anywhere}
 .prose>figure{margin-inline:0}
+.prose>figure:not(.source-quote){margin-block:var(--sp-5)}
+.prose>figure:not(.source-quote)>svg{max-width:100%;height:auto}
+.prose>figure:not(.source-quote)>figcaption{margin-top:var(--sp-2);color:var(--c-text-2);font-size:var(--fs-small);line-height:1.7;text-align:left;overflow-wrap:anywhere}
 .prose table{display:block;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch;border-collapse:collapse;margin:0 0 var(--sp-5);font-size:var(--fs-small)}
 .prose th,.prose td{padding:6px 10px;border:1px solid var(--c-border);text-align:left;vertical-align:top}
 .prose th{background:var(--c-surface-2);white-space:nowrap}
@@ -211,7 +218,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 .callout .cbody>:last-child{margin-bottom:0}.ctitle{font-weight:600;margin:0 0 var(--sp-1)}
 .fig{margin:0 0 var(--sp-5)}.fig img{display:block;width:100%;border:1px solid var(--c-border);border-radius:var(--r-md);background:var(--c-surface)}
 .fig.wide{margin-inline:calc((var(--measure) - min(960px,100vw - 2*var(--gutter)))/2)}
-.fig figcaption{color:var(--c-text-2);font-size:var(--fs-small);text-align:center;margin-top:var(--sp-2)}
+.fig figcaption{color:var(--c-text-2);font-size:var(--fs-small);text-align:left;margin-top:var(--sp-2)}
 .steps{list-style:none;counter-reset:s;padding:0!important}
 .steps>li{counter-increment:s;position:relative;padding-left:40px;margin-bottom:var(--sp-3)}
 .steps>li::before{content:counter(s);position:absolute;left:0;top:2px;width:26px;height:26px;border-radius:50%;background:var(--c-surface-2);border:1px solid var(--c-primary);color:var(--c-primary);font-size:var(--fs-xs);display:grid;place-items:center}

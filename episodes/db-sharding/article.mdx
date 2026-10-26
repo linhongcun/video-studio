@@ -22,6 +22,8 @@ related: ["db-replication", "global-id"]
 
 本片先把既有示例记录分为三组，再跟踪新订单7050、7051和7052。镜头省略不相关记录，不能把画面的行数当作实际数据量或删除操作。
 
+<SourceQuote sourceId="A1" supports="分片保存同一数据集的不同子集，不是把全部订单复制到每个库。" />
+
 ## 分片键决定写到哪里 {#key}
 
 本例选择**用户编号**作为决定目标位置的字段，即“分片键”；实际分片键也可以由多个字段共同构成。教学映射为42→A库、17→B库、86→C库，不展开具体计算函数。相同规则和映射下，同一个用户的新订单会去同一目标位置。
@@ -33,6 +35,8 @@ related: ["db-replication", "global-id"]
 7050属于用户42，沿规则写到A；7051属于17，写到B；7052也属于42，因此仍去A。查询用户42的订单时，也可依据相同映射定位A，再取出相关结果。官方Vitess说明中，路由映射负责确定目标分片；客户与订单选择相关字段也可帮助数据靠近。[^reshard]
 
 视频不宣称“没有用户编号就只能查遍所有库”。具体系统可能提供其他路由信息、跨分片索引或查询计划；是否访问多个位置取决于查询和实现。跨片查询一般增加汇总、网络和协调工作。
+
+<Figure src="/video-studio/episodes/db-sharding/article/01.jpg" alt="用户42的订单查询沿路由箭头定位A库，A库显示用户42的订单7050与7052" caption="教学示例：查询用户42的订单仍按同一映射定位到A库；规则负责路由，不表示所有查询都能只访问一片。" seekTo={90} chapter="routing" />
 
 ## 分开不代表自动变快 {#boundary}
 
@@ -55,8 +59,7 @@ related: ["db-replication", "global-id"]
 [^vindex]: [Vitess Vindexes](https://vitess.io/docs/23.0/reference/features/vindexes/)
 [^reshard]: [Vitess Resharding](https://vitess.io/docs/23.0/user-guides/configuration-advanced/resharding/)
 
-## 片尾参考资料
-
+### 视频采用的资料
 片尾列出以下四篇实际用于本片的官方资料，沿用 **2026-10-24（北京时间）** 的正文阅读记录。原参考资料与脚注继续保留；下列固定链接所指的“既有实读记录”是本仓阅读记录，不是官方固定正文。
 
 **[R1] Sharding pattern**

@@ -24,6 +24,10 @@ Outbox把需要发送的事件与本地业务一起保存。本例订单表与�
 
 这解决本地业务与发送意图的持久衔接，队列和下游数据库仍在事务边界外。即使应用在提交后停止，待办仍可供恢复程序读取。
 
+<SourceQuote sourceId="A1" supports="先把业务修改和待发送消息放进同一数据库事务保存，再由独立过程发送。" />
+
+<Figure src="/video-studio/episodes/tx-outbox/article/01.jpg" alt="订单记录8124与扣库存待办E8124均已保存，同一笔本地事务提交完成" caption="教学示例：订单8124与待发送通知E8124已在同一笔本地事务中保存；此时保存完成，消息发送是后续步骤。" seekTo={27} chapter="local" />
+
 ## 发送与重发是下一步 {#send}
 
 独立转发程序读取待办、发送事件、收到队列确认后标记发送结果。发送与标记之间不能被画成一笔本地原子提交；若程序恰在这个空档停止，恢复时可能再次发送同一事件。[^outbox]
@@ -49,8 +53,7 @@ Outbox把需要发送的事件与本地业务一起保存。本例订单表与�
 [^consumer]: [Chris Richardson：Handling duplicate messages using the Idempotent consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，2020-10-16，Tracking message IDs，访问2026-10-24。
 [^safe]: [AWS：Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，Reducing client complexity，访问2026-10-24。
 
-## 片尾参考资料
-
+## 参考资料
 片尾精选以下两篇原作者资料，作者均为 **Chris Richardson**，题名与署名沿用 **2026-10-24（北京时间）** 的实读书目记录。原有AWS佐证及脚注继续保留。下列“既有实读记录”是本仓阅读记录，不是官方固定正文。
 
 **[R1] Transactional outbox**
