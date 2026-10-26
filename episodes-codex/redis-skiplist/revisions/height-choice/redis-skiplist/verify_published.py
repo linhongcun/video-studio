@@ -35,6 +35,8 @@ REFERENCE_LAYOUT = {"kind": "title-author-single-column", "maxItemsPerPage": 4,
 ARTICLE_IMAGE = "article/height-one.jpg"
 ARTICLE_FRAME = 2667
 ARTICLE_SEEK = 88.9
+ARTICLE_CAPTION = "教学示例：新55的层高为1，底层接好后插入即完成；整个跳表仍有两层。"
+ARTICLE_ALT = "55只有底层链接，底层50指向55再指向60；上层40仍指向70，没有55的上层端口"
 
 
 def read(path: Path):
@@ -47,6 +49,36 @@ def sha(path: Path) -> str:
         for block in iter(lambda: handle.read(256 * 1024), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def validate_article_page(page: str, sources: dict):
+    """Check the real component scopes, including each complete quotation."""
+    plain = lambda value: " ".join(unescape(re.sub(r"<[^>]+>", "", value)).split())
+    for source_id in ["R1", "A1"]:
+        source = sources[source_id]
+        found = re.findall(
+            r'<figure\b[^>]*data-source-quote="' + source_id + r'"[^>]*>(.*?)</figure>',
+            page, re.S)
+        assert len(found) == 1, ("SourceQuote scope missing or repeated", source_id)
+        figure = found[0]
+        quotes = re.findall(r"<blockquote\b[^>]*>(.*?)</blockquote>", figure, re.S)
+        assert len(quotes) == 1 and plain(quotes[0]) == " ".join(source["quotation"]["text"].split()), \
+            ("SourceQuote must show its complete original quotation", source_id)
+        for text in [source["title"], source.get("author", source["organization"]),
+                     source["version"], source["quotation"]["locator"]]:
+            assert " ".join(text.split()) in plain(figure), ("SourceQuote identity missing", source_id, text)
+        assert source["url"] in unescape(figure), ("SourceQuote original URL missing", source_id)
+    image_url = "/video-studio/episodes/" + SLUG + "/" + ARTICLE_IMAGE
+    figures = re.findall(r'<figure\b[^>]*data-figure-kind="video"[^>]*>(.*?)</figure>', page, re.S)
+    figures = [figure for figure in figures if image_url in unescape(figure)]
+    assert len(figures) == 1, "The planned height-one video Figure is missing or repeated"
+    figure = figures[0]
+    assert ARTICLE_CAPTION in plain(figure), "The actual height-one Figure caption differs"
+    assert ('alt="' + ARTICLE_ALT + '"') in unescape(figure), "Height-one Figure alt differs"
+    assert unescape(figure).count('href="' + image_url + '"') >= 2, "Image and view-original links are required"
+    assert 'data-seek-time="88.9"' in figure and 'href="?t=88.9#player"' in unescape(figure), \
+        "The planned88.9s video replay link is missing"
+    assert "查看大图" in plain(figure)
 
 
 def main():
@@ -229,6 +261,8 @@ def main():
             assert text in text_page, ("page missing", text)
         for chapter in chapter_ids:
             assert ('id="' + chapter + '"') in page, ("chapter anchor missing", chapter)
+        validate_article_page(page, {source["id"]: source for source in
+                                    refs["sources"] + article_sources["sources"]})
         for key in ["video", "poster"]:
             fetch("episodes/" + SLUG + "/" + meta[key], published / meta[key])
         fetch("episodes/" + SLUG + "/" + ARTICLE_IMAGE, published / ARTICLE_IMAGE)

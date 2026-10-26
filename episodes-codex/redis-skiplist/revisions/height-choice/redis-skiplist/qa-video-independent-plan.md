@@ -1,8 +1,8 @@
 # height-choice 最终媒体 QA 准备
 
-状态：仅准备入口和语义采样要求；3句新配音、fresh整轨/源审计及新SB尚未完成，没有最终帧号或passed成片结论。
+状态：最终源已选定并实际执行 --prepare-plan；151项完整冻结已核验，尚未执行正式成片检查。当前正文4557帧、31张正文计划图，加正文末和一页资料首中末预计35张。
 
-所有输出仅本revision。旧flat/clear-parts目录、已发布媒体与历史QA不改写。当前复制的旧SB/WAV不作为本轮最终身份；正文总帧数、每句窗口、术语起音、appendix起点和声音SHA必须从实际新产物读取。
+所有输出仅本revision。旧flat/clear-parts目录、已发布媒体与历史QA不改写。当前正式身份为Main390ad829、SB64e7a5ce和新WAVe63140e9；帧号已按实际新句窗计算。“层高”cue为07局部1帧，reset在局部221帧，预分配渐显起于局部268帧、完整态在326帧。
 
 声音分别处理17句精确raw/48k/request复用和3句新选中take（07两句、09首句）。本轮必须具备正常fresh qa-voice/qa-voice-takes/必要pause-review和current input-provenance；旧审计只保留历史身份。fresh全局归一化可以改变17句normalized PCM的gain，不要求旧PCM或整轨字节相同。
 
@@ -18,4 +18,4 @@
 
 正式执行保留完整decode、全PTS/H2641080p30、AAC payload/PTS/DTS/duration/size、全PCM、当前新源波形/逐句漂移/固定延迟/响度数值检查，原checker与阈值不变。收到最终冻结和完整MP4 SHA后才运行；实际decoded PNG必须真正看过再写视觉gate。没有ASR、全片人工听审或实时全片观看宣称。
 
-当前两个入口仅AST/--help通过；fresh source适配器要等实际schema落地后验证。
+两个入口AST/--help及实际fresh source适配器已通过只读准备核验。实际发生4次TTS生成，最终选中3句：07-1取d、07-2和09-1取c；17原声源逐项SHA核验通过。没有媒体decode、ASR或听辨执行。正式检查继续等待制作方成片完成通知与完整MP4 SHA。

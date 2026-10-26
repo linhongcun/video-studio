@@ -5,7 +5,7 @@ Default mode reads completed artifacts only. Publishing additionally requires
 the reviewed final-video SHA and an explicit release matching site/package.json:
 
   python3 episodes-codex/redis-skiplist/revisions/height-choice/redis-skiplist/sync_site.py --publish \
-    --reviewed-video-sha256 <final-reviewed-sha256> --release v0.73.1
+    --reviewed-video-sha256 <final-reviewed-sha256> --release v0.74.1
 
 That SHA binds the operator's completed media review; this script checks media
 identity and receipts, and does not perform a visual or listening review.

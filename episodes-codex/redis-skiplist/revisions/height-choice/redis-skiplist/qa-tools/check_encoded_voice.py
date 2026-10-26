@@ -97,9 +97,31 @@ def mixed_source_identity(provenance, takes, sentence_count):
     fresh = set(ledger['pendingNewSentenceIds'])
     assert len(rows) == len(reused) == ledger['reusedSentenceCount'] == 17
     assert len(fresh) == 3 and not reused.intersection(fresh)
+    assert fresh == {'07-height-1', '07-height-2', '09-splice-upper-1'}
     assert reused | fresh == set(requests) == set(audited) and len(requests) == sentence_count
     assert provenance['oldTakesReused'] == len(reused)
-    assert provenance['newTTSRequestsMade'] == len(fresh)
+    generation = provenance['freshGeneration']
+    assert provenance['newTTSRequestsMade'] == len(generation) >= len(fresh)
+    selected_generation = [row for row in generation if row['selected']]
+    assert selected_generation == provenance['selectedFreshSentences']
+    assert len(selected_generation) == len(fresh)
+    selected = {row['id']: row for row in selected_generation}
+    assert set(selected) == fresh
+    for candidate in generation:
+        assert candidate['id'] in fresh
+        assert candidate['approvedCurrentScriptSHA256'] == sha(D / 'script.md')
+        assert candidate['tts'] == requests[candidate['id']]['tts']
+        for item in candidate['files'].values():
+            path = (D / item['path']).resolve()
+            assert path.is_relative_to(D / 'voice/takes') and sha(path) == item['sha256']
+    mixed = {row['id']: row for row in provenance['mixedSource']}
+    assert len(provenance['mixedSource']) == len(mixed) == sentence_count and set(mixed) == set(requests)
+    for sid, row in mixed.items():
+        assert row['text'] == requests[sid]['text'] and row['tts'] == requests[sid]['tts']
+        assert row['take'] == audited[sid]['take'] == picks.get(sid, 'a')
+        assert row['sourceKind'] == ('exact-original-selected-source-reuse' if sid in reused else 'fresh-current-approved-TTS')
+        for suffix, field in [('.raw.wav', 'rawSHA256'), ('.wav', 'takeSHA256'), ('.txt.json', 'requestSHA256')]:
+            assert row['sourceSHA256'][suffix] == audited[sid][field]
     for row in rows:
         sid = row['id']
         assert requests[sid]['text'] == row['text'] and requests[sid]['tts'] == row['tts']
@@ -114,14 +136,16 @@ def mixed_source_identity(provenance, takes, sentence_count):
         row = audited[sid]
         take = picks.get(sid, 'a')
         assert row['take'] == take and row['scriptText'] == requests[sid]['text']
+        assert selected[sid]['take'] == take
         assert row['requestMatchesExpected'] is True and row['pcmConversionMatches'] is True
         stem = D / 'voice/takes' / f'{sid}-{take}'
         for suffix, field in [('.raw.wav', 'rawSHA256'), ('.wav', 'takeSHA256'), ('.txt.json', 'requestSHA256')]:
-            assert sha(Path(str(stem) + suffix)) == row[field]
+            assert sha(Path(str(stem) + suffix)) == row[field] == selected[sid]['files'][suffix]['sha256']
         fresh_rows.append({'id': sid, 'take': take, 'rawSHA256': row['rawSHA256'],
                            'takeSHA256': row['takeSHA256'], 'requestSHA256': row['requestSHA256']})
     return {'reusedSourceLedger': str(ledger_path.relative_to(D)), 'ledgerSHA256': sha(ledger_path),
         'reusedSentences': len(reused), 'newSelectedSentences': len(fresh),
+        'actualTTSRequestsMade': len(generation),
         'freshSelectedSourceAudits': fresh_rows, 'previousVoiceSHA256': ledger['originalVoiceSHA256'],
         'currentVoiceSHA256': sha(D / 'voice.wav'), 'fullWAVIdentityRequired': False,
         'normalizedPCMIdentityRequired': False,
