@@ -4,6 +4,7 @@ import {Shot,shots,MAIN,EQUALITY,PLAYBACK,TraceCase,TraceEvent,Beat,STORYBOARD} 
 import {C,FONT,MONO} from './theme';
 import {CodeCard} from './CodeCard';
 import {StackPrimer,OrderPrimer} from './StackPrimer';
+import {ProblemFitIntro} from './ProblemFitIntro';
 declare const __HAS_VOICE_AUDIO__:boolean;
 
 const clamp=(n:number)=>Math.max(0,Math.min(1,n));
@@ -147,7 +148,8 @@ const HEADS:Record<string,[string,string]>={
 };
 function Scene({shot:s}:{shot:Shot}){
  const f=useCurrentFrame(),t=s.visualType,p=phase(s,f),q=phase(s,f,1);
- const title=t==='stack-basics'&&f>=(s.cueFrames?.labels?.['栈']??at(s,1,0))?['栈：后放的先取','左侧是栈底；右侧是栈顶，加入和取出都在这里']:t==='monotone'&&f>=(s.cueFrames?.labels?.['单调']??at(s,1,0))?['单调：从栈底到栈顶不升','这里选择温度不升的顺序，允许相等']:HEADS[t]??['每日温度',''];
+ const problemNamed=t==='problem'&&f>=(s.cueFrames?.labels?.['这题用单调栈']??at(s,1,0));
+ const title=problemNamed?['单调栈：留下还在等待的日子','新一天来了，看看能解决哪些等待']:t==='stack-basics'?['把等待的日期，留在同一个末尾','右侧加入和取出；保留原日期，不改原来的气温']:t==='monotone'&&f>=(s.cueFrames?.labels?.['单调']??at(s,1,0))?['单调：从栈底到栈顶不升','这里选择温度不升的顺序，允许相等']:HEADS[t]??['每日温度',''];
  const chapter=({problem:'先看题目要什么',derive:'为什么这样保存',walk:'按天走完整过程',code:'写回程序'} as any)[s.chapterId];
  if(s.codeCardFrom!==undefined&&f>=s.codeCardFrom)return <CodeCard/>;
  const pbCfg=PLAYBACK[t];
@@ -165,7 +167,9 @@ function Scene({shot:s}:{shot:Shot}){
    equality:pb.event.id<4?'30 = 30，没有严格更暖；两天都要保留':'31更暖，先解决第2天，再解决第1天',
   };
   body=<><Weather c={c} pb={pb} showPending showZeros={finishing}/><Note color={finishing?C.teal:C.gold}>{notes[t]}</Note></>;
- } else if(t==='stack-basics'||t==='monotone'){
+ } else if(t==='stack-basics'){
+  body=<><Weather allVisible current={4} focus={[2,3,4]} showAnswers={false}/><ProblemFitIntro shot={s} frame={f}/></>;
+ } else if(t==='monotone'){
   body=<><Weather allVisible current={4} focus={[2,3,4]} showAnswers={false}/><StackPrimer shot={s} frame={f}/></>;
  } else if(t==='problem'){
   const scanning=Math.min(3,Math.floor(q*4)),look=[3,4,5,6][scanning];
