@@ -4,7 +4,7 @@ summary: 只用两层链接和一个游标，从查找55到接入55，讲清有�
 chapters:
   - { id: goal, title: 怎样少走几步找到位置 }
   - { id: search, title: 加一层链接怎样跳过一段 }
-  - { id: insert, title: 把新节点接回各层链接 }
+  - { id: insert, title: 按选定层高接入55 }
   - { id: boundary, title: 额外链接换取跨越的机会 }
 related: ["bloom-filter", "consistent-hashing"]
 ---
@@ -55,11 +55,20 @@ related: ["bloom-filter", "consistent-hashing"]
 
 Redis8.4.0的`zslInsert`正是从最高层开始：比较当前节点的后继，后继小于目标才前进；不能继续时记录当前前驱，再下降。实际排序先比较score，相同score再比较member的字节字典序；本例分数互不相同，暂时只看分数。[^source][^sorted]
 
-## 把新节点接回各层链接 {#insert}
+## 按选定层高接入55 {#insert}
 
 刚才的查找还留下两个有用位置：底层前驱50，上层前驱40。插入55时，无需再把所有节点重新排序。
 
-假设本次新节点取得两层，就分别接入：
+**新节点不一定接入上层。** 如果55的层高是1，只把底层50→60改成50→55→60；整个跳表仍有两层，上层前向链接仍为40→70，55没有上层端口。层高在接线前就已确定，不能插入一层后为了演示再把同一次插入临时升为两层。[^source]
+
+<SourceQuote sourceId="A1" supports="源码说明新节点层高可以为1，较高层更少见；本节使用固定合法对照，不是随机过程回放。" />
+
+<Figure src="/video-studio/episodes/redis-skiplist/article/height-one.jpg"
+  alt="55只有底层链接，底层50指向55再指向60；上层40仍指向70，没有55的上层端口"
+  caption="教学示例：新55的层高为1，底层接好后插入即完成；整个跳表仍有两层。"
+  seekTo={88.9} chapter="insert" />
+
+下面回到相同的插入前状态，预先把55的层高固定为2，再分别接入：
 
 - 底层：原来50→60，改为50→55→60。
 - 上层：原来40→70，改为40→55→70。
