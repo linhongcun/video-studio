@@ -77,3 +77,57 @@ related: ["db-transaction", "idempotency", "distributed-tx"]
 [^retry]: [Azure：Retry pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry)，Retry strategies与Issues and considerations，访问日期2026-10-24。
 [^compensate]: [Azure：Compensating Transaction pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)，Context and problem、Solution与Problems and considerations，访问日期2026-10-24。
 [^seata]: [Apache Seata：What Is Seata?](https://seata.apache.org/docs/overview/what-is-seata/)，AT Overall mechanism与Read isolation，访问日期2026-10-24。
+
+## 片尾参考资料
+
+以下书目对应视频片尾简表。技术实读日期保留为2026-10-24；本文列明完整原题、发布机构及对应知识点。
+
+**[R1] Transactions**
+
+PostgreSQL · PostgreSQL 18 Documentation · 实读2026-10-24
+
+[正式文档](https://www.postgresql.org/docs/18/tutorial-transactions.html) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/distributed-tx-intro/research.md#L15)
+
+对应知识点：同一笔本地事务管理的事务型数据可共同提交或撤销；同库中的独立事务不会自动合为一笔。
+
+正文位置：3.4 Transactions · 原子性、BEGIN / COMMIT / ROLLBACK。
+
+**[R2] XA Transactions**
+
+Oracle / MySQL · MySQL 8.4 Reference Manual · 实读2026-10-24
+
+[正式文档](https://dev.mysql.com/doc/refman/8.4/en/xa.html) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/distributed-tx-intro/research.md#L16)
+
+对应知识点：受支持的跨资源协调由各资源处理自己的事务分支；独立提交不会自动变成同一笔本地事务。 片中协调决定后落实提交是一类思路，不承诺所有方案都有相同全局隔离或同一毫秒可见。
+
+正文位置：XA Transactions · 全局事务、资源管理器与两阶段处理。
+
+**[R3] Retry pattern**
+
+Microsoft · Azure Architecture Center · Azure Architecture Center · 实读2026-10-24
+
+[正式文档](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/distributed-tx-intro/research-navigation.json#L34) · [题名核对固定原文](https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/cb69919fc6c9ebe8c3e3c389020e29a0ede6c941/docs/patterns/retry.yml)
+
+对应知识点：没有得到回复不能证明操作没有执行；无重复保护的重试可能重复产生业务效果。 对适合重试的临时故障安排次数、间隔与终止策略；永久故障或业务拒绝需要其他异常出口。
+
+正文位置：Solution · Retry strategies · Idempotency · Issues and considerations。
+
+**[R4] Compensating Transaction pattern**
+
+Microsoft · Azure Architecture Center · Azure Architecture Center · 实读2026-10-24
+
+[正式文档](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/distributed-tx-intro/research-navigation.json#L13) · [题名核对固定原文](https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/498e83a207cfd512b396489e95ed3f791b372364/docs/patterns/compensating-transaction.md)
+
+对应知识点：各本地步骤可能先提交并留下可见中间状态，恢复与失败收尾要遵守业务规则；补偿不是覆写旧快照。 流程需要持久进度、可恢复执行和必要的人工介入；最终一致不等于等待后必成功。
+
+正文位置：Context and problem · Solution · Issues and considerations。
+
+**[R5] Idempotent Consumer pattern**
+
+Microsoft · Azure Architecture Center · Azure Architecture Center · 实读2026-10-24
+
+[正式文档](https://learn.microsoft.com/en-us/azure/architecture/patterns/idempotent-consumer) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/distributed-tx-intro/research-navigation.json#L27) · [题名核对固定原文](https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/dcf29659535a230ee4d73b812d49a6953b912430/docs/patterns/idempotent-consumer.md)
+
+对应知识点：稳定的操作标识用于识别同一逻辑操作；已处理标记与业务效果共同原子保存，并处理并发重复。 此处机制可用于会重复到达的HTTP或其他操作，不把视频中的同步调用误写成已有消息队列协议。
+
+正文位置：Solution · Commit the processed key and the side effects atomically · Idempotent processing beyond messaging。

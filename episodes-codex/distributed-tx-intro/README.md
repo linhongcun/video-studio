@@ -40,3 +40,19 @@ npm run covers
 站点从`episodes/distributed-tx-intro/`读取发布副本，源码链接指向本目录。两片共用整数期号21，以“入门”“方案详解”区分；学习顺序EP.20 → 入门 → 方案详解，分别保留独立URL/媒体/章节。原方案详解冻结输入与成片不因站点引导改动而变。
 
 三构图封面由本期Cover.tsx/covers.json生成；4:3核心x315..1125、y<918，poster与3:4 JPEG相同。成片不追加全局片尾。配乐Kevin MacLeod《Wallpaper》，CC BY 4.0。
+
+## 第7批参考资料名单与当前入口
+
+本批为已验收的完整原片追加`title-author`参考资料名单，每页最多4项、默认5秒，仅显示完整原题与明确作者或机构。原旁白、字幕、分镜、导航和身份图形保持；本批不运行装配、TTS或正文渲染。Git基线`656b525f533037f1c0dff6383c4afa69926e612c`的完整原片已逐字节保存在`revisions/reference-endcards/body.mp4`及同SHA的`remotion/out/body.mp4`，由本批直接消费并另做实际追加媒体保真检查。
+
+当前使用本期`freeze.py`。它保留旧清单全部180个key和既有共享依赖；旧article/research/package及freeze的记录通过`revisions/reference-endcards/`下before快照核对，其他历史输入按原路径核对。当前清单声明实际资料与新入口依赖，不声称它已重现旧MP4。原输入校验保留；storyboard、words、带SHA的分镜快照及placeholder只读核对，不重写。
+
+资料负责人停写且来源预检通过后，从仓根执行：
+
+```sh
+node site/scripts/check-references.mjs --sources episodes-codex/distributed-tx-intro
+python3 episodes-codex/distributed-tx-intro/freeze.py
+python3 episodes-codex/distributed-tx-intro/freeze.py --verify
+```
+
+默认`npm run render`现调用共享bibliography wrapper，先核对来源和冻结，再运行`render:body`及附录。`render:body`保留原voice→mix与并发参数，只把mix输出改到`out/body.mp4`；`npm run render:references`从该完整body单独追加名单。`npm run verify:references`用于后续完整交付核验，会做最终媒体验证；本批入口检查只做只读freeze和wrapper.verify_freeze，不重复整片解码。旧正文范围内的QA和历史发布事实按原记录保留，最终总帧数以新receipt、render-result和发布metadata为准。进度见[第7批记录](../../docs/reference-endcards/batch-7/README.md)，不预记尚未完成的媒体或线上结果。

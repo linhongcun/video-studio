@@ -56,3 +56,11 @@
 PostgreSQL共同提交/撤销支持同笔范围；Retry的Idempotency段明确“服务已成功处理却没能发出回复，重发会产生重复效果”，约束图中的结果未知；Idempotent Consumer说明业务效果和去重标记共同原子保存及并发约束；Compensating Transaction说明持久进度、业务规则、不可逆步骤与失败恢复。图中上下是管理范围对照，部分成功/未知是问题示例，不把示例拼成一笔业务必经路径，也不将两类协作思路说成穷尽二分类。
 
 本次AWS正文直连被网络隧道403阻断，未记为重新读到；超时与重复效果使用上述实际可读的官方GitHub正文独立核对。retry.yml本身只是包装，已继续打开retry-content.md，未把包装摘要当作正文。
+
+## 片尾参考资料
+
+2026-10-26整理存量片尾书目，保留上述2026-10-24技术实读及其原日期口径，不把本轮题名核对改写为重新技术调研。`references.json`采用`presentation: title-author`，5项分两页、每页最多4项且默认5秒；没有明确公开个人署名，使用PostgreSQL、Oracle / MySQL及Microsoft · Azure Architecture Center发布机构，不把维护账号推定为作者。
+
+片尾清单编号独立于前文原研究编号：R1 Transactions对应04–07镜本地事务范围；R2 XA Transactions对应08–11及17镜跨资源协调；R3 Retry pattern对应12–16镜结果未知与有界重试；R4 Compensating Transaction pattern对应部分成功、业务补偿与恢复边界；R5 Idempotent Consumer pattern对应15–16镜业务效果与已处理标记共同原子保存、并发重复，以及非消息场景的适用边界。最后一项不能仅以Retry概括替代。
+
+Azure题名与维护信息本轮从官方固定Github源补核；四份完整GET响应的字节数及SHA与`research-navigation.json`的24日快照记录完全相同，技术读日仍保留24日。Retry使用wrapper的`metadata.title`，其论点来自实际include正文；补偿与幂等使用正文H1完整题名并保留pattern后缀。原研究、导航的完整SHA/Git blob、逐论点原记录、26日元数据请求和署名判断见[本轮证据](../../docs/reference-endcards/batch-7/sources-distributed-tx-intro.json)，完整清单见[references.md](references.md)。未重新请求或声称本轮访问PostgreSQL/MySQL官网页面，也未将旧AWS复读403写成成功。

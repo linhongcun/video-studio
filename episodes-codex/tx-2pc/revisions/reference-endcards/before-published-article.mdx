@@ -1,0 +1,48 @@
+---
+title: 两阶段提交，两个库怎么共同确认？
+summary: 只看两阶段提交的一条主线：先可靠准备，再按共同决定分别落实，并分清拒绝与决定未知。
+chapters:
+  - { id: question, title: 两个库，怎么共同确认？ }
+  - { id: prepare, title: 先准备，不算完成 }
+  - { id: decision, title: 共同决定，分别落实 }
+  - { id: failure, title: 拒绝与失联，怎样收尾 }
+related: ["distributed-tx-intro", "tx-tcc", "tx-saga", "tx-outbox"]
+---
+
+## 两个库，怎么共同确认？ {#question}
+
+订单8124购买商品7042一件，初始库存4、目标3，都是教学示例。若订单独立保存，而库存处理失败，本例的业务条件便没有满足。两阶段提交让参与同一事务的资源先准备，再按共同决定完成。它要求资源真实支持相关事务协议，不能只把两个普通远程调用放进一个代码块。[^mysql]
+
+尚未熟悉独立提交边界，可以先看[分布式事务入门](../distributed-tx-intro/)。这一集只解释两阶段提交，不在同片比较其他实现。
+
+## 先准备，不算完成 {#prepare}
+
+第一阶段，事务管理器让参与资源准备。参与方需要可靠保存足够的恢复状态，然后才能答复就绪。此时待确认修改还没有成为已提交业务结果：动画保留库存已保存值4，另外显示拟改3。准备不是提交。[^prepare]
+
+数据库分支的业务修改通常已在准备命令之前执行；准备阶段重点是保证可按最终决定提交或撤销。视频把本次待确认修改与可靠准备能力连贯展示，不表示所有数据库到prepare时才开始执行业务SQL。[^mysql]
+
+回答就绪还意味着不能随后因本地等待超时就擅自放弃承诺。准备状态可能持续持有锁；数据库重启、连接变化也不等于这项事务自动消失。状态和最终决定由外部事务管理器继续跟踪与恢复。[^states]
+
+## 共同决定，分别落实 {#decision}
+
+只有所有相关参与方都能完成，协调者才进入提交结果。本片先显示可靠记录中的保存决定，再发送最终指令；参与方按同一决定完成，而不是重新做业务选择。协调者恢复以后也要找回既有决定继续完成。[^narayana]
+
+指令到达和本地提交有先后，所以画面让订单先保存、库存随后从4变3。统一的提交结果不代表每处数据在同一毫秒改变，也不自动得到任意跨库查询的全局快照；并发隔离还依赖实际实现和访问方式。Oracle文档的commit-point实现也明确展示先后，但其优化不应直接当作所有2PC系统通用结构。[^oracle]
+
+XA与2PC属于不同层次：2PC描述提交协调过程，XA提供事务管理器与资源管理器协作的接口标准。数据库具体提供的SQL语法、支持操作与恢复接口还要查看各自文档。[^mysql][^states]
+
+## 拒绝与失联，怎样收尾 {#failure}
+
+决定保存以前，有一个参与方不能准备，就要整体放弃。动画重新从无本单记录、库存4开始：订单已经准备，库存拒绝；协调者记录放弃，再通知撤销尚未提交的订单。没有删除先前成功分支的已提交订单。[^mysql]
+
+另一种情况是参与方已经准备，却不知道协调者的决定。这时不能把超时当作“全局一定放弃”。本片故障分支在恢复时揭示协调者故障前已记录保存决定，然后让两边按原决定完成。具体恢复流程、日志丢失、启发式处理与人工干预须服从事务管理器规则，不能凭本地猜测给生产事务强制收尾。[^narayana][^oracle]
+
+准备状态持续占用资源，所以适用边界包括支持范围、事务持续时间、故障恢复能力和运维责任。它适合受控、能及时完成的资源协调；不应把长时间等待的人为业务流程直接塞进同一笔准备事务。[^prepare]
+
+本集记住一条线：**可靠准备 → 可靠共同决定 → 分别落实**。共同结果需要付出等待和资源占用的代价。
+
+[^mysql]: [MySQL 8.4：XA Transactions](https://dev.mysql.com/doc/refman/8.4/en/xa.html)，两阶段流程与资源/事务管理器，访问2026-10-24。
+[^states]: [MySQL 8.4：XA Transaction States](https://dev.mysql.com/doc/refman/8.4/en/xa-states.html)，PREPARED与终结状态，访问2026-10-24。
+[^prepare]: [PostgreSQL：PREPARE TRANSACTION](https://www.postgresql.org/docs/current/sql-prepare-transaction.html)，Description/Caution，访问2026-10-24。
+[^narayana]: [Narayana项目文档](https://www.narayana.io/docs/project/index.html)，Two-phase commit与Failure Recovery，访问2026-10-24。
+[^oracle]: [Oracle：Distributed Transactions Concepts](https://docs.oracle.com/en/database/oracle/oracle-database/26/admin/distributed-transactions-concepts.html)，Prepare Phase/Commit Phase，访问2026-10-24。

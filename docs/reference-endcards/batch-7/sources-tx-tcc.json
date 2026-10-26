@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-7",
+  "episode": "tx-tcc",
+  "presentation": "title-author",
+  "baselineCommit": "656b525f533037f1c0dff6383c4afa69926e612c",
+  "organizedAt": "2026-10-26T17:40:11.911168+08:00",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex appendix_implementation source organizer",
+  "selectedSourceCount": 2,
+  "scope": "Two core official sources for the actual TCC video: current user-mode documentation and the historical Fence implementation article. No guessed authors, title expansion, new technical review or media/freeze/package changes.",
+  "sourceReadMode": "reuse-previous-actual-reading-record-with-title-only-supplement",
+  "recordedTechnicalAccessDate": "2026-10-24",
+  "newTechnicalBodyReadPerformed": false,
+  "newGETPerformed": true,
+  "newGETScope": "Three successful pinned Apache Seata repository file GETs for frontmatter title/explicit byline evidence only. Canonical Seata and AWS hosts absent from current enforced allowlist: no canonical requests attempted and no bypass.",
+  "networkPolicy": {
+    "mode": "restricted",
+    "state": "enforced",
+    "observationsCurrent": true,
+    "sourceHostsUsed": [
+      "api.github.com",
+      "raw.githubusercontent.com"
+    ],
+    "canonicalHostAccessStatus": "not-requested-not-in-allowlist"
+  },
+  "baselineResearch": {
+    "path": "episodes-codex/tx-tcc/research.md",
+    "baseCommit": "656b525f533037f1c0dff6383c4afa69926e612c",
+    "gitBlobSHA1": "99fbebecf13cf0d2d029a7db8e1fb60f9306bcea",
+    "sha256": "3e06809700ff7d02f37a2e4539380a0012f05b0dd15a291112aab324cd3f3fbb",
+    "bytes": 2543,
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/tx-tcc/research.md",
+    "recordedTechnicalAccessDate": "2026-10-24",
+    "fullOriginalRecord": "# TCC：核心资料核验\n\n访问2026-10-24（北京时间）。实际打开下列官方正文，先核对机制再写分镜；旧EP.21只作代码布局参考，不是技术出处。\n\n| 资料 | 实际阅读范围 | 本期使用与边界 |\n|---|---|---|\n| [Apache Seata：TCC用户文档](https://seata.apache.org/docs/user/mode/tcc/) | Overview、Disadvantages、Overall Mechanism、Basic Usage | 业务代码提供检查/预留、确认、取消动作。预留后择一确认或释放；不是三个动作都顺次执行。需要侵入业务设计，不当作数据库通用自动回滚。 |\n| [Apache Seata：TCC开发文档](https://seata.apache.org/docs/dev/mode/tcc-mode/) | 分支事务自定义prepare/commit/rollback行为 | 本地资源操作由业务实现，分布式协调与单个数据库悬挂事务不是同一层保证。本文不把Seata实现当唯一TCC实现。 |\n| [Apache Seata：TCC Fence](https://seata.apache.org/blog/seata-tcc-fence/) | 2022-06-25正文，Try本地提交、幂等、空回滚、悬挂、状态表与业务共同本地事务 | 预留是真的持久化；二阶段通信可失败并重试，同一操作不能再产生副作用。Fence的具体表/版本只作公开实现例子，不声称所有框架自动覆盖业务幂等。 |\n| [AWS：Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/) | Retrying and side effects、Reducing client complexity | 没收到回复不等于未执行；重复请求需要保留同一操作标识，避免第二次业务效果。本文仅借此交叉核对重复确认/释放语义。 |\n\n镜01直接售出而整单失败是明示错误示例，不是推荐实现。镜03–05依据Try检查并持久预留；镜06–08依据有效预留后的确认及重复保护；镜09–12独立重置，取消只释放本单预留。镜13–14说明业务接口和恢复责任。\n\n订单8124、商品7042、可用4/预留0/已售0、购买1件全部是本片教学设定，不是官方性能或行业数字。正确分支均守恒4：成功4/0/0→3/1/0→3/0/1；取消分支重置后4/0/0→3/1/0→4/0/0。其他业务写入路径也必须遵守预留约束，不能绕过业务规则直接消耗已预留资源。\n\n不使用无依据的“性能提升”“锁更快”“无阻塞”等比较。确认/释放仍可能遇到故障，需要按持久决定恢复；不能收到超时就擅自改走另一结局。空回滚、迟到Try、并发重复的复杂实现放文章，视频不铺术语表。\n",
+    "evidenceLimit": "Frozen Git record preserves the original actual-reading statement and scope; it is not an archived official response and does not supply an upstream 2026-10-24 body SHA/commit. Those missing identities are not invented."
+  },
+  "priorIndependentRecords": [
+    {
+      "path": "docs/transaction-split-editorial-review.md",
+      "baseCommit": "656b525f533037f1c0dff6383c4afa69926e612c",
+      "gitBlobSHA1": "d99dc7bbd56948b6d0eb2f259bc882c3e987df3f",
+      "completeSHA256": "0d75ab1f705cfc639076d3b78c084529d091757aa50e011a89a1e3981ab2b5a1",
+      "bytes": 17284,
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/docs/transaction-split-editorial-review.md#L28",
+      "startLine": 28,
+      "endLine": 41,
+      "excerpt": "## 实际打开的权威正文\n\n以下均于2026-10-24实际打开相关正文，独立转述。当前产品文档按访问时内容阅读，不依据页脚推断初始发表年份；没有引用性能或普及率数字。\n\n| 来源 | 实际阅读位置及本次用途 |\n|---|---|\n| [MySQL 8.4：XA Transactions](https://dev.mysql.com/doc/refman/8.4/en/xa.html) | RM/TM及2PC过程段落：准备与最终提交/回滚分阶段，不能只画两边同帧变绿。 |\n| [MySQL 8.4：XA Transaction States](https://dev.mysql.com/doc/refman/8.4/en/xa-states.html) | PREPARED、XA RECOVER和终结操作：准备成功尚未终结，连接分离并非事务完成。 |\n| [MySQL 8.4：Restrictions on XA Transactions](https://dev.mysql.com/doc/refman/8.4/en/xa-restrictions.html) | XA实现与恢复限制的交叉阅读，不将本地连接生命周期当全局事务生命周期。 |\n| [Apache Seata：XA Mode](https://seata.apache.org/docs/user/mode/xa/) | 受支持资源与准备期资源占用的交叉核对。 |\n| [Apache Seata：TCC Mode](https://seata.apache.org/docs/user/mode/tcc/) | Try检查与预留、Confirm/Cancel业务操作：不把Try只画成一次查询，也不画成三步依次全部执行。 |\n| [Apache Seata：TCC Fence，2022-06-25](https://seata.apache.org/blog/seata-tcc-fence/) | 预留本地提交及幂等/空回滚/悬挂：核心短片保留重试责任，其余放文章。 |\n| [AWS：Saga patterns](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-patterns.html) | 本地事务序列、继续推进/补偿和两种组织方式：本片只选一种可读流程，不顺带做模式比较。 |\n| [Azure：Compensating Transaction](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction) | 补偿业务规则、并发影响、持久进度、补偿失败及人工处理：不能承诺无条件自动恢复。 |",
+      "scope": "Prior independent actual-reading context and navigation-only reuse; not official content or a new source reading."
+    },
+    {
+      "path": "docs/transaction-branch-navigation-review.md",
+      "baseCommit": "656b525f533037f1c0dff6383c4afa69926e612c",
+      "gitBlobSHA1": "4067c5024ea113fee830107333bd58c771dcaadd",
+      "completeSHA256": "8bdbfae28a342be77b0a408a0f51481fd374fcd3911930e7aeba4061a8e19ea2",
+      "bytes": 27195,
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/docs/transaction-branch-navigation-review.md#L23",
+      "startLine": 23,
+      "endLine": 31,
+      "excerpt": "\n| 短片 | 允许的主干与分叉 | 必须避免的误导 |\n|---|---|---|\n| 两阶段提交 | 准备→可靠共同决定→各自落实；准备被拒绝后记录放弃；已准备但决定未知时保留状态，恢复查证原决定 | 把已经记录的保存决定改成放弃；把失联当确定失败；恢复时重新决策；准备成功直接标全局已提交 |\n| TCC | 真实预留后，确认或取消二选一；各支上的相同操作重试读取已有结果 | 从确认后的正式售出顺接释放；取消把可用加到5；把重试画成第三种业务结局 |\n| Saga | 各步骤本地保存；库存成功后确认；已扣款但缺货后新增退款；退款失败留下待恢复进度 | 退款倒带删除原扣款；补偿失败直接标整单已取消；将待恢复等同于已终结叶子；重复退款再次加钱 |\n| Outbox | 订单+待办共同保存→独立发送→消费端库存+处理标记共同保存；发送/消费故障在各自层级处理 | 将订单已记录当整笔业务成功；重发冒充新订单；混淆发送端重复与消费端回滚；永久缺货靠无限重试成功 |\n\n技术边界沿用前轮已实际阅读的官方正文交叉核验，来源与访问位置见[前轮独立审查](transaction-split-editorial-review.md)。本轮若拓扑涉及新事实或出现疑义，再实际查阅对应权威正文；不将旧稿或代理消息当技术出处。",
+      "scope": "Prior independent actual-reading context and navigation-only reuse; not official content or a new source reading."
+    }
+  ],
+  "titleOnlySupplements": [
+    {
+      "repository": "apache/incubator-seata-website",
+      "commit": "ae31c10be89d7cca4d3a7010f3875d30992731c8",
+      "path": "i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md",
+      "url": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md",
+      "fixedSourceUrl": "https://github.com/apache/incubator-seata-website/blob/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md",
+      "finalUrl": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md",
+      "status": 200,
+      "checkedAt": "2026-10-26T17:37:36.399202+08:00",
+      "bytes": 6349,
+      "sha256": "ae1c05f35a3273c6218a2b216d007048408bbf4796b5a2814fa2a32903d593a8",
+      "savedPath": "docs/reference-endcards/batch-7/tx-tcc-title-evidence/seata-user-tcc.md",
+      "titleEvidence": {
+        "startLine": 2,
+        "endLine": 2,
+        "text": "title: Seata TCC Mode"
+      },
+      "title": "Seata TCC Mode",
+      "readScope": "Downloaded complete official repository file and inspected exact frontmatter title/explicit byline only. No new technical-body review or re-dating of 2026-10-24 actual reading.",
+      "selectedForVideo": true
+    },
+    {
+      "repository": "apache/incubator-seata-website",
+      "commit": "ae31c10be89d7cca4d3a7010f3875d30992731c8",
+      "path": "i18n/en/docusaurus-plugin-content-docs/current/dev/mode/tcc-mode.md",
+      "url": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/dev/mode/tcc-mode.md",
+      "fixedSourceUrl": "https://github.com/apache/incubator-seata-website/blob/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/dev/mode/tcc-mode.md",
+      "finalUrl": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/dev/mode/tcc-mode.md",
+      "status": 200,
+      "checkedAt": "2026-10-26T17:37:36.728856+08:00",
+      "bytes": 1639,
+      "sha256": "0a42b79d8156483268bf65ef2ecc66671183dbc6856dde7c76b215198a5f5e4e",
+      "savedPath": "docs/reference-endcards/batch-7/tx-tcc-title-evidence/seata-dev-tcc-mode.md",
+      "titleEvidence": {
+        "startLine": 2,
+        "endLine": 2,
+        "text": "title: Seata TCC Mode"
+      },
+      "title": "Seata TCC Mode",
+      "readScope": "Downloaded complete official repository file and inspected exact frontmatter title/explicit byline only. No new technical-body review or re-dating of 2026-10-24 actual reading.",
+      "selectedForVideo": false
+    },
+    {
+      "repository": "apache/incubator-seata-website",
+      "commit": "ae31c10be89d7cca4d3a7010f3875d30992731c8",
+      "path": "i18n/en/docusaurus-plugin-content-blog/seata-tcc-fence.md",
+      "url": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-blog/seata-tcc-fence.md",
+      "fixedSourceUrl": "https://github.com/apache/incubator-seata-website/blob/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-blog/seata-tcc-fence.md",
+      "finalUrl": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-blog/seata-tcc-fence.md",
+      "status": 200,
+      "checkedAt": "2026-10-26T17:37:37.079554+08:00",
+      "bytes": 17524,
+      "sha256": "798d7cda0fd1567601dd0eb01b262ad0f150246d354ffd71f233cde9f2475f53",
+      "savedPath": "docs/reference-endcards/batch-7/tx-tcc-title-evidence/seata-tcc-fence.md",
+      "titleEvidence": {
+        "startLine": 2,
+        "endLine": 2,
+        "text": "title: Alibaba Seata Resolves Idempotence, Dangling, and Empty Rollback Issues in TCC Mode"
+      },
+      "title": "Alibaba Seata Resolves Idempotence, Dangling, and Empty Rollback Issues in TCC Mode",
+      "readScope": "Downloaded complete official repository file and inspected exact frontmatter title/explicit byline only. No new technical-body review or re-dating of 2026-10-24 actual reading.",
+      "authorEvidence": {
+        "startLine": 4,
+        "endLine": 4,
+        "text": "author: Zhu Jinjun"
+      },
+      "explicitAuthor": "Zhu Jinjun",
+      "selectedForVideo": true
+    }
+  ],
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Apache Seata",
+      "title": "Seata TCC Mode",
+      "version": "Seata TCC 用户文档 · 原技术实读2026-10-24",
+      "url": "https://seata.apache.org/docs/user/mode/tcc/",
+      "sections": "Overview；Disadvantages；Overall Mechanism；Basic Usage",
+      "supports": [
+        "业务实现Try检查并预留资源，再根据协调决定选择Confirm或Cancel；确认与取消是互斥结局，不是三个动作依次全部执行。",
+        "TCC要求业务提供相应动作及资源约束，不能把给远程接口加标记当成通用数据库自动回滚。"
+      ],
+      "limitations": [
+        "Seata是本片引用的公开TCC实现，不是唯一实现；不采用文档中面向所有系统的性能或适用性口号。",
+        "保留本片订单8124、库存4及购买1件的教学身份，不当作官方案例或实测。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "timezone": "Asia/Shanghai",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/tx-tcc/research.md#L7",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/tx-tcc/research.md",
+        "gitBlobSHA1": "99fbebecf13cf0d2d029a7db8e1fb60f9306bcea",
+        "fileSHA256": "3e06809700ff7d02f37a2e4539380a0012f05b0dd15a291112aab324cd3f3fbb",
+        "startLine": 7,
+        "endLine": 7,
+        "text": "| [Apache Seata：TCC用户文档](https://seata.apache.org/docs/user/mode/tcc/) | Overview、Disadvantages、Overall Mechanism、Basic Usage | 业务代码提供检查/预留、确认、取消动作。预留后择一确认或释放；不是三个动作都顺次执行。需要侵入业务设计，不当作数据库通用自动回滚。 |"
+      },
+      "titleEvidence": {
+        "locator": "Apache官方仓库固定i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md frontmatter · line 2",
+        "evidence": "docs/reference-endcards/batch-7/sources-tx-tcc.json",
+        "originalTitle": "Seata TCC Mode",
+        "basis": "Fresh official Apache repository frontmatter title; title-only supplement date is distinct from old technical reading."
+      },
+      "authorshipEvidence": {
+        "publisher": "Apache Seata",
+        "basis": "Official documentation publisher named in old source label and URL; no personal byline recorded or inferred.",
+        "explicitAuthor": null
+      },
+      "newCanonicalGETPerformed": false,
+      "newTechnicalBodyReadPerformed": false,
+      "oldOfficialBodySHA256": null
+    },
+    {
+      "id": "R2",
+      "organization": "Apache Seata",
+      "author": "Zhu Jinjun",
+      "title": "Alibaba Seata Resolves Idempotence, Dangling, and Empty Rollback Issues in TCC Mode",
+      "version": "2022-06-25 · Seata 1.5.1 Fence公开实现，仅参考",
+      "url": "https://seata.apache.org/blog/seata-tcc-fence/",
+      "sections": "TCC；Try本地提交；幂等、空回滚、悬挂；Fence状态表与业务操作的本地事务",
+      "note": "仅参考：2022-06-25历史实现材料；现行用户/开发文档另列，不将1.5.1细节推广为所有TCC实现。",
+      "supports": [
+        "Try需要真正提交业务预留，相关控制状态和资源修改需要正确原子衔接。",
+        "具体Fence实现展示对幂等、空回滚、悬挂问题的处理；重复确认或释放不能再次改变资源数量。"
+      ],
+      "limitations": [
+        "仅作公开实现参考，不根据标题中的Resolves推导所有框架、版本或业务代码天然正确。",
+        "确认与取消需要依据持久决定恢复，不能因一次超时擅自切换结果；其他写入路径仍需遵守预留约束。",
+        "旧文的1.5.1版本及具体Fence表不作为当前部署默认值。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "timezone": "Asia/Shanghai",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/tx-tcc/research.md#L9",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/tx-tcc/research.md",
+        "gitBlobSHA1": "99fbebecf13cf0d2d029a7db8e1fb60f9306bcea",
+        "fileSHA256": "3e06809700ff7d02f37a2e4539380a0012f05b0dd15a291112aab324cd3f3fbb",
+        "startLine": 9,
+        "endLine": 9,
+        "text": "| [Apache Seata：TCC Fence](https://seata.apache.org/blog/seata-tcc-fence/) | 2022-06-25正文，Try本地提交、幂等、空回滚、悬挂、状态表与业务共同本地事务 | 预留是真的持久化；二阶段通信可失败并重试，同一操作不能再产生副作用。Fence的具体表/版本只作公开实现例子，不声称所有框架自动覆盖业务幂等。 |"
+      },
+      "titleEvidence": {
+        "locator": "Apache官方仓库固定i18n/en/docusaurus-plugin-content-blog/seata-tcc-fence.md frontmatter · line 2；显式author line 4",
+        "evidence": "docs/reference-endcards/batch-7/sources-tx-tcc.json",
+        "originalTitle": "Alibaba Seata Resolves Idempotence, Dangling, and Empty Rollback Issues in TCC Mode",
+        "basis": "Fresh official Apache repository frontmatter title; title-only supplement date is distinct from old technical reading."
+      },
+      "authorshipEvidence": {
+        "publisher": "Apache Seata",
+        "basis": "Official Apache Seata blog frontmatter explicitly names Zhu Jinjun; not inferred from a Git committer.",
+        "explicitAuthor": "Zhu Jinjun"
+      },
+      "newCanonicalGETPerformed": false,
+      "newTechnicalBodyReadPerformed": false,
+      "oldOfficialBodySHA256": null
+    }
+  ],
+  "preservedInputPrefixes": {
+    "productionArticleSHA256Before": "d21a48b9d8d0a59ffd5affda3dea644d585280d94962c8b9b3d5eb693ed2c69c",
+    "productionResearchSHA256Before": "3e06809700ff7d02f37a2e4539380a0012f05b0dd15a291112aab324cd3f3fbb",
+    "publishedArticleSHA256Before": "d21a48b9d8d0a59ffd5affda3dea644d585280d94962c8b9b3d5eb693ed2c69c"
+  },
+  "layout": {
+    "maxItemsPerPage": 4,
+    "secondsPerPage": 5,
+    "expectedPages": 1
+  },
+  "scopeBoundaries": [
+    "Try is a real durable business reservation, not a query-only check or a database transaction held open forever.",
+    "Confirm/Cancel are alternative outcomes; retry and lost replies must not repeat inventory changes or switch an already persisted decision.",
+    "State and resource mutation need correct local atomicity and concurrency handling; other business writers must honor reservation constraints.",
+    "The 2022 Fence article and Seata1.5.1 are historical implementation reference only, supported by current user/developer docs; not all TCC implementations or business code automatically solve every failure.",
+    "All stock/order numbers are the unchanged video teaching example; no performance/industry/market share claim.",
+    "The missing AWS byline in an old note is not proof that the public article has no author; no guessed individual or fallback institution is added to the new video list for that article."
+  ],
+  "selectionRationale": {
+    "selected": [
+      "Current user documentation explicitly requires business-implemented Try/Confirm/Cancel and explains the main reserve/confirm-or-cancel mechanism.",
+      "The 2022 Fence article supplies the existing durable local reservation, idempotence, empty rollback and hanging implementation reference, with a real explicit byline."
+    ],
+    "notSelected": [
+      "Developer documentation has the same original title as the user guide; its old technical record and honest new title-only supplement remain available internally, but it is not duplicated on the video list.",
+      "The AWS retry article has an old actual technical read record, but its explicit personal byline is not established by the currently available record. It is omitted from the new bibliography rather than treating missing note metadata as proof of no author. Its original footnote remains unchanged."
+    ]
+  },
+  "localVerification": {
+    "checkedAt": "2026-10-26T17:41:28.279815+08:00",
+    "command": "node site/scripts/check-references.mjs --sources episodes-codex/tx-tcc",
+    "selectedSourceCount": 2,
+    "originalArticlePrefixBytes": 4633,
+    "originalResearchPrefixBytes": 2543,
+    "originalPrefixesUnchanged": true,
+    "allThreeTitleSupplementBytesAndSHA256Matched": true,
+    "titleAndAuthorLineNumbersMatched": true,
+    "note": "Source preflight run after this finalized two-item input; success recorded by actual CLI output."
+  }
+}
