@@ -6,7 +6,7 @@ const {pathToFileURL} = require('node:url');
 const assert = require('node:assert/strict');
 const {chromium} = require('playwright');
 const root = path.resolve(__dirname, '../..');
-const out = __dirname;
+const out = process.env.CITATION_QA_OUTPUT ? path.resolve(root, process.env.CITATION_QA_OUTPUT) : __dirname;
 const base = process.env.CITATION_QA_BASE || 'http://127.0.0.1:4323/video-studio/';
 const shots = path.join(out, 'screenshots');
 const read = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -100,6 +100,9 @@ async function verifyLinkHit(page, id) {
     const file = path.join(root, 'episodes', slug, 'meta.json');
     return fs.existsSync(file) && !read(file).draft && !read(file).archived;
   }).sort();
+  const requestedSlugs = (process.env.CITATION_QA_SLUGS || '').split(',').map((slug) => slug.trim()).filter(Boolean);
+  assert.ok(requestedSlugs.every((slug) => episodes.includes(slug)), 'CITATION_QA_SLUGS must name current published episodes');
+  const pageEpisodes = requestedSlugs.length ? episodes.filter((slug) => requestedSlugs.includes(slug)) : episodes;
   const expected = new Map(episodes.map((slug) => {
     const tree = parseArticle(fs.readFileSync(path.join(root, 'episodes', slug, 'article.mdx'), 'utf8'));
     const ids = [];
@@ -121,7 +124,7 @@ async function verifyLinkHit(page, id) {
       const page = await context.newPage();
       page.setDefaultTimeout(7000);
       page.setDefaultNavigationTimeout(20000);
-      for (const slug of episodes) await runCase(`all-${slug}-${mode.width}`, async () => {
+      for (const slug of pageEpisodes) await runCase(`all-${slug}-${mode.width}`, async () => {
         const errors = [];
         const listener = (error) => errors.push(error.message);
         page.on('pageerror', listener);

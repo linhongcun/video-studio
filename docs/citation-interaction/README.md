@@ -11,8 +11,14 @@
 - 浮层在入口附近展开，根据视口翻转或限制高度，可滚动长内容；不推动正文，不遮出视口。亮暗主题共用站点变量。
 - 原文和出处仍在服务端HTML中。现代浏览器无JavaScript时仍可通过原生Popover点击查看；不支持Popover的浏览器保留完整引用作为降级。
 
-只调整共享组件与交互，不逐篇改文章和引用数据，既有视频、文章、来源及元数据保持。515项完整SHA基线见 [baseline.json](baseline.json)。后续新期继续使用相同 `SourceQuote`，自动获得本次交互，制作与发布检查同步更新。
+只调整共享组件与交互，不逐篇改文章和引用数据。首次515项完整SHA基线见 [baseline.json](baseline.json)。发布前同步主干至 `9714a4b3d9f74b2e8e04244d516a9dd39f32b572`，保留同期GitHub导航入口和每日温度的新文章、截图与媒体；本次版本采用 `v0.76.0`，与已发布0.75.x区分。集成基线见 [baseline-integrated.json](baseline-integrated.json)，[集成记录](integration.json)保留6项上游内容差异及交互文件不变的完整SHA，515项相对该基线的保留核对见 [preservation.json](preservation.json)。后续新期继续使用相同 `SourceQuote`，自动获得本次交互，制作与发布检查同步更新。
 
 ## 验证与发布
 
-实现、浏览器检查和上线结果完成后记录于此；不将设计目标或尚未执行的检查写成已完成。
+- [完整构建](build.log)通过，47篇文章、67处引用与50幅配图的原有发布检查通过；[91项原有检查](tests.log)通过。
+- [独立浏览器验收](browser-review.json)101项通过：94组桌面亮色/手机暗色页面验证引用默认收起、原文及定位身份、入口位置和宽度；代表交互验证悬停、跨入面板、点击固定、再次点击/关闭按钮/外点/Escape、键盘与焦点、单一面板、无正文位移、实际触摸内部滚动、小视口重定位和无JS原生开关。
+- [视觉复核](visual-review.json)逐张查看8张[代表截图](screenshots/)，引用入口和展开内容在亮暗/桌面手机均清楚；组件另有[独立代表检查](component-review.json)。旧浏览器降级经CSS路径审查，未声称在旧版真机或每种引擎实际运行。
+- 首两轮失败及针对复验保留：native toggle状态同步和rAF重定位需要等待，CDP合成scroll未移动不代表真实触摸滚动失败；最终实际touch start/move/end推动面板且正文未滚动，生产组件未因QA假设改动。最初构建与保留报告按其当时基线保留，后续集成的相关页面与交互[定向复验](integrated/browser-review.json)13项全部通过（6组daily/HTTP/strategy页面与7项代表交互），[集成视觉复核](integrated/visual-review.json)实际查看新页头下的4张TLS图，原101项证据保留。
+- [密钥扫描](secret-scan.log)及 `git diff --check`通过。
+
+发布与线上结果将在实际完成后记录；检查范围不扩大为阅读效率测量或用户已观看认可。

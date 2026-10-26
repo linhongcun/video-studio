@@ -10,7 +10,7 @@ from urllib.request import Request, urlopen
 ROOT = Path(__file__).resolve().parents[2]
 OUT = Path(__file__).resolve().parent
 BASE = 'https://linhongcun.github.io/video-studio/'
-VERSION = '0.75.0'
+VERSION = '0.76.0'
 
 
 class Citations(HTMLParser):
