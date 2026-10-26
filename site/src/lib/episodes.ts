@@ -150,7 +150,8 @@ export function buildVtt(slug: string) {
   const ts = (f: number, cueEnd = false) => {
     // Native cues can remain active when their end equals the first card frame.
     // Only that exact end uses the greatest millisecond strictly before it.
-    const s = cueEnd && f === cardFrom ? (Math.ceil(f / fps * 1000) - 1) / 1000 : f / fps;
+    // Multiply integer frames first; rounding seconds first can cross an exact millisecond boundary.
+    const s = cueEnd && f === cardFrom ? (Math.ceil(f * 1000 / fps) - 1) / 1000 : f / fps;
     const hh = Math.floor(s / 3600), mm = Math.floor((s % 3600) / 60), ss = (s % 60).toFixed(3).padStart(6, '0');
     return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}:${ss}`;
   };

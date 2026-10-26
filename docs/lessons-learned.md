@@ -200,6 +200,8 @@
 
 - **整数毫秒边界的后续缺口（2026-10-25）：**LC.46原生字幕在精确182.100秒仍激活末句，+0.000001秒才退出；仅floor不能保证整数毫秒时严格早于卡首。保留失败矩阵与精确诊断后，唯一附录结束边界改为`ceil(卡首毫秒)-1`，其余结束戳与文字不动。45份VTT前后证明只影响LC.46、LC.70、LC.206各一个末cue（-1ms），其他42份全文SHA不变；三片双视口精确首卡/+.0001均0cue，旧两片各一次桌面短检也通过，视频/声音/431冻结输入保持。见[边界证据](leetcode-batch-next/site-qa/vtt-boundary-audit.json)与[旧片定验](leetcode-batch-next/site-qa/retained-card-boundaries.json)。不为站点序列化重编码电影，不用容差接受暂停卡字幕残留。
 
+- **整数帧换算的浮点回归（2026-10-26）：**第五批索引片的3924/30秒先除再乘1000产生130800.00000000001，原`ceil-1`仍输出130.800，未避开资料首帧。将换算改为先用整数帧乘1000再除fps；7项真实函数回归及47份VTT对照中，仅该片末cue改为130.799，其余46份字节不变，文字和起点也保持。视频不重编码，见[实际边界修正](reference-endcards/batch-5/vtt-boundary-correction.json)。
+
 - **Java附录的识别缺口（D02主线修订，2026-10-25）：**同一结束边界策略只读取unvoicedEndCard，漏掉设计模式的javaEndCard。新observer首卡4292/30=143.066666秒，普通序列化会把末cue写成143.067；补上Java元数据回退后写143.066。复用实际buildVtt运行时，45目录对比仅3个现有Java片末边界变1ms，其余42份字节不变；新冻结20cue fixture仅末终点调整，6输入场景与后续真实build/123项静态核验通过。没有本环境浏览器native cue观察，不把严格时间关系的计算写成浏览器实测。见[边界报告](../episodes-codex/observer-pattern/qa-observer-first-vtt-boundary.json)。
 
 ## L021 过程讲对了，观众仍不知道这期要回答什么
