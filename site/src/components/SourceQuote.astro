@@ -7,31 +7,69 @@ const slug = Astro.params.slug;
 const source = validateArticleSource(readArticleSources(slug).get(sourceId));
 if (typeof supports !== 'string' || !supports.trim()) throw new Error(`${slug}: SourceQuote ${sourceId} needs a concrete supports explanation`);
 const fixedUrl = source.verification.sourceUrl;
+const panelId = `source-${slug}-${sourceId}`;
+const headingId = `${panelId}-heading`;
 ---
-<figure class="source-quote" data-source-quote={sourceId}>
-  <div class="source-quote-label">原文摘录</div>
-  <blockquote cite={fixedUrl ?? source.url}><p>{source.quotation.text}</p></blockquote>
-  {translation && <p class="source-translation"><span>译文</span> {translation}</p>}
-  <p class="source-support"><strong>编者说明</strong> {supports}</p>
-  <figcaption>
-    <cite><a href={source.url}>{source.title}</a></cite>
-    <p class="source-identity">{source.author ?? source.organization} · {source.version}</p>
-    <p class="source-location">原文位置：{source.quotation.locator}</p>
-    <p class="source-access">核验于 <time datetime={source.verification.checkedAt}>{source.verification.checkedAt}</time>{fixedUrl && fixedUrl !== source.url && <> · <a href={fixedUrl}>查看固定原文</a></>}</p>
-  </figcaption>
-</figure>
+<div class="source-quote" data-source-quote={sourceId}>
+  <span class="source-anchor">
+    <button class="source-trigger" type="button" popovertarget={panelId} aria-controls={panelId} aria-haspopup="dialog" data-source-trigger={sourceId} aria-label={`查看原文与出处：${source.title}`}>
+      <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M6.25 4H3.5A1.5 1.5 0 0 0 2 5.5V9h3V7.5H3.5v-2h2.75M14 4h-2.75a1.5 1.5 0 0 0-1.5 1.5V9h3V7.5h-1.5v-2H14" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" stroke-linecap="round" /></svg>
+      <span>原文</span>
+    </button>
+  </span>
+  <aside class="source-panel" id={panelId} popover="auto" role="dialog" aria-labelledby={headingId} data-source-panel={sourceId}>
+    <header class="source-panel-header">
+      <h4 id={headingId}>原文与出处</h4>
+      <button class="source-close" type="button" popovertarget={panelId} popovertargetaction="hide" aria-label="关闭原文与出处">
+        <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="m4 4 8 8m0-8-8 8" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" /></svg>
+      </button>
+    </header>
+    <figure class="source-content">
+      <blockquote cite={fixedUrl ?? source.url}><p>{source.quotation.text}</p></blockquote>
+      {translation && <p class="source-translation"><span>译文</span> {translation}</p>}
+      <p class="source-support"><strong>编者说明</strong> {supports}</p>
+      <figcaption>
+        <cite><a href={source.url}>{source.title}</a></cite>
+        <p class="source-identity">{source.author ?? source.organization} · {source.version}</p>
+        <p class="source-location">原文位置：{source.quotation.locator}</p>
+        <p class="source-access">核验于 <time datetime={source.verification.checkedAt}>{source.verification.checkedAt}</time>{fixedUrl && fixedUrl !== source.url && <> · <a href={fixedUrl}>查看固定原文</a></>}</p>
+      </figcaption>
+    </figure>
+  </aside>
+</div>
+
+<script>
+import '../scripts/source-quotes';
+</script>
 
 <style>
-.source-quote{margin:var(--sp-5) 0;padding:var(--sp-5);border:1px solid var(--c-border);border-left:3px solid var(--c-primary);border-radius:var(--r-md);background:var(--c-surface);overflow-wrap:anywhere;min-width:0}
-.source-quote-label{margin:0 0 var(--sp-3);color:var(--c-primary);font-size:var(--fs-xs);font-weight:650;letter-spacing:.06em}
-.source-quote blockquote{padding:0;margin:0 0 var(--sp-4);border:0;font-size:var(--fs-body);line-height:1.8;color:var(--c-text)}
-.source-quote blockquote p{margin:0;white-space:pre-wrap}
-.source-quote figcaption{padding-top:var(--sp-3);border-top:1px solid var(--c-border);color:var(--c-text-2);font-size:var(--fs-small);line-height:1.7;text-align:left}
-.source-quote cite{font-style:normal;font-weight:600}
-.source-quote figcaption p{margin:var(--sp-1) 0 0}
-.source-quote .source-access{font-size:var(--fs-xs)}
-.source-quote .source-support{margin:var(--sp-4) 0;font-size:var(--fs-small);line-height:1.8}
+.source-quote{display:contents}
+.source-anchor{display:none}
+.source-trigger{display:inline-flex;align-items:center;gap:3px;margin:0 0 0 5px;padding:0 2px;border:0;border-radius:3px;background:transparent;color:var(--c-primary);font:inherit;font-size:var(--fs-small);line-height:inherit;vertical-align:baseline;cursor:pointer;white-space:nowrap;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:4px;text-decoration-thickness:1px}
+.source-trigger svg{flex:none;align-self:center}
+.source-trigger:hover,.source-trigger[aria-expanded="true"]{color:var(--c-text);background:var(--c-primary-a12)}
+.source-trigger:focus-visible,.source-close:focus-visible{outline:none;box-shadow:var(--focus-ring)}
+.source-panel{box-sizing:border-box;margin:var(--sp-5) 0;padding:var(--sp-5);border:1px solid var(--c-border);border-left:3px solid var(--c-primary);border-radius:var(--r-md);background:var(--c-surface);color:var(--c-text);font:inherit;line-height:1.8;overflow-wrap:anywhere;min-width:0}
+.source-panel-header{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin:0 0 var(--sp-4)}
+.source-panel-header h4{margin:0;color:var(--c-primary);font-size:var(--fs-small);font-weight:650;line-height:1.5}
+.source-close{display:none;align-items:center;justify-content:center;flex:none;width:32px;height:32px;margin:-7px -7px -7px 0;padding:0;border:0;border-radius:var(--r-sm);background:transparent;color:var(--c-text-2);cursor:pointer}
+.source-close:hover{color:var(--c-text);background:var(--c-surface-2)}
+.source-content{margin:0}
+.source-content blockquote{padding:0;margin:0 0 var(--sp-4);border:0;font-size:var(--fs-body);line-height:1.8;color:var(--c-text)}
+.source-content blockquote p{margin:0;white-space:pre-wrap}
+.source-content figcaption{padding-top:var(--sp-3);border-top:1px solid var(--c-border);color:var(--c-text-2);font-size:var(--fs-small);line-height:1.7;text-align:left}
+.source-content cite{font-style:normal;font-weight:600}
+.source-content figcaption p{margin:var(--sp-1) 0 0}
+.source-content .source-access{font-size:var(--fs-xs)}
+.source-content .source-support{margin:var(--sp-4) 0;font-size:var(--fs-small);line-height:1.8}
 .source-support strong,.source-translation span{color:var(--c-primary);font-weight:600;margin-right:var(--sp-1)}
-.source-quote .source-translation{margin:0 0 var(--sp-4);font-size:var(--fs-small);color:var(--c-text-2)}
-@media(max-width:767px){.source-quote{padding:var(--sp-4)}}
+.source-content .source-translation{margin:0 0 var(--sp-4);font-size:var(--fs-small);color:var(--c-text-2)}
+@supports selector(:popover-open){
+  .source-anchor{display:inline;white-space:nowrap}
+  .source-panel{position:fixed;inset:0;width:min(540px,calc(100vw - 24px));max-height:min(480px,calc(100vh - 24px));max-height:min(480px,calc(100dvh - 24px));margin:auto;overflow:auto;overscroll-behavior:contain;box-shadow:var(--shadow-2)}
+  .source-panel::backdrop{background:transparent}
+  .source-close{display:inline-flex}
+}
+@media(max-width:767px){.source-panel{padding:var(--sp-4)}.source-close{width:36px;height:36px;margin:-7px -7px -7px 0}}
+@supports selector(:popover-open){@media(max-width:767px){.source-panel{max-height:min(520px,70vh,calc(100vh - 24px));max-height:min(520px,70dvh,calc(100dvh - 24px))}}}
 </style>
