@@ -501,3 +501,5 @@ Redis是后续考虑独立规划的大模块，本次仅记录内容组织方向
 后续观看暴露了另一项说明缺口：新55接完底层后继续接上层，缺少足够明确的条件，容易被读成每次插入都必须跨两层。当前仅修07两句与09首句，保留其他17句及前期已明确的查找转场；先用层高1的合法完成图说明只接底层，再显式回到共同before、预先选2层，演示本例原接法，避免事后升层。
 
 固定Redis8.4源码证明层高从1开始选择，并只对低于所选层高的层接入forward；未展示的span等维护仍有自身步骤，不把上层forward不加入55扩大成全部内部状态不变。两个分支由独立模型审查，按[issue #355](https://github.com/linhongcun/video-studio/issues/355)推进；新3句须独立审稿后生成，旧17句按实际源与SHA复用，不能延用旧“20句全相同”的验收。当前还未完成本轮新成片与上线，不预记认可。Redis独立模块继续仅记未来考虑方向。
+
+- **层高修订实际交付：**[PR357](https://github.com/linhongcun/video-studio/pull/357)合并6790d926，附注tag/Release v0.76.2，最新主干的Release后Pages40339259076成功；正式156.9秒，一层完成、共同before重置和预选两层分别呈现。151冻结、35成片图、162本地网页检查及线上11项完整GET/95浏览器与Fullscreen检查通过，实际查看14张线上图，完整视频SHA为0edf23150bb3a3a00950ebb99547e09e9ede6ba9326e22d46e73d5e2e50f24f9。#355已completed关闭，详见[实际交付](../episodes-codex/redis-skiplist/revisions/height-choice/redis-skiplist/publication.json)。全站并行更新至v0.77.0，不改本期Release/首发身份；旧两版、882份旧生产文件与当前1123份其他公开文件保留，未作全片人工听辨/ASR/真机或学习效果宣称，未预记用户认可；Redis独立模块仍仅为未来考虑。
