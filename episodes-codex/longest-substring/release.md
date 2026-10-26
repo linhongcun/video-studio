@@ -36,3 +36,15 @@
 - 2026-10-24 23:57:57（北京时间）实际HTTPS GET核验通过：视频/海报完整字节与SHA均匹配本地新媒体，36句VTT与本地已检查构建逐字节一致，四章/正文锚点、源码入口、library/系列/RSS、学习站首页及实际Release条目通过，见online-verification.json及docs/leetcode-problem-first/online-verification.json。
 - 原制作issue保持completed；本轮为已上线视频修订，由PR #201跟踪，未将平台发布事项说成已完成。不声称用户已观看认可新开头。
 - Release后另触发的[部署40109221283](https://github.com/linhongcun/video-studio/actions/runs/40109221283)也已成功，head与合并提交一致，见release-deployment.json；未取消其它工作流。
+
+<!-- batch-10-publication-archive:start -->
+## 存量片尾参考资料第十批 · v0.76.1
+
+[PR #363](https://github.com/linhongcun/video-studio/pull/363)已合并，发布[v0.76.1](https://github.com/linhongcun/video-studio/releases/tag/v0.76.1)，[Pages 40336357388](https://github.com/linhongcun/video-studio/actions/runs/40336357388)成功；合并提交`169cb0c09b16efdc4b5740452c2b225b5e30e841`。2026-10-26T22:11:12+08:00完成21项规范URL完整GET和5次公开GitHub身份读取，五片完整MP4 SHA、海报、全文VTT、资料页、原章节/日期、更新日志与tag/Release/Pages身份一致。原存量累计38/47，含新增Redis的当前站点39/48有附录，分别记数。实际响应见online-verification.json。
+
+本期3项、1页，每页150帧5秒，位于原完整Python代码页之后；原body 5980帧→最终6130帧，完整SHA256 `8f92c416714b29bfb6a96dffff9fafeed6bb05ed3fcc9f4b9a3bdf3a81b690f7`。原源目录MP4未留存，以Git发布原片与保留render-result完整SHA/帧数相同作为唯一body身份。原首发/日期、完整讲解/音轨、solution.py/json、完整代码页及原文章/研究/脚注保留。
+
+各项实际技术阅读日期：R1 Longest Substring Without Repeating Characters：2026-10-24；R2 Set Types — set, frozenset：2026-10-24；R3 Time complexity of operations on built-in types：2026-10-24。盛最多水与最长子串保留24日技术阅读；岛屿与全排列保留25日。接雨水R1保留25日题面，R2为26日真实新增Python函数技术补核；其余26日工作只补核原题/机构，未改写旧技术读日或冒称读过editorial。
+
+本批900项当前真实输入；旧842项声明全文保留，其中813现存匹配，29历史缺件只保留原key/SHA并明确未验证。未重渲正文、运行算法、重做ASR或改动冻结输入。证据见docs/reference-endcards/batch-10/。
+<!-- batch-10-publication-archive:end -->
