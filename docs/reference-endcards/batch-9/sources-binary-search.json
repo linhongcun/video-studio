@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "batch": "reference-endcards-batch-9",
+  "episode": "binary-search",
+  "baselineCommit": "036ce88d416e08127f8135afb55d1d62044f30f6",
+  "preparedAtUTC": "2026-10-26T11:42:08.578558+00:00",
+  "preparedAtBeijing": "2026-10-26T19:42:08.578558+08:00",
+  "originalOfficialReadDate": "2026-10-25",
+  "newNetworkRetrievalPerformed": false,
+  "newOfficialTitleSupplementPerformed": false,
+  "originalReadRecord": {
+    "path": "episodes-codex/binary-search/research.md",
+    "commit": "036ce88d416e08127f8135afb55d1d62044f30f6",
+    "gitBlobSHA1": "accb745bb9249a408a3e0241f5789b889da7f353",
+    "completeRecordSHA256": "4dec1b05a5581ea51738292cb064962d2f8e822a3163a0c4a623203b06442059",
+    "bytes": 6329,
+    "fixedRecordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/binary-search/research.md",
+    "notAnOfficialPageMirror": true,
+    "historicalAccessStatement": "访问日期：2026-10-25（北京时间）。制作选题为[issue #76](https://github.com/linhongcun/video-studio/issues/76)。本文区分公开题面、语言语义、独立证明和有限执行核验，不表示配音、动态动画、成片或线上交付已经通过。",
+    "rawCompleteReadingRecord": "# LC.704 公开资料与推导\n\n访问日期：2026-10-25（北京时间）。制作选题为[issue #76](https://github.com/linhongcun/video-studio/issues/76)。本文区分公开题面、语言语义、独立证明和有限执行核验，不表示配音、动态动画、成片或线上交付已经通过。\n\n## R1 官方题面\n\n- 来源：[LeetCode 704. Binary Search](https://leetcode.com/problems/binary-search/description/)与[力扣704. 二分查找](https://leetcode.cn/problems/binary-search/description/)。\n- 实际获取：本次独立调研代理通过可用网页工具分别打开并读取中英文正文、两组示例及约束；没有把搜索摘要当作全文阅读。\n- 页面日期：题面未标发表或更新时间，不以版权年份推断。\n- 支持主张：给定升序整数数组与目标值，存在则返回下标，不存在则返回-1；所有数组元素唯一；要求算法时间复杂度为`O(log n)`。官方数组长度为1..10000，英文题面对数组值和目标值均限定在-10000与10000之间（不含两端）。\n- 短引：英文题面写“return its index”和“Otherwise, return `-1`”。\n- 官方示例：数组`[-1,0,3,5,9,12]`，目标9返回4，目标2返回-1。\n- 用在：开头题意、成功/未找到的返回值、文章适用条件。主片采用自行选取的较易读输入，不称为官方示例；不引用题目通过率、企业标签或面试频率。\n\n## R2 Python整除与下标语义\n\n- 来源：[Python 3 Language Reference — Binary arithmetic operations](https://docs.python.org/3/reference/expressions.html#binary-arithmetic-operations)；[Python 3 Built-in Types — Common Sequence Operations](https://docs.python.org/3/builtins/stdtypes.html#common-sequence-operations)。\n- 实际获取：网页工具打开官方表达式文档，并定位`//`解释；另打开内置类型文档。表达式页面显示最后更新2026-10-24 11:38 UTC，这是文档元数据，不表示二分算法的提出日期。\n- 支持主张：整数`//`返回向下取整的整数商；序列按下标访问元素。文章里的`left + (right-left)//2`在有效非空闭区间中选择靠左的中点，偶数个候选时并无唯一“正中间那一格”。\n- 短引：“floor division of integers results in an integer”。\n- 用在：中点下标、Python程序与文章。该文档只提供运算语义，不作为整段算法正确性的官方证明。\n\n## 独立正确性论证\n\n初始闭区间为`[0,n-1]`。每轮开始时维持：若目标存在于原数组，目标下标仍在当前闭区间`[left,right]`内。\n\n取`mid = left + (right-left)//2`，当`left <= right`时必有`left <= mid <= right`。若中点值等于目标，返回`mid`即满足题意。若中点值小于目标，升序性质保证所有下标不大于`mid`的候选值都小于目标，所以可以把`left`更新为`mid+1`。若中点值大于目标，则所有下标不小于`mid`的候选值都大于目标，所以把`right`更新为`mid-1`。\n\n每次未命中更新都保留不变式，并且排除中点自身，使区间严格缩短。目标存在时不会被排除；如果最终`left > right`，区间没有下标，不变式说明目标在原数组中不存在，返回-1。最后只剩一格时仍应比较，所以循环条件是`left <= right`。\n\n## 复杂度独立推导\n\n当前候选数为`m`时，未命中后保留的候选数至多为`floor(m/2)`。循环轮数因此为`O(log n)`，每轮作常数次下标、整数运算及比较；题目范围内按常见单位成本模型计。迭代代码只维护有限个下标和中点，不切片、不递归，额外空间`O(1)`。这里“比较三次”指访问三个中点、完成三轮查找，不声称源码只执行三个布尔比较。\n\n主片不采用issue中“百万个数最多20次”的开场数字；本片只需要同一8元素例子的可见缩减，避免用未经当前程序计数核验的规模对比替代题意。\n\n## 自选教学轨迹\n\n固定原数组`[1,3,5,7,9,11,13,15]`，下标0..7；原数组从不删除或移动，只改变候选区间，已排除格保留原位置并变淡。以下两次查找是独立输入情景，第二次必须重置全部候选，再把目标改成8。\n\n| 目标 | 轮次 | 原候选下标 | 中点下标/值 | 结果 | 新候选下标或返回值 |\n|---:|---:|---|---|---|---|\n| 13 | 1 | 0..7 | 3 / 7 | 7 < 13 | 4..7 |\n| 13 | 2 | 4..7 | 5 / 11 | 11 < 13 | 6..7 |\n| 13 | 3 | 6..7 | 6 / 13 | 相等 | 返回6 |\n| 8 | 1 | 0..7 | 3 / 7 | 7 < 8 | 4..7 |\n| 8 | 2 | 4..7 | 5 / 11 | 11 > 8 | 4..4 |\n| 8 | 3 | 4..4 | 4 / 9 | 9 > 8 | left=4，right=3，返回-1 |\n\n执行核验已由`research/verify_algorithm.py`直接加载本期`solution.py`，与独立顺序枚举答案交叉核对：值域-4..4的全部511个非空升序独特数组、目标-5..5共5,621组通过，另有16个显式用例（含官方两例、教学两例、单元素/两元素、值域端点和10,000元素输入）及3个官方约束外的空数组健壮性用例通过。执行中通过Python行跟踪观察实际提交函数，检查目标下标留在候选闭区间、中点有效、未命中后每轮候选至多减半与输入不变。两条教学轨迹、显示JSON及文章唯一Python块均与执行源一致。实际SHA与报告见[research/algorithm-verification.json](research/algorithm-verification.json)。有限样本不代替上述一般论证，也不能证明画面或声音正确。\n\n## 叙事与画面风险\n\n- 开头先交代输入已有序且值不重复、按目标找位置、下标从0、找不到返回-1，再引入查找范围与二分方法。题号或标题不能代替这些信息。\n- 偶数候选数取靠左中点，不能无解释地把两格中任一格称为唯一正中间。\n- 暗下去表示“已排除”，不表示原数组被删除或下标重排；返回值6是原下标，不是值13，也不是剩余区间内的相对位置。\n- 缺失目标情景先明确“换一个目标，重新查找”，再恢复候选；不能让观众以为同一次搜索把目标13改为8。\n- 最后剩一格应继续比较；区间交错时没有候选，中点不得继续访问。\n- 主线只用闭区间版，不混入半开区间的`right=mid`、`left<right`或其他终止约定。最后完整Python卡5秒，提示暂停，不新增口播/字幕。\n"
+  },
+  "selectionRationale": "One original official problem statement plus the two actually read Python sections directly support task/return contracts, integer floor division and sequence indexing. The invariant, termination argument, teaching trace and O(log n)/O(1) implementation proof remain independent episode derivations; no Editorial reading or new source requests are claimed.",
+  "originalPrefixIntegrity": {
+    "article.mdx": {
+      "bytes": 8240,
+      "sha256": "e20c9b1f04e8491558ee00d5a8f96e56383385042f2c08d032cacd519c0a9030",
+      "preservation": "Entire original file remains a byte-for-byte prefix, including all original footnotes, anchors and Python block; only the bibliography section is appended."
+    },
+    "research.md": {
+      "bytes": 6329,
+      "sha256": "4dec1b05a5581ea51738292cb064962d2f8e822a3163a0c4a623203b06442059",
+      "preservation": "Entire original file remains a byte-for-byte prefix, including all original footnotes, anchors and Python block; only the bibliography section is appended."
+    }
+  },
+  "sources": [
+    {
+      "id": "R1",
+      "title": {
+        "text": "704. Binary Search",
+        "locator": "既有官方题面实读记录 · 第7行",
+        "recordLine": 7,
+        "rawExcerpt": "- 来源：[LeetCode 704. Binary Search](https://leetcode.com/problems/binary-search/description/)与[力扣704. 二分查找](https://leetcode.cn/problems/binary-search/description/)。",
+        "extractionMethod": "Retain the exact numbered English title 704. Binary Search from the documented official source label; LeetCode is the publisher, not prepended to the original title."
+      },
+      "organization": "LeetCode",
+      "version": "官方题面 · 实读2026-10-25",
+      "canonicalUrl": "https://leetcode.com/problems/binary-search/description/",
+      "additionalCanonicalUrls": [
+        "https://leetcode.cn/problems/binary-search/description/"
+      ],
+      "originalReadDate": "2026-10-25",
+      "newNetworkRetrievalPerformed": false,
+      "sourceMethod": "Reuse the existing documented real official-page reading; no successful HTTP status or new retrieval date is invented.",
+      "existingReadRecordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/binary-search/research.md#L5-L13",
+      "recordCommit": "036ce88d416e08127f8135afb55d1d62044f30f6",
+      "recordGitBlobSHA1": "accb745bb9249a408a3e0241f5789b889da7f353",
+      "completeRecordSHA256": "4dec1b05a5581ea51738292cb064962d2f8e822a3163a0c4a623203b06442059",
+      "retainedClaimRecords": [
+        {
+          "startLine": 5,
+          "endLine": 13,
+          "verbatimRecordExcerpt": "## R1 官方题面\n\n- 来源：[LeetCode 704. Binary Search](https://leetcode.com/problems/binary-search/description/)与[力扣704. 二分查找](https://leetcode.cn/problems/binary-search/description/)。\n- 实际获取：本次独立调研代理通过可用网页工具分别打开并读取中英文正文、两组示例及约束；没有把搜索摘要当作全文阅读。\n- 页面日期：题面未标发表或更新时间，不以版权年份推断。\n- 支持主张：给定升序整数数组与目标值，存在则返回下标，不存在则返回-1；所有数组元素唯一；要求算法时间复杂度为`O(log n)`。官方数组长度为1..10000，英文题面对数组值和目标值均限定在-10000与10000之间（不含两端）。\n- 短引：英文题面写“return its index”和“Otherwise, return `-1`”。\n- 官方示例：数组`[-1,0,3,5,9,12]`，目标9返回4，目标2返回-1。\n- 用在：开头题意、成功/未找到的返回值、文章适用条件。主片采用自行选取的较易读输入，不称为官方示例；不引用题目通过率、企业标签或面试频率。"
+        }
+      ],
+      "supports": [
+        "给定升序且元素唯一的整数数组与目标值，存在时返回原下标，不存在时返回-1。",
+        "题面要求O(log n)时间复杂度；官方示例与约束用于题意，不把自选8元素轨迹称为官方例子。"
+      ],
+      "sections": "Description; Examples 1–2; Constraints",
+      "publisherBasis": {
+        "label": "LeetCode",
+        "attributionKind": "publisher/organization; no personal author recorded",
+        "explanation": "Official LeetCode problem statement; no individual byline is recorded, and no author/editorial writer is invented.",
+        "noGitAccountAuthorInference": true
+      },
+      "scopeNote": "The current preparation reuses the dated actual English/Chinese statement read. No fresh website request or Editorial reading is claimed."
+    },
+    {
+      "id": "R2",
+      "title": {
+        "text": "Binary arithmetic operations",
+        "locator": "既有Python官方章节实读记录 · 第17行",
+        "recordLine": 17,
+        "rawExcerpt": "- 来源：[Python 3 Language Reference — Binary arithmetic operations](https://docs.python.org/3/reference/expressions.html#binary-arithmetic-operations)；[Python 3 Built-in Types — Common Sequence Operations](https://docs.python.org/3/builtins/stdtypes.html#common-sequence-operations)。",
+        "extractionMethod": "Exact English section title retained after the Language Reference label. Cite the actual anchored section, without inventing a combined Python+section title or an unrecorded runtime microversion."
+      },
+      "organization": "Python Software Foundation",
+      "version": "Python 3 Language Reference · 实读2026-10-25",
+      "canonicalUrl": "https://docs.python.org/3/reference/expressions.html#binary-arithmetic-operations",
+      "additionalCanonicalUrls": [],
+      "originalReadDate": "2026-10-25",
+      "newNetworkRetrievalPerformed": false,
+      "sourceMethod": "Reuse the existing documented real official-page reading; no successful HTTP status or new retrieval date is invented.",
+      "existingReadRecordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/binary-search/research.md#L15-L21",
+      "recordCommit": "036ce88d416e08127f8135afb55d1d62044f30f6",
+      "recordGitBlobSHA1": "accb745bb9249a408a3e0241f5789b889da7f353",
+      "completeRecordSHA256": "4dec1b05a5581ea51738292cb064962d2f8e822a3163a0c4a623203b06442059",
+      "retainedClaimRecords": [
+        {
+          "startLine": 15,
+          "endLine": 21,
+          "verbatimRecordExcerpt": "## R2 Python整除与下标语义\n\n- 来源：[Python 3 Language Reference — Binary arithmetic operations](https://docs.python.org/3/reference/expressions.html#binary-arithmetic-operations)；[Python 3 Built-in Types — Common Sequence Operations](https://docs.python.org/3/builtins/stdtypes.html#common-sequence-operations)。\n- 实际获取：网页工具打开官方表达式文档，并定位`//`解释；另打开内置类型文档。表达式页面显示最后更新2026-10-24 11:38 UTC，这是文档元数据，不表示二分算法的提出日期。\n- 支持主张：整数`//`返回向下取整的整数商；序列按下标访问元素。文章里的`left + (right-left)//2`在有效非空闭区间中选择靠左的中点，偶数个候选时并无唯一“正中间那一格”。\n- 短引：“floor division of integers results in an integer”。\n- 用在：中点下标、Python程序与文章。该文档只提供运算语义，不作为整段算法正确性的官方证明。"
+        }
+      ],
+      "supports": [
+        "整数//给出向下取整的整数商，支持有效闭区间中靠左中点的计算语义。",
+        "该官方语言文档说明运算行为；本期二分查找不变式、终止性和O(log n)推导另由本期论证承担。"
+      ],
+      "sections": "Language Reference / Expressions / Binary arithmetic operations, integer floor division",
+      "publisherBasis": {
+        "label": "Python Software Foundation",
+        "attributionKind": "publisher/organization; no personal author recorded",
+        "explanation": "Python official documentation at docs.python.org, published under the Python Software Foundation; no personal byline is recorded or inferred from contributors.",
+        "noGitAccountAuthorInference": true
+      },
+      "scopeNote": "The 2026-10-24 11:38 UTC maintenance timestamp in the old record is not an algorithm publication date or proof of a platform Python microversion."
+    },
+    {
+      "id": "R3",
+      "title": {
+        "text": "Common Sequence Operations",
+        "locator": "既有Python官方章节实读记录 · 第17行",
+        "recordLine": 17,
+        "rawExcerpt": "- 来源：[Python 3 Language Reference — Binary arithmetic operations](https://docs.python.org/3/reference/expressions.html#binary-arithmetic-operations)；[Python 3 Built-in Types — Common Sequence Operations](https://docs.python.org/3/builtins/stdtypes.html#common-sequence-operations)。",
+        "extractionMethod": "Exact English anchored section title from the actual prior Built-in Types read. The parent manual label and section heading are kept separate; no translated/paraphrased title."
+      },
+      "organization": "Python Software Foundation",
+      "version": "Python 3 Built-in Types · 实读2026-10-25",
+      "canonicalUrl": "https://docs.python.org/3/builtins/stdtypes.html#common-sequence-operations",
+      "additionalCanonicalUrls": [],
+      "originalReadDate": "2026-10-25",
+      "newNetworkRetrievalPerformed": false,
+      "sourceMethod": "Reuse the existing documented real official-page reading; no successful HTTP status or new retrieval date is invented.",
+      "existingReadRecordUrl": "https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/binary-search/research.md#L15-L21",
+      "recordCommit": "036ce88d416e08127f8135afb55d1d62044f30f6",
+      "recordGitBlobSHA1": "accb745bb9249a408a3e0241f5789b889da7f353",
+      "completeRecordSHA256": "4dec1b05a5581ea51738292cb064962d2f8e822a3163a0c4a623203b06442059",
+      "retainedClaimRecords": [
+        {
+          "startLine": 15,
+          "endLine": 21,
+          "verbatimRecordExcerpt": "## R2 Python整除与下标语义\n\n- 来源：[Python 3 Language Reference — Binary arithmetic operations](https://docs.python.org/3/reference/expressions.html#binary-arithmetic-operations)；[Python 3 Built-in Types — Common Sequence Operations](https://docs.python.org/3/builtins/stdtypes.html#common-sequence-operations)。\n- 实际获取：网页工具打开官方表达式文档，并定位`//`解释；另打开内置类型文档。表达式页面显示最后更新2026-10-24 11:38 UTC，这是文档元数据，不表示二分算法的提出日期。\n- 支持主张：整数`//`返回向下取整的整数商；序列按下标访问元素。文章里的`left + (right-left)//2`在有效非空闭区间中选择靠左的中点，偶数个候选时并无唯一“正中间那一格”。\n- 短引：“floor division of integers results in an integer”。\n- 用在：中点下标、Python程序与文章。该文档只提供运算语义，不作为整段算法正确性的官方证明。"
+        }
+      ],
+      "supports": [
+        "序列按下标访问元素，正常非负下标从0开始；负下标具有访问末尾元素的语言语义。",
+        "本片返回-1表示题目约定的未找到；不能把它继续当作nums[-1]访问的成功下标。"
+      ],
+      "sections": "Built-in Types / Common Sequence Operations, sequence indexing and negative indices",
+      "publisherBasis": {
+        "label": "Python Software Foundation",
+        "attributionKind": "publisher/organization; no personal author recorded",
+        "explanation": "Python official documentation at docs.python.org, published under the Python Software Foundation; no personal byline is recorded or inferred from contributors.",
+        "noGitAccountAuthorInference": true
+      },
+      "scopeNote": "The original research documents opening Built-in Types; the original article explicitly preserves zero-based/negative-index usage and its source footnote. The detailed table was not newly fetched in this pass.",
+      "retainedOriginalArticleFootnote": {
+        "path": "episodes-codex/binary-search/article.mdx",
+        "commit": "036ce88d416e08127f8135afb55d1d62044f30f6",
+        "line": 131,
+        "rawExcerpt": "[^sequence]: [Python 3：Common Sequence Operations](https://docs.python.org/3/builtins/stdtypes.html#common-sequence-operations)，序列下标从0开始及负下标语义，访问日期2026-10-25（北京时间）。",
+        "completeArticleSHA256": "e20c9b1f04e8491558ee00d5a8f96e56383385042f2c08d032cacd519c0a9030"
+      }
+    }
+  ],
+  "scopeBoundaries": [
+    "Official problem complexity is a required target, not a claim that LeetCode authored or proved this particular closed-interval implementation.",
+    "Binary arithmetic operations and Common Sequence Operations are exact original section titles, not invented parent-document titles.",
+    "The original research/verification program supplies independent reasoning and finite execution checks. That does not establish rendered-card, ASR, listening, publication or user approval.",
+    "The full 150-frame original Python card, solution.py, solution.json, script, storyboard, words, audio, freeze/package and all media are outside this source-author edit; no reconstruction of an initially absent production MP4 is attempted.",
+    "All official access dates remain 2026-10-25. This 2026-10-26 organization pass adds neither a successful GET status nor a current-runtime microversion."
+  ]
+}

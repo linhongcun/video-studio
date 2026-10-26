@@ -57,3 +57,18 @@
 - 缺失目标情景先明确“换一个目标，重新查找”，再恢复候选；不能让观众以为同一次搜索把目标13改为8。
 - 最后剩一格应继续比较；区间交错时没有候选，中点不得继续访问。
 - 主线只用闭区间版，不混入半开区间的`right=mid`、`left<right`或其他终止约定。最后完整Python卡5秒，提示暂停，不新增口播/字幕。
+
+
+## 片尾参考资料（2026-10-26整理，沿用2026-10-25实读）
+
+本轮只整理既有事实来源，采用title-author；三项原题/发布机构见references.json/md，一页5秒，安排在既有完整Python卡之后。未请求官方网页，未新增官方原文标题补核、视频引文或Editorial正文阅读。逐项证据见[本轮书目证据](../../docs/reference-endcards/batch-9/sources-binary-search.json)。
+
+原读取记录固定于Git提交`036ce88d416e08127f8135afb55d1d62044f30f6`，路径`episodes-codex/binary-search/research.md`，Git blob为`accb745bb9249a408a3e0241f5789b889da7f353`，完整6329字节SHA-256为`4dec1b05a5581ea51738292cb064962d2f8e822a3163a0c4a623203b06442059`。来源证据保留完整原记录与逐行原题，日期仍是2026-10-25，不是2026-10-26新GET。
+
+- 新R1 · **704. Binary Search**；机构：LeetCode。来自原记录第7行，[既有实读记录](https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/binary-search/research.md#L5-L13)。官方题面给出升序、元素唯一、返回原下标或-1的任务，以及O(log n)复杂度要求。上文的闭区间实现、不变式和每轮至多减半证明属于本期独立推导。
+- 新R2 · **Binary arithmetic operations**；机构：Python Software Foundation。来自原记录第17行，[既有实读记录](https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/binary-search/research.md#L15-L21)。该章节说明整数//的向下取整语义，用于解释程序如何取得靠左的中点；它提供语言语义依据，算法正确性与复杂度论证见上文。
+- 新R3 · **Common Sequence Operations**；机构：Python Software Foundation。来自原记录第17行，[既有实读记录](https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/binary-search/research.md#L15-L21)。该章节提供序列下标从0开始及负下标语义的依据。程序返回-1表示题目约定的未找到，后续不应据此误取nums[-1]。
+
+**边界：**题面中的O(log n)是题目要求；上述闭区间不变式、终止、复杂度和自选8元素轨迹仍由本期原有独立推导/有限执行核验承担，不标为官方解法。Python标题是原锚点章节的真实题名，版本只标Python 3文档，不从页面维护时间推断平台小版本。没有个人署名记录时使用机构，不从仓库账号猜作者。
+
+**编辑范围：**原article/research全文、脚注、锚点和唯一Python代码块保持为完整原字节前缀；本轮仅追加本节与文章的“片尾参考资料”。未改solution、script、分镜、words、声音、旧冻结、package、共享工具或媒体；本节不预记独立QA、渲染、浏览器或发布通过。

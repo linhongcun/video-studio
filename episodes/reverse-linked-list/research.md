@@ -50,3 +50,21 @@
 ## 执行核验状态
 
 `research/verify_algorithm.py`已直接加载实际`solution.py`。对长度0..7、节点值-1/0/1的全部3,280条短链，通过独立构造的对象验证返回身份、反向身份顺序、原值不变、没有环、尾部为空及没有新节点构造；另8个显式例与1条5,000节点最大长度链通过，包含官方空链/单节点及重复值。显示JSON及文章唯一Python块与执行源逐字相同。实际SHA与结果见`research/algorithm-verification.json`；有限执行不能代替上述一般论证，也不能证明动态画面或听辨已经通过。
+
+## 片尾参考资料清单（2026-10-26整理，沿用2026-10-25访问）
+
+本轮选两项真实已读来源：Reverse Linked List（LeetCode中英题面）与Assignment statements（Python官方实际被读章节）。原英文题面名来自本research第7行及原article第98行；章节原题来自research第16行，不将中文主题概括、Language Reference容器名或未读editorial替代实际题名。
+
+原完整研究基线`036ce88d416e08127f8135afb55d1d62044f30f6`，Git blob`a2b8518e6fc70d8a54563dac326bcac0c9823d51`，SHA-256`5777c0ad31a49674655d49260daf5f3e947ab1aa7e05441834cf8f3e098998b9`（5208字节）；原article SHA-256`3ac678192ceab522985a885dbf55dc7092c17f978237638132a9a0edced71c54`（7215字节）。[固定既有实读记录](https://github.com/linhongcun/video-studio/blob/036ce88d416e08127f8135afb55d1d62044f30f6/episodes-codex/reverse-linked-list/research.md)与[旧全文归档](../../docs/reference-endcards/batch-9/reverse-linked-list-evidence/prior-research-036ce88d.md)均为本仓阅读证据，不是官方固定正文。
+
+未新GET，verification.checkedAt保留2026-10-25；Python旧页更新2026-10-24只是所见元数据，不是本轮重读或算法发表日，也不推断运行时小版本。没有明确个人作者，机构记LeetCode、Python Software Foundation。
+
+| 片尾编号 | 实际原题 | 机构 | 旧记录位置 |
+| --- | --- | --- | --- |
+| R1 | [Reverse Linked List](https://leetcode.com/problems/reverse-linked-list/description/) | LeetCode | research第7行 |
+| R2 | [Assignment statements](https://docs.python.org/3/reference/simple_stmts.html#assignment-statements) | Python Software Foundation | research第16行 |
+
+
+完整旧字节、Git/blob与逐项主张证据见[sources-reverse-linked-list.json](../../docs/reference-endcards/batch-9/sources-reverse-linked-list.json)。题面只支持任务/空链/范围，Python只支持语言语义；上文不变式、复杂度和有限程序执行保持独立身份，不将editorial空壳记成已读算法。没有新算法测试或官方逐行背书。
+
+原完整Python代码卡150帧必须保留，资料仅后接title-author简表，4项上限、每页5秒，无quote/date/hint。旧文章/研究/全部章节与代码保持原全文前缀；本资料任务不触碰video、solution、SB、words、freeze、package或shared，不预记媒体/发布检查。
