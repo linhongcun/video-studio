@@ -1,0 +1,149 @@
+---
+title: 布隆过滤器：为什么能确定不存在，却只能说可能存在？
+summary: 从8个只记0或1的格子开始，用一次哈希讲清加入、碰撞、确定排除与可能存在，再用一个重建对照理解多个位置的作用和取舍。
+chapters:
+  - { id: goal, title: 用标记判断是否加入过 }
+  - { id: write, title: 一次计算怎样留下标记 }
+  - { id: query, title: 为什么零与一结论不同 }
+  - { id: boundary, title: 共享标记的边界与取舍 }
+related: ["consistent-hashing"]
+---
+
+## 用标记判断是否加入过 {#goal}
+
+想判断一个元素有没有被加入过，最直接的办法是保存所有元素，再逐个或按索引查找。布隆过滤器换了一种取舍：**只留下很小的标记，不保存元素本身**。这样能判断到什么程度？[^redis]
+
+先用最简版本理解它：准备8个格子，每格只能保存0或1，开始全部为0。这一排格子就是**位数组**。
+
+- 格子外面的0到7是**位置编号**，也叫下标。
+- 格子里面的0或1是**位值**，表示这个位置是否被置位。
+- 位置编号不是元素编号。例如3号位并不对应一个名叫3的元素。
+
+主线只用一次位置计算。一个哈希位置也能构成基础Bloom；Guava的实际源码也允许每个元素只选一个位置，但这不表示所有产品都默认这样配置。[^guava]
+
+## 一次计算怎样留下标记 {#write}
+
+哈希按固定规则，把元素算成一个位置。只要输入、编码和规则相同，同一个元素每次都会到相同位置；**不同元素也可能到同一格**。
+
+本例中，元素A和B都算到3号位：
+
+1. 加入A时，把3号位从0改成1，其余位置不动。
+2. 加入B时，又来到3号位，发生了碰撞。这里已经是1，就仍然保留1，不能加成2。
+
+<figure>
+  <svg viewBox="0 0 640 220" role="img" aria-labelledby="bf-single-title bf-single-desc" style={{width: '100%', height: 'auto', display: 'block', background: '#0f172a', borderRadius: '16px'}}>
+    <title id="bf-single-title">加入A和B后，只有3号位为1</title>
+    <desc id="bf-single-desc">8个位置从0到7，只有下标3的格内为1。A和B共享这个标记，格子不保存元素内容或所有者。</desc>
+    <g font-family="sans-serif" text-anchor="middle">
+      <text x="320" y="35" fill="#e2e8f0" font-size="25">加入A和B后，只有3号位为1</text>
+      <g fill="#1e293b" stroke="#64748b" stroke-width="2">
+        <rect x="28" y="88" width="66" height="60" rx="9" /><rect x="102" y="88" width="66" height="60" rx="9" /><rect x="176" y="88" width="66" height="60" rx="9" /><rect x="250" y="88" width="66" height="60" rx="9" fill="#713f12" stroke="#fbbf24" /><rect x="324" y="88" width="66" height="60" rx="9" /><rect x="398" y="88" width="66" height="60" rx="9" /><rect x="472" y="88" width="66" height="60" rx="9" /><rect x="546" y="88" width="66" height="60" rx="9" />
+      </g>
+      <g fill="#94a3b8" font-size="22"><text x="61" y="75">0</text><text x="135" y="75">1</text><text x="209" y="75">2</text><text x="283" y="75">3</text><text x="357" y="75">4</text><text x="431" y="75">5</text><text x="505" y="75">6</text><text x="579" y="75">7</text></g>
+      <g fill="#f8fafc" font-size="34"><text x="61" y="130">0</text><text x="135" y="130">0</text><text x="209" y="130">0</text><text x="283" y="130">1</text><text x="357" y="130">0</text><text x="431" y="130">0</text><text x="505" y="130">0</text><text x="579" y="130">0</text></g>
+      <text x="320" y="192" fill="#cbd5e1" font-size="23">格外是位置编号，格内是0或1</text>
+    </g>
+  </svg>
+  <figcaption>A、B都使用3号位，最后只留下一个1；位中没有保存谁写过、写过几次。</figcaption>
+</figure>
+
+这正是它紧凑的原因，也是误判的来源：许多元素可以共享少量位置，而元素身份没有被完整保留下来。
+
+## 为什么零与一结论不同 {#query}
+
+### D读到0：可以确定未加入
+
+现在按同样规则查询D，它落在7号位，这里还是0。
+
+如果D真的被正确加入过，加入时就会把7号位置成1。规则不变、标记正确保留时，这个位置不应仍为0。因此，**0足以排除D曾被加入的可能**。
+
+这里的前提很重要：这份标记确实反映了相关元素的加入，且没有被错误清除或破坏。它不能替一份漏更新的摘要证明真实集合中没有元素。
+
+### C读到1：仍然只能说可能存在
+
+C从未加入，但它也算到3号位，恰好读到1。这个1是A和B留下的，无法证明C自己加入过。
+
+这就是一次**假阳性**：过滤器回答可能存在，而元素实际没有加入。过滤器没有造出C，也没有取出C的内容，只是无法把它排除。[^redis][^guava]
+
+| 查询元素 | 算到的位置 | 读到的位 | 能得到的结论 |
+|---|---|---|---|
+| D | 7 | 0 | 在正确维护前提下，确定未加入 |
+| C | 3 | 1 | 可能存在；本例实际未加入 |
+
+因此，**0和1并不是同样确定的两种回答**。需要精确确认时，可能存在的结果仍要交给保存真实元素的结构判断。
+
+## 共享标记的边界与取舍 {#boundary}
+
+### 不能按元素直接清零
+
+删除A时，能不能把3号位清成0？不能把它当作普通过滤器支持的删除方法：3号位同时被B使用，清零后，仍在集合里的B也会被错误排除。
+
+原因不是计算不稳定，而是**这一个1没有保存所有者**。删除需求应由相应的数据结构或重建策略解决，不能把某个元素用过的位置直接清掉。
+
+### 一个很短的两位置对照
+
+多个位置可以为可能存在增加检查条件，但必须先按新的规则完整构造标记。
+
+另建一份同样8位的数组，仍然只加入A和B：A写3、2，B写3、1。全部写完后，1、2、3号位为1。再查C，它需要同时检查3和5；3是1，但5是0，便排除了刚才那次误判。
+
+这是**同一集合重新构造后的对照**，不是直接对旧数组换一套查询规则。它只说明C这次被排除，不能推断每个查询都会改善，或计算出线上误判率。
+
+位置也不是越多越好：更多选取意味着更多写入和检查，也可能让固定数组更拥挤。要把空间、预计元素数与选取次数一起选择；不同实现也可能从少量基础哈希派生多个位置。[^redis][^guava][^cassandra]
+
+### 可运行的小例子
+
+下面使用Python标准库，可直接运行。主规则是真实计算`SHA256("22:" + 元素)`，取前8字节的big-endian非负整数对8取余；第二规则只在最后的重建对照中使用前缀`0:`。输入和参数为展示碰撞而选，不代表产品内部实现或统计样本。
+
+```python
+from hashlib import sha256
+
+
+def position(key, seed=22):
+    digest = sha256(f"{seed}:{key}".encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big") % 8
+
+
+def add(bits, key):
+    bits[position(key)] = 1
+
+
+def maybe_contains(bits, key):
+    return bits[position(key)] == 1
+
+
+bits = [0] * 8
+for key in ("A", "B"):
+    add(bits, key)
+
+for key in ("A", "B", "C", "D"):
+    print(key, position(key), maybe_contains(bits, key))
+
+assert bits == [0, 0, 0, 1, 0, 0, 0, 0]
+assert not maybe_contains(bits, "D")  # 7号是0，可以排除
+assert maybe_contains(bits, "C")  # C未加入，但3号是1，发生假阳性
+
+# 错误操作反例：假设只移除A，B仍在，不能直接清零共享位。
+wrong = bits.copy()
+wrong[position("A")] = 0
+assert not maybe_contains(wrong, "B")  # B被错误排除
+
+# 另从全0重建两位置对照，仍然只加入A和B。
+two = [0] * 8
+for key in ("A", "B"):
+    for seed in (22, 0):
+        two[position(key, seed)] = 1
+assert two == [0, 1, 1, 1, 0, 0, 0, 0]
+assert not all(two[position("C", seed)] for seed in (22, 0))
+```
+
+代码中的清零段是错误操作反例；两位置段从全0重建。需要完整复算和模型核对的读者可查看[完整示例源码](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/article-demo.py)。
+
+### 资料依据
+
+以下保留官方原题与固定正文版本。本次核对既有固定原文，原始读取记录与技术阅读范围另存研究文件；不以复读日期冒充文档发布日期。
+
+[^redis]: Redis，**Bloom filter**。[固定官方正文](https://github.com/redis/docs/blob/4fe762f8dab40f0b661207374378ed52113c9fe3/content/develop/data-types/probabilistic/bloom-filter.md)；[官网对应页](https://redis.io/docs/latest/develop/data-types/probabilistic/bloom-filter/)。核对2026-10-26。原文摘录：A Bloom filter can guarantee the absence of an item from a set, but it can only give an estimation about its presence. **编者说明：**本片采用最简单的单位置参数讲原理，不将其称为Redis默认配置。
+
+[^guava]: Google Guava，**BloomFilter.java**、**BloomFilterStrategies.java**。[固定类型与选k源码](https://github.com/google/guava/blob/5ae56d77e64305752b919ff2c96713f47ac0c94c/guava/src/com/google/common/hash/BloomFilter.java)；[固定置位/查询策略源码](https://github.com/google/guava/blob/5ae56d77e64305752b919ff2c96713f47ac0c94c/guava/src/com/google/common/hash/BloomFilterStrategies.java)。核对2026-10-26。**编者说明：**构造器要求位置次数大于0，选择次数的方法也保留下限1；这是源码依据，不把本文的SHA教学规则冒充Guava实际Murmur派生策略。
+
+[^cassandra]: Apache Cassandra，**Bloom Filters**。[固定官方正文](https://github.com/apache/cassandra/blob/05853eaeab006bd1e834331ac8b1dfdc464d1f31/doc/modules/cassandra/pages/managing/operating/bloom_filters.adoc)；[官网对应页](https://cassandra.apache.org/doc/latest/cassandra/managing/operating/bloom_filters.html)。核对2026-10-26。原文摘录：bloom filters can be made more accurate by allowing them to consume more RAM. **编者说明：**原文用于空间与准确性的工程取舍，不把具体产品默认值或内存倍数作为通用规律。

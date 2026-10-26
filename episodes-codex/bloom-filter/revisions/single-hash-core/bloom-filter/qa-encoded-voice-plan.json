@@ -1,0 +1,62 @@
+{
+  "status": "prepared-awaiting-authorized-freeze-and-final-render",
+  "preparedAtUTC": "2026-10-26T01:55:31.070027+00:00",
+  "scope": "New single-hash revision only. Numerical source/waveform consistency and encoded audio integrity; no semantic listening or ASR.",
+  "qaEntry": "qa-tools/check_encoded_voice.py",
+  "qaEntrySHA256": "fca90896e11d4e6decaf42f085dfbf4c20ed1a98a5b95a9ef6a803f2f3c7e708",
+  "executionRequires": [
+    "Explicit authorized complete --expected-media-sha256",
+    "Explicit authorized complete --expected-manifest-sha256",
+    "Actual completed new source-sha256.json, storyboard/words/voice build/source audits, remotion/out/body.mp4, remotion/out/voice.mp4, video.mp4 and three render/reference receipts"
+  ],
+  "dynamicExpectations": {
+    "bodyFrames": "storyboard.meta.durationInFrames == words.durationFrames == sum(actual shot durations) == source/provenance frames == final receipts bodyFrames",
+    "finalFrames": "actual render-result.frames == reference-appendix.finalVideoFrames == reference-appendix-media-check.finalFrames",
+    "sentences": "actual voice/build sentences == voice/sents == 2*episode-config.shotCount == both source audits/provenance",
+    "frozenInputs": "Every actual entry of the exact SHA-bound new manifest, before and after. No fixed legacy input count."
+  },
+  "plannedChecks": [
+    "Unchanged canonical encoded-body gate in disposable repository-shaped nested symlink view; real render receipts remain unchanged",
+    "Pinned retained numerical checker imported unchanged with only episode/repository globals redirected",
+    "Premix/source whole and each-sentence correlation, sample offsets, gain, coverage/padding and native channel consistency",
+    "Actual final mixed AAC known-voice/BGM regression, each-sentence drift and native channel consistency",
+    "Actual body/final AAC packet SHA payloads plus PTS/DTS/duration/size equality",
+    "Actual decoded body/final stereo PCM digest and sample count equality",
+    "Actual body/final integrated LUFS and true peak; retained -16 ±0.3LUFS and <=-2.0dBTP criteria",
+    "Source/premix sentence low-level window measurements",
+    "Recheck exact media, manifest and publication receipts unchanged"
+  ],
+  "retainedImplementations": [
+    {
+      "path": "episodes-codex/_shared/check_encoded_episode.py",
+      "sha256": "183b01c300269dc2b5ad82ff7893552916405882556a6daf2f87c4dcd9d2db7a"
+    },
+    {
+      "path": "episodes-codex/egg-drop/verify_encoded_voice.py",
+      "sha256": "0ca5ba05a0a0e7c8bbad4abd512a0b83d1667e69b6061af94822591841e1eac5",
+      "numericAlgorithmsAndCriteriaChanged": false
+    }
+  ],
+  "preparationVerification": {
+    "ASTSyntaxParsed": true,
+    "helpEntryExecuted": true,
+    "formalMediaQAExecuted": false
+  },
+  "plannedOutputs": [
+    "qa-encoded-voice-content.json",
+    "qa-encoded-voice-content.numerical.json",
+    "qa-encoded-body-gate.json",
+    "qa-encoded-body-gate.log"
+  ],
+  "ASRPerformed": false,
+  "semanticListeningPerformed": false,
+  "fullHumanListeningPerformed": false,
+  "limitations": [
+    "Source and waveform matching cannot identify actual spoken words or pronunciation.",
+    "Known-music regression is not blind separation or human listening.",
+    "No final-media result is claimed by this preparation plan."
+  ],
+  "productionInputsModified": false,
+  "oldRootModified": false,
+  "manifestRewritten": false
+}
