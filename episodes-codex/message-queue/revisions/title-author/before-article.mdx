@@ -1,0 +1,61 @@
+---
+title: "订单已提交，为什么还没处理完？"
+summary: "跟着同一笔订单走过可靠入队、后台处理和完成确认，分清已提交与已完成，也看清重投和积压的边界。"
+chapters:
+  - id: hook
+    title: 提交不等于完成
+  - id: enqueue
+    title: 先保存，再回已提交
+  - id: process
+    title: 取出、处理、确认
+  - id: retry
+    title: 失败与重复处理
+  - id: recap
+    title: 削峰的作用与边界
+related:
+  - rate-limit
+  - idempotency
+---
+
+页面显示“已提交”，可能只表示系统已经接住任务。后台还要继续做业务工作，所以“已提交”和“已处理完”可以同时出现在同一笔订单的不同阶段。任务队列让耗时处理从短暂的网页请求中分离出来。[^work]
+
+## 先保存，再处理
+
+本片用7042贯穿整个过程。示例先等队列确认可靠保存，再返回“已提交”；后台有空后接收任务，完成业务，最后发回处理确认。这两种确认的对象不同：前一个面向发送者，后一个面向处理者，不能相互替代。可靠保存仍依赖正确的消息、队列、路由和确认配置。[^confirm]
+
+## 为什么同一任务还会再来
+
+在本片采用的手动确认模式下，消费者连接关闭时，未确认任务可以重新投递。确认丢失时，业务甚至可能早已成功。因此程序仍要能安全面对重复任务，例如对同一业务编号复用已完成结果，而不能看到消息就再执行一次扣款。[^reliability]
+
+## 队列不能无限等待
+
+集中来的任务被摊开处理，叫削峰；它没有凭空增加后台处理能力。积压过久会增加用户等待，容量、过期和溢出策略也会影响消息保留。不同策略可能拒绝新消息，也可能丢弃旧消息，必须结合业务选择并监控。[^length]
+
+片中的订单编号、三笔任务和单笔处理节奏都是教学示例，不是容量建议或真实平台行为。
+
+[^work]: RabbitMQ，[Work Queues](https://www.rabbitmq.com/tutorials/tutorial-two-python)，访问于2026-10-24。
+[^confirm]: RabbitMQ，[Consumer Acknowledgements and Publisher Confirms](https://www.rabbitmq.com/docs/confirms)，访问于2026-10-24。
+[^reliability]: RabbitMQ，[Reliability Guide](https://www.rabbitmq.com/docs/reliability)，访问于2026-10-24。
+[^length]: RabbitMQ，[Queue Length Limit](https://www.rabbitmq.com/docs/maxlength)，访问于2026-10-24。
+
+## 参考资料
+
+**[R1] Consumer Acknowledgements and Publisher Confirms**
+
+RabbitMQ · 官方维护文档 · 2026-10-26核验
+
+> The two features, however, are entirely orthogonal and unaware of each other.
+
+原文位置：The Basics · #relation。
+
+[正式文档](https://www.rabbitmq.com/docs/confirms) · [固定原文](https://github.com/rabbitmq/rabbitmq-website/blob/29cb9ecf131223ad9b7faf61921ac3683008f722/docs/confirms.md)。
+
+**[R2] Reliability Guide**
+
+RabbitMQ · 官方维护文档 · 2026-10-26核验
+
+> Therefore consumer applications will need to perform deduplication or handle incoming messages in an idempotent manner.
+
+原文位置：Data Safety on the Publisher Side。
+
+[正式文档](https://www.rabbitmq.com/docs/reliability) · [固定原文](https://github.com/rabbitmq/rabbitmq-website/blob/29cb9ecf131223ad9b7faf61921ac3683008f722/docs/reliability.md)。

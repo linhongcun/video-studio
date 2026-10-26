@@ -58,7 +58,7 @@ root已于2026-10-25T15:11:08.084554+00:00完成当前185项严格冻结与共�
 修订交付助手按当前发布任务显式传--release，首发firstRelease保留。sync_site.py的实际文件表还包含references.json及两份附录receipt；verify_site.py传实际本地--base，verify_online.py传真实Release证据路径。原章节／24句字幕／创建及首次公开时间保留，updatedAt采用实际append完成时刻的毫秒值；不使用站点构建时间。新证据写对应修订目录，不覆盖首发或已验收正文报告。
 
 
-## 原始题名与原文短引：当前资料入口
+## 原始题名与原文短引（历史资料样式）
 
 本次沿用最新二分开头修订后的5569帧主体及其真实生产输入，只修订参考资料的呈现。主体不可变MP4位于 `revisions/reference-endcards/body/video.mp4`，SHA为`b43510f3196f92964d21a3b854941a65f4af33fffd2484c171ca518f9f747c66`；不能从早于本次开头修订的主干、旧帧数或旧冻结清单恢复来替代它。修前当前输入与回执另保存在 `revisions/original-titles/`，不覆盖原169项主体、13项首版append或185项默认交付阶段的历史证据。
 
@@ -69,3 +69,16 @@ root已于2026-10-25T15:11:08.084554+00:00完成当前185项严格冻结与共�
 从 `remotion/` 执行 `npm run check:references`；全部输入停写后按本期 `freeze.py` 冻结，以 `freeze.py --verify` 只读核对。默认 `npm run render` 仍经共享wrapper生成完整主体到`out/body.mp4`并自动调用新器追加，`render:body`保留现有Remotion画面、人声和共享混音流程。本轮不执行该正文编码流程，只从上述已验收主体路径生成新资料尾卡；可直接给新器明确指定该`--body`，不得把含旧附录的最终`video.mp4`当成主体重复追加。可选`render:references`已改为新器，面向已准备好的`out/body.mp4`，前置检查当前资料与冻结。
 
 `append_freeze.py`和`revisions/reference-endcards/append-source-sha256.json`保持旧append13阶段原字节；其`--verify`只适用于旧输入字节，当前资料已更新时不把它当成本轮检查，也不重写它追认新输入。本轮使用当前`freeze.py --verify`及新器媒体回执核对，接齐新的根级回执和`render-result.json.publicationMetadata`后执行`npm run verify:references`。原旁白/24句字幕/words/SB仍表示5569帧主体，实际查看所有新资料页及精确首卡、桌面/手机暂停和全屏；旧QA按原主体保真范围复用，不预记当前附录已通过或已上线。
+
+
+## 题名与作者：当前资料入口
+
+本轮资料卡采用`presentation: title-author`，按完整原始题名和作者/机构列示。仅在来源本身已有`author`时使用该字段，否则使用既有`organization`，不补造个人姓名。原题名、机构、原文摘录、定位及核验文件保留在`references.json`和配套文章中；本轮只切换显示方式，不改研究结论或正文。
+
+默认资料渲染器为共享`append_references_bibliography.py`，早先两份渲染器保持历史字节并继续作为冻结依赖。新卡按实际排版分页，每页默认5秒；修前回执、来源清单、入口及输入身份保存在本实际制作目录的`revisions/title-author/`，不重写旧验收结果。候选资料卡同在该修订目录生成，通过检查后再接入既有最终产物与回执位置；本轮进度由根任务记录。
+
+当前冻结入口为`freeze.py`，加`--verify`只读核对。冻结清单在原有正文、声音、图标、导航和历史来源输入之外收录新渲染器，既有wrapper、发布检查器、两份旧渲染器及证据仍保留。默认正文构建、混音、并发和已有代码卡顺序均沿用实际package；本批只消费基线已验收的完整正文生成资料卡，不运行正文prepare、TTS、重渲或重混音。
+
+本期继续使用最新5569帧二分开头修订正文；原169项body和旧append13阶段保持独立历史身份，不从旧分支恢复或重写这些证据。
+
+资料生成后按新回执同步最终总帧数、媒体SHA及发布映射；实际复核题名/署名、分页、首卡字幕边界、暂停及原生全屏。原脚本、配音、字幕、分镜、动作和文章/研究均保持本轮基线字节，旧技术验收只按原体保真范围复用，不预记新版已获观看认可。

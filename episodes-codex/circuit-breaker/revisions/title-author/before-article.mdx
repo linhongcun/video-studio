@@ -1,0 +1,62 @@
+---
+title: "一个服务出故障，为什么整个网站没跟着崩？"
+summary: "暂停失败调用，保住其他请求。"
+chapters:
+  - id: hook
+    title: "局部故障为什么会扩散"
+  - id: stop
+    title: "失败达到条件后暂停调用"
+  - id: recover
+    title: "少量探测后逐步恢复"
+  - id: recap
+    title: "隔离影响而非修好服务"
+related: []
+---
+
+教学场景中，提交订单会调用可选的运费险服务。这个服务长时间不回应时，等待可能占住共享的处理资源；请求越积越多，其他功能也可能受影响。
+
+## 暂停容易失败的调用
+
+熔断器观察近期失败，达到预先设置的条件后暂停这条调用。新调用快速返回不可用，上层再决定合适的业务反馈。运费险为可选功能时，可以明确告知暂不可用，并继续符合条件的订单流程。
+
+## 少量探测，再判断恢复
+
+暂停一段时间后，只让有限请求尝试，避免恢复中的服务立即被全量流量压垮。探测失败则继续暂停，满足成功条件后恢复。视频中的三个失败处理位只是教学示意，不是通用生产阈值。
+
+## 熔断不能替代业务校验或修复
+
+库存和支付等必要条件失败时，不能假装成功。熔断减少无效等待与故障扩散机会，不负责修好服务本身，也不保证网站永不出故障。应用还要设置合适超时、隔离资源，监控状态并测试恢复过程。常见“关闭/打开/半开”的名称容易与停止放行相混淆，片中用“正常调用/暂停/少量探测”说明行为。
+
+## 公开资料
+
+- [Microsoft Azure Architecture Center — Circuit Breaker pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)，实际访问2026-10-24。
+- [AWS Well-Architected — graceful degradation](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html)，实际访问2026-10-24。
+
+
+## 参考资料
+
+片尾精选以下两项官方资料，实际读取与核验于2026-10-26（北京时间）。保留原始题名与原文；运费险场景、处理位、失败次数和探测量均为教学示意，实际参数应按服务和业务条件设置。
+
+**[R1] Circuit Breaker Pattern**
+
+Microsoft · Azure Architecture Center · 2026-10-26核验
+
+[正式文档](https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker)；[实读固定原文](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/circuit-breaker.md)。
+
+> A limited number of requests from the application are allowed to pass through and invoke the operation.
+
+原文位置：Solution / Half-Open · line 45。
+
+**编者说明：**该文档说明正常放行并统计近期失败、达到条件后快速拒绝，以及等待后少量试探。失败试探仍要继续暂停，达到恢复条件才恢复；熔断本身不会修好下游，业务还须正确处理不可用。
+
+**[R2] Retry pattern**
+
+Microsoft · Azure Architecture Center · 2026-10-26核验
+
+[正式文档](https://learn.microsoft.com/en-us/azure/architecture/patterns/retry)；[实读固定原文](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry-content.md)；[固定页面版本](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/retry.yml)。
+
+> For some noncritical operations, it's better to fail fast rather than retry several times and affect the throughput of the application.
+
+原文位置：Issues and considerations / Impact on performance · line 44。
+
+**编者说明：**该文档用于说明非关键操作可以快速失败，避免反复调用继续消耗资源；恢复策略也需按故障和业务条件验证。可选运费险不可用不表示库存、支付等必要条件可以跳过，熔断或重试不能替代业务一致性。

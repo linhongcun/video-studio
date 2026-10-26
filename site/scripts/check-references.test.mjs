@@ -51,6 +51,35 @@ function fixture(t, slug = 'new-video') {
   return {root, episode, refs, meta, receipt, media, save(name, value) { write(path.join(episode, name), value); }};
 }
 
+function resizeAppendix(f, count, framesPerPage = 150) {
+  const added = count * framesPerPage;
+  f.meta.referenceAppendix.durationInFrames = added;
+  f.meta.finalVideoFrames = f.receipt.finalVideoFrames = f.media.finalFrames = 1200 + added;
+  f.receipt.appendix.durationInFrames = f.media.appendedFrames = added;
+  f.receipt.appendix.framesPerPage = framesPerPage;
+  f.receipt.appendix.pages = Array.from({length: count}, (_, index) => ({file: `references-${index + 1}.png`, sha256: digest}));
+  f.save('meta.json', f.meta);
+  f.save('reference-appendix.json', f.receipt);
+  f.save('reference-appendix-media-check.json', f.media);
+}
+
+function titleAuthorFixture(t, count = 1) {
+  const f = fixture(t);
+  f.refs.presentation = f.receipt.presentation = 'title-author';
+  f.refs.sources = Array.from({length: count}, (_, index) => ({...structuredClone(f.refs.sources[0]), id: `R${index + 1}`}));
+  f.receipt.sourceTitles = f.refs.sources.map(({id, title}) => ({id, title}));
+  f.receipt.bibliography = f.refs.sources.map(({id, title, organization}) => ({id, title, credit: organization}));
+  f.receipt.layout = {kind: 'title-author-single-column', maxItemsPerPage: 4,
+    renderedFields: ['title', 'credit'], quotesRendered: false};
+  f.receipt.fps = '30';
+  f.receipt.inputs.secondsPerPage = 5;
+  f.receipt.appendix.sourceIds = f.refs.sources.map(({id}) => id);
+  f.save('references.json', f.refs);
+  f.receipt.inputs.referencesSHA256 = shaFile(path.join(f.episode, 'references.json'));
+  resizeAppendix(f, Math.ceil(count / 4));
+  return f;
+}
+
 test('new video with a complete appendix passes, including a prior code card', (t) => {
   const f = fixture(t);
   assert.deepEqual(checkEpisode(f.episode, {repoRoot: f.root}), {slug: 'new-video', sourceCount: 1});
@@ -246,6 +275,120 @@ test('receipt must bind original-title presentation and exact title/quotation re
       if (mutation === 'missing-quotations') delete f.receipt.quotations;
       f.save('reference-appendix.json', f.receipt);
       assert.throws(() => checkEpisode(f.episode, {repoRoot: f.root}), /presentation|source titles|quotations/);
+    });
+  }
+});
+
+test('title-author publication uses only original title and organization credit, including a prior code card', (t) => {
+  const f = titleAuthorFixture(t);
+  assert.deepEqual(checkEpisode(f.episode, {repoRoot: f.root}), {slug: 'new-video', sourceCount: 1});
+  assert.equal(checkPublished({repoRoot: f.root, legacySlugs: new Set()}).validated.length, 1);
+  assert.deepEqual(f.receipt.bibliography, [{id: 'R1', title: 'Reference fixture', credit: 'Synthetic fixture'}]);
+  assert.deepEqual(f.receipt.quotations, []);
+});
+
+test('a real author takes precedence over organization and is bound exactly in bibliography', (t) => {
+  const f = titleAuthorFixture(t);
+  f.refs.sources[0].author = 'Ada Example';
+  f.save('references.json', f.refs);
+  f.receipt.inputs.referencesSHA256 = shaFile(path.join(f.episode, 'references.json'));
+  f.save('reference-appendix.json', f.receipt);
+  assert.throws(() => checkEpisode(f.episode, {repoRoot: f.root}), /bibliography title\/credit differs/);
+  f.receipt.bibliography[0].credit = 'Ada Example';
+  f.save('reference-appendix.json', f.receipt);
+  assert.equal(checkEpisode(f.episode, {repoRoot: f.root}).sourceCount, 1);
+});
+
+test('present but unusable author values cannot silently fall back to an organization', async (t) => {
+  for (const author of ['', '  ', null, 7, ['Ada Example'], {name: 'Ada Example'}]) {
+    await t.test(JSON.stringify(author), (t) => {
+      const f = titleAuthorFixture(t);
+      f.refs.sources[0].author = author;
+      f.save('references.json', f.refs);
+      assert.throws(() => checkSources(f.episode, {repoRoot: f.root}), /author must be a nonempty string/);
+    });
+  }
+});
+
+test('title-author mode still rejects paraphrased titles and deprecated summary overrides', async (t) => {
+  for (const mutation of ['title', 'displayTitle', 'displaySupport']) {
+    await t.test(mutation, (t) => {
+      const f = titleAuthorFixture(t);
+      if (mutation === 'title') f.refs.sources[0].title = '自译概括不能替代原标题';
+      else f.refs.sources[0][mutation] = '';
+      f.save('references.json', f.refs);
+      assert.throws(() => checkSources(f.episode, {repoRoot: f.root}), /original title|cannot replace original titles/);
+    });
+  }
+});
+
+test('title-author retains verified research quotations without rendering them', (t) => {
+  const f = titleAuthorFixture(t);
+  f.refs.sources[0].quotation = {text: originalQuotation, locator: 'Synthetic paragraph 1', evidence: 'docs/evidence.md'};
+  f.receipt.quotations = [{id: 'R1', ...f.refs.sources[0].quotation}];
+  f.save('references.json', f.refs);
+  f.receipt.inputs.referencesSHA256 = shaFile(path.join(f.episode, 'references.json'));
+  f.save('reference-appendix.json', f.receipt);
+  assert.equal(checkEpisode(f.episode, {repoRoot: f.root}).sourceCount, 1);
+  assert.equal(f.receipt.layout.quotesRendered, false);
+  f.refs.sources[0].quotation.text = f.refs.sources[0].supports[0];
+  f.save('references.json', f.refs);
+  assert.throws(() => checkSources(f.episode, {repoRoot: f.root}), /quotation: exact original text missing/);
+});
+
+test('valid research edits after title-author rendering invalidate identity and source SHA', async (t) => {
+  await t.test('changed research quotation', (t) => {
+    const f = titleAuthorFixture(t);
+    f.refs.sources[0].quotation = {text: originalQuotation, locator: 'paragraph 1', evidence: 'docs/evidence.md'};
+    f.save('references.json', f.refs);
+    assert.equal(checkSources(f.episode, {repoRoot: f.root}).refs.sources.length, 1);
+    assert.throws(() => checkEpisode(f.episode, {repoRoot: f.root}), /original quotations differ/);
+  });
+  await t.test('changed internal supported claim', (t) => {
+    const f = titleAuthorFixture(t);
+    f.refs.sources[0].supports.push('Another independently recorded synthetic claim');
+    f.save('references.json', f.refs);
+    assert.throws(() => checkEpisode(f.episode, {repoRoot: f.root}), /reference input SHA differs/);
+  });
+});
+
+test('title-author receipt cannot change source identity, title, credit or rendered fields', async (t) => {
+  for (const mutation of ['missing-bibliography', 'id', 'title', 'credit', 'source-titles', 'research-identity',
+    'layout-kind', 'max-items', 'shows-quote', 'quotes-rendered']) {
+    await t.test(mutation, (t) => {
+      const f = titleAuthorFixture(t);
+      if (mutation === 'missing-bibliography') delete f.receipt.bibliography;
+      if (['id', 'title', 'credit'].includes(mutation)) f.receipt.bibliography[0][mutation] = 'Wrong record';
+      if (mutation === 'source-titles') f.receipt.sourceTitles[0].title = 'A summary';
+      if (mutation === 'research-identity') delete f.receipt.quotations;
+      if (mutation === 'layout-kind') f.receipt.layout.kind = 'summary';
+      if (mutation === 'max-items') f.receipt.layout.maxItemsPerPage = 2;
+      if (mutation === 'shows-quote') f.receipt.layout.renderedFields.push('quotation');
+      if (mutation === 'quotes-rendered') f.receipt.layout.quotesRendered = true;
+      f.save('reference-appendix.json', f.receipt);
+      assert.throws(() => checkEpisode(f.episode, {repoRoot: f.root}), /bibliography|source titles|quotations|title\/credit layout/);
+    });
+  }
+});
+
+test('title-author pages hold four entries for five seconds with a second page for a fifth', async (t) => {
+  for (const count of [4, 5]) {
+    await t.test(`${count} sources`, (t) => {
+      const f = titleAuthorFixture(t, count);
+      assert.equal(checkEpisode(f.episode, {repoRoot: f.root}).sourceCount, count);
+      assert.equal(f.receipt.appendix.pages.length, count === 4 ? 1 : 2);
+      resizeAppendix(f, count === 4 ? 2 : 1);
+      assert.throws(() => checkEpisode(f.episode, {repoRoot: f.root}), /four sources per page/);
+    });
+  }
+  for (const mutation of ['duration', 'seconds', 'fps']) {
+    await t.test(mutation, (t) => {
+      const f = titleAuthorFixture(t);
+      if (mutation === 'duration') resizeAppendix(f, 1, 180);
+      if (mutation === 'seconds') f.receipt.inputs.secondsPerPage = 6;
+      if (mutation === 'fps') f.receipt.fps = 'not-fps';
+      f.save('reference-appendix.json', f.receipt);
+      assert.throws(() => checkEpisode(f.episode, {repoRoot: f.root}), /five seconds per page/);
     });
   }
 });

@@ -82,6 +82,7 @@ else:
         if 'quotation' in source:
             evidence_paths.append(source['quotation']['evidence'])
         extras.extend(ROOT/evidence for evidence in evidence_paths)
+    extras += [ROOT/'episodes-codex/_shared/append_references_bibliography.py']
     for path in extras:
         manifest[os.path.relpath(path, D)] = digest(path)
     (D / 'source-sha256.json').write_text(json.dumps(dict(sorted(manifest.items())),
