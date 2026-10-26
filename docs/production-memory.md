@@ -386,4 +386,4 @@
 
 ## 工程算法入门的复杂度取舍（2026-10-26）
 
-EP39首版的三路映射与商品查询流程占用了过多注意力。当前修订以单哈希、8位数组、抽象元素A/B/C/D讲清碰撞与不对称判断，再给出简短多位置动机。用户本期明确聚焦算法，无需为了通用场景偏好追加商品或数据库界面。只代表本片取舍，不将一次哈希写成实际产品默认参数，也不把去业务场景扩大为所有课程规范。本轮由[PR #343](https://github.com/linhongcun/video-studio/pull/343)合并，随v0.71.1上线；实际动态、成片及线上完整SHA检查通过，证据见[修订记录](../episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/README.md)。工作项为[#342](https://github.com/linhongcun/video-studio/issues/342)，新版尚无观看结论。
+EP39首版的三路映射与商品查询流程占用了过多注意力。当前修订以单哈希、8位数组、抽象元素A/B/C/D讲清碰撞与不对称判断，再给出简短多位置动机。用户本期明确聚焦算法，无需为了通用场景偏好追加商品或数据库界面。只代表本片取舍，不将一次哈希写成实际产品默认参数，也不把去业务场景扩大为所有课程规范。本轮由[PR #343](https://github.com/linhongcun/video-studio/pull/343)合并，随v0.71.1上线；实际动态、成片及线上完整SHA检查通过，证据见[修订记录](../episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/README.md)。工作项[#342](https://github.com/linhongcun/video-studio/issues/342)已完成关闭。用户后续认可v0.71.1的清晰度与讲解深度，并授权继续下一期工程算法；后续沿用先以最简可行例子建立完整因果、再补必要参数取舍的节奏，不据此推断所有题都只用一个参数或删除业务场景。
