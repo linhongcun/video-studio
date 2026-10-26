@@ -17,3 +17,13 @@
 引用交互v0.76.0在PR合并前进入主干，整合b792a35a后最终版本为v0.76.1。所有900输入、5片媒体/资料/发布文章图片以及VideoPlayer/Header/Layout均未改变；第四次构建与最终5片本地验证通过。0.75.2的真实结尾播放/15图目视记录保持其原版本，新增按需引用兼容检查单列，不为站外原文的展示方式重渲或重播视频。
 
 最终0.76.1新增10项按需引用兼容检查及10张新浮层图实际逐张查看通过；桌面click/手机原生tap、原文和全部元数据、链接、具名关闭/无正文位移、图像SHA与精确回看、严格0溢出通过。历史两轮静态引用40case保留原版，共计50实际图文case；未冒称重跑上游完整组件交互套件或未变的视频播放。
+
+<!-- batch-10-publication-archive:start -->
+## 发布与线上归档
+
+[PR #363](https://github.com/linhongcun/video-studio/pull/363)已合并，发布[v0.76.1](https://github.com/linhongcun/video-studio/releases/tag/v0.76.1)，[Pages 40336357388](https://github.com/linhongcun/video-studio/actions/runs/40336357388)成功；合并提交`169cb0c09b16efdc4b5740452c2b225b5e30e841`。2026-10-26T22:11:12+08:00完成21项规范URL完整GET和5次公开GitHub身份读取，五片完整MP4 SHA、海报、全文VTT、资料页、原章节/日期、更新日志与tag/Release/Pages身份一致。原存量累计38/47，含新增Redis的当前站点39/48有附录，分别记数。实际响应见online-verification.json。
+
+盛最多水与最长子串保留24日技术阅读；岛屿与全排列保留25日。接雨水R1保留25日题面，R2为26日真实新增Python函数技术补核；其余26日工作只补核原题/机构，未改写旧技术读日或冒称读过editorial。
+
+发布前已整合主干品牌、GitHub入口和每日温度等更新；仅补资料，原媒体/冻结及内容日期未由归档改写。根据已保存的本批只读议题审查，没有专属open议题；原#78/#79/#82/#84/#86早已关闭，未重关。
+<!-- batch-10-publication-archive:end -->

@@ -1,5 +1,15 @@
 # 项目制作记忆
 
+<!-- batch-10-publication-archive:start -->
+## 存量片尾参考资料第十批（2026-10-26）
+
+盛最多水、最长子串、岛屿数量、全排列、接雨水追加1/3/3/2/2项原题与机构，共11项5页，各5秒，接在原完整Python卡之后。原body全帧/PTS、AAC/PCM、完整代码页/程序源、全文/脚注保留，全文nativeVTT与冻结字幕匹配，仍在原Python页前退出。盛最多水与最长子串保留24日技术阅读；岛屿与全排列保留25日。接雨水R1保留25日题面，R2为26日真实新增Python函数技术补核；其余26日工作只补核原题/机构，未改写旧技术读日或冒称读过editorial。
+
+900当前输入实际匹配；旧842-key声明全文保留，813现存验证、29历史缺件明确未验证。最长子串原源目录MP4缺失，按Git发布影片与保留render-result完整身份捕获，不重建旧body；其余原制作片与Git发布片相同。独立20实际尾帧逐图查看；5次桌面1x穿过原代码卡和资料页、5组手机全屏等播放器检查按最终QA及实际复测/逐字节复用证据记录。Rain新公开资料段固定SHA仅加换行样式，源/900冻结/影片未改；未重复全片解码、算法、ASR或声称真机/全片人工听辨。
+
+[PR #363](https://github.com/linhongcun/video-studio/pull/363)已合并，发布[v0.76.1](https://github.com/linhongcun/video-studio/releases/tag/v0.76.1)，[Pages 40336357388](https://github.com/linhongcun/video-studio/actions/runs/40336357388)成功；合并提交`169cb0c09b16efdc4b5740452c2b225b5e30e841`。2026-10-26T22:11:12+08:00完成21项规范URL完整GET和5次公开GitHub身份读取，五片完整MP4 SHA、海报、全文VTT、资料页、原章节/日期、更新日志与tag/Release/Pages身份一致。原存量累计38/47，含新增Redis的当前站点39/48有附录，分别记数。实际响应见online-verification.json。 本批已留只读记录中五个原议题均已关闭、无专属open议题。仅GitHub站点，无平台重发或新版观看认可；见[批次记录](reference-endcards/batch-10/README.md)。
+<!-- batch-10-publication-archive:end -->
+
 ## 配套图文统一要求（2026-10-26）
 
 引用展示的后续反馈集中在阅读篇幅：完整出处继续保留，将默认入口收为段末轻量「原文」按钮，按需打开完整引用浮层。桌面支持悬停预览和点击固定，手机点按，键盘也可访问；不把邻近整句自动标成来源支持范围。新期沿用共享 `SourceQuote` 组件、既有写法与证据检查，默认折叠不降低准确引用和有效配图的最低要求，也不要求改写文章或冻结输入。47篇67处引用已按共同组件上线，[PR #362](https://github.com/linhongcun/video-studio/pull/362)合并、[v0.76.0](https://github.com/linhongcun/video-studio/releases/tag/v0.76.0)和[Pages 40334600064](https://github.com/linhongcun/video-studio/actions/runs/40334600064)完成；101项原始交互检查、同步上游后的13项定向复验、8张代表图与4张集成图实际查看通过，2026-10-26T22:01:06.108327+08:00完成47篇及3个JS/CSS和更新日志共51项线上核验。具体实现与实际验证范围见 [引用交互记录](citation-interaction/README.md)，不扩为阅读效率测量或用户已观看认可。
