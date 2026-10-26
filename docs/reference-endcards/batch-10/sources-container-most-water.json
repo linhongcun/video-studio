@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "batch": "reference-endcards-batch-10",
+  "episode": "container-most-water",
+  "baselineCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+  "preparedAtUTC": "2026-10-26T12:52:49.136675+00:00",
+  "originalTechnicalReadDate": "2026-10-24",
+  "newNetworkRetrievalPerformed": false,
+  "newGETCount": 0,
+  "newTechnicalReadingClaimed": false,
+  "originalPageContentHashesAvailable": false,
+  "originalReadRecord": {
+    "path": "episodes-codex/container-most-water/research.md",
+    "commit": "4213a233c4c242b04453b8c1215031dc421c2398",
+    "gitBlobSHA1": "0727626abea3340647ff1bdc5e9ea0bdae387e9e",
+    "completeRecordSHA256": "24b80f90d1142e8812d9ce3f83b940c4609c9073ef335c10407e0af0f09a1746",
+    "bytes": 8331,
+    "fixedRecordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/container-most-water/research.md",
+    "linkLabel": "既有实读记录",
+    "isOfficialPageMirror": false
+  },
+  "historicalAccessStatement": "访问日期：2026-10-24（北京时间）。本期对应LeetCode第11题、项目issue #78。本文只记录题意、算法推导与可复现数值验证，不代表配音、动画、成片或上线检查已经完成。",
+  "selectionRationale": "One primary actually read Chinese official problem statement supplies the problem definition, constraints and examples. The English version remains authentic historical cross-checking but is not duplicated in the video bibliography. The short-side elimination proof, linear bound and teaching traces remain independent episode mathematics and existing implementation checks. No unrelated programming document is added merely to increase the count.",
+  "historical2018Source": {
+    "includedInVideoBibliography": false,
+    "preservedRecord": {
+      "startLine": 25,
+      "endLine": 31,
+      "verbatimRecordExcerpt": "### R3 官方旧版阅读页：仅参考\n\n- 来源：[LeetCode阅读：盛最多水的容器](https://leetcode.cn/articles/container-with-most-water/)。\n- 页面日期：2018-06-03，早于2020年，**仅参考，不作为本片主论证来源**。\n- 实际获取：完整打开旧版阅读正文，阅读“方法一：暴力法”“方法二：双指针法”及复杂度分析。\n- 交叉核对：两端开始、记录最大面积、移动较短边；枚举所有配对为二次时间，双指针为线性时间与常数额外空间。\n- 边界：正文提到更高内侧线段时，不能改写成“移动短边一定会找到更高线段”或“面积每一步都会变大”。本期用严格的不等式与实际下降的面积序列解释。"
+    },
+    "reason": "Pre-2020 article remains only-reference history, not the video main proof or an invented modern editorial."
+  },
+  "unreadEditorialBoundary": {
+    "startLine": 33,
+    "endLine": 35,
+    "verbatimRecordExcerpt": "### 未阅读全文的页面，不充当已读出处\n\n尝试打开2020-04-17的[力扣官方题解](https://leetcode.cn/problems/container-with-most-water/solutions/207215/sheng-zui-duo-shui-de-rong-qi-by-leetcode-solution/)及英文editorial。网页工具只返回页面壳，未返回完整题解正文。搜索索引能识别2020官方题解及题目官方提示，但本期不将搜索摘要写成“阅读全文”。没有绕过网络策略或登录壁垒。"
+  },
+  "independentCorrectnessAndCostProof": {
+    "startLine": 37,
+    "endLine": 54,
+    "verbatimRecordExcerpt": "## 本期独立推导：为什么删除短边不会漏掉更优解\n\n令当前端点为`l < r`，面积为`A(l,r) = (r-l) × min(h[l],h[r])`。若`h[l] ≤ h[r]`，对所有`l < k < r`：\n\n```text\nA(l,k) = (k-l) × min(h[l],h[k])\n       ≤ (k-l) × h[l]\n       ≤ (r-l) × h[l]\n       = A(l,r)\n```\n\n这是由R1的面积定义和非负高度直接推出的数学关系，**不是逐句转述未获取的官方题解**。当`h[l] > 0`时宽度缩小使第二个不等式为严格小于；当短边为0时只能说“不超过”，不能宣称所有面积严格下降。\n\n先把当前面积计入最大值，再删除左短边，不会失去更优候选。右边较短时对称。两边相等时两侧都满足相同排除条件，本期代码固定移动左边，任意移动一侧也正确。\n\n每一步只排除一组已经证明“不超过已记录面积”的配对；未被排除的配对仍在缩小后的区间里。区间缩至不足两根线后，没有剩余配对，记录的最大值就是全局答案。该表述允许多个最优配对或零面积；不声称保留每个最优配对的具体下标。\n\n复杂度也独立从实现推导：左右下标距离从`n-1`每轮恰好缩小1，到0停止，共计算`n-1`次面积；仅保存左右下标、当前面积与最大值，额外空间与`n`无关。因此时间`O(n)`、额外空间`O(1)`。"
+  },
+  "algorithmExecutionRecord": {
+    "path": "episodes-codex/container-most-water/research/algorithm-verification.json",
+    "commit": "4213a233c4c242b04453b8c1215031dc421c2398",
+    "gitBlobSHA1": "87449adb961a6132fc9081ff3511126a316576c1",
+    "completeRecordSHA256": "2c915dab061e1354e73979902ebf7d44f60f7b2411d947ad22f4a48df147c358",
+    "bytes": 4645,
+    "fixedRecordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/container-most-water/research/algorithm-verification.json",
+    "linkLabel": "既有实读记录",
+    "isOfficialPageMirror": false
+  },
+  "newAlgorithmExecutionClaimed": false,
+  "authorSelfCheck": {
+    "status": "passed",
+    "checkedAt": "2026-10-26",
+    "method": "Inspect the preserved official-reading identities, original titles, publishers and authorship scope. No personal byline is identified in these historical problem records; omit author and display the official platform brand as organization. Do not infer authors from Git users, maintainers or copyright year.",
+    "newOnlineAuthorshipReadClaimed": false,
+    "sourcesWithExplicitPersonalByline": [],
+    "sources": [
+      {
+        "id": "R1",
+        "organization": "力扣（LeetCode）",
+        "basis": "Official Chinese LeetCode/力扣 problem domain and source identity in the preserved actual-reading record.",
+        "historicalRecordIdentifiesPersonalByline": false,
+        "authorFieldOmitted": true,
+        "noGitMaintainerOrCopyrightAuthorInference": true
+      }
+    ]
+  },
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "力扣（LeetCode）",
+      "title": {
+        "text": "盛最多水的容器",
+        "locator": "既有实读记录 · 第9行",
+        "rawExcerpt": "- 来源：[LeetCode 11. 盛最多水的容器](https://leetcode.cn/problems/container-with-most-water/)。",
+        "method": "Exact Chinese official problem title in the preserved actual-reading source record, excluding platform and problem number, which remain separate identity fields."
+      },
+      "canonicalUrl": "https://leetcode.cn/problems/container-with-most-water/",
+      "technicalReadDate": "2026-10-24",
+      "existingReadRecordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/container-most-water/research.md#L9",
+      "retainedClaimRecord": {
+        "startLine": 9,
+        "endLine": 16,
+        "verbatimRecordExcerpt": "- 来源：[LeetCode 11. 盛最多水的容器](https://leetcode.cn/problems/container-with-most-water/)。\n- 实际获取：通过可用网页工具打开题目正文，读取题意、两个示例与约束；正文可读，不依赖搜索摘要。\n- 页面日期：正文未标发表或更新日期，不根据页脚版权推断年份。\n- 核验位置：题目说明、示例1/2、提示中的输入约束。\n- 支持主张：数组下标决定竖线横坐标，数组值决定高度；选择两条竖线与横轴形成容器，求最大水量；不允许倾斜；高度非负、至少两条线。\n- 用在：题意前置、面积计算、示例正确性；文章“先弄清楚算什么”。\n- 数字：官方例子`[1,8,6,2,5,4,8,3,7]`结果49；`[1,1]`结果1。`2 ≤ n ≤ 100000`，`0 ≤ height[i] ≤ 10000`。\n- 本期转述：两个端点的距离乘以较矮端点的高度；中间的线段不是要扣除体积的实心柱子。后两点是由竖线与容器定义作出的数学解释，不额外引入真实液体或材料模型。"
+      },
+      "publisherAndAuthorBasis": {
+        "id": "R1",
+        "organization": "力扣（LeetCode）",
+        "basis": "Official Chinese LeetCode/力扣 problem domain and source identity in the preserved actual-reading record.",
+        "historicalRecordIdentifiesPersonalByline": false,
+        "authorFieldOmitted": true,
+        "noGitMaintainerOrCopyrightAuthorInference": true
+      },
+      "supports": [
+        "输入数组给出非负竖线高度，横坐标由下标决定；选择两条线与横轴组成不可倾斜的容器，求最大水量。",
+        "官方示例与输入约束支持面积定义及非负高度前提；本片面积解释、短边排除证明与教学数组均独立推导。"
+      ],
+      "sections": "题目说明 · 示例1/2 · 输入约束",
+      "shots": "01–05；题意前提支持后续独立证明",
+      "newGETPerformed": false,
+      "originalPageContentSHA256Claimed": false
+    }
+  ],
+  "historicalEnglishCrossCheck": {
+    "id": "R2",
+    "organization": "LeetCode",
+    "title": {
+      "text": "Container With Most Water",
+      "locator": "既有实读记录 · 第20行",
+      "rawExcerpt": "- 来源：[LeetCode 11. Container With Most Water](https://leetcode.com/problems/container-with-most-water/description/)。本次实际打开带题单参数的同一正文地址：<https://leetcode.com/problems/container-with-most-water/description/?envId=eabxy4hs&envType=problem-list-v2>。",
+      "method": "Exact English official problem title in the preserved actual-reading source record, excluding platform and problem number; original parameterized successful-read URL remains in the verbatim record."
+    },
+    "canonicalUrl": "https://leetcode.com/problems/container-with-most-water/description/",
+    "technicalReadDate": "2026-10-24",
+    "existingReadRecordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/container-most-water/research.md#L20",
+    "retainedClaimRecord": {
+      "startLine": 20,
+      "endLine": 23,
+      "verbatimRecordExcerpt": "- 来源：[LeetCode 11. Container With Most Water](https://leetcode.com/problems/container-with-most-water/description/)。本次实际打开带题单参数的同一正文地址：<https://leetcode.com/problems/container-with-most-water/description/?envId=eabxy4hs&envType=problem-list-v2>。\n- 实际获取：可读英文正文、示例与输入约束，与R1一致。\n- 页面日期：正文未标发表或更新日期。\n- 用在：核对“选两条线”“不可倾斜”“相邻横坐标相差1”；不引用企业标签、题目热度、通过率或面试频率。"
+    },
+    "publisherAndAuthorBasis": {
+      "id": "R2",
+      "organization": "LeetCode",
+      "basis": "Official LeetCode problem domain and source identity in the preserved actual-reading record.",
+      "historicalRecordIdentifiesPersonalByline": false,
+      "authorFieldOmitted": true,
+      "noGitMaintainerOrCopyrightAuthorInference": true
+    },
+    "supports": [
+      "英文官方题面交叉核对选两条线、不得倾斜及相邻横坐标相差1，与本片宽度和高度的解释一致。",
+      "题目求最大可容纳面积；本片不引用企业标签、热度、通过率、面试频率或未取得的官方题解。"
+    ],
+    "sections": "Problem statement · Examples · Constraints",
+    "shots": "01–05；题意交叉核对",
+    "newGETPerformed": false,
+    "originalPageContentSHA256Claimed": false,
+    "includedInVideoBibliography": false,
+    "reason": "The same problem in a second language cross-checks the existing definition, but adds no separate core argument. Retained as historical reading rather than a duplicate video source."
+  }
+}

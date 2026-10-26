@@ -1,0 +1,412 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-10",
+  "episode": "number-of-islands",
+  "presentation": "title-author",
+  "baselineCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+  "organizedAt": "2026-10-26T20:56:27.742336+08:00",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex appendix_implementation source organizer",
+  "selectedSourceCount": 3,
+  "scope": "Select the actual official problem statement, list-stack section and full set-types section heading. Preserve accepted map, DFS/state semantics, code and full Python card. Only bibliography source files and appended article/research sections are written.",
+  "sourceReadMode": "reuse-previous-actual-reading-record-with-one-explicit-title-only-supplement",
+  "recordedTechnicalAccessDate": "2026-10-25",
+  "newTechnicalBodyReadPerformed": false,
+  "newTitleGETPerformed": true,
+  "newTitleGETScope": "One successful full pinned official Python3.13 RST GET, inspected section heading only. Preceding old Doc/library/stdtypes.rst path returned404; official tree shows maintained Doc/builtins/stdtypes.rst, consistent with prior actual read resolvedURL. Canonical LeetCode/Python pages not requested this round.",
+  "baselineResearch": {
+    "path": "episodes-codex/number-of-islands/research.md",
+    "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+    "gitBlobSHA1": "481173f090997030b86da5d76ca217ee0d479d56",
+    "sha256": "d3cb895467c36d775aa39369a7f66f206851c2443305fdcebab59a6580b27921",
+    "bytes": 7118,
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/number-of-islands/research.md",
+    "archivePath": "docs/reference-endcards/batch-10/sources-number-of-islands-before-research.md",
+    "recordedTechnicalAccessDate": "2026-10-25",
+    "fullOriginalRecord": "# LC200 岛屿数量：从整座归属到迭代 DFS\n\n本期基线为 `7e0172a2a10ba855f07ff793275298c208a19fe0`。2026-10-25通过联网阅读工具实际读取中英文官方题面与Python官方资料；制作issue #82只用于任务身份，不作为题目或算法来源。访问记录见[research/source-access.json](research/source-access.json)。\n\n## 题意与约束\n\n输入是非空的 `m × n` 字符网格，`\"1\"` 表示陆地，`\"0\"` 表示水；`1 ≤ m,n ≤ 300`。只通过上下左右相邻的陆地连接成岛，斜角接触不连通，返回岛的座数，不是陆地格数。[S1][S2]\n\n“网格四条边被水包围”指网格以外可视为水，不要求网格的边缘格全为0；官方例子第一行、第一列均可以包含陆地。[S1][S2]\n\n本片主例采用官方示例2，原图始终保持：\n\n```text\n11000\n11000\n00100\n00011\n```\n\n这20格中有7块陆地，但只有3座岛：左上4格为一座，中间1格为一座，右下2格为一座。`(1,1)` 与 `(2,2)`、`(2,2)` 与 `(3,3)` 仅斜角接触。这里坐标从0起；视频采用从1起的行列说明时，明确对应为代码下标各加1。\n\n## 方法如何选出来\n\n目标是数“整座岛”，所以不能每遇到一块陆地就加一。扫描到未归属的陆地，先把岛数加一，再沿四邻找全与它相连的陆地并登记归属；扫描以后再遇到这些格，就知道它们已经计入同一座岛。这一步从防止重复计数的需要推出，之后才命名深度优先搜索（DFS）。\n\n用显式栈保存已经归属、尚待展开的陆地。Python列表的 `append()` 与无下标 `pop()` 分别在末端加入和取出元素，构成后进先出的栈。[S3] `seen` 用集合登记陆地坐标，集合提供去重和成员判断。[S4] 图上的“已归属”不等于“已展开完”，更不等于把陆地改成海。\n\n程序对新发现的陆地先 `seen.add`，再入栈。这样同一个格即使同时邻接多块待处理陆地，也只会入栈一次。程序不写入 `grid`；地图地形与单独的归属标记分别表达。\n\nPython解释器存在递归深度限制，限制值及提高限制的安全范围依平台而定。[S5] 本题最大有90000格，细长单岛可能使递归搜索链很深，因此完整程序采用显式栈，不依赖调高递归限制。不能把这一选择说成Python在任何平台都只能递归某个固定次数。\n\n## 固定访问顺序与真实trace\n\n完整程序为[solution.py](solution.py)，26行、最长67字符；[solution.json](solution.json)由程序逐行生成，供完整5秒静态卡使用，不另写一份显示算法。\n\n方向循环固定为右、下、左、上。由于栈是后进先出，不能把方向循环顺序直接说成展开顺序。官方主例从 `(0,0)` 开始时，先登记并压入 `(0,1)`，再登记并压入 `(1,0)`；所以首岛的弹栈顺序为：\n\n```text\n(0,0) → (1,0) → (1,1) → (0,1)\n```\n\n处理 `(1,1)` 的上邻 `(0,1)` 时，后者已经在 `seen` 中，但仍留在栈里等待展开；此处跳过，避免重复入栈。新岛的起点按行扫描依次为 `(0,0)`、`(2,2)`、`(3,3)`。\n\n唯一动画数据源为[research/demo-trace.json](research/demo-trace.json)，由[research/generate_demo_trace.py](research/generate_demo_trace.py)对同份实际 `solution.py` 只增加观察回调后执行产生，绑定程序SHA。它不是另一套算法生成的假过程；脚本与实际执行验证见其说明。制作方原样复制至 `remotion/src/lesson.json`，画面按事件状态取阶段，不自行重算一套访问顺序。\n\ntrace坐标从0起，栈数组从底到顶。`mark` 为登记归属之后、压栈之前；`pop` 为开始展开；`expanded` 才表示该格四个方向都已检查完。集合快照以行列排序只是展示顺序，不暗示Python集合有访问顺序。[S4]\n\n## 正确性与复杂度边界\n\n1. 从一块陆地出发，只加入四邻陆地，所以不会跨水或跨斜角加入别的岛；反过来，如果仍有同岛陆地未被登记，沿它到起点的一条四邻路径，必有第一条从已登记格通向未登记陆地的边，已登记格被展开时就会发现它。因此栈清空时恰好登记了整座岛。\n2. 每次加一的起点都未归属，既有岛的全部陆地已经登记，所以它属于一座新岛；每座岛总有第一块被扫描到的陆地，因此不会漏岛。岛数与这些起点一一对应。\n3. 登记在入栈之前，使每格陆地最多入栈、出栈一次，水格不入栈。外层检查每格一次，每块陆地只检查四邻；按常规集合操作的期望常数时间模型，时间为 `O(mn)`，额外空间为 `O(mn)`。保留原图并不是原地常数空间方案。\n\n这些是文章和算法核验的依据，不要求在片尾追加长证明。正文用同一主例呈现选择方法及四邻归属过程，结尾回收结果并给完整程序暂停卡。\n\n## 独立验证\n\n[research/verify_algorithm.py](research/verify_algorithm.py)直接执行本片实际解法，用独立并查集oracle验证：只合并右侧、下侧相邻陆地，按不同根数量判断岛数，避免镜像DFS实现。2026-10-25实际完成全部65536个4×4网格、16组边界/压力和300组固定种子随机输入，共65852组，17.542302秒通过。每组均执行原程序及同源AST观察版，实际完整分组与oracle根形成双射，输入深快照不变；每块陆地恰好登记、入栈、出栈、展开一次。\n\n长蛇压力例采用偶数行全陆地、奇数行交替在左右边缘留一个连接点，形成45150格的单条路径。实际验证其只有两个度1端点、其余45148格度2且全连通，迭代程序成功且栈峰值为1；300×300全陆地实际栈峰值44851，棋盘格得到45000座岛。长蛇从端点逐格递归会需要45150层访问，这是依据形状的数学推论，没有执行递归程序或制造崩溃。实际结果、程序/验证源SHA、归属与栈操作检查、运行时间及能力边界见[research/algorithm-verification.json](research/algorithm-verification.json)。有限执行验证不代替上述通用连通性论证或后续视觉、配音和网站验收。程序与trace交给编剧和动画后已停止修改；顺序变化必须先通知并重新验证。\n\n## 公开来源\n\n- **S1** LeetCode，200. Number of Islands，当前官方题面，未标独立发布日期；2026-10-25访问。<https://leetcode.com/problems/number-of-islands/description/>\n- **S2** 力扣，200. 岛屿数量，当前官方中文题面，未标独立发布日期；2026-10-25访问。<https://leetcode.cn/problems/number-of-islands/description/>\n- **S3** Python官方教程，Using Lists as Stacks，当前3.13文档；2026-10-25访问。<https://docs.python.org/3.13/tutorial/datastructures.html#using-lists-as-stacks>\n- **S4** Python官方文档，Set Types；2026-10-25访问。<https://docs.python.org/3.13/library/stdtypes.html#types-set>\n- **S5** Python官方文档，`sys.getrecursionlimit` 与 `sys.setrecursionlimit`；2026-10-25访问。<https://docs.python.org/3.13/library/sys.html#sys.getrecursionlimit>\n",
+    "evidenceLimit": "Frozen prior-reading record, not an official body snapshot or new GET. Original problem and language evidence is separate from this project's algorithm reasoning/tests."
+  },
+  "baselineSourceAccess": {
+    "path": "episodes-codex/number-of-islands/research/source-access.json",
+    "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+    "gitBlobSHA1": "fe7717f7bfa0e9505a4d605a0ed0f2602d31c05f",
+    "sha256": "2aa672802d5b53301f99d712d5de97f8f895124435f8ac6fcdebb3a40b097a78",
+    "bytes": 4168,
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/number-of-islands/research/source-access.json",
+    "archivePath": "docs/reference-endcards/batch-10/sources-number-of-islands-source-access.json",
+    "fullOriginalRecord": {
+      "status": "read",
+      "recordedAtUTC": "2026-10-25T07:55:02.904271+00:00",
+      "readDateUTC": "2026-10-25",
+      "executor": "Codex derive_production_audit agent",
+      "method": "tools.mcp__codex_apps__search_service_web_run open/find",
+      "sources": [
+        {
+          "id": "S1",
+          "url": "https://leetcode.com/problems/number-of-islands/description/",
+          "title": "200. Number of Islands — LeetCode",
+          "toolReferences": [
+            "turn290961view0"
+          ],
+          "relevantLines": [
+            22,
+            54
+          ],
+          "factsChecked": [
+            "m by n character grid; 1 means land, 0 means water",
+            "Only horizontal or vertical adjacent lands connect; return island count",
+            "Dimensions each between1 and300; cell values exactly0 or1",
+            "Official example2 rows11000/11000/00100/00011 returns3"
+          ],
+          "publicationDate": "not separately stated on page"
+        },
+        {
+          "id": "S2",
+          "url": "https://leetcode.cn/problems/number-of-islands/description/",
+          "title": "200. 岛屿数量 — 力扣",
+          "toolReferences": [
+            "turn290961view1"
+          ],
+          "relevantLines": [
+            24,
+            59
+          ],
+          "factsChecked": [
+            "Chinese statement matches English four-neighbor definition",
+            "Grid exterior surrounded by water does not prohibit land in border cells",
+            "Official second example and constraints match English statement"
+          ],
+          "publicationDate": "not separately stated on page"
+        },
+        {
+          "id": "S3",
+          "url": "https://docs.python.org/3.13/tutorial/datastructures.html#using-lists-as-stacks",
+          "title": "Python3.13 documentation — Using Lists as Stacks",
+          "toolReferences": [
+            "turn693973view0"
+          ],
+          "relevantLines": [
+            83,
+            98
+          ],
+          "factsChecked": [
+            "append adds to list end; pop without index retrieves last item",
+            "This usage implements a last-in-first-out stack"
+          ],
+          "publicationDate": "current versioned official documentation"
+        },
+        {
+          "id": "S4",
+          "url": "https://docs.python.org/3.13/library/stdtypes.html#types-set",
+          "resolvedURL": "https://docs.python.org/3.13/builtins/stdtypes.html",
+          "title": "Python3.13 documentation — Set Types",
+          "toolReferences": [
+            "turn693973view1",
+            "turn124803view3"
+          ],
+          "relevantLines": [
+            [
+              2708,
+              2738
+            ],
+            [
+              2858,
+              2861
+            ]
+          ],
+          "factsChecked": [
+            "Set is an unordered collection of distinct hashable objects",
+            "Supports membership tests and adding an element",
+            "No insertion-order or traversal-order promise is used for seen"
+          ],
+          "publicationDate": "current versioned official documentation"
+        },
+        {
+          "id": "S5",
+          "url": "https://docs.python.org/3.13/library/sys.html#sys.getrecursionlimit",
+          "title": "Python3.13 documentation — recursion limits",
+          "toolReferences": [
+            "turn693973view2",
+            "turn124803view4"
+          ],
+          "relevantLines": [
+            [
+              499,
+              500
+            ],
+            [
+              922,
+              928
+            ]
+          ],
+          "factsChecked": [
+            "Interpreter recursion limit exists",
+            "Supported upper limit is platform dependent; setting it too high can crash",
+            "No universal exact default limit or measured recursive crash is claimed"
+          ],
+          "publicationDate": "current versioned official documentation"
+        }
+      ],
+      "sourceScope": "Official problem statements support problem facts; Python official documentation supports language semantics. Algorithm correctness and tests are separately produced by this project.",
+      "limits": [
+        "Tool returned extracted text with source references, not raw HTTP response bytes or headers; no invented status200, ETag or page-contentSHA is recorded.",
+        "No executor request was sent to the LeetCode domains.",
+        "No issue text, old episode or generated answer was used as authoritative problem evidence.",
+        "Only short fact summaries are archived; the source pages are linked rather than copied wholesale."
+      ]
+    },
+    "evidenceLimit": "Actual prior tool references, relevant line ranges and fact summaries. Extracted text is not rawHTTP; no invented200/ETag/bodySHA. The recorded English/Chinese problem reads and Python semantics remain dated25."
+  },
+  "titleOnlySupplement": {
+    "repository": "python/cpython",
+    "branch": "3.13",
+    "path": "Doc/builtins/stdtypes.rst",
+    "commit": "42155a0feaca9ba6991942c323cbe9fb7278be3c",
+    "url": "https://raw.githubusercontent.com/python/cpython/42155a0feaca9ba6991942c323cbe9fb7278be3c/Doc/builtins/stdtypes.rst",
+    "fixedSourceUrl": "https://github.com/python/cpython/blob/42155a0feaca9ba6991942c323cbe9fb7278be3c/Doc/builtins/stdtypes.rst",
+    "status": 200,
+    "finalUrl": "https://raw.githubusercontent.com/python/cpython/42155a0feaca9ba6991942c323cbe9fb7278be3c/Doc/builtins/stdtypes.rst",
+    "checkedAt": "2026-10-26T20:54:07.211965+08:00",
+    "bytes": 230579,
+    "sha256": "3a5533d8d038ddcca6b4fd223b90f9d97ceaf1df9c43e1a33bca52acbb536bc7",
+    "headingLine": 4824,
+    "rawHeading": "Set Types --- :class:`set`, :class:`frozenset`",
+    "readScope": "Official branch3.13 reference downloaded whole; inspected the Set Types section heading only. Old technical support remains2026-10-25.",
+    "failedPrecedingPathLookup": {
+      "path": "Doc/library/stdtypes.rst",
+      "status": 404,
+      "scope": "Not source evidence; actual maintained file moved to Doc/builtins/stdtypes.rst, matching prior read resolvedURL."
+    },
+    "savedPath": "docs/reference-endcards/batch-10/sources-number-of-islands-stdtypes.rst",
+    "renderedOriginalTitle": "Set Types — set, frozenset",
+    "titleExtraction": "Render the exact RST section heading: remove :class: role markup around set/frozenset, and render the source typographic --- as an em dash. Preserve all title words, order and punctuation; no summary/title expansion."
+  },
+  "sources": [
+    {
+      "id": "R1",
+      "priorId": "S1",
+      "organization": "LeetCode",
+      "title": "Number of Islands",
+      "version": "LeetCode 200 · 官方题面 · 原记录未标独立发布日期",
+      "url": "https://leetcode.com/problems/number-of-islands/description/",
+      "alternateOfficialUrl": "https://leetcode.cn/problems/number-of-islands/description/",
+      "sections": "Problem statement；Example 2；Constraints；原题读取行22—54及中文交叉核对",
+      "supports": [
+        "输入字符网格，1为陆地、0为水，仅上下左右相邻陆地连通，返回岛的座数；斜角接触不相连。",
+        "官方第二例11000/11000/00100/00011有7块陆地、3座岛；维度各1至300，网格外为水不要求边缘格全为水。"
+      ],
+      "limitations": [
+        "官方题面支持题意、约束和示例，不给本期独立DFS方法、正确性证明或复杂度分析加官方题解背书。",
+        "本期资料没有读取或使用官方editorial正文的证据，故不将其列为已读来源。",
+        "视频行列从1起，代码/trace下标从0起；资料清单不改变原地图或坐标映射。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-25",
+      "priorActualSourceRead": {
+        "id": "S1",
+        "url": "https://leetcode.com/problems/number-of-islands/description/",
+        "title": "200. Number of Islands — LeetCode",
+        "toolReferences": [
+          "turn290961view0"
+        ],
+        "relevantLines": [
+          22,
+          54
+        ],
+        "factsChecked": [
+          "m by n character grid; 1 means land, 0 means water",
+          "Only horizontal or vertical adjacent lands connect; return island count",
+          "Dimensions each between1 and300; cell values exactly0 or1",
+          "Official example2 rows11000/11000/00100/00011 returns3"
+        ],
+        "publicationDate": "not separately stated on page"
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/number-of-islands/research/source-access.json",
+      "baselineResearchSourceExcerpt": "- **S1** LeetCode，200. Number of Islands，当前官方题面，未标独立发布日期；2026-10-25访问。<https://leetcode.com/problems/number-of-islands/description/>",
+      "titleEvidence": {
+        "locator": "基线4213a233 research/source-access.json S1 title字段；分离平台/题号/站点名，保留原题",
+        "evidence": "docs/reference-endcards/batch-10/sources-number-of-islands.json",
+        "originalTitle": "Number of Islands",
+        "basis": "Exact selected chapter name preserved in actual-reading record; no fresh title GET."
+      },
+      "authorshipEvidence": {
+        "publisher": "LeetCode",
+        "basis": "Official LeetCode problem platform, explicitly identified in old title and canonical domain.",
+        "explicitPersonalAuthor": null
+      },
+      "newTechnicalBodyReadPerformed": false,
+      "oldRawOfficialHTTPBodySHA256": null
+    },
+    {
+      "id": "R2",
+      "priorId": "S3",
+      "organization": "Python Software Foundation",
+      "title": "Using Lists as Stacks",
+      "version": "Python 3.13 Tutorial · 章节原题",
+      "url": "https://docs.python.org/3.13/tutorial/datastructures.html#using-lists-as-stacks",
+      "sections": "Using Lists as Stacks；2026-10-25读取行83—98",
+      "supports": [
+        "列表append在末端添加元素，不给索引的pop取出最后一个元素。",
+        "这两个操作支持后进先出栈，用来保存本片已归属但尚待展开的位置。"
+      ],
+      "limitations": [
+        "方向循环右、下、左、上不等于弹栈展开顺序；本片实际顺序由独立程序trace固定，不冒充Python文档规定的DFS顺序。",
+        "列表作栈的语言说明不替代找全一座岛、每座只加一的独立连通性证明。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-25",
+      "priorActualSourceRead": {
+        "id": "S3",
+        "url": "https://docs.python.org/3.13/tutorial/datastructures.html#using-lists-as-stacks",
+        "title": "Python3.13 documentation — Using Lists as Stacks",
+        "toolReferences": [
+          "turn693973view0"
+        ],
+        "relevantLines": [
+          83,
+          98
+        ],
+        "factsChecked": [
+          "append adds to list end; pop without index retrieves last item",
+          "This usage implements a last-in-first-out stack"
+        ],
+        "publicationDate": "current versioned official documentation"
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/number-of-islands/research/source-access.json",
+      "baselineResearchSourceExcerpt": "- **S3** Python官方教程，Using Lists as Stacks，当前3.13文档；2026-10-25访问。<https://docs.python.org/3.13/tutorial/datastructures.html#using-lists-as-stacks>",
+      "titleEvidence": {
+        "locator": "基线4213a233 research/source-access.json S3及research.md公开来源S3，实际章节原题",
+        "evidence": "docs/reference-endcards/batch-10/sources-number-of-islands.json",
+        "originalTitle": "Using Lists as Stacks",
+        "basis": "Exact selected chapter name preserved in actual-reading record; no fresh title GET."
+      },
+      "authorshipEvidence": {
+        "publisher": "Python Software Foundation",
+        "basis": "Institutional official Python3.13 documentation, maintained by Python Software Foundation; no per-section personal byline established in the preserved document record. A Git contributor is not used as author.",
+        "explicitPersonalAuthor": null
+      },
+      "newTechnicalBodyReadPerformed": false,
+      "oldRawOfficialHTTPBodySHA256": null
+    },
+    {
+      "id": "R3",
+      "priorId": "S4",
+      "organization": "Python Software Foundation",
+      "title": "Set Types — set, frozenset",
+      "version": "Python 3.13 Documentation · Built-in Types章节",
+      "url": "https://docs.python.org/3.13/library/stdtypes.html#types-set",
+      "sections": "Set Types；2026-10-25读取行2708—2738、2858—2861；本轮仅补官方RST第4824行完整原题",
+      "supports": [
+        "集合由互异的可哈希对象组成，支持成员测试和添加元素，可用于seen去重和归属判断。",
+        "集合无序，不将展示时排序的集合快照说成Python集合插入或遍历顺序保证。"
+      ],
+      "limitations": [
+        "已加入seen表示已经归属，仍可能在栈中等待展开；这些程序状态由本片实现区分，不是集合自动提供的DFS状态机。",
+        "O(mn)分析采用通常集合操作的期望常数成本模型，不由本章节推出所有输入或实现都绝对常数时间。",
+        "26日固定源码GET仅补完整章节题名，不回写为25日官方响应、实际运行时patch版本或新增技术实读。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-25",
+      "priorActualSourceRead": {
+        "id": "S4",
+        "url": "https://docs.python.org/3.13/library/stdtypes.html#types-set",
+        "resolvedURL": "https://docs.python.org/3.13/builtins/stdtypes.html",
+        "title": "Python3.13 documentation — Set Types",
+        "toolReferences": [
+          "turn693973view1",
+          "turn124803view3"
+        ],
+        "relevantLines": [
+          [
+            2708,
+            2738
+          ],
+          [
+            2858,
+            2861
+          ]
+        ],
+        "factsChecked": [
+          "Set is an unordered collection of distinct hashable objects",
+          "Supports membership tests and adding an element",
+          "No insertion-order or traversal-order promise is used for seen"
+        ],
+        "publicationDate": "current versioned official documentation"
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/number-of-islands/research/source-access.json",
+      "baselineResearchSourceExcerpt": "- **S4** Python官方文档，Set Types；2026-10-25访问。<https://docs.python.org/3.13/library/stdtypes.html#types-set>",
+      "titleEvidence": {
+        "locator": "Python官方固定42155a0feaca9ba6991942c323cbe9fb7278be3c Doc/builtins/stdtypes.rst line 4824，完整RST章节原题",
+        "evidence": "docs/reference-endcards/batch-10/sources-number-of-islands.json",
+        "originalTitle": "Set Types — set, frozenset",
+        "basis": "Render the exact RST section heading: remove :class: role markup around set/frozenset, and render the source typographic --- as an em dash. Preserve all title words, order and punctuation; no summary/title expansion."
+      },
+      "authorshipEvidence": {
+        "publisher": "Python Software Foundation",
+        "basis": "Institutional official Python3.13 documentation, maintained by Python Software Foundation; no per-section personal byline established in the preserved document record. A Git contributor is not used as author.",
+        "explicitPersonalAuthor": null
+      },
+      "newTechnicalBodyReadPerformed": false,
+      "oldRawOfficialHTTPBodySHA256": null
+    }
+  ],
+  "algorithmBoundary": {
+    "officialEditorialCited": false,
+    "statement": "The official statement supports facts/examples only; iterative DFS, marking-before-push, completeness proof, state distinctions, exacttrace and independent DSU validation are this project's separate derivation and execution evidence. No unrecorded official editorial read or algorithm attribution is added."
+  },
+  "notSelectedOldSources": [
+    "Chinese S2 remains a full official cross-check in old records/article and an alternateOfficialUrl under R1, rather than a duplicate video listing.",
+    "S5 recursion-limit API material remains in the unchanged original article/research; it is implementation background outside the selected core card. Its abbreviated old label is not expanded into a fabricated document title."
+  ],
+  "preservedInputPrefixes": {
+    "productionArticleSHA256Before": "d6ae79c117437295c61dfad6d296049305dea5166d47bda2b5c9f76a963f2681",
+    "productionResearchSHA256Before": "d3cb895467c36d775aa39369a7f66f206851c2443305fdcebab59a6580b27921",
+    "publishedArticleSHA256Before": "d6ae79c117437295c61dfad6d296049305dea5166d47bda2b5c9f76a963f2681"
+  },
+  "layout": {
+    "maxItemsPerPage": 4,
+    "secondsPerPage": 5,
+    "expectedPages": 1
+  },
+  "scopeBoundaries": [
+    "Four-neighbor land connectivity only; border land allowed; return3islands for the official7land-cell example, not7.",
+    "Seen means assigned, not already expanded or terrain changed. Mark before push; stackLIFO determines actual pop order.",
+    "Keep input unchanged; O(mn)time/space relies on stated expected-cost model and independent proof, not official editorial attribution.",
+    "All old sources and footnotes remain; no media/program/storyboard/words/shared/freezer/package/QA mutation."
+  ],
+  "authorSelfCheck": {
+    "checkedAt": "2026-10-26T20:56:27.742336+08:00",
+    "result": "PASS",
+    "records": [
+      {
+        "id": "R1",
+        "credit": "LeetCode",
+        "authorFieldOmitted": true,
+        "creditExactInVisibleArticle": true,
+        "noGitContributorOrUnrecordedPersonalAuthorUsed": true
+      },
+      {
+        "id": "R2",
+        "credit": "Python Software Foundation",
+        "authorFieldOmitted": true,
+        "creditExactInVisibleArticle": true,
+        "noGitContributorOrUnrecordedPersonalAuthorUsed": true
+      },
+      {
+        "id": "R3",
+        "credit": "Python Software Foundation",
+        "authorFieldOmitted": true,
+        "creditExactInVisibleArticle": true,
+        "noGitContributorOrUnrecordedPersonalAuthorUsed": true
+      }
+    ],
+    "method": "Review each institutional source and exact title/credit against linked official identity and stored read record; check source author field absent, no inferred personal name, exact publisher string included in appended article."
+  },
+  "localVerification": {
+    "checkedAt": "2026-10-26T20:56:27.742336+08:00",
+    "command": "node site/scripts/check-references.mjs --sources episodes-codex/number-of-islands",
+    "sourceCount": 3,
+    "originalArticlePrefixBytes": 9051,
+    "originalResearchPrefixBytes": 7118,
+    "originalPrefixesUnchanged": true,
+    "allArchivedBytesAndSHA256Matched": true,
+    "rawOriginalSetHeadingLineMatched": true
+  }
+}
