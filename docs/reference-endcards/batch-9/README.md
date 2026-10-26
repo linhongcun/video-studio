@@ -13,3 +13,9 @@
 两次站点构建均通过：34附录/14固定原片存量、48日期/RSS与四片实际帧数、本地四片两轮通过。两轮各8组播放器通过：4次从原Python卡前0.2秒真实1x播放穿过完整5秒代码页及新参考页到ended、4次手机原生全屏；首轮根实际查看8张参考图+4张Python暂停图；整合后重新实际查看4张手机图，其余8张与已目视图逐字节相同，按完整SHA复用目视证据。全部字幕仍在原Python卡前退出，4份新VTT与旧基线逐字节相同。独立16实际编码尾帧及源/发布/回执/清单绑定通过。见validation.json/qa-browser.json/qa-independent.json。
 
 发布前整合主干`179a423fd1efe61f8cb49f13eef92261e3f3488a`，保留每日温度v0.72.4更新。本批顺延v0.72.5；上游变更与642项当前冻结输入无交集。v0.72.5重新构建、本地及8组播放器均通过，旧候选日志与QA保留其真实版本身份，未重复制作媒体。
+
+<!-- batch-9-publication-archive:start -->
+## 发布与线上归档
+
+[PR #354](https://github.com/linhongcun/video-studio/pull/354)已合并，发布[v0.72.5](https://github.com/linhongcun/video-studio/releases/tag/v0.72.5)，[Pages 40323593612](https://github.com/linhongcun/video-studio/actions/runs/40323593612)成功；合并提交`dc3676793e08caffe2d281c62777a7acbc3f775c`。2026-10-26T20:40:16+08:00完成17项规范URL完整GET，四片完整MP4 SHA、海报、全文VTT、资料页、原章节/日期、更新日志及tag/Release/Pages身份通过。原存量累计33/47，全站含新增Redis为34/48有附录，分别记数。实际响应见online-verification.json；原议题#75/#76/#77/#81此前已关闭，未发现本批专属未关闭issue。
+<!-- batch-9-publication-archive:end -->

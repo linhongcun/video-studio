@@ -1,5 +1,15 @@
 # 项目制作记忆
 
+<!-- batch-9-publication-archive:start -->
+## 存量片尾参考资料第九批（2026-10-26）
+
+两数之和、反转链表、爬楼梯、二分查找追加3/2/2/3项原题与机构，共4页、各5秒，位于原完整5秒Python页之后。原讲解全帧/PTS、AAC/PCM、程序源与代码卡区间、旧全文/脚注和原VTT均保留，字幕仍在Python页前退出。技术实读保留25日，TwoSum26日仅补官方题名/出版者元数据，未冒称读到官方editorial。
+
+源目录原MP4缺失，以Git发布原片与保留render-result的完整SHA/帧数匹配作immutable body；642当前实际冻结输入通过。旧618-key声明全文保留，其中576现存匹配、42历史缓存缺件只保留原key/SHA并明确未验证；不补造缓存、不声称618当前全过。独立16实际短尾图逐张查看；两轮构建与播放器通过，保留首轮8参考图/4代码图目视记录，最终另看4手机图，另8图按完整SHA复用已看证据。未重复正文重渲/ASR/算法运行，Chromium模拟不扩为真机或全片人工听辨。
+
+[PR #354](https://github.com/linhongcun/video-studio/pull/354)已合并，发布[v0.72.5](https://github.com/linhongcun/video-studio/releases/tag/v0.72.5)，[Pages 40323593612](https://github.com/linhongcun/video-studio/actions/runs/40323593612)成功；合并提交`dc3676793e08caffe2d281c62777a7acbc3f775c`。2026-10-26T20:40:16+08:00完成17项规范URL完整GET，四片完整MP4 SHA、海报、全文VTT、资料页、原章节/日期、更新日志及tag/Release/Pages身份通过。原存量累计33/47，全站含新增Redis为34/48有附录，分别记数。实际响应见online-verification.json；原议题#75/#76/#77/#81此前已关闭，未发现本批专属未关闭issue。 仅GitHub站点，无平台重发或新版观看认可；见[批次记录](reference-endcards/batch-9/README.md)。
+<!-- batch-9-publication-archive:end -->
+
 ## 存量片尾参考资料第八批（2026-10-26）
 
 Saga、可靠消息Outbox、服务降级追加4/2/2项原题与作者/机构，各一页5秒；原正文全帧/PTS、AAC/PCM及全部旧文稿/脚注保持。Saga幂等处理是26日真实新增技术核验，其余保留24日技术读；降级22日题名片段与24日技术依据分清；Outbox忠实旧书目原题/Chris署名，不猜当前H1前缀。373旧keys、422当前输入/10证据文件、12实际尾帧通过；一次构建/48日期、6播放器/3次1x结尾/3组手机全屏/6实际截图通过，模拟视口不扩为真机/全片听辨。
