@@ -1,0 +1,100 @@
+--- tool-before-media-lifecycle.py
++++ /tmp/bloom-online-browser-smoke.py
+@@ -16,6 +16,7 @@
+ from pathlib import Path
+ import shutil
+ import traceback
++import time
+ import urllib.request
+ from urllib.parse import urlsplit,unquote
+ 
+@@ -59,45 +60,73 @@
+ 
+ def run_case(browser,name,viewport,meta,sb,out):
+     case={'name':name,'viewport':viewport,'chapterSeeks':[],'screenshots':[],
+-          'pageErrors':[],'consoleErrors':[],'requestFailures':[]}
++          'pageErrors':[],'consoleErrors':[],'requestFailures':[],'mediaWitnesses':[]}
++    phase={'name':'navigation'};requests={}
+     context=browser.new_context(viewport=viewport,device_scale_factor=1,color_scheme='dark',
+                                reduced_motion='reduce',ignore_https_errors=False)
+     page=context.new_page();page.set_default_timeout(20000)
+     page.on('pageerror',lambda e:case['pageErrors'].append(str(e)))
+     page.on('console',lambda m:case['consoleErrors'].append(m.text) if m.type=='error' else None)
+-    page.on('requestfailed',lambda r:case['requestFailures'].append({'url':r.url,'failure':r.failure}))
++    page.add_init_script('''window.__qaMediaEvents=[];for(const type of ['loadstart','loadedmetadata','loadeddata','canplay','suspend','abort','error','seeking','seeked','playing','pause'])document.addEventListener(type,e=>{const v=e.target;if(v.tagName==='VIDEO')window.__qaMediaEvents.push({type,epochMS:performance.timeOrigin+performance.now(),time:v.currentTime,readyState:v.readyState,networkState:v.networkState,preload:v.preload,error:v.error?.message??null})},true)''')
++    def on_request(request):
++        requests[request]={'url':request.url,'resourceType':request.resource_type,'range':request.headers.get('range'),'startedPhase':phase['name'],'startedAtEpochMS':time.time()*1000}
++    def on_failed(request):
++        case['requestFailures'].append({**requests.get(request,{'url':request.url,'resourceType':request.resource_type,'range':request.headers.get('range')}),'failure':request.failure,'failedPhase':phase['name'],'failedAtEpochMS':time.time()*1000})
++    page.on('request',on_request);page.on('requestfailed',on_failed)
+     try:
+         response=page.goto(URL,wait_until='networkidle',timeout=60000)
+         assert response.status==200 and page.url==URL
+         case.update(documentStatus=response.status,finalURL=page.url,title=page.locator('header.eh h1').inner_text())
+         assert case['title']==meta['title']
+         page.wait_for_function("()=>{const v=document.querySelector('#player video');return v&&v.readyState>=1&&Number.isFinite(v.duration)}")
+-        video=page.locator('#player video');state=video.evaluate("v=>({duration:v.duration,width:v.videoWidth,height:v.videoHeight,source:v.currentSrc,controls:v.controls,defaultTrackModes:[...v.textTracks].map(t=>t.mode),error:v.error?.message??null})")
++        video=page.locator('#player video');state=video.evaluate("v=>({duration:v.duration,width:v.videoWidth,height:v.videoHeight,source:v.currentSrc,controls:v.controls,preload:v.preload,defaultTrackModes:[...v.textTracks].map(t=>t.mode),error:v.error?.message??null})")
+         assert state['source']==URL+meta['video'] and (state['width'],state['height'])==(1920,1080)
+         assert abs(state['duration']-meta['finalVideoFrames']/sb['meta']['fps'])<.01
+         assert state['controls'] and state['error'] is None;case['media']=state
++        phase['name']='short-playback'
+         video.evaluate('v=>{v.muted=true;v.playbackRate=1;return v.play()}')
+         page.wait_for_function("()=>document.querySelector('#player video').currentTime>.25")
+-        case['shortPlayback']=video.evaluate('v=>{v.pause();return {time:v.currentTime,paused:v.paused,muted:v.muted,rate:v.playbackRate}}')
++        case['shortPlayback']=video.evaluate('v=>{v.pause();return {time:v.currentTime,paused:v.paused,muted:v.muted,rate:v.playbackRate,error:v.error?.message??null,readyState:v.readyState}}')
+         assert case['shortPlayback']['time']>.25 and case['shortPlayback']['paused'] and case['shortPlayback']['rate']==1
++        case['mediaWitnesses'].append({'type':'successful-short-playback','atEpochMS':time.time()*1000,**case['shortPlayback']})
+         player_path=out/(name+'-player.png');page.locator('#player').screenshot(path=str(player_path));case['screenshots'].append({'path':str(player_path.relative_to(ROOT)),'sha256':sha(player_path)})
+         chapters=page.locator('#player').evaluate('e=>JSON.parse(e.dataset.chapters)')
+         assert [c['id'] for c in chapters]==['goal','write','query','boundary']
+         for chapter in chapters:
++            phase['name']='chapter-'+chapter['id']
+             kind='.ch' if viewport['width']>=768 else '.chip';page.locator(f'#player {kind}[data-id="{chapter["id"]}"]').click()
+             page.wait_for_function('(t)=>{const v=document.querySelector("#player video");return !v.seeking&&v.currentTime>=t&&v.currentTime<t+.5}',arg=chapter['start'])
+-            sample=video.evaluate('v=>{v.pause();return {time:v.currentTime,paused:v.paused,error:v.error?.message??null}}');sample.update(id=chapter['id'],expected=chapter['start']);assert sample['paused'] and sample['error'] is None and abs(sample['time']-chapter['start'])<.5;case['chapterSeeks'].append(sample)
++            sample=video.evaluate('v=>{v.pause();return {time:v.currentTime,paused:v.paused,error:v.error?.message??null,readyState:v.readyState}}');sample.update(id=chapter['id'],expected=chapter['start']);assert sample['paused'] and sample['error'] is None and abs(sample['time']-chapter['start'])<.5;case['chapterSeeks'].append(sample)
+         video.evaluate('v=>v.textTracks[0].mode="showing"');page.wait_for_function('()=>document.querySelector("#player video").textTracks[0].cues?.length===26')
+         cues=video.evaluate('v=>({count:v.textTracks[0].cues.length,lastEnd:v.textTracks[0].cues[v.textTracks[0].cues.length-1].endTime})');case['nativeCaptions']=cues
++        phase['name']='first-reference-seek'
+         frame=meta['referenceAppendix']['from'];fps=sb['meta']['fps'];assert frame==sb['meta']['durationInFrames'] and cues['lastEnd']<frame/fps
+         pause=page.evaluate(FIRST_CARD,{'time':frame/fps,'frame':frame,'fps':fps});assert pause['paused'] and pause['paintedFrame']==frame and not pause['activeCues'] and pause['error'] is None;case['firstReferencePause']=pause
+         video.hover();card_path=out/(name+'-references-first.png');video.screenshot(path=str(card_path));case['screenshots'].append({'path':str(card_path.relative_to(ROOT)),'sha256':sha(card_path)})
+         case['dimensions']=page.evaluate('({viewport:innerWidth,document:document.documentElement.scrollWidth})');assert case['dimensions']['document']<=viewport['width']
+-        assert not case['pageErrors'] and not case['consoleErrors'] and not case['requestFailures']
++        current=video.evaluate('v=>({error:v.error?.message??null,readyState:v.readyState,time:v.currentTime})')
++        assert current['error'] is None and current['readyState']>=2
++        case['mediaWitnesses'].append({'type':'painted-first-reference-screenshot','atEpochMS':time.time()*1000,'paintedFrame':pause['paintedFrame'],**current})
++        case['nativeMediaEvents']=page.evaluate('window.__qaMediaEvents')
++        case['classifiedMediaCancellations']=[];case['unexpectedRequestFailures']=[]
++        for failed in case['requestFailures']:
++            witnesses=[w for w in case['mediaWitnesses'] if w['atEpochMS']>failed['failedAtEpochMS'] and w.get('error') is None and w.get('readyState',0)>=2]
++            exact_media=(failed['url']==URL+meta['video'] and failed['resourceType']=='media' and failed['failure']=='net::ERR_ABORTED' and bool(failed.get('range')))
++            active_seek=failed['failedPhase'] in ['chapter-goal','chapter-write','chapter-query','chapter-boundary','first-reference-seek']
++            metadata_close=(failed['failedPhase'] in ['navigation','short-playback'] and state['preload']=='metadata' and any(e['type']=='loadedmetadata' and e['error'] is None for e in case['nativeMediaEvents']) and any(e['type']=='suspend' and e['preload']=='metadata' and e['error'] is None for e in case['nativeMediaEvents']))
++            if exact_media and witnesses and (active_seek or metadata_close):
++                failed.update(classification='expected-browser-managed-media-read-cancellation',reason='Old Range read cancelled during active seek' if active_seek else 'Initial preload=metadata read ended after metadata became available',subsequentSuccessfulWitness=witnesses[0])
++                case['classifiedMediaCancellations'].append(failed)
++            else:
++                failed['classification']='unexpected-failure';case['unexpectedRequestFailures'].append(failed)
++        case['observedMediaCancellationCount']=len(case['classifiedMediaCancellations'])
++        case['networkObservationEndsBeforeIntentionalContextTeardown']=True
++        assert not case['pageErrors'] and not case['consoleErrors'] and not case['unexpectedRequestFailures'],case['unexpectedRequestFailures']
+         case['status']='passed'
+     except Exception as exc:
+         case.update(status='failed',error=repr(exc),traceback=traceback.format_exc())
+-    finally:context.close()
++    finally:
++        page.remove_listener('request',on_request);page.remove_listener('requestfailed',on_failed);context.close()
+     return case
+ 
+ 
+@@ -119,7 +148,7 @@
+         'transport':{'explicitInheritedSessionProxy':True,'tlsVerificationEnabled':True,'ignoreHTTPSErrors':False,'customCacheHeaders':False,'cacheBusting':False,'automaticRetryCount':0,'configuredCAEnvironmentPresent':True,'policyAllowsPagesHost':True},
+         'environment':{'python':shutil.which('python3'),'playwright':importlib.metadata.version('playwright'),'chromium':shutil.which('chromium')},
+         'script':{'path':__file__,'sha256':sha(__file__)},'productionManifestSHA256':sha(D/'source-sha256.json'),'viewports':[]}
+-    path=D/'qa-online-browser.json';out=D/'qa-online-browser-evidence';out.mkdir(exist_ok=True)
++    path=D/'qa-online-browser.json';out=D/'qa-online-browser-evidence-v2';out.mkdir(exist_ok=True)
+     if path.exists():
+         archive=D/'qa-revisions/online-browser';archive.mkdir(parents=True,exist_ok=True);saved=archive/('previous-'+datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')+'.json');shutil.copyfile(path,saved);report['previousReportArchived']=str(saved.relative_to(ROOT))
+     def save():path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')

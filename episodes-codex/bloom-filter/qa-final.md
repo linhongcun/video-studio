@@ -1,6 +1,6 @@
 # 布隆过滤器最终检查
 
-本地制作、实际成片与站点验收通过；正式合并、Release、部署和线上核验按release.md及publication-evidence.json补齐，不以本记录预记成功。
+本地制作、实际成片、网站与正式线上验收均已完成；PR#340合并、v0.71.0 Release、Release后Pages成功。10项canonical内容身份与两视口正式播放检查通过，issue#300已completed关闭。实际证据见release.md及publication-evidence.json。
 
 - **媒体身份：**5891帧/196.3666667秒/1920×1080/30fps，SHA-256 `5b95e463dc5d95e7666de2c6fdf1c4c482bcdb6ca47faec835b040b917307143`，10,312,433字节；正文5741帧，资料150帧。
 - **资料与教学：**两项片尾原题/连续原文及四份官方固定正文已独立重取核验；13镜26句叙事/前置复核，模型140668项断言通过。见qa-source-independent、qa-script-independent、qa-model。
