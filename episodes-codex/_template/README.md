@@ -22,11 +22,11 @@
 4. 用共享 `episodes/_shared/voice/` 的 prep、gen、build 等真实脚本生成冰糖配音、比较候选并保留 picks。按本期组装脚本写入真实句级区间，使用共享起音与 `place_v2.py --mode whole`；public/audio/voice.wav 是实体副本。ASR或听辨未执行时如实记录，不把字符兼容包络当作逐字识别，也不伪造共享自检结果。
 5. 完成预检与独立动态复核，停止写入后冻结实际输入（含选中takes、共享实现、全部渲染源码，以及下述资料清单/证据/渲染入口）。在编码前后只读核对同一份清单，不把视频或生成的附录回执当作编码前输入冻结。
 6. 按下面的默认入口接通 `npm run render`：资料预检 → 正文及代码卡 → 参考资料 → 最终媒体。完成完整解码、媒体指标、实际编码中间态及跨镜接续复核，另外实际查看所有资料页和原生播放器的暂停/全屏效果。记录执行者、具体范围和能力边界。
-7. 将检查通过的同一份媒体、来源清单和附录回执接入站点，按实际渲染结果写入发布元数据；执行 `npm --prefix site run check:references`。新制作或重制的公开视频缺资料附录时，构建会阻止发布。文章章节、字幕及线上完整SHA仍按 [publish.md](../../docs/publish.md) 核验；平台授权范围保持原约定。
+7. 将检查通过的同一份媒体、来源清单和附录回执接入站点，按实际渲染结果写入发布元数据；执行 `npm --prefix site run check:references` 和 `npm --prefix site run check:articles`，实际复核引用支持关系、图片信息价值、手机/桌面阅读、回看和原图入口。新制作或重制的公开视频缺资料附录时，构建会阻止发布。文章章节、字幕及线上完整SHA仍按 [publish.md](../../docs/publish.md) 核验；平台授权范围保持原约定。
 
 ## 配套图文起稿与接入
 
-从 [article.mdx](article.mdx) 复制骨架，按 [图文写作说明](../../docs/article-style.md) 替换所有占位内容。调研时核对原文、位置和对应论点，文稿中放置 `SourceQuote`；最终媒体生成后再选择实际关键帧，补 `Figure` 与准确时间，不把尚未生成的图记为已验收。至少一处核心原文与一幅有效配图，发布前运行 `npm --prefix site run check:articles` 并实际复核阅读和回看操作。文章独有来源可存 `article-sources.json`，随发布稿和 `article/` 图片、证据一起接入 `episodes/<slug>/`。
+从 [article.mdx](article.mdx) 复制骨架，按 [图文写作说明](../../docs/article-style.md) 替换所有占位内容。调研时核对原文、位置和对应论点，文稿中放置 `SourceQuote`；编码前按已定分镜时序写好并启用 `Figure` 图位（路径、预定秒数、章节、图注和alt），随文章、已有文章独有来源和实读证据一起冻结；最终媒体生成后只生成并核验截图，不把尚未生成的图记为已验收。实际选图需改时间或文稿时，保留冻结制作稿，只做记录前后SHA及差异的站点发布派生稿；新增来源、证据和图片也记录各自SHA。至少一处核心原文与一幅有效配图，发布前运行 `npm --prefix site run check:articles` 并实际复核阅读和回看操作。文章独有来源可存 `article-sources.json`，随发布稿和 `article/` 图片、证据一起接入 `episodes/<slug>/`。
 
 ## 新期默认接入参考资料
 
@@ -59,6 +59,14 @@ for source in json.loads((D / 'references.json').read_text())['sources']:
     files.append(ROOT / source['titleEvidence']['evidence'])
     if source.get('quotation'):
         files.append(ROOT / source['quotation']['evidence'])
+article_sources = D / 'article-sources.json'
+if article_sources.exists():
+    files.append(article_sources)
+    for source in json.loads(article_sources.read_text())['sources']:
+        files.append(ROOT / source['verification']['evidence'])
+        files.append(ROOT / source['quotation']['evidence'])
+        if source.get('titleEvidence'):
+            files.append(ROOT / source['titleEvidence']['evidence'])
 ```
 
 `remotion/package.json` 也须冻结。按本期真实冻结器写入清单，停止写入后再从本期 `remotion/` 执行 `npm run render`。入口会在正文开始前检查资料与冻结，在正文后调用 `append_references_bibliography.py`；它通过保留的两个旧追加器完成媒体操作，不修改旧文件字节，也不重写原旁白、分镜或 `words.json`。Python依赖先按 `_shared/requirements-reference-appendix.txt` 安装。新模式每页最多4项、默认5秒，原题和署名溢出会报COPYFIT，不能靠截断、缩写题名或杜撰作者过关。当前追加器用于已有16:9、至少1280×720的H.264/AAC恒定帧率工程，其他格式另做适配与检查。
@@ -68,6 +76,7 @@ for source in json.loads((D / 'references.json').read_text())['sources']:
 ```sh
 python3 episodes-codex/_shared/render_with_references.py episodes-codex/your-episode --verify
 npm --prefix site run check:references
+npm --prefix site run check:articles
 ```
 
 发布检查只证明录入资料与输出身份一致，不代替原文审读或实际审片。存量豁免名单只保护引入流程时仍未补齐、媒体字节未变的旧片；新片或旧片后续重制都要带齐参考资料。
