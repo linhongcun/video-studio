@@ -2,7 +2,7 @@
 
 IT小村工作室的互联网开发技术与算法科普短视频项目。一条主线讲清楚一个问题，画面不用比喻。视频用代码生成（[Remotion](https://www.remotion.dev/)），每期配一篇图文文章。
 
-做片的人从 [AGENTS.md](AGENTS.md) 进入，规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
+做片的人从 [AGENTS.md](AGENTS.md) 进入，规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。手册、经验、策划和历史记录统一从[文档索引](docs/README.md)查找。
 
 - 线上站点：https://linhongcun.github.io/video-studio/
 - 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。不发快手，不发 X。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
@@ -12,7 +12,7 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 
 ## 已上线剧集
 
-剧集信息来自各期的 `episodes/<slug>/meta.json`。当前制作入口由 `sourcePath` 指向 `episodes-codex/`；EP.01–21 已完成重制，完整版本记录见 [Releases](https://github.com/linhongcun/video-studio/releases) 和 [制作记忆](docs/production-memory.md)。已下架的隔离级别旧片和被替代工程已从工作树清理，仍可通过 Git 历史恢复，详见 [清理记录](docs/repository-cleanup.md)。
+剧集信息来自各期的 `episodes/<slug>/meta.json`。当前制作入口由 `sourcePath` 指向 `episodes-codex/`；EP.01–21 已完成重制，完整版本记录见 [Releases](https://github.com/linhongcun/video-studio/releases) 和 [制作记忆](docs/production-memory.md)。已下架的隔离级别旧片和被替代工程已从工作树清理，仍可通过 Git 历史恢复，详见 [清理记录](docs/archive/2026-10/repository-cleanup.md)。
 
 GitHub 主干、Release 和站点沿用用户持续授权，完成制作与检查后自主发布；平台新发另行授权。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
 
@@ -74,7 +74,8 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 ```
 AGENTS.md                   项目入口
-docs/                      规范、制作手册、经验与检查记录
+docs/                      规范、手册、经验与现行策划；入口 README.md
+   archive/                 已完成记录与保留原路径的历史证据索引
 episodes-codex/
    <slug>/                  当前制作工程，以 meta.json.sourcePath 为准
      remotion/              动画、逐期封面与渲染命令
@@ -88,7 +89,7 @@ episodes/
 site/                      Astro 站点（GitHub Pages）
 ```
 
-发布目录不另存旧动画工程、WAV 或 PNG 原稿；幕后源码链接由 `meta.json.sourcePath` 指向制作工程。用户已要求删除A01/EP.22与A02/EP.28两期Agent试片，相关发布内容与制作工程退出当前目录；原`agent-intro-v2/`拼接依赖不再保留。旧工程可通过Git历史追溯，当前范围与发布验证见[撤下记录](docs/agent-video-retirement.md)。后续概念研究题库继续保留。
+发布目录不另存旧动画工程、WAV 或 PNG 原稿；幕后源码链接由 `meta.json.sourcePath` 指向制作工程。用户已要求删除A01/EP.22与A02/EP.28两期Agent试片，相关发布内容与制作工程退出当前目录；原`agent-intro-v2/`拼接依赖不再保留。旧工程可通过Git历史追溯，当前范围与发布验证见[撤下记录](docs/archive/2026-10/agent-video-retirement.md)。后续概念研究题库继续保留。
 
 ## 本地开发与渲染
 
