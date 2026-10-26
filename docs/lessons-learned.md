@@ -200,6 +200,8 @@
 
 - **整数毫秒边界的后续缺口（2026-10-25）：**LC.46原生字幕在精确182.100秒仍激活末句，+0.000001秒才退出；仅floor不能保证整数毫秒时严格早于卡首。保留失败矩阵与精确诊断后，唯一附录结束边界改为`ceil(卡首毫秒)-1`，其余结束戳与文字不动。45份VTT前后证明只影响LC.46、LC.70、LC.206各一个末cue（-1ms），其他42份全文SHA不变；三片双视口精确首卡/+.0001均0cue，旧两片各一次桌面短检也通过，视频/声音/431冻结输入保持。见[边界证据](leetcode-batch-next/site-qa/vtt-boundary-audit.json)与[旧片定验](leetcode-batch-next/site-qa/retained-card-boundaries.json)。不为站点序列化重编码电影，不用容差接受暂停卡字幕残留。
 
+- **整数帧换算的浮点回归（2026-10-26）：**第五批索引片的3924/30秒先除再乘1000产生130800.00000000001，原`ceil-1`仍输出130.800，未避开资料首帧。将换算改为先用整数帧乘1000再除fps；7项真实函数回归及47份VTT对照中，仅该片末cue改为130.799，其余46份字节不变，文字和起点也保持。视频不重编码，见[实际边界修正](reference-endcards/batch-5/vtt-boundary-correction.json)。
+
 - **Java附录的识别缺口（D02主线修订，2026-10-25）：**同一结束边界策略只读取unvoicedEndCard，漏掉设计模式的javaEndCard。新observer首卡4292/30=143.066666秒，普通序列化会把末cue写成143.067；补上Java元数据回退后写143.066。复用实际buildVtt运行时，45目录对比仅3个现有Java片末边界变1ms，其余42份字节不变；新冻结20cue fixture仅末终点调整，6输入场景与后续真实build/123项静态核验通过。没有本环境浏览器native cue观察，不把严格时间关系的计算写成浏览器实测。见[边界报告](../episodes-codex/observer-pattern/qa-observer-first-vtt-boundary.json)。
 
 ## L021 过程讲对了，观众仍不知道这期要回答什么
@@ -327,6 +329,8 @@
 - **LC.46文章编译的同类边界（2026-10-25）：**来源/代码一致性与章节锚点检查通过后，第一次真实Astro构建仍因生成稿`<!-- SOLUTION:... -->`HTML注释失败；目标MDX需要JSX注释。仅把两个不可见标记转换为MDX注释，保留原稿/精确diff/proof，讲解、Python和已编码媒体不改。三篇按实际MDX编译器静态编译及后续真实build通过；总计3次build中另一次因原生字幕边界被阻断，不把失败擦掉或写成一次成功。新文章应在配音/冻结或网站接入前，用当前站点编译器检查章节与语法，文本核对不能代替目标编译。证据见[派生链](leetcode-batch-next/derived-articles/)及[原失败](leetcode-batch-next/site-qa/attempt-1-build-failed/)。
 
 - **EA01网页的重复边界（2026-10-25）：**制作文章中的原生SVG采用React式fontSize/textAnchor/strokeWidth，MDX能解析、SVG数量检查也通过，但实际浏览器仍按16px/起始对齐/1px描边绘制；手机figure默认横向边距还把图压为270px。真实DOM和PNG拦截后，在站点AST仅对SVG JSX属性规范命名，移除原生figure横向默认边距；修后24px/居中/14px接管弧及350px手机图实测通过，策略/适配器旧图回归不变。冻结文稿和媒体未改，见本期qa-site-svg-before/after与qa-site-existing-svg记录。解析成功不等于浏览器遵守了写入的图形属性。
+
+- **参考链接写法的后续缺口（2026-10-26）：**新增资料段中的`<https://...>`被MDX视为JSX，导致第五批事务页构建失败。引用链接统一用`[说明](URL)`；本轮仅修四个新链接并重新冻结、构建，原地址、正文和视频保持，见[修正记录](reference-endcards/batch-5/mdx-link-correction.json)。
 
 ## L036 同形数据卡让数据库身份只能靠读字
 

@@ -13,3 +13,10 @@
 | R7 | [§17.7.5 Deadlocks](https://dev.mysql.com/doc/refman/8.4/en/innodb-deadlocks.html) | 多事务互等可能死锁，应处理失败重试、缩短事务和统一访问次序 | 仅文章，不在主线加入多锁支线 |
 
 库存1、商品7042、请求甲乙是教学设计，无吞吐、等待时长或性能实测。错误流程允许程序忽略相同值写回未实际改变行数，并在未重新核验库存时错误放行；SQL没有报错不等于业务购买成功。这是针对程序流程的推演，不是实际银行或商城故障结论，也不声称已运行真实MySQL并发压测。加锁读取后的库存判断是程序责任，不能把锁当成库存业务约束。没有先来先得/FIFO或无饥饿承诺。
+
+
+## 片尾书目整理（2026-10-26，复用既有实读记录）
+
+本轮只整理片尾title-author书目，选取Locking Reads, InnoDB Locking两项核心资料；不新增官方正文读取结论，也不将原R3简写Locks Set用作完整题名。上方2026-10-24访问日期、全部原研究内容和已有资料编号原字节保留。
+
+原实读记录固定于[本批基线research.md](https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-lock/research.md)；Git blob为`aad662403e90f4315e8df99c38e355512a2c6b17`，完整SHA-256为`ea0fae457b9084490c2b0370ac90b0448698d98ec7f857a836cb8a11402db590`。该链接是既有实读记录，不是MySQL官网正文的固定副本。两项原记录行、完整原研究上下文和适用边界存入`docs/reference-endcards/batch-5/sources-db-lock.json`，供独立复核。

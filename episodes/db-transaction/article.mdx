@@ -76,3 +76,43 @@ related: ["db-index", "db-lock"]
 [^read]: §17.7.2.3《Consistent Nonlocking Reads》：https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html
 [^isolation]: §17.7.2.1《Transaction Isolation Levels》：https://dev.mysql.com/doc/refman/8.4/en/innodb-transaction-isolation-levels.html
 [^acid]: §17.2《InnoDB and the ACID Model》：https://dev.mysql.com/doc/refman/8.4/en/mysql-acid.html
+
+## 片尾参考资料
+
+片尾精选以下四篇实际用于本片主线的 MySQL 官方手册，访问日期均为 **2026-10-24（北京时间）**。本轮沿用当时的正文阅读记录；其他拓展资料与上方七条脚注继续保留。
+
+**[R1] autocommit, Commit, and Rollback**
+
+- 机构：Oracle · MySQL
+- 版本：MySQL 8.4 Reference Manual
+- 正式链接：[正式文档](https://dev.mysql.com/doc/refman/8.4/en/innodb-autocommit-commit-rollback.html)
+- [既有实读记录（2026-10-24）](https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-transaction/research.md#L5-L13)：本仓阅读记录，非官方固定正文。
+
+支持的主张：默认自动提交时，每个成功语句各自形成事务；显式开始事务后，可以把多条修改一起提交或回滚。
+
+**[R2] START TRANSACTION, COMMIT, and ROLLBACK Statements**
+
+- 机构：Oracle · MySQL
+- 版本：MySQL 8.4 Reference Manual
+- 正式链接：[正式文档](https://dev.mysql.com/doc/refman/8.4/en/commit.html)
+- [既有实读记录（2026-10-24）](https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-transaction/research.md#L15-L23)：本仓阅读记录，非官方固定正文。
+
+支持的主张：提交确认当前事务的更改；回滚取消当前事务的更改。已经完成独立提交的第一条修改，不会因之后另一条修改失败而被直接撤销。
+
+**[R3] InnoDB Recovery**
+
+- 机构：Oracle · MySQL
+- 版本：MySQL 8.4 Reference Manual
+- 正式链接：[正式文档](https://dev.mysql.com/doc/refman/8.4/en/innodb-recovery.html)
+- [既有实读记录（2026-10-24）](https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-transaction/research.md#L25-L33)：本仓阅读记录，非官方固定正文。
+
+支持的主张：服务端意外退出后，正常重启时会执行崩溃恢复，回滚崩溃时未提交的事务。
+
+**[R4] InnoDB Error Handling**
+
+- 机构：Oracle · MySQL
+- 版本：MySQL 8.4 Reference Manual
+- 正式链接：[正式文档](https://dev.mysql.com/doc/refman/8.4/en/innodb-error-handling.html)
+- [既有实读记录（2026-10-24）](https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-transaction/research.md#L35-L43)：本仓阅读记录，非官方固定正文。
+
+支持的主张：部分错误只撤销出错语句，有些错误会撤销整笔事务。不能把任意失败都画成无条件自动整笔回滚。
