@@ -1,0 +1,266 @@
+{
+  "schemaVersion": 1,
+  "episode": "global-id",
+  "heading": "参考资料",
+  "presentation": "title-author",
+  "checkedAt": "2026-10-25",
+  "timezone": "Asia/Shanghai",
+  "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "IETF",
+      "title": "Universally Unique IDentifiers (UUIDs)",
+      "version": "RFC 9562 · May 2024",
+      "url": "https://www.rfc-editor.org/rfc/rfc9562.html",
+      "supports": [
+        "随机UUIDv4支持节点本地生成，但依赖可靠随机源，碰撞风险低不等于绝对不碰撞。",
+        "UUIDv4缺少时间排序造成数据库索引局部性问题；UUIDv7时间字段和排序目的不能扩为严格的跨机器业务全序。"
+      ],
+      "sections": "§2.1；§5.4；§5.7；§6.4、§6.8—6.11",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "method": "技术主张沿用基线research.md明确记录于2026-10-25的官方正文/代码实读；本轮整理不冒充新技术全文读取。 2026-10-26另实际GET固定IETF官方书目记录，仅补完整原题和显式作者，不声称重读RFC正文。",
+        "sourceId": "global-id-R1",
+        "sourceUrl": "https://www.rfc-editor.org/rfc/rfc9562.html",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "provenanceMode": "reuse-previous-actual-reading-record",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L12",
+        "recordBaseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+        "recordGitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "recordSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+        "newTechnicalBodyReadPerformed": false,
+        "titleAndBylineCheckedAt": "2026-10-26T16:49:09.693893+08:00",
+        "titleAndBylineSourceUrl": "https://raw.githubusercontent.com/ietf-tools/relaton-data-rfcs/04b9eaa000f02f4a35d08c8e17ee3b3d00faf523/data/RFC9562.yaml"
+      },
+      "titleEvidence": {
+        "locator": "IETF-tools固定RFC9562.yaml line 5；IETF-ribose固定rfc9562.xml line 3（本轮仅题名/署名）",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json"
+      },
+      "author": "K. Davis, B. Peabody, P. Leach"
+    },
+    {
+      "id": "R2",
+      "organization": "Oracle / MySQL",
+      "title": "Clustered and Secondary Indexes",
+      "version": "MySQL 8.4 Reference Manual",
+      "url": "https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html",
+      "supports": [
+        "InnoDB主键通常就是存放行数据的聚簇索引，二级索引也携带主键。",
+        "随机UUIDv4直接作主键的页局部性讨论限定于本片InnoDB语境。"
+      ],
+      "sections": "§17.6.2.1 · 既有实读正文371—382行",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "method": "技术主张沿用基线research.md明确记录于2026-10-25的官方正文/代码实读；本轮整理不冒充新技术全文读取。",
+        "sourceId": "global-id-R2",
+        "sourceUrl": "https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "provenanceMode": "reuse-previous-actual-reading-record",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L16",
+        "recordBaseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+        "recordGitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "recordSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+        "newTechnicalBodyReadPerformed": false
+      },
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R10 · line 16",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json"
+      }
+    },
+    {
+      "id": "R3",
+      "organization": "Oracle / MySQL",
+      "title": "The Physical Structure of an InnoDB Index",
+      "version": "MySQL 8.4 Reference Manual",
+      "url": "https://dev.mysql.com/doc/refman/8.4/en/innodb-physical-structure.html",
+      "supports": [
+        "除空间索引外，InnoDB索引采用B-tree；顺序和随机插入的索引页利用情况不同。",
+        "结合UUIDv4非顺序落点和原有fill-factor补充来源，说明空间不足时可能页分裂与额外维护。"
+      ],
+      "sections": "§17.6.2.2 · 既有实读正文370—374行；原记录另列Glossary fill factor",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "method": "技术主张沿用基线research.md明确记录于2026-10-25的官方正文/代码实读；本轮整理不冒充新技术全文读取。",
+        "sourceId": "global-id-R3",
+        "sourceUrl": "https://dev.mysql.com/doc/refman/8.4/en/innodb-physical-structure.html",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "provenanceMode": "reuse-previous-actual-reading-record",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L17",
+        "recordBaseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+        "recordGitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "recordSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+        "newTechnicalBodyReadPerformed": false
+      },
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R11 · line 17",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json"
+      }
+    },
+    {
+      "id": "R4",
+      "organization": "Redis",
+      "title": "INCR",
+      "version": "Redis command documentation · 实读2026-10-25",
+      "url": "https://redis.io/docs/latest/commands/incr/",
+      "supports": [
+        "同一key整数值原子加一，key不存在时从0初始化。",
+        "多节点共享同一计数器可集中取号；原子递增的运行区间和异步复制故障后的状态保留是不同条件。"
+      ],
+      "sections": "命令说明；Pattern: counter",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "method": "技术主张沿用基线research.md明确记录于2026-10-25的官方正文/代码实读；本轮整理不冒充新技术全文读取。",
+        "sourceId": "global-id-R4",
+        "sourceUrl": "https://redis.io/docs/latest/commands/incr/",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "provenanceMode": "reuse-previous-actual-reading-record",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L13",
+        "recordBaseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+        "recordGitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "recordSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+        "newTechnicalBodyReadPerformed": false
+      },
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R7 · line 13",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json"
+      }
+    },
+    {
+      "id": "R5",
+      "organization": "Redis",
+      "title": "Redis replication",
+      "version": "Redis replication documentation · 实读2026-10-25",
+      "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/replication/",
+      "supports": [
+        "默认异步复制下故障转移可能丢失已经确认的写入，旧主已返回计数可能尚未到副本。",
+        "WAIT可降低部分风险，但不能据此把Redis变为强一致CP系统或推出INCR跨故障唯一。"
+      ],
+      "sections": "异步复制；故障转移丢写；WAIT一致性边界",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "method": "技术主张沿用基线research.md明确记录于2026-10-25的官方正文/代码实读；本轮整理不冒充新技术全文读取。",
+        "sourceId": "global-id-R5",
+        "sourceUrl": "https://redis.io/docs/latest/operate/oss_and_stack/management/replication/",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "provenanceMode": "reuse-previous-actual-reading-record",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L15",
+        "recordBaseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+        "recordGitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "recordSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+        "newTechnicalBodyReadPerformed": false
+      },
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R9 · line 15",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json"
+      }
+    },
+    {
+      "id": "R6",
+      "organization": "Redis",
+      "title": "High availability with Redis Sentinel",
+      "version": "Redis Sentinel documentation · 实读2026-10-25",
+      "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/",
+      "supports": [
+        "副本可在故障后提升为主，默认异步复制仍可丢失已确认的写入，旧主可被新主状态覆盖。",
+        "落后副本接管共同计数器后，计数状态可能回退而重复发号。"
+      ],
+      "sections": "既有实读正文102—103、139、852—862行；本轮仅补官方源title行12",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "method": "技术主张沿用基线research.md明确记录于2026-10-25的官方正文/代码实读；本轮整理不冒充新技术全文读取。 2026-10-26另实际GET官方redis/docs固定文件，检查frontmatter补全原题；不将旧标签Redis Sentinel冒充完整题名。",
+        "sourceId": "global-id-R6",
+        "sourceUrl": "https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "provenanceMode": "reuse-previous-actual-reading-record",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L19",
+        "recordBaseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+        "recordGitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "recordSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+        "newTechnicalBodyReadPerformed": false,
+        "titleCheckedAt": "2026-10-26T16:50:02.838707+08:00",
+        "titleSourceUrl": "https://raw.githubusercontent.com/redis/docs/d1b865f6dd93274757e28dad7fb02d4ccd7d39d4/content/operate/oss_and_stack/management/sentinel.md"
+      },
+      "titleEvidence": {
+        "locator": "Redis官方仓库固定sentinel.md frontmatter · line 12（本轮补完整原题）",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json"
+      }
+    },
+    {
+      "id": "R7",
+      "organization": "Twitter",
+      "title": "IdWorker.scala",
+      "version": "snowflake-2010 · 2010—2012历史原始实现，仅参考",
+      "url": "https://github.com/twitter-archive/snowflake/blob/snowflake-2010/src/main/scala/com/twitter/service/snowflake/IdWorker.scala",
+      "supports": [
+        "历史原实现将时间、机房/worker身份、同毫秒序号放在不同位字段。",
+        "同毫秒序号用尽会等待下一毫秒，时钟回拨有拒绝生成分支；身份冲突会破坏不重复前提。"
+      ],
+      "sections": "源码中的datacenterId、workerId、sequence、nextId、tilNextMillis",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-24",
+        "method": "技术主张沿用基线research.md明确记录于2026-10-24的官方正文/代码实读；本轮整理不冒充新技术全文读取。",
+        "sourceId": "global-id-R7",
+        "sourceUrl": "https://github.com/twitter-archive/snowflake/blob/snowflake-2010/src/main/scala/com/twitter/service/snowflake/IdWorker.scala",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "provenanceMode": "reuse-previous-actual-reading-record",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L9",
+        "recordBaseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+        "recordGitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "recordSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+        "newTechnicalBodyReadPerformed": false
+      },
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R3 · line 9",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json"
+      },
+      "note": "仅参考：2010—2012历史原实现。"
+    },
+    {
+      "id": "R8",
+      "organization": "Apache ShardingSphere",
+      "title": "SnowflakeKeyGenerateAlgorithm.java",
+      "version": "Apache ShardingSphere master · 按2026-10-24实读内容",
+      "url": "https://github.com/apache/shardingsphere/blob/master/infra/algorithm/type/key-generator/type/snowflake/src/main/java/org/apache/shardingsphere/infra/algorithm/keygen/snowflake/SnowflakeKeyGenerateAlgorithm.java",
+      "supports": [
+        "现行ShardingSphere实现用于对照时间、worker及序号的整数位组合，而非拼接十进制文本。",
+        "机器身份、时钟处理与序号状态需按所用实现正确维护，不能只凭“用了雪花”宣称无条件不重复。"
+      ],
+      "sections": "当前实现的worker/sequence字段、时间处理、序号耗尽等待",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-24",
+        "method": "技术主张沿用基线research.md明确记录于2026-10-24的官方正文/代码实读；本轮整理不冒充新技术全文读取。",
+        "sourceId": "global-id-R8",
+        "sourceUrl": "https://github.com/apache/shardingsphere/blob/master/infra/algorithm/type/key-generator/type/snowflake/src/main/java/org/apache/shardingsphere/infra/algorithm/keygen/snowflake/SnowflakeKeyGenerateAlgorithm.java",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "provenanceMode": "reuse-previous-actual-reading-record",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L10",
+        "recordBaseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+        "recordGitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "recordSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+        "newTechnicalBodyReadPerformed": false
+      },
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R4 · line 10",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json"
+      }
+    }
+  ],
+  "scope": "8项为实际视频核心主线的精选资料，2页，每页最多4项5秒。屏幕仅原题和明确作者/机构。技术主张实读日期沿用2026-10-24/25；RFC题名/署名及Sentinel完整题名的2026-10-26补证另记，未将书目或标题读取冒充技术正文重读。旧文章/研究全部脚注与来源保留。"
+}

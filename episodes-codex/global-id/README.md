@@ -47,3 +47,14 @@
 实际长编号均在sample-data.ts中用BigInt运算并转字符串，不能先转Number。最终全片渲染使用共享锁：flock /tmp/video-studio-render.lock -c 'npm run render > /tmp/ep20-render.log 2>&1'。
 
 配乐：Kevin MacLeod《Wallpaper》，CC BY 4.0，沿用共享混音，目标−16 LUFS。按用户的持续授权，由主任务统一接入站点、合并、发布并核验，完成后关闭对应issue；本目录制作代理不单独操作Git。
+
+
+## 第6批资料名单与当前冻结入口
+
+本批只为已验收的tradeoffs完整原片追加`title-author`名单，不重做UUID/Redis/雪花正文、配音或拼接。根已将Git发布原片保存为`revisions/reference-endcards/body.mp4`及同SHA的`remotion/out/body.mp4`；基线、原200项清单和修前文稿/freezer/package分别存档。引用完整原题名与真实作者/机构，每页最多4项、默认5秒，技术主张沿用本片2026-10-24/25实际实读记录；2026-10-26补查的RFC题名/署名和Sentinel完整题名另记范围，不冒充技术正文重读。
+
+现有freeze.py的profile、完整时序SHA、WAV样本数、逐镜/字幕/配音位置校验全部保留。当前只验证已装配的storyboard.<sha>.json与placeholder字节相同，不再重写它们；不运行assemble-methods、TTS、render-methods或正文渲染。旧200项按article/research/freezer/package四份before快照映射及其他原路径独立核对，原methods/tradeoffs历史输入不回滚。
+
+资料作者停写、`npm run check:references`通过后，运行`freeze.py --profile tradeoffs`及`freeze.py --verify --profile tradeoffs`；新清单保留原200个key，并登记当前名单、实际wrapper/三个渲染器、发布检查器和引用证据，包括3份逐字节保存的题名/署名原文件。新清单声明当前入口/附录输入，不能据此声称原MP4已按新引用重现。
+
+默认render现经bibliography wrapper；render:body严格保留本期原voice→mix闭环及并发参数，mix输出到out/body.mp4后追加名单。根本批直接消费不可变body执行新卡和完整帧/PTS/AAC/PCM保真检查，接齐当前交付回执/总帧数后再发布；不重复fullwrapper解码。`npm run verify:references`是后续完整交付验证入口。实际进度见[第6批记录](../../docs/reference-endcards/batch-6/README.md)，不预记新版名单或线上验证通过。

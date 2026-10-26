@@ -15,3 +15,14 @@
 动态检查在remotion目录：node scripts/motion-qa.mjs /tmp/ep18-motion --shots=05,07,09,10,12 --flow=09-11。该模式关闭字幕和声音；正式输出默认保留字幕和配音。
 
 配乐：Kevin MacLeod《Wallpaper》，CC BY 4.0，沿用共享混音脚本，目标−16 LUFS。
+
+
+## 第6批资料名单：当前入口与原片保留
+
+本批仅追加`title-author`名单：完整原题名与真实作者/机构，每页最多4条、默认5秒。根已将原Git发布整片保存为`revisions/reference-endcards/body.mp4`，`remotion/out/body.mp4`为同SHA副本；基线、旧30项记录、修前package/文稿及发布身份均归档，不回写旧证据。既有MySQL身份组件、SVG、许可和legacy包装器保留。
+
+本期原工程没有独立freeze.py。新增薄入口先核对归档旧记录，旧package使用before快照映射，再登记当前名单和默认渲染实际输入；旧窄记录不被扩展为“原MP4可按新清单重现”的承诺。freeze不运行assemble/TTS、复制SB或改写words/placeholder。来源资料由独立作者整理本片既有真实实读记录，不在此入口补造新GET、技术事实或署名。
+
+资料停写且`npm run check:references`通过后，从本期目录执行`python3 freeze.py`和`python3 freeze.py --verify`。默认`npm run render`经现行bibliography wrapper，原voice→mix及并发参数保持，只将正文混音输出改为out/body.mp4再追加名单；本批不执行正文构建或重混音，由根消费不可变原片追加并做实际全帧/PTS/AAC/PCM比较。
+
+根级回执、实际总帧数和`render-result.json.publicationMetadata`接齐后可执行`npm run verify:references`；本批只做sourcegate、只读freeze和wrapper.verify_freeze，不重复完整媒体解码。原脚本、声音、字幕、场景、主体程序和既有文章/研究前缀保持。实际状态及范围见[第6批记录](../../docs/reference-endcards/batch-6/README.md)，不预记新卡或线上核验完成。

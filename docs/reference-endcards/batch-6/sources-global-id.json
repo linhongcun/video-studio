@@ -1,0 +1,481 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-6",
+  "episode": "global-id",
+  "presentation": "title-author",
+  "baselineCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+  "organizedAt": "2026-10-26T16:52:28.340248+08:00",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex appendix_implementation source organizer",
+  "scope": "Eight selected core official sources for the actual UUIDv4/InnoDB, Redis counter+failover, and Snowflake video. Preserve original technical-read dates and all original article/research bytes; selected list is not an exhaustive replacement for the old footnotes.",
+  "sourceReadMode": "reuse-previous-actual-reading-record-with-explicit-title-only-supplement",
+  "recordedOfficialAccessDates": [
+    "2026-10-24",
+    "2026-10-25"
+  ],
+  "newGETPerformed": true,
+  "newTechnicalBodyReadPerformed": false,
+  "newGETScope": "Only title/byline bibliographic supplement for RFC9562 and original title supplement for Redis Sentinel. Three successful GETs of pinned official repository resources, stored byte-exact with SHA256. Canonical RFC Editor/MySQL/Redis hosts absent from current enforced allowlist: no canonical GET attempted and no bypass. GitHub API discovery 404s were not source evidence.",
+  "networkPolicy": {
+    "mode": "restricted",
+    "state": "enforced",
+    "observationsCurrent": true,
+    "allowedSourceHostsUsed": [
+      "api.github.com",
+      "raw.githubusercontent.com"
+    ],
+    "canonicalHostAccessStatus": "not-attempted-not-in-allowlist"
+  },
+  "baselineResearch": {
+    "path": "episodes-codex/global-id/research.md",
+    "baseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+    "gitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+    "sha256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+    "bytes": 8097,
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md",
+    "recordedAccessDates": [
+      "2026-10-24",
+      "2026-10-25"
+    ],
+    "fullOriginalRecord": "# EP.20 权威资料核验\n\n访问日期：R1—R5为2026-10-24，R6—R13为本轮2026-10-25（北京时间）。已实际打开下列官方正文与原始代码，不以issue、旧稿或搜索摘要代替事实来源。\n\n| ID | 来源 | 核验结论与范围 |\n|---|---|---|\n| R1 | [MySQL 8.4 §5.6.9 Using AUTO_INCREMENT](https://dev.mysql.com/doc/refman/8.4/en/example-auto-increment.html) | 官方示例用AUTO_INCREMENT配合PRIMARY KEY，为本表新记录生成编号；不能据此推断独立表之间全局不重。 |\n| R2 | [Apache ShardingSphere 当前Key Generate Algorithm](https://shardingsphere.apache.org/document/current/en/user-manual/common-config/builtin-algorithm/keygen/) | 分片后不同实际表彼此不感知，本地自增会有重复风险；SNOWFLAKE要求唯一worker-id，有时间差处理参数。 |\n| R3 | [Twitter原始IdWorker.scala](https://github.com/twitter-archive/snowflake/blob/snowflake-2010/src/main/scala/com/twitter/service/snowflake/IdWorker.scala) | 2010—2012原实现，仅参考历史原理：机房和worker各5位、sequence12位，时间位在上方；同毫秒序号增加，用尽等下一毫秒；回拨拒绝生成。不是现行产品配置默认值。 |\n| R4 | [Apache ShardingSphere现行SnowflakeKeyGenerateAlgorithm.java](https://github.com/apache/shardingsphere/blob/master/infra/algorithm/type/key-generator/type/snowflake/src/main/java/org/apache/shardingsphere/infra/algorithm/keygen/snowflake/SnowflakeKeyGenerateAlgorithm.java) | 核验当前实现的机器/序号字段、时间处理与序号耗尽等待；原理并非随意拼十进制文本。master内容会变，本文按本次访问内容说明。 |\n| R5 | [MDN Number.MAX_SAFE_INTEGER](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/MAX_SAFE_INTEGER)与[BigInt](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt) | Number安全整数范围有限；大整数用BigInt计算、toString显示，不能先损失精度再转BigInt，JSON应按约定用字符串等方式承载。 |\n| R6 | [RFC 9562（2024）§2.1](https://www.rfc-editor.org/rfc/rfc9562.html#section-2.1)、[§5.4 UUIDv4](https://www.rfc-editor.org/rfc/rfc9562.html#section-5.4)、[§5.7 UUIDv7](https://www.rfc-editor.org/rfc/rfc9562.html#section-5.7)、[§6.4](https://www.rfc-editor.org/rfc/rfc9562.html#section-6.4)、[§6.8—6.11](https://www.rfc-editor.org/rfc/rfc9562.html#section-6.8) | 2026-10-25实际读取正文：§5.4明确UUIDv4随机生成；§2.1说明非时间有序UUIDv4的数据库索引局部性较差，连续新值会落到不同索引位置；§5.7与§6.11说明UUIDv7的时间有序字段和排序/局部性目的。§6.4、6.8—6.9保留独立生成、碰撞风险与可靠随机源边界。不把所有UUID都说成随机、不递增或严格全局有序，不报没有测量依据的性能倍数。 |\n| R7 | [Redis INCR](https://redis.io/docs/latest/commands/incr/) | 2026-10-25实际读取命令说明及“Pattern: counter”：对同一key的整数值原子加一，key不存在时从0初始化。以多个节点共享同一计数器解释集中发号；不推断多个独立计数器自动互斥，也不承诺没有跳号或故障后永不重复。 |\n| R8 | [Redis persistence](https://redis.io/docs/latest/operate/oss_and_stack/management/persistence/) | 2026-10-25实际读取持久化方式和RDB/AOF优缺点：RDB保存时间点快照，AOF记录写操作；不同策略有不同的数据丢失窗口。用于说明恢复旧状态可能导致计数回退；不将“开启持久化”写成零丢失保证，不在本片展开配置教学。 |\n| R9 | [Redis replication](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/) | 2026-10-25实际读取复制及故障转移正文：默认异步复制，故障转移仍可能丢失已确认写入；WAIT降低风险但不会把系统变成强一致的CP系统。用于限定Redis集中发号的恢复边界，不能只凭INCR原子性推出跨故障唯一。 |\n| R10 | [MySQL 8.4 §17.6.2.1 Clustered and Secondary Indexes](https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html) | 2026-10-25实际读取正文371—382行：InnoDB主键通常就是存放行数据的聚簇索引；二级索引记录也携带主键。用于限定随机UUIDv4直接作为InnoDB主键的讨论，不能泛化为所有MySQL存储引擎或索引失效。 |\n| R11 | [MySQL 8.4 §17.6.2.2 The Physical Structure of an InnoDB Index](https://dev.mysql.com/doc/refman/8.4/en/innodb-physical-structure.html)、[Glossary：fill factor](https://dev.mysql.com/doc/refman/8.4/en/glossary.html#glos_fill_factor) | 2026-10-25实际读取物理结构370—374行与词汇表998—1000行：除空间索引外采用B-tree；顺序与随机插入的索引页利用情况不同，fill factor定义涉及页分裂前的空间占用及维护开销。结合R6随机落点说明页维护代价；动画页空间不足时可能分裂为机制教学示意，不是每条插入必然分裂或真实磁盘布局实测。 |\n| R12 | [MySQL 8.4 §10.5.5 Bulk Data Loading for InnoDB Tables](https://dev.mysql.com/doc/refman/8.4/en/optimizing-innodb-bulk-data-loading.html) | 2026-10-25实际读取445行：批量按PRIMARY KEY顺序插入更快，尤其在表不能全部容纳于缓冲池时。用于支持主键顺序与写入局部性的关系，不把批量加载建议扩成任何负载下固定性能结论。 |\n| R13 | [Redis Sentinel](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/) | 2026-10-25实际读取102—103、139、852—862行：副本可在故障后被提升，异步复制下已确认写入仍可能丢失，旧主数据会被新主状态覆盖。用于说明落后副本切换后计数回退与重复发号。可靠预留号段、停号/隔离旧主和越过安全上界属于本文根据风险推导的设计条件，不声称Sentinel自动跳号或固定加N即可安全。 |\n\n## 本轮方案范围与叙事修订\n\n用户指出，上来先说“雪花只是一种”很突兀，要求依次讲UUID、Redis再详细讲雪花，并补每种方法的取舍。本轮取消该开场，先说明随机UUIDv4的本地生成和不递增对InnoDB主键插入位置的影响，再说明Redis共同计数器、异步复制与切换回退，最后自然进入雪花三字段。\n\nRedis演示沿用1001/1002：旧主已返回两个号码、副本只保留1000，提升后若直接INCR就会重发1001。另一种事先可靠预留号段的治理方案，假设已在旧主使用1001—1200前可靠、原子地预留上界1200；先停号、隔离旧主，放弃整个旧号段后从1201继续。可靠记录必须不会随本次故障回退，恢复和再次预留必须互斥；不能在事故后凭空选1200，不能只看已落库记录而漏掉已发未落库号码，无法确认边界则暂停核对。这是安全条件的教学推导，不是Redis默认功能或一组已被实测验证的生产配置。\n\n随机UUIDv4的非递增性质不延伸为所有UUID；UUIDv7在文章给出时间有序边界。各方案收益与成本在逐项讲述后的回顾表并列，不把任何方案写成普遍优于其他方案。\n\n## 教学数字\n\n本地自增示例41→42为虚构订单数据。字段示例使用相对毫秒4000000000、生成器编号7或9、序号0或1；按 `(相对毫秒 << 22) | (生成器编号 << 12) | 序号` 的整数规则组合。示意生成器编号概括原版机房号与机器号，总共10位，并非某个实际部署的身份。数值均在对应字段范围内；实际实现的纪元、分配与恢复策略必须统一。\n\nUUID示例和索引页分布为教学示意；Redis计数器、1001/1002及预留上界1200、下一号1201均为教学数字，不代表默认配置、自动故障切换行为或真实事故。\n\n片中不讲各段位数、不提供吞吐实测或无条件安全承诺；重启、身份复用、时钟回拨、序号耗尽都需要实现正确处理。没有宣称所有节点生成顺序等于业务发生顺序，也没有将ID当作安全令牌。\n",
+    "evidenceLimit": "Frozen Git record preserves actual prior-reading statement and original technical context; not an archived official HTTP body and not a new read. Upstream old body hashes/commits were not recorded and are not invented."
+  },
+  "titleOnlySupplements": [
+    {
+      "repository": "ietf-tools/relaton-data-rfcs",
+      "path": "data/RFC9562.yaml",
+      "commit": "04b9eaa000f02f4a35d08c8e17ee3b3d00faf523",
+      "url": "https://raw.githubusercontent.com/ietf-tools/relaton-data-rfcs/04b9eaa000f02f4a35d08c8e17ee3b3d00faf523/data/RFC9562.yaml",
+      "fixedSourceUrl": "https://github.com/ietf-tools/relaton-data-rfcs/blob/04b9eaa000f02f4a35d08c8e17ee3b3d00faf523/data/RFC9562.yaml",
+      "finalUrl": "https://raw.githubusercontent.com/ietf-tools/relaton-data-rfcs/04b9eaa000f02f4a35d08c8e17ee3b3d00faf523/data/RFC9562.yaml",
+      "status": 200,
+      "checkedAt": "2026-10-26T16:49:09.693893+08:00",
+      "bytes": 3180,
+      "sha256": "3e6529450ad90b67d48c3a5e0ec688ad3c18334a44582d2146a008bc8262590e",
+      "savedPath": "docs/reference-endcards/batch-6/global-id-title-evidence/rfc9562-ietf-tools.yaml",
+      "readScope": "Title/byline bibliographic metadata only; no RFC technical-body reread.",
+      "titleExcerpt": {
+        "startLine": 5,
+        "endLine": 5,
+        "text": "- content: Universally Unique IDentifiers (UUIDs)"
+      }
+    },
+    {
+      "repository": "ietf-ribose/bibxml-data-rfcs",
+      "path": "data/rfc9562.xml",
+      "commit": "f88785aa1cdbd3696a00c7d11fd603a26cdd56cf",
+      "url": "https://raw.githubusercontent.com/ietf-ribose/bibxml-data-rfcs/f88785aa1cdbd3696a00c7d11fd603a26cdd56cf/data/rfc9562.xml",
+      "fixedSourceUrl": "https://github.com/ietf-ribose/bibxml-data-rfcs/blob/f88785aa1cdbd3696a00c7d11fd603a26cdd56cf/data/rfc9562.xml",
+      "finalUrl": "https://raw.githubusercontent.com/ietf-ribose/bibxml-data-rfcs/f88785aa1cdbd3696a00c7d11fd603a26cdd56cf/data/rfc9562.xml",
+      "status": 200,
+      "checkedAt": "2026-10-26T16:49:10.645416+08:00",
+      "bytes": 1568,
+      "sha256": "84532252cfd5d60423acef7d4e33362ba4ac36d0debc142dc81b0fcd101ab4c1",
+      "savedPath": "docs/reference-endcards/batch-6/global-id-title-evidence/rfc9562-ietf-ribose.xml",
+      "readScope": "Title/byline bibliographic metadata only; no RFC technical-body reread.",
+      "titleExcerpt": {
+        "startLine": 3,
+        "endLine": 3,
+        "text": "    <title>Universally Unique IDentifiers (UUIDs)</title>"
+      }
+    },
+    {
+      "repository": "redis/docs",
+      "path": "content/operate/oss_and_stack/management/sentinel.md",
+      "commit": "d1b865f6dd93274757e28dad7fb02d4ccd7d39d4",
+      "url": "https://raw.githubusercontent.com/redis/docs/d1b865f6dd93274757e28dad7fb02d4ccd7d39d4/content/operate/oss_and_stack/management/sentinel.md",
+      "fixedSourceUrl": "https://github.com/redis/docs/blob/d1b865f6dd93274757e28dad7fb02d4ccd7d39d4/content/operate/oss_and_stack/management/sentinel.md",
+      "status": 200,
+      "finalUrl": "https://raw.githubusercontent.com/redis/docs/d1b865f6dd93274757e28dad7fb02d4ccd7d39d4/content/operate/oss_and_stack/management/sentinel.md",
+      "checkedAt": "2026-10-26T16:50:02.838707+08:00",
+      "bytes": 76506,
+      "sha256": "f7e6f36748075be7d3072219b2724c6f9161b2a47e4041ec09f81198c22a5bad",
+      "savedPath": "docs/reference-endcards/batch-6/global-id-title-evidence/sentinel-redis-docs.md",
+      "readScope": "Full official repository file downloaded and stored; this pass inspected its frontmatter title only. Prior technical reading remains 2026-10-25.",
+      "titleExcerpt": {
+        "startLine": 12,
+        "endLine": 12,
+        "text": "title: High availability with Redis Sentinel"
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "R1",
+      "baselineResearchId": "R6",
+      "organization": "IETF",
+      "title": "Universally Unique IDentifiers (UUIDs)",
+      "author": "K. Davis, B. Peabody, P. Leach",
+      "version": "RFC 9562 · May 2024",
+      "canonicalUrl": "https://www.rfc-editor.org/rfc/rfc9562.html",
+      "sections": "§2.1；§5.4；§5.7；§6.4、§6.8—6.11",
+      "recordedAccessDate": "2026-10-25",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "newTechnicalBodyReadPerformed": false,
+      "newCanonicalGETPerformed": false,
+      "officialCanonicalBodySHA256": null,
+      "titleEvidence": {
+        "locator": "IETF-tools固定RFC9562.yaml line 5；IETF-ribose固定rfc9562.xml line 3（本轮仅题名/署名）",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "originalTitle": "Universally Unique IDentifiers (UUIDs)",
+        "scope": "Fresh official bibliographic title/byline record only; technical support remains old actual-reading record."
+      },
+      "authorshipEvidence": {
+        "sourceRecords": [
+          "docs/reference-endcards/batch-6/global-id-title-evidence/rfc9562-ietf-tools.yaml",
+          "docs/reference-endcards/batch-6/global-id-title-evidence/rfc9562-ietf-ribose.xml"
+        ],
+        "explicitByline": [
+          "K. Davis",
+          "B. Peabody",
+          "P. Leach"
+        ],
+        "scope": "Explicit author metadata, not git committers."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L12",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/global-id/research.md",
+        "gitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "fileSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "startLine": 12,
+        "endLine": 12,
+        "text": "| R6 | [RFC 9562（2024）§2.1](https://www.rfc-editor.org/rfc/rfc9562.html#section-2.1)、[§5.4 UUIDv4](https://www.rfc-editor.org/rfc/rfc9562.html#section-5.4)、[§5.7 UUIDv7](https://www.rfc-editor.org/rfc/rfc9562.html#section-5.7)、[§6.4](https://www.rfc-editor.org/rfc/rfc9562.html#section-6.4)、[§6.8—6.11](https://www.rfc-editor.org/rfc/rfc9562.html#section-6.8) | 2026-10-25实际读取正文：§5.4明确UUIDv4随机生成；§2.1说明非时间有序UUIDv4的数据库索引局部性较差，连续新值会落到不同索引位置；§5.7与§6.11说明UUIDv7的时间有序字段和排序/局部性目的。§6.4、6.8—6.9保留独立生成、碰撞风险与可靠随机源边界。不把所有UUID都说成随机、不递增或严格全局有序，不报没有测量依据的性能倍数。 |"
+      },
+      "supports": [
+        "随机UUIDv4支持节点本地生成，但依赖可靠随机源，碰撞风险低不等于绝对不碰撞。",
+        "UUIDv4缺少时间排序造成数据库索引局部性问题；UUIDv7时间字段和排序目的不能扩为严格的跨机器业务全序。"
+      ],
+      "limitations": [
+        "讨论随机、不递增限于UUIDv4，不扩展到所有UUID。",
+        "不提供统一性能倍数或跨节点严格业务先后承诺。"
+      ]
+    },
+    {
+      "id": "R2",
+      "baselineResearchId": "R10",
+      "organization": "Oracle / MySQL",
+      "title": "Clustered and Secondary Indexes",
+      "author": null,
+      "version": "MySQL 8.4 Reference Manual",
+      "canonicalUrl": "https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html",
+      "sections": "§17.6.2.1 · 既有实读正文371—382行",
+      "recordedAccessDate": "2026-10-25",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "newTechnicalBodyReadPerformed": false,
+      "newCanonicalGETPerformed": false,
+      "officialCanonicalBodySHA256": null,
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R10 · line 16",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "originalTitle": "Clustered and Secondary Indexes",
+        "scope": "Actual section heading, command name or source filename preserved in the old actual-reading record. No title expansion or translation."
+      },
+      "authorshipEvidence": {
+        "organization": "Oracle / MySQL",
+        "basis": "Official documentation publisher / project identity as named in the unchanged baseline source URL and actual-reading record. No personal author is inferred from commits."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L16",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/global-id/research.md",
+        "gitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "fileSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "startLine": 16,
+        "endLine": 16,
+        "text": "| R10 | [MySQL 8.4 §17.6.2.1 Clustered and Secondary Indexes](https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html) | 2026-10-25实际读取正文371—382行：InnoDB主键通常就是存放行数据的聚簇索引；二级索引记录也携带主键。用于限定随机UUIDv4直接作为InnoDB主键的讨论，不能泛化为所有MySQL存储引擎或索引失效。 |"
+      },
+      "supports": [
+        "InnoDB主键通常就是存放行数据的聚簇索引，二级索引也携带主键。",
+        "随机UUIDv4直接作主键的页局部性讨论限定于本片InnoDB语境。"
+      ],
+      "limitations": [
+        "不泛化为所有MySQL存储引擎，不称随机主键导致索引失效。"
+      ]
+    },
+    {
+      "id": "R3",
+      "baselineResearchId": "R11",
+      "organization": "Oracle / MySQL",
+      "title": "The Physical Structure of an InnoDB Index",
+      "author": null,
+      "version": "MySQL 8.4 Reference Manual",
+      "canonicalUrl": "https://dev.mysql.com/doc/refman/8.4/en/innodb-physical-structure.html",
+      "sections": "§17.6.2.2 · 既有实读正文370—374行；原记录另列Glossary fill factor",
+      "recordedAccessDate": "2026-10-25",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "newTechnicalBodyReadPerformed": false,
+      "newCanonicalGETPerformed": false,
+      "officialCanonicalBodySHA256": null,
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R11 · line 17",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "originalTitle": "The Physical Structure of an InnoDB Index",
+        "scope": "Actual section heading, command name or source filename preserved in the old actual-reading record. No title expansion or translation."
+      },
+      "authorshipEvidence": {
+        "organization": "Oracle / MySQL",
+        "basis": "Official documentation publisher / project identity as named in the unchanged baseline source URL and actual-reading record. No personal author is inferred from commits."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L17",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/global-id/research.md",
+        "gitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "fileSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "startLine": 17,
+        "endLine": 17,
+        "text": "| R11 | [MySQL 8.4 §17.6.2.2 The Physical Structure of an InnoDB Index](https://dev.mysql.com/doc/refman/8.4/en/innodb-physical-structure.html)、[Glossary：fill factor](https://dev.mysql.com/doc/refman/8.4/en/glossary.html#glos_fill_factor) | 2026-10-25实际读取物理结构370—374行与词汇表998—1000行：除空间索引外采用B-tree；顺序与随机插入的索引页利用情况不同，fill factor定义涉及页分裂前的空间占用及维护开销。结合R6随机落点说明页维护代价；动画页空间不足时可能分裂为机制教学示意，不是每条插入必然分裂或真实磁盘布局实测。 |"
+      },
+      "supports": [
+        "除空间索引外，InnoDB索引采用B-tree；顺序和随机插入的索引页利用情况不同。",
+        "结合UUIDv4非顺序落点和原有fill-factor补充来源，说明空间不足时可能页分裂与额外维护。"
+      ],
+      "limitations": [
+        "动画为机制教学示意，不是磁盘布局实测，不说每次插入都页分裂。",
+        "原文章的Glossary、Bulk Data Loading等独立脚注仍保留，未冒充本条标题。"
+      ]
+    },
+    {
+      "id": "R4",
+      "baselineResearchId": "R7",
+      "organization": "Redis",
+      "title": "INCR",
+      "author": null,
+      "version": "Redis command documentation · 实读2026-10-25",
+      "canonicalUrl": "https://redis.io/docs/latest/commands/incr/",
+      "sections": "命令说明；Pattern: counter",
+      "recordedAccessDate": "2026-10-25",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "newTechnicalBodyReadPerformed": false,
+      "newCanonicalGETPerformed": false,
+      "officialCanonicalBodySHA256": null,
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R7 · line 13",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "originalTitle": "INCR",
+        "scope": "Actual section heading, command name or source filename preserved in the old actual-reading record. No title expansion or translation."
+      },
+      "authorshipEvidence": {
+        "organization": "Redis",
+        "basis": "Official documentation publisher / project identity as named in the unchanged baseline source URL and actual-reading record. No personal author is inferred from commits."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L13",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/global-id/research.md",
+        "gitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "fileSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "startLine": 13,
+        "endLine": 13,
+        "text": "| R7 | [Redis INCR](https://redis.io/docs/latest/commands/incr/) | 2026-10-25实际读取命令说明及“Pattern: counter”：对同一key的整数值原子加一，key不存在时从0初始化。以多个节点共享同一计数器解释集中发号；不推断多个独立计数器自动互斥，也不承诺没有跳号或故障后永不重复。 |"
+      },
+      "supports": [
+        "同一key整数值原子加一，key不存在时从0初始化。",
+        "多节点共享同一计数器可集中取号；原子递增的运行区间和异步复制故障后的状态保留是不同条件。"
+      ],
+      "limitations": [
+        "不承诺独立计数器自动互斥、绝不跳号或故障后永不重复。",
+        "计数器不得被不当重置、过期或与其他业务复用。"
+      ]
+    },
+    {
+      "id": "R5",
+      "baselineResearchId": "R9",
+      "organization": "Redis",
+      "title": "Redis replication",
+      "author": null,
+      "version": "Redis replication documentation · 实读2026-10-25",
+      "canonicalUrl": "https://redis.io/docs/latest/operate/oss_and_stack/management/replication/",
+      "sections": "异步复制；故障转移丢写；WAIT一致性边界",
+      "recordedAccessDate": "2026-10-25",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "newTechnicalBodyReadPerformed": false,
+      "newCanonicalGETPerformed": false,
+      "officialCanonicalBodySHA256": null,
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R9 · line 15",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "originalTitle": "Redis replication",
+        "scope": "Actual section heading, command name or source filename preserved in the old actual-reading record. No title expansion or translation."
+      },
+      "authorshipEvidence": {
+        "organization": "Redis",
+        "basis": "Official documentation publisher / project identity as named in the unchanged baseline source URL and actual-reading record. No personal author is inferred from commits."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L15",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/global-id/research.md",
+        "gitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "fileSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "startLine": 15,
+        "endLine": 15,
+        "text": "| R9 | [Redis replication](https://redis.io/docs/latest/operate/oss_and_stack/management/replication/) | 2026-10-25实际读取复制及故障转移正文：默认异步复制，故障转移仍可能丢失已确认写入；WAIT降低风险但不会把系统变成强一致的CP系统。用于限定Redis集中发号的恢复边界，不能只凭INCR原子性推出跨故障唯一。 |"
+      },
+      "supports": [
+        "默认异步复制下故障转移可能丢失已经确认的写入，旧主已返回计数可能尚未到副本。",
+        "WAIT可降低部分风险，但不能据此把Redis变为强一致CP系统或推出INCR跨故障唯一。"
+      ],
+      "limitations": [
+        "可靠预留号段及切换跳号是本文根据风险推导的设计条件，不是Redis复制自动提供的功能或保证。"
+      ]
+    },
+    {
+      "id": "R6",
+      "baselineResearchId": "R13",
+      "organization": "Redis",
+      "title": "High availability with Redis Sentinel",
+      "author": null,
+      "version": "Redis Sentinel documentation · 实读2026-10-25",
+      "canonicalUrl": "https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/",
+      "sections": "既有实读正文102—103、139、852—862行；本轮仅补官方源title行12",
+      "recordedAccessDate": "2026-10-25",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "newTechnicalBodyReadPerformed": false,
+      "newCanonicalGETPerformed": false,
+      "officialCanonicalBodySHA256": null,
+      "titleEvidence": {
+        "locator": "Redis官方仓库固定sentinel.md frontmatter · line 12（本轮补完整原题）",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "originalTitle": "High availability with Redis Sentinel",
+        "scope": "Fresh official repository frontmatter title only; technical support remains old actual-reading record."
+      },
+      "authorshipEvidence": {
+        "organization": "Redis",
+        "basis": "Official documentation publisher / project identity as named in the unchanged baseline source URL and actual-reading record. No personal author is inferred from commits."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L19",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/global-id/research.md",
+        "gitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "fileSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "startLine": 19,
+        "endLine": 19,
+        "text": "| R13 | [Redis Sentinel](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/) | 2026-10-25实际读取102—103、139、852—862行：副本可在故障后被提升，异步复制下已确认写入仍可能丢失，旧主数据会被新主状态覆盖。用于说明落后副本切换后计数回退与重复发号。可靠预留号段、停号/隔离旧主和越过安全上界属于本文根据风险推导的设计条件，不声称Sentinel自动跳号或固定加N即可安全。 |"
+      },
+      "supports": [
+        "副本可在故障后提升为主，默认异步复制仍可丢失已确认的写入，旧主可被新主状态覆盖。",
+        "落后副本接管共同计数器后，计数状态可能回退而重复发号。"
+      ],
+      "limitations": [
+        "1001—1200号段必须在使用前由独立可靠记录原子预留；隔离旧主、恢复与重新预留互斥，无法确认边界就停号。",
+        "这些号段安全条件是教学推导，不声称Sentinel自动跳号、固定加N或只看落库ID就能安全。"
+      ]
+    },
+    {
+      "id": "R7",
+      "baselineResearchId": "R3",
+      "organization": "Twitter",
+      "title": "IdWorker.scala",
+      "author": null,
+      "version": "snowflake-2010 · 2010—2012历史原始实现，仅参考",
+      "canonicalUrl": "https://github.com/twitter-archive/snowflake/blob/snowflake-2010/src/main/scala/com/twitter/service/snowflake/IdWorker.scala",
+      "sections": "源码中的datacenterId、workerId、sequence、nextId、tilNextMillis",
+      "recordedAccessDate": "2026-10-24",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "newTechnicalBodyReadPerformed": false,
+      "newCanonicalGETPerformed": false,
+      "officialCanonicalBodySHA256": null,
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R3 · line 9",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "originalTitle": "IdWorker.scala",
+        "scope": "Actual section heading, command name or source filename preserved in the old actual-reading record. No title expansion or translation."
+      },
+      "authorshipEvidence": {
+        "organization": "Twitter",
+        "basis": "Official documentation publisher / project identity as named in the unchanged baseline source URL and actual-reading record. No personal author is inferred from commits."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L9",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/global-id/research.md",
+        "gitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "fileSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "startLine": 9,
+        "endLine": 9,
+        "text": "| R3 | [Twitter原始IdWorker.scala](https://github.com/twitter-archive/snowflake/blob/snowflake-2010/src/main/scala/com/twitter/service/snowflake/IdWorker.scala) | 2010—2012原实现，仅参考历史原理：机房和worker各5位、sequence12位，时间位在上方；同毫秒序号增加，用尽等下一毫秒；回拨拒绝生成。不是现行产品配置默认值。 |"
+      },
+      "supports": [
+        "历史原实现将时间、机房/worker身份、同毫秒序号放在不同位字段。",
+        "同毫秒序号用尽会等待下一毫秒，时钟回拨有拒绝生成分支；身份冲突会破坏不重复前提。"
+      ],
+      "limitations": [
+        "2010—2012历史原始实现仅参考，不作为现行产品默认值或当前部署指南。",
+        "片中的10位生成器身份概括历史机房与worker组合，不把两个进程共用身份当作不同生成器。"
+      ]
+    },
+    {
+      "id": "R8",
+      "baselineResearchId": "R4",
+      "organization": "Apache ShardingSphere",
+      "title": "SnowflakeKeyGenerateAlgorithm.java",
+      "author": null,
+      "version": "Apache ShardingSphere master · 按2026-10-24实读内容",
+      "canonicalUrl": "https://github.com/apache/shardingsphere/blob/master/infra/algorithm/type/key-generator/type/snowflake/src/main/java/org/apache/shardingsphere/infra/algorithm/keygen/snowflake/SnowflakeKeyGenerateAlgorithm.java",
+      "sections": "当前实现的worker/sequence字段、时间处理、序号耗尽等待",
+      "recordedAccessDate": "2026-10-24",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "newTechnicalBodyReadPerformed": false,
+      "newCanonicalGETPerformed": false,
+      "officialCanonicalBodySHA256": null,
+      "titleEvidence": {
+        "locator": "基线278f69a7 research.md R4 · line 10",
+        "evidence": "docs/reference-endcards/batch-6/sources-global-id.json",
+        "originalTitle": "SnowflakeKeyGenerateAlgorithm.java",
+        "scope": "Actual section heading, command name or source filename preserved in the old actual-reading record. No title expansion or translation."
+      },
+      "authorshipEvidence": {
+        "organization": "Apache ShardingSphere",
+        "basis": "Official documentation publisher / project identity as named in the unchanged baseline source URL and actual-reading record. No personal author is inferred from commits."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/global-id/research.md#L10",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/global-id/research.md",
+        "gitBlobSHA1": "a424fd10e55813281e6c8ae38b11e1481dc1c222",
+        "fileSHA256": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+        "startLine": 10,
+        "endLine": 10,
+        "text": "| R4 | [Apache ShardingSphere现行SnowflakeKeyGenerateAlgorithm.java](https://github.com/apache/shardingsphere/blob/master/infra/algorithm/type/key-generator/type/snowflake/src/main/java/org/apache/shardingsphere/infra/algorithm/keygen/snowflake/SnowflakeKeyGenerateAlgorithm.java) | 核验当前实现的机器/序号字段、时间处理与序号耗尽等待；原理并非随意拼十进制文本。master内容会变，本文按本次访问内容说明。 |"
+      },
+      "supports": [
+        "现行ShardingSphere实现用于对照时间、worker及序号的整数位组合，而非拼接十进制文本。",
+        "机器身份、时钟处理与序号状态需按所用实现正确维护，不能只凭“用了雪花”宣称无条件不重复。"
+      ],
+      "limitations": [
+        "原始访问链接为可变master，本次只复用2026-10-24所记录的实际读取，不伪造该日未保存的上游commit或代码全文SHA。",
+        "当前配置说明Key Generate Algorithm仍保留旧脚注；本条源码不替代各版本部署配置核验。"
+      ]
+    }
+  ],
+  "preservedInputPrefixes": {
+    "productionArticleSHA256Before": "ab8b8f89fad81e4953ce656a9c9a6eb39b5685da44ef27f34ebb4e1ffd234c6f",
+    "productionResearchSHA256Before": "51f698626af14fe8a51b9e31f5d1b80c4a0d719867f446122e43f90d5003ee37",
+    "publishedArticleSHA256Before": "ab8b8f89fad81e4953ce656a9c9a6eb39b5685da44ef27f34ebb4e1ffd234c6f"
+  },
+  "selectedSourceCount": 8,
+  "layout": {
+    "maxItemsPerPage": 4,
+    "secondsPerPage": 5,
+    "expectedPages": 2
+  },
+  "scopeBoundaries": [
+    "UUIDv4/InnoDB only; no universal UUID randomness, inevitable page split, measured throughput or strict global business ordering.",
+    "Redis INCR atomicity does not imply failover uniqueness. Reliable pre-reserved range, durable independent highwater, fencing old primary and mutually exclusive recovery are conditional teaching derivation, not automatic Redis/Sentinel guarantees.",
+    "Historical Twitter implementation is reference-only; current ShardingSphere code is distinct and does not inherit historical defaults.",
+    "Original AUTO_INCREMENT, persistence, bulk loading, fill-factor, ShardingSphere configuration and MDN BigInt sources/footnotes remain byte-preserved, although not selected for the video list."
+  ],
+  "localVerification": {
+    "command": "node site/scripts/check-references.mjs --sources episodes-codex/global-id",
+    "result": "PASS; 8 selected sources",
+    "checkedAt": "2026-10-26T16:53:35.067489+08:00",
+    "entireOriginalArticlePrefixBytes": 11067,
+    "entireOriginalResearchPrefixBytes": 8097,
+    "originalPrefixesUnchanged": true,
+    "allTitleSupplementBytesAndSHA256Matched": true,
+    "titleExcerptLineNumbersMatched": true
+  }
+}
