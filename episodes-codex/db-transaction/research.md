@@ -74,3 +74,20 @@
 1000／500 的原始余额、200 的转账、800／700 的成功结果，以及 800／500 的半成状态，都是同一数据库内的虚构教学数据。它们不是银行真实接口、支付时效或故障概率；镜头时长也不是崩溃恢复耗时。没有真实机构、真实资金操作或跨行协议。
 
 本期可支持的结论：在正确使用事务的前提下，一笔事务中的扣款、入账共同提交或撤销；遇到演示的语句失败时应用请求整笔回滚；在演示的提交前进程崩溃场景中，恢复会撤销未提交事务。片中不推断现实“扣款后未到账”的唯一原因。
+
+## 片尾参考资料清单（2026-10-26整理，沿用2026-10-24访问）
+
+原片主线与事实未改。本轮从以上七篇既有官方正文实读记录中选R1–R4进入片尾，采用 `presentation: title-author`，只显示实际原题与机构 `Oracle · MySQL`，每页最多4项、默认5秒；没有明确个人署名，不填写author。四项分别覆盖多语句事务、提交/回滚、提交前进程崩溃恢复、不同错误回滚范围。
+
+既有完整研究基线：`76e9b36737063d109a866ff47c1dcf81ef46c638`，Git blob：`31cc8d38612f7bdca7a6a2c6445de3baf698f5a8`，SHA-256：`be16c916b6d25ff4341eb9ef30240fcc460d16888299888b60d43ebb808e9168`（5758字节）。[固定既有实读记录](https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-transaction/research.md)只是本仓研究记录，不是官方原文固定快照。本轮没有新GET，`verification.checkedAt`与清单核验日保留`2026-10-24`；未声称重新读取当前官方页面、核对新head或取得官方正文响应SHA。
+
+| 片尾编号 | 实际原题 | 版本 | 旧记录位置 |
+| --- | --- | --- | --- |
+| R1 | [autocommit, Commit, and Rollback](https://dev.mysql.com/doc/refman/8.4/en/innodb-autocommit-commit-rollback.html) | MySQL 8.4 Reference Manual | R1，第5–13行 |
+| R2 | [START TRANSACTION, COMMIT, and ROLLBACK Statements](https://dev.mysql.com/doc/refman/8.4/en/commit.html) | MySQL 8.4 Reference Manual | R2，第15–23行 |
+| R3 | [InnoDB Recovery](https://dev.mysql.com/doc/refman/8.4/en/innodb-recovery.html) | MySQL 8.4 Reference Manual | R3，第25–33行 |
+| R4 | [InnoDB Error Handling](https://dev.mysql.com/doc/refman/8.4/en/innodb-error-handling.html) | MySQL 8.4 Reference Manual | R4，第35–43行 |
+
+证据与原主张逐字记录见[`sources-db-transaction.json`](../../docs/reference-endcards/batch-5/sources-db-transaction.json)；完整标题/机构/链接同时记入`references.json`、`references.md`和文章末尾新增的“片尾参考资料”节。原研究全文、R5自身修改可见性、R6隔离级别、R7 ACID及其适用边界保留，不以片尾精选替代全部参考。
+
+本条只记录资料复用与清单生产；未执行冻结、媒体生成、声音复核、附录实际观看或发布，不预记用户认可。
