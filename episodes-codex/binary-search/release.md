@@ -25,3 +25,13 @@
 Release后手动[Pages部署40116314325](https://github.com/linhongcun/video-studio/actions/runs/40116314325)成功，实际head为c0c24e71，见deployment.json。2026-10-24T17:34:12Z实际HTTPS GET核验完整视频/海报SHA与字节、28句VTT、四章精确时间与文章锚点、源码入口、学习首页/资料库/系列/RSS及真实v0.56.0 Release条目通过，见online-verification.json。线上视频SHA为`9faef1baf76695937c252b0e56cebe7a06c12f252451d30aa1e721d11ee660ae`。
 
 制作issue #76已在上述核验后以completed关闭（UTC2026-10-24T17:35:04Z），见issue-completion.json。未向外部平台投稿；新片尚无用户观看反馈，技术/交付检查不写成学习效果测量。
+
+<!-- batch-9-publication-archive:start -->
+## 存量片尾参考资料第九批 · v0.72.5
+
+[PR #354](https://github.com/linhongcun/video-studio/pull/354)已合并，发布[v0.72.5](https://github.com/linhongcun/video-studio/releases/tag/v0.72.5)，[Pages 40323593612](https://github.com/linhongcun/video-studio/actions/runs/40323593612)成功；合并提交`dc3676793e08caffe2d281c62777a7acbc3f775c`。2026-10-26T20:40:16+08:00完成17项规范URL完整GET，四片完整MP4 SHA、海报、全文VTT、资料页、原章节/日期、更新日志及tag/Release/Pages身份通过。原存量累计33/47，全站含新增Redis为34/48有附录，分别记数。实际响应见online-verification.json；原议题#75/#76/#77/#81此前已关闭，未发现本批专属未关闭issue。
+
+本期新增3项原题与作者/机构、1页150帧5秒，追加在原5秒完整Python卡之后；原body 5209帧→最终5359帧，完整SHA256 `6267c805257c5e80ac933585b60d34421029e97183199668aa61e9d5067e3bed`。原首发/日期、完整讲解和音轨、solution.py/solution.json、代码卡区间及旧文章/研究/脚注保留。原源目录video.mp4缺失，以Git发布原片与保留render-result的完整SHA/帧数匹配作为唯一body依据。技术依据保留2026-10-25实际阅读；TwoSum的26日补查仅题名/出版者元数据，未读到的editorial不作为官方解法。未重制正文或重跑算法。
+
+批次证据：docs/reference-endcards/batch-9/{delivery.json,validation.json,qa-independent.json,qa-browser.json,online-verification.json}。
+<!-- batch-9-publication-archive:end -->

@@ -308,6 +308,8 @@
 
 - **LC.739中间产物边界补充（2026-10-26）：**本期编排遗漏共享拼接的显式输出参数，生成voice-approach.mp4，而保留的混音入口仍读取ignored旧voice.mp4。检查实际路径与帧数时拦截，未进入新片发布；保存原plan/freeze/log后，显式输出同一voice.mp4，重新冻结并跑默认正文/混音/附录，4881帧正文和5031帧最终回执一致。只复用已验收的两段新clip和配音，不为入口错误重录或重渲。同步最新源码不能证明ignored中间文件属于本轮；拼接输出、混音输入和实际媒体身份必须闭合，不能依赖同名文件存在。见[本轮拦截](../episodes-codex/daily-temperatures/revisions/problem-fit-mix-input-before/finding.json)。
 
+- **存量附录的历史输入边界（2026-10-26）：**第九批四期的原制作MP4未留存，旧618项声明中42项ignored拼接缓存已缺失。按原render-result完整SHA与帧数确认Git发布原片后，保留原清单和缺件key/SHA，明确576项现存验证与42项未验证；当前真实输入另冻结为642项。未伪造或恢复旧缓存。当前完整正文静态依赖无缺件，只证明入口依赖闭合，不冒称重渲复现旧片；本轮只用绑定原片追加资料，并实际比较全部原帧、PTS、AAC和PCM。历史记录保全、当前可验证输入及实际编码依赖应分别记录，见[本批入口审计](reference-endcards/batch-9/production-entry-check.json)与[独立核验](reference-endcards/batch-9/qa-independent.json)。
+
 ## L033 查找的数值与返回的下标必须分别映射
 
 - **案例：**LC.1批量制作预检前，源码审查发现命中结果`0`代表先前下标，却被同时传给按数值选择高亮行的表格；示例需要查询键`3`并读出下标`0`，两者都是数字，错误映射不会被TypeScript阻止。
