@@ -22,4 +22,6 @@
 - [保留核对](preservation.json)：48篇的原代码、锚点和旧链接保持；869项既有发布文件逐一比较，除47项 `updatedAt` 外无变化，包含全部原MP4、海报、分镜、资料及旧回执。制作冻结稿未修改，归档全文未修改。
 - [密钥检查](secret-scan.log)通过，`git diff --check` 通过。
 
-发布版本为 `v0.73.0`；实际PR、Release、Pages与线上核验身份在发布完成后记录。检查说明交付范围，不代表用户已观看认可。
+[PR #356](https://github.com/linhongcun/video-studio/pull/356) 已合并至 `c3666b42fe7e6ddcc01430d5d5d807dddcf5aa0e`，发布 [v0.73.0](https://github.com/linhongcun/video-studio/releases/tag/v0.73.0)，[Pages 40327319665](https://github.com/linhongcun/video-studio/actions/runs/40327319665) 成功。Release于13:03:48 UTC发布，成功构建任务于13:03:56 UTC开始，因此实际构建已读取Release；线上更新日志已确认包含此版本，取消了相同提交的冗余排队手动运行40327399053。完整身份见 [publication.json](publication.json)。
+
+2026-10-26T21:10:22.947449+08:00完成96项规范URL核验：47篇线上原文/出处/图片/回看时间/日期与当前构建一致，42张新增图片完整SHA一致，另核对3条原视频与海报的完整SHA、更新日志。详细响应摘要及范围见 [online-verification.json](online-verification.json)，脚本见 [verify-online.py](verify-online.py)。原视频未改变，本轮未重复全站成片解码或配音复核。检查说明实际交付范围，不代表用户已观看认可。
