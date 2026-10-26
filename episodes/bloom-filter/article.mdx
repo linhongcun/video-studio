@@ -1,183 +1,149 @@
 ---
 title: 布隆过滤器：为什么能确定不存在，却只能说可能存在？
-summary: 从不存在的商品编号也要查库出发，用同一份16位摘要演示写入、共享标记、遇零排除和全一误判，再讲清容量、删除及维护前提。
+summary: 从8个只记0或1的格子开始，用一次哈希讲清加入、碰撞、确定排除与可能存在，再用一个重建对照理解多个位置的作用和取舍。
 chapters:
-  - { id: goal, title: 为什么先排除不存在的查询 }
-  - { id: write, title: 同一编号怎样留下标记 }
-  - { id: query, title: 零与一为什么给出不同结论 }
-  - { id: boundary, title: 省下查询需要什么条件 }
-related: ["server-cache", "cache-consistency", "consistent-hashing"]
+  - { id: goal, title: 用标记判断是否加入过 }
+  - { id: write, title: 一次计算怎样留下标记 }
+  - { id: query, title: 为什么零与一结论不同 }
+  - { id: boundary, title: 共享标记的边界与取舍 }
+related: ["consistent-hashing"]
 ---
 
-## 为什么先排除不存在的查询 {#goal}
+## 用标记判断是否加入过 {#goal}
 
-一个商品目录当前只收录编号101和205。应用查001时，数据库仍要完成一次查询，最后才返回未收录。能否先用一份很小的标记，排除一部分肯定没有的编号？
+想判断一个元素有没有被加入过，最直接的办法是保存所有元素，再逐个或按索引查找。布隆过滤器换了一种取舍：**只留下很小的标记，不保存元素本身**。这样能判断到什么程度？[^redis]
 
-这里的目标只是判断**某个编号是否属于已收录集合**，不是读取商品名称、价格或库存。即使过滤器认为可能存在，实际商品内容仍由真实目录返回。Redis官方文档将这类结构用于紧凑的成员查询；Cassandra也利用它排除不含目标分区的SSTable文件，减少无用检查。[^redis][^cassandra]
+先用最简版本理解它：准备8个格子，每格只能保存0或1，开始全部为0。这一排格子就是**位数组**。
 
-先准备16个只能保存0或1的格子，开始全为0。这是一份**位数组**：
+- 格子外面的0到7是**位置编号**，也叫下标。
+- 格子里面的0或1是**位值**，表示这个位置是否被置位。
+- 位置编号不是元素编号。例如3号位并不对应一个名叫3的元素。
 
-- **下标**是格子的位置，本例从0到15，写在格子外。
-- **位值**是格子里的0或1，写在格子内。
-- 一个0不是在说某个同号商品不存在，它只表示这个位置尚未置位。
+主线只用一次位置计算。一个哈希位置也能构成基础Bloom；Guava的实际源码也允许每个元素只选一个位置，但这不表示所有产品都默认这样配置。[^guava]
 
-16位、三路计算和下面四个编号都是可复算的教学样例，不是Redis内部参数，也不用于估算线上误判率。
+## 一次计算怎样留下标记 {#write}
 
-## 同一编号怎样留下标记 {#write}
+哈希按固定规则，把元素算成一个位置。只要输入、编码和规则相同，同一个元素每次都会到相同位置；**不同元素也可能到同一格**。
 
-我们用固定的计算规则，把每个编号映射到三个下标。这个过程称为**哈希**。规则、编码和参数相同时，同一编号每次都落在相同位置；不同编号可能共享位置，不能把哈希理解成一定唯一的标识。
+本例中，元素A和B都算到3号位：
 
-画面上的101、205、001、067，在程序里分别对应字符串`sku101`、`sku205`、`sku001`、`sku067`。教学规则是：分别用seed 0、1、2，计算UTF-8字符串`seed:key`的SHA-256，取摘要前8字节作为big-endian非负整数，再对16取余。
-
-| 身份 | 程序输入 | 三个位置 | 是否先加入目录与过滤器 |
-|---|---|---|---|
-| 101 | `sku101` | 3、14、15 | 是 |
-| 205 | `sku205` | 0、3、12 | 是 |
-| 001 | `sku001` | 12、2、15 | 初始否 |
-| 067 | `sku067` | 14、0、15 | 否 |
-
-插入101时，只把3、14、15三个位置置为1；插入205时，把0、3、12置为1。3号位已经是1，就仍然保留1，**不会累加成2**。最终为1的位置是0、3、12、14、15，其余仍为0。
+1. 加入A时，把3号位从0改成1，其余位置不动。
+2. 加入B时，又来到3号位，发生了碰撞。这里已经是1，就仍然保留1，不能加成2。
 
 <figure>
-  <svg viewBox="0 0 640 280" role="img" aria-labelledby="bf-bits-title bf-bits-desc" style={{width: '100%', height: 'auto', display: 'block', background: '#0f172a', borderRadius: '16px'}}>
-    <title id="bf-bits-title">加入101和205后，16位数组中只有0、3、12、14、15为1</title>
-    <desc id="bf-bits-desc">为排版分为两行，第一行下标0到7，第二行8到15。3号位由两个编号共享，仍只保存一个1；其他置位来源为0和12来自205，14和15来自101。</desc>
+  <svg viewBox="0 0 640 220" role="img" aria-labelledby="bf-single-title bf-single-desc" style={{width: '100%', height: 'auto', display: 'block', background: '#0f172a', borderRadius: '16px'}}>
+    <title id="bf-single-title">加入A和B后，只有3号位为1</title>
+    <desc id="bf-single-desc">8个位置从0到7，只有下标3的格内为1。A和B共享这个标记，格子不保存元素内容或所有者。</desc>
     <g font-family="sans-serif" text-anchor="middle">
-      <text x="320" y="36" fill="#e2e8f0" font-size="24">同一份摘要：共享位置仍只保存0或1</text>
+      <text x="320" y="35" fill="#e2e8f0" font-size="25">加入A和B后，只有3号位为1</text>
       <g fill="#1e293b" stroke="#64748b" stroke-width="2">
-        <rect x="24" y="78" width="66" height="48" rx="8" fill="#064e3b" /><rect x="99" y="78" width="66" height="48" rx="8" /><rect x="174" y="78" width="66" height="48" rx="8" /><rect x="249" y="78" width="66" height="48" rx="8" fill="#713f12" /><rect x="324" y="78" width="66" height="48" rx="8" /><rect x="399" y="78" width="66" height="48" rx="8" /><rect x="474" y="78" width="66" height="48" rx="8" /><rect x="549" y="78" width="66" height="48" rx="8" />
-        <rect x="24" y="178" width="66" height="48" rx="8" /><rect x="99" y="178" width="66" height="48" rx="8" /><rect x="174" y="178" width="66" height="48" rx="8" /><rect x="249" y="178" width="66" height="48" rx="8" /><rect x="324" y="178" width="66" height="48" rx="8" fill="#064e3b" /><rect x="399" y="178" width="66" height="48" rx="8" /><rect x="474" y="178" width="66" height="48" rx="8" fill="#0c4a6e" /><rect x="549" y="178" width="66" height="48" rx="8" fill="#0c4a6e" />
+        <rect x="28" y="88" width="66" height="60" rx="9" /><rect x="102" y="88" width="66" height="60" rx="9" /><rect x="176" y="88" width="66" height="60" rx="9" /><rect x="250" y="88" width="66" height="60" rx="9" fill="#713f12" stroke="#fbbf24" /><rect x="324" y="88" width="66" height="60" rx="9" /><rect x="398" y="88" width="66" height="60" rx="9" /><rect x="472" y="88" width="66" height="60" rx="9" /><rect x="546" y="88" width="66" height="60" rx="9" />
       </g>
-      <g fill="#94a3b8" font-size="20"><text x="57" y="66">0</text><text x="132" y="66">1</text><text x="207" y="66">2</text><text x="282" y="66">3</text><text x="357" y="66">4</text><text x="432" y="66">5</text><text x="507" y="66">6</text><text x="582" y="66">7</text><text x="57" y="166">8</text><text x="132" y="166">9</text><text x="207" y="166">10</text><text x="282" y="166">11</text><text x="357" y="166">12</text><text x="432" y="166">13</text><text x="507" y="166">14</text><text x="582" y="166">15</text></g>
-      <g fill="#f8fafc" font-size="30"><text x="57" y="112">1</text><text x="132" y="112">0</text><text x="207" y="112">0</text><text x="282" y="112">1</text><text x="357" y="112">0</text><text x="432" y="112">0</text><text x="507" y="112">0</text><text x="582" y="112">0</text><text x="57" y="212">0</text><text x="132" y="212">0</text><text x="207" y="212">0</text><text x="282" y="212">0</text><text x="357" y="212">1</text><text x="432" y="212">0</text><text x="507" y="212">1</text><text x="582" y="212">1</text></g>
-      <text x="320" y="260" fill="#cbd5e1" font-size="21">格外是下标，格内是位值；分行不改变下标顺序</text>
+      <g fill="#94a3b8" font-size="22"><text x="61" y="75">0</text><text x="135" y="75">1</text><text x="209" y="75">2</text><text x="283" y="75">3</text><text x="357" y="75">4</text><text x="431" y="75">5</text><text x="505" y="75">6</text><text x="579" y="75">7</text></g>
+      <g fill="#f8fafc" font-size="34"><text x="61" y="130">0</text><text x="135" y="130">0</text><text x="209" y="130">0</text><text x="283" y="130">1</text><text x="357" y="130">0</text><text x="431" y="130">0</text><text x="505" y="130">0</text><text x="579" y="130">0</text></g>
+      <text x="320" y="192" fill="#cbd5e1" font-size="23">格外是位置编号，格内是0或1</text>
     </g>
   </svg>
-  <figcaption>写入后的固定状态。颜色只用于说明本例的置位来源；真实位数组不保存来源或所有者信息。</figcaption>
+  <figcaption>A、B都使用3号位，最后只留下一个1；位中没有保存谁写过、写过几次。</figcaption>
 </figure>
 
-这种让多个元素共享紧凑标记的结构，就是这里讲的**布隆过滤器**。Guava的官方源码将插入描述为设置选中的位，将查询描述为检查这些位是否全部置位。实际库也可能从少量哈希结果派生多个位置；本例的三路SHA计算只是教学实现。[^guava]
+这正是它紧凑的原因，也是误判的来源：许多元素可以共享少量位置，而元素身份没有被完整保留下来。
 
-## 零与一为什么给出不同结论 {#query}
+## 为什么零与一结论不同 {#query}
 
-### 001：遇到一个0，就可以停止
+### D读到0：可以确定未加入
 
-查询001，仍用原来的规则得到12、2、15：
+现在按同样规则查询D，它落在7号位，这里还是0。
 
-1. 12号位是1，暂时还不能判断。
-2. 2号位是0，立即返回可以排除。
-3. 15号位不必继续读；**不需要等到三个位全为0**。
+如果D真的被正确加入过，加入时就会把7号位置成1。规则不变、标记正确保留时，这个位置不应仍为0。因此，**0足以排除D曾被加入的可能**。
 
-原因来自插入过程本身：如果某编号已经正确加入过，其对应位置就都被设成了1。规则不变、这些标记没有被错误清除时，查询同一编号不会遇到0。因此在这个维护前提下，遇到0能确定它没有被加入。
+这里的前提很重要：这份标记确实反映了相关元素的加入，且没有被错误清除或破坏。它不能替一份漏更新的摘要证明真实集合中没有元素。
 
-已加入的101对应3、14、15，查询时三个位置确实全为1。但这份结果仍然只表示可能存在，过滤器没有取出商品记录。[^redis][^guava]
+### C读到1：仍然只能说可能存在
 
-### 067：全部为1，也可能没加入过
+C从未加入，但它也算到3号位，恰好读到1。这个1是A和B留下的，无法证明C自己加入过。
 
-067从未加入，却映射到14、0、15。这三个位恰好都为1：14和15是101留下的，0是205留下的。它们共同制造了一个**假阳性**：过滤器放行了一个实际不在集合中的编号。
+这就是一次**假阳性**：过滤器回答可能存在，而元素实际没有加入。过滤器没有造出C，也没有取出C的内容，只是无法把它排除。[^redis][^guava]
 
-<figure>
-  <svg viewBox="0 0 640 350" role="img" aria-labelledby="bf-fp-title bf-fp-desc" style={{width: '100%', height: 'auto', display: 'block', background: '#0f172a', borderRadius: '16px'}}>
-    <title id="bf-fp-title">067的三个1由其他编号共同留下</title>
-    <desc id="bf-fp-desc">已加入的101把14和15置1，205把0置1。未加入的067查询14、0、15，看到全1，因此只能回答可能存在，仍要查询真实目录。</desc>
-    <g font-family="sans-serif" text-anchor="middle">
-      <rect x="64" y="26" width="180" height="52" rx="12" fill="#0c4a6e" /><rect x="396" y="26" width="180" height="52" rx="12" fill="#064e3b" />
-      <text x="154" y="61" fill="#e0f2fe" font-size="28">已加入101</text><text x="486" y="61" fill="#d1fae5" font-size="28">已加入205</text>
-      <path d="M154 80 L112 156 M154 80 L528 156" fill="none" stroke="#38bdf8" stroke-width="5" /><path d="M486 80 L320 156" fill="none" stroke="#34d399" stroke-width="5" />
-      <rect x="48" y="160" width="128" height="70" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="3" /><rect x="256" y="160" width="128" height="70" rx="12" fill="#1e293b" stroke="#34d399" stroke-width="3" /><rect x="464" y="160" width="128" height="70" rx="12" fill="#1e293b" stroke="#38bdf8" stroke-width="3" />
-      <text x="112" y="206" fill="#f8fafc" font-size="30">14：1</text><text x="320" y="206" fill="#f8fafc" font-size="30">0：1</text><text x="528" y="206" fill="#f8fafc" font-size="30">15：1</text>
-      <text x="320" y="280" fill="#fbbf24" font-size="28">未加入067 → 全1 → 可能存在</text>
-      <text x="320" y="320" fill="#cbd5e1" font-size="22">继续查真实目录，得到未收录</text>
-    </g>
-  </svg>
-  <figcaption>连线是本例的解释叠加，不是过滤器额外保存的数据。位数组只留下0或1，无法知道这些1是不是由067写入。</figcaption>
-</figure>
+| 查询元素 | 算到的位置 | 读到的位 | 能得到的结论 |
+|---|---|---|---|
+| D | 7 | 0 | 在正确维护前提下，确定未加入 |
+| C | 3 | 1 | 可能存在；本例实际未加入 |
 
-这也说明为什么不能把过滤器的阳性当作业务命中：**它只决定是否继续查，真实查询才决定最终返回什么。**在本片路径中，一次假阳性多放行了一次查库，不会凭空造出一条商品记录。
+因此，**0和1并不是同样确定的两种回答**。需要精确确认时，可能存在的结果仍要交给保存真实元素的结构判断。
 
-## 省下查询需要什么条件 {#boundary}
+## 共享标记的边界与取舍 {#boundary}
 
-### 容量与误判率要一起规划
+### 不能按元素直接清零
 
-固定这么多位，加入更多元素后，置为1的位置通常越来越多，未加入编号也更容易碰到全1。实际使用要按预计元素数和可接受的误判率规划空间；更低的目标误判率通常需要更多空间。Redis文档还说明其实现可增加子过滤器，不能把所有产品都理解成单个永不变化的16位数组。[^redis][^cassandra]
+删除A时，能不能把3号位清成0？不能把它当作普通过滤器支持的删除方法：3号位同时被B使用，清零后，仍在集合里的B也会被错误排除。
 
-假阳性概率说的是：**对实际未加入的查询，过滤器误报可能存在的概率**。它不是所有阳性回答中有多少错误，后者还受查询中真实存在比例的影响。本例只构造了一次可以复算的误判，没有测生产误判率，也不据此声称能节省某个固定比例的数据库请求。
+原因不是计算不稳定，而是**这一个1没有保存所有者**。删除需求应由相应的数据结构或重建策略解决，不能把某个元素用过的位置直接清掉。
 
-### 普通位数组不能按元素直接清零
+### 一个很短的两位置对照
 
-如果删除101时，把它的3、14、15全部清成0，仍在目录中的205查询0、3、12时，就会在3号位遇到0，被错误排除。原因是3号位同时被205使用，而普通位数组没有保存每个1的所有者。
+多个位置可以为可能存在增加检查条件，但必须先按新的规则完整构造标记。
 
-这是一段**错误操作反例**，不是基础过滤器支持的删除接口。需要删除能力时，应选择有相应维护机制的结构或重建策略，不能直接把单元素的哈希位置清零。
+另建一份同样8位的数组，仍然只加入A和B：A写3、2，B写3、1。全部写完后，1、2、3号位为1。再查C，它需要同时检查3和5；3是1，但5是0，便排除了刚才那次误判。
 
-### 新数据必须反映到摘要中
+这是**同一集合重新构造后的对照**，不是直接对旧数组换一套查询规则。它只说明C这次被排除，不能推断每个查询都会改善，或计算出线上误判率。
 
-再看一个独立维护场景：001后来已经加入真实目录，但过滤器还停留在旧状态，2号位仍为0。这时过滤器会错拦真实数据，原来的排除结论已不再安全。
+位置也不是越多越好：更多选取意味着更多写入和检查，也可能让固定数组更拥挤。要把空间、预计元素数与选取次数一起选择；不同实现也可能从少量基础哈希派生多个位置。[^redis][^guava][^cassandra]
 
-正确把`sku001`加入摘要后，12、2、15都为1，实际新置位的是2号；随后001才会继续到真实目录确认。本片只说明维护前提，不展开分布式写入与切换协议。**只有相关数据已正确反映在这份摘要中，才可以依赖阴性做排除。**
+### 可运行的小例子
 
-### 可运行的同源教学示例
-
-下面代码使用Python标准库，可直接运行：先写入两条编号，再检查四个编号，最后演示错误清零和新增数据未同步的影响。输出每行依次为编号、三个位置、过滤器是否认为可能存在、真实目录是否收录。
-
-它只是固定16位演示，不含生产库的容量策略、并发控制、持久化或版本兼容保证。进阶读者可查看[完整示例源码](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/bloom-filter/article-demo.py)。
+下面使用Python标准库，可直接运行。主规则是真实计算`SHA256("22:" + 元素)`，取前8字节的big-endian非负整数对8取余；第二规则只在最后的重建对照中使用前缀`0:`。输入和参数为展示碰撞而选，不代表产品内部实现或统计样本。
 
 ```python
 from hashlib import sha256
 
 
-def positions(key):
-    return [
-        int.from_bytes(sha256(f"{seed}:{key}".encode("utf-8")).digest()[:8], "big") % 16
-        for seed in range(3)
-    ]
+def position(key, seed=22):
+    digest = sha256(f"{seed}:{key}".encode("utf-8")).digest()
+    return int.from_bytes(digest[:8], "big") % 8
 
 
-bits = [0] * 16
+def add(bits, key):
+    bits[position(key)] = 1
 
 
-def add(key):
-    for index in positions(key):
-        bits[index] = 1
+def maybe_contains(bits, key):
+    return bits[position(key)] == 1
 
 
-def maybe_contains(key):
-    for index in positions(key):
-        if bits[index] == 0:
-            return False
-    return True
+bits = [0] * 8
+for key in ("A", "B"):
+    add(bits, key)
 
+for key in ("A", "B", "C", "D"):
+    print(key, position(key), maybe_contains(bits, key))
 
-catalog = {"sku101", "sku205"}
-for key in ["sku101", "sku205"]:
-    add(key)
+assert bits == [0, 0, 0, 1, 0, 0, 0, 0]
+assert not maybe_contains(bits, "D")  # 7号是0，可以排除
+assert maybe_contains(bits, "C")  # C未加入，但3号是1，发生假阳性
 
-for key in ["sku101", "sku205", "sku001", "sku067"]:
-    print(key, positions(key), maybe_contains(key), key in catalog)
+# 错误操作反例：假设只移除A，B仍在，不能直接清零共享位。
+wrong = bits.copy()
+wrong[position("A")] = 0
+assert not maybe_contains(wrong, "B")  # B被错误排除
 
-assert not maybe_contains("sku001")  # 遇到2号位的0，可排除
-assert maybe_contains("sku067") and "sku067" not in catalog  # 假阳性
-
-# 错误删除反例：不能把某个编号的位直接清零。
-saved_bits = bits.copy()
-catalog.remove("sku101")
-for index in positions("sku101"):
-    bits[index] = 0
-assert "sku205" in catalog and not maybe_contains("sku205")  # 误清共享位
-
-# 恢复原状态，演示另一个维护场景：新增真实记录后也要更新摘要。
-bits[:] = saved_bits
-catalog = {"sku101", "sku205", "sku001"}
-assert "sku001" in catalog and not maybe_contains("sku001")  # 尚未同步，不能信任排除
-add("sku001")
-assert maybe_contains("sku001")  # 现在可以继续去真实目录确认
+# 另从全0重建两位置对照，仍然只加入A和B。
+two = [0] * 8
+for key in ("A", "B"):
+    for seed in (22, 0):
+        two[position(key, seed)] = 1
+assert two == [0, 1, 1, 1, 0, 0, 0, 0]
+assert not all(two[position("C", seed)] for seed in (22, 0))
 ```
 
-### 资料与原文
+代码中的清零段是错误操作反例；两位置段从全0重建。需要完整复算和模型核对的读者可查看[完整示例源码](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/article-demo.py)。
 
-下列资料以固定的官方仓库版本为依据，并提供对应官网链接供继续阅读。访问日期为2026-10-26；文档未标发布日期，固定提交用于追溯本次引用。
+### 资料依据
 
-[^redis]: Redis，**Bloom filter**。[固定官方文档正文](https://github.com/redis/docs/blob/4fe762f8dab40f0b661207374378ed52113c9fe3/content/develop/data-types/probabilistic/bloom-filter.md)；[官网对应页](https://redis.io/docs/latest/develop/data-types/probabilistic/bloom-filter/)。访问2026-10-26。原文摘录：A Bloom filter can guarantee the absence of an item from a set, but it can only give an estimation about its presence. **编者说明：**采用基础成员查询和容量取舍，不把概述中的口语化错误比例解释为条件概率定义。
+以下保留官方原题与固定正文版本。本次核对既有固定原文，原始读取记录与技术阅读范围另存研究文件；不以复读日期冒充文档发布日期。
 
-[^cassandra]: Apache Cassandra，**Bloom Filters**。[固定官方文档正文](https://github.com/apache/cassandra/blob/05853eaeab006bd1e834331ac8b1dfdc464d1f31/doc/modules/cassandra/pages/managing/operating/bloom_filters.adoc)；[官网对应页](https://cassandra.apache.org/doc/latest/cassandra/managing/operating/bloom_filters.html)。访问2026-10-26。原文摘录：bloom filters can be made more accurate by allowing them to consume more RAM. **编者说明：**这份原文讨论SSTable读路径；本文仅借其说明工程用途和空间取舍，不采用产品默认参数或具体内存倍数作通用结论。
+[^redis]: Redis，**Bloom filter**。[固定官方正文](https://github.com/redis/docs/blob/4fe762f8dab40f0b661207374378ed52113c9fe3/content/develop/data-types/probabilistic/bloom-filter.md)；[官网对应页](https://redis.io/docs/latest/develop/data-types/probabilistic/bloom-filter/)。核对2026-10-26。原文摘录：A Bloom filter can guarantee the absence of an item from a set, but it can only give an estimation about its presence. **编者说明：**本片采用最简单的单位置参数讲原理，不将其称为Redis默认配置。
 
-[^guava]: Google Guava，**BloomFilter.java**与**BloomFilterStrategies.java**。[成员查询契约与容量相关源码](https://github.com/google/guava/blob/5ae56d77e64305752b919ff2c96713f47ac0c94c/guava/src/com/google/common/hash/BloomFilter.java)；[实际置位/查询策略源码](https://github.com/google/guava/blob/5ae56d77e64305752b919ff2c96713f47ac0c94c/guava/src/com/google/common/hash/BloomFilterStrategies.java)。访问2026-10-26。**编者说明：**本期三路SHA-256教学规则不冒充该库实际的Murmur哈希派生策略；它用于解释基础结构，不代替具体产品实现。
+[^guava]: Google Guava，**BloomFilter.java**、**BloomFilterStrategies.java**。[固定类型与选k源码](https://github.com/google/guava/blob/5ae56d77e64305752b919ff2c96713f47ac0c94c/guava/src/com/google/common/hash/BloomFilter.java)；[固定置位/查询策略源码](https://github.com/google/guava/blob/5ae56d77e64305752b919ff2c96713f47ac0c94c/guava/src/com/google/common/hash/BloomFilterStrategies.java)。核对2026-10-26。**编者说明：**构造器要求位置次数大于0，选择次数的方法也保留下限1；这是源码依据，不把本文的SHA教学规则冒充Guava实际Murmur派生策略。
+
+[^cassandra]: Apache Cassandra，**Bloom Filters**。[固定官方正文](https://github.com/apache/cassandra/blob/05853eaeab006bd1e834331ac8b1dfdc464d1f31/doc/modules/cassandra/pages/managing/operating/bloom_filters.adoc)；[官网对应页](https://cassandra.apache.org/doc/latest/cassandra/managing/operating/bloom_filters.html)。核对2026-10-26。原文摘录：bloom filters can be made more accurate by allowing them to consume more RAM. **编者说明：**原文用于空间与准确性的工程取舍，不把具体产品默认值或内存倍数作为通用规律。

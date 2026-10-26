@@ -1,0 +1,118 @@
+{
+  "status": "approved-for-tts",
+  "checkedAtUTC": "2026-10-26T01:50:01.753449+00:00",
+  "checkedAtBeijing": "2026-10-26T09:50:01.753558+08:00",
+  "reviewer": "Independent model and technical-script reviewer",
+  "scope": "Technical approval of this exact nine-shot/eighteen-sentence script and verified one-/two-hash teaching model, before TTS",
+  "inputs": {
+    "script.md": "7a2b0fa13f5b27055490db0bb2031bd8ea457ede895d81787b0085f2cd2eb842",
+    "model.json": "24dc5bb873fcb168dbc8f91dd141f8cb971e82977e697ff1be11f48436786375",
+    "plan.json": "fe65bba53bc8fbf822fd8806e3b754f3bff054f657c097d10ad100ea7db07a96",
+    "references.json": "75ea83475a3b05c53b5521dcc8fae30ca77f4d141debf34f324394582f39d366",
+    "research/source-verification.json": "a0c2b3514c17f47abcd3c1a628ed06561cb6562e0f48947c9da84a064182a7fe",
+    "qa-model.json": "1fc01922c09b5eb8deb01ec6a9238b2917a462ea8f93535583e70874eee757f8"
+  },
+  "actualScriptSHA256": "7a2b0fa13f5b27055490db0bb2031bd8ea457ede895d81787b0085f2cd2eb842",
+  "shots": 9,
+  "sentences": 18,
+  "modelAssertionsExecuted": 60349,
+  "mustFix": [],
+  "technicalReview": [
+    {
+      "shots": [
+        "03",
+        "04"
+      ],
+      "finding": "k=1 is a valid simplest Bloom parameter; A/B use the same stable H1 location3 and re-setting1 is not a counter.",
+      "evidence": "Guava BloomFilter.java Strategy contract, constructor k>0 (line136), optimalNumOfHashFunctions minimum1 (lines565-567); independent SHA model."
+    },
+    {
+      "shots": [
+        "05",
+        "06"
+      ],
+      "finding": "D at7 reads0 and is not inserted; C at3 reads1 but is absent. Zero exclusion and possible presence are distinguished with correct-insertion/intact-mark conditions.",
+      "evidence": "Independent model; Redis first-sentence quotation and Guava mightContain contract."
+    },
+    {
+      "shots": [
+        "07"
+      ],
+      "finding": "Clearing shared position3 after deletingA wrongly rejects retainedB; this is explicitly an unsupported-operation counterexample.",
+      "evidence": "Independent model counterexample, no claim of a production deletion API."
+    },
+    {
+      "shots": [
+        "08"
+      ],
+      "finding": "A separate same-size eight-cell array is rebuilt from empty with A/B under H1/H2; C checks3 then5 and this specific previous false positive is excluded. Current wording clearly distinguishes array length8 from two positions per element.",
+      "evidence": "Model rebuilt states [2,3] then [1,2,3]; C trace [3,5] and zero5."
+    },
+    {
+      "shots": [
+        "09"
+      ],
+      "finding": "More positions are explicitly not universally better; added marks compete with space and expected insertion count. No measured rate or per-query improvement is claimed.",
+      "evidence": "H maps1/1: rejected under k1 but accepted under rebuiltk2, so C improvement is case-specific; source sizing/parameter tradeoff sections."
+    }
+  ],
+  "sourceIdentityChecks": [
+    {
+      "id": "R1",
+      "path": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/sources/redis-bloom-filter.md",
+      "sha256": "0e72ec0308ce57807ff8012465455c7d5bc37df78cecffe99e23e8f1e3ecfc59",
+      "gitBlobSHA1": "727d1c8d80da68d963939dd0fc785121be9bd81a",
+      "retrievalThisReview": "none; reread identical fixed original bytes"
+    },
+    {
+      "id": "R2",
+      "path": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/sources/cassandra-bloom-filters.adoc",
+      "sha256": "8582c28aba3e3ec34c01aeb2dcd8463995d443a5280ae624fbbf2894b3c0c357",
+      "gitBlobSHA1": "5ce5f8d04cb52cc4e0b01867f764cd61e9e47411",
+      "retrievalThisReview": "none; reread identical fixed original bytes"
+    },
+    {
+      "id": "R3",
+      "path": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/sources/guava-BloomFilter.java",
+      "sha256": "c72a38abb4a0963ed026b5b56d1e265ab9ebd1805a20227d290c371f19849143",
+      "gitBlobSHA1": "067d8d0ef6ab0116e852a2714bfd8b81f405d192",
+      "retrievalThisReview": "none; reread identical fixed original bytes"
+    },
+    {
+      "id": "R3-strategy",
+      "path": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/sources/guava-BloomFilterStrategies.java",
+      "sha256": "4d643bea3fcf55540b8d39343b89ccccecc707daf1593fb503c1d7d4b299b5c2",
+      "gitBlobSHA1": "1a9ec615fc641db070b8b3d8640bee037b7dc3a7",
+      "retrievalThisReview": "none; reread identical fixed original bytes"
+    }
+  ],
+  "citationChecks": [
+    {
+      "id": "R1",
+      "originalTitle": "Bloom filter",
+      "exactContinuousQuotation": true,
+      "startLine": 33,
+      "endLine": 33
+    },
+    {
+      "id": "R2",
+      "originalTitle": "Bloom Filters",
+      "exactContinuousQuotation": true,
+      "startLine": 14,
+      "endLine": 15
+    }
+  ],
+  "sourceReadingScope": [
+    "New-path identical official Redis Overview and size/parameter sections; original title and selected continuous quotation.",
+    "New-path Cassandra opening absence/presence and RAM/accuracy sections; original title and quotation.",
+    "New-path Guava Strategy contract, constructor positive k, optimal k minimum1 and actual set/get loops."
+  ],
+  "networkRetrievalPerformedThisReview": false,
+  "sourceUse": "Previously fetched fixed official originals were reread and exact bytes/identities rechecked at the new revision paths. No website GET or product execution is claimed.",
+  "limits": [
+    "Approval applies to the bound script/model, not future audio, timing, animation, final media or website quality.",
+    "k=1 is a teaching simplification, not a statement that Redis or Guava normally use one probe.",
+    "The two-position comparison improves this C witness only and does not establish a lower population false-positive rate.",
+    "No production implementation was imported or executed, and no prior visual/audio pass was reused as approval of this new script."
+  ]
+}
