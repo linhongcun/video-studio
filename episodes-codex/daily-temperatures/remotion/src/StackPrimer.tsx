@@ -107,9 +107,9 @@ export const OrderPrimer=({playback:pb}:{playback:ActualPlayback})=>{
  const staged=e.type==='pop'||e.type==='resolve'?e.previous??null:null;
  const before=e.type==='push'||e.type==='pop'?old.pending:e.pending;
  const reason=e.type==='compare'?e.reason:null;
- const note=e.id<16?'新来的32，先看末尾30':e.id<19?'32 > 30：先取出第5天':e.id<22?'32 > 31：再取出第4天':e.id<23?'32 < 35：保留35，停止取出':'把第6天32加入栈顶，恢复35 ≥ 32';
+ const note=e.id<16?'新来的32，先看末尾30':e.id<19?'32 > 30：先取出第5天':e.id<22?'32 > 31：再取出第4天':e.id<23?'32 < 35：保留35，停止取出':'把第6天32加入末尾，仍有35 ≥ 32';
  return <g data-algorithm-trace-event={e.id} data-source-line={e.sourceLine}>
-  <StackRow before={before} after={e.pending} day={day} operation={moving} progress={pb.progress} named stagedDay={staged} topFocus={reason?e.previous??null:null}/>
+  <StackRow before={before} after={e.pending} day={day} operation={moving} progress={pb.progress} named={false} stagedDay={staged} topFocus={reason?e.previous??null:null}/>
   {reason&&e.previous!==null&&e.previous!==undefined&&<>
    <Text x={1510} y={737} size={32} color={reason==='warmer'?C.teal:C.gold} anchor="middle" mono>32 {reason==='warmer'?'>':'<'} {MAIN.input[e.previous]}</Text>
    <Text x={1510} y={777} size={24} color={reason==='warmer'?C.teal:C.gold} anchor="middle">{reason==='warmer'?'更暖，可以取出':'不够暖，保留并停止'}</Text>
