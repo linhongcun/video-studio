@@ -54,3 +54,43 @@ related: ["db-replication", "global-id"]
 [^shard]: [Vitess Shard](https://vitess.io/docs/23.0/concepts/shard/)
 [^vindex]: [Vitess Vindexes](https://vitess.io/docs/23.0/reference/features/vindexes/)
 [^reshard]: [Vitess Resharding](https://vitess.io/docs/23.0/user-guides/configuration-advanced/resharding/)
+
+## 片尾参考资料
+
+片尾列出以下四篇实际用于本片的官方资料，沿用 **2026-10-24（北京时间）** 的正文阅读记录。原参考资料与脚注继续保留；下列固定链接所指的“既有实读记录”是本仓阅读记录，不是官方固定正文。
+
+**[R1] Sharding pattern**
+
+- 机构：Microsoft · Azure Architecture Center
+- 版本：官方文档 · 原记录未标页面版本或发布日期
+- 正式链接：[Sharding pattern（官方文档）](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)
+- [既有实读记录（2026-10-24，R1）](https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/db-sharding/research.md#L7)
+
+支持的主张：将数据拆成不同子集，分片键和路由决定位置；存储/写入压力可能适用，均衡与资源条件影响收益。
+
+**[R2] Shard**
+
+- 机构：Vitess
+- 版本：Vitess 23.0
+- 正式链接：[Shard（官方文档）](https://vitess.io/docs/23.0/concepts/shard/)
+- [既有实读记录（2026-10-24，R2）](https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/db-sharding/research.md#L8)
+
+支持的主张：分片是逻辑数据空间的子集；分片数据不重叠，分片与副本是不同概念。
+
+**[R3] Vindexes**
+
+- 机构：Vitess
+- 版本：Vitess 23.0
+- 正式链接：[Vindexes（官方文档）](https://vitess.io/docs/23.0/reference/features/vindexes/)
+- [既有实读记录（2026-10-24，R3）](https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/db-sharding/research.md#L9)
+
+支持的主张：映射列值到keyspace ID以确定目标分片；Primary Vindex决定插入路由；同映射值可以有多条记录；缺少适用路由信息可能需要散播查询。
+
+**[R4] Resharding**
+
+- 机构：Vitess
+- 版本：Vitess 23.0
+- 正式链接：[Resharding（官方文档）](https://vitess.io/docs/23.0/user-guides/configuration-advanced/resharding/)
+- [既有实读记录（2026-10-24，R4）](https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/db-sharding/research.md#L10)
+
+支持的主张：选择客户编号可共置相关订单，映射与访问模式须规划；重分片要复制、校验和切流，序列也需要安排。

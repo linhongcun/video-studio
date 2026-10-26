@@ -1,0 +1,313 @@
+{
+  "schemaVersion": 1,
+  "batch": 6,
+  "episode": "db-sharding",
+  "presentation": "title-author",
+  "baseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+  "assembledAtBeijing": "2026-10-26T16:44:08+08:00",
+  "checkedAt": "2026-10-24",
+  "timezone": "Asia/Shanghai",
+  "scope": "Four already-used official sources from the unchanged accepted lesson. Reuse of 2026-10-24 actual reading records only; no fresh official GET, fixed official body, current page title, response SHA, media/render/freeze/release or user-acceptance claim.",
+  "verificationReuse": {
+    "method": "existing-official-read-record",
+    "originalAccessDate": "2026-10-24",
+    "newNetworkRequests": [],
+    "recordedBodyReadScope": "访问日期2026-10-24（北京时间）。以下官方正文已实际打开并核验，不以issue、旧分镜或搜索摘要作为引用。",
+    "reviewThisRound": "实际读本期原script/article/research，核对原题与机构、记录中的主张与适用边界；读取固定基线Git对象并验证blob完整字节及SHA，保存独立旧记录副本。",
+    "limits": [
+      "官方正文实读是2026-10-24既有制作记录，不把本轮查看记录写成新联网阅读。",
+      "固定Git链接、本仓归档及完整research SHA只证明阅读记录身份；不代表官方原文固定快照或当前响应。",
+      "原研究未记录官方正文响应SHA或逐段位置，本轮不补造，不声称重新核对官方head或发布日期。"
+    ]
+  },
+  "historicalResearchRecord": {
+    "path": "episodes-codex/db-sharding/research.md",
+    "baseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+    "gitBlob": "8a36d0f003c26aca09d91e7a6ae8fb033c85f098",
+    "bytes": 2372,
+    "sha256": "42a769580bc5286097d10c44102391ba23eb36680ed7a69f62c233d653d8c718",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/db-sharding/research.md",
+    "recordUrlKind": "existing-research-record-not-official-fixed-body",
+    "archivePath": "docs/reference-endcards/batch-6/evidence/db-sharding-prior-reading-278f69a7.md",
+    "fullOriginalText": "# EP.19 权威资料核验\n\n访问日期2026-10-24（北京时间）。以下官方正文已实际打开并核验，不以issue、旧分镜或搜索摘要作为引用。\n\n|ID|官方资料|已核验主张|本期用法与边界|\n|---|---|---|---|\n|R1|[Microsoft Azure Architecture Center: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)|将数据拆成不同子集，分片键和路由决定位置；存储/写入压力可能适用，均衡与资源条件影响收益|只演示按用户固定教学映射，不把所有下单卡顿归于数据库，不给容量阈值或性能数字|\n|R2|[Vitess: Shard](https://vitess.io/docs/23.0/concepts/shard/)|分片是逻辑数据空间的子集；分片数据不重叠，分片与副本是不同概念|画面A/B/C是逻辑库与订单表，不是物理机或复制三份完整数据|\n|R3|[Vitess: Vindexes](https://vitess.io/docs/23.0/reference/features/vindexes/)|映射列值到keyspace ID以确定目标分片；Primary Vindex决定插入路由；同映射值可以有多条记录；缺少适用路由信息可能需要散播查询|本例按用户编号42/17/86映射A/B/C，只是教学规则，非具体哈希算法；规则不变时用户42同路由|\n|R4|[Vitess: Resharding](https://vitess.io/docs/23.0/user-guides/configuration-advanced/resharding/)|选择客户编号可共置相关订单，映射与访问模式须规划；重分片要复制、校验和切流，序列也需要安排|扩容不是多建表名就自动完成；下一期只预告跨库编号碰撞，不在本期展开方案|\n\n补充边界：同机分表不能凭空增加单机资源；读多时缓存或副本等方法可能更适合。分片键应结合稳定性、基数、热点、常用查询选择，不是用户编号在所有系统里都最合适。查询不带这个字段也不必然查所有分片，可能有其他路由或索引；跨片访问一般带来额外协调成本，不能说所有JOIN或事务都不支持。上述边界来自R1、R3及R4的适用范围，视频仅选其中必要的两句。\n\n示例订单7042、7043、7044、7045、7046、7047与新订单7050、7051、7052仅为追踪标签。示例用户42、17、86，以及A/B/C映射和进入顺序均为教学设计，无QPS、延迟、吞吐或容量实测。画面订单表是节选，不表示迁移、删除或完整数据量。\n",
+    "gitBlobBytesMatched": true,
+    "gitBlobObjectHashRecomputed": true
+  },
+  "originalArticleRecord": {
+    "path": "episodes-codex/db-sharding/article.mdx",
+    "baseCommit": "278f69a71151cada63e7068b4cfc0d5222501ac7",
+    "gitBlob": "f4249c77f5a852cc22cf46305a25ae90666f0e6e",
+    "bytes": 4294,
+    "sha256": "1d16a3256cba437b222440470889d53f9624709991e9f753df6c4f754ed9d6b3",
+    "preservation": "Entire original source article including frontmatter, all explicit anchors, reference section and four footnotes remains an exact prefix; only append the new reference section."
+  },
+  "sources": [
+    {
+      "id": "db-sharding-r1",
+      "referenceId": "R1",
+      "organization": "Microsoft · Azure Architecture Center",
+      "title": "Sharding pattern",
+      "version": "官方文档 · 原记录未标页面版本或发布日期",
+      "canonicalUrl": "https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding",
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-24",
+      "verificationBasis": "existing-official-read-record",
+      "originalRecord": {
+        "startLine": 7,
+        "endLine": 7,
+        "text": "|R1|[Microsoft Azure Architecture Center: Sharding pattern](https://learn.microsoft.com/en-us/azure/architecture/patterns/sharding)|将数据拆成不同子集，分片键和路由决定位置；存储/写入压力可能适用，均衡与资源条件影响收益|只演示按用户固定教学映射，不把所有下单卡顿归于数据库，不给容量阈值或性能数字|",
+        "officialMaterialLabel": "Microsoft Azure Architecture Center: Sharding pattern",
+        "claimCell": "将数据拆成不同子集，分片键和路由决定位置；存储/写入压力可能适用，均衡与资源条件影响收益",
+        "boundaryCell": "只演示按用户固定教学映射，不把所有下单卡顿归于数据库，不给容量阈值或性能数字",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/db-sharding/research.md#L7",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-24既有官方实读记录：research.md第7行R1的官方资料栏，题名部分（去除机构前缀）",
+        "evidence": "docs/reference-endcards/batch-6/sources-db-sharding.json",
+        "originalLabel": "Microsoft Azure Architecture Center: Sharding pattern",
+        "titlePart": "Sharding pattern",
+        "basis": "严格沿用既有实读条目的题名部分，仅将明确机构前缀与题名分栏；不自行翻译、概括、加品牌后缀或改大小写。未新GET官方页面head/title。"
+      },
+      "organizationEvidence": {
+        "basis": "原记录官方资料标签“Microsoft Azure Architecture Center: Sharding pattern”及正式域名learn.microsoft.com；发布机构为Microsoft Azure Architecture Center。原记录未明确个人署名，不从维护账号或Git提交者推断作者。",
+        "personalAuthor": "not-established-in-existing-record"
+      },
+      "supports": [
+        "将数据拆成不同子集，分片键和路由决定位置；存储/写入压力可能适用，均衡与资源条件影响收益"
+      ],
+      "sections": "2026-10-24实读记录R1（第7行）；原记录未单列官方小节标题或段落号",
+      "shots": [
+        "01",
+        "02",
+        "04",
+        "05",
+        "06",
+        "07",
+        "12",
+        "13",
+        "14"
+      ],
+      "limitations": [
+        "只演示按用户固定教学映射，不把所有下单卡顿归于数据库，不给容量阈值或性能数字"
+      ],
+      "canonicalAccessThisRound": {
+        "status": "not-requested",
+        "newGet": false,
+        "reason": "原片事实与技术主张未改，本轮复用2026-10-24实际官方正文阅读记录。"
+      },
+      "officialBodyCapture": {
+        "newResponseCaptured": false,
+        "officialResponseSHA256": null,
+        "note": "基线Git/blob及SHA仅标识本仓研究记录，不是官方固定正文版本或官方HTTP响应摘要。"
+      },
+      "versionEvidence": {
+        "recordedVersion": "官方文档 · 原记录未标页面版本或发布日期",
+        "basis": "原研究记录没有单列官方页面版本、发布日期或更新时间，本轮不补造。"
+      }
+    },
+    {
+      "id": "db-sharding-r2",
+      "referenceId": "R2",
+      "organization": "Vitess",
+      "title": "Shard",
+      "version": "Vitess 23.0",
+      "canonicalUrl": "https://vitess.io/docs/23.0/concepts/shard/",
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-24",
+      "verificationBasis": "existing-official-read-record",
+      "originalRecord": {
+        "startLine": 8,
+        "endLine": 8,
+        "text": "|R2|[Vitess: Shard](https://vitess.io/docs/23.0/concepts/shard/)|分片是逻辑数据空间的子集；分片数据不重叠，分片与副本是不同概念|画面A/B/C是逻辑库与订单表，不是物理机或复制三份完整数据|",
+        "officialMaterialLabel": "Vitess: Shard",
+        "claimCell": "分片是逻辑数据空间的子集；分片数据不重叠，分片与副本是不同概念",
+        "boundaryCell": "画面A/B/C是逻辑库与订单表，不是物理机或复制三份完整数据",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/db-sharding/research.md#L8",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-24既有官方实读记录：research.md第8行R2的官方资料栏，题名部分（去除机构前缀）",
+        "evidence": "docs/reference-endcards/batch-6/sources-db-sharding.json",
+        "originalLabel": "Vitess: Shard",
+        "titlePart": "Shard",
+        "basis": "严格沿用既有实读条目的题名部分，仅将明确机构前缀与题名分栏；不自行翻译、概括、加品牌后缀或改大小写。未新GET官方页面head/title。"
+      },
+      "organizationEvidence": {
+        "basis": "原记录官方资料标签“Vitess: Shard”及正式域名vitess.io；发布机构为Vitess官方文档。原记录未明确个人署名，不从维护账号或Git提交者推断作者。",
+        "personalAuthor": "not-established-in-existing-record"
+      },
+      "supports": [
+        "分片是逻辑数据空间的子集；分片数据不重叠，分片与副本是不同概念"
+      ],
+      "sections": "2026-10-24实读记录R2（第8行）；原记录未单列官方小节标题或段落号",
+      "shots": [
+        "01",
+        "02",
+        "05",
+        "12"
+      ],
+      "limitations": [
+        "画面A/B/C是逻辑库与订单表，不是物理机或复制三份完整数据"
+      ],
+      "canonicalAccessThisRound": {
+        "status": "not-requested",
+        "newGet": false,
+        "reason": "原片事实与技术主张未改，本轮复用2026-10-24实际官方正文阅读记录。"
+      },
+      "officialBodyCapture": {
+        "newResponseCaptured": false,
+        "officialResponseSHA256": null,
+        "note": "基线Git/blob及SHA仅标识本仓研究记录，不是官方固定正文版本或官方HTTP响应摘要。"
+      },
+      "versionEvidence": {
+        "recordedVersion": "Vitess 23.0",
+        "basis": "原正式URL包含/docs/23.0/，保留该明示版本。"
+      }
+    },
+    {
+      "id": "db-sharding-r3",
+      "referenceId": "R3",
+      "organization": "Vitess",
+      "title": "Vindexes",
+      "version": "Vitess 23.0",
+      "canonicalUrl": "https://vitess.io/docs/23.0/reference/features/vindexes/",
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-24",
+      "verificationBasis": "existing-official-read-record",
+      "originalRecord": {
+        "startLine": 9,
+        "endLine": 9,
+        "text": "|R3|[Vitess: Vindexes](https://vitess.io/docs/23.0/reference/features/vindexes/)|映射列值到keyspace ID以确定目标分片；Primary Vindex决定插入路由；同映射值可以有多条记录；缺少适用路由信息可能需要散播查询|本例按用户编号42/17/86映射A/B/C，只是教学规则，非具体哈希算法；规则不变时用户42同路由|",
+        "officialMaterialLabel": "Vitess: Vindexes",
+        "claimCell": "映射列值到keyspace ID以确定目标分片；Primary Vindex决定插入路由；同映射值可以有多条记录；缺少适用路由信息可能需要散播查询",
+        "boundaryCell": "本例按用户编号42/17/86映射A/B/C，只是教学规则，非具体哈希算法；规则不变时用户42同路由",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/db-sharding/research.md#L9",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-24既有官方实读记录：research.md第9行R3的官方资料栏，题名部分（去除机构前缀）",
+        "evidence": "docs/reference-endcards/batch-6/sources-db-sharding.json",
+        "originalLabel": "Vitess: Vindexes",
+        "titlePart": "Vindexes",
+        "basis": "严格沿用既有实读条目的题名部分，仅将明确机构前缀与题名分栏；不自行翻译、概括、加品牌后缀或改大小写。未新GET官方页面head/title。"
+      },
+      "organizationEvidence": {
+        "basis": "原记录官方资料标签“Vitess: Vindexes”及正式域名vitess.io；发布机构为Vitess官方文档。原记录未明确个人署名，不从维护账号或Git提交者推断作者。",
+        "personalAuthor": "not-established-in-existing-record"
+      },
+      "supports": [
+        "映射列值到keyspace ID以确定目标分片；Primary Vindex决定插入路由；同映射值可以有多条记录；缺少适用路由信息可能需要散播查询"
+      ],
+      "sections": "2026-10-24实读记录R3（第9行）；原记录未单列官方小节标题或段落号",
+      "shots": [
+        "03",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "13"
+      ],
+      "limitations": [
+        "本例按用户编号42/17/86映射A/B/C，只是教学规则，非具体哈希算法；规则不变时用户42同路由"
+      ],
+      "canonicalAccessThisRound": {
+        "status": "not-requested",
+        "newGet": false,
+        "reason": "原片事实与技术主张未改，本轮复用2026-10-24实际官方正文阅读记录。"
+      },
+      "officialBodyCapture": {
+        "newResponseCaptured": false,
+        "officialResponseSHA256": null,
+        "note": "基线Git/blob及SHA仅标识本仓研究记录，不是官方固定正文版本或官方HTTP响应摘要。"
+      },
+      "versionEvidence": {
+        "recordedVersion": "Vitess 23.0",
+        "basis": "原正式URL包含/docs/23.0/，保留该明示版本。"
+      }
+    },
+    {
+      "id": "db-sharding-r4",
+      "referenceId": "R4",
+      "organization": "Vitess",
+      "title": "Resharding",
+      "version": "Vitess 23.0",
+      "canonicalUrl": "https://vitess.io/docs/23.0/user-guides/configuration-advanced/resharding/",
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-24",
+      "verificationBasis": "existing-official-read-record",
+      "originalRecord": {
+        "startLine": 10,
+        "endLine": 10,
+        "text": "|R4|[Vitess: Resharding](https://vitess.io/docs/23.0/user-guides/configuration-advanced/resharding/)|选择客户编号可共置相关订单，映射与访问模式须规划；重分片要复制、校验和切流，序列也需要安排|扩容不是多建表名就自动完成；下一期只预告跨库编号碰撞，不在本期展开方案|",
+        "officialMaterialLabel": "Vitess: Resharding",
+        "claimCell": "选择客户编号可共置相关订单，映射与访问模式须规划；重分片要复制、校验和切流，序列也需要安排",
+        "boundaryCell": "扩容不是多建表名就自动完成；下一期只预告跨库编号碰撞，不在本期展开方案",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/278f69a71151cada63e7068b4cfc0d5222501ac7/episodes-codex/db-sharding/research.md#L10",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-24既有官方实读记录：research.md第10行R4的官方资料栏，题名部分（去除机构前缀）",
+        "evidence": "docs/reference-endcards/batch-6/sources-db-sharding.json",
+        "originalLabel": "Vitess: Resharding",
+        "titlePart": "Resharding",
+        "basis": "严格沿用既有实读条目的题名部分，仅将明确机构前缀与题名分栏；不自行翻译、概括、加品牌后缀或改大小写。未新GET官方页面head/title。"
+      },
+      "organizationEvidence": {
+        "basis": "原记录官方资料标签“Vitess: Resharding”及正式域名vitess.io；发布机构为Vitess官方文档。原记录未明确个人署名，不从维护账号或Git提交者推断作者。",
+        "personalAuthor": "not-established-in-existing-record"
+      },
+      "supports": [
+        "选择客户编号可共置相关订单，映射与访问模式须规划；重分片要复制、校验和切流，序列也需要安排"
+      ],
+      "sections": "2026-10-24实读记录R4（第10行）；原记录未单列官方小节标题或段落号",
+      "shots": [
+        "10",
+        "11",
+        "13",
+        "14"
+      ],
+      "limitations": [
+        "扩容不是多建表名就自动完成；下一期只预告跨库编号碰撞，不在本期展开方案"
+      ],
+      "canonicalAccessThisRound": {
+        "status": "not-requested",
+        "newGet": false,
+        "reason": "原片事实与技术主张未改，本轮复用2026-10-24实际官方正文阅读记录。"
+      },
+      "officialBodyCapture": {
+        "newResponseCaptured": false,
+        "officialResponseSHA256": null,
+        "note": "基线Git/blob及SHA仅标识本仓研究记录，不是官方固定正文版本或官方HTTP响应摘要。"
+      },
+      "versionEvidence": {
+        "recordedVersion": "Vitess 23.0",
+        "basis": "原正式URL包含/docs/23.0/，保留该明示版本。"
+      }
+    }
+  ],
+  "selection": {
+    "selected": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ],
+    "reason": "覆盖数据子集与资源条件、分片/副本区别、分片键路由和相同用户共置、重分片与跨片代价边界。",
+    "presentation": "title-author",
+    "maxItemsPerPage": 4,
+    "secondsPerPage": 5,
+    "renderedFields": [
+      "title",
+      "credit"
+    ],
+    "creditPolicy": "organization; no personal byline established in the retained reading record"
+  },
+  "preservedBoundaries": [
+    "补充边界：同机分表不能凭空增加单机资源；读多时缓存或副本等方法可能更适合。分片键应结合稳定性、基数、热点、常用查询选择，不是用户编号在所有系统里都最合适。查询不带这个字段也不必然查所有分片，可能有其他路由或索引；跨片访问一般带来额外协调成本，不能说所有JOIN或事务都不支持。上述边界来自R1、R3及R4的适用范围，视频仅选其中必要的两句。",
+    "",
+    "示例订单7042、7043、7044、7045、7046、7047与新订单7050、7051、7052仅为追踪标签。示例用户42、17、86，以及A/B/C映射和进入顺序均为教学设计，无QPS、延迟、吞吐或容量实测。画面订单表是节选，不表示迁移、删除或完整数据量。"
+  ]
+}

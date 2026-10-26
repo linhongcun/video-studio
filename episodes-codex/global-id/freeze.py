@@ -3,9 +3,12 @@ from pathlib import Path
 import argparse
 import hashlib
 import json
+import os
+import subprocess
 import wave
 
 D = Path(__file__).resolve().parent
+ROOT = D.parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--verify', action='store_true', help='Read-only check of the frozen manifest and inputs.')
 parser.add_argument('--profile', choices=('methods', 'tradeoffs'), help='Require the already assembled profile; never reassemble inputs.')
@@ -61,9 +64,10 @@ if args.verify:
     assert (D/'remotion/src/placeholders/storyboard.json').read_bytes() == raw
     print(f'Verified {profile_name}: {len(manifest)} frozen inputs; {total_frames} frames; storyboard {sha8}.')
     raise SystemExit(0)
-(D/f'storyboard.{sha8}.json').write_bytes(raw)
-(D/'remotion/src/placeholders').mkdir(parents=True,exist_ok=True)
-(D/'remotion/src/placeholders/storyboard.json').write_bytes(raw)
+# This reference-only revision consumes the already assembled profile. Never
+# rewrite a body snapshot/placeholder merely to freeze a new citation appendix.
+assert (D/f'storyboard.{sha8}.json').read_bytes() == raw
+assert (D/'remotion/src/placeholders/storyboard.json').read_bytes() == raw
 files = [
     'storyboard.json',f'storyboard.{sha8}.json','words.json','script.md','voice.wav',
     'covers.json','visual-direction.md','assemble.py','assemble-methods.py','freeze.py','check-final.py',
@@ -96,5 +100,51 @@ files += [str(p.relative_to(D)) for p in sorted((D/'remotion/scripts').glob('*.m
 picks = json.loads((D/'voice/picks.json').read_text())
 for sid,take in picks.items():
     files.extend([f'voice/takes/{sid}-{take}.wav',f'voice/takes/{sid}-{take}.txt.json'])
-save(D/'source-sha256.json',{rel:digest(D/rel) for rel in dict.fromkeys(files)})
+# Preserve the original 200-input profile record separately from current
+# article/research/entry wiring. This is not a claim that the retained MP4 was
+# re-rendered from the expanded reference input set.
+archive = D/'revisions/reference-endcards'
+history = archive/'before-source-sha256.json'
+assert digest(history) == 'ed02996a2ef55c2f6a18ee8cd3175538edabe78139ab7bb013ee1105f253471a', 'Archived profile record changed'
+original = json.loads(history.read_text())
+relocated = {
+    'article.mdx': archive/'before-article.mdx',
+    'research.md': archive/'before-research.md',
+    'freeze.py': archive/'before-freeze.py',
+    'remotion/package.json': archive/'before-remotion-package.json',
+}
+for relative, expected in original.items():
+    path = relocated.get(relative, D/relative)
+    assert path.is_file() and digest(path) == expected, ('Original profile input changed', relative)
+subprocess.run(['node', str(ROOT/'site/scripts/check-references.mjs'), '--sources', str(D)],
+               cwd=ROOT, check=True)
+reference_inputs = [history, *relocated.values(), D/'references.json',
+    ROOT/'episodes-codex/_shared/append_references_bibliography.py',
+    ROOT/'episodes-codex/_shared/append_references_original.py',
+    ROOT/'episodes-codex/_shared/append_references.py',
+    ROOT/'episodes-codex/_shared/render_with_references.py',
+    ROOT/'episodes-codex/_shared/requirements-reference-appendix.txt',
+    ROOT/'site/scripts/check-references.mjs', ROOT/'episodes/_shared/theme/pageTheme.ts']
+for source in json.loads((D/'references.json').read_text())['sources']:
+    records = [source['verification'], source['titleEvidence']]
+    if 'quotation' in source:
+        records.append(source['quotation'])
+    reference_inputs += [ROOT/record['evidence'] for record in records]
+# Bibliographic supplements are real dependencies, not merely paths mentioned
+# inside the source JSON. Retain their byte-exact files with the recorded SHA.
+for evidence in dict.fromkeys(ROOT/record['evidence'] for source in
+        json.loads((D/'references.json').read_text())['sources']
+        for record in [source['verification'], source['titleEvidence'],
+                       *([source['quotation']] if 'quotation' in source else [])]):
+    for supplement in json.loads(evidence.read_text()).get('titleOnlySupplements', []):
+        path = ROOT/supplement['savedPath']
+        assert path.resolve().is_relative_to(ROOT) and path.is_file(), path
+        assert digest(path) == supplement['sha256'], ('Title evidence changed', path)
+        reference_inputs.append(path)
+for path in reference_inputs:
+    assert path.resolve().is_relative_to(ROOT) and path.is_file(), path
+    files.append(os.path.relpath(path, D))
+current = {rel:digest(D/rel) for rel in dict.fromkeys(files)}
+assert set(original) <= set(current), 'An original profile input key was dropped'
+save(D/'source-sha256.json',current)
 print(f'Frozen {profile_name}: storyboard {sha8}; {len(dict.fromkeys(files))} actual inputs; {total_frames} frames.')
