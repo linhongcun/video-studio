@@ -46,3 +46,19 @@ TMPDIR=/workspace/islands-tmp flock /tmp/video-studio-render.lock npm run render
 ## 交付范围
 
 按持续授权合并、附注tag/Release和GitHub Pages交付，网站仅接入最终检查通过的canonical副本。发布前再次同步并核对冻结输入交集、实际版本与其它课程；保留旧6条算法、最新Skills/适配器/P04/P05草稿和旧Agent删除结果。站点构建/两视口播放、字幕、章节、媒体与海报完整HTTP SHA和Release日志核验在实际执行后记录。线上通过后将issue #82以completed关闭。平台新发不在本轮范围。
+
+## 第10批参考资料名单与当前入口
+
+本批只在完整原片之后追加`title-author`参考资料名单，每页最多4项、默认5秒。完整body包含原150帧Python解法卡，参考资料从代码卡结束后开始；solution.py/json、分镜、字幕和音轨均不改写。基线`4213a233c4c242b04453b8c1215031dc421c2398`的Git发布原片已绑定原render-result与总帧数，逐字节保存在`revisions/reference-endcards/body.mp4`及同SHA的`remotion/out/body.mp4`；本批直接使用这些原片追加，不寻找旧缓存或重制正文。
+
+原151项历史输入全部现存并按原路径或before快照逐一验证，保留全部原key。当前清单只声明现存真实依赖及本轮资料/入口，不将它当作原MP4已重新编码的证明。旧freezer及清单完整保存在revisions/reference-endcards；旧QA、局部拼接、媒体和算法测试记录保留其历史身份。完整源码入口的静态import、别名及公开音轨核对不依赖缺失缓存，详见[生产入口报告](../../docs/reference-endcards/batch-10/production-entry-check.json)。当前freeze.py保留实质断言，分镜快照/placeholder和代码卡只读核对；不调用原写入型freezer、prepare_code_endcard、装配、TTS或算法测试。
+
+资料负责人停写且来源预检通过后，从仓根执行：
+
+```sh
+node site/scripts/check-references.mjs --sources episodes-codex/number-of-islands
+python3 episodes-codex/number-of-islands/freeze.py
+python3 episodes-codex/number-of-islands/freeze.py --verify
+```
+
+默认`npm run render`接共享bibliography wrapper，先核对来源和冻结，再运行`render:body`及附录。`render:body`保留原voice→mix闭环、编码参数和concurrency=2，仅把mix输出改至`out/body.mp4`，完整Python卡仍由现行源码渲染。`npm run render:references`从该完整body单独追加资料；`npm run verify:references`是后续完整交付检查入口。本批只做来源与只读冻结/入口检查，未运行正文、混音或重复完整解码。最终总帧数以新receipt、render-result及发布metadata为准；[本批进度](../../docs/reference-endcards/batch-10/README.md)不预记未完成的媒体或线上通过。

@@ -29,3 +29,19 @@ python3 episodes-codex/longest-substring/freeze.py --verify
 旧静帧与失败布局证据保留原目录/原SHA，布局修后再采的证据独立标识。本轮没有逐字ASR、全片人工听辨或新手学习效果实验；技术/视觉验收和用户观看反馈分开记录。站点、实际版本与线上完整SHA统一见批次发布记录。
 
 本轮已随[v0.60.1](https://github.com/linhongcun/video-studio/releases/tag/v0.60.1)发布，PR #246、Release后手动部署40150838653及正式完整SHA核验通过。具体五片媒体身份、历史issue状态与检查范围统一见[本轮发布记录](../../docs/leetcode-derivation-20261025/release.md)。旧版release/QA保留其原始历史含义，不代表当前成片身份。
+
+## 第10批参考资料名单与当前入口
+
+本批只在完整原片之后追加`title-author`参考资料名单，每页最多4项、默认5秒。完整body包含原150帧Python解法卡，参考资料从代码卡结束后开始；solution.py/json、分镜、字幕和音轨均不改写。基线`4213a233c4c242b04453b8c1215031dc421c2398`的Git发布原片已绑定原render-result与总帧数，逐字节保存在`revisions/reference-endcards/body.mp4`及同SHA的`remotion/out/body.mp4`；本批直接使用这些原片追加，不寻找旧缓存或重制正文。
+
+旧声明195项，现存182项按原路径或before快照逐一验证；13项旧拼接缓存缺失并按原key/SHA完整归档，不造占位或声称已验证。当前清单只声明现存真实依赖及本轮资料/入口，不将它当作原MP4已重新编码的证明。旧freezer及清单完整保存在revisions/reference-endcards；旧QA、局部拼接、媒体和算法测试记录保留其历史身份。完整源码入口的静态import、别名及公开音轨核对不依赖缺失缓存，详见[生产入口报告](../../docs/reference-endcards/batch-10/production-entry-check.json)。当前freeze.py保留实质断言，分镜快照/placeholder和代码卡只读核对；不调用原写入型freezer、prepare_code_endcard、装配、TTS或算法测试。
+
+资料负责人停写且来源预检通过后，从仓根执行：
+
+```sh
+node site/scripts/check-references.mjs --sources episodes-codex/longest-substring
+python3 episodes-codex/longest-substring/freeze.py
+python3 episodes-codex/longest-substring/freeze.py --verify
+```
+
+默认`npm run render`接共享bibliography wrapper，先核对来源和冻结，再运行`render:body`及附录。`render:body`保留原voice→mix闭环、编码参数和concurrency=2，仅把mix输出改至`out/body.mp4`，完整Python卡仍由现行源码渲染。`npm run render:references`从该完整body单独追加资料；`npm run verify:references`是后续完整交付检查入口。本批只做来源与只读冻结/入口检查，未运行正文、混音或重复完整解码。最终总帧数以新receipt、render-result及发布metadata为准；[本批进度](../../docs/reference-endcards/batch-10/README.md)不预记未完成的媒体或线上通过。

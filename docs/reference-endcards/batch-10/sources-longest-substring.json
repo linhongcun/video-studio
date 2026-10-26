@@ -1,0 +1,537 @@
+{
+  "schemaVersion": 1,
+  "batch": 10,
+  "episode": "longest-substring",
+  "presentation": "title-author",
+  "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+  "assembledAtBeijing": "2026-10-26T20:56:26+08:00",
+  "checkedAt": "2026-10-24",
+  "timezone": "Asia/Shanghai",
+  "scope": "Three unchanged actual-reading sources from 2026-10-24: bilingual problem, set semantics and conditional operation costs. Python title/publisher identity is reviewed locally on 2026-10-26 from already saved complete official responses. No new GET, editorial-body reading, algorithm execution, media/freeze/QA/release or user-acceptance result claimed.",
+  "historicalResearchRecord": {
+    "path": "episodes-codex/longest-substring/research.md",
+    "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+    "gitBlob": "8b1069dc030965fe2fcd922ae32b21e97ec496ec",
+    "bytes": 7183,
+    "sha256": "a43a0f61bacd12ee3cd5e8757c5e8353053c4061ad55c5e0b010da5efbb1ed4e",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/research.md",
+    "archivePath": "docs/reference-endcards/batch-10/sources-longest-substring-prior-research-4213a233.md",
+    "fullOriginalText": "# LC.3 资料核验与独立推导\n\n访问日期：2026-10-24（北京时间）。对应[issue #79](https://github.com/linhongcun/video-studio/issues/79)。本文件记录题意来源、集合语义、算法推导及教学输入，不表示配音、连续动画、正式媒体或上线检查已完成。\n\n## 公开资料实际阅读\n\n### R1 官方题目正文\n\n- 中文：[LeetCode 3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/)。\n- 英文：[LeetCode 3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/description/)。\n- 实际获取：独立调研代理通过可用网页工具打开并读取中英文题目正文、示例和约束。shell直连LeetCode曾被代理403拒绝，不能写成curl成功；本文件采用的是实际网页读取结果，不依赖搜索摘要。\n- 页面日期：题目正文未标发表或更新时间，不根据版权年份推断。\n- 支持主张：输入是字符串，返回无重复字符的最长子串长度；子串要求连续；长度范围0..100000，字符可以包含英文字母、数字、符号和空格。\n- 官方例子：`abcabcbb`→3，`bbbbb`→1，`pwwkew`→3；`pwke`不是连续子串。\n- 用在：题意前置、文章返回值/连续性/边界解释。没有把通过率、企业标签或面试频率当作制作依据。\n\n### R2 Python集合语义\n\n- 来源：[Python 3 Library Reference — Set Types](https://docs.python.org/3/builtins/stdtypes.html#set-types-set-frozenset)。\n- 实际获取：调研代理通过网页工具打开完整正文；shell urllib直连被代理403拒绝，不将其写成curl读取成功。\n- 实际阅读支持：set是不同可哈希对象组成的无序集合，不记录元素位置或插入次序；支持成员判断、add和remove。\n- 用在：画面集合成员区不得被解释成另一条有序队列，位置由原字符串与左右下标记录。\n- 边界：语言文档的语义说明不等于每个输入下最坏`O(1)`操作承诺。本文线性时间按常见哈希集合平均常数操作模型表述，最坏情况不作该保证。\n\n### R3 Python官方集合复杂度说明\n\n- 来源：[Python 3 — Time Complexity：set/frozenset](https://docs.python.org/3/builtins/time-complexity.html#set-frozenset)。旧`wiki.python.org/moin/TimeComplexity`迁移页指向该官方文档，优先使用迁移后的来源。\n- 实际获取：调研代理通过网页open/click读取完整set复杂度段及脚注；shell直连同样被代理403拒绝。\n- 页面实际显示最后更新：2026-10-24 11:38 UTC；这是页面元数据，不解释为算法首次提出时间。\n- 支持主张：成员判断、add与remove的平均复杂度为`O(1)`；add有摊还说明，哈希碰撞可令相应操作退化为线性。平均/摊还成本不能改写成所有输入下的最坏常数保证。\n- 用在：14镜“集合操作平均是常数时间”，以及文章时间复杂度的条件。算法总共线性数量的集合操作、额外空间上限仍由本期代码独立推导，不冒称官方题解逐字证明。\n\n## 独立正确性推导\n\n循环开始时，`seen`保存旧窗口`s[left:right]`的字符，旧窗口无重复，`s[right]`是待处理新字符。\n\n如果新字符与旧窗口中下标`p`的字符相同，任何从`p`或更早开始、在当前`right`结束的区间都包含这两份字符，不能成为合法子串。依次移除左端，直到`left=p+1`时冲突恰好消失；剩余旧窗口仍无重复，加入新字符后合法，并保留了最多的左侧字符。\n\n如果新字符不在集合中，原窗口直接扩展。以前排除的更早起点在上一个右端已含重复，再向右添加字符不会消除原有重复，因此不必把左边界退回。\n\n每轮由此得到以当前右端结束的最长合法窗口。任意子串都有某个右端，取所有轮次长度的最大值，就得到全局答案。当前长度在消重后可能下降，`best`只能保持或增加，结束必须返回`best`。\n\n## 复杂度的模型与边界\n\n右端扫描n个位置，左端只向右、最多移过n个位置。每个位置对应的字符加入集合一次、移出至多一次，所以整个算法只有线性数量的集合操作；不能因为源码有内外两层循环，就把它机械算成`O(n²)`。\n\n在集合成员查询、加入和删除平均为常数时间的常见哈希表模型下，平均时间是`O(n)`。这不是Python语言对恶意碰撞等最坏情况的性能保证。空间由无重复窗口的最大成员数决定，为`O(min(n, Σ))`，其中`Σ`表示可用字符种类数；本题不把字符固定成26个字母。输入字符串不计入额外空间。\n\n## 自选教学输入\n\n`abcbadea`是本片自行选取的教学字符串，画面应标“示例”，不是官方例子。\n\n| 当前右下标 | 加入前需移出的下标/字符 | 完成后的左下标 | 合法窗口 | 当前长度 | 最长记录 |\n|---:|---|---:|---|---:|---:|\n| 0 | 无 | 0 | a | 1 | 1 |\n| 1 | 无 | 0 | ab | 2 | 2 |\n| 2 | 无 | 0 | abc | 3 | 3 |\n| 3 | 0/a、1/b | 2 | cb | 2 | 3 |\n| 4 | 无 | 2 | cba | 3 | 3 |\n| 5 | 无 | 2 | cbad | 4 | 4 |\n| 6 | 无 | 2 | cbade | 5 | 5 |\n| 7 | 2/c、3/b、4/a | 5 | dea | 3 | 5 |\n\n独立调研代理已实际运行该输入，确认两处重复的移除顺序和最终结果5。独立技术QA随后直接执行本期solution.py，以独立枚举连续区间的暴力解交叉核对：字母表`ab #`、长度0..7共21,845个有限输入，以及16个显式边界用例全部通过；覆盖官方三例、空串、全同、abba、主例、空格/制表符、大小写和Unicode。还逐轮核对集合与合法窗口成员相同、left为当前右端最早合法起点、best等于该前缀暴力答案。执行源、显示JSON及文章唯一Python块逐字一致。实际范围、输入SHA与复现命令见[qa-technical.md](qa-technical.md)及同名JSON；未重复执行测试。有限输入核验不能代替前面的一般性正确性论证，也不代表动画、声音或成片检查已通过。\n\n## 稿件与动画边界\n\n- 18镜36句围绕同一输入展开，首次重复的候选在合法窗口外，删除首字符后必须继续显示重复，不能让“挪一次”看似有效。\n- 集合没有两份相同成员；候选新字符在冲突解除后才加入集合，保留原位置格并用状态表现离开当前窗口。\n- 第11镜先后删除c、b、旧a，不能瞬间跳到结果而跳过本片承诺的因果动作。\n- 第12镜当前3与最长5分开保留；第13镜证明回看明确标出独立回看，不把回退当作正式算法左边界后退。\n- 第14镜必须说“平均”，不把期望操作时间说成最坏保证。第15镜用while而不是if；第16镜先加入，再更新长度。\n- 17镜边界示意与主例分开；最后完整Python卡静态5秒、明确暂停提示，无新口播或旧字幕。程序、显示JSON和文章代码须逐字一致。\n\n本次已对照script逐镜核读范围与叙事。本文件不表示已听辨生成TTS、完成无字幕连续动画或审过正式MP4。\n",
+    "gitBlobBytesMatched": true,
+    "gitObjectHashRecomputed": true
+  },
+  "originalArticleRecord": {
+    "path": "episodes-codex/longest-substring/article.mdx",
+    "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+    "gitBlob": "650ac13bffc90b3b1feb5ec5e6a3bbab16e341b8",
+    "bytes": 8223,
+    "sha256": "e8db3ffabf00915713e267cb07c2ff38c018114aeca150adcfc44bac8a138bcc",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/article.mdx",
+    "archivePath": "docs/reference-endcards/batch-10/sources-longest-substring-prior-article-4213a233.mdx",
+    "fullOriginalText": "---\ntitle: 无重复字符的最长子串：重复了，左边要移几步？\nsummary: 先由逐起点尝试发现重复检查，再从连续与不重复的要求推到保留合法片段，理解为什么选择滑动窗口以及重复时左边需要移几步。\nchapters:\n  - { id: goal, title: 从题意找到入手点 }\n  - { id: shrink, title: 为什么左边要连续移动 }\n  - { id: best, title: 窗口会缩小，最长要记住 }\n  - { id: code, title: 把过程写进完整程序 }\nrelated: []\n---\n\n## 从题意找到入手点 {#goal}\n\nLeetCode第3题给出字符串`s`，要求返回其中**不含重复字符的最长子串的长度**。子串必须连续，不能隔着字符挑选；返回的是长度，不是所有不同字符的数量，也不要求返回那一段文本。[^problem]\n\n本片使用自行选取的教学输入，不是官方示例：\n\n```text\n字符：a b c b a d e a\n下标：0 1 2 3 4 5 6 7\n```\n\n`abc`是连续且无重复的一段；从整串挑出五种不同字符，并不自动构成子串。顺序、连续区间以及是否重复，都必须同时满足。\n\n### 从直接尝试，到保留已经检查过的片段\n\n先不预设算法。最直接的办法，是从每个起点向右尝试，发现重复就停止：从下标0开始，读过`abc`，再遇下标3的`b`时冲突；换成下标1重新开始，又要检查刚看过的`b`和`c`，接着仍撞上同一个新`b`。反复清空重来，会重复处理重叠的部分。\n\n要减少重复检查，先看哪些位置已经确定不能作为起点。固定到下标3的新`b`，从0开始的`abcb`、从1开始的`bcb`都包含下标1与3的两份`b`，必定不合法。只挖掉中间下标1的旧`b`也不行，`a·cb`在原串中不再连续。\n\n因此起点至少要越过旧`b`，最早可以保留下标2..3的连续`cb`。此前`abc`无重复，移除左端前缀后留下的字符仍然无重复，所以这一段不必从头检查。下一字符不重复，就接在右侧；发生重复，就从左端移出，直到冲突消失。再单独记录当前片段里有哪些字符，就能快速判断新字符是否已经出现。\n\n由这些要求，才得到下面的做法；片中的这段推导与随后从空区间正式执行有明确重置，不能把`cb`当作程序初态。\n\n用`left`和`right`圈出一段连续区间，向右探索新字符；当新字符与区间内已有字符相同时，从左边逐个移出，直到可以加入新字符。这就是本期使用的**滑动窗口**。\n\n程序另外用集合`seen`记录当前窗口里的字符，快速回答“这个新字符已经在里面了吗”。集合没有顺序，也不保存每个字符的位置；顺序与位置由原字符串和边界提供。[^set]\n\n## 为什么左边要连续移动 {#shrink}\n\n先读入下标0..2的`abc`，三个字符不同，当前长度与最长记录都是3。\n\n现在准备读入下标3的新`b`。旧窗口中已经有下标1的`b`，所以新字符先作为候选，不能直接加入正式集合。按左边界逐个移出：\n\n| 动作 | 左边界 | 加入新字符前的旧窗口 | 新`b`能否加入 |\n|---|---:|---|---|\n| 发现冲突 | 0 | `abc` | 不能，旧`b`仍在 |\n| 移除下标0的`a` | 1 | `bc` | 仍不能，旧`b`仍在 |\n| 移除下标1的旧`b` | 2 | `c` | 可以，冲突消失 |\n| 加入下标3的新`b` | 2 | 新窗口为`cb` | 合法，长度2 |\n\n因此条件必须是“**只要还重复，就继续移除**”，不能写成只执行一次的`if`。这个例子里只删除最左边的`a`，重复的两个`b`依然都在候选区间中。\n\n### 为什么这种收缩不会漏掉更长答案\n\n加入新字符之前，旧窗口已经没有重复。若新字符与窗口内下标`p`的旧字符相同，那么任何从`p`或更左开始、在当前`right`结束的区间，都包含这两份相同字符，必然不合法。\n\n所以左边界至少要越过`p`。按顺序删除，第一次让冲突消失的位置就是`p+1`：剩余旧窗口仍无重复，再加入新字符也合法，并且没有多删掉本来可以保留的左端字符。\n\n如果新字符不在集合里，就保持左边界；此前已经排除的更早起点，添加右侧新字符也不会让原有重复消失。于是每轮都得到**以当前右端结束的最长合法窗口**。所有子串都有一个右端，逐轮保存这些长度的最大值，就覆盖了全局最长答案。这是由窗口不变式得到的独立论证，不把示例或有限用例当作证明。\n\n## 窗口会缩小，最长要记住 {#best}\n\n接着读入下标4..6的`ade`，它们都能依次加入当前窗口：\n\n| 右下标 | 完成消重后的窗口 | 当前长度 | 最长记录 |\n|---:|---|---:|---:|\n| 0 | `a` | 1 | 1 |\n| 1 | `ab` | 2 | 2 |\n| 2 | `abc` | 3 | 3 |\n| 3 | `cb` | 2 | 3 |\n| 4 | `cba` | 3 | 3 |\n| 5 | `cbad` | 4 | 4 |\n| 6 | `cbade` | 5 | 5 |\n| 7 | `dea` | 3 | 5 |\n\n最后一个新字符是下标7的`a`。旧窗口`cbade`中的旧`a`位于下标4，所以依次移除下标2的`c`、3的`b`、4的旧`a`，才能加入新`a`。最终窗口是下标5..7的`dea`，长度3。\n\n但此前已经见过下标2..6的`cbade`，长度5，不能因为当前窗口缩短就把历史最佳改小。每次只执行：\n\n```text\n最长记录 = max(原最长记录, 当前合法窗口长度)\n```\n\n扫描结束返回5，而不是最后一个窗口的长度3。官方示例`abcabcbb`返回3、`bbbbb`返回1、`pwwkew`返回3；其中`pwke`虽没有重复，却不连续，不能算子串。[^problem]\n\n## 把过程写进完整程序 {#code}\n\n下方程序与片尾代码卡共用同一份执行源`solution.py`；视频只在正文突出当前规则的关键行，片尾另完整展示并提示暂停阅读。\n\n```python\nclass Solution:\n    def lengthOfLongestSubstring(self, s: str) -> int:\n        seen = set()\n        left = 0\n        best = 0\n\n        for right, ch in enumerate(s):\n            while ch in seen:\n                seen.remove(s[left])\n                left += 1\n            seen.add(ch)\n            best = max(best, right - left + 1)\n\n        return best\n```\n\n每轮循环开始时，集合保存的是`s[left:right]`的字符，不包含准备加入的`s[right]`；这段旧窗口没有重复。先消重，再加入新字符，最后更新长度，顺序不能颠倒。\n\n### 时间与空间\n\n虽然写了内外两层循环，左边界不会回退。每个下标对应的字符加入一次、移出至多一次，因此整个扫描的集合操作数为线性数量。在集合查询、加入、删除平均为常数时间的常见哈希表模型下，平均时间为`O(n)`；Python语言文档不承诺所有输入下的最坏常数哈希操作时间。[^complexity]\n\n集合最多保存当前无重复窗口中的字符。若可用字符种类数为`Σ`，额外空间为`O(min(n, Σ))`，不包含输入字符串；不固定把字符集假设成26个英文字母。\n\n### 边界\n\n- 空字符串没有字符，返回0。\n- 全部字符相同，例如`aaaa`，最长只能是1。\n- `abba`需要在第二个`b`到来时连续移出`a`和旧`b`，返回2。\n- 空格和符号也是题目允许的字符，应照常参与集合判断；不要先用`strip()`或过滤规则改写输入。[^problem]\n\n片尾完整程序静态停留5秒，供需要的观众自行暂停查看。完整实现的正确性、显示一致性与实际媒体检查按制作报告分别记录，不将机器检查当作用户观看结论。\n\n[^problem]: [LeetCode：3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/)，官方题意、示例及约束，访问日期2026-10-24（北京时间）。\n[^set]: [Python 3：Set Types — set, frozenset](https://docs.python.org/3/builtins/stdtypes.html#set-types-set-frozenset)，集合无序、不记录元素位置的语义，访问日期2026-10-24（北京时间）。\n[^complexity]: [Python 3：Time Complexity — set/frozenset](https://docs.python.org/3/builtins/time-complexity.html#set-frozenset)，set成员判断、加入、删除的平均复杂度及哈希碰撞/摊还边界，访问日期2026-10-24（北京时间）。本文线性操作次数由程序独立推导，不声称Python语言保证最坏`O(n)`。\n",
+    "preservation": "Complete original text/frontmatter/anchors/three footnotes/sole Python block remains an exact prefix; append only."
+  },
+  "currentScriptRecord": {
+    "path": "episodes-codex/longest-substring/script.md",
+    "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+    "gitBlob": "2cc365e518d81bb79ff0461ba81e0d6e819370e5",
+    "bytes": 6067,
+    "sha256": "808bda6749c877e5e187bbc31f9fa80746d7be9e3b2587f97d56788d3d4e7688",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/script.md",
+    "readScope": "只读核对当前20镜资料对应位置；旧research的较早镜号保留原值，不重写为当前镜号。"
+  },
+  "verificationReuse": {
+    "technicalReadDate": "2026-10-24",
+    "recordedReadScope": "访问日期：2026-10-24（北京时间）。对应[issue #79](https://github.com/linhongcun/video-studio/issues/79)。本文件记录题意来源、集合语义、算法推导及教学输入，不表示配音、连续动画、正式媒体或上线检查已完成。",
+    "newNetworkRequests": [],
+    "newCanonicalGETCount": 0,
+    "newOfficialRawGETCount": 0,
+    "newTechnicalReadingClaimed": false,
+    "localIdentityReviewDate": "2026-10-26",
+    "identityMethod": "Reuse batch9 official CPython raw responses already stored byte-exact in the baseline; verify full SHA/blob and inspect headings/publisher lines only.",
+    "limits": [
+      "原网页工具成功读取与旧shell403失败分别保留，不将其改成curl成功。",
+      "题目、集合语义、平均/摊还成本和原独立滑窗证明分别归属；未引用任何未读官方editorial。",
+      "本仓旧阅读记录不是官方固定正文；官方响应元数据复用日期26日不是24日技术访问日期或旧响应SHA。",
+      "没有明确个人署名，机构署名不从Git贡献者或历史版权年份推断个人作者。"
+    ]
+  },
+  "officialMetadataSnapshotsReused": [
+    {
+      "path": "docs/reference-endcards/batch-9/two-sum-stdtypes.rst.source",
+      "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+      "gitBlob": "cf05f947c5908df8fabe006fa7a804a1b2f23b84",
+      "bytes": 262618,
+      "sha256": "766d7f02b3872eedbffda498bfd0a23225a6082c18fdf02e2b3f420817f2422b",
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/docs/reference-endcards/batch-9/two-sum-stdtypes.rst.source",
+      "kind": "original section title",
+      "fixedOfficialSourceUrl": "https://github.com/python/cpython/blob/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/stdtypes.rst",
+      "officialRepository": "python/cpython",
+      "officialCommit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+      "officialPath": "Doc/builtins/stdtypes.rst",
+      "originalRetrieval": {
+        "url": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/stdtypes.rst",
+        "status": 200,
+        "finalUrl": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/stdtypes.rst",
+        "checkedAtUTC": "2026-10-26T11:37:40.117389+00:00",
+        "bytes": 262618,
+        "sha256": "766d7f02b3872eedbffda498bfd0a23225a6082c18fdf02e2b3f420817f2422b",
+        "path": "Doc/builtins/stdtypes.rst",
+        "commit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+        "completeResponse": true,
+        "savedResponsePath": "docs/reference-endcards/batch-9/two-sum-stdtypes.rst.source",
+        "purpose": "2026-10-26 original title and publisher metadata supplementation only. Not a fresh technical reading, a newly accessed canonical website, or a hash of the 2026-10-25 original webpage."
+      },
+      "localIdentityReviewDate": "2026-10-26",
+      "newGETThisBatch": false,
+      "scope": "只本地核对已保存官方完整响应中的题名/机构；24日技术实读保持，未新GET或重读技术正文。",
+      "excerpt": {
+        "startLine": 5414,
+        "endLine": 5415,
+        "text": "Set Types --- :class:`set`, :class:`frozenset`\n=============================================="
+      }
+    },
+    {
+      "path": "docs/reference-endcards/batch-9/two-sum-time-complexity.rst.source",
+      "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+      "gitBlob": "5ce02ac2761b62151e11758991ee5a4ee93d15fc",
+      "bytes": 11291,
+      "sha256": "57a0ec0af127c75d556a2e160c079f5d2fe81a92d89634b50ecf132b38e26c17",
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/docs/reference-endcards/batch-9/two-sum-time-complexity.rst.source",
+      "kind": "original page title",
+      "fixedOfficialSourceUrl": "https://github.com/python/cpython/blob/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/time-complexity.rst",
+      "officialRepository": "python/cpython",
+      "officialCommit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+      "officialPath": "Doc/builtins/time-complexity.rst",
+      "originalRetrieval": {
+        "url": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/time-complexity.rst",
+        "status": 200,
+        "finalUrl": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/time-complexity.rst",
+        "checkedAtUTC": "2026-10-26T11:37:40.455066+00:00",
+        "bytes": 11291,
+        "sha256": "57a0ec0af127c75d556a2e160c079f5d2fe81a92d89634b50ecf132b38e26c17",
+        "path": "Doc/builtins/time-complexity.rst",
+        "commit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+        "completeResponse": true,
+        "savedResponsePath": "docs/reference-endcards/batch-9/two-sum-time-complexity.rst.source",
+        "purpose": "2026-10-26 original title and publisher metadata supplementation only. Not a fresh technical reading, a newly accessed canonical website, or a hash of the 2026-10-25 original webpage."
+      },
+      "localIdentityReviewDate": "2026-10-26",
+      "newGETThisBatch": false,
+      "scope": "只本地核对已保存官方完整响应中的题名/机构；24日技术实读保持，未新GET或重读技术正文。",
+      "excerpt": {
+        "startLine": 3,
+        "endLine": 5,
+        "text": "===============================================\nTime complexity of operations on built-in types\n==============================================="
+      }
+    },
+    {
+      "path": "docs/reference-endcards/batch-9/two-sum-copyright.rst.source",
+      "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+      "gitBlob": "9210d5f50ed84154c7532aa40ad417883da8271d",
+      "bytes": 446,
+      "sha256": "f2c1d094466270ed41fc4dd2904d91b34d58cbb5033403b2de5cc153aba8e608",
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/docs/reference-endcards/batch-9/two-sum-copyright.rst.source",
+      "kind": "publisher identity, not personal author",
+      "fixedOfficialSourceUrl": "https://github.com/python/cpython/blob/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/copyright.rst",
+      "officialRepository": "python/cpython",
+      "officialCommit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+      "officialPath": "Doc/copyright.rst",
+      "originalRetrieval": {
+        "url": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/copyright.rst",
+        "status": 200,
+        "finalUrl": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/copyright.rst",
+        "checkedAtUTC": "2026-10-26T11:37:40.674122+00:00",
+        "bytes": 446,
+        "sha256": "f2c1d094466270ed41fc4dd2904d91b34d58cbb5033403b2de5cc153aba8e608",
+        "path": "Doc/copyright.rst",
+        "commit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+        "completeResponse": true,
+        "savedResponsePath": "docs/reference-endcards/batch-9/two-sum-copyright.rst.source",
+        "purpose": "2026-10-26 original title and publisher metadata supplementation only. Not a fresh technical reading, a newly accessed canonical website, or a hash of the 2026-10-25 original webpage."
+      },
+      "localIdentityReviewDate": "2026-10-26",
+      "newGETThisBatch": false,
+      "scope": "只本地核对已保存官方完整响应中的题名/机构；24日技术实读保持，未新GET或重读技术正文。",
+      "excerpt": {
+        "startLine": 5,
+        "endLine": 7,
+        "text": "Python and this documentation is:\n\nCopyright © 2001 Python Software Foundation. All rights reserved."
+      }
+    }
+  ],
+  "sources": [
+    {
+      "id": "longest-substring-r1",
+      "referenceId": "R1",
+      "organization": "LeetCode",
+      "title": "Longest Substring Without Repeating Characters",
+      "version": "LeetCode 3 · 官方题面（未标发布日期或更新时间）",
+      "canonicalUrl": "https://leetcode.com/problems/longest-substring-without-repeating-characters/description/",
+      "additionalUrls": [
+        "https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/"
+      ],
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-24",
+      "verificationBasis": "existing-official-reading-record",
+      "originalRecord": {
+        "startLine": 7,
+        "endLine": 15,
+        "text": "### R1 官方题目正文\n\n- 中文：[LeetCode 3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/)。\n- 英文：[LeetCode 3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/description/)。\n- 实际获取：独立调研代理通过可用网页工具打开并读取中英文题目正文、示例和约束。shell直连LeetCode曾被代理403拒绝，不能写成curl成功；本文件采用的是实际网页读取结果，不依赖搜索摘要。\n- 页面日期：题目正文未标发表或更新时间，不根据版权年份推断。\n- 支持主张：输入是字符串，返回无重复字符的最长子串长度；子串要求连续；长度范围0..100000，字符可以包含英文字母、数字、符号和空格。\n- 官方例子：`abcabcbb`→3，`bbbbb`→1，`pwwkew`→3；`pwke`不是连续子串。\n- 用在：题意前置、文章返回值/连续性/边界解释。没有把通过率、企业标签或面试频率当作制作依据。",
+        "claimText": "输入是字符串，返回无重复字符的最长子串长度；子串要求连续；长度范围0..100000，字符可以包含英文字母、数字、符号和空格。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/research.md#L7-L15",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-24既有实读记录research.md第10行：LeetCode 3.之后的英文原题",
+        "evidence": "docs/reference-endcards/batch-10/sources-longest-substring.json",
+        "record": {
+          "oldTitleLabelLine": 10,
+          "oldTitleLabelText": "- 英文：[LeetCode 3. Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/description/)。",
+          "oldTitleLabelUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/research.md#L10",
+          "actualTitleText": "Longest Substring Without Repeating Characters",
+          "basis": "英文原题逐字沿用24日实际题面读取记录，不新核当前H1。"
+        }
+      },
+      "organizationEvidence": {
+        "basis": "原官方题面平台LeetCode，无明确个人署名。",
+        "publisherSnapshot": null,
+        "personalAuthor": "not-established; author field omitted"
+      },
+      "supports": [
+        "输入是字符串，返回无重复字符的最长子串长度；子串要求连续；长度范围0..100000，字符可以包含英文字母、数字、符号和空格。"
+      ],
+      "sections": "中英文题目正文、示例与约束；不包含未读官方editorial",
+      "currentScriptShotMapping": [
+        "01",
+        "02",
+        "03",
+        "04",
+        "19"
+      ],
+      "currentCanonicalAccess": {
+        "newGet": false,
+        "status": "not-requested"
+      },
+      "historicalOfficialBodySHA256": null,
+      "hashScope": "旧research/article SHA为本仓记录身份；复用官方文件SHA仅标识26日已保存的题名/出版元数据文件，不冒充24日旧官方技术响应SHA。"
+    },
+    {
+      "id": "longest-substring-r2",
+      "referenceId": "R2",
+      "organization": "Python Software Foundation",
+      "title": "Set Types — set, frozenset",
+      "version": "Python 3 Library Reference（旧记录未标小版本）",
+      "canonicalUrl": "https://docs.python.org/3/builtins/stdtypes.html#set-types-set-frozenset",
+      "additionalUrls": [],
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-24",
+      "verificationBasis": "existing-official-reading-record",
+      "originalRecord": {
+        "startLine": 17,
+        "endLine": 23,
+        "text": "### R2 Python集合语义\n\n- 来源：[Python 3 Library Reference — Set Types](https://docs.python.org/3/builtins/stdtypes.html#set-types-set-frozenset)。\n- 实际获取：调研代理通过网页工具打开完整正文；shell urllib直连被代理403拒绝，不将其写成curl读取成功。\n- 实际阅读支持：set是不同可哈希对象组成的无序集合，不记录元素位置或插入次序；支持成员判断、add和remove。\n- 用在：画面集合成员区不得被解释成另一条有序队列，位置由原字符串与左右下标记录。\n- 边界：语言文档的语义说明不等于每个输入下最坏`O(1)`操作承诺。本文线性时间按常见哈希集合平均常数操作模型表述，最坏情况不作该保证。",
+        "claimText": "set是不同可哈希对象组成的无序集合，不记录元素位置或插入次序；支持成员判断、add和remove。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/research.md#L17-L23",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "旧article.mdx第126行的完整章节题名；本地复用官方固定stdtypes.rst第5414行heading核对（26日题名/机构核对，非新技术实读）",
+        "evidence": "docs/reference-endcards/batch-10/sources-longest-substring.json",
+        "record": {
+          "oldTitleLabelLine": 19,
+          "oldTitleLabelText": "- 来源：[Python 3 Library Reference — Set Types](https://docs.python.org/3/builtins/stdtypes.html#set-types-set-frozenset)。",
+          "oldTitleLabelUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/research.md#L19",
+          "actualTitleText": "Set Types — set, frozenset",
+          "localReviewDate": "2026-10-26",
+          "newGET": false,
+          "officialSnapshot": {
+            "path": "docs/reference-endcards/batch-9/two-sum-stdtypes.rst.source",
+            "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+            "gitBlob": "cf05f947c5908df8fabe006fa7a804a1b2f23b84",
+            "bytes": 262618,
+            "sha256": "766d7f02b3872eedbffda498bfd0a23225a6082c18fdf02e2b3f420817f2422b",
+            "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/docs/reference-endcards/batch-9/two-sum-stdtypes.rst.source",
+            "kind": "original section title",
+            "fixedOfficialSourceUrl": "https://github.com/python/cpython/blob/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/stdtypes.rst",
+            "officialRepository": "python/cpython",
+            "officialCommit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+            "officialPath": "Doc/builtins/stdtypes.rst",
+            "originalRetrieval": {
+              "url": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/stdtypes.rst",
+              "status": 200,
+              "finalUrl": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/stdtypes.rst",
+              "checkedAtUTC": "2026-10-26T11:37:40.117389+00:00",
+              "bytes": 262618,
+              "sha256": "766d7f02b3872eedbffda498bfd0a23225a6082c18fdf02e2b3f420817f2422b",
+              "path": "Doc/builtins/stdtypes.rst",
+              "commit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+              "completeResponse": true,
+              "savedResponsePath": "docs/reference-endcards/batch-9/two-sum-stdtypes.rst.source",
+              "purpose": "2026-10-26 original title and publisher metadata supplementation only. Not a fresh technical reading, a newly accessed canonical website, or a hash of the 2026-10-25 original webpage."
+            },
+            "localIdentityReviewDate": "2026-10-26",
+            "newGETThisBatch": false,
+            "scope": "只本地核对已保存官方完整响应中的题名/机构；24日技术实读保持，未新GET或重读技术正文。",
+            "excerpt": {
+              "startLine": 5414,
+              "endLine": 5415,
+              "text": "Set Types --- :class:`set`, :class:`frozenset`\n=============================================="
+            }
+          },
+          "basis": "仅从第9批已保存官方完整响应核原题；原技术支持继续24日旧记录。",
+          "oldCompleteTitleArticleLine": 126,
+          "oldCompleteTitleArticleText": "[^set]: [Python 3：Set Types — set, frozenset](https://docs.python.org/3/builtins/stdtypes.html#set-types-set-frozenset)，集合无序、不记录元素位置的语义，访问日期2026-10-24（北京时间）。",
+          "headingRendering": "原文reStructuredText的---为排版长破折号，Sphinx class角色显示set/frozenset；本期旧article已有完全相同的显示题名。"
+        }
+      },
+      "organizationEvidence": {
+        "basis": "Python官方文档发布机构Python Software Foundation；已有固定copyright原文只用作机构出版身份，不将版权或Git作者变成个人文献署名。",
+        "publisherSnapshot": {
+          "path": "docs/reference-endcards/batch-9/two-sum-copyright.rst.source",
+          "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+          "gitBlob": "9210d5f50ed84154c7532aa40ad417883da8271d",
+          "bytes": 446,
+          "sha256": "f2c1d094466270ed41fc4dd2904d91b34d58cbb5033403b2de5cc153aba8e608",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/docs/reference-endcards/batch-9/two-sum-copyright.rst.source",
+          "kind": "publisher identity, not personal author",
+          "fixedOfficialSourceUrl": "https://github.com/python/cpython/blob/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/copyright.rst",
+          "officialRepository": "python/cpython",
+          "officialCommit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+          "officialPath": "Doc/copyright.rst",
+          "originalRetrieval": {
+            "url": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/copyright.rst",
+            "status": 200,
+            "finalUrl": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/copyright.rst",
+            "checkedAtUTC": "2026-10-26T11:37:40.674122+00:00",
+            "bytes": 446,
+            "sha256": "f2c1d094466270ed41fc4dd2904d91b34d58cbb5033403b2de5cc153aba8e608",
+            "path": "Doc/copyright.rst",
+            "commit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+            "completeResponse": true,
+            "savedResponsePath": "docs/reference-endcards/batch-9/two-sum-copyright.rst.source",
+            "purpose": "2026-10-26 original title and publisher metadata supplementation only. Not a fresh technical reading, a newly accessed canonical website, or a hash of the 2026-10-25 original webpage."
+          },
+          "localIdentityReviewDate": "2026-10-26",
+          "newGETThisBatch": false,
+          "scope": "只本地核对已保存官方完整响应中的题名/机构；24日技术实读保持，未新GET或重读技术正文。",
+          "excerpt": {
+            "startLine": 5,
+            "endLine": 7,
+            "text": "Python and this documentation is:\n\nCopyright © 2001 Python Software Foundation. All rights reserved."
+          }
+        },
+        "personalAuthor": "not-established; author field omitted"
+      },
+      "supports": [
+        "set是不同可哈希对象组成的无序集合，不记录元素位置或插入次序；支持成员判断、add和remove。"
+      ],
+      "sections": "Set Types：集合无序、不同可哈希成员、成员判断、add与remove；不作为最坏常数时间保证",
+      "currentScriptShotMapping": [
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18"
+      ],
+      "currentCanonicalAccess": {
+        "newGet": false,
+        "status": "not-requested"
+      },
+      "historicalOfficialBodySHA256": null,
+      "hashScope": "旧research/article SHA为本仓记录身份；复用官方文件SHA仅标识26日已保存的题名/出版元数据文件，不冒充24日旧官方技术响应SHA。"
+    },
+    {
+      "id": "longest-substring-r3",
+      "referenceId": "R3",
+      "organization": "Python Software Foundation",
+      "title": "Time complexity of operations on built-in types",
+      "version": "Python 3 · 官方内置类型复杂度文档（旧记录未标小版本）",
+      "canonicalUrl": "https://docs.python.org/3/builtins/time-complexity.html#set-frozenset",
+      "additionalUrls": [],
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-24",
+      "verificationBasis": "existing-official-reading-record",
+      "originalRecord": {
+        "startLine": 25,
+        "endLine": 31,
+        "text": "### R3 Python官方集合复杂度说明\n\n- 来源：[Python 3 — Time Complexity：set/frozenset](https://docs.python.org/3/builtins/time-complexity.html#set-frozenset)。旧`wiki.python.org/moin/TimeComplexity`迁移页指向该官方文档，优先使用迁移后的来源。\n- 实际获取：调研代理通过网页open/click读取完整set复杂度段及脚注；shell直连同样被代理403拒绝。\n- 页面实际显示最后更新：2026-10-24 11:38 UTC；这是页面元数据，不解释为算法首次提出时间。\n- 支持主张：成员判断、add与remove的平均复杂度为`O(1)`；add有摊还说明，哈希碰撞可令相应操作退化为线性。平均/摊还成本不能改写成所有输入下的最坏常数保证。\n- 用在：14镜“集合操作平均是常数时间”，以及文章时间复杂度的条件。算法总共线性数量的集合操作、额外空间上限仍由本期代码独立推导，不冒称官方题解逐字证明。",
+        "claimText": "成员判断、add与remove的平均复杂度为`O(1)`；add有摊还说明，哈希碰撞可令相应操作退化为线性。平均/摊还成本不能改写成所有输入下的最坏常数保证。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/research.md#L25-L31",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "本地复用已保存官方固定time-complexity.rst第4行原始页题，26日只补题名/机构；原技术读取为research.md第25–31行的24日记录",
+        "evidence": "docs/reference-endcards/batch-10/sources-longest-substring.json",
+        "record": {
+          "oldTitleLabelLine": 27,
+          "oldTitleLabelText": "- 来源：[Python 3 — Time Complexity：set/frozenset](https://docs.python.org/3/builtins/time-complexity.html#set-frozenset)。旧`wiki.python.org/moin/TimeComplexity`迁移页指向该官方文档，优先使用迁移后的来源。",
+          "oldTitleLabelUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/research.md#L27",
+          "actualTitleText": "Time complexity of operations on built-in types",
+          "localReviewDate": "2026-10-26",
+          "newGET": false,
+          "officialSnapshot": {
+            "path": "docs/reference-endcards/batch-9/two-sum-time-complexity.rst.source",
+            "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+            "gitBlob": "5ce02ac2761b62151e11758991ee5a4ee93d15fc",
+            "bytes": 11291,
+            "sha256": "57a0ec0af127c75d556a2e160c079f5d2fe81a92d89634b50ecf132b38e26c17",
+            "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/docs/reference-endcards/batch-9/two-sum-time-complexity.rst.source",
+            "kind": "original page title",
+            "fixedOfficialSourceUrl": "https://github.com/python/cpython/blob/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/time-complexity.rst",
+            "officialRepository": "python/cpython",
+            "officialCommit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+            "officialPath": "Doc/builtins/time-complexity.rst",
+            "originalRetrieval": {
+              "url": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/time-complexity.rst",
+              "status": 200,
+              "finalUrl": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/builtins/time-complexity.rst",
+              "checkedAtUTC": "2026-10-26T11:37:40.455066+00:00",
+              "bytes": 11291,
+              "sha256": "57a0ec0af127c75d556a2e160c079f5d2fe81a92d89634b50ecf132b38e26c17",
+              "path": "Doc/builtins/time-complexity.rst",
+              "commit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+              "completeResponse": true,
+              "savedResponsePath": "docs/reference-endcards/batch-9/two-sum-time-complexity.rst.source",
+              "purpose": "2026-10-26 original title and publisher metadata supplementation only. Not a fresh technical reading, a newly accessed canonical website, or a hash of the 2026-10-25 original webpage."
+            },
+            "localIdentityReviewDate": "2026-10-26",
+            "newGETThisBatch": false,
+            "scope": "只本地核对已保存官方完整响应中的题名/机构；24日技术实读保持，未新GET或重读技术正文。",
+            "excerpt": {
+              "startLine": 3,
+              "endLine": 5,
+              "text": "===============================================\nTime complexity of operations on built-in types\n==============================================="
+            }
+          },
+          "basis": "仅从第9批已保存官方完整响应核原题；原技术支持继续24日旧记录。"
+        }
+      },
+      "organizationEvidence": {
+        "basis": "Python官方文档发布机构Python Software Foundation；已有固定copyright原文只用作机构出版身份，不将版权或Git作者变成个人文献署名。",
+        "publisherSnapshot": {
+          "path": "docs/reference-endcards/batch-9/two-sum-copyright.rst.source",
+          "baseCommit": "4213a233c4c242b04453b8c1215031dc421c2398",
+          "gitBlob": "9210d5f50ed84154c7532aa40ad417883da8271d",
+          "bytes": 446,
+          "sha256": "f2c1d094466270ed41fc4dd2904d91b34d58cbb5033403b2de5cc153aba8e608",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/docs/reference-endcards/batch-9/two-sum-copyright.rst.source",
+          "kind": "publisher identity, not personal author",
+          "fixedOfficialSourceUrl": "https://github.com/python/cpython/blob/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/copyright.rst",
+          "officialRepository": "python/cpython",
+          "officialCommit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+          "officialPath": "Doc/copyright.rst",
+          "originalRetrieval": {
+            "url": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/copyright.rst",
+            "status": 200,
+            "finalUrl": "https://raw.githubusercontent.com/python/cpython/c436e8d83597c6f8c1bc7e37812c98d46670c29a/Doc/copyright.rst",
+            "checkedAtUTC": "2026-10-26T11:37:40.674122+00:00",
+            "bytes": 446,
+            "sha256": "f2c1d094466270ed41fc4dd2904d91b34d58cbb5033403b2de5cc153aba8e608",
+            "path": "Doc/copyright.rst",
+            "commit": "c436e8d83597c6f8c1bc7e37812c98d46670c29a",
+            "completeResponse": true,
+            "savedResponsePath": "docs/reference-endcards/batch-9/two-sum-copyright.rst.source",
+            "purpose": "2026-10-26 original title and publisher metadata supplementation only. Not a fresh technical reading, a newly accessed canonical website, or a hash of the 2026-10-25 original webpage."
+          },
+          "localIdentityReviewDate": "2026-10-26",
+          "newGETThisBatch": false,
+          "scope": "只本地核对已保存官方完整响应中的题名/机构；24日技术实读保持，未新GET或重读技术正文。",
+          "excerpt": {
+            "startLine": 5,
+            "endLine": 7,
+            "text": "Python and this documentation is:\n\nCopyright © 2001 Python Software Foundation. All rights reserved."
+          }
+        },
+        "personalAuthor": "not-established; author field omitted"
+      },
+      "supports": [
+        "成员判断、add与remove的平均复杂度为`O(1)`；add有摊还说明，哈希碰撞可令相应操作退化为线性。平均/摊还成本不能改写成所有输入下的最坏常数保证。"
+      ],
+      "sections": "set/frozenset复杂度段及脚注；平均/摊还成本与哈希碰撞边界",
+      "currentScriptShotMapping": [
+        "16"
+      ],
+      "currentCanonicalAccess": {
+        "newGet": false,
+        "status": "not-requested"
+      },
+      "historicalOfficialBodySHA256": null,
+      "hashScope": "旧research/article SHA为本仓记录身份；复用官方文件SHA仅标识26日已保存的题名/出版元数据文件，不冒充24日旧官方技术响应SHA。"
+    }
+  ],
+  "independentDerivation": {
+    "classification": "original episode invariant proof and operation-count derivation, not official editorial",
+    "recordStartLine": 33,
+    "recordEndLine": 48,
+    "text": "## 独立正确性推导\n\n循环开始时，`seen`保存旧窗口`s[left:right]`的字符，旧窗口无重复，`s[right]`是待处理新字符。\n\n如果新字符与旧窗口中下标`p`的字符相同，任何从`p`或更早开始、在当前`right`结束的区间都包含这两份字符，不能成为合法子串。依次移除左端，直到`left=p+1`时冲突恰好消失；剩余旧窗口仍无重复，加入新字符后合法，并保留了最多的左侧字符。\n\n如果新字符不在集合中，原窗口直接扩展。以前排除的更早起点在上一个右端已含重复，再向右添加字符不会消除原有重复，因此不必把左边界退回。\n\n每轮由此得到以当前右端结束的最长合法窗口。任意子串都有某个右端，取所有轮次长度的最大值，就得到全局答案。当前长度在消重后可能下降，`best`只能保持或增加，结束必须返回`best`。\n\n## 复杂度的模型与边界\n\n右端扫描n个位置，左端只向右、最多移过n个位置。每个位置对应的字符加入集合一次、移出至多一次，所以整个算法只有线性数量的集合操作；不能因为源码有内外两层循环，就把它机械算成`O(n²)`。\n\n在集合成员查询、加入和删除平均为常数时间的常见哈希表模型下，平均时间是`O(n)`。这不是Python语言对恶意碰撞等最坏情况的性能保证。空间由无重复窗口的最大成员数决定，为`O(min(n, Σ))`，其中`Σ`表示可用字符种类数；本题不把字符固定成26个字母。输入字符串不计入额外空间。\n",
+    "textSHA256": "2943c2ff10fb147a7db4695cca0527d512dfaf914427546290d43cb0f68ff8fe",
+    "priorExecutionRecord": "qa-technical.md/json retains original exhaustive21845/explicit16 finite execution identity; no new tests run."
+  },
+  "editorial": {
+    "selected": false,
+    "officialEditorialBodyReadingClaimed": false,
+    "attemptMadeThisTask": false,
+    "scope": "未引用官方题解，未虚构本期发生过editorial成功或失败请求。"
+  },
+  "publicationMetadata": {
+    "setComplexityObservedLastUpdated": "2026-10-24 11:38 UTC",
+    "sourceRecordLine": 29,
+    "sourceRecordText": "- 页面实际显示最后更新：2026-10-24 11:38 UTC；这是页面元数据，不解释为算法首次提出时间。",
+    "scope": "旧实读看到的页面元数据，不当作算法首次发表日或当前页面新读取结果。"
+  },
+  "preservationRequirement": {
+    "basis": "root batch10 immutable body capture, recorded as preservation requirement only; no personal media QA",
+    "body": {
+      "slug": "longest-substring",
+      "bodyFrames": 5980,
+      "bodySHA256": "1b0ee7819bfa434635f2eeaa2d78358df2629eb4586c230c8c05c7b2baaaa7f6",
+      "existingCodeCard": {
+        "kind": "full-python-solution",
+        "from": 5830,
+        "durationInFrames": 150,
+        "codeSource": "solution.py",
+        "displaySource": "solution.json",
+        "title": "完整 Python 解法",
+        "codeSourceSha256": "c80663cfede2547827b8b846d220179f92cb28cad9c11aebe9e0326bad8effcb",
+        "displaySourceSha256": "388bfbe203d30d05e99e1a14982e624e6d8d5a6ab5d8518964c97218a6a6c424"
+      },
+      "productionVideoInitiallyPresent": false
+    },
+    "original150FramePythonCardMustRemain": true,
+    "notTouchedByThisTask": [
+      "freezer",
+      "README",
+      "source-sha",
+      "code/solution",
+      "published episodes",
+      "shared code",
+      "QA/media"
+    ]
+  },
+  "selection": {
+    "selected": [
+      "R1",
+      "R2",
+      "R3"
+    ],
+    "reason": "分别覆盖连续子串任务、无序集合语义和平均/摊还性能模型，不把集合语义当最坏常数保证或把独立滑窗证明冒充官方题解。",
+    "presentation": "title-author",
+    "maxItemsPerPage": 4,
+    "secondsPerPage": 5,
+    "renderedFields": [
+      "title",
+      "credit"
+    ],
+    "creditPolicy": "organization; no personal author established"
+  }
+}

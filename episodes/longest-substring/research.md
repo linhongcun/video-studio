@@ -73,3 +73,22 @@
 - 17镜边界示意与主例分开；最后完整Python卡静态5秒、明确暂停提示，无新口播或旧字幕。程序、显示JSON和文章代码须逐字一致。
 
 本次已对照script逐镜核读范围与叙事。本文件不表示已听辨生成TTS、完成无字幕连续动画或审过正式MP4。
+
+## 片尾参考资料清单（2026-10-26整理，技术实读仍为2026-10-24）
+
+选三项真实来源，title-author每页最多4项、默认5秒，仅原题/机构：Longest Substring Without Repeating Characters、Set Types — set, frozenset、Time complexity of operations on built-in types。没有明确个人作者，机构为LeetCode、Python Software Foundation。
+
+原完整research基线`4213a233c4c242b04453b8c1215031dc421c2398`，Git blob`8b1069dc030965fe2fcd922ae32b21e97ec496ec`，完整SHA-256`a43a0f61bacd12ee3cd5e8757c5e8353053c4061ad55c5e0b010da5efbb1ed4e`（7183字节）；原article SHA-256`e8db3ffabf00915713e267cb07c2ff38c018114aeca150adcfc44bac8a138bcc`（8223字节）。[固定既有实读记录](https://github.com/linhongcun/video-studio/blob/4213a233c4c242b04453b8c1215031dc421c2398/episodes-codex/longest-substring/research.md)及[原全文归档](../../docs/reference-endcards/batch-10/sources-longest-substring-prior-research-4213a233.md)仅为本仓阅读记录，不是官方固定正文。
+
+本批无新GET。R1原题取本research第10行；R2旧article第126行已有完整章节题名，另本地核第9批已保存CPython固定stdtypes.rst第5414行；R3旧Time Complexity为简称，按已有官方time-complexity.rst第4行补齐实际完整原题。三份官方原始文件字节/SHA与基线Git对象一致，26日只核题名/机构，技术verification.checkedAt仍24日；未声称新的官方技术正文阅读或24日网页响应SHA。
+
+| 片尾编号 | 实际原题 | 机构 | 原技术记录 |
+| --- | --- | --- | --- |
+| R1 | [Longest Substring Without Repeating Characters](https://leetcode.com/problems/longest-substring-without-repeating-characters/description/) | LeetCode | research第7–15行 |
+| R2 | [Set Types — set, frozenset](https://docs.python.org/3/builtins/stdtypes.html#set-types-set-frozenset) | Python Software Foundation | research第17–23行 |
+| R3 | [Time complexity of operations on built-in types](https://docs.python.org/3/builtins/time-complexity.html#set-frozenset) | Python Software Foundation | research第25–31行 |
+
+
+原记录逐字块、官方固定文件完整SHA、原题/机构段落与成本边界见[sources-longest-substring.json](../../docs/reference-endcards/batch-10/sources-longest-substring.json)。保留网页读取成功与shell403失败的原区分；不引用未读editorial，不将独立窗口证明/复杂度推导或有限执行包装为官方题解。当前script复杂度为第16镜，旧research早期第14镜映射仍原样保留，不改写历史。
+
+旧article/research/所有脚注锚点与唯一Python程序全文前缀保持，原150帧代码卡必须保留。未改媒体、solution、freezer、README、source-sha、共享或QA，不预记成片、声音/上线检查或用户认可。
