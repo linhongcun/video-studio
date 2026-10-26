@@ -177,3 +177,13 @@ python3 episodes-codex/strategy-pattern/demo/pricing.py
 | 15–16 | 简单稳定时不强行拆；独立变化与导航成本 | S01、S05 |
 
 S02、S03、S06仅用于配套文章，不在短片中增加API或状态模式支线。
+
+
+## 片尾参考资料（第12批整理，2026-10-26）
+
+本节仅追加出处清单，不改写前面的原例、历史阅读日期、技术范围或验证结果。R1/R2的当前技术阅读日期均为2026-10-25；2026-10-26只核旧记录的题名和机构元数据，无新GET。未明确个人署名，不猜作者。
+
+- **[R1] Design Patterns**；UBC CPSC 310；CPSC 310课程材料 · 原实读页面未标独立发布日期或更新时间；[正式来源](https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/)。范围：Design Pattern Process；Strategy: Encapsulating algorithms；Analysis。实读：2026-10-25（初读2026-10-24）。编者说明：支持同一任务的算法分离、共同约定、外部选择、委托与维护成本。
+- **[R2] Strategy**；Refactoring.Guru；专业教学网页 · 原实读页面未标发布日期或更新时间；[正式来源](https://refactoring.guru/design-patterns/strategy)。范围：Solution；Structure；Pros and Cons；Relations with Other Patterns。实读：2026-10-25（初读2026-10-24）。编者说明：辅助核对结构、委托与适用边界，不冒称模式原始定义或GoF原书。
+
+完整固定旧记录、原题/署名依据、逐主张映射及限制见[本批证据](../../docs/archive/2026-10/reference-endcards-batch-12/sources-strategy-pattern.json)。片尾只有原题与机构，2项1页5秒；原Java代码卡、程序与旧官方阅读/运行证据全部保留，不重制媒体。

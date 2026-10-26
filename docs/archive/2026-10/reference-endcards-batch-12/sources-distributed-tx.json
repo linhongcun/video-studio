@@ -1,0 +1,643 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-12",
+  "episode": "distributed-tx",
+  "presentation": "title-author",
+  "baselineCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+  "organizedAt": "2026-10-26T23:38:10.557861+08:00",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex appendix_implementation source organizer",
+  "selectedSourceCount": 8,
+  "scope": "Eight selected current official/original-author sources across the archived multi-scheme overview. Preserve all original source prose, footnotes, archive status and replacement/learning paths; no new lecture rendering, audio or timing edits.",
+  "recordedTechnicalAccessDate": "2026-10-24",
+  "newTechnicalReadingForThisEpisode": false,
+  "metadataReadingScope": "Three successful new pinned official-file GETs for AT/Saga/RocketMQ titles only; two existing official metadata responses reused locally, old24Oct exact bibliographic title/byline reused for AWS outbox and ChrisRichardson. No unrecorded official original body SHA or24Oct upstream commit invented.",
+  "baselineResearch": {
+    "path": "episodes-codex/distributed-tx/research.md",
+    "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+    "gitBlobSHA1": "b127e90a9f1d6e6bdfe8c394ac30baf82a435494",
+    "sha256": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+    "bytes": 17607,
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/distributed-tx/research.md",
+    "archivePath": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx-before-research.md",
+    "fullOriginalRecord": "# EP.21 主流方案分章版：权威资料与技术边界\n\n访问日期：2026-10-24（北京时间）。根据用户最新反馈重新核验，替代原片只讲可靠消息的内容范围。本文件由独立技术研究代理实际打开官方正文并核对有关段落后写作。当前范围为五类方案的新版稿件与配套文章；不是最终编码或上线检查报告。\n\n## 先确定讲解的层次\n\n新版按 **2PC/XA → Seata AT → TCC → Saga → 可靠消息** 分章，最后比较。这里是常用设计方向的教学地图，不是市场占有率排名，也不宣称穷尽全部研究协议。\n\n- **2PC** 是原子提交协议的两阶段过程；**XA** 是事务管理器与资源管理器协作的标准接口。两者在同章说明关系，不能数成两个互不相关的方案。\n- **AT** 是框架的一种事务模式；本片所述具体机制属于 **Seata AT**，不把产品模式泛化为全行业统一标准。\n- **TCC** 把资源准备、确认、取消放到业务接口；**Saga** 把长流程拆为本地事务，并设计继续推进或业务补偿。\n- **Outbox、事务消息** 首先处理“本地业务提交与消息发布”的衔接；它们不是自动把下游数据库纳入同一笔原子提交。可靠发布可以成为 Saga 的组成部分，因此不能画成彼此完全排斥的分类。\n- “最终一致”是对收敛结果的要求，既不是具体框架，也不是“等一会儿一定成功”的机制。\n\n用户这次明确要求覆盖多方案，优先于旧稿“只保留两三个术语”的范围限制。适合保留的视觉原则是分章、同一示例、渐进揭示，一屏只讲当前步骤，不能因为方案增加而把所有流程长期铺满画面。\n\n## 官方正文核验表\n\n以下为独立转述，页面路径未带版本号者在访问时按官网当前文档阅读；本片不报性能排名或产品配置版本。\n\n| ID | 已实际阅读的官方正文 | 支撑范围与关键边界 |\n|---|---|---|\n| A1 | [MySQL：XA Transactions](https://dev.mysql.com/doc/refman/8.4/en/xa.html)，“XA Transactions”正文，特别是全局事务与两阶段过程 | TM 协调各 RM：准备阶段报告能否提交；全部可提交才下达提交，否则回滚。2PC 是过程，XA 规定协作接口。 |\n| A2 | [MySQL：XA Transaction States](https://dev.mysql.com/doc/refman/8.4/en/xa-states.html)，“PREPARED”及恢复状态 | prepare 后尚未终结；显式 commit/rollback 才结束。连接可分离不等于事务已完成或锁自动释放。 |\n| A3 | [MySQL：Restrictions on XA Transactions](https://dev.mysql.com/doc/refman/8.4/en/xa-restrictions.html)，“persistent”与 XA RECOVER | prepared 状态可以持久存在；故障恢复要识别未完成 XA。不能把超时或连接断开画成已准备参与者自行回滚。 |\n| A4 | [Seata：XA Mode](https://seata.apache.org/docs/user/mode/xa/)，“Overall Mechanism”“Disadvantages” | 资源本身需支持 XA；prepare 之后可能等待终决并长期占用锁，限制并发和适用事务长度。 |\n| B1 | [Seata：AT Mode](https://seata.apache.org/docs/user/mode/at/)，“Overall Mechanism” | 一阶段将业务修改与 undo_log 在同一本地事务提交，释放本地锁；二阶段成功清理，失败用日志补偿。 |\n| B2 | [Seata：AT 开发原理](https://seata.apache.org/docs/dev/mode/at-mode/)，“Write isolation”“Read isolation”“Phase 1”“Phase 2” | 全局锁约束参与写入；普通 SELECT 不自动检查全局锁，可能看见本地已提交但全局未完成的数据。回滚需校验前后镜像，不能盲目覆盖并发新数据。 |\n| B3 | [Seata：What Is Seata?](https://seata.apache.org/docs/overview/what-is-seata/)，“AT Mode”“Read isolation” | 当前总览也区分本地提交和全局完成，说明需额外代理读隔离；避免只按产品简介笼统说强隔离。 |\n| C1 | [Seata：TCC Mode](https://seata.apache.org/docs/user/mode/tcc/)，“Overview”“Disadvantages” | 业务实现 Try、Confirm、Cancel，侵入业务但不依赖底层提供 XA；需要资源预留及异常控制。 |\n| C2 | [Seata：TCC 开发原理](https://seata.apache.org/docs/dev/mode/tcc-mode/) | 两阶段由自定义准备、确认和取消行为组成；不是数据库自动回滚。 |\n| C3 | [Seata：TCC Fence 原理，2022-06-25](https://seata.apache.org/blog/seata-tcc-fence/)，“TCC”“Empty rollback”“Idempotence”“Hanging” | Try 实际提交业务预留；重复请求、先 Cancel 后 Try、未执行 Try 的 Cancel 都需设计。框架可辅助，不替代业务正确性。 |\n| D1 | [Seata：Saga Mode](https://seata.apache.org/docs/user/mode/saga/)，“Overview”“Dealing with Lack of Isolation” | 各参与者逐步提交本地事务，失败可补偿；默认没有跨整个流程的事务隔离，已产生的可见业务效果不能当作未发生。 |\n| D2 | [AWS：Saga patterns](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-patterns.html) | 可向前重试或向后补偿；包含编排和事件协同两种组织方式。不是只有中心协调器才叫 Saga。 |\n| D3 | [AWS：Saga orchestration](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-orchestration.html)，“Issues and considerations” | 幂等、无全局事务隔离、语义锁、状态可观察性是具体实现责任。只引用这些边界，不沿用其将所有 database-per-service 情形一概排除 2PC 的概括。 |\n| D4 | [Azure：Compensating Transaction](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)，“Solution”“Problems and considerations” | 补偿依赖业务，不必恢复原快照，不必严格反向执行；补偿会失败，需持久进度、重试和人工处理。 |\n| E1 | [AWS：Transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)，“Intent”“Issues and considerations”“Using an outbox table” | 业务行与待发事件同库事务，另行发送；可能重复，消费者需幂等。它弥合本地持久化与通知之间的双写空档。 |\n| E2 | [RocketMQ：Transaction Message](https://rocketmq.apache.org/docs/featureBehavior/04transactionmessage/)，“Working mechanism”“Usage limits”“Usage notes” | 先保存不可投递半消息，再执行本地事务并报告结果；未知时回查本地结果。边界是本地事务与消息可投递性，下游成功不自动受同一事务保障；只支持接受异步的场景，回查有时限和终止策略。 |\n| E3 | [RocketMQ：Transactional Message Sending](https://rocketmq.apache.org/docs/4.x/producer/06message5/)，Introduction及本地结果回查示例 | 补充核验半消息暂不可投递、执行本地事务、提交/取消结果通知、丢失后回查的顺序。此页用于原理交叉核对，配置和API以实际选定版本为准。 |\n| E4 | [Chris Richardson：Idempotent Consumer，2020-10-16](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，Tracking message IDs及PROCESSED_MESSAGE | 原作者正文实际重读：唯一处理标识与业务修改同事务提交，重复由唯一键拦截；不能只在内存查重或将已处理标识独立提交。 |\n\n本次核心依据均为当前官方文档、2022 年官方技术文章或 2020 年原作者公开说明；未将 2020 年以前材料作为本片关键事实依据。Saga 原论文历史可另列“仅参考”，不需要为了完整性而展开学术沿革。\n\n## 各章统一回答的五个问题\n\n为避免“全部列举以后还是混在一起”，每章必须用相同问题做收尾：**谁负责协调？何时实际提交？失败如何结束？期间别人能看到什么？适合哪些前提？**\n\n| 方案 | 提交与协调 | 正常完成 / 失败 | 期间状态和代价 | 清楚的适用边界 |\n|---|---|---|---|---|\n| 2PC / XA | 协调器决策；支持 XA 的资源先 prepared，后执行最终决定 | 全部准备后决定提交；任一准备失败可决定回滚。进入终决后按记录恢复，不能随意改决定 | prepared 可能持续持锁和等待；原子提交不等同于全局快照、串行化或同一毫秒可见 | 受控、支持 XA 的参与资源与较短事务；不自动纳入普通 HTTP 接口或已发出的邮件 |\n| Seata AT | 代理记录修改前后镜像与 undo_log，本地先提交，全局后决定 | 成功清理日志；失败校验后用日志补偿 | 提早释放本地锁，但仍有全局锁、日志和回滚开销；普通读可能看到全局中间状态 | 支持的数据库、SQL、数据源代理与参与写入路径；不能把外部不可逆副作用当成 SQL 自动撤销 |\n| TCC | 业务实现可恢复的资源预留及确认/取消 | Try 完成资源预留；全部 Try 成功后确认，否则释放预留。阶段调用需可重复与可恢复 | 资源业务上被占用；Try 自身通常已经本地提交，不能画成悬而未提交的 DB 长事务 | 能提供预留接口并正确处理幂等、空回滚和悬挂的业务；不能只做一次查询就声称已预留 |\n| Saga | 各步骤本地提交；由流程编排或事件协同推进 | 暂时故障可继续重试，业务失败可补偿已完成步骤 | 中间结果可见，无天然全局隔离；补偿是新的业务动作 | 长流程、多服务、允许中间状态和业务补偿；不可逆步骤需另行安排或人工处理 |\n| 可靠消息 | 先保证本地提交与发布意图有可靠衔接，再异步消费 | 发布/消费重试，幂等处理；永久业务失败另走失败或补偿流程 | 上下游暂时不一致；消息确认不代表业务成功 | 能接受异步推进的业务；不保证所有资源在同一原子事务里提交 |\n\n该表用于创作和文章，不建议整表长时间铺满视频。视频各章只留下本章最关键的“动作 + 边界”两行，结尾逐行加入对照。\n\n## 可靠消息一章必须再分清的两个实现\n\n**Outbox：**订单库中，订单 8124 与事件 E8124 同笔本地事务写入。提交后由持久化发送进度驱动投递。此处“同笔事务”只包住订单与同库事件，不包住库存库。外发重试可能重复，库存处理标识与库存修改还需在库存本地事务共同提交。\n\n**事务消息（以 RocketMQ 机制作公开依据）：**先在消息系统保存“暂不可投递”的半消息；生产者执行本地事务，再向消息系统确认提交或取消。报告丢失时，消息系统回查生产者所能核验的本地事务最终结果；事务尚在进行应回答 Unknown，不凭空猜结果。此处回查不是询问下游库存有没有扣完。\n\n二者都在弥合本地写入与发布之间的空档，但持久证据位置、先后顺序与恢复协议不同，不能把“Outbox 表”画成“半消息队列”。它们也都不使库存扣减与订单本地提交在同一原子边界内。\n\n## 适合动画的统一业务例子\n\n以下全部为教学示例，不是性能实验。每章明确“重新演示”，复用订单 8124、库存 4 件、本次买 1 件，若展示账户则余额 1000、本次支付 200。颜色稳定：金色为待决定或预留，青色为本步已确认，红色为失败，白色为当前可读基线。不要单靠颜色分辨状态，必须写短状态字。\n\n1. **开场：**两个独立数据资源，订单已写、库存未改，展示普通本地事务边界。随后给出五章导航，当前章单独高亮，其余缩退。\n2. **XA：**两边修改进入准备状态，出现“可提交 / 等决定”；协调器将唯一提交决定持久化，再把决定分别送达。可画一边先收到、一边尚在等待，最后两边完成；不要用同帧变绿暗示消息零时延。另画准备失败→回滚；prepared 后故障则停在“待恢复决定”，不用擅自超时变回原值。\n3. **AT：**库存 4→3 与撤销日志“4→3”共同本地落盘；画面注明“本地已提交，全局未完成”。第二步失败后，从日志发起校验和恢复 3→4，最后释放全局锁。让旁观普通读短暂看到 3，可直观解释与 XA 的边界不同。\n4. **TCC：**库存从“可用 4，预留 0”变成“可用 3，预留 1”。确认分支将预留 1 转成已售 1；取消分支将预留 1 释放，可用回到 4。先预留，再确认，不画成先卖出去再退款。账户若展示，1000 分为可用 800 与预留 200，不凭空改变总量。\n5. **Saga：**本章明确重置示例库存为 0：账户先扣款 200 并本地提交，随后库存检查不足；补偿新增一次“退款 200”的业务操作，余额 800 回到 1000。保留原扣款记录与退款记录，不把时间倒带并抹掉历史。补偿暂时失败时停在“待重试/人工处理”，不要立即宣称全流程完成。\n6. **消息：**先展示 Outbox 的订单+事件同库边界，事件穿过异步链路到库存；随后明确切换“另一种发布机制”，展示半消息/本地事务/结果确认/回查。二者共用下游幂等步骤：E8124 已处理后库存仍为 3。\n7. **结尾：**按“数据库准备 / 日志补偿 / 业务预留 / 业务补偿 / 异步通知”依次回放五个动作，一次只加一个。收尾一句：“先问业务能否等待、能否预留、能否补偿，再选机制；这些方案能组合，没有一项适合所有场景。”此句是基于上述边界的创作归纳，不是来源原话。\n\n## 必须拦截的误导主张\n\n- “XA 和 2PC 是两种并列协议。”应明确接口标准与提交过程的关系。\n- “XA 要求所有库同一瞬间可见”“2PC 自动给出跨库一致快照或全局串行化”。原子终决不推出这些额外保证。\n- “XA 参与者准备后，超时就自己回滚。”已准备资源不能凭本地猜测推翻全局决定。\n- “AT 一阶段还没提交”“释放了全部锁”“跟 XA 的读隔离完全一样”。实际是本地已提交、全局锁仍有作用，普通读还需考虑中间值。\n- “AT 能自动撤销一切副作用”“发现脏写也直接覆写回旧值”。其适用范围是受支持、受代理的数据资源与操作。\n- “TCC 只需检查库存足够”“Try 预留不需要本地持久化”“Confirm 只调用一次就够”。必须真的占住资源并支持恢复与重复调用。\n- “TCC 只有 Try/Confirm 两步”“Saga 只是 TCC 改个名字”。TCC 的取消是释放事先预留；Saga 常在已完成本地业务之后补偿。\n- “Saga 失败就是数据库回滚”“补偿会清掉原来的历史”“补偿永远成功”“Saga 天然全局隔离”。均不成立。\n- “Outbox 保证订单库和库存库原子提交”“半消息回查的是库存消费结果”“事务消息保证下游业务成功”。均越过真实事务边界。\n- “消息只会收到一次”“收到代理确认就是库存改完”“无限重试必然成功”。永久故障、保留期限、业务拒绝及重复必须处理。\n- “可靠消息与 Saga 完全互斥”。可靠事件发布可以支撑 Saga 的某一步或协同消息。\n- “当前主流只有这五种”“某方案一定最快”“某一种占多数”。本次未做市场调查和吞吐比较，视频应说“常见的五个设计方向”，不报排名。\n\n## 内容范围建议\n\n将 3PC、共识算法、数据库内部复制事务、分布式 SQL 内核、框架产品清单放在文章“延伸与范围”即可，不把抽象层不同的名称继续平铺为视频第六、第七种业务方案。若介绍 3PC，应另读原始论文并标年代；不能仅凭网络概括称它“彻底解决 2PC 阻塞”。本次没有为 3PC 或具体分布式数据库产品做完整选型研究，不给该方向作性能或普及率结论。\n\n交付边界：本文件是技术研究与动画建议，不是成片 QA；配音、起音、动态实现、最终编码和上线检查须在新版本实际完成后另行记录。\n\n## 38 镜新版稿件独立审读\n\n已逐镜阅读 `script-overview-v2.md` 与 `visual-overview-v2.md` 的首版 38 镜草稿。五章机制、成功与失败边界基本符合上述官方正文；Saga 第20镜已显式重置库存0，余额1000→800→退款1000没有数值矛盾。XA 的唯一终决、AT 的本地先提交与普通读、TCC 的预留、Saga 的新业务补偿、Outbox 与半消息的不同边界均在稿中出现。\n\n首版审读发现并已由主任务修订：第08镜条件句；第10镜本地锁与全局写锁的区别；第14镜TCC三个操作而非依次三步；第15镜Try预留已经本地提交；第37镜改为幂等与失败处理，避免暗示重试必定使业务成功。第12镜回看全局未结束、第18镜确认成功分支、第22镜退款失败分支均增加明确重置说明。\n\n已重新逐镜核读当前script.md，以上修订已经进入当前旁白与画面描述，稿件核心技术和示例数值检查通过，主任务已启动配音。本研究代理未修改script.md，也不以稿件通过替代实际配音、动态小样或最终编码检查。\n\n配套article.mdx使用固定七章problem、xa、at、tcc、saga、message、compare，并补充XA恢复、AT读隔离、TCC空回滚与悬挂、Saga补偿失败、可靠消息的本地与消费边界和统一比较表。所有阅读记录仅证明资料与稿件已核验；未声称完成人工听辨、逐字ASR、成片审或线上核验。\n",
+    "evidenceLimit": "Existing actual technical reading and original context; not an archived official HTTP body. All18 old rows and original footnotes remain."
+  },
+  "titleMetadataRecords": [
+    {
+      "repository": "apache/incubator-seata-website",
+      "commit": "ae31c10be89d7cca4d3a7010f3875d30992731c8",
+      "path": "i18n/en/docusaurus-plugin-content-docs/current/dev/mode/at-mode.md",
+      "url": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/dev/mode/at-mode.md",
+      "fixedSourceUrl": "https://github.com/apache/incubator-seata-website/blob/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/dev/mode/at-mode.md",
+      "finalUrl": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/dev/mode/at-mode.md",
+      "status": 200,
+      "checkedAt": "2026-10-26T23:34:05.635368+08:00",
+      "bytes": 8214,
+      "sha256": "b2f436c42744a8e7280b43e62b9637321b7329b3506453e8c8d1a62cc195d944",
+      "readScope": "Fixed official title/frontmatter and displayed heading only; old distributed-tx technical reading remains2026-10-24.",
+      "savedPath": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx-seata-at-dev.md",
+      "titleEvidence": {
+        "startLine": 7,
+        "endLine": 7,
+        "exactRawHeading": "#  Seata AT mode",
+        "originalTitle": "Seata AT mode",
+        "selection": "Exact displayed H1, including original case, rather than changing it to the metadata/page label."
+      },
+      "freshGETThisPass": true
+    },
+    {
+      "repository": "apache/incubator-seata-website",
+      "commit": "ae31c10be89d7cca4d3a7010f3875d30992731c8",
+      "path": "i18n/en/docusaurus-plugin-content-docs/current/user/mode/saga.md",
+      "url": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/user/mode/saga.md",
+      "fixedSourceUrl": "https://github.com/apache/incubator-seata-website/blob/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/user/mode/saga.md",
+      "finalUrl": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/user/mode/saga.md",
+      "status": 200,
+      "checkedAt": "2026-10-26T23:34:05.926572+08:00",
+      "bytes": 52876,
+      "sha256": "d7142ef63c872d8bf512e22a637fc3aa27051a242b0159c1d4d46fbf94d2ddd9",
+      "readScope": "Fixed official title/frontmatter and displayed heading only; old distributed-tx technical reading remains2026-10-24.",
+      "savedPath": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx-seata-saga-user.md",
+      "titleEvidence": {
+        "startLine": 6,
+        "endLine": 6,
+        "exactRawHeading": "# SEATA Saga Pattern",
+        "originalTitle": "SEATA Saga Pattern",
+        "selection": "Exact displayed H1, including original case, rather than changing it to the metadata/page label."
+      },
+      "freshGETThisPass": true
+    },
+    {
+      "repository": "apache/rocketmq-site",
+      "commit": "fd076ce3777a04f18bdc4ad7c6aff22ec031082b",
+      "path": "i18n/en/docusaurus-plugin-content-docs/version-5.0/04-featureBehavior/04transactionmessage.md",
+      "url": "https://raw.githubusercontent.com/apache/rocketmq-site/fd076ce3777a04f18bdc4ad7c6aff22ec031082b/i18n/en/docusaurus-plugin-content-docs/version-5.0/04-featureBehavior/04transactionmessage.md",
+      "fixedSourceUrl": "https://github.com/apache/rocketmq-site/blob/fd076ce3777a04f18bdc4ad7c6aff22ec031082b/i18n/en/docusaurus-plugin-content-docs/version-5.0/04-featureBehavior/04transactionmessage.md",
+      "finalUrl": "https://raw.githubusercontent.com/apache/rocketmq-site/fd076ce3777a04f18bdc4ad7c6aff22ec031082b/i18n/en/docusaurus-plugin-content-docs/version-5.0/04-featureBehavior/04transactionmessage.md",
+      "status": 200,
+      "checkedAt": "2026-10-26T23:35:21.931388+08:00",
+      "bytes": 16074,
+      "sha256": "244c788ebe3a68e49222c834e0036cf9ae1d8e6ae85d6456c5f1b74472cd2a24",
+      "readScope": "Exact displayed English title/frontmatter only; original episode technical reading remains2026-10-24.",
+      "precedingPathLookup": {
+        "path": "docs/featureBehavior/04transactionmessage.md",
+        "status": 404,
+        "scope": "Not source evidence; official recursive tree located the actual version5.0 English file."
+      },
+      "savedPath": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx-rocketmq-transaction-message.md",
+      "titleEvidence": {
+        "startLine": 1,
+        "endLine": 1,
+        "exactRawHeading": "# Transaction Message",
+        "originalTitle": "Transaction Message",
+        "selection": "Exact displayed H1, including original case, rather than changing it to the metadata/page label."
+      },
+      "freshGETThisPass": true
+    },
+    {
+      "repository": "apache/incubator-seata-website",
+      "commit": "ae31c10be89d7cca4d3a7010f3875d30992731c8",
+      "path": "i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md",
+      "url": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md",
+      "fixedSourceUrl": "https://github.com/apache/incubator-seata-website/blob/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md",
+      "finalUrl": "https://raw.githubusercontent.com/apache/incubator-seata-website/ae31c10be89d7cca4d3a7010f3875d30992731c8/i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md",
+      "status": 200,
+      "checkedAt": "2026-10-26T17:37:36.399202+08:00",
+      "bytes": 6349,
+      "sha256": "ae1c05f35a3273c6218a2b216d007048408bbf4796b5a2814fa2a32903d593a8",
+      "title": "Seata TCC Mode",
+      "readScope": "Downloaded complete official repository file and inspected exact frontmatter title/explicit byline only. No new technical-body review or re-dating of 2026-10-24 actual reading.",
+      "selectedForVideo": true,
+      "savedPath": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx-seata-tcc-user.md",
+      "copiedFromBaselinePath": "docs/reference-endcards/batch-7/tx-tcc-title-evidence/seata-user-tcc.md",
+      "copiedFromBaselineGitBlobSHA1": "711934c0d96f50702973702adf5336f850662cf5",
+      "copiedFromBaselineFileSHA256": "ae1c05f35a3273c6218a2b216d007048408bbf4796b5a2814fa2a32903d593a8",
+      "freshGETThisPass": false,
+      "titleEvidence": {
+        "startLine": 7,
+        "endLine": 7,
+        "exactRawHeading": "# Seata TCC Mode",
+        "originalTitle": "Seata TCC Mode"
+      },
+      "scope": "Reuse exact official response captured in an earlier26Oct source pass. This is title metadata identity only for this archived lesson; technical support remains its own24Oct reading."
+    },
+    {
+      "repository": "MicrosoftDocs/architecture-center",
+      "commit": "498e83a207cfd512b396489e95ed3f791b372364",
+      "path": "docs/patterns/compensating-transaction.md",
+      "url": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/498e83a207cfd512b396489e95ed3f791b372364/docs/patterns/compensating-transaction.md",
+      "fixedSourceUrl": "https://github.com/MicrosoftDocs/architecture-center/blob/498e83a207cfd512b396489e95ed3f791b372364/docs/patterns/compensating-transaction.md",
+      "status": 200,
+      "checkedAt": "2026-10-26T09:39:54.694694+00:00",
+      "bytes": 16441,
+      "sha256": "18d9aca47cba63058af04b44ffe4d40485ff786c71c6ec6059870eefd0ed4c50",
+      "savedPath": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx-azure-compensating-transaction.md",
+      "copiedFromBaselinePath": "docs/reference-endcards/batch-8/tx-saga-compensating-transaction.md.source",
+      "copiedFromBaselineGitBlobSHA1": "1cb3531d7d1b30955d5e6361d6ad205f415f0f91",
+      "copiedFromBaselineFileSHA256": "18d9aca47cba63058af04b44ffe4d40485ff786c71c6ec6059870eefd0ed4c50",
+      "freshGETThisPass": false,
+      "titleEvidence": {
+        "startLine": 11,
+        "endLine": 11,
+        "exactRawHeading": "# Compensating Transaction pattern",
+        "originalTitle": "Compensating Transaction pattern"
+      },
+      "scope": "Reuse exact official response captured in an earlier26Oct source pass. This is title metadata identity only for this archived lesson; technical support remains its own24Oct reading."
+    }
+  ],
+  "priorTitleAndAuthorBibliography": [
+    {
+      "path": "episodes-codex/tx-outbox/article.mdx",
+      "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+      "gitBlobSHA1": "9e17c41a54a94ec66bfd94f82baf4030380351c6",
+      "fileSHA256": "9f5bcc4f88922a63078d2cfd90845796d747a5cf1c6fa31a4b7d75706c78b4fb",
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/tx-outbox/article.mdx#L47",
+      "startLine": 47,
+      "endLine": 47,
+      "text": "[^aws]: [AWS：Transactional outbox pattern](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)，Intent、Issues and considerations、Using an outbox table，访问2026-10-24。",
+      "scope": "Existing24Oct actual-reading bibliography title/byline record; no new canonical page/H1/byline GET."
+    },
+    {
+      "path": "episodes-codex/tx-outbox/article.mdx",
+      "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+      "gitBlobSHA1": "9e17c41a54a94ec66bfd94f82baf4030380351c6",
+      "fileSHA256": "9f5bcc4f88922a63078d2cfd90845796d747a5cf1c6fa31a4b7d75706c78b4fb",
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/tx-outbox/article.mdx#L49",
+      "startLine": 49,
+      "endLine": 49,
+      "text": "[^consumer]: [Chris Richardson：Handling duplicate messages using the Idempotent consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，2020-10-16，Tracking message IDs，访问2026-10-24。",
+      "scope": "Existing24Oct actual-reading bibliography title/byline record; no new canonical page/H1/byline GET."
+    }
+  ],
+  "sources": [
+    {
+      "id": "R1",
+      "priorId": "A1",
+      "organization": "Oracle / MySQL",
+      "title": "XA Transactions",
+      "version": "MySQL 8.4 Reference Manual",
+      "url": "https://dev.mysql.com/doc/refman/8.4/en/xa.html",
+      "sections": "XA Transactions：全局事务；TM/RM；两阶段提交过程",
+      "supports": [
+        "事务管理器与资源管理器通过XA协作，准备阶段与最终提交或回滚阶段分开。",
+        "2PC描述提交过程，XA提供协作接口；原子终决不自动推出跨库全局快照、同毫秒可见或全局串行化。"
+      ],
+      "limits": [
+        "准备态恢复、锁和连接生命周期的细节仍由原A2/A3/A4脚注补充；本精选条目不冒称整个MySQL手册所有章节都为同一页。",
+        "仅受控且支持相关接口的资源可参与，普通HTTP或邮件副作用不会因名称自动纳入。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/distributed-tx/research.md#L23",
+      "baselineReadExcerpt": {
+        "path": "episodes-codex/distributed-tx/research.md",
+        "gitBlobSHA1": "b127e90a9f1d6e6bdfe8c394ac30baf82a435494",
+        "fileSHA256": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+        "startLine": 23,
+        "endLine": 23,
+        "text": "| A1 | [MySQL：XA Transactions](https://dev.mysql.com/doc/refman/8.4/en/xa.html)，“XA Transactions”正文，特别是全局事务与两阶段过程 | TM 协调各 RM：准备阶段报告能否提交；全部可提交才下达提交，否则回滚。2PC 是过程，XA 规定协作接口。 |"
+      },
+      "titleEvidence": {
+        "locator": "基线f3610e24 research.md A1 · line 23完整原题",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx.json",
+        "originalTitle": "XA Transactions",
+        "metadataRecordIndex": null,
+        "priorBibliographyRecordIndex": null
+      },
+      "authorshipEvidence": {
+        "publisher": "Oracle / MySQL",
+        "explicitPersonalAuthor": null,
+        "basis": "Official institutional documentation publisher/project as identified by original read record/canonical source. Do not infer a person from frontmatter maintenance usernames, Git committers or missing account metadata."
+      },
+      "newTechnicalReadingForThisEpisode": false
+    },
+    {
+      "id": "R2",
+      "priorId": "B2",
+      "organization": "Apache Seata",
+      "title": "Seata AT mode",
+      "version": "Seata AT开发原理文档 · 原技术实读2026-10-24",
+      "url": "https://seata.apache.org/docs/dev/mode/at-mode/",
+      "sections": "Write isolation；Read isolation；Phase 1；Phase 2",
+      "supports": [
+        "Seata AT将业务修改与undo_log同一本地事务提交，先释放本地锁；全局锁仍控制参与写入。",
+        "二阶段失败需校验数据后按日志补偿，普通SELECT不自动获得相同全局读隔离保护。"
+      ],
+      "limits": [
+        "本条特指Seata AT，不泛化为全部框架；支持数据库、SQL、代理及参与路径仍有条件。",
+        "不能盲目覆盖别人的合法写入，也不能自动撤销邮件、外部付款等任意副作用。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/distributed-tx/research.md#L28",
+      "baselineReadExcerpt": {
+        "path": "episodes-codex/distributed-tx/research.md",
+        "gitBlobSHA1": "b127e90a9f1d6e6bdfe8c394ac30baf82a435494",
+        "fileSHA256": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+        "startLine": 28,
+        "endLine": 28,
+        "text": "| B2 | [Seata：AT 开发原理](https://seata.apache.org/docs/dev/mode/at-mode/)，“Write isolation”“Read isolation”“Phase 1”“Phase 2” | 全局锁约束参与写入；普通 SELECT 不自动检查全局锁，可能看见本地已提交但全局未完成的数据。回滚需校验前后镜像，不能盲目覆盖并发新数据。 |"
+      },
+      "titleEvidence": {
+        "locator": "apache/incubator-seata-website固定i18n/en/docusaurus-plugin-content-docs/current/dev/mode/at-mode.md · line 7实际H1",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx.json",
+        "originalTitle": "Seata AT mode",
+        "metadataRecordIndex": 0,
+        "priorBibliographyRecordIndex": null
+      },
+      "authorshipEvidence": {
+        "publisher": "Apache Seata",
+        "explicitPersonalAuthor": null,
+        "basis": "Official institutional documentation publisher/project as identified by original read record/canonical source. Do not infer a person from frontmatter maintenance usernames, Git committers or missing account metadata."
+      },
+      "newTechnicalReadingForThisEpisode": false
+    },
+    {
+      "id": "R3",
+      "priorId": "C1",
+      "organization": "Apache Seata",
+      "title": "Seata TCC Mode",
+      "version": "Seata TCC用户文档 · 原技术实读2026-10-24",
+      "url": "https://seata.apache.org/docs/user/mode/tcc/",
+      "sections": "Overview；Disadvantages；Try、Confirm、Cancel业务操作",
+      "supports": [
+        "业务提供检查预留、确认与取消，预留之后按决定择一确认或释放，不是三个操作顺次全做。",
+        "需要侵入业务资源设计，不能把一次查询或数据库通用回滚当作已持久预留。"
+      ],
+      "limits": [
+        "幂等、空回滚、悬挂和Try本地保存细节仍由原C2/C3及Fence脚注补充，未从视频或文章删除。",
+        "只引用公开Seata实现，不宣称Seata是唯一TCC方案或所有业务天然正确。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/distributed-tx/research.md#L30",
+      "baselineReadExcerpt": {
+        "path": "episodes-codex/distributed-tx/research.md",
+        "gitBlobSHA1": "b127e90a9f1d6e6bdfe8c394ac30baf82a435494",
+        "fileSHA256": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+        "startLine": 30,
+        "endLine": 30,
+        "text": "| C1 | [Seata：TCC Mode](https://seata.apache.org/docs/user/mode/tcc/)，“Overview”“Disadvantages” | 业务实现 Try、Confirm、Cancel，侵入业务但不依赖底层提供 XA；需要资源预留及异常控制。 |"
+      },
+      "titleEvidence": {
+        "locator": "apache/incubator-seata-website固定i18n/en/docusaurus-plugin-content-docs/current/user/mode/tcc.md · line 7实际H1",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx.json",
+        "originalTitle": "Seata TCC Mode",
+        "metadataRecordIndex": 3,
+        "priorBibliographyRecordIndex": null
+      },
+      "authorshipEvidence": {
+        "publisher": "Apache Seata",
+        "explicitPersonalAuthor": null,
+        "basis": "Official institutional documentation publisher/project as identified by original read record/canonical source. Do not infer a person from frontmatter maintenance usernames, Git committers or missing account metadata."
+      },
+      "newTechnicalReadingForThisEpisode": false
+    },
+    {
+      "id": "R4",
+      "priorId": "D1",
+      "organization": "Apache Seata",
+      "title": "SEATA Saga Pattern",
+      "version": "Seata Saga用户文档 · 原技术实读2026-10-24",
+      "url": "https://seata.apache.org/docs/user/mode/saga/",
+      "sections": "Overview；Dealing with Lack of Isolation",
+      "supports": [
+        "参与者逐步提交本地事务，失败可发起业务补偿，不能把已提交效果说成从未发生。",
+        "没有天然跨整个流程的事务隔离，中间状态与业务并发需另行设计。"
+      ],
+      "limits": [
+        "此处是Seata公开Saga机制，不把它的组织方式当所有Saga唯一实现；原AWS变体脚注仍保留。",
+        "没有引用页面链接的1987论文为本片已读原文，也不为完整性追加历史理论来源。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/distributed-tx/research.md#L33",
+      "baselineReadExcerpt": {
+        "path": "episodes-codex/distributed-tx/research.md",
+        "gitBlobSHA1": "b127e90a9f1d6e6bdfe8c394ac30baf82a435494",
+        "fileSHA256": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+        "startLine": 33,
+        "endLine": 33,
+        "text": "| D1 | [Seata：Saga Mode](https://seata.apache.org/docs/user/mode/saga/)，“Overview”“Dealing with Lack of Isolation” | 各参与者逐步提交本地事务，失败可补偿；默认没有跨整个流程的事务隔离，已产生的可见业务效果不能当作未发生。 |"
+      },
+      "titleEvidence": {
+        "locator": "apache/incubator-seata-website固定i18n/en/docusaurus-plugin-content-docs/current/user/mode/saga.md · line 6实际H1",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx.json",
+        "originalTitle": "SEATA Saga Pattern",
+        "metadataRecordIndex": 1,
+        "priorBibliographyRecordIndex": null
+      },
+      "authorshipEvidence": {
+        "publisher": "Apache Seata",
+        "explicitPersonalAuthor": null,
+        "basis": "Official institutional documentation publisher/project as identified by original read record/canonical source. Do not infer a person from frontmatter maintenance usernames, Git committers or missing account metadata."
+      },
+      "newTechnicalReadingForThisEpisode": false
+    },
+    {
+      "id": "R5",
+      "priorId": "D4",
+      "organization": "Microsoft · Azure Architecture Center",
+      "title": "Compensating Transaction pattern",
+      "version": "Azure Architecture Center · 原技术实读2026-10-24",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction",
+      "sections": "Solution；Problems and considerations",
+      "supports": [
+        "补偿依赖业务语义，是已提交之后的新动作，不必抹掉历史、覆写旧快照或严格反向执行。",
+        "补偿本身也会失败，需要持久进度、可重试与幂等、监控及必要人工处理。"
+      ],
+      "limits": [
+        "ms.author和author维护账号不是公开个人署名；采用机构而不把账号猜成人名。",
+        "不能承诺所有外部动作可逆或补偿必然成功。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/distributed-tx/research.md#L36",
+      "baselineReadExcerpt": {
+        "path": "episodes-codex/distributed-tx/research.md",
+        "gitBlobSHA1": "b127e90a9f1d6e6bdfe8c394ac30baf82a435494",
+        "fileSHA256": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+        "startLine": 36,
+        "endLine": 36,
+        "text": "| D4 | [Azure：Compensating Transaction](https://learn.microsoft.com/en-us/azure/architecture/patterns/compensating-transaction)，“Solution”“Problems and considerations” | 补偿依赖业务，不必恢复原快照，不必严格反向执行；补偿会失败，需持久进度、重试和人工处理。 |"
+      },
+      "titleEvidence": {
+        "locator": "MicrosoftDocs/architecture-center固定docs/patterns/compensating-transaction.md · line 11实际H1",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx.json",
+        "originalTitle": "Compensating Transaction pattern",
+        "metadataRecordIndex": 4,
+        "priorBibliographyRecordIndex": null
+      },
+      "authorshipEvidence": {
+        "publisher": "Microsoft · Azure Architecture Center",
+        "explicitPersonalAuthor": null,
+        "basis": "Official institutional documentation publisher/project as identified by original read record/canonical source. Do not infer a person from frontmatter maintenance usernames, Git committers or missing account metadata."
+      },
+      "newTechnicalReadingForThisEpisode": false
+    },
+    {
+      "id": "R6",
+      "priorId": "E1",
+      "organization": "Amazon Web Services",
+      "title": "Transactional outbox pattern",
+      "version": "AWS Prescriptive Guidance · 原技术实读2026-10-24",
+      "url": "https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html",
+      "sections": "Intent；Issues and considerations；Using an outbox table",
+      "supports": [
+        "业务行和待发事件在同库本地事务中一起保存，另行发送以衔接本地持久化和通知。",
+        "可能重复投递，消费端需要幂等；Outbox不把下游库存库纳入生产端同一原子事务。"
+      ],
+      "limits": [
+        "完整题名由既有24日Outbox原书目补充核对，不声称本轮GET了当前AWS H1或新技术正文。",
+        "发送恢复、消费处理及永久业务拒绝需要另外收尾；消息确认不等于库存业务已成功。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/distributed-tx/research.md#L37",
+      "baselineReadExcerpt": {
+        "path": "episodes-codex/distributed-tx/research.md",
+        "gitBlobSHA1": "b127e90a9f1d6e6bdfe8c394ac30baf82a435494",
+        "fileSHA256": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+        "startLine": 37,
+        "endLine": 37,
+        "text": "| E1 | [AWS：Transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)，“Intent”“Issues and considerations”“Using an outbox table” | 业务行与待发事件同库事务，另行发送；可能重复，消费者需幂等。它弥合本地持久化与通知之间的双写空档。 |"
+      },
+      "titleEvidence": {
+        "locator": "24日既有原题/署名书目：tx-outbox/article.mdx line 47",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx.json",
+        "originalTitle": "Transactional outbox pattern",
+        "metadataRecordIndex": null,
+        "priorBibliographyRecordIndex": 0
+      },
+      "authorshipEvidence": {
+        "publisher": "Amazon Web Services",
+        "explicitPersonalAuthor": null,
+        "basis": "Official institutional documentation publisher/project as identified by original read record/canonical source. Do not infer a person from frontmatter maintenance usernames, Git committers or missing account metadata."
+      },
+      "newTechnicalReadingForThisEpisode": false
+    },
+    {
+      "id": "R7",
+      "priorId": "E2",
+      "organization": "Apache RocketMQ",
+      "title": "Transaction Message",
+      "version": "Apache RocketMQ事务消息文档 · 原技术实读2026-10-24",
+      "url": "https://rocketmq.apache.org/docs/featureBehavior/04transactionmessage/",
+      "sections": "Working mechanism；Usage limits；Usage notes",
+      "supports": [
+        "先保存暂不可投递的半消息，再执行本地事务，报告提交或取消；未知结果时回查生产端本地事务状态。",
+        "真实边界是本地事务与消息可投递性，不能自动保障消费端业务与上游共同成功。"
+      ],
+      "limits": [
+        "回查不是重做扣款，也不是询问下游库存结果；回查时限、次数和终止需遵守具体系统策略。",
+        "固定version5.0英文源仅补实际题名，不把metadata获取改写成当前部署配置或24日上游SHA证据。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/distributed-tx/research.md#L38",
+      "baselineReadExcerpt": {
+        "path": "episodes-codex/distributed-tx/research.md",
+        "gitBlobSHA1": "b127e90a9f1d6e6bdfe8c394ac30baf82a435494",
+        "fileSHA256": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+        "startLine": 38,
+        "endLine": 38,
+        "text": "| E2 | [RocketMQ：Transaction Message](https://rocketmq.apache.org/docs/featureBehavior/04transactionmessage/)，“Working mechanism”“Usage limits”“Usage notes” | 先保存不可投递半消息，再执行本地事务并报告结果；未知时回查本地结果。边界是本地事务与消息可投递性，下游成功不自动受同一事务保障；只支持接受异步的场景，回查有时限和终止策略。 |"
+      },
+      "titleEvidence": {
+        "locator": "apache/rocketmq-site固定i18n/en/docusaurus-plugin-content-docs/version-5.0/04-featureBehavior/04transactionmessage.md · line 1实际H1",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx.json",
+        "originalTitle": "Transaction Message",
+        "metadataRecordIndex": 2,
+        "priorBibliographyRecordIndex": null
+      },
+      "authorshipEvidence": {
+        "publisher": "Apache RocketMQ",
+        "explicitPersonalAuthor": null,
+        "basis": "Official institutional documentation publisher/project as identified by original read record/canonical source. Do not infer a person from frontmatter maintenance usernames, Git committers or missing account metadata."
+      },
+      "newTechnicalReadingForThisEpisode": false
+    },
+    {
+      "id": "R8",
+      "priorId": "E4",
+      "organization": "microservices.io",
+      "author": "Chris Richardson",
+      "title": "Handling duplicate messages using the Idempotent consumer pattern",
+      "version": "2020-10-16 · 原作者公开文章",
+      "url": "https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html",
+      "sections": "Tracking message IDs；PROCESSED_MESSAGE",
+      "supports": [
+        "唯一处理标识与业务修改应在同一本地事务提交，重复请求由唯一约束等原子保护拦截。",
+        "只在内存查重、先查询再无保护更新，或把处理标识独立提交，都不足以保证重复消费不再扣库存。"
+      ],
+      "limits": [
+        "原作者Chris Richardson在本片旧研究及既有24日书目明确署名，未从Git账号推定。",
+        "仅用同一事件或业务操作身份去重，不把订单出现过当作屏蔽后续合法退款的条件。"
+      ],
+      "recordedTechnicalAccessDate": "2026-10-24",
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/distributed-tx/research.md#L40",
+      "baselineReadExcerpt": {
+        "path": "episodes-codex/distributed-tx/research.md",
+        "gitBlobSHA1": "b127e90a9f1d6e6bdfe8c394ac30baf82a435494",
+        "fileSHA256": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+        "startLine": 40,
+        "endLine": 40,
+        "text": "| E4 | [Chris Richardson：Idempotent Consumer，2020-10-16](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，Tracking message IDs及PROCESSED_MESSAGE | 原作者正文实际重读：唯一处理标识与业务修改同事务提交，重复由唯一键拦截；不能只在内存查重或将已处理标识独立提交。 |"
+      },
+      "titleEvidence": {
+        "locator": "24日既有原题/署名书目：tx-outbox/article.mdx line 49",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx.json",
+        "originalTitle": "Handling duplicate messages using the Idempotent consumer pattern",
+        "metadataRecordIndex": null,
+        "priorBibliographyRecordIndex": 1
+      },
+      "authorshipEvidence": {
+        "publisher": "microservices.io",
+        "explicitPersonalAuthor": "Chris Richardson",
+        "basis": "Explicit Chris Richardson authorship in the original episodeE4 read record and exact old24Oct bibliography."
+      },
+      "newTechnicalReadingForThisEpisode": false
+    }
+  ],
+  "preservedArchiveIdentity": {
+    "archived": true,
+    "replacedBy": [
+      "tx-2pc",
+      "tx-tcc",
+      "tx-saga",
+      "tx-outbox"
+    ],
+    "learningGuide": {
+      "slug": "distributed-tx-intro",
+      "label": "先建立基本概念"
+    },
+    "episodePart": "方案合集（历史版）",
+    "related": [
+      {
+        "slug": "distributed-tx-intro",
+        "label": "前置入门"
+      },
+      "global-id",
+      "db-transaction",
+      "message-queue",
+      "idempotency"
+    ]
+  },
+  "archiveIdentityScope": "Observed from fixed original meta. This source task does not modify archived/replacedBy/learning paths or metadata.",
+  "preservedInputPrefixes": {
+    "productionArticleSHA256Before": "6a4da5a79d33f5d4e93aeea2b4af78e002b8f0176865e73eb3d593279c79889a",
+    "productionResearchSHA256Before": "85a242a751961521e5addb8fcb32d02ed1fd9b6a00c2ff23fa8d98fb3ae54241",
+    "publishedArticleSHA256Before": "6a4da5a79d33f5d4e93aeea2b4af78e002b8f0176865e73eb3d593279c79889a"
+  },
+  "layout": {
+    "maxItemsPerPage": 4,
+    "secondsPerPage": 5,
+    "expectedPages": 2
+  },
+  "scopeBoundaries": [
+    "Protocols/interfaces/framework modes/business patterns are different layers; no market/performance ranking or exhaustive-protocol claim.",
+    "PreparedXA vs local-committedAT vs durableTCCreservation vs newly committedSaga compensation remain distinct.",
+    "Outbox and half-message mechanisms are separate; producer-side guarantees do not atomically complete downstream business.",
+    "Old Fence/other chapter detail references remain intact; selected8 are core display references, not replacement for the full18-source research map.",
+    "No claims of having read the1987Saga paper,3PC papers or books that are only linked by current documents."
+  ],
+  "authorSelfCheck": {
+    "checkedAt": "2026-10-26T23:38:10.557861+08:00",
+    "result": "PASS",
+    "sources": [
+      {
+        "id": "R1",
+        "title": "XA Transactions",
+        "credit": "Oracle / MySQL",
+        "exactCreditVisibleInAppendedArticle": true,
+        "personalAuthorOnlyWhenExplicitlyEstablished": true
+      },
+      {
+        "id": "R2",
+        "title": "Seata AT mode",
+        "credit": "Apache Seata",
+        "exactCreditVisibleInAppendedArticle": true,
+        "personalAuthorOnlyWhenExplicitlyEstablished": true
+      },
+      {
+        "id": "R3",
+        "title": "Seata TCC Mode",
+        "credit": "Apache Seata",
+        "exactCreditVisibleInAppendedArticle": true,
+        "personalAuthorOnlyWhenExplicitlyEstablished": true
+      },
+      {
+        "id": "R4",
+        "title": "SEATA Saga Pattern",
+        "credit": "Apache Seata",
+        "exactCreditVisibleInAppendedArticle": true,
+        "personalAuthorOnlyWhenExplicitlyEstablished": true
+      },
+      {
+        "id": "R5",
+        "title": "Compensating Transaction pattern",
+        "credit": "Microsoft · Azure Architecture Center",
+        "exactCreditVisibleInAppendedArticle": true,
+        "personalAuthorOnlyWhenExplicitlyEstablished": true
+      },
+      {
+        "id": "R6",
+        "title": "Transactional outbox pattern",
+        "credit": "Amazon Web Services",
+        "exactCreditVisibleInAppendedArticle": true,
+        "personalAuthorOnlyWhenExplicitlyEstablished": true
+      },
+      {
+        "id": "R7",
+        "title": "Transaction Message",
+        "credit": "Apache RocketMQ",
+        "exactCreditVisibleInAppendedArticle": true,
+        "personalAuthorOnlyWhenExplicitlyEstablished": true
+      },
+      {
+        "id": "R8",
+        "title": "Handling duplicate messages using the Idempotent consumer pattern",
+        "credit": "Chris Richardson",
+        "exactCreditVisibleInAppendedArticle": true,
+        "personalAuthorOnlyWhenExplicitlyEstablished": true
+      }
+    ],
+    "maintenanceAccountsNotPromotedToAuthors": true
+  },
+  "localVerification": {
+    "checkedAt": "2026-10-26T23:38:10.557861+08:00",
+    "sourcePreflightCommand": "node site/scripts/check-references.mjs --sources episodes-codex/distributed-tx",
+    "originalArticlePrefixBytes": 15879,
+    "originalResearchPrefixBytes": 17607,
+    "originalPrefixesUnchanged": true,
+    "allMetadataBytesSHA256AndOriginalHeadingLinesMatched": true,
+    "archiveMetadataUntouchedByThisTask": true
+  },
+  "fullHistoricalSourceCount": 18,
+  "copyfitCheck": {
+    "checkedAt": "2026-10-26T23:40:48.282021+08:00",
+    "result": "PASS",
+    "generator": "episodes-codex/_shared/append_references_bibliography.py",
+    "generatorSHA256": "fe2eb02aa15cb5fc1f39752bc34ecbb879459445721f9044da38ddf6e3fee70b",
+    "resolutionsRenderedWithoutTruncationOrBoundsError": [
+      [
+        1920,
+        1080
+      ],
+      [
+        1280,
+        720
+      ]
+    ],
+    "pagesPerResolution": 2,
+    "actualViewImageScope": "Both1920x1080source-preview PNGs actually inspected: all8 exact titles and author/institution credits complete, no overlap or clipping.1280was programmatic COPYFIT only. Not finalMP4QA.",
+    "previews": [
+      {
+        "path": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx-preview-page-1.png",
+        "sha256": "aa2bedaaa4a7f803f24e368b469597bd55544a683c4573279e07d0e04c61bb91",
+        "page": 1,
+        "actuallyViewed": true
+      },
+      {
+        "path": "docs/archive/2026-10/reference-endcards-batch-12/sources-distributed-tx-preview-page-2.png",
+        "sha256": "045b118eacf081ab2b2fdce2d91968d4d22a8d78015cfaf60aa079c4610d21ce",
+        "page": 2,
+        "actuallyViewed": true
+      }
+    ]
+  }
+}

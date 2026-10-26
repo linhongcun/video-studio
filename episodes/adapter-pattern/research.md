@@ -71,3 +71,11 @@ V1/V2教学SDK无网络、无真实外发。程序中两版本是各自独立的
 “主动包装”本身不等于Adapter，必须有目标约定、把已有接口转换到该用法的意图和委托。完整ACL是保护领域模型的架构目的，可使用Adapter/Facade等，更可能包含业务语义转换；本片主要演示接口技术细节的边界隔离。没有语义冲突时不因一层薄包装就自称完整ACL。
 
 旧受理/送达、拒绝/未知、异常保留与无自动重试规则仍在Java和文章扩展中；目标约定/服务能力不足时，上层也可能变化。资料阅读、编译运行、动态和正式媒体检查分开记录，不预写新稿用户认可、完整听辨、ASR或新手实验结果。
+
+## 片尾参考资料
+
+2026-10-26为存量原片整理title-author清单，2项一页5秒。TaskExecutorAdapter取实际源码类声明原名，明确Javadoc作者为Juergen Hoeller，机构Spring Framework；Anti-Corruption Layer pattern取正文H1完整原题，机构Microsoft · Azure Architecture Center，仅维护账号不足以推断个人作者。原技术实读日期均保留2026-10-25。
+
+本轮2份完整固定官方raw GET仅补核原题／明确署名及原文身份：Spring5309字节／SHA2564b450a253fcfad5879f88fd12603269efb9ee116a8fd0a5103142e2be38beff0，Azure10713字节／SHA2562c2f1586eb46629a57470c70ef645bfaf60428125654171780dfcfdf2380e48a，与原25日business-boundary-evidence所记完整SHA完全相同。26日元数据补核不追记为技术新读，也未访问其他受限文档站。
+
+两项直接支持对象适配器的契约／持有／转换委托及业务自己的模型边界。其余OpenJDK示例、wrapper反例与RFC202保留原文章拓展，不为条数加入片尾；未读GoF全文、旧Refactoring.Guru未重读的限制照旧。教学V1/V2与20组验证仍为既有工作，本轮不重新执行Java或改造视频、静默代码卡、原引用与配图。完整标题／署名证据、逐论点旧读与原研究Git blob／SHA、本轮原始响应字节和完整SHA见[本轮证据](../../docs/archive/2026-10/reference-endcards-batch-12/sources-adapter-pattern.json)，清单见[references.md](references.md)。

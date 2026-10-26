@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 1,
+  "batch": 12,
+  "episode": "agent-skills",
+  "presentation": "title-author",
+  "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+  "assembledAtBeijing": "2026-10-26T23:40:38+08:00",
+  "checkedAt": "2026-10-25",
+  "timezone": "Asia/Shanghai",
+  "scope": "Four first-party source identities for unchanged accepted Skills lesson. Technical readings stay2026-10-25;2026-10-26 is only original engineering article H1/explicit-author metadata supplementation via available TinyFish connector. No demo/model/audio/media/freeze/release check claimed.",
+  "historicalResearchRecord": {
+    "path": "episodes-codex/agent-skills/research.md",
+    "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+    "gitBlob": "75489ac9a4b592e5a826d60e748be7674628bd7a",
+    "bytes": 10280,
+    "sha256": "1d7c8a659c740ef462a8b143b0bf8b975a4d03b52b45d51754b89f2cb73b8d58",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md",
+    "archivePath": "episodes-codex/agent-skills/revisions/reference-endcards/before-research.md",
+    "fullOriginalText": "# Agent Skills：本期资料与主张核验\n\n访问日期均为 **2026-10-25（北京时间）**。本期只用第一方公开规范、客户端文档与原始工程文章；文档支持技术事实，不证明热度排名、本片教学效果或“有Skill必然比无Skill更准确”。\n\n核心命题：**SKILL.md没有变成自动执行的程序。Skill将可复用工作方法及其资源打包，宿主让模型发现并按需加载，具体动作再交给工具。** 影片沿同一份API请求兼容审查推进，比较信息组织与加载路径；不伪造两组模型表现。\n\n## S01 Agent Skills格式规范\n\n- 来源：[Specification](https://agentskills.io/specification)。页面未标发布日期；动态规范，访问基线如上。\n- 已读范围：目录结构、frontmatter、正文、可选资源与progressive disclosure。\n- 支持主张：技能以目录为单位，至少有`SKILL.md`；标准要求`name`和`description`，脚本、参考资料和资产可选。元数据用于发现，正文在激活时交入上下文，资源按需使用。\n- 短引：`Required: metadata + instructions`。\n- 用在：正文的技能包展开及目录→指令→资源过程；必填字段/推荐长度细节只留文章。\n- 边界：约5000 tokens、500行属于编写建议，不是宿主统一硬上限；`allowed-tools`仍标实验性，支持依实现。格式相同不保证触发、依赖、权限或运行结果相同。\n\n## S02 客户端怎样实现技能支持\n\n- 来源：[How to add skills support to your agent](https://agentskills.io/client-implementation/adding-skills-support)。页面未标发布日期；原`/integrate-skills`现跳转至此。\n- 已读范围：三层加载、目录生成、模型/用户激活、资源列举及会话保留。\n- 支持主张：宿主可以扫描文件，也可用API或注册表发现；将候选名称、描述及访问位置交给模型。激活可通过普通文件读取或专用工具，用户显式选择也可由宿主注入。资源列表不等于资源正文已全部加载。\n- 短引：`The model sees the catalog from the start`。\n- 用在：发现阶段与宿主/模型的职责；本片不限定所有产品必须提供同一条斜杠命令。\n- 边界：模型自动选择是常见方式，不是本期demo已经实测的能力；“没有交给模型全文”也不等于宿主从未读取底层文件。已加载内容需要会话管理、去重和压缩策略，不应表现为任务结束自动清空。\n\n## S03 当前概述与设计意图\n\n- 来源：[Agent Skills Overview](https://agentskills.io/home)。页面未标发布日期；`/what-are-skills`现跳转至此。\n- 支持主张：Skill打包程序性知识、团队约定和专用资源，便于复用、版本管理及按需使用；发现、激活、执行是不同阶段。\n- 短引：`portable, version-controlled folders`。\n- 用在：为什么不一直复制整段工作说明，以及片尾回答“技能究竟增加了什么”。\n- 边界：这是标准的设计意图，不是对任意宿主或任意技能效果的保证。它不改模型权重，不能从技能文件数推断模型能力提升。\n\n## S04 Claude Code：产品行为与生命周期\n\n- 来源：[Extend Claude with skills](https://code.claude.com/docs/en/skills)，重点为[Skill content lifecycle](https://code.claude.com/docs/en/skills#skill-content-lifecycle)。页面未标统一发布日期；动态产品文档。\n- 已读范围：普通会话的description/body加载、调用控制、标准与扩展、上下文保留、工具预授权和触发评估。\n- 支持主张：该产品将技能作为提示指导；与常驻CLAUDE.md相比，正文在使用时加载。已加载正文作为会话消息跨轮保留，压缩时按预算续带。工具执行和模型遵循不是仅凭文件格式自动保证的。\n- 短引：`stays there across later turns`。\n- 用在：脚本工具路径与保留边界；具体配置只进文章。\n- 边界：Claude Code允许部分frontmatter省略，不能覆盖S01标准的必填要求；`disable-model-invocation`、fork等为产品特性。其`allowed-tools`是当轮预授权，非封闭工具白名单，不表示Skill能自行授予任意能力；标准和其他宿主的同名字段不可混讲。\n\n## S05 原始工程文章：参考文本与脚本是两条路径\n\n- 来源：[Equipping agents for the real world with Agent Skills](https://www.anthropic.com/research/equipping-agents-for-the-real-world-with-agent-skills)。原发布日期 **2025-10-16**，页面另有2025-12-18开放标准更新。\n- 已读范围：技能结构、PDF案例、上下文过程、代码执行及先评估再补技能的建议。\n- 支持主张：详细参考材料可以在需要时读取；配套脚本可以直接经工具执行，不必先把脚本源码或待处理文件全文塞进模型，必要结果再回传。\n- 短引：`Skills can also include code`。\n- 用在：本片核心分流：`references → 按需读入上下文`；`scripts → 工具执行 → 结果回到上下文`。\n- 边界：旧文解释稳定设计，不作为当前SDK接口说明。确定性程序执行不等于程序正确、输入覆盖充分或完整业务兼容；本片自制检查器仅覆盖明确的必填规则。\n\n## S06 Skills over MCP：获取不是自动激活\n\n- 来源：[Skills extension overview](https://modelcontextprotocol.io/extensions/skills/overview)。动态官方扩展文档；页面标注SEP-2640为Final，示例适用MCP **2026-07-28或以后**。\n- 支持主张：MCP服务器可暴露技能元数据、说明与资源；该扩展规定发现和获取。宿主决定怎样向模型/用户呈现并走技能加载路径，直接读到`SKILL.md`不自动构成激活。\n- 短引：`This extension defines discovery and retrieval over MCP`。\n- 用在：仅文章补充，防止将“Skill给方法、MCP只给工具”当绝对二分。\n- 边界：SDK/宿主支持仍需逐一核验；完整性、内容信任、加载与执行不能混成一个保证。本片没有演示MCP宿主兼容性。\n\n## S07 开放治理的近期变化\n\n- 来源：[Donating Agent Skills to the Agentic AI Foundation](https://www.anthropic.com/news/donating-agent-skills-to-the-agentic-ai-foundation)。发布日期 **2026-10-22**。\n- 支持主张：Anthropic宣布将Agent Skills标准及名称/标识、GitHub组织、域名等捐赠给AAIF。\n- 用在：仅文章背景，不进入视频机制主线。\n- 边界：公告中的平台数、发布量和安装量为厂商报告，不用于本片量化效果、普遍兼容性或最热门排名。\n\n## S08 MCP工作组确认扩展状态\n\n- 来源：[Skills Over MCP Charter](https://modelcontextprotocol.io/community/working-groups/skills-over-mcp)。动态工作组记录；完成里程碑写明SEP-2640于 **2026-09-13**合并并Final。\n- 支持主张：Skills over MCP已经发布，不只是路线图计划；当前工作仍包括实现支持与互操作。\n- 短引：`Client implementation mandates`列在范围之外。\n- 用在：文章核对S06的交付状态与宿主边界。\n- 边界：扩展正式发布不等于每个SDK或客户端均已实现；不把工作组意图写成全部宿主的统一行为。\n\n## 本期自制示例的证据边界\n\n公开资料支持上方机制；以下路径属于本项目示例，不作外部引用或行业效果依据。已只读核对当前文件，未由本调研代理重跑或修改demo。\n\n- 同一份合成旧请求省略`channel`；`after-optional.json`与`after-required.json`分别检查可选/必填变化。所谓接受/拒绝来自本地必填字段校验器，不是实际HTTP服务响应。\n- 技能入口：`demo/skills/api-compat-review/SKILL.md`；参考规则：`references/request-fields.md`；执行脚本：`scripts/check_fields.py`（二者路径均相对该技能目录）。\n- 运行脚本需要旧契约、新契约、旧请求三个输入。结论覆盖必填变化，不涵盖所有类型/枚举、响应、认证、默认值或实际服务行为；“可选字段分支通过”只能称通过已检查规则。\n- `demo/outputs/trace.json`明确无LLM请求、由演示宿主显式选择。四阶段输入载荷是机制示意，实际文件I/O、命令和检查结果可复核；不声称测到了模型自动触发、token成本或准确率。\n- 建立目录索引时宿主读过两个`SKILL.md`；模型侧示意载荷初始只含名称/描述。未选中`release-notes`正文和脚本源码没有加入该载荷，不能说底层文件从未被读取。\n- 常驻对照是人为选定“两个工作方法预先粘贴”的配置，不代表所有Prompt用法；同样资料也能直接写入Prompt，Skill的区别在组织、发现、复用和按需供给。\n\n## 技术审稿检查点\n\n- 不把Skill描述成训练、插件二进制或自动执行程序。\n- 不把目录/资源存在、实际读入模型、经工具执行、任务正确完成混为一步。\n- 图中区分参考文本进入上下文与脚本执行后结果回流；脚本可被读取，但不是必须先全文载入。\n- 不预设所有技能默认可自动触发，不把演示显式选择写成真实模型选择实测。\n- 不表现任务一结束所有内容自动卸载，不把宿主特有权限/语法推广成标准。\n- 不用“加字段一定兼容”、单一旧请求通过或一次脚本退出0证明完整兼容。\n\n## 文稿技术复审\n\n调研代理只读审查了`script.md`、`plan.json`和`visual-direction.md`，并与当前demo路径、输入和输出逐项对照。初审提出：两种配置不能画成同会话自动卸载；候选数应与两项实际示例一致；脚本执行应包含旧契约、新契约和旧请求三个输入。\n\n编辑修正后，锁定脚本SHA-256为`915c23f9445eeaf615d2b9b471134a4f6ad3ffa934e410709b444c8607c41eac`，上述三项技术问题已落实。正文还明确目录索引有开销、小技能包未必更省，未使用编造的token/价格/准确率收益，宿主保留/压缩与审查正确性分别说明。**本轮技术主张复审通过**；这不是动画实际实现、成片表达、模型自动触发实验或用户观看效果已经通过。视觉实现仍需核对03的配置切换、07读取、08执行与结果回流以及11不自动清空。\n",
+    "gitBlobBytesMatched": true,
+    "gitObjectHashRecomputed": true
+  },
+  "originalArticleRecord": {
+    "path": "episodes-codex/agent-skills/article.mdx",
+    "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+    "gitBlob": "bdf3c07c1e08771d62374822500cf283d1ed33ae",
+    "bytes": 11294,
+    "sha256": "13400d15c8a90e1a1943e702032448d039ba28d583a394f9af15270c596fd186",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/article.mdx",
+    "archivePath": "episodes-codex/agent-skills/revisions/reference-endcards/before-article.mdx",
+    "fullOriginalText": "---\ntitle: Agent Skills：一个Markdown文件，为什么能成为技能？\nsummary: 用同一次接口兼容审查，拆开技能的发现、指引加载、资料读取和脚本执行。Skill组织的是可复用工作方法，渐进加载不保证总token更少，也不保证结果正确。\nchapters:\n  - { id: problem, title: 一份规程怎样成为技能 }\n  - { id: loading, title: 先发现，再展开方法 }\n  - { id: resources, title: 读资料与跑脚本是两条路 }\n  - { id: boundaries, title: 实际价值与使用边界 }\nrelated: []\n---\n\n## 一份规程怎样成为技能 {#problem}\n\n开发者要审查一次创建订单接口变更：旧客户端只发送`sku`与`quantity`，新接口定义新增了`channel`（来源渠道），并把它设为必填。旧客户端不改代码，还能不能使用新接口？团队已经有审查规程，要求检查约束变化、找出受影响请求，并给出可核对的证据。\n\n把整份规程贴进提示词，模型当然能读到。问题出现在同一个助手还要承担发布说明等其他工作时：所有方法都常驻，就会把本次不需要的正文也送进上下文。这里比较的是两种人为选择的信息组织配置，**不是所有Prompt用法都必须全量常驻**，也不是先把正文读入后再自动卸载。\n\nAgent Skills把工作方法打包成可发现的目录。按照当前开放规范，一个技能目录以`SKILL.md`为入口：YAML元数据中的`name`和`description`用来标识用途，正文写具体指引，还可以配套脚本、参考资料和模板等资源。这个结构让宿主和Agent可以先找到方法，再按任务需要读取细节。它没有修改模型权重，也没有使Markdown本身变成可执行程序。[^spec]\n\n本期只围绕这一种变化展开：**一套工作方法怎样在适当时机，以适当粒度交给Agent使用。** 安装命令、API接线和通用Agent循环都不承担主线。\n\n## 先发现，再展开方法 {#loading}\n\n渐进加载可分成三个层次。它们说明内容进入模型上下文的时机，不等于底层磁盘读取的先后保证。[^client]\n\n| 层次 | 给Agent看的内容 | 本例的作用 |\n|---|---|---|\n| 发现 | 候选技能的名称和描述 | 区分接口兼容审查与发布说明。 |\n| 激活 | 选中技能的`SKILL.md`正文 | 知道先收集哪些输入、读哪份规则、怎样报告证据。 |\n| 按需使用资源 | 相关资料，或工具执行脚本后的结果 | 只展开请求字段规则，并取得本次字段检查结果。 |\n\n本地示例采用下面的组织方式：\n\n```text\nskills/\n  api-compat-review/\n    SKILL.md\n    references/request-fields.md\n    scripts/check_fields.py\n  release-notes/\n    SKILL.md\n```\n\n描述要能回答“什么时候应该用这项技能”。“处理代码问题”覆盖面太大；“比较新旧请求契约，检查既有客户端是否因必填字段变化受影响”提供的路由信息更充分。即便如此，**描述不是确定性的开关条件**：模型可能误选或漏选，用户也可以显式指定；具体的触发与加载方式取决于宿主。[^client]\n\n选中后，入口正文给出一组工作指引：确认旧契约、新契约和旧客户端请求；按需读取规则；调用允许使用的工具运行检查；报告结论、依据及未检查范围。指引告诉Agent怎样组织工作，实际读文件、运行代码及处理错误仍需要宿主提供的能力。\n\n## 读资料与跑脚本是两条路 {#resources}\n\n参考资料和脚本不必以同一种方式使用。原始工程说明给出的重要设计是：Agent可以读取相关文本，也可以经工具运行预写脚本，让执行结果回到上下文，而无需先把脚本全文送给模型。这里说的是“可以不读全文”，不是禁止Agent在需要时检查源码。[^engineering]\n\n本例的两条路径分别是：\n\n```text\n参考规则 → 文件读取 → 规则文本进入上下文\n预写脚本 + 旧契约 + 新契约 + 旧请求 → 工具执行 → 检查结果进入上下文\n```\n\n脚本必须同时拿到旧字段定义、新字段定义和旧请求，才能分别给出契约级变化与该请求受到的影响。只看到“新增了字段”还不足以判断：新增可选字段和新增必填字段，会产生不同的检查结果。\n\n| 相同的旧请求 | 新契约变化 | 本地检查结果 | 能下的结论 |\n|---|---|---|---|\n| 只有`sku`与`quantity` | 新增可选`channel` | 没有新增必填项，旧请求通过本例校验 | 通过已检查的必填字段规则。 |\n| 只有`sku`与`quantity` | 新增必填`channel` | 新增必填项为`channel`，旧请求缺少它 | 该变化破坏了本例旧请求的必填字段约定。 |\n\n主分支的工具结果保留三个关键事实：\n\n```json\n{\n  \"newRequiredFields\": [\"channel\"],\n  \"oldClientValidation\": {\n    \"missingRequiredFields\": [\"channel\"]\n  },\n  \"verdict\": \"breaking_required_field_change\"\n}\n```\n\n审查结论应把字段变更、团队规则与这份检查结果对应起来，而不是仅说“技能已加载”或“脚本运行成功”。本地检查器发现不兼容变更时也会正常结束；退出成功表示程序完成了检查，不表示接口变更通过。\n\n### 配套示例真正验证了什么\n\n从仓库根目录运行：\n\n```sh\npython3 episodes-codex/agent-skills/demo/run_demo.py\n```\n\n完整文件位于[本期制作工程的demo目录](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/agent-skills/demo)。`outputs/trace.json`记录实际文件身份、命令和结果，`review.json`与`review-optional.json`分别保存必填及可选分支。\n\n这个程序真实读取文件、启动Python子进程并检查合成契约，但**没有调用LLM或真实HTTP服务**。技能由演示宿主显式选定，四阶段上下文载荷是机制示意，不是实测模型输入，也不能证明模型自动选择技能成功。索引阶段宿主真实读取了两个`SKILL.md`文件，却只把提取的名称和描述放进示意载荷；“模型没有收到正文”与“程序从未读过文件”是不同事实。\n\n本期另保留一次真实Codex子代理按技能执行的记录：它先看候选名称/描述，再选择接口兼容审查，读取入口、规则和输入，实际调用工具运行两个分支，最后提交带范围说明的审查结论。结果在`outputs/agent-review.md`与`agent-review.json`中。它没有读取未选发布说明的正文，也没有把检查脚本源码全文读入模型上下文。这个记录支持**这一次受委派的本地执行**，不等于商业宿主端到端自动技能路由测试，更不是准确率提升实验；`run_demo.py`本身仍没有调用LLM。\n\n字段检查范围也很窄：它只检查简化JSON对象的必填约束，不覆盖响应字段、类型收窄、枚举、认证、默认值、状态码或实际服务行为。可选分支通过这一规则，不能据此称整个API完全兼容；必填分支的拒绝也只是本地校验器结果，不是虚构的HTTP响应。\n\n## 实际价值与使用边界 {#boundaries}\n\n提示词、工具和Skill分别承担不同职责，可以在同一个系统中配合：\n\n| 对象 | 承担的职责 | 本例对应 |\n|---|---|---|\n| 提示词 | 承载模型接收的指令与任务要求 | 当前审查需求、已读取的工作指引。 |\n| 工具 | 提供读取文件、运行程序等执行能力 | 读取字段规则，执行字段检查。 |\n| Skill | 将可复用方法与资源组织成可发现、按需使用的包 | 名称/描述、入口指引、参考规则与脚本。 |\n\n同一段说明既可以直接出现在Prompt里，也可以在Skill被选中后进入上下文。两者的内容未必不同，改变的是发现、分发、复用和加载方式；不能把“换成文件”本身当作模型能力提高的证据。[^spec][^client]\n\n### 按需加载不保证全程更省\n\n本地两项短技能的实际UTF-8字节记录如下。它仅描述本例构造的载荷，不是token计量、请求费用或模型效果评测：\n\n| 配置 | 起步的方法载荷 | 加入相同检查结果后的累计新增载荷 |\n|---|---:|---:|\n| 先名称/描述，再加载选中正文与规则 | 555字节 | 3649字节 |\n| 两套方法及字段规则都先放入 | 3025字节 | 3621字节 |\n\n渐进路径起步更小，却在这个小例子的完整路径上多了28字节，因为发现索引与重复元数据也有开销。我们保留这个结果，没有加长无关说明来制造“节省比例”。真实收益还取决于技能数量与长度、被激活的比例、调用次数、缓存及宿主上下文策略，不能从起步载荷较小推出全任务成本一定更低。\n\n### 已加载内容和执行权限仍要管理\n\n“按需加载”不等于“用完自动消失”。内容什么时候继续保留、裁剪或压缩，由宿主管理。例如当前Claude Code文档明确说明技能正文在后续轮次和压缩中的保留机制；它是产品行为，不能推广成所有宿主完全相同的生命周期。[^lifecycle]\n\n方法和规则也要维护版本，脚本会有缺陷，返回结果需要核对。Skill格式不会自动给脚本增加权限，加载成功更不会证明结论正确。标准中的`allowed-tools`仍属实验性支持字段，具体含义和约束必须查所用宿主，不能仅凭文件里的声明推断实际授权。[^spec]\n\n与MCP的区别也不宜压成“一个只教方法、一个只给工具”。Skill定义内容包怎样组织，MCP解决能力与资源的协议交互，现有可选Skills over MCP扩展还能承担技能发现与获取。读取资源、激活技能和执行脚本仍是不同环节，实际支持要逐宿主核验。[^mcp]\n\n回到开头：Markdown是入口，配套资料与脚本承载方法的细节，宿主让它们可发现、可按需读取或执行。值得复用的是这套工作方法及其可核对的依据。\n\n[^spec]: [Agent Skills Specification](https://agentskills.io/specification)，Agent Skills开放规范，动态文档，访问2026-10-25。支持目录、必需元数据、资源组织和实验性字段的事实；格式兼容不保证行为一致。\n[^client]: [Adding skills support](https://agentskills.io/client-implementation/adding-skills-support)，Agent Skills客户端实现指南，动态文档，访问2026-10-25。支持发现、激活、按需资源加载及模型/用户选择方式；实际宿主实现需分别核对。\n[^engineering]: [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/research/equipping-agents-for-the-real-world-with-agent-skills)，Anthropic，2025-10-16，访问2026-10-25。原始工程说明支持渐进加载与预写脚本经工具执行的路径，不作为当前所有产品收益保证。\n[^lifecycle]: [Extend Claude with skills — Skill content lifecycle](https://code.claude.com/docs/en/skills#skill-content-lifecycle)，Claude Code动态文档，访问2026-10-25。只说明该产品的当前生命周期行为。\n[^mcp]: [Skills over MCP](https://modelcontextprotocol.io/extensions/skills/overview)，MCP官方可选扩展，动态文档，访问2026-10-25。SDK和宿主支持需再次核验，本文不以该扩展作为本地示例的运行依赖。\n",
+    "gitBlobBytesMatched": true,
+    "gitObjectHashRecomputed": true
+  },
+  "originalScriptRecord": {
+    "path": "episodes-codex/agent-skills/script.md",
+    "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+    "gitBlob": "df313e37083d1be5c7f43d23b69c554af0ee8a87",
+    "bytes": 8901,
+    "sha256": "331115c988f3feaad9cb43fef467111f429a4aae1f64e20eaaf08a8c0c73f671",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/script.md"
+  },
+  "existingPublishedSpecificationEvidence": {
+    "path": "episodes/agent-skills/article/source-evidence.json",
+    "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+    "gitBlob": "f02cc7a416e56e6d744cbb89174321af04ddf357",
+    "bytes": 15962,
+    "sha256": "ecefda99e705f5c6bf9c01bd1ad7ed77bba9a3ad25693f236b7d4912218a5edc",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes/agent-skills/article/source-evidence.json",
+    "scope": "旧正式原页文章引用提取文件的身份，只读；其现有SourceQuote/文章链接与Figure由root保留，本任务不修改。"
+  },
+  "verificationReuse": {
+    "technicalReadDate": "2026-10-25",
+    "oldRecordedReadingScope": "访问日期均为 **2026-10-25（北京时间）**。本期只用第一方公开规范、客户端文档与原始工程文章；文档支持技术事实，不证明热度排名、本片教学效果或“有Skill必然比无Skill更准确”。",
+    "newIdentityMetadataDate": "2026-10-26",
+    "newTechnicalReadingClaimed": false,
+    "newRawHTTPGETClaimed": false,
+    "canonicalToolExtractions": 3,
+    "extractionScope": "Only Anthropic original article H1 and explicit Written by paragraph. Full returned tool extraction JSON preserved; JSON snapshotSHA is not unmodified HTTP responseSHA.",
+    "limits": [
+      "前三文档原题从旧实读记录逐字复用，无26日新正文阅读或个人署名推断。",
+      "原工程文章SEO题名缩短，实际H1仍完整；元数据author=Anthropic不替代正文三人Written by。",
+      "标准必需字段与Claude Code产品扩展/生命周期分开；不把格式兼容当宿主行为一致。",
+      "旧demo、真实子代理记录与人工构造载荷各自范围保留，不重跑、改写为新模型效果/自动路由测试或普遍省token保证。"
+    ]
+  },
+  "metadataExtractions": [
+    {
+      "path": "docs/archive/2026-10/reference-endcards-batch-12/agent-skills-engineering-metadata-tinyfish.json",
+      "bytes": 15187,
+      "sha256": "0442c168671b7d6ccab5cf85281862d4c6270885aae0ff66f974900f91e81272",
+      "reviewedAt": "2026-10-26",
+      "artifactType": "complete returned TinyFish extraction result serialized as UTF-8 JSON; not raw HTTP response bytes",
+      "scope": "Only title/H1 and explicit authors inspected; no fresh technical claim validation."
+    },
+    {
+      "path": "docs/archive/2026-10/reference-endcards-batch-12/agent-skills-engineering-html-tinyfish.json",
+      "bytes": 13097,
+      "sha256": "c6818ebde0a69457ca144b0ac1915295d94d75e544f5aadafdb156a77b65d72c",
+      "reviewedAt": "2026-10-26",
+      "artifactType": "complete returned TinyFish extraction result serialized as UTF-8 JSON; not raw HTTP response bytes",
+      "scope": "Only title/H1 and explicit authors inspected; no fresh technical claim validation."
+    },
+    {
+      "path": "docs/archive/2026-10/reference-endcards-batch-12/agent-skills-engineering-h1-tinyfish.json",
+      "bytes": 2943,
+      "sha256": "206cff0c6bfeb1eb9eaac3c706f6bf5d047e70ef0f374fc5544108b71bdaf060",
+      "reviewedAt": "2026-10-26",
+      "artifactType": "complete returned TinyFish extraction result serialized as UTF-8 JSON; not raw HTTP response bytes",
+      "scope": "Only title/H1 and explicit authors inspected; no fresh technical claim validation."
+    }
+  ],
+  "metadataFacts": {
+    "actualH1": "Equipping agents for the real world with Agent Skills",
+    "h1HTML": "<h1 class=\"ArticleHero-module-scss-module__VYxBBq__Title\">Equipping agents for the real world with Agent Skills</h1>",
+    "seoTitle": "Equipping agents with Agent Skills",
+    "explicitAuthorString": "Barry Zhang, Keith Lazuka, and Mahesh Murag",
+    "explicitAuthorParagraph": "Written by Barry Zhang, Keith Lazuka, and Mahesh Murag, who all really like folders. Special thanks to the many others across Anthropic who championed, supported, and built Skills.",
+    "publishedDate": "2025-10-16T00:00:00.000Z",
+    "modifiedDateMetadata": "2026-10-18T21:26:58.000Z",
+    "dateScope": "原始发表2025-10-16与旧开放标准更新日期保留；网页修改/本轮metadata查证日期不是新的技术阅读日期。"
+  },
+  "sources": [
+    {
+      "id": "agent-skills-r1",
+      "referenceId": "R1",
+      "oldSourceId": "S01",
+      "title": "Specification",
+      "organization": "Agent Skills",
+      "version": "Agent Skills · 动态格式规范（旧记录未标发布日期）",
+      "canonicalUrl": "https://agentskills.io/specification",
+      "checkedAt": "2026-10-25",
+      "verificationStatus": "verified",
+      "verificationBasis": "existing-first-party-reading-record",
+      "originalRecord": {
+        "startLine": 7,
+        "endLine": 14,
+        "text": "## S01 Agent Skills格式规范\n\n- 来源：[Specification](https://agentskills.io/specification)。页面未标发布日期；动态规范，访问基线如上。\n- 已读范围：目录结构、frontmatter、正文、可选资源与progressive disclosure。\n- 支持主张：技能以目录为单位，至少有`SKILL.md`；标准要求`name`和`description`，脚本、参考资料和资产可选。元数据用于发现，正文在激活时交入上下文，资源按需使用。\n- 短引：`Required: metadata + instructions`。\n- 用在：正文的技能包展开及目录→指令→资源过程；必填字段/推荐长度细节只留文章。\n- 边界：约5000 tokens、500行属于编写建议，不是宿主统一硬上限；`allowed-tools`仍标实验性，支持依实现。格式相同不保证触发、依赖、权限或运行结果相同。",
+        "claimText": "技能以目录为单位，至少有`SKILL.md`；标准要求`name`和`description`，脚本、参考资料和资产可选。元数据用于发现，正文在激活时交入上下文，资源按需使用。",
+        "scopeBoundaryText": "约5000 tokens、500行属于编写建议，不是宿主统一硬上限；`allowed-tools`仍标实验性，支持依实现。格式相同不保证触发、依赖、权限或运行结果相同。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md#L7-L14",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-25既有实读记录research.md第9行，S01来源英文原题",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-agent-skills.json",
+        "record": {
+          "line": 9,
+          "text": "- 来源：[Specification](https://agentskills.io/specification)。页面未标发布日期；动态规范，访问基线如上。",
+          "actualTitle": "Specification",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md#L9",
+          "scope": "忠实沿用旧实读记录的完整文档原题，不以文章中文主题或定位小节替代原题。"
+        }
+      },
+      "creditEvidence": {
+        "organization": "Agent Skills",
+        "basis": "旧记录明确的第一方Agent Skills标准/客户端文档。",
+        "personalAuthor": "not-established in retained document reading; omit author, no Git or account inference"
+      },
+      "supports": [
+        "技能以目录为单位，至少有`SKILL.md`；标准要求`name`和`description`，脚本、参考资料和资产可选。元数据用于发现，正文在激活时交入上下文，资源按需使用。"
+      ],
+      "sections": "目录结构、frontmatter、正文、可选资源与progressive disclosure。",
+      "limitations": [
+        "约5000 tokens、500行属于编写建议，不是宿主统一硬上限；`allowed-tools`仍标实验性，支持依实现。格式相同不保证触发、依赖、权限或运行结果相同。"
+      ],
+      "shots": [
+        "03",
+        "05",
+        "06",
+        "10",
+        "12"
+      ],
+      "newTechnicalReadingClaimed": false,
+      "oldOfficialHTTPBodySHA256": null,
+      "oldBodyHashScope": "旧research/artifact SHA只证明本仓历史记录身份；无旧完整HTTP字节摘要，不替代或伪造。",
+      "publicClaim": "技能目录至少包含SKILL.md，名称与描述用于发现，正文与配套资源按需使用；Markdown文件本身不会自动执行。"
+    },
+    {
+      "id": "agent-skills-r2",
+      "referenceId": "R2",
+      "oldSourceId": "S02",
+      "title": "How to add skills support to your agent",
+      "organization": "Agent Skills",
+      "version": "Agent Skills · 动态客户端实现文档（旧记录未标发布日期）",
+      "canonicalUrl": "https://agentskills.io/client-implementation/adding-skills-support",
+      "checkedAt": "2026-10-25",
+      "verificationStatus": "verified",
+      "verificationBasis": "existing-first-party-reading-record",
+      "originalRecord": {
+        "startLine": 16,
+        "endLine": 23,
+        "text": "## S02 客户端怎样实现技能支持\n\n- 来源：[How to add skills support to your agent](https://agentskills.io/client-implementation/adding-skills-support)。页面未标发布日期；原`/integrate-skills`现跳转至此。\n- 已读范围：三层加载、目录生成、模型/用户激活、资源列举及会话保留。\n- 支持主张：宿主可以扫描文件，也可用API或注册表发现；将候选名称、描述及访问位置交给模型。激活可通过普通文件读取或专用工具，用户显式选择也可由宿主注入。资源列表不等于资源正文已全部加载。\n- 短引：`The model sees the catalog from the start`。\n- 用在：发现阶段与宿主/模型的职责；本片不限定所有产品必须提供同一条斜杠命令。\n- 边界：模型自动选择是常见方式，不是本期demo已经实测的能力；“没有交给模型全文”也不等于宿主从未读取底层文件。已加载内容需要会话管理、去重和压缩策略，不应表现为任务结束自动清空。",
+        "claimText": "宿主可以扫描文件，也可用API或注册表发现；将候选名称、描述及访问位置交给模型。激活可通过普通文件读取或专用工具，用户显式选择也可由宿主注入。资源列表不等于资源正文已全部加载。",
+        "scopeBoundaryText": "模型自动选择是常见方式，不是本期demo已经实测的能力；“没有交给模型全文”也不等于宿主从未读取底层文件。已加载内容需要会话管理、去重和压缩策略，不应表现为任务结束自动清空。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md#L16-L23",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-25既有实读记录research.md第18行，S02来源英文原题",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-agent-skills.json",
+        "record": {
+          "line": 18,
+          "text": "- 来源：[How to add skills support to your agent](https://agentskills.io/client-implementation/adding-skills-support)。页面未标发布日期；原`/integrate-skills`现跳转至此。",
+          "actualTitle": "How to add skills support to your agent",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md#L18",
+          "scope": "忠实沿用旧实读记录的完整文档原题，不以文章中文主题或定位小节替代原题。"
+        }
+      },
+      "creditEvidence": {
+        "organization": "Agent Skills",
+        "basis": "旧记录明确的第一方Agent Skills标准/客户端文档。",
+        "personalAuthor": "not-established in retained document reading; omit author, no Git or account inference"
+      },
+      "supports": [
+        "宿主可以扫描文件，也可用API或注册表发现；将候选名称、描述及访问位置交给模型。激活可通过普通文件读取或专用工具，用户显式选择也可由宿主注入。资源列表不等于资源正文已全部加载。"
+      ],
+      "sections": "三层加载、目录生成、模型/用户激活、资源列举及会话保留。",
+      "limitations": [
+        "模型自动选择是常见方式，不是本期demo已经实测的能力；“没有交给模型全文”也不等于宿主从未读取底层文件。已加载内容需要会话管理、去重和压缩策略，不应表现为任务结束自动清空。"
+      ],
+      "shots": [
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "10",
+        "11",
+        "12"
+      ],
+      "newTechnicalReadingClaimed": false,
+      "oldOfficialHTTPBodySHA256": null,
+      "oldBodyHashScope": "旧research/artifact SHA只证明本仓历史记录身份；无旧完整HTTP字节摘要，不替代或伪造。",
+      "publicClaim": "宿主组织候选技能及其访问位置，模型或用户可以选择技能，激活与资源读取由具体宿主实现；资源列表不等于正文已经加载。"
+    },
+    {
+      "id": "agent-skills-r3",
+      "referenceId": "R3",
+      "oldSourceId": "S04",
+      "title": "Extend Claude with skills",
+      "organization": "Anthropic",
+      "version": "Claude Code · 动态产品文档（2026-10-25实读）",
+      "canonicalUrl": "https://code.claude.com/docs/en/skills",
+      "checkedAt": "2026-10-25",
+      "verificationStatus": "verified",
+      "verificationBasis": "existing-first-party-reading-record",
+      "originalRecord": {
+        "startLine": 33,
+        "endLine": 40,
+        "text": "## S04 Claude Code：产品行为与生命周期\n\n- 来源：[Extend Claude with skills](https://code.claude.com/docs/en/skills)，重点为[Skill content lifecycle](https://code.claude.com/docs/en/skills#skill-content-lifecycle)。页面未标统一发布日期；动态产品文档。\n- 已读范围：普通会话的description/body加载、调用控制、标准与扩展、上下文保留、工具预授权和触发评估。\n- 支持主张：该产品将技能作为提示指导；与常驻CLAUDE.md相比，正文在使用时加载。已加载正文作为会话消息跨轮保留，压缩时按预算续带。工具执行和模型遵循不是仅凭文件格式自动保证的。\n- 短引：`stays there across later turns`。\n- 用在：脚本工具路径与保留边界；具体配置只进文章。\n- 边界：Claude Code允许部分frontmatter省略，不能覆盖S01标准的必填要求；`disable-model-invocation`、fork等为产品特性。其`allowed-tools`是当轮预授权，非封闭工具白名单，不表示Skill能自行授予任意能力；标准和其他宿主的同名字段不可混讲。",
+        "claimText": "该产品将技能作为提示指导；与常驻CLAUDE.md相比，正文在使用时加载。已加载正文作为会话消息跨轮保留，压缩时按预算续带。工具执行和模型遵循不是仅凭文件格式自动保证的。",
+        "scopeBoundaryText": "Claude Code允许部分frontmatter省略，不能覆盖S01标准的必填要求；`disable-model-invocation`、fork等为产品特性。其`allowed-tools`是当轮预授权，非封闭工具白名单，不表示Skill能自行授予任意能力；标准和其他宿主的同名字段不可混讲。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md#L33-L40",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-25既有实读记录research.md第35行，S04来源英文原题",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-agent-skills.json",
+        "record": {
+          "line": 35,
+          "text": "- 来源：[Extend Claude with skills](https://code.claude.com/docs/en/skills)，重点为[Skill content lifecycle](https://code.claude.com/docs/en/skills#skill-content-lifecycle)。页面未标统一发布日期；动态产品文档。",
+          "actualTitle": "Extend Claude with skills",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md#L35",
+          "scope": "忠实沿用旧实读记录的完整文档原题，不以文章中文主题或定位小节替代原题。"
+        }
+      },
+      "creditEvidence": {
+        "organization": "Anthropic",
+        "basis": "旧记录明确的Claude Code第一方产品文档，由Anthropic发布。",
+        "personalAuthor": "not-established in retained document reading; omit author, no Git or account inference"
+      },
+      "supports": [
+        "该产品将技能作为提示指导；与常驻CLAUDE.md相比，正文在使用时加载。已加载正文作为会话消息跨轮保留，压缩时按预算续带。工具执行和模型遵循不是仅凭文件格式自动保证的。"
+      ],
+      "sections": "普通会话的description/body加载、调用控制、标准与扩展、上下文保留、工具预授权和触发评估。",
+      "limitations": [
+        "Claude Code允许部分frontmatter省略，不能覆盖S01标准的必填要求；`disable-model-invocation`、fork等为产品特性。其`allowed-tools`是当轮预授权，非封闭工具白名单，不表示Skill能自行授予任意能力；标准和其他宿主的同名字段不可混讲。"
+      ],
+      "shots": [
+        "05",
+        "08",
+        "11"
+      ],
+      "newTechnicalReadingClaimed": false,
+      "oldOfficialHTTPBodySHA256": null,
+      "oldBodyHashScope": "旧research/artifact SHA只证明本仓历史记录身份；无旧完整HTTP字节摘要，不替代或伪造。",
+      "publicClaim": "Claude Code的技能正文按使用进入会话，并按其会话和压缩机制保留；这是产品行为，不是所有宿主统一的内容生命周期。"
+    },
+    {
+      "id": "agent-skills-r4",
+      "referenceId": "R4",
+      "oldSourceId": "S05",
+      "title": "Equipping agents for the real world with Agent Skills",
+      "organization": "Anthropic",
+      "version": "2025-10-16 · 原始工程文章（2025-12-18开放标准更新）",
+      "canonicalUrl": "https://www.anthropic.com/research/equipping-agents-for-the-real-world-with-agent-skills",
+      "checkedAt": "2026-10-25",
+      "verificationStatus": "verified",
+      "verificationBasis": "existing-first-party-reading-record",
+      "originalRecord": {
+        "startLine": 42,
+        "endLine": 49,
+        "text": "## S05 原始工程文章：参考文本与脚本是两条路径\n\n- 来源：[Equipping agents for the real world with Agent Skills](https://www.anthropic.com/research/equipping-agents-for-the-real-world-with-agent-skills)。原发布日期 **2025-10-16**，页面另有2025-12-18开放标准更新。\n- 已读范围：技能结构、PDF案例、上下文过程、代码执行及先评估再补技能的建议。\n- 支持主张：详细参考材料可以在需要时读取；配套脚本可以直接经工具执行，不必先把脚本源码或待处理文件全文塞进模型，必要结果再回传。\n- 短引：`Skills can also include code`。\n- 用在：本片核心分流：`references → 按需读入上下文`；`scripts → 工具执行 → 结果回到上下文`。\n- 边界：旧文解释稳定设计，不作为当前SDK接口说明。确定性程序执行不等于程序正确、输入覆盖充分或完整业务兼容；本片自制检查器仅覆盖明确的必填规则。",
+        "claimText": "详细参考材料可以在需要时读取；配套脚本可以直接经工具执行，不必先把脚本源码或待处理文件全文塞进模型，必要结果再回传。",
+        "scopeBoundaryText": "旧文解释稳定设计，不作为当前SDK接口说明。确定性程序执行不等于程序正确、输入覆盖充分或完整业务兼容；本片自制检查器仅覆盖明确的必填规则。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md#L42-L49",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "26日正式原页h1限定提取的实际主标题；与旧research.md第44行原题一致，区别于缩短SEO title",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-agent-skills.json",
+        "record": {
+          "line": 44,
+          "text": "- 来源：[Equipping agents for the real world with Agent Skills](https://www.anthropic.com/research/equipping-agents-for-the-real-world-with-agent-skills)。原发布日期 **2025-10-16**，页面另有2025-12-18开放标准更新。",
+          "actualTitle": "Equipping agents for the real world with Agent Skills",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md#L44",
+          "scope": "本轮只核原题/署名；实际H1而非缩短SEO题名用于视频。",
+          "h1HTML": "<h1 class=\"ArticleHero-module-scss-module__VYxBBq__Title\">Equipping agents for the real world with Agent Skills</h1>",
+          "h1Text": "Equipping agents for the real world with Agent Skills",
+          "seoTitle": "Equipping agents with Agent Skills",
+          "metadataReviewDate": "2026-10-26",
+          "snapshot": {
+            "path": "docs/archive/2026-10/reference-endcards-batch-12/agent-skills-engineering-h1-tinyfish.json",
+            "bytes": 2943,
+            "sha256": "206cff0c6bfeb1eb9eaac3c706f6bf5d047e70ef0f374fc5544108b71bdaf060",
+            "reviewedAt": "2026-10-26",
+            "artifactType": "complete returned TinyFish extraction result serialized as UTF-8 JSON; not raw HTTP response bytes",
+            "scope": "Only title/H1 and explicit authors inspected; no fresh technical claim validation."
+          }
+        }
+      },
+      "creditEvidence": {
+        "author": "Barry Zhang, Keith Lazuka, and Mahesh Murag",
+        "locator": "Authors & acknowledgements → Acknowledgements，Written by段",
+        "verbatim": "Written by Barry Zhang, Keith Lazuka, and Mahesh Murag, who all really like folders. Special thanks to the many others across Anthropic who championed, supported, and built Skills.",
+        "snapshot": {
+          "path": "docs/archive/2026-10/reference-endcards-batch-12/agent-skills-engineering-metadata-tinyfish.json",
+          "bytes": 15187,
+          "sha256": "0442c168671b7d6ccab5cf85281862d4c6270885aae0ff66f974900f91e81272",
+          "reviewedAt": "2026-10-26",
+          "artifactType": "complete returned TinyFish extraction result serialized as UTF-8 JSON; not raw HTTP response bytes",
+          "scope": "Only title/H1 and explicit authors inspected; no fresh technical claim validation."
+        },
+        "htmlSnapshot": {
+          "path": "docs/archive/2026-10/reference-endcards-batch-12/agent-skills-engineering-html-tinyfish.json",
+          "bytes": 13097,
+          "sha256": "c6818ebde0a69457ca144b0ac1915295d94d75e544f5aadafdb156a77b65d72c",
+          "reviewedAt": "2026-10-26",
+          "artifactType": "complete returned TinyFish extraction result serialized as UTF-8 JSON; not raw HTTP response bytes",
+          "scope": "Only title/H1 and explicit authors inspected; no fresh technical claim validation."
+        },
+        "corporateMetadataAuthor": "Anthropic",
+        "scope": "以原文明确列出的三位作者为个人署名，不用泛metadata author=Anthropic替代，不遗漏Keith Lazuka。"
+      },
+      "supports": [
+        "详细参考材料可以在需要时读取；配套脚本可以直接经工具执行，不必先把脚本源码或待处理文件全文塞进模型，必要结果再回传。"
+      ],
+      "sections": "技能结构、PDF案例、上下文过程、代码执行及先评估再补技能的建议。",
+      "limitations": [
+        "旧文解释稳定设计，不作为当前SDK接口说明。确定性程序执行不等于程序正确、输入覆盖充分或完整业务兼容；本片自制检查器仅覆盖明确的必填规则。"
+      ],
+      "shots": [
+        "03",
+        "05",
+        "06",
+        "07",
+        "08",
+        "10",
+        "12"
+      ],
+      "newTechnicalReadingClaimed": false,
+      "oldOfficialHTTPBodySHA256": null,
+      "oldBodyHashScope": "旧research/artifact SHA只证明本仓历史记录身份；无旧完整HTTP字节摘要，不替代或伪造。",
+      "publicClaim": "参考材料可以按需读入，预写脚本则可以通过工具执行后回传结果，不必先把脚本和待处理文件全文交给模型；代码执行本身仍不证明业务结论正确。"
+    }
+  ],
+  "unchangedDemoBoundary": {
+    "startLine": 74,
+    "text": "## 本期自制示例的证据边界\n\n公开资料支持上方机制；以下路径属于本项目示例，不作外部引用或行业效果依据。已只读核对当前文件，未由本调研代理重跑或修改demo。\n\n- 同一份合成旧请求省略`channel`；`after-optional.json`与`after-required.json`分别检查可选/必填变化。所谓接受/拒绝来自本地必填字段校验器，不是实际HTTP服务响应。\n- 技能入口：`demo/skills/api-compat-review/SKILL.md`；参考规则：`references/request-fields.md`；执行脚本：`scripts/check_fields.py`（二者路径均相对该技能目录）。\n- 运行脚本需要旧契约、新契约、旧请求三个输入。结论覆盖必填变化，不涵盖所有类型/枚举、响应、认证、默认值或实际服务行为；“可选字段分支通过”只能称通过已检查规则。\n- `demo/outputs/trace.json`明确无LLM请求、由演示宿主显式选择。四阶段输入载荷是机制示意，实际文件I/O、命令和检查结果可复核；不声称测到了模型自动触发、token成本或准确率。\n- 建立目录索引时宿主读过两个`SKILL.md`；模型侧示意载荷初始只含名称/描述。未选中`release-notes`正文和脚本源码没有加入该载荷，不能说底层文件从未被读取。\n- 常驻对照是人为选定“两个工作方法预先粘贴”的配置，不代表所有Prompt用法；同样资料也能直接写入Prompt，Skill的区别在组织、发现、复用和按需供给。\n\n## 技术审稿检查点\n\n- 不把Skill描述成训练、插件二进制或自动执行程序。\n- 不把目录/资源存在、实际读入模型、经工具执行、任务正确完成混为一步。\n- 图中区分参考文本进入上下文与脚本执行后结果回流；脚本可被读取，但不是必须先全文载入。\n- 不预设所有技能默认可自动触发，不把演示显式选择写成真实模型选择实测。\n- 不表现任务一结束所有内容自动卸载，不把宿主特有权限/语法推广成标准。\n- 不用“加字段一定兼容”、单一旧请求通过或一次脚本退出0证明完整兼容。\n\n## 文稿技术复审\n\n调研代理只读审查了`script.md`、`plan.json`和`visual-direction.md`，并与当前demo路径、输入和输出逐项对照。初审提出：两种配置不能画成同会话自动卸载；候选数应与两项实际示例一致；脚本执行应包含旧契约、新契约和旧请求三个输入。\n\n编辑修正后，锁定脚本SHA-256为`915c23f9445eeaf615d2b9b471134a4f6ad3ffa934e410709b444c8607c41eac`，上述三项技术问题已落实。正文还明确目录索引有开销、小技能包未必更省，未使用编造的token/价格/准确率收益，宿主保留/压缩与审查正确性分别说明。**本轮技术主张复审通过**；这不是动画实际实现、成片表达、模型自动触发实验或用户观看效果已经通过。视觉实现仍需核对03的配置切换、07读取、08执行与结果回流以及11不自动清空。",
+    "newExecution": false
+  },
+  "otherSourcesRetained": "S03概述、S06可选MCP扩展、S07治理公告、S08工作组记录和五条原文章脚注全部保留；片尾选择主线四项，不冒称其余未被使用。",
+  "preservationRequirement": {
+    "basis": "root completed immutable before/body baseline; requirement record only",
+    "bodyFrames": 5648,
+    "bodySHA256": "b6db5109f529062465b0b1199042ea72f598fff59a2841acb4099174c9da355d",
+    "noSBVoiceWordsMediaChangedByThisTask": true,
+    "oldArticleModules": "Keep original source article prefix and existing publishedSourceQuote/Figure/links; root integrates new bibliography only."
+  },
+  "selection": {
+    "selected": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ],
+    "reason": "覆盖开放格式、宿主发现激活、产品生命周期与参考/脚本双路径；不因作者补证麻烦漏掉核心工程文章，也不凑文章外背景。",
+    "maxItemsPerPage": 4,
+    "secondsPerPage": 5,
+    "renderedFields": [
+      "title",
+      "credit"
+    ],
+    "creditPolicy": "R1–R3 documented first-party publishing organizations;R4 all three explicitly credited human authors"
+  }
+}

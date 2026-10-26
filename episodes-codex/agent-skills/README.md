@@ -38,3 +38,19 @@
 [本地汇总](qa-final.md)、[独立内容/预检](qa-value-independent.md)、[正式MP4独立复核](qa-encoded-independent.md)、[根实际查看](qa-root-editorial.md)、[站点检查](qa-site.md)、[配音记录](voice/substitutions.md)。原失败帧与正式解码、浏览器截图分别保存，静态样本不冒充多个有效动态阶段。
 
 本轮没有逐字ASR或全片人工听辨，字符兼容字段只是句子包络。来源/信号检查、实际抽样审读与用户观看结论分别记录；原A01/A02继续保持撤下，未来10项仍为研究候选，平台未新发。
+
+## 第12批参考资料与当前入口
+
+本批从基线`f3610e244f9e23e7a9075e406bbc990ba53b7699`的完整Git发布原片追加`title-author`参考资料，每页最多4项、默认5秒。原MP4已核对完整SHA和总帧数，保存为`revisions/reference-endcards/body.mp4`及同SHA的`remotion/out/body.mp4`；本批直接使用这些原片，不重渲正文、混音或TTS。原完整body共5648帧，无代码卡，原收尾和字幕范围保持。
+
+原142项声明全部现存，按原路径或article/research/freezer/package四份before快照逐项核对；旧源与旧引擎原路径及字节保持。新freeze.py只写当前清单，分镜快照/placeholder只读核对，不调用旧写入型冻结器。当前新增清单说明真实入口与附录输入，不声称已据此重现原MP4；旧QA与历史制作事实保留原意。
+
+来源全部停写后，从仓根执行：
+
+```sh
+node site/scripts/check-references.mjs --sources episodes-codex/agent-skills
+python3 episodes-codex/agent-skills/freeze.py
+python3 episodes-codex/agent-skills/freeze.py --verify
+```
+
+默认`npm run render`经共享bibliography wrapper检查来源和冻结，再生成完整body并追加资料。当前render:body保留原voice→mix闭环。默认mix只改输出到`out/body.mp4`，其余混音参数及concurrency=2保留。`npm run render:references`从完整body单独追加；`npm run verify:references`用于后续完整交付核验。最终总帧数由新receipt/render-result与发布meta声明，正文SB/words范围不改。生产整合结果见[入口报告](../../docs/archive/2026-10/reference-endcards-batch-12/production-entry-check.json)，[本批记录](../../docs/archive/2026-10/reference-endcards-batch-12/README.md)只按真实完成状态更新。

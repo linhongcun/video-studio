@@ -1,0 +1,34 @@
+---
+title: "手一抖点了两次支付，为什么只扣一次钱？"
+summary: "同一次支付，保留同一个编号。"
+related: []
+chapters:
+  - id: retry
+    title: "没收到结果，结果仍可能已发生"
+  - id: identity
+    title: "后台可靠地记住同一次操作"
+  - id: boundary
+    title: "幂等承诺有范围"
+---
+
+同一笔支付发出两次请求，不一定需要扣两次款。教学例子里，支付金额30元，账户从100元变为70元；即使成功响应丢了，重发同一次支付也仍使用编号7042。
+
+## 没收到结果，结果仍可能已发生 {#retry}
+
+请求可能已完成，只是响应没有回来。重试需要先区分“同一次操作”与“另一笔内容相同的新操作”：两笔真正不同的30元支付应该有不同编号。仅拿金额或请求参数做去重，不足以表达业务意图。
+
+## 后台可靠地记住同一次操作 {#identity}
+
+首次处理必须协调编号登记、业务变更和结果记录，使它们不会出现“钱扣了却没有去重记录”的断裂。重复请求拿到此前结果，而不是再扣一次。两次并发到来时，只有一个处理者可认领同一编号；另一份应等待或按接口约定重试，不能让两个处理者都先查到不存在。
+
+<SourceQuote sourceId="A1" supports="Stripe以客户端生成的幂等键识别同一请求的后续重试；具体保存期、并发及响应规则须按接口约定核对。" />
+
+<Figure src="/video-studio/episodes/idempotency/article/01.jpg" alt="同一次支付请求次数为3，账户余额仍为70元，累计扣款30元" caption="教学示例：同一次支付请求到达3次，账户仍为70元，累计扣款30元；重复的是请求，业务效果没有增加。" seekTo={62} chapter="identity" />
+
+## 幂等承诺有范围 {#boundary}
+
+幂等约束的是重复操作的业务效果，不要求每次HTTP报文逐字节相同。不同接口的保留期、处理中响应、错误重试策略各有定义；编号过期后重用可能被当成新请求，调用者身份和请求参数也应纳入校验。视频没有承诺所有网站、所有重复点击永久只扣一次。
+
+## 参考资料
+- [AWS Builders Library — Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，实际访问2026-10-24。
+- [Stripe API — Idempotent requests](https://docs.stripe.com/api/idempotent_requests)，实际访问2026-10-24。

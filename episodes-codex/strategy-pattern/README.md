@@ -42,3 +42,19 @@ render:voice校验生产输入SHA，旧视频只取视频流，整轨使用新WA
 v0.52.0首发、v0.54.1章节衔接、v0.54.4语法讲解及v0.56.1思想修订为历史产物。对应revisions与不可变tag保留各自来源，不能改写为本轮结果。本轮是对既有思想版的有限流程修订；所学经验由主任务更新共享文档。
 
 本轮实际冻结入口：从仓库根执行`python3 episodes-codex/strategy-pattern/freeze.py`，编码前后只读复核加`--verify`。它委托新增pattern-flow共享包装，保留旧共享检查器，显式验证真实有声正文与Java静默尾卡派生，并纳入源码、Java、正文快照、旧媒体参照和复用依据。
+
+## 第12批参考资料与当前入口
+
+本批从基线`f3610e244f9e23e7a9075e406bbc990ba53b7699`的完整Git发布原片追加`title-author`参考资料，每页最多4项、默认5秒。原MP4已核对完整SHA和总帧数，保存为`revisions/reference-endcards/body.mp4`及同SHA的`remotion/out/body.mp4`；本批直接使用这些原片，不重渲正文、混音或TTS。保留4628帧正文后的原150帧Java关键节选卡，完整body共4778帧；参考资料从Java卡结束之后开始。Java源、显示JSON、正文快照、逐句时序及静音派生通过原共享工具的纯函数只读核对，不调用会写报告或改输入的Java append/verify入口，不编译或运行演示。
+
+原323项声明全部现存，按原路径或article/research/freezer/package四份before快照逐项核对；旧源与旧引擎原路径及字节保持。新freeze.py只写当前清单，分镜快照/placeholder只读核对，不调用旧写入型冻结器。当前新增清单说明真实入口与附录输入，不声称已据此重现原MP4；旧QA与历史制作事实保留原意。
+
+来源全部停写后，从仓根执行：
+
+```sh
+node site/scripts/check-references.mjs --sources episodes-codex/strategy-pattern
+python3 episodes-codex/strategy-pattern/freeze.py
+python3 episodes-codex/strategy-pattern/freeze.py --verify
+```
+
+默认`npm run render`经共享bibliography wrapper检查来源和冻结，再生成完整body并追加资料。原render:voice及render-flow/旧计划完整保留作历史；该计划锁定旧package.json。为不改旧计划或绕过哈希，当前render:body使用现存render:voice:full再mix，参数和完整Main/Java卡不变。默认mix只改输出到`out/body.mp4`，其余混音参数及concurrency=2保留。`npm run render:references`从完整body单独追加；`npm run verify:references`用于后续完整交付核验。最终总帧数由新receipt/render-result与发布meta声明，正文SB/words范围不改。生产整合结果见[入口报告](../../docs/archive/2026-10/reference-endcards-batch-12/production-entry-check.json)，[本批记录](../../docs/archive/2026-10/reference-endcards-batch-12/README.md)只按真实完成状态更新。
