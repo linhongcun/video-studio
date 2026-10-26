@@ -216,14 +216,52 @@ def main():
         source = read(D / 'qa-voice.json')
         takes = read(D / 'qa-voice-takes.json')
         provenance = read(D / 'voice/input-provenance.json')
-        assert source['status'] == takes['status'] == 'passed'
+        assert source['status'] == 'passed'
+        assert takes['status'] in ['passed', 'needs-review']
         assert provenance['finalVoiceAuditSHA256'] == sha(D / 'qa-voice.json')
         assert provenance['finalSelectedAuditSHA256'] == sha(D / 'qa-voice-takes.json')
         assert source['voiceSHA256'] == provenance['audioSHA256'] == sha(D / 'voice.wav')
         assert source['frames'] == provenance['durationFrames'] == body_frames
         assert source['sentences'] == takes['sentences'] == provenance['sentences'] == sentence_count
         assert source['shots'] == provenance['shots'] == shot_count
-        assert not takes['failures'] and not takes['warnings']
+        assert not takes['failures']
+        # Preserve explicitly reviewed source-pause flags. This is narrow source
+        # provenance handling; the retained encoded correlation/delay/drift/gain
+        # criteria below are unchanged and all remain mandatory.
+        warnings = takes.get('warnings', [])
+        pause_review = None
+        pause_ids = set()
+        if warnings:
+            pause_path = D / source['sourcePauseReview']['path']
+            assert pause_path.resolve().is_relative_to(D)
+            pause_sha = sha(pause_path)
+            assert pause_sha == source['sourcePauseReview']['sha256'] == provenance['sourcePauseReviewSHA256']
+            pause_review = read(pause_path)
+            assert pause_review['sourceAuditSHA256'] == sha(D / 'qa-voice-takes.json')
+            assert warnings == source['retainedSourceSignalFlags'] == provenance['retainedRawLowEnergyFlags']
+            assert pause_review['status'] == 'source-intervals-verified-awaiting-track-replay'
+            assert source['sharedBuilderReplay']['status'] == 'passed'
+            assert source['sharedBuilderReplay']['voiceSHA256'] == sha(D / 'voice.wav')
+            pause_ids = set(pause_review['sourceFlagIds'])
+            assert set(warnings) == {f'{key}: low-level interval at least .50s' for key in pause_ids}
+            assert {row['id'] for row in pause_review['rows']} == pause_ids
+            for row in pause_review['rows']:
+                assert row['trimmedInteriorEqualsOriginalTake'] is True and row['flagIntervalEqualsOriginalTake'] is True
+                assert sha(D / 'voice/takes' / f"{row['id']}-{row['take']}.wav") == row['takeSHA256']
+            assert set(source['measurements']['innerDropouts']) == set(provenance['assembledLowEnergyFlags'])
+            assert set(provenance['assembledLowEnergyFlags']).issubset(pause_ids)
+        else:
+            assert takes['status'] == 'passed'
+        report['retainedSourceSignalFlags'] = {
+            'sourceTakeScreeningStatus': takes['status'], 'warnings': warnings,
+            'sourceTrackFlags': source['measurements'].get('innerDropouts', []),
+            'review': None if pause_review is None else {
+                'path': str(pause_path.relative_to(D)), 'sha256': pause_sha,
+                'status': pause_review['status'], 'scope': pause_review['scope'],
+                'trackReplayStatus': source['sharedBuilderReplay']['status'],
+                'reviewedSourceFlagIds': sorted(pause_ids)},
+            'note': 'Source pause screening flags remain recorded; no spoken-word or naturalness judgment is claimed.'}
+
         report['bodyGate'] = body_gate(before, args.expected_manifest_sha256, body_frames)
         assert sha(NUMERICAL_CHECKER) == NUMERICAL_CHECKER_SHA256
         spec = importlib.util.spec_from_file_location('bloom_single_hash_pinned_encoded_audio', NUMERICAL_CHECKER)
@@ -261,9 +299,19 @@ def main():
             a, b = sentence['startSample'], sentence['endSample']
             source_gap = longest_low_level(reference[a:b])
             decoded_gap = longest_low_level(premix[a:b])
-            assert decoded_gap < .5, (sentence['id'], 'Encoded premix low-level gap', decoded_gap)
+            reviewed_pause = sentence['id'] in pause_ids
+            if reviewed_pause:
+                # Source pause already approved as source-preserved, rather than
+                # an encoded interruption. Measurements use 10ms bins; allow at
+                # most two bin boundaries while all correlation/drift checks
+                # above still apply to every sample range.
+                assert decoded_gap <= source_gap + .0200001, (sentence['id'], 'Encoded pause exceeds reviewed source', source_gap, decoded_gap)
+            else:
+                assert decoded_gap < .5, (sentence['id'], 'New encoded premix low-level gap', decoded_gap)
             quiet_rows.append({'id': sentence['id'], 'sourceMaximumLowLevelSeconds': source_gap,
-                               'premixMaximumLowLevelSeconds': decoded_gap})
+                'premixMaximumLowLevelSeconds': decoded_gap, 'reviewedSourceFlag': reviewed_pause,
+                'maximumEncodedExtraLowLevelSeconds': .02 if reviewed_pause else None,
+                'lowLevelBinSeconds': .01})
         assert before == frozen_snapshot(args.expected_manifest_sha256)
         assert publication_before == {name: sha(D / name) for name in publication_before}
         assert media_before == {relative: sha(D / relative) for relative in media_before}

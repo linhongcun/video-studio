@@ -11,33 +11,36 @@
       "title": "Bloom filter",
       "titleEvidence": {
         "locator": "Markdown front matter: title",
-        "evidence": "episodes-codex/bloom-filter/research/sources/redis-bloom-filter.md"
+        "evidence": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/sources/redis-bloom-filter.md"
       },
       "version": "官方文档 · 4fe762f8",
       "url": "https://github.com/redis/docs/blob/4fe762f8dab40f0b661207374378ed52113c9fe3/content/develop/data-types/probabilistic/bloom-filter.md",
       "canonicalUrl": "https://redis.io/docs/latest/develop/data-types/probabilistic/bloom-filter/",
       "supports": [
-        "布隆过滤器用紧凑摘要回答集合成员查询；阴性与阳性具有不对称含义，阳性可能是假阳性。",
-        "预期容量和目标误判率决定空间取舍；Redis可扩展实现与本片固定位数组模型分开。"
+        "布隆过滤器用紧凑的位标记做近似成员查询；正确维护时0可排除，1仅表示可能存在。",
+        "预期容量、空间和选取位置数量需要联合选择；本片以k=1最简参数讲解，不冒称Redis默认实现只算一个位置。"
       ],
-      "sections": "Overview; Example false-positive note; Reserving Bloom filters; Total size of a Bloom filter",
+      "sections": "Overview; Reserving Bloom filters; Total size of a Bloom filter",
       "quotation": {
         "text": "A Bloom filter can guarantee the absence of an item from a set, but it can only give an estimation about its presence.",
         "locator": "Overview, third paragraph, first sentence (line 33)",
-        "evidence": "episodes-codex/bloom-filter/research/sources/redis-bloom-filter.md"
+        "evidence": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/sources/redis-bloom-filter.md"
       },
       "verification": {
         "status": "verified",
         "checkedAt": "2026-10-26",
-        "method": "实际读取官方GitHub仓库固定commit原文；原文通过Contents API GET、base64原字节还原，Git blob SHA-1和SHA-256核对；原题与短引逐字比对。",
+        "method": "复读既有固定官方原文；本轮按原字节复制此前Contents API取回的文件并核SHA与Git blob身份。新路径的原题与连续短引逐字匹配；未执行新的网络取回。",
         "sourceUrl": "https://github.com/redis/docs/blob/4fe762f8dab40f0b661207374378ed52113c9fe3/content/develop/data-types/probabilistic/bloom-filter.md",
-        "retrievedUrl": "https://api.github.com/repos/redis/docs/contents/content/develop/data-types/probabilistic/bloom-filter.md?ref=4fe762f8dab40f0b661207374378ed52113c9fe3",
+        "originalRetrievedUrl": "https://api.github.com/repos/redis/docs/contents/content/develop/data-types/probabilistic/bloom-filter.md?ref=4fe762f8dab40f0b661207374378ed52113c9fe3",
         "commit": "4fe762f8dab40f0b661207374378ed52113c9fe3",
         "gitBlobSHA1": "727d1c8d80da68d963939dd0fc785121be9bd81a",
         "sha256": "0e72ec0308ce57807ff8012465455c7d5bc37df78cecffe99e23e8f1e3ecfc59",
-        "evidence": "episodes-codex/bloom-filter/research/source-verification.json",
-        "canonicalAccess": "官网直接访问被代理403拒绝，本轮未取回canonical页面正文；实际成功访问为官方维护仓库固定版本。",
-        "readingScope": "Full 184-line document"
+        "evidence": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/source-verification.json",
+        "retrievalStatus": "reused-exact-original-bytes",
+        "originalRetrievalUTC": "2026-10-25T23:05:27.766761+00:00",
+        "newNetworkRetrievalPerformed": false,
+        "canonicalAccess": "保留原官网链接；原访问被代理403拒绝，本轮未重新访问，未将官网记作成功读取。",
+        "rereadScope": "Overview的不对称错误与容量/选k相关段；k=1实际源码依据另列Guava。"
       }
     },
     {
@@ -46,35 +49,38 @@
       "title": "Bloom Filters",
       "titleEvidence": {
         "locator": "AsciiDoc document title, line 1",
-        "evidence": "episodes-codex/bloom-filter/research/sources/cassandra-bloom-filters.adoc"
+        "evidence": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/sources/cassandra-bloom-filters.adoc"
       },
       "version": "官方文档 · 05853eae",
       "url": "https://github.com/apache/cassandra/blob/05853eaeab006bd1e834331ac8b1dfdc464d1f31/doc/modules/cassandra/pages/managing/operating/bloom_filters.adoc",
       "canonicalUrl": "https://cassandra.apache.org/doc/latest/cassandra/managing/operating/bloom_filters.html",
       "supports": [
-        "Cassandra使用布隆过滤器排除不含目标分区的SSTable，以减少无用文件检查；可能存在仍需确认。",
-        "更低假阳性率与更高内存占用形成工程取舍；不采用本页的产品默认参数或具体倍数作为通用规律。"
+        "真实系统利用布隆过滤器排除不含目标的文件，可能存在仍需进一步检查。",
+        "准确性与内存存在取舍，不采用文档的产品默认参数或具体内存倍数作为通用规律。"
       ],
-      "sections": "Opening section: SSTable read-path filtering, definitely absent/probably present and RAM/accuracy tradeoff",
+      "sections": "Opening section: definite absence/probable presence and RAM/accuracy tradeoff",
       "quotation": {
         "text": "bloom filters can be made more accurate by allowing them to\nconsume more RAM.",
         "locator": "Opening section, third paragraph (lines 14–15)",
-        "evidence": "episodes-codex/bloom-filter/research/sources/cassandra-bloom-filters.adoc"
+        "evidence": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/sources/cassandra-bloom-filters.adoc"
       },
       "verification": {
         "status": "verified",
         "checkedAt": "2026-10-26",
-        "method": "实际读取官方GitHub仓库固定commit原文；原文通过Contents API GET、base64原字节还原，Git blob SHA-1和SHA-256核对；原题与短引逐字比对。",
+        "method": "复读既有固定官方原文；本轮按原字节复制此前Contents API取回的文件并核SHA与Git blob身份。新路径的原题与连续短引逐字匹配；未执行新的网络取回。",
         "sourceUrl": "https://github.com/apache/cassandra/blob/05853eaeab006bd1e834331ac8b1dfdc464d1f31/doc/modules/cassandra/pages/managing/operating/bloom_filters.adoc",
-        "retrievedUrl": "https://api.github.com/repos/apache/cassandra/contents/doc/modules/cassandra/pages/managing/operating/bloom_filters.adoc?ref=05853eaeab006bd1e834331ac8b1dfdc464d1f31",
+        "originalRetrievedUrl": "https://api.github.com/repos/apache/cassandra/contents/doc/modules/cassandra/pages/managing/operating/bloom_filters.adoc?ref=05853eaeab006bd1e834331ac8b1dfdc464d1f31",
         "commit": "05853eaeab006bd1e834331ac8b1dfdc464d1f31",
         "gitBlobSHA1": "5ce5f8d04cb52cc4e0b01867f764cd61e9e47411",
         "sha256": "8582c28aba3e3ec34c01aeb2dcd8463995d443a5280ae624fbbf2894b3c0c357",
-        "evidence": "episodes-codex/bloom-filter/research/source-verification.json",
-        "canonicalAccess": "官网直接访问被代理403拒绝，本轮未取回canonical页面正文；实际成功访问为官方维护仓库固定版本。",
-        "readingScope": "Full short document"
+        "evidence": "episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/research/source-verification.json",
+        "retrievalStatus": "reused-exact-original-bytes",
+        "originalRetrievalUTC": "2026-10-25T23:05:27.746711+00:00",
+        "newNetworkRetrievalPerformed": false,
+        "canonicalAccess": "保留原官网链接；原访问被代理403拒绝，本轮未重新访问，未将官网记作成功读取。",
+        "rereadScope": "开头的两种结果和内存/准确率取舍。"
       }
     }
   ],
-  "scope": "片尾仅列两项核心官方文档，一页默认5秒。Guava实际置位/查询源码仅作文章和研究补充，所有教学编号和哈希位置是可复算自设示例，非产品实测。"
+  "scope": "单位置基础机制为主；Guava实际源码支持k最小为1，另列于研究与文章。片尾保留Redis/Cassandra原题及连续原文，一页默认5秒。教学hash与碰撞例子非产品实现或误判率实验。"
 }
