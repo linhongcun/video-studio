@@ -15,3 +15,5 @@
 本地三片与6个播放器场景首次检查通过；3次桌面1x尾段到ended、3次手机原生全屏、6张每页截图实际view_image查看，根另看Outbox/降级两张手机卡。8项原题/署名完整，原生字幕和控件不盖文字。独立12张实际短尾及所有源/发布/回执/元数据/清单绑定通过。仅Chromium视口模拟，不扩写为真机/iOS、全片人工听辨或新ASR。见qa-independent.json与qa-browser.json。
 
 关键词检索命中未来MQ10的Outbox/CDC新课issue#318，与本批既有EP21短片不同，未关闭；未发现本批专属未关闭issue。
+
+[PR #351](https://github.com/linhongcun/video-studio/pull/351)已合并，发布[v0.72.2](https://github.com/linhongcun/video-studio/releases/tag/v0.72.2)，[Pages40309419409](https://github.com/linhongcun/video-studio/actions/runs/40309419409)成功；提交`cf9a0c9ebec6d930e490f905a10bc2491cc2eabd`。2026-10-26T18:48:29+08:00完成13项规范URL完整GET，三片视频完整SHA、海报、VTT、资料页面/原章节/日期、更新日志及tag/Release/部署身份通过。原存量累计29/47完成，全站含新增Redis为30/48有资料附录。实际响应见online-verification.json；未关闭不同范围的新课issue#318。
