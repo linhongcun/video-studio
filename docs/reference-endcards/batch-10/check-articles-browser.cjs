@@ -15,12 +15,11 @@ const {pathToFileURL} = require('node:url');
 
 const ROOT = path.resolve(__dirname, '../../..');
 const OUT = __dirname;
+const PRIOR_REPORT = path.join(OUT, 'qa-article-browser-before-sourcequote-interaction.json');
 const TARGETS = ['container-most-water', 'longest-substring', 'number-of-islands', 'permutations', 'trapping-rain-water'];
 const MODES = [
-  {name: 'desktop-light', width: 1440, height: 1000, theme: 'light', screenshots: true, enlargeControl: 'image'},
-  {name: 'desktop-dark', width: 1440, height: 1000, theme: 'dark', screenshots: false, enlargeControl: 'caption'},
-  {name: 'mobile-light', width: 390, height: 844, theme: 'light', screenshots: false, enlargeControl: 'image'},
-  {name: 'mobile-dark', width: 390, height: 844, theme: 'dark', screenshots: true, enlargeControl: 'caption'},
+  {name: 'desktop-dark', width: 1440, height: 1000, theme: 'dark', screenshots: true, mobile: false},
+  {name: 'mobile-dark', width: 390, height: 844, theme: 'dark', screenshots: true, mobile: true},
 ];
 const read = file => JSON.parse(fs.readFileSync(file, 'utf8'));
 const digest = bytes => crypto.createHash('sha256').update(bytes).digest('hex');
@@ -31,7 +30,7 @@ const normalize = text => text.replace(/\s+/g, ' ').trim();
 function argumentsForRun() {
   const argv = process.argv.slice(2);
   if (argv.includes('--help') || argv.includes('-h')) {
-    console.log('Usage: node docs/reference-endcards/batch-10/check-articles-browser.cjs --base-url http://127.0.0.1:PORT/video-studio/\nChecks only five startup targets, four viewport/theme modes. Saves quote+figure screenshots for desktop-light and mobile-dark; other two modes use assertions only. Writes qa-article-browser.json with visual review pending.');
+    console.log('Usage: node docs/reference-endcards/batch-10/check-articles-browser.cjs --base-url http://127.0.0.1:PORT/video-studio/\nChecks only five startup targets in desktop-dark and mobile-dark (10 cases): actual click/touch open and close, exact quotation/metadata, Figure load/seek, strict zero overflow. Saves 10 open-panel screenshots, preserves prior 40-case report and does not replay those cases.');
     return null;
   }
   let base = process.env.ARTICLE_QA_BASE;
@@ -115,7 +114,7 @@ async function runCase(browser, base, expected, mode, directory) {
   const result = {slug, mode: mode.name, viewport: {width: mode.width, height: mode.height},
     theme: mode.theme, screenshotMode: mode.screenshots, quotes: [], figures: [], screenshots: [], errors: [], passed: false};
   const context = await browser.newContext({viewport: result.viewport, colorScheme: mode.theme,
-    reducedMotion: 'reduce', deviceScaleFactor: 1});
+    reducedMotion: 'reduce', deviceScaleFactor: 1, isMobile: mode.mobile, hasTouch: mode.mobile});
   await context.addInitScript(theme => localStorage.setItem('vs:theme', theme), mode.theme);
   const page = await context.newPage();
   page.setDefaultTimeout(15000);
@@ -140,21 +139,52 @@ async function runCase(browser, base, expected, mode, directory) {
     result.actualTheme = theme;
     const quotes = page.locator('#article .source-quote');
     assert.equal(await quotes.count(), expected.quotes.length);
+    await page.waitForFunction(() => [...document.querySelectorAll('[data-source-quote]')].every(node => node.dataset.sourceReady === 'true'));
+    assert.equal(await page.locator('aside[data-source-panel]:popover-open').count(), 0);
     for (let i = 0; i < expected.quotes.length; i++) {
-      const props = expected.quotes[i], source = expected.sources.get(props.sourceId), node = quotes.nth(i);
-      await node.scrollIntoViewIfNeeded();
+      const props = expected.quotes[i], source = expected.sources.get(props.sourceId);
+      const trigger = page.locator(`button[data-source-trigger="${props.sourceId}"]`);
+      const node = page.locator(`aside[data-source-panel="${props.sourceId}"]`);
+      assert.equal(await trigger.count(), 1);
+      assert.equal(await node.count(), 1);
+      assert.equal(await trigger.getAttribute('aria-label'), `查看原文与出处：${source.title}`);
+      assert.equal(await trigger.getAttribute('aria-controls'), await node.getAttribute('id'));
+      assert.equal(await trigger.getAttribute('popovertarget'), await node.getAttribute('id'));
+      await trigger.scrollIntoViewIfNeeded();
+      assert.ok(await trigger.isVisible());
+      assert.equal(await trigger.getAttribute('aria-expanded'), 'false');
+      assert.equal(await node.isVisible(), false);
+      assert.equal(await node.locator('blockquote').isVisible(), false);
+      const collapsed = await trigger.evaluate(button => ({inParagraph: !!button.closest('p'),
+        rootHeight: [...document.querySelectorAll('[data-source-quote]')].find(root => root.dataset.sourceQuote === button.dataset.sourceTrigger).getBoundingClientRect().height}));
+      assert.ok(collapsed.inParagraph && collapsed.rootHeight <= 48, `${slug}: citation is not a compact paragraph entry`);
+      const flow = () => page.locator('#article > p, #article > h2, #article > h3, #article > figure').evaluateAll(nodes => nodes.map(node => {
+        const rect = node.getBoundingClientRect(); return {top: rect.top + scrollY, height: rect.height};
+      }));
+      const before = await flow();
+      if (mode.mobile) await trigger.tap(); else await trigger.click();
+      await page.waitForFunction(id => document.querySelector(`aside[data-source-panel="${id}"]`)?.matches(':popover-open')
+        && document.querySelector(`button[data-source-trigger="${id}"]`)?.getAttribute('aria-expanded') === 'true', props.sourceId);
       assert.ok(await node.isVisible());
+      assert.equal(await node.getAttribute('data-source-state'), 'pinned');
+      assert.equal(await page.locator('aside[data-source-panel]:popover-open').count(), 1);
+      const box = await node.boundingBox();
+      assert.ok(box && box.x >= 0 && box.y >= 0 && box.x + box.width <= mode.width && box.y + box.height <= mode.height,
+        `${slug}: citation panel exceeds viewport`);
+      const openMetrics = await page.evaluate(() => ({documentWidth: document.documentElement.scrollWidth, viewportWidth: innerWidth}));
+      assert.ok(openMetrics.documentWidth <= openMetrics.viewportWidth);
       const actual = await node.evaluate(element => {
         const text = selector => element.querySelector(selector)?.textContent;
         const style = getComputedStyle(element.querySelector('blockquote'));
-        return {id: element.dataset.sourceQuote, text: text('blockquote'), title: text('cite a'),
+        return {id: element.dataset.sourcePanel, text: text('blockquote'), title: text('cite a'),
           url: element.querySelector('cite a')?.href, cite: element.querySelector('blockquote')?.getAttribute('cite'),
           identity: text('.source-identity'), locator: text('.source-location'),
           checkedAt: element.querySelector('.source-access time')?.dateTime,
           support: text('.source-support'), translation: text('.source-translation'),
           links: [...element.querySelectorAll('a')].map(a => a.href), width: element.getBoundingClientRect().width,
           quoteFontPixels: parseFloat(style.fontSize), lineHeightPixels: parseFloat(style.lineHeight),
-          horizontalOverflow: element.scrollWidth - element.clientWidth};
+          horizontalOverflow: element.scrollWidth - element.clientWidth,
+          scrollHeight: element.scrollHeight, clientHeight: element.clientHeight};
       });
       assert.equal(actual.id, props.sourceId);
       assert.equal(actual.text, source.quotation.text, `${slug}: original quote changed`);
@@ -172,8 +202,30 @@ async function runCase(browser, base, expected, mode, directory) {
       }
       assert.ok(actual.width > 250 && actual.width <= mode.width && actual.horizontalOverflow <= 1);
       assert.ok(actual.quoteFontPixels >= 14 && actual.lineHeightPixels >= actual.quoteFontPixels * 1.3);
-      result.quotes.push({...actual, metadataSourceId: source.id, exactOriginalTextAndMetadataMatch: true});
+      const sourceLink = node.locator('cite a');
+      await sourceLink.scrollIntoViewIfNeeded();
+      const sourceLinkHit = await sourceLink.evaluate(link => {
+        const rect = link.getClientRects()[0], x = rect.x + Math.min(rect.width / 2, 80), y = rect.y + rect.height / 2;
+        return {expected: link.href, actual: document.elementFromPoint(x, y)?.closest('a')?.href};
+      });
+      assert.equal(sourceLinkHit.actual, sourceLinkHit.expected);
+      await node.evaluate(panel => { panel.scrollTop = 0; });
       if (mode.screenshots) await screenshot(node, `${slug}-${mode.name}-quote-${i + 1}.png`, 'quote', result, directory);
+      const close = node.getByRole('button', {name: '关闭原文与出处'});
+      if (mode.mobile) await close.tap(); else await close.click();
+      await page.waitForFunction(id => !document.querySelector(`aside[data-source-panel="${id}"]`)?.matches(':popover-open')
+        && document.querySelector(`button[data-source-trigger="${id}"]`)?.getAttribute('aria-expanded') === 'false', props.sourceId);
+      assert.equal(await node.isVisible(), false);
+      const after = await flow();
+      assert.equal(after.length, before.length);
+      for (let j = 0; j < before.length; j++) {
+        assert.ok(Math.abs(after[j].top - before[j].top) < 1 && Math.abs(after[j].height - before[j].height) < 1,
+          `${slug}: source panel changed article layout`);
+      }
+      result.quotes.push({...actual, metadataSourceId: source.id, exactOriginalTextAndMetadataMatch: true,
+        interaction: {collapsed, control: mode.mobile ? 'actual touchscreen tap' : 'actual mouse click',
+          openedPinned: true, closedWithLabelledButton: true, layoutShift: false, panelBounds: box,
+          openDocumentMetrics: openMetrics, sourceLinkHit, externalSourceNavigationPerformed: false}});
     }
     assert.equal(await page.locator('#article figure.fig').count(), expected.figures.length);
     const fps = expected.storyboard.meta.fps ?? 30;
@@ -209,23 +261,9 @@ async function runCase(browser, base, expected, mode, directory) {
       const captionStyle = await caption.evaluate(node => ({font: parseFloat(getComputedStyle(node).fontSize),
         overflow: node.scrollWidth - node.clientWidth}));
       assert.ok(captionStyle.font >= 12 && captionStyle.overflow <= 1);
-      if (mode.screenshots) await screenshot(figure, `${slug}-${mode.name}-figure-${i + 1}.png`, 'figure', result, directory);
-      // Alternate image and caption links across the four modes. Both must
-      // point to the same original; each control is actually activated twice.
-      const zoomLink = mode.enlargeControl === 'image' ? figure.locator('.fig-image-link')
-        : caption.locator('a').filter({hasText: '查看大图'});
-      const originalURL = new URL(props.src, base).href;
-      await Promise.all([page.waitForURL(originalURL, {waitUntil: 'load'}), zoomLink.click()]);
-      const enlarged = await page.locator('img').evaluate(async node => { await node.decode();
-        return {src: node.currentSrc, naturalWidth: node.naturalWidth, naturalHeight: node.naturalHeight}; });
-      assert.equal(enlarged.src, originalURL);
-      assert.ok(enlarged.naturalWidth >= 640);
-      await page.goBack({waitUntil: 'load'});
-      assert.equal(new URL(page.url()).pathname, new URL(url).pathname);
-      assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), mode.theme);
-      figure = page.locator('#article figure.fig').nth(i);
       const record = {...actual, caption: text, actualLoadedImage: served,
-        originalImageOpened: {control: mode.enlargeControl, ...enlarged}, kind: props.kind ?? 'video'};
+        originalImageNavigationRetested: false, priorOriginalImageAndVisualEvidence: relative(PRIOR_REPORT),
+        kind: props.kind ?? 'video'};
       if (record.kind === 'video') {
         assert.ok(Number.isFinite(props.seekTo) && props.seekTo >= 0 && props.seekTo < bodyEnd / fps,
           `${slug}: Figure timestamp is outside the actual lecture body`);
@@ -278,12 +316,13 @@ async function main() {
     targets: TARGETS, expectedCaseCount: TARGETS.length * MODES.length, cases: [], failures: [],
     screenshotModes: MODES.filter(m => m.screenshots).map(m => m.name),
     assertionOnlyModes: MODES.filter(m => !m.screenshots).map(m => m.name),
-    scope: 'Five changed published articles only: SourceQuote exact original text/identity and Figure image/caption/original-image navigation/timestamp. No whole-site scan or explicit full video fetch.',
+    scope: 'Five published batch-10 articles in desktop-dark/mobile-dark only: collapsed SourceQuote entry, actual mouse/touch open/close and exact original text/identity, Figure image/caption/timestamp, strict zero overflow. Prior 40 browser cases and figure visuals remain historical evidence; they are not replayed.',
     status: 'running', automatedAssertionsPassed: false, passed: false,
-    visualReview: 'Pending actual view_image inspection of saved desktop-light and mobile-dark quote/figure screenshots.',
+    visualReview: 'Pending actual view_image inspection of 10 newly saved open SourceQuote panel screenshots.',
     limitations: ['Chromium viewport/theme emulation, not a physical-device or reader comprehension study.',
-      'Desktop-dark and mobile-light use assertions only; no screenshots or manual visual review are claimed for those modes.',
-      'Citation URLs are checked against metadata without fetching external sources. Original-image navigation is local preview only.',
+      'This incremental run uses dark themes only. Prior light-theme and figure screenshots remain tied to their historical candidates.',
+      'Citation URLs and their hit targets are checked against metadata without external navigation. Original-image navigation was checked in the preserved prior report and is not repeated.',
+      'The shared citation interaction suite targets hover/keyboard/Escape/outside click/multiple-source/no-JS/fallback behavior. This batch repeats only actual desktop click/mobile tap open, source data and labelled-button close; it does not claim to rerun the complete shared suite.',
       'Native figure links seek and pause as soon as seeking completes. No continuous/tail playback, old media QA replay or explicit full MP4 GET is performed.',
       'CSS font/width checks do not replace actual screenshot review.'],
   };
@@ -296,12 +335,20 @@ async function main() {
     const {readArticleSources, articleImageFile} = await import(pathToFileURL(path.join(ROOT, 'site/scripts/article-sources.mjs')).href);
     const expected = await expectations(parseArticle, readArticleSources, articleImageFile);
     report.version = read(path.join(ROOT, 'site/package.json')).version;
+    assert.equal(report.version, '0.76.1', 'Run only after the final 0.76.1 build');
     report.commit = execFileSync('git', ['rev-parse', 'HEAD'], {cwd: ROOT, encoding: 'utf8'}).trim();
+    const previous = read(PRIOR_REPORT);
+    assert.ok(previous.passed && previous.totalActualBrowserCasesExecuted === 40, 'Missing preserved 40-case evidence');
+    report.historicalEvidence = {report: relative(PRIOR_REPORT), sha256: sha(PRIOR_REPORT),
+      version: previous.version, commit: previous.commit, actualBrowserCasesExecuted: 40,
+      executionHistory: previous.executionHistory, notReexecutedThisRun: true};
+    report.upstreamInteractionQA = ['docs/citation-interaction/check-ui.cjs', 'docs/citation-interaction/browser-review.json']
+      .filter(file => fs.existsSync(path.join(ROOT, file))).map(file => ({path: file, sha256: sha(path.join(ROOT, file)), rerunByThisScript: false}));
     report.startupBaseCommit = read(path.join(OUT, 'startup.json')).baseCommit;
     report.inputs = expected.map(({slug, inputFiles, html}) => ({slug, inputFiles, html}));
-    report.moduleInputs = ['site/src/components/SourceQuote.astro', 'site/src/components/Figure.astro', 'docs/article-style.md']
+    report.moduleInputs = ['site/src/components/SourceQuote.astro', 'site/src/scripts/source-quotes.ts', 'site/src/components/Figure.astro', 'docs/article-style.md']
       .map(file => ({path: file, sha256: sha(path.join(ROOT, file))}));
-    report.expectedScreenshotCount = expected.reduce((n, item) => n + item.quotes.length + item.figures.length, 0) * 2;
+    report.expectedScreenshotCount = expected.reduce((n, item) => n + item.quotes.length, 0) * MODES.length;
     const {chromium} = require('playwright');
     browser = await chromium.launch({executablePath: '/usr/bin/chromium', headless: true,
       args: ['--no-sandbox', '--disable-dev-shm-usage']});
@@ -314,6 +361,8 @@ async function main() {
         screenshots: result.screenshots.length, ...(result.failure ? {error: result.failure.message} : {})}));
     }
     report.screenshots = report.cases.flatMap(c => c.screenshots);
+    report.currentRunActualBrowserCasesExecuted = report.cases.length;
+    report.totalActualBrowserCasesExecuted = 40 + report.cases.length;
     report.automatedAssertionsPassed = report.cases.length === report.expectedCaseCount && !report.failures.length
       && report.screenshots.length === report.expectedScreenshotCount;
     report.status = report.automatedAssertionsPassed ? 'automated-passed-visual-pending' : 'failed';
