@@ -13,4 +13,8 @@
 - 独立检查确认四条核心路径与已选头像完全一致，32 / 180 px PNG 与 SVG 在深蓝底的渲染一致，图标引用及读屏名称正确。
 - `python3 episodes/_shared/tests/secret_scan.py` 通过（19475文件）；`git diff --check` 通过。
 
-仅网站品牌图标更新；没有向外部平台发片或更改账号资料。线上发布结果以发布后的核验记录为准。
+[PR #358](https://github.com/linhongcun/video-studio/pull/358) 已合并，发布提交为 `b77dc7e0d51e4bfffea74571df3254f21ab71638`；[v0.74.0 Release](https://github.com/linhongcun/video-studio/releases/tag/v0.74.0) 于北京时间 2026-10-26 21:20:09 发布。[Pages 40329604429](https://github.com/linhongcun/video-studio/actions/runs/40329604429) 成功，实际构建在 Release 之后执行，部署于 21:26:39 完成。已取消重复待处理的 40329689220。运行、步骤与 Release 元数据见 `deployment.json`、`deployment-job-times.json` 和 `release.json`。
+
+北京时间 2026-10-26 21:33:53、v0.74.0 发布时点的实际 HTTPS 核验共7项全部通过：原始与带缓存参数的 SVG、PNG32、PNG180 均返回200，完整 SHA-256 与发布源文件一致；首页、HTTP 文章页和更新日志均返回200，引用新的 SVG、PNG 后备、Apple 图标和页头标志，页面版本为 v0.74.0；更新日志同时核对本次 Release 正文与版本链接。结果见 `online-verification.json`。
+
+归档时依次整合了制作规范提交 `29dc6461` 和后续 GitHub 导航入口提交 `2cc29a77`（#360、v0.75.0），保留上游全部改动；再次确认品牌 SVG、PNG 字节未变，页头继续引用同一 `brand-mark` 图标。上述7项证据保留 v0.74.0 发布时点的实际结果，不作为后续版本的重复发布记录。仅网站品牌图标更新；没有向外部平台发片或更改账号资料。
