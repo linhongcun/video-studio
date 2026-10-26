@@ -38,6 +38,10 @@ COMMIT;
 
 以上是流程示意，分支检查和异常处理必须由应用实现，注释不是可直接执行的完整购买程序。单行条件扣减也是可用的实现方向，需检查更新结果；视频选择加锁读取，是为了把检查过程演示清楚，并非宣称只有这一种正确写法。
 
+<SourceQuote sourceId="A1" supports="FOR UPDATE读取最新可用数据并设置排他锁；库存是否足够仍由业务判断。" />
+
+<Figure src="/video-studio/episodes/db-lock/article/01.jpg" alt="请求甲已获得商品7042的冲突锁并处理库存，请求乙仍等待查询返回" caption="教学示例：甲持有冲突锁并检查库存，乙的加锁读取仍在等待；此时不能让乙拿旧值继续扣减。" seekTo={74} chapter="locking" />
+
 ## 等待后读取新库存 {#fresh}
 
 甲先获得本例冲突锁，乙的加锁查询尚未返回。甲提交后，锁释放，乙继续并读取到0，程序据此判定缺货，不扣减、不放行，再结束自己的事务。提交或回滚都会释放该事务的相关锁。[^auto]
@@ -72,8 +76,7 @@ InnoDB记录锁实际锁定索引记录。本例采用主键精确查找已存�
 [^error]: [MySQL 8.4 §17.20.5 InnoDB Error Handling](https://dev.mysql.com/doc/refman/8.4/en/innodb-error-handling.html)
 [^dead]: [MySQL 8.4 §17.7.5 Deadlocks in InnoDB](https://dev.mysql.com/doc/refman/8.4/en/innodb-deadlocks.html)
 
-## 片尾参考资料
-
+### 视频采用的资料
 以下选列支撑视频核心流程的两项官方资料，沿用本期2026-10-24的实读记录。本节于2026-10-26整理，未将本轮整理记作新的官网访问。原有资料及脚注保留。
 
 **[R1] Locking Reads**

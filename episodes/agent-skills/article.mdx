@@ -19,6 +19,8 @@ Agent Skills把工作方法打包成可发现的目录。按照当前开放规�
 
 本期只围绕这一种变化展开：**一套工作方法怎样在适当时机，以适当粒度交给Agent使用。** 安装命令、API接线和通用Agent循环都不承担主线。
 
+<SourceQuote sourceId="A1" supports="技能以目录组织，至少包含SKILL.md入口；配套脚本和参考材料是可选资源，Markdown并未因此自动执行。" />
+
 ## 先发现，再展开方法 {#loading}
 
 渐进加载可分成三个层次。它们说明内容进入模型上下文的时机，不等于底层磁盘读取的先后保证。[^client]
@@ -92,6 +94,8 @@ python3 episodes-codex/agent-skills/demo/run_demo.py
 本期另保留一次真实Codex子代理按技能执行的记录：它先看候选名称/描述，再选择接口兼容审查，读取入口、规则和输入，实际调用工具运行两个分支，最后提交带范围说明的审查结论。结果在`outputs/agent-review.md`与`agent-review.json`中。它没有读取未选发布说明的正文，也没有把检查脚本源码全文读入模型上下文。这个记录支持**这一次受委派的本地执行**，不等于商业宿主端到端自动技能路由测试，更不是准确率提升实验；`run_demo.py`本身仍没有调用LLM。
 
 字段检查范围也很窄：它只检查简化JSON对象的必填约束，不覆盖响应字段、类型收窄、枚举、认证、默认值、状态码或实际服务行为。可选分支通过这一规则，不能据此称整个API完全兼容；必填分支的拒绝也只是本地校验器结果，不是虚构的HTTP响应。
+
+<Figure src="/video-studio/episodes/agent-skills/article/01.jpg" alt="本次变更channel改为必填、团队规则不能要求旧请求新增字段、脚本发现旧请求缺少channel三栏并列" caption="教学示例：将channel改为必填的变更、团队兼容规则与旧请求缺少channel的脚本结果相互对应；结论只覆盖本例已检查规则。" seekTo={127} chapter="resources" />
 
 ## 实际价值与使用边界 {#boundaries}
 

@@ -3,6 +3,20 @@ import fs from 'node:fs';
 import path from 'node:path';
 const root = path.resolve(import.meta.dirname, '../../episodes');
 const out = path.resolve(import.meta.dirname, '../public/episodes');
+const imageTypes = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
+function copyArticleImages(directory, destination) {
+  if (fs.lstatSync(directory).isSymbolicLink()) throw new Error(`[copy-assets] article images cannot be symlinks: ${directory}`);
+  for (const entry of fs.readdirSync(directory, {withFileTypes: true})) {
+    const source = path.join(directory, entry.name);
+    const target = path.join(destination, entry.name);
+    if (entry.isSymbolicLink()) throw new Error(`[copy-assets] article images cannot be symlinks: ${source}`);
+    if (entry.isDirectory()) copyArticleImages(source, target);
+    else if (entry.isFile() && imageTypes.test(entry.name)) {
+      fs.mkdirSync(destination, {recursive: true});
+      fs.copyFileSync(source, target);
+    }
+  }
+}
 fs.rmSync(out, {recursive: true, force: true});
 for (const slug of fs.readdirSync(root)) {
   const metaPath = path.join(root, slug, 'meta.json');
@@ -16,6 +30,8 @@ for (const slug of fs.readdirSync(root)) {
     fs.copyFileSync(src, path.join(out, slug, f));
     console.log(`[copy-assets] ${slug}/${f}`);
   }
+  const articleImages = path.join(root, slug, 'article');
+  if (fs.existsSync(articleImages)) copyArticleImages(articleImages, path.join(out, slug, 'article'));
 }
 
 // 旧链接兼容（构建时生成，不在仓库里重复存二进制）：

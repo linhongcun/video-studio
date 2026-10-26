@@ -23,6 +23,8 @@ related: ["distributed-tx-intro", "tx-tcc", "tx-saga", "tx-outbox"]
 
 回答就绪还意味着不能随后因本地等待超时就擅自放弃承诺。准备状态可能持续持有锁；数据库重启、连接变化也不等于这项事务自动消失。状态和最终决定由外部事务管理器继续跟踪与恢复。[^states]
 
+<SourceQuote sourceId="A1" supports="PostgreSQL的准备命令把准备状态持久保存，使后续可以按协调结果继续处理；准备完成仍不等于业务已经提交。" />
+
 ## 共同决定，分别落实 {#decision}
 
 只有所有相关参与方都能完成，协调者才进入提交结果。本片先显示可靠记录中的保存决定，再发送最终指令；参与方按同一决定完成，而不是重新做业务选择。协调者恢复以后也要找回既有决定继续完成。[^narayana]
@@ -30,6 +32,8 @@ related: ["distributed-tx-intro", "tx-tcc", "tx-saga", "tx-outbox"]
 指令到达和本地提交有先后，所以画面让订单先保存、库存随后从4变3。统一的提交结果不代表每处数据在同一毫秒改变，也不自动得到任意跨库查询的全局快照；并发隔离还依赖实际实现和访问方式。Oracle文档的commit-point实现也明确展示先后，但其优化不应直接当作所有2PC系统通用结构。[^oracle]
 
 XA与2PC属于不同层次：2PC描述提交协调过程，XA提供事务管理器与资源管理器协作的接口标准。数据库具体提供的SQL语法、支持操作与恢复接口还要查看各自文档。[^mysql][^states]
+
+<Figure src="/video-studio/episodes/tx-2pc/article/01.jpg" alt="协调者已记录保存修改，订单8124已保存，库存库准备就绪但尚未确认" caption="教学示例：协调者已有保存决定，订单库先落实，库存库仍等待最终指令；共同决定不要求同一毫秒完成。" seekTo={50} chapter="decision" />
 
 ## 拒绝与失联，怎样收尾 {#failure}
 
@@ -47,8 +51,7 @@ XA与2PC属于不同层次：2PC描述提交协调过程，XA提供事务管理�
 [^narayana]: [Narayana项目文档](https://www.narayana.io/docs/project/index.html)，Two-phase commit与Failure Recovery，访问2026-10-24。
 [^oracle]: [Oracle：Distributed Transactions Concepts](https://docs.oracle.com/en/database/oracle/oracle-database/26/admin/distributed-transactions-concepts.html)，Prepare Phase/Commit Phase，访问2026-10-24。
 
-## 片尾参考资料
-
+## 参考资料
 片尾列出以下四项核心官方资料，技术内容沿用 **2026-10-24（北京时间）** 的实读记录。Narayana原题及PostgreSQL机构署名于2026-10-26单独补核；这不改变技术内容的原访问日期。原有交叉核对资料与脚注继续保留。“既有实读记录”链接指向本仓阅读记录，不是官方固定正文。
 
 **[R1] XA Transactions**

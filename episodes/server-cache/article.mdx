@@ -19,11 +19,17 @@ chapters:
 
 本片采用一种常见的按需填充流程：先找缓存；没有才去数据库取；拿到结果后填回缓存，再交给调用方。下一次找到同一份数据时，可以省掉这次数据库读取。[Cache-Aside官方说明](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside)给出了这个顺序，访问于2026-10-24。
 
+<SourceQuote sourceId="R1" supports="应用先尝试读缓存，以判断条目是否已在缓存中。" />
+
 这里没有承诺“数据库变快了”。缓存命中改变的是请求走过的路径，省掉部分重复访问；数据库原记录仍然保留。
+
+<Figure src="/video-studio/episodes/server-cache/article/01.jpg" alt="应用直接读取缓存中的商品7042价格199，数据库原记录保持不变" caption="教学示例：本次命中缓存，应用直接取得199元，省掉这一次数据库读取；商品、价格和路径均为教学设置。" seekTo={75} chapter="cache" />
 
 ## 临时数据必须有生命周期 {#lifecycle}
 
 缓存容量有限，条目可能到期或被清理。未命中时重新查源并填充，是正常流程。数据库更新以后，旧副本如何失效则是另一项工作，下一期继续沿同一商品说明。[Redis官方缓存参考](https://redis.io/docs/latest/develop/reference/client-side-caching/)具体讨论了本地复用、失效消息和旧值问题，访问于2026-10-24；该文的产品实现细节不代表全部缓存。
+
+<SourceQuote sourceId="R2" supports="已设置超时的Redis键在期限结束后会被删除；其他缓存的生命周期需分别定义。" />
 
 ## 缓存不是越多越好
 
@@ -37,8 +43,6 @@ chapters:
 
 **[R1] Cache-Aside Pattern**（Microsoft · Azure Architecture Center；官方文档 · 2026-10-26核验）。
 
-> The application determines whether an item currently resides in the cache by attempting to read from the cache.
-
 定位：Solution, step 1 (line 19)。 [正式原文](https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside) · [本轮实读固定正文](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside-content.md)。
 
 [该页原题与内容入口](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside.yml)。
@@ -46,8 +50,6 @@ chapters:
 编者说明：该文说明先查缓存、未命中取数据源并回填的流程，也明确指出Cache-Aside不保证缓存与数据源始终一致。本片中的Redis共享缓存是一种实现示例，应用进程内缓存也是另一种放置方式。
 
 **[R2] EXPIRE**（Redis；官方命令文档 · 2026-10-26核验）。
-
-> After the timeout has expired, the key will automatically be deleted.
 
 定位：Opening paragraph (line 77)。 [正式原文](https://redis.io/docs/latest/commands/expire/) · [本轮实读固定正文](https://github.com/redis/docs/blob/1406db84d01f1d6a07fe567cbdea4d051456a2d7/content/commands/expire.md)。
 

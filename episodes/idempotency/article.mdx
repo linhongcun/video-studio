@@ -21,11 +21,14 @@ chapters:
 
 首次处理必须协调编号登记、业务变更和结果记录，使它们不会出现“钱扣了却没有去重记录”的断裂。重复请求拿到此前结果，而不是再扣一次。两次并发到来时，只有一个处理者可认领同一编号；另一份应等待或按接口约定重试，不能让两个处理者都先查到不存在。
 
+<SourceQuote sourceId="A1" supports="Stripe以客户端生成的幂等键识别同一请求的后续重试；具体保存期、并发及响应规则须按接口约定核对。" />
+
+<Figure src="/video-studio/episodes/idempotency/article/01.jpg" alt="同一次支付请求次数为3，账户余额仍为70元，累计扣款30元" caption="教学示例：同一次支付请求到达3次，账户仍为70元，累计扣款30元；重复的是请求，业务效果没有增加。" seekTo={62} chapter="identity" />
+
 ## 幂等承诺有范围 {#boundary}
 
 幂等约束的是重复操作的业务效果，不要求每次HTTP报文逐字节相同。不同接口的保留期、处理中响应、错误重试策略各有定义；编号过期后重用可能被当成新请求，调用者身份和请求参数也应纳入校验。视频没有承诺所有网站、所有重复点击永久只扣一次。
 
-## 公开资料
-
+## 参考资料
 - [AWS Builders Library — Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，实际访问2026-10-24。
 - [Stripe API — Idempotent requests](https://docs.stripe.com/api/idempotent_requests)，实际访问2026-10-24。

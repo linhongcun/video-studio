@@ -1,0 +1,37 @@
+---
+import {readArticleSources, validateArticleSource} from '../../scripts/article-sources.mjs';
+
+interface Props { sourceId: string; supports: string; translation?: string; }
+const {sourceId, supports, translation} = Astro.props;
+const slug = Astro.params.slug;
+const source = validateArticleSource(readArticleSources(slug).get(sourceId));
+if (typeof supports !== 'string' || !supports.trim()) throw new Error(`${slug}: SourceQuote ${sourceId} needs a concrete supports explanation`);
+const fixedUrl = source.verification.sourceUrl;
+---
+<figure class="source-quote" data-source-quote={sourceId}>
+  <div class="source-quote-label">原文摘录</div>
+  <blockquote cite={fixedUrl ?? source.url}><p>{source.quotation.text}</p></blockquote>
+  {translation && <p class="source-translation"><span>译文</span> {translation}</p>}
+  <p class="source-support"><strong>编者说明</strong> {supports}</p>
+  <figcaption>
+    <cite><a href={source.url}>{source.title}</a></cite>
+    <p class="source-identity">{source.author ?? source.organization} · {source.version}</p>
+    <p class="source-location">原文位置：{source.quotation.locator}</p>
+    <p class="source-access">核验于 <time datetime={source.verification.checkedAt}>{source.verification.checkedAt}</time>{fixedUrl && fixedUrl !== source.url && <> · <a href={fixedUrl}>查看固定原文</a></>}</p>
+  </figcaption>
+</figure>
+
+<style>
+.source-quote{margin:var(--sp-5) 0;padding:var(--sp-5);border:1px solid var(--c-border);border-left:3px solid var(--c-primary);border-radius:var(--r-md);background:var(--c-surface);overflow-wrap:anywhere;min-width:0}
+.source-quote-label{margin:0 0 var(--sp-3);color:var(--c-primary);font-size:var(--fs-xs);font-weight:650;letter-spacing:.06em}
+.source-quote blockquote{padding:0;margin:0 0 var(--sp-4);border:0;font-size:var(--fs-body);line-height:1.8;color:var(--c-text)}
+.source-quote blockquote p{margin:0;white-space:pre-wrap}
+.source-quote figcaption{padding-top:var(--sp-3);border-top:1px solid var(--c-border);color:var(--c-text-2);font-size:var(--fs-small);line-height:1.7;text-align:left}
+.source-quote cite{font-style:normal;font-weight:600}
+.source-quote figcaption p{margin:var(--sp-1) 0 0}
+.source-quote .source-access{font-size:var(--fs-xs)}
+.source-quote .source-support{margin:var(--sp-4) 0;font-size:var(--fs-small);line-height:1.8}
+.source-support strong,.source-translation span{color:var(--c-primary);font-weight:600;margin-right:var(--sp-1)}
+.source-quote .source-translation{margin:0 0 var(--sp-4);font-size:var(--fs-small);color:var(--c-text-2)}
+@media(max-width:767px){.source-quote{padding:var(--sp-4)}}
+</style>

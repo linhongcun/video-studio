@@ -19,15 +19,21 @@ chapters:
 
 教学示例把容量设为2、每秒补1。甲来时扣掉1，乙再用掉1，丙到达时没有额度，于是被拒绝。拒绝式令牌桶不会把丙留在后台偷偷排队；已经放行的甲乙则继续处理。容量、补充量和间隔是不同参数。[^envoy]
 
+<SourceQuote sourceId="R1" supports="执行本地令牌桶检查且没有可用令牌时，Envoy返回可配置的拒绝响应，默认是429。" />
+
 示例为便于观察经过放慢，甲乙丙的密集到达发生在同一补充间隔内。它不是实际服务的承载数字，也不等于每个真实接口都应使用这种配置。
 
 ## 等待以后，仍可能再次失败 {#refill}
 
 时间到达后，示例只补充1个额度，并不会把所有额度全部重置。其他人也可能先消耗这个额度，所以稍后重试不等于成功。响应如果带有Retry-After，可按提示时间再发起后续请求；不停点击只会增加请求，不会改变补充规则。[^retry]
 
+<Figure src="/video-studio/episodes/rate-limit/article/01.jpg" alt="容量为两个额度的入口经过一秒后，可用额度从零增加到一" caption="教学示例：容量2、每秒补1的规则在时间到达后只增加一个额度，并不会把两个额度全部重置。" seekTo={68} chapter="refill" />
+
 ## 限流不负责决定票归谁 {#recap}
 
 限流规则可以按用户、资源、接口或服务范围设置。请求进入后台后，还要由业务检查库存等条件；限流本身并不保证公平或保证获得票。规则的范围、业务优先级和重试方式，需要结合服务能力设计。[^status]
+
+<SourceQuote sourceId="R2" supports="限流实现各不相同，限制范围可以是整个服务，也可以是某项资源。" />
 
 额度控制的是进入速度，并不直接限制同时正在处理的请求数；请求耗时变长时，仍可能积压。片中的两个后台位置只帮助追踪甲乙，并非把令牌桶误当并发上限。
 
@@ -41,8 +47,6 @@ chapters:
 
 **[R1] Local rate limit**（Envoy；维护文档 · 2026-10-26核验）。
 
-> If the local rate limit token bucket is checked, and there are no tokens available, a 429 response is returned (the response is configurable).
-
 定位：Opening behavior description (lines 15–16)。 [正式原文](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/local_rate_limit_filter) · [实读固定正文](https://github.com/envoyproxy/envoy/blob/83297dad103f3dbd6320d0b29cd1e7781cf45305/docs/root/configuration/http/http_filters/local_rate_limit_filter.rst)。
 
 [令牌桶参数定义](https://github.com/envoyproxy/envoy/blob/83297dad103f3dbd6320d0b29cd1e7781cf45305/api/envoy/type/v3/token_bucket.proto) · [本地过滤器参数定义](https://github.com/envoyproxy/envoy/blob/83297dad103f3dbd6320d0b29cd1e7781cf45305/api/envoy/extensions/filters/http/local_ratelimit/v3/local_rate_limit.proto)。
@@ -50,8 +54,6 @@ chapters:
 编者说明：容量、每次补充量与补充间隔分别配置。视频中的容量2、每秒补1是教学参数组合，不是通用默认值；额度限制进入速率与突发，不等同于同时处理数量，也不判定库存或保证公平。
 
 **[R2] 429 Too Many Requests**（MDN Web Docs；维护文档 · 2026-10-26核验）。
-
-> Implementations of rate limiting vary; restrictions may be server-wide or per resource.
 
 定位：Opening discussion (line 14)。 [正式原文](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429) · [实读固定正文](https://github.com/mdn/content/blob/87ca9db1ebe56eb20c1f20b91fca43955d8f0e26/files/en-us/web/http/reference/status/429/index.md)。
 

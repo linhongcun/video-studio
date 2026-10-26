@@ -17,9 +17,15 @@ chapters:
 
 页面包含许多独立资源。本片只追踪一张图片，不把整页说成只发一次请求。第一次取得时，本地没有可用副本，需要从网站接收图片；允许缓存的响应可以与缓存规则一起保存。
 
+<SourceQuote sourceId="R2" supports="HTTP缓存保存与请求关联的响应，并在后续请求中复用该响应。" />
+
 ## 有效期内直接复用 {#fresh}
 
 再次需要相应资源时，浏览器检查存储的响应是否适用于当前请求，以及缓存规则是否允许直接使用。示例允许60秒内复用，时间快进到20秒时仍满足条件，图片就从本地进入页面，省下这张图片的一次网络请求与内容传输。60秒是教学设置，没有统一的“所有图片缓存60秒”规则。[^caching]
+
+<SourceQuote sourceId="R1" supports="新鲜响应可以在满足缓存复用条件时服务后续请求，无需联系源站。" />
+
+<Figure src="/video-studio/episodes/browser-cache/article/01.jpg" alt="浏览器内的本地图片副本进入页面，通向网站的请求路径未启用" caption="教学示例：同一张图片在规则允许时从本地副本进入页面，本次不为取得这张图重新发出网络请求。" seekTo={58} chapter="fresh" />
 
 ## 期限到达，需要重新确认 {#stale}
 
@@ -33,21 +39,17 @@ chapters:
 [^validation]: [RFC 9110 §15.4.5](https://www.rfc-editor.org/rfc/rfc9110.html#name-304-not-modified)，2022，304响应不含内容，访问于2026-10-24。
 [^mdn]: [MDN HTTP caching](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching)，实际阅读Private caches、ETag/If-None-Match与no-cache/no-store相关章节，访问于2026-10-24。
 
-## 片尾参考资料
+## 参考资料
 
 本次于2026-10-25（北京时间）核对以下负责工作组或MDN官方仓库的固定正文；各项分别提供正式链接与本轮实读版本，便于核查。
 
 **[R1] IETF HTTP WG：《HTTP Caching》（RFC 9111 · 2022）**。
-
-> When a response is fresh, it can be used to satisfy subsequent requests without contacting the origin server, thereby improving efficiency.
 
 原文位置：§4.2 Freshness。
 
 [正式文档](https://www.rfc-editor.org/rfc/rfc9111.html) · [固定原文](https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml)。
 
 **[R2] MDN Web Docs：《HTTP caching》（持续维护文档 · 2026-10-25核验）**。
-
-> The HTTP cache stores a response associated with a request and reuses the stored response for subsequent requests.
 
 原文位置：Opening paragraph · line 8。
 

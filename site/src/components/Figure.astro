@@ -1,10 +1,15 @@
 ---
 import {fmtTime} from '../lib/episodes';
-const {src, alt, caption, wide = false, seekTo, chapter, width = 1920, height = 1080, n} = Astro.props;
+const {src, alt, caption, wide = false, seekTo, chapter, width = 1920, height = 1080, n, kind = 'video'} = Astro.props;
 ---
-<figure class:list={['fig', {wide}]}>
-  <img src={src} alt={alt} width={width} height={height} loading="lazy" decoding="async" />
+<figure class:list={['fig', {wide}]} data-figure-kind={kind}>
+  <a class="fig-image-link" href={src} aria-label={`打开原图：${alt}`}>
+    <img src={src} alt={alt} width={width} height={height} loading="lazy" decoding="async" />
+  </a>
   {(caption || seekTo !== undefined) && (
-    <figcaption>{n && `图 ${n} `}{caption}{seekTo !== undefined && <> · <a href={`?t=${seekTo}#player`} data-seek={chapter}>▶ 在视频中查看 {fmtTime(seekTo)}</a></>}</figcaption>
+    <figcaption>{n && `图 ${n} `}{caption} · <a href={src}>查看大图</a>{seekTo !== undefined && <> · <a href={`?t=${seekTo}#player`} data-seek-time={seekTo}>▶ 在视频中查看 {fmtTime(seekTo)}</a></>}</figcaption>
   )}
 </figure>
+<style>
+.fig-image-link{display:block;cursor:zoom-in}
+</style>
