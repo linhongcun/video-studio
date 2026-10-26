@@ -78,7 +78,7 @@
 | 文件 | 作用 |
 |---|---|
 | `script.md` | 旁白、画面、屏幕文字、出处。旁白以「旁白：」为准 |
-| `article.mdx` | 站点文章。前置信息包括：`title`、`summary`、`chapters`、`related`；按 [图文模板](../episodes-codex/_template/article.mdx) 准备 `SourceQuote`，成片后补 `Figure` |
+| `article.mdx` | 站点文章。前置信息包括：`title`、`summary`、`chapters`、`related`；按 [图文模板](../episodes-codex/_template/article.mdx) 准备 `SourceQuote`，编码前定好 `Figure` 图位并冻结，成片后生成和核对图片 |
 | `pronunciation.md` | 多音字和整词读法，三列表：文本、读法、出现镜号 |
 | `references.json` 等片尾清单 | 原题与署名清单、完整出处及内部论点映射；视频只显原题与作者/机构，完整链接留配套文章 |
 
@@ -125,6 +125,8 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 
 新片冻结还包括参考资料清单、原题/署名与实际使用的研究证据、`append_references_bibliography.py` 及其实际依赖（包括保留的两个旧追加器）、默认入口、实际调用的 `site/scripts/check-references.mjs` 及所用配置；按当期冻结器加入实际路径。正文（含已有代码卡）的时序与最终资料附录分别声明，最终帧数、参考卡起点和输出媒体SHA由本轮追加记录与发布元数据对应。
 
+图文制作稿同样在编码前冻结：按已定分镜时序写好图片路径、预定秒数、图注和alt，实际图片在成片后生成；已有的文章独有来源JSON及其原文/核验依据同时冻结。成片后若需改文稿，只做有前后SHA与差异记录的站点发布派生稿，保留冻结制作稿，详见 [图文冻结与配图时序](article-style.md#冻结与成片后配图)。
+
 ## 6. Deming 预检
 
 见 [validate.md](validate.md)。预检不过就改分镜或配音，然后回到第 5 步重新冻结。
@@ -154,6 +156,8 @@ npm run render
 接入后运行 `npm --prefix site run check:references`，该项也由 `npm run build` 在复制媒体之前自动执行。新片及旧slug重制/换片必须包含完整资料清单、文章链接、实际片尾及相符的SHA/区间记录；只补文章或空标题不能通过。存量名单仅允许未接入附录且原视频SHA与固定基线相同的旧片渐进处理，不得改写名单或基线规避。机器检查之后仍须实际看成片资料卡、原生播放器暂停和手机全屏，确认文字可读、控件不遮主要信息且无原字幕残留。
 
 站点只改页面、不重发平台时，沿用 v0.45.0 的做法：PR 说明写「只上站点」，Release 同样写明，平台链接保持不动。
+
+图文上线前同时运行 `npm --prefix site run check:articles`，并按 [图文写作说明](article-style.md) 复核实际引用支持关系、图片信息价值、手机/桌面及亮暗主题、回看与原图入口。其中命令检查与参考资料检查一同由站点build自动执行，编辑与实际页面复核另行完成；缺项先补齐再发布。
 
 ## 9. 按实际反馈复盘
 
