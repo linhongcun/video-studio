@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 from datetime import datetime, timezone
+from fractions import Fraction
 import hashlib
 from html import unescape
 import json
@@ -26,6 +27,11 @@ ROOT = next(parent for parent in D.parents
             if (parent / 'AGENTS.md').is_file() and (parent / 'site/package.json').is_file())
 SLUG = "redis-skiplist"
 BASE = "https://linhongcun.github.io/video-studio/"
+REFERENCE_GENERATOR = ROOT / "episodes-codex/_shared/append_references_bibliography.py"
+ORIGINAL_RENDERER = REFERENCE_GENERATOR.with_name("append_references_original.py")
+OLD_ENGINE = REFERENCE_GENERATOR.with_name("append_references.py")
+REFERENCE_LAYOUT = {"kind": "title-author-single-column", "maxItemsPerPage": 4,
+                    "renderedFields": ["title", "credit"], "quotesRendered": False}
 
 
 def read(path: Path):
@@ -69,6 +75,51 @@ def main():
     assert sha(published / meta["video"]) == render["sha256"]
     assert meta["finalVideoFrames"] == render["frames"]
     assert meta["referenceAppendix"] == render["publicationMetadata"]["referenceAppendix"]
+    for name in ["references.json", "reference-appendix.json", "reference-appendix-media-check.json"]:
+        assert sha(published / name) == sha(D / name), "Published reference identity differs from production"
+    refs = read(published / "references.json")
+    receipt = read(published / "reference-appendix.json")
+    assert receipt["schemaVersion"] == refs["schemaVersion"] == 1
+    assert receipt["episode"] == refs["episode"] == SLUG
+    assert refs["presentation"] == receipt["presentation"] == "title-author"
+    assert receipt["layout"] == REFERENCE_LAYOUT
+    bibliography = []
+    for source in refs["sources"]:
+        credit = source["author"] if "author" in source else source["organization"]
+        assert isinstance(credit, str) and credit.strip(), "Reference credit must be explicit and nonempty"
+        bibliography.append({"id": source["id"], "title": source["title"], "credit": credit})
+    assert bibliography and receipt["bibliography"] == bibliography
+    assert receipt["sourceTitles"] == [{"id": source["id"], "title": source["title"]}
+                                        for source in refs["sources"]]
+    assert receipt["quotations"] == [{"id": source["id"], **source["quotation"]}
+                                      for source in refs["sources"] if "quotation" in source]
+    assert receipt["inputs"]["referencesSHA256"] == sha(published / "references.json")
+    assert receipt["inputs"]["generatorSHA256"] == sha(REFERENCE_GENERATOR)
+    assert receipt["dependencies"] == {
+        "oldEngine": str(OLD_ENGINE.relative_to(ROOT)), "oldEngineSHA256": sha(OLD_ENGINE),
+        "originalRenderer": str(ORIGINAL_RENDERER.relative_to(ROOT)),
+        "originalRendererSHA256": sha(ORIGINAL_RENDERER),
+    }
+    fps = Fraction(str(receipt["fps"]))
+    assert fps == sb["meta"]["fps"] == 30
+    body_frames = sb["meta"]["durationInFrames"]
+    assert receipt["bodyFrames"] == render["bodyFrames"] == sb["meta"]["finalVideoFrames"] == body_frames
+    appendix = receipt["appendix"]
+    expected_pages = (len(refs["sources"]) + 3) // 4
+    assert appendix["kind"] == "references" and appendix["from"] == body_frames
+    assert appendix["sourceIds"] == [source["id"] for source in refs["sources"]]
+    assert len(appendix["pages"]) == expected_pages
+    assert receipt["inputs"]["secondsPerPage"] == 5
+    assert appendix["framesPerPage"] == fps * 5
+    assert appendix["durationInFrames"] == fps * 5 * expected_pages
+    final_frames = body_frames + appendix["durationInFrames"]
+    assert receipt["finalVideoFrames"] == meta["finalVideoFrames"] == render["frames"] == final_frames
+    assert render["finalVideoFrames"] == render["publicationMetadata"]["finalVideoFrames"] == final_frames
+    assert receipt["durationSeconds"] == render["seconds"] == float(final_frames / fps)
+    assert meta["referenceAppendix"] == {
+        "kind": "references", "from": body_frames, "durationInFrames": appendix["durationInFrames"],
+        "sources": "references.json", "manifest": "reference-appendix.json",
+    }
     chapter_ids = list(dict.fromkeys(shot["chapterId"] for scene in sb["scenes"] for shot in scene["shots"]))
     planned_chapters = list(dict.fromkeys(item["chapterId"] for item in read(D / "plan.json")))
     assert planned_chapters and chapter_ids == planned_chapters
@@ -83,6 +134,11 @@ def main():
         "page": BASE + "episodes/" + SLUG + "/", "release": args.release,
         "firstRelease": meta["firstRelease"], "contentUpdatedAt": meta["updatedAt"],
         "productionSource": meta["sourcePath"],
+        "referencePresentation": receipt["presentation"], "bibliography": bibliography,
+        "referenceLayout": receipt["layout"],
+        "referenceReceiptSHA256": sha(published / "reference-appendix.json"),
+        "referenceGeneratorSHA256": receipt["inputs"]["generatorSHA256"],
+        "referenceDependencies": receipt["dependencies"],
         "transport": "Ordinary canonical urllib GET via inherited proxy and CA trust",
         "rangeRequests": False, "cacheBusting": False, "customCacheHeaders": False,
         "automaticRetryCount": 0, "requests": rows,

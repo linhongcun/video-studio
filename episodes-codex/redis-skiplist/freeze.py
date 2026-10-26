@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Freeze this episode's real body and original-title reference production inputs.
+"""Freeze this episode's real body and title-author reference production inputs.
 
 Run only after narration, timing, source evidence, artwork and all production
 writers are final. Verification is read-only. Rendered media and generated
@@ -31,6 +31,7 @@ def production_extras():
     references = json.loads((D / 'references.json').read_text())
     paths = [Path(__file__).resolve(), D / 'references.json', D / 'article.mdx',
              WRAPPER,
+             ROOT / 'episodes-codex/_shared/append_references_bibliography.py',
              ROOT / 'episodes-codex/_shared/append_references_original.py',
              ROOT / 'episodes-codex/_shared/append_references.py',
              ROOT / 'episodes-codex/_shared/requirements-reference-appendix.txt',

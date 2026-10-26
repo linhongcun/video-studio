@@ -193,6 +193,8 @@ def main():
     assert final_frames == appendix['finalVideoFrames'] == receipt['finalFrames']
     assert final_frames > body_frames and receipt['appendedFrames'] == final_frames - body_frames
     assert receipt['passed'] is True
+    assert appendix['presentation'] == read(D / 'references.json')['presentation'] == 'title-author'
+    assert appendix['layout']['quotesRendered'] is False and appendix['layout']['maxItemsPerPage'] == 4
     for path in [BODY, PREMIX, D / 'remotion/out/mix-report.json']:
         assert path.is_file(), ('Actual completed media required', str(path))
     assert sha(BODY) == appendix['inputs']['bodySHA256']
@@ -221,7 +223,20 @@ def main():
         assert takes['status'] in ['passed', 'needs-review']
         assert provenance['voiceQAReportSHA256'] == sha(D / 'qa-voice.json')
         assert source['sourceAuditSHA256'] == sha(D / 'qa-voice-takes.json')
-        assert source['scriptSHA256'] == provenance['scriptSHA256'] == sha(D / 'script.md')
+        assert source['scriptSHA256'] == provenance['scriptSHA256']
+        # Preserve the actual approved TTS script identity. A later nonspoken
+        # reference/prolog update may change the full file SHA; independently
+        # require every current narration sentence to equal the frozen requests.
+        narration_lines = re.findall(r'^旁白：(.*)$', (D / 'script.md').read_text(), re.M)
+        current_narration = [sentence.strip() for line in narration_lines
+                             for sentence in re.findall(r'[^。？！]+[。？！]?', line) if sentence.strip()]
+        request_narration = [row['text'] for row in read(D / 'voice/sents.json')]
+        assert current_narration == request_narration and len(current_narration) == sentence_count
+        report['scriptBinding'] = {'approvedTtsScriptSHA256': source['scriptSHA256'],
+            'currentDeliveryScriptSHA256': sha(D / 'script.md'),
+            'currentNarrationSentencesEqualFrozenRequests': True,
+            'sentenceCount': len(current_narration),
+            'scope': 'Exact text equality, not ASR or spoken-word listening.'}
         assert source['voiceSHA256'] == provenance['currentVoiceSHA256'] == sha(D / 'voice.wav')
         assert source['frames'] == body_frames
         assert source['sentences'] == takes['sentences'] == provenance['sentences'] == sentence_count

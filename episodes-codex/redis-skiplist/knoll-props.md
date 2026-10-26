@@ -10,4 +10,4 @@
 
 Main提供hideSubtitles/auditLayout与真实glyph/forward/edge/port/cursor几何；独立DOM与连续无字幕片段验证不依赖Scene.state自述。封面3比例实际DOM+安全区并实看，metadata回填仅同步SB.meta.covers，声音和时间保持。
 
-默认render包括正文H264/AAC、共享BGM−16LUFS目标及原题资料一页5秒。正式编码前冻结，最终媒体/播放器/在线全SHA另查，不把本说明当作成片通过声明。
+默认render包括正文H264/AAC、共享BGM−16LUFS目标及title-author资料列表：仅原题与作者或机构，每页最多4项、默认5秒，本期2项共1页。两份来源无明确个人署名，使用Redis机构；引文、定位、版本与核验日只留研究及文章。正式编码前冻结，最终媒体/播放器/在线全SHA另查，不把本说明当作成片通过声明。

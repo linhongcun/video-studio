@@ -31,6 +31,11 @@ ROOT = next(parent for parent in D.parents
             if (parent / 'AGENTS.md').is_file() and (parent / 'site/package.json').is_file())
 SLUG = "redis-skiplist"
 DESTINATION = ROOT / "episodes" / SLUG
+REFERENCE_GENERATOR = ROOT / "episodes-codex/_shared/append_references_bibliography.py"
+ORIGINAL_RENDERER = REFERENCE_GENERATOR.with_name("append_references_original.py")
+OLD_ENGINE = REFERENCE_GENERATOR.with_name("append_references.py")
+REFERENCE_LAYOUT = {"kind": "title-author-single-column", "maxItemsPerPage": 4,
+                    "renderedFields": ["title", "credit"], "quotesRendered": False}
 FILES = (
     "article.mdx", "script.md", "research.md", "storyboard.json", "video.mp4",
     "cover-16x9.jpg", "cover-4x3.jpg", "cover-3x4.jpg", "references.json",
@@ -111,8 +116,22 @@ def validate(reviewed_sha: str | None = None):
     assert caption_count == sum(len(shot["sentences"]) for shot in words["shots"])
     assert sum(shot["durationInFrames"] for shot in shots) == body_frames
 
+    assert receipt["schemaVersion"] == refs["schemaVersion"] == 1
     assert receipt["episode"] == refs["episode"] == SLUG
-    assert refs["presentation"] == receipt["presentation"] == "original-title-quote"
+    assert refs["presentation"] == receipt["presentation"] == "title-author"
+    assert receipt["layout"] == REFERENCE_LAYOUT
+    bibliography = []
+    for source in refs["sources"]:
+        credit = source["author"] if "author" in source else source["organization"]
+        assert isinstance(credit, str) and credit.strip(), "Reference credit must be explicit and nonempty"
+        bibliography.append({"id": source["id"], "title": source["title"], "credit": credit})
+    assert receipt["bibliography"] == bibliography
+    assert receipt["inputs"]["generatorSHA256"] == sha(REFERENCE_GENERATOR)
+    assert receipt["dependencies"] == {
+        "oldEngine": str(OLD_ENGINE.relative_to(ROOT)), "oldEngineSHA256": sha(OLD_ENGINE),
+        "originalRenderer": str(ORIGINAL_RENDERER.relative_to(ROOT)),
+        "originalRendererSHA256": sha(ORIGINAL_RENDERER),
+    }
     assert Fraction(str(receipt["fps"])) == fps
     assert receipt["bodyFrames"] == render["bodyFrames"] == body_frames
     assert receipt["inputs"]["referencesSHA256"] == sha(D / "references.json")
@@ -124,13 +143,15 @@ def validate(reviewed_sha: str | None = None):
     appendix = receipt["appendix"]
     assert appendix["kind"] == "references" and appendix["from"] == body_frames
     assert refs["sources"]
-    expected_pages = (len(refs["sources"]) + 1) // 2
+    expected_pages = (len(refs["sources"]) + 3) // 4
     assert len(appendix["pages"]) == expected_pages
+    assert receipt["inputs"]["secondsPerPage"] == 5
     assert appendix["framesPerPage"] == fps * 5
     assert appendix["durationInFrames"] == fps * 5 * expected_pages
     assert appendix["sourceIds"] == [source["id"] for source in refs["sources"]]
     assert receipt["sourceTitles"] == [{"id": source["id"], "title": source["title"]}
                                         for source in refs["sources"]]
+    # Quotations identify verified research inputs; title-author never draws them.
     assert receipt["quotations"] == [{"id": source["id"], **source["quotation"]}
                                       for source in refs["sources"] if "quotation" in source]
     artifacts = D / "revisions/reference-endcards"
@@ -180,6 +201,10 @@ def validate(reviewed_sha: str | None = None):
         "scriptSHA256": words["scriptSha256"], "voiceSHA256": voice_sha,
         "renderResultSHA256": sha(D / "render-result.json"), "videoSHA256": video_sha,
         "reviewedVideoSHA256": reviewed_sha, "bodyFrames": body_frames,
+        "referencePresentation": receipt["presentation"], "bibliography": bibliography,
+        "referenceLayout": receipt["layout"],
+        "referenceGeneratorSHA256": receipt["inputs"]["generatorSHA256"],
+        "referenceDependencies": receipt["dependencies"],
         "frames": final_frames, "fps": fps, "captions": caption_count,
         "chapters": chapter_ids, "files": files,
     }

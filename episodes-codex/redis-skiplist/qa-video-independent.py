@@ -14,6 +14,7 @@ from decimal import Decimal
 from fractions import Fraction
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -67,6 +68,10 @@ def frozen_snapshot(expected_sha: str):
     assert sha(MANIFEST) == expected_sha, 'Authorized new manifest identity differs'
     manifest = read(MANIFEST)
     assert manifest and all(p in manifest for p in CORE), 'Core production input missing from freeze'
+    for helper in ['append_references_bibliography.py', 'append_references_original.py', 'append_references.py', 'render_with_references.py']:
+        source = ROOT / 'episodes-codex/_shared' / helper
+        relative = os.path.relpath(source, D)
+        assert relative in manifest and manifest[relative] == sha(source), f'Actual bibliography dependency not frozen: {helper}'
     for relative, digest in manifest.items():
         path = (D / relative).resolve()
         assert path.is_relative_to(ROOT), relative
@@ -184,8 +189,26 @@ def main():
     assert reference_frames == receipt['appendedFrames'] == final_frames - body_frames
     assert appendix['appendix']['from'] == body_frames and receipt['passed'] is True
     assert appendix['inputs']['referencesSHA256'] == sha(D / 'references.json')
-    assert appendix['presentation'] == references['presentation'] == 'original-title-quote'
+    assert appendix['presentation'] == references['presentation'] == 'title-author'
+    layout = appendix['layout']
+    assert layout == {'kind': 'title-author-single-column', 'maxItemsPerPage': 4,
+                      'renderedFields': ['title', 'credit'], 'quotesRendered': False}
+    bibliography = [dict(id=s['id'], title=s['title'], credit=s['author'] if 'author' in s else s['organization'])
+                    for s in references['sources']]
+    assert all(isinstance(row['credit'], str) and row['credit'].strip() for row in bibliography)
+    assert appendix['bibliography'] == bibliography
+    expected_pages = (len(bibliography) + layout['maxItemsPerPage'] - 1) // layout['maxItemsPerPage']
+    assert len(appendix['appendix']['pages']) == expected_pages
+    assert appendix['appendix']['framesPerPage'] == sb['meta']['fps'] * 5
+    assert reference_frames == expected_pages * appendix['appendix']['framesPerPage']
     assert appendix['sourceTitles'] == [dict(id=s['id'], title=s['title']) for s in references['sources']]
+    dependencies = appendix['dependencies']
+    for file_key, sha_key in [('oldEngine', 'oldEngineSHA256'), ('originalRenderer', 'originalRendererSHA256')]:
+        source = (ROOT / dependencies[file_key]).resolve()
+        assert source.is_relative_to(ROOT) and sha(source) == dependencies[sha_key]
+    assert appendix['inputs']['generatorSHA256'] == sha(ROOT / 'episodes-codex/_shared/append_references_bibliography.py')
+    # Quotations remain research identities only; the new card intentionally
+    # draws no quotation/version/date/pause hint.
     for source in references['sources']:
         if source.get('quotation'):
             q = next(q for q in appendix['quotations'] if q['id'] == source['id'])
@@ -233,7 +256,7 @@ def main():
         start = body_frames + page * page_frames
         for delta, purpose in ((0, 'first'), (page_frames // 2, 'middle'), (page_frames - 1, 'last')):
             frame = start + delta
-            selected[frame] = {'frame': frame, 'purposes': [f'Actual reference page {page+1} {purpose} frame; title/quote/date/caption boundary'], 'referencePage': page + 1}
+            selected[frame] = {'frame': frame, 'purposes': [f'Actual reference page {page+1} {purpose} frame; original title/credit only and caption boundary'], 'referencePage': page + 1}
     frames = [selected[n] for n in sorted(selected)]
     out = D / 'qa-video-independent-evidence' / media_sha
     out.mkdir(parents=True, exist_ok=True)
@@ -274,7 +297,9 @@ def main():
                                'allPacketPayloadsAndTimingEqual': True, 'packetRowsSHA256': packet_digest,
                                'note': 'Retains the original body AAC endpoint; no new zero PCM packet claim.'},
         'referenceIdentity': {'sourceTitles': appendix['sourceTitles'],
-                              'quotationsBoundToCurrentReferences': True,
+                              'presentation': appendix['presentation'], 'layout': layout,
+                              'bibliography': bibliography, 'researchQuotationsBoundToCurrentReferences': True,
+                              'quotesRendered': False, 'maximumItemsPerPage': layout['maxItemsPerPage'],
                               'appendixFrom': body_frames, 'appendixFrames': reference_frames},
         'actualEncodedImages': images,
         'limitations': ['Every extracted image still requires actual visual inspection.',
