@@ -46,3 +46,47 @@ XA与2PC属于不同层次：2PC描述提交协调过程，XA提供事务管理�
 [^prepare]: [PostgreSQL：PREPARE TRANSACTION](https://www.postgresql.org/docs/current/sql-prepare-transaction.html)，Description/Caution，访问2026-10-24。
 [^narayana]: [Narayana项目文档](https://www.narayana.io/docs/project/index.html)，Two-phase commit与Failure Recovery，访问2026-10-24。
 [^oracle]: [Oracle：Distributed Transactions Concepts](https://docs.oracle.com/en/database/oracle/oracle-database/26/admin/distributed-transactions-concepts.html)，Prepare Phase/Commit Phase，访问2026-10-24。
+
+## 片尾参考资料
+
+片尾列出以下四项核心官方资料，技术内容沿用 **2026-10-24（北京时间）** 的实读记录。Narayana原题及PostgreSQL机构署名于2026-10-26单独补核；这不改变技术内容的原访问日期。原有交叉核对资料与脚注继续保留。“既有实读记录”链接指向本仓阅读记录，不是官方固定正文。
+
+**[R1] XA Transactions**
+
+- 机构：Oracle / MySQL
+- 版本：MySQL 8.4 Reference Manual
+- 正式链接：[XA Transactions（官方文档）](https://dev.mysql.com/doc/refman/8.4/en/xa.html)
+- [既有实读记录（2026-10-24，R1）](https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/tx-2pc/research.md#L7)
+
+支持的主张与边界：先准备并收集结果，再共同决定；参与资源必须支持相关协议，XA接口不与2PC并列当另一算法。
+
+**[R2] XA Transaction States**
+
+- 机构：Oracle / MySQL
+- 版本：MySQL 8.4 Reference Manual
+- 正式链接：[XA Transaction States（官方文档）](https://dev.mysql.com/doc/refman/8.4/en/xa-states.html)
+- [既有实读记录（2026-10-24，R2）](https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/tx-2pc/research.md#L8)
+
+支持的主张与边界：准备状态可恢复，最终按决定终结；不把连接断开画成自动撤销。
+
+**[R3] PREPARE TRANSACTION**
+
+- 机构：The PostgreSQL Global Development Group
+- 版本：PostgreSQL current（旧实读记录未标具体主版本）
+- 正式链接：[PREPARE TRANSACTION（官方文档）](https://www.postgresql.org/docs/current/sql-prepare-transaction.html)
+- [既有实读记录（2026-10-24，R3）](https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/tx-2pc/research.md#L9)
+
+- [机构署名证据（官方固定版本，2026-10-26补核）](https://github.com/postgres/postgres/blob/a5ccf20801c821b72bb04d56b7320d52149a1ce5/doc/src/sgml/postgres.sgml)
+
+支持的主张与边界：prepare的状态可靠保存，尚未提交，锁继续持有；长期prepared会妨碍运行。只转述机制，不给出自行手工操作生产待决事务的建议。
+
+**[R4] Narayana Project Documentation**
+
+- 机构：Narayana Project
+- 版本：官方项目文档（旧实读记录未标发布版本）
+- 正式链接：[Narayana Project Documentation（官方文档）](https://www.narayana.io/docs/project/index.html)
+- [既有实读记录（2026-10-24，R4）](https://github.com/linhongcun/video-studio/blob/656b525f533037f1c0dff6383c4afa69926e612c/episodes-codex/tx-2pc/research.md#L11)
+
+- [原题证据（官方固定版本，2026-10-26补核）](https://github.com/jbosstm/narayana/blob/e3581c58f702af60c6a0d5ef0a5b9a95ca37fcf8/docs/src/main/asciidoc/project/book_info.adoc)
+
+支持的主张与边界：协调者提交决定先稳定记录，恢复后按既有决定完成，不可随参与方各自超时改成相反结果。正文为当前项目文档，不据页脚猜首次发表年份。
