@@ -51,3 +51,13 @@
 两份大学公开来源通过本任务明确指定的TinyFish connector实际读取，不使用执行环境shell访问受限目标、不改代理、不执行网页或外部源码。没有访问失败，不虚构网络拒绝；没有读取的外链、课程其他章节或视频不记作已读。
 
 本期`verify_math.py`是独立质量检查，不是视频程序附录，不新增代码卡。精确概率核验不代替门位、选中状态、主持人信息边界、动画、配音、媒体或网页检查；用户观看结论另记。
+
+
+## 片尾参考资料
+
+2026-10-26整理，`presentation: title-author`，2项1页5秒。两份资料实际技术阅读日期仍为2026-10-25（北京时间），本轮不新GET原站/PDF或题名署名，不把整理日期写成技术访问日期。
+
+- **[R1] Lecture 11: Coincidences** — Stanford University；STATS60, Intro to statistics · Lecture 11 · 原实读未标发布或更新时间。正式出处：[https://web.stanford.edu/class/stats60/lectures/11-lecture-coincidences.html#the-monty-hall-problem](https://web.stanford.edu/class/stats60/lectures/11-lecture-coincidences.html#the-monty-hall-problem)。定位：The Monty Hall Problem；Monty Hall: solution；Monty Hall: switch；Monty Hall: stay。题名直接沿用旧完整文献名中的Lecture题名，STATS60课程站名另列。只支撑对称性固定初选与总体策略分类；公平空门二选一/盲开变体不冒引讲义。
+- **[R2] The Monty Hall game** — Jayadev Misra；University of Texas at Austin；2011 · 文档原样日期8/10/2011，未推断日月顺序 · 两页讲义，**旧资料，仅参考**。正式出处：[https://www.cs.utexas.edu/~misra/Notes.dir/MontyHall.pdf](https://www.cs.utexas.edu/~misra/Notes.dir/MontyHall.pdf)。定位：题面；Proof 1—4；A Final Note。旧研究与同日独立来源复核明确记录题名/作者及完整两页读取；末注“不必随机”的支撑限于总体始终换门2/3，不扩为本期具体开门后验或盲开模型。
+
+完整原研究与独立读取复核按固定基线Git/blob/完整SHA归档在[本轮来源记录](../../docs/reference-endcards/batch-11/sources-monty-hall.json)及同前缀文件；这些是本仓真实旧读取记录，不是原大学网页/PDF的原始HTTP快照。没有原始响应字节就不声明原页正文SHA/状态码，也未虚构新26日请求。原全文/脚注/锚点、主持人规则与精确推导字节prefix全部保留；未新增代码卡、执行概率程序、渲染或解码影片。

@@ -59,3 +59,21 @@
 - 最优值17既有可行路线，又有30个整数势值、全部112个逐边不等式构成的下界证书；Dijkstra与独立构图的Floyd–Warshall交叉检查，见[verify_math.py](verify_math.py)和[research-math.md](research-math.md)。
 
 视频先讲题目、完整演示直觉安排，再从同一分叉状态解释两位慢者同行；只回收本期方法与17结果。文章可展示完整精确核验，但片尾不追加证明、不口头引流，不把两条路线对照冒充任意参数下的通用贪心证明。
+
+## 片尾参考资料清单（2026-10-26整理，技术实读沿用2026-10-25）
+
+本轮采用2项真实已读来源：OEIS A318271实际%N完整题名与%A作者Peter Kagey，以及固定README实际原题Lantern & Bridge。README未见明确个人byline，按原article第164行和本research第28行公开项目发布名PuzzleLearning / LanternNBridgePuzzle列出，不从Git账号/贡献者猜个人作者。
+
+原research基线`a1a9821845c83a61a57fbb3f0e10461ef4c55238`，Git blob`d883a65feca8aa32d752512045b08eed8d7e7edf`，完整SHA-256`596f0da38d929ad885bcef1400c5d4b7aa519353ab16a7300c7e4316e3a44263`（6829字节）；原article完整SHA-256`0f4483a8007e6ed6c6761a4295ecde1f48c50123b3fde2e55d26ba1139b05d70`（10528字节）。[固定既有实读记录](https://github.com/linhongcun/video-studio/blob/a1a9821845c83a61a57fbb3f0e10461ef4c55238/episodes-codex/bridge-torch/research.md)及[旧全文归档](../../docs/reference-endcards/batch-11/sources-bridge-torch-prior-research-a1a98218.md)为本仓历史记录，不是外部完整原文。
+
+26日OEIS题名/作者直接复用现有已发布article/source-evidence.json的%N/%A与旧article166行；原JSON完整字节和Git身份另存副本，不将其中旧reported response SHA冒充本轮取得全文。README只对旧明确固定版本GET一次、核Setext原题和署名项，完整原字节/SHA保存，Git blob与25日旧记录a503b42919ac8174197d282d9a72d759b8a1dbfc一致；技术checkedAt仍25日。
+
+| 片尾编号 | 原题/条目 | 实际作者或发布名 | 原技术记录 |
+| --- | --- | --- | --- |
+| R1 | [The optimum crossing time for the Bridge and Torch problem, given that the crossing times for the group's members are given by the n-th partition in A026791.](https://github.com/oeis/oeisdata/blob/a9e08efbe0e8af62bb8a76cde2bb3677e241508b/seq/A318/A318271.seq#L9-L14) | Peter Kagey | research第13–23行 |
+| R2 | [Lantern & Bridge](https://github.com/PuzzleLearning/LanternNBridgePuzzle/blob/c40f9bbd7e2f960230ebff554e5ccb65853c8bef/README.md) | PuzzleLearning / LanternNBridgePuzzle | research第25–35行 |
+
+
+完整标题、署名、原记录逐字块、年代标记与本轮元数据原字节见[sources-bridge-torch.json](../../docs/reference-endcards/batch-11/sources-bridge-torch.json)。OEIS2018标历史仅参考，2026固定导出不当题目首次发表；2026公开实现说明提供规则/结果交叉核对。最短性仍来自本期全部合法转移的独立状态图和势值下界证书，未读取的OEIS外链论文/维基、TED不入片尾，外部约简搜索代码和不同参数旧变体不入选。
+
+原article/research全文、锚点、旧脚注与独立证明字节前缀保持。生产MP4初始缺失而root已捕获Git6025帧原片，本任务不重建视频、不重跑数学或成片检查，也不预记新媒体/上线/用户认可。片尾仅title-author、每页最多4项/5秒，无quote/date/hint。
