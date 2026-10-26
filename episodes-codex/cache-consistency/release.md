@@ -21,3 +21,7 @@
 ## v0.70.4 · 第三批片尾参考资料
 
 本片补充一页5秒可暂停资料卡，保留实际原题、连续原文摘录和位置；原正文/音轨/分镜与视觉保持，最终3614帧，完整SHA-256：`77c9567e43c9de5f12056c8616339107a9b75635b6c39e32e708cd10d5924d80`。[PR #339](https://github.com/linhongcun/video-studio/pull/339)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.70.4)和[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40242724829)完成。13次canonical完整GET覆盖本片视频/海报SHA、字幕、章节、出处和更新日志通过，见[本批记录](../../docs/reference-endcards/batch-3/README.md)。仅GitHub站点，无平台重发或本版用户观看结论。
+
+## v0.71.2 · 题名与署名简表
+
+资料片尾统一只显示完整原始题名和作者/机构，一页5秒；原引文/定位等保留文章研究，正文、声音、代码卡不变。当前3614帧，完整SHA-256：`cfab8b0c242265f643c7d1be8ae9a0f1826a01c1b43ec65e1850c3bc8612f539`。[PR #345](https://github.com/linhongcun/video-studio/pull/345)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.71.2)与[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40284847950)完成，69次canonical完整GET覆盖本片媒体/海报SHA、字幕、章节/日期、引用及更新日志通过。实际检查与限制见仓库docs/reference-endcards/title-author。仅GitHub站点，无平台重发或本版观看认可。

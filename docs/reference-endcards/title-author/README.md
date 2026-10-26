@@ -39,3 +39,7 @@
 17页/37项、68张实际MP4尾帧（各body末帧和卡首/中/末）全部逐张查看，17页卡首末MD5与producer报告一致。所有完整题名/署名正确，无引文、日期、定位、编号、暂停提示、截断或原字幕带入；包括HTTP四项、最长TLS题名、长机构、Bloom当前单位置末镜，以及原Java/Python卡。见qa-independent.json。
 
 17片本地built/完整文件/原章节和字幕检查通过；六片代表作完成desktop真实1倍速尾段到ended、mobile原生全屏，13张必要浏览器图实际查看通过。详见local-verification.json、qa-browser.json及visual-review.json。QA只兼容Bloom既有“资料依据”/脚注原格式，原文章未改；模拟手机/静音播放、旧代码卡原生控件遮挡范围如实保留，不宣称真机、全片听辨或重新检查所有旧代码行。正式线上69次GET在Release后另行执行。
+
+## 发布与线上核验
+
+[PR #345](https://github.com/linhongcun/video-studio/pull/345)合并为`46e126a921c238a7d63171326e4cf627af164b6e`，附注标签和[Release v0.71.2](https://github.com/linhongcun/video-studio/releases/tag/v0.71.2)指向实际验收树。[Release后Pages 40284847950](https://github.com/linhongcun/video-studio/actions/runs/40284847950)完整构建/门禁/部署成功。69次普通canonical完整GET核对17片整条视频/海报SHA、VTT全文/原时序、原章节/日期/源码入口、原题/署名和配套完整出处及更新日志真实Release通过，见[线上证明](online-verification.json)。远程媒体只流式计算完整SHA，未下载落盘。实际17页都为title-author且37条作者/机构身份绑定；原文和定位留图文/研究，无新来源GET或新的技术内容宣称。仅GitHub站点，无外部平台重发或本版观看认可。
