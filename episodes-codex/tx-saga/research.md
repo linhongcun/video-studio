@@ -28,3 +28,11 @@
 ## 开工独立审阅
 
 独立编辑逐句核对14镜28句后未发现配音阻断项。按反馈将视频导航使用白话“失败怎么收尾”，不提前露出09首次补偿标签；14明确回看已经提交的阶段，避免与12退款失败分支的当前值混淆。此记录只说明稿件审阅，动态预演与最终编码另记。
+
+## 片尾参考资料
+
+2026-10-26整理片尾书目，采用`presentation: title-author`，4项一页5秒，只显示完整原题及发布机构。片尾编号独立于上文原研究编号：R1 Saga distributed transactions pattern、R2 Compensating Transaction pattern、R3 Retry pattern沿用本片2026-10-24的技术实读；R4 Idempotent Consumer pattern是本片本轮新增技术核验，不把其他视频24日读过同文的记录追认为本片旧读。Azure源内仅见Git/ms.author维护账号，没有可确认公开个人署名，故使用Microsoft · Azure Architecture Center。
+
+本次新增实读Idempotent Consumer官方固定完整正文：`dcf29659535a230ee4d73b812d49a6953b912430/docs/patterns/idempotent-consumer.md`，2026-10-26完整GET200、19616字节，SHA-256 `c4650525eb0380f519ada5e18793ef474b466bac66f91672a5072ce4ed4e153d`。实际阅读30–75行的稳定键、标记和业务效果同事务及并发唯一约束，以及131–143行对无消息代理场景的适用边界。该资料直接支撑11镜同一退款R8124不重复产生效果、退款结果与已完成标记原子保存；不据此声称所有外部副作用都能加入该本地事务、天然全局恰好一次或本片已有消息代理。
+
+Saga wrapper的完整页面名为`Saga distributed transactions pattern`，技术正文在实际include；Compensating与Idempotent取正文H1，Retry取wrapper完整题名，保留pattern后缀。题名补核及当前固定正文快照与技术旧读分开：Saga wrapper/content是本轮新GET，Compensating/Retry复用batch7已保存的26日完整官方响应并独立绑定，未伪记新访问。原Saga实读没有保存原页hash，不把其他期快照hash追记为本片24日原页身份。完整旧研究Git blob/SHA、官方响应、逐论点原证据与新读范围见[本轮证据](../../docs/reference-endcards/batch-8/sources-tx-saga.json)，清单见[references.md](references.md)。原AWS来源、脚注及正文完整保留；本轮未将可能带个人byline的AWS文献改填机构作者。
