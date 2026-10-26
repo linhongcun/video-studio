@@ -140,7 +140,8 @@ def run_case(browser,name,viewport,meta,sb,out):
         case['transitionPauses']=[]
         encoded_pts=actual_video_pts(D/'video.mp4')
         s3=next(shot for scene in sb['scenes'] for shot in scene['shots'] if shot['id']=='03')
-        for label,frame,boundary in [('bridge-first',s3['from'],True),('upper-growing',s3['from']+105,False)]:
+        s4=next(shot for scene in sb['scenes'] for shot in scene['shots'] if shot['id']=='04')
+        for label,frame,boundary in [('bridge-first',s3['from'],True),('upper-growing',s3['from']+105,False),('requery-first',s4['from'],True)]:
             phase['name']='transition-'+label;phase['sinceEpochMS']=time.time()*1000
             pause=page.evaluate(FIRST_CARD,{'time':encoded_pts[frame] if boundary else (frame+.5)/sb['meta']['fps'],'frame':frame,'fps':sb['meta']['fps']})
             assert pause['paused'] and pause['paintedFrame']==frame and pause['error'] is None
@@ -160,7 +161,7 @@ def run_case(browser,name,viewport,meta,sb,out):
             witnesses=[w for w in case['mediaWitnesses'] if w['atEpochMS']>failed['failedAtEpochMS'] and w.get('error') is None and w.get('readyState',0)>=2]
             exact_media=(failed['url']==URL+meta['video'] and failed['resourceType']=='media' and failed['failure']=='net::ERR_ABORTED' and bool(failed.get('range')))
             seek_events=[e for e in case['nativeMediaEvents'] if e['type']=='seeking' and e['error'] is None and failed['failedPhaseSinceEpochMS']-100<=e['epochMS']<=failed['failedAtEpochMS']+100]
-            active_seek=(failed['failedPhase'] in ['chapter-'+c for c in CHAPTER_IDS]+['transition-bridge-first','transition-upper-growing','first-reference-seek'] and bool(seek_events))
+            active_seek=(failed['failedPhase'] in ['chapter-'+c for c in CHAPTER_IDS]+['transition-bridge-first','transition-upper-growing','transition-requery-first','first-reference-seek'] and bool(seek_events))
             metadata_events=[e for e in case['nativeMediaEvents'] if e['epochMS']<=failed['failedAtEpochMS']+100 and e['error'] is None]
             metadata_close=(failed['failedPhase'] in ['navigation','short-playback'] and state['preload']=='metadata' and any(e['type']=='loadedmetadata' for e in metadata_events) and any(e['type']=='suspend' and e['preload']=='metadata' for e in metadata_events))
             if exact_media and witnesses and (active_seek or metadata_close):
@@ -200,7 +201,7 @@ def main():
     assert sha(ROOT/'episodes'/SLUG/'video.mp4')==sha(D/'video.mp4')
     report={'schemaVersion':1,'status':'in-progress','checkedAtUTC':datetime.now(timezone.utc).isoformat(),
         'page':URL,'release':args.release,'firstRelease':meta['firstRelease'],'deploymentRun':args.deployment_run,'publicationIdentity':{k:meta[k] for k in ['createdAt','publishedAt','firstRelease','updatedAt','sourcePath']},
-        'scope':'Small actual canonical Chromium smoke only: short muted1x playback, four real chapter clicks, all20 original exact native cues, two exact painted new-transition pauses and exact first-reference4482 in desktop/narrow viewports.',
+        'scope':'Small actual canonical Chromium smoke only: short muted1x playback, four real chapter clicks, all20 original exact native cues, three exact painted new-transition pauses and exact first-reference4482 in desktop/narrow viewports.',
         'limitations':['390px is a headless desktop Chromium viewport, not a physical phone.','No full-film listening, ASR or teaching-effect claim.','Native video loading is browser-managed; full-file canonical HTTP identity checks are separate.'],
         'transport':{'explicitInheritedSessionProxy':True,'tlsVerificationEnabled':True,'ignoreHTTPSErrors':False,'customCacheHeaders':False,'cacheBusting':False,'automaticRetryCount':0,'configuredCAEnvironmentPresent':True,'policyAllowsPagesHost':True},
         'environment':{'python':shutil.which('python3'),'playwright':importlib.metadata.version('playwright'),'chromium':shutil.which('chromium')},

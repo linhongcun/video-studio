@@ -14,4 +14,8 @@ Remotion使用本目录的独立锁文件与fresh npm ci实体依赖；在`remot
 
 当前新版c570ad44…为4632帧/154.4秒/7,094,976字节；146项冻结，清单43191a81…。33张实际编码图、声轨和50项双视口网页检查通过，16张网页截图已看。仅02尾/03/04改段落交接，20句配音和后半插入保持；旧139项输入、492份历史工程及最新880项其他公开文件完整保留。完整范围见[最终QA](qa-final.md)。原0.72.2网页检查的QA取帧失败及修正留档，未追认为成功。
 
-修订候选v0.72.3，首发v0.72.0与首次日期保留；GitHub与线上实际结果见publication.json。新版本尚无用户观看结论，Redis独立模块仅记为后续考虑方向。
+修订v0.72.3已上线，首发v0.72.0与首次日期保留；GitHub与线上实际结果见publication.json。新版本尚无用户观看结论，Redis独立模块仅记为后续考虑方向。
+
+[观看修订成片](https://linhongcun.github.io/video-studio/episodes/redis-skiplist/)；[PR350](https://github.com/linhongcun/video-studio/pull/350)合并1c36c15a，Release后Pages40312953998及10项canonical GET、线上两视口实际播放与10张截图均通过。完整时间和SHA见publication.json。
+
+#349已在实际线上核验后以completed关闭，#301与#294已补修订回链；工程算法仍3项完成、6项待安排。
