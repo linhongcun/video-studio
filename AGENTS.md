@@ -2,6 +2,8 @@
 
 给 Codex 或同类 coding agent。做一期之前先读本文件，再按下面的手册往下走。规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
 
+文档入口见 [docs/README.md](docs/README.md)，已完成记录见[历史索引](docs/archive/README.md)。整理文档时先查[文档维护规范](docs/RULES.md#文档维护)，保护冻结输入和历史证据的原路径与字节。
+
 制作或重制视频前，先读 [教训](docs/lessons-learned.md) 和 [成功经验](docs/successful-practices.md)，再用 [项目制作记忆](docs/production-memory.md) 确认用户偏好和案例状态。每期制作、返工和收到用户反馈时都检查是否需要更新记录：新发现的错误与已经验证有效的做法分别追加到这两份文件，写清案例、改法与验证方式；尚未验证的指导先记到项目记忆，验证后再补证据。没有新发现时不凑条目；单期参数不自动变成新规范。
 
 经验与反馈记录使用总结性语言：结合反馈和实际制作过程，提炼有效做法、问题原因、改进措施及验证范围，保持简洁清晰。不摘录用户原话或复制对话；提交、issue和PR中的反馈说明也遵守此约定。
@@ -77,14 +79,14 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 |---|---|
 | `episodes/` | 站点发布内容：元数据、文章、字幕、分镜、MP4 和 JPG；制作源码及 WAV、PNG 原稿留在 `episodes-codex/` |
 | `episodes/degradation/` | EP.14 站点数据副本；当前制作工程在 `episodes-codex/degradation/` |
-| `episodes-codex/` | EP.01–21 的当前 Codex 制作目录，另有 EP.21 前置入门 `distributed-tx-intro/` 与独立短片 `tx-2pc/`、`tx-tcc/`、`tx-saga/`、`tx-outbox/`。EP.01–14 本轮状态见 [批次记录](docs/codex-remake-ep01-14.md)；开新期入口见 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
+| `episodes-codex/` | EP.01–21 的当前 Codex 制作目录，另有 EP.21 前置入门 `distributed-tx-intro/` 与独立短片 `tx-2pc/`、`tx-tcc/`、`tx-saga/`、`tx-outbox/`。EP.01–14 本轮状态见 [批次记录](docs/archive/2026-10/codex-remake-ep01-14.md)；开新期入口见 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
 | `*-backup/` | 各角色备份。本仓没有这些目录 |
 | `share/` | 本仓没有。规范不要写回这里 |
 | `episodes/_shared/` | 页身色、水印规范、混音、MiMo TTS，以及起音、铺轨、制作说明与配音整轨工具；固定回归样本仍保留 |
 | `docs/` | 下面这些手册。制作说明模板是 `docs/knoll-props.template.md` |
 | `site/` | Astro 站点。`site/package.json` 的 `version` 是三段式版本号 |
 
-2026-10-25 清理已被替代的旧工程，记录见 [docs/repository-cleanup.md](docs/repository-cleanup.md)。当前制作入口以各期 `meta.json.sourcePath` 为准。用户随后明确要求删除两期Agent试片：A01/EP.22与A02/EP.28的发布目录及相关制作工程一并移除，原先保护`agent-intro-v2/video.mp4`拼接依赖的说明随第三版删除而失效。后续仍推进Skills、MCP、Subagent、Goal等11项概念研究候选；删除前工程与检查通过固定Git提交追溯。当前删除范围与发布验证见[撤下记录](docs/agent-video-retirement.md)，不从历史恢复这两期为现行课程。
+2026-10-25 清理已被替代的旧工程，记录见[旧工程清理](docs/archive/2026-10/repository-cleanup.md)。当前制作入口以各期 `meta.json.sourcePath` 为准。用户随后明确要求删除两期Agent试片：A01/EP.22与A02/EP.28的发布目录及相关制作工程一并移除，原先保护`agent-intro-v2/video.mp4`拼接依赖的说明随第三版删除而失效。后续仍推进Skills、MCP、Subagent、Goal等11项概念研究候选；删除前工程与检查通过固定Git提交追溯。当前删除范围与发布验证见[撤下记录](docs/archive/2026-10/agent-video-retirement.md)，不从历史恢复这两期为现行课程。
 
 ## 手册
 
