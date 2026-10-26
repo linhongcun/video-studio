@@ -15,3 +15,19 @@ source-sha256.json与verify-freeze.py核对实际输入；动态检查、成片�
 ## 站点发布
 
 [v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。
+
+## 第8批参考资料名单与当前入口
+
+本批为已验收的完整原片追加`title-author`参考资料名单，每页最多4项、默认5秒，仅显示完整原题与明确作者或机构。原旁白、字幕、分镜及现有视觉依赖保持；不运行装配、TTS、正文渲染或混音。基线`61d3b984a594578a67bc34aa374cccd0326cd9d6`的Git完整原片已逐字节保存在`revisions/reference-endcards/body.mp4`及同SHA的`remotion/out/body.mp4`，本批直接消费该body并另做实际追加媒体保真检查。
+
+当前冻结入口为本期`freeze.py`，保留旧清单全部84个key与既有共享依赖；旧article/research/package及freeze记录通过`revisions/reference-endcards/`下before快照核对，其余按原路径核对。当前清单声明实际资料与新入口依赖，不声称它已重现旧MP4。原实质输入校验保留；storyboard、words、带SHA的分镜快照及placeholder只读检查，不再重写。来源JSON及其中记录的原始补证文件分别按完整SHA纳入冻结，技术实读日期与本轮题名/署名补查范围按来源记录区分。
+
+资料负责人停写且来源预检通过后，从仓根执行：
+
+```sh
+node site/scripts/check-references.mjs --sources episodes-codex/degradation
+python3 episodes-codex/degradation/freeze.py
+python3 episodes-codex/degradation/freeze.py --verify
+```
+
+默认`npm run render`调用共享bibliography wrapper，先核对来源和冻结，再运行`render:body`及附录。`render:body`保留本期原voice→mix闭环、编码参数与concurrency=1，只把mix输出改到`out/body.mp4`；`npm run render:references`从该完整body单独追加名单。`npm run verify:references`用于后续完整交付核验，会检查最终媒体；本批入口审计只执行只读freeze与wrapper.verify_freeze，不重复整片解码。旧正文QA和发布事实按原记录保留，最终总帧数以新receipt、render-result和发布metadata为准。进度见[第8批记录](../../docs/reference-endcards/batch-8/README.md)，不预记尚未完成的媒体或线上结果。

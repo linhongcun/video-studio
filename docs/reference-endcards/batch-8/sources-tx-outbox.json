@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "batch": 8,
+  "episode": "tx-outbox",
+  "presentation": "title-author",
+  "baseCommit": "61d3b984a594578a67bc34aa374cccd0326cd9d6",
+  "assembledAtBeijing": "2026-10-26T18:28:09+08:00",
+  "checkedAt": "2026-10-24",
+  "timezone": "Asia/Shanghai",
+  "scope": "Two sources explicitly credited to Chris Richardson in retained 2026-10-24 actual-reading records. Exact recorded bibliography titles and author attribution only; no fresh canonical/body/H1/byline response, new official body hash or media/freeze/release result is claimed.",
+  "historicalResearchRecord": {
+    "path": "episodes-codex/tx-outbox/research.md",
+    "baseCommit": "61d3b984a594578a67bc34aa374cccd0326cd9d6",
+    "gitBlob": "0986a194beed12659bbcfb57dd52847c3ec27a5e",
+    "bytes": 2687,
+    "sha256": "46d4971b74525c7e0f87bb496cc9b9143584b7a41a91f3fe5535366b6f19dc5f",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/tx-outbox/research.md",
+    "archivePath": "docs/reference-endcards/batch-8/tx-outbox-evidence/prior-research-61d3b984.md",
+    "fullOriginalText": "# Outbox单机制短片：资料核验\n\n访问日期2026-10-24（北京时间）。实际打开并阅读以下官方/原作者正文，不使用旧稿或搜索摘要代替核验；全文均为独立转述，无长引文。\n\n| 来源 | 实际阅读位置 | 本期取用与边界 |\n|---|---|---|\n| [AWS Transactional outbox](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html) | Intent、Issues and considerations、Using an outbox table、示例独立发送程序 | 01–07：业务与待发事件共同本地保存，独立转发，仅发布已提交记录；回滚不应发消息。未照搬其中任何特定队列的“恰好一次”宣称。 |\n| [Chris Richardson Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html) | Solution、Participants、Result context | 08–09：relay在发送后、记录完成前中断可重发；需要消费者处理重复。模式正文未给原始发表年，按当前原作者正文引用，不从页脚推断年龄。 |\n| [AWS Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/) | Retrying and side effects、Reducing client complexity | 10–12：同一请求身份和业务效果需正确原子衔接；仅看相同参数或内存查询不充分。 |\n| [Chris Richardson Idempotent Consumer](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html) | Why duplicate messages、Tracking IDs、PROCESSED_MESSAGE | 10–12：处理标识应有唯一约束，并与业务修改同一本地事务；提交后确认消息。2020-10-16原作者文章，未早于2020。 |\n\n## 逐镜核验\n\n- 01：双写空档导致订单已保存、通知未发，是故障示例设定。\n- 02–05：订单与待办共同提交/共同回滚；不等于数据库和队列同一原子提交。\n- 06–09：独立发送、等队列确认后记录发送结果，发送成功与标记完成之间仍可出故障；同一通知身份重发。\n- 10–12：消费本地事务将库存扣减和唯一已处理标记共同保存；失败不留下半套结果，重复不再扣。唯一约束是并发保护责任，不把先查后扣的普通查询当充分方案。\n- 13–14：最终业务收敛仍依赖消息持久性、发送与消费恢复。永久业务拒绝须按规则结束，Outbox本身不包办业务补偿，也不提供跨库全局隔离。\n\n商品7042库存4买1、订单8124、事件E8124为明示教学设定，不是官方性能数据或真实业务记录。本集不同时解释CDC、RocketMQ半消息、TCC或Saga，也不宣称这是唯一可靠消息实现。\n",
+    "gitBlobBytesMatched": true,
+    "gitObjectHashRecomputed": true
+  },
+  "originalArticleRecord": {
+    "path": "episodes-codex/tx-outbox/article.mdx",
+    "baseCommit": "61d3b984a594578a67bc34aa374cccd0326cd9d6",
+    "gitBlob": "5397917b4840a533ac2b27bf9f9a391761be020f",
+    "bytes": 4441,
+    "sha256": "0878d922eeda4386c5047e6f92b741ea742816dd218814ba9b94a5b8f31a3f59",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/tx-outbox/article.mdx",
+    "archivePath": "docs/reference-endcards/batch-8/tx-outbox-evidence/prior-article-61d3b984.mdx",
+    "fullOriginalText": "---\ntitle: 可靠消息：Outbox怎样把通知送出去？\nsummary: 一笔本地事务先保存订单和待发通知，再由独立程序转发；通知可能重复，消费端用同一本地事务保护库存修改与处理标记。\nchapters:\n  - { id: gap, title: 一条通知，卡住整笔业务 }\n  - { id: local, title: 先把待办一起保存 }\n  - { id: send, title: 发送与重发是下一步 }\n  - { id: consume, title: 库存与处理标记共同提交 }\n  - { id: boundary, title: 最后看清保证的边界 }\nrelated: [\"distributed-tx-intro\", \"idempotency\", \"tx-saga\"]\n---\n\n## 一条通知，卡住整笔业务 {#gap}\n\n订单已保存以后，程序可能在发通知前中断；把发消息代码放在数据库提交之后，仍会留下这一段故障空档。反过来先发消息，数据库后续回滚也会留下错误通知。[^aws]\n\n示例订单8124购买商品7042一件，初始库存4。订单记录落地只表示这一步保存，不表示整笔业务已经完成。事件E8124代表这次库存安排，重送时沿用同一个身份；数字均为教学设定。\n\n尚未熟悉提交边界，可以先看[分布式事务入门](../distributed-tx-intro/)。本片只讲可靠消息的一种具体做法Outbox。\n\n## 先把待办一起保存 {#local}\n\nOutbox把需要发送的事件与本地业务一起保存。本例订单表与待发表属于订单库同一笔事务：一起提交或一起撤销，发送程序只读取已提交记录。[^aws]\n\n这解决本地业务与发送意图的持久衔接，队列和下游数据库仍在事务边界外。即使应用在提交后停止，待办仍可供恢复程序读取。\n\n## 发送与重发是下一步 {#send}\n\n独立转发程序读取待办、发送事件、收到队列确认后标记发送结果。发送与标记之间不能被画成一笔本地原子提交；若程序恰在这个空档停止，恢复时可能再次发送同一事件。[^outbox]\n\n因此，需要在队列持久性与确认、可恢复发送进度、同一聚合的顺序、积压监控和失败出口之间建立正确约定。本片用单一事件说明机制，没有承诺所有队列配置天然不丢、不乱序或只投递一次。\n\n## 库存与处理标记共同提交 {#consume}\n\n消费端在另一笔本地事务中，保存唯一事件身份和库存修改。示例把库存4扣成3，同时记录E8124已处理；中途失败则两处修改一起撤销。[^consumer]\n\n**唯一约束与本地事务缺一不可。** 只先查询“有没有处理过”，并不能阻止并发请求都读到不存在后各自扣减。已处理标识应按消费者作用域与事件身份建立唯一约束，业务变更与该标记共同提交。重复同一事件时识别已处理，返回相应结果并按消息协议确认，不能再扣一次。[^safe]\n\n保留标识多久、事件身份如何定义、并发冲突如何重试、确认丢失后如何重投，都属于实现责任。针对不同业务意图，不应只凭请求参数相同就合并成一次。\n\n## 最后看清保证的边界 {#boundary}\n\n生产端本地事务、发送流程、消息系统、消费端本地事务，是相互衔接的不同边界。Outbox没有让订单库和库存库变成同一次全局提交，也不自动提供全局隔离。\n\n消息、发送和消费恢复真正工作，才有继续推进的基础。临时故障可按策略重试；缺货等永久业务拒绝要明确取消、补偿或人工处理的规则，不能靠无限重试宣称一定成功。业务补偿可继续看[Saga单集](../tx-saga/)，本片不同时展开另一套机制。\n\n[^aws]: [AWS：Transactional outbox pattern](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)，Intent、Issues and considerations、Using an outbox table，访问2026-10-24。\n[^outbox]: [Chris Richardson：Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html)，Solution、Result context，访问2026-10-24。\n[^consumer]: [Chris Richardson：Handling duplicate messages using the Idempotent consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，2020-10-16，Tracking message IDs，访问2026-10-24。\n[^safe]: [AWS：Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，Reducing client complexity，访问2026-10-24。\n",
+    "gitBlobBytesMatched": true,
+    "gitObjectHashRecomputed": true
+  },
+  "navigationRecord": {
+    "path": "episodes-codex/tx-outbox/navigation.md",
+    "baseCommit": "61d3b984a594578a67bc34aa374cccd0326cd9d6",
+    "gitBlob": "275a5a0b95498398515e461010ab19eb7709d211",
+    "bytes": 4840,
+    "sha256": "5788a9d563ec05ea232e0c0d3bb884821282a7f7cd3acfd18a1cbf7220c627a1",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/tx-outbox/navigation.md",
+    "readScope": "既有Outbox主链、技术恢复与业务拒绝的边界",
+    "excerpts": [
+      {
+        "startLine": 5,
+        "endLine": 11,
+        "text": "## 图的含义\n\n主链是“订单与待办共同保存 → 后台发送 → 消费处理”。发送节点写明“队列确认后记已发”，确认接收不代表消费完成，更不代表整单业务成功。\n\n消费判断检查重复与库存，分别进入“未处理且有货：一起保存库存＋唯一标记”“已经处理：不再扣减”与“未处理且缺货：业务收尾”。三个条件互斥：同一E8124已经处理后，即使别的订单把库存耗到0，仍走已经处理分支。节点保留动作标签；仅10镜实际共同提交后，本例节点才变为完成色，当前位置写“共同保存完成”。缺货拒绝直接从消费检查分出，不从已经扣库存、写完标记的保存节点分出。技术回边标明“本次未完成：重试检查”，不把已经提交的事务画成事后回滚。\n\n两条技术恢复路线均是回边：未标记的发送意图恢复后可能重发；消费技术失败共同回滚，再尝试同一通知。通知仍为E8124，不制造新订单。库存0的业务拒绝另设终点，要按业务规则收尾，不画无限重试直至成功。"
+      }
+    ]
+  },
+  "priorIndependentEditorialRecord": {
+    "path": "docs/transaction-split-editorial-review.md",
+    "baseCommit": "61d3b984a594578a67bc34aa374cccd0326cd9d6",
+    "gitBlob": "d99dc7bbd56948b6d0eb2f259bc882c3e987df3f",
+    "bytes": 17284,
+    "sha256": "0d75ab1f705cfc639076d3b78c084529d091757aa50e011a89a1e3981ab2b5a1",
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/docs/transaction-split-editorial-review.md",
+    "recordType": "historical-editorial-reading-evidence-not-official-source-body",
+    "excerpts": [
+      {
+        "startLine": 63,
+        "endLine": 65,
+        "text": "- Outbox：订单+待办与库存+唯一处理标记分属两笔本地事务；发送成功与本地标记之间的中断导致重复，不能画成一次全局提交。消费重试与业务拒绝边界均已说明。\n\n文章核验另独立实际打开[Narayana官方Commit protocol及Failure Recovery](https://www.narayana.io/docs/project/index.html)、[PostgreSQL PREPARE TRANSACTION](https://www.postgresql.org/docs/current/sql-prepare-transaction.html)、[Azure Saga](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)、[原作者Outbox](https://microservices.io/patterns/data/transactional-outbox.html)、[原作者2020幂等消费](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)及[AWS安全重试](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，交叉核对可靠决定、资源占用、补偿失败、重复与原子处理标记。访问日期均2026-10-24；未采用文档中对所有架构一概而论的选型口号或性能宣称。"
+      }
+    ]
+  },
+  "verificationReuse": {
+    "technicalReadDate": "2026-10-24",
+    "recordedBodyReadScope": "访问日期2026-10-24（北京时间）。实际打开并阅读以下官方/原作者正文，不使用旧稿或搜索摘要代替核验；全文均为独立转述，无长引文。",
+    "method": "Authenticated prior-reading record reuse. Baseline file bytes, Git blob and SHA256 checked; title/author strings transcribed from original article lines48/49 and corroborated by research rows8/10.",
+    "newOfficialBodyGETs": [],
+    "currentTitleOrBylineRecheckPerformed": false,
+    "limits": [
+      "既有阅读记录不是官方固定正文；不把固定Git链接、原research SHA或GitHub搜索结果冒充当前官方页面响应。",
+      "Transactional outbox按旧英文文献名原样列出，不凭印象添加Pattern:，不声称重新核对当前完整H1或证明前缀不存在。",
+      "2020长文保留旧article中的完整原题及Chris Richardson署名，不使用简称Idempotent Consumer替代。",
+      "原两AWS脚注及研究全部保留，AWS作者本轮未核，不将机构自行替代个人署名或强行加入片尾。"
+    ]
+  },
+  "networkDiscovery": {
+    "checkedAt": "2026-10-26",
+    "scope": "Unsuccessful search for currently accessible original-author GitHub source only. No canonical request; microservices.io absent from current enforced allowlist, inherited proxy kept and no bypass. Candidate repository and commit404 and repository searches do not become source evidence.",
+    "requests": [
+      {
+        "url": "https://api.github.com/search/repositories?q=%22microservices.io%22+in%3Areadme+user%3Acer&per_page=100",
+        "finalUrl": "https://api.github.com/search/repositories?q=%22microservices.io%22+in%3Areadme+user%3Acer&per_page=100",
+        "status": 200,
+        "bytes": 55,
+        "sha256": "4af480b8ee5b87b369a76c49bd22c9a783908272ebffbe97898f8ab0f0772a5f",
+        "checkedAtUTC": "2026-10-26T10:23:24.127366+00:00",
+        "classification": "GitHub discovery only; never accepted as canonical content/title/byline evidence"
+      },
+      {
+        "url": "https://api.github.com/search/repositories?q=user%3Acer+microservices&per_page=30",
+        "finalUrl": "https://api.github.com/search/repositories?q=user%3Acer+microservices&per_page=30",
+        "status": 200,
+        "bytes": 10954,
+        "sha256": "e1d1cc4d718daf6fe83472f2dfb7cf335c6a2da80c6045efb314dc566298d26d",
+        "checkedAtUTC": "2026-10-26T10:20:47.639664+00:00",
+        "classification": "GitHub discovery only; never accepted as canonical content/title/byline evidence"
+      },
+      {
+        "url": "https://api.github.com/repos/cer/microservices.io/commits/master",
+        "finalUrl": "https://api.github.com/repos/cer/microservices.io/commits/master",
+        "status": 404,
+        "bytes": 118,
+        "sha256": "c391981e33b3d73d489d22c8ae4da47417d407010e28de24ee4b1a1673554ba5",
+        "checkedAtUTC": "2026-10-26T10:20:19.070026+00:00",
+        "classification": "GitHub discovery only; never accepted as canonical content/title/byline evidence"
+      },
+      {
+        "url": "https://api.github.com/search/repositories?q=microservices.io+in%3Adescription&per_page=30",
+        "finalUrl": "https://api.github.com/search/repositories?q=microservices.io+in%3Adescription&per_page=30",
+        "status": 200,
+        "bytes": 172845,
+        "sha256": "ef8a449b525ebb3a4848bcea68c8fa49e01975e484a537bd79df8fed5e3292ac",
+        "checkedAtUTC": "2026-10-26T10:24:15.177766+00:00",
+        "classification": "GitHub discovery only; never accepted as canonical content/title/byline evidence"
+      },
+      {
+        "url": "https://api.github.com/search/repositories?q=%22microservices.io%22+in%3Aname+fork%3Atrue&per_page=100",
+        "finalUrl": "https://api.github.com/search/repositories?q=%22microservices.io%22+in%3Aname+fork%3Atrue&per_page=100",
+        "status": 200,
+        "bytes": 318903,
+        "sha256": "ee938904a50b7a140a715ac67bc5b596c4a4c2cb1fcfff65af8933265f4e4c38",
+        "checkedAtUTC": "2026-10-26T10:21:39.324806+00:00",
+        "classification": "GitHub discovery only; never accepted as canonical content/title/byline evidence"
+      },
+      {
+        "url": "https://api.github.com/search/repositories?q=microservices.io+in%3Aname&per_page=15",
+        "finalUrl": "https://api.github.com/search/repositories?q=microservices.io+in%3Aname&per_page=15",
+        "status": 200,
+        "bytes": 92986,
+        "sha256": "db883097bd6d954be6b7eb18253988a0e7e35d3fa626c147be4c334b9877d153",
+        "checkedAtUTC": "2026-10-26T10:20:39.391135+00:00",
+        "classification": "GitHub discovery only; never accepted as canonical content/title/byline evidence"
+      },
+      {
+        "url": "https://api.github.com/repos/cer/microservices.io",
+        "finalUrl": "https://api.github.com/repos/cer/microservices.io",
+        "status": 404,
+        "bytes": 118,
+        "sha256": "4f50e254a719a6b1b06b529bdaa08980e4acf0878aad0090cba7771f6ebdf0b9",
+        "checkedAtUTC": "2026-10-26T10:20:18.700782+00:00",
+        "classification": "GitHub discovery only; never accepted as canonical content/title/byline evidence"
+      }
+    ],
+    "acceptedNewSourceResponses": 0
+  },
+  "sources": [
+    {
+      "id": "tx-outbox-r1",
+      "referenceId": "R1",
+      "organization": "microservices.io",
+      "author": "Chris Richardson",
+      "title": "Transactional outbox",
+      "version": "原作者模式文档（旧记录未标首次发表年）",
+      "canonicalUrl": "https://microservices.io/patterns/data/transactional-outbox.html",
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-24",
+      "verificationBasis": "existing-author-original-reading-record",
+      "originalRecord": {
+        "startLine": 8,
+        "endLine": 8,
+        "text": "| [Chris Richardson Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html) | Solution、Participants、Result context | 08–09：relay在发送后、记录完成前中断可重发；需要消费者处理重复。模式正文未给原始发表年，按当前原作者正文引用，不从页脚推断年龄。 |",
+        "originalLabel": "Chris Richardson Transactional outbox",
+        "sectionsCell": "Solution、Participants、Result context",
+        "claimAndBoundaryCell": "08–09：relay在发送后、记录完成前中断可重发；需要消费者处理重复。模式正文未给原始发表年，按当前原作者正文引用，不从页脚推断年龄。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/tx-outbox/research.md#L8",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-24既有实读书目：article.mdx第48行，Chris Richardson：后的英文文献名",
+        "evidence": "docs/reference-endcards/batch-8/sources-tx-outbox.json",
+        "record": {
+          "line": 48,
+          "text": "[^outbox]: [Chris Richardson：Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html)，Solution、Result context，访问2026-10-24。",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/tx-outbox/article.mdx#L48",
+          "sourceType": "existing-actual-reading-bibliography-not-current-official-page-response",
+          "titleText": "Transactional outbox",
+          "authorText": "Chris Richardson"
+        },
+        "scope": "24日实际读取后留下的英文书目题名。不是26日当前页面完整H1复读；不凭印象加Pattern:，也不声称已证明页面没有分类前缀。"
+      },
+      "authorEvidence": {
+        "locator": "article.mdx第48行的Chris Richardson明确署名，research.md第8行同名原作者资料记录",
+        "record": {
+          "line": 48,
+          "text": "[^outbox]: [Chris Richardson：Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html)，Solution、Result context，访问2026-10-24。",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/tx-outbox/article.mdx#L48",
+          "sourceType": "existing-actual-reading-bibliography-not-current-official-page-response",
+          "titleText": "Transactional outbox",
+          "authorText": "Chris Richardson"
+        },
+        "researchLabel": "Chris Richardson Transactional outbox",
+        "scope": "原24日实读记录中的明确Chris Richardson归属，非26日新公开byline响应；不从Git账号或贡献者身份推断作者。"
+      },
+      "supports": [
+        "08–09：relay在发送后、记录完成前中断可重发；需要消费者处理重复。模式正文未给原始发表年，按当前原作者正文引用，不从页脚推断年龄。"
+      ],
+      "sections": "Solution、Participants、Result context",
+      "shots": [
+        "06",
+        "07",
+        "08",
+        "09"
+      ],
+      "currentCanonicalAccess": {
+        "newGet": false,
+        "status": "not-requested",
+        "currentH1Checked": false,
+        "newBylineResponseCaptured": false
+      },
+      "officialBodySHA256": null,
+      "hashScope": "完整research/article SHA标识旧阅读记录，未保存旧官方完整正文响应SHA，不冒充官方正文摘要。"
+    },
+    {
+      "id": "tx-outbox-r2",
+      "referenceId": "R2",
+      "organization": "microservices.io",
+      "author": "Chris Richardson",
+      "title": "Handling duplicate messages using the Idempotent consumer pattern",
+      "version": "2020-10-16 · 原作者文章",
+      "canonicalUrl": "https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html",
+      "verificationStatus": "verified",
+      "checkedAt": "2026-10-24",
+      "verificationBasis": "existing-author-original-reading-record",
+      "originalRecord": {
+        "startLine": 10,
+        "endLine": 10,
+        "text": "| [Chris Richardson Idempotent Consumer](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html) | Why duplicate messages、Tracking IDs、PROCESSED_MESSAGE | 10–12：处理标识应有唯一约束，并与业务修改同一本地事务；提交后确认消息。2020-10-16原作者文章，未早于2020。 |",
+        "originalLabel": "Chris Richardson Idempotent Consumer",
+        "sectionsCell": "Why duplicate messages、Tracking IDs、PROCESSED_MESSAGE",
+        "claimAndBoundaryCell": "10–12：处理标识应有唯一约束，并与业务修改同一本地事务；提交后确认消息。2020-10-16原作者文章，未早于2020。",
+        "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/tx-outbox/research.md#L10",
+        "recordUrlKind": "existing-research-record-not-official-fixed-body"
+      },
+      "titleEvidence": {
+        "locator": "2026-10-24既有实读书目：article.mdx第49行，Chris Richardson：后的英文文献名",
+        "evidence": "docs/reference-endcards/batch-8/sources-tx-outbox.json",
+        "record": {
+          "line": 49,
+          "text": "[^consumer]: [Chris Richardson：Handling duplicate messages using the Idempotent consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，2020-10-16，Tracking message IDs，访问2026-10-24。",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/tx-outbox/article.mdx#L49",
+          "sourceType": "existing-actual-reading-bibliography-not-current-official-page-response",
+          "titleText": "Handling duplicate messages using the Idempotent consumer pattern",
+          "authorText": "Chris Richardson"
+        },
+        "scope": "24日实际读取后留下的英文书目题名。不是26日当前页面完整H1复读；不凭印象加Pattern:，也不声称已证明页面没有分类前缀。"
+      },
+      "authorEvidence": {
+        "locator": "article.mdx第49行的Chris Richardson明确署名，research.md第10行同名原作者资料记录",
+        "record": {
+          "line": 49,
+          "text": "[^consumer]: [Chris Richardson：Handling duplicate messages using the Idempotent consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，2020-10-16，Tracking message IDs，访问2026-10-24。",
+          "recordUrl": "https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/tx-outbox/article.mdx#L49",
+          "sourceType": "existing-actual-reading-bibliography-not-current-official-page-response",
+          "titleText": "Handling duplicate messages using the Idempotent consumer pattern",
+          "authorText": "Chris Richardson"
+        },
+        "researchLabel": "Chris Richardson Idempotent Consumer",
+        "scope": "原24日实读记录中的明确Chris Richardson归属，非26日新公开byline响应；不从Git账号或贡献者身份推断作者。"
+      },
+      "supports": [
+        "10–12：处理标识应有唯一约束，并与业务修改同一本地事务；提交后确认消息。2020-10-16原作者文章，未早于2020。"
+      ],
+      "sections": "Why duplicate messages、Tracking IDs、PROCESSED_MESSAGE",
+      "shots": [
+        "10",
+        "11",
+        "12"
+      ],
+      "currentCanonicalAccess": {
+        "newGet": false,
+        "status": "not-requested",
+        "currentH1Checked": false,
+        "newBylineResponseCaptured": false
+      },
+      "officialBodySHA256": null,
+      "hashScope": "完整research/article SHA标识旧阅读记录，未保存旧官方完整正文响应SHA，不冒充官方正文摘要。"
+    }
+  ],
+  "selection": {
+    "selected": [
+      "R1",
+      "R2"
+    ],
+    "reason": "采用旧记录中明确Chris Richardson归属的Outbox模式与完整2020幂等消费文章；保留转发重复、唯一处理标识及与业务修改同一本地事务的主要依据。",
+    "retainedOutsideList": "原两AWS资料、全研究及全部旧文章脚注原字节保留，片尾精选不声明它们未被使用或已在本轮重新读取。",
+    "presentation": "title-author",
+    "maxItemsPerPage": 4,
+    "secondsPerPage": 5,
+    "renderedFields": [
+      "title",
+      "credit"
+    ],
+    "creditPolicy": "explicit author Chris Richardson; organization microservices.io retained offscreen"
+  },
+  "preservedShotMapping": [
+    "- 01：双写空档导致订单已保存、通知未发，是故障示例设定。",
+    "- 02–05：订单与待办共同提交/共同回滚；不等于数据库和队列同一原子提交。",
+    "- 06–09：独立发送、等队列确认后记录发送结果，发送成功与标记完成之间仍可出故障；同一通知身份重发。",
+    "- 10–12：消费本地事务将库存扣减和唯一已处理标记共同保存；失败不留下半套结果，重复不再扣。唯一约束是并发保护责任，不把先查后扣的普通查询当充分方案。",
+    "- 13–14：最终业务收敛仍依赖消息持久性、发送与消费恢复。永久业务拒绝须按规则结束，Outbox本身不包办业务补偿，也不提供跨库全局隔离。",
+    ""
+  ]
+}

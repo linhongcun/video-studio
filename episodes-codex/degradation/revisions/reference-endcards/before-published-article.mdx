@@ -1,0 +1,32 @@
+---
+title: "搜索页和结算页，为什么两个价不一样？"
+summary: "少算一处非核心功能，保住下单。"
+related: []
+chapters:
+  - id: load
+    title: "搜索预估也消耗资源"
+  - id: degrade
+    title: "减少功能仍要交代清楚"
+  - id: boundary
+    title: "核心链路不能靠跳过校验维持"
+---
+
+视频使用同一件教学商品：标价199元，符合条件的红包减20元，结算确认179元。搜索与结算价格不同，来自示例系统临时关闭了搜索中的红包预估；这不是对所有网站差价原因的解释。
+
+## 搜索预估也消耗资源 {#load}
+
+平常搜索可能为很多商品预估优惠。高峰时，这些计算会与结算业务竞争资源。示例系统先减少搜索预估，保持商品搜索可用，把优惠核验留到结算。
+
+## 减少功能仍要交代清楚 {#degrade}
+
+降级是有计划地减少部分功能，让重要业务继续提供。搜索展示199元时，应明确标明未计红包、以结算为准；结算再按资格和规则核验，显示确认金额供用户决定。
+
+## 核心链路不能靠跳过校验维持 {#boundary}
+
+结算、库存、支付的正确性仍然重要。核心校验失败不能假装成功；合适的方案可能是明确失败、只读或保留待完成状态。降级路径要更简单、经过测试并有监控，压力减轻后再逐步恢复。随意切到另一个脆弱依赖，可能使故障更严重。
+
+## 公开资料
+
+- [AWS Well-Architected — graceful degradation](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html)，实际访问2026-10-24。
+- [Microsoft Well-Architected — self-healing and self-preservation](https://learn.microsoft.com/en-us/azure/well-architected/reliability/self-preservation)，实际访问2026-10-24。
+- [AWS Builders Library — Avoiding fallback in distributed systems](https://aws.amazon.com/builders-library/avoiding-fallback-in-distributed-systems/)，实际访问2026-10-24。
