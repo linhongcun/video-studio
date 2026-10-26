@@ -15,7 +15,7 @@ Remotion：在remotion目录npm ci、npx tsc --noEmit、npm run covers、npm run
 [v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。
 
 
-## 第3批参考资料：当前默认入口
+## 第3批参考资料（历史资料样式）
 
 本批在已发布原片后补参考资料，不重新渲染正文或混音。不可变原片位于 `revisions/reference-endcards/body.mp4`，完整SHA和原帧数见同目录 `baseline.json`；`before-source-sha256.json`、修前文章/调研/入口快照保留原制作身份，不能重写这些历史记录来追认新引用段。原配音、字幕、分镜、动作与图标继续保持，当前新清单仅声明新资料尾卡及后续默认渲染所需输入。
 
@@ -28,3 +28,14 @@ Remotion：在remotion目录npm ci、npx tsc --noEmit、npm run covers、npm run
 新媒体清单及逐帧/音频保留报告位于`revisions/reference-endcards/reference-appendix.json`和同目录媒体检查回执。接齐期根交付回执、`render-result.json.publicationMetadata`及实际发布总帧数后，在`remotion/`执行`npm run verify:references`，核对当前资料、冻结和最终媒体；该wrapper使用`out/body.mp4`，仅复用存量时须先准备与不可变原片SHA完全一致的副本。旧编码检查器的正文帧数断言只适用于正文副本，不拿它判定已加资料卡的最终成片。
 
 实际查看所有资料页、精确首卡字幕边界和桌面/手机暂停及原生全屏后再接入站点。原创建/首发时间、链接和平台身份保留，ASR或全片人工听辨未执行时继续如实记录；本批发布进度以真实证据为准。
+
+
+## 题名与作者：当前资料入口
+
+本轮资料卡采用`presentation: title-author`，按完整原始题名和作者/机构列示。仅在来源本身已有`author`时使用该字段，否则使用既有`organization`，不补造个人姓名。原题名、机构、原文摘录、定位及核验文件保留在`references.json`和配套文章中；本轮只切换显示方式，不改研究结论或正文。
+
+默认资料渲染器为共享`append_references_bibliography.py`，早先两份渲染器保持历史字节并继续作为冻结依赖。新卡按实际排版分页，每页默认5秒；修前回执、来源清单、入口及输入身份保存在本实际制作目录的`revisions/title-author/`，不重写旧验收结果。候选资料卡同在该修订目录生成，通过检查后再接入既有最终产物与回执位置；本轮进度由根任务记录。
+
+当前冻结入口为`freeze.py`，加`--verify`只读核对。冻结清单在原有正文、声音、图标、导航和历史来源输入之外收录新渲染器，既有wrapper、发布检查器、两份旧渲染器及证据仍保留。默认正文构建、混音、并发和已有代码卡顺序均沿用实际package；本批只消费基线已验收的完整正文生成资料卡，不运行正文prepare、TTS、重渲或重混音。
+
+资料生成后按新回执同步最终总帧数、媒体SHA及发布映射；实际复核题名/署名、分页、首卡字幕边界、暂停及原生全屏。原脚本、配音、字幕、分镜、动作和文章/研究均保持本轮基线字节，旧技术验收只按原体保真范围复用，不预记新版已获观看认可。

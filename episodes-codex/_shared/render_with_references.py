@@ -3,7 +3,7 @@
 
 The episode's render:body script must write remotion/out/body.mp4, including
 any existing code card. This wrapper never edits narration, timing or metadata.
-It uses the original-title/excerpt renderer and emits a publication metadata patch
+It uses the title/author bibliography renderer and emits a publication metadata patch
 in render-result.json. Independent source and visual review remain required.
 
   python3 episodes-codex/_shared/render_with_references.py episodes-codex/SLUG
@@ -23,7 +23,8 @@ from types import SimpleNamespace
 
 
 ROOT = Path(__file__).resolve().parents[2]
-APPENDER = ROOT / 'episodes-codex/_shared/append_references_original.py'
+APPENDER = ROOT / 'episodes-codex/_shared/append_references_bibliography.py'
+ORIGINAL_RENDERER = APPENDER.with_name('append_references_original.py')
 OLD_ENGINE = APPENDER.with_name('append_references.py')
 CHECKER = ROOT / 'site/scripts/check-references.mjs'
 BODY_GUARD = 'VIDEO_STUDIO_REFERENCE_BODY_RENDER'
@@ -55,7 +56,8 @@ def verify_freeze(directory: Path) -> None:
             raise ValueError(f'Frozen input changed: {relative}')
         paths[path] = expected
     required = [directory / 'references.json', directory / 'article.mdx',
-                directory / 'remotion/package.json', Path(__file__).resolve(), APPENDER, OLD_ENGINE, CHECKER,
+                directory / 'remotion/package.json', Path(__file__).resolve(), APPENDER,
+                ORIGINAL_RENDERER, OLD_ENGINE, CHECKER,
                 APPENDER.with_name('requirements-reference-appendix.txt'),
                 ROOT / 'episodes/_shared/theme/pageTheme.ts']
     references = read(directory / 'references.json')
@@ -90,6 +92,9 @@ def run(directory: Path, verify_only: bool = False) -> dict:
     for font in (appender.DEFAULT_FONT, appender.DEFAULT_BOLD):
         if not font.is_file():
             raise ValueError(f'Missing reference-card font: {font}')
+    # Historical source formats remain readable by the site checker; the new
+    # production entry must select its own presentation before rendering body.
+    appender.load_references(directory / 'references.json')
     args = SimpleNamespace(body=directory / 'remotion/out/body.mp4',
                            references=directory / 'references.json',
                            output=directory / 'video.mp4',

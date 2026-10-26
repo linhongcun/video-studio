@@ -88,3 +88,16 @@ python3 episodes-codex/consistent-hashing/freeze_with_references.py --verify
 本次仅重出参考资料页并接到无损恢复的`remotion/out/body.mp4`之后，不调用默认正文渲染、不重新混音或请求TTS。正文恢复及最终文件的实际身份由本轮`revisions/original-titles/baseline.json`和媒体保留检查记录；旧容器摘要与恢复后容器摘要可能不同，不能以文件名代替逐帧、时间戳及原AAC/PCM保留证明。
 
 后续确需完整渲染时，既有`npm run render`仍调用统一wrapper，`render:body`沿本期原voice→mix流程输出`out/body.mp4`，wrapper现选用新原题名生成器。实际资料页与最终总帧数以新回执为准；不要把原正文5881帧或旧6031帧整体时长直接当成本轮结果。接齐期根交付回执和`render-result.json.publicationMetadata`后，在本期`remotion/`执行`npm run verify:references`，只验证当前冻结与整体交付，不重渲染。精确资料首帧字幕、各页暂停/全屏和最终线上完整SHA仍需按实际结果独立核验。
+
+
+## 题名与作者：当前资料入口
+
+本轮资料卡采用`presentation: title-author`，按完整原始题名和作者/机构列示。仅在来源本身已有`author`时使用该字段，否则使用既有`organization`，不补造个人姓名。原题名、机构、原文摘录、定位及核验文件保留在`references.json`和配套文章中；本轮只切换显示方式，不改研究结论或正文。
+
+默认资料渲染器为共享`append_references_bibliography.py`，早先两份渲染器保持历史字节并继续作为冻结依赖。新卡按实际排版分页，每页默认5秒；修前回执、来源清单、入口及输入身份保存在本实际制作目录的`revisions/title-author/`，不重写旧验收结果。候选资料卡同在该修订目录生成，通过检查后再接入既有最终产物与回执位置；本轮进度由根任务记录。
+
+当前冻结入口为`freeze_with_references.py`，加`--verify`只读核对。冻结清单在原有正文、声音、图标、导航和历史来源输入之外收录新渲染器，既有wrapper、发布检查器、两份旧渲染器及证据仍保留。默认正文构建、混音、并发和已有代码卡顺序均沿用实际package；本批只消费基线已验收的完整正文生成资料卡，不运行正文prepare、TTS、重渲或重混音。
+
+原146项正文来源仍以真实历史package及旧文章/研究快照分别验证；当前清单另外声明新资料入口，不改旧核心`freeze.py`或历史输入，也不将当前资料格式追认为旧正文的编码来源。
+
+资料生成后按新回执同步最终总帧数、媒体SHA及发布映射；实际复核题名/署名、分页、首卡字幕边界、暂停及原生全屏。原脚本、配音、字幕、分镜、动作和文章/研究均保持本轮基线字节，旧技术验收只按原体保真范围复用，不预记新版已获观看认可。

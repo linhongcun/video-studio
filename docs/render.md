@@ -4,18 +4,18 @@
 
 ## 新片默认入口
 
-新片从调研阶段准备 `presentation: original-title-quote` 的 `references.json`，并按[新期模板](../episodes-codex/_template/README.md)接入默认附录流程。原始题名及其证据必需，实际原文短引按需要选择，内部 `supports` 不上屏。正式编码前先做来源预检；正文命令写为本期的 `render:body`，输出独立的 `remotion/out/body.mp4`，其中保留已设计的完整代码卡（如有）。默认入口随后调用 `append_references_original.py` 生成最终 `video.mp4`，不允许只交付 `render:body` 产物。
+新片从调研阶段准备 `presentation: title-author` 的 `references.json`，并按[新期模板](../episodes-codex/_template/README.md)接入默认附录流程。原题及其证据必需；有明确公开署名时用非空 `author`，否则省略该字段并显示 `organization`。视频只显原题与作者/机构，完整链接、年份/版本、日期、位置、摘录和内部 `supports` 留文章或研究。正式编码前先做来源预检；正文命令写为本期的 `render:body`，输出独立的 `remotion/out/body.mp4`，其中保留已设计的完整代码卡（如有）。默认入口随后调用 `append_references_bibliography.py` 生成最终 `video.mp4`，不允许只交付 `render:body` 产物。
 
 ```sh
 node site/scripts/check-references.mjs --sources EPDIR
 python3 episodes-codex/_shared/render_with_references.py EPDIR
 ```
 
-入口先检查资料，再只读核对本期 `source-sha256.json`，随后执行 `npm run render:body` 和新追加器；具体参数与文件约定以[共享入口](../episodes-codex/_shared/README.md)为准。资料清单、文章、题名/短引证据、默认入口、新追加器及其保留的旧引擎依赖、实际调用的 `site/scripts/check-references.mjs` 和所用配置随本期实际输入冻结；旧引擎字节不改，产出的receipt和MP4不作为编码前输入冻结。附录两份receipt复制到制作目录根，其中 `reference-appendix.json` 记录起点、分页、原题/短引及完整区间；`render-result.json` 记录输出SHA、最终帧数及 `publicationMetadata`。接入站点时复制清单和receipt，按该metadata片段填写 `meta.referenceAppendix`、`meta.finalVideoFrames`，不改写正文的旁白、分镜或 `words.json`。来源尚未核验时应在渲染前失败，避免先做完正文再补片尾。
+入口先检查资料，再只读核对本期 `source-sha256.json`，随后执行 `npm run render:body` 和新追加器；具体参数与文件约定以[共享入口](../episodes-codex/_shared/README.md)为准。资料清单、文章、原题/署名与实际研究证据、默认入口、新追加器及其保留的旧引擎依赖、实际调用的 `site/scripts/check-references.mjs` 和所用配置随本期实际输入冻结；旧引擎字节不改，产出的receipt和MP4不作为编码前输入冻结。附录两份receipt复制到制作目录根，其中 `reference-appendix.json` 记录起点、分页、实际原题/署名列表及完整区间；`render-result.json` 记录输出SHA、最终帧数及 `publicationMetadata`。接入站点时复制清单和receipt，按该metadata片段填写 `meta.referenceAppendix`、`meta.finalVideoFrames`，不改写正文的旁白、分镜或 `words.json`。来源尚未核验时应在渲染前失败，避免先做完正文再补片尾。
 
 已完成生成后可用 `python3 episodes-codex/_shared/render_with_references.py EPDIR --verify` 复核资料、冻结和最终媒体；此模式只写QA报告，不重新渲染正文或重写冻结清单。
 
-新模式每页最多2项、默认5秒并提示暂停；原始题名和可选「原文摘录」各自检查排版，超限报COPYFIT，不自动截断或改写成概括。实际检查所有资料页和首/中/末帧、字幕结束及播放器暂停/手机全屏，提示与核验日期避开原生底部控件。正文、代码卡和参考资料分别计时，不额外延长旁白或覆盖代码卡。
+新模式每页最多4项、默认5秒，采用原题与作者/机构的简洁列表；原题和署名各自检查排版，超限报COPYFIT，不截断或改写成概括。实际检查所有资料页和首/中/末帧、字幕结束及播放器暂停/手机全屏；不叠加摘录、定位、年份/版本、核验日期、链接或提示说明。正文、代码卡和参考资料分别计时，不额外延长旁白或覆盖代码卡。新回执的 `bibliography` 绑定实际 `title` 与 `credit`，`layout` 声明单列、最多4项与只渲染题名/署名，`quotesRendered` 为false；每页5秒由 `inputs.secondsPerPage` 记录。旧原题/摘录模式及旧QA按历史范围保留，不改旧回执追认新列表。
 
 ## 现行旧期正文入口参考
 

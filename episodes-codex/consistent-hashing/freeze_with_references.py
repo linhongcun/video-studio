@@ -79,6 +79,7 @@ def compose_manifest() -> dict[str, str]:
         D / 'references.json',
         D / 'references.md',
         ROOT / 'episodes-codex/_shared/render_with_references.py',
+        ROOT / 'episodes-codex/_shared/append_references_bibliography.py',
         ROOT / 'episodes-codex/_shared/append_references_original.py',
         ROOT / 'episodes-codex/_shared/append_references.py',
         ROOT / 'episodes-codex/_shared/requirements-reference-appendix.txt',

@@ -31,6 +31,7 @@ def production_extras():
     references = json.loads((D / 'references.json').read_text())
     paths = [Path(__file__).resolve(), D / 'references.json', D / 'article.mdx',
              WRAPPER,
+             ROOT / 'episodes-codex/_shared/append_references_bibliography.py',
              ROOT / 'episodes-codex/_shared/append_references_original.py',
              ROOT / 'episodes-codex/_shared/append_references.py',
              ROOT / 'episodes-codex/_shared/requirements-reference-appendix.txt',

@@ -1,0 +1,23 @@
+{
+  "name": "circuit-breaker-codex-remake",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "render": "python3 ../../_shared/render_with_references.py ..",
+    "render:voice": "remotion render src/index.ts Main out/voice.mp4 --codec=h264 --crf=20 --concurrency=1 --browser-executable=/usr/bin/chromium --bundle-cache=false",
+    "render:mix": "python3 ../../../episodes/_shared/music/mix_bgm.py --in out/voice.mp4 --bgm ../../../episodes/_shared/music/Wallpaper.mp3 --mode constant --below 12 --out out/body.mp4 --report out/mix-report.json",
+    "covers": "node scripts/covers.mjs",
+    "stills": "node scripts/stills.mjs",
+    "render:body": "npm run render:voice && npm run render:mix",
+    "check:references": "node ../../../site/scripts/check-references.mjs --sources ..",
+    "render:references": "npm run check:references && python3 ../freeze.py --verify && python3 ../../_shared/append_references_original.py append --body out/body.mp4 --references ../references.json --output ../video.mp4 --artifacts ../revisions/reference-endcards --seconds 5",
+    "verify:references": "python3 ../../_shared/render_with_references.py .. --verify"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.534",
+    "typescript": "^7.0.2"
+  }
+}

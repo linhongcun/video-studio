@@ -63,6 +63,7 @@ for source in json.loads((D/'references.json').read_text())['sources']:
     if 'quotation' in source:
         evidence_paths.append(source['quotation']['evidence'])
     files.extend(ROOT/evidence for evidence in evidence_paths)
+files += [ROOT/'episodes-codex/_shared/append_references_bibliography.py']
 # Keep parent references portable instead of writing workspace absolute paths.
 manifest = {os.path.relpath(p, D):sha(p) for p in sorted(set(files))}
 (D/'source-sha256.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')

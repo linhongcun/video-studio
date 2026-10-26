@@ -1,0 +1,77 @@
+---
+title: 网站离你那么远，为什么还这么快？
+summary: 用真实地图跟踪同一张图片，理解CDN如何选择临近边缘节点，以及何时回源、何时直接返回。
+chapters:
+  - id: hook
+    title: 图片每次都要从远处下载吗
+  - id: network
+    title: 请求先到边缘节点
+  - id: miss
+    title: 没有副本先回源
+  - id: hit
+    title: 命中后直接返回
+  - id: fresh
+    title: 缓存规则与私人内容边界
+related:
+  - dns
+  - browser-cache
+  - load-balancing
+---
+
+网站的源站离用户很远，并不意味着每一次图片请求都必须从源站重新下载。内容分发网络（CDN）将节点分布在多个网络位置，让允许共享和复用的内容在合适的节点保存。本期只追踪一张公开商品图片，在真实大陆轮廓地图上说明用户、临近边缘节点与远端源站的关系。画面首次点出“CDN · 内容分发网络”，口播逐字母读C、D、N，再结合请求动作认识边缘节点与回源。
+
+## 先到合适的节点
+
+地图大陆轮廓来自公有领域数据Natural Earth；用户、节点位置和连线路径均为教学示例，不代表厂商真实部署、物理光缆或实际网络跳数。请求经过服务的调度机制，被引到适合服务的边缘位置。“近”通常指网络时延较低，不能只看地图直线距离；负载、路由与服务配置也会影响选择。[AWS 的交付流程](https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/HowCloudFrontWorks.html)
+
+## 没有副本，就继续回源
+
+节点先检查能否找到可使用的响应。没有时，请求继续向上游或源站获取。简化画面只保留一层边缘和源站，真实系统可能有区域缓存或多级缓存。
+
+源站内容返回后，节点可以开始转发给用户，同时按缓存规则保留副本。并非必须等整张图片完整下载后才开始传输。第一次未命中仍可能需要走远端路径，不能承诺一定加速。
+
+## 命中且允许复用，才省掉本次回源
+
+下一个等价请求到达时，若缓存键匹配、响应可复用且满足新鲜度等规则，节点可以直接响应。这样减少本次内容回源的传输与源站工作，但改善幅度取决于命中率、网络、内容大小和配置，没有统一倍数。
+
+缓存不是永远有效。内容过期后可能需要验证或重新获取；特定条件下允许使用旧响应的策略必须显式正确配置。应依据 HTTP 语义和实际 CDN 产品规则配置，而非假定所有响应都会自动缓存。[RFC 9111](https://www.rfc-editor.org/rfc/rfc9111.html)、[Cloudflare 默认缓存行为](https://developers.cloudflare.com/cache/concepts/default-cache-behavior/)
+
+## 私人订单不能误进共享副本
+
+商品图片通常适合公开共享，个人订单响应则有访问边界。不能因为响应带 Cookie 就认定共享缓存会自动保护它。应根据真实业务和产品规则正确设置 `private`、`no-store` 等指令或绕缓存策略，避免将一个用户的数据发给其他用户。[MDN 的私有与共享缓存说明](https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching)
+
+CDN 还可能提供动态内容传输优化等能力，但它不会自动修复源站程序、数据库或业务逻辑中的瓶颈。本片聚焦可缓存图片的命中与回源。
+
+资料访问日期：2026-10-24（北京时间）。
+
+## 参考资料
+
+片尾主要依据以下三项资料，核验于2026-10-25（北京时间）。正式链接与本轮实读的官方仓库固定版本分别列出。Cloudflare资料用于核验公开产品实现，片中地图与节点仍是教学示例，不表示所有CDN采用同样调度方式或缓存层级。
+
+**[R1] Cloudflare：《Content Delivery Network (CDN) Reference Architecture》（官方文档 · 2026-10-25核验）**。
+
+> Edge nodes within the Cloudflare network cache content from the origin server and are able to respond to requests via a cached copy.
+
+原文位置：Cloudflare CDN architecture and design。
+
+[正式文档](https://developers.cloudflare.com/reference-architecture/architectures/cdn/) · [固定原文](https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/reference-architecture/architectures/cdn.mdx)。
+
+**[R2] IETF HTTP WG：《HTTP Caching》（RFC 9111 · 2022）**。
+
+> When a response is fresh, it can be used to satisfy subsequent requests without contacting the origin server, thereby improving efficiency.
+
+原文位置：§4.2 Freshness。
+
+[正式文档](https://www.rfc-editor.org/rfc/rfc9111.html) · [固定原文](https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml)。
+
+**[R3] Cloudflare：《Cloudflare cache responses》（官方文档 · 2026-10-25核验）**。
+
+> The response is eligible for cache but was not present in Cloudflare's cache at request time, so it was served from the origin web server.
+
+原文位置：MISS · line 29。
+
+[正式文档](https://developers.cloudflare.com/cache/concepts/cache-responses/) · [固定原文](https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/cache/concepts/cache-responses.mdx)。
+
+Cloudflare架构页标注审阅日期2022-12-02；上面的2026-10-25是本轮核验日期。它说明网络路由和节点容量参与选择，不能据地图直线长度推算真实时延，也不构成固定加速倍数保证。
+
+前文保留的AWS、MDN与地图相关材料沿用原访问记录；AWS开源文档仓库已归档，没有将其称为本轮实读的现行CloudFront文档。Natural Earth地图许可继续见原制作资料，不列入片尾技术主依据。
