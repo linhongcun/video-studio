@@ -10,6 +10,10 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 - 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
+<!-- batch-12-publication-archive:start -->
+固定原47期参考资料补齐已完成，当前48期发布视频均有原题与作者/机构附录；新期默认生成并继续核验。真实发布与检查范围见[完成归档](docs/archive/2026-10/reference-endcards-batch-12/README.md)，固定存量与新增视频分别见[清单](docs/reference-endcards/inventory.json)。
+<!-- batch-12-publication-archive:end -->
+
 ## 已上线剧集
 
 剧集信息来自各期的 `episodes/<slug>/meta.json`。当前制作入口由 `sourcePath` 指向 `episodes-codex/`；EP.01–21 已完成重制，完整版本记录见 [Releases](https://github.com/linhongcun/video-studio/releases) 和 [制作记忆](docs/production-memory.md)。已下架的隔离级别旧片和被替代工程已从工作树清理，仍可通过 Git 历史恢复，详见 [清理记录](docs/archive/2026-10/repository-cleanup.md)。

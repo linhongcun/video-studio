@@ -52,10 +52,10 @@
 
 ## 参考资料补齐的已完成批次
 
-补齐工作仍在持续，当前范围与状态见[存量清单](../reference-endcards/inventory.json)。以下入口只记录各批次实际完成的工作；批次目录同时保存被制作工程引用的来源证据。
+原47期存量参考资料补齐已全部完成，当前48期发布视频均有附录；新片继续默认生成并核验参考资料。完整范围与实际发布状态见[存量清单](../reference-endcards/inventory.json)。以下入口记录各批次完成证据；被制作工程和冻结清单引用的文件保持原路径。
 
 | 批次 | 后续样式修订 |
 | --- | --- |
-| [1](../reference-endcards/batch-1/README.md) · [2](../reference-endcards/batch-2/README.md) · [3](../reference-endcards/batch-3/README.md) · [4](../reference-endcards/batch-4/README.md) · [5](../reference-endcards/batch-5/README.md) · [6](../reference-endcards/batch-6/README.md) · [7](../reference-endcards/batch-7/README.md) · [8](../reference-endcards/batch-8/README.md) · [9](../reference-endcards/batch-9/README.md) · [10](../reference-endcards/batch-10/README.md) · [11](2026-10/reference-endcards-batch-11/README.md) | [原题核对](../reference-endcards/original-titles/README.md) · [原题与署名列表](../reference-endcards/title-author/README.md) |
+| [1](../reference-endcards/batch-1/README.md) · [2](../reference-endcards/batch-2/README.md) · [3](../reference-endcards/batch-3/README.md) · [4](../reference-endcards/batch-4/README.md) · [5](../reference-endcards/batch-5/README.md) · [6](../reference-endcards/batch-6/README.md) · [7](../reference-endcards/batch-7/README.md) · [8](../reference-endcards/batch-8/README.md) · [9](../reference-endcards/batch-9/README.md) · [10](../reference-endcards/batch-10/README.md) · [11](2026-10/reference-endcards-batch-11/README.md) · [12](2026-10/reference-endcards-batch-12/README.md) | [原题核对](../reference-endcards/original-titles/README.md) · [原题与署名列表](../reference-endcards/title-author/README.md) |
 
 后续文档的存放、收尾与迁移要求见[文档维护规范](../RULES.md#文档维护)。

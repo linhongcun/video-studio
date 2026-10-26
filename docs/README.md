@@ -41,6 +41,10 @@
 
 `reference-endcards/` 中各批次的 README、检查报告和发布回执保留当次版本身份；已完成批次的入口也收录在[历史索引](archive/README.md)。
 
+<!-- batch-12-publication-archive:start -->
+固定原47期的参考资料附录已全部补齐，当前48期发布视频均有附录。新片继续按现行模板默认生成与核验；完成范围、真实发布版本与边界见[最后一批归档](archive/2026-10/reference-endcards-batch-12/README.md)及[存量清单](reference-endcards/inventory.json)。旧来源/冻结证据保持原路径。
+<!-- batch-12-publication-archive:end -->
+
 ## 历史任务与证据
 
 [归档与历史任务索引](archive/README.md)汇总已完成的重制、修订、站点改版、仓库清理及平台整理记录。部分任务目录保留原路径，以保持冻结清单、脚本依赖和证据引用；保留位置不表示仍在制作。
