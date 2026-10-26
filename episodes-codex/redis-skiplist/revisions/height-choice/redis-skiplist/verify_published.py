@@ -32,6 +32,9 @@ ORIGINAL_RENDERER = REFERENCE_GENERATOR.with_name("append_references_original.py
 OLD_ENGINE = REFERENCE_GENERATOR.with_name("append_references.py")
 REFERENCE_LAYOUT = {"kind": "title-author-single-column", "maxItemsPerPage": 4,
                     "renderedFields": ["title", "credit"], "quotesRendered": False}
+ARTICLE_IMAGE = "article/height-one.jpg"
+ARTICLE_FRAME = 2667
+ARTICLE_SEEK = 88.9
 
 
 def read(path: Path):
@@ -126,6 +129,19 @@ def main():
         "kind": "references", "from": body_frames, "durationInFrames": appendix["durationInFrames"],
         "sources": "references.json", "manifest": "reference-appendix.json",
     }
+    for name in ["article.mdx", "article-sources.json", ARTICLE_IMAGE]:
+        assert sha(published / name) == sha(D / name), "Published article identity differs from production"
+    article_sources = read(published / "article-sources.json")
+    assert article_sources["schemaVersion"] == 1 and article_sources["episode"] == SLUG
+    assert isinstance(article_sources["sources"], list)
+    article_frame = read(D / "article-frame.json")
+    assert article_frame["schemaVersion"] == 1
+    assert article_frame["videoSHA256"] == render["sha256"] == sha(published / meta["video"])
+    assert article_frame["frame"] == ARTICLE_FRAME and article_frame["seekTo"] == ARTICLE_SEEK
+    assert Fraction(str(article_frame["seekTo"])) * fps == article_frame["frame"]
+    assert 0 <= article_frame["frame"] < final_frames
+    assert article_frame["image"] == ARTICLE_IMAGE
+    assert article_frame["imageSHA256"] == sha(published / ARTICLE_IMAGE)
     chapter_ids = list(dict.fromkeys(shot["chapterId"] for scene in sb["scenes"] for shot in scene["shots"]))
     planned_chapters = list(dict.fromkeys(item["chapterId"] for item in read(D / "plan.json")))
     assert planned_chapters and chapter_ids == planned_chapters
@@ -141,6 +157,8 @@ def main():
         "firstRelease": meta["firstRelease"], "contentUpdatedAt": meta["updatedAt"],
         "productionSource": meta["sourcePath"],
         "voiceInputProvenanceSHA256": sha(D / "voice/input-provenance.json"),
+        "articleSourcesSHA256": sha(published / "article-sources.json"),
+        "articleFrameReceiptSHA256": sha(D / "article-frame.json"), "articleFrame": article_frame,
         "referencePresentation": receipt["presentation"], "bibliography": bibliography,
         "referenceLayout": receipt["layout"],
         "referenceReceiptSHA256": sha(published / "reference-appendix.json"),
@@ -213,6 +231,7 @@ def main():
             assert ('id="' + chapter + '"') in page, ("chapter anchor missing", chapter)
         for key in ["video", "poster"]:
             fetch("episodes/" + SLUG + "/" + meta[key], published / meta[key])
+        fetch("episodes/" + SLUG + "/" + ARTICLE_IMAGE, published / ARTICLE_IMAGE)
         fetch("episodes/" + SLUG + "/captions.vtt", expected_vtt)
         local_vtt = expected_vtt.read_text()
         assert local_vtt.count(" --> ") == caption_count
@@ -227,6 +246,7 @@ def main():
         assert release["tag_name"] == args.release and release["html_url"] == release_url
         assert release["draft"] is False and release["prerelease"] is False and release["published_at"]
         assert report["page"] in release["body"], "Actual Release must identify this lesson"
+        assert len(rows) == 11, "This delivery requires the original ten canonical GETs plus the article JPEG"
         report.update(status="passed", requestCount=len(rows), chapterCount=len(chapter_ids),
             captionCount=caption_count, frames=render["frames"], mediaSHA256=render["sha256"],
             publishedMedia=meta["video"], publishedPoster=meta["poster"],

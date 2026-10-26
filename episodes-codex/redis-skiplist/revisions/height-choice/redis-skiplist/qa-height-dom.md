@@ -1,0 +1,1 @@
+42个当前新版本实际DOM/PNG时点，13,533个断言通过。使用实际字形、节点端口、SVG箭头/路径、真实cursor/dot及字幕几何核对。height1完整、resetbefore无55、height2allocated双槽未可达严格分相；第一可见55同时有两槽，47帧reset可读。07formal层高标签只在实测cue后出现，09明确以预选2为上层接线条件，四写前后按新4557窗核对。没有导入制作算法或使用Scene.state自证；0.06CSS像素几何容差未变。

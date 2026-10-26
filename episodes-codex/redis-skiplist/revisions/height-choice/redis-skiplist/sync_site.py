@@ -5,7 +5,7 @@ Default mode reads completed artifacts only. Publishing additionally requires
 the reviewed final-video SHA and an explicit release matching site/package.json:
 
   python3 episodes-codex/redis-skiplist/revisions/height-choice/redis-skiplist/sync_site.py --publish \
-    --reviewed-video-sha256 <final-reviewed-sha256> --release v0.72.5
+    --reviewed-video-sha256 <final-reviewed-sha256> --release v0.73.1
 
 That SHA binds the operator's completed media review; this script checks media
 identity and receipts, and does not perform a visual or listening review.
@@ -40,7 +40,11 @@ FILES = (
     "article.mdx", "script.md", "research.md", "storyboard.json", "video.mp4",
     "cover-16x9.jpg", "cover-4x3.jpg", "cover-3x4.jpg", "references.json",
     "reference-appendix.json", "reference-appendix-media-check.json",
+    "article-sources.json", "article/height-one.jpg",
 )
+ARTICLE_IMAGE = "article/height-one.jpg"
+ARTICLE_FRAME = 2667
+ARTICLE_SEEK = 88.9
 
 
 def read(path: Path):
@@ -65,6 +69,29 @@ def probe(path: Path):
     return json.loads(subprocess.check_output([
         "ffprobe", "-v", "error", "-show_streams", "-show_format", "-of", "json", str(path)
     ], text=True))
+
+
+def validate_article_assets(directory: Path, video_sha: str, final_frames: int, fps: int):
+    """Read the post-render image receipt; never freeze or publish the receipt."""
+    for name in ["article-sources.json", "article-frame.json", ARTICLE_IMAGE]:
+        assert (directory / name).is_file(), f"Missing article delivery artifact: {name}"
+    sources = read(directory / "article-sources.json")
+    assert sources["schemaVersion"] == 1 and sources["episode"] == SLUG
+    assert isinstance(sources["sources"], list)
+    receipt = read(directory / "article-frame.json")
+    assert receipt["schemaVersion"] == 1
+    assert receipt["videoSHA256"] == video_sha == sha(directory / "video.mp4")
+    assert receipt["frame"] == ARTICLE_FRAME and receipt["seekTo"] == ARTICLE_SEEK
+    assert Fraction(str(receipt["seekTo"])) * fps == receipt["frame"]
+    assert 0 <= receipt["frame"] < final_frames
+    assert receipt["image"] == ARTICLE_IMAGE
+    assert receipt["imageSHA256"] == sha(directory / ARTICLE_IMAGE)
+    image = next(stream for stream in probe(directory / ARTICLE_IMAGE)["streams"]
+                 if stream["codec_type"] == "video")
+    assert image["codec_name"] == "mjpeg" and (image["width"], image["height"]) == (1920, 1080)
+    assert (directory / ARTICLE_IMAGE).read_bytes().startswith(b"\xff\xd8\xff"), "Article image must be a real JPEG"
+    return {"receiptSHA256": sha(directory / "article-frame.json"), **receipt,
+            "sourcesSHA256": sha(directory / "article-sources.json")}
 
 
 def validate(reviewed_sha: str | None = None):
@@ -200,6 +227,7 @@ def validate(reviewed_sha: str | None = None):
     assert (D / "video.mp4").stat().st_size == render["bytes"]
     if reviewed_sha is not None:
         assert reviewed_sha == video_sha, "Final reviewed media changed; review the actual current output"
+    article = validate_article_assets(D, video_sha, final_frames, fps)
     for label, numerator, denominator in [("16x9", 16, 9), ("4x3", 4, 3), ("3x4", 3, 4)]:
         image = next(stream for stream in probe(D / f"cover-{label}.jpg")["streams"]
                      if stream["codec_type"] == "video")
@@ -213,6 +241,7 @@ def validate(reviewed_sha: str | None = None):
         "renderResultSHA256": sha(D / "render-result.json"), "videoSHA256": video_sha,
         "reviewedVideoSHA256": reviewed_sha, "bodyFrames": body_frames,
         "previousPublishedMetadataSHA256": existing_meta_sha,
+        "articleFrame": article,
         "referencePresentation": receipt["presentation"], "bibliography": bibliography,
         "referenceLayout": receipt["layout"],
         "referenceGeneratorSHA256": receipt["inputs"]["generatorSHA256"],
@@ -256,12 +285,16 @@ def main():
                 "firstRelease": first_release, "targetDuration": round(detail["frames"] / detail["fps"])}
     allowed = {*FILES, "meta.json"}
     if DESTINATION.exists():
-        assert set(path.name for path in DESTINATION.iterdir()) <= allowed, "Unexpected site files; preserve them"
+        allowed_entries = allowed | {str(Path(name).parent) for name in allowed if Path(name).parent != Path(".")}
+        assert all(not path.is_symlink() for path in DESTINATION.rglob("*")), "Preserve unexpected publication symlinks"
+        assert {str(path.relative_to(DESTINATION)) for path in DESTINATION.rglob("*")} <= allowed_entries, \
+            "Unexpected site files; preserve them"
     # Prepare and validate the entire copy before creating/updating the public directory.
     with tempfile.TemporaryDirectory(prefix=".site-copy-", dir=D) as temporary:
         stage = Path(temporary) / SLUG
         stage.mkdir()
         for name in FILES:
+            (stage / name).parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(D / name, stage / name)
             assert sha(stage / name) == detail["files"][name]["sha256"]
         (stage / "meta.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + "\n")
@@ -270,10 +303,23 @@ def main():
             "console.log(JSON.stringify(checkEpisode(process.argv[1])));", str(stage)], cwd=ROOT, check=True)
         assert sha(DESTINATION / "meta.json") == detail["previousPublishedMetadataSHA256"], \
             "Published metadata changed before copying; preserve the current public version"
-        DESTINATION.mkdir(parents=True, exist_ok=True)
-        for name in sorted(allowed):
-            shutil.copyfile(stage / name, DESTINATION / name)
-            assert sha(stage / name) == sha(DESTINATION / name)
+        # Install the complete staged whitelist atomically, retaining a rollback
+        # until the real site-wide article checker and copied identities pass.
+        backup = Path(temporary) / "previous-publication"
+        DESTINATION.rename(backup)
+        try:
+            stage.rename(DESTINATION)
+            subprocess.run(["npm", "--prefix", "site", "run", "check:articles"], cwd=ROOT, check=True)
+            for name in FILES:
+                assert sha(DESTINATION / name) == detail["files"][name]["sha256"]
+            assert read(DESTINATION / "meta.json") == metadata
+            assert sha(DESTINATION / "video.mp4") == detail["articleFrame"]["videoSHA256"]
+            assert sha(DESTINATION / ARTICLE_IMAGE) == detail["articleFrame"]["imageSHA256"]
+        except BaseException:
+            if DESTINATION.exists():
+                shutil.rmtree(DESTINATION)
+            backup.rename(DESTINATION)
+            raise
     detail["files"]["meta.json"] = {"sha256": sha(DESTINATION / "meta.json"),
                                      "bytes": (DESTINATION / "meta.json").stat().st_size}
     report = {"schemaVersion": 1, "status": "site-copy-prepared", "preparedAtBeijing": now,
@@ -281,7 +327,8 @@ def main():
         "source": str(D.relative_to(ROOT)), "destination": str(DESTINATION.relative_to(ROOT)),
         "publicationStatus": "Validated publishable copy prepared; live availability is checked after deployment.",
         "reviewScope": "Operator supplied the reviewed output SHA; automatic input/receipt/format identity checks do not replace visual or listening QA.",
-        "exclusions": ["voice.wav", "production PNGs", "Remotion source", "dependencies"]}
+        "articleCheck": {"command": "npm --prefix site run check:articles", "passed": True},
+        "exclusions": ["article-frame.json", "voice.wav", "production PNGs", "Remotion source", "dependencies"]}
     (D / "delivery-copy.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n")
     print(json.dumps({"status": report["status"], "files": len(detail["files"]),
         "videoSHA256": detail["videoSHA256"], "publishedAt": published_at,
