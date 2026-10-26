@@ -9,3 +9,9 @@ Remotion使用本目录的独立锁文件与fresh npm ci实体依赖；在`remot
 资料核验使用已固定的官方证据，`references.json`中显式引用的原顶层研究字节也列入新冻结，不移动或重写原证据。公开片身份不变：createdAt、publishedAt、firstRelease v0.72.0保留，updatedAt记录本轮实际内容修改。发布候选v0.72.2须在发布前重新核主干版本。sourcePath指向本nested remotion，sync/verify按修订语义严格核完整媒体、收据和来源SHA。
 
 本次scaffold的原始复制与保护见`qa-revision-baseline-protection.json`，真实声音/时序继承见`qa-voice-reuse-provenance.json`。这些记录不代表修订已通过动态预检、成片、浏览器或线上交付。
+
+## 正式成片与本地验收
+
+当前新版c570ad44…为4632帧/154.4秒/7,094,976字节；146项冻结，清单43191a81…。33张实际编码图、声轨和50项双视口网页检查通过，16张网页截图已看。仅02尾/03/04改段落交接，20句配音和后半插入保持；旧139项输入、492份历史工程及最新880项其他公开文件完整保留。完整范围见[最终QA](qa-final.md)。原0.72.2网页检查的QA取帧失败及修正留档，未追认为成功。
+
+修订候选v0.72.3，首发v0.72.0与首次日期保留；GitHub与线上实际结果见publication.json。新版本尚无用户观看结论，Redis独立模块仅记为后续考虑方向。
