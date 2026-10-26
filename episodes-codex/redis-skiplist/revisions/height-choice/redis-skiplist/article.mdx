@@ -17,6 +17,8 @@ related: ["bloom-filter", "consistent-hashing"]
 
 本例只有两层，目的是把动作看清。图中演示的是Redis启用跳表编码时的前向链接机制，**不是8项小集合的默认实际内存布局**。[^encoding]
 
+<SourceQuote sourceId="R1" supports="Redis文档说明这类有序集合实现同时包含跳表与哈希表；本文只展开跳表编码下的前向链接，小集合的紧凑编码另有边界。" />
+
 ## 加一层链接怎样跳过一段 {#search}
 
 底层保持全部八个节点，上层只有40和70。查55时，始终只有一个当前游标：
@@ -48,7 +50,7 @@ related: ["bloom-filter", "consistent-hashing"]
       <text x="320" y="232" fill="#cbd5e1" font-size="20">底层50 &lt; 55 &lt; 60，插入点在50与60之间</text>
     </g>
   </svg>
-  <figcaption>上下对齐表示同一节点的不同层链接；金色表示已走的路径，不表示曾跳到70再退回。</figcaption>
+  <figcaption>教学示意：上下对齐表示同一节点的不同层链接；金色表示已走的路径，不表示曾跳到70再退回。</figcaption>
 </figure>
 
 Redis8.4.0的`zslInsert`正是从最高层开始：比较当前节点的后继，后继小于目标才前进；不能继续时记录当前前驱，再下降。实际排序先比较score，相同score再比较member的字节字典序；本例分数互不相同，暂时只看分数。[^source][^sorted]
@@ -58,6 +60,13 @@ Redis8.4.0的`zslInsert`正是从最高层开始：比较当前节点的后继�
 刚才的查找还留下两个有用位置：底层前驱50，上层前驱40。插入55时，无需再把所有节点重新排序。
 
 **新节点不一定接入上层。** 如果55的层高是1，只把底层50→60改成50→55→60；整个跳表仍有两层，上层前向链接仍为40→70，55没有上层端口。层高在接线前就已确定，不能插入一层后为了演示再把同一次插入临时升为两层。[^source]
+
+<SourceQuote sourceId="A1" supports="源码说明新节点层高可以为1，较高层更少见；本节使用固定合法对照，不是随机过程回放。" />
+
+<Figure src="/video-studio/episodes/redis-skiplist/article/height-one.jpg"
+  alt="55只有底层链接，底层50指向55再指向60；上层40仍指向70，没有55的上层端口"
+  caption="教学示例：新55的层高为1，底层接好后插入即完成；整个跳表仍有两层。"
+  seekTo={88.9} chapter="insert" />
 
 下面回到相同的插入前状态，预先把55的层高固定为2，再分别接入：
 
@@ -126,11 +135,11 @@ print("上层：", order(1))
 
 另外，**不是所有Redis有序集合都使用跳表**。较小集合可以使用listpack，超过相关配置阈值后转换为普通编码；本片讲的是跳表编码下的机制。[^encoding] 分数变化后，如果仍能留在原邻居之间，源码可能直接改score；需要换位置时才删除旧节点再插入，也不必全量重新排序。[^source]
 
-### 完整出处
+## 参考资料
 
 下面保留实际原题/原文件名、固定版本和编者说明。核对日期为2026-10-26，不将读取日期当文档发布日期。
 
-[^sorted]: Redis，**Redis sorted sets**。[固定官方文档](https://github.com/redis/docs/blob/fcc15c76a48baeb0dc08fc839242a7799c077080/content/develop/data-types/sorted-sets.md)；[官网入口](https://redis.io/docs/latest/develop/data-types/sorted-sets/)。原文摘录：“Sorted sets are implemented via a dual-ported data structure containing both a skip list and a hash table”。**编者说明：**结合源码与紧凑编码文档限定适用范围，不据此声称所有小集合都使用跳表。
+[^sorted]: Redis，**Redis sorted sets**。[固定官方文档](https://github.com/redis/docs/blob/fcc15c76a48baeb0dc08fc839242a7799c077080/content/develop/data-types/sorted-sets.md)；[官网入口](https://redis.io/docs/latest/develop/data-types/sorted-sets/)。**编者说明：**结合源码与紧凑编码文档限定适用范围，不据此声称所有小集合都使用跳表。
 
 [^source]: Redis，**t_zset.c**，Redis Open Source8.4.0 GA，固定提交`60ba86f3c8b4e1ec96451171753a0a38e5c45a0c`（2025-11-18）。[实际源码](https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/t_zset.c)。`zslRandomLevel`、`zslInsert`、`zslUpdateScore`支持本片的层高、向前/下降、链接接入及改分边界。**编者说明：**正文Python是前向链接教学模型，不是Redis服务端实测、随机层高回放或完整实现。
 
