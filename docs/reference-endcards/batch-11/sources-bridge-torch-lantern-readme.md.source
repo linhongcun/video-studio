@@ -1,0 +1,247 @@
+Lantern & Bridge
+================
+
+A logic puzzle, solved twice over — once by a search that needs no cleverness,
+and once by a rule that needs nothing else.
+
+Six people have to cross a bridge in the dark. The bridge takes two of them at
+a time, they own a single lantern, and nobody crosses without it — so after
+every pair goes over, somebody has to carry the light back. Each walker has
+their own pace and a pair moves at the slower one's speed, which is where the
+puzzle stops being bookkeeping and starts being interesting: the obvious plan
+is to let the quickest person ferry everybody across one at a time, and the
+obvious plan is wrong. Sending the two *slowest* walkers over together, so
+their times overlap instead of adding, saves more than the extra return trips
+cost. This repository does the honest thing first — it enumerates every
+arrangement of who walks with whom, in every order, and reports the fastest —
+and then shows the greedy rule that gets the same number in a fraction of the
+work. The riddle asks whether a fifteen-minute torch is enough. It is not, and
+the search proves it rather than asserting it.
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/banner-dark.svg">
+  <img alt="Lantern &amp; Bridge — 6 people, one lantern, 9 crossings, 31 minutes" src="docs/banner-light.svg" width="100%">
+</picture>
+
+*(The banner is not decoration: who stands on which bank, how wide every bar is
+and where the torch runs out were all decided by running the solver in this
+repository, so the picture is the answer.)*
+
+## Problem definition
+
+Six people come to a river in the night. There is a narrow bridge, but it can
+only hold two people at a time. They have one torch and, because it's night,
+the torch has to be used when crossing the bridge.
+
+Person `A` can cross the bridge in `1` minute, `B` in `3` minutes, `C` in `4`
+minutes, and `D` in `6` minutes. Person `E` needs `8` minutes, and person `F`
+needs `9` minutes. When two people cross the bridge together, they must move
+at the slower person's pace.
+
+The question is, can they all get across the bridge if the torch lasts only
+`15` minutes?
+
+## Requirements
+
+**Python 3.10 or newer** — tested up to 3.13, and nothing here is expected to
+break on later versions. No third-party packages, no build step, nothing to
+install.
+
+Older interpreters are not supported. On Python 3.9 and below the script fails
+at import with `TypeError: dataclass() got an unexpected keyword argument
+'slots'`, and would fail a few lines later anyway on parameters written as
+`list[int] | None` — the `X | Y` union syntax
+([PEP 604](https://peps.python.org/pep-0604/)) only became valid at runtime in
+3.10. Python 2 is long gone from this repo; the original version supported it
+via `six`.
+
+Check what you have with `python --version`, and mind that on many systems
+`python` and `python3` point at different interpreters.
+
+## Puzzle solver
+
+```
+python bridge_puzzle.py
+```
+
+Options:
+
+| Flag | Meaning |
+| --- | --- |
+| `-t T…`, `--times T…` | Crossing times of the party, in minutes (default: `1 3 4 6 8 9`). |
+| `-l N`, `--limit N` | How long the torch burns; `0` skips the verdict (default: `15`). |
+| `-m M`, `--method M` | `search` (default, exhaustive) or `greedy` (the rule below). |
+| `-h`, `--help` | Show usage. |
+
+The schedule goes to **stdout** and the summary lines go to **stderr**, so the
+plan stays easy to pipe somewhere else:
+
+```
+$ python bridge_puzzle.py 2>/dev/null
+ 1. --> A + B          3 min   (elapsed   3)   cross over
+ 2. <-- A              1 min   (elapsed   4)   walks the torch back
+ 3. --> E + F          9 min   (elapsed  13)   cross over
+ 4. <-- B              3 min   (elapsed  16)   walks the torch back
+ 5. --> A + B          3 min   (elapsed  19)   cross over
+ 6. <-- A              1 min   (elapsed  20)   walks the torch back
+ 7. --> A + C          4 min   (elapsed  24)   cross over
+ 8. <-- A              1 min   (elapsed  25)   walks the torch back
+ 9. --> A + D          6 min   (elapsed  31)   cross over
+    total: 31 minutes
+```
+
+Any other party works too — the famous four-person version, for instance:
+
+```
+$ python bridge_puzzle.py -t 1 2 5 10 --limit 17 >/dev/null
+4 people (A=1, B=2, C=5, D=10) cross in 17 minutes.
+A torch lasting 17 minutes fits.
+```
+
+## The answer, and why
+
+**No — six people at `1, 3, 4, 6, 8` and `9` minutes need `31` minutes, and no
+arrangement does better.** A fifteen-minute torch does not get them halfway;
+they are still on the wrong bank when it gutters out, with `E` and `F` yet to
+move.
+
+That much the search establishes by exhaustion. The reason is nicer. The
+tempting plan is to make the fastest walker the ferryman: `A` escorts everybody
+over one at a time and jogs back alone in between, which costs
+`9 + 1 + 8 + 1 + 6 + 1 + 4 + 1 + 3 = 34` minutes. It feels efficient, because
+every return trip is as cheap as it can be. But it also means every slow walker
+gets a crossing of their own, and their times simply add up.
+
+The alternative is to make the slow walkers share a trip. Sending `E` and `F`
+together costs `9` minutes — the same as sending `F` alone — so `E`'s eight
+minutes vanish into `F`'s nine. Paying for that means getting the torch to the
+far side and back around them, which is what the first two moves are for:
+
+```
+A + B cross   3      A and B are now across, torch with them
+A returns     1      the torch comes back with the faster of the two
+E + F cross   9      the expensive pair, and it only costs once
+B returns     3      B was left over there precisely to do this
+```
+
+Four moves, `16` minutes, and the two slowest are dealt with for good. Repeat
+the same reasoning on whoever is left. In general, with times sorted
+`t₁ ≤ t₂ ≤ … ≤ tₙ`, disposing of the two slowest costs
+
+```
+min( t₁ + 2·t₂ + tₙ ,   2·t₁ + tₙ₋₁ + tₙ )
+      pair-shuttle          escort
+```
+
+— the left branch is the four-move dance above, the right branch is the
+fastest walker escorting `tₙ` and `tₙ₋₁` over in turn. Take the cheaper one,
+drop the two slowest, and continue until three or fewer remain (three cross in
+`t₁ + t₂ + t₃`, two in `t₂`, one in `t₁`). For this party the arithmetic runs:
+
+| Remaining | Pair-shuttle | Escort | Cheaper | Running total |
+| --- | --- | --- | --- | --- |
+| `1 3 4 6 8 9` | `1 + 6 + 9 = 16` | `2 + 8 + 9 = 19` | shuttle, `16` | `16` |
+| `1 3 4 6` | `1 + 6 + 6 = 13` | `2 + 4 + 6 = 12` | escort, `12` | `28` |
+| `1 3` | — | — | `3` | `31` |
+
+Note that the two branches change places between the first row and the second:
+the shuttle only pays off when the slow walkers are much slower than the fast
+ones. That is exactly why the greedy "always send the two slowest" folklore is
+not quite the rule, and why it is worth having a search to check the rule
+against.
+
+## Other ways to solve it
+
+**1. Fixed-shape enumeration.** Assume the schedule alternates *two over, one
+back* for a known number of rounds, then loop over every choice at every step.
+This is what the first version of this repository did, with eight nested
+`for` loops hard-wired for six people. It is easy to write, impossible to
+generalise, and — as it turned out — easy to get subtly wrong.
+
+**2. Shortest path over states.** *(what `bridge_puzzle.py` does)* Treat "who
+is still on the near bank, and which side the torch is on" as a graph node and
+a crossing as an edge weighted by the slower walker's pace. Dijkstra then
+returns the optimum, and the predecessor map replays it as an actual schedule.
+There are `2ⁿ⁺¹` states and `O(n²)` edges out of each, so it stays instant for
+any party you would plausibly write down, and it needs no insight at all about
+which pairs are worth sending.
+
+**3. The greedy rule — `O(n log n)`.** *(`--method greedy`)* Sort, then apply
+the `min(…)` above repeatedly, as in the table. This is optimal, but that is a
+theorem rather than an observation: see Rote's paper in the
+[Literature](#literature) section for the proof. Here the two methods are kept
+side by side on purpose, because agreement between a dumb method and a clever
+one is decent evidence that the clever one is right:
+
+```python
+from itertools import product
+from bridge_puzzle import solve, greedy_schedule
+
+for party in product(range(1, 9), repeat=5):          # 32 768 parties, a few seconds
+    assert solve(party).minutes == greedy_schedule(party).minutes
+```
+
+**4. Just look it up.** For the classic four-person party — `1, 2, 5, 10` — the
+answer is `17` minutes, and it is famous precisely because the intuitive
+ferry-everybody plan gives `19`. Knowing the answer, however, tells you nothing
+about the party at `1, 3, 4, 6, 8, 9`, which is why there is code here at all.
+
+## History
+
+Originally written years ago as a quick Python 2/3 prototype: eight nested
+loops hard-coded for six walkers, a `six` dependency for `print`, and a trace
+in Polish. It also did not work. It removed people from the group with
+`str.strip()`, which only strips characters off the *ends* of a string — so
+`'ABCDEF'.strip('AC')` quietly returns `'BCDEF'` with `C` still in it — and it
+charged the final crossing to a stale variable from the first loop. The result
+was a reported best time of `30` minutes, one minute better than the true
+optimum, backed by a schedule in which people cross from banks they were never
+standing on.
+
+The 2026 refresh dropped `six`, replaced the nested loops with a shortest-path
+search that works for any party of any size, added the greedy rule as an
+independent check, added type hints, docstrings and a CLI, and wrote down the
+mathematics above.
+
+## Literature
+
+The puzzle is not original to this repository. It travels under several names —
+**bridge and torch**, **the midnight train**, **dangerous crossing**, and in
+software-interview folklore the **U2 puzzle**, after a version starring the
+four members of the band. It belongs to the wider family of
+[river crossing puzzles](https://en.wikipedia.org/wiki/River_crossing_puzzle),
+alongside the wolf, the goat and the cabbage.
+
+**Where it comes from.** The four-person version at `1, 2, 5, 10` minutes is
+usually traced to Levmore and Cook's *Super Strategies for Puzzles and Games*
+(Doubleday, 1981); Wikipedia's
+[Bridge and torch problem](https://en.wikipedia.org/wiki/Bridge_and_torch_problem)
+article collects the naming history and the standard `17`-minute solution.
+
+**The proof.** That the greedy rule is actually optimal — and what happens for
+arbitrary `n` — is settled in Günter Rote,
+["Crossing the Bridge at Night"](https://page.mi.fu-berlin.de/rote/Papers/pdf/Crossing+the+bridge+at+night.pdf),
+*Bulletin of the EATCS* **78** (2002), 241–246. Rote shows that only two move
+patterns can ever be worth using, which is precisely the `min(…)` compared
+above, and gives an `O(n log n)` algorithm.
+
+**Generalisations.** Roland Backhouse's *The Capacity-C Torch Problem* (in
+*Mathematics of Program Construction*, LNCS 5133, Springer, 2008) works out the
+version where the bridge holds `C` people rather than two, and derives the
+solution calculationally rather than by search; the puzzle also appears as a
+worked example in his *Algorithmic Problem Solving* (Wiley, 2011). Once the
+group is large, the interesting question stops being "what is the answer" and
+becomes "why is the obvious rule the right one".
+
+**As a benchmark.** Because it is small, discrete and has an unobvious
+optimum, the puzzle is a standing example in model checking and scheduling: the
+[UPPAAL](https://uppaal.org/) toolkit ships a *bridge* model among its demos —
+four vikings at `5, 10, 20` and `25` minutes, one torch — where the crossing
+times become clocks and the torch limit becomes a deadline, so "can they make
+it in time?" is literally a reachability query. It is also a common exercise
+in AI planning courses, for the same reason it is a good interview question —
+the state space is tiny, but the greedy instinct is wrong.
+
+## License
+
+Released under the MIT License — see [LICENSE](LICENSE).
