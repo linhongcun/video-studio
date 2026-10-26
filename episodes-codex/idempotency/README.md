@@ -15,3 +15,19 @@ source-sha256.json与verify-freeze.py核对实际输入；动态检查、成片�
 ## 站点发布
 
 [v0.48.0](https://github.com/linhongcun/video-studio/releases/tag/v0.48.0)已完成站点部署与线上文件核验，见[发布记录](release.md)。
+
+## 第12批参考资料与当前入口
+
+本批从基线`f3610e244f9e23e7a9075e406bbc990ba53b7699`的完整Git发布原片追加`title-author`参考资料，每页最多4项、默认5秒。原MP4已核对完整SHA和总帧数，保存为`revisions/reference-endcards/body.mp4`及同SHA的`remotion/out/body.mp4`；本批直接使用这些原片，不重渲正文、混音或TTS。原完整body共2998帧，无代码卡，原收尾和字幕范围保持。
+
+原84项声明全部现存，按原路径或article/research/freezer/package四份before快照逐项核对；旧源与旧引擎原路径及字节保持。新freeze.py只写当前清单，分镜快照/placeholder只读核对，不调用旧写入型冻结器。当前新增清单说明真实入口与附录输入，不声称已据此重现原MP4；旧QA与历史制作事实保留原意。
+
+来源全部停写后，从仓根执行：
+
+```sh
+node site/scripts/check-references.mjs --sources episodes-codex/idempotency
+python3 episodes-codex/idempotency/freeze.py
+python3 episodes-codex/idempotency/freeze.py --verify
+```
+
+默认`npm run render`经共享bibliography wrapper检查来源和冻结，再生成完整body并追加资料。当前render:body保留原voice→mix闭环。默认mix只改输出到`out/body.mp4`，其余混音参数及concurrency=1保留。`npm run render:references`从完整body单独追加；`npm run verify:references`用于后续完整交付核验。最终总帧数由新receipt/render-result与发布meta声明，正文SB/words范围不改。生产整合结果见[入口报告](../../docs/archive/2026-10/reference-endcards-batch-12/production-entry-check.json)，[本批记录](../../docs/archive/2026-10/reference-endcards-batch-12/README.md)只按真实完成状态更新。

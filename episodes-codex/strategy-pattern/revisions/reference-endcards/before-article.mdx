@@ -1,0 +1,218 @@
+---
+title: 策略模式：结算怎样换一种算价办法？
+summary: 先在结算页选择会员或活动优惠，再对照结构图认识选择方、结算上下文与定价策略；沿用100元算出90元或80元的原例，最后用Java关键代码连接设计与实现。
+chapters:
+  - { id: why, title: 同一任务，做法会变 }
+  - { id: delegate, title: 把变化独立成策略 }
+  - { id: change, title: 先选策略，再让结算使用 }
+  - { id: boundary, title: 独立维护的收益与成本 }
+related: []
+---
+
+## 同一任务，做法会变 {#why}
+
+先看结算功能：页面列出原价100元的商品，并提供“会员九折”“活动八折”两个单选项。本例每次只用一种优惠；选择会员时应付90元，改选活动后重新从原价计算，显示应付80元。页面是教学示意，没有执行真实交易。
+
+用户在界面上只是换了一项定价办法，接下来才展开页面背后的程序：两次都在完成结算，但具体算价不同，共同步骤怎样继续保留？
+
+先分清两件事：
+
+- **共同流程比较稳定：**取得订单原金额，安排算价，拿到应付金额。
+- **具体细则可能变化：**会员怎样优惠、活动怎样优惠，需要分别维护，也可能按业务条件选择使用。
+
+| 本次采用的办法 | 同一原金额 | 本次应付金额 |
+|---|---|---|
+| 会员九折 | 100元 | 90元 |
+| 活动八折 | 100元 | 80元 |
+
+这些价格和折扣都是教学示例。每次都从原价100元重新结算，只选一种优惠，不把两种折扣叠加。
+
+把所有细则放在共同流程内部，最初可能很直接；当各条细则需要独立变化时，结算流程也会频繁接触这些细节。我们要解决的是：**怎样把变化的算价办法分开维护，同时让结算继续完成原来的工作？** 是否值得拆分，要结合真实变化和维护成本判断。[^ubc]
+
+## 把变化独立成策略 {#delegate}
+
+先把两种算价职责分开：会员策略负责会员优惠，活动策略负责活动优惠。这里的一个**定价策略**，就是一种能够独立维护、供结算选择使用的算价办法。[^strategy]
+
+结算保留共同流程，把“具体怎么算”这项工作交给当前选中的策略，再接收它返回的应付金额。这种把工作交给另一个职责执行的关系，就是本例中的**委托**。
+
+<figure style={{ margin: '1.5rem 0', maxWidth: '100%' }} aria-label="稳定的结算流程与分别维护的定价策略">
+<svg viewBox="0 0 420 350" width="100%" style={{ maxWidth: '420px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="strategy-responsibilities-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="strategy-responsibilities-title">结算保留共同流程，会员和活动策略分别维护具体算价细则</title>
+  <rect width="420" height="350" rx="16" fill="#0F172A" />
+  <text x="24" y="32" fill="#94A3B8" font-size="18">先分职责，再看一次执行</text>
+  <rect x="24" y="55" width="372" height="105" rx="12" fill="#182F48" stroke="#38BDF8" />
+  <text x="44" y="86" fill="#38BDF8" font-size="23">结算：共同流程</text>
+  <text x="44" y="118" fill="#E5E7EB" font-size="18">取得原金额 → 安排算价 → 接收结果</text>
+  <text x="44" y="144" fill="#94A3B8" font-size="17">具体计算交给选中的定价策略</text>
+  <text x="24" y="198" fill="#E5E7EB" font-size="18">共同约定：原金额 → 应付金额</text>
+  <rect x="24" y="222" width="174" height="92" rx="12" fill="#14342F" stroke="#2DD4BF" />
+  <text x="42" y="255" fill="#2DD4BF" font-size="22">会员策略</text>
+  <text x="42" y="287" fill="#E5E7EB" font-size="19">维护九折细则</text>
+  <rect x="222" y="222" width="174" height="92" rx="12" fill="#14342F" stroke="#2DD4BF" />
+  <text x="240" y="255" fill="#2DD4BF" font-size="22">活动策略</text>
+  <text x="240" y="287" fill="#E5E7EB" font-size="19">维护八折细则</text>
+  <text x="24" y="338" fill="#94A3B8" font-size="16">约定相同，计算细则分别维护</text>
+</svg>
+<figcaption>结算组织共同处理；策略承担具体算价。这里只说明职责，不表示两种策略同时执行。</figcaption>
+</figure>
+
+两种策略还需要遵守同一个约定：**接收本单原金额，返回采用本次优惠后的应付金额。** 不只是都交回一个数字，数字的业务含义也必须相同。一个返回应付价格、另一个返回折扣比例，就不能直接当作相同结果使用。
+
+结算因此可以依照这个约定使用策略，具体九折或八折怎样计算，留在对应策略内部。它们做的是同一个定价任务，又能分别维护和替换，这才形成了我们需要的设计关系。[^ubc][^strategy]
+
+## 先选策略，再让结算使用 {#change}
+
+### 从页面对象对上结构角色
+
+节点名称先说明职责，再对应Java实现。接口是各方依赖的共同约定，不是独立执行的计算步骤。
+
+| 结构角色 | 本例对象与Java名称 | 谁负责什么 |
+|---|---|---|
+| Client · 选择方 | 页面选择/调用侧main | 按本次需要选定策略，配置结算对象 |
+| Context · 上下文 | 结算Checkout | 持有所选PricingStrategy，组织共同流程并委托定价 |
+| Strategy · 抽象策略 | 定价约定PricingStrategy | 规定接收原金额、交回应付金额的共同任务 |
+| ConcreteStrategy · 具体策略 | MemberPricing、CampaignPricing | 分别负责会员九折和活动八折的计算细节 |
+
+选择方不替策略计算，上下文也不重新实现九折或八折；具体策略履行同一业务约定，才能按需替换。类名或语法本身不保证这些关系成立。[^ubc][^strategy]
+
+
+在进入结算前，先按本次业务条件确定要使用哪一种策略。本例先选会员策略。**选择发生在结算外侧；结算使用已经选定的策略，不自己决定当前适用哪一种优惠。**
+
+跟着这笔100元订单走一遍：
+
+1. 已选定会员策略，结算取得原金额100元。
+2. 结算按照共同约定，把算价工作委托给会员策略。
+3. 会员策略按九折计算，交回应付金额90元。
+4. 结算接收这个结果，完成本次算价。
+
+<figure style={{ margin: '1.5rem 0', maxWidth: '100%' }} aria-label="一次选定会员策略后的委托与返回过程">
+<svg viewBox="0 0 420 310" width="100%" style={{ maxWidth: '420px', display: 'block', margin: '0 auto' }} role="img" aria-labelledby="strategy-delegation-title" xmlns="http://www.w3.org/2000/svg">
+  <title id="strategy-delegation-title">外侧已选会员策略，结算委托算价，策略返回90元</title>
+  <rect width="420" height="310" rx="16" fill="#0F172A" />
+  <text x="24" y="32" fill="#94A3B8" font-size="18">示例 · 本次已选：会员策略</text>
+  <rect x="24" y="64" width="160" height="160" rx="12" fill="#182F48" stroke="#38BDF8" />
+  <text x="42" y="98" fill="#38BDF8" font-size="22">结算流程</text>
+  <text x="42" y="139" fill="#E5E7EB" font-size="18">原金额100元</text>
+  <text x="42" y="193" fill="#E5E7EB" font-size="18">收到应付90元</text>
+  <rect x="236" y="64" width="160" height="160" rx="12" fill="#14342F" stroke="#2DD4BF" />
+  <text x="254" y="98" fill="#2DD4BF" font-size="22">会员策略</text>
+  <text x="254" y="139" fill="#E5E7EB" font-size="18">按九折计算</text>
+  <text x="254" y="193" fill="#E5E7EB" font-size="18">100元 → 90元</text>
+  <path d="M184 119H236" stroke="#38BDF8" stroke-width="2" />
+  <path d="M226 112L236 119L226 126" fill="none" stroke="#38BDF8" stroke-width="2" />
+  <text x="210" y="106" text-anchor="middle" fill="#38BDF8" font-size="15">委托</text>
+  <path d="M236 179H184" stroke="#2DD4BF" stroke-width="2" />
+  <path d="M194 172L184 179L194 186" fill="none" stroke="#2DD4BF" stroke-width="2" />
+  <text x="210" y="205" text-anchor="middle" fill="#2DD4BF" font-size="15">返回</text>
+  <text x="24" y="261" fill="#E5E7EB" font-size="18">共同约定：原金额 → 应付金额</text>
+  <text x="24" y="291" fill="#94A3B8" font-size="17">九折细则由会员策略承担</text>
+</svg>
+<figcaption>本次只有会员策略参与计算。结算依照约定交出工作、接收应付结果。</figcaption>
+</figure>
+
+现在重新使用原价100元，只把本次选择换为活动策略，再走相同流程。活动策略按八折计算，返回应付80元。这是另一次从原价开始的计算，不是在先前90元的基础上继续打折。
+
+| 外侧选定的策略 | 结算怎样组织工作 | 策略计算的结果 |
+|---|---|---|
+| 会员策略 | 取得原金额，委托算价，接收应付金额 | 100元 → 90元 |
+| 改选活动策略 | 沿用相同共同流程与约定 | 100元 → 80元 |
+
+**替换能成立，是因为结算依靠共同约定使用策略，而具体算法留在各自策略内部。** 本次换了策略，结算的职责和使用方式保持不变。[^ubc]
+
+## 独立维护的收益与成本 {#boundary}
+
+把同一任务的不同算法独立组织，让使用它们的流程依照共同约定委托当前策略，这就是本例中的**策略模式**。它描述的是职责与协作，可以用不同编程语言实现。[^ubc][^strategy]
+
+它带来的收益，是让需要分别变化的内容有清楚的维护位置。在本例中，可以这样判断改动范围：
+
+| 变化发生在哪里 | 应该查看的职责 |
+|---|---|
+| 一种优惠的计算细则改变 | 对应的定价策略 |
+| 适用哪种优惠的选择规则改变 | 结算外侧的选择位置 |
+| 结算新增共同处理步骤 | 结算流程自身 |
+
+只有共同约定保持相容时，结算才可以继续按原来的方式使用策略。新增一种策略还需要实现其细则，并明确怎样选到它；这不是“所有需求都只改一个地方”。
+
+拆分也有成本：阅读一次结算时，需要继续追踪它委托了哪一种策略；共同约定与选择逻辑都需要维护。若只是两条长期不变的简单判断，直接放在一处处理可能更省事。**是否值得用模式，取决于真实变化和协作成本，不能只看形式是否更复杂。**[^ubc]
+
+阅读项目时，可以沿着三个问题追踪：哪部分组织共同流程？哪部分承担可替换的算法？当前策略由哪里选择？这些关系比某个名称或语法写法更能说明设计意图。
+
+本片要建立的关系到这里已经完整：**稳定流程保留，把变化的算价细则交给独立、可替换的策略。** 下面再用一种语言展示如何落实这种安排。
+
+### Java实现与暂停代码卡 {#java}
+
+结构图中的结算上下文表示业务职责；这份最小Java示例的`Checkout.total`只展示核心定价委托，输入和输出由`main`演示，并未实现整套结算页面。
+
+视频末尾为5秒静默Java关键节选，标有“暂停查看”。正文先解释产品操作、模式角色和协作，代码只把同一关系落到实现，不逐行讲语法。Checkout显式持有PricingStrategy，会员与活动分别实现约定，main在外侧选择；名称与上方结构表逐一对应。
+
+卡片明确是**节选**，省略外层类、import与金额校验/舍入帮助方法，不能称为完整可复制程序。下面的完整程序与[StrategyDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo-java/StrategyDemo.java)逐字一致。
+
+```java
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.Objects;
+
+/** Teaching example: one pricing strategy per calculation; amounts are yuan. */
+public final class StrategyDemo {
+    // CARD_BEGIN
+    interface PricingStrategy { BigDecimal price(BigDecimal original); }
+    static final class MemberPricing implements PricingStrategy {
+        public BigDecimal price(BigDecimal n) { return discounted(n, "0.90"); }
+    }
+    static final class CampaignPricing implements PricingStrategy {
+        public BigDecimal price(BigDecimal n) { return discounted(n, "0.80"); }
+    }
+
+    static final class Checkout {
+        private final PricingStrategy strategy;
+        Checkout(PricingStrategy strategy) { this.strategy = Objects.requireNonNull(strategy); }
+        BigDecimal total(BigDecimal original) { return strategy.price(original); }
+    }
+
+    public static void main(String[] args) {
+        BigDecimal original = new BigDecimal("100.00");
+        Checkout checkout = new Checkout(new MemberPricing());
+        System.out.println(checkout.total(original)); // 90.00
+        checkout = new Checkout(new CampaignPricing());
+        System.out.println(checkout.total(original)); // 80.00
+    }
+    // CARD_END
+
+    // Shared amount validation/calculation is omitted from the short video card.
+    // This example rounds down to one cent, matching the earlier Python example.
+    private static BigDecimal discounted(BigDecimal original, String factor) {
+        Objects.requireNonNull(original, "original amount");
+        if (original.signum() < 0 || original.scale() > 2) {
+            throw new IllegalArgumentException("non-negative yuan amount, at most two decimals");
+        }
+        return original.multiply(new BigDecimal(factor)).setScale(2, RoundingMode.DOWN);
+    }
+}
+```
+
+金额用BigDecimal的元单位，限定非负、最多两位小数，结果向零舍入至分。对本例的非负输入，这与旧整数分示例的向下截断一致；它是本例金额政策，不是通用定价规则。100元的两次计算分别输出90.00、80.00，原金额保持100.00，并未叠加优惠。
+
+实际编译运行入口：
+
+```sh
+python3 episodes-codex/strategy-pattern/demo-java/verify.py
+```
+
+[运行结果](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo-java/verified-results.json)记录Java21真实编译命令与输出、40002个整数分参照比较，以及负数、过多小数、空金额与空策略拒绝。卡片21行节选与完整源码有逐行映射，运行验证具体实现，不代替设计思想或观看效果检查。
+
+### 进一步阅读与边界
+
+此前的[Python实现](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo/pricing.py)和[运行证据](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo/verified-results.json)保留作其他语言参考，其中七五折、新客等扩展不属于本片的会员/活动两策略主线。模式不绑定语言，本轮选择Java是为了明确展示接口、具体实现和上下文持有关系。[^java-interfaces]
+
+阅读项目时，应沿“谁选择、谁组织共同流程、谁承担可替换算法、依赖什么约定”追踪。策略与状态也应按意图区分：本例选择同一任务的不同办法，状态模式关注内部状态变化时的操作和迁移。[^state]
+
+资格校验、优惠叠加、税费、支付与并发仍需各自设计。策略模式不会自动解决这些业务问题，也不保证运行更快。
+
+### 资料范围
+
+职责/协作依据仍为已读公开课程和辅助资料；本轮Java21接口、BigDecimal与舍入API正文由实现代理实际读取，访问日期2026-10-25（北京时间），具体范围见[Java实现说明](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo-java/README.md)。未把旧Python运行结果当Java语义保证。
+
+[^ubc]: [UBC CPSC310：Design Patterns](https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/)，Design Pattern Process、Strategy与Analysis；正文未标独立发布日期，访问日期2026-10-24（北京时间）。
+[^strategy]: [Refactoring.Guru：Strategy](https://refactoring.guru/design-patterns/strategy)，Solution、Structure及Pros and Cons；辅助教学资料，非官方规范，页面未标发布日期，访问日期2026-10-24（北京时间）。
+[^state]: [Refactoring.Guru：State](https://refactoring.guru/design-patterns/state)，Intent与Solution，并对照UBC课程State小节；辅助辨析，页面未标发布日期，访问日期2026-10-24（北京时间）。
+[^java-interfaces]: [JLS21，第9章Interfaces](https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html)，共同接口类型、实现及接口引用说明；访问日期2026-10-25（北京时间）。

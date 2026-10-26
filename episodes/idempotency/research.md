@@ -24,3 +24,13 @@
 |08|并发到达，也只处理一份。数据均为示例，不能推断实际系统统一策略。|R1、R2|
 |09|不同支付 · 不同编号。数据均为示例，不能推断实际系统统一策略。|R1、R2|
 |10|同一次支付 · 同一个结果。数据均为示例，不能推断实际系统统一策略。|R1、R2|
+
+
+## 片尾参考资料
+
+2026-10-26整理为`title-author`模式，2项1页5秒，片尾只显示原题与明确作者/机构。两项技术正文阅读仍是2026-10-24，不因本次整理改写日期。
+
+- **[R1] Making retries safe with idempotent APIs** — Malcolm Featonby；Amazon Web Services；The Amazon Builders' Library · 未标可核验的独立发布日期。正式链接：[https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)。定位：Retrying and side effects；Reducing client complexity；Retries and semantic equivalence。26日真实TinyFish正式页面提取仅补核H1（解码text第7行）和By Malcolm Featonby（第13行及About the author），未打开PDF；顶层HTML/OG标题占位值不作为原题。完整提取JSON已归档，但其SHA是保存的结构化提取字节身份，不是HTTP/PDF原响应或24日页面SHA。
+- **[R2] Idempotent requests** — Stripe；Stripe API Reference · API v1/v2边界 · 原实读未绑定特定接口版本。正式链接：[https://docs.stripe.com/api/idempotent_requests](https://docs.stripe.com/api/idempotent_requests)。定位：Idempotent requests：API v1与v2；参数比较；保留期；并发冲突。本轮只本地复用基线已跟踪的26日TinyFish正式提取与H1，没有新Stripe请求；保留24日技术实读与26日既有文章来源证据的不同身份。
+
+旧完整研究和新/旧元数据提取、Git/blob/完整SHA见[本轮来源记录](../../docs/archive/2026-10/reference-endcards-batch-12/sources-idempotency.json)及同前缀证据。新增AWS题名署名补核不替换旧技术日期；旧Stripe提取既有获取时间不改。编号与业务原子一致、语义相同结果、同额新交易用新编号及参数/调用者/并发/保留期边界保持；未改旧SB、words、音轨、教学例子或媒体，未新增程序/服务端实现或性能测量。

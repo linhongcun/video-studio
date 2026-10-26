@@ -96,3 +96,23 @@
 调研代理只读审查了`script.md`、`plan.json`和`visual-direction.md`，并与当前demo路径、输入和输出逐项对照。初审提出：两种配置不能画成同会话自动卸载；候选数应与两项实际示例一致；脚本执行应包含旧契约、新契约和旧请求三个输入。
 
 编辑修正后，锁定脚本SHA-256为`915c23f9445eeaf615d2b9b471134a4f6ad3ffa934e410709b444c8607c41eac`，上述三项技术问题已落实。正文还明确目录索引有开销、小技能包未必更省，未使用编造的token/价格/准确率收益，宿主保留/压缩与审查正确性分别说明。**本轮技术主张复审通过**；这不是动画实际实现、成片表达、模型自动触发实验或用户观看效果已经通过。视觉实现仍需核对03的配置切换、07读取、08执行与结果回流以及11不自动清空。
+
+## 片尾参考资料清单（2026-10-26整理，技术实读沿用2026-10-25）
+
+选主线四项：Specification、How to add skills support to your agent、Extend Claude with skills、Equipping agents for the real world with Agent Skills。前三项按明确第一方发布机构列出，原工程文章按公开原文三位作者Barry Zhang, Keith Lazuka, and Mahesh Murag列出；不把泛metadata author=Anthropic当成个人作者，不根据Git或版权推定人名。
+
+旧完整research基线`f3610e244f9e23e7a9075e406bbc990ba53b7699`，Git blob`75489ac9a4b592e5a826d60e748be7674628bd7a`，SHA-256`1d7c8a659c740ef462a8b143b0bf8b975a4d03b52b45d51754b89f2cb73b8d58`（10280字节）；旧article完整SHA-256`13400d15c8a90e1a1943e702032448d039ba28d583a394f9af15270c596fd186`（11294字节）。[固定既有实读记录](https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/agent-skills/research.md)与root before原字节记录只是本仓历史证据，不是官方全文镜像。
+
+26日使用可用TinyFish对原工程正式页面做题名/署名元数据补查。SEO标题缩短为Equipping agents with Agent Skills，但h1限定提取实际仍为完整旧原题；Acknowledgements的Written by段明确三位作者。三个完整工具提取结果JSON及其SHA保存，不能称为原始HTTP响应SHA或25日旧全文hash；没有重新技术核验或运行demo，verification.checkedAt仍25日。
+
+| 片尾编号 | 实际原题 | 实际作者或发布方 | 旧阅读记录 |
+| --- | --- | --- | --- |
+| R1 | [Specification](https://agentskills.io/specification) | Agent Skills | S01，第7–14行 |
+| R2 | [How to add skills support to your agent](https://agentskills.io/client-implementation/adding-skills-support) | Agent Skills | S02，第16–23行 |
+| R3 | [Extend Claude with skills](https://code.claude.com/docs/en/skills) | Anthropic | S04，第33–40行 |
+| R4 | [Equipping agents for the real world with Agent Skills](https://www.anthropic.com/research/equipping-agents-for-the-real-world-with-agent-skills) | Barry Zhang, Keith Lazuka, and Mahesh Murag | S05，第42–49行 |
+
+
+完整旧记录、真实H1/署名提取与身份SHA见[sources-agent-skills.json](../../docs/archive/2026-10/reference-endcards-batch-12/sources-agent-skills.json)。S03/S06/S07/S08和原五脚注保留；标准格式、具体客户端行为、脚本确定性与业务正确性分别处理，不把原始文章作为当前SDK统一承诺，不把演示或资料公开变成教学/热度/精度收益证明。
+
+旧article/research全文、锚点、代码/示例块与文章链接保持前缀。title-author最多4项/页5秒，视频无quote/date/hint。原SB/voice/words/media与现有发布SourceQuote/Figure不改，不预记编码、声音/成片检查、上线或用户认可。

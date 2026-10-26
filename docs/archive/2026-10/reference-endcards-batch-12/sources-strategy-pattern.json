@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-12",
+  "episode": "strategy-pattern",
+  "baselineCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+  "organizedAt": "2026-10-26T23:35:16.342734+08:00",
+  "presentation": "title-author",
+  "sourceCount": 2,
+  "expectedPages": 1,
+  "secondsPerPage": 5,
+  "originalTechnicalReadDates": [
+    "2026-10-24",
+    "2026-10-25"
+  ],
+  "selectedLatestTechnicalReadDate": "2026-10-25",
+  "metadataCheckedAt": "2026-10-26",
+  "metadataCheckIsLocalRecordReview": true,
+  "newGETCount": 0,
+  "newCanonicalGETCount": 0,
+  "newMetadataGETCount": 0,
+  "newTechnicalReadPerformed": false,
+  "baselineRecords": {
+    "research": {
+      "path": "episodes-codex/strategy-pattern/research.md",
+      "archivePath": "docs/archive/2026-10/reference-endcards-batch-12/sources-strategy-pattern-prior-research-f3610e24.md",
+      "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+      "gitBlobSHA1": "aca41efe6ef84354ef1fe112e6f4147a1869ad45",
+      "bytes": 15774,
+      "sha256": "e9d06aa9cd029bb2bc975f5e14226fe67bfad245de4feadfce2c97d05f2813c4",
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/strategy-pattern/research.md",
+      "fullOriginalText": "# D01 策略模式：资料核验与示例证据\n\n首次资料核验：2026-10-24（北京时间）；当前设计思想来源于2026-10-25重读。\n\n本期仅讲一笔订单选择一种优惠规则，不叠加优惠，不接入真实支付系统。数字、订单、折扣和舍入方式均为教学设定。本文记录实际打开的公开正文及本地运行结果；不将选题 issue、旧分镜或内部对话作为事实来源。\n\n## 本轮原例与呈现流程修订（2026-10-25）\n\n本轮按用户最新决定保留100元、会员90元、活动80元的原例，只增加结算功能教学示意、结构角色对应与静默Java关键代码卡。页面为原创教学示意，不代表某个真实商家的产品；金额规则与不叠加范围仍是本例设定。当前01先看用户操作，05再对照Client/Context/Strategy/ConcreteStrategy，06–11沿原例说明委托、替换与取舍。\n\nJava实现与代码卡的官方语义来源、实际阅读范围和日期记录于[demo-java/README.md](demo-java/README.md)，真实Java21编译/40002组参照比较记录于[运行证据](demo-java/verified-results.json)。Checkout.total只映射核心定价委托，main演示输入输出，不把最小程序称为整套结算页面。旧Python核验继续作为历史和另一语言实现证据，不定义Java语义。\n\n真实时序无字幕预演位于remotion/out/flow-preflight-v1，129张状态、3段连续片，COPYFIT为空；独立概念/画面检查分别落在revisions/flow-ui-java。旧正文复用只允许局部时序与fresh PNG严格相等的08–11正文，其输入与36张对照完整SHA记录于tail-reuse-proof.json；该证据不等于正式媒体或观众理解通过。\n\n## 本期结论与证据分工\n\n- 本轮语言无关的模式意图、职责、共同约定、选择与委托及取舍：2026-10-25实际重读UBC Strategy正文与Analysis、Refactoring.Guru的Solution/Structure/Pros and Cons/Relations。以原始课程材料为主要教学依据，二手教学资料交叉核对；共同约定有同一业务任务和行为含义，不简化成语法或签名相同。\n- 外部传入可替换行为的工程契约：Oracle Java SE 25 的 Comparator 与 Arrays 官方 API，Python 3.12 官方排序指南。\n- 本片金额、输入、输出和修改范围：自制 `demo/pricing.py` 与实际运行报告 `demo/verified-results.json`，不是官方促销规则或普遍性能结论。\n- 未获取 GoF 全书正文，不宣称已经通读；没有从来源不明的电子书摘引。若后续补读经典原文，按仓库要求标“历史仅参考”并记录实际阅读位置。\n\n## S01 变化、共同契约、外部选择与引入成本\n\n- 主张：具体算法可以从使用方分离；调用方选择算法，使用方依赖共同接口。是否引入模式要结合实际变化和维护成本判断。\n- 来源：UBC CPSC 310 — Design Patterns，大学课程维护者发布的原始教学材料。\n- 链接：https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/\n- 访问日期：2026-10-24（北京时间）。\n- 页面上的日期：未标独立发布日期或 Last updated；页面导航指向 26W1，不把该学期标识当作正文更新时间。\n- 实际阅读：Design Pattern Process；Strategy: Encapsulating algorithms；其 Analysis；State 小节用于辨析。\n- 原句（短引）：“we defer the question of ‘which strategy do I choose?’ to the caller”。\n- 支持：本期把规则选择放在结算入口外部；保留简单写法及抽象成本的比较。\n- 限制：课程例子与本期优惠规则不同。其“client”在具体段落指使用算法的程序，不据此宣称全系统新增策略时一行也不用改。\n- 用在：当前11镜的变化隔离、共同约定、外侧选择、委托与成本；旧镜号映射只作后文历史。\n\n## S02 共同接口也需要行为契约\n\n- 主张：可替换行为通过统一调用方式交给另一段程序；实现必须遵守输入输出与行为约定。\n- 来源：Oracle — Comparator，Java SE 25 官方 API。\n- 链接：https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Comparator.html\n- 访问日期：2026-10-24（北京时间）。\n- 页面上的日期：未标独立发布日期；文档版本为 Java SE 25。\n- 实际阅读：接口说明、Functional Interface 标记、compare 方法契约、与 equals 一致性的限定。\n- 原句（短引）：“Comparators can be passed to a sort method”。\n- 支持：文章以比较规则和排序过程分离作实际 API 阅读线索；函数或方法引用可以承担共同接口。\n- 限制：Comparator 调整比较次序，不是让调用者任意更换排序算法；比较器约束不等于本期金额规则。本片不点名真实库，工程对照仅在文章引用文档时出现。\n- 用在：仅文章“读项目时如何识别”“共同签名不是全部”。\n\n## S03 执行方遵守契约并接收外部行为\n\n- 主张：Arrays.sort 的比较器重载根据提供的比较器排序；API 的具体实现说明与必须满足的规范需要区分。\n- 来源：Oracle — Arrays，Java SE 25 官方 API。\n- 链接：https://docs.oracle.com/en/java/javase/25/docs/api/java.base/java/util/Arrays.html#sort(T%5B%5D,java.util.Comparator)\n- 访问日期：2026-10-24（北京时间）。\n- 页面上的日期：未标独立发布日期；文档版本为 Java SE 25。\n- 实际阅读：类说明中 implementation notes 的限定；sort(T[], Comparator) 方法说明。\n- 原句（短引）：“according to the order induced by the specified comparator”。\n- 支持：文章追踪“调用侧提供行为 → 稳定过程调用该行为”的实际接口关系。\n- 限制：不从该文档推导本期优惠计算的性能、金额或异常语义；不宣称修改比较规则等于替换整个排序实现。\n- 用在：仅文章工程识别补充。\n\n## S04 函数可以承载可替换的局部行为\n\n- 主张：语言允许将函数作为参数时，可以用函数提供局部行为，不一定引入策略类的继承层次。\n- 来源：Python 官方 Sorting Techniques，Key Functions。\n- 链接：https://docs.python.org/3.12/howto/sorting.html#key-functions\n- 访问日期：2026-10-24（北京时间）。\n- 页面上的日期：正文末尾标 Last updated on Oct 21, 2026 (13:58 UTC)，即北京时间 2026-10-21 21:58；访问页面标题为 Python 3.12.15 文档。\n- 实际阅读：Key Functions、Comparison Functions，核对 key 与比较函数的区别。\n- 原句（短引）：“a function (or other callable) that takes a single argument”。\n- 支持：本期使用 `Callable[[int], int]` 形式的定价函数。实际环境为 Python 3.12.14；代码不依赖本补丁版本特有功能。\n- 限制：`sorted(key=...)` 替换的是取排序键的行为，不是更换排序算法；官方文档不把所有传回调的程序自动归类为 GoF 策略。\n- 用在：仅文章可选语言实现与完整代码，不是当前视频思想主线。\n\n## S05 模式的结构与适用边界（辅助解释）\n\n- 主张：上下文委托当前策略；策略可用对象或函数实现。少量稳定差异未必值得增加抽象。\n- 来源：Refactoring.Guru — Strategy，专业二手教学资料。\n- 链接：https://refactoring.guru/design-patterns/strategy\n- 访问日期：2026-10-24（北京时间）。\n- 页面上的日期：页面未标发布日期或更新时间，不从页脚版权年份推定。\n- 实际阅读：Intent、Solution、Structure、Pros and Cons，尤其函数实现的说明。\n- 原句（短引）：“the client passes the desired strategy to the context”。\n- 支持：辅助核对共同接口、委托、外部选择和额外间接层的取舍。\n- 限制：不是官方规范或原始定义，不照搬生活比喻、导航应用或页面插画。本文实例与代码为独立设计。\n- 用在：正文策略首次定义、取舍；文章。\n\n## S06 与状态模式的区别（辅助解释）\n\n- 主张：策略在这里组织同一任务的可替换算法；状态模式组织随对象内部状态变化的行为与迁移。\n- 来源：Refactoring.Guru — State；并与 S01 的 State 小节交叉阅读。\n- 链接：https://refactoring.guru/design-patterns/state\n- 访问日期：2026-10-24（北京时间）。\n- 页面上的日期：页面未标发布日期或更新时间。\n- 实际阅读：Intent、Solution、Relations with Other Patterns。\n- 原句（短引）：“alter its behavior when its internal state changes”。\n- 支持：文章的短辨析。\n- 限制：这不是“凡可切换就是策略/状态”的判定规则；要看具体设计意图和控制迁移的职责。\n- 用在：仅文章，不在视频中另起状态模式支线。\n\n## S07 函数名、形参与同一函数对象（可选Python实现，非模式定义）\n\n- 主张：函数名关联函数对象；其他名字也可引用并调用同一个函数。调用时，实参进入被调用函数的局部参数表。因此本例把`member`作为参数交给`checkout`后，`pricing`引用这个会员函数；执行`pricing(total_cents)`时才产生金额结果。\n- 来源：Python官方教程，Python 3.12，§4.8 Defining Functions。\n- 链接：https://docs.python.org/3.12/tutorial/controlflow.html#defining-functions\n- 访问日期：2026-10-25（北京时间），制作与独立质检均实际阅读。\n- 页面版本：Python 3.12.15文档；本地执行版本以本轮示例证据记录为准。\n- 实际阅读：函数调用局部符号表、实参为对象引用、函数名与函数对象、`f = fib`后调用`f(100)`的示例。\n- 支持：仅文章可选Python实现中的函数本身与结果区分，以及`pricing`和`member`引用同一函数的对应关系；v0.54.4曾用于视频06–08，该语法主线已被最新用户反馈纠正。\n- 限制：普通函数传参本身不自动构成某种模式；本例还要明确同一任务的可替换办法、共同约定及选择/执行职责。图中的名称对应不代表复制函数体、预先执行或全局改名。\n\n## 本地示例的明确契约\n\n1. 金额以非负整数分表示，拒绝布尔值、浮点、字符串、空值和负数。\n2. 每次只选择一个规则：普通原价、会员九折、活动八折。金额百分比使用整数运算，出现不足一分的部分向下取整；这是教学约定，真实产品按自己的舍入规则实现。\n3. `checkout(total_cents, pricing)` 校验金额，调用传入函数一次，校验返回值并返回。返回值必须是 0 到原价之间的整数分。\n4. 单文件演示把活动版本二单独保存，由调用侧映射选择它，以便同场对照；这不冒充“一处修改”的补丁。另存独立源快照，只修改同名 `campaign` 的函数体80→75，注册表、选择函数、结算入口及其他规则保持同一份；视频“只改活动规则”以此快照为准。\n5. 文章扩展的新客规则减 1000 分并在 0 截断。增加规则仍要实现函数、登记并决定如何选择，不把“上下文不改”说成“全项目不用改”。\n6. 不涉及税、运费、优惠叠加、资格校验、退款、并发或支付执行，不宣称是通用促销引擎。\n\n## 已执行验证\n\n执行环境：Python 3.12.14，标准库，无外部依赖。\n\n```sh\npython3 episodes-codex/strategy-pattern/demo/verify_demo.py\npython3 episodes-codex/strategy-pattern/demo/pricing.py\n```\n\n实际结果见 `demo/verified-results.json`：\n\n- 150003 组有限输入对照：0 至 50000 分、每个整数金额、三个原始规则，重构前后输出一致且满足金额范围。\n- 33 组 Decimal 独立表示的舍入参照，包含零、极小金额、非整元与整元。\n- 30 个非法金额拒绝检查；7 个未知规则/非法选择拒绝检查；4 个不满足返回契约的策略拒绝检查。\n- 5 个新客固定减免的截零边界。\n- 21 组最小源快照对照，AST比对确认唯一改变的顶层节点是 `campaign`；同一10000分输入的前后结果分别为 `[10000,9000,8000]` 和 `[10000,9000,7500]`。\n- 10000 分订单的原始结果为 10000、9000、8000 分；活动替换后为 7500 分，新客为 9000 分。\n- 报告保存被实际调用的函数与输入输出轨迹、源码 SHA-256；结算入口的源码散列在活动替换前后相同。\n\n最小源码补丁为 `demo/snapshots/campaign-only.diff`。快照完整SHA-256：before 为 `12a9fbf07648a1d2a32ef214348fef56b621171115f8a1fd6c4b978b523f54ec`，after 为 `c42a1bbb5742c9599664ddd42c4e1464240722a3448a63090fc155db7ebdfd5a`。二者共同的结算入口含输入和返回校验，不把它说成仅有一行委托。\n\n这些检查支持本例的行为与动画数据，不证明任意第三方策略都正确，不证明模式提高性能或观众已经理解。视频、音画和站点检查由后续实际产物另行记录。\n\n## 设计思想版主张映射（2026-10-25，当前11镜）\n\n| 镜号 | 内容 | 依据 |\n|---|---|---|\n| 01–02 | 同一定价任务存在不同做法；共同步骤与变化细节混在一起的维护动机 | S01、S05及本例设定 |\n| 03–04 | 各策略独立承担同一任务，按有业务含义的共同约定可替换 | S01、S05 |\n| 05–06 | 外侧选择仍需决定用谁，结算按约定把定价委托给当前策略 | S01、S05；本例100到90的实测金额 |\n| 07–08 | 从同一原价只换活动策略得到80，结算的共同步骤/使用方式保留，定价细节仍归策略 | S01、S05；本例执行结果 |\n| 09–11 | 约定不变时的独立维护边界；选择、协作与阅读成本；回收三个职责 | S01、S05 |\n\n视频不讲函数/参数、对象构造或某语言接口写法。S02–S04、S07及具体代码记录只支持文章实现与拓展，不承担模式定义或主线学习目标。媒体与独立思想复核由新产物另行记录，不沿用旧语法/音画检查作通过结论。\n\n## v0.54.4语言实现讲解主张映射（历史）\n\n| 镜号 | 内容 | 依据 |\n|---|---|---|\n| 01–02 | 同一100元订单、会员90/活动80；分别维护/替换的需求和简单判断的合理性 | S01、S05及本例执行 |\n| 03–04 | 具体会员函数后命名策略，两办法共享原金额到应付金额约定 | S01、S05、本例执行 |\n| 05–07 | 外部选函数、传函数本身、pricing本次关联同一函数而非结果 | S07与demo/beginner-evidence.json |\n| 08 | 调用pricing才执行会员函数，10000分得到9000分 | S07、实际函数绑定与金额结果 |\n| 09–10 | 同一10000分重算，改传活动函数得到8000分，会员不执行 | 本例实际调用，S01、S07 |\n| 11–13 | 可替换办法的共同使用方式；独立维护与拆分阅读成本 | S01、S05 |\n\n完整金额校验、改价/新增的有限验证保留为文章拓展，视频不增加这些支线。新手版代码摘录省略校验并显式标注；完整程序仍为demo/pricing.py。\n\n## 首发与章节衔接版脚本主张映射（历史）\n\n| 镜号 | 内容 | 依据 |\n|---|---|---|\n| 01–03 | 需求变化使算法与结算职责混在一起；100/90/80 | S01与本例实测 |\n| 04–07 | 独立函数、共同契约、策略定义、调用方选择 | S01、S04、S05 |\n| 08–10 | 只执行选中规则、90返回、重置后改选活动80 | 本例实际调用轨迹，S01委托关系 |\n| 11–13 | 活动75只替换规则，新客函数和可选项仍要新增 | 本例实测、S01选择责任 |\n| 14 | 结算调用传入的函数；沿参数找实际实现 | 实际代码，S04函数参数机制 |\n| 15–16 | 简单稳定时不强行拆；独立变化与导航成本 | S01、S05 |\n\nS02、S03、S06仅用于配套文章，不在短片中增加API或状态模式支线。\n"
+    },
+    "independentReview": {
+      "path": "episodes-codex/strategy-pattern/qa-independent.md",
+      "archivePath": "docs/archive/2026-10/reference-endcards-batch-12/sources-strategy-pattern-prior-independent-f3610e24.md",
+      "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+      "gitBlobSHA1": "2ed83cf80c15c157e5a23c129ceb77e9aa42adf0",
+      "bytes": 12578,
+      "sha256": "439726818e2360e5c965f491ecf78cd9369cce54c178969264bd8aaab4d88346",
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/strategy-pattern/qa-independent.md",
+      "fullOriginalText": "# 策略模式思想版：独立概念与媒体复核\n\n检查人：Codex 独立教学/成片质检代理 strategy_final_qa。日期：2026-10-25（北京时间）。这是用户指出 v0.54.4 偏重函数、参数语法后，针对本轮11镜22句思想版的新报告；旧版的通过结论不作为本轮证据。\n\n## 当前结论\n\n本轮稿件的语言无关概念闭环、真实配音时序状态图、三支实际无字幕预检片，以及正式MP4的19张独立精确抽帧，在下述实际检查范围内没有发布阻塞。正式文件身份、字幕版式与关键过程已实际复核；未做逐字音频听辨，也不据此宣称全片逐帧审完。\n\n这是一项有范围的独立编辑和视觉检查，不是新手学习效果实验，也不是用户观看认可。机器检查成功只作为产物身份与技术条件的证据。\n\n## 版本与依据\n\n- 实读完整 script.md：SHA-256 2544193fefb22aeb9b161c8c83f86910089066d1a1a3d3e51cad177e2928970d。\n- 本轮 storyboard.json：SHA-256 38bcfffb1994ca6e4e155db8c9018df1d076e8fd65f20836adaba27bf9ffcac5；4410帧、30fps、147秒；provisionalTiming=false、pendingAudio=false。章节为同一任务、独立成策略、选择及使用、维护收益与成本。\n- 实际预检记录中的 Main.tsx：d40b7fc15a81f0049de9a2805989f7fa6a11f8c76fabcdcb5290a42614d22232。\n- 实际预检记录中的 motion.ts：ab63d23ffa4345ca02ddc2330d4ec6b7d3a57b5925a74c35f2fe89563b468c0c。\n- 两批预检的源SHA一致；data.ts 为 f8c1a22684b7d2dab48d3ee042246435e8c622512d87bcc804a3b3a43e578441。其余源SHA保存于各批 frames.json 和独立证据JSON。源冻结的完整清单及媒体编码技术检查由制作/root另行记录，不冒充本代理重复执行。\n\n实际重读资料：当前 research.md，以及 [Refactoring.Guru Strategy](https://refactoring.guru/design-patterns/strategy) 的 Solution、Structure、Pros and Cons、Relations；[UBC CPSC 310 Design Patterns](https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/) 的 Design Pattern Process、Strategy与Analysis。访问日期为2026-10-25（北京时间）。前者是专业教学资料，后者是课程维护者发布的原始课程材料，均不冒充GoF原书。\n\n复核重点来自两者共同的职责关系：使用方经共同接口委托算法实现，选择责任在外侧；实现形式可以不同。Python函数名/形参语义不是本轮模式定义的依据，本轮视频没有讲这条语言实现支线。\n\n## 稿件概念审查\n\nTTS前逐镜审读后未提出必须修改的阻塞；root已将08第二句改为“在定价这一步，结算只按共同约定使用策略，具体怎么算由策略负责”，本报告核对的是修改后的SHA。\n\n| 观众需要能够回答的问题 | 本轮解释与证据位置 | 独立判断 |\n|---|---|---|\n| 哪件事保持，什么做法会变？ | 01–03：读取原价、定价、显示应付是共同流程；九折、八折是定价做法 | 问题和变化对象清楚，不把两个简单判断本身称作错误 |\n| 为什么不只是把两段计算取出来？ | 04定义同一任务、独立做法、共同约定、替换使用；06及08说明结算依赖约定 | 有可替换协作关系，未把“独立函数”当成完整模式定义 |\n| 两种策略怎样能由同一流程使用？ | 04接收原价、交回应付金额；06及08的定价职责按约定使用当前策略 | 是同一业务职责与结果意义，不声称相同形状的输入输出就自动可替换 |\n| 谁选，谁计算，谁继续共同步骤？ | 05外侧选择；06策略负责具体定价、结算使用返回金额继续；11回收职责 | 三者边界清楚；选择并未消失，也不负责算出应付金额 |\n| 换策略时什么改变、什么保留？ | 07结束会员结果，从原价100元改选活动，流程和约定保留；08解释原因 | 不是90元再打八折，也不声称上下文今后永远不用改 |\n| 哪些维护独立，付出什么成本？ | 09限定本例共同约定不变时的策略内部；10保留选择、协作、阅读成本和简单直接处理 | 收益有前提，无全项目零改动或普遍更优承诺 |\n\n去掉代码与语言名后，上述解释仍成立。本片没有要求观众先懂函数传参、形参绑定、类继承、构造器或setter，也没有把运行中不断切换当成模式的必要条件。\n\n## 真实时序状态图：实际查看32张\n\n批次：remotion/out/ideas-final-preflight-all/frames.json。该批生成119张，不表示本代理看了全部119张；记录为 provisional=false、COPYFIT为空、hideSubtitles=true，effectiveProps为 hideSubtitles=true/showSubtitles=false。实际图中没有旁白字幕，屏幕说明文字与角色标签仍保留。\n\n逐张实际调用图片查看工具的清单及每图SHA保存于 remotion/out/ideas-independent-preflight.json：\n\n| 镜号 | 实际查看的镜内帧 |\n|---|---|\n| 01 | 0、92、204 |\n| 02 | 225 |\n| 03 | 187、345 |\n| 04 | 108、441 |\n| 05 | 84、208、345 |\n| 06 | 91、199、292、325 |\n| 07 | 90、149、196、248、325、343 |\n| 08 | 134、240、392 |\n| 09 | 98、203、399 |\n| 10 | 129、384 |\n| 11 | 118、261、483 |\n\n实际观察：\n\n- 01首帧同时出现问题与原价100元，后续两种结果是同一任务下的备选例子。02将具体九折、八折置于共同流程定价区域。03末态留下原价、定价职责、显示结果三个锚点，具体做法分开。\n- 04共同约定是策略协作连线的边注，没有成为额外执行节点；两种策略都处理定价，90与80的不同结果明确标为作用示例。\n- 05选择在结算边界外侧，选会员后仍标“本次尚未定价”及“等待本次结果”，没有把选择动作画成计算。\n- 06会员细节留在策略区，结算定价职责只按约定使用当前策略；活动仅留备选名称。返回后才在显示应付位置显示90元，再突出共同流程继续。\n- 07先保留上次90元，再清空并等待；外侧改选活动后仍从100元原价请求，活动返回80元，会员只作备选。没有将旧结果用作新输入。\n- 08共同流程的定价职责标“按约定使用当前策略”；具体做法没有重新放回流程枚举，约定仍为边注，当前选择仍可辨。\n- 09先回看维护问题，随后标题明确“本例共同约定不变时”，只圈会员策略内部；活动与共同流程退为保留上下文。不是一次新的选择或计算。\n- 10指出选择与协作仍需维护，并保留直接处理少量稳定判断的合理性。11依次突出策略、结算职责，末态回收“选择采用谁、策略负责怎么算、结算按约定使用”。所看各镜没有代码或语言语法布局，没有文字遮挡或明显越界。\n\n## 实际无字幕MP4：独立抽看动态中间态\n\n批次：remotion/out/ideas-final-preflight-motion/frames.json。43张生成状态图与下列三支实际连续MP4同源；本节的动态判断来自本代理自行对MP4使用精确帧选择抽出的17张图，不把作者提供的事件参数当作观看结果。\n\n独立证据在 remotion/out/ideas-independent-motion/samples.json，记录实际clip SHA、ffprobe结果、镜内/全局帧号、抽出图SHA与actualViewed=true。三片均为960×540、30fps，仅含视频流；本节没有音频听辨。\n\n| 实际文件 | MP4 SHA-256 | 帧范围及实际查看的镜内帧 |\n|---|---|---|\n| ideas-final-preflight-motion/03-motion.mp4 | f00e9921d6b5585289576cd6d5fca9139252cd5ba37eac19b333b0a23d416b23 | 全局809–1160，352帧；查看180、220、270 |\n| ideas-final-preflight-motion/06-motion.mp4 | 1391789695e060dccb523d5d4024e0a7e2fa9642f47c0048c78dffbd8a6b11c5 | 全局1963–2340，378帧；查看85、115、155、230、270、285、310 |\n| ideas-final-preflight-motion/07-motion.mp4 | e0eba3e3f5df1d8b0decbbc71197ac007494abce5d8dddc9e087f439408141a1 | 全局2341–2717，377帧；查看135、170、220、235、295、315、335 |\n\n实际观察：03的两种做法从共同定价区域连续移出，原价与显示应付位置保持，不是切换为无关结构图。06的100元请求进入当前会员策略后才出现计算；90元回传沿下方路径抵达结果，经过定价职责附近时避开正文，结果接收前仍显示等待，接收后才继续显示。07的90元先淡出，等待态在改选与新请求时可见；新请求仍是100元，当前策略变为活动，80元沿同一回传关系返回。所看中间态没有让备选策略同时执行，没有移动金额遮住策略或等待文字，且真正隐藏了旁白字幕。\n\n本节是对关键过渡的分布抽帧检查，不声称逐帧播放审完三片，也不以小样代替正式1080p媒体检查。\n\n## 能力边界与待补范围\n\n- 本代理可读取脚本、来源和时序记录，实际查看PNG，并从MP4精确抽帧；这支持上述有限的图像与动作检查。\n- 未执行本轮逐字ASR、全片人工听辨或配音发音评价。句边界与声学起音核验应以voice/root本轮实际报告为准，不能写成逐字听辨通过。\n- 正式文件SHA、媒体规格、正式字幕及抽离/委托/替换/边界代表帧已完成下节所列复核。封面与完整编码/音轨技术检查按root与制作的独立记录，不冒充本代理重复执行。\n\n## 正式媒体复核\n\n检查文件：episodes-codex/strategy-pattern/video.mp4。独立读取本地正式文件并计算SHA-256为9293cf4d66319a44ac7808f5f75d8bdd1da3a3cec627b8da4d57f802466a1a57，大小7,927,803字节，与制作交付相符。独立ffprobe为4410帧、1920×1080、H.264、30/1fps，AAC双声道48kHz，容器147.008秒。\n\n本代理从该实际文件一次使用精确帧号选择提取19张PNG，并逐张实际查看。完整文件身份、规格、全局帧/时间、每张图SHA及actualViewed=true记录于 remotion/out/ideas-independent-final/samples.json。以下不是复用预检图：\n\n| 全局帧 | 镜内位置 | 实际观察 |\n|---|---|---|\n| 0 | 01首帧 | 问题、示例原价及主体直接可见；正式旁白字幕出现且清楚 |\n| 1029 | 03 local220 | 九折/八折做法从定价区域移出，原价与显示应付锚点保留 |\n| 1400 | 04 local239 | 两种独立定价策略与共同约定；约定是连线边注，显示应付仍等待；作用示例没有冒充新结算 |\n| 1819 | 05 local208 | 选择位于流程外，会员已选但本次尚未定价，选择不产生金额 |\n| 2078 | 06 local115 | 原价100元请求正进入当前会员策略，结果仍等待 |\n| 2193、2233 | 06 local230/270 | 策略内已有九折结果，90元沿回传路径移动；显示应付仍等待，移动标记避开正文与字幕 |\n| 2288 | 06 local325 | 90元已接收，突出显示应付与流程继续，活动只是备选 |\n| 2476、2511 | 07 local135/170 | 旧90先淡出，随后清空为等待；原价仍100元，此时没有新80元 |\n| 2561 | 07 local220 | 外侧与当前策略均为活动，重新发送100元原价，会员只作备选 |\n| 2656、2684 | 07 local315/343 | 活动80元回传时仍等待；接收后显示80并继续相同流程，未拿90叠加计算 |\n| 2958 | 08 local240 | 流程定价职责按共同约定使用当前策略，具体计算归策略，未将会员/活动的计算分支放回流程 |\n| 3321 | 09 local203 | 明确本例/共同约定不变前提，只圈会员内部的九折细节；活动及流程保留上下文 |\n| 3654、3909 | 10 local129/384 | 保留选择和协作成本，再说明少量稳定判断直接处理合理 |\n| 4340、4409 | 11 local423/末帧 | 回收选择、策略、结算的职责与共同约定；末帧主体、品牌和字幕完整，无异常收尾画面 |\n\n上述正式抽帧覆盖13条不同句子的字幕画面。所见字幕与本轮稿件对应句一致，字形、边距与底部区域清楚，没有与流程或移动金额重叠；未将画面文字核对说成听到了每个词。所看正式画面延续语言无关的设计关系，没有函数、参数绑定、语言代码或类语法主线。\n\n制作另报告125项冻结源核验、完整decode与PTS检查、-16LUFS/-3.8dBTP；实际编码音轨对冻结WAV的数值相关性为全轨0.999983、offset0，22句最低0.9999759。这些由制作/root执行，本代理未重复运行，且数值相关性不能证明发音正确或替代ASR/听辨。\n\n正式文件与实际抽帧在本报告范围内通过，未发现发布阻塞。此结论不包括用户已理解或已认可本版、全片人工听辨、逐帧连续播放审查及本代理未独立检查的站点/封面事项。\n"
+    },
+    "javaReading": {
+      "path": "episodes-codex/strategy-pattern/demo-java/README.md",
+      "archivePath": "docs/archive/2026-10/reference-endcards-batch-12/sources-strategy-pattern-prior-java-reading-f3610e24.md",
+      "baseCommit": "f3610e244f9e23e7a9075e406bbc990ba53b7699",
+      "gitBlobSHA1": "3352efd0ece4a43ff71e8950d15999f463651041",
+      "bytes": 3643,
+      "sha256": "126a9f6cb622337e109d9a55f78996d895cc7ee589d9a54b458e0f3f614cc0d4",
+      "recordUrl": "https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/strategy-pattern/demo-java/README.md",
+      "fullOriginalText": "# D01原例的Java实现与暂停代码卡\n\n本期保留原价100元、会员九折90元、活动八折80元的原例。一次计算只使用一个策略，活动重新从原价100元计算，不把会员价再打折。这里验证设计关系的一种实现，不是生产促销引擎。\n\n完整程序为[StrategyDemo.java](StrategyDemo.java)：选择方在main中选具体策略，Checkout显式持有PricingStrategy并委托，MemberPricing和CampaignPricing分别承担定价。金额使用BigDecimal的元单位，输入为非负且最多两位小数；计算结果向零舍入至分。对本例非负金额，这与旧Python整数分示例的向下截断相同。它是本例金额政策，不是所有定价系统的通用规则。\n\n## 实际运行与只读复核\n\n从仓库根运行：\n\n```sh\npython3 episodes-codex/strategy-pattern/demo-java/verify.py\n```\n\n默认只读检查源码/代码卡并在临时目录编译、运行，不改已冻结的结果文件。明确修改并审读源码后，才使用同一命令的`--write-artifacts`刷新卡和运行记录。\n\n本机Java为OpenJDK21.0.12.1，虽未安装javac启动器，运行时包含jdk.compiler模块；验证器实际使用`java --module jdk.compiler/com.sun.tools.javac.Main`编译完整程序和独立整数分参照检查器，再运行两者。实际源码SHA、命令、编译器版本与输出在[verified-results.json](verified-results.json)。\n\n已验证100元分别为90/80、原价未变且不叠加；0至20000分的20001个输入分别检查两种规则，共40002个参照比较；负数、超过两位小数、空金额及空策略拒绝。此运行证据只支持本例实现，不替代思想、画面或学习效果检查。\n\n## 卡片与完整程序的关系\n\n`remotion/src/java-card.json`为实际渲染源，含21行关键节选。显示的非空代码均来自StrategyDemo.java，记录源SHA、行范围与移除公共缩进的映射；验证器逐行比对。卡内可见两个实现、共同接口、Checkout持有/委托及main的外侧选择。\n\n卡片标题明确标节选，未展示外层类、import和金额校验/舍入帮助方法。不能把它称为整套可复制编译程序；完整文件才是编译入口。代码卡提供暂停查看，不逐行口播语法。\n\n## 实际阅读的Java21官方资料\n\n访问日期：2026-10-25（北京时间）。本次读取正文和对应API方法说明，不以旧Python运行结果当Java语义保证。\n\n- [JLS21第9章Interfaces](https://docs.oracle.com/javase/specs/jls/se21/html/jls-9.html)：§9开头关于共同接口类型、类声明实现及接口类型引用的说明；用于本例PricingStrategy与具体策略的关系。\n- [BigDecimal Java21 API](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/BigDecimal.html)：类说明、字符串构造器说明、multiply(BigDecimal)、setScale(int,RoundingMode)；用于十进制金额、乘法、显式舍入，以及原BigDecimal不可变的边界。只采用这些内容，不声称精度政策由策略模式规定。\n- [RoundingMode Java21 API](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/math/RoundingMode.html)：DOWN常量定义及示例。其方向是向零；仅在本例非负输入范围内等同向下截断。\n\n- [Objects Java21 API](https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Objects.html)：实际读取requireNonNull的两个方法说明及构造器示例，用于拒绝必需的空引用。\n\n本例仅保留核心设计关系：`Checkout.total` 负责按共同约定委托定价并返回，`main` 演示输入与显示，未实现完整产品 UI。\n"
+    }
+  },
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "UBC CPSC 310",
+      "title": "Design Patterns",
+      "version": "CPSC 310课程材料 · 原实读页面未标独立发布日期或更新时间",
+      "url": "https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/",
+      "sections": "Design Pattern Process；Strategy: Encapsulating algorithms；Analysis",
+      "supports": [
+        "同一任务的可替换算法可与使用方分离；上下文依共同约定使用策略，选择哪一种由调用侧决定。",
+        "是否引入策略需要结合真实变化、调用和维护成本判断，不把上下文不变扩大为整个项目永远不用修改。"
+      ],
+      "titleEvidence": {
+        "locator": "固定旧research.md第25行：UBC CPSC 310 — Design Patterns；既有article-sources A1同原题；25日独立重读记录核对课程身份",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-strategy-pattern.json"
+      },
+      "limits": [
+        "大学课程维护者发布的原始教学资料，不冒称GoF原书或官方语言规范。",
+        "课程示例与本期定价教学例不同；100元、九折与八折是本片自设规则，非来源给定业务事实。"
+      ],
+      "priorReadingExcerpts": [
+        {
+          "startLine": 15,
+          "endLine": 20,
+          "text": "## 本期结论与证据分工\n\n- 本轮语言无关的模式意图、职责、共同约定、选择与委托及取舍：2026-10-25实际重读UBC Strategy正文与Analysis、Refactoring.Guru的Solution/Structure/Pros and Cons/Relations。以原始课程材料为主要教学依据，二手教学资料交叉核对；共同约定有同一业务任务和行为含义，不简化成语法或签名相同。\n- 外部传入可替换行为的工程契约：Oracle Java SE 25 的 Comparator 与 Arrays 官方 API，Python 3.12 官方排序指南。\n- 本片金额、输入、输出和修改范围：自制 `demo/pricing.py` 与实际运行报告 `demo/verified-results.json`，不是官方促销规则或普遍性能结论。\n- 未获取 GoF 全书正文，不宣称已经通读；没有从来源不明的电子书摘引。若后续补读经典原文，按仓库要求标“历史仅参考”并记录实际阅读位置。"
+        },
+        {
+          "startLine": 22,
+          "endLine": 33,
+          "text": "## S01 变化、共同契约、外部选择与引入成本\n\n- 主张：具体算法可以从使用方分离；调用方选择算法，使用方依赖共同接口。是否引入模式要结合实际变化和维护成本判断。\n- 来源：UBC CPSC 310 — Design Patterns，大学课程维护者发布的原始教学材料。\n- 链接：https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/\n- 访问日期：2026-10-24（北京时间）。\n- 页面上的日期：未标独立发布日期或 Last updated；页面导航指向 26W1，不把该学期标识当作正文更新时间。\n- 实际阅读：Design Pattern Process；Strategy: Encapsulating algorithms；其 Analysis；State 小节用于辨析。\n- 原句（短引）：“we defer the question of ‘which strategy do I choose?’ to the caller”。\n- 支持：本期把规则选择放在结算入口外部；保留简单写法及抽象成本的比较。\n- 限制：课程例子与本期优惠规则不同。其“client”在具体段落指使用算法的程序，不据此宣称全系统新增策略时一行也不用改。\n- 用在：当前11镜的变化隔离、共同约定、外侧选择、委托与成本；旧镜号映射只作后文历史。"
+        }
+      ],
+      "originalReadingShortQuotation": "we defer the question of ‘which strategy do I choose?’ to the caller",
+      "authorshipEvidence": {
+        "explicitPersonalAuthor": null,
+        "basis": "旧实际课程阅读记录与现行article-sources A1明确发布课程为UBC CPSC 310；未建立明确个人署名，不从课程维护账号、教师名单或Git提交人猜作者。"
+      },
+      "technicalFirstReadDate": "2026-10-24",
+      "technicalReadDate": "2026-10-25",
+      "metadataCheckedAt": "2026-10-26",
+      "metadataCheckMethod": "Local reread of pinned prior actual-reading records only; no new external source request.",
+      "newGETPerformed": false,
+      "newTechnicalReadingPerformed": false,
+      "titleIdentityScope": "Actual original document title explicitly named in prior reading record; not an invented summary or translation.",
+      "relatedIndependentReviewExcerpt": {
+        "startLine": 15,
+        "endLine": 22,
+        "text": "- 实际预检记录中的 Main.tsx：d40b7fc15a81f0049de9a2805989f7fa6a11f8c76fabcdcb5290a42614d22232。\n- 实际预检记录中的 motion.ts：ab63d23ffa4345ca02ddc2330d4ec6b7d3a57b5925a74c35f2fe89563b468c0c。\n- 两批预检的源SHA一致；data.ts 为 f8c1a22684b7d2dab48d3ee042246435e8c622512d87bcc804a3b3a43e578441。其余源SHA保存于各批 frames.json 和独立证据JSON。源冻结的完整清单及媒体编码技术检查由制作/root另行记录，不冒充本代理重复执行。\n\n实际重读资料：当前 research.md，以及 [Refactoring.Guru Strategy](https://refactoring.guru/design-patterns/strategy) 的 Solution、Structure、Pros and Cons、Relations；[UBC CPSC 310 Design Patterns](https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/) 的 Design Pattern Process、Strategy与Analysis。访问日期为2026-10-25（北京时间）。前者是专业教学资料，后者是课程维护者发布的原始课程材料，均不冒充GoF原书。\n\n复核重点来自两者共同的职责关系：使用方经共同接口委托算法实现，选择责任在外侧；实现形式可以不同。Python函数名/形参语义不是本轮模式定义的依据，本轮视频没有讲这条语言实现支线。\n"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Refactoring.Guru",
+      "title": "Strategy",
+      "version": "专业教学网页 · 原实读页面未标发布日期或更新时间",
+      "url": "https://refactoring.guru/design-patterns/strategy",
+      "sections": "Solution；Structure；Pros and Cons；Relations with Other Patterns",
+      "supports": [
+        "上下文通过共同约定委托当前策略；调用侧选择并交给上下文，可替换同一任务的具体做法。",
+        "少量稳定差异未必值得新增抽象，选择逻辑和额外协作、阅读关系仍有维护成本。"
+      ],
+      "titleEvidence": {
+        "locator": "固定旧research.md第77行：Refactoring.Guru — Strategy；25日独立QA明确重读Strategy Solution/Structure/Pros and Cons/Relations",
+        "evidence": "docs/archive/2026-10/reference-endcards-batch-12/sources-strategy-pattern.json"
+      },
+      "limits": [
+        "专业二手教学资料，仅作结构、职责和边界的交叉核对，不冒充模式原始定义或GoF全书。",
+        "未从版权方、网站维护者或Git账号推定个人文献署名；未把页面插画、应用例子或隐喻复制为本片来源事实。"
+      ],
+      "priorReadingExcerpts": [
+        {
+          "startLine": 15,
+          "endLine": 20,
+          "text": "## 本期结论与证据分工\n\n- 本轮语言无关的模式意图、职责、共同约定、选择与委托及取舍：2026-10-25实际重读UBC Strategy正文与Analysis、Refactoring.Guru的Solution/Structure/Pros and Cons/Relations。以原始课程材料为主要教学依据，二手教学资料交叉核对；共同约定有同一业务任务和行为含义，不简化成语法或签名相同。\n- 外部传入可替换行为的工程契约：Oracle Java SE 25 的 Comparator 与 Arrays 官方 API，Python 3.12 官方排序指南。\n- 本片金额、输入、输出和修改范围：自制 `demo/pricing.py` 与实际运行报告 `demo/verified-results.json`，不是官方促销规则或普遍性能结论。\n- 未获取 GoF 全书正文，不宣称已经通读；没有从来源不明的电子书摘引。若后续补读经典原文，按仓库要求标“历史仅参考”并记录实际阅读位置。"
+        },
+        {
+          "startLine": 74,
+          "endLine": 85,
+          "text": "## S05 模式的结构与适用边界（辅助解释）\n\n- 主张：上下文委托当前策略；策略可用对象或函数实现。少量稳定差异未必值得增加抽象。\n- 来源：Refactoring.Guru — Strategy，专业二手教学资料。\n- 链接：https://refactoring.guru/design-patterns/strategy\n- 访问日期：2026-10-24（北京时间）。\n- 页面上的日期：页面未标发布日期或更新时间，不从页脚版权年份推定。\n- 实际阅读：Intent、Solution、Structure、Pros and Cons，尤其函数实现的说明。\n- 原句（短引）：“the client passes the desired strategy to the context”。\n- 支持：辅助核对共同接口、委托、外部选择和额外间接层的取舍。\n- 限制：不是官方规范或原始定义，不照搬生活比喻、导航应用或页面插画。本文实例与代码为独立设计。\n- 用在：正文策略首次定义、取舍；文章。"
+        }
+      ],
+      "originalReadingShortQuotation": "the client passes the desired strategy to the context",
+      "authorshipEvidence": {
+        "explicitPersonalAuthor": null,
+        "basis": "既有实际读取记录按Refactoring.Guru网页发布者列出处，未保存明确个人文章署名，因此视频使用机构，不把作者简介或版权名字推定为本文署名。"
+      },
+      "technicalFirstReadDate": "2026-10-24",
+      "technicalReadDate": "2026-10-25",
+      "metadataCheckedAt": "2026-10-26",
+      "metadataCheckMethod": "Local reread of pinned prior actual-reading records only; no new external source request.",
+      "newGETPerformed": false,
+      "newTechnicalReadingPerformed": false,
+      "titleIdentityScope": "Actual original document title explicitly named in prior reading record; not an invented summary or translation.",
+      "relatedIndependentReviewExcerpt": {
+        "startLine": 15,
+        "endLine": 22,
+        "text": "- 实际预检记录中的 Main.tsx：d40b7fc15a81f0049de9a2805989f7fa6a11f8c76fabcdcb5290a42614d22232。\n- 实际预检记录中的 motion.ts：ab63d23ffa4345ca02ddc2330d4ec6b7d3a57b5925a74c35f2fe89563b468c0c。\n- 两批预检的源SHA一致；data.ts 为 f8c1a22684b7d2dab48d3ee042246435e8c622512d87bcc804a3b3a43e578441。其余源SHA保存于各批 frames.json 和独立证据JSON。源冻结的完整清单及媒体编码技术检查由制作/root另行记录，不冒充本代理重复执行。\n\n实际重读资料：当前 research.md，以及 [Refactoring.Guru Strategy](https://refactoring.guru/design-patterns/strategy) 的 Solution、Structure、Pros and Cons、Relations；[UBC CPSC 310 Design Patterns](https://ubccpsc.github.io/310/textbook/3-software-design/design-patterns/) 的 Design Pattern Process、Strategy与Analysis。访问日期为2026-10-25（北京时间）。前者是专业教学资料，后者是课程维护者发布的原始课程材料，均不冒充GoF原书。\n\n复核重点来自两者共同的职责关系：使用方经共同接口委托算法实现，选择责任在外侧；实现形式可以不同。Python函数名/形参语义不是本轮模式定义的依据，本轮视频没有讲这条语言实现支线。\n"
+      }
+    }
+  ],
+  "preservation": {
+    "sourceArticle": {
+      "path": "episodes-codex/strategy-pattern/article.mdx",
+      "originalBytes": 16327,
+      "originalSHA256": "2afd51f40d8df520df23eb75fb9b7d9a04ace6a7068e416dba9523e1cf62897b",
+      "completePrefixPreserved": true
+    },
+    "sourceResearch": {
+      "path": "episodes-codex/strategy-pattern/research.md",
+      "originalBytes": 15774,
+      "originalSHA256": "e9d06aa9cd029bb2bc975f5e14226fe67bfad245de4feadfce2c97d05f2813c4",
+      "completePrefixPreserved": true
+    }
+  },
+  "limits": [
+    "No fresh GET, complete new original-page copy, or current external-H1 reread is claimed. Original titles and source identities are carried from pinned prior actual-reading records.",
+    "No GoF full-book reading is claimed. UBC is course primary teaching material and Refactoring.Guru is auxiliary secondary teaching material.",
+    "The unchanged Java key-code excerpt and existing Java21 official reading/runtime evidence remain in the original article and demo-java files; they are not regenerated or replaced by this appendix.",
+    "This source record does not claim media playback, listening, final card readability, publication or user approval."
+  ]
+}

@@ -179,3 +179,27 @@ return new AdapterDemo.ShipmentReminder(notifier).send("buyer17@shop.example");
 [^wrapper]: [OpenJDK21 FilterInputStream](https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/io/FilterInputStream.java#L28)，实际读28–75行。官方说明它包装另一输入流，目标仍是InputStream；不凭这个文件给所有包装下GoF分类，只用来说明包装结构本身不是充分判断依据。
 [^http202]: [HTTPwg官方RFC9110 XML，202 Accepted](https://github.com/httpwg/http-core/blob/bde37f634681bd5462568b73aa722af9c9a3ef5e/rfc9110.xml#L8578)，标准日期2022-06，读取快照2025-11-14。接受处理不等于完成，不证明教学SDK使用HTTP。
 [^demo]: 本项目[完整Java示例与实际20组验证](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/adapter-pattern/demo-java)。所有服务、地址、消息和Q17为教学模拟，无真实外发；执行记录证明本例接口与变化范围，不是用户观看或学习效果结论。
+
+## 片尾参考资料
+
+以下两项为本片实际读过的官方来源，技术实读日期均为2026-10-25；题名与署名于2026-10-26另行核对固定原文。具体教学服务、升级步骤和行为验证仍以本项目示例约定为准。
+
+**[R1] TaskExecutorAdapter**
+
+作者：Juergen Hoeller · 发布机构：Spring Framework · Spring Framework · 主干快照7bdf9c86f865 · 实读2026-10-25
+
+[官方固定来源](https://github.com/spring-projects/spring-framework/blob/7bdf9c86f8657029567067051b7c6bd47b4ae67e/spring-core/src/main/java/org/springframework/core/task/support/TaskExecutorAdapter.java) · [实际固定原文](https://raw.githubusercontent.com/spring-projects/spring-framework/7bdf9c86f8657029567067051b7c6bd47b4ae67e/spring-core/src/main/java/org/springframework/core/task/support/TaskExecutorAdapter.java) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/adapter-pattern/research.md#L11)
+
+对应知识点：实际实现目标接口、持有既有Executor，并在转换后真实委托，支持本片对象适配器的契约、持有和调用关系。 这是具体实现证据；不将该框架的异步、装饰或异常策略推广为所有适配器或本片通知服务的统一语义。
+
+正文位置：类声明与构造 · execute / submit / doExecute。
+
+**[R2] Anti-Corruption Layer pattern**
+
+发布机构：Microsoft · Azure Architecture Center · Azure Architecture Center · 文档日期2026-05-28 · 实读2026-10-25
+
+[官方固定来源](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/anti-corruption-layer.md) · [实际固定原文](https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/anti-corruption-layer.md) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/f3610e244f9e23e7a9075e406bbc990ba53b7699/episodes-codex/adapter-pattern/research.md#L15)
+
+对应知识点：业务侧可以继续使用自己的数据模型与用法，将外部调用的模型和格式转换集中于接入边界。 保护领域模型是防腐层的目的；本例适配器有边界保护作用，但不等同完整防腐层，也不保证外部能力改变后上层永远无需调整。
+
+正文位置：Solution · Problems and considerations · When to use this pattern。
