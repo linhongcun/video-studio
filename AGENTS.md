@@ -20,7 +20,7 @@
 
 ## 配套图文
 
-2026-10-26配套图文要求见 [RULES 的配套图文](docs/RULES.md#配套图文) 与 [写作说明](docs/article-style.md)：每篇当前文章至少有精确原文引用模块和有效正文配图，统一 `SourceQuote` / `Figure` 样式。新期文稿从 [图文模板](episodes-codex/_template/article.mdx) 起草，编码前定好图位并随文章、已有文章来源及证据冻结，成片后生成核验关键帧；需要改稿时按写作说明制作带SHA记录的站点派生稿。发布前运行 `npm --prefix site run check:articles` 并检查实际阅读与回看操作。存量站点文章的派生不改写已编码制作稿和旧冻结清单。
+2026-10-26配套图文要求见 [RULES 的配套图文](docs/RULES.md#配套图文) 与 [写作说明](docs/article-style.md)：每篇当前文章至少有精确原文引用模块和有效正文配图，统一 `SourceQuote` / `Figure` 样式。引用默认由共享组件提供段末「原文」入口与按需浮层，写法和来源数据不变，新期自动沿用；复核桌面悬停/点击、手机点按和键盘访问，默认折叠不算缺引用。新期文稿从 [图文模板](episodes-codex/_template/article.mdx) 起草，编码前定好图位并随文章、已有文章来源及证据冻结，成片后生成核验关键帧；需要改稿时按写作说明制作带SHA记录的站点派生稿。发布前运行 `npm --prefix site run check:articles` 并检查实际阅读与回看操作。存量站点文章的派生不改写已编码制作稿和旧冻结清单。
 
 ## 提交署名
 
