@@ -23,3 +23,5 @@
 正式本地预检及6个浏览器用例通过：3次桌面1x尾段到ended、3次手机原生全屏、8张每页截图实际查看；RFC明确作者在真实HTML与画面均可见。只模拟Chromium手机视口，不声称真机/iOS或全片听辨。预览服务未运行导致的连接/失败截图尝试保留，重启后成功。见qa-browser.json与各attempt。
 
 三份官方题名原文件按完整SHA逐字节保留；限定该目录的.gitattributes防止行尾转换，仅对Sentinel原文件保留其上游三处尾空白，不清洗后冒认原响应SHA。
+
+已合并[PR #347](https://github.com/linhongcun/video-studio/pull/347)，发布[v0.71.4](https://github.com/linhongcun/video-studio/releases/tag/v0.71.4)，[Pages 40297652180](https://github.com/linhongcun/video-studio/actions/runs/40297652180)成功。发布提交`daccc593ecfc9333600a2e3ad310c900746497ed`；2026-10-26T17:17:47+08:00完成13项规范URL完整GET，三片视频完整SHA、海报、VTT、资料页面/原章节/日期、更新日志及tag/Release/部署身份通过。累计23片具备已核验参考片尾，未发现本批专属未关闭issue。实际响应证据见online-verification.json。

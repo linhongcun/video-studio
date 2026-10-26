@@ -21,3 +21,11 @@
 制作检查证据见 [qa-motion.md](qa-motion.md)、[qa-final.md](qa-final.md)、[source-sha256.json](source-sha256.json) 与 [render-result.json](render-result.json)。检查包括真实编码抽帧、全部字幕/冻结输入核对及完整媒体解码；没有可用官方ASR权重，不声称已做逐字ASR或全片人工听辨。
 
 发布顺序：本地站点构建与逐项核验 → PR合并 → 附注tag及Release → Release后再次部署Pages → 核验线上完整视频SHA、海报、全部VTT、章节、时长及更新日志 → 将对应 [#70](https://github.com/linhongcun/video-studio/issues/70) 以 `completed` 关闭。未执行的平台新发事项不勾选完成。
+
+## 片尾参考资料补齐 · v0.71.4
+
+[PR #347](https://github.com/linhongcun/video-studio/pull/347)已合并`daccc593ecfc9333600a2e3ad310c900746497ed`，附注tag与[Release v0.71.4](https://github.com/linhongcun/video-studio/releases/tag/v0.71.4)后[Pages40297652180](https://github.com/linhongcun/video-studio/actions/runs/40297652180)成功。2026-10-26T17:17:47+08:00正式线上核验通过。
+
+本期4项原始题名与作者/机构、1页，每页5秒；最终3710帧，完整SHA-256：`5bd0683ca3855def55f4b7ef4fc78d53cbbad30afae19f336fe854562989faa8`。原Git正文全帧/PTS及AAC/PCM保持，原文章/研究/脚注、创建与首发信息保留。技术实读日期沿用24/25日，26日题名补查独立记录；无新配音或正文重渲。
+
+本批来源、冻结、实际片尾和6组播放器检查通过，13项完整GET核对视频/字幕/海报/页面/更新日志与发布身份，见[第六批证据](../../docs/reference-endcards/batch-6/README.md)。累计23片已具备参考片尾；只上GitHub站点，无平台重发，不预记新版观看认可。
