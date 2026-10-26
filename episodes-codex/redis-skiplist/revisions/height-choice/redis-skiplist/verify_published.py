@@ -51,23 +51,82 @@ def sha(path: Path) -> str:
     return digest.hexdigest()
 
 
+def assert_source_quote(page: str, source_id: str, source: dict, supports: str):
+    """Check the169cb0c SourceQuote root, native controls and exact source data."""
+    text = lambda value: unescape(re.sub(r"<[^>]+>", "", value))
+    attrs = lambda value: {key: unescape(val) for key, val in
+                           re.findall(r'([\w:-]+)="([^"]*)"', value)}
+
+    def elements(markup, tag, class_name=None):
+        rows = [(attrs(a), body) for a, body in
+                re.findall(r"<" + tag + r"\b([^>]*)>(.*?)</" + tag + r">", markup, re.S)]
+        return [row for row in rows if class_name is None or class_name in row[0].get("class", "").split()]
+
+    roots = [(attrs(a), body) for a, body in re.findall(
+        r'<div\b([^>]*\bdata-source-quote="' + re.escape(source_id) + r'"[^>]*)>(.*?)</div>',
+        page, re.S) if "source-quote" in attrs(a).get("class", "").split()]
+    assert len(roots) == 1, ("SourceQuote div root missing or repeated", source_id)
+    root = roots[0][1]
+    panel_id = "source-" + SLUG + "-" + source_id
+    heading_id = panel_id + "-heading"
+    triggers = [row for row in elements(root, "button", "source-trigger")
+                if row[0].get("data-source-trigger") == source_id]
+    assert len(triggers) == 1, ("SourceQuote trigger missing or repeated", source_id)
+    trigger, trigger_body = triggers[0]
+    for key, value in {"type": "button", "popovertarget": panel_id, "aria-controls": panel_id,
+                       "aria-haspopup": "dialog", "aria-label": "查看原文与出处：" + source["title"]}.items():
+        assert trigger.get(key) == value, ("SourceQuote trigger attribute differs", source_id, key)
+    assert text(trigger_body).strip() == "原文"
+    panels = [row for row in elements(root, "aside", "source-panel")
+              if row[0].get("data-source-panel") == source_id]
+    assert len(panels) == 1, ("SourceQuote panel missing or repeated", source_id)
+    panel, panel_body = panels[0]
+    for key, value in {"id": panel_id, "popover": "auto", "role": "dialog", "aria-labelledby": heading_id}.items():
+        assert panel.get(key) == value, ("SourceQuote panel attribute differs", source_id, key)
+    headings = [row for row in elements(panel_body, "h4") if row[0].get("id") == heading_id]
+    assert len(headings) == 1 and text(headings[0][1]).strip() == "原文与出处"
+    close = elements(panel_body, "button", "source-close")
+    assert len(close) == 1
+    for key, value in {"type": "button", "popovertarget": panel_id, "popovertargetaction": "hide",
+                       "aria-label": "关闭原文与出处"}.items():
+        assert close[0][0].get(key) == value, ("SourceQuote close control differs", source_id, key)
+    figures = elements(panel_body, "figure", "source-content")
+    assert len(figures) == 1, ("SourceQuote content missing or repeated", source_id)
+    figure = figures[0][1]
+    quotes = elements(figure, "blockquote")
+    assert len(quotes) == 1 and quotes[0][0].get("cite") == source["verification"].get("sourceUrl", source["url"])
+    paragraphs = elements(quotes[0][1], "p")
+    assert len(paragraphs) == 1 and text(paragraphs[0][1]) == source["quotation"]["text"], \
+        ("SourceQuote original text differs character-for-character", source_id)
+    for class_name, expected in {
+        "source-identity": source.get("author", source["organization"]) + " · " + source["version"],
+        "source-location": "原文位置：" + source["quotation"]["locator"],
+        "source-support": "编者说明 " + supports,
+    }.items():
+        rows = elements(figure, "p", class_name)
+        assert len(rows) == 1 and text(rows[0][1]).strip() == expected, ("SourceQuote field differs", source_id, class_name)
+    cites = elements(figure, "cite")
+    assert len(cites) == 1
+    links = elements(cites[0][1], "a")
+    assert len(links) == 1 and links[0][0].get("href") == source["url"] and text(links[0][1]) == source["title"]
+    access = elements(figure, "p", "source-access")
+    assert len(access) == 1 and text(access[0][1]).strip().startswith("核验于 ")
+    dates = elements(access[0][1], "time")
+    date = source["verification"]["checkedAt"]
+    assert len(dates) == 1 and dates[0][0].get("datetime") == date and text(dates[0][1]) == date
+    fixed = source["verification"].get("sourceUrl")
+    if fixed and fixed != source["url"]:
+        assert any(a.get("href") == fixed and text(body) == "查看固定原文" for a, body in elements(access[0][1], "a"))
+
+
 def validate_article_page(page: str, sources: dict):
-    """Check the real component scopes, including each complete quotation."""
+    """Check both native source popovers and the unchanged planned Figure."""
     plain = lambda value: " ".join(unescape(re.sub(r"<[^>]+>", "", value)).split())
+    article = (D / "article.mdx").read_text()
     for source_id in ["R1", "A1"]:
-        source = sources[source_id]
-        found = re.findall(
-            r'<figure\b[^>]*data-source-quote="' + source_id + r'"[^>]*>(.*?)</figure>',
-            page, re.S)
-        assert len(found) == 1, ("SourceQuote scope missing or repeated", source_id)
-        figure = found[0]
-        quotes = re.findall(r"<blockquote\b[^>]*>(.*?)</blockquote>", figure, re.S)
-        assert len(quotes) == 1 and plain(quotes[0]) == " ".join(source["quotation"]["text"].split()), \
-            ("SourceQuote must show its complete original quotation", source_id)
-        for text in [source["title"], source.get("author", source["organization"]),
-                     source["version"], source["quotation"]["locator"]]:
-            assert " ".join(text.split()) in plain(figure), ("SourceQuote identity missing", source_id, text)
-        assert source["url"] in unescape(figure), ("SourceQuote original URL missing", source_id)
+        supports = re.search(r'<SourceQuote\s+sourceId="' + source_id + r'"\s+supports="([^"]+)"', article)
+        assert supports, ("Frozen SourceQuote declaration missing", source_id)
+        assert_source_quote(page, source_id, sources[source_id], supports[1])
     image_url = "/video-studio/episodes/" + SLUG + "/" + ARTICLE_IMAGE
     figures = re.findall(r'<figure\b[^>]*data-figure-kind="video"[^>]*>(.*?)</figure>', page, re.S)
     figures = [figure for figure in figures if image_url in unescape(figure)]

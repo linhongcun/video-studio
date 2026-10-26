@@ -32,7 +32,7 @@ FINAL=4707
 FIGURE_FRAME=2667
 FIGURE_TIME=88.9
 VIEWPORTS=[('desktop',{'width':1440,'height':1000}),('narrow',{'width':390,'height':844})]
-RUNTIME_FILES=['site/src/components/SourceQuote.astro','site/src/components/Figure.astro','site/src/components/VideoPlayer.astro','site/src/components/SiteHeader.astro','site/src/components/ThemeToggle.astro','site/src/layouts/BaseLayout.astro','site/src/pages/episodes/[slug]/index.astro','site/src/styles/global.css','site/src/styles/tokens.css','site/scripts/article-sources.mjs']
+RUNTIME_FILES=['site/src/scripts/source-quotes.ts','site/src/components/SourceQuote.astro','site/src/components/Figure.astro','site/src/components/VideoPlayer.astro','site/src/components/SiteHeader.astro','site/src/components/ThemeToggle.astro','site/src/layouts/BaseLayout.astro','site/src/pages/episodes/[slug]/index.astro','site/src/styles/global.css','site/src/styles/tokens.css','site/scripts/article-sources.mjs']
 
 
 def read(p):return json.loads(Path(p).read_text())
@@ -129,8 +129,8 @@ ARM_FIGURE="""({fps})=>{const v=document.querySelector('#player video');v.pause(
 
 
 def run_case(browser,args,data,out,label,viewport,theme,online):
-    case={'name':label,'viewport':viewport,'theme':theme,'checks':[],'screenshots':[],'pageErrors':[],'consoleErrors':[],'requestFailures':[],'blockedExternalRequests':[],'mediaWitnesses':[]}
-    ctx=browser.new_context(viewport=viewport,color_scheme=theme,reduced_motion='reduce',device_scale_factor=1,ignore_https_errors=False)
+    case={'name':label,'viewport':viewport,'theme':theme,'touchEmulated':viewport['width']<768,'checks':[],'screenshots':[],'pageErrors':[],'consoleErrors':[],'requestFailures':[],'blockedExternalRequests':[],'mediaWitnesses':[]}
+    ctx=browser.new_context(viewport=viewport,color_scheme=theme,reduced_motion='reduce',device_scale_factor=1,ignore_https_errors=False,has_touch=viewport['width']<768,is_mobile=viewport['width']<768)
     if not online:
         def local_only(route):
             if urlsplit(route.request.url).hostname in ['127.0.0.1','localhost','::1'] or route.request.url.startswith(('data:','blob:')):route.continue_()
@@ -171,13 +171,51 @@ def run_case(browser,args,data,out,label,viewport,theme,online):
                 page.wait_for_function('(t)=>{const v=document.querySelector("#player video");return !v.seeking&&v.currentTime>=t&&v.currentTime<t+.5}',arg=c['start']);sample=video.evaluate('v=>{v.pause();return {time:v.currentTime,error:v.error?.message??null}}');case['chapterClicks'].append({'id':c['id'],**sample});check(case,'actual chapter click '+c['id'],abs(sample['time']-c['start'])<.5 and sample['error'] is None)
         article=page.locator('#article');check(case,'R1 and A1 source modules present',article.locator('.source-quote').count()==2)
         case['quotes']=[]
+        check(case,'source popovers initially collapsed',page.locator('[data-source-panel]:popover-open').count()==0)
+        def trigger_for(sid):return article.locator('[data-source-trigger="'+sid+'"]')
+        def panel_for(sid):return article.locator('[data-source-panel="'+sid+'"]')
+        def wait_open(sid):page.wait_for_function("(id)=>document.getElementById('source-redis-skiplist-'+id).matches(':popover-open')",arg=sid)
+        def wait_closed(sid):page.wait_for_function("(id)=>!document.getElementById('source-redis-skiplist-'+id).matches(':popover-open')",arg=sid)
+        def activate(locator):locator.tap() if viewport['width']<768 else locator.click()
         for sid,support in data['quote_attrs']:
-            s=data['sources'][sid];q=article.locator('[data-source-quote="'+sid+'"]');rect=stable(q)
+            source=data['sources'][sid];trigger=trigger_for(sid);q=panel_for(sid);stable(trigger)
+            check(case,'lightweight source entry at paragraph end '+sid,trigger.evaluate('e=>e.closest("p")!==null') and trigger.get_attribute('aria-controls')==q.get_attribute('id'))
+            if viewport['width']>=768:
+                trigger.hover();wait_open(sid);page.wait_for_function("(id)=>document.getElementById('source-redis-skiplist-'+id).dataset.sourceState==='preview'",arg=sid)
+                check(case,'desktop hover previews source '+sid,q.get_attribute('data-source-state')=='preview')
+            activate(trigger);wait_open(sid);page.wait_for_function("(id)=>document.getElementById('source-redis-skiplist-'+id).dataset.sourceState==='pinned'",arg=sid)
+            check(case,'tap/click pins actual source '+sid,q.get_attribute('data-source-state')=='pinned' and trigger.get_attribute('aria-expanded')=='true' and page.locator('[data-source-panel]:popover-open').count()==1)
+            q.evaluate("async e=>{e.scrollTo({top:0,behavior:'instant'});await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))}")
+            rect=q.evaluate('e=>{const r=e.getBoundingClientRect();return {left:r.left,right:r.right,top:r.top,bottom:r.bottom,scrollWidth:e.scrollWidth,clientWidth:e.clientWidth,scrollHeight:e.scrollHeight,clientHeight:e.clientHeight}}')
             actual=q.locator('blockquote p').text_content();identity=q.locator('.source-identity').inner_text().strip();date=q.locator('.source-access time').get_attribute('datetime')
-            ok=actual==s['quotation']['text'] and q.locator('cite a').text_content()==s['title'] and q.locator('cite a').get_attribute('href')==s['url'] and q.locator('blockquote').get_attribute('cite')==s['verification'].get('sourceUrl',s['url']) and identity==(s.get('author') or s['organization'])+' · '+s['version'] and s['quotation']['locator'] in q.locator('.source-location').inner_text() and date==s['verification']['checkedAt'] and support in q.locator('.source-support').inner_text()
-            check(case,'exact quotation identity/support/date '+sid,ok,{'historicalCheckedAt':date,'characters':len(actual),'rect':rect})
-            check(case,'source text wraps within viewport '+sid,rect['left']>=-1 and rect['right']<=viewport['width']+1 and rect['scrollWidth']<=rect['clientWidth']+1)
-            case['quotes'].append({'id':sid,'quoteSHA256':digest(actual.encode()),'checkedAt':date});shot(page,q,out,label+'-quote-'+sid,case)
+            ok=actual==source['quotation']['text'] and q.locator('cite a').text_content()==source['title'] and q.locator('cite a').get_attribute('href')==source['url'] and q.locator('blockquote').get_attribute('cite')==source['verification'].get('sourceUrl',source['url']) and identity==(source.get('author') or source['organization'])+' · '+source['version'] and source['quotation']['locator'] in q.locator('.source-location').inner_text() and date==source['verification']['checkedAt'] and support in q.locator('.source-support').inner_text()
+            check(case,'exact opened quotation identity/support/date '+sid,ok,{'historicalCheckedAt':date,'characters':len(actual),'rect':rect})
+            check(case,'source panel within viewport and wraps '+sid,rect['left']>=-1 and rect['right']<=viewport['width']+1 and rect['top']>=-1 and rect['bottom']<=viewport['height']+1 and rect['scrollWidth']<=rect['clientWidth']+1)
+            shot(page,q,out,label+'-quote-'+sid,case)
+            scroll={'needed':rect['scrollHeight']>rect['clientHeight']+1,'method':None}
+            if scroll['needed']:
+                body_y=page.evaluate('scrollY');box=q.bounding_box()
+                if viewport['width']<768:
+                    session=ctx.new_cdp_session(page);x=box['x']+box['width']*.6;start_y=box['y']+box['height']*.8;end_y=box['y']+box['height']*.3
+                    session.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':start_y,'id':1}]})
+                    for step in range(1,7):session.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x,'y':start_y+(end_y-start_y)*step/6,'id':1}]})
+                    session.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]});session.detach();scroll['method']='CDP touchStart/move/end in emulated touch context'
+                else:q.hover();page.mouse.wheel(0,rect['scrollHeight']);scroll['method']='actual wheel over source panel'
+                page.wait_for_function("(id)=>document.getElementById('source-redis-skiplist-'+id).scrollTop>0",arg=sid)
+                scroll.update(top=q.evaluate('e=>e.scrollTop'),bodyScrollBefore=body_y,bodyScrollAfter=page.evaluate('scrollY'))
+                check(case,'long panel scrolls without moving article '+sid,scroll['top']>0 and abs(scroll['bodyScrollAfter']-body_y)<2,scroll)
+                q.evaluate("async e=>{e.scrollTo({top:e.scrollHeight,behavior:'instant'});await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))}")
+                shot(page,q,out,label+'-quote-'+sid+'-end',case)
+            q.locator('cite a').focus();check(case,'original external link keyboard accessible '+sid,q.locator('cite a').evaluate('e=>document.activeElement===e&&e.href.startsWith("https://")'))
+            case['quotes'].append({'id':sid,'quoteSHA256':digest(actual.encode()),'checkedAt':date,'panelScroll':scroll,'externalNavigationPerformed':False})
+            activate(q.locator('.source-close'));wait_closed(sid);page.wait_for_function("(id)=>[...document.querySelectorAll('[data-source-trigger]')].find(e=>e.dataset.sourceTrigger===id).getAttribute('aria-expanded')==='false'",arg=sid)
+            check(case,'close button collapses source '+sid,trigger.get_attribute('aria-expanded')=='false')
+        t1=trigger_for('R1');stable(t1);t1.focus();t1.press('Enter');wait_open('R1');page.keyboard.press('Escape');wait_closed('R1');page.wait_for_function("()=>document.activeElement===[...document.querySelectorAll('[data-source-trigger]')].find(e=>e.dataset.sourceTrigger==='R1')")
+        check(case,'keyboard Enter/Escape closes and restores focus',t1.evaluate('e=>document.activeElement===e'))
+        t1.press('Enter');wait_open('R1');t2=trigger_for('A1');stable(t2);activate(t2);wait_open('A1')
+        check(case,'only one opened source at a time',page.locator('[data-source-panel]:popover-open').count()==1 and not panel_for('R1').evaluate('e=>e.matches(":popover-open")'))
+        page.touchscreen.tap(3,viewport['height']-3) if viewport['width']<768 else page.mouse.click(3,viewport['height']-3)
+        wait_closed('A1');check(case,'outside tap/click closes source',page.locator('[data-source-panel]:popover-open').count()==0)
         fig=article.locator('figure.fig[data-figure-kind="video"]');check(case,'one planned height1 screenshot Figure',fig.count()==1)
         stable(fig);img=fig.locator('img');page.wait_for_function("()=>{const i=document.querySelector('#article figure.fig img');return i&&i.complete&&i.naturalWidth===1920&&i.naturalHeight===1080}")
         check(case,'Figure exact alt/caption/time links',img.get_attribute('alt')==data['figure']['alt'] and data['figure']['caption'] in fig.locator('figcaption').inner_text() and fig.locator('.fig-image-link').get_attribute('href')==data['figure']['src'] and fig.locator('figcaption a').first.get_attribute('href')==data['figure']['src'] and fig.locator('[data-seek-time]').get_attribute('data-seek-time')==str(FIGURE_TIME))
@@ -226,7 +264,7 @@ def main(online=False):
     parser.add_argument('--expected-video-sha256',required=True)
     parser.add_argument('--expected-manifest-sha256',required=True)
     parser.add_argument('--first-release',default='v0.72.0')
-    parser.add_argument('--runtime-ref',default='29dc6461')
+    parser.add_argument('--runtime-ref',default='169cb0c09b16efdc4b5740452c2b225b5e30e841')
     parser.add_argument('--themes',nargs='+',choices=['light','dark'],default=['dark'] if online else ['light','dark'])
     parser.add_argument('--deployment-run',type=int,required=online)
     parser.add_argument('--report',type=Path)
