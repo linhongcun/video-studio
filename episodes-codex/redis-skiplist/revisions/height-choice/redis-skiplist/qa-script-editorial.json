@@ -1,0 +1,162 @@
+{
+  "status": "approved-for-tts",
+  "reviewer": "next_topic_editor",
+  "checkedAtUTC": "2026-10-26T12:33:54.370220+00:00",
+  "approvedForTTS": true,
+  "readyForTTSFromThisReview": true,
+  "blockingIssues": [],
+  "scriptSHA256": "d967f35deb07e6e3d1b19fddabfc3a3be970649f0a2a438336a2c4e31e9a0420",
+  "planSHA256": "cd3f7cb8c112113cdd7a666cbb462eab8390b03c9eb091a65c56d493f0c86637",
+  "heightOptionsSHA256": "ca0abf5dcef32e4cb96cd5912530a6b922a66894461a21d1a6b5be47b0700e50",
+  "inputs": {
+    "script.md": "d967f35deb07e6e3d1b19fddabfc3a3be970649f0a2a438336a2c4e31e9a0420",
+    "plan.json": "cd3f7cb8c112113cdd7a666cbb462eab8390b03c9eb091a65c56d493f0c86637",
+    "model.json": "7f614b6796e74e8a58c786bcb09cd26ffec9e5cb134611c550a565fbe763167b",
+    "height-options.json": "ca0abf5dcef32e4cb96cd5912530a6b922a66894461a21d1a6b5be47b0700e50",
+    "build_height_options.py": "a95f0cf3c16fe0a0150a46c8e510369f8c9d36c331d0980ed9d116c5eb5e70f0",
+    "episode-config.json": "c2c9a691b80a4607b9a3ea8c196ec7bed0cd28ea6b095ae09f364af2449fb94a"
+  },
+  "scope": "Independent editorial approval of the actual height-choice script/plan, read against base model and independent height-options JSON. This new review does not replace or relabel the previous clear-parts QA. Technical/source review, real voice timing, actual animation and final-media gates remain separate.",
+  "scriptShotCount": 10,
+  "scriptSentenceCount": 20,
+  "sentencePreservation": {
+    "baselineScript": "episodes-codex/redis-skiplist/revisions/clear-parts/redis-skiplist/script.md",
+    "baselineSHA256": "cc210675423ed7f64fc7c0bb5e7a79c20d49affb99a4ae72480262fe0f5105be",
+    "changedSentenceIds": [
+      "07:0",
+      "07:1",
+      "09:0"
+    ],
+    "unchangedSentenceCount": 17,
+    "changedSentences": {
+      "07:0": "层高，就是新节点有几层链接；如果五十五只有一层，接好底层就结束。",
+      "07:1": "接入前，Redis会随机确定层高；本例预先选两层，回到未插入的状态，再看两层怎样接。",
+      "09:0": "本例选了两层，所以还要接上层：先让五十五指向七十，再让四十改为指向五十五。"
+    }
+  },
+  "coreRetelling": "新节点的层高决定它有几层前向链接。55层高1时，底层50→55→60接好就完成这份前向链接例子，已有上层40→70继续保留。真实Redis在接入前随机确定层高；演示明确重置到原8节点未插入状态，另用事先固定的合法层高2。随后先接底层；因为这一分支选了两层，还需先55→70再40→55接上层。",
+  "checks": [
+    {
+      "id": "height-versus-total-levels",
+      "status": "passed",
+      "finding": "07第一句定义的是新节点链接层数；同一已有两层跳表中，新55可以只有一层，不要求每个新节点参加上层。"
+    },
+    {
+      "id": "complete-height-one-counterexample",
+      "status": "passed",
+      "finding": "07首句配合height1.after完整单图：底层50→55→60已接好，上层40→70保留；实际n55只有height1/一个forward，没有上端口。结束限定在本片前向链接教学过程，不承诺Redis span等字段不维护。"
+    },
+    {
+      "id": "random-rule-versus-fixed-demo",
+      "status": "passed",
+      "finding": "07第二句先陈述Redis接入前随机确定层高，再明说本例预先选两层；没有实际抽到两层的断言或随机回放。"
+    },
+    {
+      "id": "explicit-reset-before-height-two",
+      "status": "passed",
+      "finding": "07文稿明确回到未插入状态；画面契约要求共同before8原节点后，才显示预选height2的未接入55。单层完成分支没有升级为两层。"
+    },
+    {
+      "id": "conditional-upper-splice",
+      "status": "passed",
+      "finding": "09首句明确本例选两层所以继续上层，仍先55→70再40→55；08两句与09第二句原样，底层/全部完成区分保持。"
+    },
+    {
+      "id": "previous-transition-and-seventeen-sentences",
+      "status": "passed",
+      "finding": "与当前已上线clear-parts实际script逐句比对，仅07:0/07:1/09:0三句改变，另17句逐字保留。02结束、03独立桥接/无cursor渐显、04同55重新查询的文字契约保留。"
+    },
+    {
+      "id": "cue-and-density",
+      "status": "passed",
+      "finding": "10镜20句结构保持；层高cue已移07句0，与新的句首定义一致。单图分时对照，不引入第三种层高、随机参数或业务支线，允许新配音自然占时。"
+    }
+  ],
+  "narrowSerializedStateReading": {
+    "method": "Read actual height-options JSON and independently follow each level of serialized forward links; did not execute the producer model builder or claim the full technical model review.",
+    "wholeSkiplistLevelCount": 2,
+    "commonBeforeHasNew55": false,
+    "height1NewNode": {
+      "id": "n55",
+      "value": 55,
+      "height": 1,
+      "forward": [
+        "n60"
+      ]
+    },
+    "height1Bottom": [
+      "n10",
+      "n20",
+      "n30",
+      "n40",
+      "n50",
+      "n55",
+      "n60",
+      "n70",
+      "n80"
+    ],
+    "height1Upper": [
+      "n40",
+      "n70"
+    ],
+    "height1CompleteAfterWrites": 2,
+    "resetBeforePaths": [
+      [
+        "n10",
+        "n20",
+        "n30",
+        "n40",
+        "n50",
+        "n60",
+        "n70",
+        "n80"
+      ],
+      [
+        "n40",
+        "n70"
+      ]
+    ],
+    "height2AllocatedPaths": [
+      [
+        "n10",
+        "n20",
+        "n30",
+        "n40",
+        "n50",
+        "n60",
+        "n70",
+        "n80"
+      ],
+      [
+        "n40",
+        "n70"
+      ]
+    ],
+    "height2AllocatedNew55": {
+      "id": "n55",
+      "value": 55,
+      "height": 2,
+      "forward": [
+        null,
+        null
+      ]
+    },
+    "height2AfterMatchesBaseModel": true,
+    "height2CompleteAfterWrites": 4
+  },
+  "requiredLaterVisualAcceptance": [
+    "07第一句完整显示height1.after单图：新55只在底层，无上层槽、竖连或隐藏上层身份；上层仍40→70，整体跳表仍有两层。",
+    "height1分支必须标明已经完成，不表现为两层主线接到一半；无需双缩小面板。",
+    "第二句先显式reset到共同before：新55消失，原50→60和40→70恢复，旧8节点保留；之后才出现预选height2且尚未可达的55。",
+    "案例标签与reset有足够真实配音停留，不在同一帧把一层成品改成二层节点，不表现成同次插入重复抽高。",
+    "08/09从height2 allocated和主线write0开始；每层先新后继再上一节点，旧边到对应提交才消失。09上层动作体现本例height2的条件。",
+    "层高正式标签按新07句0真实起音测定；未改17句的PCM/实际动态契约按影响范围证明保留，时长不靠加快语速压回旧值。",
+    "一层接线结束限定于前向链接示意，不添加所有Redis实现字段均不变的声明；不新增Redis模块或其他题目。"
+  ],
+  "notChecked": [
+    "Fresh first-party source retrieval and independent technical-model assertion matrix; separate reviewer handles those.",
+    "Actual new TTS, pronunciation, onset/pacing or rebuilt audio.",
+    "Rendered height1/reset/height2 transitions, DOM/motion/frame readability, final MP4 or website."
+  ],
+  "limitations": "Approval binds only the listed actual bytes and editorial/model-reading scope. No source edits or TTS generation by this reviewer; no final visual, semantic-listening or learning-effect pass is claimed."
+}

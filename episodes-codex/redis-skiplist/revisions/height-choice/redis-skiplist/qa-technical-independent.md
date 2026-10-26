@@ -1,0 +1,5 @@
+技术脚本审批通过，可对绑定的3句进行新TTS；其余17句文本已核对保持。当前完整script SHA为d967f35deb07e6e3d1b19fddabfc3a3be970649f0a2a438336a2c4e31e9a0420。
+
+实际正式height-options经1,952断言、11个序列化快照和333个实际图邻接查询独立通过。height1仅55自身一层，整个跳表仍两层；它只需要底层两次forward写即可完成本图接线。主线height2在分配前选定，底层完成后仍需上层两写，不能解释为临时升层。07明确展示合法height1完成对照后回共同before，再预选2；09明确以预选2为继续接上层的条件。
+
+固定Redis源码先随机层高、按level创建、仅i<level逐层接forward；未触碰上层span和backward/length等维护仍存在。片中结束/完成是forward示意语境，没有宣称真实Redis函数省去这些更新。实际新配音、句窗、DOM转场和最终成片尚待后续QA。

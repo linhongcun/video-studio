@@ -1,0 +1,129 @@
+{
+  "status": "approved-for-tts",
+  "readyForTTSFromThisReview": true,
+  "approvedForTTS": true,
+  "checkedAtUTC": "2026-10-26T12:37:38.688484+00:00",
+  "scriptSHA256": "d967f35deb07e6e3d1b19fddabfc3a3be970649f0a2a438336a2c4e31e9a0420",
+  "inputs": {
+    "script.md": "d967f35deb07e6e3d1b19fddabfc3a3be970649f0a2a438336a2c4e31e9a0420",
+    "plan.json": "cd3f7cb8c112113cdd7a666cbb462eab8390b03c9eb091a65c56d493f0c86637",
+    "height-options.json": "ca0abf5dcef32e4cb96cd5912530a6b922a66894461a21d1a6b5be47b0700e50",
+    "model.json": "7f614b6796e74e8a58c786bcb09cd26ffec9e5cb134611c550a565fbe763167b",
+    "pronunciation.md": "2f612dfaa94dc42fa2ec7f90f6f2867094fe2a28b63d780aef0ec1f6551512f0",
+    "references.json": "544184eb9be239489ed4861adf34a0f9682bd56fa1b2b765f827d0590480ccb0"
+  },
+  "modelQA": {
+    "path": "qa-height-options-independent.json",
+    "sha256": "3aa41b02d3505350cb8e9dfa97f019aef88f7486882483af2bb596f1d226abbe",
+    "assertionsExecuted": 1952,
+    "actualFormalSerializedStatesAudited": 11,
+    "actualGraphNeighborQueries": 333
+  },
+  "sourceQA": {
+    "path": "qa-height-source-independent.json",
+    "sha256": "3bd2f61ba6d9c32ac95a93fbf93bcff3e89e21b964884940ec79aa68407578d7",
+    "freshOfficialFiles": 0,
+    "mode": "exact pinned local official bytes verified; no new fetch claim"
+  },
+  "shots": 10,
+  "sentences": 20,
+  "approvedFreshSentenceIds": [
+    "07-height-1",
+    "07-height-2",
+    "09-splice-upper-1"
+  ],
+  "approvedFreshSentences": [
+    {
+      "id": "07-height-1",
+      "text": "层高，就是新节点有几层链接；如果五十五只有一层，接好底层就结束。",
+      "textSHA256": "78172e8665b53329732d34dcfa981fec96d22115e14e4725019e26661b375074"
+    },
+    {
+      "id": "07-height-2",
+      "text": "接入前，Redis会随机确定层高；本例预先选两层，回到未插入的状态，再看两层怎样接。",
+      "textSHA256": "9f02b910ca0d18f747e1d0f6e4d3432070658ad690a1bea2ce2130f445c6afa5"
+    },
+    {
+      "id": "09-splice-upper-1",
+      "text": "本例选了两层，所以还要接上层：先让五十五指向七十，再让四十改为指向五十五。",
+      "textSHA256": "7503cdc08ea38e6d62d42e7be96a2ed14e87105fd9c262cbc9b8393769cad645"
+    }
+  ],
+  "verifiedUnchangedReuseSentenceIds": [
+    "01-goal-1",
+    "01-goal-2",
+    "02-linear-1",
+    "02-linear-2",
+    "03-sparse-1",
+    "03-sparse-2",
+    "04-upper-1",
+    "04-upper-2",
+    "05-descend-1",
+    "05-descend-2",
+    "06-locate-1",
+    "06-locate-2",
+    "08-splice-bottom-1",
+    "08-splice-bottom-2",
+    "09-splice-upper-2",
+    "10-boundary-1",
+    "10-boundary-2"
+  ],
+  "verifiedUnchangedReuseCount": 17,
+  "baselineScriptSHA256": "cc210675423ed7f64fc7c0bb5e7a79c20d49affb99a4ae72480262fe0f5105be",
+  "technicalReview": [
+    {
+      "shots": [
+        "07"
+      ],
+      "claim": "层高是新节点自身的链接层数；height1不是整张跳表只剩一层",
+      "basis": "Formal height1 node has one base port; shared head and original40/70 retain height2 and upper chain.",
+      "verdict": "accurate"
+    },
+    {
+      "shots": [
+        "07"
+      ],
+      "claim": "55若height1，接好底层便完成本图的forward接线；上层仍40→70且没有55端口",
+      "basis": "Formal height1 allocation/two writes/after audited against independent construction and actual forward traversals. zslInsert writes only i<level.",
+      "verdict": "accurate within explicit forward-link scope"
+    },
+    {
+      "shots": [
+        "07"
+      ],
+      "claim": "Redis在接线前随机确定层高；本例预先选2，明确回共同before再看两层接法",
+      "basis": "Pinned source chooses level, creates node(level), then writes. Script visual direction explicitly resets the legal alternative to the common uninserted state; fixed selection is not RNG replay.",
+      "verdict": "accurate; prevents a false late-upgrade story"
+    },
+    {
+      "shots": [
+        "08",
+        "09"
+      ],
+      "claim": "只有主线预选2，底层写完之后才需要继续两次上层forward写",
+      "basis": "Formal height2 already has two slots at allocation; four snapshots match the old main model exactly.09 condition explicitly names the choice.",
+      "verdict": "accurate"
+    },
+    {
+      "shots": [
+        "07",
+        "09"
+      ],
+      "claim": "结束/完成限定本片的前向接线示意",
+      "basis": "height-options.forwardLinksOnly and hiddenRedisSpanUpdatesAreNotClaimedUnchanged are true. No narration or script says span/backward/length stay unchanged; actual remaining metadata maintenance is recorded in sourceQA.",
+      "verdict": "accurate scope; no exhaustive-Redis-function claim"
+    }
+  ],
+  "blockingIssues": [],
+  "nonBlockingNotes": [
+    "The two legal choices share an unmodified before; height1 completion must never be animated as the starting point of a late height2 upgrade.",
+    "Formal07 direction requires a readable reset to original8 nodes before showing the preselected height2 allocated node.",
+    "Actual fresh3 TTS quality, cue alignment, new storyboard windows and actual DOM/media require later checks."
+  ],
+  "limits": [
+    "This approves technical content for exactly the bound full script and the listed three fresh sentences; no TTS call has been made by this reviewer.",
+    "The remaining17 texts are verified identical, but their actual physical audio reuse must still be proven by the pipeline.",
+    "No animation, final encoded film, publication or human full-listening conclusion."
+  ],
+  "checkerSHA256": "93f658565d18bc3f159c1b62897774390b3a7e1a108fba70a912d26b9befdcca"
+}

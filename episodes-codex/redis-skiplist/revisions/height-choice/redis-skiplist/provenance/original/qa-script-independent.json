@@ -1,0 +1,292 @@
+{
+  "status": "approved-for-tts",
+  "reviewer": "next_topic_editor",
+  "reviewType": "independent-editorial-and-causal-script-review",
+  "checkedAtUTC": "2026-10-26T06:59:59.794174+00:00",
+  "scriptSHA256": "704f43aaf70d731b59b1d5bc36e124fdd6c03107d5baf0ff6ea2915391a76169",
+  "inputs": {
+    "script.md": "704f43aaf70d731b59b1d5bc36e124fdd6c03107d5baf0ff6ea2915391a76169",
+    "plan.json": "566cce60f541bc797734e69bc3aaee67335288ca7807bfaeaae11ed03b3c877f",
+    "model.json": "7f614b6796e74e8a58c786bcb09cd26ffec9e5cb134611c550a565fbe763167b",
+    "episode-config.json": "c2c9a691b80a4607b9a3ea8c196ec7bed0cd28ea6b095ae09f364af2449fb94a"
+  },
+  "readyForTTSFromThisReview": true,
+  "blockingIssues": [],
+  "scope": "实际逐镜审读最终script、plan、model与episode-config；按片中已建立的信息复述因果链，并独立从序列化forward指针重算查找与四次接线。仅本审稿角色批准进入TTS，不替代来源、真实音轨、动态画面或最终成片复核。",
+  "scriptShotCount": 10,
+  "scriptSentenceCount": 20,
+  "coreRetelling": "在有序链表插入55，逐项检查要看到60才知道应接在50后。为了跳过中间节点，少数已有节点多一层前向链接；仍保留完整底层。从上层走到40，70过大，便留在40下降；底层走到50、看到60过大，得到同一位置。位置找到后确定新节点的链接层数，本例固定为两层；先设置55的后继，再把各层上一节点改连55，使底层50→55→60和上层40→55→70都保持有序。额外链接提供跨越机会，不保证每次查询更快。",
+  "checks": [
+    {
+      "id": "goal-and-foundation",
+      "status": "passed",
+      "shots": [
+        "01",
+        "02"
+      ],
+      "finding": "先给有序序列与插入55的目标，再解释沿下一链接查找；先走10/20/30/40/50、看60过大，插入位置50与60由动作得到，不要求知道上一期或Redis业务API。"
+    },
+    {
+      "id": "derive-sparse-links-before-name",
+      "status": "passed",
+      "shots": [
+        "02",
+        "03",
+        "04"
+      ],
+      "finding": "逐项查找经过多个节点的代价先出现，再增加少数节点的上层链接；底层全保留，同一节点上下对齐，然后命名跳表并复查同一目标。首屏没有随机、层数参数或业务支线。"
+    },
+    {
+      "id": "forward-and-descend",
+      "status": "passed",
+      "shots": [
+        "04",
+        "05",
+        "06"
+      ],
+      "finding": "从上层head比较40可前进，再比较70过大；游标不进入70，在原40下降。底层比较50可前进、60过大后停50，得到与基线相同的位置。"
+    },
+    {
+      "id": "height-after-location",
+      "status": "passed",
+      "shots": [
+        "06",
+        "07"
+      ],
+      "finding": "07先口头承接位置已找到，并提出新节点链接层数问题，第二句才解释层高。Redis随机选择与本例固定合法两层被明确区分，不冒充真实抽样。无需展开概率证明才能理解接线。"
+    },
+    {
+      "id": "local-splice-order",
+      "status": "passed",
+      "shots": [
+        "08",
+        "09"
+      ],
+      "finding": "底层先55→60再50→55，上层先55→70再40→55；底层接好与全部完成区分，其他链接不变。四个独立重算快照与模型一致。"
+    },
+    {
+      "id": "chapter-bridges",
+      "status": "passed",
+      "shots": [
+        "03",
+        "07",
+        "10"
+      ],
+      "finding": "03以逐项经过许多节点承接前段并说明加链接目的；07明确从定位转向接入；10由已完成结构归纳额外链接的取舍。四章goal/search/insert/boundary有连续口头线索，无需靠标题猜切换。"
+    },
+    {
+      "id": "term-cue-contract",
+      "status": "passed",
+      "shots": [
+        "01",
+        "04",
+        "07"
+      ],
+      "finding": "链表cue在01句1、跳表cue在04句0、层高cue在07句1（均0起算），与实际旁白首次正式解释一致。最终07版本已实际读取，没有沿用EOF或承接改动前的SHA。"
+    },
+    {
+      "id": "scope-and-boundary",
+      "status": "passed",
+      "shots": [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10"
+      ],
+      "finding": "一个目标、同一组有序节点、一次查找接一次插入；随机/更多层与编码边界后置。片尾说明额外链接、更多稀疏层、小集合可能紧凑编码以及不保证每次更快；没有以教学比较数宣称生产性能。"
+    },
+    {
+      "id": "counts-and-plan",
+      "status": "passed",
+      "shots": [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10"
+      ],
+      "finding": "实际10镜20句，script镜ID与plan一一匹配，四章范围一致；镜数不用于倒逼时长。"
+    }
+  ],
+  "independentRecomputation": {
+    "method": "仅使用Python标准库，读取before.nodes的实际forward；独立执行逐项/由上至下查找，按所得各层前驱生成四个预期指针写入，并逐写比较完整snapshot、上下层链、无环有序性与底层可达性。未执行或依赖build_model.py/qa-model.py来得出此结论。",
+    "linearComparedValues": [
+      10,
+      20,
+      30,
+      40,
+      50,
+      60
+    ],
+    "skiplistComparedValues": [
+      40,
+      70,
+      50,
+      60
+    ],
+    "keyComparisonCounts": {
+      "linear": 6,
+      "skiplist": 4,
+      "scope": "只属于此固定例子；下降动作不算关键值比较，也不是生产性能测试。"
+    },
+    "predecessorsByLevelBottomUp": [
+      "n50",
+      "n40"
+    ],
+    "pointerWritesLevelOwnerOldNew": [
+      [
+        0,
+        "n55",
+        null,
+        "n60"
+      ],
+      [
+        0,
+        "n50",
+        "n60",
+        "n55"
+      ],
+      [
+        1,
+        "n55",
+        null,
+        "n70"
+      ],
+      [
+        1,
+        "n40",
+        "n70",
+        "n55"
+      ]
+    ],
+    "reachabilityPhases": [
+      {
+        "phase": "allocated",
+        "bottom": [
+          "n10",
+          "n20",
+          "n30",
+          "n40",
+          "n50",
+          "n60",
+          "n70",
+          "n80"
+        ],
+        "upper": [
+          "n40",
+          "n70"
+        ]
+      },
+      {
+        "phase": 1,
+        "bottom": [
+          "n10",
+          "n20",
+          "n30",
+          "n40",
+          "n50",
+          "n60",
+          "n70",
+          "n80"
+        ],
+        "upper": [
+          "n40",
+          "n70"
+        ]
+      },
+      {
+        "phase": 2,
+        "bottom": [
+          "n10",
+          "n20",
+          "n30",
+          "n40",
+          "n50",
+          "n55",
+          "n60",
+          "n70",
+          "n80"
+        ],
+        "upper": [
+          "n40",
+          "n70"
+        ]
+      },
+      {
+        "phase": 3,
+        "bottom": [
+          "n10",
+          "n20",
+          "n30",
+          "n40",
+          "n50",
+          "n55",
+          "n60",
+          "n70",
+          "n80"
+        ],
+        "upper": [
+          "n40",
+          "n70"
+        ]
+      },
+      {
+        "phase": 4,
+        "bottom": [
+          "n10",
+          "n20",
+          "n30",
+          "n40",
+          "n50",
+          "n55",
+          "n60",
+          "n70",
+          "n80"
+        ],
+        "upper": [
+          "n40",
+          "n55",
+          "n70"
+        ]
+      }
+    ],
+    "allSerializedSnapshotsMatch": true,
+    "newNodeBottomReachableOnlyAfterWrite": 2,
+    "newNodeUpperReachableOnlyAfterWrite": 4,
+    "completionOnlyAfterWrite": 4
+  },
+  "nonBlockingNotes": [
+    "07的随机选择仅交代层高来源，本期不证明随机分布；两层是已明确声明的固定合法教学结构，当前不需要增加多层或概率讲解。",
+    "01“每个只链接到下一个”在此有序前向链接模型中成立；画面与样例标识须保持该范围，不扩大为所有链表或完整Redis节点都没有其他字段。",
+    "图文可承担字典分工、span排名、同分排序和完整编码条件；无需为这些边界追加视频支线。"
+  ],
+  "requiredLaterVisualAcceptance": [
+    "第一帧显示底层有序节点和目标55；01句1起音后再给链表正式标签。03解释增加链接目的后才展开上层。",
+    "基线看60过大时停50；上层看70过大时停40，沿同一节点垂直下降，不能先进入70、回到head或平移到别的节点。",
+    "始终一个活动查询游标；03明确结束基线并回到起点，04—06连续使用同一跳表查询状态。",
+    "已有节点上下保持身份和横坐标对应，不出现两份成员或每隔固定数量必升层的规则。",
+    "07新55显示为未接入，旧50→60和40→70仍保持；层高正式标签按句1真实起音出现。",
+    "08第一次写55→60时，50仍指向60；第二次写后才显示底层55可达，上层仍未接入。",
+    "09第三次写55→70时，40上层仍指向70；第四次写后才显示上层55可达及两层完成。新框不能仅靠遮挡旧边制造已接入错觉。",
+    "真实配音时长应容纳逐个比较与四次接线的停留，不能用加快语速或提前关键状态适配镜数。",
+    "结尾回到插入后的正常有序结构，清楚标注跳表编码教学示意；边界短说明不挤占查询与接线。"
+  ],
+  "notChecked": [
+    "第一方资料原文、引用题名/短引与文章完整性；该项由独立来源/技术审查负责，本报告未重新取证来源。",
+    "真实TTS语义听辨、发音、起音、句间停顿、铺轨和具体时长。",
+    "实际动画、DOM与文字布局、动态预演、字幕/章节文件、参考资料附录、封面、正式编码或线上播放器。",
+    "真实Redis内存布局、真实随机抽样或生产基准表现。"
+  ],
+  "limitations": "通过只绑定所列实际文件SHA与本审稿范围；未改script、plan或model，未生成TTS。未来改动须按影响范围复核，动画验收点不等于已经通过。"
+}

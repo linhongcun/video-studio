@@ -1,0 +1,58 @@
+{
+  "status": "passed",
+  "checkedAtUTC": "2026-10-26T12:37:38.687394+00:00",
+  "scope": "Read fixed official local Redis8.4 source bytes, identical to previously API-verified pinned official source; no fresh network fetch claimed.",
+  "sourceSHA256": "216e757ebd39efcf1d53ff6c576d8a850c6382104be39d4195f1050543e48e0b",
+  "officialURL": "https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/t_zset.c",
+  "freshFetchPerformed": false,
+  "localPinnedBytesMatchPriorVerifiedOfficialSource": true,
+  "lineEvidence": [
+    {
+      "exactText": "int level = 1;",
+      "line": 131
+    },
+    {
+      "exactText": "level = zslRandomLevel();",
+      "line": 164
+    },
+    {
+      "exactText": "x = zslCreateNode(zsl,level,score,ele);",
+      "line": 173
+    },
+    {
+      "exactText": "for (i = 0; i < level; i++) {",
+      "line": 174
+    },
+    {
+      "exactText": "x->level[i].forward = update[i]->level[i].forward;",
+      "line": 175
+    },
+    {
+      "exactText": "update[i]->level[i].forward = x;",
+      "line": 176
+    },
+    {
+      "exactText": "for (i = level; i < zsl->level; i++) {",
+      "line": 184
+    },
+    {
+      "exactText": "update[i]->level[i].span++;",
+      "line": 185
+    },
+    {
+      "exactText": "x->backward = (update[0] == zsl->header) ? NULL : update[0];",
+      "line": 188
+    },
+    {
+      "exactText": "zsl->length++;",
+      "line": 193
+    }
+  ],
+  "facts": [
+    "Level1 is a valid result: the random-level function starts at1.",
+    "The chosen level is known before creating the node and before any new forward-pointer write.",
+    "Only levels i<level get the new-node successor and predecessor-splice writes, in bottom-to-top order.",
+    "A level1 node does not receive an upper forward link; existing upper forward links remain.",
+    "After these forward writes Redis still maintains untouched spans, backward pointers, length and possibly tail. The video is a forward-link illustration, not an exhaustive zslInsert trace."
+  ]
+}
