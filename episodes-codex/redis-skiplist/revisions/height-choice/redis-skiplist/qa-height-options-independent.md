@@ -1,0 +1,5 @@
+正式height-options实际独立审查通过：从同一before深拷贝验证height1与height2两分支。height1完成态：底层50→55→60，上层head→40→70；55只有底层端口，2写即完成。height2在分配前已选2，分配时就有两个端口；底层2写后仍未完成，随后上层2写。不能把已完成的一层节点演成临时升级为两层。
+
+Redis固定源码先zslRandomLevel，再zslCreateNode(level)，只在i<level内写forward。height1不会写上层forward，但实际Redis还会增加未触碰上层的span，所以片中应精确说上层链接保持，不能说上层所有字段都不变。
+
+实际执行独立图验证、逐写无泄漏/高度恒定检查，以及333次严格分数邻接查询oracle；当前height2四快照也与正式模型一致。正式11个序列化快照均按实际forward独立核对，333查询直接使用正式JSON的before/两after。模型报告本身不授权TTS；脚本审批另行绑定fullSHA。没有改旧目录。

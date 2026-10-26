@@ -1,0 +1,67 @@
+{
+  "status": "draft-entry-ready-awaiting-fresh-source-audits-new-whole-voice-and-final-freeze",
+  "preparedAtUTC": "2026-10-26T12:41:39.192110+00:00",
+  "revision": "height-choice",
+  "qaEntry": "qa-tools/check_encoded_voice.py",
+  "qaEntrySHA256": "17e680e60fc8b4ce47a66019a5e0e7a7bae0e335e1fb6d10e9c731e793eb5f29",
+  "scope": "Current fresh full-track/source audit applicability and actual final encoded-audio numerics;17 reused raw/48k/request identities remain a separate ledger. No all20 PCM reuse claim.",
+  "dynamicExpectations": {
+    "bodyFrames": "actual current SB == words == sum shot durations == fresh source-audit frames",
+    "voiceSHA256": "actual new full WAV == words.audioSha256 == fresh qa-voice.voiceSHA256 == input-provenance.currentVoiceSHA256; differs from old ledger fullWAV",
+    "sentences": "actual build/sents/config;17 reused and3 fresh selected sources individually checked",
+    "finalFramesAndAppendixStart": "actual matching final/render/reference receipts, not previous4482 or4632"
+  },
+  "freshSourceSchema": {
+    "currentReports": [
+      "qa-voice.json",
+      "qa-voice-takes.json",
+      "voice/pause-review.json when current source flagged"
+    ],
+    "provenance": "voice/input-provenance.json: scriptSHA256/currentVoiceSHA256/currentStoryboardSHA256/currentWordsSHA256/voiceQAReportSHA256/sourceAuditSHA256/pauseReviewSHA256/currentApprovals/newTTSRequestsMade/oldTakesReused",
+    "oldReports": "provenance/original and clear-parts histories are not loaded as current audit passes"
+  },
+  "reuseLedger": {
+    "path": "voice/reused-source-baseline.json",
+    "sha256": "1efb66fa712713b25d355035e2684f45ad6cb2498ad92960cc6302ecd81d4933",
+    "reusedSources": 17,
+    "freshSentenceIds": [
+      "07-height-1",
+      "07-height-2",
+      "09-splice-upper-1"
+    ],
+    "identity": "raw/48k/request exact; selected take text/tts/picks and fresh audit rows match; previous normalized gain not required"
+  },
+  "retainedCheckers": {
+    "body": {
+      "path": "episodes-codex/_shared/check_encoded_episode.py",
+      "sha256": "183b01c300269dc2b5ad82ff7893552916405882556a6daf2f87c4dcd9d2db7a"
+    },
+    "numerical": {
+      "path": "episodes-codex/egg-drop/verify_encoded_voice.py",
+      "sha256": "0ca5ba05a0a0e7c8bbad4abd512a0b83d1667e69b6061af94822591841e1eac5"
+    }
+  },
+  "numericAlgorithmsAndCriteriaUnchanged": true,
+  "requiredChecks": [
+    "strict complete MP4 decode and all video PTS/frame durations",
+    "body/final AAC payload,PTS,DTS,duration,size and decoded PCM identity",
+    "actual new WAV/premix coverage, correlations, gains, AAC padding, fixed delay and per-sentence drift",
+    "actual known voice/music reconstruction and per-channel checks",
+    "-16±0.3 LUFS; truepeak<=-2dBTP",
+    "fresh source pause flags retained and no added encoded gaps under original criteria"
+  ],
+  "executionRequires": [
+    "Exact new full manifest SHA",
+    "Producer completion notification and exact new full MP4 SHA",
+    "Fresh source QA and final matched default-render/reference receipts"
+  ],
+  "preparationVerification": {
+    "ASTSyntaxParsed": true,
+    "helpEntryExecuted": true,
+    "sourceAdapterExercisedAgainstFreshAudits": false,
+    "formalMediaQAExecuted": false
+  },
+  "ASRPerformed": false,
+  "semanticListeningPerformed": false,
+  "fullHumanListeningPerformed": false
+}
