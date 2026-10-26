@@ -80,3 +80,9 @@
 ## 核验结论
 
 公开文档直接支持本片核心解释：合适的索引可减少为寻找少量匹配记录而检查的无关数据，并帮助取得对应记录。公开文档也直接要求保留边界：索引不保证每次更快。没有公开材料支持「索引后必然瞬间返回」「固定快若干倍」「只需固定几次比较」，所以本片不使用这些说法。
+
+## 2026-10-26 片尾书目清单整理
+
+本轮只给已验收成片补title-author简列表，选原记录中的《How MySQL Uses Indexes》和《Clustered and Secondary Indexes》两项，覆盖索引定位、扫描取舍与取得对应记录。原R5《Optimization and Indexes》明确仅用于文章拓展，保留原脚注而不凑入片尾。
+
+实际官方实读日期仍为2026-10-24；本轮未进行新GET或将旧访问记成新读取。原记录在基线`76e9b36737063d109a866ff47c1dcf81ef46c638`的Git blob为`1bbd9e82e9f12b2a1bfffe789edbfa48e5635957`，完整SHA-256为`787f4239fccde5dbf86a82a4d3648b8d1e6791986414bd5d5ac9051ae43381cb`。[清单证据](../../docs/reference-endcards/batch-5/sources-db-index.json)逐项保存原题、日期和原论点记录。作者未有明确个人署名，列表采用文档发布机构Oracle / MySQL，不从维护账号推断作者。原主体、frontmatter、锚点、旁白、分镜与冻结不改。

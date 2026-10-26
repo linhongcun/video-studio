@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "batch": "reference-endcards-batch-5",
+  "episode": "db-lock",
+  "presentation": "title-author",
+  "baselineCommit": "76e9b36737063d109a866ff47c1dcf81ef46c638",
+  "organizedAt": "2026-10-26T15:46:49.378216+08:00",
+  "recordedOfficialAccessDate": "2026-10-24",
+  "timezone": "Asia/Shanghai",
+  "executor": "Codex appendix_implementation source organizer",
+  "scope": "Two selected official MySQL8.4 source titles, backed by the exact pre-existing actual-reading record at the baseline commit. This is historical-read reuse, not a new official GET or a newly captured official-body snapshot. No quotations are manufactured.",
+  "sourceReadMode": "reuse-previous-actual-reading-record",
+  "newGETPerformed": false,
+  "baselineResearch": {
+    "path": "episodes-codex/db-lock/research.md",
+    "baseCommit": "76e9b36737063d109a866ff47c1dcf81ef46c638",
+    "gitBlobSHA1": "aad662403e90f4315e8df99c38e355512a2c6b17",
+    "sha256": "ea0fae457b9084490c2b0370ac90b0448698d98ec7f857a836cb8a11402db590",
+    "bytes": 2761,
+    "recordUrl": "https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-lock/research.md",
+    "recordedAccessDate": "2026-10-24",
+    "fullOriginalRecord": "# EP.17 权威资料核验\n\n访问日期：2026-10-24（北京时间）。已实际打开以下官方正文，不以旧稿、搜索摘要或issue建议充当来源。技术背景为 MySQL 8.4 长期支持系列的 InnoDB；视频不口播产品版本，文章示例写8.4.0所属系列。\n\n| ID | 官方资料 | 已核验主张 | 片中适用范围 |\n|---|---|---|---|\n| R1 | [§17.7.2.4 Locking Reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html) | 普通读后再修改不足以保护先前读值；FOR UPDATE读取最新可用数据，冲突读取等待；需要显式事务，提交或回滚释放锁 | 08—12，乙等待后才得到0，不先返回旧1 |\n| R2 | [§17.7.1 InnoDB Locking](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking.html) | 记录锁锁定索引记录；唯一索引定位唯一已存在记录的范围不同于范围扫描 | 本例id7042为主键且记录已存在，不说所有查询只锁一行 |\n| R3 | [§17.7.3 Locks Set](https://dev.mysql.com/doc/refman/8.4/en/innodb-locks-set.html) | UPDATE本身也加锁；范围与扫描路径有关，无合适索引可能扩大锁定范围 | 错例不是“UPDATE没有锁”，而是普通读取旧值后绝对值写回 |\n| R4 | [§17.7.2.3 Consistent Nonlocking Reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-consistent-read.html) | 常见隔离级别普通一致性读使用快照；不等同FOR UPDATE | 不说所有SELECT都阻塞；后续SQL不能继续用旧读取结果 |\n| R5 | [§17.7.2.2 autocommit, Commit, and Rollback](https://dev.mysql.com/doc/refman/8.4/en/innodb-autocommit-commit-rollback.html) | 显式多语句事务，提交与回滚结束并释放其锁 | 甲提交后乙继续；乙缺货后也结束事务，不永远持锁 |\n| R6 | [§17.20.5 InnoDB Error Handling](https://dev.mysql.com/doc/refman/8.4/en/innodb-error-handling.html) | 不同错误可能只撤销语句或整笔；超时与死锁不能混为一谈 | 仅文章，不给默认超时秒数，不声称一定等待成功 |\n| R7 | [§17.7.5 Deadlocks](https://dev.mysql.com/doc/refman/8.4/en/innodb-deadlocks.html) | 多事务互等可能死锁，应处理失败重试、缩短事务和统一访问次序 | 仅文章，不在主线加入多锁支线 |\n\n库存1、商品7042、请求甲乙是教学设计，无吞吐、等待时长或性能实测。错误流程允许程序忽略相同值写回未实际改变行数，并在未重新核验库存时错误放行；SQL没有报错不等于业务购买成功。这是针对程序流程的推演，不是实际银行或商城故障结论，也不声称已运行真实MySQL并发压测。加锁读取后的库存判断是程序责任，不能把锁当成库存业务约束。没有先来先得/FIFO或无饥饿承诺。\n",
+    "evidenceLimit": "This frozen Git record preserves the prior claim of actual official reading and its original context; it is not an archived HTTP body from dev.mysql.com."
+  },
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Oracle / MySQL",
+      "title": "Locking Reads",
+      "version": "MySQL 8.4 Reference Manual",
+      "canonicalUrl": "https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html",
+      "section": "§17.7.2.4",
+      "recordedOfficialHeadingLabel": "§17.7.2.4 Locking Reads",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "recordedAccessDate": "2026-10-24",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "newOfficialGETPerformed": false,
+      "newOfficialHTTPStatus": null,
+      "officialBodySHA256": null,
+      "titleEvidence": {
+        "locator": "基线76e9b367 research.md R1 · line 7",
+        "evidence": "docs/reference-endcards/batch-5/sources-db-lock.json",
+        "recordedOriginalTitle": "Locking Reads",
+        "scope": "The title is preserved from the exact section label in the baseline prior actual-reading record; this pass does not claim new HTML-title extraction."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-lock/research.md#L7",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/db-lock/research.md",
+        "gitBlobSHA1": "aad662403e90f4315e8df99c38e355512a2c6b17",
+        "fileSHA256": "ea0fae457b9084490c2b0370ac90b0448698d98ec7f857a836cb8a11402db590",
+        "startLine": 7,
+        "endLine": 7,
+        "text": "| R1 | [§17.7.2.4 Locking Reads](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking-reads.html) | 普通读后再修改不足以保护先前读值；FOR UPDATE读取最新可用数据，冲突读取等待；需要显式事务，提交或回滚释放锁 | 08—12，乙等待后才得到0，不先返回旧1 |"
+      },
+      "supports": [
+        "显式事务中的FOR UPDATE锁定读取用于协调读取后修改；存在冲突锁时等待，等待后读取最新可用数据。",
+        "FOR UPDATE锁定读取的相关锁在事务提交或回滚时释放；获取锁后仍需由应用重新检查库存与更新结果。"
+      ],
+      "shots": [
+        "08",
+        "09",
+        "10",
+        "11",
+        "12"
+      ],
+      "limitations": [
+        "本片为主键7042精确定位已存在记录的教学示例。",
+        "不把SQL未报错或获得锁等同业务购买成功；程序必须检查库存及实际更新结果。",
+        "不保证一定等待成功、先到先得、FIFO或无饥饿；错误处理及其他隔离级别条件仍按实际系统设计。"
+      ]
+    },
+    {
+      "id": "R2",
+      "organization": "Oracle / MySQL",
+      "title": "InnoDB Locking",
+      "version": "MySQL 8.4 Reference Manual",
+      "canonicalUrl": "https://dev.mysql.com/doc/refman/8.4/en/innodb-locking.html",
+      "section": "§17.7.1",
+      "recordedOfficialHeadingLabel": "§17.7.1 InnoDB Locking",
+      "provenanceMode": "reuse-previous-actual-reading-record",
+      "recordedAccessDate": "2026-10-24",
+      "recordedAccessTimezone": "Asia/Shanghai",
+      "newOfficialGETPerformed": false,
+      "newOfficialHTTPStatus": null,
+      "officialBodySHA256": null,
+      "titleEvidence": {
+        "locator": "基线76e9b367 research.md R2 · line 8",
+        "evidence": "docs/reference-endcards/batch-5/sources-db-lock.json",
+        "recordedOriginalTitle": "InnoDB Locking",
+        "scope": "The title is preserved from the exact section label in the baseline prior actual-reading record; this pass does not claim new HTML-title extraction."
+      },
+      "baselineRecordUrl": "https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-lock/research.md#L8",
+      "baselineRecordExcerpt": {
+        "path": "episodes-codex/db-lock/research.md",
+        "gitBlobSHA1": "aad662403e90f4315e8df99c38e355512a2c6b17",
+        "fileSHA256": "ea0fae457b9084490c2b0370ac90b0448698d98ec7f857a836cb8a11402db590",
+        "startLine": 8,
+        "endLine": 8,
+        "text": "| R2 | [§17.7.1 InnoDB Locking](https://dev.mysql.com/doc/refman/8.4/en/innodb-locking.html) | 记录锁锁定索引记录；唯一索引定位唯一已存在记录的范围不同于范围扫描 | 本例id7042为主键且记录已存在，不说所有查询只锁一行 |"
+      },
+      "supports": [
+        "InnoDB记录锁作用于索引记录；唯一索引定位唯一且已存在记录，与范围扫描的锁定范围不同。",
+        "本片的单条主键示例不能推广为任意查询只锁一行，锁的作用与业务库存检查需要区分。"
+      ],
+      "shots": [
+        "08",
+        "09",
+        "10",
+        "11",
+        "12"
+      ],
+      "limitations": [
+        "仅采用与现有视频相关的索引记录锁、唯一记录定位及范围差异，不新增间隙锁或意向锁教学。",
+        "标题保留InnoDB Locking，不将未选用R3的旧缩写Locks Set当作完整原题。"
+      ]
+    }
+  ],
+  "preservedInputPrefixes": {
+    "productionArticleSHA256Before": "c12a0234bc3f72a4e3ce2a489b7fca26bd31b6c8b3f05cb88e92a82e66609477",
+    "productionResearchSHA256Before": "ea0fae457b9084490c2b0370ac90b0448698d98ec7f857a836cb8a11402db590",
+    "publishedArticleSHA256Before": "c12a0234bc3f72a4e3ce2a489b7fca26bd31b6c8b3f05cb88e92a82e66609477"
+  },
+  "selectedSourceCount": 2,
+  "scopeBoundaries": [
+    "Locking and business validation have separate responsibilities; lock acquisition is not a successful purchase.",
+    "No timeout values, FIFO fairness, guaranteed eventual lock acquisition or real MySQL concurrency benchmark is invented.",
+    "Old R3 Locks Set and other historical footnotes remain untouched; this appendix selects the two primary sources rather than claiming an exhaustive bibliography.",
+    "The task has no new official page/body/title fetch. URLs identify the official manual; the repository links identify only the existing actual-reading record."
+  ]
+}
