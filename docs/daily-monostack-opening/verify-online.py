@@ -145,6 +145,14 @@ def title_author_contract(references, receipt):
     return bibliography
 
 
+def prefix_cue(shot, prefix, sentence):
+    assert shot['subtitles'][sentence]['text'].startswith(prefix)
+    frame = shot['cueFrames']['labels'][prefix]
+    assert isinstance(frame, int)
+    return {'prefix': prefix, 'sentence': sentence, 'appearLocalFrame': frame,
+            'onsetScope': 'Sentence-prefix acoustic cue; no word-level onset is claimed.'}
+
+
 def vtt_cues(body):
     blocks = re.split(r'\r?\n\s*\r?\n', body.decode().strip())
     assert blocks.pop(0) == 'WEBVTT'
@@ -297,7 +305,9 @@ def verify(args, run):
         assert len(shots) == 14 and len(expected) == 28
         assert shots[0]['visualType'] == 'problem' and shots[0]['from'] == 0
         assert '单调栈' in shots[0]['subtitles'][1]['text'] and '日子' in shots[0]['subtitles'][1]['text']
-        assert isinstance(shots[0]['cueFrames']['labels']['单调栈'], int)
+        method_cue = prefix_cue(shots[0], '这题用单调栈', 1)
+        basics = next(shot for shot in shots if shot['visualType'] == 'stack-basics')
+        basics_cues = [prefix_cue(basics, '末尾就是栈顶', 0), prefix_cue(basics, '本题让温度', 1)]
         assert all(cue['end'] <= card['from'] / fps for cue in expected)
         assert rendered['frames'] == frames and sha((production / 'render-result.json').read_bytes()) == sha(blob(tagged, f'episodes-codex/{slug}/render-result.json'))
         for name in ['meta.json', 'article.mdx', 'script.md', 'storyboard.json', meta['video'], 'cover-16x9.jpg', 'cover-4x3.jpg', 'cover-3x4.jpg', appendix['sources'], appendix['manifest'], 'reference-appendix-media-check.json']:
@@ -359,7 +369,7 @@ def verify(args, run):
         videos = [attrs for element, attrs in document.attrs if element == 'video']
         assert len(videos) == 1 and 'controls' in videos[0] and videos[0]['poster'].endswith(f'episodes/{slug}/{meta["poster"]}')
         assert any(element == 'track' and attrs.get('kind') == 'captions' and attrs['src'].endswith(vtt_path) for element, attrs in document.attrs)
-        episode_reports.append({'slug': slug, 'problemNumber': meta['problemNumber'], 'frames': frames, 'bodyFrames': body_frames, 'fps': fps, 'cues': len(actual), 'chapters': chapter_plan, 'cardFrames': 150, 'referenceAppendix': appendix, 'referencePresentation': references['presentation'], 'bibliography': bibliography, 'referenceSourceIds': [ref['id'] for ref in references['sources']], 'referenceEvidence': reference_evidence, 'referenceReceiptSHA256': sha((canonical / appendix['manifest']).read_bytes()), 'referenceMediaCheckSHA256': sha((canonical / 'reference-appendix-media-check.json').read_bytes()), 'firstRelease': meta['firstRelease'], 'dates': {key: meta[key] for key in ['createdAt', 'updatedAt', 'publishedAt']}, 'media': media, 'captionsSHA256': sha(vtt), 'source': source, 'completePythonExact': True, 'earlyMethodPreviewInFirstShot': True})
+        episode_reports.append({'slug': slug, 'problemNumber': meta['problemNumber'], 'frames': frames, 'bodyFrames': body_frames, 'fps': fps, 'cues': len(actual), 'chapters': chapter_plan, 'cardFrames': 150, 'methodCue': method_cue, 'basicsCues': basics_cues, 'referenceAppendix': appendix, 'referencePresentation': references['presentation'], 'bibliography': bibliography, 'referenceSourceIds': [ref['id'] for ref in references['sources']], 'referenceEvidence': reference_evidence, 'referenceReceiptSHA256': sha((canonical / appendix['manifest']).read_bytes()), 'referenceMediaCheckSHA256': sha((canonical / 'reference-appendix-media-check.json').read_bytes()), 'firstRelease': meta['firstRelease'], 'dates': {key: meta[key] for key in ['createdAt', 'updatedAt', 'publishedAt']}, 'media': media, 'captionsSHA256': sha(vtt), 'source': source, 'completePythonExact': True, 'earlyMethodPreviewInFirstShot': True})
     run.stage = 'Existing lesson home/learning/series/library/RSS and this revision Release only'
     home, learning, library, series = [Document(run.get(relative).decode()) for relative in ['', 'learn/', 'library/', 'series/leetcode/']]
     assert args.revision_tag in home.footer and '/video-studio/learn/#algorithms' in home.links

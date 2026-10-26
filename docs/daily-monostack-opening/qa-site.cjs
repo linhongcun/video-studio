@@ -75,6 +75,11 @@ function titleAuthorContract(references, receipt) {
   for (const item of bibliography) for (const value of Object.values(item)) assert.ok(typeof value === 'string' && value.trim());
   assert.deepEqual(receipt.bibliography, bibliography); return bibliography;
 }
+function prefixCue(shot, prefix, sentence) {
+  assert.ok(shot.subtitles[sentence].text.startsWith(prefix));
+  const appearLocalFrame = shot.cueFrames.labels[prefix]; assert.ok(Number.isInteger(appearLocalFrame));
+  return {prefix, sentence, appearLocalFrame, onsetScope: 'Sentence-prefix acoustic cue; no word-level onset is claimed.'};
+}
 function inputs(slug, opts, dates) {
   const canonical = path.join(root, 'episodes', slug), production = path.join(root, 'episodes-codex', slug);
   const meta = read(path.join(canonical, 'meta.json')), config = read(path.join(production, 'episode-config.json')), sb = read(path.join(canonical, 'storyboard.json'));
@@ -120,11 +125,11 @@ function inputs(slug, opts, dates) {
   assert.equal(shots.length, 14); assert.equal(config.shotCount, 14); assert.equal(cues.length, 28);
   assert.ok(opening && basic && opening.from === 0 && opening.voice.length === 2 && basic.voice.length === 2);
   assert.ok(opening.subtitles[1].text.includes('单调栈') && opening.subtitles[1].text.includes('日子'));
-  assert.ok(Number.isInteger(opening.cueFrames.labels['单调栈']));
+  const methodCue = prefixCue(opening, '这题用单调栈', 1), basicsCues = [prefixCue(basic, '末尾就是栈顶', 0), prefixCue(basic, '本题让温度', 1)];
   const methodFrame = Math.floor(opening.from + (opening.voice[1].localStart + opening.voice[1].localEnd) / 2);
-  assert.ok(methodFrame >= opening.from + opening.cueFrames.labels['单调栈'] && methodFrame < opening.from + opening.durationInFrames);
+  assert.ok(methodFrame >= opening.from + methodCue.appearLocalFrame && methodFrame < opening.from + opening.durationInFrames);
   const sampleFrame = opts.sampleFrame ?? Math.floor(basic.from + (basic.voice[1].localStart + basic.voice[1].localEnd) / 2); assert.ok(sampleFrame > 15 && sampleFrame < card.from);
-  return {slug, canonical, production, meta, sb, fps, frames, bodyFrames, card, appendix, references, referenceEvidence, receipt, bibliography, cues, chapters, solution, videoSha256, posterSha256, sampleFrame, methodFrame, original,
+  return {slug, canonical, production, meta, sb, fps, frames, bodyFrames, card, appendix, references, referenceEvidence, receipt, bibliography, cues, chapters, solution, videoSha256, posterSha256, sampleFrame, methodFrame, methodCue, basicsCues, original,
     displayDuration: `${Math.floor(frames / fps / 60)}:${String(Math.floor(frames / fps % 60)).padStart(2, '0')}`, expectedSource: `https://github.com/linhongcun/video-studio/tree/main/${meta.sourcePath}`};
 }
 function parseVtt(bytes) {
@@ -224,7 +229,7 @@ async function run(opts) {
     const counts = read(receiptFile).actualInvocations;
     const report = {status: 'passed', checkedAtUTC: new Date().toISOString(), executor: 'Codex opening_site single revision QA', revisionTag: opts.revisionTag, preservationBaseline: opts.preservationBase, slugs: opts.slugs, inputFingerprint,
       build: {runs: counts.build, passed: true, reused: opts.reuseBuild}, datesCheck: {builtRuns: counts.dates, passed: true}, historicalRegression: {runs: counts.regression, passed: true},
-      media: episodes.map((e) => ({slug: e.slug, problemNumber: e.meta.problemNumber, frames: e.frames, bodyFrames: e.bodyFrames, fps: e.fps, cues: e.cues.length, cardFrom: e.card.from, cardFrames: 150, referenceAppendix: e.appendix, referenceEvidence: e.referenceEvidence, sourceIds: e.references.sources.map((source) => source.id), videoSha256: e.videoSha256, posterSha256: e.posterSha256, dates: {createdAt: e.meta.createdAt, updatedAt: e.meta.updatedAt, publishedAt: e.meta.publishedAt}, firstRelease: e.meta.firstRelease})),
+      media: episodes.map((e) => ({slug: e.slug, problemNumber: e.meta.problemNumber, frames: e.frames, bodyFrames: e.bodyFrames, fps: e.fps, cues: e.cues.length, cardFrom: e.card.from, cardFrames: 150, methodCue: e.methodCue, basicsCues: e.basicsCues, referenceAppendix: e.appendix, referenceEvidence: e.referenceEvidence, sourceIds: e.references.sources.map((source) => source.id), videoSha256: e.videoSha256, posterSha256: e.posterSha256, dates: {createdAt: e.meta.createdAt, updatedAt: e.meta.updatedAt, publishedAt: e.meta.publishedAt}, firstRelease: e.meta.firstRelease})),
       retained, algorithmSeries: {before: older, after: series}, browserChecks, entryChecks, screenshots: screenshots.map((file) => ({path: path.relative(root, file), sha256: fileSha(file)})), actualScreenshotReviewPending: true,
       localReleaseFetch: {warnings: fs.readFileSync(path.join(out, 'build.log'), 'utf8').split(/\r?\n/).filter((line) => line.includes('[changelog]')), revisionChangelogRequiresProductionVerification: true},
       limits: ['Only this revised film has actual local muted playback/CC/seek and media HTTP checks. All other canonical bytes and built media are retained without old online media downloads.', 'Each viewport plays the early-method opening and integrated basics; captures the basics page, Python card, reference-card fullscreen and full decoded reference card; actual visual review must follow before final acceptance. References first/middle/last are paused with native CC empty.', 'Title, original creation/publication timestamps and firstRelease remain fixed. Only actual updatedAt and explicit release identity change. No full listening, ASR or learning outcome is claimed.']};
@@ -233,5 +238,5 @@ async function run(opts) {
   } finally {if (browser) await browser.close(); if (preview) preview.kill('SIGTERM');}
 }
 async function recorded(opts) {const file = path.join(__dirname, 'qa-site-attempts.json'), history = fs.existsSync(file) ? read(file) : {attempts: []}, attempt = {attempt: history.attempts.length + 1, status: 'running', startedAtUTC: new Date().toISOString(), revisionTag: opts.revisionTag, preservationBaseline: opts.preservationBase, slugs: opts.slugs, reuseBuild: opts.reuseBuild}; history.attempts.push(attempt); fs.writeFileSync(file, JSON.stringify(history, null, 2) + '\n'); try {const result = await run(opts); attempt.status = 'passed'; console.log(JSON.stringify({status: result.status, slugs: opts.slugs, browserCases: result.browserChecks.length, visualReviewPending: true}));} catch (error) {attempt.status = 'failed'; attempt.stage = opts.stage; attempt.exception = error.name; attempt.message = error.message; attempt.passReportWrittenByThisAttempt = false; throw error;} finally {attempt.buildInvoked = !!opts.buildInvoked; attempt.datesInvoked = !!opts.datesInvoked; attempt.regressionInvoked = !!opts.regressionInvoked; attempt.finishedAtUTC = new Date().toISOString(); history.status = `${attempt.status}_on_attempt_${attempt.attempt}`; fs.writeFileSync(file, JSON.stringify(history, null, 2) + '\n');}}
-module.exports = {parse, preserve, inputs, run, titleAuthorContract};
+module.exports = {parse, preserve, inputs, run, titleAuthorContract, prefixCue};
 if (require.main === module) {const opts = parse(process.argv.slice(2)); if (opts.help) console.log('After final media approval only: node qa-site.cjs --revision-tag vX.Y.Z --preservation-base SHA [--sample-frame FRAME] [--reuse-build] [--port 4247 | --base URL]. No npm ci; only Daily is revised. Requires the actual reference appendix/receipts; video total comes from publication metadata.'); else recorded(opts).catch((error) => {console.error(error); process.exitCode = 1;});}
