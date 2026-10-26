@@ -13,6 +13,7 @@ const read = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 const nonempty = (value) => typeof value === 'string' && value.trim().length > 0;
 const hashPattern = /^[a-f0-9]{64}$/;
 const integer = (value) => Number.isSafeInteger(value) && value >= 0;
+const presentations = new Set(['title-author', 'original-title-quote']);
 
 export function shaFile(file) {
   const hash = crypto.createHash('sha256');
@@ -69,7 +70,7 @@ export function checkSources(episodeDir, {repoRoot = ROOT, sources = 'references
   const refsFile = within(episodeDir, sources, 'references');
   const refs = read(refsFile);
   require(refs.schemaVersion === 1 && refs.episode === slug, 'reference schema/episode differs');
-  require(refs.presentation === 'original-title-quote', 'references must use original-title-quote presentation');
+  require(presentations.has(refs.presentation), 'references must use title-author or historical original-title-quote presentation');
   require(validDate(refs.checkedAt), 'reference checkedAt must be a real YYYY-MM-DD date');
   require(Array.isArray(refs.sources) && refs.sources.length > 0, 'reference sources must not be empty');
   const article = fs.readFileSync(within(episodeDir, 'article.mdx', 'article'), 'utf8');
@@ -79,6 +80,8 @@ export function checkSources(episodeDir, {repoRoot = ROOT, sources = 'references
       require(nonempty(source[key]), `source ${source.id ?? '?'} missing ${key}`);
     require(!Object.hasOwn(source, 'displayTitle') && !Object.hasOwn(source, 'displaySupport'),
       `${source.id}: displayTitle/displaySupport cannot replace original titles or quotations`);
+    if (Object.hasOwn(source, 'author'))
+      require(nonempty(source.author), `${source.id}: author must be a nonempty string when supplied`);
     require(!ids.has(source.id), `duplicate source id ${source.id}`);
     ids.add(source.id);
     require(https(source.url), `${source.id}: source URL must use HTTPS`);
@@ -115,15 +118,33 @@ export function checkEpisode(episodeDir, {repoRoot = ROOT} = {}) {
   const media = read(within(episodeDir, 'reference-appendix-media-check.json', 'appendix media check'));
   require(receipt.schemaVersion === 1 && receipt.episode === slug && receipt.appendix?.kind === 'references',
     'appendix receipt schema/episode differs');
-  require(receipt.presentation === refs.presentation, 'rendered appendix presentation differs from original-title mode');
+  require(receipt.presentation === refs.presentation, 'rendered appendix presentation differs from reference mode');
   require(Array.isArray(receipt.sourceTitles) && receipt.sourceTitles.length === refs.sources.length
-    && receipt.sourceTitles.every((entry, index) => entry.id === refs.sources[index].id
+    && receipt.sourceTitles.every((entry, index) => entry?.id === refs.sources[index].id
       && entry.title === refs.sources[index].title), 'rendered appendix original source titles differ');
+  // Quotations remain research input identities, including in title-author
+  // mode. Their receipt presence does not mean they were rendered on screen.
   const quotations = refs.sources.filter((source) => Object.hasOwn(source, 'quotation'))
     .map((source) => ({id: source.id, ...source.quotation}));
   require(Array.isArray(receipt.quotations) && receipt.quotations.length === quotations.length
     && receipt.quotations.every((entry, index) => ['id', 'text', 'locator', 'evidence']
-      .every((key) => entry[key] === quotations[index][key])), 'rendered appendix original quotations differ');
+      .every((key) => entry?.[key] === quotations[index][key])), 'rendered appendix original quotations differ');
+  if (refs.presentation === 'title-author') {
+    const bibliography = refs.sources.map((source) => ({id: source.id, title: source.title,
+      credit: nonempty(source.author) ? source.author : source.organization}));
+    require(Array.isArray(receipt.bibliography) && receipt.bibliography.length === bibliography.length
+      && receipt.bibliography.every((entry, index) => ['id', 'title', 'credit']
+        .every((key) => entry?.[key] === bibliography[index][key])), 'rendered appendix bibliography title/credit differs');
+    require(receipt.layout?.kind === 'title-author-single-column' && receipt.layout.maxItemsPerPage === 4
+      && JSON.stringify(receipt.layout.renderedFields) === JSON.stringify(['title', 'credit'])
+      && receipt.layout.quotesRendered === false, 'title-author receipt must declare title/credit layout without rendered quotations');
+    const fps = String(receipt.fps ?? '').split('/').map(Number);
+    const rate = fps.length === 1 ? fps[0] : fps.length === 2 ? fps[0] / fps[1] : NaN;
+    require(Number.isFinite(rate) && rate > 0 && receipt.inputs?.secondsPerPage === 5
+      && receipt.appendix.framesPerPage === rate * 5
+      && Array.isArray(receipt.appendix.pages) && receipt.appendix.pages.length === Math.ceil(bibliography.length / 4),
+    'title-author appendix requires four sources per page and five seconds per page');
+  }
   const end = appendix.from + appendix.durationInFrames;
   require(integer(meta.finalVideoFrames) && meta.finalVideoFrames === end
     && receipt.bodyFrames === appendix.from && receipt.finalVideoFrames === end

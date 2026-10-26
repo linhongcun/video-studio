@@ -18,13 +18,13 @@ python3 episodes-codex/degradation/verify-freeze.py
 
 ## 参考资料：渲染前与发布前
 
-新片从调研起准备 `presentation: original-title-quote` 的 `references.json`，随脚本和配套文章同步定稿。`title` 与实际文档原始题名一致，`titleEvidence: {locator, evidence}` 齐全；可选 `quotation: {text, locator, evidence}` 保留连续原文和原语言。不能用 `displayTitle`、`displaySupport`、内部 `supports` 或译文替代原题/原文。正式编码前从仓根只读检查来源字段、核验记录与文章链接：
+新片从调研起准备 `presentation: title-author` 的 `references.json`，随脚本和配套文章同步定稿。`title` 与实际文档原题一致，`titleEvidence: {locator, evidence}` 齐全。明确公开个人署名才填写非空字符串 `author`，否则省略该字段并显示 `organization`，关联核验记录能定位署名依据。视频不使用 `displayTitle`、`displaySupport`、`supports`、译文或研究摘录代替原题/署名。正式编码前从仓根只读检查来源字段、核验记录与文章链接：
 
 ```sh
 node site/scripts/check-references.mjs --sources EPDIR
 ```
 
-`EPDIR` 指 `episodes-codex/<slug>`。缺来源、原题或短引证据，未核验或题文不符时先修正，不启动昂贵的正文编码；字段通过并不表示工具已经阅读原文或确认论点真实，技术审稿仍须逐项核对实际题名、原句及上下文。没有短引时应省略字段，不要求每条填段落；不自行改词、拼接或添加省略。
+`EPDIR` 指 `episodes-codex/<slug>`。缺来源、原题/署名依据，未核验或题文不符时先修正，不启动昂贵的正文编码；字段通过并不表示工具已经阅读原文或确认论点真实，技术审稿仍须逐项核对实际题名、作者/机构及论点上下文。有保留研究摘录时仍核对原句与证据，不自行改词、拼接或添加省略；摘录与位置只用于文章或研究，不进入视频。
 
 采用新期默认入口时，`python3 episodes-codex/_shared/render_with_references.py EPDIR --verify` 复核本期来源、冻结输入与最终媒体，并只写QA报告。不要对已编码工程重跑会改写输入的准备步骤来追认通过。
 
@@ -34,7 +34,7 @@ node site/scripts/check-references.mjs --sources EPDIR
 npm --prefix site run check:references
 ```
 
-站点 `build` 在复制媒体前自动执行同一项。检查资料JSON、文章链接、原题/短引及附录记录、发布元数据的区间和最终帧数，以及实际MP4与记录的完整SHA；新片只有文章出处、概括题名、空资料标题或过期媒体记录时不能发布。完整解码、原题与短引的实际显示、原生字幕首卡边界、资料可读性及播放器控件遮挡仍按[成片审](qa.md#成片审)实际检查。
+站点 `build` 在复制媒体前自动执行同一项。检查资料JSON、文章链接、原题/署名及实际附录记录、发布元数据的区间和最终帧数，以及实际MP4与记录的完整SHA；新片只有文章出处、概括题名、空资料标题或过期媒体记录时不能发布。完整解码、原题与作者/机构的实际显示、原生字幕首卡边界、资料可读性及播放器控件遮挡仍按[成片审](qa.md#成片审)实际检查。
 
 `site/scripts/reference-legacy.json` 固定登记本次流程接入前45片的slug和原视频SHA，仅未接入附录且实际MP4仍与基线字节相同的旧片可分批暂缓。已开始接入附录的旧片、旧slug重制或更换MP4后均须完整检查，不能通过扩大名单或重写基线SHA绕过。检查命令不改写资料、媒体或冻结清单，失败后不能靠重写哈希追认未使用的输入。
 

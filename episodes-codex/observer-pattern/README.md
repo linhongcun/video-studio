@@ -27,7 +27,7 @@ references.json的两项资料分别支持模式主体和唯一实战镜，来�
 旧回执与原始资料输入现归档于`revisions/original-titles/`；本轮新器入口见下节，不再对当前资料清单执行旧生成器。正式参考卡独立抽4441/4442/4517/4591四帧及全尺寸PNG，机构、资料名/版本、暂停提示和正文/附录边界通过；原47核心状态检查按全前缀保真继续适用。完整检查见qa-observer-first-references-independent.json及reference-appendix-media-check.json。Java字幕边界在4292帧优先，后面的4442帧参考卡不覆盖它。
 
 
-## 原始题名与原文短引：当前资料入口
+## 原始题名与原文短引（历史资料样式）
 
 本轮使用 `presentation: original-title-quote`，保留资料实际完整原题名及原语言；短引采用连续原文并标明位置，不把内部 `supports` 当成文献原句。每页最多2项、默认5秒，最终时长以新回执为准。本轮修前资料/文章/研究/冻结与回执均保存在 `revisions/original-titles/`，不得覆盖；旧附录的SHA和核验只表示当时实际结果。详见 [原题名修订](../../docs/reference-endcards/original-titles/README.md)。
 
@@ -46,3 +46,16 @@ npm run verify:references
 尾卡入口使用 `append_references_original.py`，明确指定`--body ../video.mp4 --output ../video-with-references.mp4 --artifacts ../revisions/observer-first/reference-appendix`。`verify:references`执行当前来源与本期冻结检查，再由同一新器验证该独立核心/最终媒体和资料回执；它不会调用普通wrapper覆盖核心，也不会自动更新最终发布元数据。`site-integrate.py`的发布映射仍要求最终报告与实际最终媒体一致，接入前必须按新回执更新并另行复核`render-result-final.json`。
 
 Java卡仍自4292帧开始150帧，参考卡从完整核心4442帧之后开始，两段字幕边界分别检查。最后实际查看所有资料页、精确首卡和桌面/手机暂停/全屏；原核心QA只在完整正文/Java卡及原AAC确证保持的范围复用，不预记当前附录或发布已经通过。
+
+
+## 题名与作者：当前资料入口
+
+本轮资料卡采用`presentation: title-author`，按完整原始题名和作者/机构列示。仅在来源本身已有`author`时使用该字段，否则使用既有`organization`，不补造个人姓名。原题名、机构、原文摘录、定位及核验文件保留在`references.json`和配套文章中；本轮只切换显示方式，不改研究结论或正文。
+
+默认资料渲染器为共享`append_references_bibliography.py`，早先两份渲染器保持历史字节并继续作为冻结依赖。新卡按实际排版分页，每页默认5秒；修前回执、来源清单、入口及输入身份保存在本实际制作目录的`revisions/title-author/`，不重写旧验收结果。候选资料卡同在该修订目录生成，通过检查后再接入既有最终产物与回执位置；本轮进度由根任务记录。
+
+当前冻结入口为`freeze.py`，加`--verify`只读核对。冻结清单在原有正文、声音、图标、导航和历史来源输入之外收录新渲染器，既有wrapper、发布检查器、两份旧渲染器及证据仍保留。默认正文构建、混音、并发和已有代码卡顺序均沿用实际package；本批只消费基线已验收的完整正文生成资料卡，不运行正文prepare、TTS、重渲或重混音。
+
+本期`video.mp4`仍是4442帧讲解加Java卡核心，最终附录输出仍为独立`video-with-references.mp4`，核心报告不覆盖。当前尾卡append/verify入口明确区分两者，不能改用普通wrapper覆盖核心；正式发布继续按独立最终报告和实际媒体映射核对。
+
+资料生成后按新回执同步最终总帧数、媒体SHA及发布映射；实际复核题名/署名、分页、首卡字幕边界、暂停及原生全屏。原脚本、配音、字幕、分镜、动作和文章/研究均保持本轮基线字节，旧技术验收只按原体保真范围复用，不预记新版已获观看认可。

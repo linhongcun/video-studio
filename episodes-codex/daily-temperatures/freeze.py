@@ -34,6 +34,7 @@ for source in json.loads((EP/'references.json').read_text())['sources']:
  evidence_paths=[source['verification']['evidence'],source['titleEvidence']['evidence']]
  if 'quotation' in source:evidence_paths.append(source['quotation']['evidence'])
  extra += [ROOT/evidence for evidence in evidence_paths]
+extra += [ROOT/'episodes-codex/_shared/append_references_bibliography.py']
 for p in extra:m[os.path.relpath(p,EP)]=hashlib.sha256(p.read_bytes()).hexdigest()
 (EP/'source-sha256.json').write_text(json.dumps(m,ensure_ascii=False,indent=2)+'\n')
 print(f'{len(m)} actual production inputs frozen.')

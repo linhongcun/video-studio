@@ -1,0 +1,196 @@
+---
+title: 一致性哈希：多加一台机器，为什么只改部分数据的归属？
+summary: 从缓存三台扩到四台的路由变化出发，看固定哈希环如何保留大部分已有去向，再理解虚拟节点的作用、数据迁移与热点边界。
+chapters:
+  - { id: remap, title: 为什么多一台缓存，旧键也改了去向 }
+  - { id: ring, title: 固定位置，顺时针找负责节点 }
+  - { id: insert, title: 新节点只接管局部区间 }
+  - { id: vnodes, title: 多个虚拟位置与工程边界 }
+related: ["db-sharding", "load-balancing", "server-cache"]
+---
+
+## 为什么多一台缓存，旧键也改了去向 {#remap}
+
+应用按键查缓存。例如键`product:7042`对应一份商品信息；键决定“查哪一项”，值是缓存的实际内容。现在A、B、C三台缓存已经保存了一批数据，我们希望加入D，容纳更多缓存数据。问题是：**定位规则一改，原来的键会不会突然被查到别处？**
+
+先用一种容易实现的规则：固定哈希算法把键算成非负整数`h`，再用`h % 节点数`选择节点编号。算法、参数和键编码一致时，同一个键的哈希值不变；这里变化的是后面的除数。节点编号约定A=0、B=1、C=2，新增D=3。[^cassandra]
+
+假设某键的示例哈希值是56：
+
+- 三台时，`56 % 3 = 2`，交给C。
+- 四台时，`56 % 4 = 0`，改去A。
+
+旧值可能还保存在C，新请求却去了A。A没找到时，这个教学系统要从数据库读取并重建缓存，或者在切换前安排迁移。路由表变了，数据不会因此自动搬完。NGINX官方把减少成员变化造成的键重映射，直接联系到缓存命中率。[^nginx]
+
+下面始终使用同十个**预设哈希值**，逐项按规则计算。它们不是对真实键运行某个产品哈希函数后的测量，也不代表普遍分布。
+
+| 哈希值h | `h % 3`负责节点 | `h % 4`负责节点 | 是否改变 |
+|---|---|---|---|
+| 5 | C | B | 改变 |
+| 13 | B | B | 保持 |
+| 27 | A | D | 改变 |
+| 34 | B | C | 改变 |
+| 46 | B | C | 改变 |
+| 56 | C | A | 改变 |
+| 64 | B | A | 改变 |
+| 78 | A | C | 改变 |
+| 86 | C | C | 保持 |
+| 95 | C | D | 改变 |
+
+本例8个键改了去向；不能把“8/10”当作任意系统扩容的固定迁移比例。我们需要的改进是：让新缓存接走一部分键，其余键尽量保留原去向。
+
+## 固定位置，顺时针找负责节点 {#ring}
+
+一种办法是把**键和节点都映射到同一个固定空间**，按位置确定负责者；增减节点时，已有键的哈希位置和保留节点的位置都不跟着重排。这就是这里讲的一致性哈希环。Cassandra官方文档通过token环解释这一机制，也用多个token对应同一物理节点解释虚拟节点。[^cassandra]
+
+实际系统使用远大的空间。本例为了看清位置，预设编号0到99，并让99之后回到0，沿顺时针递增；A在20、B在50、C在85。它们是教学位置，不是NGINX或Cassandra的配置。
+
+找负责节点的规则是：从键的哈希位置开始，顺时针找第一个节点；若恰好与节点同位置，就归该节点。超过最后一个节点则回绕。
+
+- `h=56`：先遇到85的C，因此归C；**键的位置仍是56**。
+- `h=95`：超过85后，跨过99和0，先遇到20的A，因此归A。
+
+本片只取一个负责者。Cassandra还根据复制策略选择多个不同物理节点，不能把这里的单归属示例当成它的完整数据复制行为。[^cassandra]
+
+<figure>
+  <svg viewBox="0 0 640 460" role="img" aria-labelledby="ch-ring-title ch-ring-desc" style={{width: '100%', height: 'auto', display: 'block', background: '#0f172a', borderRadius: '16px'}}>
+    <title id="ch-ring-title">在固定哈希环上插入D，只改变B之后到D这一段的负责节点</title>
+    <desc id="ch-ring-desc">零在上方，顺时针增加。A位于20，B位于50，C位于85，新节点D位于70。金色圆弧为50之后到70及70本身，原来归C，现在归D；其余位置保留原负责者。</desc>
+    <defs>
+      <marker id="ch-ring-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#94a3b8" /></marker>
+    </defs>
+    <circle cx="300" cy="210" r="150" fill="none" stroke="#64748b" strokeWidth="4" />
+    <path d="M300 360 A150 150 0 0 1 157.3 256.4" fill="none" stroke="#fbbf24" strokeWidth="14" strokeLinecap="round" />
+    <path d="M352 69 A150 150 0 0 1 410 108" fill="none" stroke="#94a3b8" strokeWidth="3" markerEnd="url(#ch-ring-arrow)" />
+    <circle cx="300" cy="60" r="5" fill="#cbd5e1" />
+    <text x="300" y="34" textAnchor="middle" fill="#e2e8f0" fontSize="24">0 / 99回绕</text>
+    <circle cx="442.7" cy="163.6" r="12" fill="#38bdf8" />
+    <text x="466" y="170" fill="#e2e8f0" fontSize="26">A · 20</text>
+    <circle cx="300" cy="360" r="12" fill="#34d399" />
+    <text x="300" y="402" textAnchor="middle" fill="#e2e8f0" fontSize="26">B · 50</text>
+    <circle cx="178.6" cy="121.8" r="12" fill="#c084fc" />
+    <text x="135" y="99" textAnchor="middle" fill="#e2e8f0" fontSize="26">C · 85</text>
+    <circle cx="157.3" cy="256.4" r="14" fill="#fbbf24" />
+    <text x="76" y="292" textAnchor="middle" fill="#fbbf24" fontSize="26">新D · 70</text>
+    <text x="310" y="199" textAnchor="middle" fill="#fbbf24" fontSize="27">只接管 (50,70]</text>
+    <text x="310" y="240" textAnchor="middle" fill="#cbd5e1" fontSize="24">其余位置保留去向</text>
+    <text x="320" y="444" textAnchor="middle" fill="#cbd5e1" fontSize="23">示例：56、64从C改归D；哈希位置不变</text>
+  </svg>
+  <figcaption>示例环。金色区间左端50不包含，右端70包含；环上位置与真实数据搬迁是两件事。</figcaption>
+</figure>
+
+## 新节点只接管局部区间 {#insert}
+
+现在只插入D@70，A@20、B@50、C@85保持不动。
+
+原来50之后到85的键，顺时针先遇到C。D加入以后，其中**50之后到70及70本身**先遇到D，其余70之后到85的键仍先遇到C。这段改变的范围写作`(50,70]`。其余区间的第一个节点没有改变。
+
+| 哈希值h | 原A/B/C环 | 加D@70以后 | 是否改变 |
+|---|---|---|---|
+| 5、13 | A | A | 保持 |
+| 27、34、46 | B | B | 保持 |
+| 56、64 | C | D | 改变 |
+| 78 | C | C | 保持 |
+| 86、95 | A | A | 保持 |
+
+同样十个键，仅56、64改变，得到本例的2/10。更一般地，**只插入新位置并保留旧位置**时，受影响的只是新节点与它前驱之间的区间。移除节点则让原先归它的区间转给后继。这个几何关系来自查找规则，不要求把所有键重新散列一次。[^cassandra]
+
+“局部”不保证在任意布局中都很小：若新位置截走一段特别长的区间，改变的键也可能多。本例D截走的空间长度是20；只有加上键位置均匀、样本足够等假设，才可把空间占比联系到长期键数比例。键大小和访问频率仍可能不同，键数比例也不等于迁移字节、请求负载或耗时比例。
+
+## 多个虚拟位置与工程边界 {#vnodes}
+
+单个节点只放一个位置，负责的区间长短可能差很多。即使是本例插入D以后，A、B、C、D负责的编号空间长度也分别是35、30、15、20；稳定映射本身并不保证平均。
+
+**虚拟节点**让一个物理缓存拥有多个分散位置，每个位置仍映回同一台缓存。合理分散这些位置，可以让每台节点承接多个较小区间，让新增节点有机会从多个原节点接走数据。Cassandra官方同时提醒：更多token也会增加维护、修复等操作的成本。[^cassandra]
+
+下面是**另一套预先配置的示例**，不是把前一个环无成本地改成此布局：
+
+<figure>
+  <svg viewBox="0 0 640 345" role="img" aria-labelledby="ch-vnode-title ch-vnode-desc" style={{width: '100%', height: 'auto', display: 'block', background: '#0f172a', borderRadius: '16px'}}>
+    <title id="ch-vnode-title">每台缓存的三个环位置，映射回同一台物理缓存</title>
+    <desc id="ch-vnode-desc">A拥有5、38、72，B拥有15、48、82，C拥有28、60、94；每一行的三个位置只对应右侧的一台缓存。新D可在10、34、88加入，接管多个分散小区间。</desc>
+    <defs><marker id="ch-vnode-arrow" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="#94a3b8" /></marker></defs>
+    <text x="320" y="36" textAnchor="middle" fill="#e2e8f0" fontSize="26">多个环位置，仍是一台缓存</text>
+    <g fill="none" stroke="#38bdf8" strokeWidth="3"><circle cx="66" cy="91" r="27" /><circle cx="166" cy="91" r="27" /><circle cx="266" cy="91" r="27" /></g>
+    <g fill="#e2e8f0" fontSize="25" textAnchor="middle"><text x="66" y="99">5</text><text x="166" y="99">38</text><text x="266" y="99">72</text></g>
+    <path d="M308 91 H428" fill="none" stroke="#94a3b8" strokeWidth="3" markerEnd="url(#ch-vnode-arrow)" />
+    <rect x="454" y="60" width="147" height="62" rx="12" fill="#12324a" stroke="#38bdf8" strokeWidth="2" /><text x="528" y="100" textAnchor="middle" fill="#e2e8f0" fontSize="26">A缓存</text>
+    <g fill="none" stroke="#34d399" strokeWidth="3"><circle cx="66" cy="174" r="27" /><circle cx="166" cy="174" r="27" /><circle cx="266" cy="174" r="27" /></g>
+    <g fill="#e2e8f0" fontSize="25" textAnchor="middle"><text x="66" y="182">15</text><text x="166" y="182">48</text><text x="266" y="182">82</text></g>
+    <path d="M308 174 H428" fill="none" stroke="#94a3b8" strokeWidth="3" markerEnd="url(#ch-vnode-arrow)" />
+    <rect x="454" y="143" width="147" height="62" rx="12" fill="#123b35" stroke="#34d399" strokeWidth="2" /><text x="528" y="183" textAnchor="middle" fill="#e2e8f0" fontSize="26">B缓存</text>
+    <g fill="none" stroke="#c084fc" strokeWidth="3"><circle cx="66" cy="257" r="27" /><circle cx="166" cy="257" r="27" /><circle cx="266" cy="257" r="27" /></g>
+    <g fill="#e2e8f0" fontSize="25" textAnchor="middle"><text x="66" y="265">28</text><text x="166" y="265">60</text><text x="266" y="265">94</text></g>
+    <path d="M308 257 H428" fill="none" stroke="#94a3b8" strokeWidth="3" markerEnd="url(#ch-vnode-arrow)" />
+    <rect x="454" y="226" width="147" height="62" rx="12" fill="#302248" stroke="#c084fc" strokeWidth="2" /><text x="528" y="266" textAnchor="middle" fill="#e2e8f0" fontSize="26">C缓存</text>
+    <text x="320" y="328" textAnchor="middle" fill="#fbbf24" fontSize="24">另例：新D在10、34、88加入</text>
+  </svg>
+  <figcaption>同一颜色的多个位置指向同一缓存。虚拟位置增加，并没有增加物理机器，也不自动复制数据。</figcaption>
+</figure>
+
+在该预设布局中，D分别接管`(5,10]`、`(28,34]`、`(82,88]`，原负责者依次为B、A、C。它表现“从多个原节点分担小段”的机制；这组手选位置没有证明随机分配、最优均衡或一般性能提升。
+
+### 虚拟节点解决不了的事
+
+- **单个热点键。**同一键仍找到同一负责节点。若一个键承担大部分请求，多放虚拟位置不会把它自动拆开；热点复制、请求合并或业务拆分需要另行设计。
+- **真实负载。**区间长度、键数、数据字节、请求频率、节点容量是不同指标。位置分散只是均衡手段之一，不能保证每台一样忙。
+- **迁移与切换。**新路由确定“该由谁负责”，还需要处理原数据搬迁、缓存重建、并发读写和客户端成员视图；固定环不是完整在线迁移协议。
+- **副本一致性。**名称中的“一致性”指成员变化时映射保持的性质，不等于自动获得强一致读写、复制或选举协议。
+
+### Redis Cluster为何不是本片这张环
+
+Redis Cluster采用固定16384个槽。键通常经`CRC16(key) % 16384`映射到槽，再由槽的分配关系确定负责节点；hash-tag规则还可能使参与计算的内容只取键的一部分。扩容时迁移部分槽及其中的键，16384并不随着节点数变成3或4。[^redis]
+
+所以，不能因为它也“哈希后取余”，就把它等同于前面的`h % 节点数`；也不能把Redis Cluster的节点直接贴到本片环上，说它就是这种实现。两者都能把键的稳定位置与物理节点分配分开，但维护方式和迁移协议各有具体设计。
+
+### 可复算的单环查找
+
+下面的Python仅复现本文已经给定的哈希位置与单归属规则；没有实现真实键的哈希函数、复制、迁移或客户端协议。节点位置必须唯一，工程中还要选稳定哈希与足够大的空间，并定义位置冲突的处理办法。
+
+```python
+from bisect import bisect_left
+
+def owner(h, tokens):
+    """tokens: {位置: 节点名}；h与位置使用同一固定空间。"""
+    positions = sorted(tokens)
+    if not positions:
+        raise ValueError("ring is empty")
+    i = bisect_left(positions, h)
+    if i == len(positions):
+        i = 0
+    return tokens[positions[i]]
+
+keys = [5, 13, 27, 34, 46, 56, 64, 78, 86, 95]
+before = {20: "A", 50: "B", 85: "C"}
+after = {**before, 70: "D"}
+changed = [h for h in keys if owner(h, before) != owner(h, after)]
+print(changed)  # [56, 64]
+```
+
+一致性哈希在这条主线上带来的价值，是让新增节点截走局部负责范围，同时保留其余去向；虚拟节点改善位置分配的机会，迁移、热点和真实负载继续由相应工程机制处理。
+
+## 参考资料
+
+以下官方正文访问于2026-10-25（北京时间）。公开资料支持机制与产品边界，本文所有0..99位置、十键数量及虚拟位置均为教学设计；完整核验范围和短引见本期research.md。
+
+[^nginx]: NGINX，[Module ngx_http_upstream_module](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#hash)。动态文档未标该节最后更新日期；正文说明`consistent`使用Ketama，减少成员变化后的键重映射并帮助缓存命中。
+[^cassandra]: Apache Cassandra，[Dynamo](https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html)。本次读取页面标识5.0，未标页面日期；包含token环、虚拟节点及维护代价，原页的多副本语境未被简化为本片的单归属模型。
+[^redis]: Redis，[Redis cluster specification：Key distribution model；Live reconfiguration](https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/)。正文未标最后更新日期，页面元数据modified_time为2026-09-21；固定槽、hash-tag例外和迁移职责依规范分别说明。
+
+#### 片尾原题名与逐字引用（2026-10-25核验）
+
+以下保留资料原题与所引原句，机构、版本和具体位置分别注明。本轮核对了下列官方仓库固定版本，原有资料读取记录继续保留。
+
+**[R1] Module ngx_http_upstream_module**（NGINX；持续维护文档 · 核验2026-10-25）。
+
+> The method ensures that only a few keys will be remapped to different servers when a server is added to or removed from the group.
+
+定位：hash directive, consistent parameter paragraph。 [正式链接](https://nginx.org/en/docs/http/ngx_http_upstream_module.html#hash) · [本轮实读固定正文](https://github.com/nginx/nginx.org/blob/34f63eb329ff52623cec453cd8f7539f9a5f8606/xml/en/docs/http/ngx_http_upstream_module.xml)。
+
+**[R2] Dynamo**（Apache Cassandra；5.0文档 · 核验2026-10-25）。
+
+> Virtual nodes solve the problem by assigning multiple tokens in the token ring to each physical node.
+
+定位：Multiple Tokens per Physical Node (vnodes), paragraph 2。 [正式链接](https://cassandra.apache.org/doc/latest/cassandra/architecture/dynamo.html) · [本轮实读固定正文](https://github.com/apache/cassandra/blob/76550e931481e965ae3283d8cf4a59c320d74c55/doc/modules/cassandra/pages/architecture/dynamo.adoc)。
+
+《Dynamo》是Apache Cassandra 5.0架构文档的原题；Token Ring与vnodes是其中的章节。

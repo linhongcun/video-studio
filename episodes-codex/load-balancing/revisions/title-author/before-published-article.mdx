@@ -1,0 +1,53 @@
+---
+title: "一台服务器忙不过来，怎么办？"
+summary: "跟着同一批请求，看应用实例怎样分担工作、故障实例怎样暂停接收新请求。"
+related: ["cdn", "browser-cache"]
+chapters:
+  - id: hook
+    title: "一台实例为何积压"
+  - id: balance
+    title: "请求交给哪一个实例"
+  - id: health
+    title: "检查故障，再决定分配"
+  - id: limits
+    title: "共享瓶颈与失败请求"
+---
+
+## 一台实例为何积压 {#hook}
+
+一次活动涌入许多访问，程序处理得比请求到达慢，等待便会积累。增加运行同一程序的应用实例，可以分担工作；入口还需要决定将每次请求送到哪个实例，这就是本片讨论的负载均衡。
+
+## 请求交给哪一个实例 {#balance}
+
+视频用轮流分配作示例。同一条请求只交给一个被选实例，实例生成的结果经入口返回对应浏览器。实际系统也可按连接数、权重等条件选择，不能从示意图推断所有系统都会平均分配。[^lb]
+
+## 检查故障，再决定分配 {#health}
+
+故障处理是另一项关键工作。主动健康检查发送专门的探测请求，被动检查则观察真实交易的失败；两者不要混为一谈。视频选择主动检查来说明：示例配置要求连续两次失败才暂时停用，修复后连续两次成功才恢复。次数是教学配置，不是通用默认值，发现故障也不是瞬时完成。NGINX官方文档所述主动检查属于Plus功能，其开源版支持被动检查。[^health]
+
+## 共享瓶颈与失败请求 {#limits}
+
+避开故障实例主要保护后续分配，不能让此前失败的请求自动成功。重试还要结合请求是否可安全重做、超时和幂等设计。多个应用实例也不保证性能线性增加：若共同依赖的数据库已经到达能力边界，增加应用实例仍可能继续等待。会话状态怎样跨实例共享、入口本身如何保证可用，是需要另行设计的问题。
+
+[^lb]: [NGINX 官方负载均衡文档](https://nginx.org/en/docs/http/load_balancing.html)，实际阅读Introduction、methods与default configuration，访问于2026-10-24。
+[^health]: [NGINX 官方健康检查文档](https://docs.nginx.com/nginx/admin-guide/load-balancer/http-health-check/)，实际阅读Passive/Active Health Checks及fails/passes配置，访问于2026-10-24。
+
+## 参考资料
+
+以下资料保留实际原题与原文短引；本轮核验于2026-10-26（北京时间）。
+
+**[R1] NGINX：《Using nginx as HTTP load balancer》（维护文档 · 2026-10-26核验）**。
+
+> When the load balancing method is not specifically configured, it defaults to round-robin.
+
+原文位置：Default load balancing configuration。
+
+[正式文档](https://nginx.org/en/docs/http/load_balancing.html) · [固定原文](https://github.com/nginx/nginx.org/blob/a8e5cbef9776c487521e2903ffcf5d2fcb111eeb/xml/en/docs/http/load_balancing.xml)。
+
+**[R2] NGINX：《HTTP Health Checks》（维护文档 · 2026-10-26核验）**。
+
+> The server is marked as unhealthy, and NGINX Plus does not send client requests to it until it once again passes a health check.
+
+原文位置：Active Health Checks。
+
+[正式文档](https://docs.nginx.com/nginx/admin-guide/load-balancer/http-health-check/) · [固定原文](https://github.com/nginx/documentation/blob/463c9ec87b77b4bb138ce4edb3449ffefc623cdc/content/nginx/admin-guide/load-balancer/http-health-check.md)。

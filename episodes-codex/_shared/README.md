@@ -4,29 +4,29 @@
 
 ## 新期的固定参考资料流程
 
-新制作或重制的视频从调研起准备 `presentation: original-title-quote` 的本期 `references.json`、原题/原文证据和文章出处；默认入口必须覆盖参考资料附录。[新期模板](../_template/README.md)提供待填写JSON、package脚本片段及冻结清单示例。不要把复制旧工程的 `render` 命令当作已接入新流程。
+新制作或重制的视频从调研起准备 `presentation: title-author` 的本期 `references.json`、原题/署名证据和文章出处，默认入口必须覆盖参考资料附录。[新期模板](../_template/README.md)提供待填写JSON、package脚本片段及冻结清单示例，不把复制旧工程的 `render` 命令当作已接入新流程。
 
-`title` 必须保留文档实际原始题名及其语言、字词与标点，`titleEvidence: {locator, evidence}` 可定位。可选 `quotation: {text, locator, evidence}` 保存需要展示的连续原文，画面标「原文摘录」；无需摘录则省略字段。不自行拼接省略，不用概括或译文替代原题/原文；`displayTitle`、`displaySupport` 禁用，内部 `supports` 不上屏。文章引用区另附翻译或解释时分别标「译文」「编者说明」。
+`title` 保留文档实际原题及其语言、字词与标点，`titleEvidence: {locator, evidence}` 可定位。有明确公开个人署名时填写非空字符串 `author`，否则省略该字段并显示 `organization`；实际署名依据留关联核验记录，不从Git提交者、维护账号或`ms.author`用户名推断。视频采用简洁列表，只显示原题与作者/机构；版本、日期、定位、链接、`quotation`、`supports`和额外提示都不上屏。需要保留的原文摘录仍逐字核对，放文章或内部研究，不自行翻译、拼接或添加省略后冒充原文。
 
 ```sh
 node site/scripts/check-references.mjs --sources episodes-codex/your-episode
 python3 episodes-codex/_shared/render_with_references.py episodes-codex/your-episode
 ```
 
-入口先只读检查来源/文章链接及本期实际 `source-sha256.json`，再调用本期 `npm run render:body`；该命令应把完整正文和已有代码卡混音到 `remotion/out/body.mp4`。随后使用 `append_references_original.py`，默认每页5秒、最多2项、提示暂停阅读，生成最终 `video.mp4`。新器保留并依赖旧 `append_references.py` 的媒体处理实现，不修改旧引擎字节。资料不全或冻结失效时应在正文渲染前失败。
+入口先只读检查来源/文章链接及本期实际 `source-sha256.json`，再调用本期 `npm run render:body`；该命令把完整正文和已有代码卡混音到 `remotion/out/body.mp4`。随后用 `append_references_bibliography.py`，每页最多4项、默认5秒，生成最终 `video.mp4`。新器依赖保留的 `append_references_original.py` 与 `append_references.py` 完成媒体操作，不修改旧引擎字节。资料不全或冻结失效时应在正文渲染前失败。
 
-资料清单、文章、核验/题名/短引证据、package脚本、默认入口、新追加器及其旧引擎依赖/依赖锁、资料预检代码与实际主题都随本期输入冻结；最终视频和生成回执不作为编码前输入。Pillow按 `requirements-reference-appendix.txt` 安装，字体及编码环境按实际生成回执记录。该流程不复制配音、混音或起音算法，不改已经发布的冻结追加器。
+资料清单、文章、原题/署名及实际使用的研究证据、package脚本、默认入口、新追加器及两个旧引擎依赖/依赖锁、资料预检代码与实际主题都随本期输入冻结；最终视频和生成回执不作为编码前输入。Pillow按 `requirements-reference-appendix.txt` 安装，字体及编码环境按实际回执记录。此流程不复制配音、混音或起音算法，不改已经发布的冻结追加器。
 
-生成的两份附录回执放在 `revisions/reference-endcards/`，并复制到本期根目录；`render-result.json` 提供最终SHA和 `publicationMetadata`。发布时复制最终视频、文章、来源及两份回执，按该metadata片段填写 `meta.referenceAppendix`、`meta.finalVideoFrames`，正文分镜和 `words.json` 继续描述实际正文范围。
+两份附录回执同时存放于 `revisions/reference-endcards/` 与本期根目录。`render-result.json` 的 `publicationMetadata` 说明应接入站点的 `meta.referenceAppendix`、`meta.finalVideoFrames`，正文分镜和 `words.json` 继续描述实际正文范围。
 
-新回执将 `sourceTitles`、`quotations` 与实际清单逐条绑定，记录新器的生成身份及旧引擎依赖SHA。标题与短引各自最多3行，溢出时明确失败，不自动截断、改写成概括或从 `supports` 合成原文。实际原题/原文、版式及播放器仍须复核，不能把回执存在当作已看过原文。
+新回执的 `bibliography` 绑定实际原题 `title` 与署名 `credit`；`layout` 使用 `kind: title-author-single-column`、`maxItemsPerPage: 4`、`renderedFields: ['title', 'credit']`、`quotesRendered: false`，每页5秒记于 `inputs.secondsPerPage`。原有 `sourceTitles` 和研究用 `quotations` 仍保留内部身份，不代表摘录上屏。标题和署名溢出时明确报COPYFIT，不截断、概括原题或杜撰作者；完整原文与来源、实际版式及播放器仍须独立复核。旧原题/摘录卡与QA保留历史范围，不替换为新列表结果。
 
 ```sh
 python3 episodes-codex/_shared/render_with_references.py episodes-codex/your-episode --verify
 npm --prefix site run check:references
 ```
 
-`--verify` 只读核对冻结与媒体，按帮助信息写QA报告；不重写冻结或重渲正文。发布构建在复制媒体之前自动执行同一附录检查：新视频和更换媒体的旧视频缺附录时阻断；只在固定基线名单且媒体字节未变的未处理旧片允许继续分批。来源原文是否真正支持结论、资料卡可读性、原生字幕和暂停/手机全屏效果仍须实际复核。
+`--verify` 只读核对冻结与媒体，按帮助信息写QA报告；不重写冻结或重渲正文。发布构建在复制媒体之前自动执行同一附录检查：新视频和更换媒体的旧视频缺附录时阻断；只在固定基线名单且媒体字节未变的未处理旧片允许继续分批。来源原文是否支持结论、原题与署名是否准确、简表可读性、原生字幕和暂停/手机全屏效果仍须实际复核。
 
 以下句级装配示例原用于`tx-2pc`、`tx-tcc`、`tx-saga`、`tx-outbox`正文；不要把正文检查器的帧数规则直接用于追加参考资料后的最终媒体。
 

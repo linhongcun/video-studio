@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "episode": "cdn",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-25",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Cloudflare",
+      "title": "Content Delivery Network (CDN) Reference Architecture",
+      "version": "官方文档 · 2026-10-25核验",
+      "url": "https://developers.cloudflare.com/reference-architecture/architectures/cdn/",
+      "supports": [
+        "CDN在多个网络位置缓存源站内容，可用副本能减少获取内容的回源请求。",
+        "Cloudflare的Anycast由BGP路由，并考虑处理容量；片中地图直线长度不等于实际网络路由或时延测量。",
+        "标准缓存未命中可继续取源，真实部署也可有多级缓存；片中一层边缘与源站是教学简化。"
+      ],
+      "sections": "How a CDN tackles web application challenges；Routing requests to CDN nodes；Tiered Cache及流量示例",
+      "shots": [
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "11",
+        "12"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "method": "实际HTTP GET读取官方仓库固定commit完整响应，核对标题/版本与逐论点原文；canonical正文访问失败单独记录。",
+        "sourceId": "cdn-architecture",
+        "sourceUrl": "https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/reference-architecture/architectures/cdn.mdx",
+        "retrievedUrl": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/reference-architecture/architectures/cdn.mdx",
+        "commit": "ec32a21c71d1aa8747ef270e180ef0d31e5231f6",
+        "sha256": "4a281ae24e3576bbccdf4ad776a3853df8d136cb95beb4d4deb1b364317f5b16",
+        "evidence": "docs/reference-endcards/batch-2/sources-cdn.json",
+        "canonicalAccess": "本轮未取得正式站点正文，实际核验负责机构官方GitHub固定正文。"
+      },
+      "titleEvidence": {
+        "locator": "frontmatter title · line 2",
+        "evidence": "docs/reference-endcards/original-titles/sources-core.json"
+      },
+      "quotation": {
+        "text": "Edge nodes within the Cloudflare network cache content from the origin server and are able to respond to requests via a cached copy.",
+        "locator": "Cloudflare CDN architecture and design",
+        "evidence": "docs/reference-endcards/original-titles/sources-core.json"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "IETF HTTP WG",
+      "title": "HTTP Caching",
+      "version": "RFC 9111 · 2022",
+      "url": "https://www.rfc-editor.org/rfc/rfc9111.html",
+      "supports": [
+        "响应存储和复用受请求匹配、缓存指令及新鲜度等条件限制，不是取到内容就能永久共享。",
+        "缓存不能直接复用时可通过条件请求验证或获取新响应；不能把过期副本一直当成新内容使用。",
+        "共享缓存与私有缓存有不同边界；不带字段列表的private禁止共享缓存存储该响应，no-store限制存储。"
+      ],
+      "sections": "§2 Overview；§3 Storing Responses in Caches；§4/§4.2/§4.3复用、新鲜度与验证；§5.2.2响应缓存指令；Caching of Sensitive Information",
+      "shots": [
+        "4",
+        "6",
+        "7",
+        "9",
+        "10",
+        "12"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "method": "实际HTTP GET读取官方仓库固定commit完整响应，核对标题/版本与逐论点原文；canonical正文访问失败单独记录。",
+        "sourceId": "cdn-rfc9111",
+        "sourceUrl": "https://github.com/httpwg/http-core/blob/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml",
+        "retrievedUrl": "https://raw.githubusercontent.com/httpwg/http-core/3cdfb4df4dc47e75e9642efc99ab699a0495d883/rfc9111.xml",
+        "commit": "3cdfb4df4dc47e75e9642efc99ab699a0495d883",
+        "sha256": "800d7f7c39dbe9b580c5d1bac28bd6328e396d66608a25c8bc9c1f78b6da5a25",
+        "evidence": "docs/reference-endcards/batch-2/sources-cdn.json",
+        "canonicalAccess": "本轮未取得正式站点正文，实际核验负责机构官方GitHub固定正文。"
+      },
+      "articleOnlySupports": [
+        "Set-Cookie本身不自动禁止HTTP缓存，服务器仍应设置适当Cache-Control；带Cookie不等于共享副本天然安全。"
+      ],
+      "titleEvidence": {
+        "locator": "RFC front/title",
+        "evidence": "docs/reference-endcards/original-titles/sources-core.json"
+      },
+      "quotation": {
+        "text": "When a response is fresh, it can be used to satisfy subsequent requests without contacting the origin server, thereby improving efficiency.",
+        "locator": "§4.2 Freshness",
+        "evidence": "docs/reference-endcards/original-titles/sources-core.json"
+      }
+    },
+    {
+      "id": "R3",
+      "organization": "Cloudflare",
+      "title": "Cloudflare cache responses",
+      "version": "官方文档 · 2026-10-25核验",
+      "url": "https://developers.cloudflare.com/cache/concepts/cache-responses/",
+      "supports": [
+        "Cloudflare将从缓存找到资源与未命中后取源区分为不同状态，命中可用副本与回源是不同请求路径。",
+        "过期内容可能重新取源或条件验证；不适合缓存的内容也可能直接取源，未命中不是所有回源的唯一原因。"
+      ],
+      "sections": "HIT；MISS；EXPIRED；STALE；REVALIDATED；DYNAMIC",
+      "shots": [
+        "4",
+        "5",
+        "7",
+        "9",
+        "11"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-25",
+        "method": "实际HTTP GET读取官方仓库固定commit完整响应，核对标题/版本与逐论点原文；canonical正文访问失败单独记录。",
+        "sourceId": "cdn-cache-responses",
+        "sourceUrl": "https://github.com/cloudflare/cloudflare-docs/blob/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/cache/concepts/cache-responses.mdx",
+        "retrievedUrl": "https://raw.githubusercontent.com/cloudflare/cloudflare-docs/ec32a21c71d1aa8747ef270e180ef0d31e5231f6/src/content/docs/cache/concepts/cache-responses.mdx",
+        "commit": "ec32a21c71d1aa8747ef270e180ef0d31e5231f6",
+        "sha256": "261e6e29bc3e9e54a6dbacb213ad2a6aaf8bb8882609d18b624455fd3dd84ef3",
+        "evidence": "docs/reference-endcards/batch-2/sources-cdn.json",
+        "canonicalAccess": "本轮未取得正式站点正文，实际核验负责机构官方GitHub固定正文。"
+      },
+      "titleEvidence": {
+        "locator": "frontmatter title · line 2",
+        "evidence": "docs/reference-endcards/original-titles/sources-core.json"
+      },
+      "quotation": {
+        "text": "The response is eligible for cache but was not present in Cloudflare's cache at request time, so it was served from the origin web server.",
+        "locator": "MISS · line 29",
+        "evidence": "docs/reference-endcards/original-titles/sources-core.json"
+      }
+    }
+  ],
+  "scope": "片尾列出与CDN边缘选择、命中/回源和缓存边界直接相关的三项资料；地图许可及旧稿历史资料另存原记录，不为凑数列入技术主依据。",
+  "presentation": "original-title-quote"
+}

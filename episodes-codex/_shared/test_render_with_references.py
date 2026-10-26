@@ -35,7 +35,7 @@ class RenderWithReferences(unittest.TestCase):
         self.evidence.write_text('Synthetic integration-test evidence, not a published reference.\n'
                                  'Reference-render integration fixture\n')
         self.references = {
-            'schemaVersion': 1, 'presentation': 'original-title-quote',
+            'schemaVersion': 1, 'presentation': 'title-author',
             'episode': self.directory.name, 'checkedAt': '2026-10-25',
             'sources': [{'id': 'R1', 'organization': 'Synthetic test fixture',
                          'title': 'Reference-render integration fixture', 'version': '2026',
@@ -76,7 +76,8 @@ subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i',
     def freeze(self):
         files = [self.directory/name for name in ('references.json', 'article.mdx', 'evidence.md', 'storyboard.json')]
         files += [self.remotion/'package.json', self.remotion/'make-body.py', WRAPPER,
-                  SHARED/'append_references_original.py', SHARED/'append_references.py',
+                  SHARED/'append_references_bibliography.py', SHARED/'append_references_original.py',
+                  SHARED/'append_references.py',
                   SHARED/'requirements-reference-appendix.txt',
                   ROOT/'episodes/_shared/theme/pageTheme.ts', ROOT/'site/scripts/check-references.mjs']
         write(self.directory/'source-sha256.json', {os.path.relpath(p, self.directory): sha(p) for p in files})
@@ -101,6 +102,15 @@ subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i',
         self.assertIn('Frozen input changed', result.stderr)
         self.assertFalse((self.directory/'body-started').exists())
 
+    def test_historical_source_presentation_is_rejected_before_body_starts(self):
+        self.references['presentation'] = 'original-title-quote'
+        write(self.directory/'references.json', self.references)
+        self.freeze()
+        result = self.execute()
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("presentation 'title-author'", result.stderr)
+        self.assertFalse((self.directory/'body-started').exists())
+
     def test_recursive_render_body_is_rejected_without_starting_real_body(self):
         self.package['scripts']['render:body'] = 'npm run render'
         write(self.remotion/'package.json', self.package)
@@ -121,11 +131,16 @@ subprocess.run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i',
         self.assertEqual(receipt['appendix']['durationInFrames'], 150)
         self.assertEqual(receipt['finalVideoFrames'], 156)
         self.assertEqual(receipt['outputSHA256'], sha(self.directory/'video.mp4'))
-        self.assertEqual(receipt['presentation'], 'original-title-quote')
+        self.assertEqual(receipt['presentation'], 'title-author')
         self.assertEqual(receipt['sourceTitles'], [{'id': 'R1', 'title': 'Reference-render integration fixture'}])
         self.assertEqual(receipt['quotations'], [])
-        self.assertEqual(receipt['inputs']['generatorSHA256'], sha(SHARED/'append_references_original.py'))
+        self.assertEqual(receipt['bibliography'], [{'id': 'R1', 'title': 'Reference-render integration fixture',
+                                                  'credit': 'Synthetic test fixture'}])
+        self.assertEqual(receipt['layout'], {'kind': 'title-author-single-column', 'maxItemsPerPage': 4,
+                                             'renderedFields': ['title', 'credit'], 'quotesRendered': False})
+        self.assertEqual(receipt['inputs']['generatorSHA256'], sha(SHARED/'append_references_bibliography.py'))
         self.assertEqual(receipt['dependencies']['oldEngineSHA256'], sha(SHARED/'append_references.py'))
+        self.assertEqual(receipt['dependencies']['originalRendererSHA256'], sha(SHARED/'append_references_original.py'))
         self.assertEqual(rendered['publicationMetadata']['referenceAppendix']['from'], 6)
         self.assertEqual(rendered['publicationMetadata']['finalVideoFrames'], 156)
         self.assertTrue(media['bodyDecodedFramesAndTimestampsEqual'])

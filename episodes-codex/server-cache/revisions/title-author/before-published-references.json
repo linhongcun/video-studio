@@ -1,0 +1,102 @@
+{
+  "schemaVersion": 1,
+  "episode": "server-cache",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-26",
+  "timezone": "Asia/Shanghai",
+  "presentation": "original-title-quote",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Microsoft · Azure Architecture Center",
+      "title": "Cache-Aside Pattern",
+      "titleEvidence": {
+        "locator": "cache-aside.yml, metadata.title (line 3)",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json"
+      },
+      "version": "官方文档 · 2026-10-26核验",
+      "url": "https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside",
+      "supports": [
+        "应用先检查缓存，未命中再读取数据源、填回缓存并返回；命中时可复用临时副本，减少重复读取。",
+        "缓存可以在应用进程内，也可以由多个应用实例共享；Redis是原文给出的共享缓存实现示例。",
+        "条目过期或被清理后可能重新取源；命中少或复用少时额外缓存检查与填充可能得不偿失。",
+        "Cache-Aside不保证缓存与数据库始终一致，过期时间也不能证明数据库修改会立即反映到旧副本。"
+      ],
+      "sections": "Solution（步骤1–3）；Problems and considerations（Lifetime／Evicting data／Consistency／Local caching）；When to use this pattern；Example",
+      "shots": [
+        "01",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12"
+      ],
+      "quotation": {
+        "text": "The application determines whether an item currently resides in the cache by attempting to read from the cache.",
+        "locator": "Solution, step 1 (line 19)",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json"
+      },
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-26",
+        "method": "通过继承的会话HTTP代理实际GET官方GitHub固定commit完整正文，核对原始题名、连续逐字短句和对应论点；不使用旧日志冒充新访问。",
+        "sourceId": "server-cache-cache-aside",
+        "sourceUrl": "https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside-content.md",
+        "retrievedUrl": "https://raw.githubusercontent.com/MicrosoftDocs/architecture-center/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside-content.md",
+        "commit": "b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a",
+        "sha256": "eb19852e710d924d98a39f386928ef1b0d763391f0e9e22a353ce818dd57881f",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json",
+        "provenance": "负责机构官方文档仓库固定版本。",
+        "canonicalAccess": "本轮只读取官方GitHub固定正文；正式链接保留供查阅，未将其记作本轮成功请求。",
+        "titleSourceUrl": "https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/cache-aside.yml"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Redis",
+      "title": "EXPIRE",
+      "titleEvidence": {
+        "locator": "frontmatter title (line 74)",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json"
+      },
+      "version": "官方命令文档 · 2026-10-26核验",
+      "url": "https://redis.io/docs/latest/commands/expire/",
+      "supports": [
+        "对已设置超时的Redis键，超时后键会过期；Redis通过访问时的惰性检查和主动检查处理到期键。",
+        "Redis键并非天然都带TTL，未设置过期的键可以持续存在，也可以显式删除或清除其TTL。",
+        "过期或删除后的数据读取仍需由应用的cache-aside逻辑决定是否重新读取数据库并回填；EXPIRE本身不定义数据库更新传播或强一致协议。"
+      ],
+      "sections": "Opening paragraph；Appendix: Redis expires／Keys with an expire／How Redis expires keys",
+      "shots": [
+        "05",
+        "06",
+        "10",
+        "12"
+      ],
+      "quotation": {
+        "text": "After the timeout has expired, the key will automatically be deleted.",
+        "locator": "Opening paragraph (line 77)",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json"
+      },
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-26",
+        "method": "通过继承的会话HTTP代理实际GET官方GitHub固定commit完整正文，核对原始题名、连续逐字短句和对应论点；不使用旧日志冒充新访问。",
+        "sourceId": "server-cache-redis-expire",
+        "sourceUrl": "https://github.com/redis/docs/blob/1406db84d01f1d6a07fe567cbdea4d051456a2d7/content/commands/expire.md",
+        "retrievedUrl": "https://raw.githubusercontent.com/redis/docs/1406db84d01f1d6a07fe567cbdea4d051456a2d7/content/commands/expire.md",
+        "commit": "1406db84d01f1d6a07fe567cbdea4d051456a2d7",
+        "sha256": "8724f37add5b23122fc8f7b78e5c250888a0c2321850a463b0a80709cbe00f6b",
+        "evidence": "docs/reference-endcards/batch-3/sources-server-cache.json",
+        "provenance": "负责机构官方文档仓库固定版本。",
+        "canonicalAccess": "本轮只读取官方GitHub固定正文；正式链接保留供查阅，未将其记作本轮成功请求。"
+      }
+    }
+  ],
+  "scope": "每页两项原题与原句、默认5秒。原文支撑cache-aside命中/未命中、回填和Redis过期边界；不把TTL当强一致保证，不改正文讲解、配音或示例数字。"
+}

@@ -15,3 +15,7 @@
 独立模型/审稿、真实动态/DOM、56张实际MP4图及完整解码/音轨数值检查通过；桌面/窄屏84项本地检查及代码滚动、完整复制/执行可达性通过。最新[Pages40262765700](https://github.com/linhongcun/video-studio/actions/runs/40262765700)成功，2026-10-26T11:16:49.910345+08:00的10个普通canonical GET核对完整媒体SHA、海报、VTT、四章及实际Release/更新日志通过；线上两视口实际播放、章跳转、4570首资料帧paint与无active cue通过。
 
 实际阶段结果见[最终QA](qa-final.md)、[动态预检](qa-motion-independent.md)、[实际成片](qa-video-independent.md)、[网页审查](qa-site-visual-independent.md)、[发布证据](publication-evidence.json)。Release首轮识别检查发现说明缺课程URL，补齐后重新部署同步日志，原失败记录保留；没有重配或替换成片。旧150项冻结和原媒体、其他902份发布文件保持。没有全片人工听辨、逐字ASR或新版用户观看认可；窄屏为headless视口，非真机。仅GitHub站点，无外部平台新发。
+
+## v0.71.2 · 题名与署名简表
+
+资料片尾统一只显示完整原始题名和作者/机构，一页5秒；原引文/定位等保留文章研究，正文、声音、代码卡不变。当前4720帧，完整SHA-256：`96801cb3fe9a49a91cc7adb9fc0d6a50806f42835ef0bebe757ddd410c30e60b`。[PR #345](https://github.com/linhongcun/video-studio/pull/345)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.71.2)与[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40284847950)完成，69次canonical完整GET覆盖本片媒体/海报SHA、字幕、章节/日期、引用及更新日志通过。实际检查与限制见仓库docs/reference-endcards/title-author。仅GitHub站点，无平台重发或本版观看认可。

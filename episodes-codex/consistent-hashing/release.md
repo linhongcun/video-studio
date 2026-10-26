@@ -26,3 +26,7 @@ Pages只发布video.mp4与meta.poster（16:9）；4:3/3:4封面留Git。verify_p
 ## 用户观看反馈（2026-10-26）
 
 本片的动画清晰度与内容准确性获得正向反馈。复盘保留从工程问题切入、固定示例逐步推导、官方资料核验和明确适用边界的做法，经验见docs/successful-practices.md的S002。观看反馈与技术检查分别记录，其余8个工程算法候选仍待安排。
+
+## v0.71.2 · 题名与署名简表
+
+资料片尾统一只显示完整原始题名和作者/机构，一页5秒；原引文/定位等保留文章研究，正文、声音、代码卡不变。当前6031帧，完整SHA-256：`c259639c6cacec2905937ba33dac8758da776de50b7d5b10b52e93fc2028a3e8`。[PR #345](https://github.com/linhongcun/video-studio/pull/345)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.71.2)与[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40284847950)完成，69次canonical完整GET覆盖本片媒体/海报SHA、字幕、章节/日期、引用及更新日志通过。实际检查与限制见仓库docs/reference-endcards/title-author。仅GitHub站点，无平台重发或本版观看认可。
