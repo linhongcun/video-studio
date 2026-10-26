@@ -19,3 +19,9 @@
 ## v0.71.2 · 题名与署名简表
 
 资料片尾统一只显示完整原始题名和作者/机构，一页5秒；原引文/定位等保留文章研究，正文、声音、代码卡不变。当前5472帧，完整SHA-256：`60e3192f057f70bb11c6ebd60ea6a971a7c0258ed1e7e86da46d502637f4224e`。[PR #345](https://github.com/linhongcun/video-studio/pull/345)、[Release](https://github.com/linhongcun/video-studio/releases/tag/v0.71.2)与[Release后Pages](https://github.com/linhongcun/video-studio/actions/runs/40284847950)完成，69次canonical完整GET覆盖本片媒体/海报SHA、字幕、章节/日期、引用及更新日志通过。实际检查与限制见仓库docs/reference-endcards/title-author。仅GitHub站点，无平台重发或本版观看认可。
+
+## 贴题开场优化（2026-10-26）
+
+基础衔接获得改善反馈后，进一步改为简明题意后预告单调栈，并立即说明保留等待日期与新一天处理的适配。基础操作融入同一日期示例，去掉单独取出再放回与最后命名镜；14镜28句、4句新声24复用，只新渲01/04共957帧。最终5031帧/167.7秒，Python4731..4880和资料4881..5030各5秒。完整SHA256：`07fd5e2916f4688cfbb6747539144242d7d8d8b0cd0f820a69ec99a84c54a8dd`。
+
+274输入、独立声音与真实动态、39个编码对照、实际成片22视觉时点、媒体时间戳/声音与两卡全150帧检查通过。最新主体/资料格式、身份及其他课程保留，网站接入v0.72.4进行中。实际发布与线上证据见[本轮记录](../../docs/daily-monostack-opening/README.md)。本轮没有逐字ASR、全片人工听辨或新一版学习效果测量；#80保持已completed历史，未向外部平台新发。
