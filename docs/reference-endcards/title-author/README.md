@@ -33,3 +33,9 @@
 新模板与调研/分镜/冻结/默认渲染/发布规范同步。全站构建17份实际资料附录/30片固定未换媒体存量通过，剩余存量不预记完成。实际图片、代表播放器和最终线上检查按各自真实报告记录；未重新GET未变的引用原文或改写来源对象，无全片听辨/ASR，不预记用户认可或传播效果。仅GitHub站点，不重发外部平台。
 
 证据入口：startup.json、production-entry-check.json、media-results.json、delivery.json、各期revisions/title-author中的before快照/迁移receipt/媒体检查及Bloom body-recovery.json。旧视频和QA按其原提交追溯，不改为新格式结果。
+
+## 最终本地验收
+
+17页/37项、68张实际MP4尾帧（各body末帧和卡首/中/末）全部逐张查看，17页卡首末MD5与producer报告一致。所有完整题名/署名正确，无引文、日期、定位、编号、暂停提示、截断或原字幕带入；包括HTTP四项、最长TLS题名、长机构、Bloom当前单位置末镜，以及原Java/Python卡。见qa-independent.json。
+
+17片本地built/完整文件/原章节和字幕检查通过；六片代表作完成desktop真实1倍速尾段到ended、mobile原生全屏，13张必要浏览器图实际查看通过。详见local-verification.json、qa-browser.json及visual-review.json。QA只兼容Bloom既有“资料依据”/脚注原格式，原文章未改；模拟手机/静音播放、旧代码卡原生控件遮挡范围如实保留，不宣称真机、全片听辨或重新检查所有旧代码行。正式线上69次GET在Release后另行执行。
