@@ -11,3 +11,13 @@
 sync_site.py准备站点白名单；核实际成片后以完整SHA和显式release发布复制，verify_published.py在Release后的Pages成功后做普通canonical GET全文件身份检查。网页与实际浏览器播放/暂停/章节另验。GitHub主干、Release、Pages按持续授权交付；没有外部平台新发。
 
 追踪：[issue #301](https://github.com/linhongcun/video-studio/issues/301)、[PR #344](https://github.com/linhongcun/video-studio/pull/344)。本期创建时间为首次建立meta记录的北京时间，首次公开另写publishedAt；EA07不是发布第七期。
+
+## 交付结果
+
+已由PR #344合并656b525f，首发[v0.72.0](https://github.com/linhongcun/video-studio/releases/tag/v0.72.0)，Release后Pages40299437706成功。[观看成片与图文](https://linhongcun.github.io/video-studio/episodes/redis-skiplist/)。
+
+最终4632帧/154.4秒/7,062,438字节，正文4482帧、资料150帧；139项冻结。49实际编码图、声轨与90项本地浏览器检查通过，最终整合构建保持8个已审页面/运行产物字节；10项canonical完整GET与线上两视口实际播放、四章、20条字幕、4482帧精确暂停均通过。完整身份、时间、报告与能力范围见[最终QA](qa-final.md)和[发布记录](publication.json)。
+
+本期没有用户新观看结论，不将技术通过写成学习效果或用户已认可。
+
+制作issue #301已在上线核验后以completed关闭；总览#294已更新为3项完成、6项待安排。

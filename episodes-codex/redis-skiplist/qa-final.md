@@ -12,6 +12,6 @@
 
 生产输入清单SHA-256：`3f7537c54543396f1b547d95acebd86e1c81930e6bb6dbd8e17721816b618716`（139项）。最终MP4：7,062,438字节，SHA-256 `1c78a906545d3eb9b25df0d6c7c104c5d8de3f248440cbb3bb9ed1467db2150e`。
 
-限制：关键动态连续片段及采样复核不等于全片实时观看；未作逐字ASR、全片人工听辨、物理手机或学习效果实验。当前是发布前技术/视觉通过，GitHub合并、Release、Pages与普通canonical全文件线上检查由后续publication.json记录；不预记用户已观看认可本片。交付仅GitHub仓库、Release和Pages。
+限制：关键动态连续片段及采样复核不等于全片实时观看；未作逐字ASR、全片人工听辨、物理手机或学习效果实验。GitHub合并656b525f、Release v0.72.0与Release后Pages40299437706均已完成；10项canonical完整GET、线上两视口实际播放/四章/20cue/首资料精确暂停均通过，完整时间与证据见[发布记录](publication.json)及[在线浏览器](qa-online-browser.md)；不预记用户已观看认可本片。交付仅GitHub仓库、Release和Pages。
 
 最终再整合2f85101d（v0.71.4）三片其他课程参考资料：174路径与139冻结项、站点运行源码均无交集。第二次fresh构建通过，8项本期页面/字幕/视频/海报及编译运行资源与90项浏览器检查时逐字节相同；不声称重跑90次动作。当前946项既有发布文件与新主干相同，见[最终整合检查](qa-final-site-integration.json)。
