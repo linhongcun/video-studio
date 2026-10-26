@@ -2,4 +2,4 @@
 
 [观看视频与图文](https://linhongcun.github.io/video-studio/episodes/redis-skiplist/)
 
-保留20句原配音、正文时序和后半段插入过程，章节名称同步明确。Redis独立模块仅记为后续规划方向。本次只上GitHub站点，不重发外部平台。
+保留20句原配音、正文时序和后半段插入过程，视频内分段提示已明确。Redis独立模块仅记为后续规划方向。本次只上GitHub站点，不重发外部平台。
