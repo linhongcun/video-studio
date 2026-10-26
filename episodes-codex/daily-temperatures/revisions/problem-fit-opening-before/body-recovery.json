@@ -1,0 +1,241 @@
+{
+  "status": "passed",
+  "checkedBy": "reuse_audio_audit",
+  "checkedAtUTC": "2026-10-26T11:01:53.429016+00:00",
+  "purpose": "Recover the immutable published body for reviewed picture-only reuse. No ignored body cache is used. The full current published reference appendix remains separately archived.",
+  "baseCommit": "cf9a0c9ebec6d930e490f905a10bc2491cc2eabd",
+  "source": {
+    "file": "published-video.mp4",
+    "sha256": "60e3192f057f70bb11c6ebd60ea6a971a7c0258ed1e7e86da46d502637f4224e",
+    "bytes": 9225368,
+    "frames": 5472,
+    "appendixFrom": 5322,
+    "referenceManifestSHA256": "857f05187ce0b96783c24adeb91226df1d76e9ae7111e6195152d2cc9c1eab1c",
+    "referenceMediaCheckSHA256": "c50ee6e3ecb8b4798a9a1fdc6f3ba8649badb5d1b8627cabb784530d51605244"
+  },
+  "output": {
+    "file": "video.mp4",
+    "sha256": "34b0d0189eff9e129809e2e0cbbeaed963cc57ba051d9f9f95b9a92d93888f18",
+    "bytes": 9190045,
+    "frames": 5322,
+    "width": 1920,
+    "height": 1080,
+    "fps": "30/1",
+    "videoSeconds": 177.4,
+    "audioSeconds": 177.408,
+    "containerSeconds": 177.408
+  },
+  "commands": [
+    [
+      "ffmpeg",
+      "-v",
+      "error",
+      "-n",
+      "-i",
+      "/workspace/video-studio/episodes-codex/daily-temperatures/revisions/problem-fit-opening-before/published-video.mp4",
+      "-map",
+      "0:v:0",
+      "-an",
+      "-frames:v",
+      "5322",
+      "-c:v",
+      "copy",
+      "-map_metadata",
+      "-1",
+      "/workspace/video-studio/episodes-codex/daily-temperatures/revisions/problem-fit-opening-before/body-video-recovery.tmp.mp4"
+    ],
+    [
+      "ffmpeg",
+      "-v",
+      "error",
+      "-n",
+      "-i",
+      "/workspace/video-studio/episodes-codex/daily-temperatures/revisions/problem-fit-opening-before/body-video-recovery.tmp.mp4",
+      "-i",
+      "/workspace/video-studio/episodes-codex/daily-temperatures/revisions/problem-fit-opening-before/published-video.mp4",
+      "-map",
+      "0:v:0",
+      "-map",
+      "1:a:0",
+      "-c",
+      "copy",
+      "-map_metadata",
+      "-1",
+      "-movflags",
+      "+faststart",
+      "/workspace/video-studio/episodes-codex/daily-temperatures/revisions/problem-fit-opening-before/video.mp4"
+    ]
+  ],
+  "recoveryMethod": "Stream-copy the first5322 encoded video packets to a temporary video-only file, then stream-copy that video with the complete untouched published AAC. No re-encoding, no -shortest. Remove inherited reference-appendix metadata marker because recovered body has no appendix.",
+  "sharedEvidenceImplementation": {
+    "file": "episodes-codex/_shared/append_references.py",
+    "sha256": "6688770d1221a115c9c1f591e3bffd14a6603d8c809c5b66f5e03e2fa4639f02",
+    "functions": [
+      "frame_rows",
+      "sequence_hash",
+      "audio_packets",
+      "audio_hash",
+      "probe",
+      "stream"
+    ]
+  },
+  "checks": {
+    "bodyDecodedFramesAndTimestampsEqualPublishedPrefix": true,
+    "bodyFrameMD5RowsSHA256": "b12b7ab0ebd74993e90d4c37cc9d4bb2d9cdecaf68d09ad6b29b651127dc7cce",
+    "publishedBodyPrefixFrameMD5RowsSHA256": "b12b7ab0ebd74993e90d4c37cc9d4bb2d9cdecaf68d09ad6b29b651127dc7cce",
+    "recoveredTimelineContinuous": true,
+    "audioPacketsPayloadOrderAndTimingEqual": true,
+    "audioPacketCount": 8317,
+    "audioPacketsSHA256": "292755f4c789f0f88e1bc007c47534ad4758b021a381c2785fc2e17470654b7d",
+    "decodedAudioPCMEqual": true,
+    "decodedAudioPCM": "SHA256=0ca86d8b1dc039b6761396f30e925d9d29e862db1597a094bc62124e5d898e20",
+    "videoStreamParametersEqual": true,
+    "audioStreamParametersAndEndpointEqual": true,
+    "inheritedAppendixMarkerRemoved": true
+  },
+  "originalBodyVoice": {
+    "file": "voice.wav",
+    "sha256": "2e74f1cb78ef53d53879298261a5414f4517fc02028cc85847accc2d88ef9c43",
+    "samples": 8515200,
+    "frames": 5322,
+    "storyboardSHA256": "58c57a029a80661b71e12587b4fce4bc579711b6a664c99d1ef96da360cd2592",
+    "sourceManifestSHA256": "0fd3d6c2a3e0e331ee60032ff9392cc4b3ea725fe36de222394476288804afcb"
+  },
+  "oldSamplePhase1600": [
+    {
+      "id": "01-problem-1",
+      "shot": "01-problem",
+      "startSample": 14400,
+      "endSample": 225972,
+      "startSampleModulo1600": 0,
+      "endSampleModulo1600": 372
+    },
+    {
+      "id": "01-problem-2",
+      "shot": "01-problem",
+      "startSample": 242772,
+      "endSample": 448898,
+      "startSampleModulo1600": 1172,
+      "endSampleModulo1600": 898
+    },
+    {
+      "id": "02-output-1",
+      "shot": "02-output",
+      "startSample": 482498,
+      "endSample": 740210,
+      "startSampleModulo1600": 898,
+      "endSampleModulo1600": 1010
+    },
+    {
+      "id": "02-output-2",
+      "shot": "02-output",
+      "startSample": 757010,
+      "endSample": 960442,
+      "startSampleModulo1600": 210,
+      "endSampleModulo1600": 442
+    },
+    {
+      "id": "03-repeat-1",
+      "shot": "03-repeat",
+      "startSample": 994042,
+      "endSample": 1226524,
+      "startSampleModulo1600": 442,
+      "endSampleModulo1600": 924
+    },
+    {
+      "id": "03-repeat-2",
+      "shot": "03-repeat",
+      "startSample": 1243324,
+      "endSample": 1452020,
+      "startSampleModulo1600": 124,
+      "endSampleModulo1600": 820
+    },
+    {
+      "id": "04-stack-basics-1",
+      "shot": "04-stack-basics",
+      "startSample": 1485620,
+      "endSample": 1733238,
+      "startSampleModulo1600": 820,
+      "endSampleModulo1600": 438
+    },
+    {
+      "id": "04-stack-basics-2",
+      "shot": "04-stack-basics",
+      "startSample": 1750038,
+      "endSample": 2043560,
+      "startSampleModulo1600": 1238,
+      "endSampleModulo1600": 360
+    },
+    {
+      "id": "05-monotone-1",
+      "shot": "05-monotone",
+      "startSample": 2077160,
+      "endSample": 2420296,
+      "startSampleModulo1600": 360,
+      "endSampleModulo1600": 1096
+    },
+    {
+      "id": "05-monotone-2",
+      "shot": "05-monotone",
+      "startSample": 2437096,
+      "endSample": 2706261,
+      "startSampleModulo1600": 296,
+      "endSampleModulo1600": 661
+    },
+    {
+      "id": "06-order-1",
+      "shot": "06-order",
+      "startSample": 2740020,
+      "endSample": 2923398,
+      "startSampleModulo1600": 820,
+      "endSampleModulo1600": 198
+    },
+    {
+      "id": "06-order-2",
+      "shot": "06-order",
+      "startSample": 2940198,
+      "endSample": 3166786,
+      "startSampleModulo1600": 998,
+      "endSampleModulo1600": 386
+    },
+    {
+      "id": "07-name-1",
+      "shot": "07-name",
+      "startSample": 3200386,
+      "endSample": 3414182,
+      "startSampleModulo1600": 386,
+      "endSampleModulo1600": 1382
+    },
+    {
+      "id": "07-name-2",
+      "shot": "07-name",
+      "startSample": 3430982,
+      "endSample": 3667487,
+      "startSampleModulo1600": 582,
+      "endSampleModulo1600": 287
+    },
+    {
+      "id": "08-first-days-1",
+      "shot": "08-first-days",
+      "startSample": 3701087,
+      "endSample": 3977490,
+      "startSampleModulo1600": 287,
+      "endSampleModulo1600": 1490
+    },
+    {
+      "id": "08-first-days-2",
+      "shot": "08-first-days",
+      "startSample": 3994290,
+      "endSample": 4170126,
+      "startSampleModulo1600": 690,
+      "endSampleModulo1600": 526
+    }
+  ],
+  "priorPendingBaselineSHA256": "d341ead4bedce051861f8f17bd5c34def1be06cc2bcd59d9101a0143f6082f2d",
+  "temporaryVideoRemovedAfterVerification": true,
+  "limits": [
+    "The recovered container is a new byte identity; it is not claimed equal to any ignored or historically encoded body.mp4.",
+    "Published visual body and audio were compared in full. Visual meaning, current revised audio, and future final media remain separate QA gates.",
+    "All archived old source/QA file bytes and their archivedFiles hashes remain unchanged."
+  ]
+}
