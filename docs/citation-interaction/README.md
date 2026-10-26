@@ -21,4 +21,6 @@
 - 首两轮失败及针对复验保留：native toggle状态同步和rAF重定位需要等待，CDP合成scroll未移动不代表真实触摸滚动失败；最终实际touch start/move/end推动面板且正文未滚动，生产组件未因QA假设改动。最初构建与保留报告按其当时基线保留，后续集成的相关页面与交互[定向复验](integrated/browser-review.json)13项全部通过（6组daily/HTTP/strategy页面与7项代表交互），[集成视觉复核](integrated/visual-review.json)实际查看新页头下的4张TLS图，原101项证据保留。
 - [密钥扫描](secret-scan.log)及 `git diff --check`通过。
 
-发布与线上结果将在实际完成后记录；检查范围不扩大为阅读效率测量或用户已观看认可。
+[PR #362](https://github.com/linhongcun/video-studio/pull/362)合并至 `b792a35ae69b4357730fb056b73c843e4db40718`，发布[v0.76.0](https://github.com/linhongcun/video-studio/releases/tag/v0.76.0)后执行[Pages 40334600064](https://github.com/linhongcun/video-studio/actions/runs/40334600064)并成功。合并提交使用skip ci避免重复部署，Release之后的手动流程执行了完整站点检查与构建。同期最后进入主干的 `6b9fe39e` 仅归档每日温度上线证据，没有改变已复核的站点运行输入。
+
+2026-10-26T22:01:06.108327+08:00完成51项规范URL核验：47篇的67个引用面板/入口与原文、来源链接匹配，全部3个链接的JS/CSS完整SHA与已复核构建一致，更新日志包含本版Release。详见[线上核验](online-verification.json)、[发布身份](publication.json)、[核验脚本](verify-online.py)；[集成后密钥扫描](secret-scan-integrated.log)通过。检查范围不扩大为阅读效率测量或用户已观看认可。
