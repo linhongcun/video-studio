@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "presentation": "original-title-quote",
+  "episode": "redis-skiplist",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-26",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Redis",
+      "title": "Redis sorted sets",
+      "titleEvidence": {
+        "locator": "Markdown front matter: title, line20",
+        "evidence": "episodes-codex/redis-skiplist/research/sources/sorted-sets.md"
+      },
+      "version": "官方文档 · fcc15c76",
+      "url": "https://github.com/redis/docs/blob/fcc15c76a48baeb0dc08fc839242a7799c077080/content/develop/data-types/sorted-sets.md",
+      "canonicalUrl": "https://redis.io/docs/latest/develop/data-types/sorted-sets/",
+      "supports": [
+        "普通跳表编码下的有序集合按分数排序，同分按member字节字典序；跳表与字典职责不同。"
+      ],
+      "sections": "Ordering; implementation note, lines25–27/44–47/69–73",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-26",
+        "method": "Actual official GitHub Contents API GETs at pinned commits; base64 decoded original UTF-8 bytes, SHA-256 and Git blobSHA1 checked; source filename metadata reread.",
+        "sourceUrl": "https://github.com/redis/docs/blob/fcc15c76a48baeb0dc08fc839242a7799c077080/content/develop/data-types/sorted-sets.md",
+        "apiUrl": "https://api.github.com/repos/redis/docs/contents/content/develop/data-types/sorted-sets.md?ref=fcc15c76a48baeb0dc08fc839242a7799c077080",
+        "commit": "fcc15c76a48baeb0dc08fc839242a7799c077080",
+        "gitBlobSHA1": "c953d910b9fa0a105950581e552d2041f43533dc",
+        "sha256": "5743488bb6bb5dffe810a41b553814dac8aa86a910fc90bdd74cad9f41de4740",
+        "evidence": "episodes-codex/redis-skiplist/research/source-verification.json",
+        "canonicalWebsiteAccessed": false
+      },
+      "quotation": {
+        "text": "Sorted sets are implemented via a\ndual-ported data structure containing both a skip list and a hash table",
+        "locator": "Implementation note, lines69–70 (continuous original text)",
+        "evidence": "episodes-codex/redis-skiplist/research/sources/sorted-sets.md"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Redis",
+      "title": "t_zset.c",
+      "titleEvidence": {
+        "locator": "GitHub Contents API name; original source path src/t_zset.c",
+        "evidence": "episodes-codex/redis-skiplist/research/sources/t_zset.c.metadata.json"
+      },
+      "version": "Redis8.4.0 · 60ba86f3",
+      "url": "https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/t_zset.c",
+      "canonicalUrl": "https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/t_zset.c",
+      "supports": [
+        "从高层起，对下一节点按(score,member)比较，可前进时沿本层链接移动，否则在当前位置下降；各层记录前驱。",
+        "新节点层高由随机过程产生，各层前向链接接入对应前驱与原后继；示例固定两层不是真实RNG回放或完整Redis内存布局。"
+      ],
+      "sections": "zslRandomLevel129–136; zslInsert140–191; zslUpdateScore267–309; encoding1259–1280",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-26",
+        "method": "Actual official GitHub Contents API GETs at pinned commits; base64 decoded original UTF-8 bytes, SHA-256 and Git blobSHA1 checked; source filename metadata reread.",
+        "sourceUrl": "https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/t_zset.c",
+        "apiUrl": "https://api.github.com/repos/redis/redis/contents/src/t_zset.c?ref=60ba86f3c8b4e1ec96451171753a0a38e5c45a0c",
+        "commit": "60ba86f3c8b4e1ec96451171753a0a38e5c45a0c",
+        "gitBlobSHA1": "d451c6f33540aec31cb42c42920c353ce1a4cde0",
+        "sha256": "216e757ebd39efcf1d53ff6c576d8a850c6382104be39d4195f1050543e48e0b",
+        "evidence": "episodes-codex/redis-skiplist/research/source-verification.json",
+        "canonicalWebsiteAccessed": false
+      }
+    }
+  ],
+  "scope": "Two core first-party references: original official doc title and actual C source filename. Compact encoding boundary is separately cited in research/article. No claim of real Redis RNG replay or product benchmark."
+}

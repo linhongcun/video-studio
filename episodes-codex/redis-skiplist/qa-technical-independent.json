@@ -1,0 +1,83 @@
+{
+  "status": "approved-for-tts",
+  "readyForTTSFromThisReview": true,
+  "checkedAtUTC": "2026-10-26T06:48:55.226890+00:00",
+  "scriptSHA256": "704f43aaf70d731b59b1d5bc36e124fdd6c03107d5baf0ff6ea2915391a76169",
+  "inputs": {
+    "script.md": "704f43aaf70d731b59b1d5bc36e124fdd6c03107d5baf0ff6ea2915391a76169",
+    "plan.json": "566cce60f541bc797734e69bc3aaee67335288ca7807bfaeaae11ed03b3c877f",
+    "model.json": "7f614b6796e74e8a58c786bcb09cd26ffec9e5cb134611c550a565fbe763167b",
+    "episode-config.json": "c2c9a691b80a4607b9a3ea8c196ec7bed0cd28ea6b095ae09f364af2449fb94a",
+    "pronunciation.md": "2f612dfaa94dc42fa2ec7f90f6f2867094fe2a28b63d780aef0ec1f6551512f0",
+    "references.json": "f0486e130ede0cab26586ba4bf3db84af8f04f61597a97cba3593f80d8682e68"
+  },
+  "modelQA": {
+    "path": "qa-model.json",
+    "sha256": "243e983073e31d08b1dec3c4db92e077fa72b525368e298d484e02d45c6e9ad8",
+    "assertionsExecuted": 3458
+  },
+  "sourceQA": {
+    "path": "qa-source-independent.json",
+    "sha256": "7a06af3d004f323393e3ab036231c6d3d5e3778fed86ef72d0345e84b81977fc",
+    "freshOfficialFiles": 3
+  },
+  "shots": 10,
+  "sentences": 20,
+  "technicalReview": [
+    {
+      "shots": [
+        "01",
+        "02"
+      ],
+      "claim": "有序单向链接基线与55插入点50/60",
+      "basis": "Independent real serialized forward chain; linear candidates10/20/30/40/50/60.",
+      "verdict": "accurate within stated baseline"
+    },
+    {
+      "shots": [
+        "03",
+        "04",
+        "05",
+        "06"
+      ],
+      "claim": "高层先比下一节点、可前进才走，否则在当前位置下降",
+      "basis": "Pinned zslInsert140–158 and actual trace40/70/50/60; no move into70.",
+      "verdict": "accurate"
+    },
+    {
+      "shots": [
+        "07"
+      ],
+      "claim": "层高表示前向链接层数；Redis随机选，例子固定两层",
+      "basis": "Pinned zslRandomLevel125–136; fixed legal toy height is explicitly not a real sampled result.",
+      "verdict": "accurate"
+    },
+    {
+      "shots": [
+        "08",
+        "09"
+      ],
+      "claim": "逐层先设置新节点后继、再修改前驱，底层后上层",
+      "basis": "Pinned zslInsert174–180; independent four-pointer snapshots and reachability phases.",
+      "verdict": "accurate"
+    },
+    {
+      "shots": [
+        "10"
+      ],
+      "claim": "额外链接/更多稀疏层与非每次必快；ZSET小集合可能紧凑编码",
+      "basis": "Source structure/random-height and memory-optimization; target5 counterexample needs2 rather than1 candidate test.",
+      "verdict": "accurate; no universal complexity or benchmark claim"
+    }
+  ],
+  "blockingIssues": [],
+  "nonBlockingNotes": [
+    "“链表中的节点” refers to this displayed forward-linked baseline, not a claim that all linked lists or Redis nodes lack backward links.",
+    "Actual animation must retain old50→60 and upper40→70 until their own pointer writes; an allocated visible55 is not already reachable.",
+    "The four-versus-six comparison count is only this fixed example."
+  ],
+  "limits": [
+    "Approval covers facts, serialized states, script and cue contract only; actual TTS timing/semantics, DOM, animation, encoded film and player checks are still separate.",
+    "No real Redis memory layout, product benchmark or actual RNG replay is claimed."
+  ]
+}
