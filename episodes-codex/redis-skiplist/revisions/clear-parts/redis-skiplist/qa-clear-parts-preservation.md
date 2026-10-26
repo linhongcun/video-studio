@@ -1,0 +1,1 @@
+797项独立保留断言通过。全部571数值、真实voice/cue/subtitle/shot字段、4482帧/20句及15动作窗保持。Goal/Search/Upper/Descend/Locate/Height/Splice/Boundary等15个未改函数行原样；Scene仅03note改变。2072/3134/3798三个未改graph区域以零像素容差比较通过，完整PNG SHA也一致。原139冻结源和492旧历史文件逐项hash保持；theme相对路径重定位被显式验证解析到同一共享文件。

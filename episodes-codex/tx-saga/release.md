@@ -21,3 +21,11 @@ Saga：扣款成功，缺货了怎么办？：保留原配音、字幕与3478帧
 实际站点版本v0.51.0，完整保留至v0.50.5的协作主干；分镜内v0.47.1仅保留最初导航设计ID。历史源和媒体见revisions/v0.47.0.json。
 
 已由[PR #186](https://github.com/linhongcun/video-studio/pull/186)合并，发布[v0.51.0](https://github.com/linhongcun/video-studio/releases/tag/v0.51.0)，Release后[部署40103321270](https://github.com/linhongcun/video-studio/actions/runs/40103321270)成功。线上四片完整SHA/字节、海报、112句字幕、18章、学习顺序、原入门与旧合集、更新日志及协作主干视频核验通过，[#152](https://github.com/linhongcun/video-studio/issues/152)已以completed关闭。完整证据见[线上报告](../../docs/transaction-branch-online-verification.json)。只上GitHub站点；未预写用户对新版的观看认可。
+
+## 片尾参考资料补齐 · v0.72.2
+
+[PR #351](https://github.com/linhongcun/video-studio/pull/351)合并`cf9a0c9ebec6d930e490f905a10bc2491cc2eabd`后发布[v0.72.2](https://github.com/linhongcun/video-studio/releases/tag/v0.72.2)，Release后[Pages40309419409](https://github.com/linhongcun/video-studio/actions/runs/40309419409)成功；2026-10-26T18:48:29+08:00线上核验通过。
+
+本期4项原始题名与作者/机构，一页5秒；最终3628帧，完整SHA-256：`694c708aadd98fa85f462105582648a58be8bb73784a8bddf5c6aac7eb890b73`。原Git正文全帧/PTS、AAC/PCM、原文/脚注及创建/首发信息保持；新旧技术阅读和题名记录按真实范围分别标注，无新配音、正文重渲或平台重发。
+
+本批8项/3页、422当前冻结/373旧记录、12实际尾帧、6组播放器/6张截图及13项完整GET通过。原存量累计29期，全站30片有资料附录（含新Redis），见[第八批证据](../../docs/reference-endcards/batch-8/README.md)。不预记新版观看认可。
