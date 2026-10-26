@@ -122,6 +122,8 @@
 
 保留修前Main、冻结清单、实际失败图与完整原预演身份，只将08未完成分支改为“等四邻全部看完”；真实trace、声音、字幕和时间均保持，按单分支字面差异证明复用未改范围，重新采样08原6时点和391帧连续片。修后3181实际图说明与空栈/当前项一致。整岛完成仍由真实component_done事件35/68/97驱动，不能把出栈当完成。具体原图、差异与复核见[本期记录](../episodes-codex/number-of-islands/revisions/08-before-neighbor-label/finding.json)和本期qa-preflight报告；正式新MP4的3181也经独立实际查看，修正文案已进入成片，见[成片独立报告](../episodes-codex/number-of-islands/qa-video-independent.md)；上线结果另按实际记录。
 
+- **布隆过滤器的等待与拒绝（2026-10-26）：**全一判定后尚未发起查库的停留段，以及同步、恢复阶段，曾因共用未放行条件而误画拒绝叉号。应将判定结果与执行阶段分开：等待和维护采用中性路径，拒绝标记只用于明确零位拒绝或错误拦截。修前源码与实际相邻帧已保留；修后连续片段实看和独立SVG路径检查均通过，见[动态复核](../episodes-codex/bloom-filter/qa-motion-independent.md)与[链接检查](../episodes-codex/bloom-filter/qa-query-link-independent.md)。这是正式编码前的修复，位值与文字边界通过不能代替状态语义复核。
+
 ## L011 目录忽略规则没有排除同名软链接
 
 - **案例：**2026-10-24，EP.21入门篇复用本机`node_modules`软链接。提交收尾检查发现原`node_modules/`规则只忽略目录，软链接仍被纳入分支提交；在合并前移出版本控制，未重写已经推送的提交。

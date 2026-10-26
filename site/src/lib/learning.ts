@@ -74,7 +74,7 @@ const definitions: TrackDefinition[] = [
     number: '06',
     title: '工程算法',
     eyebrow: '从系统问题理解算法',
-    description: '从扩容、故障和容量约束出发，用连续过程理解工程系统怎样分配数据、协调节点和作出选择。',
+    description: '从扩容、查询、故障和容量约束出发，用连续过程理解数据分配、集合摘要与节点协调。',
     outcome: '看清算法如何解决具体问题，理解它依赖的条件、维护成本与适用边界。',
     audience: '会基本编程，希望理解后端与分布式系统实现原理的开发者。',
     seriesIds: ['engineering-algorithms'],

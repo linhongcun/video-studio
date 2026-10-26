@@ -1,0 +1,1111 @@
+{
+  "schemaVersion": 1,
+  "status": "failed",
+  "checkedAtUTC": "2026-10-26T00:16:00.583811+00:00",
+  "baseURL": "http://127.0.0.1:4321/video-studio/",
+  "version": "v0.71.0",
+  "scope": "Actual local headless Chromium, muted 1x playback, four chapter clicks, exact native captions, painted appendix pauses, real fullscreen API, article and engineering entry checks.",
+  "limitations": [
+    "390px/landscape viewports are headless desktop Chromium, not physical phone or device rotation.",
+    "Short muted playback and end-card playback do not establish full-film listening or ASR.",
+    "Actual Release/changelog check runs separately after Release-following public deployment."
+  ],
+  "script": {
+    "path": "/tmp/bloom-site-qa.py",
+    "sha256": "8b95230b8b365af627f52dec21da08b0f357dfb6bf784013544539ace451cfe9"
+  },
+  "productionManifestSHA256": "f7f978e13b703c7cc57e9182615e1448f8dc8c9269424c0394ff4ae81a0ff7f9",
+  "environment": {
+    "python": "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+    "playwright": "1.62.0",
+    "chromium": "/usr/bin/chromium",
+    "browserVersion": "154.0.8037.57"
+  },
+  "inputs": {
+    "episodes/bloom-filter/meta.json": "3203faeb0e42492fe74dd520d5451122f6f2dd56b6c7b21975e636c239681b99",
+    "episodes/bloom-filter/article.mdx": "446b466ac9f247545fd30d37086304fd57ae38b6f4e3abf0f80daf9247227fb2",
+    "episodes/bloom-filter/storyboard.json": "c77fe8ab729fe6b20f790af82d700c1127cb468e154b628d42b74be6df2e56be",
+    "episodes/bloom-filter/video.mp4": "5b95e463dc5d95e7666de2c6fdf1c4c482bcdb6ca47faec835b040b917307143",
+    "episodes/bloom-filter/cover-16x9.jpg": "28b09684789fa54052787dfeed7cbcf4243f1b058655544bcc23f6859920b8f0",
+    "episodes/bloom-filter/references.json": "87e9d938c67df1f86dae04feb6f2c1b2f31c85a3dc44dd0432f262e364459404",
+    "episodes/bloom-filter/reference-appendix.json": "4151ba5eefadd5c8532794acd09a230c3037964f806066ebea07c9f294677788"
+  },
+  "viewports": [
+    {
+      "name": "desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "checks": [
+        {
+          "name": "serves exact built episode HTML",
+          "passed": true,
+          "observed": {
+            "status": 200,
+            "sha256": "1eeaf1c3b8ef4d358d13b5c0df415b137b97d8f8536e2d9541c1db35acc43af2"
+          },
+          "expected": "1eeaf1c3b8ef4d358d13b5c0df415b137b97d8f8536e2d9541c1db35acc43af2"
+        },
+        {
+          "name": "actual final video duration and dimensions",
+          "passed": true,
+          "observed": {
+            "duration": 196.366667,
+            "width": 1920,
+            "height": 1080,
+            "controls": true,
+            "playsInline": true,
+            "src": "http://127.0.0.1:4321/video-studio/episodes/bloom-filter/video.mp4",
+            "poster": "http://127.0.0.1:4321/video-studio/episodes/bloom-filter/cover-16x9.jpg",
+            "error": null,
+            "defaultModes": [
+              "disabled"
+            ]
+          }
+        },
+        {
+          "name": "native controls and inline playback retained",
+          "passed": true,
+          "observed": {
+            "duration": 196.366667,
+            "width": 1920,
+            "height": 1080,
+            "controls": true,
+            "playsInline": true,
+            "src": "http://127.0.0.1:4321/video-studio/episodes/bloom-filter/video.mp4",
+            "poster": "http://127.0.0.1:4321/video-studio/episodes/bloom-filter/cover-16x9.jpg",
+            "error": null,
+            "defaultModes": [
+              "disabled"
+            ]
+          }
+        },
+        {
+          "name": "complete served video matches publication copy",
+          "passed": true,
+          "observed": {
+            "url": "http://127.0.0.1:4321/video-studio/episodes/bloom-filter/video.mp4",
+            "status": 200,
+            "bytes": 10312433,
+            "sha256": "5b95e463dc5d95e7666de2c6fdf1c4c482bcdb6ca47faec835b040b917307143"
+          },
+          "expected": "5b95e463dc5d95e7666de2c6fdf1c4c482bcdb6ca47faec835b040b917307143"
+        },
+        {
+          "name": "complete served poster matches publication copy",
+          "passed": true,
+          "observed": {
+            "url": "http://127.0.0.1:4321/video-studio/episodes/bloom-filter/cover-16x9.jpg",
+            "status": 200,
+            "bytes": 156316,
+            "sha256": "28b09684789fa54052787dfeed7cbcf4243f1b058655544bcc23f6859920b8f0"
+          },
+          "expected": "28b09684789fa54052787dfeed7cbcf4243f1b058655544bcc23f6859920b8f0"
+        },
+        {
+          "name": "four chapter identities and exact starts",
+          "passed": true,
+          "observed": [
+            {
+              "id": "goal",
+              "title": "为什么先排除不存在的查询",
+              "start": 0
+            },
+            {
+              "id": "write",
+              "title": "同一编号怎样留下标记",
+              "start": 22.233333333333334
+            },
+            {
+              "id": "query",
+              "title": "零与一为什么给出不同结论",
+              "start": 67.13333333333334
+            },
+            {
+              "id": "boundary",
+              "title": "省下查询需要什么条件",
+              "start": 126.76666666666667
+            }
+          ],
+          "expected": [
+            {
+              "id": "goal",
+              "start": 0.0
+            },
+            {
+              "id": "write",
+              "start": 22.233333333333334
+            },
+            {
+              "id": "query",
+              "start": 67.13333333333334
+            },
+            {
+              "id": "boundary",
+              "start": 126.76666666666667
+            }
+          ]
+        },
+        {
+          "name": "26 native VTT texts and exact millisecond boundaries",
+          "passed": true,
+          "observed": [
+            {
+              "text": "应用查询商品目录，编号不存在，也要让数据库查一遍。",
+              "startMS": 0,
+              "endMS": 6367,
+              "start": 0,
+              "end": 6.367
+            },
+            {
+              "text": "我们想先排除肯定没有的编号，减少这类回源。",
+              "startMS": 6367,
+              "endMS": 11100,
+              "start": 6.367,
+              "end": 11.1
+            },
+            {
+              "text": "先准备十六个只能记零或一的格子，开始全部为零。",
+              "startMS": 11100,
+              "endMS": 16333,
+              "start": 11.1,
+              "end": 16.333
+            },
+            {
+              "text": "位数组不保存整条商品记录，只用零和一留下标记。",
+              "startMS": 16333,
+              "endMS": 22233,
+              "start": 16.333,
+              "end": 22.233
+            },
+            {
+              "text": "哈希把商品编号按固定规则算成位置，同一编号每次都到同样的位置。",
+              "startMS": 22233,
+              "endMS": 29500,
+              "start": 22.233,
+              "end": 29.5
+            },
+            {
+              "text": "这里用三路计算，让每个编号对应三个位；不同编号也可能碰到同一格。",
+              "startMS": 29500,
+              "endMS": 36800,
+              "start": 29.5,
+              "end": 36.8
+            },
+            {
+              "text": "把编号一零一加入时，算出三、十四、十五这三个位置。",
+              "startMS": 36800,
+              "endMS": 43900,
+              "start": 36.8,
+              "end": 43.9
+            },
+            {
+              "text": "沿着它们，把对应的零改成一，其他格子保持不动。",
+              "startMS": 43900,
+              "endMS": 50433,
+              "start": 43.9,
+              "end": 50.433
+            },
+            {
+              "text": "再加入二零五，对应零、三、十二号位，三号已经是一，就仍然保留一。",
+              "startMS": 50433,
+              "endMS": 59700,
+              "start": 50.433,
+              "end": 59.7
+            },
+            {
+              "text": "布隆过滤器就这样让许多编号共享标记，格子里并不记录是谁写过。",
+              "startMS": 59700,
+              "endMS": 67133,
+              "start": 59.7,
+              "end": 67.133
+            },
+            {
+              "text": "现在查询从没加入的零零一，它对应十二、二、十五号位。",
+              "startMS": 67133,
+              "endMS": 73667,
+              "start": 67.133,
+              "end": 73.667
+            },
+            {
+              "text": "十二号是一，但二号还是零，看到这个零就能排除，不必再查数据库。",
+              "startMS": 73667,
+              "endMS": 82467,
+              "start": 73.667,
+              "end": 82.467
+            },
+            {
+              "text": "因为一个编号真被加入过，它对应的三个位，当时就都被设成了一。",
+              "startMS": 82467,
+              "endMS": 89233,
+              "start": 82.467,
+              "end": 89.233
+            },
+            {
+              "text": "只要正确收录并保留这些标记，查询同一编号就不会碰到零。",
+              "startMS": 89233,
+              "endMS": 95333,
+              "start": 89.233,
+              "end": 95.333
+            },
+            {
+              "text": "换一个没加入的编号零六七，它对应十四、零、十五号位，恰好全部是一。",
+              "startMS": 95333,
+              "endMS": 105167,
+              "start": 95.333,
+              "end": 105.167
+            },
+            {
+              "text": "这回过滤器只能说可能存在；去数据库确认，才发现目录里根本没有它。",
+              "startMS": 105167,
+              "endMS": 112933,
+              "start": 105.167,
+              "end": 112.933
+            },
+            {
+              "text": "这三个一，是一零一和二零五分别留下的，不是零六七自己的记录。",
+              "startMS": 112933,
+              "endMS": 121467,
+              "start": 112.933,
+              "end": 121.467
+            },
+            {
+              "text": "多个编号共享标记，正是全一仍会误判的原因。",
+              "startMS": 121467,
+              "endMS": 126767,
+              "start": 121.467,
+              "end": 126.767
+            },
+            {
+              "text": "所以，任意一位为零时先排除；三个位都是一时，仍走原来的真实查询。",
+              "startMS": 126767,
+              "endMS": 134867,
+              "start": 126.767,
+              "end": 134.867
+            },
+            {
+              "text": "误判只会多放行一次查库，不应变成错误的商品结果。",
+              "startMS": 134867,
+              "endMS": 140700,
+              "start": 134.867,
+              "end": 140.7
+            },
+            {
+              "text": "固定这么多位，加入越多编号，一就越密，没加入的编号也更容易碰到全一。",
+              "startMS": 140700,
+              "endMS": 148167,
+              "start": 140.7,
+              "end": 148.167
+            },
+            {
+              "text": "实际要按预计数量和可接受的误判率选择空间，不能用这四个教学编号估算线上效果。",
+              "startMS": 148167,
+              "endMS": 158133,
+              "start": 148.167,
+              "end": 158.133
+            },
+            {
+              "text": "普通布隆过滤器不能按编号，直接把对应的位清零。",
+              "startMS": 158133,
+              "endMS": 164433,
+              "start": 158.133,
+              "end": 164.433
+            },
+            {
+              "text": "若删除一零一时清掉共享的三号位，还在目录里的二零五，也会被错误拦下。",
+              "startMS": 164433,
+              "endMS": 172233,
+              "start": 164.433,
+              "end": 172.233
+            },
+            {
+              "text": "若零零一后来已新增到目录，标记却没有同步，刚才的零位就会错拦真实数据。",
+              "startMS": 172233,
+              "endMS": 181967,
+              "start": 172.233,
+              "end": 181.967
+            },
+            {
+              "text": "因此必须正确维护这份标记：零位才可排除，全一仍需查真实记录。",
+              "startMS": 181967,
+              "endMS": 191366,
+              "start": 181.967,
+              "end": 191.366
+            }
+          ],
+          "expected": [
+            {
+              "text": "应用查询商品目录，编号不存在，也要让数据库查一遍。",
+              "startMS": 0,
+              "endMS": 6367
+            },
+            {
+              "text": "我们想先排除肯定没有的编号，减少这类回源。",
+              "startMS": 6367,
+              "endMS": 11100
+            },
+            {
+              "text": "先准备十六个只能记零或一的格子，开始全部为零。",
+              "startMS": 11100,
+              "endMS": 16333
+            },
+            {
+              "text": "位数组不保存整条商品记录，只用零和一留下标记。",
+              "startMS": 16333,
+              "endMS": 22233
+            },
+            {
+              "text": "哈希把商品编号按固定规则算成位置，同一编号每次都到同样的位置。",
+              "startMS": 22233,
+              "endMS": 29500
+            },
+            {
+              "text": "这里用三路计算，让每个编号对应三个位；不同编号也可能碰到同一格。",
+              "startMS": 29500,
+              "endMS": 36800
+            },
+            {
+              "text": "把编号一零一加入时，算出三、十四、十五这三个位置。",
+              "startMS": 36800,
+              "endMS": 43900
+            },
+            {
+              "text": "沿着它们，把对应的零改成一，其他格子保持不动。",
+              "startMS": 43900,
+              "endMS": 50433
+            },
+            {
+              "text": "再加入二零五，对应零、三、十二号位，三号已经是一，就仍然保留一。",
+              "startMS": 50433,
+              "endMS": 59700
+            },
+            {
+              "text": "布隆过滤器就这样让许多编号共享标记，格子里并不记录是谁写过。",
+              "startMS": 59700,
+              "endMS": 67133
+            },
+            {
+              "text": "现在查询从没加入的零零一，它对应十二、二、十五号位。",
+              "startMS": 67133,
+              "endMS": 73667
+            },
+            {
+              "text": "十二号是一，但二号还是零，看到这个零就能排除，不必再查数据库。",
+              "startMS": 73667,
+              "endMS": 82467
+            },
+            {
+              "text": "因为一个编号真被加入过，它对应的三个位，当时就都被设成了一。",
+              "startMS": 82467,
+              "endMS": 89233
+            },
+            {
+              "text": "只要正确收录并保留这些标记，查询同一编号就不会碰到零。",
+              "startMS": 89233,
+              "endMS": 95333
+            },
+            {
+              "text": "换一个没加入的编号零六七，它对应十四、零、十五号位，恰好全部是一。",
+              "startMS": 95333,
+              "endMS": 105167
+            },
+            {
+              "text": "这回过滤器只能说可能存在；去数据库确认，才发现目录里根本没有它。",
+              "startMS": 105167,
+              "endMS": 112933
+            },
+            {
+              "text": "这三个一，是一零一和二零五分别留下的，不是零六七自己的记录。",
+              "startMS": 112933,
+              "endMS": 121467
+            },
+            {
+              "text": "多个编号共享标记，正是全一仍会误判的原因。",
+              "startMS": 121467,
+              "endMS": 126767
+            },
+            {
+              "text": "所以，任意一位为零时先排除；三个位都是一时，仍走原来的真实查询。",
+              "startMS": 126767,
+              "endMS": 134867
+            },
+            {
+              "text": "误判只会多放行一次查库，不应变成错误的商品结果。",
+              "startMS": 134867,
+              "endMS": 140700
+            },
+            {
+              "text": "固定这么多位，加入越多编号，一就越密，没加入的编号也更容易碰到全一。",
+              "startMS": 140700,
+              "endMS": 148167
+            },
+            {
+              "text": "实际要按预计数量和可接受的误判率选择空间，不能用这四个教学编号估算线上效果。",
+              "startMS": 148167,
+              "endMS": 158133
+            },
+            {
+              "text": "普通布隆过滤器不能按编号，直接把对应的位清零。",
+              "startMS": 158133,
+              "endMS": 164433
+            },
+            {
+              "text": "若删除一零一时清掉共享的三号位，还在目录里的二零五，也会被错误拦下。",
+              "startMS": 164433,
+              "endMS": 172233
+            },
+            {
+              "text": "若零零一后来已新增到目录，标记却没有同步，刚才的零位就会错拦真实数据。",
+              "startMS": 172233,
+              "endMS": 181967
+            },
+            {
+              "text": "因此必须正确维护这份标记：零位才可排除，全一仍需查真实记录。",
+              "startMS": 181967,
+              "endMS": 191366
+            }
+          ]
+        },
+        {
+          "name": "served VTT exact built bytes",
+          "passed": true,
+          "observed": {
+            "sha256": "a9126493a009f349b46a69c0e685c85870edc5c855d3812f33333f89c565237c",
+            "bytes": 3074
+          },
+          "expected": "a9126493a009f349b46a69c0e685c85870edc5c855d3812f33333f89c565237c"
+        },
+        {
+          "name": "actual short 1x playback advanced",
+          "passed": true,
+          "observed": {
+            "time": 0.276274,
+            "paused": true,
+            "muted": true,
+            "rate": 1
+          }
+        },
+        {
+          "name": "real chapter click seeks goal",
+          "passed": true,
+          "observed": {
+            "time": 0.014489,
+            "paused": true,
+            "error": null,
+            "id": "goal",
+            "expected": 0
+          }
+        },
+        {
+          "name": "real chapter click seeks write",
+          "passed": true,
+          "observed": {
+            "time": 22.252913,
+            "paused": true,
+            "error": null,
+            "id": "write",
+            "expected": 22.233333333333334
+          }
+        },
+        {
+          "name": "real chapter click seeks query",
+          "passed": true,
+          "observed": {
+            "time": 67.149641,
+            "paused": true,
+            "error": null,
+            "id": "query",
+            "expected": 67.13333333333334
+          }
+        },
+        {
+          "name": "real chapter click seeks boundary",
+          "passed": true,
+          "observed": {
+            "time": 126.774381,
+            "paused": true,
+            "error": null,
+            "id": "boundary",
+            "expected": 126.76666666666667
+          }
+        },
+        {
+          "name": "1x playback crosses audio end and reaches video end",
+          "passed": true,
+          "observed": {
+            "from": 190.86666666666667,
+            "currentTime": 196.366667,
+            "duration": 196.366667,
+            "ended": true,
+            "playbackRate": 1,
+            "muted": true,
+            "elapsedSeconds": 5.552099999999627,
+            "samples": [
+              {
+                "time": 191.076988,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 191.342586,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 191.602413,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 191.868101,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 192.133295,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 192.399406,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 192.665045,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 192.930572,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 193.196253,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 193.461862,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 193.727456,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 193.993055,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 194.258657,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 194.524334,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 194.789978,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 195.055667,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 195.321211,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 195.586876,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 195.852554,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 196.118117,
+                "paused": false,
+                "ended": false
+              },
+              {
+                "time": 196.366667,
+                "paused": true,
+                "ended": true
+              }
+            ],
+            "error": null
+          }
+        },
+        {
+          "name": "painted reference first frame has no native caption",
+          "passed": true,
+          "observed": {
+            "requestedTime": 191.36666666666667,
+            "currentTime": 191.366666,
+            "painted": {
+              "mediaTime": 191.366667,
+              "presentedFrames": 181
+            },
+            "requestedFrame": 5741,
+            "paintedFrame": 5741,
+            "paused": true,
+            "readyState": 4,
+            "error": null,
+            "activeCues": [],
+            "name": "first"
+          }
+        },
+        {
+          "name": "painted reference middle frame has no native caption",
+          "passed": false,
+          "observed": {
+            "requestedTime": 193.86666666666667,
+            "currentTime": 193.866666,
+            "painted": {
+              "mediaTime": 193.833333,
+              "presentedFrames": 182
+            },
+            "requestedFrame": 5816,
+            "paintedFrame": 5815,
+            "paused": true,
+            "readyState": 4,
+            "error": null,
+            "activeCues": [],
+            "name": "middle"
+          }
+        }
+      ],
+      "screenshots": [
+        {
+          "path": "episodes-codex/bloom-filter/qa-site-browser-evidence/desktop-player.png",
+          "sha256": "c2aac424765770a95452231391abd34abb904bfba439f8ab43c3784898dcac85"
+        },
+        {
+          "path": "episodes-codex/bloom-filter/qa-site-browser-evidence/desktop-references-first.png",
+          "sha256": "4be6a6d4baa306a30b7e83e0877056def0dcc7b42f790fc52771799318657825"
+        }
+      ],
+      "pageErrors": [],
+      "consoleErrors": [],
+      "blockedExternalRequests": [],
+      "media": {
+        "duration": 196.366667,
+        "width": 1920,
+        "height": 1080,
+        "controls": true,
+        "playsInline": true,
+        "src": "http://127.0.0.1:4321/video-studio/episodes/bloom-filter/video.mp4",
+        "poster": "http://127.0.0.1:4321/video-studio/episodes/bloom-filter/cover-16x9.jpg",
+        "error": null,
+        "defaultModes": [
+          "disabled"
+        ]
+      },
+      "chapters": [
+        {
+          "id": "goal",
+          "title": "为什么先排除不存在的查询",
+          "start": 0
+        },
+        {
+          "id": "write",
+          "title": "同一编号怎样留下标记",
+          "start": 22.233333333333334
+        },
+        {
+          "id": "query",
+          "title": "零与一为什么给出不同结论",
+          "start": 67.13333333333334
+        },
+        {
+          "id": "boundary",
+          "title": "省下查询需要什么条件",
+          "start": 126.76666666666667
+        }
+      ],
+      "nativeCues": [
+        {
+          "text": "应用查询商品目录，编号不存在，也要让数据库查一遍。",
+          "startMS": 0,
+          "endMS": 6367,
+          "start": 0,
+          "end": 6.367
+        },
+        {
+          "text": "我们想先排除肯定没有的编号，减少这类回源。",
+          "startMS": 6367,
+          "endMS": 11100,
+          "start": 6.367,
+          "end": 11.1
+        },
+        {
+          "text": "先准备十六个只能记零或一的格子，开始全部为零。",
+          "startMS": 11100,
+          "endMS": 16333,
+          "start": 11.1,
+          "end": 16.333
+        },
+        {
+          "text": "位数组不保存整条商品记录，只用零和一留下标记。",
+          "startMS": 16333,
+          "endMS": 22233,
+          "start": 16.333,
+          "end": 22.233
+        },
+        {
+          "text": "哈希把商品编号按固定规则算成位置，同一编号每次都到同样的位置。",
+          "startMS": 22233,
+          "endMS": 29500,
+          "start": 22.233,
+          "end": 29.5
+        },
+        {
+          "text": "这里用三路计算，让每个编号对应三个位；不同编号也可能碰到同一格。",
+          "startMS": 29500,
+          "endMS": 36800,
+          "start": 29.5,
+          "end": 36.8
+        },
+        {
+          "text": "把编号一零一加入时，算出三、十四、十五这三个位置。",
+          "startMS": 36800,
+          "endMS": 43900,
+          "start": 36.8,
+          "end": 43.9
+        },
+        {
+          "text": "沿着它们，把对应的零改成一，其他格子保持不动。",
+          "startMS": 43900,
+          "endMS": 50433,
+          "start": 43.9,
+          "end": 50.433
+        },
+        {
+          "text": "再加入二零五，对应零、三、十二号位，三号已经是一，就仍然保留一。",
+          "startMS": 50433,
+          "endMS": 59700,
+          "start": 50.433,
+          "end": 59.7
+        },
+        {
+          "text": "布隆过滤器就这样让许多编号共享标记，格子里并不记录是谁写过。",
+          "startMS": 59700,
+          "endMS": 67133,
+          "start": 59.7,
+          "end": 67.133
+        },
+        {
+          "text": "现在查询从没加入的零零一，它对应十二、二、十五号位。",
+          "startMS": 67133,
+          "endMS": 73667,
+          "start": 67.133,
+          "end": 73.667
+        },
+        {
+          "text": "十二号是一，但二号还是零，看到这个零就能排除，不必再查数据库。",
+          "startMS": 73667,
+          "endMS": 82467,
+          "start": 73.667,
+          "end": 82.467
+        },
+        {
+          "text": "因为一个编号真被加入过，它对应的三个位，当时就都被设成了一。",
+          "startMS": 82467,
+          "endMS": 89233,
+          "start": 82.467,
+          "end": 89.233
+        },
+        {
+          "text": "只要正确收录并保留这些标记，查询同一编号就不会碰到零。",
+          "startMS": 89233,
+          "endMS": 95333,
+          "start": 89.233,
+          "end": 95.333
+        },
+        {
+          "text": "换一个没加入的编号零六七，它对应十四、零、十五号位，恰好全部是一。",
+          "startMS": 95333,
+          "endMS": 105167,
+          "start": 95.333,
+          "end": 105.167
+        },
+        {
+          "text": "这回过滤器只能说可能存在；去数据库确认，才发现目录里根本没有它。",
+          "startMS": 105167,
+          "endMS": 112933,
+          "start": 105.167,
+          "end": 112.933
+        },
+        {
+          "text": "这三个一，是一零一和二零五分别留下的，不是零六七自己的记录。",
+          "startMS": 112933,
+          "endMS": 121467,
+          "start": 112.933,
+          "end": 121.467
+        },
+        {
+          "text": "多个编号共享标记，正是全一仍会误判的原因。",
+          "startMS": 121467,
+          "endMS": 126767,
+          "start": 121.467,
+          "end": 126.767
+        },
+        {
+          "text": "所以，任意一位为零时先排除；三个位都是一时，仍走原来的真实查询。",
+          "startMS": 126767,
+          "endMS": 134867,
+          "start": 126.767,
+          "end": 134.867
+        },
+        {
+          "text": "误判只会多放行一次查库，不应变成错误的商品结果。",
+          "startMS": 134867,
+          "endMS": 140700,
+          "start": 134.867,
+          "end": 140.7
+        },
+        {
+          "text": "固定这么多位，加入越多编号，一就越密，没加入的编号也更容易碰到全一。",
+          "startMS": 140700,
+          "endMS": 148167,
+          "start": 140.7,
+          "end": 148.167
+        },
+        {
+          "text": "实际要按预计数量和可接受的误判率选择空间，不能用这四个教学编号估算线上效果。",
+          "startMS": 148167,
+          "endMS": 158133,
+          "start": 148.167,
+          "end": 158.133
+        },
+        {
+          "text": "普通布隆过滤器不能按编号，直接把对应的位清零。",
+          "startMS": 158133,
+          "endMS": 164433,
+          "start": 158.133,
+          "end": 164.433
+        },
+        {
+          "text": "若删除一零一时清掉共享的三号位，还在目录里的二零五，也会被错误拦下。",
+          "startMS": 164433,
+          "endMS": 172233,
+          "start": 164.433,
+          "end": 172.233
+        },
+        {
+          "text": "若零零一后来已新增到目录，标记却没有同步，刚才的零位就会错拦真实数据。",
+          "startMS": 172233,
+          "endMS": 181967,
+          "start": 172.233,
+          "end": 181.967
+        },
+        {
+          "text": "因此必须正确维护这份标记：零位才可排除，全一仍需查真实记录。",
+          "startMS": 181967,
+          "endMS": 191366,
+          "start": 181.967,
+          "end": 191.366
+        }
+      ],
+      "chapterSeeks": [
+        {
+          "time": 0.014489,
+          "paused": true,
+          "error": null,
+          "id": "goal",
+          "expected": 0
+        },
+        {
+          "time": 22.252913,
+          "paused": true,
+          "error": null,
+          "id": "write",
+          "expected": 22.233333333333334
+        },
+        {
+          "time": 67.149641,
+          "paused": true,
+          "error": null,
+          "id": "query",
+          "expected": 67.13333333333334
+        },
+        {
+          "time": 126.774381,
+          "paused": true,
+          "error": null,
+          "id": "boundary",
+          "expected": 126.76666666666667
+        }
+      ],
+      "appendixPlayback": {
+        "from": 190.86666666666667,
+        "currentTime": 196.366667,
+        "duration": 196.366667,
+        "ended": true,
+        "playbackRate": 1,
+        "muted": true,
+        "elapsedSeconds": 5.552099999999627,
+        "samples": [
+          {
+            "time": 191.076988,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 191.342586,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 191.602413,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 191.868101,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 192.133295,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 192.399406,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 192.665045,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 192.930572,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 193.196253,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 193.461862,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 193.727456,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 193.993055,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 194.258657,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 194.524334,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 194.789978,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 195.055667,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 195.321211,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 195.586876,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 195.852554,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 196.118117,
+            "paused": false,
+            "ended": false
+          },
+          {
+            "time": 196.366667,
+            "paused": true,
+            "ended": true
+          }
+        ],
+        "error": null
+      },
+      "referencePauses": [
+        {
+          "requestedTime": 191.36666666666667,
+          "currentTime": 191.366666,
+          "painted": {
+            "mediaTime": 191.366667,
+            "presentedFrames": 181
+          },
+          "requestedFrame": 5741,
+          "paintedFrame": 5741,
+          "paused": true,
+          "readyState": 4,
+          "error": null,
+          "activeCues": [],
+          "name": "first"
+        },
+        {
+          "requestedTime": 193.86666666666667,
+          "currentTime": 193.866666,
+          "painted": {
+            "mediaTime": 193.833333,
+            "presentedFrames": 182
+          },
+          "requestedFrame": 5816,
+          "paintedFrame": 5815,
+          "paused": true,
+          "readyState": 4,
+          "error": null,
+          "activeCues": [],
+          "name": "middle"
+        }
+      ],
+      "status": "failed",
+      "error": "AssertionError('painted reference middle frame has no native caption')",
+      "traceback": "Traceback (most recent call last):\n  File \"/tmp/bloom-site-qa.py\", line 161, in run_case\n    check(case,'painted reference '+label+' frame has no native caption',paused['paused'] and paused['paintedFrame']==frame and not paused['activeCues'] and paused['error'] is None,paused)\n  File \"/tmp/bloom-site-qa.py\", line 91, in check\n    assert passed, name\n           ^^^^^^\nAssertionError: painted reference middle frame has no native caption\n"
+    }
+  ],
+  "error": "AssertionError(\"AssertionError('painted reference middle frame has no native caption')\")",
+  "completedAtUTC": "2026-10-26T00:16:10.278944+00:00"
+}
