@@ -1,0 +1,15 @@
+import storyboard from '@storyboard';
+import traceData from '../../research/trace.json';
+export type Subtitle={text:string;from:number;to?:number;duration?:number};
+export type Shot={id:string;from:number;durationInFrames:number;visualType:string;chapterId:string;cueFrames?:{sentences?:number[];labels?:Record<string,number>};subtitles?:Subtitle[];codeCardFrom?:number;[key:string]:any};
+export type Event={id:number;type:string;sourceLine:number;a?:number;b?:number;pair?:number[];parent:number[];parentBefore?:number[];size:number[];count:number;groupRoots:number[];groups:number[][];roots?:number[];city?:number;root?:number;path?:number[];findSide?:string;mergedRoots?:number[]};
+export type TraceCase={cityLabels:string[];inputMatrix:number[][];edges:number[][];actual:number;expected:number;events:Event[]};
+export const MAIN=traceData.cases.main as TraceCase;
+export const EXTRA=traceData.cases.extraCycle as TraceCase;
+export const TRACE=traceData;
+export const STORYBOARD=storyboard;
+export const LABELS=MAIN.cityLabels;
+export const shots:Shot[]=(storyboard.scenes??[]).flatMap((scene:any)=>scene.shots??[]).map((s:any)=>({...s,id:String(s.id).padStart(2,'0')}));
+export const VIDEO={width:1920,height:1080,fps:30,durationInFrames:shots.reduce((n,s)=>n+s.durationInFrames,0)};
+export const CITY_POS=[[250,450],[495,405],[770,460],[355,685],[635,700],[955,650]];
+export const PARENT_POS=[[1315,430],[1245,635],[1460,635],[1600,430],[1735,635],[1750,430]];
