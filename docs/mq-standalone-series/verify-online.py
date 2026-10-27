@@ -20,7 +20,7 @@ targets += [(suffix, tokens) for suffix, tokens in [
     ('series/peak/', ['v0.80.0']),
     ('episodes/message-queue/', ['v0.80.0', 'EP.10', '消息队列']),
     ('library/', ['v0.80.0', 'data-track="message-queue"']),
-    ('changelog/', ['v0.80.0', 'MQ独立系列']),
+    ('changelog/', ['releases/tag/v0.80.0', '独立的消息队列系列']),
 ]]
 rows = []
 attempt_path = D/'online-attempts.json'
