@@ -33,3 +33,11 @@ npm --prefix site run test:articles
 npm --prefix site run test:releases
 python3 episodes/_shared/tests/secret_scan.py
 ```
+
+## 上线结果
+
+[PR #399](https://github.com/linhongcun/video-studio/pull/399) 已合并，发布 [v0.82.0](https://github.com/linhongcun/video-studio/releases/tag/v0.82.0)。初次 Pages `40604223382` 及 Release 后 Pages `40604271523` 均成功，实际发布提交为 `ac31f8431fe49a64f05e87e44a037de4e9af0cfd`。Release 后再次确认线上版本、素材提交与更新日志正常。
+
+`online-verification.json` 核对全部 49 个单集页面和字幕、98 份线上媒体完整 SHA-256，以及原始文件、卡片、系列目录和真实多层错误路径的中文 404。`online-browser-check.json` 记录桌面浅色及手机深色的 32 项实际浏览器检查；中文字幕默认显示、实际播放及跳转到 30 秒通过，观察到 4 次真实 HTTP 206 范围响应，无已知能力限制。浏览器使用原生 CA 校验和环境代理，不绕过 TLS。
+
+12 个 issue 均已以 `completed` 关闭，状态快照见 `completed-issues.json`；发布回执见 `publication.json`。本次仅 GitHub 站点上线，未重发外平台。
