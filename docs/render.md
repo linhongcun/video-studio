@@ -75,6 +75,8 @@ LeetCode 系列当前封面使用[独立系列模板](../episodes-codex/_shared/
 
 趣味推理系列使用[独立系列模板](../episodes-codex/_shared/puzzles-covers/README.md)，固定紫黑底、P编号与上题下图构图，按发布元数据核对单集身份。三比例检查、安装和SHA记录独立于旧视频工程；新增题沿同一入口扩展。
 
+数据库系列使用[独立系列模板](../episodes-codex/_shared/database-covers/README.md)，固定墨绿/薄荷绿、数据库圆柱与真实EP编号，按元数据核对索引、事务、锁和主从复制。当前封面记录与旧视频冻结源独立，新增单集沿本系列入口扩展。
+
 其他系列封面由当期 `remotion/src/Cover.tsx` 和 `covers.json` 定义。当前 EP.14 的实际入口是：
 
 ```sh
