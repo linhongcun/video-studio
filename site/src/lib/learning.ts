@@ -1,7 +1,7 @@
 import {BASE, getSeries, type Episode, type Series} from './episodes';
 
 export type LearningTrack = {
-  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles' | 'engineering';
+  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles' | 'engineering' | 'message-queue';
   title: string;
   eyebrow: string;
   description: string;
@@ -27,7 +27,7 @@ const definitions: TrackDefinition[] = [
     description: '从浏览器与网络，到缓存、数据库和分布式。沿着真实的数据流，理解一个系统怎样运转。',
     outcome: '看懂请求怎样到达服务、数据怎样保存，以及系统遇到高峰和故障时怎样继续工作。',
     audience: '想建立计算机与后端基础，或补齐系统知识的开发者。',
-    seriesIds: ['request', 'cache', 'peak', 'message-queue', 'database', 'distributed'],
+    seriesIds: ['request', 'cache', 'peak', 'database', 'distributed'],
   },
   {
     id: 'agent',
@@ -78,6 +78,16 @@ const definitions: TrackDefinition[] = [
     outcome: '看清算法如何解决具体问题，理解它依赖的条件、维护成本与适用边界。',
     audience: '会基本编程，希望理解后端与分布式系统实现原理的开发者。',
     seriesIds: ['engineering-algorithms'],
+  },
+  {
+    id: 'message-queue',
+    number: '07',
+    title: '消息队列',
+    eyebrow: '跟随一条消息理解机制',
+    description: '从任务提交与消费开始，理解发布订阅、可靠性、顺序与积压。每期围绕一个完整问题，可以独立观看。',
+    outcome: '看清消息怎样保存、投递和确认，理解不同队列模型解决的问题、条件与代价。',
+    audience: '会基本编程，希望理解消息队列工作原理与设计取舍的开发者。',
+    seriesIds: ['message-queue'],
   },
 ];
 

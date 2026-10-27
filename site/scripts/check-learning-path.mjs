@@ -124,7 +124,9 @@ if (process.argv.includes('--built')) {
   assert.equal(archivePage.includes('class="pager"'), false);
   assert.equal((text(`episodes/${archiveSlug}/captions.vtt`).match(/-->/g) ?? []).length, 76);
   const movie = fs.readFileSync(path.join(dist, `episodes/${archiveSlug}/video.mp4`));
-  assert.equal(createHash('sha256').update(movie).digest('hex'), 'ef17294435f00901ffcdc7c3711501102ffea9db8e7c0160b5001cbb6b19eb91');
+  const archiveSource = fs.readFileSync(path.join(site, '../episodes', archiveSlug, 'video.mp4'));
+  assert.equal(createHash('sha256').update(movie).digest('hex'), createHash('sha256').update(archiveSource).digest('hex'),
+    'Built archive media must match the current published source, including its reference appendix');
   for (const rel of ['index.html', 'series/distributed/index.html', 'tags/分布式事务/index.html', 'rss.xml']) {
     assert.equal(text(rel).includes(`/episodes/${archiveSlug}/`), false, `Archive leaked into ${rel}`);
   }
@@ -335,7 +337,7 @@ const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
 const directionForSeries = {
   request: 'systems', cache: 'systems', peak: 'systems', database: 'systems', distributed: 'systems',
   agent: 'agent', leetcode: 'algorithms', 'design-patterns': 'patterns', puzzles: 'puzzles',
-  'engineering-algorithms': 'engineering',
+  'engineering-algorithms': 'engineering', 'message-queue': 'message-queue',
 };
 const expectedDirections = new Set(liveLessons.map((lesson) => directionForSeries[lesson.series]));
 assert.equal(expectedDirections.has(undefined), false, 'Every published series needs a known learning direction');
@@ -361,6 +363,14 @@ for (const track of tracks) {
   }
 }
 assert.equal(tracks.find((t) => t.id === 'systems')?.start.slug, 'http-request', 'System fundamentals should start with the request');
+const mq = liveLessons.find((lesson) => lesson.slug === 'message-queue');
+assert.equal(mq.series, 'message-queue', 'MQ must have its own primary series');
+assert.equal(learning.getTrackForSeries(mq.series)?.id, 'message-queue');
+assert.equal(tracks.find((track) => track.id === 'message-queue')?.start.slug, mq.slug);
+assert.equal(tracks.find((track) => track.id === 'systems').episodes.some((lesson) => lesson.slug === mq.slug), false);
+assert.equal(published.getSeries().find((series) => series.id === 'peak').episodes.some((lesson) => lesson.slug === mq.slug), false);
+assert.equal(published.seriesNav(mq).prev, undefined, 'MQ must not inherit a systems prerequisite');
+assert.equal(published.seriesNav(mq).next, undefined, 'The only MQ lesson must not lead into systems');
 const agentTrack = tracks.find((track) => track.id === 'agent');
 if (hasPublishedAgent) {
   assert.ok(agentTrack, 'New published Agent lessons need their own learning direction');
