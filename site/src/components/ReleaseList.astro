@@ -1,0 +1,60 @@
+---
+import {epHref, epLabel, type Episode} from '../lib/episodes';
+import {episodesForRelease, type Release} from '../lib/releases';
+import {readerNotes} from '../lib/release-notes.mjs';
+interface Props { releases: Release[]; episodes: Episode[]; }
+const {releases, episodes} = Astro.props;
+const knownSlugs = new Set(episodes.map((e) => e.slug));
+const entries = releases.map((release) => {
+  const notes = readerNotes(release);
+  const lessons = episodesForRelease(release, episodes);
+  const lessonHrefs = new Set(lessons.map((episode) => epHref(episode.slug)));
+  // Retired episode URLs must not reappear merely because an old Release links them.
+  const links = notes.links.filter((link) => {
+    const slug = /^\/video-studio\/episodes\/([a-z0-9-]+)\//.exec(link.href)?.[1];
+    return (!slug || knownSlugs.has(slug)) && !lessonHrefs.has(link.href);
+  });
+  return {...release, ...notes, lessons, links};
+});
+---
+<ol class="rl" role="list">
+  {entries.map((r) => (
+    <li>
+      <div class="hd">
+        <a class="tag num" href={r.url} rel="noopener" target="_blank">{r.tag}</a>
+        <span class={`k k-${r.kind === '新增' ? 'add' : r.kind === '修正' ? 'fix' : 'upd'}`}>{r.kind}</span>
+        <time class="num" datetime={`${r.date.replace(' ', 'T')}:00+08:00`}>{r.date.slice(0, 10)}</time>
+      </div>
+      <h3>{r.heading}</h3>
+      {r.summary && <p class="body">{r.summary}</p>}
+      {r.lessons.length > 0 && (
+        <ul class="eps" aria-label="相关内容">
+          {r.lessons.map((e) => <li><a href={epHref(e.slug)}>{epLabel(e)} {e.title}</a></li>)}
+        </ul>
+      )}
+      {r.links.length > 0 && (
+        <ul class="resources" aria-label="相关页面与素材">
+          {r.links.map((link) => <li><a href={link.href} rel={link.external ? 'noopener' : undefined} target={link.external ? '_blank' : undefined}>{link.label}{link.external && ' ↗'}</a></li>)}
+        </ul>
+      )}
+      <a class="full" href={r.url} rel="noopener" target="_blank">完整记录见 GitHub Release ↗</a>
+    </li>
+  ))}
+</ol>
+<style>
+.rl{list-style:none;margin:0;padding:0;border-left:2px solid var(--c-border)}
+.rl>li{position:relative;padding:0 0 var(--sp-6) var(--sp-5)}
+.rl>li::before{content:'';position:absolute;left:-7px;top:6px;width:12px;height:12px;border-radius:50%;background:var(--c-bg);border:2px solid var(--c-primary)}
+.hd{display:flex;align-items:center;gap:var(--sp-2);flex-wrap:wrap}
+.tag{font-family:var(--font-mono);font-weight:700;color:var(--c-text)}
+.k{font-size:var(--fs-xs);padding:1px 8px;border-radius:var(--r-full);border:1px solid var(--c-border)}
+.k-add{background:var(--c-primary);color:var(--c-on-primary);border-color:var(--c-primary)}
+.k-fix{color:var(--c-accent);border-color:var(--c-accent)}
+time{color:var(--c-text-2);font-size:var(--fs-small)}
+h3{font-size:var(--fs-h3);margin:var(--sp-2) 0}
+.body{color:var(--c-text-2);font-size:var(--fs-small);line-height:1.7;margin:var(--sp-2) 0;overflow-wrap:anywhere}
+.eps{display:flex;flex-wrap:wrap;gap:var(--sp-2);margin:var(--sp-2) 0;padding:0;list-style:none;font-size:var(--fs-small)}
+.eps a{display:block;padding:1px 10px;border-radius:var(--r-full);background:var(--c-surface-2);color:var(--c-text);text-decoration:none}
+.resources{padding-left:1.2em;margin:var(--sp-2) 0;font-size:var(--fs-small);overflow-wrap:anywhere}
+.full{display:inline-block;font-size:var(--fs-xs);margin-top:var(--sp-2)}
+</style>

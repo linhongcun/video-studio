@@ -10,13 +10,14 @@ const root = path.resolve(site, '../episodes');
 const source = fs.readFileSync(path.join(site, 'src/lib/episodes.ts'), 'utf8');
 const dateSource = source.slice(source.indexOf('/** 历史日期'), source.indexOf('/** NEW 根据'));
 const {code} = transformSync(dateSource.replace(/^export /gm, ''), {loader: 'ts'});
-const {dateIso, episodeDates, fmtDate, fmtVersion} = vm.compileFunction(
-  `${code}\nreturn {dateIso, episodeDates, fmtDate, fmtVersion};`, [])();
+const {dateIso, episodeDates, fmtDate, fmtVersion, fmtDay} = vm.compileFunction(
+  `${code}\nreturn {dateIso, episodeDates, fmtDate, fmtVersion, fmtDay};`, [])();
 
 assert.equal(dateIso('2026-10-25'), '2026-10-25T00:00:00+08:00');
 assert.equal(fmtVersion('2026-10-25'), '2026-10-25 版');
 assert.equal(fmtDate('2026-10-25'), '2026年10月25日');
 assert.equal(fmtVersion('2026-10-24T16:30:12Z'), '2026-10-25 00:30:12 版');
+assert.equal(fmtDay('2026-10-24T16:30:12Z'), '2026-10-25');
 assert.equal(fmtDate('2026-10-25T00:30:12+08:00'), '2026年10月25日 00:30:12');
 assert.equal(fmtVersion('2026-10-25T15:30:12+08:00'), fmtVersion('2026-10-25T07:30:12Z'));
 assert.notEqual(fmtVersion('2026-10-25T15:30:12+08:00'), fmtVersion('2026-10-25T15:30:13+08:00'));
@@ -51,7 +52,11 @@ for (const slug of fs.readdirSync(root)) {
   assert.equal(jsonLd.dateModified, dateIso(dates.updatedAt), `${slug}: dateModified`);
   assert.equal(jsonLd.uploadDate, dateIso(dates.publishedAt), `${slug}: uploadDate must remain first publication`);
   if (!meta.archived) {
-    assert.ok(library.includes(fmtVersion(dates.updatedAt)), `${slug}: missing card version`);
+    const card = [...library.matchAll(/<a\b[^>]*class="card"[^>]*>[\s\S]*?<\/a>/g)].map((m) => m[0]).find((card) => card.includes(`href="/video-studio/episodes/${slug}/"`));
+    assert.ok(card, `${slug}: missing library card`);
+    assert.equal((card.match(/<time\b/g) ?? []).length, 1, `${slug}: cards should show one date`);
+    assert.ok(card.includes(`>${fmtDay(dates.updatedAt)}</time>`), `${slug}: card date should use Shanghai day precision`);
+    assert.ok(!card.includes('创建于') && !card.includes('修改于'), `${slug}: full content dates belong in episode details`);
     const item = rss.split('<item>').find((item) => item.includes(`/episodes/${slug}/`));
     assert.ok(item, `${slug}: missing RSS item`);
     assert.equal(Date.parse(item.match(/<pubDate>([^<]+)<\/pubDate>/)[1]), Date.parse(dateIso(dates.publishedAt)), `${slug}: RSS must keep first publication`);
