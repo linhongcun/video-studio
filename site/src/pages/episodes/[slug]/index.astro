@@ -17,7 +17,7 @@ import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
 import PlatformLinks from '../../../components/PlatformLinks.astro';
 import {getTrackForSeries} from '../../../lib/learning';
-import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, fmtVersion, dateIso, isNew, isoDuration, seriesNav, seriesHref, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
+import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, fmtVersion, dateIso, isNew, isoDuration, seriesNav, seriesHref, additionalSeriesFor, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes({includeArchived: true});
   const current = getEpisodes();
@@ -35,6 +35,7 @@ const Content = e.Content;
 const tree = `${REPO}/blob/main/episodes/${e.slug}`;
 // Markdown → 组件自动映射：Sorkin 的稿件无需改写
 const sNav = seriesNav(e);
+const additionalSeries = additionalSeriesFor(e);
 const track = !e.archived ? getTrackForSeries(e.series) : undefined;
 const articleHeadings = e.chapters.filter((c) => c.inArticle);
 const learningGuide = learningGuideFor(e);
@@ -77,6 +78,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
       <a href="#player"><span class="reading-icon" aria-hidden="true">▶</span><span>看视频 <small>{fmtTime(e.duration)}</small></span></a>
       <a href="#article"><span class="reading-icon" aria-hidden="true">≡</span><span>读图文 {e.readMin > 0 && <small>约 {e.readMin} 分钟</small>}</span></a>
       {sNav && <a href="#course-directory" data-open-course><span class="reading-icon" aria-hidden="true">☷</span><span>课程目录 <small>{sNav.total} 篇</small></span></a>}
+      {additionalSeries.map((series) => <a href={seriesHref(series.id)}><span class="reading-icon" aria-hidden="true">↗</span><span>{series.title}<small>系列目录</small></span></a>)}
     </nav>
     <PlatformLinks platforms={e.platforms} />
     <VideoPlayer src={asset(e.slug, e.video)} poster={asset(e.slug, e.poster)} captions={`${BASE}episodes/${e.slug}/captions.vtt`} chapters={e.chapters} title={e.title} />

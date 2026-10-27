@@ -1,0 +1,20 @@
+--- a152/Main.tsx
++++ 7104/Main.tsx
+@@ -46,7 +46,7 @@
+     <Label x={650} y={280} w={540} size={33}><span style={{display: 'inline-flex', gap: 13, alignItems: 'center'}}><MiddlewareMark kind="rabbitmq" size={40}/>消息队列<span style={{fontSize: 20, color: C.muted}}>RabbitMQ 示例</span></span></Label>
+     <Panel x={650} w={530}/>
+     {rows.map((id, i) => <Task key={id} id={id} x={730} y={373 + i * 91 + rowOffset} color={id === '7042' ? C.gold : C.blue}/>) }
+-    {rows.length === 0 && <Label x={700} y={462} w={430} align="center" color={C.teal}>待处理：0</Label>}
++    {rows.length === 0 && !inFlight && <Label x={700} y={462} w={430} align="center" color={C.teal}>待处理：0</Label>}
+     <Label x={682} y={644} w={466} size={24} color={C.muted}>{note ?? `待处理 ${rows.length}　投递未确认 ${inFlight ? 1 : 0}`}</Label>
+     {!saved && <Label x={680} y={743} size={23} color={C.muted}>消息保存完成后才回复已受理</Label>}
+   </div>;
+@@ -103,7 +103,7 @@
+   if (n === 6) {
+     const p = a(34, Math.max(100, b - 18));
+     const deliveryEnd = Math.max(100, b - 18), shift = tween(f, deliveryEnd, deliveryEnd + 30);
+-    return <><Header stage={2} title={titles[5]} tag="继续上一情景 · 消费者恢复连接并接收任务"/><Page/><Queue rows={p > 0 ? ['7043', '7044'] : ['7042', '7043', '7044']} rowOffset={p > 0 ? 91 * (1 - shift) : 0} inFlight={p > 0}/><Worker status={p === 1 ? '收到7042，开始处理' : '恢复连接'} progress={p === 1 ? .06 : 0}/>{p > 0 && <Task x={mix(730, 1410, p)} y={mix(373, 424, clamp((p - .66) / .34))} state={p === 1 ? '处理中' : '投递中'}/>}<Foot alpha={z()}>仍是7042 · 7043和7044继续排队</Foot></>;
++    return <><Header stage={2} title={titles[5]} tag="继续上一情景 · 消费者恢复连接并接收任务"/><Page/><Queue rows={p > 0 ? ['7043', '7044'] : ['7042', '7043', '7044']} rowOffset={p > 0 ? 91 * (1 - shift) : 0} inFlight={p > 0}/><Worker status={p === 1 ? '收到7042，开始处理' : p === 0 ? '恢复连接' : ''} progress={p === 1 ? .06 : 0}/>{p > 0 && <Task x={mix(730, 1410, p)} y={mix(373, 424, clamp((p - .66) / .34))} state={p === 1 ? '处理中' : '投递中'}/>}<Foot alpha={z()}>仍是7042 · 7043和7044继续排队</Foot></>;
+   }
+   if (n === 7) {
+     const p = .06 + .94 * a(16, d - 50);

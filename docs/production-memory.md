@@ -533,3 +533,10 @@ Redis是后续考虑独立规划的大模块，本次仅记录内容组织方向
 固定Redis8.4源码证明层高从1开始选择，并只对低于所选层高的层接入forward；未展示的span等维护仍有自身步骤，不把上层forward不加入55扩大成全部内部状态不变。两个分支由独立模型审查，按[issue #355](https://github.com/linhongcun/video-studio/issues/355)推进；新3句须独立审稿后生成，旧17句按实际源与SHA复用，不能延用旧“20句全相同”的验收。当前还未完成本轮新成片与上线，不预记认可。Redis独立模块继续仅记未来考虑方向。
 
 - **层高修订实际交付：**[PR357](https://github.com/linhongcun/video-studio/pull/357)合并6790d926，附注tag/Release v0.76.2，最新主干的Release后Pages40339259076成功；正式156.9秒，一层完成、共同before重置和预选两层分别呈现。151冻结、35成片图、162本地网页检查及线上11项完整GET/95浏览器与Fullscreen检查通过，实际查看14张线上图，完整视频SHA为0edf23150bb3a3a00950ebb99547e09e9ede6ba9326e22d46e73d5e2e50f24f9。#355已completed关闭，详见[实际交付](../episodes-codex/redis-skiplist/revisions/height-choice/redis-skiplist/publication.json)。全站并行更新至v0.77.0，不改本期Release/首发身份；旧两版、882份旧生产文件与当前1123份其他公开文件保留，未作全片人工听辨/ASR/真机或学习效果宣称，未预记用户认可；Redis独立模块仍仅为未来考虑。
+
+
+## MQ系列入门改造（2026-10-27）
+
+MQ规划收敛为9个独立核心选题，14个原储备已取消。用户明确将既有EP.10改造为系列入门，并已授权本轮执行；沿用message-queue、原EP/URL/创建与首发身份，不增加重复入门片。当前独立revision围绕7042的提交、排队、暂停恢复、处理与页面查询结果，替换原重投/幂等详细支线。
+
+本地成片3700帧/123.333秒含5秒资料卡，5句旧take与19句新配；资料、时序、独立动态/实际成片抽检与网页检查范围分别记录，未声称全片人工听辨、ASR、真实Broker实验或用户观看认可。新MQ目录与旧peak路径共用同一episode，学习计数按唯一slug。GitHub发布及线上结果以[本轮发布记录](../episodes-codex/message-queue/revisions/mq-intro/message-queue/release.md)为准，不扩展为平台重发。

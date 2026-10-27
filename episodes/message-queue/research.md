@@ -1,32 +1,50 @@
-# EP10 公开资料实读记录
+# EP.10 / MQ01 入门改造：公开资料与原理核验
 
-访问日期：2026-10-24（北京时间）。实际通过搜索服务打开官方正文并定位相关章节；不是只看摘要。公开文档当前显示RabbitMQ 4.4，片中不要求观众使用该产品，教学机制限定如下。
+核验日期：2026-10-27（北京时间）。这是独立 `mq-intro` revision 的新研究记录，不替换父目录2026-10-24/26记录，不追认旧媒体完成了本轮检查。
 
-| 编号 | 官方正文 | 支持本片的主张 | 本片保留的边界 |
+## 当前入口与证据身份
+
+开工基线为 `16689e572c594224bd779a9b4403964e049cc99c`。基线发布元数据 `episodes/message-queue/meta.json` 的 `sourcePath` 指向 `episodes-codex/message-queue/remotion`；本轮从现有素材建立新的revision，保留EP.10、slug、首发日期、原Release与历史输入的身份。
+
+本轮实际读取官方网页正文及对应固定源，机构均为RabbitMQ，未见明确个人署名，不把Git提交作者当作文献作者。公开文档页面显示RabbitMQ 4.4；Python教程为现行Work Queues教程，正文未标产品版本号。来源日期是核验日，不是出版日。
+
+官方仓库固定commit：`a284a068ab720672b40ceed40f3f151d9829fb70`（仓库提交时间 `2026-10-26T16:03:34Z`）。通过GitHub connector `fetch_file`读取三份完整UTF-8源，并核对保存字节生成的Git blob身份与返回blob SHA一致。实际标题、连续短引、行号、论点上下文与保存文件SHA见 [sources/evidence.json](sources/evidence.json)。这不是shell完整HTTP GET记录，不捏造HTTP状态码。三份原文保存在本revision的 `sources/` 目录供逐字复核。
+
+## 主张与最低必要边界
+
+| 新编号 | 官方文档原题 | 本片使用 | 片内和图文必须保留的前提 |
 |---|---|---|---|
-| R1 | [Work Queues](https://www.rabbitmq.com/tutorials/tutorial-two-python)，Work Queues / Message acknowledgment / Message durability | 耗时工作可作为任务消息交后台处理；处理完成后确认；持久化需队列与消息配合 | 例子不是全局严格FIFO；可靠保存不等于业务已完成 |
-| R2 | [Consumer Acknowledgements and Publisher Confirms](https://www.rabbitmq.com/docs/confirms)，Basics / Automatic Requeueing / When Will Published Messages Be Confirmed | 发布确认与处理确认属于不同通信方向；手动确认下连接关闭会重投未确认任务；持久消息进入持久队列的确认发生在保存后 | 发现断连需要时间；重投不代表新业务；路由失败和确认需共同处理 |
-| R3 | [Reliability Guide](https://www.rabbitmq.com/docs/reliability)，Data Safety on Publisher/Consumer Side | 发送者、队列、消费者共同负责安全；不确定的确认可能造成重复，应让业务可安全重试 | 无恰好一次或永久不丢承诺；只有确认消息丢失与业务未做完要区分 |
-| R4 | [Queue Length Limit](https://www.rabbitmq.com/docs/maxlength)，Overview / Overflow Behaviour | 积压有资源与策略边界；到达上限后的行为可配置 | 不能把队列当成无限缓存；某些策略会丢旧消息，某些拒绝新发布 |
+| R1 | RabbitMQ tutorial - Work Queues | 任务变成消息，由后台worker稍后执行；网页受理与后台完成是不同阶段 | 原教程的模拟工作与本片7042订单节奏都是教学示例，不是RabbitMQ性能数字；本片不复制多worker轮询分发支线 |
+| R2 | Queues | 队列和消息持久性、队列生命周期、ready与未确认投递、TTL和长度边界 | 固定durable quorum queue、non-exclusive、non-auto-delete、persistent消息；暂停发生在7042尚未投递之前；未配置TTL/溢出行为不能概括成永远保留 |
+| R3 | Consumer Acknowledgements and Publisher Confirms | Consumer ACK送给Broker，允许其结束本次投递；发布确认与消费确认方向分开 | 固定手动ACK且业务工作完成后才确认；自动确认是另一种语义。ACK不会自动更新网页，也不能充当业务数据库的独立证明 |
 
-片中教学设计：7042/7043/7044是无真实含义的业务编号；一次只处理一笔和三笔瞬时抵达仅用于看清状态，不是性能测试。画面中的移动时间经过放慢，不代表官方时延。
+原始题名、机构、连续原句及原文定位完整列在 [references.md](references.md)；视频片尾只显示三条原题与机构，采用 `title-author`，不显示摘录、链接或核验说明。
 
-本轮相对旧片的内容修正：不再用“有队列就不会丢单”作绝对承诺。开头改问提交与完成的区别，把可靠保存、消费完成、确认丢失三个阶段分开。消费侧的记录仅表示队列维护的未确认状态，不是一笔新订单。
+## 本片正常接力的教学选择
 
+1. 7042是无真实含义的示例业务编号。生产者发布的是处理任务，不把“消息已提交”画成全部订单工作已经完成。
+2. 为讲清消费者不在线时为什么还可以等待，本例使用不绑定消费者连接生命周期的队列。暂停场景表现为消费者尚未订阅或投递被暂停、7042从未进入消费端；不能只暂停处理线程却忽略prefetch可能已把消息推到客户端。
+3. 恢复后，7042从ready变成已投递未确认；消费者完成必要业务并保存业务结果，然后将手动ACK送回Broker，Broker才可释放本次投递。Ready计数减少与本次业务完成不能画成同一个时刻。
+4. 网站服务查询保存的业务状态，再把页面改为已完成。这条查询路径是本片选择的应用设计，不是RabbitMQ协议自带的页面通知，也不是把ACK转送给网页。
+5. 一段短时输入高峰结束后，若后台净处理速度为正，积压可以排空。持续输入长期超过处理能力时，待处理量增长。速率、持续时间、单笔处理顺序均为示意，不称作实测，不给容量建议。
+6. 本片只完成正常路径和积压边界，不展开确认丢失、重投、去重、Exactly Once、多消费者分工或复制协议；保留一句失败情况需要额外处理即可，后续视频仅作为拓展。
 
-## flow-map-20261024 / #199：导航关系正文复核
+## 保留条件：避免从临时订阅队列推出持久任务结论
 
-实际阅读日期：2026-10-24。复用root取回的RabbitMQ官方仓库正文，原始URL为 https://raw.githubusercontent.com/rabbitmq/rabbitmq-website/main/docs/confirms.md ，本地只读材料 `/workspace/.video-studio-flow-audit/authorities/rabbitmq-confirms.md`，31,197字节，SHA-256 `861abccf819fddcdaddd661255914d867d6ed511a9ff19311bfef73d0907b127`；检索元数据在同目录retrieval.json。此处记录实际阅读正文，不把代理摘要当作出处。
+`durable`说明队列重启恢复语义，`persistent`说明发布消息持久性；它们不等于“所有故障永不丢失”，发布确认和正确路由仍有独立前提。Quorum queue不得被画成与消费者连接同生共死的exclusive队列。
 
-- 正文The Basics / Are Publisher Confirms Related to Consumer Delivery Acknowledgements（42–88行）明确两者互不知晓：发布确认只覆盖发送者和broker，消费确认只覆盖broker和消费者。因此地图保存回执必须标接收方网站；处理成功后的确认必须标接收方队列，不能将入队回执接到业务完成。
-- Consumer Acknowledgement Modes（123–172行）区分自动与手动，手动正面确认才告知队列可把本次投递标为已处理。片中仅保留现有手动确认示例，不宣称所有模式都在业务完成后等待。
-- Automatic Requeueing（520–535行）说明未确认投递在原channel/connection关闭后重新入队，发现不可用客户端需要时间，消费者必须准备处理重投并考虑幂等。因此回路条件是手动确认下断连被发现且仍未确认，不用普通超时直接触发无条件重投；回路不能推断业务必定未完成。
-- When Will Published Messages Be Confirmed（603–618行）对可路由的持久消息与持久队列，确认要等可靠保存；无法路由也可能收到confirm，所以本例画明任务已写入目标队列，不将任意confirm视为业务成功。持久化/路由和程序可靠性边界保留原文章，不扩展成其他消息方案。
+Queues的Queue Properties、Temporary Queues、Exclusive章节分别定义了属性；exclusive队列随声明它的连接关闭而删除，auto-delete又有最后消费者取消后的删除条件。因此不能把Publish/Subscribe教程里临时、自动命名、`exclusive=True`的日志订阅队列搬来支撑“消费者离线后订单任务仍在”。本片使用Work Queues的durable task_queue方向，教程只提供原理与配置线索，不表示本轮已运行Broker演示。
 
-导航仅把原片已经分别讲过的两类回执、未完成中断、业务成功但确认未达两个情景放回同一生命周期。第10镜仍止于复用已有结果，队列未收到处理确认；从复用到队列结束的虚线是后续要求，不假装该事件已经发生。
+队列、消息的TTL与队列长度限制会影响保留；资源也有限。本片仅声明所选配置和正常存储条件下任务继续待处理，不承诺无限容量或永久保留。发布确认的深入配置与故障窗口移至后续选题；入门画面不要把任意confirm误标为业务成功。
 
-## 2026-10-26 片尾原题与原文核验
+## 原理依据与原创推导分工
 
-本轮实际GET RabbitMQ官方仓库固定commit `29cb9ecf131223ad9b7faf61921ac3683008f722` 的`docs/confirms.md`与`docs/reliability.md`，两份全文均200。原题分别为`Consumer Acknowledgements and Publisher Confirms`与`Reliability Guide`，来自frontmatter，未拼接小节或改写题名。[本片证据](../../docs/reference-endcards/batch-4/sources-message-queue.json)保存完整SHA、连续完整原句、原定位及逐论点段落。
+- 异步任务、队列属性、消息状态与ACK语义是官方来源支持的事实。
+- “已提交/处理中/已完成”页面文字、业务状态查询接口、订单编号、速率曲线、暂停/恢复动作与镜头节奏是本片的教学和应用设计。
+- 积压守恒关系及净排空条件是按本例输入/完成口径得到的推导，不是假托官方压测。不得把已拉取数量当作完成数量。
 
-核对重点为发布确认与消费确认互不替代、目标队列与持久配置下的保存条件、手动确认断连重入队，以及确认不确定造成的重复／幂等边界。无法路由也可能confirm，重投不能反推业务一定未完成，不作exactly-once承诺。旧Work Queues与Queue Length Limit脚注沿用原历史日期，不记作本轮重新读取。原article主体、frontmatter、锚点、旁白、分镜、旧冻结与媒体保持。
+## 沿用与冻结保护
+
+旧父稿的 `references.json` 只收Confirms和Reliability Guide，两条R编号与旧research表格的R1—R4不是同一编号体系。本revision独立定义R1/R2/R3，不按编号直接继承旧SourceQuote。旧详讲确认丢失与幂等的来源仍保留为旧片历史，不在新入门中虚构已使用。
+
+父目录旧 `references.json`、`research.md`、`article.mdx`、`freeze.py`、旧冻结清单、历史QA和已发布媒体未由本任务改写。本轮新的参考资料输入及证据应随revision新冻结；不能在旧冻结中把日期改成今天。本轮只完成资料事实与来源核验，未声明Broker运行、配音、成片、附录渲染或线上SHA检查通过。

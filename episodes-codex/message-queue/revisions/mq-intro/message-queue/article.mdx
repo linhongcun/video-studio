@@ -1,0 +1,82 @@
+---
+title: "订单已提交，为什么还没处理完？"
+summary: "跟着同一笔订单7042，从任务受理、排队等待到恢复处理和页面获知结果，理解消息队列如何缓冲短时高峰，以及为什么积压不能无限增长。"
+related:
+  - rate-limit
+  - idempotency
+chapters:
+  - id: problem
+    title: "已受理，为什么还没完成"
+  - id: enqueue
+    title: "先接住任务，再处理业务"
+  - id: process
+    title: "暂停、恢复与业务完成"
+  - id: boundary
+    title: "短时缓冲与持续积压"
+---
+
+## 已受理，为什么还没完成 {#problem}
+
+点击提交订单，页面很快显示“已受理”，后台却还没有处理完成。这两个状态可以先后属于同一笔订单：前者说明系统接住了待办，后者才说明相应业务工作已经成功。
+
+本片沿订单7042的处理任务解释这个过程。它是教学重建，不代表任何真实平台的内部架构；订单号、三笔任务、单笔处理节奏和后面的流量计数也都是示例。
+
+## 先接住任务，再处理业务 {#enqueue}
+
+当三笔任务几乎同时到来，后台可能来不及一起处理。与其让页面始终等着业务结束，网站服务可以先把待办写进消息队列，由后台随后接收和执行。写入任务的网站服务是生产者，接收任务的后台是消费者；页面通过网站服务操作，不直接连接消息中间件。
+
+<SourceQuote sourceId="R1" supports="任务可以安排到稍后执行；提交任务与实际完成工作因而可以分开。" />
+
+本例使用RabbitMQ，在目标队列确认任务已经保存后，网站服务才回复页面“已受理”。这是教学应用选择的受理条件，并不意味着发布确认已证明消费者业务完成。消息、队列、路由和确认配置都要满足对应条件；“页面显示成功”本身不能替代这些证据。
+
+<Figure src="/video-studio/episodes/message-queue/article/01.jpg" alt="订单7042已保存到RabbitMQ队列，网站服务回复页面已受理，消费者还没有接收任务" caption="教学示意：先确认7042已保存，再由网站服务回复已受理；后台业务仍未完成。" seekTo={41.8} chapter="enqueue" />
+
+## 暂停、恢复与业务完成 {#process}
+
+### 消费者暂停，任务在哪里
+
+现在暂停消费者，且暂停发生在它尚未取走7042之前。队列仍在线，7042继续处于待处理状态，7043、7044也保留在等待位置。页面仍然显示已受理，不能因为任务已经保存就显示处理完成。
+
+本例固定使用durable、non-exclusive、non-auto-delete的quorum队列和持久消息，并采用发布确认与手动消费确认。它没有采用消费者退出就删除队列的临时订阅配置，也没有演示Broker宕机。保留与恢复依赖明确配置，不能从一个暂停画面推导任意故障下都不会丢失。
+
+<SourceQuote sourceId="R2" supports="持久队列与持久消息是消息恢复条件的一部分；本例明确固定保留配置，不把所有队列都视为同样持久。" />
+
+<Figure src="/video-studio/episodes/message-queue/article/02.jpg" alt="消费者在接收订单7042之前暂停，7042仍在队列中等待，页面没有显示处理完成" caption="教学示意：消费者尚未取走7042，消息仍为ready待处理；这里没有发生处理中断或重投。" seekTo={50.5} chapter="process" />
+
+消费者恢复后，接收的是队列里原来的7042，其他任务继续等待。这次是该消息首次投递给消费者，不是用户又提交了一单，也不是断连后的重复投递。任务送到后台，只代表开始处理，还没有自动得到业务结果。
+
+### 业务完成以后，页面怎样知道
+
+消费者完成7042的业务工作并成功保存结果后，再向RabbitMQ发送手动处理确认。队列收到这个ACK，才结束本次投递并移除对应消息；已经保存的业务结果不会随之删除。应用什么时候发确认，与Broker收到确认后如何处理消息，是相接的两个动作。
+
+<SourceQuote sourceId="R3" supports="消费者的正向确认告诉RabbitMQ该消息已投递并可丢弃；本例由应用在业务成功后发送确认。" />
+
+这条确认线的接收方是队列，不是网页。网页通过网站服务查询业务结果，查询返回7042已处理成功后，才将状态更新为“处理完成”。本片采用的是明确的查询设计，不把它说成RabbitMQ内置的页面通知功能。
+
+<Figure src="/video-studio/episodes/message-queue/article/03.jpg" alt="网站服务查询订单7042已保存的业务结果，返回成功后页面更新为处理完成，消费确认路径仍只连接消费者与RabbitMQ" caption="教学示意：页面从业务结果查询获知完成；Consumer ACK只负责确认本次投递。" seekTo={86.2} chapter="process" />
+
+<span id="retry"></span>
+
+因此，任务受理、开始处理、业务成功、队列收到确认、页面获知结果应分别核对。本片只演示正常闭环；生产环境仍须面对失败恢复和可能的重复投递，不能从这条成功路径推导业务天然恰好执行一次。重投和幂等的实现不在本片展开。
+
+<span id="recap"></span>
+
+## 短时缓冲与持续积压 {#boundary}
+
+7042完成后，后台继续处理剩下的7043、7044。如果这波集中输入已经停止，后台保持原有速度也能逐步消化待办，直到排空。消息队列把短时间集中到来的工作摊开了，却没有让消费者瞬间变快。
+
+再换成一个独立的持续流量示例：每个完整1秒窗口进入2条任务，只完成1条。经过n个这样的窗口，累计进入2n条、累计完成n条，未完成总量就增加到n条。统计未完成总量时必须包含已经投递但尚未完成的任务，不能把出队当成业务完成；画面中的“待处理”也按这一明确口径观察。
+
+<Figure src="/video-studio/episodes/message-queue/article/04.jpg" alt="教学流量每个完整秒窗进入两条任务、完成一条，累计未完成数量每窗增加一条" caption="教学计数：持续流入快于业务完成，未完成任务不断增加；数字不代表RabbitMQ性能基准。" seekTo={106.2} chapter="boundary" />
+
+队列只能缓冲，无法消除长期的处理能力缺口。积压增加意味着等待更久，还会受到容量、保留期与溢出策略限制；具体系统需要结合业务决定如何限制流入、处理过期或提高真正受限环节的能力。本片不承诺无限排队、固定等待时长或任何故障下均无丢失。
+
+回到7042：已受理表示任务已经接住，处理完成表示相应业务结果已经成功。消息队列把这两个时刻分开，让后台按自己的能力继续工作，同时承担等待和有限容量的代价。
+
+## 参考资料
+
+以下3项均为RabbitMQ第一方资料，2026-10-27核验；精确原文、定位、固定源字节与论点映射由本revision的references.json、research.md及sources/evidence.json记录。
+
+- **[R1] [RabbitMQ tutorial - Work Queues](https://www.rabbitmq.com/tutorials/tutorial-two-python)** · RabbitMQ。用于工作任务延后执行、生产者与消费者的职责。[本轮固定源](https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/tutorials/tutorial-two-python.md)。
+- **[R2] [Queues](https://www.rabbitmq.com/docs/queues)** · RabbitMQ。用于队列持久性、消息保留与消费者关系。[本轮固定源](https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/docs/queues.md)。
+- **[R3] [Consumer Acknowledgements and Publisher Confirms](https://www.rabbitmq.com/docs/confirms)** · RabbitMQ。用于发布确认与消费确认的独立边界、手动消费确认及消息移除。[本轮固定源](https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/docs/confirms.md)。

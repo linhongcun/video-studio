@@ -15,7 +15,7 @@ export type Episode = {
   slug: string; ep: number; problemNumber?: number; episodePart?: string; lessonOrder?: number; firstRelease?: string; title: string; summary: string; duration: number; tags: string[];
   createdAt: string; updatedAt: string; publishedAt?: string; date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
   draft: boolean; legacy: boolean; archived: boolean; replacedBy?: string[]; related: {slug: string; label?: string}[];
-  learningGuide?: {slug: string; label: string}; series?: string; description?: string; platforms: Platform[]; readMin: number; sourcePath: string;
+  learningGuide?: {slug: string; label: string}; series?: string; additionalSeries?: string[]; description?: string; platforms: Platform[]; readMin: number; sourcePath: string;
 };
 export type Platform = {id: string; label: string; url: string};
 /** 平台链接：只渲染 meta.json platforms 里写了真实 URL 的平台，没写的不显示（绝不拼猜） */
@@ -194,7 +194,9 @@ export function getEpisodes({includeArchived = false}: {includeArchived?: boolea
         slug, ep: meta.ep ?? 0, problemNumber: meta.problemNumber, episodePart: meta.episodePart, lessonOrder: meta.lessonOrder, firstRelease: meta.firstRelease, learningGuide: meta.learningGuide, replacedBy: meta.replacedBy, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
         tags: meta.tags ?? [], ...dates, date: dates.publishedAt ?? dates.createdAt, poster: meta.poster, video: meta.video,
         duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, archived: !!meta.archived, related: meta.related ?? [],
-        series: meta.series, description: meta.description,
+        series: meta.series,
+        additionalSeries: Array.isArray(meta.additionalSeries) ? meta.additionalSeries.filter((id: unknown) => typeof id === 'string' && id !== meta.series) : [],
+        description: meta.description,
         platforms: platformsOf(meta), readMin: readingMinutes(slug),
         sourcePath: meta.sourcePath ?? `episodes/${slug}/remotion`,
       };
@@ -285,17 +287,21 @@ export const isNew = (d: string, slug?: string) => {
 /** ISO 8601 时长，供 JSON-LD 使用 */
 export const isoDuration = (s: number) => `PT${Math.floor(s / 60)}M${Math.floor(s % 60)}S`;
 
-/** 系列（篇章）：series.json 定义顺序与简介；每期 meta.json 的 series 指向其 id。系列内按期号与教学顺序升序 */
-export type Series = {id: string; title: string; description: string; order: number; crossSeriesNavigation?: boolean; episodes: Episode[]};
+/** 一期可额外收录进多个目录，仍使用同一slug、媒体与首发身份；series保留主学习路径。 */
+export type Series = {id: string; title: string; description: string; order: number; crossSeriesNavigation?: boolean; independentLessons?: boolean; episodes: Episode[]};
 export function getSeries(): Series[] {
-  const meta = seriesMeta as Record<string, {title: string; description: string; order: number; crossSeriesNavigation?: boolean}>;
-  return Object.entries(meta).map(([id, m]) => ({id, ...m, episodes: getEpisodes().filter((e) => e.series === id).sort(compareLessons)}))
+  const meta = seriesMeta as Record<string, {title: string; description: string; order: number; crossSeriesNavigation?: boolean; independentLessons?: boolean}>;
+  return Object.entries(meta).map(([id, m]) => ({id, ...m, episodes: getEpisodes().filter((e) => e.series === id || e.additionalSeries?.includes(id)).sort(compareLessons)}))
     .filter((s) => s.episodes.length).sort((a, b) => a.order - b.order);
 }
+export const additionalSeriesFor = (e: Episode) => e.archived ? [] : getSeries()
+  .filter((series) => series.id !== e.series && e.additionalSeries?.includes(series.id));
 /** 某期在系列中的位置与系列内上/下一期；独立系列不与相邻系列组成学习路径。 */
 export function seriesNav(e: Episode) {
   if (e.archived) return null;
-  const all = getSeries();
+  // 额外目录不能改变原有上/下一课，也不作为跨系列导航的中间章节。
+  const all = getSeries().map((series) => ({...series, episodes: series.episodes.filter((episode) => episode.series === series.id)}))
+    .filter((series) => series.episodes.length);
   const si = all.findIndex((s) => s.id === e.series);
   if (si < 0) return null;
   const s = all[si], i = s.episodes.findIndex((x) => x.slug === e.slug);
