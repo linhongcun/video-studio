@@ -335,7 +335,7 @@ const tracks = learning.getLearningTracks();
 const hasPublishedAgent = liveLessons.some((lesson) => lesson.series === 'agent');
 const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
 const directionForSeries = {
-  request: 'systems', cache: 'systems', peak: 'systems', database: 'systems', distributed: 'systems',
+  request: 'systems', cache: 'systems', peak: 'systems', database: 'database', distributed: 'systems',
   agent: 'agent', leetcode: 'algorithms', 'design-patterns': 'patterns', puzzles: 'puzzles',
   'engineering-algorithms': 'engineering', 'message-queue': 'message-queue',
 };
@@ -371,6 +371,18 @@ assert.equal(tracks.find((track) => track.id === 'systems').episodes.some((lesso
 assert.equal(published.getSeries().find((series) => series.id === 'peak').episodes.some((lesson) => lesson.slug === mq.slug), false);
 assert.equal(published.seriesNav(mq).prev, undefined, 'MQ must not inherit a systems prerequisite');
 assert.equal(published.seriesNav(mq).next, undefined, 'The only MQ lesson must not lead into systems');
+const databaseTrack = tracks.find((track) => track.id === 'database');
+const databaseSlugs = ['db-index', 'db-transaction', 'db-lock', 'db-replication'];
+assert.deepEqual(slugs(databaseTrack.episodes).slice(0, databaseSlugs.length), databaseSlugs, 'Database keeps its existing lesson order while allowing new lessons');
+assert.equal(databaseTrack.start.slug, 'db-index');
+assert.equal(tracks.find((track) => track.id === 'systems').series.some((series) => series.id === 'database'), false);
+for (const [index, lesson] of databaseTrack.episodes.entries()) {
+  const nav = published.seriesNav(lesson);
+  assert.equal(nav.prev?.slug, databaseTrack.episodes[index - 1]?.slug, 'Database previous lessons stay inside the series');
+  assert.equal(nav.next?.slug, databaseTrack.episodes[index + 1]?.slug, 'Database next lessons stay inside the series');
+}
+assert.equal(published.seriesNav(liveLessons.find((lesson) => lesson.slug === 'degradation')).next?.slug, 'db-sharding');
+assert.equal(published.seriesNav(liveLessons.find((lesson) => lesson.slug === 'db-sharding')).prev?.slug, 'degradation');
 const agentTrack = tracks.find((track) => track.id === 'agent');
 if (hasPublishedAgent) {
   assert.ok(agentTrack, 'New published Agent lessons need their own learning direction');

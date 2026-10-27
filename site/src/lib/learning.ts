@@ -1,7 +1,7 @@
 import {BASE, getSeries, type Episode, type Series} from './episodes';
 
 export type LearningTrack = {
-  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles' | 'engineering' | 'message-queue';
+  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles' | 'engineering' | 'message-queue' | 'database';
   title: string;
   eyebrow: string;
   description: string;
@@ -24,10 +24,10 @@ const definitions: TrackDefinition[] = [
     number: '01',
     title: '系统原理',
     eyebrow: '从一次请求开始',
-    description: '从浏览器与网络，到缓存、数据库和分布式。沿着真实的数据流，理解一个系统怎样运转。',
-    outcome: '看懂请求怎样到达服务、数据怎样保存，以及系统遇到高峰和故障时怎样继续工作。',
+    description: '从浏览器与网络，到缓存、流量治理和分布式。沿着真实的数据流，理解一个系统怎样运转。',
+    outcome: '看懂请求怎样到达服务、缓存怎样协作，以及系统遇到高峰和故障时怎样继续工作。',
     audience: '想建立计算机与后端基础，或补齐系统知识的开发者。',
-    seriesIds: ['request', 'cache', 'peak', 'database', 'distributed'],
+    seriesIds: ['request', 'cache', 'peak', 'distributed'],
   },
   {
     id: 'agent',
@@ -88,6 +88,16 @@ const definitions: TrackDefinition[] = [
     outcome: '看清消息怎样保存、投递和确认，理解不同队列模型解决的问题、条件与代价。',
     audience: '会基本编程，希望理解消息队列工作原理与设计取舍的开发者。',
     seriesIds: ['message-queue'],
+  },
+  {
+    id: 'database',
+    number: '08',
+    title: '数据库',
+    eyebrow: '从数据读写理解内部机制',
+    description: '从索引、事务、锁与复制出发，理解数据怎样查询和修改，以及并发、故障下的正确性与取舍。',
+    outcome: '看清数据库如何组织数据、协调并发和复制状态，理解机制依赖的条件与适用边界。',
+    audience: '会基本编程，希望理解数据库工作原理并持续深入的开发者。',
+    seriesIds: ['database'],
   },
 ];
 

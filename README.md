@@ -72,6 +72,10 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 独立系列从任务提交、排队到处理完成讲一条消息怎样接力，可以单独观看，不要求先看「扛住高峰」。首期为[EP.10《订单已提交，为什么还没处理完？》](https://linhongcun.github.io/video-studio/episodes/message-queue/)，约2分03秒（含5秒参考资料卡）；系列页见[消息队列](https://linhongcun.github.io/video-studio/series/message-queue/)。制作入口见[本期工程](episodes-codex/message-queue/README.md)。
 
+## 数据库
+
+[数据库独立系列](https://linhongcun.github.io/video-studio/series/database/)从索引、事务、锁和主从复制开始，后续持续扩充数据库工作原理与设计取舍。现有[EP.15 索引](https://linhongcun.github.io/video-studio/episodes/db-index/)、[EP.16 事务](https://linhongcun.github.io/video-studio/episodes/db-transaction/)、[EP.17 锁](https://linhongcun.github.io/video-studio/episodes/db-lock/)与[EP.18 主从复制](https://linhongcun.github.io/video-studio/episodes/db-replication/)归入这一独立学习方向，不再作为系统原理的章节或前后课。原期号、URL与首发身份保留，系列目录只展示实际已发布内容。
+
 ## 制作流程
 
 完整清单在 [docs/pipeline.md](docs/pipeline.md)。顺序是：调研 → `script.md` / `article.mdx` / `pronunciation.md` → `storyboard.json` / `covers.json` → 配音冻结 → Deming 预检 → 渲染 → Nolan 与 Deming 审成片 → 按持续授权合并、Release、部署 GitHub 站点 → 线上文件核验；三个平台另行授权。
