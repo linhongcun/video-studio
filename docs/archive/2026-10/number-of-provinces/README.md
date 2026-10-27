@@ -11,3 +11,6 @@
 
 
 v0.78.0站点候选已首轮单次构建/日期/历史回归和双视口检查通过；14张截图逐份实阅。24字幕、8章定位与真实播放、两卡4次全屏/毫秒边界、3引用双视口过滤检查及本页桌面悬停/点击、手机点按/键盘Esc、118秒配图完整HTTP与原图/回看均通过。48旧metadata（47当前公开非归档+1归档）及1179旧canonical文件全文SHA保持，10旧算法加本片为11。createdAt沿实际开工2026-10-27T14:16:01+08:00，首次发布准备的publishedAt/updatedAt为2026-10-27T15:01:56+08:00；本轮无平台发布。后续Release/部署与线上证据另补，不预记结果。
+
+
+已通过[PR #367](https://github.com/linhongcun/video-studio/pull/367)合并16689e572c594224bd779a9b4403964e049cc99c，附注tag/[Release v0.78.0](https://github.com/linhongcun/video-studio/releases/tag/v0.78.0)于07:10:07Z发布；随后唯一手动[Pages40465492636](https://github.com/linhongcun/video-studio/actions/runs/40465492636)相同HEAD成功。首轮11次完整HTTPS共9,961,905字节核验通过，最终视频全文SHA、海报/配图、24字幕/四章/两卡/原文和回看/目录入口及更新日志自身关联一致；旧1179canonical文件保持。#85在核验后以completed关闭，未发外部平台。详细见publication.json和online-verification.json/md。当前没有新版本用户观看或学习效果结论。
