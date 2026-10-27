@@ -1,6 +1,6 @@
 # EP.10 MQ入门改造：本地交付核验
 
-本轮把既有EP.10改造为MQ系列入门，保留同一message-queue地址、整数EP及创建/首发身份。当前本地制作与下列检查已完成；GitHub发布、线上完整SHA与issue收尾另按release.md实际记录，不把本地通过写成已经上线。
+本轮把既有EP.10改造为MQ系列入门，保留同一message-queue地址、整数EP及创建/首发身份。本地制作与下列检查已完成，已随v0.79.0合并上线；Release后Pages、13项普通GET完整资产/页面、93项线上播放器及36项系列检查通过。实际发布身份与传输范围见[release.md](release.md)和[publication.json](publication.json)。
 
 ## 实际交付
 

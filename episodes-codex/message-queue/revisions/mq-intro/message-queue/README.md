@@ -2,7 +2,7 @@
 
 独立修订工程，开工基线为`16689e572c594224bd779a9b4403964e049cc99c`。沿用`message-queue`站点slug、EP.10及原创建/首发身份；原根工程、冻结清单、历史媒体与QA保持原位。本目录只继承基础设施和明确选中的声源，不继承旧成片或验收结论。
 
-本地制作与核验已完成，正式3700帧/123.333秒，含5秒资料卡。实际范围见[本轮QA](qa-final.md)、[独立动态审查](qa-motion-independent.md)和[独立成片审查](qa-video-independent.md)；GitHub发布与线上结果见[发布记录](release.md)。
+已随v0.79.0上线并完成线上核验，正式3700帧/123.333秒，含5秒资料卡。实际范围见[本轮QA](qa-final.md)、[独立动态审查](qa-motion-independent.md)和[独立成片审查](qa-video-independent.md)；GitHub发布与线上结果见[发布记录](release.md)。
 
 ## 入口
 
