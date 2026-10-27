@@ -27,7 +27,7 @@ const definitions: TrackDefinition[] = [
     description: '从浏览器与网络，到缓存、数据库和分布式。沿着真实的数据流，理解一个系统怎样运转。',
     outcome: '看懂请求怎样到达服务、数据怎样保存，以及系统遇到高峰和故障时怎样继续工作。',
     audience: '想建立计算机与后端基础，或补齐系统知识的开发者。',
-    seriesIds: ['request', 'cache', 'peak', 'database', 'distributed'],
+    seriesIds: ['request', 'cache', 'peak', 'message-queue', 'database', 'distributed'],
   },
   {
     id: 'agent',
@@ -91,7 +91,7 @@ export function getLearningTracks(): LearningTrack[] {
       const item = allSeries.find((s) => s.id === id);
       return item ? [item] : [];
     });
-    const episodes = series.flatMap((s) => s.episodes);
+    const episodes = [...new Map(series.flatMap((s) => s.episodes).map((episode) => [episode.slug, episode])).values()];
     const start = episodes[0];
     return start ? [{...definition, series, episodes, start, href: `${BASE}learn/#${definition.id}`}] : [];
   });

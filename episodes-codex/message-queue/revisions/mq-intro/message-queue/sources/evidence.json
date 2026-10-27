@@ -1,0 +1,238 @@
+{
+  "schemaVersion": 1,
+  "episode": "message-queue",
+  "revision": "mq-intro",
+  "checkedAt": "2026-10-27",
+  "timezone": "Asia/Shanghai",
+  "baselineCommit": "16689e572c594224bd779a9b4403964e049cc99c",
+  "repository": "rabbitmq/rabbitmq-website",
+  "commit": "a284a068ab720672b40ceed40f3f151d9829fb70",
+  "commitDateUTC": "2026-10-26T16:03:34Z",
+  "scope": "Current introductory task handoff only: asynchronous work queues, queue-lifetime and retention assumptions, manual consumer ACK responsibility. No broker run, media review, producer failure recovery, idempotency or exactly-once validation is claimed.",
+  "sources": [
+    {
+      "id": "work-queues",
+      "referenceId": "R1",
+      "canonicalUrl": "https://www.rabbitmq.com/tutorials/tutorial-two-python",
+      "fixedSourceUrl": "https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/tutorials/tutorial-two-python.md",
+      "repositoryFile": "tutorials/tutorial-two-python.md",
+      "savedSource": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/rabbitmq-work-queues.md",
+      "retrieval": {
+        "method": "GitHub connector fetch_file; complete UTF-8 content at fixed commit",
+        "blobSha": "d610acb8d8a2ba389a838513e3921d918db79feb",
+        "gitBlobIdentityMatched": true,
+        "bytes": 13816,
+        "sha256": "cabb69419c24d03876e78504e064c3ad2a8df3242481e3065e7cc6c23964d211",
+        "checkedAt": "2026-10-27",
+        "timezone": "Asia/Shanghai",
+        "httpStatusClaimed": false
+      },
+      "canonicalAccess": {
+        "method": "search_service_web_run open and targeted find; actual canonical HTML passages reviewed",
+        "bodyReviewed": true,
+        "displayedVersion": "Current tutorial; no product-version badge in tutorial body"
+      },
+      "title": {
+        "text": "RabbitMQ tutorial - Work Queues",
+        "locator": "frontmatter title · source line 2",
+        "startLine": 2,
+        "endLine": 2,
+        "rawExcerpt": "title: RabbitMQ tutorial - Work Queues"
+      },
+      "authorship": {
+        "organization": "RabbitMQ",
+        "author": null,
+        "basis": "Official rabbitmq.com documentation and rabbitmq/rabbitmq-website repository; page has no explicit personal byline. Git commit authors are not treated as document authors."
+      },
+      "documentPublishedAt": null,
+      "dateNote": "Source frontmatter gives no document publication date; access date and repository commit date are not publication dates.",
+      "quotations": [
+        {
+          "text": "Instead we schedule the task to be done later.",
+          "locator": "What This Tutorial Focuses On · source line 48",
+          "startLine": 48,
+          "endLine": 48,
+          "rawExcerpt": "it to complete. Instead we schedule the task to be done later. We encapsulate a",
+          "normalization": "None; exact contiguous original sentence."
+        }
+      ],
+      "claimExcerpts": [
+        {
+          "startLine": 39,
+          "endLine": 55,
+          "text": "### What This Tutorial Focuses On\n\nIn the [first tutorial](./tutorial-one-python) we\nwrote programs to send and receive messages from a named queue. In this\none we'll create a _Work Queue_ that will be used to distribute\ntime-consuming tasks among multiple workers.\n\nThe main idea behind Work Queues (aka: _Task Queues_) is to avoid\ndoing a resource-intensive task immediately and having to wait for\nit to complete. Instead we schedule the task to be done later. We encapsulate a\n_task_ as a message and send it to the queue. A worker process running\nin the background will pop the tasks and eventually execute the\njob. When you run many workers the tasks will be shared between them.\n\nThis concept is especially useful in web applications where it's\nimpossible to handle a complex task during a short HTTP request\nwindow."
+        },
+        {
+          "startLine": 179,
+          "endLine": 207,
+          "text": "TCP connection is lost) without sending an ack, RabbitMQ will\nunderstand that a message wasn't processed fully and will re-queue it.\nIf there are other consumers online at the same time, it will then quickly redeliver it\nto another consumer. That way you can be sure that no message is lost,\neven if the workers occasionally die.\n\nA timeout (30 minutes by default) is enforced on consumer delivery acknowledgement.\nThis helps detect buggy (stuck) consumers that never acknowledge deliveries.\nYou can increase this timeout as described in\n[Delivery Acknowledgement Timeout](/docs/consumers#acknowledgement-timeout).\n\n[Manual message acknowledgments](/docs/confirms) are turned on by default. In previous\nexamples we explicitly turned them off via the `auto_ack=True`\nflag. It's time to remove this flag and send a proper acknowledgment\nfrom the worker, once we're done with a task.\n\n```python\ndef callback(ch, method, properties, body):\n    print(f\" [x] Received {body.decode()}\")\n    time.sleep(body.count(b'.') )\n    print(\" [x] Done\")\n    ch.basic_ack(delivery_tag = method.delivery_tag)\n\nchannel.basic_consume(queue='hello', on_message_callback=callback)\n```\n\nUsing this code, you can ensure that even if you terminate a worker using\nCTRL+C while it was processing a message, nothing is lost. Soon\nafter the worker terminates, all unacknowledged messages are redelivered."
+        },
+        {
+          "startLine": 237,
+          "endLine": 291,
+          "text": "------------------\n\nWe have learned how to make sure that even if the consumer dies, the\ntask isn't lost. But our tasks will still be lost if RabbitMQ server\nstops.\n\nWhen RabbitMQ quits or crashes it will forget the queues and messages\nunless you tell it not to. Two things are required to make sure that\nmessages aren't lost: we need to mark both the queue and messages as\ndurable.\n\nFirst, we need to make sure that the queue will survive a RabbitMQ node restart.\nIn order to do so, we need to declare it as _durable_:\n\n```python\nchannel.queue_declare(queue='hello', durable=True, arguments={'x-queue-type': 'quorum'})\n```\n\nAlthough this command is correct by itself, it won't work in our\nsetup. That's because we've already defined a queue called `hello`\nwhich is not durable. RabbitMQ doesn't allow you to redefine an existing queue\nwith different parameters and will return an error to any program\nthat tries to do that. But there is a quick workaround - let's declare\na queue with different name, for example `task_queue`:\n\n```python\nchannel.queue_declare(queue='task_queue', durable=True, arguments={'x-queue-type': 'quorum'})\n```\n\nThis `queue_declare` change needs to be applied to both the producer\nand consumer code.\n\nAt that point we're sure that the `task_queue` queue won't be lost\neven if RabbitMQ restarts. Now we need to mark our messages as persistent -\nby supplying a `delivery_mode` property with the value of `pika.DeliveryMode.Persistent`\n\n```python\nchannel.basic_publish(exchange='',\n                      routing_key=\"task_queue\",\n                      body=message,\n                      properties=pika.BasicProperties(\n                         delivery_mode = pika.DeliveryMode.Persistent\n                      ))\n```\n\n> #### Note on message persistence\n>\n> Marking messages as persistent doesn't fully guarantee that a message\n> won't be lost. Although it tells RabbitMQ to save the message to disk,\n> there is still a short time window when RabbitMQ has accepted a message and\n> hasn't saved it yet. Also, RabbitMQ doesn't do `fsync(2)` for every\n> message -- it may be just saved to cache and not really written to the\n> disk. The persistence guarantees aren't strong, but it's more than enough\n> for our simple task queue. If you need a stronger guarantee then you can use\n> [publisher confirms](/docs/confirms)."
+        }
+      ]
+    },
+    {
+      "id": "queues",
+      "referenceId": "R2",
+      "canonicalUrl": "https://www.rabbitmq.com/docs/queues",
+      "fixedSourceUrl": "https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/docs/queues.md",
+      "repositoryFile": "docs/queues.md",
+      "savedSource": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/rabbitmq-queues.md",
+      "retrieval": {
+        "method": "GitHub connector fetch_file; complete UTF-8 content at fixed commit",
+        "blobSha": "2ff21f14cb2eb807647210501c1ed9eb2ced90ba",
+        "gitBlobIdentityMatched": true,
+        "bytes": 29219,
+        "sha256": "70a81800b3df6e9e0295391a2fae37f67421af5b097d112e06a3ac9ba3087025",
+        "checkedAt": "2026-10-27",
+        "timezone": "Asia/Shanghai",
+        "httpStatusClaimed": false
+      },
+      "canonicalAccess": {
+        "method": "search_service_web_run open and targeted find; actual canonical HTML passages reviewed",
+        "bodyReviewed": true,
+        "displayedVersion": "4.4"
+      },
+      "title": {
+        "text": "Queues",
+        "locator": "frontmatter title · source line 2",
+        "startLine": 2,
+        "endLine": 2,
+        "rawExcerpt": "title: Queues"
+      },
+      "authorship": {
+        "organization": "RabbitMQ",
+        "author": null,
+        "basis": "Official rabbitmq.com documentation and rabbitmq/rabbitmq-website repository; page has no explicit personal byline. Git commit authors are not treated as document authors."
+      },
+      "documentPublishedAt": null,
+      "dateNote": "Source frontmatter gives no document publication date; access date and repository commit date are not publication dates.",
+      "quotations": [
+        {
+          "text": "Durable queues will be recovered on node boot, including messages in them published as persistent.",
+          "locator": "Durability · #durability · source line 272",
+          "startLine": 272,
+          "endLine": 272,
+          "rawExcerpt": "Durable queues will be recovered on node boot, including messages in them published as persistent.",
+          "normalization": "None; exact contiguous original sentence."
+        }
+      ],
+      "claimExcerpts": [
+        {
+          "startLine": 103,
+          "endLine": 113,
+          "text": "## Queue Properties {#properties}\n\nQueues have properties that define how they behave. There is a set\nof mandatory properties and a map of optional ones:\n\n * Name\n * Durable (the queue will survive a broker restart)\n * Exclusive (used by only one connection and the queue will be deleted when that connection closes)\n * Auto-delete (queue that has had at least one consumer is deleted when last consumer unsubscribes)\n * Arguments (optional; used by plugins and broker-specific features such as message TTL, queue length limit, etc)\n"
+        },
+        {
+          "startLine": 262,
+          "endLine": 278,
+          "text": "## Durability {#durability}\n\nQueues can be durable or transient (non-durable). Metadata of a durable queue is stored on disk,\nwhile metadata of a transient queue is stored in memory when possible.\nThe same distinction is made for [messages at publishing time](./publishers#message-properties)\nin some protocols, e.g. AMQP 0-9-1 and MQTT.\n\nIn environments and use cases where durability is important, applications\nmust use durable queues *and* make sure that [publishers](/docs/publishers) mark published messages as persisted.\n\nDurable queues will be recovered on node boot, including messages in them published as persistent.\nMessages published as transient will be **discarded** during recovery, even if they were stored\nin durable queues.\n\nTransient queues will be deleted on node boot. They therefore will not survive a node restart,\nby design. Messages in transient queues will also be discarded.\n"
+        },
+        {
+          "startLine": 322,
+          "endLine": 350,
+          "text": "## Temporary Queues {#temporary-queues}\n\nWith some workloads queues are supposed to be short lived. While clients can\ndelete the queues they declare before disconnection, this is not always convenient.\nOn top of that, client connections can fail, potentially leaving unused\nresources (queues) behind.\n\nRabbitMQ supports a number of queue properties that make sense for the data that is\ntransient or client-specific in nature. Some of these settings can be applied to\ndurable queues but not every combination makes sense.\n\n:::tip\nConsider using [server-generated names](#names) for exclusive temporary queues. Since such queues\nare not meant to be shared between N consumers, using unique names makes sense.\n:::\n\nThere are three ways to make queue deleted automatically:\n\n * Exclusive queues (covered below)\n * TTLs (also covered below)\n * Auto-delete queues\n\nAn auto-delete queue will be deleted when its last consumer\nis cancelled (e.g. using the <code>basic.cancel</code> in AMQP 0-9-1)\nor gone (closed channel or connection, or lost TCP connection with the server).\n\nIf a queue never had any consumers, for instance, when all consumption happens\n[using polling](/docs/consumers#polling), it won't be automatically\ndeleted. For such cases, use exclusive queues or queue TTL."
+        },
+        {
+          "startLine": 380,
+          "endLine": 410,
+          "text": "## Exclusive (Client Connection-Specific) Queues {#exclusive-queues}\n\nAn exclusive queue can only be used (consumed from, purged, deleted, etc)\nby its declaring connection. Such queues are by definition [temporary](#temporary-queues) in nature,\nsetting the `exclusive` property on a durable queue does not make logical sense\nsince such queue cannot outlive its declaring connection, and thus cannot satisfy its durability\nproperty in case of a node restart.\n\nQueues declared as exclusive will always be declared as classic queues: exclusive [quorum queues](./quorum-queues)\nand [streams](./streams) do not make logical sense as their lifetimes would be bound to the lifetime\nof a specific client connection and thus a single node (or application instance).\n\n:::tip\nConsider using [server-generated names](#names) for exclusive queues. Since such queues\ncannot be shared between N consumers, using server-generated names makes most sense.\n:::\n\nAn attempt to use an exclusive queue from\na different connection will result in a channel-level exception\n<code>RESOURCE_LOCKED</code> with an error message that says\n<code>cannot obtain exclusive access to locked queue</code>.\n\nExclusive queues are deleted when their declaring connection is closed\nor gone (e.g. due to underlying TCP connection loss). They therefore\nare only suitable for client-specific transient state.\n\nIt is common to make exclusive queues server-named.\n\nExclusive queues are declared on the \"client-local\" node (the node that the client declaring\nthe queue is connected to), regardless of the `queue_leader_locator` value.\n"
+        },
+        {
+          "startLine": 450,
+          "endLine": 472,
+          "text": "from a queue Q hosted on B, while a client connected to node C can publish in a way that routes\nmessages to queue Q.\n\nClient libraries or applications **may** choose to connect to the node that hosts the current leader replica of a specific queue\nfor improved data locality.\n\nThis general rule applies to all messaging data types supported by RabbitMQ except for one.\n[Streams](./streams) are an exception to this rule, and require clients, regardless of the protocol they use, to connect to a node\nthat hosts a replica (a leader of rollower) of the target stream.\nConsequently, RabbitMQ Stream protocol clients will [connect to multiple nodes in parallel](./stream-connections).\n\n\n\n## Time-to-Live and Length Limit {#ttl-and-limits}\n\nQueues can have their length [limited](./maxlength).\nQueues and messages can have a [TTL](./ttl).\n\nBoth features can be used for data expiration and as a way of limiting\nhow many resources (RAM, disk space) a queue can use at most, e.g.\nwhen consumers go offline or their throughput falls behind publishers.\n\n"
+        },
+        {
+          "startLine": 536,
+          "endLine": 588,
+          "text": "## Consumers and Acknowledgements {#consumer-acknowledgement}\n\nMessages can be consumed by registering a consumer (subscription),\nwhich means RabbitMQ will push messages to the client, or fetched\nindividually for protocols that support this (e.g. the <code>basic.get</code> AMQP 0-9-1 method),\nsimilarly to HTTP GET.\n\nDelivered messages can be [acknowledged by consumer](./confirms) explicitly\nor automatically as soon as a delivery is written to connection socket.\n\nAutomatic acknowledgement mode generally will provide higher throughput\nrate and uses less network bandwidth. However, it offers the least number\nof guarantees when it comes to [failures](./reliability). As a rule of\nthumb, consider using manual acknowledgement mode first.\n\n### Prefetch and Consumer Overload {#prefetch-consumer-overload}\n\nAutomatic acknowledgement mode can also overwhelm\nconsumers which cannot process messages as quickly as they are delivered.\nThis can result in permanently growing memory usage and/or\nOS swapping for the consumer process.\n\nManual acknowledgement mode provides a way to [set a limit on the number\nof outstanding (unconfirmed) deliveries](./confirms): channel QoS (prefetch).\n\nConsumers using higher (several thousands or more) prefetch levels can experience\nthe same overload problem as consumers using automatic acknowledgements.\n\nHigh number of unacknowledged messages will lead to higher memory usage by\nthe broker.\n\n\n### Message States {#message-states}\n\nEnqueued messages therefore can be in one of two states:\n\n * Ready for delivery\n * Delivered but not yet [acknowledged by consumer](./confirms)\n\nMessage breakdown by state can be found in the management UI.\n\n\n\n## Determining Queue Length {#queue-length}\n\nIt is possible to determine queue length in a number of ways:\n\n * With AMQP 0-9-1, using a property on the <code>queue.declare</code> method response\n   (<code>queue.declare-ok</code>). The field name is <code>message_count</code>. How it is accessed\n   varies from client library to client library.\n * Using [RabbitMQ HTTP API](./management).\n * Using the [rabbitmqctl](./man/rabbitmqctl.8) <code>list_queues</code> command.\n"
+        }
+      ],
+      "versionIdentity": {
+        "versionedFile": "versioned_docs/version-4.4/queues.md",
+        "blobSha": "2ff21f14cb2eb807647210501c1ed9eb2ced90ba",
+        "sameBlobAsSavedSource": true,
+        "method": "GitHub recursive tree at the same fixed commit shows identical Git blob SHA for docs/ and versioned_docs/version-4.4/."
+      }
+    },
+    {
+      "id": "confirms",
+      "referenceId": "R3",
+      "canonicalUrl": "https://www.rabbitmq.com/docs/confirms",
+      "fixedSourceUrl": "https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/docs/confirms.md",
+      "repositoryFile": "docs/confirms.md",
+      "savedSource": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/rabbitmq-confirms.md",
+      "retrieval": {
+        "method": "GitHub connector fetch_file; complete UTF-8 content at fixed commit",
+        "blobSha": "4488211a4b421fc82125ed9e240870dbdbc2aebf",
+        "gitBlobIdentityMatched": true,
+        "bytes": 31197,
+        "sha256": "861abccf819fddcdaddd661255914d867d6ed511a9ff19311bfef73d0907b127",
+        "checkedAt": "2026-10-27",
+        "timezone": "Asia/Shanghai",
+        "httpStatusClaimed": false
+      },
+      "canonicalAccess": {
+        "method": "search_service_web_run open and targeted find; actual canonical HTML passages reviewed",
+        "bodyReviewed": true,
+        "displayedVersion": "4.4"
+      },
+      "title": {
+        "text": "Consumer Acknowledgements and Publisher Confirms",
+        "locator": "frontmatter title · source line 2",
+        "startLine": 2,
+        "endLine": 2,
+        "rawExcerpt": "title: Consumer Acknowledgements and Publisher Confirms"
+      },
+      "authorship": {
+        "organization": "RabbitMQ",
+        "author": null,
+        "basis": "Official rabbitmq.com documentation and rabbitmq/rabbitmq-website repository; page has no explicit personal byline. Git commit authors are not treated as document authors."
+      },
+      "documentPublishedAt": null,
+      "dateNote": "Source frontmatter gives no document publication date; access date and repository commit date are not publication dates.",
+      "quotations": [
+        {
+          "text": "Positive acknowledgements simply instruct RabbitMQ to record a message as delivered and can be discarded.",
+          "locator": "Consumer Acknowledgement Modes and Data Safety Considerations · #acknowledgement-modes · source line 146",
+          "startLine": 144,
+          "endLine": 144,
+          "rawExcerpt": "Positive acknowledgements simply instruct RabbitMQ to record a message as delivered and can be discarded.",
+          "normalization": "None; exact contiguous original sentence."
+        }
+      ],
+      "claimExcerpts": [
+        {
+          "startLine": 64,
+          "endLine": 88,
+          "text": "### Are Publisher Confirms Related to Consumer Delivery Acknowledgements? {#relation}\n\n[Publisher confirms](#publisher-confirms) and [consumer delivery acknowledgements](#consumer-acknowledgements)\nare very similar features that solve similar problems in different contexts:\n\n1. Consumer acknowledgements, as the name suggests, cover RabbitMQ communication with consumers\n2. Publisher confirms cover publisher communication with RabbitMQ\n\nThe two features, however, are entirely orthogonal and unaware of each other.\n\n**Publisher confirms are not aware of consumers**: they only cover publisher's interactions\nwith node it is connected to, and the queue (or [stream](./streams)) leader replica.\n\n**Consumer acknowledgements are not aware of publishers**: their goal is to confirm\nto a RabbitMQ node that a given delivery was successfully received and processed successfully,\nso the delivered message can be marked for future deletion.\n\nSometimes publishing and consuming applications need to communicate via requests and responses\nthat need an explicit acknowledgement from the peer. [RabbitMQ tutorial #6](/tutorials)\ndemonstrates the basics of how that's done, and [Direct Reply-to](./direct-reply-to) provides\na way to do it without creating response queues.\n\nThis type of communication, however, is not covered in this guide, and is mentioned only to\ncontrast it with the much more focussed messaging protocol features described in this guide.\n"
+        },
+        {
+          "startLine": 123,
+          "endLine": 165,
+          "text": "### Consumer Acknowledgement Modes and Data Safety Considerations {#acknowledgement-modes}\n\nWhen a node delivers a message to a consumer, it has to decide whether the\nmessage should be considered handled (or at least received) by the consumer. Since\nmultiple things (client connections, consumer apps, and so on) can fail,\nthis decision is a data safety concern. Messaging protocols usually provide\na confirmation mechanism that allows consumers to acknowledge deliveries\nto the node they are connected to. Whether the mechanism is used is decided\nat the time consumer subscribes.\n\nDepending on the acknowledgement mode used, RabbitMQ can consider a message to be\nsuccessfully delivered either immediately after it is sent out (written to a TCP socket)\nor when an explicit (\"manual\") client acknowledgement is received. Manually sent\nacknowledgements can be positive or negative and use one of the following protocol methods:\n\n * `basic.ack` is used for positive acknowledgements\n * `basic.nack` is used for negative acknowledgements (note: this is a [RabbitMQ extension to AMQP 0-9-1](./nack))\n * `basic.reject` is used for negative acknowledgements but has one limitation compared to `basic.nack`\n\nHow these methods are exposed in client library APIs will be discussed below.\n\nPositive acknowledgements simply instruct RabbitMQ to record a message as delivered and can be discarded.\nNegative acknowledgements with `basic.reject` have the same effect. The difference\nis primarily in the semantics: positive acknowledgements assume\na message was successfully processed while their negative counterpart\nsuggests that a delivery wasn't processed but still should be deleted.\n\nIn automatic acknowledgement mode, a message is considered\nto be successfully delivered immediately after it is\nsent. This mode trades off higher throughput (as long as the\nconsumers can keep up) for reduced safety of delivery and\nconsumer processing. This mode is often referred to as\n\"fire-and-forget\".  Unlike with manual acknowledgement\nmodel, if consumers's TCP connection or channel is closed\nbefore successful delivery, the message sent by the server will be lost.\nTherefore, automatic message acknowledgement <strong>should be considered unsafe</strong>\nand not suitable for all workloads.\n\nAnother thing that's important to consider when using\nautomatic acknowledgement mode is consumer overload.\nManual acknowledgement mode is typically used with a bounded\nchannel prefetch which limits the number of outstanding (\"in progress\")\ndeliveries on a channel. With automatic acknowledgements, however, there is"
+        },
+        {
+          "startLine": 520,
+          "endLine": 535,
+          "text": "### When Consumers Fail or Lose Connection: Automatic Requeueing {#automatic-requeueing}\n\nWhen manual acknowledgements are used, any delivery\n(message) that was not acked is automatically requeued when\nthe channel (or connection) on which the delivery happened\nis closed. This includes TCP connection loss by clients,\nconsumer application (process) failures, and channel-level\nprotocol exceptions (covered below).\n\nNote that it takes a period of time to [detect an unavailable client](./heartbeats).\n\nDue to this behavior, consumers must be prepared to handle redeliveries and otherwise\nbe implemented with [idempotence](https://en.wikipedia.org/wiki/Idempotence) in mind.\nRedeliveries will have a special boolean property, `redeliver`, set to `true`\nby RabbitMQ. For first time deliveries it will be set to `false`. Note that\na consumer can receive a message that was previously delivered to another consumer."
+        },
+        {
+          "startLine": 605,
+          "endLine": 619,
+          "text": "### When Will Published Messages Be Confirmed by the Broker? {#when-publishes-are-confirmed}\n\nFor unroutable messages, the broker will issue a confirm\nonce the exchange verifies a message won't route to any queue\n(returns an empty list of queues). If the message is also\npublished as mandatory, the `basic.return` is sent\nto the client before `basic.ack`. The same\nis true for negative acknowledgements (`basic.nack`).\n\nFor routable messages, the `basic.ack` is sent when a\nmessage has been accepted by all the queues. For persistent\nmessages routed to durable queues, this <strong>means persisting\nto disk</strong>. For [quorum queues](./quorum-queues),\nthis means that a quorum replicas have accepted and confirmed\nthe message to the elected leader."
+        }
+      ],
+      "versionIdentity": {
+        "versionedFile": "versioned_docs/version-4.4/confirms.md",
+        "blobSha": "4488211a4b421fc82125ed9e240870dbdbc2aebf",
+        "sameBlobAsSavedSource": true,
+        "method": "GitHub recursive tree at the same fixed commit shows identical Git blob SHA for docs/ and versioned_docs/version-4.4/."
+      }
+    }
+  ]
+}

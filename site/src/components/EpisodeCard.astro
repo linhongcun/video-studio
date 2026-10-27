@@ -4,9 +4,10 @@ import {getTrackForSeries} from '../lib/learning';
 const {e} = Astro.props;
 const track = getTrackForSeries(e.series);
 const series = track?.series.find((s) => s.id === e.series);
+const seriesMemberships = [...new Set([e.series, ...(e.additionalSeries ?? [])].filter(Boolean))];
 const rank = track ? Number(track.number) * 10000 + track.episodes.findIndex((lesson) => lesson.slug === e.slug) : 99999;
 ---
-<a class="card" href={epHref(e.slug)} data-tags={e.tags.join('|')} data-series={e.series ?? ''} data-track={track?.id ?? ''} data-date={e.date} data-rank={rank} data-legacy={e.legacy ? '' : undefined}>
+<a class="card" href={epHref(e.slug)} data-tags={e.tags.join('|')} data-series={e.series ?? ''} data-series-memberships={seriesMemberships.join('|')} data-track={track?.id ?? ''} data-date={e.date} data-rank={rank} data-legacy={e.legacy ? '' : undefined}>
   <div class="cover">
     <img src={asset(e.slug, e.poster)} alt="" width="1280" height="720" loading="lazy" decoding="async" />
     <span class="play" aria-hidden="true">↗</span><span class="dur num" aria-label={`时长 ${fmtTime(e.duration)}`}>{fmtTime(e.duration)}</span>

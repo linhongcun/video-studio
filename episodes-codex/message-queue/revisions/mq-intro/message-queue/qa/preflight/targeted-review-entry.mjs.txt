@@ -1,0 +1,133 @@
+import {bundle} from '/workspace/video-studio/episodes-codex/message-queue/revisions/mq-intro/message-queue/remotion/node_modules/@remotion/bundler/dist/index.js';
+import {openBrowser, renderMedia, renderStill, selectComposition} from '/workspace/video-studio/episodes-codex/message-queue/revisions/mq-intro/message-queue/remotion/node_modules/@remotion/renderer/dist/index.js';
+import path from 'node:path';
+import fs from 'node:fs';
+import crypto from 'node:crypto';
+import {fileURLToPath} from 'node:url';
+import webpack from '/workspace/video-studio/episodes-codex/message-queue/revisions/mq-intro/message-queue/remotion/node_modules/webpack/lib/index.js';
+
+const REM = "/workspace/video-studio/episodes-codex/message-queue/revisions/mq-intro/message-queue/remotion";
+const D = path.resolve(REM, '..');
+let ROOT = D;
+while (!fs.existsSync(path.join(ROOT, 'AGENTS.md'))) {
+  const next = path.dirname(ROOT);
+  if (next === ROOT) throw new Error('Repository root not found');
+  ROOT = next;
+}
+const sha = file => crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+const walk = dir => fs.readdirSync(dir, {withFileTypes: true}).flatMap(entry => {
+  const item = path.join(dir, entry.name);
+  return entry.isDirectory() ? walk(item) : entry.isFile() ? [item] : [];
+});
+const sourceFiles = [...walk(path.join(REM, 'src')), ...[
+  'storyboard.json', 'words.json', 'covers.json', 'episode-config.json', 'plan.json', 'script.md',
+  'remotion/package.json', 'remotion/package-lock.json', 'remotion/remotion.config.ts',
+  'remotion/tsconfig.json', 'remotion/scripts/review.mjs',
+].map(name => path.join(D, name)),
+  ...walk(path.join(ROOT, 'episodes-codex/_shared/middleware-identity')),
+  path.join(ROOT, 'episodes/_shared/theme/pageTheme.ts'),
+].filter(file => fs.existsSync(file));
+sourceFiles.push(fileURLToPath(import.meta.url));
+const sources = Object.fromEntries([...new Set(sourceFiles)].sort().map(file => [path.relative(ROOT, file), sha(file)]));
+const mainSHA = sources[path.relative(ROOT, path.join(REM, 'src/Main.tsx'))];
+const args = process.argv.slice(2);
+const base = path.resolve(args.find(arg => !arg.startsWith('--')) ?? '/workspace/work/mq-intro/dynamic');
+const out = path.join(base, `candidate-${mainSHA.slice(0, 12)}`);
+fs.mkdirSync(out, {recursive: true});
+const inputProps = {showSubtitles: false, hideSubtitles: true};
+const sb = JSON.parse(fs.readFileSync(path.join(D, 'storyboard.json'), 'utf8'));
+const shots = sb.scenes.flatMap(scene => scene.shots);
+const samples = new Map();
+function add(shot, local, name) {
+  local = Math.max(0, Math.min(shot.durationInFrames - 1, Math.round(local)));
+  const frame = shot.from + local;
+  const value = samples.get(frame) ?? {shot: shot.id, local, frame, labels: []};
+  value.labels.push(name);
+  samples.set(frame, value);
+}
+for (const shot of shots) {
+  const d = shot.durationInFrames;
+  for (const [name, local] of [['start', 0], ['quarter', d * .25], ['middle', d * .5], ['end', d - 1]]) add(shot, local, name);
+}
+const by = id => shots.find(shot => Number(shot.id) === id);
+const s3 = by(3), roleFrom = Math.ceil(s3.voice[1].localEnd);
+for (const local of [s3.durationInFrames - 72, roleFrom - 1, roleFrom, roleFrom + 1, roleFrom + 35, s3.durationInFrames - 1]) add(s3, local, 'roles-final-window');
+const s4 = by(4), b4 = s4.subtitles[1].from;
+for (const local of [19, 20, Math.ceil(Math.max(60, b4 * .55)) - 1, Math.ceil(Math.max(60, b4 * .55)), b4 - 11, b4 - 10, b4 - 9]) add(s4, local, 'save-before-page-acceptance');
+for (const n of [6, 10, 11]) {
+  const shot = by(n);
+  for (let local = 0; local < shot.durationInFrames; local += 20) add(shot, local, 'dense-action-or-counter-window');
+}
+const s6 = by(6), b6 = s6.subtitles[1].from;
+for (const local of [33, 34, 35, Math.max(100, b6 - 18) - 1, Math.max(100, b6 - 18), Math.max(100, b6 - 18) + 1]) add(s6, local, 'delivery-boundary');
+const s7 = by(7);
+for (const local of [s7.durationInFrames - 51, s7.durationInFrames - 50, s7.durationInFrames - 49]) add(s7, local, 'business-result-boundary');
+const s8 = by(8), b8 = s8.subtitles[1].from;
+for (const local of [0, s8.cueFrames.labels['处理确认'], 24, 25, Math.max(85, b8 - 15) - 1, Math.max(85, b8 - 15), Math.max(85, b8 - 15) + 1]) add(s8, local, 'ack-only-to-broker');
+const s9 = by(9), b9 = s9.subtitles[1].from;
+for (const local of [Math.max(90, b9 - 18) - 1, Math.max(90, b9 - 18), b9 + 14, b9 + 15, s9.durationInFrames - 46, s9.durationInFrames - 45, s9.durationInFrames - 44]) add(s9, local, 'query-before-page-completion');
+
+const drain = by(10), drainStart = drain.subtitles[1].from + 5;
+const drainCycle = (drain.durationInFrames - 36 - drainStart) / 2;
+for (const boundary of [Math.ceil(drainStart + drainCycle), Math.ceil(drainStart + drainCycle * 2)]) {
+  for (const local of [boundary - 1, boundary, boundary + 1]) add(drain, local, 'drain-completion-boundary');
+}
+
+const browserLogs = [];
+const onBrowserLog = entry => {
+  if (/COPYFIT|error|warning/i.test(entry.text)) browserLogs.push({type: entry.type, text: entry.text});
+};
+const ledger = {createdAtUTC: new Date().toISOString(), sourceHashes: sources, mainSHA256: mainSHA,
+  inputProps, subtitleLayer: 'disabled by Main props', voiceAudio: 'disabled at compile time for silent visual review',
+  width: 1920, height: 1080, fps: 30, bodyFrames: sb.meta.durationInFrames,
+  roleFullDisplay: {from: roleFrom, through: s3.durationInFrames - 1, frames: s3.durationInFrames - roleFrom},
+  stills: [], clips: [], browserLogs, sourceUnchangedAfterReview: null};
+const save = () => fs.writeFileSync(path.join(out, 'review-ledger.json'), JSON.stringify(ledger, null, 2) + '\n');
+save();
+const serveUrl = await bundle({
+  entryPoint: path.join(REM, 'src/index.ts'), enableCaching: false,
+  webpackOverride: config => ({...config,
+    resolve: {...config.resolve, alias: {...config.resolve?.alias,
+      '@storyboard': path.join(D, 'storyboard.json'), '@covers': path.join(D, 'covers.json')},
+      modules: [path.join(REM, 'node_modules'), 'node_modules']},
+    plugins: [...(config.plugins ?? []), new webpack.DefinePlugin({__HAS_VOICE_AUDIO__: false})],
+  }),
+});
+const browser = await openBrowser('chrome', {browserExecutable: '/usr/bin/chromium', logLevel: 'error'});
+try {
+  const composition = await selectComposition({serveUrl, id: 'Main', inputProps, puppeteerInstance: browser, logLevel: 'error'});
+  if (!args.includes('--clips-only')) {
+    for (const sample of [...samples.values()].filter(sample => ['06','10'].includes(String(sample.shot))).sort((a, b) => a.frame - b.frame)) {
+      const file = `s${sample.shot}-l${String(sample.local).padStart(4, '0')}-f${String(sample.frame).padStart(5, '0')}.png`;
+      await renderStill({composition, serveUrl, frame: sample.frame, output: path.join(out, file),
+        imageFormat: 'png', inputProps, puppeteerInstance: browser, onBrowserLog, logLevel: 'error'});
+      ledger.stills.push({...sample, file, sha256: sha(path.join(out, file))});
+    }
+    save();
+    console.log(`stills: ${ledger.stills.length}`);
+  }
+  if (!args.includes('--stills-only')) {
+    for (const [first, last] of [[4, 6], [10, 11]]) {
+      const from = by(first).from, end = by(last).from + by(last).durationInFrames - 1;
+      const file = `silent-no-subtitles-${first}-${last}.mp4`;
+      await renderMedia({composition, serveUrl, outputLocation: path.join(out, file), codec: 'h264',
+        frameRange: [from, end], scale: .5, crf: 24, concurrency: 2, muted: true,
+        inputProps, puppeteerInstance: browser, onBrowserLog, logLevel: 'error'});
+      ledger.clips.push({file, firstShot: first, lastShot: last, from, through: end, frames: end - from + 1,
+        width: 960, height: 540, sha256: sha(path.join(out, file))});
+      save();
+      console.log(`clip: ${first}-${last}`);
+    }
+  }
+} finally {
+  await browser.close({silent: true});
+  const changed = Object.entries(sources).filter(([relative, expected]) => sha(path.join(ROOT, relative)) !== expected).map(([relative]) => relative);
+  ledger.sourceUnchangedAfterReview = changed.length === 0;
+  ledger.changedSourcePaths = changed;
+  ledger.copyfitMessages = browserLogs.filter(entry => entry.text.includes('COPYFIT'));
+  save();
+}
+if (!ledger.sourceUnchangedAfterReview) throw new Error('Source changed during review; keep this candidate as historical evidence only');
+if (ledger.copyfitMessages.length) throw new Error(`COPYFIT found: ${ledger.copyfitMessages.length}`);
+console.log(JSON.stringify({output: out, stills: ledger.stills.length, clips: ledger.clips.length,
+  rolesVisibleFrames: ledger.roleFullDisplay.frames, copyfit: 0, sourceUnchanged: true}));

@@ -1,0 +1,150 @@
+import React, {useLayoutEffect, useRef} from 'react';
+import {AbsoluteFill, Audio, Sequence, staticFile, useCurrentFrame} from 'remotion';
+import {C, FONT, MONO} from './theme';
+import {Shot, shots} from './data';
+import {createMiddlewareIdentity} from '../../../../../../_shared/middleware-identity';
+
+const MiddlewareMark = createMiddlewareIdentity(React);
+declare const __HAS_VOICE_AUDIO__: boolean;
+const clamp = (n: number) => Math.max(0, Math.min(1, n));
+const tween = (f: number, from: number, to: number) => {
+  const p = clamp((f - from) / Math.max(1, to - from));
+  return p * p * (3 - 2 * p);
+};
+const mix = (a: number, b: number, p: number) => a + (b - a) * p;
+const Label: React.FC<{children: React.ReactNode; x: number; y: number; w?: number; size?: number; color?: string; alpha?: number; align?: 'left' | 'center' | 'right'}> =
+  ({children, x, y, w = 1600, size = 34, color = C.text, alpha = 1, align = 'left'}) => {
+    const ref = useRef<HTMLDivElement>(null);
+    useLayoutEffect(() => {
+      const el = ref.current;
+      if (el && alpha > .1 && el.scrollWidth > el.clientWidth + 2) console.error('COPYFIT', el.textContent);
+    });
+    return <div ref={ref} data-copyfit style={{position: 'absolute', left: x, top: y, width: w, fontSize: size, lineHeight: 1.4, color, opacity: alpha, textAlign: align, fontWeight: 600, whiteSpace: 'nowrap'}}>{children}</div>;
+  };
+const Panel: React.FC<{x: number; y?: number; w: number; h?: number; children?: React.ReactNode; color?: string; alpha?: number}> =
+  ({x, y = 345, w, h = 355, children, color = C.edge, alpha = 1}) => <div style={{position: 'absolute', left: x, top: y, width: w, height: h, background: C.surface, border: `2px solid ${color}`, borderRadius: 20, boxSizing: 'border-box', opacity: alpha}}>{children}</div>;
+const Task: React.FC<{id?: string; x: number; y: number; state?: string; alpha?: number; color?: string; w?: number}> =
+  ({id = '7042', x, y, state = '待处理', alpha = 1, color = C.gold, w = 370}) => <div data-task-id={id} data-task-state={state} style={{position: 'absolute', left: x, top: y, width: w, height: 74, boxSizing: 'border-box', display: 'flex', alignItems: 'center', justifyContent: w < 260 ? 'center' : 'space-between', padding: w < 260 ? 0 : '0 22px', border: `2px solid ${color}`, borderRadius: 12, background: '#17263B', opacity: alpha}}><span style={{fontFamily: MONO, color, fontSize: 30}}>{id}</span>{w >= 260 && <span style={{fontSize: 26, color: C.text}}>{state}</span>}</div>;
+const Arrow: React.FC<{x1: number; x2: number; y: number; p?: number; label?: string; color?: string; alpha?: number}> =
+  ({x1, x2, y, p = 0, label, color = C.blue, alpha = 1}) => <svg width={1920} height={1080} style={{position: 'absolute', inset: 0, opacity: alpha, pointerEvents: 'none'}}>
+    <path d={`M${x1} ${y}H${x2}`} stroke={color} strokeOpacity={.5} strokeWidth={3} fill="none"/>
+    <path d={`M${x2 + (x2 > x1 ? -12 : 12)} ${y - 8}L${x2} ${y}L${x2 + (x2 > x1 ? -12 : 12)} ${y + 8}`} stroke={color} strokeWidth={3} fill="none"/>
+    {p > 0 && p < 1 && <circle cx={mix(x1, x2, p)} cy={y} r={9} fill={color}/>}
+    {label && <text x={(x1 + x2) / 2} y={y - 18} textAnchor="middle" fill={color} fontFamily={FONT} fontSize={25}>{label}</text>}
+  </svg>;
+
+const Page: React.FC<{state?: string; active?: boolean; detail?: string; x?: number; y?: number; w?: number; button?: string; alpha?: number}> =
+  ({state = '已受理', active = false, detail = '后台尚未完成', x = 100, y = 345, w = 400, button, alpha = 1}) => <Panel x={x} y={y} w={w} h={355} alpha={alpha} color={active ? C.teal : C.edge}>
+    <div style={{padding: '26px 30px', color: C.muted, fontSize: 28}}>订单页面 · 教学示例</div>
+    <div style={{padding: '0 30px', fontFamily: MONO, fontSize: 38, color: C.gold}}>订单 7042</div>
+    <div data-page-state={state} style={{margin: '20px 30px 14px', color: active ? C.teal : C.gold, fontSize: 40, fontWeight: 700}}>{state}</div>
+    <div style={{margin: '0 30px', color: C.muted, fontSize: 25}}>{detail}</div>
+    {button && <div style={{margin: '20px 30px', borderRadius: 10, padding: '12px 22px', background: active ? C.teal : '#26465D', color: active ? C.bg : C.text, fontSize: 27, textAlign: 'center'}}>{button}</div>}
+  </Panel>;
+const Queue: React.FC<{rows?: string[]; inFlight?: boolean; saved?: boolean; alpha?: number; note?: string; rowOffset?: number}> =
+  ({rows = ['7042', '7043', '7044'], inFlight = false, saved = true, alpha = 1, note, rowOffset = 0}) => <div style={{opacity: alpha}}>
+    <Label x={650} y={280} w={540} size={33}><span style={{display: 'inline-flex', gap: 13, alignItems: 'center'}}><MiddlewareMark kind="rabbitmq" size={40}/>消息队列<span style={{fontSize: 20, color: C.muted}}>RabbitMQ 示例</span></span></Label>
+    <Panel x={650} w={530}/>
+    {rows.map((id, i) => <Task key={id} id={id} x={730} y={373 + i * 91 + rowOffset} color={id === '7042' ? C.gold : C.blue}/>) }
+    {rows.length === 0 && !inFlight && <Label x={700} y={462} w={430} align="center" color={C.teal}>待处理：0</Label>}
+    <Label x={682} y={644} w={466} size={24} color={C.muted}>{note ?? `待处理 ${rows.length}　投递未确认 ${inFlight ? 1 : 0}`}</Label>
+    {!saved && <Label x={680} y={743} size={23} color={C.muted}>消息保存完成后才回复已受理</Label>}
+  </div>;
+const Worker: React.FC<{status?: string; progress?: number; connected?: boolean; id?: string; result?: boolean; alpha?: number}> =
+  ({status = '等待任务', progress = 0, connected = true, id, result = false, alpha = 1}) => <div style={{opacity: alpha}}>
+    <Label x={1385} y={280} w={420} size={33}>后台处理</Label>
+    <Panel x={1385} w={420} color={!connected ? C.gold : result ? C.teal : C.edge}/>
+    <Label x={1415} y={370} w={360} size={29} color={!connected ? C.gold : C.muted}>{status}</Label>
+    {id && <Task x={1410} y={424} w={370} id={id} state={result ? '业务成功' : '处理中'} color={result ? C.teal : C.gold}/>}
+    <div style={{position: 'absolute', left: 1415, top: 538, width: 360, height: 12, background: C.edge, borderRadius: 8, overflow: 'hidden'}}><div style={{width: `${progress * 100}%`, height: '100%', background: C.teal}}/></div>
+    <Label x={1415} y={586} w={360} size={25} color={result ? C.teal : C.muted}>{result ? '业务结果：7042 成功' : !connected ? '尚未建立消费连接' : '按后台处理能力执行'}</Label>
+  </div>;
+const stages = ['提交受理', '排队等待', '后台处理', '业务完成'];
+const Header: React.FC<{stage: number; title: string; tag?: string}> = ({stage, title, tag}) => <>
+  <Label x={100} y={48} w={330} size={24} color={C.muted}>消息队列 · 入门 · EP.10</Label>
+  {stages.map((t, i) => <React.Fragment key={t}><Label x={560 + i * 255} y={48} w={215} size={25} color={i === stage ? C.gold : C.muted} align="center">{t}</Label>{i < 3 && <Label x={783 + i * 255} y={47} w={32} size={25} color={C.edge}>→</Label>}</React.Fragment>)}
+  <Label x={1660} y={49} w={160} size={25} align="right">IT小村</Label>
+  <Label x={100} y={145} w={1710} size={52}>{title}</Label>
+  {tag && <Label x={100} y={224} w={1700} size={24} color={C.muted}>{tag}</Label>}
+</>;
+const Foot: React.FC<{children: React.ReactNode; color?: string; alpha?: number}> = ({children, color = C.gold, alpha = 1}) => <Label x={100} y={791} w={1720} size={33} color={color} alpha={alpha} align="center">{children}</Label>;
+const SiteService: React.FC = () => <Panel x={100} y={725} w={400} h={59} color={C.blue}><div style={{fontSize: 24, padding: '10px 15px', color: C.blue, textAlign: 'center'}}>网站服务 · 接收请求并回复页面</div></Panel>;
+
+const titles = ['点下提交，后台就做完了吗？', '先看：后台来不及一起处理', '在网站和后台之间，保存待处理任务', '先接住任务，再回复已受理', '消费者暂停，消息仍在等待', '恢复后，接着处理同一条消息', '任务已投递，还要把工作做完', '业务成功后，确认本次投递', '页面完成状态，来自业务结果', '短时高峰结束后，任务逐步排空', '持续超过处理能力，积压仍会增长', '已受理和处理完成，是两件事'];
+const Scene: React.FC<{s: Shot}> = ({s}) => {
+  const f = useCurrentFrame(), n = Number(String(s.id).slice(0, 2)), d = s.durationInFrames;
+  const b = s.subtitles?.[1]?.from ?? Math.floor(d / 2);
+  const a = (from = 16, to = Math.max(48, b - 15)) => tween(f, from, to);
+  const z = (from = b + 12, to = d - 26) => tween(f, from, to);
+  const pageState = n >= 9 ? '处理完成' : '已受理';
+  if (n === 1) {
+    const click = a(18, Math.min(72, b - 12));
+    return <><Header stage={0} title={titles[0]}/><Page x={410} y={320} w={650} state={click === 1 ? '已受理' : '填写完成'} detail={click === 1 ? '等待后台处理结果' : '订单信息已就绪'} button={click === 1 ? '已提交订单 7042' : '提交订单'} active={click === 1}/><Label x={1210} y={420} w={470} size={35} color={C.muted}>后台任务</Label><Task x={1200} y={490} w={420} state="尚未完成"/><Foot alpha={z()}>同一笔订单：页面已受理，后台尚未完成</Foot></>;
+  }
+  if (n === 2) {
+    const p = a(10, b - 10);
+    return <><Header stage={0} title={titles[1]} tag="引入队列前的对照 · 三笔订单集中到来 · 一次处理一笔，仅为教学示例"/>
+      {[0, 1, 2].map(i => <Task key={i} x={mix(110, 720, tween(f, 20 + i * 24, 75 + i * 24))} y={365 + i * 105} id={String(7042 + i)} state={i === 0 ? '等待处理' : '仍在等待'} color={i === 0 ? C.gold : C.blue}/>)}
+      <Worker status="一次处理一笔 · 示例" progress={p * .5}/><Foot alpha={z()}>集中到来的任务，需要一个可以等待的位置</Foot></>;
+  }
+  if (n === 3) {
+    const p = a(20, Math.max(65, b - 15));
+    const queueCue = s.cueFrames?.labels?.['消息队列'] ?? 1;
+    const rolesShown = f >= Math.ceil(s.voice?.[1]?.localEnd ?? d - 72) ? 1 : 0;
+    return <><Header stage={1} title={titles[2]} tag="回到引入队列后的流程 · 同一批订单7042、7043、7044"/><Panel x={100} w={400}/><Label x={135} y={382} w={330} size={34}>网站服务</Label><Label x={135} y={446} w={330} size={28} color={C.muted}>写入后台处理任务</Label><Queue rows={p === 1 ? ['7042', '7043', '7044'] : []} alpha={f >= queueCue ? 1 : 0}/><Worker alpha={.65}/>
+      {p < 1 && <Task x={mix(125, 730, p)} y={373} alpha={p > .02 ? 1 : 0}/>}<Arrow x1={505} x2={642} y={535} p={p}/>
+      <Label x={125} y={590} w={350} size={29} color={C.blue} alpha={rolesShown}>生产者：写入任务</Label><Label x={1410} y={630} w={370} size={26} color={C.blue} alpha={rolesShown}>消费者：接收并处理</Label><Foot alpha={rolesShown}>网站负责提交，后台按自己的节奏处理</Foot></>;
+  }
+  if (n === 4) {
+    const receipt = a(20, Math.max(60, b * .55)), reply = a(Math.max(65, b * .55), b - 10);
+    return <><Header stage={0} title={titles[3]} tag="本例已配置持久保存与发送确认；这里演示正常保存成功后的受理路径"/><Page state={reply === 1 ? '已受理' : '提交中'} detail="后台尚未完成"/><SiteService/><Queue/><Worker alpha={.55}/><Arrow x1={650} x2={505} y={750} p={receipt} label="保存回执" color={C.teal}/><svg width={1920} height={1080} style={{position:'absolute',inset:0}}><path d="M300 725V700" stroke={C.teal} strokeWidth={3}/>{reply > 0 && reply < 1 && <circle cx={300} cy={mix(725,700,reply)} r={8} fill={C.teal}/>}</svg><Foot alpha={z()}>已受理：任务已接住　≠　业务已完成</Foot></>;
+  }
+  if (n === 5) return <><Header stage={1} title={titles[4]} tag="暂停情景：本例消费者尚未建立消费连接，7042从未被取走"/><Page/><Queue/><Worker connected={false} status="消费者暂停"/><Arrow x1={1188} x2={1375} y={520} alpha={.25}/><Foot alpha={z()}>待处理仍为3条 · 已受理的任务可以先等待</Foot></>;
+  if (n === 6) {
+    const p = a(34, Math.max(100, b - 18));
+    const deliveryEnd = Math.max(100, b - 18), shift = tween(f, deliveryEnd, deliveryEnd + 30);
+    return <><Header stage={2} title={titles[5]} tag="继续上一情景 · 消费者恢复连接并接收任务"/><Page/><Queue rows={p > 0 ? ['7043', '7044'] : ['7042', '7043', '7044']} rowOffset={p > 0 ? 91 * (1 - shift) : 0} inFlight={p > 0}/><Worker status={p === 1 ? '收到7042，开始处理' : p === 0 ? '恢复连接' : ''} progress={p === 1 ? .06 : 0}/>{p > 0 && <Task x={mix(730, 1410, p)} y={mix(373, 424, clamp((p - .66) / .34))} state={p === 1 ? '处理中' : '投递中'}/>}<Foot alpha={z()}>仍是7042 · 7043和7044继续排队</Foot></>;
+  }
+  if (n === 7) {
+    const p = .06 + .94 * a(16, d - 50);
+    return <><Header stage={2} title={titles[6]} tag="示例采用手动消费确认 · 业务结果先保存，随后再确认投递"/><Page/><Queue rows={['7043', '7044']} inFlight/><Worker status={p === 1 ? '业务工作已成功' : '正在执行业务'} progress={p} id="7042" result={p === 1}/><Foot alpha={z()}>投递到后台，是处理的开始；业务结果需要实际产生</Foot></>;
+  }
+  if (n === 8) {
+    const p = a(25, Math.max(85, b - 15));
+    return <><Header stage={3} title={titles[7]} tag="7042业务结果已保存成功 · 处理确认只发给队列"/><Page/><Queue rows={['7043', '7044']} inFlight={p < 1}/><Worker status="业务成功 · 发送确认" progress={1} id="7042" result/><Arrow x1={1380} x2={1190} y={530} p={p} label="处理确认" color={C.teal} alpha={f >= (s.cueFrames?.labels?.['处理确认'] ?? 1) ? 1 : 0}/><Foot color={C.teal} alpha={z()}>队列收到确认，结束7042这次投递</Foot></>;
+  }
+  if (n === 9) {
+    const query = a(24, Math.max(90, b - 18)), response = z(b + 15, d - 45);
+    return <><Header stage={3} title={titles[8]} tag="应用设计示意：页面经网站服务查询业务结果；处理确认的接收方仍是队列"/><Page state={response === 1 ? pageState : '已受理'} active={response === 1} detail={response === 1 ? '7042后台处理已成功' : '正在查询处理结果'}/><SiteService/><Queue rows={['7043', '7044']} alpha={.4}/><Worker status="业务结果已可查询" progress={1} id="7042" result/><Arrow x1={510} x2={1375} y={750} p={query} label="网站服务查询7042的业务结果"/><Arrow x1={1375} x2={510} y={854} p={response} color={C.teal} label="查询返回：处理成功"/><svg width={1920} height={1080} style={{position:'absolute',inset:0,pointerEvents:'none'}}><path d="M510 854H300V784M300 725V700" stroke={C.teal} strokeWidth={3} fill="none" strokeOpacity={.6}/></svg></>;
+  }
+  if (n === 10) {
+    const start = b + 5, cycle = (d - 36 - start) / 2;
+    const time = clamp((f - start) / (cycle * 2)) * 2, k = Math.min(2, Math.floor(time));
+    const active = f > start && k < 2, fraction = time - k;
+    const delivery = clamp(fraction / .4), progress = clamp((fraction - .4) / .6);
+    const travel = clamp((delivery - .15) / .7), originY = k === 0 ? 373 : 464;
+    const cardWidth = delivery < .15 ? mix(370, 150, delivery / .15) : delivery > .85 ? mix(150, 370, (delivery - .85) / .15) : 150;
+    const rows = ['7043', '7044'].slice(k + (active ? 1 : 0));
+    const done = ['7042', '7043', '7044'].slice(0, k + 1);
+    const activeId = String(7043 + k), targetY = 373 + (k + 1) * 91;
+    return <><Header stage={1} title={titles[9]} tag="继续同一批订单 · 7042已完成 · 这波集中输入停止，不再新增任务"/><Panel x={100} w={400}/><Label x={130} y={392} w={340} size={34}>这波输入已停止</Label><Label x={130} y={478} w={340} size={26} color={C.muted}>后台继续逐条处理</Label><Queue rows={rows} rowOffset={active && k === 0 ? 91 : 0} inFlight={active}/><Label x={1385} y={280} w={420} size={33}>后台处理与完成记录</Label><Panel x={1385} w={420} color={C.teal}/>{done.map((id,i)=><Task key={id} id={id} x={1410} y={373+i*91} state="已完成" color={C.teal}/>)}{active && <><Task id={activeId} x={mix(730,1410,travel)} y={mix(originY,targetY,clamp((travel-.55)/.2))} w={cardWidth} state={delivery < 1 ? '投递中' : '处理中'}/>{delivery === 1 && <div style={{position:'absolute',left:1410,top:targetY+79,width:370,height:5,background:C.edge}}><div style={{width:`${progress*100}%`,height:'100%',background:C.teal}}/></div>}</>}<Foot color={k === 2 ? C.teal : C.gold}>未完成 {2 - k} 条　＋　已完成 {k+1} 条　＝　原来的3条</Foot></>;
+  }
+  if (n === 11) {
+    const tick = Math.min(4, Math.floor(tween(f, 25, d - 40) * 4.99));
+    return <><Header stage={1} title={titles[10]} tag="另一情景，重新计数 · 每秒进入2条、完成1条，仅为教学示例"/>
+      <Panel x={100} w={430}/><Label x={135} y={386} w={360} size={32}>累计进入</Label><Label x={135} y={464} w={360} size={64} color={C.blue}>{tick * 2} 条</Label><Label x={135} y={590} w={360} size={25} color={C.muted}>流入：2条 / 秒</Label>
+      <Panel x={690} w={500} color={C.gold}/><Label x={725} y={386} w={430} size={32}>尚未完成的任务</Label><Label x={725} y={464} w={430} size={64} color={C.gold}>{tick} 条</Label><Label x={725} y={590} w={430} size={23} color={C.muted}>含排队与处理中 · 每秒净增1条</Label>
+      <Panel x={1375} w={430}/><Label x={1410} y={386} w={360} size={32}>累计完成</Label><Label x={1410} y={464} w={360} size={64} color={C.teal}>{tick} 条</Label><Label x={1410} y={590} w={360} size={25} color={C.muted}>处理能力：1条 / 秒</Label>
+      <Label x={100} y={733} w={1720} size={26} color={C.muted} align="center">示意时间：第{tick}秒窗口结束时的累计计数</Label><Foot>进入 {tick * 2} 条 − 完成 {tick} 条 ＝ 未完成 {tick} 条 · 容量有限，等待会增长</Foot></>;
+  }
+  const p = z(b + 8, d - 50);
+  return <><Header stage={3} title={titles[11]}/><Panel x={240} y={350} w={640} h={300} color={C.gold}/><Label x={280} y={392} w={560} size={46} color={C.gold} align="center">已受理</Label><Label x={280} y={490} w={560} size={29} align="center">任务已接住，后台可能仍在等待</Label><Panel x={1040} y={350} w={640} h={300} color={C.teal}/><Label x={1080} y={392} w={560} size={46} color={C.teal} align="center">处理完成</Label><Label x={1080} y={490} w={560} size={29} align="center">后台已产生成功的业务结果</Label><Label x={913} y={430} w={92} size={64} color={C.muted} align="center">≠</Label><Foot alpha={p}>缓冲短时高峰 · 后台能力未增加 · 等待与积压有代价</Foot></>;
+};
+
+const ShotView: React.FC<{s: Shot; captions: boolean}> = ({s, captions}) => {
+  const f = useCurrentFrame();
+  const sub = s.subtitles?.find(q => f >= q.from && f <= (q.to ?? q.from + (q.duration ?? 1) - 1));
+  return <AbsoluteFill style={{background: C.bg, color: C.text, fontFamily: FONT, overflow: 'hidden'}}><div style={{position: 'absolute', inset: 0, background: 'radial-gradient(ellipse at 85% 0%, #19384B55, transparent 65%)'}}/><Scene s={s}/>{captions && sub && <div data-subtitle style={{position: 'absolute', left: 110, right: 110, top: 925, height: 110, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 37, lineHeight: 1.4, textAlign: 'center', padding: '0 18px', boxSizing: 'border-box', background: `${C.bg}F5`, borderRadius: 14}}>{sub.text}</div>}</AbsoluteFill>;
+};
+export type MainProps = {showSubtitles?: boolean; hideSubtitles?: boolean};
+export const Main: React.FC<MainProps> = ({showSubtitles = true, hideSubtitles = false}) => <AbsoluteFill style={{background: C.bg, fontFamily: FONT}}>{typeof __HAS_VOICE_AUDIO__ !== 'undefined' && __HAS_VOICE_AUDIO__ && <Audio src={staticFile('audio/voice.wav')}/>} {shots.map(s => <Sequence key={s.id} from={s.from} durationInFrames={s.durationInFrames}><ShotView s={s} captions={showSubtitles && !hideSubtitles}/></Sequence>)}</AbsoluteFill>;
