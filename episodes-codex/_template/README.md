@@ -19,6 +19,7 @@
 1. 实际读取核心公开资料，按 [docs/research-template.md](../../docs/research-template.md) 记录原始题名、题名证据、主张、访问日期和边界，同时建立 `presentation: title-author` 的本期 `references.json`。核对公开作者或维护机构；明确个人署名填非空 `author`，否则省略并用 `organization`。原文摘录留图文/研究，不上视频，不用概括或译文冒充原题。先确认观众需要的前置概念；术语与支线按本期范围取舍，不沿用上期的来源或已通过状态。
 2. 编写 `script.md`、`article.mdx`、`pronunciation.md` 和 `visual-direction.md`；文章同步提供片尾各项的完整标题、链接和对应知识点。完成下面的资料预检后，再开始配音和昂贵的正式渲染。同一对象、渐进揭示，让动作解释因果；先做关键连续过程的小样，再展开全片。
 3. 生成本期 `storyboard.json`、`covers.json` 和 `knoll-props.md`。主线收束后明确安排原题与作者/机构的参考资料简表；如有完整代码卡，参考资料放在代码卡之后，每页最多4项、默认5秒。结构参照 [分镜字段](../../docs/storyboard-schema.md)，画面与封面依当前 [RULES](../../docs/RULES.md)。
+   LeetCode新题封面默认沿用已认可的[共享系列模板](../_shared/leetcode-covers/README.md)：按本题元数据扩展catalog和对应题图，统一生成并检查三比例，不从旧期复制另一套封面样式。
 4. 用共享 `episodes/_shared/voice/` 的 prep、gen、build 等真实脚本生成冰糖配音、比较候选并保留 picks。按本期组装脚本写入真实句级区间，使用共享起音与 `place_v2.py --mode whole`；public/audio/voice.wav 是实体副本。ASR或听辨未执行时如实记录，不把字符兼容包络当作逐字识别，也不伪造共享自检结果。
 5. 完成预检与独立动态复核，停止写入后冻结实际输入（含选中takes、共享实现、全部渲染源码，以及下述资料清单/证据/渲染入口）。在编码前后只读核对同一份清单，不把视频或生成的附录回执当作编码前输入冻结。
 6. 按下面的默认入口接通 `npm run render`：资料预检 → 正文及代码卡 → 参考资料 → 最终媒体。完成完整解码、媒体指标、实际编码中间态及跨镜接续复核，另外实际查看所有资料页和原生播放器的暂停/全屏效果。记录执行者、具体范围和能力边界。

@@ -66,7 +66,7 @@
 - 内容本身是网页、地址栏或 DevTools 时用浏览器壳。讲解用的表、图、流程图用干净全屏 canvas，不套外壳。
 - 演示页身深色：`pageBg` `#0F172A`，`pageInk` `#E5E7EB`，定义在 `episodes/_shared/theme/pageTheme.ts`。禁止大面积纯白页身。浏览器框和 DevTools 仍用各期 `remotion/src/theme.ts` 的 `P`。
 - 封面 4:3 安全区：内容落在 x 315..1125、y < 918。`episodes/degradation/covers.json` 里对应字段是 `sizes["4x3"].centerRegion` 与 `bottom15Y`。水印走该尺寸的 `watermarkZone`。封面文字不许溢出，检查时不得出现 `COPYFIT`。
-- 系列封面保持稳定的字体、配色、标识和构图，以题名、题号和对应示例区分单集。LeetCode 先统一存量11片，现行入口与独立SHA记录见[封面渲染](render.md#封面)；其他系列按后续任务推进，不为统一封面改写已编码视频或旧冻结源。
+- 系列封面保持稳定的字体、配色、标识和构图，以题名、题号和对应示例区分单集。LeetCode 现有11片的统一模板已获用户对视觉效果的认可，后续新增题目默认沿用同一模板，按内容替换单集文字与题图；现行入口与独立SHA记录见[封面渲染](render.md#封面)；其他系列按后续任务推进，不为统一封面改写已编码视频或旧冻结源。
 - 示例域名用 `.example`（RFC 2606）。画面上的示例数字写明「示例」。
 
 ## 开头
