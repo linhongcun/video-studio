@@ -2,6 +2,8 @@
 
 2026-10-24用户授权EP01–14按今天Codex规格重制，本期为全新制作工程。只在本目录产出，不改线上旧文件；站点接入和发布由root统一完成。
 
+> 现行上线：站点 `message-queue` 自 v0.79.0 起由 [`revisions/mq-intro/message-queue/`](revisions/mq-intro/message-queue/README.md) 制作，唯一冻结为 `storyboard.ccc32813.json`（`meta.draft: false`）。本目录根部的 `storyboard.json` / `storyboard.1519c529.json`（`draft: true`）和 `storyboard.2cad9a4c.json` 是此前 EP.10 正文的历史冻结，已绑定 `source-sha256.json`、`delivery.json` 与 QA 记录，按[文档维护规范](../../docs/RULES.md#文档维护)保留原路径与字节；不要把它们当作现行分镜，也不要据此重渲。
+
 - research.md记录实际读取的官方正文、日期与边界。
 - script.md、article.mdx、pronunciation.md和visual-direction.md记录同一主线与逐镜因果。
 - 已完成本地成片与核验，见delivery.json和qa-final.md。全片12镜、24句、3100帧、约103.3秒，1920×1080、30fps。
