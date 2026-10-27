@@ -1,5 +1,5 @@
 ---
-import {epHref, asset, fmtTime, epLabel, fmtDate, fmtVersion, LEGACY_LABEL} from '../lib/episodes';
+import {epHref, asset, fmtTime, epLabel, fmtDay, LEGACY_LABEL} from '../lib/episodes';
 import {getTrackForSeries} from '../lib/learning';
 const {e} = Astro.props;
 const track = getTrackForSeries(e.series);
@@ -17,8 +17,7 @@ const rank = track ? Number(track.number) * 10000 + track.episodes.findIndex((le
     <h3>{e.title}</h3>
     <p class="summary">{e.summary}</p>
     <div class="meta">
-      <p class="version-row"><span class="num">{epLabel(e)}</span><time class="version num" datetime={e.updatedAt} aria-label="当前版本">{fmtVersion(e.updatedAt)}</time></p>
-      <p class="dates"><span>创建于 <time datetime={e.createdAt}>{fmtDate(e.createdAt)}</time></span><span>修改于 <time datetime={e.updatedAt}>{fmtDate(e.updatedAt)}</time></span></p>
+      <p class="date-row"><span class="num">{epLabel(e)}</span><span>更新于 <time class="num" datetime={e.updatedAt}>{fmtDay(e.updatedAt)}</time></span></p>
     </div>
   </div>
 </a>
@@ -26,6 +25,6 @@ const rank = track ? Number(track.number) * 10000 + track.episodes.findIndex((le
 .card{display:flex;flex-direction:column;background:var(--c-surface);border:1px solid var(--c-border);border-radius:var(--r-lg);overflow:hidden;color:inherit;text-decoration:none;transition:transform var(--dur),box-shadow var(--dur),border-color var(--dur)}
 .card:hover{transform:translateY(-3px);box-shadow:var(--shadow-2);border-color:var(--c-primary-a40);filter:none}.card:focus-visible{box-shadow:var(--focus-ring)}
 .cover{position:relative;aspect-ratio:16/9;overflow:hidden;background:var(--c-surface-2)}.cover img{display:block;width:100%;height:100%;object-fit:cover}.dur{position:absolute;right:12px;bottom:12px;background:var(--c-overlay);color:var(--c-on-overlay);font-size:11px;line-height:1.6;padding:2px 7px;border-radius:4px}.play{position:absolute;right:12px;top:12px;color:#e0f7ef;font-size:20px;opacity:0;transition:opacity var(--dur)}.card:hover .play{opacity:1}
-.body{padding:22px;display:flex;flex-direction:column;gap:10px;flex:1}.series{margin:0;font-size:11px;font-weight:600;color:var(--c-primary);letter-spacing:.02em}.legacy{margin-left:8px;color:var(--c-text-2);font-weight:400}h3{margin:0;font-size:20px;font-weight:600;line-height:1.55;letter-spacing:-.015em}.summary{margin:0 0 10px;color:var(--c-text-2);font-size:13px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.meta{margin:auto 0 0;padding-top:14px;border-top:1px solid var(--c-border);font-size:11px;line-height:1.7;color:var(--c-text-2)}.version-row{margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px}.version{color:var(--c-primary);font-weight:600}.dates{margin:0;display:flex;flex-direction:column;gap:2px}.dates time{font-variant-numeric:tabular-nums}
+.body{padding:22px;display:flex;flex-direction:column;gap:10px;flex:1}.series{margin:0;font-size:11px;font-weight:600;color:var(--c-primary);letter-spacing:.02em}.legacy{margin-left:8px;color:var(--c-text-2);font-weight:400}h3{margin:0;font-size:20px;font-weight:600;line-height:1.55;letter-spacing:-.015em}.summary{margin:0 0 10px;color:var(--c-text-2);font-size:13px;line-height:1.8;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.meta{margin:auto 0 0;padding-top:14px;border-top:1px solid var(--c-border);font-size:11px;line-height:1.7;color:var(--c-text-2)}.date-row{margin:0;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:4px 12px}
 @media(max-width:767px){.body{padding:20px}h3{font-size:19px}}
 </style>

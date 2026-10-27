@@ -13,11 +13,13 @@ import Summary from '../../../components/Summary.astro';
 import BehindTheScenes from '../../../components/BehindTheScenes.astro';
 import MusicCredit from '../../../components/MusicCredit.astro';
 import EpisodePager from '../../../components/EpisodePager.astro';
+import EpisodeNumbering from '../../../components/EpisodeNumbering.astro';
 import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
 import PlatformLinks from '../../../components/PlatformLinks.astro';
+import {episodeSourceLinks} from '../../../lib/source-links.mjs';
 import {getTrackForSeries} from '../../../lib/learning';
-import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, REPO, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, fmtVersion, dateIso, isNew, isoDuration, seriesNav, seriesHref, additionalSeriesFor, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
+import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, fmtVersion, dateIso, isNew, isoDuration, seriesNav, seriesFor, seriesHref, additionalSeriesFor, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes({includeArchived: true});
   const current = getEpisodes();
@@ -32,11 +34,12 @@ export function getStaticPaths() {
 const {e, prev, next, redirectTo} = Astro.props;
 if (redirectTo) return Astro.redirect(`${BASE}episodes/${redirectTo}/`);
 const Content = e.Content;
-const tree = `${REPO}/blob/main/episodes/${e.slug}`;
+const sourceResources = episodeSourceLinks(e);
 // Markdown → 组件自动映射：Sorkin 的稿件无需改写
 const sNav = seriesNav(e);
+const series = seriesFor(e);
 const additionalSeries = additionalSeriesFor(e);
-const track = !e.archived ? getTrackForSeries(e.series) : undefined;
+const track = getTrackForSeries(e.series);
 const articleHeadings = e.chapters.filter((c) => c.inArticle);
 const learningGuide = learningGuideFor(e);
 const replacements = e.archived ? archiveReplacementsFor(e) : [];
@@ -53,7 +56,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 ---
 <BaseLayout title={e.title} description={(e as any).description ?? e.summary} ogImage={asset(e.slug, e.poster)} ogType="video.other" jsonLd={jsonLd} noIndex={e.archived}>
   <div class="container">
-    <Breadcrumb items={[{label: '首页', href: BASE}, ...(track && track.title !== sNav?.series.title ? [{label: track.title, href: track.href}] : []), ...(sNav ? [{label: sNav.series.title, href: seriesHref(sNav.series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `${epLabel(e)} · 第 ${sNav.index}/${sNav.total} 期` : epLabel(e)}]} />
+    <Breadcrumb items={[{label: '首页', href: BASE}, ...(track && track.title !== series?.title ? [{label: track.title, href: track.href}] : []), ...(series ? [{label: series.title, href: seriesHref(series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `本系列第 ${sNav.index}/${sNav.total} 课 · ${epLabel(e)}` : epLabel(e)}]} />
     {e.archived && <aside class="archive-notice" data-archived aria-labelledby="archive-title">
       <h2 id="archive-title">此合集已拆为独立短片</h2>
       <p>建议先看入门，再一次学习一种实现。此页保留合集版本供回看。</p>
@@ -80,13 +83,18 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
       {sNav && <a href="#course-directory" data-open-course><span class="reading-icon" aria-hidden="true">☷</span><span>课程目录 <small>{sNav.total} 篇</small></span></a>}
       {additionalSeries.map((series) => <a href={seriesHref(series.id)}><span class="reading-icon" aria-hidden="true">↗</span><span>{series.title}<small>系列目录</small></span></a>)}
     </nav>
+    <nav class="source-links" aria-label="制作文件">
+      <span>制作文件</span>
+      {sourceResources.map(({label, href}) => <a href={href} rel="noopener" target="_blank">{label} <small>GitHub ↗</small></a>)}
+    </nav>
     <PlatformLinks platforms={e.platforms} />
     <VideoPlayer src={asset(e.slug, e.video)} poster={asset(e.slug, e.poster)} captions={`${BASE}episodes/${e.slug}/captions.vtt`} chapters={e.chapters} title={e.title} />
     {learningGuide && <a class="learning-guide" href={epHref(learningGuide.slug)} aria-label={`${e.learningGuide.label}：${learningGuide.title}`}>
       <span>{e.learningGuide.label}</span><strong>{learningGuide.title} →</strong>
     </a>}
     {sNav && <details class="course-directory" id="course-directory">
-      <summary><span><span class="directory-label">课程目录</span><strong>{sNav.series.title}</strong></span><span class="directory-position">第 {sNav.index} / {sNav.total} 篇 <span class="directory-chevron" aria-hidden="true">⌄</span></span></summary>
+      <summary><span><span class="directory-label">课程目录</span><strong>{sNav.series.title}</strong></span><span class="directory-position">本系列第 {sNav.index} / {sNav.total} 课 <span class="directory-chevron" aria-hidden="true">⌄</span></span></summary>
+      <div class="directory-note"><EpisodeNumbering inSeries /></div>
       <nav aria-label={`${sNav.series.title}课程目录`}><ol>{sNav.series.episodes.map((lesson, i) => <li>
         <a href={epHref(lesson.slug)} aria-current={lesson.slug === e.slug ? 'page' : undefined}>
           <span class="lesson-number num">{String(i + 1).padStart(2, '0')}</span><span class="lesson-title">{lesson.title}</span><span class="lesson-duration num">{fmtTime(lesson.duration)}</span>
@@ -101,7 +109,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
       <div class="article-end" data-pagefind-ignore>
         {!e.archived && <EpisodePager nav={sNav ?? {prev, next}} />}
         <RelatedEpisodes items={getRelated(e)} />
-        <BehindTheScenes script={`${tree}/script.md`} storyboard={`${tree}/storyboard.json`} source={`${REPO}/tree/main/${e.sourcePath}`} />
+        <BehindTheScenes resources={sourceResources} />
         <MusicCredit />
       </div>
     </article>
@@ -154,6 +162,10 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 .reading-links a:hover{border-color:var(--c-primary-a40);color:var(--c-primary);filter:none}
 .reading-links .reading-icon{color:var(--c-primary);font-size:16px;line-height:1}
 .reading-links small{font-size:var(--fs-xs);color:var(--c-text-2);font-weight:400;margin-left:6px}
+.source-links{display:flex;flex-wrap:wrap;align-items:center;gap:0 var(--sp-4);margin:calc(-1 * var(--sp-2)) 0 var(--sp-4);font-size:var(--fs-small)}
+.source-links>span,.source-links small{color:var(--c-text-2);font-size:var(--fs-xs)}
+.source-links a{display:inline-flex;align-items:center;gap:6px;min-height:44px;text-decoration:none}
+.source-links a:hover{text-decoration:underline}
 .course-directory{margin-top:var(--sp-5);border:1px solid var(--c-border);background:var(--c-surface);border-radius:var(--r-md);scroll-margin-top:calc(var(--header-h) + 16px)}
 .course-directory summary{display:flex;justify-content:space-between;align-items:center;gap:var(--sp-3);list-style:none;padding:var(--sp-4) var(--sp-5);cursor:pointer}
 .course-directory summary::-webkit-details-marker{display:none}
@@ -164,6 +176,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 .directory-chevron{font-size:18px;transition:transform var(--dur)}
 .course-directory[open] .directory-chevron{transform:rotate(180deg)}
 .course-directory nav{padding:0 var(--sp-5) var(--sp-4)}
+.directory-note{padding-inline:var(--sp-5)}
 .course-directory ol{list-style:none;padding:0;margin:0;display:grid;gap:var(--sp-1)}
 .course-directory a{display:flex;align-items:center;gap:var(--sp-3);color:var(--c-text);text-decoration:none;padding:12px;border-radius:var(--r-sm);font-size:var(--fs-small);line-height:1.6;min-height:48px}
 .course-directory a:hover{background:var(--c-surface-2);filter:none}

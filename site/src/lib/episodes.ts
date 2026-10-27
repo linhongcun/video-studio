@@ -272,6 +272,7 @@ export const fmtDate = (d: string) => {
   const p = dateParts(d);
   return `${p.year}年${Number(p.month)}月${Number(p.day)}日${d.length > 10 ? ` ${p.hour}:${p.minute}:${p.second}` : ''}`;
 };
+export const fmtDay = (d: string) => {const p = dateParts(d); return `${p.year}-${p.month}-${p.day}`;};
 export const fmtDateShort = (d: string) => {const p = dateParts(d); return `${Number(p.month)}月${Number(p.day)}日`;};
 
 /** NEW 根据首发日期计算，内容修改不会变成新一期。 */
@@ -289,6 +290,11 @@ export const isoDuration = (s: number) => `PT${Math.floor(s / 60)}M${Math.floor(
 
 /** 一期可额外收录进多个目录，仍使用同一slug、媒体与首发身份；series保留主学习路径。 */
 export type Series = {id: string; title: string; description: string; order: number; crossSeriesNavigation?: boolean; independentLessons?: boolean; episodes: Episode[]};
+/** 归档内容仍保留系列归属；这不把它重新加入现行课程或前后课导航。 */
+export function seriesFor(e: Pick<Episode, 'series'>): Omit<Series, 'episodes'> | undefined {
+  const meta = seriesMeta as Record<string, Omit<Series, 'id' | 'episodes'>>;
+  return e.series && meta[e.series] ? {id: e.series, ...meta[e.series]} : undefined;
+}
 export function getSeries(): Series[] {
   const meta = seriesMeta as Record<string, {title: string; description: string; order: number; crossSeriesNavigation?: boolean; independentLessons?: boolean}>;
   return Object.entries(meta).map(([id, m]) => ({id, ...m, episodes: getEpisodes().filter((e) => e.series === id || e.additionalSeries?.includes(id)).sort(compareLessons)}))
