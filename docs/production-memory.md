@@ -554,3 +554,5 @@ MQ规划收敛为9个独立核心选题，14个原储备已取消。用户明确
 ## MQ独立系列与后续封面方向（2026-10-27）
 
 用户明确要求MQ独立于系统原理；此前primary peak加additionalSeries的双收录只代表v0.79.0历史，不再作为当前归类方案。现有EP.10迁入message-queue主系列，独立学习方向、首页、筛选及课程导航随之调整，保留原slug、EP及首发身份。后续MQ采用独立封面视觉体系，具体样式尚待确定；本轮不将系统原理或LeetCode现行封面模板设为MQ默认，也不把方向记录当成新封面已制作或获认可。其余8期仍未开工。
+
+- **独立归类已交付：**[PR #375](https://github.com/linhongcun/video-studio/pull/375)合并9c2bf61e并发布v0.80.0，Release后Pages40512522108成功，14项普通canonical完整资产/页面与126项线上分类交互检查通过。MQ独立1篇，系统24篇、peak4篇，全站仍48个唯一条目；现有视频、图文与封面未变，后续封面样式仍待确定。实际证据见[独立系列记录](mq-standalone-series/publication.json)。
