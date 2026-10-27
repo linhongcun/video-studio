@@ -71,6 +71,8 @@ export {PAGE, pageBg, pageInk} from '../../../../episodes/_shared/theme/pageThem
 
 ## 封面
 
+LeetCode 系列当前封面使用[独立系列模板](../episodes-codex/_shared/leetcode-covers/README.md)，以当前发布元数据核对题号、题名与方法，统一生成三比例，并检查实际字体边界、长标题间距与4:3安全区。各期 `cover-style.json` 记录当前模板及图片SHA；原Remotion封面源与旧冻结清单保持历史身份，不再用旧 `npm run covers` 覆盖现行系列封面。新题沿同一模板扩展目录与题图。
+
 封面由当期 `remotion/src/Cover.tsx` 和 `covers.json` 定义。当前 EP.14 的实际入口是：
 
 ```sh
