@@ -5,8 +5,8 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 做片的人从 [AGENTS.md](AGENTS.md) 进入，规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。手册、经验、策划和历史记录统一从[文档索引](docs/README.md)查找。
 
 - 线上站点：https://linhongcun.github.io/video-studio/
-- 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。不发快手，不发 X。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
-- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式 / LeetCode · 算法可视化 / Agent 开发 / 设计模式 / 趣味推理 / 工程算法）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
+- 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。默认不发快手（STATUS 中逐次明确授权除外），不发 X。小红书由村长自己发，运营和 Codex 默认不发（STATUS 中逐次明确授权除外）。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
+- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / 数据库 / 分布式 / Agent 开发 / LeetCode · 算法可视化 / 设计模式 / 趣味推理 / 工程算法 / 消息队列）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
 - 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
@@ -31,7 +31,7 @@ GitHub 主干、Release 和站点沿用用户持续授权，完成制作与检�
 | 7 | 浏览器与网络 | 同一个网页，第二次打开为什么快这么多？ | [browser-cache](https://linhongcun.github.io/video-studio/episodes/browser-cache/) | 2026-10-12 |
 | 8 | 后台缓存 | 数据库明明有数据，为什么还要再存一份？ | [server-cache](https://linhongcun.github.io/video-studio/episodes/server-cache/) | 2026-10-13 |
 | 9 | 后台缓存 | 后台改了价格，页面怎么还是旧的？ | [cache-consistency](https://linhongcun.github.io/video-studio/episodes/cache-consistency/) | 2026-10-16 |
-| 10 | 扛住高峰 | 订单已提交，为什么还没处理完？ | [message-queue](https://linhongcun.github.io/video-studio/episodes/message-queue/) | 2026-10-13 |
+| 10 | 消息队列 | 订单已提交，为什么还没处理完？ | [message-queue](https://linhongcun.github.io/video-studio/episodes/message-queue/) | 2026-10-13 |
 | 11 | 扛住高峰 | 抢票时，为什么总提示系统繁忙？ | [rate-limit](https://linhongcun.github.io/video-studio/episodes/rate-limit/) | 2026-10-13 |
 | 12 | 扛住高峰 | 手一抖点了两次支付，为什么只扣一次钱？ | [idempotency](https://linhongcun.github.io/video-studio/episodes/idempotency/) | 2026-10-13 |
 | 13 | 扛住高峰 | 一个服务出故障，为什么整个网站没跟着崩？ | [circuit-breaker](https://linhongcun.github.io/video-studio/episodes/circuit-breaker/) | 2026-10-14 |
@@ -67,6 +67,10 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 ## 工程算法
 
 从扩容、故障和容量约束等真实系统问题出发，研究算法解决了什么、怎样工作，以及维护成本和适用边界。首批选题见[系列总览 #294](https://github.com/linhongcun/video-studio/issues/294)，首期为[EA01 一致性哈希](https://linhongcun.github.io/video-studio/episodes/consistent-hashing/)，约3分21秒（含5秒参考资料卡）；[制作与检查](episodes-codex/consistent-hashing/README.md)保留同一组十键的取余/哈希环对比、虚拟位置与迁移边界。第二期为[布隆过滤器](https://linhongcun.github.io/video-studio/episodes/bloom-filter/)，约3分16秒（含5秒原题资料卡）；用同一位数组解释安全排除、误判、共享位删除风险和同步前提，[制作与检查](episodes-codex/bloom-filter/README.md)分别保留来源、动态、成片与网站证据。其余选题待后续安排，候选不作为已上线内容。
+
+## 消息队列
+
+独立系列从任务提交、排队到处理完成讲一条消息怎样接力，可以单独观看，不要求先看「扛住高峰」。首期为[EP.10《订单已提交，为什么还没处理完？》](https://linhongcun.github.io/video-studio/episodes/message-queue/)，约2分03秒（含5秒参考资料卡）；系列页见[消息队列](https://linhongcun.github.io/video-studio/series/message-queue/)。制作入口见[本期工程](episodes-codex/message-queue/README.md)。
 
 ## 制作流程
 
