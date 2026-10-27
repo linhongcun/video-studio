@@ -550,3 +550,7 @@ MQ规划收敛为9个独立核心选题，14个原储备已取消。用户明确
 本地成片3700帧/123.333秒含5秒资料卡，5句旧take与19句新配；资料、时序、独立动态/实际成片抽检与网页检查范围分别记录，未声称全片人工听辨、ASR、真实Broker实验或用户观看认可。新MQ目录与旧peak路径共用同一episode，学习计数按唯一slug。GitHub发布及线上结果以[本轮发布记录](../episodes-codex/message-queue/revisions/mq-intro/message-queue/release.md)为准，不扩展为平台重发。
 
 - **本轮实际交付：**[PR #369](https://github.com/linhongcun/video-studio/pull/369)合并34b8e306，附注tag/Release v0.79.0后Pages40473036363成功。13项普通canonical GET完整资产/页面、93项线上播放器与36项系列检查通过，原EP.10和peak路径保持，新MQ目录只有同一入门片；根代理实际查看5张线上图。完整视频SHA为639d373be2afe007440e31a6877609c2b883bcc7a0af213a535b8caf4783b52e，证据见[发布记录](../episodes-codex/message-queue/revisions/mq-intro/message-queue/publication.json)。Chromium原生CA失败与经环境CA验证的urllib回填交互范围如实保留；其余8期未开工，不预记用户已认可新版。
+
+## MQ独立系列与后续封面方向（2026-10-27）
+
+用户明确要求MQ独立于系统原理；此前primary peak加additionalSeries的双收录只代表v0.79.0历史，不再作为当前归类方案。现有EP.10迁入message-queue主系列，独立学习方向、首页、筛选及课程导航随之调整，保留原slug、EP及首发身份。后续MQ采用独立封面视觉体系，具体样式尚待确定；本轮不将系统原理或LeetCode现行封面模板设为MQ默认，也不把方向记录当成新封面已制作或获认可。其余8期仍未开工。
