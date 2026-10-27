@@ -1,6 +1,6 @@
 # 趣味推理系列封面统一
 
-日期：2026-10-27。范围：P01–P05五期存量封面、制作与站点副本、可复用系列模板和下载包。当前本地制作、独立检查与站点构建通过；发版与线上实际结果由本目录后续 `publication.json` / `online-verification.json` 记录。
+日期：2026-10-27。范围：P01–P05五期存量封面、制作与站点副本、可复用系列模板和下载包。已按v0.80.1发布：PR #376合并为4b712fed，附注tag/Release后[Pages40513903437](https://github.com/linhongcun/video-studio/actions/runs/40513903437)成功。24项完整canonical GET与下载SHA全部通过，共61,165,081字节；实际范围见 `publication.json` / `online-verification.json`。
 
 从clean最新主干 `b50f6ae9add8d0dcfc0a960f208ece3b4f8c7ce9` 开工。实际比较设计模式3期、工程算法3期和趣味推理5期的封面，选择后者：已有题名层级、图示密度差异较大，与旧LeetCode蓝金风格也较接近。前两系列已有较一致的基础，留待后续任务。实际范围与基线见 `startup.json`。
 
