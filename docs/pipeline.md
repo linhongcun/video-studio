@@ -90,7 +90,7 @@
 
 ## 3. 分镜与封面
 
-制作目录交付 `storyboard.json`、`covers.json`、`knoll-props.md`。分镜字段见 [storyboard-schema.md](storyboard-schema.md)，实际结构与生成代码以本期工程为准；LeetCode封面默认使用已获用户认可的[共享系列模板](../episodes-codex/_shared/leetcode-covers/README.md)，新增题扩展catalog与题图并沿同一布局渲染；其他系列封面由本期 `remotion/src/Cover.tsx` 读取。不要将历史 EP.14 的 20 镜、5152 帧或旧组件当作新期模板。
+制作目录交付 `storyboard.json`、`covers.json`、`knoll-props.md`。分镜字段见 [storyboard-schema.md](storyboard-schema.md)，实际结构与生成代码以本期工程为准；LeetCode封面默认使用已获用户认可的[共享系列模板](../episodes-codex/_shared/leetcode-covers/README.md)，新增题扩展catalog与题图并沿同一布局渲染；趣味推理使用[对应共享模板](../episodes-codex/_shared/puzzles-covers/README.md)，按新题扩展目录与示意；其他系列封面由本期 `remotion/src/Cover.tsx` 读取。不要将历史 EP.14 的 20 镜、5152 帧或旧组件当作新期模板。
 
 在脚本与制作说明中确定“正文收束 → 本期既有代码卡（如有）→ 参考资料”的顺序、原题与作者/机构的列表位置、每页最多4项和默认每页5秒停留。资料卡不覆盖代码、尾句或原字幕；无旁白资料区间由追加记录明确声明，不为此改写已核验正文的句级时序。
 
@@ -147,7 +147,7 @@ npm run render
 
 `npm run render` 先出 `out/voice.mp4`，再调用 `episodes/_shared/music/mix_bgm.py`，得到 `episodes-codex/degradation/video.mp4`。
 
-LeetCode封面使用[共享系列入口](../episodes-codex/_shared/leetcode-covers/README.md)生成并安装三比例，不用旧期 `npm run covers` 覆盖当前模板。其他系列运行当期 package.json 的 `npm run covers`，由本期 Cover.tsx 与 covers.json 生成；实际文件和安全区见 [render.md](render.md)。
+LeetCode封面使用[共享系列入口](../episodes-codex/_shared/leetcode-covers/README.md)生成并安装三比例，不用旧期 `npm run covers` 覆盖当前模板。趣味推理同样通过[本系列入口](../episodes-codex/_shared/puzzles-covers/README.md)生成三比例；其他系列运行当期 package.json 的 `npm run covers`，由本期 Cover.tsx 与 covers.json 生成；实际文件和安全区见 [render.md](render.md)。
 
 ## 8. 成片审与上线
 
