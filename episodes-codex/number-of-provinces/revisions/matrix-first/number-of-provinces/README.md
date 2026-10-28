@@ -11,3 +11,5 @@
 本轮状态及一次性回执见[修订记录](../../../../../docs/archive/2026-10/number-of-provinces-matrix-first/README.md)；首发历史见[原制作记录](../../../../../docs/archive/2026-10/number-of-provinces/README.md)。仅按持续授权更新GitHub主干、Release与Pages，不含外部平台。
 
 正式渲染与默认verify已完成：6138帧、204.6秒，最终SHA `58d7b168822e1feb643c3bbd9607172b8c3fa463405669747abe6a4092228471`。156冻结与原声来源保持，独立33张正式图和26声窗/媒体时间轴检查通过；网站及真实发布状态见本轮归档，尚未完成事项不预记通过。
+
+GitHub站点已随v0.89.2上线：PR425、Release后Pages40708201857及11项线上完整HTTPS核验通过，#423已completed关闭。当前媒体和156冻结未改，发布及能力边界见归档回执。

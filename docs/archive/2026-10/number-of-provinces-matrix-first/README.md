@@ -13,3 +13,5 @@
 发布前两次整合并行上游：先并入d804fe07的系列层级更新，再保留60f29ac2的Redis缓存新媒体与封面；两次生产输入交集均为零。首个0.89.1网站候选已自动检查通过，但同版本被上游实际发布，完整归档到[candidates/v0.89.1](candidates/v0.89.1/qa-site.json)。当前候选顺延v0.89.2，以60f29ac2保护其他发布内容，最终网站和线上结果另见当前QA及发布回执。
 
 最终v0.89.2网站验收已通过：两视口实际播放、26字幕、四章、两卡共4次Fullscreen、原文浮层与145.6秒回看；20图逐张实看，根代理另看4图。相对最终上游60f29ac2，1236份其他canonical文件、47公开课与本期5份封面资产保持；两候选实际构建次数保留。见[网站验收](qa-site.json)。合并、Release、部署及线上完整SHA将在实际完成后追加。
+
+已由[PR #425](https://github.com/linhongcun/video-studio/pull/425)合并`0a04afffc52ef728ce8565d4dcf56896b9210708`，发布annotated tag与[Release v0.89.2](https://github.com/linhongcun/video-studio/releases/tag/v0.89.2)；Release后唯一[Pages40708201857](https://github.com/linhongcun/video-studio/actions/runs/40708201857)在同一HEAD成功。首轮11次规范HTTPS完整GET、11,554,361字节核验通过，最终视频SHA、海报/配图、26字幕/四章、原文与当前Release单集关联均一致。[issue #423](https://github.com/linhongcun/video-studio/issues/423)在核验后以completed关闭；见[发布回执](publication.json)与[线上核验](online-verification.json)。未发外平台，未预记用户对新版的观看结论。PR附件调用没有成功回执，未声称界面附件已完成；GitHub PR本身已真实合并。
