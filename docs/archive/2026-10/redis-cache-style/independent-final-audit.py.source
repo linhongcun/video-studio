@@ -1,0 +1,271 @@
+#!/usr/bin/env python3
+"""Read-only Redis publication audit. Writes only its named archive report.
+
+The initial mode checks preservation and frozen inputs while encoding runs.
+--final additionally requires installed results and checks complete presentation
+packet timelines, without repeating the producer's full video/PCM decode.
+"""
+from pathlib import Path
+from fractions import Fraction
+from datetime import datetime, timezone
+from types import SimpleNamespace
+import argparse
+import hashlib
+import importlib.util
+import json
+import subprocess
+import sys
+
+sys.dont_write_bytecode = True
+ROOT = Path(__file__).resolve().parents[2]
+ARCHIVE = ROOT / 'docs/archive/2026-10/redis-cache-style'
+SLUGS = ('server-cache', 'cache-consistency')
+COLOR = {'pix_fmt': 'yuv420p', 'color_range': 'tv', 'color_space': 'bt709',
+         'color_transfer': 'bt709', 'color_primaries': 'bt709'}
+REPLACEMENTS = {'meta.json', 'video.mp4', 'reference-appendix.json',
+                'reference-appendix-media-check.json', 'render-result.json',
+                'article/01.jpg', 'cover-16x9.jpg', 'cover-3x4.jpg', 'cover-4x3.jpg'}
+WORKFLOW = {'docs/archive/README.md', 'docs/pipeline.md', 'docs/render.md',
+            'docs/production-memory.md', 'docs/lessons-learned.md',
+            'docs/successful-practices.md', 'site/package.json', 'site/package-lock.json'}
+
+
+def read(path):
+    return json.loads(path.read_text())
+
+
+def sha(path):
+    h = hashlib.sha256()
+    with path.open('rb') as f:
+        for block in iter(lambda: f.read(1024 * 1024), b''):
+            h.update(block)
+    return h.hexdigest()
+
+
+def run(*args, data=None):
+    return subprocess.check_output(args, cwd=ROOT, input=data, text=True)
+
+
+def require(condition, description):
+    if not condition:
+        raise AssertionError(description)
+
+
+def allowed_existing(path):
+    return path in WORKFLOW or any(path.startswith('episodes/' + slug + '/')
+           and path.split('/', 2)[2] in REPLACEMENTS for slug in SLUGS)
+
+
+def allowed_new(path):
+    if path.startswith('docs/archive/2026-10/redis-cache-style/'):
+        return True
+    if path.startswith(('episodes-codex/_shared/redis-cache-video/',
+                        'episodes-codex/_shared/redis-covers-v2/')):
+        return True
+    for slug in SLUGS:
+        root = 'episodes-codex/' + slug + '/'
+        if path.startswith(root + 'revisions/redis-style/') or path.startswith(root + 'remotion/src/redis-style/'):
+            return True
+        if path == root + 'remotion/README.md' or path in {
+            'episodes/' + slug + '/cover-style.json', 'episodes/' + slug + '/poster.jpg'}:
+            return True
+    return False
+
+
+def preservation(baseline):
+    all_paths = dict(baseline['protectedOriginalFiles'])
+    all_paths.update(baseline['allOldSourceManifests'])
+    stages = {}
+    for line in run('git', 'ls-files', '--stage').splitlines():
+        info, path = line.split('\t', 1)
+        mode, blob, stage = info.split()
+        require(stage == '0', 'Unmerged index: ' + path)
+        stages[path] = {'mode': mode, 'gitBlobSHA1': blob}
+    sparse = {line[2:] for line in run('git', 'ls-files', '-v').splitlines() if line[:1] == 'S'}
+    original_count = local_count = sparse_count = 0
+    replaced = []
+    for path, identity in all_paths.items():
+        require(path in stages, 'Protected original removed from index: ' + path)
+        if allowed_existing(path) and path not in baseline['allOldSourceManifests']:
+            replaced.append(path)
+            continue
+        require(stages[path]['gitBlobSHA1'] == identity['gitBlobSHA1'], 'Protected index blob changed: ' + path)
+        require(stages[path]['mode'] == identity['mode'], 'Protected mode changed: ' + path)
+        actual = ROOT / path
+        if actual.exists():
+            blob = run('git', 'hash-object', '--', path).strip()
+            require(blob == identity['gitBlobSHA1'], 'Protected local bytes changed: ' + path)
+            local_count += 1
+        else:
+            require(path in sparse, 'Protected path missing outside sparse checkout: ' + path)
+            sparse_count += 1
+        original_count += 1
+    changes = run('git', 'diff', '--name-only', baseline['baselineCommit'], '--').splitlines()
+    new = run('git', 'ls-files', '--others', '--exclude-standard').splitlines()
+    unexpected = [p for p in changes if not allowed_existing(p) and not allowed_new(p)]
+    unexpected += [p for p in new if not allowed_new(p)]
+    require(not unexpected, 'Out-of-scope changes: ' + repr(unexpected))
+    old_inputs = []
+    for episode in baseline['episodes']:
+        freeze = episode['oldFreeze']
+        require(sha(ROOT / freeze['path']) == freeze['sha256'], 'Old manifest changed')
+        for item in freeze['matching']:
+            require(sha(ROOT / item['resolvedPath']) == item['sha256'], 'Old frozen input changed: ' + item['resolvedPath'])
+        old_inputs.append({'slug': episode['slug'], 'verifiedActualHistoricalInputs': len(freeze['matching']),
+                           'missingHistoricalDeclarationsRetained': len(freeze['missing'])})
+    return {'protectedOriginalPathCount': len(baseline['protectedOriginalFiles']),
+            'protectedOldSourceManifests': len(baseline['allOldSourceManifests']),
+            'immutableUnionPaths': original_count, 'actualLocalImmutableFilesChecked': local_count,
+            'sparseIndexOnlyImmutableFilesChecked': sparse_count,
+            'allowedPublicationReplacementPaths': replaced, 'trackedChangedPaths': changes,
+            'newPaths': new, 'unexpectedPaths': unexpected, 'oldFreezeInputs': old_inputs}
+
+
+def load_renderer():
+    path = ROOT / 'episodes-codex/_shared/redis-cache-video/render.py'
+    spec = importlib.util.spec_from_file_location('independent_redis_final_readonly', path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def frozen_inputs(slug, renderer):
+    args = SimpleNamespace(episode=slug, revision='redis-style', baseline=None,
+                           entry='src/redis-style/index.ts', composition='Main')
+    ctx = renderer.context(args)
+    adapter = renderer.adapter_module()
+    manifest = renderer.verify_inputs(ctx)
+    closure = {renderer.display(p): renderer.digest(p) for p in renderer.production_inputs(ctx, adapter)}
+    require(closure == manifest['inputs'], 'Frozen closure differs: ' + slug)
+    require(len(closure) == {'server-cache': 56, 'cache-consistency': 61}[slug], 'Unexpected closure count')
+    require(len(manifest['fontBindings']) == 8 and len(manifest['externalInputs']) == 6, 'Incomplete fonts')
+    return {'manifestSHA256': sha(ctx.manifest), 'repositoryInputs': len(closure),
+            'externalFontFiles': len(manifest['externalInputs']), 'fontBindings': len(manifest['fontBindings']),
+            'actualDependencyClosureExact': True, 'actualFontAndRuntimeBindingsExact': True}, ctx, adapter
+
+
+def probe(video):
+    return json.loads(run('ffprobe', '-v', 'error', '-show_streams', '-show_format', '-of', 'json', str(video)))
+
+
+def timeline(video):
+    streams = probe(video)['streams']
+    stream = next(s for s in streams if s['codec_type'] == 'video')
+    base = Fraction(stream['time_base'])
+    packets = json.loads(run('ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_packets',
+        '-show_entries', 'packet=pts,duration', '-of', 'json', str(video)))['packets']
+    rows = sorted((Fraction(int(p['pts'])) * base, Fraction(int(p['duration'])) * base) for p in packets)
+    require(all(row == (Fraction(i, 30), Fraction(1, 30)) for i, row in enumerate(rows)), 'Non-continuous PTS: ' + str(video))
+    require(len(rows) == int(stream['nb_frames']), 'Frame/packet count differs')
+    return rows
+
+
+def final_media(episode, ctx, adapter):
+    slug = episode['slug']
+    pub = ROOT / 'episodes' / slug
+    rev = ctx.revision
+    result = read(rev / 'render-result.json')
+    receipt = read(rev / 'reference-appendix.json')
+    check = read(rev / 'reference-appendix-media-check.json')
+    color = read(rev / 'color-encoding-check.json')
+    audio = read(rev / 'baseline-audio-check.json')
+    final_sha = sha(rev / 'video.mp4')
+    for name in ('video.mp4', 'render-result.json', 'reference-appendix.json', 'reference-appendix-media-check.json'):
+        require(sha(pub / name) == sha(rev / name), 'Installed/revision differs: ' + slug + '/' + name)
+    require(final_sha == result['sha256'] == receipt['outputSHA256'] == check['outputSHA256'], 'Final SHA disagreement')
+    require(final_sha != episode['publishedVideoSHA256'], 'Final video was not replaced')
+    require(result['newProductionManifestSHA256'] == sha(ctx.manifest), 'Result manifest identity differs')
+    require(result['visualRevision'] == 'redis-cache-style-v1', 'Wrong revision identity')
+    require(result['frames'] == episode['finalVideoFrames'] and result['bodyFrames'] == episode['bodyFramesFromActualStoryboard'], 'Changed episode frame count')
+    require(result['episode'] == slug and result['width'] == 1920 and result['height'] == 1080 and result['fps'] == '30/1', 'Result video shape differs')
+    require(result['bytes'] == (rev / 'video.mp4').stat().st_size and abs(result['seconds'] - result['frames'] / 30) < 1e-9, 'Result size/duration differs')
+    require(result['sourceInputsVerified'] == {'server-cache': 56, 'cache-consistency': 61}[slug], 'Result closure count differs')
+    require(result['frames'] - result['bodyFrames'] == 150, 'Appendix length differs')
+    require(receipt['bodyFrames'] == result['bodyFrames'] and receipt['finalVideoFrames'] == result['frames'], 'Receipt frame count differs')
+    require(receipt['inputs']['referencesSHA256'] == episode['referenceSourceSHA256'], 'Sources differ')
+    require(receipt['presentation'] == 'title-author' and receipt['layout']['maxItemsPerPage'] == 4, 'Wrong appendix format')
+    adapter.verify_identity(receipt, adapter.load_references(ctx.references))
+    require(receipt['appendix']['sourceIds'] == ['R1', 'R2'] and len(receipt['appendix']['pages']) == 1, 'Actual appendix sources differ')
+    require(receipt['appendix']['from'] == result['bodyFrames'] and receipt['appendix']['durationInFrames'] == 150 and receipt['appendix']['framesPerPage'] == 150, 'Actual appendix timing differs')
+    require(receipt['inputs']['bodySHA256'] == sha(rev / 'body.mp4'), 'Receipt body SHA differs')
+    for page in receipt['appendix']['pages']:
+        require(sha(rev / 'references' / page['file']) == page['sha256'], 'Reference page pixels differ')
+    require(check['passed'] and audio['passed'] and color['passed'], 'Producer media check failed')
+    for key in ('bodyDecodedFramesAndTimestampsEqual', 'outputVideoTimelineContinuous', 'audioPacketsAndTimingEqual'):
+        require(check[key] is True, 'Missing producer full decode evidence: ' + key)
+    require(audio['baselineSHA256'] == episode['publishedVideoSHA256'] and audio['bodySHA256'] == sha(rev / 'body.mp4'), 'Audio provenance differs')
+    require(audio['audioPacketsAndTimingEqual'] and audio['decodedAudioPCM'] == check['decodedAudioPCM'], 'Complete PCM evidence differs')
+    require(all(audio[k] == check[k] for k in ('audioPacketCount', 'audioPacketPayloadAndTimingSHA256')), 'AAC packet evidence differs')
+    packets = adapter.engine.audio_packets(ctx.baseline)
+    require(packets == adapter.engine.audio_packets(rev / 'body.mp4') == adapter.engine.audio_packets(rev / 'video.mp4'), 'Actual complete AAC packets/timing differ')
+    require(adapter.engine.sequence_hash(packets) == audio['audioPacketPayloadAndTimingSHA256'] and len(packets) == audio['audioPacketCount'], 'Actual AAC packet evidence differs')
+    require(check['bodySHA256'] == sha(rev / 'body.mp4') and check['bodyFrames'] == result['bodyFrames'] and check['appendedFrames'] == 150 and check['finalFrames'] == result['frames'], 'Full decode evidence provenance differs')
+    require(len(check['cardPages']) == 1 and check['cardPages'][0]['frames'] == 150, 'Decoded reference card evidence differs')
+    require(result['baselineAudioPreserved'] == audio, 'Result audio evidence differs')
+    require(color['allOriginalPublishedPresentationTimesEqual'] is True and color['allRawToNormalizedPresentationTimesEqual'] is True, 'Producer PTS evidence missing')
+    for video in (rev / 'normalized-silent-body.mp4', rev / 'body.mp4', rev / 'video.mp4'):
+        stream = next(s for s in probe(video)['streams'] if s['codec_type'] == 'video')
+        require(all(stream.get(k) == v for k, v in COLOR.items()), 'Actual video color profile differs: ' + str(video))
+    require(result['colorEncoding'] == receipt['colorEncoding'] == color['output'] == COLOR, 'Color evidence differs')
+    require(timeline(ctx.baseline) == timeline(rev / 'video.mp4'), 'All original video PTS differ')
+    for name in ('script.md', 'storyboard.json', 'words.json', 'references.json'):
+        require((pub / name).read_bytes() == (ctx.directory / name).read_bytes(), 'Original publication content differs: ' + name)
+    require(sha(pub / 'article.mdx') == episode['article']['publishedSHA256'], 'Published article bytes changed')
+    require(sha(ctx.directory / 'article.mdx') == episode['article']['productionSHA256'], 'Production article bytes changed')
+    require((pub / 'article.mdx').read_bytes() == (rev / 'article.mdx').read_bytes(), 'Revision article differs')
+    meta = read(pub / 'meta.json')
+    before = episode['metadata']
+    changed = sorted(k for k in set(meta) | set(before) if meta.get(k) != before.get(k))
+    require(set(changed) <= {'updatedAt', 'burnedInCaptions'}, 'Publication identity changed: ' + repr(changed))
+    require(meta['burnedInCaptions'] is True and meta['updatedAt'] != before['updatedAt'], 'New visual publication time/captions missing')
+    require(all(meta[k] == v for k, v in result['publicationMetadata'].items()), 'Publication media metadata differs')
+    cover = read(pub / 'cover-style.json')
+    require((pub / 'cover-style.json').read_bytes() == (rev / 'cover-style.json').read_bytes(), 'Cover sidecars differ')
+    for name, info in cover['covers'].items():
+        require(sha(pub / ('cover-' + name + '.jpg')) == info['jpgSha256'] == sha(rev / ('cover-' + name + '.jpg')), 'Cover bytes differ')
+        require(sha(rev / ('cover-' + name + '.png')) == info['pngSha256'], 'Cover PNG differs')
+    require(sha(pub / 'poster.jpg') == sha(pub / 'cover-3x4.jpg'), 'Portrait poster differs')
+    final_check = read(ARCHIVE / 'final' / slug / 'final-media-check.json')
+    require(final_check['sha256'] == final_sha, 'Final screenshots report references other media')
+    require(final_check['article']['figureFrame'] == episode['article']['figureSeeks'][0]['frame'], 'Figure time changed')
+    require(final_check['article']['figureSHA256'] == sha(pub / 'article/01.jpg'), 'Figure SHA differs')
+    samples = []
+    for sample in final_check['samples']:
+        require(sha(ROOT / sample['file']) == sample['sha256'], 'Final sample SHA differs')
+        samples.append({'frame': sample['frame'], 'file': sample['file'], 'sha256': sample['sha256']})
+    return {'slug': slug, 'sha256': final_sha, 'bytes': (pub / 'video.mp4').stat().st_size,
+            'frames': result['frames'], 'bodyFrames': result['bodyFrames'], 'referenceFrames': 150,
+            'allActualVideoPresentationTimesEqual': True, 'actualColorTags': COLOR,
+            'allActualCompleteBaselineAACPacketsAndTimingEqual': True,
+            'completeBaselineAudioProducerEvidence': audio, 'producerFullDecodeEvidenceSHA256': sha(rev / 'reference-appendix-media-check.json'),
+            'changedMetadataFields': changed, 'publishedAndProductionArticleIdentitiesPreserved': True,
+            'figureFrame': final_check['article']['figureFrame'], 'figureSHA256': final_check['article']['figureSHA256'],
+            'samples': samples}
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--final', action='store_true')
+    args = parser.parse_args()
+    baseline = read(ARCHIVE / 'preservation-baseline.json')
+    report = {'schemaVersion': 1, 'status': 'passed-independent-final-file-audit' if args.final else 'passed-independent-preservation-and-input-preaudit',
+              'reviewedAtUTC': datetime.now(timezone.utc).isoformat(), 'baselineCommit': baseline['baselineCommit'],
+              'preservation': preservation(baseline), 'frozenInputs': [], 'finalMedia': [],
+              'limits': ['Actual final samples are reviewed separately and are not implied by this file audit.',
+                         'Producer full decoded body/PTS and AAC/PCM equality evidence is checked; no redundant full decode is performed.',
+                         'Sparse originals are checked by recorded Git blob/index, not claimed to be locally read.',
+                         'No new official source retrieval, ASR, full-film human listening, physical-device or user approval is claimed.']}
+    renderer = load_renderer()
+    for episode in baseline['episodes']:
+        inputs, ctx, adapter = frozen_inputs(episode['slug'], renderer)
+        report['frozenInputs'].append({'slug': episode['slug'], **inputs})
+        if args.final:
+            report['finalMedia'].append(final_media(episode, ctx, adapter))
+    dest = ARCHIVE / ('independent-final-file-audit.json' if args.final else 'independent-final-input-preaudit.json')
+    dest.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+    print(json.dumps({'status': report['status'], 'report': str(dest.relative_to(ROOT)), 'protectedOriginals': len(baseline['protectedOriginalFiles']),
+                      'oldManifests': len(baseline['allOldSourceManifests']), 'frozenInputs': report['frozenInputs']}, ensure_ascii=False))
+
+
+if __name__ == '__main__':
+    main()
