@@ -337,7 +337,7 @@ const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
 const directionForSeries = {
   request: 'systems', cache: 'systems', peak: 'systems', database: 'database', distributed: 'systems',
   agent: 'agent', leetcode: 'algorithms', 'design-patterns': 'patterns', puzzles: 'puzzles',
-  'engineering-algorithms': 'engineering', 'message-queue': 'message-queue',
+  'engineering-algorithms': 'engineering', 'message-queue': 'message-queue', redis: 'redis',
 };
 const expectedDirections = new Set(liveLessons.map((lesson) => directionForSeries[lesson.series]));
 assert.equal(expectedDirections.has(undefined), false, 'Every published series needs a known learning direction');
