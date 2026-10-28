@@ -1,0 +1,245 @@
+#!/usr/bin/env python3
+"""Package final reviewed Redis media and existing baseline covers into one ZIP.
+
+Only writes beneath work/redis-video-style. No render, metadata edit, commit,
+push, Release upload or production-cover write occurs. Run after final metadata
+and render/media receipts are installed. The immutable download URL stays an
+explicit plan until the parent publishes a delivery branch and records its SHA.
+"""
+from __future__ import annotations
+
+import argparse
+from datetime import datetime, timezone, timedelta
+import hashlib
+from io import BytesIO
+import json
+from pathlib import Path, PurePosixPath
+import subprocess
+import zipfile
+
+ROOT = Path(__file__).resolve().parents[2]
+WORK = ROOT / 'work/redis-video-style'
+REVISION = ROOT / 'episodes-codex/redis-skiplist/revisions/redis-style'
+BASELINE = '8d30ec3954297cc9aad6412c417ece8da4ceb9f7'
+SIZES = ('16x9', '4x3', '3x4')
+ZIP_NAME = 'redis-video-style-20261028.zip'
+DELIVERY_PATH = 'design/redis-video-style-20261028'
+DELIVERY_BRANCH = 'delivery/redis-style-20261028'
+MAX_BYTES = 95 * 1024 * 1024
+CST = timezone(timedelta(hours=8))
+
+
+def sha256(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def record(data: bytes) -> dict:
+    return {'bytes': len(data), 'sha256': sha256(data)}
+
+
+def read_json(path: Path) -> dict:
+    return json.loads(path.read_text(encoding='utf-8'))
+
+
+def safe_name(name: str) -> str:
+    path = PurePosixPath(name)
+    if (not name or path.is_absolute() or '\\' in name or '\x00' in name
+            or any(part in ('', '.', '..') for part in name.split('/'))
+            or ':' in path.parts[0]):
+        raise ValueError(f'Unsafe archive path: {name!r}')
+    return name
+
+
+def git_bytes(path: str) -> bytes:
+    return subprocess.check_output(['git', 'show', f'{BASELINE}:{path}'], cwd=ROOT)
+
+
+def resolve_output(value: str) -> Path:
+    path = Path(value)
+    path = (ROOT / path).resolve() if not path.is_absolute() else path.resolve()
+    if not path.is_relative_to(WORK):
+        raise ValueError(f'Outputs must stay below {WORK}')
+    return path
+
+
+def input_state(path: Path) -> dict:
+    data = path.read_bytes()
+    return {**record(data), 'mtimeNs': path.stat().st_mtime_ns}
+
+
+def validate_zip(path: Path, expected: dict[str, bytes]) -> dict:
+    with zipfile.ZipFile(path) as archive:
+        names = archive.namelist()
+        if len(names) != len(set(names)) or set(names) != set(expected):
+            raise ValueError('Duplicate, extra or missing ZIP members')
+        for name in names:
+            safe_name(name)
+        bad = archive.testzip()
+        if bad is not None:
+            raise ValueError(f'ZIP CRC mismatch: {bad}')
+        actual = {}
+        for name in names:
+            data = archive.read(name)
+            if data != expected[name]:
+                raise ValueError(f'ZIP member payload differs: {name}')
+            actual[name] = record(data)
+    return {'status': 'passed', 'allCRCVerified': True, 'allPathsSafe': True,
+            'allEntryBytesAndSHA256EqualSources': True, 'entries': actual}
+
+
+def package(video: Path, metadata: Path, render_result: Path,
+            media_check: Path, output: Path) -> dict:
+    for path in (video, metadata, render_result, media_check):
+        if not path.is_file():
+            raise ValueError(f'Final production input does not exist yet: {path}')
+    protected = {path: input_state(path) for path in
+                 (video, metadata, render_result, media_check)}
+    meta, result, media = map(read_json, (metadata, render_result, media_check))
+    baseline_meta = json.loads(git_bytes('episodes/redis-skiplist/meta.json'))
+    if meta.get('slug') != 'redis-skiplist' or meta.get('ep') != 40 \
+            or meta.get('series') != 'redis':
+        raise ValueError('Expected the existing Redis EP.40 identity')
+    for key in ('slug', 'ep', 'title', 'createdAt', 'publishedAt', 'firstRelease'):
+        if meta.get(key) != baseline_meta.get(key):
+            raise ValueError(f'Existing episode identity/date changed: {key}')
+    # The new entry lives beside original models under the same real Remotion
+    # root; sourcePath remains the actual directory rather than a media folder.
+    if meta.get('sourcePath') != baseline_meta.get('sourcePath'):
+        raise ValueError('Actual production Remotion directory changed unexpectedly')
+    updated = datetime.fromisoformat(meta['updatedAt'])
+    if updated.tzinfo is None or updated <= datetime.fromisoformat(baseline_meta['updatedAt']):
+        raise ValueError('Expected the actual new final metadata updatedAt')
+    if result.get('visualRevision') != 'redis-style-v1' \
+            or result.get('episode') != 'redis-skiplist':
+        raise ValueError('Unexpected final render-result identity')
+    manifest_path = ROOT / result.get('newProductionManifest', '')
+    if manifest_path != REVISION / 'source-sha256.json' \
+            or not manifest_path.is_file() \
+            or sha256(manifest_path.read_bytes()) != result.get('newProductionManifestSHA256'):
+        raise ValueError('Independent final visual manifest is missing or differs')
+    source_manifest = read_json(manifest_path)
+    if not any('/src/redis-style/index.ts' in name for name in source_manifest.get('inputs', {})):
+        raise ValueError('New visual entry is not bound by the final source manifest')
+    movie = video.read_bytes()
+    if result.get('sha256') != sha256(movie) or result.get('bytes') != len(movie):
+        raise ValueError('Final MP4 does not match render-result bytes/SHA')
+    if meta.get('finalVideoFrames') != result.get('finalVideoFrames') \
+            or result.get('frames') != 4707 or result.get('bodyFrames') != 4557:
+        raise ValueError('Final body/reference duration changed')
+    audio = result.get('baselineAudioPreserved', {})
+    if audio.get('passed') is not True or audio.get('audioPacketsAndTimingEqual') is not True:
+        raise ValueError('Complete baseline AAC preservation is not confirmed')
+    if media.get('passed') is not True \
+            or media.get('outputSHA256') != sha256(movie) \
+            or media.get('bodyDecodedFramesAndTimestampsEqual') is not True \
+            or media.get('audioPacketsAndTimingEqual') is not True:
+        raise ValueError('Final appendix/body/audio receipt is missing or differs')
+    style_bytes = git_bytes('episodes/redis-skiplist/cover-style.json')
+    style = json.loads(style_bytes)
+    if style.get('ep') != 40 or style.get('style') != 'redis-covers-v1':
+        raise ValueError('Unexpected original cover style/episode')
+    entries = {'EP40-Redis跳表.mp4': movie}
+    covers = []
+    # Normal git-show restores exact committed blobs into delivery-only copies.
+    # No production path is restored or modified, including sparse-absent files.
+    from PIL import Image
+    for size in SIZES:
+        source = f'episodes/redis-skiplist/cover-{size}.jpg'
+        data = git_bytes(source)
+        cover = style['covers'][size]
+        if sha256(data) != cover['jpgSha256']:
+            raise ValueError(f'Original cover manifest SHA mismatch: {source}')
+        with Image.open(BytesIO(data)) as image:
+            if image.format != 'JPEG' or list(image.size) != cover['dimensions']:
+                raise ValueError(f'Original cover dimensions/format differ: {source}')
+        name = f'covers/cover-{size}.jpg'
+        entries[name] = data
+        covers.append({'path': source, 'zipPath': name, 'dimensions': cover['dimensions'],
+                       'baseline': BASELINE, **record(data)})
+    readme = f'''Redis 系列视频与封面交付说明
+
+EP.40 {meta['title']}
+本次视频更新时间（原始记录）：{meta['updatedAt']}
+北京时间：{updated.astimezone(CST).strftime('%Y-%m-%d %H:%M:%S %z')}
+首次创建：{meta['createdAt']}
+首次发布：{meta['publishedAt']}（{meta['firstRelease']}）
+
+正文与参考资料页采用现有封面的冷银灰、Redis红、石墨文字和原始Redis标记。
+保留原完整配音、烧录字幕及章节时序；跳表查找、下降、层高对照与接入动作延续原教学模型。
+完整视频：1920×1080，30fps，4707帧（156.9秒），最后5秒为题名与署名参考资料页。
+三张JPG为Git基线 {BASELINE} 的原有封面，未重新生成。
+本次交付用于GitHub站点；没有向外部视频平台重发。
+
+包内文件与完整SHA-256：
+'''
+    readme += '\n'.join(f'{record(data)["sha256"]}  {name} ({len(data)}字节)'
+                        for name, data in entries.items())
+    readme += '\n\n说明与技术检查不表示用户已观看认可，也不表示真机或全片人工听辨。\n'
+    entries['说明.txt'] = readme.encode('utf-8')
+    output.mkdir(parents=True, exist_ok=True)
+    delivery = output / 'files'
+    for name, data in entries.items():
+        path = delivery / safe_name(name)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if path.exists() and path.read_bytes() != data:
+            raise ValueError(f'Delivery-only file already exists with different bytes: {path}')
+        if not path.exists():
+            path.write_bytes(data)
+    zip_path = output / ZIP_NAME
+    if zip_path.exists():
+        raise ValueError('ZIP already exists; validate the existing manifest or choose a fresh output directory')
+    # Stable timestamps make a repeat of these exact final inputs reproducible.
+    timestamp = updated.astimezone(CST).timetuple()[:6]
+    with zipfile.ZipFile(zip_path, 'w', compression=zipfile.ZIP_STORED,
+                         allowZip64=True) as archive:
+        for name, data in entries.items():
+            info = zipfile.ZipInfo(safe_name(name), date_time=timestamp)
+            info.compress_type = zipfile.ZIP_STORED
+            info.create_system = 3
+            info.external_attr = 0o100644 << 16
+            archive.writestr(info, data)
+    if zip_path.stat().st_size >= MAX_BYTES:
+        raise ValueError('Single ZIP exceeds the conservative 95 MiB Git limit')
+    validation = validate_zip(zip_path, entries)
+    for path, before in protected.items():
+        if input_state(path) != before:
+            raise ValueError(f'Production source changed during packaging: {path}')
+    archive_data = zip_path.read_bytes()
+    manifest = {'schemaVersion': 1, 'status': 'packaged-and-verified',
+                'createdAt': datetime.now(CST).isoformat(timespec='seconds'),
+                'slug': meta['slug'], 'ep': meta['ep'], 'title': meta['title'],
+                'updatedAt': meta['updatedAt'], 'createdAtOriginal': meta['createdAt'],
+                'publishedAtOriginal': meta['publishedAt'],
+                'baseline': BASELINE,
+                'metadata': {'path': str(metadata.relative_to(ROOT)), **record(metadata.read_bytes())},
+                'renderResult': {'path': str(render_result.relative_to(ROOT)), **record(render_result.read_bytes())},
+                'finalMediaCheck': {'path': str(media_check.relative_to(ROOT)), **record(media_check.read_bytes())},
+                'originalCoverManifestSHA256': sha256(style_bytes), 'originalCovers': covers,
+                'productionInputsBytesSHA256AndMtimeUnchanged': True,
+                'package': {'path': str(zip_path.relative_to(ROOT)), 'file': ZIP_NAME,
+                            **record(archive_data), 'validation': validation},
+                'deliveryPlan': {'status': 'not-published', 'branch': DELIVERY_BRANCH,
+                                 'directory': DELIVERY_PATH,
+                                 'immutableURLTemplate': f'https://raw.githubusercontent.com/linhongcun/video-studio/DELIVERY_COMMIT_SHA/{DELIVERY_PATH}/{ZIP_NAME}',
+                                 'note': 'Replace the explicit placeholder only after actual delivery-branch publication and Git blob/HEAD verification.'}}
+    manifest_path = output / 'package-manifest.json'
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    return {'manifest': str(manifest_path.relative_to(ROOT)), **record(manifest_path.read_bytes()),
+            'package': manifest['package'], 'deliveryPlan': manifest['deliveryPlan']}
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--video', type=Path, default=REVISION / 'video.mp4')
+    parser.add_argument('--metadata', type=Path, default=ROOT / 'episodes/redis-skiplist/meta.json')
+    parser.add_argument('--render-result', type=Path, default=REVISION / 'render-result.json')
+    parser.add_argument('--media-check', type=Path, default=REVISION / 'reference-appendix-media-check.json')
+    parser.add_argument('--out-dir', default='work/redis-video-style/delivery')
+    args = parser.parse_args()
+    result = package(args.video.resolve(), args.metadata.resolve(), args.render_result.resolve(),
+                     args.media_check.resolve(), resolve_output(args.out_dir))
+    print(json.dumps(result, ensure_ascii=False, indent=2))
+
+
+if __name__ == '__main__':
+    main()

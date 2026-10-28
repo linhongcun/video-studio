@@ -1,0 +1,68 @@
+from pathlib import Path
+from datetime import datetime, timezone, timedelta
+import hashlib, json, shutil, subprocess, gzip
+
+ROOT = Path.cwd().resolve()
+W = ROOT / 'work/redis-video-style'
+A = ROOT / 'docs/archive/2026-10/redis-video-style'
+REV = ROOT / 'episodes-codex/redis-skiplist/revisions/redis-style-bt709-v2'
+OLD = ROOT / 'episodes-codex/redis-skiplist/revisions/redis-style'
+PUB = ROOT / 'episodes/redis-skiplist'
+def read(p): return json.loads(p.read_text())
+def sha(p): return hashlib.sha256(p.read_bytes()).hexdigest()
+def write(p, d):
+    p.parent.mkdir(parents=True, exist_ok=True)
+    p.write_text(json.dumps(d, ensure_ascii=False, indent=2) + '\n')
+def frame(video, n, dest):
+    second, offset = divmod(n, 30)
+    subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', str(second), '-i', str(video),
+                    '-vf', f'select=eq(n\\,{offset})', '-frames:v', '1', '-fps_mode', 'vfr',
+                    *(['-q:v', '2'] if dest.suffix == '.jpg' else []), str(dest)], check=True)
+
+result = read(REV / 'render-result.json')
+receipt = read(REV / 'reference-appendix.json')
+check = read(REV / 'reference-appendix-media-check.json')
+normal = read(REV / 'normalization-check.json')
+video = REV / 'video.mp4'
+assert result['visualRevision'] == 'redis-style-bt709-v2'
+assert sha(video) == result['sha256'] == receipt['outputSHA256'] == check['outputSHA256']
+assert check['passed'] and normal['passed']
+assert all(check[k] for k in ['bodyDecodedFramesAndTimestampsEqual', 'outputVideoTimelineContinuous', 'audioPacketsAndTimingEqual'])
+assert normal['allVideoPTSAndDurationsEqual']
+assert result['frames'] == 4707 and result['bodyFrames'] == 4557
+assert result['newProductionManifestSHA256'] == sha(REV / 'source-sha256.json')
+assert normal['sourceSHA256'] == sha(OLD / 'body.mp4')
+assert (PUB / 'article.mdx').read_bytes() == (OLD / 'article.mdx').read_bytes()
+before_meta = read(PUB / 'meta.json')
+assert sha(PUB / 'video.mp4') == read(OLD / 'render-result.json')['sha256']
+
+dest = A / 'final-bt709'
+dest.mkdir(parents=True, exist_ok=True)
+samples = []
+for n in [0, 1850, 2060, 2667, 2785, 2900, 3215, 3715, 4556, 4557, 4632, 4706]:
+    p = dest / f'frame-{n:06d}.png'
+    frame(video, n, p)
+    samples.append({'frame': n, 'file': str(p.relative_to(ROOT)), 'sha256': sha(p)})
+figure = PUB / 'article/height-one.jpg'
+before_figure = sha(figure)
+frame(video, 2667, figure)
+meta = {**before_meta, **result['publicationMetadata']}
+meta['updatedAt'] = datetime.fromisoformat(result['createdAtUTC']).astimezone(timezone(timedelta(hours=8))).isoformat(timespec='seconds')
+assert {k for k in set(meta) | set(before_meta) if meta.get(k) != before_meta.get(k)} <= {'updatedAt'}
+write(PUB / 'meta.json', meta)
+for name in ['video.mp4', 'reference-appendix.json', 'reference-appendix-media-check.json', 'render-result.json']:
+    shutil.copyfile(REV / name, PUB / name)
+    assert sha(PUB / name) == sha(REV / name)
+for name in ['bt709-freeze', 'bt709-render', 'bt709-v2-freeze', 'bt709-v2-render']:
+    p = W / (name + '.log')
+    if p.exists(): (A / (name + '.log.gz')).write_bytes(gzip.compress(p.read_bytes(), mtime=0))
+report = {'status': 'installed-bt709-media-verified', 'sha256': sha(video), 'bytes': video.stat().st_size,
+          'frames': 4707, 'bodyFrames': 4557, 'referenceFrames': 150, 'samples': samples,
+          'normalizationCheck': normal, 'colorEncoding': result['colorEncoding'],
+          'bodyFramesAndTimestampsPreservedByAppendixEngine': True,
+          'sourcePathAndContentMetadataPreserved': True,
+          'article': {'mdxBytesPreserved': True, 'sha256': sha(PUB / 'article.mdx'), 'figureSeconds': 88.9, 'figureFrame': 2667, 'preBT709FigureSHA256': before_figure, 'figureSHA256': sha(figure)},
+          'oldFrozenRenderAndInitialMoviePreserved': True,
+          'stillsMethod': 'Integer-second input seek plus exact relative CFR frame select; no extra full decode solely to make stills.'}
+write(A / 'final-bt709-media-summary.json', report)
+print(json.dumps({'status': report['status'], 'sha256': report['sha256'], 'frames': 4707, 'samples': len(samples)}))

@@ -1,0 +1,106 @@
+#!/usr/bin/env python3
+"""One-shot Redis final-file identity audit; no rendering, decoding or mutation of inputs."""
+from pathlib import Path
+import argparse,datetime,gzip,hashlib,json,subprocess,sys
+ROOT=Path(__file__).resolve().parents[2]
+ARCHIVE=ROOT/'docs/archive/2026-10/redis-video-style'
+REV=ROOT/'episodes-codex/redis-skiplist/revisions/redis-style'
+PUB=ROOT/'episodes/redis-skiplist'
+SOURCE='episodes-codex/redis-skiplist/revisions/height-choice/redis-skiplist/remotion/'
+
+def sha_bytes(b):return hashlib.sha256(b).hexdigest()
+def sha(p):return sha_bytes(p.read_bytes())
+def blob(b):return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+def git(*a):return subprocess.check_output(['git',*a],cwd=ROOT)
+def read(p):return json.loads(p.read_text())
+def tree(ref):
+    out={}
+    for row in git('ls-tree','-rz',ref).split(b'\0'):
+        if not row:continue
+        meta,name=row.split(b'\t',1);mode,typ,oid=meta.decode().split()
+        out[name.decode()]={'mode':mode,'type':typ,'gitBlobSHA1':oid}
+    return out
+
+def main():
+    ap=argparse.ArgumentParser();ap.add_argument('--candidate');ap.add_argument('--out',default=str(ARCHIVE/'independent-final-file-audit.json'));args=ap.parse_args()
+    baseline=read(ARCHIVE/'preservation-baseline.json');base=baseline['baselineCommit'];head=git('rev-parse','HEAD').decode().strip()
+    selected=args.candidate or head;selected=git('rev-parse',selected).decode().strip();t=tree(selected)
+    stage={}
+    for row in git('ls-files','--stage','-z').split(b'\0'):
+        if not row:continue
+        meta,name=row.split(b'\t',1);mode,oid,st=meta.decode().split();stage[name.decode()]={'mode':mode,'type':'blob','gitBlobSHA1':oid}
+    tags={row[2:].decode():row[:1].decode() for row in git('ls-files','-t','-z').split(b'\0') if row}
+    def current_id(path):
+        p=ROOT/path
+        if args.candidate:return t.get(path)
+        if p.is_file():return {'mode':stage.get(path,t.get(path,{})).get('mode','100644'),'type':'blob','gitBlobSHA1':blob(p.read_bytes())}
+        # Sparse missing files retain the index identity; actual removals are staged/index mismatches.
+        return stage.get(path) if tags.get(path)=='S' else None
+    allowed_changed={
+        'episodes/redis-skiplist/meta.json','episodes/redis-skiplist/video.mp4',
+        'episodes/redis-skiplist/reference-appendix.json','episodes/redis-skiplist/reference-appendix-media-check.json',
+        'episodes/redis-skiplist/article/height-one.jpg',
+    }
+    mismatches=[];derived=[];preserved=0
+    for path,old in baseline['protectedOriginalFiles'].items():
+        actual=current_id(path)
+        if actual!=old:
+            if path in allowed_changed:derived.append({'path':path,'before':old,'after':actual})
+            else:mismatches.append({'path':path,'before':old,'after':actual})
+        else:preserved+=1
+    manifest_mismatch=[p for p,v in baseline['allExistingSourceManifestGitBlobs'].items() if current_id(p)!=v]
+    manifest=read(REV/'source-sha256.json')
+    frozen=[{'path':p,'expected':v,'actual':sha(ROOT/p)} for p,v in manifest['inputs'].items()]
+    fonts=[{'path':p,'expected':v,'actual':sha(Path(p))} for p,v in manifest['externalInputs'].items()]
+    frozen_mismatch=[d for d in frozen+fonts if d['actual']!=d['expected']]
+    font_bindings=manifest['fontBindings'];assert len(font_bindings)==8 and all(x['matchedRequestedFamily'] for x in font_bindings)
+    assert all(x['file'] in manifest['externalInputs'] and x['sha256']==manifest['externalInputs'][x['file']] for x in font_bindings)
+    old_local=[]
+    for d in baseline['currentProductionClosure']:
+        p=ROOT/d['path']
+        if p.is_file():old_local.append({'path':d['path'],'expected':d['expectedSHA256'],'actual':sha(p)})
+    old_local_mismatch=[d for d in old_local if d['actual']!=d['expected']]
+    preflight=[]
+    for kind in ['preflight','preflight-critical','visual-initial','visual-focus']:
+        p=ROOT/'work/redis-video-style'/kind/'qa-report.json'
+        if p.exists():d=read(p);report_sha=sha(p)
+        else:
+            p=ARCHIVE/kind/'qa-report.json.gz';raw=gzip.decompress(p.read_bytes());d=json.loads(raw);report_sha=sha_bytes(raw)
+        failures=[k for k,v in d['sourceSHA256'].items() if manifest['inputs'].get(k)!=v]
+        preflight.append({'kind':kind,'status':d['status'],'requestedFrameCount':len(d['requestedFrames']),'reportSHA256':report_sha,'sourceBindingsCount':len(d['sourceSHA256']),'sourceVsFreezeMismatches':failures})
+    # Only exact existing publication outputs, version, and named long-lived manuals may change.
+    allowed_existing=allowed_changed|{'site/package.json','site/package-lock.json','docs/render.md','docs/pipeline.md','docs/RULES.md','docs/production-memory.md','docs/lessons-learned.md','docs/successful-practices.md','docs/archive/README.md','docs/README.md'}
+    allowed_new_prefixes=['docs/archive/2026-10/redis-video-style/','episodes-codex/_shared/redis-video/','episodes-codex/redis-skiplist/revisions/redis-style/',SOURCE+'src/redis-style/']
+    allowed_new_exact={SOURCE+'README.md','episodes/redis-skiplist/render-result.json'}
+    diff_rows=[]
+    if args.candidate:
+        names=[p for p in git('diff','--name-only','-z',base,selected).decode().split('\0') if p]
+    else:
+        names=[p for p in git('diff','--name-only','-z',base).decode().split('\0') if p]
+        names+= [p for p in git('ls-files','--others','--exclude-standard','-z').decode().split('\0') if p]
+    base_tree=tree(base);unexpected=[]
+    for name in sorted(set(names)):
+        existed=name in base_tree;allowed=name in allowed_existing if existed else name in allowed_new_exact or any(name.startswith(p) for p in allowed_new_prefixes)
+        row={'path':name,'existedAtBaseline':existed,'allowed':allowed};diff_rows.append(row)
+        if not allowed:unexpected.append(row)
+    meta=read(PUB/'meta.json');old=baseline['publishedMetadata'];changed=[k for k in set(old)|set(meta) if old.get(k)!=meta.get(k)]
+    assert set(changed)<={'updatedAt','burnedInCaptions','finalVideoFrames','referenceAppendix','targetDuration'}
+    assert meta['sourcePath']==old['sourcePath'] and meta['burnedInCaptions'] is True
+    assert sha(PUB/'article.mdx')==baseline['publishedArticleSHA256']==sha(REV/'article.mdx')
+    results=read(REV/'render-result.json');receipt=read(REV/'reference-appendix.json');media=read(REV/'reference-appendix-media-check.json')
+    movie_sha=sha(REV/'video.mp4');assert movie_sha==sha(PUB/'video.mp4')==results['sha256']==receipt['outputSHA256']==media['outputSHA256']
+    assert sha(REV/'render-result.json')==sha(PUB/'render-result.json')
+    for n in ['reference-appendix.json','reference-appendix-media-check.json']:assert sha(REV/n)==sha(PUB/n)
+    assert results['newProductionManifestSHA256']==sha(REV/'source-sha256.json')
+    assert results['frames']==4707 and results['bodyFrames']==4557 and results['baselineAudioPreserved']['passed']
+    assert media['passed'] and all(media[k] for k in ['bodyDecodedFramesAndTimestampsEqual','outputVideoTimelineContinuous','audioPacketsAndTimingEqual'])
+    covers=[p for p in baseline['protectedOriginalFiles'] if Path(p).name.startswith('cover-') or Path(p).name in ['poster.jpg','cover-style.json']]
+    assert all(current_id(p)==baseline['protectedOriginalFiles'][p] for p in covers)
+    summary=read(ARCHIVE/'final-media-summary.json');assert summary['article']['mdxBytesPreserved'] and summary['article']['figureFrame']==2667 and summary['article']['figureSeconds']==88.9
+    assert summary['article']['figureSHA256']==sha(PUB/'article/height-one.jpg')
+    good=not(mismatches or manifest_mismatch or frozen_mismatch or old_local_mismatch or unexpected or any(x['sourceVsFreezeMismatches'] for x in preflight))
+    report={'schemaVersion':1,'status':'passed' if good else 'failed','checkedAt':datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).isoformat(timespec='seconds'),'baselineCommit':base,'candidateCommit':selected if args.candidate else None,'worktreeHead':head,'mode':'immutable-candidate-tree' if args.candidate else 'actual-local-bytes-with-sparse-index-identities','protectedOriginalPaths':len(baseline['protectedOriginalFiles']),'protectedUnchanged':preserved,'allowedPublishedDerivations':derived,'protectedUnexpectedMismatches':mismatches,'oldSourceManifestCount':len(baseline['allExistingSourceManifestGitBlobs']),'oldSourceManifestMismatches':manifest_mismatch,'newFrozenRepositoryInputCount':len(frozen),'newFrozenActualFontFileCount':len(fonts),'newFontBindingCount':len(font_bindings),'frozenInputs':frozen,'actualFonts':fonts,'frozenMismatches':frozen_mismatch,'oldClosureActuallyAvailableChecked':len(old_local),'oldClosureLocalMismatches':old_local_mismatch,'preflightSourceBindings':preflight,'coverAssetManifestCount':len(covers),'coverAssetsUnchanged':True,'changedPublicationMetadataFields':sorted(changed),'articleBytesAnd2667FigureBindingPass':True,'finalVideoSHA256':movie_sha,'finalVideoFrames':4707,'bodyFrames':4557,'referenceFrames':150,'mediaIdentityAndProducerChecksRead':True,'fileScope':diff_rows,'unexpectedFileScope':unexpected,'limits':['This script performs file/Git/input/font/media identity checks only. It does not decode or render again. Producer complete audio/frame comparison results are read and bound to actual result/movie SHA.','Sparse absent original files are compared by immutable Git tree/index blob identity; no fresh old full-file SHA or wholefilm review is claimed.','Actual final screenshot review is recorded separately. No browser/deployment claim is made here.']}
+    dest=Path(args.out);dest.parent.mkdir(parents=True,exist_ok=True);dest.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+    print(json.dumps({k:report[k] for k in ['status','protectedOriginalPaths','protectedUnchanged','oldSourceManifestCount','newFrozenRepositoryInputCount','newFrozenActualFontFileCount','newFontBindingCount','coverAssetManifestCount','finalVideoSHA256']},ensure_ascii=False))
+    if not good:sys.exit(1)
+if __name__=='__main__':main()
