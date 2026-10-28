@@ -68,7 +68,7 @@
 - 封面 4:3 安全区：内容落在 x 315..1125、y < 918。`episodes/degradation/covers.json` 里对应字段是 `sizes["4x3"].centerRegion` 与 `bottom15Y`。水印走该尺寸的 `watermarkZone`。封面文字不许溢出，检查时不得出现 `COPYFIT`。
 - 系列封面保持稳定的字体、配色、标识和构图，以题名、题号和对应示例区分单集。LeetCode 现有11片的统一模板已获用户对视觉效果的认可，后续新增题目默认沿用同一模板，按内容替换单集文字与题图；现行入口与独立SHA记录见[封面渲染](render.md#封面)；趣味推理当前使用独立紫色系列模板，新题沿对应共享入口扩展；MySQL当前使用独立墨绿系列模板，按真实EP与单集机制扩展；设计模式当前使用暖砂/靛蓝系列模板，以D编号与职责关系区分模式；Kafka消息队列使用独立暖炭灰/橙/冰蓝模板、Kafka标识与稳定MQ编号；其他系列按后续任务推进，不为统一封面改写已编码视频或旧冻结源。
 - 数据库学习方向当前统一显示为MySQL。现有四期以MySQL 8.4为技术范围，索引/事务/锁明确InnoDB前提，复制明确单主异步示例；普通名词“数据库”、逻辑范围及来源机构Oracle/MySQL按实际含义保留。当前封面和正文分别使用[MySQL封面](../episodes-codex/_shared/mysql-covers/README.md)与[正文入口](../episodes-codex/_shared/mysql-video/README.md)，不改写旧database系列冻结记录。
-- 视频正文延续本系列现行封面的字体、配色、线条与系列标识，减少点击后视觉切换。首批为趣味推理P01–P05；按题目保留各自场景和动作，强调、排除与确认状态继续有明确含义。当前正文入口见[共享制作说明](../episodes-codex/_shared/puzzles-video/README.md)，不为样式统一压缩推理或改变原题关系。
+- 视频正文延续本系列现行封面的字体、配色、线条与系列标识，减少点击后视觉切换。首批为趣味推理P01–P05；按题目保留各自场景和动作，强调、排除与确认状态继续有明确含义。趣味推理当前正文入口见[共享制作说明](../episodes-codex/_shared/puzzles-video/README.md)，LeetCode沿[本系列正文入口](../episodes-codex/_shared/leetcode-video/README.md)保持深蓝/暖金/青色与完整Python/资料页分层，不为样式统一压缩推理或改变原题关系。
 - 示例域名用 `.example`（RFC 2606）。画面上的示例数字写明「示例」。
 
 - 消息队列系列统一以Apache Kafka为具体实现，按实际日志、消费组、位点、保留与确认语义制作，不将其他MQ的逐条ACK删除模型套用到Kafka。稳定MQ号沿issue规划，不是发布序；MQ15不改为MQ09。当前MQ01同步重制为Kafka后再安装Kafka封面；后续正文与封面沿[共享Kafka入口](../episodes-codex/_shared/kafka-covers/README.md)保持一致。新增题扩展目录与机制图，旧片只依赖不可变style-v1，不因题库扩容重写冻结。
