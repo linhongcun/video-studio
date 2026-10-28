@@ -1,6 +1,6 @@
 # Redis系列封面统一
 
-日期：2026-10-28（北京时间）。本地制作、独立安装与最终站点验收已通过；GitHub发布与线上回执待执行。
+日期：2026-10-28（北京时间）。本地制作、独立安装与最终站点验收已通过，已按v0.86.1发布并完成线上核验。
 
 从clean最新2b418a9d/v0.85.1开工，已保留其他线程的LeetCode正文样式与字幕更新。现有Redis独立系列仅redis-skiplist / EP.40，原完整题为《Redis 跳表：怎样跳过一段，找到插入位置？》。本轮仅更换封面，不重制视频，不改变课号、meta/sourcePath、内容日期、URL或原始冻结。
 
@@ -30,3 +30,11 @@
 手机series缩略图按现有CSS隐藏，library封面完整显示；原生暂停控件会盖住播放器海报下部问题文字，不能把图片安全区检查扩大成所有控件状态无遮挡。实际HTTP keepalive reset保留，浏览器pageerror为0。最初两次静态文件路径假设在浏览器启动前失败，按真实发布树修正QA脚本，没有改产品或放宽字节判断。非物理手机测试，未重复已保真正文的动画、声音或逐字听辨。完整报告与实际截图见[site-qa](site-qa/report.json)。
 
 最后fetch还取得分布式发布回执`453747f7`，仅8份任务归档文件，全部原字节整合。相对最终UI检查head16e2576f，site/episodes/episodes-codex三棵树完全相同，不重复构建或媒体检查；记录见[最新回执整合](latest-upstream-receipt.json)。
+
+## 发布与线上核验
+
+[PR #416](https://github.com/linhongcun/video-studio/pull/416)合并为`43259b689a25d6df490c3cc488c0d351f37ef087`，与已验收分支树相同，Codex联合署名保留。附注tag与[Release v0.86.1](https://github.com/linhongcun/video-studio/releases/tag/v0.86.1)指向该提交；Release后手动[Pages 40670831777](https://github.com/linhongcun/video-studio/actions/runs/40670831777)以相同HEAD完成构建和部署。
+
+北京时间2026-10-28 18:21:17，11项规范URL完整GET通过，共10,407,453字节。原视频、新横封、全文字幕、6个实际页面及2个固定合并提交下载均匹配；页面包含Redis完整题、独立系列、实际版本与Release链接。原视频完整SHA仍为`0edf23150bb3a3a00950ebb99547e09e9ede6ba9326e22d46e73d5e2e50f24f9`。实际响应、HTTP状态、完整SHA及部署身份见[online-verification.json](online-verification.json)、[deployment-status.json](deployment-status.json)和[publication.json](publication.json)。
+
+[Redis系列](https://linhongcun.github.io/video-studio/series/redis/)已显示新封面，[三比例素材](../../../../design/redis-covers-20261028/README.md)可领取。没有对应开放封面issue，旧已关闭制作记录及未来候选未修改；外平台作品封面未修改。发布回执仅文档归档，不另升版本或部署。
