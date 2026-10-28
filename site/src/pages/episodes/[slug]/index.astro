@@ -18,7 +18,6 @@ import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
 import PlatformLinks from '../../../components/PlatformLinks.astro';
 import {episodeSourceLinks} from '../../../lib/source-links.mjs';
-import {getTrackForSeries} from '../../../lib/learning';
 import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, fmtVersion, dateIso, isNew, isoDuration, seriesNav, seriesFor, seriesHref, additionalSeriesFor, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes({includeArchived: true});
@@ -39,7 +38,6 @@ const sourceResources = episodeSourceLinks(e);
 const sNav = seriesNav(e);
 const series = seriesFor(e);
 const additionalSeries = additionalSeriesFor(e);
-const track = getTrackForSeries(e.series);
 const articleHeadings = e.chapters.filter((c) => c.inArticle);
 const learningGuide = learningGuideFor(e);
 const replacements = e.archived ? archiveReplacementsFor(e) : [];
@@ -56,7 +54,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
 ---
 <BaseLayout title={e.title} description={(e as any).description ?? e.summary} ogImage={asset(e.slug, e.poster)} ogType="video.other" jsonLd={jsonLd} noIndex={e.archived}>
   <div class="container">
-    <Breadcrumb items={[{label: '首页', href: BASE}, ...(track && track.title !== series?.title ? [{label: track.title, href: track.href}] : []), ...(series ? [{label: series.title, href: seriesHref(series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `本系列第 ${sNav.index}/${sNav.total} 课 · ${epLabel(e)}` : epLabel(e)}]} />
+    <Breadcrumb items={[{label: '首页', href: BASE}, ...(series ? [{label: series.title, href: seriesHref(series.id)}] : e.tags[0] ? [{label: e.tags[0], href: tagHref(e.tags[0])}] : []), {label: sNav ? `本系列第 ${sNav.index}/${sNav.total} 课 · ${epLabel(e)}` : epLabel(e)}]} />
     {e.archived && <aside class="archive-notice" data-archived aria-labelledby="archive-title">
       <h2 id="archive-title">此合集已拆为独立短片</h2>
       <p>建议先看入门，再一次学习一种实现。此页保留合集版本供回看。</p>
