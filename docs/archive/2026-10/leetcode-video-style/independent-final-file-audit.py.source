@@ -1,0 +1,132 @@
+#!/usr/bin/env python3
+"""Independent read-only file/manifest/receipt audit of installed LeetCode outputs.
+No rendering, audio analysis, image inspection or whole-stream decoding.
+"""
+from pathlib import Path
+import json,hashlib,subprocess,datetime,argparse
+from fractions import Fraction
+
+ROOT=Path(__file__).resolve().parents[2]
+W=ROOT/'work/leetcode-video-style'
+A=ROOT/'docs/archive/2026-10/leetcode-video-style'
+BASE='d04a30c12b1ce0fb5743f20ce61f9db8908311ad'
+
+def load(p):return json.loads(p.read_text())
+def sha(p):
+ h=hashlib.sha256()
+ with p.open('rb') as f:
+  for b in iter(lambda:f.read(1024*1024),b''):h.update(b)
+ return h.hexdigest()
+def blob(ref,p):return subprocess.check_output(['git','show',ref+':'+str(p.relative_to(ROOT))],cwd=ROOT)
+def digest_bytes(b):return hashlib.sha256(b).hexdigest()
+def require(value,label):
+ if not value:raise AssertionError(label)
+def probe(p):return json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-show_format','-of','json',str(p)],text=True))
+def binding(p):return {'path':str(p.relative_to(ROOT)),'sha256':sha(p),'bytes':p.stat().st_size}
+
+def audit(row):
+ s=row['slug'];source=ROOT/'episodes-codex'/s;rev=source/'revisions/leetcode-style';pub=ROOT/'episodes'/s
+ done_file=A/'final'/s/'final-media-check.json';require(done_file.is_file(),s+' final installation report missing');done=load(done_file);require(done==row,s+' summary row differs from done report')
+ marker=load(W/'render-complete'/f'{s}.json');require(marker['status']=='render-complete' and marker['exitCode']==0 and marker['slug']==s,s+' render exit marker')
+ result=load(rev/'render-result.json');manifest=load(rev/'source-sha256.json');receipt=load(rev/'reference-appendix.json');media=load(rev/'reference-appendix-media-check.json');audio=load(rev/'baseline-audio-check.json');old=load(rev/'baseline-publication.json');meta=load(pub/'meta.json')
+ require(old['baselineCommit']==BASE,s+' wrong baseline commit');old_git= json.loads(blob(BASE,pub/'meta.json'));require(old['publishedMetadata']==old_git,s+' baseline metadata differs from immutable Git')
+ baseline=W/'baseline'/f'{s}.mp4';require(sha(baseline)==old['baselineSHA256']==manifest['baseline']['sha256']==audio['baselineSHA256'],s+' baseline video SHA')
+ final=rev/'video.mp4';body=rev/'body.mp4';body_sha=sha(body);final_sha=sha(final);require(final_sha==row['sha256']==result['sha256']==receipt['outputSHA256']==media['outputSHA256']==marker['sha256'],s+' final SHA binding')
+ copies=[binding(p) for p in [final,source/'video.mp4',pub/'video.mp4']];require(all(x['sha256']==final_sha and x['bytes']==row['bytes']==result['bytes'] for x in copies),s+' three installed MP4 identities')
+ record_copies={}
+ for name in ['render-result.json','reference-appendix.json','reference-appendix-media-check.json']:
+  pieces=[binding(p/name) for p in [rev,source,pub]];require(len(set(x['sha256'] for x in pieces))==1,s+' three '+name+' copies');record_copies[name]=pieces
+ require(result['episode']==receipt['episode']==s and result['visualRevision']=='leetcode-style-v1',s+' revision identity')
+ require(result['newProductionManifestSHA256']==sha(rev/'source-sha256.json'),s+' actual frozen manifest binding')
+ inputs={}
+ for name,h in manifest['inputs'].items():
+  p=(ROOT/name).resolve();require(p.is_relative_to(ROOT) and p.is_file(),s+' missing manifest input '+name);require(sha(p)==h,s+' manifest input SHA '+name);inputs[name]=h
+ require(result['sourceInputsVerified']==len(inputs),s+' input count')
+ external={}
+ for name,h in manifest['externalInputs'].items():
+  p=Path(name);require(p.is_file() and sha(p)==h,s+' external/font SHA '+name);external[name]=h
+ require(len(external)==6 and len(manifest['fontBindings'])==8,s+' font coverage')
+ for f in manifest['fontBindings']:
+  require(f['matchedRequestedFamily'] is True and f['sha256']==external[f['file']],s+' binding '+str(f))
+ require(all(str(p.relative_to(ROOT)) in inputs for p in (source/'remotion/src/leetcode-style').iterdir() if p.is_file()),s+' incomplete visual source input closure')
+ for name in ['Frame.tsx','theme.ts','style-v1.json','identities-v1.json']:
+  require(str(Path('episodes-codex/_shared/leetcode-video')/name) in inputs,s+' shared visual input missing '+name)
+ sb=load(source/'storyboard.json');shots=[q for sc in sb['scenes'] for q in sc['shots']];frames=sum(q['durationInFrames'] for q in shots);code_start=frames-shots[-1]['durationInFrames']+shots[-1]['codeCardFrom'];code=sb['meta']['unvoicedEndCard']
+ require(code_start==code['from']==frames-150 and code['durationInFrames']==150,s+' complete code card interval')
+ require(frames==manifest['timeline']['bodyFrames']==result['bodyFrames']==receipt['bodyFrames']==media['bodyFrames']==old_git['referenceAppendix']['from'],s+' body frame agreement')
+ require(row['codeRange']==[code_start,frames-1] and row['referenceRange']==[frames,frames+149],s+' final range report')
+ require(result['frames']==result['finalVideoFrames']==receipt['finalVideoFrames']==media['finalFrames']==old_git['finalVideoFrames']==frames+150,s+' final frame agreement')
+ require(result['referenceAppendix']['from']==frames and result['referenceAppendix']['durationInFrames']==150 and receipt['appendix']['from']==frames and receipt['appendix']['durationInFrames']==150 and media['appendedFrames']==150,s+' reference interval')
+ probe_info=probe(final);video=next(x for x in probe_info['streams'] if x['codec_type']=='video');audio_stream=next(x for x in probe_info['streams'] if x['codec_type']=='audio')
+ require(video['codec_name']=='h264' and int(video['width'])==1920 and int(video['height'])==1080 and Fraction(video['r_frame_rate'])==30 and Fraction(video['avg_frame_rate'])==30 and int(video['nb_frames'])==frames+150,s+' actual ffprobe shape/frames')
+ require(audio_stream['codec_name']=='aac' and int(audio_stream['sample_rate'])==result['audioSampleRate']==48000,s+' actual audio stream format')
+ require(abs(float(video['duration'])-(frames+150)/30)<0.00001,s+' actual video duration')
+ require(meta['sourcePath']==f'episodes-codex/{s}/revisions/leetcode-style',s+' source path')
+ expected=dict(old_git);expected.update(result['publicationMetadata']);expected['sourcePath']=meta['sourcePath'];expected['updatedAt']=datetime.datetime.fromisoformat(result['createdAtUTC']).astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat(timespec='seconds');require(meta==expected,s+' unapproved metadata difference')
+ require(meta['finalVideoFrames']==frames+150 and meta['referenceAppendix']==result['publicationMetadata']['referenceAppendix'],s+' metadata publication binding')
+ article=pub/'article.mdx';require(article.read_bytes()==(rev/'article.mdx').read_bytes(),s+' article differs from frozen snapshot');require(sha(article)==row['originalArticleSHA256'],s+' article SHA report')
+ figure=ROOT/row['articleFigure']['file'];require(sha(figure)==row['articleFigure']['sha256'],s+' figure image SHA')
+ require(audio['passed'] is True and audio['audioPacketsAndTimingEqual'] is True,s+' complete baseline audio report')
+ require(audio['bodySHA256']==body_sha==receipt['inputs']['bodySHA256']==media['bodySHA256'],s+' body SHA report binding')
+ require(result['baselineAudioPreserved']==audio,s+' result baseline audio report binding')
+ require(all(media[k] is True for k in ['passed','bodyDecodedFramesAndTimestampsEqual','outputVideoTimelineContinuous','audioPacketsAndTimingEqual']),s+' all full-media checks')
+ require(audio['audioPacketCount']==media['audioPacketCount']==row['audioPacketCount'] and audio['audioPacketPayloadAndTimingSHA256']==media['audioPacketPayloadAndTimingSHA256'] and audio['decodedAudioPCM']==media['decodedAudioPCM']==row['decodedPCM'],s+' baseline/body/final audio report chain')
+ require(row['fullBaselineAACPacketsAndTimingEqual'] is True and row['bodyFramesAndPTSVerifiedByAppendixEngine'] is True and row['preservedBodyIncludesCompletePythonCard'] is True,s+' installed summary guarantees')
+ refs=load(source/'references.json');require(receipt['inputs']['referencesSHA256']==sha(source/'references.json'),s+' references file binding')
+ expected_bibliography=[{'id':x['id'],'title':x['title'],'credit':x.get('author') or x['organization']} for x in refs['sources']]
+ require(receipt['bibliography']==expected_bibliography and receipt['presentation']=='title-author' and len(receipt['appendix']['pages'])==1,s+' original titles and attribution')
+ for page in receipt['appendix']['pages']:require(sha(rev/'references'/page['file'])==page['sha256'],s+' bibliography PNG identity')
+ sample_bindings=[]
+ for q in row['samples']:
+  p=ROOT/q['file'];require(p.is_file() and sha(p)==q['sha256'],s+' formal frame sample SHA '+str(q['frame']));sample_bindings.append(q)
+ covers=[]
+ for directory,names in [(source,['cover-16x9.jpg','cover-4x3.jpg','cover-3x4.jpg','cover-16x9.png','cover-4x3.png','cover-3x4.png','poster.jpg','cover-style.json']),(pub,['cover-16x9.jpg','cover-4x3.jpg','cover-3x4.jpg','poster.jpg','cover-style.json'])]:
+  cover_style=load(directory/'cover-style.json');require((directory/'cover-style.json').read_bytes()==blob(BASE,directory/'cover-style.json'),s+' cover style changed')
+  for name in names:
+   p=directory/name;baseline_bytes=blob(BASE,p);baseline_sha=digest_bytes(baseline_bytes)
+   if p.exists():current_sha=sha(p);mode='actual-local-file'
+   else:current_sha=digest_bytes(blob('HEAD',p));mode='retained-Git-blob; sparse local asset absent'
+   require(current_sha==baseline_sha,s+' original cover bytes changed '+str(p))
+   if name.startswith('cover-') and name.endswith(('.png','.jpg')):
+    ratio=name.removeprefix('cover-').removesuffix('.jpg').removesuffix('.png');field='jpgSha256' if name.endswith('.jpg') else 'pngSha256';require(current_sha==cover_style['covers'][ratio][field],s+' cover-style binding '+name)
+   if name=='poster.jpg':require(current_sha==cover_style['covers']['3x4']['jpgSha256'],s+' portrait poster')
+   covers.append({'path':str(p.relative_to(ROOT)),'sha256':current_sha,'bytes':len(baseline_bytes),'mode':mode})
+ return {'slug':s,'problemNumber':row['problemNumber'],'status':'passed','checkedAtUTC':datetime.datetime.now(datetime.timezone.utc).isoformat(),'completedInstallationReportSHA256':sha(done_file),'threeMP4Copies':copies,'installedRecordCopies':record_copies,'videoShape':{k:video[k] for k in ['codec_name','width','height','r_frame_rate','avg_frame_rate','nb_frames','duration']},'audioStream':{k:audio_stream.get(k) for k in ['codec_name','sample_rate','channels','start_time','duration']},'bodyFrames':frames,'codeRange':[code_start,frames-1],'referenceRange':[frames,frames+149],'baselineSHA256':sha(baseline),'bodySHA256':body_sha,'manifestSHA256':sha(rev/'source-sha256.json'),'inputCount':len(inputs),'inputSHA256':inputs,'externalInputSHA256':external,'fontBindings':manifest['fontBindings'],'metadataSHA256':sha(pub/'meta.json'),'originalMetadataExactlyMatchesGitBaseline':True,'updatedMetadataOnlyExpectedFields':True,'preservedMetadataFields':'All fields except result publicationMetadata, actual updatedAt and current revision sourcePath; original creation/publication/firstRelease/platforms/slug/title/EP/problemNumber retained.','articleSHA256':sha(article),'frozenArticleEqual':True,'figureSHA256':sha(figure),'audioAndBodyReportBindings':{'baselineAudioReportSHA256':sha(rev/'baseline-audio-check.json'),'appendixFullMediaReportSHA256':sha(rev/'reference-appendix-media-check.json'),'packetCount':audio['audioPacketCount'],'audioPacketPayloadAndTimingSHA256':audio['audioPacketPayloadAndTimingSHA256'],'decodedPCM':audio['decodedAudioPCM'],'bodyFrameMD5RowsSHA256':media['bodyFrameMD5RowsSHA256'],'allReportChecksPassedAndFileBindingsMatch':True,'independentFullDecodingPerformed':False},'bibliography':expected_bibliography,'covers':covers,'formalPNGSampleBindings':sample_bindings}
+
+def audit_restored_covers():
+    inv=load(W/'inventory.json');restoration=A/'restored-original-covers.json';record=load(restoration)
+    require(record['baseline']==BASE and record['status']=='all33-matched','restored cover provenance baseline')
+    prior={(x['slug'],x['size']):x for x in record['rows']};rows=[]
+    for ep in inv['episodes']:
+        slug=ep['slug'];pub=ROOT/'episodes'/slug;style=load(pub/'cover-style.json')
+        require((pub/'cover-style.json').read_bytes()==blob(BASE,pub/'cover-style.json'),slug+' cover-style baseline')
+        for ratio in ['16x9','4x3','3x4']:
+            path=W/'delivery/covers'/slug/f'cover-{ratio}.jpg';git_path=pub/f'cover-{ratio}.jpg';original=blob(BASE,git_path)
+            actual=sha(path);expected=digest_bytes(original);producer=prior[(slug,ratio)]
+            require(actual==expected==style['covers'][ratio]['jpgSha256']==producer['sha256'],slug+' restored delivery cover SHA '+ratio)
+            require(path.stat().st_size==len(original)==producer['bytes'],slug+' restored delivery cover bytes '+ratio)
+            require(str(path.relative_to(ROOT))==producer['file'] and str(git_path.relative_to(ROOT))==producer['gitPath'],slug+' restored cover path '+ratio)
+            rows.append({'slug':slug,'ratio':ratio,'file':str(path.relative_to(ROOT)),'gitBaselinePath':str(git_path.relative_to(ROOT)),'sha256':actual,'bytes':path.stat().st_size,'mode':'actual-restored-delivery-JPG; not a production-directory restoration'})
+    require(len(rows)==33 and len(set(x['file'] for x in rows))==33,'all33 restored cover copies')
+    return {'status':'passed','checkedAtUTC':datetime.datetime.now(datetime.timezone.utc).isoformat(),'count':33,'videoCompletionIndependent':True,'restorationRecordSHA256':sha(restoration),'scope':'Actual work/delivery JPG copies matched directly against immutable BASE Git JPG bytes, unchanged published cover-style jpgSha256, and restoration record. Production sparse asset modes above remain unchanged. No image generation or repeated image viewing.','rows':rows}
+
+def save_report(result):
+    dest=W/'independent-final-file-audit.json';tmp=dest.with_suffix('.json.next');tmp.write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n');tmp.replace(dest)
+
+def main():
+    parser=argparse.ArgumentParser();parser.add_argument('--covers-only',action='store_true');args=parser.parse_args()
+    if args.covers_only:
+        result=load(W/'independent-final-file-audit.json');result['restoredDeliveryCoverCopies']=audit_restored_covers();save_report(result)
+        print('PASS all33 actual delivery JPG copies; existing media audit entries preserved without re-decoding or re-probing.',flush=True)
+        return
+    inv=load(W/'inventory.json');identity=[x['slug'] for x in inv['episodes']];summary_file=A/'final-media-summary.json';rows=load(summary_file) if summary_file.exists() else []
+    results=[];errors=[]
+    for row in rows:
+        try:results.append(audit(row));print('PASS',row['slug'],results[-1]['threeMP4Copies'][0]['sha256'],flush=True)
+        except Exception as e:errors.append({'slug':row['slug'],'type':type(e).__name__,'message':str(e)});print('FAIL',row['slug'],repr(e),flush=True)
+    completed=[r['slug'] for r in results]
+    result={'schemaVersion':1,'status':'passed-complete' if len(results)==11 and not errors else 'passed-available-partial' if not errors else 'failed','checkedAtUTC':datetime.datetime.now(datetime.timezone.utc).isoformat(),'baselineCommit':BASE,'scope':'Independent direct file hashes/Git baseline/ffprobe/manifest/fonts/metadata/cover and report binding audit only. No image viewing, full decoding, audio analysis or publication check.','completedCount':len(results),'expectedCount':11,'remainingSlugs':[s for s in identity if s not in completed],'sumVerifiedManifestInputs':sum(r['inputCount'] for r in results),'actualLocalCovers':sum(x['mode']=='actual-local-file' for r in results for x in r['covers']),'retainedGitCoversWithSparseLocalAssetAbsent':sum(x['mode']!='actual-local-file' for r in results for x in r['covers']),'episodes':results,'errors':errors}
+    result['restoredDeliveryCoverCopies']=audit_restored_covers();save_report(result)
+    print('RESULT',result['status'],len(results),'of11', 'inputs',result['sumVerifiedManifestInputs'],'restoredDeliveryCovers',result['restoredDeliveryCoverCopies']['count'],flush=True)
+    if errors:raise SystemExit(1)
+if __name__=='__main__':main()

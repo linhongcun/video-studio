@@ -1,0 +1,151 @@
+---
+title: '省份数量：没有直接相连，为什么仍是一组？'
+summary: '从城市相连关系推导分组查询与合并，再用并查集数出省份；区分原始相连线、归属箭头与孤立城市。'
+chapters:
+  - { id: problem, title: 先看题目要什么 }
+  - { id: derive, title: 从分组需要推导做法 }
+  - { id: walk, title: 沿主例处理相连关系 }
+  - { id: code, title: 写成完整程序 }
+related: [number-of-islands, daily-temperatures]
+---
+
+## 先看题目要什么 {#problem}
+
+LeetCode第547题给出`n`座城市及一个`n × n`相连表`isConnected`。`isConnected[a][b] == 1`表示城市`a`和`b`直接相连；通过其他城市间接连通也属于同一个省份。要返回的是**省份的数量**，不是连接条数，也不是城市数。一个没有连接到其他城市的孤城，自身仍算一个省份。
+
+<SourceQuote sourceId="R1" supports="题面以城市间的直接或间接连通定义省份，返回这些省份的数量；具体教学样例与解法推导由本文给出。" />
+
+相连表满足对称关系，且对角线为1。本题的“省份”是相连关系形成的连通组，不需要真实地理位置、面积或行政边界；图中的实线只表示题目输入的直接相连关系，不声称存在真实道路。
+
+本片构造六城教学示例，画面标签A–F分别对应程序下标0–5。只有`A—B`、`B—C`、`D—E`三对直接相连，F没有与其他城市相连：
+
+```text
+A—B—C       D—E       F
+```
+
+虽然A和C没有直接相连，仍能通过B连通。最终分组是`{A,B,C}`、`{D,E}`、`{F}`，所以答案为`3`。城市的位置只用于把关系画清楚；是否同组取决于连接，不能看画面上靠得近不近。
+
+## 从分组需要推导做法 {#derive}
+
+### 只需要分组，不需要保存每一条路线
+
+沿每一对相连城市处理时，我们关心这条关系会不会改变现有分组。两端已经在同一组，新增这条关系不会减少组数；两端分属不同组，才把两组合成一组，使组数减少一。
+
+于是，状态只需支持两种操作：**判断两个城市是否同组**，以及**将不同的两组合并**。这来自题目只问分组数量的目标，尚不需要先指定某种已知数据结构。
+
+### 给组一个代表
+
+同一组的城市若能找到同一个代表，就可以通过代表是否相同来判断同组。最开始尚未处理输入的任何相连关系，所有城市各自成组，每座城市的代表暂时都是自己，组数为`n`。
+
+为了让后来合并的两组共享同一个代表，可以为每座城市记录一个上级。不断沿着这份记录查找，直到某个位置指向自己，这个位置就是根，也就是组代表。
+
+这份`parent`记录与题目的相连关系是**两个不同的层面**。原图的实线AB、BC、DE不会因为查找或合并而凭空增加；归属面板中的虚线`C → A`只表达C当前最终归到A所在的组，不表示输入中存在AC直接连接。
+
+### 接根合并，得到并查集
+
+当一对相连城市分属不同组，先找到它们各自的根，再把其中一个根接到另一个根下面。整个旧组都可以通过原有归属链找到新根，组数因此少一。必须操作两个**根**；覆盖任意成员的归属可能使旧组的其他成员继续指向旧根，破坏合并结果。
+
+先找到组代表，再合并不同组，这一组操作对应**并查集**。`find`负责找代表，合并操作连接不同的根。根相同就跳过，不能把输入中的每个1都当成少了一个省份。
+
+<SourceQuote sourceId="R2" supports="并查集把元素划分为互不重叠的集合，每个城市只属于其中一组；具体找根与合并由本文同例推导。" />
+
+## 沿主例处理相连关系 {#walk}
+
+现在明确回到主例的初始状态：六座城市各自成组，`parent = [0,1,2,3,4,5]`，组数为6。固定输入是AB、BC、DE，不包含AC。
+
+| 处理的关系 | 分别找到的根 | 合并后的归属变化 | 组数 |
+|---|---|---|---:|
+| 初始 | 各自为根 | A、B、C、D、E、F独立 | 6 |
+| A—B | A与B | B的根接到A，A与B同组 | 5 |
+| B—C | B沿记录找到A；C找到自己 | C的根接到A，ABC同组 | 4 |
+| D—E | D与E | E的根接到D，DE同组 | 3 |
+| 关系全部处理完 | A、D、F | F始终独立，自身也是一省 | 3 |
+
+这里根的具体选择与本片程序按大小合并、平手时保留前一根的规则一致。不同的合法根选择也能得到相同分组与省份数；代表的字母不是题目的额外要求。
+
+<Figure src="/video-studio/episodes/number-of-provinces/article/01.jpg" alt="A、B、C一组，D、E一组，孤立F单独一组，六座城市共三省" caption="教学相连关系示意：A与C没有直接相连，但经B连通；ABC、DE和孤立F形成三个省份。虚线归属记录不代表新增相连关系。" seekTo={118} chapter="walk" />
+
+### 补例：多一条组内连接，不应少算一个省份
+
+另看一个输入：在主例的基础上增加AC直接连接。这里**输入已经改变，并且从六个独立组重新扫描**。程序只检查上三角，所以相关顺序是AB、AC、BC，之后才是DE；不能把新增AC说成主例最后才遇到的一条连接。
+
+先处理AB，组数6变5；再处理AC，组数5变4，此时ABC已经同组。随后检查BC时，两边的根都为A，必须跳过，组数仍是4。视频补例镜头只聚焦这个局部，并标明DE尚未处理；这个4不是补例的最终答案。完整执行继续处理DE才从4变3，最后仍得到ABC、DE、F三组。
+
+如果根相同也减一，就把组内已有的另一条连接误当成了跨组合并。这个补例说明，合并次数应等于初始组数减最终组数，而不等于所有相连关系的数量。
+
+## 写成完整程序 {#code}
+
+### 为什么只检查相连表的一侧
+
+回到不包含AC的主例。相连表的行与列都对应同一组城市，AB与BA是同一对对称关系，不必处理两次；对角线AA表示自己和自己，不能减少组数。因此程序只检查`a < b`的严格上三角。遇到0跳过，遇到1才去查询两端的代表。查询结果同根，仍然跳过。
+
+这一取舍依据题目保证的对称表；如果输入变成有向连接，就不能直接沿用本片的分组含义和上三角扫描。
+
+### 完整Python解法
+
+下面代码就是本片的唯一执行源`solution.py`，完整代码卡也从同源`solution.json`生成。片尾停留5秒并提示暂停，适合回查实现。
+
+```python
+class Solution:
+    def findCircleNum(self, isConnected: list[list[int]]) -> int:
+        n = len(isConnected)
+        parent = list(range(n))
+        size = [1] * n
+        count = n
+        def find(city):
+            while parent[city] != city:
+                parent[city] = parent[parent[city]]
+                city = parent[city]
+            return city
+        for a in range(n):
+            for b in range(a + 1, n):
+                if isConnected[a][b] == 0:
+                    continue
+                ra, rb = find(a), find(b)
+                if ra == rb:
+                    continue
+                if size[ra] < size[rb]:
+                    ra, rb = rb, ra
+                parent[rb] = ra
+                size[ra] += size[rb]
+                count -= 1
+        return count
+```
+
+代码采用两项实现优化：合并时把较小组的根接到较大组的根，避免持续堆出长链；查找时令当前城市指向祖父，再向上走，这叫路径减半。大小只需在根上维护，普通成员的`size`不会被用来决定合并方向。
+
+令城市数量为`n`，需要检查`n(n-1)/2`对候选关系。采用平衡合并与路径压缩这一组合时，查找/合并的摊还代价为`O(α(n))`，其中反阿克曼函数`α`增长极慢。因此可给出时间`O(n² α(n))`、额外空间`O(n)`；这解释视频“接近平方时间”的说法，不把省略这些优化的任意实现也写成相同界。复杂度不是仅数主例中三个1，而要计入输入相连表的检查。
+
+<SourceQuote sourceId="R3" supports="路径压缩与按大小或按秩合并结合，可使查询达到近常数的摊还代价；本片查表的总工作量另行分析。" />
+
+Princeton的官方UF实现采用按秩合并和路径减半，本文使用按大小合并和路径减半。二者的平衡依据不同，不是逐行移植；对应的按大小与按秩的复杂度关系另据R3核对。
+
+## 回看主线
+
+题目问分组，所以先判断是否同组，跨组才合并。给每组一个代表，沿归属记录找根，就把这两个需求落实为并查集；每次成功连接不同的根，省份数恰好减少一，孤立城市自然保留下来。
+
+## 参考资料 {#references}
+
+**[R1] Doocs：《547. Number of Provinces》**。
+
+Fixed public source commit 42ac9040510ef8711ed8c66a4c9be2e6ffa08f73；实际核验日期：2026-10-27。原文位置：Description:definition of province。
+
+[本轮实读的固定公开来源](https://github.com/doocs/leetcode/blob/42ac9040510ef8711ed8c66a4c9be2e6ffa08f73/solution/0500-0599/0547.Number%20of%20Provinces/README_EN.md) · [原始官方入口](https://leetcode.com/problems/number-of-provinces/description/)。
+
+本轮直接读取的是公开题面镜像的题意、例子和约束，未直接读取原始官方网页；未把镜像解法当成本片独立算法推导的来源。
+
+**[R2] Robert Sedgewick, Kevin Wayne：《UF.java》**。
+
+Fixed public source commit 6157ca02644bdc24892ffbac1cf449d5169e71de；实际核验日期：2026-10-27。原文位置：UF class Javadoc:collection of disjoint sets。
+
+[本轮实读的固定公开来源](https://github.com/kevin-wayne/algs4/blob/6157ca02644bdc24892ffbac1cf449d5169e71de/src/main/java/edu/princeton/cs/algs4/UF.java) · [原始官方入口](https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/UF.java.html)。
+
+支持不交集合、组代表、查询/合并/count概念；具体实现是按秩与路径减半，不独自用它证明本文按大小实现的复杂度。
+
+**[R3] CP-Algorithms：《Disjoint Set Union》**。
+
+Fixed public source commit f06f7d5e5630f0b811e37d9e657562ba38c41f6a；实际核验日期：2026-10-27。原文位置：Time complexity section。
+
+[本轮实读的固定公开来源](https://github.com/cp-algorithms/cp-algorithms/blob/f06f7d5e5630f0b811e37d9e657562ba38c41f6a/src/data_structures/disjoint_set_union.md) · [原始官方入口](https://cp-algorithms.com/data_structures/disjoint_set_union.html)。
+
+支持按大小/秩平衡与路径压缩组合的复杂度前提；本文的主例、补例、归属记录画法和教学推导不是资料原句。

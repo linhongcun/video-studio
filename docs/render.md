@@ -99,3 +99,7 @@ npm run covers
 ## 趣味推理正文的当前视觉入口
 
 P01–P05按封面的紫黑、浅紫、珊瑚配色使用[独立正文入口](../episodes-codex/_shared/puzzles-video/README.md)。当前画面在各期`remotion/src/cover-continuity/`，输出与独立清单位于`revisions/cover-continuity/`；原src、旧音轨/时序与冻结保留历史身份。当前成片不得通过旧`npm run render`覆盖；使用共享`render.py <slug> --freeze / --render / --verify`，命令、基线声音恢复及实际范围见对应说明。新资料卡通过独立紫色adapter复用既有原题/署名排版，不改旧引擎。
+
+## LeetCode正文的当前视觉入口
+
+现有11题正文沿封面使用[独立视觉入口](../episodes-codex/_shared/leetcode-video/README.md)，新源位于各期`src/leetcode-style/`，当前独立输入/产物位于`revisions/leetcode-style/`。保留原模型、分镜、声音和旧冻结；整片包含原150帧完整Python卡后再追加150帧参考资料。通过共享入口先逐镜/代码预检再freeze/render/verify，不用旧`npm run render`覆盖当前新版；新增题保持不可变样式，身份另传，不修改已编码快照。
