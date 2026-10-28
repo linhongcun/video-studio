@@ -1,7 +1,7 @@
 ---
 // 原生 <video> + 章节。无 JS 时跳到对应正文；没有正文段落的章节回到播放器。
 import {fmtTime} from '../lib/episodes';
-const {src, poster, captions, chapters, stickyOnMobile = true, title = ''} = Astro.props;
+const {src, poster, captions, chapters, stickyOnMobile = true, title = '', burnedInCaptions = false} = Astro.props;
 ---
 <section class="vp" id="player" aria-label="视频与章节" data-chapters={JSON.stringify(chapters.map(({id, title, start}) => ({id, title, start})))} data-sticky={stickyOnMobile ? '1' : '0'}>
   <div class="stage">
@@ -9,7 +9,7 @@ const {src, poster, captions, chapters, stickyOnMobile = true, title = ''} = Ast
     <div class="vwrap">
       <video controls playsinline preload="metadata" poster={poster} aria-label={title}>
         <source src={src} type="video/mp4" />
-        {captions && <track kind="captions" srclang="zh" label="中文" src={captions} default />}
+        {captions && <track kind="captions" srclang="zh" label="中文" src={captions} default={!burnedInCaptions} />}
         你的浏览器不支持视频播放，<a href={src}>下载 mp4</a>。
       </video>
       <button class="unstick" type="button" aria-label="取消视频吸顶" hidden>×</button>

@@ -13,7 +13,7 @@ const articles = import.meta.glob('../../../episodes/*/article.mdx', {eager: tru
 export type Chapter = {id: string; title: string; start: number; frame: number; fmStart?: number; inArticle?: boolean};
 export type Episode = {
   slug: string; ep: number; problemNumber?: number; episodePart?: string; lessonOrder?: number; firstRelease?: string; title: string; summary: string; duration: number; tags: string[];
-  createdAt: string; updatedAt: string; publishedAt?: string; date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number;
+  createdAt: string; updatedAt: string; publishedAt?: string; date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number; burnedInCaptions?: boolean;
   draft: boolean; legacy: boolean; archived: boolean; replacedBy?: string[]; related: {slug: string; label?: string}[];
   learningGuide?: {slug: string; label: string}; series?: string; additionalSeries?: string[]; description?: string; platforms: Platform[]; readMin: number; sourcePath: string;
 };
@@ -199,6 +199,7 @@ export function getEpisodes({includeArchived = false}: {includeArchived?: boolea
         description: meta.description,
         platforms: platformsOf(meta), readMin: readingMinutes(slug),
         sourcePath: meta.sourcePath ?? `episodes/${slug}/remotion`,
+        burnedInCaptions: meta.burnedInCaptions === true,
       };
     })
     .sort((a, b) => Date.parse(dateIso(b.date)) - Date.parse(dateIso(a.date)) || compareLessons(b, a));
