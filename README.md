@@ -76,6 +76,10 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 [MySQL独立系列](https://linhongcun.github.io/video-studio/series/database/)以MySQL 8.4为背景，从InnoDB索引、事务与锁，到MySQL单主异步复制，后续持续扩充MySQL工作原理与设计取舍；具体存储引擎、复制模式和适用条件按单集说明。现有[EP.15 索引](https://linhongcun.github.io/video-studio/episodes/db-index/)、[EP.16 事务](https://linhongcun.github.io/video-studio/episodes/db-transaction/)、[EP.17 锁](https://linhongcun.github.io/video-studio/episodes/db-lock/)与[EP.18 主从复制](https://linhongcun.github.io/video-studio/episodes/db-replication/)归入这一独立学习方向，不再作为系统原理的章节或前后课。原期号、URL与首发身份保留，系列目录只展示实际已发布内容。
 
+## 分布式
+
+[分布式独立系列](https://linhongcun.github.io/video-studio/series/distributed/)从分库分表、分布式 ID，进入事务入门与2PC、TCC、Saga、Outbox四种实现，共7篇已发布内容。系列内沿原学习顺序衔接，不再作为系统原理的章节或前后课；系统原理保留浏览器与网络、后台缓存、扛住高峰三个部分。原URL、EP编号、内容时间与媒体保留，历史事务合集继续只供回看。分类与发布状态见[本轮记录](docs/archive/2026-10/distributed-standalone-series/README.md)。
+
 ## 制作流程
 
 完整清单在 [docs/pipeline.md](docs/pipeline.md)。顺序是：调研 → `script.md` / `article.mdx` / `pronunciation.md` → `storyboard.json` / `covers.json` → 配音冻结 → Deming 预检 → 渲染 → Nolan 与 Deming 审成片 → 按持续授权合并、Release、部署 GitHub 站点 → 线上文件核验；三个平台另行授权。

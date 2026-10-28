@@ -12,6 +12,7 @@ const site = path.resolve(import.meta.dirname, '..');
 const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 const introSlug = 'distributed-tx-intro', archiveSlug = 'distributed-tx';
 const mechanismSlugs = ['tx-2pc', 'tx-tcc', 'tx-saga', 'tx-outbox'];
+const distributedSlugs = ['db-sharding', 'global-id', introSlug, ...mechanismSlugs];
 const complete = process.argv.includes('--complete');
 const existingOnly = process.argv.includes('--existing-only');
 const stripImports = (text) => text.replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '');
@@ -74,20 +75,14 @@ assert.deepEqual(slugs(episodesForRelease({tag: 'v0.46.0', kind: '新增', eps: 
 if (!existingOnly) {
   const mechanisms = mechanismSlugs.map((slug) => lessons.find((e) => e.slug === slug));
   mechanisms.forEach((e, i) => assert.ok(e, `Missing production metadata for ${mechanismSlugs[i]}`));
-  const expected = ['db-sharding', 'global-id', introSlug, ...mechanismSlugs];
-  assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'distributed').episodes), expected);
+  assert.deepEqual(slugs(preview.getSeries().find((s) => s.id === 'distributed').episodes), distributedSlugs);
   const chain = [intro, ...mechanisms];
   for (let i = 0; i < chain.length; i++) {
     const e = chain[i];
     assert.equal(e.ep, 21);
     assert.equal(e.lessonOrder, i);
     assert.equal(preview.seriesNav(e).prev.slug, i ? chain[i - 1].slug : 'global-id');
-    // The last mechanism may lead into the first lesson of a later series.
-    const series = preview.getSeries();
-    const seriesIndex = series.findIndex((s) => s.id === e.series);
-    const nextSeries = series[seriesIndex + 1];
-    const crossNext = series[seriesIndex].crossSeriesNavigation !== false && nextSeries?.crossSeriesNavigation !== false ? nextSeries : undefined;
-    assert.equal(preview.seriesNav(e).next?.slug, chain[i + 1]?.slug ?? crossNext?.episodes[0]?.slug);
+    assert.equal(preview.seriesNav(e).next?.slug, chain[i + 1]?.slug);
     if (i < chain.length - 1) {
       assert.equal(preview.learningGuideFor(e)?.slug, chain[i + 1].slug);
       const actual = published.learningGuideFor(e);
@@ -101,7 +96,7 @@ if (!existingOnly) {
   }
   assert.equal(preview.learningGuideFor(mechanisms.at(-1))?.slug, introSlug);
   assert.equal(preview.seriesNav(lessons.find((e) => e.slug === 'global-id')).next.slug, introSlug);
-  const liveExpected = expected.filter((slug) => !lessons.find((e) => e.slug === slug).draft);
+  const liveExpected = distributedSlugs.filter((slug) => !lessons.find((e) => e.slug === slug).draft);
   assert.deepEqual(slugs(published.getSeries().find((s) => s.id === 'distributed').episodes), liveExpected);
   assert.deepEqual(slugs(preview.archiveReplacementsFor(archive)), mechanismSlugs);
   for (const replacement of published.archiveReplacementsFor(archive)) {
@@ -335,7 +330,7 @@ const tracks = learning.getLearningTracks();
 const hasPublishedAgent = liveLessons.some((lesson) => lesson.series === 'agent');
 const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
 const directionForSeries = {
-  request: 'systems', cache: 'systems', peak: 'systems', database: 'database', distributed: 'systems',
+  request: 'systems', cache: 'systems', peak: 'systems', database: 'database', distributed: 'distributed',
   agent: 'agent', leetcode: 'algorithms', 'design-patterns': 'patterns', puzzles: 'puzzles',
   'engineering-algorithms': 'engineering', 'message-queue': 'message-queue', redis: 'redis',
 };
@@ -363,6 +358,27 @@ for (const track of tracks) {
   }
 }
 assert.equal(tracks.find((t) => t.id === 'systems')?.start.slug, 'http-request', 'System fundamentals should start with the request');
+const systemsTrack = tracks.find((track) => track.id === 'systems');
+assert.deepEqual(Array.from(systemsTrack.series, (series) => series.id), ['request', 'cache', 'peak'],
+  'System fundamentals keep request, cache and traffic-governance chapters');
+const distributedTrack = tracks.find((track) => track.id === 'distributed');
+assert.ok(distributedTrack, 'Distributed systems need an independent learning direction');
+assert.deepEqual(Array.from(distributedTrack.series, (series) => series.id), ['distributed']);
+assert.deepEqual(slugs(distributedTrack.episodes), distributedSlugs, 'Distributed systems preserve all seven published lessons in their established order');
+assert.equal(distributedTrack.start.slug, 'db-sharding');
+assert.equal(learning.getTrackForSeries('distributed')?.id, 'distributed');
+for (const runtime of [preview, published]) {
+  for (const [index, slug] of distributedSlugs.entries()) {
+    const lesson = runtime.getEpisodes().find((episode) => episode.slug === slug);
+    const nav = runtime.seriesNav(lesson);
+    assert.equal(nav.prev?.slug, distributedSlugs[index - 1], `${slug}: previous lesson must stay in the distributed direction`);
+    assert.equal(nav.next?.slug, distributedSlugs[index + 1], `${slug}: next lesson must stay in the distributed direction`);
+    assert.equal(nav.prevCross, undefined, `${slug}: distributed systems must not inherit another direction`);
+    assert.equal(nav.nextCross, undefined, `${slug}: distributed systems must not lead into another direction`);
+  }
+  assert.equal(runtime.seriesNav(runtime.getEpisodes().find((lesson) => lesson.slug === 'degradation')).next, undefined,
+    'The final systems lesson must not lead into distributed systems');
+}
 const mq = liveLessons.find((lesson) => lesson.slug === 'message-queue');
 assert.equal(mq.series, 'message-queue', 'MQ must have its own primary series');
 assert.equal(learning.getTrackForSeries(mq.series)?.id, 'message-queue');
@@ -381,8 +397,6 @@ for (const [index, lesson] of databaseTrack.episodes.entries()) {
   assert.equal(nav.prev?.slug, databaseTrack.episodes[index - 1]?.slug, 'Database previous lessons stay inside the series');
   assert.equal(nav.next?.slug, databaseTrack.episodes[index + 1]?.slug, 'Database next lessons stay inside the series');
 }
-assert.equal(published.seriesNav(liveLessons.find((lesson) => lesson.slug === 'degradation')).next?.slug, 'db-sharding');
-assert.equal(published.seriesNav(liveLessons.find((lesson) => lesson.slug === 'db-sharding')).prev?.slug, 'degradation');
 const agentTrack = tracks.find((track) => track.id === 'agent');
 if (hasPublishedAgent) {
   assert.ok(agentTrack, 'New published Agent lessons need their own learning direction');
