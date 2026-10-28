@@ -1,5 +1,11 @@
 # 项目制作记忆
 
+## MySQL系列正文与封面统一（2026-10-28）
+
+用户要求继续统一数据库四期视频，并将本系列明确定位为MySQL。基线为d7a5d768/v0.83.1，原课号/问题/链接与通用数据库名词保持；当前显示名、系列介绍、标签、文章开头和画面范围明确为MySQL 8.4。索引、事务、锁采用InnoDB，复制采用MySQL单主异步示例，不把复制称为InnoDB复制。已有四期研究均基于24日实读的MySQL官方手册，当前技术审读未发现须因收口而重录的旁白；新视觉保留原声音与时序，原出处机构Oracle/MySQL仍按实际署名保留。
+
+正文采用现行墨绿/薄荷绿家族，新封面入口为`_shared/mysql-covers/`，正文为`_shared/mysql-video/`及各期`remotion/src/mysql-style/`，独立冻结在`revisions/mysql-style/`。旧database-covers、制作稿、分镜与冻结按历史身份保留。四期媒体制作与独立终审完成，完整AAC/PCM和时序保真；最终网站验收与发布真实状态见[本轮记录](archive/2026-10/mysql-video-style/README.md)，不预记新片观看反馈。
+
 ## 视频正文延续系列封面（2026-10-28）
 
 用户希望统一封面与视频正文的视觉风格，减少点击后画风切换。首批范围为趣味推理P01–P05，沿现行紫黑/浅紫/珊瑚配色、字体、P编号与题目图形表达，原题的演示动作继续承担推理。本轮5条高清成片与独立检查完成：210逐镜预检、35正式抽帧、五条完整AAC/PCM保真、最终双视口播放/字幕/全屏/图回看和HTTP文件SHA通过。新入口与独立冻结位于各期 `revisions/cover-continuity/`，旧制作源和冻结保留。当前制作与检查见[本轮记录](archive/2026-10/puzzles-video-style/README.md)，实际Release/部署回执见[v0.83.1附件](https://github.com/linhongcun/video-studio/releases/tag/v0.83.1)。环境域名策略阻止canonical GET/SHA，不能将本地或GitHub源SHA称作线上完整验证；尚无新版观看反馈。

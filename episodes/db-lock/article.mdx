@@ -1,6 +1,6 @@
 ---
 title: 两个人抢最后一件货，听谁的？
-summary: 同一条库存记录，被两个请求读到同一个旧值。演示加锁读取、等待、读取新库存后重新判断，区分行锁与业务检查。
+summary: 以MySQL 8.4的InnoDB为背景，演示同一主键库存记录的旧值写回、事务内加锁读取、等待及重新检查，分清锁与业务判断的职责。
 chapters:
   - { id: hook, title: 最后一件怎么通过两次 }
   - { id: stale, title: 两次读取同一个旧值 }
@@ -9,6 +9,8 @@ chapters:
   - { id: recap, title: 锁与业务检查各管什么 }
 related: ["db-transaction", "db-replication"]
 ---
+
+本期以 **MySQL 8.4 的 InnoDB** 为背景，使用已存在主键记录的显式事务内加锁读取示例，解释冲突访问怎样协调，以及取得新库存后为什么仍要由程序判断。
 
 ## 最后一件怎么通过两次 {#hook}
 
