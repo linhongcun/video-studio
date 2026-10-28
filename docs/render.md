@@ -93,3 +93,7 @@ npm run covers
 ## 共享工具回归
 
 历史 EP.14 的 20 镜、5152 帧样例只保存在 [固定回归输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md)，用于共享工具测试，不是现行渲染工程。相关命令见 [validate.md](validate.md) 的「共享工具回归」。
+
+## 趣味推理正文的当前视觉入口
+
+P01–P05按封面的紫黑、浅紫、珊瑚配色使用[独立正文入口](../episodes-codex/_shared/puzzles-video/README.md)。当前画面在各期`remotion/src/cover-continuity/`，输出与独立清单位于`revisions/cover-continuity/`；原src、旧音轨/时序与冻结保留历史身份。当前成片不得通过旧`npm run render`覆盖；使用共享`render.py <slug> --freeze / --render / --verify`，命令、基线声音恢复及实际范围见对应说明。新资料卡通过独立紫色adapter复用既有原题/署名排版，不改旧引擎。

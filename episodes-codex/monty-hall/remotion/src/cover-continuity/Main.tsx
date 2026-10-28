@@ -1,0 +1,35 @@
+import {PuzzleCanvas} from '../../../../_shared/puzzles-video/Frame';
+import React from 'react';
+import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
+import {shots,Shot} from '../data';
+import {C,FONT} from './theme';
+import {T,Head,Note} from './primitives';
+import {DoorRow} from './DoorBoard';
+import {Overview} from './Overview';
+import {WORLDS,HERO,ROWS,CLOSED,PICKED,OFFER,COMPLETE,ease,mix} from '../monty-model';
+import {gameProgress,morphProgress,focusProgress,additionProgress} from '../timeline';
+import {useLayoutAudit} from '../LayoutAudit';
+declare const __HAS_VOICE_AUDIO__:boolean;
+const Scene=({s,f}:{s:Shot;f:number})=>{
+ const type=s.visualType,progress=gameProgress(s,f),single=WORLDS[1];
+ if(type==='hook')return <><Head title="只剩两扇门，保留还是换门？" sub="唯一奖品，开局放在1、2、3号门后的机会相同。"/><DoorRow world={single} progress={CLOSED} layout={HERO}/><T x={960} y={828} size={35} color={C.gold} anchor="middle">目标：最终选中奖品</T><Note>三门均未开 · 尚未选择 · 奖品位置暂不显示</Note></>;
+ if(type==='host-rules')return <><Head title="主持人知情，必开没选的空门" sub="每一局都给保留或换门机会；有两扇合法空门时，各以1/2选一扇。"/><DoorRow world={single} progress={CLOSED} layout={HERO}/><T x={960} y={828} size={33} color={C.gold} anchor="middle">知道奖位 → 只开未选空门 → 每局可换</T><Note>先明确规则，尚未开始这一局</Note></>;
+ if(type==='example-open')return <><Head title={progress.host===1?'3号已开为空，1号和2号仍未开':'先选1号，主持人再打开空门'} sub="单局示例 · 奖品开局已固定，暂不向玩家揭示。"/><DoorRow world={single} progress={progress} layout={HERO}/><T x={960} y={862} size={32} color={progress.host===1?C.gold:C.muted} anchor="middle">{progress.host===1?'当前选择仍是1号；可保留1，或换到2':progress.pick<1?'玩家先作出初选':progress.host===0?'已初选1号，接下来由主持人开空门':'主持人正在打开3号空门'}</T><Note>主持人动作和玩家决定，是前后两个步骤</Note></>;
+ if(type==='example-switch')return <><Head title={progress.reveal===1?'这一局：换门中奖':'玩家换到2号，再揭晓结果'} sub="同一局 · 奖品从开局到结束，都在原来的位置。"/><DoorRow world={single} progress={progress} layout={HERO}/><T x={960} y={862} size={32} color={progress.reveal===1?C.gold:C.teal} anchor="middle">{progress.swap===0?'当前选1号，准备换到2号':progress.swap<1?'玩家正在换门':progress.reveal===0?'已选2号，接着揭晓':progress.reveal<1?'正在揭晓2号':'终选2号 · 拿到奖品'}</T><Note>{progress.reveal===1?'这一局已完成；换门前的两个选择，真是各一半吗？':'选择框到达2号后，才揭开这扇门'}</Note></>;
+ if(type==='choose-viewpoint')return <><Head title="一局中奖，还不能比较两种策略" sub="回看最初选对或选错时，主持人分别能开什么。"/><DoorRow world={single} progress={COMPLETE} layout={HERO}/><T x={960} y={862} size={32} color={C.gold} anchor="middle">把这一局，放进全部初始奖位中分析</T><Note>已完成局保持原样，接下来切换到分析视图</Note></>;
+ if(type==='three-positions')return <><Head title="固定初选1号，列齐全部初始奖位" sub="刚才的示例缩到中行，另外两行分别是别的初始情景。"/><Overview states={[PICKED,COMPLETE,PICKED]} morph={morphProgress(s,f)} focusY={580}/><Note>每行是一个奖品位置，占1/3；奖品没有从一行移到另一行</Note></>;
+ if(type==='initially-right')return <><Head title="初选正确：主持人可以开2号或3号" sub="分析奖品初始在1号的情景；这里只演示开3号。"/><Overview states={[progress,COMPLETE,PICKED]} focusY={mix(580,390,ease(focusProgress(s,f)))}/><Note>另一合法开门选择仍属于同一行，不增加一种初始奖位</Note></>;
+ if(type==='right-switch-loses')return <><Head title={progress.reveal===1?'初选正确，换门反而离开奖品':'换到2号，看看这一行的结果'} sub="奖品从这个初始情景开始，就固定在1号。"/><Overview states={[progress,COMPLETE,PICKED]} focusY={390} alternate={progress.reveal===1}/><Note>{progress.reveal===1?'若主持人改开2号，换到3号也输；本行仍只占1/3':'主持人先开空门，玩家再换门，最后揭晓'}</Note></>;
+ if(type==='initially-wrong-two')return <><Head title="回看刚才那局：当时只能开3号" sub="当时初选1号，奖品在2号；主持人两者都不能开。"/><Overview states={[COMPLETE,COMPLETE,PICKED]} focusY={mix(390,580,ease(focusProgress(s,f)))} alternate/><Note>回看做决定时：初选1号，奖品在2号，主持人只能开3号</Note></>;
+ if(type==='wrong-two-switch-wins')return <><Head title="当时另一个未开门，正是奖品所在" sub="回看已完成的中行：初选1号错，换到2号赢。"/><Overview states={[COMPLETE,COMPLETE,PICKED]} focusY={580} alternate/><Note>现在2号已经揭晓；说的是当时做决定时的状态</Note></>;
+ if(type==='initially-wrong-three')return <><Head title="另一种开局：奖品在3号，初选1号错" sub="先看主持人开2号，再看玩家换到剩下的3号。"/><Overview states={[COMPLETE,COMPLETE,progress]} focusY={mix(580,770,ease(focusProgress(s,f)))} alternate/><Note>{progress.reveal===1?'第三行完成：奖品一直在3号，换门中奖':'新的初始奖位；主持人、换门、揭晓依次发生'}</Note></>;
+ if(type==='right-wrong-relation')return <><Head title="初选对，换门输；初选错，换门赢" sub="主持人避开初选门和奖门，让错误初选有机会改对。"/><Overview states={[COMPLETE,COMPLETE,COMPLETE]} focusY={mix(770,580,ease(focusProgress(s,f)))} alternate/><Note>这是三种初始奖位的完整分析，不是三次随机试验</Note></>;
+ if(type==='add-the-chances')return <><Head title="两种错误初选，都能靠换门中奖" sub="三行先验机会各1/3，将换门赢的两行机会相加。"/><Overview states={[COMPLETE,COMPLETE,COMPLETE]} focusY={580} sum={additionProgress(s,f)} alternate/><Note>{additionProgress(s,f)===1?'穷尽情景的机会相加：1/3 + 1/3 = 2/3':'初始机会各1/3，汇总能靠换门中奖的两行'}</Note></>;
+ if(type==='closing')return <><Head title="保留原选1/3，每次换门2/3" sub="主持人知情、必开未选空门、每局都提供换门机会。"/><Overview states={[COMPLETE,COMPLETE,COMPLETE]} focusY={580} sum={1} closing alternate/><Note>IT小村 · 原创</Note></>;
+ throw Error('Unknown monty-hall visualType: '+type);
+};
+const ShotView=({s,hideSubtitles=false,auditLayout=false}:any)=>{
+ const f=useCurrentFrame(),caption=(s.subtitles??[]).find((x:any)=>f>=x.from&&f<(x.to!==undefined?x.to+1:x.from+(x.duration??0)));useLayoutAudit(auditLayout,'main',s.from+f);
+ return <AbsoluteFill style={{background:C.bg,fontFamily:FONT,color:C.text}}><svg data-audit-scene="true" width={1920} height={1080} viewBox="0 0 1920 1080"><PuzzleCanvas/><Scene s={s} f={f}/><T x={1795} y={82} size={26} color={C.muted} anchor="end">IT小村</T></svg>{!hideSubtitles&&caption&&<div data-subtitle="true" style={{position:'absolute',left:160,right:160,bottom:54,textAlign:'center',fontFamily:FONT,fontSize:31,lineHeight:1.45,color:C.text}}>{caption.text}</div>}</AbsoluteFill>;
+};
+export const Main=({hideSubtitles=false,auditLayout=false}:{hideSubtitles?:boolean;auditLayout?:boolean})=><AbsoluteFill style={{background:C.bg}}>{__HAS_VOICE_AUDIO__&&<Audio src={staticFile('audio/voice.wav')}/>} {shots.map(s=><Sequence key={s.id} from={s.from} durationInFrames={s.durationInFrames}><ShotView s={s} hideSubtitles={hideSubtitles} auditLayout={auditLayout}/></Sequence>)}</AbsoluteFill>;
