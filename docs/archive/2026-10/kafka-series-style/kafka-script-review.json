@@ -1,0 +1,77 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "independent mq_qa agent",
+  "checkedAt": "2026-10-28T04:51:49.608582+00:00",
+  "status": "ready-for-voice; visual-initial-offset-clarification-required-before-freeze",
+  "scriptPath": "/workspace/work/kafka-script/script.md",
+  "inputs": {
+    "script.md": "ca00a80f4c334fd6ba2d6a954d4cf6ed4325b6398d452016a874f22448c666bc",
+    "plan.json": "94e6727b8f1670c8d199719f9c65fba87dc1a0e806d9abb0afbea2c90778d8ed",
+    "episode-config.json": "388e60fcad01027fa98cceb0afb47c3a3af415fc27736e4bd5b1e0ace08d18f8"
+  },
+  "reviewedScope": [
+    "12 shots and24 narration sentences",
+    "current first-order identity and Kafka example assumptions",
+    "Kafka official source excerpts already downloaded under /workspace/work/kafka-research",
+    "beginner causal sequence, terminology, retention and committed offset distinctions",
+    "scene transition and flow-case separation at script level"
+  ],
+  "notExecuted": [
+    "TTS or hearing",
+    "new animation or real timing evaluation",
+    "actual Kafka broker test",
+    "full source-origin verification of downloaded Kafka research",
+    "article review because article not yet supplied"
+  ],
+  "technicalConclusion": "Single topic-partition, single-consumer normal-path example correctly separates producer write success, business result, committed next offset and independently retained records. No per-message ACK/delete, global ordering or external exactly-once guarantee is claimed.",
+  "mustResolveBeforeProduction": [
+    {
+      "id": "E01",
+      "severity": "editorial-block-before-voice",
+      "issue": "Shot01 already shows accepted, while02-03 restart prior-to-write state. Explicit replay marker/utterance needed to prevent apparent acceptance before configured producer success.",
+      "rootAlreadyRequestedFix": true,
+      "resolvedInReviewedInput": true
+    },
+    {
+      "id": "E02",
+      "severity": "editorial-narrowing-before-voice",
+      "issue": "Shot09 broad consumption-is-complete wording can imply group/whole-log completion after one record; narrow to this one item handled while retained.",
+      "rootAlreadyRequestedFix": true,
+      "resolvedInReviewedInput": true
+    },
+    {
+      "id": "V01",
+      "severity": "visual-state-clarification-before-freeze",
+      "issue": "Shots05-07 label committed recovery offset0 without an initial commit0 premise. A fresh group starting at earliest0 has no committed offset.",
+      "recommendedChange": "Show given start0 and no saved offset yet; after08 display submitted/committed next offset1. Narration08 does not need to change. Alternatively explicitly premise an existing committed0; do not equate auto.offset.reset with a commit."
+    }
+  ],
+  "productionChecks": [
+    {
+      "id": "T11",
+      "requiresRealTiming": true,
+      "check": "Shot11 first finish stopped-input unfinished-count2->1->0 with original log entries remaining, then show explicit independent sustained-input reset and complete count windows. Never display both situation states concurrently or delete log to reduce backlog."
+    },
+    {
+      "id": "T08",
+      "requiresActualMotion": true,
+      "check": "Save business result before offset submit signal and move committed marker only when successful commit is represented. Retained record0 and business result must survive both actions."
+    },
+    {
+      "id": "T06",
+      "requiresActualMotion": true,
+      "check": "Pull/read creates processing representation while original log record0 stays anchored. Avoid duplicate pending-task semantics."
+    }
+  ],
+  "sourceLocations": {
+    "retention": "introduction.md:81",
+    "partitionOrder": "introduction.md:83",
+    "consumerPull": "design.md:137,141",
+    "singleIntegerNextOffset": "design.md:157",
+    "externalResultsNotAtomic": "design.md:205",
+    "positionVsCommitted": "KafkaConsumer.java:73-90",
+    "acksAll": "ProducerConfig.java:132-149"
+  },
+  "blockingTechnicalFindingsInNarration": [],
+  "voiceConclusion": "Reviewed revised02 and09 applied. No remaining narration blocker; may synthesize voice. V01 is a visual/application-premise clarification to resolve before storyboard freeze."
+}

@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "version": "kafka-series-plan-candidate-20261028",
+  "checkedAt": "2026-10-28T04:46:57.548216+00:00",
+  "overviewIssue": 308,
+  "overviewUrl": "https://github.com/linhongcun/video-studio/issues/308",
+  "codeBaseline": "d7a5d7682080232617a03cc988b7c25cb50446f4",
+  "newDirection": "本轮用户进一步指定消息队列系列统一Kafka，并选择同步重制现有MQ01为Kafka后更换封面。",
+  "numberingRule": "稳定MQ01–MQ08及MQ15，非发布序；MQ15不能改成MQ09。",
+  "currentScope": "MQ01 Kafka重制已获本轮授权；未来8期仍未开工，本文件是Kafka范围候选，不等同脚本定稿、开工或交付。",
+  "legacyIssueTreatment": "原始issue JSON原样保留；#308/#309当前归属与状态事实有效，但旧RabbitMQ技术范围须按新指导重新定稿。本任务未修改issue。",
+  "coverSystem": "中性消息队列身份+Kafka系列/单集技术定位，稳定MQ编号；禁止沿用RabbitMQ队列取走/ACK删除语义。",
+  "topics": [
+    {
+      "mqIndex": 1,
+      "number": "MQ01",
+      "recommendedOrder": 1,
+      "planningIssue": 309,
+      "issueTitle": "[消息队列 MQ01 / EP.10改造] 消息队列入门：提交之后，任务怎样走到完成？",
+      "issueState": "CLOSED",
+      "shortTopic": "异步接力",
+      "productionState": "published",
+      "legacyIssueProductExample": "RabbitMQ",
+      "targetProduct": "Apache Kafka",
+      "kafkaPlanState": "remake_authorized",
+      "kafkaScopeCandidate": "同一订单7042由网站服务写入Kafka，producer确认后回复受理；消费者暂停前尚未poll，恢复后处理业务并提交进度；日志不随消费/commit删除，页面另查业务结果。",
+      "avoid": [
+        "把producer acks当业务完成",
+        "消费后从日志移除7042",
+        "把提交offset画成业务结果或页面ACK",
+        "日志留存条数等同待处理任务数"
+      ],
+      "evidenceFocus": [
+        "producer确认作用域",
+        "retention独立于消费",
+        "读取位置、业务完成和已提交位置分别表达"
+      ]
+    },
+    {
+      "mqIndex": 2,
+      "number": "MQ02",
+      "recommendedOrder": 2,
+      "planningIssue": 310,
+      "issueTitle": "[消息队列 MQ02] 多个消费者：分工处理，还是每人一份？",
+      "issueState": "OPEN",
+      "shortTopic": "订阅与分工",
+      "productionState": "not_started",
+      "legacyIssueProductExample": "RabbitMQ",
+      "targetProduct": "Apache Kafka",
+      "kafkaPlanState": "rewrite_rabbitmq_scope",
+      "kafkaScopeCandidate": "原Exchange/fanout/独立队列改为同一Topic的不同传统consumer group各读一份，同组实例按分区分工；以两分区和两服务建立拓扑，不讨论确认协议或回放细节。",
+      "avoid": [
+        "保留Exchange/fanout路由",
+        "同一组每个实例都得一份",
+        "同组实例逐消息随机竞争同一分区",
+        "把传统group规则套到Share Groups"
+      ],
+      "evidenceFocus": [
+        "传统consumer group与分区归属",
+        "groupId区分独立订阅"
+      ]
+    },
+    {
+      "mqIndex": 3,
+      "number": "MQ03",
+      "recommendedOrder": 3,
+      "planningIssue": 311,
+      "issueTitle": "[消息队列 MQ03] Kafka 消费组：消息读过了，为什么还能重读？",
+      "issueState": "OPEN",
+      "shortTopic": "日志与重放",
+      "productionState": "not_started",
+      "legacyIssueProductExample": "Kafka",
+      "targetProduct": "Apache Kafka",
+      "kafkaPlanState": "retain_kafka_review_scope",
+      "kafkaScopeCandidate": "保留日志、已提交位置及可回退重放；相邻MQ02集中订阅归属，本片集中读过为何仍在与重读前提，避免重复大篇幅解释同组分工。",
+      "avoid": [
+        "读过立即删除",
+        "无保留前提承诺永久重放",
+        "混淆poll位置与已提交位置",
+        "重放自动安全重做外部副作用"
+      ],
+      "evidenceFocus": [
+        "日志保留/清理前提",
+        "消费位置和提交位点",
+        "一个组回退不改变另一个组"
+      ]
+    },
+    {
+      "mqIndex": 4,
+      "number": "MQ04",
+      "recommendedOrder": 4,
+      "planningIssue": 312,
+      "issueTitle": "[消息队列 MQ04] 发布确认：消息发出后，怎样才算发送成功？",
+      "issueState": "OPEN",
+      "shortTopic": "发送确认",
+      "productionState": "not_started",
+      "legacyIssueProductExample": "RabbitMQ",
+      "targetProduct": "Apache Kafka",
+      "kafkaPlanState": "rewrite_rabbitmq_scope",
+      "kafkaScopeCandidate": "移除Publisher Confirm/quorum/mandatory/return；固定Kafka producer配置，区分send调用、Future/回调成功和业务完成；用已追加但结果丢失/超时说明未知与重试窗口。副本协议和acks比较深度留MQ15。",
+      "avoid": [
+        "RabbitMQ confirm直接换名成Kafka acks",
+        "send调用返回即Broker确认",
+        "超时必定未追加",
+        "开启producer幂等即所有业务副作用恰好一次"
+      ],
+      "evidenceFocus": [
+        "send异步调用与Future/回调",
+        "acks配置的证据范围",
+        "retriable错误与未知结果"
+      ]
+    },
+    {
+      "mqIndex": 5,
+      "number": "MQ05",
+      "recommendedOrder": 5,
+      "planningIssue": 313,
+      "issueTitle": "[消息队列 MQ05] 消费幂等：已经处理过，为什么还会再来一遍？",
+      "issueState": "OPEN",
+      "shortTopic": "消费幂等",
+      "productionState": "not_started",
+      "legacyIssueProductExample": "RabbitMQ",
+      "targetProduct": "Apache Kafka",
+      "kafkaPlanState": "rewrite_rabbitmq_scope",
+      "kafkaScopeCandidate": "原业务提交后ACK前退出改为业务数据库已提交、Kafka消费位置尚未成功commit时退出，再从已提交位置重新读取；逻辑消费身份+eventId去重记录和业务修改在同一本地事务内提交，之后提交Kafka进度。",
+      "avoid": [
+        "RabbitMQ重新入队/ACK删除图",
+        "本地数据库事务同时原子提交Kafka offset",
+        "用进程ID做逻辑消费身份",
+        "producer幂等代替消费业务幂等"
+      ],
+      "evidenceFocus": [
+        "commit恢复位置与重读窗口",
+        "本地去重与业务共同原子提交",
+        "外部副作用不受本地事务覆盖"
+      ]
+    },
+    {
+      "mqIndex": 6,
+      "number": "MQ06",
+      "recommendedOrder": 6,
+      "planningIssue": 314,
+      "issueTitle": "[消息队列 MQ06] 消息保序：订单已退款，为什么又变回已支付？",
+      "issueState": "OPEN",
+      "shortTopic": "消息保序",
+      "productionState": "not_started",
+      "legacyIssueProductExample": "Kafka",
+      "targetProduct": "Apache Kafka",
+      "kafkaPlanState": "retain_kafka_review_scope",
+      "kafkaScopeCandidate": "保留固定分区数、确定的生产顺序、同Key路由与串行业务处理；仍用应用内部并发反例区分日志顺序和完成顺序。",
+      "avoid": [
+        "同Key天然定义多生产者业务顺序",
+        "分区有序等于业务完成有序",
+        "增加分区不改变Key映射",
+        "幂等替代保序"
+      ],
+      "evidenceFocus": [
+        "传统consumer group",
+        "同Key与固定分区数",
+        "生产重试/幂等条件与消费串行执行"
+      ]
+    },
+    {
+      "mqIndex": 7,
+      "number": "MQ07",
+      "recommendedOrder": 7,
+      "planningIssue": 315,
+      "issueTitle": "[消息队列 MQ07] 消息积压：加了十台消费者，为什么还越排越长？",
+      "issueState": "OPEN",
+      "shortTopic": "消息积压",
+      "productionState": "not_started",
+      "legacyIssueProductExample": "Kafka",
+      "targetProduct": "Apache Kafka",
+      "kafkaPlanState": "retain_kafka_review_scope",
+      "kafkaScopeCandidate": "保留传统消费组分区数与实例并行度上限、流入与业务完成数的示例；分清log end offset、已提交位置的lag、客户端在途和业务未完成数。",
+      "avoid": [
+        "日志留存条数就是积压",
+        "拉取即业务完成",
+        "offset差值直接等于等待秒数",
+        "扩实例必定提高吞吐"
+      ],
+      "evidenceFocus": [
+        "传统组分区分配",
+        "留存与积压分开",
+        "业务完成速率与口径"
+      ]
+    },
+    {
+      "mqIndex": 8,
+      "number": "MQ08",
+      "recommendedOrder": 8,
+      "planningIssue": 316,
+      "issueTitle": "[消息队列 MQ08] 重试与死信：失败消息，为什么不能一直重试？",
+      "issueState": "OPEN",
+      "shortTopic": "重试与死信",
+      "productionState": "not_started",
+      "legacyIssueProductExample": "RabbitMQ",
+      "targetProduct": "Apache Kafka",
+      "kafkaPlanState": "rewrite_rabbitmq_scope",
+      "kafkaScopeCandidate": "移除Broker nack/requeue与RabbitMQ DLX；改为应用控制的有限重试、明确间隔与业务错误分类，超预算写入死信Topic保留eventId/原因。发布死信成功再commit原位置的方案必须显式保留两步非原子与重复窗口，目标不可用不冒充已处置。",
+      "avoid": [
+        "Kafka内置RabbitMQ式DLX/重入队命令",
+        "写进retry Topic就自动定时重投",
+        "死信等于业务成功",
+        "发死信与commit位点天然原子",
+        "死信回放无需幂等/顺序处理"
+      ],
+      "evidenceFocus": [
+        "应用管理重试/DLQ协议",
+        "producer结果与offset提交分开",
+        "消费者轮询/重平衡时限",
+        "业务预算与间隔不冒充Broker默认功能"
+      ]
+    },
+    {
+      "mqIndex": 15,
+      "number": "MQ15",
+      "recommendedOrder": 9,
+      "planningIssue": 323,
+      "issueTitle": "[消息队列 MQ15] Kafka 多副本确认：写入成功，到底哪些副本已经跟上？",
+      "issueState": "OPEN",
+      "shortTopic": "多副本确认",
+      "productionState": "not_started",
+      "legacyIssueProductExample": "Kafka",
+      "targetProduct": "Apache Kafka",
+      "kafkaPlanState": "retain_kafka_review_scope",
+      "kafkaScopeCandidate": "保留Kafka Leader/Follower/ISR及acks=1/all对照，固定minISR=2、关闭ELR与unclean选主等教学条件；MQ15继续作为稳定题库号，推荐序仍第9。",
+      "avoid": [
+        "all等于所有配置副本/所有集群机器",
+        "all只等够minISR个即返回",
+        "复制确认等于稳定介质落盘或业务完成",
+        "把数据分区副本画成互投KRaft票"
+      ],
+      "evidenceFocus": [
+        "acks等待范围",
+        "minISR写入下限",
+        "ISR/ELR/unclean固定条件",
+        "实际记录存留与模型分别验"
+      ]
+    }
+  ],
+  "cancelledIssueNumbers": [
+    298,
+    299,
+    317,
+    318,
+    319,
+    320,
+    321,
+    322,
+    324,
+    325,
+    326,
+    327,
+    328,
+    329
+  ]
+}

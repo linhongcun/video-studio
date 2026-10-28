@@ -1,0 +1,32 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import crypto from 'node:crypto';
+import assert from 'node:assert/strict';
+import {pathToFileURL} from 'node:url';
+const root='/workspace/video-studio/episodes-codex/message-queue/revisions/kafka-intro/message-queue';
+const out='/workspace/work/kafka-independent-model';
+const names=['remotion/src/model.ts','remotion/src/model-check.ts','remotion/src/Main.tsx','script.md','plan.json'];
+const hashes=Object.fromEntries(names.map(n=>[n,crypto.createHash('sha256').update(fs.readFileSync(path.join(root,n))).digest('hex')]));
+const m=await import(pathToFileURL(path.join(root,'remotion/src/model.ts')));
+const states=m.runMainExample(),checks=[];
+const check=(name,fn)=>{fn();checks.push({name,passed:true});};
+const expectedLog=[{offset:0,orderId:'7042'},{offset:1,orderId:'7043'},{offset:2,orderId:'7044'}];
+check('single-partition teaching offsets preserve order identity',()=>assert.deepEqual(states.appended.log,expectedLog));
+check('initial committed recovery progress is absent while read origin is0',()=>{const s=m.initial();assert.equal(s.committedOffset,null);assert.equal(s.readPosition,0)});
+check('selected example only replies accepted after all3 records confirmed',()=>{assert.equal(states.accepted.confirmedThrough,2);assert.equal(states.accepted.pageState,'accepted');assert.deepEqual(states.accepted.businessResults,[])});
+check('reading0 advances client read position to1 while committed remains absent',()=>{assert.equal(states.read.readPosition,1);assert.equal(states.read.committedOffset,null);assert.equal(states.read.processing,'7042');assert.deepEqual(states.read.businessResults,[])});
+check('business save leaves page accepted and recovery progress absent',()=>{assert.deepEqual(states.saved.businessResults,['7042']);assert.equal(states.saved.processing,null);assert.equal(states.saved.pageState,'accepted');assert.equal(states.saved.committedOffset,null)});
+check('first commit records1 without updating page business state',()=>{assert.equal(states.committed.committedOffset,1);assert.equal(states.committed.pageState,'accepted');assert.deepEqual(states.committed.businessResults,['7042'])});
+check('only application result query updates page completion in main example',()=>{assert.equal(states.queried.pageState,'complete');assert.equal(states.queried.committedOffset,1)});
+check('business result query is not technically dependent on a Kafka commit',()=>{const s=m.queryResult(states.saved);assert.equal(s.pageState,'complete');assert.equal(s.committedOffset,null)});
+check('every main state retains same original three log records',()=>Object.values(states).forEach(s=>assert.deepEqual(s.log,expectedLog)));
+check('drained business has0 unfinished while Kafka log still retains3',()=>{assert.equal(m.unfinished(states.drained),0);assert.equal(states.drained.log.length,3);assert.equal(states.drained.committedOffset,3);assert.deepEqual(states.drained.businessResults,['7042','7043','7044'])});
+check('application guard refuses commit ahead of successfully handled prefix',()=>{assert.throws(()=>m.commit(states.read,1));assert.throws(()=>m.commit(states.saved,2));assert.throws(()=>m.commit(states.accepted,1))});
+check('main example transitions do not mutate earlier snapshots',()=>{assert.deepEqual(states.appended.businessResults,[]);assert.equal(states.appended.committedOffset,null);assert.equal(states.appended.readPosition,0);assert.equal(states.read.committedOffset,null)});
+check('independent steady input arithmetic21 complete windows',()=>{for(let w=0;w<=20;w++){const f=m.flowWindow(w);assert.equal(f.entered,w*2);assert.equal(f.completed,w);assert.equal(f.unfinished,w);assert.equal(f.unfinished,f.entered-f.completed)}});
+check('negative recovery offsets rejected before and after business success',()=>{assert.throws(()=>m.commit(m.initial(),-1));assert.throws(()=>m.commit(states.saved,-1));assert.throws(()=>m.commit(states.committed,-1))});
+const guardObservations=[];
+try{m.commit(m.initial(),-1);guardObservations.push({case:'negative committed offset',accepted:true,scope:'Unused by selected example, but no negative record position is meaningful here.'})}catch{guardObservations.push({case:'negative committed offset',accepted:false})}
+try{m.readNext(m.append(m.initial(),'7042'));guardObservations.push({case:'read before producer confirmation in generic API',accepted:true,scope:'Not used in main example. Do not infer that producer receipt of ack is a universal Kafka consumer prerequisite; any restriction is this teaching app sequencing only.'})}catch{guardObservations.push({case:'read before producer confirmation in generic API',accepted:false})}
+const report={schemaVersion:1,reviewer:'independent kafka_research; did not implement model or animation',checkedAt:new Date().toISOString(),root,sourceHashes:hashes,method:'Read source and execute imported production model under independent assertions. Did not run model-check.ts as sole evidence.',coreModelPassed:checks.every(c=>c.passed),checks,guardObservations,mainStateSnapshots:states,scope:'Deterministic single-partition teaching state. Static audit of Main.tsx separate from model execution. Actual pixels, actual narration timing and final encoded MP4 not reviewed yet; no real Kafka cluster experiment.'};
+fs.writeFileSync(path.join(out,'model-execution.json'),JSON.stringify(report,null,2)+'\n');console.log(JSON.stringify({coreModelPassed:report.coreModelPassed,checks:checks.length,guardObservations}));

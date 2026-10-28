@@ -82,11 +82,11 @@ const definitions: TrackDefinition[] = [
   {
     id: 'message-queue',
     number: '07',
-    title: '消息队列',
-    eyebrow: '跟随一条消息理解机制',
-    description: '从任务提交与消费开始，理解发布订阅、可靠性、顺序与积压。每期围绕一个完整问题，可以独立观看。',
-    outcome: '看清消息怎样保存、投递和确认，理解不同队列模型解决的问题、条件与代价。',
-    audience: '会基本编程，希望理解消息队列工作原理与设计取舍的开发者。',
+    title: 'Kafka · 消息队列',
+    eyebrow: '跟随一条记录理解 Kafka',
+    description: '统一围绕 Apache Kafka，理解日志、消费组、写入确认、重放、顺序与积压。每期回答一个完整问题，可以独立观看。',
+    outcome: '看清记录怎样追加、保留和读取，分清业务结果、消费进度与写入确认，理解 Kafka 的条件与代价。',
+    audience: '会基本编程，希望系统理解 Kafka 工作原理与设计取舍的开发者。',
     seriesIds: ['message-queue'],
   },
   {

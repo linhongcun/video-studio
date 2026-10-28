@@ -1,0 +1,97 @@
+---
+title: "订单已提交，为什么还没处理完？"
+summary: "跟随同一笔订单7042，理解Kafka追加日志、后台消费、业务完成与提交恢复位点的区别，以及为什么读取过的记录仍会保留。"
+related:
+  - rate-limit
+  - idempotency
+chapters:
+  - id: problem
+    title: "已受理，为什么还没完成"
+  - id: enqueue
+    title: "Kafka怎样接住任务"
+  - id: process
+    title: "读取、业务完成与消费位点"
+  - id: boundary
+    title: "缓冲的用途与代价"
+---
+
+## 已受理，为什么还没完成 {#problem}
+
+点击提交订单，页面很快显示“已受理”，后台却还没有处理完成。它们可以先后属于同一笔订单：前者表示系统已按约定接住待办，后者才表示相应业务工作已经成功。
+
+本片用Kafka解释订单7042的一次正常接力。订单功能界面、编号、处理节奏和流量数字都是教学示例，不代表真实平台的内部架构或性能。本系列此后统一以Kafka展开；这一版本不沿用旧片中RabbitMQ消费确认后移除消息的模型。
+
+## Kafka怎样接住任务 {#enqueue}
+
+回看刚才的提交过程。网站服务把“处理订单7042”编码为消息写进Kafka，后台程序稍后读取并处理。写消息的是生产者，读取和处理消息的是消费者；页面仍通过网站服务操作，不直接连接Kafka。
+
+Kafka把消息组织在主题中，主题又可以划分为多个分区。为了先看清一条任务，本例从空日志开始，固定观察主题`order-tasks`的分区0，以及一个消费者：7042追加在位置0，后来的7043、7044分别追加在位置1、2。**订单号标识业务对象，offset标识记录在这个分区中的位置**，不能把二者当成同一种编号。
+
+本例选择传统consumer group中的一个消费者顺序处理这一分区，显式从位置0开始、每次读取一条；这不是说Kafka每次poll默认只返回一条。日志采用`cleanup.policy=delete`和有限保留窗口，示例观察期间尚未触发清理。消费位置与业务未完成数都不能代替保留策略；清理按分段等规则执行，不表示每条消息到达某个秒点就立即删除。
+
+消息是追加到某一分区日志的。本片的0、1、2只是单分区中的位置，不代表全系统的统一序号，也不能从这幅图推导跨分区的全局顺序。
+
+网站服务等Kafka返回本次写入成功以后，才回复页面“已受理”。这是本应用选择的受理条件。生产者确认覆盖写入请求，不会等待消费者完成后台业务；页面显示受理不等于订单处理完成。
+
+<SourceQuote sourceId="R3" supports="acks规定生产者在将写请求视为完成前，需要leader取得怎样的确认；这个写入条件不等于消费者业务已完成。" />
+
+<Figure src="/video-studio/episodes/message-queue/article/01.jpg" alt="同一分区日志中7042位于位置0，Kafka写入回执先到网站服务，再由网站服务回复页面已受理，后台业务尚未完成" caption="教学示例：Kafka确认本次写入后，网站服务回复受理；消费者尚未完成7042。" seekTo={39} chapter="enqueue" />
+
+本教学配置采用`acks=all`、副本数3和`min.insync.replicas=2`。`acks=all`等待的是当时的同步副本集合（ISR），`min.insync.replicas`还约束可接受写入的最少同步副本数。因此写入成功不必然表示原先配置的三个副本全都已经跟上，也不等于每条消息都在所有副本逐条执行了`fsync`。本片没有演示Broker故障或确认超时，不能从正常成功路径推导任何故障下都不会丢失。
+
+## 读取、业务完成与消费位点 {#process}
+
+### 暂停取数，记录在哪里
+
+在消费者尚未读取7042时，先让它暂停取数。生产者与消费者可以按各自节奏工作；日志中的7042并不因消费者暂时不读取而消失。此时页面仍为已受理，业务状态仍是未完成。本例没有演示成员超时、重新分配分区或故障重启，不能把这里的教学暂停扩大成所有消费组场景下的行为保证。
+
+消费者恢复后，读取的是日志中原来的7042。读取会推进客户端的读取位置，但**不会因此删除日志原记录**。片中只画“已提交的恢复位置”，没有把它当成每次`poll`后的读取位置；处理区里的7042是当前读取记录对应的工作，不是又新增了一条待办。
+
+<SourceQuote sourceId="R1" supports="Kafka记录不会在消费后立即删除；消息保留由主题策略控制，与本例的读取动作分开。" />
+
+<Figure src="/video-studio/episodes/message-queue/article/02.jpg" alt="消费者读取位置0的7042后开始处理，日志中原7042仍保留，尚未提交恢复位点，本例读取起点是0" caption="教学示例：读取使后台开始工作，不会把日志中的原记录拿走，也不自动表示业务成功。" seekTo={57.5} chapter="process" />
+
+### 先完成业务，再提交恢复位置
+
+后台完成7042的业务工作，并成功保存应用业务结果后，本例才提交消费位点。这里关闭了自动提交，每次取一条、连续处理。本例明确从位置0开始读取，起初尚未提交恢复位点，不能把读取起点0说成已经提交了0；7042在位置0，处理成功后首次提交1，表示恢复消费时应从下一待读位置1继续，而不是重读已完成的0。
+
+<SourceQuote sourceId="A1" supports="已提交位点应当是应用接下来要读取的下一条记录的位置；本例处理位置0后提交1。" />
+
+<Figure src="/video-studio/episodes/message-queue/article/03.jpg" alt="7042的应用业务结果已成功保存，恢复位点从尚未提交变为已提交1，而位置0的日志记录仍然保留" caption="教学示例：先成功处理0，再提交下一位置1。业务结果、恢复进度与日志保留各自表达。" seekTo={77} chapter="process" />
+
+已提交位点是恢复消费的进度，不是删除记录的命令。7042这一条已经处理完，记录仍可留在日志里；其他任务此时还没有处理完。按保留策略保存过一段时间以后，旧记录才可能被清理。消费积压归零与日志中还有历史记录，也可以同时成立。
+
+业务结果保存和位点提交是两个动作。应用可能在业务成功之后、位点提交之前故障，恢复时便可能再次读取已处理记录。本片只展示正常闭环，**并未把外部业务操作与位点提交变成一个原子事务**，更没有证明外部副作用恰好执行一次。
+
+<SourceQuote sourceId="R2" supports="消费者处理消息后保存进度，仍可能在处理完成与保存进度之间故障；因此这两个动作不自动形成外部业务原子性。" />
+
+<span id="retry"></span>
+
+### 页面怎样知道已经完成
+
+消费位点不会直接通知网页“订单成功”。页面通过网站服务查询应用保存的业务结果，查询得到7042已处理成功，才更新为处理完成。这个查询流程是本教学应用的设计，不是Kafka内置的订单状态功能。
+
+<Figure src="/video-studio/episodes/message-queue/article/04.jpg" alt="页面通过网站服务查询已保存的7042业务结果，得到成功后才显示完成，消费位点路径与页面查询路径分开" caption="教学示例：页面从应用业务结果获知完成；Kafka写入回执和消费位点都不替代这个结果。" seekTo={97.5} chapter="process" />
+
+因此，写入请求成功、消费者读到记录、业务工作成功、提交恢复位置、页面获知完成，都应在各自的动作落点后判断，不能统称为“消息成功了”。
+
+<span id="recap"></span>
+
+## 缓冲的用途与代价 {#boundary}
+
+如果这一波短时输入停止，后台按原有速度继续完成7043、7044，未完成任务数可以逐渐减少到零。这个“排空”说的是业务积压被消化，不是把Kafka日志清成空文件；已经消费的历史记录仍可能处在保留期内。
+
+再看独立的持续流量示例：每个完整1秒窗口进入2条任务，却只完成1条，未完成量就会每窗净增加1条。这里统计的未完成量包含尚未读取与已经读取但仍在处理的任务；日志留存条数则还可能包含已经处理成功的历史记录，不能拿来直接充当业务积压。
+
+Kafka让写入与后台处理能够按不同节奏接力，却没有让消费者或它依赖的业务系统瞬间变快。长期流入快于处理，积压和等待就会增加；保留策略与存储资源也有边界，应用需要监控实际滞后、剩余保留窗口与业务时限，不能默认消息会永远等着被处理。
+
+回到7042：页面已受理，只说明本应用已按约定接住了任务；业务完成，要看实际业务结果；消费位点，则记录从哪里恢复。把这三个状态分开，才不会把Kafka返回的写入成功误当成订单处理成功。
+
+## 参考资料
+
+本篇采用Apache Kafka 4.4.0官方文档与源码，核验日期2026-10-28，固定提交为`1156b2752aaa28eafc0b4c4d387e63356793268d`。出处和精确原文按论点对应，教学配置与产品通用保证分别说明。
+
+- **[R1] [Introduction](https://kafka.apache.org/44/getting-started/introduction/)** · Apache Kafka，4.4.0。[固定原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)。用于生产者/消费者、分区追加、消费不删除及按主题保留。
+- **[R2] [Design](https://kafka.apache.org/44/design/design/)** · Apache Kafka，4.4.0。[固定原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)。用于消费者进度、处理后保存位置和失败窗口。
+- **[R3] [Producer Configs](https://kafka.apache.org/44/configuration/producer-configs/)** · Apache Kafka，4.4.0。[固定原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/producer-configs.md)。用于写入确认和最少同步副本条件；同时核对[ProducerConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java)及[TopicConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/config/TopicConfig.java)。
+- **[A1] [KafkaConsumer.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L286)** · Apache Kafka，4.4.0。[完整原文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java)。用于下一待读位置与手动提交的具体API说明。
