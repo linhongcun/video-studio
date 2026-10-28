@@ -28,3 +28,5 @@
 最终v0.86.1重新执行1440×1000与390×844双视口14项检查/14截图，11个代表原资产逐字节保持；Redis单课筛选、首页与学习入口、列表新图、播放器海报、短播放暂停及Fullscreen API通过。独立复核实看全部14截图合辑与3原图，root实看桌面library、手机poster与home。原v0.85.2整轮证据保持，不用旧UI结果替代变化后的runtime。
 
 手机series缩略图按现有CSS隐藏，library封面完整显示；原生暂停控件会盖住播放器海报下部问题文字，不能把图片安全区检查扩大成所有控件状态无遮挡。实际HTTP keepalive reset保留，浏览器pageerror为0。最初两次静态文件路径假设在浏览器启动前失败，按真实发布树修正QA脚本，没有改产品或放宽字节判断。非物理手机测试，未重复已保真正文的动画、声音或逐字听辨。完整报告与实际截图见[site-qa](site-qa/report.json)。
+
+最后fetch还取得分布式发布回执`453747f7`，仅8份任务归档文件，全部原字节整合。相对最终UI检查head16e2576f，site/episodes/episodes-codex三棵树完全相同，不重复构建或媒体检查；记录见[最新回执整合](latest-upstream-receipt.json)。
