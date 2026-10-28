@@ -75,7 +75,7 @@ LeetCode 系列当前封面使用[独立系列模板](../episodes-codex/_shared/
 
 趣味推理系列使用[独立系列模板](../episodes-codex/_shared/puzzles-covers/README.md)，固定紫黑底、P编号与上题下图构图，按发布元数据核对单集身份。三比例检查、安装和SHA记录独立于旧视频工程；新增题沿同一入口扩展。
 
-数据库系列使用[独立系列模板](../episodes-codex/_shared/database-covers/README.md)，固定墨绿/薄荷绿、数据库圆柱与真实EP编号，按元数据核对索引、事务、锁和主从复制。当前封面记录与旧视频冻结源独立，新增单集沿本系列入口扩展。
+MySQL系列使用[独立系列模板](../episodes-codex/_shared/mysql-covers/README.md)，沿墨绿/薄荷绿、圆柱与真实EP编号，封面明确MySQL及InnoDB/异步复制边界；旧database-covers保留历史身份。当前正文入口见[MySQL制作说明](../episodes-codex/_shared/mysql-video/README.md)，与新封面读取同一catalog配色。新增单集沿当前入口扩展。
 
 设计模式系列使用[独立系列模板](../episodes-codex/_shared/design-pattern-covers/README.md)，固定暖砂底、靛蓝标题、蓝橙模块标识及D编号。按实际元数据核对EP、D编号/顺序与完整原题，机制图保持策略择一、观察者当前订阅关系及适配器转换委托的职责边界。新增模式沿同一入口扩展。
 

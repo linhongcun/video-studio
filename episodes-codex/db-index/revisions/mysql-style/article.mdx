@@ -1,0 +1,95 @@
+---
+title: 加个索引，为啥就快了？
+summary: 以MySQL 8.4的InnoDB为背景，查同一笔订单，对比全表扫描与索引定位。视频讲清少读无关数据的过程，文章补充树结构、回表、维护代价与联合索引。
+chapters:
+  - { id: hook, title: 只查一笔，还在找 }
+  - { id: table, title: 订单怎样存进表 }
+  - { id: scan, title: 没有合适索引时 }
+  - { id: index, title: 索引怎样帮助查找 }
+  - { id: boundary, title: 有索引也不一定更快 }
+related: ["server-cache", "db-transaction"]
+---
+
+本系列以 **MySQL 8.4** 为技术背景，本期索引示例采用 **InnoDB**。正文先解释查询怎样找到记录，后文再按这一实现背景补充索引结构与适用条件。
+
+## 只查一笔，还在找 {#hook}
+
+明明只查一笔订单，数据库为什么可能读了许多无关记录？关键要看它怎样找。
+
+## 1. 订单怎样存进表 {#table}
+
+视频中的一张订单表，包含订单号、商品、金额等列；每一行记录一笔订单。表和行是逻辑数据结构，不代表数据库在磁盘上就是一幅电子表格。[^row]
+
+片中订单号 `7042`、金额、八行数据和行号都是**教学示例**。动画速度只为看懂过程，未测量查询耗时，也没有给出任何加速倍数。
+
+## 2. 没有合适索引时 {#scan}
+
+查询条件是找出订单号等于目标值的全部匹配记录。没有可用于该条件的索引时，数据库可以通过**全表扫描**逐行判断：这行是不是目标？不是就看下一行。即使中途找到一行，也要继续检查有没有其他匹配。[^uses]
+
+这里没有预设订单号已是主键或已有唯一索引，也没有“找到一条就停”的限制。记录增多时，需要检查的无关数据也可能增多。
+
+<SourceQuote sourceId="A1" supports="没有可用于条件的索引时，需要从首行开始读取整表寻找匹配记录；这不构成固定性能倍数的承诺。" />
+
+## 3. 索引怎样帮助查找 {#index}
+
+**索引是帮助数据库查找的数据结构。** 示例给订单号建索引，把用于查找的订单号与找到对应记录所需的信息组织起来。查找时先利用索引缩小范围，再取得目标记录，而不必逐行查看所有订单。[^uses]
+
+画面中的有序列表和引导线只解释这一关系：**订单号 → 对应记录**。它不表示真实索引是一张平铺数组，图中的行号也不是磁盘地址。具体到 InnoDB 的普通二级索引，索引项保存索引列以及对应主键，数据库可以通过主键取得原记录。[^secondary]
+
+<Figure src="/video-studio/episodes/db-index/article/01.jpg" alt="订单号7042在索引中对应订单表第6行，箭头连接索引与订单记录" caption="教学示例：先在订单号索引中找到7042，再沿对应关系读取订单记录；图中的行位置不代表磁盘地址。" seekTo={90} chapter="index" />
+
+## 4. 有索引也不一定更快 {#boundary}
+
+当表很小，或者查询本来就要读取大部分记录时，顺序扫描可能更合算。数据库仍可能选择扫描；“建了索引”和“这条查询使用了索引”是两件事。[^uses]
+
+因此，本期的结论是：**合适的索引帮助定位目标，减少寻找少量记录时的无关读取。** 不能据此断言所有查询都会变快。
+
+## 只放在文章里的补充
+
+下面以 MySQL 8.4.0 所属长期支持系列的 InnoDB 为具体例子；不同数据库和索引类型的实现可能不同。
+
+### B+ 树：为什么视频没有画树
+
+索引并不是只有一种实现。MySQL 官方手册把常规键索引归入 B-tree 设计家族，并说明其变体与经典定义可能不同；InnoDB 的相关记录存放在叶页中。这种多路结构也不等于每个节点只有两个分支的二叉树。[^tree][^gloss-tree]
+
+“B+ 树”是相关实现讨论中的常见名称，官方早期技术文章也使用这一叫法（仅参考）。[^bplus] 本片把实现细节留在片外，避免让观众误把示意列表当作真实存储结构，或从简化动画推出固定查找次数。
+
+### 回表和覆盖索引
+
+通过二级索引获得主键后，再到聚簇索引取需要的其他列，通常称为**回表**。如果某个索引已经包含查询需要的全部列，查询有机会直接从索引取得结果，这就是**覆盖索引**的思路。因此，片中的两步路径不是所有查询的必经路线。[^secondary][^uses]
+
+### 索引的维护代价
+
+索引占空间；插入、更新和删除时也要维护相应索引。为每个可能用到的字段都建索引，并不等于系统会更快。应围绕真实查询选择索引，并检查执行计划和测量结果。[^cost]
+
+### 联合索引与最左前缀
+
+一个索引可以包含多列，列的先后顺序会影响其用途。例如按“用户、下单时间”组织的联合索引，和反过来组织并不相同。官方文档说明了利用最左一列、最左两列等前缀进行查找的常规方式。[^multi]
+
+这不能简化成“没有最左列，任何情况下都绝不可能用索引”；具体访问方式仍要看执行计划。本期视频只演示单个订单号条件，不展开这条支线。
+
+## 参考资料
+
+以下官方章页均实际访问并核验于 **2026-10-24（北京时间）**，MySQL 手册主页显示文档生成于 2026-10-22。
+
+[^row]: MySQL 官方术语表，row：https://dev.mysql.com/doc/refman/8.4/en/glossary.html#glos_row
+[^uses]: MySQL 官方手册 §10.3.1《How MySQL Uses Indexes》：https://dev.mysql.com/doc/refman/8.4/en/mysql-indexes.html
+[^secondary]: MySQL 官方手册 §17.6.2.1《Clustered and Secondary Indexes》：https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html
+[^tree]: MySQL 官方手册 §17.6.2.2《The Physical Structure of an InnoDB Index》：https://dev.mysql.com/doc/refman/8.4/en/innodb-physical-structure.html
+[^gloss-tree]: MySQL 官方术语表，B-tree：https://dev.mysql.com/doc/refman/8.4/en/glossary.html#glos_b_tree
+[^bplus]: MySQL 官方技术文章《InnoDB : Tablespace Space Management》，2019 年，早于优先年份，仅参考术语沿革：https://dev.mysql.com/blog-archive/innodb-tablespace-space-management/
+[^cost]: MySQL 官方手册 §10.3《Optimization and Indexes》：https://dev.mysql.com/doc/refman/8.4/en/optimization-indexes.html
+[^multi]: MySQL 官方手册 §10.3.6《Multiple-Column Indexes》：https://dev.mysql.com/doc/refman/8.4/en/multiple-column-indexes.html
+
+### 视频采用的资料
+**[R1] How MySQL Uses Indexes**
+
+Oracle / MySQL · MySQL 8.4 Reference Manual · 实读2026-10-24
+
+[正式文档](https://dev.mysql.com/doc/refman/8.4/en/mysql-indexes.html) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-index/research.md#L5-L24)。
+
+**[R2] Clustered and Secondary Indexes**
+
+Oracle / MySQL · MySQL 8.4 Reference Manual · 实读2026-10-24
+
+[正式文档](https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html) · [既有实读记录](https://github.com/linhongcun/video-studio/blob/76e9b36737063d109a866ff47c1dcf81ef46c638/episodes-codex/db-index/research.md#L35-L43)。

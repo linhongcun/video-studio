@@ -92,11 +92,11 @@ const definitions: TrackDefinition[] = [
   {
     id: 'database',
     number: '08',
-    title: '数据库',
-    eyebrow: '从数据读写理解内部机制',
-    description: '从索引、事务、锁与复制出发，理解数据怎样查询和修改，以及并发、故障下的正确性与取舍。',
-    outcome: '看清数据库如何组织数据、协调并发和复制状态，理解机制依赖的条件与适用边界。',
-    audience: '会基本编程，希望理解数据库工作原理并持续深入的开发者。',
+    title: 'MySQL',
+    eyebrow: '从MySQL读写理解内部机制',
+    description: '以MySQL 8.4为背景，理解InnoDB索引、事务与锁，再看单主异步复制怎样传播更改。',
+    outcome: '看清MySQL怎样查找数据、协调事务与冲突访问，以及异步复制怎样传播更改，理解具体实现的条件与边界。',
+    audience: '会基本编程，希望理解MySQL工作原理并持续深入的开发者。',
     seriesIds: ['database'],
   },
 ];
