@@ -1,0 +1,11 @@
+# Kafka发布前上游集成独立复核
+
+结论：通过。上游固定为`3b0ac58f8f86bb7a755107ec28c69bde6cdc0c6e`（v0.84.0），Kafka本批原提交`986ad9f9086f3cd04a901239e454688e0688df3b`，合并提交`42fe01c252fb58d854496ec39427f4b2594641b7`，本批版本顺延0.84.1。
+
+上游474路径与Kafka160项新冻结输入、旧MQ116+161=277声明解析路径交集均为零。474里12个双方共享文档/分类/版本文件有语义合并，其余462文件已逐一核对完整Gitblob、工作区SHA256和文件mode，精确等于固定上游版本。基于d7a5d768的旧保护基线及既有授权supplement原字节保持：1826有效保护路径中1778仍等旧基线，48个DB发布路径按本次明确的上游delta精确等新上游，不删除失败或改写原baseline。
+
+12共享文件完成22项独立检查：MySQL新增文档证据逐行保留；series/learning的database对象精确等上游，MQ对象精确等Kafka原提交；首页MySQL和Kafka分支保留；package/lock除版本外依赖与配置树完全相同，版本0.84.1。初稿检查曾错误要求pipeline已有第二个Kafka-video链接，而Kafka原提交实际只有cover链接+style-v1指导；原检查结果保留first-check-assumption.json，改为对照真实已写Kafka段落逐字保持，未改生产内容。
+
+47个实际组件/样式/脚本/episode/lib运行文件在旧审查基线和新上游间Gitblob完全相同，合并工作树也精确等同。上游site10文件变化仅为MySQL方向数据与说明文字：library筛选脚本、player、SourceQuote、Figure、字幕/章节/全屏运行资源均未变。既有MQ交互验收可按原版本/范围有界复用；root另执行合并后fresh全站build、160冻结verify及必要MQ入口/版本烟测。不把这份源对比报告称作重新执行所有UI操作。
+
+可重复运行audit.py --verify和verify-shared.py；所有输出只在work目录，未改repo或Git索引。未为上游纯数据/文字改动重渲不变Kafka媒体。关键结果及完整报告SHA见integration-summary.json。

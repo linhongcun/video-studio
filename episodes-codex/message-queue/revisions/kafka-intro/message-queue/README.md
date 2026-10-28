@@ -24,3 +24,5 @@ bash episodes-codex/message-queue/revisions/kafka-intro/message-queue/render-fin
 封面使用_shared/kafka-covers/render.py，当前源接入Kafka元数据后才允许--install；不向旧RabbitMQ片只贴Kafka名称。正文引用style-v1和冻结背景副本，不引用可增长的catalog。实际源文件、输入/输出SHA、预演差异、成片和站点检查集中在docs/archive/2026-10/kafka-series-style/。
 
 站点仍episodes/message-queue，Kafka系列仍message-queue分类路径。新片/图文接入时保留历史日期与平台链接，仅更新真实修改日期、媒体范围、来源及sourcePath。GitHub按持续授权发布，外平台作品未重发。
+
+发布前整合MySQL最新主干3b0ac58f/v0.84.0，本轮版本顺延v0.84.1；实际冻结160输入与最终媒体不变，整合证明及有界站点复验见归档。
