@@ -1,6 +1,6 @@
 ---
 title: '省份数量：没有直接相连，为什么仍是一组？'
-summary: '从城市相连关系推导分组查询与合并，再用并查集数出省份；区分原始相连线、归属箭头与孤立城市。'
+summary: '从题目的二维数组逐格读出城市直接连接，再理解间接连通和省份目标，推导并查集；区分输入连接与归属记录。'
 chapters:
   - { id: problem, title: 先看题目要什么 }
   - { id: derive, title: 从分组需要推导做法 }
@@ -11,19 +11,34 @@ related: [number-of-islands, daily-temperatures]
 
 ## 先看题目要什么 {#problem}
 
-LeetCode第547题给出`n`座城市及一个`n × n`相连表`isConnected`。`isConnected[a][b] == 1`表示城市`a`和`b`直接相连；通过其他城市间接连通也属于同一个省份。要返回的是**省份的数量**，不是连接条数，也不是城市数。一个没有连接到其他城市的孤城，自身仍算一个省份。
+LeetCode第547题的输入是一个`n × n`的二维数组`isConnected`，行和列都对应同一批城市，下标从`0`到`n-1`。`isConnected[a][b] == 1`表示城市`a`和`b`**直接相连**，`0`表示没有直接连接。题目要返回省份的数量，先要看懂数组怎样表达城市关系。
 
-<SourceQuote sourceId="R1" supports="题面以城市间的直接或间接连通定义省份，返回这些省份的数量；具体教学样例与解法推导由本文给出。" />
+本片构造六座城市的教学示例，A–F依次对应下标0–5；这不是原题官方样例。输入为：
 
-相连表满足对称关系，且对角线为1。本题的“省份”是相连关系形成的连通组，不需要真实地理位置、面积或行政边界；图中的实线只表示题目输入的直接相连关系，不声称存在真实道路。
+```text
+isConnected = [
+    [1, 1, 0, 0, 0, 0],
+    [1, 1, 1, 0, 0, 0],
+    [0, 1, 1, 0, 0, 0],
+    [0, 0, 0, 1, 1, 0],
+    [0, 0, 0, 1, 1, 0],
+    [0, 0, 0, 0, 0, 1],
+]
+```
 
-本片构造六城教学示例，画面标签A–F分别对应程序下标0–5。只有`A—B`、`B—C`、`D—E`三对直接相连，F没有与其他城市相连：
+例如，行0、列1的`isConnected[0][1]`为1，因此A和B之间有一条直接连接；行0、列2为0，因此A和C没有直接连线。再看`isConnected[1][2]`和`isConnected[3][4]`，它们都是1，对应B—C和D—E。相连表对称，AB和BA描述同一对关系；对角线的1只表示自己。F与其他城市对应的格子全为0，所以图中F没有连接其他城市。
+
+把同一个数组中的直接连接画出来，就是：
 
 ```text
 A—B—C       D—E       F
 ```
 
-虽然A和C没有直接相连，仍能通过B连通。最终分组是`{A,B,C}`、`{D,E}`、`{F}`，所以答案为`3`。城市的位置只用于把关系画清楚；是否同组取决于连接，不能看画面上靠得近不近。
+接着看题目对省份的定义：直接相连，或者能够通过其他城市间接连通的城市，属于同一个省份。A和C虽然没有直接连线，仍能经过B连通，因此ABC是一省；DE是一省；没有连到其他城市的F自己也算一省。最终返回`3`，不是连接条数，也不是城市数。**数组中的0只表示没有直接连接，不代表两座城市一定分属不同省份。**
+
+<SourceQuote sourceId="R1" supports="题面以城市间的直接或间接连通定义省份，返回这些省份的数量；具体教学样例与解法推导由本文给出。" />
+
+本题的“省份”是相连关系形成的完整连通组，不需要真实地理位置、面积或行政边界。图中的实线只表示输入的直接连接，不声称存在真实道路；是否同组取决于连接，不能看画面上靠得近不近。
 
 ## 从分组需要推导做法 {#derive}
 
@@ -63,7 +78,7 @@ A—B—C       D—E       F
 
 这里根的具体选择与本片程序按大小合并、平手时保留前一根的规则一致。不同的合法根选择也能得到相同分组与省份数；代表的字母不是题目的额外要求。
 
-<Figure src="/video-studio/episodes/number-of-provinces/article/01.jpg" alt="A、B、C一组，D、E一组，孤立F单独一组，六座城市共三省" caption="教学相连关系示意：A与C没有直接相连，但经B连通；ABC、DE和孤立F形成三个省份。虚线归属记录不代表新增相连关系。" seekTo={118} chapter="walk" />
+<Figure src="/video-studio/episodes/number-of-provinces/article/01.jpg" alt="A、B、C一组，D、E一组，孤立F单独一组，六座城市共三省" caption="教学相连关系示意：A与C没有直接相连，但经B连通；ABC、DE和孤立F形成三个省份。虚线归属记录不代表新增相连关系。" seekTo={145.6} chapter="walk" />
 
 ### 补例：多一条组内连接，不应少算一个省份
 
@@ -130,15 +145,15 @@ Princeton的官方UF实现采用按秩合并和路径减半，本文使用按大
 
 Fixed public source commit 42ac9040510ef8711ed8c66a4c9be2e6ffa08f73；实际核验日期：2026-10-27。原文位置：Description:definition of province。
 
-[本轮实读的固定公开来源](https://github.com/doocs/leetcode/blob/42ac9040510ef8711ed8c66a4c9be2e6ffa08f73/solution/0500-0599/0547.Number%20of%20Provinces/README_EN.md) · [原始官方入口](https://leetcode.com/problems/number-of-provinces/description/)。
+[前期实读的固定公开来源](https://github.com/doocs/leetcode/blob/42ac9040510ef8711ed8c66a4c9be2e6ffa08f73/solution/0500-0599/0547.Number%20of%20Provinces/README_EN.md) · [原始官方入口](https://leetcode.com/problems/number-of-provinces/description/)。
 
-本轮直接读取的是公开题面镜像的题意、例子和约束，未直接读取原始官方网页；未把镜像解法当成本片独立算法推导的来源。
+前期实际读取的是公开题面镜像的题意、例子和约束，未直接读取原始官方网页；未把镜像解法当成本片独立算法推导的来源。
 
 **[R2] Robert Sedgewick, Kevin Wayne：《UF.java》**。
 
 Fixed public source commit 6157ca02644bdc24892ffbac1cf449d5169e71de；实际核验日期：2026-10-27。原文位置：UF class Javadoc:collection of disjoint sets。
 
-[本轮实读的固定公开来源](https://github.com/kevin-wayne/algs4/blob/6157ca02644bdc24892ffbac1cf449d5169e71de/src/main/java/edu/princeton/cs/algs4/UF.java) · [原始官方入口](https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/UF.java.html)。
+[前期实读的固定公开来源](https://github.com/kevin-wayne/algs4/blob/6157ca02644bdc24892ffbac1cf449d5169e71de/src/main/java/edu/princeton/cs/algs4/UF.java) · [原始官方入口](https://algs4.cs.princeton.edu/code/edu/princeton/cs/algs4/UF.java.html)。
 
 支持不交集合、组代表、查询/合并/count概念；具体实现是按秩与路径减半，不独自用它证明本文按大小实现的复杂度。
 
@@ -146,6 +161,6 @@ Fixed public source commit 6157ca02644bdc24892ffbac1cf449d5169e71de；实际核�
 
 Fixed public source commit f06f7d5e5630f0b811e37d9e657562ba38c41f6a；实际核验日期：2026-10-27。原文位置：Time complexity section。
 
-[本轮实读的固定公开来源](https://github.com/cp-algorithms/cp-algorithms/blob/f06f7d5e5630f0b811e37d9e657562ba38c41f6a/src/data_structures/disjoint_set_union.md) · [原始官方入口](https://cp-algorithms.com/data_structures/disjoint_set_union.html)。
+[前期实读的固定公开来源](https://github.com/cp-algorithms/cp-algorithms/blob/f06f7d5e5630f0b811e37d9e657562ba38c41f6a/src/data_structures/disjoint_set_union.md) · [原始官方入口](https://cp-algorithms.com/data_structures/disjoint_set_union.html)。
 
 支持按大小/秩平衡与路径压缩组合的复杂度前提；本文的主例、补例、归属记录画法和教学推导不是资料原句。

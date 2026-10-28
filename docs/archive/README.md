@@ -32,6 +32,7 @@
 
 ## 新期制作记录
 
+- [2026-10-28 · LC547从二维数组进入题目](2026-10/number-of-provinces-matrix-first/README.md)：先读isConnected并逐格建立城市连线，再解释省份与进入解法；旧源、统一封面与有效后段保留，实际状态见记录。
 - [2026-10-28 · Redis缓存两期封面与正文统一](2026-10/redis-cache-style/README.md)：EP.08/09延续跳表冷银灰/Redis红，保留应用流程、完整原声与时序，实际状态见记录。
 
 - [2026-10-28 · Redis正文延续封面](2026-10/redis-video-style/README.md)：EP.40冷银灰/Redis红正文与资料页、原层高分支和声音保持；实际状态见记录。
