@@ -14,4 +14,8 @@
 
 第一次转换被严格颜色闸门拦住：虽然矩阵与有限范围已正确，但primaries/transfer字段缺失。失败清单、工具和body原位保留，另起`redis-style-bt709-v2`，在真实像素转换后明确逐帧setparams；正文与资料小样五项颜色参数均通过才冻结83项绑定。最终完整片`5cae1e6b03eb933f17c898e6c64fc131a9e6087fa05199d362c82bfff4393178`已通过4707帧原PTS、完整AAC/PCM及附加时全部新正文解码帧保真。新12张实际成片PNG已生成。
 
-站点复验与发布仍在执行；完成后按真实结果补齐。持续授权仅用于GitHub与站点，不扩为外平台重发、未来Redis选题制作、全片人工听辨、ASR、真机或用户新观看认可。
+最终`0c57c687541147b5d38337fd68aca4d8805fb283`重新完整构建与双视口复验通过。浏览器Video→Canvas实取正文236/240/244、ffmpeg同点235/239/243；资料237/242/245、ffmpeg同点237/241/245，银灰恢复。实际五项编码参数、三个完整HTTP文件SHA、新全屏/播放/K、默认不叠原生字幕、20句原生VTT可选、资料无cue和双主题Figure精确2667帧均通过。原75个站点运行/文章/封面输入逐字节保持，因此首轮8章节/8文章seek、4原文浮层等功能证据按边界复用；保留4个名义分数秒UI seek先呈现前一帧的实际trace，精确包PTS直接探针单独通过，不将两者混称。无页面错误或横向溢出。初审与最终实际2次build、QA脚本时序/屏外控件修正及初版颜色缺陷记录完整保留，见`site-final/`。
+
+最终视频与三封面ZIP位于固定交付提交`88355c059c2e1d4f8cc9a40e82b375390c2f29bb`的`design/redis-video-style-20261028/`，文件`redis-video-style-20261028.zip`，7520321字节，SHA256`53001938133af4a39ed340d481ba1fa2f4aaaa1766584c8c3a642bea02f5c27d`。同提交的`redis-video-style-production-inputs.zip`保留最终83绑定所需三个生成媒体，便于按原相对路径恢复；其完整SHA/CRC记录见`production-inputs-manifest.json`。旧下载包仍为历史候选，不用于本次Release。
+
+本地制作、终审及站点已完成，发布按持续授权执行，实际Release/Pages结果以交付分支最终`publication.json`为准。持续授权仅用于GitHub与站点，不扩为外平台重发、未来Redis选题制作、全片人工听辨、ASR、真机或用户新观看认可。
