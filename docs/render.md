@@ -79,6 +79,8 @@ LeetCode 系列当前封面使用[独立系列模板](../episodes-codex/_shared/
 
 设计模式系列使用[独立系列模板](../episodes-codex/_shared/design-pattern-covers/README.md)，固定暖砂底、靛蓝标题、蓝橙模块标识及D编号。按实际元数据核对EP、D编号/顺序与完整原题，机制图保持策略择一、观察者当前订阅关系及适配器转换委托的职责边界。新增模式沿同一入口扩展。
 
+Kafka消息队列系列使用[独立封面模板](../episodes-codex/_shared/kafka-covers/README.md)，以暖炭灰、橙、冰蓝、Kafka标识和稳定MQ编号区分单集。正文与封面共用不可变style-v1；当前制作修订按meta.sourcePath定位。参考资料通过[Kafka配色入口](../episodes-codex/_shared/kafka-video/README.md)接入原题/机构卡，不改写旧引擎或旧冻结。
+
 其他系列封面由当期 `remotion/src/Cover.tsx` 和 `covers.json` 定义。当前 EP.14 的实际入口是：
 
 ```sh

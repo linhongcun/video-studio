@@ -2,17 +2,17 @@
   "meta": {
     "title": "订单已提交，为什么还没处理完？",
     "episode": 10,
-    "episodePart": "消息队列 · 入门",
+    "episodePart": "Kafka MQ01 · 入门",
     "slug": "message-queue",
     "width": 1920,
     "height": 1080,
     "fps": 30,
-    "durationInFrames": 3550,
-    "finalVideoFrames": 3550,
+    "durationInFrames": 3697,
+    "finalVideoFrames": 3697,
     "draft": false,
     "provisionalTiming": false,
     "pendingAudio": false,
-    "timingSource": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
+    "timingSource": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
     "onsetRule": {
       "module": "episodes/_shared/onset_rule.py",
       "checker": "episodes/_shared/label_onset_strict.py",
@@ -21,132 +21,54 @@
         2
       ]
     },
-    "style": "direct-canvas",
-    "visualRevision": 3,
+    "style": "kafka-series-canvas",
+    "visualRevision": 4,
     "visualDirection": "visual-direction.md",
-    "userScope": "将同一EP.10改造为MQ系列入门；保留EP、URL、首发身份，复用合适的视觉和声源。",
+    "userScope": "消息队列系列统一Kafka；同步重制既有MQ01再换封面，保留EP10、URL和首发身份，旧RabbitMQ工程保留。",
     "palette": {
-      "bg": "#0F172A",
-      "text": "#E5E7EB"
+      "background": "#211D1B",
+      "surface": "#302823",
+      "text": "#FFF1E8",
+      "muted": "#C3ADA0",
+      "edge": "#635044",
+      "orange": "#FFAE73",
+      "blue": "#93CCE5",
+      "success": "#90D3AB",
+      "danger": "#F78E82"
     },
-    "sampleDataLabel": "教学示例 · 状态与数值非生产测量",
+    "sampleDataLabel": "教学示例 · 单分区单消费者 · 状态与数值非生产测量",
     "boxShots": [],
     "mapShots": [],
     "devtoolsShots": [],
     "covers": {
-      "title": "订单已提交，为什么还没处理完？",
-      "description": "跟着同一笔订单，走完入队到确认",
+      "schemaVersion": 1,
+      "generator": "episodes-codex/_shared/kafka-covers/render.py",
+      "style": "kafka-covers-v1",
+      "number": "MQ01",
+      "ep": 10,
+      "sourceTitle": "订单已提交，为什么还没处理完？",
       "sizes": {
         "16x9": {
           "width": 1920,
-          "height": 1080,
-          "content": {
-            "x": 130,
-            "w": 1660
-          },
-          "bottom15Y": 918,
-          "watermarkZone": {
-            "x": 1700,
-            "y": 50
-          },
-          "textBoxes": [
-            {
-              "x": 130,
-              "y": 220,
-              "w": 1660,
-              "h": 235
-            },
-            {
-              "x": 130,
-              "y": 500,
-              "w": 1660,
-              "h": 80
-            },
-            {
-              "x": 130,
-              "y": 640,
-              "w": 1660,
-              "h": 170
-            }
-          ]
+          "height": 1080
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440
         },
         "4x3": {
           "width": 1440,
           "height": 1080,
-          "content": {
-            "x": 315,
-            "w": 810
-          },
-          "bottom15Y": 918,
-          "watermarkZone": {
-            "x": 1220,
-            "y": 50
-          },
-          "textBoxes": [
-            {
-              "x": 315,
-              "y": 220,
-              "w": 810,
-              "h": 235
-            },
-            {
-              "x": 315,
-              "y": 500,
-              "w": 810,
-              "h": 80
-            },
-            {
-              "x": 315,
-              "y": 640,
-              "w": 810,
-              "h": 170
-            }
-          ],
           "centerRegion": {
-            "x": 315,
-            "w": 810
-          }
-        },
-        "3x4": {
-          "width": 1080,
-          "height": 1440,
-          "content": {
-            "x": 110,
-            "w": 860
+            "x1": 315,
+            "x2": 1125
           },
-          "bottom15Y": 1224,
-          "watermarkZone": {
-            "x": 860,
-            "y": 50
-          },
-          "textBoxes": [
-            {
-              "x": 110,
-              "y": 250,
-              "w": 860,
-              "h": 260
-            },
-            {
-              "x": 110,
-              "y": 590,
-              "w": 860,
-              "h": 80
-            },
-            {
-              "x": 110,
-              "y": 760,
-              "w": 860,
-              "h": 250
-            }
-          ]
+          "bottom15Y": 918
         }
       },
-      "poster": {
-        "file": "poster.jpg",
-        "sameAs": "3x4"
-      }
+      "binding": "Cover outputs and full generator input SHA are recorded separately in cover-style.json. Body uses immutable style-v1, not the growing episode catalog."
     },
-    "discussionQuestion": "为什么队列已接收任务，还不能把业务显示为完成？",
+    "discussionQuestion": "为什么Kafka返回写入成功以后，还不能把订单显示为处理完成？",
     "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening."
   },
   "assets": {
@@ -160,9 +82,9 @@
     {
       "id": "problem",
       "chapterId": "problem",
-      "title": "先看为什么需要队列",
+      "title": "先看已受理与未完成",
       "from": 0,
-      "durationInFrames": 649,
+      "durationInFrames": 361,
       "shots": [
         {
           "id": "01",
@@ -210,7 +132,7 @@
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
             "wavFrom": 9.0,
             "wavTo": 340.52,
             "holdFrames": 20,
@@ -220,73 +142,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "订单功能页面示意中点击“提交订单”，出现“订单7042 · 已受理”，下方业务处理状态仍未完成。随后把同一7042连接到网站服务与尚未工作的后台位置。",
-          "direction": "订单功能页面示意中点击“提交订单”，出现“订单7042 · 已受理”，下方业务处理状态仍未完成。随后把同一7042连接到网站服务与尚未工作的后台位置。",
-          "elements": [],
-          "animations": [],
-          "transition": {
-            "type": "cut",
-            "durationInFrames": 0
-          }
-        },
-        {
-          "id": "02",
-          "scriptShot": 2,
-          "chapterId": "problem",
-          "visualType": "burst",
-          "from": 361,
-          "durationInFrames": 288,
-          "narration": "再看三笔订单几乎同时到来的情形。后台一次只能处理一笔，让所有页面一直等着，并不合适。",
-          "subtitles": [
-            {
-              "text": "再看三笔订单几乎同时到来的情形。",
-              "from": 0,
-              "to": 114,
-              "duration": 115
-            },
-            {
-              "text": "后台一次只能处理一笔，让所有页面一直等着，并不合适。",
-              "from": 115,
-              "to": 287,
-              "duration": 173
-            }
-          ],
-          "voice": [
-            {
-              "id": "02-burst-1",
-              "wavStart": 361.52,
-              "wavEnd": 465.74,
-              "localStart": 0.5199999999999818,
-              "localEnd": 104.74000000000001
-            },
-            {
-              "id": "02-burst-2",
-              "wavStart": 476.24,
-              "wavEnd": 628.53,
-              "localStart": 115.24000000000001,
-              "localEnd": 267.53
-            }
-          ],
-          "cueFrames": {
-            "labels": {},
-            "sentences": [
-              0,
-              115
-            ]
-          },
-          "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 361.52,
-            "wavTo": 628.53,
-            "holdFrames": 20,
-            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
-          },
-          "frame": "canvas",
-          "camera": null,
-          "boxShot": false,
-          "mapShot": false,
-          "scriptVisual": "明确回看本次提交前后的一小段高峰；7042、7043、7044依次出现，后台示例一次只能处理一笔，其余等待。保留7042身份，尚未执行或丢弃任务。",
-          "direction": "明确回看本次提交前后的一小段高峰；7042、7043、7044依次出现，后台示例一次只能处理一笔，其余等待。保留7042身份，尚未执行或丢弃任务。",
+          "scriptVisual": "订单功能交互示意中点击提交订单，订单7042由可提交变为已受理，业务处理状态仍是待处理；同一订单身份连接到网站服务，后台不亮完成。",
+          "direction": "订单功能交互示意中点击提交订单，订单7042由可提交变为已受理，业务处理状态仍是待处理；同一订单身份连接到网站服务，后台不亮完成。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -299,86 +156,86 @@
     {
       "id": "enqueue",
       "chapterId": "enqueue",
-      "title": "先入队，再返回已提交",
-      "from": 649,
-      "durationInFrames": 678,
+      "title": "Kafka怎样接住任务",
+      "from": 361,
+      "durationInFrames": 850,
       "shots": [
         {
-          "id": "03",
-          "scriptShot": 3,
+          "id": "02",
+          "scriptShot": 2,
           "chapterId": "enqueue",
           "visualType": "roles",
-          "from": 649,
-          "durationInFrames": 354,
-          "narration": "消息队列，先接住网站服务写入的处理任务。写入任务的网站服务叫生产者，接收任务的后台叫消费者。",
+          "from": 361,
+          "durationInFrames": 278,
+          "narration": "回看刚才的提交，写消息的网站服务是生产者。Kafka接住消息，后台消费者稍后读取并处理。",
           "subtitles": [
             {
-              "text": "消息队列，先接住网站服务写入的处理任务。",
+              "text": "回看刚才的提交，写消息的网站服务是生产者。",
               "from": 0,
-              "to": 121,
-              "duration": 122
+              "to": 141,
+              "duration": 142
             },
             {
-              "text": "写入任务的网站服务叫生产者，接收任务的后台叫消费者。",
-              "from": 122,
-              "to": 353,
-              "duration": 232
+              "text": "Kafka接住消息，后台消费者稍后读取并处理。",
+              "from": 142,
+              "to": 277,
+              "duration": 136
             }
           ],
           "voice": [
             {
-              "id": "03-roles-1",
-              "wavStart": 649.53,
-              "wavEnd": 760.6,
-              "localStart": 0.5299999999999727,
-              "localEnd": 111.60000000000002
+              "id": "02-roles-1",
+              "wavStart": 361.52,
+              "wavEnd": 493.03,
+              "localStart": 0.5199999999999818,
+              "localEnd": 132.02999999999997
             },
             {
-              "id": "03-roles-2",
-              "wavStart": 771.1,
-              "wavEnd": 931.77,
-              "localStart": 122.10000000000002,
-              "localEnd": 282.77
+              "id": "02-roles-2",
+              "wavStart": 503.53,
+              "wavEnd": 618.4,
+              "localStart": 142.52999999999997,
+              "localEnd": 257.4
             }
           ],
           "cueFrames": {
             "labels": {
-              "消息队列": 1
+              "Kafka": 141
             },
             "sentences": [
               0,
-              122
+              142
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 649.53,
-            "wavTo": 931.77,
-            "holdFrames": 71,
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 361.52,
+            "wavTo": 618.4,
+            "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
           "frame": "canvas",
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "由订单操作展开“网站服务→RabbitMQ队列→后台处理”三个角色。网站服务把同一7042任务写入队列，再依次写入7043、7044；对应动作发生后才出现生产者、消费者称呼，后台尚未取走7042。",
-          "direction": "由订单操作展开“网站服务→RabbitMQ队列→后台处理”三个角色。网站服务把同一7042任务写入队列，再依次写入7043、7044；对应动作发生后才出现生产者、消费者称呼，后台尚未取走7042。",
+          "scriptVisual": "先明示“回看刚才的提交过程”，从01已受理的功能场景回看此前接力，展开网站服务→Kafka主题order-tasks的单个分区→后台程序，先示职责连线；记录7042留在生产者，消费者未读取。Kafka技术标签只在第二句真实句首后引入；回看提示持续至04回到已受理，产品标识不替代角色，不套浏览器壳。",
+          "direction": "先明示“回看刚才的提交过程”，从01已受理的功能场景回看此前接力，展开网站服务→Kafka主题order-tasks的单个分区→后台程序，先示职责连线；记录7042留在生产者，消费者未读取。Kafka技术标签只在第二句真实句首后引入；回看提示持续至04回到已受理，产品标识不替代角色，不套浏览器壳。",
           "elements": [
             {
-              "id": "label03_0",
+              "id": "label02_0",
               "type": "text",
-              "text": "消息队列",
-              "cueText": "消息队列",
-              "appearFrame": 1,
+              "text": "Kafka",
+              "cueText": "Kafka",
+              "appearFrame": 141,
               "x": 130,
               "y": 165,
               "w": 1100,
               "h": 80,
               "fontSize": 52,
               "cueOnset": {
-                "sentence": "03-roles-1",
+                "sentence": "02-roles-2",
                 "asrFrame": null,
-                "onsetLocal": 1.5299999999999727,
+                "onsetLocal": 143.52999999999997,
                 "rule": "pause/acoustic sentence onset",
                 "delay": 0
               }
@@ -391,63 +248,128 @@
           }
         },
         {
-          "id": "04",
-          "scriptShot": 4,
+          "id": "03",
+          "scriptShot": 3,
           "chapterId": "enqueue",
-          "visualType": "accepted",
-          "from": 1003,
-          "durationInFrames": 324,
-          "narration": "本例先等队列确认任务已保存，再由网站服务回复页面已受理。这个回复只表示任务已接住，不代表业务已经完成。",
+          "visualType": "append",
+          "from": 639,
+          "durationInFrames": 261,
+          "narration": "先看同一分区，七零四二追加在零号位置。后来的两条继续追加，不会覆盖前面的记录。",
           "subtitles": [
             {
-              "text": "本例先等队列确认任务已保存，再由网站服务回复页面已受理。",
+              "text": "先看同一分区，七零四二追加在零号位置。",
               "from": 0,
-              "to": 161,
-              "duration": 162
+              "to": 122,
+              "duration": 123
             },
             {
-              "text": "这个回复只表示任务已接住，不代表业务已经完成。",
-              "from": 162,
-              "to": 323,
-              "duration": 162
+              "text": "后来的两条继续追加，不会覆盖前面的记录。",
+              "from": 123,
+              "to": 260,
+              "duration": 138
             }
           ],
           "voice": [
             {
-              "id": "04-accepted-1",
-              "wavStart": 1003.77,
-              "wavEnd": 1155.16,
-              "localStart": 0.7699999999999818,
-              "localEnd": 152.16000000000008
+              "id": "03-append-1",
+              "wavStart": 639.4,
+              "wavEnd": 751.65,
+              "localStart": 0.39999999999997726,
+              "localEnd": 112.64999999999998
             },
             {
-              "id": "04-accepted-2",
-              "wavStart": 1165.66,
-              "wavEnd": 1306.0,
-              "localStart": 162.66000000000008,
-              "localEnd": 303.0
+              "id": "03-append-2",
+              "wavStart": 762.15,
+              "wavEnd": 879.15,
+              "localStart": 123.14999999999998,
+              "localEnd": 240.14999999999998
             }
           ],
           "cueFrames": {
             "labels": {},
             "sentences": [
               0,
-              162
+              123
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 1003.77,
-            "wavTo": 1306.0,
-            "holdFrames": 21,
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 639.4,
+            "wavTo": 879.15,
+            "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
           "frame": "canvas",
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "7042已进入目标队列并保存；Broker保存确认回到网站服务后，网站服务再回复页面“已受理”。消费者仍未接收7042，页面完成状态仍不亮。",
-          "direction": "7042已进入目标队列并保存；Broker保存确认回到网站服务后，网站服务再回复页面“已受理”。消费者仍未接收7042，页面完成状态仍不亮。",
+          "scriptVisual": "同一分区日志从空白开始，将7042追加到offset0，再把7043和7044追加到offset1/2；已落位的记录稳定保留，不模拟出队、不覆盖原记录。订单号与offset分行标明身份和位置。",
+          "direction": "同一分区日志从空白开始，将7042追加到offset0，再把7043和7044追加到offset1/2；已落位的记录稳定保留，不模拟出队、不覆盖原记录。订单号与offset分行标明身份和位置。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "enqueue",
+          "visualType": "accepted",
+          "from": 900,
+          "durationInFrames": 311,
+          "narration": "网站服务等到Kafka返回写入成功，再回复页面已受理。这个成功只确认写入，不表示后台业务已经完成。",
+          "subtitles": [
+            {
+              "text": "网站服务等到Kafka返回写入成功，再回复页面已受理。",
+              "from": 0,
+              "to": 153,
+              "duration": 154
+            },
+            {
+              "text": "这个成功只确认写入，不表示后台业务已经完成。",
+              "from": 154,
+              "to": 310,
+              "duration": 157
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-accepted-1",
+              "wavStart": 900.15,
+              "wavEnd": 1043.72,
+              "localStart": 0.14999999999997726,
+              "localEnd": 143.72000000000003
+            },
+            {
+              "id": "04-accepted-2",
+              "wavStart": 1054.22,
+              "wavEnd": 1190.58,
+              "localStart": 154.22000000000003,
+              "localEnd": 290.5799999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              154
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 900.15,
+            "wavTo": 1190.58,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保持7042已追加和写入成功前提，Kafka回执到达网站服务后，网站服务再回复页面已受理；消费者尚未读取，后台仍未完成。写入确认路径不连业务结果。",
+          "direction": "保持7042已追加和写入成功前提，Kafka回执到达网站服务后，网站服务再回复页面已受理；消费者尚未读取，后台仍未完成。写入确认路径不连业务结果。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -460,59 +382,59 @@
     {
       "id": "process",
       "chapterId": "process",
-      "title": "后台恢复后，任务走到完成",
-      "from": 1327,
-      "durationInFrames": 1280,
+      "title": "消费者怎样走到完成",
+      "from": 1211,
+      "durationInFrames": 1760,
       "shots": [
         {
           "id": "05",
           "scriptShot": 5,
           "chapterId": "process",
           "visualType": "pause",
-          "from": 1327,
-          "durationInFrames": 271,
-          "narration": "现在让消费者暂停，而且还没取走七零四二。消息继续留在队列中等待，页面仍是已受理。",
+          "from": 1211,
+          "durationInFrames": 264,
+          "narration": "现在暂停消费者取数，七零四二还没有开始处理。记录仍然留在日志里，页面也仍然只是已受理。",
           "subtitles": [
             {
-              "text": "现在让消费者暂停，而且还没取走七零四二。",
+              "text": "现在暂停消费者取数，七零四二还没有开始处理。",
               "from": 0,
-              "to": 119,
-              "duration": 120
+              "to": 128,
+              "duration": 129
             },
             {
-              "text": "消息继续留在队列中等待，页面仍是已受理。",
-              "from": 120,
-              "to": 270,
-              "duration": 151
+              "text": "记录仍然留在日志里，页面也仍然只是已受理。",
+              "from": 129,
+              "to": 263,
+              "duration": 135
             }
           ],
           "voice": [
             {
               "id": "05-pause-1",
-              "wavStart": 1327.0,
-              "wavEnd": 1436.67,
-              "localStart": 0.0,
-              "localEnd": 109.67000000000007
+              "wavStart": 1211.58,
+              "wavEnd": 1329.9,
+              "localStart": 0.5799999999999272,
+              "localEnd": 118.90000000000009
             },
             {
               "id": "05-pause-2",
-              "wavStart": 1447.17,
-              "wavEnd": 1577.96,
-              "localStart": 120.17000000000007,
-              "localEnd": 250.96000000000004
+              "wavStart": 1340.4,
+              "wavEnd": 1454.98,
+              "localStart": 129.4000000000001,
+              "localEnd": 243.98000000000002
             }
           ],
           "cueFrames": {
             "labels": {},
             "sentences": [
               0,
-              120
+              129
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 1327.0,
-            "wavTo": 1577.96,
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 1211.58,
+            "wavTo": 1454.98,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -520,8 +442,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "在7042尚未从队列交给消费者的同一时点暂停消费者。待处理7042/7043/7044保持原位置与身份，出队路径停下；页面仍为“已受理 · 待处理”。暂停标记落在消费者，队列仍在线。",
-          "direction": "在7042尚未从队列交给消费者的同一时点暂停消费者。待处理7042/7043/7044保持原位置与身份，出队路径停下；页面仍为“已受理 · 待处理”。暂停标记落在消费者，队列仍在线。",
+          "scriptVisual": "同一分区0/1/2保持；在尚未读取7042时暂停取数，本例读取起点设为0且尚未提交恢复位点，消费者停留，日志已保留记录；页面已受理而业务未完成。这里不演示成员故障或重新分配。",
+          "direction": "同一分区0/1/2保持；在尚未读取7042时暂停取数，本例读取起点设为0且尚未提交恢复位点，消费者停留，日志已保留记录；页面已受理而业务未完成。这里不演示成员故障或重新分配。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -533,51 +455,51 @@
           "id": "06",
           "scriptShot": 6,
           "chapterId": "process",
-          "visualType": "resume",
-          "from": 1598,
-          "durationInFrames": 246,
-          "narration": "消费者恢复后，再接收同一笔任务来处理。看，七零四二开始处理，其他任务仍然等待。",
+          "visualType": "read",
+          "from": 1475,
+          "durationInFrames": 284,
+          "narration": "消费者恢复后，读取同一笔七零四二来处理。读取不会把记录从日志里拿走，也不代表业务已经成功。",
           "subtitles": [
             {
-              "text": "消费者恢复后，再接收同一笔任务来处理。",
+              "text": "消费者恢复后，读取同一笔七零四二来处理。",
               "from": 0,
-              "to": 116,
-              "duration": 117
+              "to": 128,
+              "duration": 129
             },
             {
-              "text": "看，七零四二开始处理，其他任务仍然等待。",
-              "from": 117,
-              "to": 245,
-              "duration": 129
+              "text": "读取不会把记录从日志里拿走，也不代表业务已经成功。",
+              "from": 129,
+              "to": 283,
+              "duration": 155
             }
           ],
           "voice": [
             {
-              "id": "06-resume-1",
-              "wavStart": 1598.96,
-              "wavEnd": 1704.71,
-              "localStart": 0.9600000000000364,
-              "localEnd": 106.71000000000004
+              "id": "06-read-1",
+              "wavStart": 1475.98,
+              "wavEnd": 1594.03,
+              "localStart": 0.9800000000000182,
+              "localEnd": 119.02999999999997
             },
             {
-              "id": "06-resume-2",
-              "wavStart": 1715.21,
-              "wavEnd": 1823.3,
-              "localStart": 117.21000000000004,
-              "localEnd": 225.29999999999995
+              "id": "06-read-2",
+              "wavStart": 1604.53,
+              "wavEnd": 1738.85,
+              "localStart": 129.52999999999997,
+              "localEnd": 263.8499999999999
             }
           ],
           "cueFrames": {
             "labels": {},
             "sentences": [
               0,
-              117
+              129
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 1598.96,
-            "wavTo": 1823.3,
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 1475.98,
+            "wavTo": 1738.85,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -585,8 +507,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "消费者恢复，沿原路径接收队列里的同一7042；任务落到处理区后才显示“处理中”，队列侧另显示本次投递待确认。7043/7044仍待处理，不把镜头切换当成另下一单。",
-          "direction": "消费者恢复，沿原路径接收队列里的同一7042；任务落到处理区后才显示“处理中”，队列侧另显示本次投递待确认。7043/7044仍待处理，不把镜头切换当成另下一单。",
+          "scriptVisual": "恢复取数，offset0的7042读出到消费者处理区；日志中的原记录始终保留，只高亮其已读身份。读出的处理副本不算第二份待执行任务，尚未提交恢复位点，不把读取位置当成已提交位置。",
+          "direction": "恢复取数，offset0的7042读出到消费者处理区；日志中的原记录始终保留，只高亮其已读身份。读出的处理副本不算第二份待执行任务，尚未提交恢复位点，不把读取位置当成已提交位置。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -599,50 +521,50 @@
           "scriptShot": 7,
           "chapterId": "process",
           "visualType": "work",
-          "from": 1844,
-          "durationInFrames": 250,
-          "narration": "后台按自己的处理能力，完成这笔订单的工作。任务已经送出，也不能立刻当成处理成功。",
+          "from": 1759,
+          "durationInFrames": 287,
+          "narration": "接下来，后台执行订单的工作，并成功保存业务结果。到这时，业务才完成，页面还没有查询新结果。",
           "subtitles": [
             {
-              "text": "后台按自己的处理能力，完成这笔订单的工作。",
+              "text": "接下来，后台执行订单的工作，并成功保存业务结果。",
               "from": 0,
-              "to": 123,
-              "duration": 124
+              "to": 152,
+              "duration": 153
             },
             {
-              "text": "任务已经送出，也不能立刻当成处理成功。",
-              "from": 124,
-              "to": 249,
-              "duration": 126
+              "text": "到这时，业务才完成，页面还没有查询新结果。",
+              "from": 153,
+              "to": 286,
+              "duration": 134
             }
           ],
           "voice": [
             {
               "id": "07-work-1",
-              "wavStart": 1844.3,
-              "wavEnd": 1958.17,
-              "localStart": 0.2999999999999545,
-              "localEnd": 114.17000000000007
+              "wavStart": 1759.85,
+              "wavEnd": 1902.01,
+              "localStart": 0.849999999999909,
+              "localEnd": 143.01
             },
             {
               "id": "07-work-2",
-              "wavStart": 1968.67,
-              "wavEnd": 2073.41,
-              "localStart": 124.67000000000007,
-              "localEnd": 229.40999999999985
+              "wavStart": 1912.51,
+              "wavEnd": 2025.58,
+              "localStart": 153.51,
+              "localEnd": 266.5799999999999
             }
           ],
           "cueFrames": {
             "labels": {},
             "sentences": [
               0,
-              124
+              153
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 1844.3,
-            "wavTo": 2073.41,
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 1759.85,
+            "wavTo": 2025.58,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -650,8 +572,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "7042的真实教学工作进度推进，页面尚未显示完成；队列只保留投递待确认的状态参照，不生成第二份可再次执行的7042。进度完成时业务结果成功保存，为08的确认提供前提。",
-          "direction": "7042的真实教学工作进度推进，页面尚未显示完成；队列只保留投递待确认的状态参照，不生成第二份可再次执行的7042。进度完成时业务结果成功保存，为08的确认提供前提。",
+          "scriptVisual": "同一7042的业务进度从开始推进，完成时业务结果记录由未完成变为成功保存；日志原记录稳定保留，尚未提交恢复位点；页面尚未查询新结果。",
+          "direction": "同一7042的业务进度从开始推进，完成时业务结果记录由未完成变为成功保存；日志原记录稳定保留，尚未提交恢复位点；页面尚未查询新结果。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -663,53 +585,53 @@
           "id": "08",
           "scriptShot": 8,
           "chapterId": "process",
-          "visualType": "ack",
-          "from": 2094,
-          "durationInFrames": 233,
-          "narration": "处理确认，要等业务真正成功后再发送。队列收到确认，才把这次投递视为完成。",
+          "visualType": "commit",
+          "from": 2046,
+          "durationInFrames": 285,
+          "narration": "消费位点，记录恢复时从哪里继续。本例关闭自动提交，零号记录成功处理后，才提交下一位置一。",
           "subtitles": [
             {
-              "text": "处理确认，要等业务真正成功后再发送。",
+              "text": "消费位点，记录恢复时从哪里继续。",
               "from": 0,
-              "to": 107,
-              "duration": 108
+              "to": 110,
+              "duration": 111
             },
             {
-              "text": "队列收到确认，才把这次投递视为完成。",
-              "from": 108,
-              "to": 232,
-              "duration": 125
+              "text": "本例关闭自动提交，零号记录成功处理后，才提交下一位置一。",
+              "from": 111,
+              "to": 284,
+              "duration": 174
             }
           ],
           "voice": [
             {
-              "id": "08-ack-1",
-              "wavStart": 2094.41,
-              "wavEnd": 2191.8,
-              "localStart": 0.4099999999998545,
-              "localEnd": 97.80000000000018
+              "id": "08-commit-1",
+              "wavStart": 2046.58,
+              "wavEnd": 2147.37,
+              "localStart": 0.5799999999999272,
+              "localEnd": 101.36999999999989
             },
             {
-              "id": "08-ack-2",
-              "wavStart": 2202.3,
-              "wavEnd": 2306.03,
-              "localStart": 108.30000000000018,
-              "localEnd": 212.0300000000002
+              "id": "08-commit-2",
+              "wavStart": 2157.87,
+              "wavEnd": 2310.52,
+              "localStart": 111.86999999999989,
+              "localEnd": 264.52
             }
           ],
           "cueFrames": {
             "labels": {
-              "处理确认": 1
+              "消费位点": 1
             },
             "sentences": [
               0,
-              108
+              111
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 2094.41,
-            "wavTo": 2306.03,
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 2046.58,
+            "wavTo": 2310.52,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -717,14 +639,14 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "保持业务结果已保存成功，消费者发出手动ACK；信号抵达队列后，7042的待确认状态才移除。本镜不把确认线延伸到页面，也不删除已保存业务结果。",
-          "direction": "保持业务结果已保存成功，消费者发出手动ACK；信号抵达队列后，7042的待确认状态才移除。本镜不把确认线延伸到页面，也不删除已保存业务结果。",
+          "scriptVisual": "先明确关闭自动提交，保持offset0的7042业务成功，然后消费位点提交信号到达Kafka，已提交恢复标记由“尚未提交”变为1；订单7043在offset1，7042原日志记录和应用业务结果均不删除。",
+          "direction": "先明确关闭自动提交，保持offset0的7042业务成功，然后消费位点提交信号到达Kafka，已提交恢复标记由“尚未提交”变为1；订单7043在offset1，7042原日志记录和应用业务结果均不删除。",
           "elements": [
             {
               "id": "label08_0",
               "type": "text",
-              "text": "处理确认",
-              "cueText": "处理确认",
+              "text": "消费位点",
+              "cueText": "消费位点",
               "appearFrame": 1,
               "x": 130,
               "y": 165,
@@ -732,9 +654,9 @@
               "h": 80,
               "fontSize": 52,
               "cueOnset": {
-                "sentence": "08-ack-1",
+                "sentence": "08-commit-1",
                 "asrFrame": null,
-                "onsetLocal": 1.4099999999998545,
+                "onsetLocal": 1.8299999999999272,
                 "rule": "pause/acoustic sentence onset",
                 "delay": 0
               }
@@ -750,51 +672,51 @@
           "id": "09",
           "scriptShot": 9,
           "chapterId": "process",
-          "visualType": "result",
-          "from": 2327,
-          "durationInFrames": 280,
-          "narration": "页面要通过网站服务，查询这笔订单的业务结果。查到七零四二已处理成功后，才更新为处理完成。",
+          "visualType": "retain",
+          "from": 2331,
+          "durationInFrames": 314,
+          "narration": "这个进度不会把零号记录删掉，它仍按保留策略留在日志里。这一条已经处理完，记录仍在，两者可以同时成立。",
           "subtitles": [
             {
-              "text": "页面要通过网站服务，查询这笔订单的业务结果。",
+              "text": "这个进度不会把零号记录删掉，它仍按保留策略留在日志里。",
               "from": 0,
-              "to": 127,
-              "duration": 128
+              "to": 151,
+              "duration": 152
             },
             {
-              "text": "查到七零四二已处理成功后，才更新为处理完成。",
-              "from": 128,
-              "to": 279,
-              "duration": 152
+              "text": "这一条已经处理完，记录仍在，两者可以同时成立。",
+              "from": 152,
+              "to": 313,
+              "duration": 162
             }
           ],
           "voice": [
             {
-              "id": "09-result-1",
-              "wavStart": 2327.03,
-              "wavEnd": 2445.29,
-              "localStart": 0.03000000000020009,
-              "localEnd": 118.28999999999996
+              "id": "09-retain-1",
+              "wavStart": 2331.52,
+              "wavEnd": 2473.12,
+              "localStart": 0.5199999999999818,
+              "localEnd": 142.1199999999999
             },
             {
-              "id": "09-result-2",
-              "wavStart": 2455.79,
-              "wavEnd": 2586.62,
-              "localStart": 128.78999999999996,
-              "localEnd": 259.6199999999999
+              "id": "09-retain-2",
+              "wavStart": 2483.62,
+              "wavEnd": 2624.95,
+              "localStart": 152.6199999999999,
+              "localEnd": 293.9499999999998
             }
           ],
           "cueFrames": {
             "labels": {},
             "sentences": [
               0,
-              128
+              152
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 2327.03,
-            "wavTo": 2586.62,
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 2331.52,
+            "wavTo": 2624.95,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -802,8 +724,73 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "缩回同一订单功能页面。页面向网站服务查询7042状态，服务读取07已保存的业务结果后返回成功，页面才从“已受理”更新为“处理完成”。与08的Broker确认路径保持空间区别。",
-          "direction": "缩回同一订单功能页面。页面向网站服务查询7042状态，服务读取07已保存的业务结果后返回成功，页面才从“已受理”更新为“处理完成”。与08的Broker确认路径保持空间区别。",
+          "scriptVisual": "保持已提交恢复位点1、业务结果成功、offset0的7042仍在；用保留范围括号标出日志保留由topic策略控制，不能表现commit删记录；不在同一镜删除记录或推导无限留存。",
+          "direction": "保持已提交恢复位点1、业务结果成功、offset0的7042仍在；用保留范围括号标出日志保留由topic策略控制，不能表现commit删记录；不在同一镜删除记录或推导无限留存。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "process",
+          "visualType": "result",
+          "from": 2645,
+          "durationInFrames": 326,
+          "narration": "回到页面，它通过网站服务查询这笔订单的业务结果。查到处理成功后，页面才更新为完成，不靠消费位点直接通知。",
+          "subtitles": [
+            {
+              "text": "回到页面，它通过网站服务查询这笔订单的业务结果。",
+              "from": 0,
+              "to": 142,
+              "duration": 143
+            },
+            {
+              "text": "查到处理成功后，页面才更新为完成，不靠消费位点直接通知。",
+              "from": 143,
+              "to": 325,
+              "duration": 183
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-result-1",
+              "wavStart": 2645.95,
+              "wavEnd": 2777.85,
+              "localStart": 0.9499999999998181,
+              "localEnd": 132.8499999999999
+            },
+            {
+              "id": "10-result-2",
+              "wavStart": 2788.35,
+              "wavEnd": 2950.63,
+              "localStart": 143.3499999999999,
+              "localEnd": 305.6300000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              143
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 2645.95,
+            "wavTo": 2950.63,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "缩回原订单功能页面，页面发查询到网站服务，服务读取07已成功保存的业务结果并返回成功；页面才由已受理更新完成。已提交位点保持独立，不向页面连假通知线。",
+          "direction": "缩回原订单功能页面，页面发查询到网站服务，服务读取07已成功保存的业务结果并返回成功；页面才由已受理更新完成。已提交位点保持独立，不向页面连假通知线。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -817,123 +804,58 @@
       "id": "boundary",
       "chapterId": "boundary",
       "title": "缓冲的用途与代价",
-      "from": 2607,
-      "durationInFrames": 943,
+      "from": 2971,
+      "durationInFrames": 726,
       "shots": [
-        {
-          "id": "10",
-          "scriptShot": 10,
-          "chapterId": "boundary",
-          "visualType": "drain",
-          "from": 2607,
-          "durationInFrames": 295,
-          "narration": "队列能把短时间集中到来的任务，摊开处理。这波集中输入停止后，后台继续处理，队列便逐步排空。",
-          "subtitles": [
-            {
-              "text": "队列能把短时间集中到来的任务，摊开处理。",
-              "from": 0,
-              "to": 117,
-              "duration": 118
-            },
-            {
-              "text": "这波集中输入停止后，后台继续处理，队列便逐步排空。",
-              "from": 118,
-              "to": 294,
-              "duration": 177
-            }
-          ],
-          "voice": [
-            {
-              "id": "10-drain-1",
-              "wavStart": 2607.62,
-              "wavEnd": 2715.11,
-              "localStart": 0.6199999999998909,
-              "localEnd": 108.11000000000013
-            },
-            {
-              "id": "10-drain-2",
-              "wavStart": 2725.61,
-              "wavEnd": 2881.28,
-              "localStart": 118.61000000000013,
-              "localEnd": 274.2800000000002
-            }
-          ],
-          "cueFrames": {
-            "labels": {},
-            "sentences": [
-              0,
-              118
-            ]
-          },
-          "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 2607.62,
-            "wavTo": 2881.28,
-            "holdFrames": 20,
-            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
-          },
-          "frame": "canvas",
-          "camera": null,
-          "boxShot": false,
-          "mapShot": false,
-          "scriptVisual": "承接7042已完成的主流程，说明接下来观察剩余队列。停止这波集中输入，消费者按相同速度继续处理7043、7044，待处理数量依次减少直至排空；任务完成后才减少计数。",
-          "direction": "承接7042已完成的主流程，说明接下来观察剩余队列。停止这波集中输入，消费者按相同速度继续处理7043、7044，待处理数量依次减少直至排空；任务完成后才减少计数。",
-          "elements": [],
-          "animations": [],
-          "transition": {
-            "type": "cut",
-            "durationInFrames": 0
-          }
-        },
         {
           "id": "11",
           "scriptShot": 11,
           "chapterId": "boundary",
-          "visualType": "growth",
-          "from": 2902,
-          "durationInFrames": 327,
-          "narration": "换成长时间高峰，示例每秒进入两条，只完成一条。待处理就会每秒多一条，队列没有让后台变快。",
+          "visualType": "buffer",
+          "from": 2971,
+          "durationInFrames": 374,
+          "narration": "最后看缓冲的代价，短时高峰停止后，未完成任务可以慢慢减少。换成持续输入快于完成，积压就会增长，Kafka并没有让后台变快。",
           "subtitles": [
             {
-              "text": "换成长时间高峰，示例每秒进入两条，只完成一条。",
+              "text": "最后看缓冲的代价，短时高峰停止后，未完成任务可以慢慢减少。",
               "from": 0,
-              "to": 162,
-              "duration": 163
+              "to": 181,
+              "duration": 182
             },
             {
-              "text": "待处理就会每秒多一条，队列没有让后台变快。",
-              "from": 163,
-              "to": 326,
-              "duration": 164
+              "text": "换成持续输入快于完成，积压就会增长，Kafka并没有让后台变快。",
+              "from": 182,
+              "to": 373,
+              "duration": 192
             }
           ],
           "voice": [
             {
-              "id": "11-growth-1",
-              "wavStart": 2902.28,
-              "wavEnd": 3055.08,
-              "localStart": 0.2800000000002001,
-              "localEnd": 153.07999999999993
+              "id": "11-buffer-1",
+              "wavStart": 2971.63,
+              "wavEnd": 3142.92,
+              "localStart": 0.6300000000001091,
+              "localEnd": 171.92000000000007
             },
             {
-              "id": "11-growth-2",
-              "wavStart": 3065.58,
-              "wavEnd": 3208.34,
-              "localStart": 163.57999999999993,
-              "localEnd": 306.34000000000015
+              "id": "11-buffer-2",
+              "wavStart": 3153.42,
+              "wavEnd": 3324.19,
+              "localStart": 182.42000000000007,
+              "localEnd": 353.19000000000005
             }
           ],
           "cueFrames": {
             "labels": {},
             "sentences": [
               0,
-              163
+              182
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 2902.28,
-            "wavTo": 3208.34,
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 2971.63,
+            "wavTo": 3324.19,
             "holdFrames": 20,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -941,8 +863,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "先给“改看持续输入 · 独立流量示例”的重置提示，再保持相同角色和空间。以每个完整1秒窗进入2条、业务完成1条，展示累计进入、累计完成与未完成数；后者每窗净增1，不能只画条形装饰。",
-          "direction": "先给“改看持续输入 · 独立流量示例”的重置提示，再保持相同角色和空间。以每个完整1秒窗进入2条、业务完成1条，展示累计进入、累计完成与未完成数；后者每窗净增1，不能只画条形装饰。",
+          "scriptVisual": "明确切换短时流量示例：新增写入停止，后台继续完成7043/7044，未完成数2→1→0；日志三条仍保留。第二句先显示独立持续流量示例重置，再用每个完整1秒窗进入2条、业务完成1条，累计未完成每窗净增1；不以日志条数作积压。",
+          "direction": "明确切换短时流量示例：新增写入停止，后台继续完成7043/7044，未完成数2→1→0；日志三条仍保留。第二句先显示独立持续流量示例重置，再用每个完整1秒窗进入2条、业务完成1条，累计未完成每窗净增1；不以日志条数作积压。",
           "elements": [],
           "animations": [],
           "transition": {
@@ -955,50 +877,50 @@
           "scriptShot": 12,
           "chapterId": "boundary",
           "visualType": "recap",
-          "from": 3229,
-          "durationInFrames": 321,
-          "narration": "所以，已受理和处理完成，是两个不同的状态。队列能缓冲短时高峰，却不能增加后台能力，也不能无限积压。",
+          "from": 3345,
+          "durationInFrames": 352,
+          "narration": "所以，写入成功、业务完成和消费进度，是不同的状态。Kafka按策略保留记录，不能无限积压，也不能替业务完成工作。",
           "subtitles": [
             {
-              "text": "所以，已受理和处理完成，是两个不同的状态。",
+              "text": "所以，写入成功、业务完成和消费进度，是不同的状态。",
               "from": 0,
-              "to": 139,
-              "duration": 140
+              "to": 173,
+              "duration": 174
             },
             {
-              "text": "队列能缓冲短时高峰，却不能增加后台能力，也不能无限积压。",
-              "from": 140,
-              "to": 320,
-              "duration": 181
+              "text": "Kafka按策略保留记录，不能无限积压，也不能替业务完成工作。",
+              "from": 174,
+              "to": 351,
+              "duration": 178
             }
           ],
           "voice": [
             {
               "id": "12-recap-1",
-              "wavStart": 3229.34,
-              "wavEnd": 3359.32,
-              "localStart": 0.3400000000001455,
-              "localEnd": 130.32000000000016
+              "wavStart": 3345.19,
+              "wavEnd": 3508.66,
+              "localStart": 0.19000000000005457,
+              "localEnd": 163.65999999999985
             },
             {
               "id": "12-recap-2",
-              "wavStart": 3369.82,
-              "wavEnd": 3510.54,
-              "localStart": 140.82000000000016,
-              "localEnd": 281.53999999999996
+              "wavStart": 3519.16,
+              "wavEnd": 3657.14,
+              "localStart": 174.15999999999985,
+              "localEnd": 312.1399999999999
             }
           ],
           "cueFrames": {
             "labels": {},
             "sentences": [
               0,
-              140
+              174
             ]
           },
           "timing": {
-            "source": "voice.wav 7b021268 + words.json 49620afe + script.md d94fc80a",
-            "wavFrom": 3229.34,
-            "wavTo": 3510.54,
+            "source": "voice.wav 279e539a + words.json 22cd6f34 + script.md ca00a80f",
+            "wavFrom": 3345.19,
+            "wavTo": 3657.14,
             "holdFrames": 39,
             "holdReason": "Natural sentence pauses; minimum shot 7.5s."
           },
@@ -1006,8 +928,8 @@
           "camera": null,
           "boxShot": false,
           "mapShot": false,
-          "scriptVisual": "回到主流程与同一订单7042的完成结果，依次回收“已受理”“后台处理”“业务结果已完成”。再并列回看短时输入停止后的排空与持续净流入造成增长，只保留已解释的两种趋势；队列边界提示“容量有限／等待增加”。",
-          "direction": "回到主流程与同一订单7042的完成结果，依次回收“已受理”“后台处理”“业务结果已完成”。再并列回看短时输入停止后的排空与持续净流入造成增长，只保留已解释的两种趋势；队列边界提示“容量有限／等待增加”。",
+          "scriptVisual": "明确显示“回看主例完成时”，用7042的时点总结卡顺次回收写入回执、业务结果成功、已提交恢复位点1和页面查询完成；日志记录保留；这是主例回顾，不把11之后的实时进度退回1。结尾保留写入成功≠业务完成、有限保留与处理能力边界，不加重投、幂等、ExactlyOnce或多副本支线。",
+          "direction": "明确显示“回看主例完成时”，用7042的时点总结卡顺次回收写入回执、业务结果成功、已提交恢复位点1和页面查询完成；日志记录保留；这是主例回顾，不把11之后的实时进度退回1。结尾保留写入成功≠业务完成、有限保留与处理能力边界，不加重投、幂等、ExactlyOnce或多副本支线。",
           "elements": [],
           "animations": [],
           "transition": {

@@ -1,0 +1,29 @@
+--- /workspace/work/kafka-animation/Main-before-timing.tsx	2026-10-28 05:05:10.889560937 +0000
++++ episodes-codex/message-queue/revisions/kafka-intro/message-queue/remotion/src/Main.tsx	2026-10-28 05:05:10.907415928 +0000
+@@ -50,8 +50,8 @@
+  const early=(a=firstStart+12,b=firstEnd-8)=>tween(f,a,Math.max(a+25,b));
+  const late=(a=secondStart+12,b=secondEnd-10)=>tween(f,a,Math.max(a+25,b));
+  if(n===1){
+-  const click=early(firstStart+12,Math.max(firstStart+50,firstEnd-12)),accepted=click===1;
+-  return <><Header stage={0} title={titles[0]} tag="订单功能教学示例 · 同一订单7042"/><OrderPage x={350} y={325} w={650} state={accepted?'已受理':'信息已填写'} detail={accepted?'业务：仍然待处理':'准备提交后台任务'} button={accepted?'已提交订单 7042':'提交订单'}/><Panel x={1190} y={390} w={500} h={210}/><Text x={1230} y={426} w={420} size={33}>后台处理状态</Text><Text x={1230} y={500} w={420} size={39} color={C.orange}>尚未完成</Text><Foot alpha={late()}>页面已受理，不能直接当成业务已完成</Foot></>;
++  const click=early(firstStart+12,firstStart+48),accepted=click===1;
++  return <><Header stage={0} title={titles[0]} tag="订单功能教学示例 · 同一订单7042"/><OrderPage x={350} y={325} w={650} state={accepted?'已受理':'信息已填写'} detail={accepted?'业务：仍然待处理':'准备提交后台任务'} button={accepted?'已提交订单 7042':'提交订单'}/><svg width={1920} height={1080} style={{position:'absolute',inset:0,pointerEvents:'none'}}>{f>=firstStart+18&&f<=firstStart+50&&<circle cx={675} cy={614} r={mix(11,28,clamp((f-firstStart-18)/32))} stroke={C.text} strokeWidth={4} fill="none" opacity={1-clamp((f-firstStart-18)/32)}/>}</svg><Panel x={1190} y={390} w={500} h={210}/><Text x={1230} y={426} w={420} size={33}>后台处理状态</Text><Text x={1230} y={500} w={420} size={39} color={C.orange}>尚未完成</Text><Foot alpha={late()}>页面已受理，不能直接当成业务已完成</Foot></>;
+  }
+  if(n===2){
+   const cue=s.cueFrames?.labels?.Kafka??Math.floor(secondStart),visible=f>=cue;
+@@ -82,13 +82,13 @@
+  }
+  if(n===9)return <><Header stage={3} title={titles[8]} tag="主例仍是7042完成、首次提交1 · 日志保留由主题策略控制"/><OrderPage detail="页面尚未查询新结果"/><KafkaLog notice="7042已经处理完，原记录仍然保留"/><Consumer status="本次业务已成功" id="7042" progress={1} result/><BusinessResult saved/><CommitProgress value={1}/><svg width={1920} height={1080} style={{position:'absolute',inset:0,pointerEvents:'none'}}><path d="M665 631V648H1255V631" stroke={C.orange} strokeWidth={3} fill="none"/></svg><Foot alpha={late()}>消费进度 ≠ 记录删除 · 保留策略有边界，并非永久留存</Foot></>;
+  if(n===10){
+-  const query=early(firstStart+14,firstEnd-10),response=late(secondStart+12,secondEnd-12),done=response===1;
++  const query=early(firstStart+14,firstEnd-10),response=late(secondStart+12,secondStart+(secondEnd-secondStart)*.66),done=response===1;
+   return <><Header stage={2} title={titles[9]} tag="应用查询路径 · 页面经网站服务读取业务结果，与Kafka消费进度分开"/><OrderPage state={done?'处理完成':'已受理'} detail={done?'7042业务处理已成功':'正在查询业务结果'} complete={done}/><ApplicationService/><KafkaLog alpha={.35}/><Consumer status="业务结果可查询" id="7042" progress={1} result/><BusinessResult saved/><Route points={[{x:510,y:749},{x:1390,y:749}]} p={query} color={C.blue} label="网站服务查询7042业务结果" labelX={610} labelY={687} labelW={680}/><Route points={[{x:1390,y:767},{x:1360,y:767},{x:1360,y:875},{x:300,y:875},{x:300,y:788}]} p={response} color={C.success} alpha={query===1?1:0} label="查询返回：处理成功" labelX={650} labelY={828} labelW={640}/>{done&&<Route points={[{x:300,y:711},{x:300,y:680}]} color={C.success}/>}</>;
+  }
+  if(n===11){
+   const resetStart=secondStart-18,resetEnd=secondStart+27;
+   if(f<resetStart){
+-   const t=tween(f,firstStart+18,firstEnd-18)*2,k=Math.min(2,Math.floor(t)),frac=t-k,id=String(7043+k),work=clamp(frac*1.2);
++   const t=tween(f,firstStart+18,firstEnd-18)*2,k=Math.min(2,Math.floor(t)),frac=t-k,id=String(7043+k),work=clamp(frac);
+    return <><Header stage={1} title={titles[10]} tag="独立短时流量示例 · 新增写入停止 · 日志仍保留三条记录"/><Panel x={100} y={338} w={400} h={333}/><Text x={130} y={385} w={340} size={30}>输入已经停止</Text><Text x={130} y={470} w={340} size={58} color={C.orange} align="center">未完成 {2-k}</Text><Text x={130} y={574} w={340} size={24} color={C.muted}>7042已完成，继续处理其余</Text><KafkaLog notice="未完成逐步归零，日志仍有3条"/><Consumer status={k===2?'剩余工作全部完成':'继续完成剩余任务'} id={k<2?id:undefined} progress={k<2?work:1} result={k===2}/><Text x={1400} y={727} w={400} size={27} color={C.success} align="center">业务已完成 {1+k} 条</Text><Foot color={C.success}>尚未完成 {2-k} 条　≠　日志保留 3 条</Foot></>;
+   }
+   if(f<resetEnd)return <><Header stage={1} title={titles[10]} tag="切换为独立持续流量示例 · 不承接上一段计数"/><Panel x={330} y={360} w={1260} h={270} color={C.blue}/><Text x={380} y={410} w={1160} size={43} align="center">重新计数：持续输入快于业务完成</Text><Text x={380} y={505} w={1160} size={29} color={C.muted} align="center">每秒进入2条 / 完成1条 · 教学计数，不是产品性能测量</Text></>;

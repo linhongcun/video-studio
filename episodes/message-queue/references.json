@@ -3,105 +3,103 @@
   "presentation": "title-author",
   "episode": "message-queue",
   "heading": "参考资料",
-  "checkedAt": "2026-10-27",
+  "checkedAt": "2026-10-28",
   "timezone": "Asia/Shanghai",
   "sources": [
     {
       "id": "R1",
-      "organization": "RabbitMQ",
-      "title": "RabbitMQ tutorial - Work Queues",
-      "version": "现行官方教程（Pika Python）· 2026-10-27核验",
-      "url": "https://www.rabbitmq.com/tutorials/tutorial-two-python",
+      "organization": "Apache Kafka",
+      "title": "Introduction",
+      "version": "Apache Kafka4.4.0",
+      "url": "https://kafka.apache.org/44/getting-started/introduction/",
       "supports": [
-        "耗时任务可以编码为消息送入工作队列，交给后台worker稍后处理。",
-        "网页请求受理任务与后台完成任务是不同阶段，工作队列将耗时处理移出短暂的请求窗口。"
+        "生产者向topic的某分区追加事件，消费者读取并处理。",
+        "消费后不删除记录，记录保留受topic配置约束。",
+        "顺序保证限定同一分区。"
       ],
-      "sections": "What This Tutorial Focuses On；Message acknowledgment；Message durability",
+      "sections": "Kafka concepts and terminology",
       "verification": {
         "status": "verified",
-        "checkedAt": "2026-10-27",
-        "method": "Read canonical official HTML and complete UTF-8 fixed-commit source from GitHub connector; exact title and sentence checked; saved raw bytes match returned Git blob identity.",
-        "sourceId": "work-queues",
-        "sourceUrl": "https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/tutorials/tutorial-two-python.md",
-        "commit": "a284a068ab720672b40ceed40f3f151d9829fb70",
-        "sha256": "cabb69419c24d03876e78504e064c3ad2a8df3242481e3065e7cc6c23964d211",
-        "evidence": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/evidence.json"
+        "checkedAt": "2026-10-28",
+        "method": "Complete HTTPS GETs of official Apache Kafka fixed-commit GitHub raw bytes through configured proxy with default TLS verification. Read frontmatter, mechanism paragraphs and same-commit API/config source. No canonical kafka.apache.org HTML was fetched or claimed verified.",
+        "sourceId": "introduction.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "4d1e964464348e8d529a7a76b95b60ec25498428e7aaf3f9d3889b9d07b7247e",
+        "evidence": "episodes-codex/message-queue/revisions/kafka-intro/message-queue/sources/source-evidence.json"
       },
       "titleEvidence": {
-        "locator": "frontmatter title · source line 2",
-        "evidence": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/evidence.json"
+        "locator": "frontmatter line2",
+        "evidence": "episodes-codex/message-queue/revisions/kafka-intro/message-queue/sources/introduction.md"
       },
       "quotation": {
-        "text": "Instead we schedule the task to be done later.",
-        "locator": "What This Tutorial Focuses On · source line 48",
-        "evidence": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/evidence.json"
+        "text": "Events in a topic can be read as often as needed-unlike traditional messaging systems, events are not deleted after consumption.",
+        "locator": "introduction.md · line 81",
+        "evidence": "episodes-codex/message-queue/revisions/kafka-intro/message-queue/sources/introduction.md"
       }
     },
     {
       "id": "R2",
-      "organization": "RabbitMQ",
-      "title": "Queues",
-      "version": "RabbitMQ 4.4 官方维护文档 · 2026-10-27核验",
-      "url": "https://www.rabbitmq.com/docs/queues",
+      "organization": "Apache Kafka",
+      "title": "Design",
+      "version": "Apache Kafka4.4.0",
+      "url": "https://kafka.apache.org/44/design/design/",
       "supports": [
-        "队列持久性与消息持久性分别配置；持久队列的重启恢复包含其中以persistent发布的消息，不能从任意入队动作推出已安全持久化。",
-        "exclusive和auto-delete是与连接或消费者生命周期有关的不同队列属性；本片固定non-exclusive、non-auto-delete的durable quorum queue，不借临时订阅队列声称消费者离线时任务仍保留。",
-        "队列和消息可以配置TTL、队列可配置长度限制；待处理任务的保留有配置和资源边界，不是永久或无限保存。",
-        "队列中的ready消息与已投递未确认消息是不同状态；本片暂停场景固定在尚未投递之前，不能把处理线程暂停自动画成消息仍在ready。"
+        "消费者按分区记录下一条消息的位置。",
+        "本例先处理再保存进度，失败窗口可能重读，不保证任意业务恰好一次。"
       ],
-      "sections": "Queue Properties；Durability；Temporary Queues；Exclusive (Client Connection-Specific) Queues；Time-to-Live and Length Limit；Message States",
+      "sections": "The Consumer / Consumer Position; Message Delivery Semantics",
       "verification": {
         "status": "verified",
-        "checkedAt": "2026-10-27",
-        "method": "Read canonical official HTML and complete UTF-8 fixed-commit source from GitHub connector; exact title and sentence checked; saved raw bytes match returned Git blob identity.",
-        "sourceId": "queues",
-        "sourceUrl": "https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/docs/queues.md",
-        "commit": "a284a068ab720672b40ceed40f3f151d9829fb70",
-        "sha256": "70a81800b3df6e9e0295391a2fae37f67421af5b097d112e06a3ac9ba3087025",
-        "evidence": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/evidence.json"
+        "checkedAt": "2026-10-28",
+        "method": "Complete HTTPS GETs of official Apache Kafka fixed-commit GitHub raw bytes through configured proxy with default TLS verification. Read frontmatter, mechanism paragraphs and same-commit API/config source. No canonical kafka.apache.org HTML was fetched or claimed verified.",
+        "sourceId": "design.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "60410c9c0e3b9f031a5da5b7241b0114345fdec15c72c6908d9e89424b8c6e6c",
+        "evidence": "episodes-codex/message-queue/revisions/kafka-intro/message-queue/sources/source-evidence.json"
       },
       "titleEvidence": {
-        "locator": "frontmatter title · source line 2",
-        "evidence": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/evidence.json"
+        "locator": "frontmatter line2",
+        "evidence": "episodes-codex/message-queue/revisions/kafka-intro/message-queue/sources/design.md"
       },
       "quotation": {
-        "text": "Durable queues will be recovered on node boot, including messages in them published as persistent.",
-        "locator": "Durability · #durability · source line 272",
-        "evidence": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/evidence.json"
+        "text": "It can read the messages, process the messages, and finally save its position. In this case there is a possibility that the consumer process crashes after processing messages but before saving its position.",
+        "locator": "design.md · line 200",
+        "evidence": "episodes-codex/message-queue/revisions/kafka-intro/message-queue/sources/design.md"
       }
     },
     {
       "id": "R3",
-      "organization": "RabbitMQ",
-      "title": "Consumer Acknowledgements and Publisher Confirms",
-      "version": "RabbitMQ 4.4 官方维护文档 · 2026-10-27核验",
-      "url": "https://www.rabbitmq.com/docs/confirms",
+      "organization": "Apache Kafka",
+      "title": "Producer Configs",
+      "version": "Apache Kafka4.4.0",
+      "url": "https://kafka.apache.org/44/configuration/producer-configs/",
       "supports": [
-        "Consumer ACK发往RabbitMQ，表示消费者承担本次投递的处理责任并允许Broker释放消息；不是向网页返回业务完成通知。",
-        "发布确认与消费者确认覆盖不同通信方向、彼此独立；本片只简要建立接力阶段，不把ACK或confirm等同于整条业务链完成。",
-        "本片固定手动ACK，并在业务操作完成后才确认；自动确认模式有不同的数据安全语义，不能把本例推广为所有消费模式。"
+        "acks控制生产者完成写入请求所需的确认，不表示下游业务处理完成。",
+        "acks=all等待当前ISR；最少ISR条件另受topic配置约束。"
       ],
-      "sections": "The Basics / Are Publisher Confirms Related to Consumer Delivery Acknowledgements?；Consumer Acknowledgement Modes and Data Safety Considerations；When Will Published Messages Be Confirmed by the Broker?",
+      "sections": "acks (generated from same-commit ProducerConfig.java ACKS_DOC133–147)",
       "verification": {
         "status": "verified",
-        "checkedAt": "2026-10-27",
-        "method": "Read canonical official HTML and complete UTF-8 fixed-commit source from GitHub connector; exact title and sentence checked; saved raw bytes match returned Git blob identity.",
-        "sourceId": "confirms",
-        "sourceUrl": "https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/docs/confirms.md",
-        "commit": "a284a068ab720672b40ceed40f3f151d9829fb70",
-        "sha256": "861abccf819fddcdaddd661255914d867d6ed511a9ff19311bfef73d0907b127",
-        "evidence": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/evidence.json"
+        "checkedAt": "2026-10-28",
+        "method": "Complete HTTPS GETs of official Apache Kafka fixed-commit GitHub raw bytes through configured proxy with default TLS verification. Read frontmatter, mechanism paragraphs and same-commit API/config source. No canonical kafka.apache.org HTML was fetched or claimed verified.",
+        "sourceId": "producer-configs.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/producer-configs.md",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "7b14676d8e8c272c19b613b25d3c338c8a334529782bdcc3e8f215fea285abbe",
+        "evidence": "episodes-codex/message-queue/revisions/kafka-intro/message-queue/sources/source-evidence.json"
       },
       "titleEvidence": {
-        "locator": "frontmatter title · source line 2",
-        "evidence": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/evidence.json"
+        "locator": "frontmatter line2",
+        "evidence": "episodes-codex/message-queue/revisions/kafka-intro/message-queue/sources/producer-configs.md"
       },
       "quotation": {
-        "text": "Positive acknowledgements simply instruct RabbitMQ to record a message as delivered and can be discarded.",
-        "locator": "Consumer Acknowledgement Modes and Data Safety Considerations · #acknowledgement-modes · source line 146",
-        "evidence": "episodes-codex/message-queue/revisions/mq-intro/message-queue/sources/evidence.json"
+        "text": "The number of acknowledgments the producer requires the leader to have received before considering a request complete.",
+        "locator": "ProducerConfig.java · line 133",
+        "evidence": "episodes-codex/message-queue/revisions/kafka-intro/message-queue/sources/ProducerConfig.java"
       }
     }
   ],
-  "scope": "Three original official document titles with institutional credits; one five-second title-author page. Quotes and locators remain in article/research evidence, not on the video endcard."
+  "scope": "Three original official document titles with Apache Kafka institutional credits. Producer Configs title is read from fixed docs wrapper; actual generated acks content is verified in same-commit ProducerConfig.java. Quotes, locations and explanations stay in article/research, not the video list."
 }

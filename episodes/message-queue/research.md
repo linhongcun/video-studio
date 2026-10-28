@@ -1,50 +1,70 @@
-# EP.10 / MQ01 入门改造：公开资料与原理核验
+# Kafka MQ01 入门：本轮官方来源核验
 
-核验日期：2026-10-27（北京时间）。这是独立 `mq-intro` revision 的新研究记录，不替换父目录2026-10-24/26记录，不追认旧媒体完成了本轮检查。
+核验日期：2026-10-28（北京时间）。固定版本：Apache Kafka 4.4.0，官方tag解引用commit `1156b2752aaa28eafc0b4c4d387e63356793268d`。本轮实际完整GET官方GitHub固定源，未访问canonical kafka.apache.org HTML，未做真实Broker实验。原字节、SHA与连续引文见source-evidence.json。
 
-## 当前入口与证据身份
+范围：仅支撑约两分钟入门的同一订单7042从提交受理、分区日志保存、后台读取处理、业务结果保存、消费进度提交到页面查询结果；复制确认、失败重试、幂等和Exactly Once各自后续展开。
 
-开工基线为 `16689e572c594224bd779a9b4403964e049cc99c`。基线发布元数据 `episodes/message-queue/meta.json` 的 `sourcePath` 指向 `episodes-codex/message-queue/remotion`；本轮从现有素材建立新的revision，保留EP.10、slug、首发日期、原Release与历史输入的身份。
+## 核心资料与片尾
 
-本轮实际读取官方网页正文及对应固定源，机构均为RabbitMQ，未见明确个人署名，不把Git提交作者当作文献作者。公开文档页面显示RabbitMQ 4.4；Python教程为现行Work Queues教程，正文未标产品版本号。来源日期是核验日，不是出版日。
+### R1 · Introduction
 
-官方仓库固定commit：`a284a068ab720672b40ceed40f3f151d9829fb70`（仓库提交时间 `2026-10-26T16:03:34Z`）。通过GitHub connector `fetch_file`读取三份完整UTF-8源，并核对保存字节生成的Git blob身份与返回blob SHA一致。实际标题、连续短引、行号、论点上下文与保存文件SHA见 [sources/evidence.json](sources/evidence.json)。这不是shell完整HTTP GET记录，不捏造HTTP状态码。三份原文保存在本revision的 `sources/` 目录供逐字复核。
+- 机构：Apache Kafka；原文无明确个人署名，不从提交者推定作者。
+- 版本：4.4.0；页面日期未单独核验，访问日期为本轮固定源读取日期。
+- 原题证据：frontmatter line2，原文件introduction.md。
+- 公开文档链接：https://kafka.apache.org/44/getting-started/introduction/
+- 固定原文：https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md
+- 论点：生产者向topic的某分区追加事件，消费者读取并处理。；消费后不删除记录，记录保留受topic配置约束。；顺序保证限定同一分区。
+- 连续原句：Events in a topic can be read as often as needed-unlike traditional messaging systems, events are not deleted after consumption.
+- 定位：introduction.md · line 81
+- 片尾：入选，按真实原题与机构显示；不显示引文、版本或定位。
 
-## 主张与最低必要边界
+### R2 · Design
 
-| 新编号 | 官方文档原题 | 本片使用 | 片内和图文必须保留的前提 |
-|---|---|---|---|
-| R1 | RabbitMQ tutorial - Work Queues | 任务变成消息，由后台worker稍后执行；网页受理与后台完成是不同阶段 | 原教程的模拟工作与本片7042订单节奏都是教学示例，不是RabbitMQ性能数字；本片不复制多worker轮询分发支线 |
-| R2 | Queues | 队列和消息持久性、队列生命周期、ready与未确认投递、TTL和长度边界 | 固定durable quorum queue、non-exclusive、non-auto-delete、persistent消息；暂停发生在7042尚未投递之前；未配置TTL/溢出行为不能概括成永远保留 |
-| R3 | Consumer Acknowledgements and Publisher Confirms | Consumer ACK送给Broker，允许其结束本次投递；发布确认与消费确认方向分开 | 固定手动ACK且业务工作完成后才确认；自动确认是另一种语义。ACK不会自动更新网页，也不能充当业务数据库的独立证明 |
+- 机构：Apache Kafka；原文无明确个人署名，不从提交者推定作者。
+- 版本：4.4.0；页面日期未单独核验，访问日期为本轮固定源读取日期。
+- 原题证据：frontmatter line2，原文件design.md。
+- 公开文档链接：https://kafka.apache.org/44/design/design/
+- 固定原文：https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md
+- 论点：消费者按分区记录下一条消息的位置。；本例先处理再保存进度，失败窗口可能重读，不保证任意业务恰好一次。
+- 连续原句：It can read the messages, process the messages, and finally save its position. In this case there is a possibility that the consumer process crashes after processing messages but before saving its position.
+- 定位：design.md · line 200
+- 片尾：入选，按真实原题与机构显示；不显示引文、版本或定位。
 
-原始题名、机构、连续原句及原文定位完整列在 [references.md](references.md)；视频片尾只显示三条原题与机构，采用 `title-author`，不显示摘录、链接或核验说明。
+### R3 · Producer Configs
 
-## 本片正常接力的教学选择
+- 机构：Apache Kafka；原文无明确个人署名，不从提交者推定作者。
+- 版本：4.4.0；页面日期未单独核验，访问日期为本轮固定源读取日期。
+- 原题证据：frontmatter line2，原文件producer-configs.md。
+- 公开文档链接：https://kafka.apache.org/44/configuration/producer-configs/
+- 固定原文：https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/producer-configs.md
+- 论点：acks控制生产者完成写入请求所需的确认，不表示下游业务处理完成。；acks=all等待当前ISR；最少ISR条件另受topic配置约束。
+- 连续原句：The number of acknowledgments the producer requires the leader to have received before considering a request complete.
+- 定位：ProducerConfig.java · line 133
+- 片尾：入选，按真实原题与机构显示；不显示引文、版本或定位。
 
-1. 7042是无真实含义的示例业务编号。生产者发布的是处理任务，不把“消息已提交”画成全部订单工作已经完成。
-2. 为讲清消费者不在线时为什么还可以等待，本例使用不绑定消费者连接生命周期的队列。暂停场景表现为消费者尚未订阅或投递被暂停、7042从未进入消费端；不能只暂停处理线程却忽略prefetch可能已把消息推到客户端。
-3. 恢复后，7042从ready变成已投递未确认；消费者完成必要业务并保存业务结果，然后将手动ACK送回Broker，Broker才可释放本次投递。Ready计数减少与本次业务完成不能画成同一个时刻。
-4. 网站服务查询保存的业务状态，再把页面改为已完成。这条查询路径是本片选择的应用设计，不是RabbitMQ协议自带的页面通知，也不是把ACK转送给网页。
-5. 一段短时输入高峰结束后，若后台净处理速度为正，积压可以排空。持续输入长期超过处理能力时，待处理量增长。速率、持续时间、单笔处理顺序均为示意，不称作实测，不给容量建议。
-6. 本片只完成正常路径和积压边界，不展开确认丢失、重投、去重、Exactly Once、多消费者分工或复制协议；保留一句失败情况需要额外处理即可，后续视频仅作为拓展。
+Producer Configs的原题来自同commit文档wrapper。wrapper引用生成的producer_config.html；实际acks说明由同commit ProducerConfig.java的ACKS_DOC提供，本轮直接读该原文（包括被引用的一句）。不将未访问的HTML冒称本轮已访问。
 
-## 保留条件：避免从临时订阅队列推出持久任务结论
+## 图文补充来源
 
-`durable`说明队列重启恢复语义，`persistent`说明发布消息持久性；它们不等于“所有故障永不丢失”，发布确认和正确路由仍有独立前提。Quorum queue不得被画成与消费者连接同生共死的exclusive队列。
+A1 `KafkaConsumer.java` 为官方源文件的真实文件名，不用推测生成JavaDoc页的标题。源码286行明确提交下一条应用将读取的offset；72–89区分拉取位置与提交恢复位置；250–256解释业务操作后commit及其中的重读窗口。图文可用article-sources-candidate.json的连续完整短引。
 
-Queues的Queue Properties、Temporary Queues、Exclusive章节分别定义了属性；exclusive队列随声明它的连接关闭而删除，auto-delete又有最后消费者取消后的删除条件。因此不能把Publish/Subscribe教程里临时、自动命名、`exclusive=True`的日志订阅队列搬来支撑“消费者离线后订单任务仍在”。本片使用Work Queues的durable task_queue方向，教程只提供原理与配置线索，不表示本轮已运行Broker演示。
+TopicConfig.java219–231核验min.insync.replicas与acks=all配合。topic-configs.md真实标题为Topic Configs；细节留研究/图文，不为增加条目在片尾强加。
 
-队列、消息的TTL与队列长度限制会影响保留；资源也有限。本片仅声明所选配置和正常存储条件下任务继续待处理，不承诺无限容量或永久保留。发布确认的深入配置与故障窗口移至后续选题；入门画面不要把任意confirm误标为业务成功。
+## 脚本与机制边界
 
-## 原理依据与原创推导分工
+- ProducerConfig ACKS_DOC133–147: acks=all waits current ISR; no promise all configured replicas always caught up. TopicConfig219–231 additionally requires min.insync.replicas threshold. Illustrative RF3/minISR2 is a selected configuration, not universal default. Acks is not fsync or a never-loss guarantee.
+- KafkaConsumer72–89 distinguishes poll/read position from committed recovery position. Manual Offset Control213–289 supports processing before commit and next-message offset. Processing offset0 then committing1 is valid in a chosen contiguous example, not a claim offsets are always consecutive.
+- KafkaConsumer135–148 requires poll for group liveness. API408–410 pause/resume controls fetching assigned partitions in future poll calls. Pausing assigned partition does not mean stopping poll indefinitely without rebalance risk.
+- Introduction81: records are not deleted on consumption. Select cleanup.policy=delete and finite retention for teaching. Deletion works by retention/segments, not an exact per-record second timer; no infinite retention promise.
+- Introduction83 orders events within a topic-partition; no global FIFO over all partitions.
+- Website accepted status, stored business results and webpage querying results are teaching application design. Do not attribute business status/query API to Kafka. Commit is progress metadata, neither page notification nor atomic commit with arbitrary external business DB.
+- Input count minus finished-business count is original illustrative arithmetic, not measured Kafka throughput or automatically equal to logEndOffset−committedOffset.
 
-- 异步任务、队列属性、消息状态与ACK语义是官方来源支持的事实。
-- “已提交/处理中/已完成”页面文字、业务状态查询接口、订单编号、速率曲线、暂停/恢复动作与镜头节奏是本片的教学和应用设计。
-- 积压守恒关系及净排空条件是按本例输入/完成口径得到的推导，不是假托官方压测。不得把已拉取数量当作完成数量。
+## 建议固定教学前提
 
-## 沿用与冻结保护
-
-旧父稿的 `references.json` 只收Confirms和Reliability Guide，两条R编号与旧research表格的R1—R4不是同一编号体系。本revision独立定义R1/R2/R3，不按编号直接继承旧SourceQuote。旧详讲确认丢失与幂等的来源仍保留为旧片历史，不在新入门中虚构已使用。
-
-父目录旧 `references.json`、`research.md`、`article.mdx`、`freeze.py`、旧冻结清单、历史QA和已发布媒体未由本任务改写。本轮新的参考资料输入及证据应随revision新冻结；不能在旧冻结中把日期改成今天。本轮只完成资料事实与来源核验，未声明Broker运行、配音、成片、附录渲染或线上SHA检查通过。
+- 一个教学topic的一个分区，记录offset0/1/2对应示例订单7042/7043/7044；本例数据连续，不推断所有offset永远连续。
+- 生产者acks=all，topic复制因子3/min.insync.replicas2并满足ISR条件；只以正常写入确认建立“已接住任务”，不用“永久不丢失/所有副本已同步/已fsync”等绝对词。
+- 消费者关闭自动提交，读到0后先把业务结果保存成功，再手动提交下一位置1；本例不将外部结果存储与Kafka位点说成一个事务。
+- 若需演示暂停，暂停已分配分区拉取并继续poll维持活跃；或只表明“尚未读取”，不承诺停止poll仍不会重平衡。
+- 记录消费后留在日志，按有限保留策略清理；commit不删除记录，也不通知网页。网页经网站服务查询业务结果，是本教学应用明确选择。
+- 短时排空/持续输入2完成1为原创教学计数，不是Kafka吞吐基准。待完成业务数量、消费者commit lag和磁盘保留条数不要混为一个值。

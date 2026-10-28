@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "reviewer": "kafka_research independent of model/animation implementation",
+  "checkedAt": "2026-10-28T05:00:10.333510+00:00",
+  "sourceSha256": {
+    "remotion/src/model.ts": "fb05ebd8adca76707c5ba8d33e35927f65e8ed98c18492527a1c490cd39c8597",
+    "remotion/src/model-check.ts": "13ae50ebe5a605784cbc7988178ae8cb5c76012fc199d0015d82b68249920511",
+    "remotion/src/Main.tsx": "f9be582abd3dd6c890144c2f2899f9ec572c344f477484d0e9e5337ac1680e2b",
+    "script.md": "ca00a80f4c334fd6ba2d6a954d4cf6ed4325b6398d452016a874f22448c666bc",
+    "article.mdx": "f5947f1714ef82937b4e13f2095650eea30f6a16f95d8f5266ec442c3f2690cf",
+    "plan.json": "94e6727b8f1670c8d199719f9c65fba87dc1a0e806d9abb0afbea2c90778d8ed"
+  },
+  "staticTechnicalChecks": [
+    {
+      "topic": "写入确认与业务结果",
+      "source": "Main.tsx scenes04,07,10",
+      "result": "静态符合",
+      "detail": "04只把写入成功回执送网站服务再受理页面；07独立保存应用业务结果；10网站服务查询该结果后才变完成。未将生产者ack或commit直接当业务成功。"
+    },
+    {
+      "topic": "追加、读取与保留",
+      "source": "Main.tsx scenes03,06,08,09,11; model log snapshots",
+      "result": "静态和模型符合",
+      "detail": "03追加offset0/1/2；06用读取副本而原KafkaLog保持；commit后原记录仍3条；业务短时未完成数归0时日志仍3条。"
+    },
+    {
+      "topic": "首次提交恢复位点",
+      "source": "Main.tsx scenes05–09; model runMainExample",
+      "result": "静态和模型符合",
+      "detail": "本例读取起点0，不写已提交0；读取后readPosition1而committedOffset仍null；业务成功后首次commit1。08值直到信号完成才从尚未提交变1。"
+    },
+    {
+      "topic": "读取位置与提交位置",
+      "source": "script.md boundary bullet06/08; Main06; article.mdx46,54",
+      "result": "静态符合",
+      "detail": "脚本明确只画已提交恢复位置，不把poll读取位置当同一标记。读取副本不代表新增第二条业务任务。"
+    },
+    {
+      "topic": "保留策略边界",
+      "source": "Main09; script/articles; official R1",
+      "result": "静态符合",
+      "detail": "明确非永久保留；不画commit触发删记录，不从消费者暂停推导无限保留。"
+    },
+    {
+      "topic": "业务结果查询",
+      "source": "Main10",
+      "result": "静态符合、实际连线待看",
+      "detail": "查询路线在网站应用服务与业务结果之间，KafkaLog降透明度；返回成功后页面更新。实际端点和跨区域连线是否清楚须看PNG，不能仅源码认定可辨。"
+    },
+    {
+      "topic": "流量计数",
+      "source": "Main11; flowWindow; independent execution",
+      "result": "静态和模型符合",
+      "detail": "明确短时停止输入与持续输入两个独立情景，重置提示持续45帧；前者只减少业务未完成数，日志3条保持；后者2入1完成的累计计数符合。窗口动画按旁白时长缩放；画面标教学窗口，不是产品实测秒表。"
+    },
+    {
+      "topic": "回顾主例时点",
+      "source": "Main12; script12",
+      "result": "静态符合",
+      "detail": "12标明回看主例完成时/时点总结，不把11之后实时位点回退。三状态回收消费位点1，页面查询后完成另说明。"
+    },
+    {
+      "topic": "Kafka配置前提",
+      "source": "article.mdx38,54,62; official ProducerConfig/TopicConfig/KafkaConsumer",
+      "result": "静态符合",
+      "detail": "acks=all、RF3/minISR2作为示例，未称全配置副本/fsync任意故障不丢；关闭自动提交，处理后commit不等于任意外部业务原子事务/恰好一次。"
+    }
+  ],
+  "staticTechnicalBlockingFindings": [],
+  "modelGuardObservations": [
+    "commit(initial(),-1) currently accepted; unused by main animation, suggest nonnegative bound before freeze.",
+    "readNext before producer receipt of confirmation is accepted in generic model; main example confirms before reading. Any guard must be described as selected app sequencing, not a universal Kafka constraint."
+  ],
+  "visualQuestionsPending": [
+    "04写入回执与10查询返回的连线起止点在代码中位于面板外；需要实际PNG确认观众能看清主体和回执落点。",
+    "07业务成功、08位点变化与10页面成功需要按真实句时看完成条件/停留，不以源码插值公式代替实际采样。",
+    "11两个情景的切换提示和12主例回看提示需要按真实帧看阅读时间与计数。"
+  ],
+  "passedForNextPreflight": true,
+  "visualReviewCompleted": false,
+  "sourceScope": "Source and deterministic model only. No real Kafka experiment, runtime fault injection, actual video or narration listening claim."
+}

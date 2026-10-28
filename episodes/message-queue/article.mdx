@@ -1,6 +1,6 @@
 ---
 title: "订单已提交，为什么还没处理完？"
-summary: "跟着同一笔订单7042，从任务受理、排队等待到恢复处理和页面获知结果，理解消息队列如何缓冲短时高峰，以及为什么积压不能无限增长。"
+summary: "跟随同一笔订单7042，理解Kafka追加日志、后台消费、业务完成与提交恢复位点的区别，以及为什么读取过的记录仍会保留。"
 related:
   - rate-limit
   - idempotency
@@ -8,75 +8,90 @@ chapters:
   - id: problem
     title: "已受理，为什么还没完成"
   - id: enqueue
-    title: "先接住任务，再处理业务"
+    title: "Kafka怎样接住任务"
   - id: process
-    title: "暂停、恢复与业务完成"
+    title: "读取、业务完成与消费位点"
   - id: boundary
-    title: "短时缓冲与持续积压"
+    title: "缓冲的用途与代价"
 ---
 
 ## 已受理，为什么还没完成 {#problem}
 
-点击提交订单，页面很快显示“已受理”，后台却还没有处理完成。这两个状态可以先后属于同一笔订单：前者说明系统接住了待办，后者才说明相应业务工作已经成功。
+点击提交订单，页面很快显示“已受理”，后台却还没有处理完成。它们可以先后属于同一笔订单：前者表示系统已按约定接住待办，后者才表示相应业务工作已经成功。
 
-本片沿订单7042的处理任务解释这个过程。它是教学重建，不代表任何真实平台的内部架构；订单号、三笔任务、单笔处理节奏和后面的流量计数也都是示例。
+本片用Kafka解释订单7042的一次正常接力。订单功能界面、编号、处理节奏和流量数字都是教学示例，不代表真实平台的内部架构或性能。本系列此后统一以Kafka展开；这一版本不沿用旧片中RabbitMQ消费确认后移除消息的模型。
 
-## 先接住任务，再处理业务 {#enqueue}
+## Kafka怎样接住任务 {#enqueue}
 
-当三笔任务几乎同时到来，后台可能来不及一起处理。与其让页面始终等着业务结束，网站服务可以先把待办写进消息队列，由后台随后接收和执行。写入任务的网站服务是生产者，接收任务的后台是消费者；页面通过网站服务操作，不直接连接消息中间件。
+回看刚才的提交过程。网站服务把“处理订单7042”编码为消息写进Kafka，后台程序稍后读取并处理。写消息的是生产者，读取和处理消息的是消费者；页面仍通过网站服务操作，不直接连接Kafka。
 
-<SourceQuote sourceId="R1" supports="任务可以安排到稍后执行；提交任务与实际完成工作因而可以分开。" />
+Kafka把消息组织在主题中，主题又可以划分为多个分区。为了先看清一条任务，本例从空日志开始，固定观察主题`order-tasks`的分区0，以及一个消费者：7042追加在位置0，后来的7043、7044分别追加在位置1、2。**订单号标识业务对象，offset标识记录在这个分区中的位置**，不能把二者当成同一种编号。
 
-本例使用RabbitMQ，在目标队列确认任务已经保存后，网站服务才回复页面“已受理”。这是教学应用选择的受理条件，并不意味着发布确认已证明消费者业务完成。消息、队列、路由和确认配置都要满足对应条件；“页面显示成功”本身不能替代这些证据。
+本例选择传统consumer group中的一个消费者顺序处理这一分区，显式从位置0开始、每次读取一条；这不是说Kafka每次poll默认只返回一条。日志采用`cleanup.policy=delete`和有限保留窗口，示例观察期间尚未触发清理。消费位置与业务未完成数都不能代替保留策略；清理按分段等规则执行，不表示每条消息到达某个秒点就立即删除。
 
-<Figure src="/video-studio/episodes/message-queue/article/01.jpg" alt="订单7042已保存到RabbitMQ队列，网站服务回复页面已受理，消费者还没有接收任务" caption="教学示意：先确认7042已保存，再由网站服务回复已受理；后台业务仍未完成。" seekTo={41.8} chapter="enqueue" />
+消息是追加到某一分区日志的。本片的0、1、2只是单分区中的位置，不代表全系统的统一序号，也不能从这幅图推导跨分区的全局顺序。
 
-## 暂停、恢复与业务完成 {#process}
+网站服务等Kafka返回本次写入成功以后，才回复页面“已受理”。这是本应用选择的受理条件。生产者确认覆盖写入请求，不会等待消费者完成后台业务；页面显示受理不等于订单处理完成。
 
-### 消费者暂停，任务在哪里
+<SourceQuote sourceId="R3" supports="acks规定生产者在将写请求视为完成前，需要leader取得怎样的确认；这个写入条件不等于消费者业务已完成。" />
 
-现在暂停消费者，且暂停发生在它尚未取走7042之前。队列仍在线，7042继续处于待处理状态，7043、7044也保留在等待位置。页面仍然显示已受理，不能因为任务已经保存就显示处理完成。
+<Figure src="/video-studio/episodes/message-queue/article/01.jpg" alt="同一分区日志中7042位于位置0，Kafka写入回执先到网站服务，再由网站服务回复页面已受理，后台业务尚未完成" caption="教学示例：Kafka确认本次写入后，网站服务回复受理；消费者尚未完成7042。" seekTo={39} chapter="enqueue" />
 
-本例固定使用durable、non-exclusive、non-auto-delete的quorum队列和持久消息，并采用发布确认与手动消费确认。它没有采用消费者退出就删除队列的临时订阅配置，也没有演示Broker宕机。保留与恢复依赖明确配置，不能从一个暂停画面推导任意故障下都不会丢失。
+本教学配置采用`acks=all`、副本数3和`min.insync.replicas=2`。`acks=all`等待的是当时的同步副本集合（ISR），`min.insync.replicas`还约束可接受写入的最少同步副本数。因此写入成功不必然表示原先配置的三个副本全都已经跟上，也不等于每条消息都在所有副本逐条执行了`fsync`。本片没有演示Broker故障或确认超时，不能从正常成功路径推导任何故障下都不会丢失。
 
-<SourceQuote sourceId="R2" supports="持久队列与持久消息是消息恢复条件的一部分；本例明确固定保留配置，不把所有队列都视为同样持久。" />
+## 读取、业务完成与消费位点 {#process}
 
-<Figure src="/video-studio/episodes/message-queue/article/02.jpg" alt="消费者在接收订单7042之前暂停，7042仍在队列中等待，页面没有显示处理完成" caption="教学示意：消费者尚未取走7042，消息仍为ready待处理；这里没有发生处理中断或重投。" seekTo={50.5} chapter="process" />
+### 暂停取数，记录在哪里
 
-消费者恢复后，接收的是队列里原来的7042，其他任务继续等待。这次是该消息首次投递给消费者，不是用户又提交了一单，也不是断连后的重复投递。任务送到后台，只代表开始处理，还没有自动得到业务结果。
+在消费者尚未读取7042时，先让它暂停取数。生产者与消费者可以按各自节奏工作；日志中的7042并不因消费者暂时不读取而消失。此时页面仍为已受理，业务状态仍是未完成。本例没有演示成员超时、重新分配分区或故障重启，不能把这里的教学暂停扩大成所有消费组场景下的行为保证。
 
-### 业务完成以后，页面怎样知道
+消费者恢复后，读取的是日志中原来的7042。读取会推进客户端的读取位置，但**不会因此删除日志原记录**。片中只画“已提交的恢复位置”，没有把它当成每次`poll`后的读取位置；处理区里的7042是当前读取记录对应的工作，不是又新增了一条待办。
 
-消费者完成7042的业务工作并成功保存结果后，再向RabbitMQ发送手动处理确认。队列收到这个ACK，才结束本次投递并移除对应消息；已经保存的业务结果不会随之删除。应用什么时候发确认，与Broker收到确认后如何处理消息，是相接的两个动作。
+<SourceQuote sourceId="R1" supports="Kafka记录不会在消费后立即删除；消息保留由主题策略控制，与本例的读取动作分开。" />
 
-<SourceQuote sourceId="R3" supports="消费者的正向确认告诉RabbitMQ该消息已投递并可丢弃；本例由应用在业务成功后发送确认。" />
+<Figure src="/video-studio/episodes/message-queue/article/02.jpg" alt="消费者读取位置0的7042后开始处理，日志中原7042仍保留，尚未提交恢复位点，本例读取起点是0" caption="教学示例：读取使后台开始工作，不会把日志中的原记录拿走，也不自动表示业务成功。" seekTo={57.5} chapter="process" />
 
-这条确认线的接收方是队列，不是网页。网页通过网站服务查询业务结果，查询返回7042已处理成功后，才将状态更新为“处理完成”。本片采用的是明确的查询设计，不把它说成RabbitMQ内置的页面通知功能。
+### 先完成业务，再提交恢复位置
 
-<Figure src="/video-studio/episodes/message-queue/article/03.jpg" alt="网站服务查询订单7042已保存的业务结果，返回成功后页面更新为处理完成，消费确认路径仍只连接消费者与RabbitMQ" caption="教学示意：页面从业务结果查询获知完成；Consumer ACK只负责确认本次投递。" seekTo={86.2} chapter="process" />
+后台完成7042的业务工作，并成功保存应用业务结果后，本例才提交消费位点。这里关闭了自动提交，每次取一条、连续处理。本例明确从位置0开始读取，起初尚未提交恢复位点，不能把读取起点0说成已经提交了0；7042在位置0，处理成功后首次提交1，表示恢复消费时应从下一待读位置1继续，而不是重读已完成的0。
+
+<SourceQuote sourceId="A1" supports="已提交位点应当是应用接下来要读取的下一条记录的位置；本例处理位置0后提交1。" />
+
+<Figure src="/video-studio/episodes/message-queue/article/03.jpg" alt="7042的应用业务结果已成功保存，恢复位点从尚未提交变为已提交1，而位置0的日志记录仍然保留" caption="教学示例：先成功处理0，再提交下一位置1。业务结果、恢复进度与日志保留各自表达。" seekTo={77} chapter="process" />
+
+已提交位点是恢复消费的进度，不是删除记录的命令。7042这一条已经处理完，记录仍可留在日志里；其他任务此时还没有处理完。按保留策略保存过一段时间以后，旧记录才可能被清理。消费积压归零与日志中还有历史记录，也可以同时成立。
+
+业务结果保存和位点提交是两个动作。应用可能在业务成功之后、位点提交之前故障，恢复时便可能再次读取已处理记录。本片只展示正常闭环，**并未把外部业务操作与位点提交变成一个原子事务**，更没有证明外部副作用恰好执行一次。
+
+<SourceQuote sourceId="R2" supports="消费者处理消息后保存进度，仍可能在处理完成与保存进度之间故障；因此这两个动作不自动形成外部业务原子性。" />
 
 <span id="retry"></span>
 
-因此，任务受理、开始处理、业务成功、队列收到确认、页面获知结果应分别核对。本片只演示正常闭环；生产环境仍须面对失败恢复和可能的重复投递，不能从这条成功路径推导业务天然恰好执行一次。重投和幂等的实现不在本片展开。
+### 页面怎样知道已经完成
+
+消费位点不会直接通知网页“订单成功”。页面通过网站服务查询应用保存的业务结果，查询得到7042已处理成功，才更新为处理完成。这个查询流程是本教学应用的设计，不是Kafka内置的订单状态功能。
+
+<Figure src="/video-studio/episodes/message-queue/article/04.jpg" alt="页面通过网站服务查询已保存的7042业务结果，得到成功后才显示完成，消费位点路径与页面查询路径分开" caption="教学示例：页面从应用业务结果获知完成；Kafka写入回执和消费位点都不替代这个结果。" seekTo={97.5} chapter="process" />
+
+因此，写入请求成功、消费者读到记录、业务工作成功、提交恢复位置、页面获知完成，都应在各自的动作落点后判断，不能统称为“消息成功了”。
 
 <span id="recap"></span>
 
-## 短时缓冲与持续积压 {#boundary}
+## 缓冲的用途与代价 {#boundary}
 
-7042完成后，后台继续处理剩下的7043、7044。如果这波集中输入已经停止，后台保持原有速度也能逐步消化待办，直到排空。消息队列把短时间集中到来的工作摊开了，却没有让消费者瞬间变快。
+如果这一波短时输入停止，后台按原有速度继续完成7043、7044，未完成任务数可以逐渐减少到零。这个“排空”说的是业务积压被消化，不是把Kafka日志清成空文件；已经消费的历史记录仍可能处在保留期内。
 
-再换成一个独立的持续流量示例：每个完整1秒窗口进入2条任务，只完成1条。经过n个这样的窗口，累计进入2n条、累计完成n条，未完成总量就增加到n条。统计未完成总量时必须包含已经投递但尚未完成的任务，不能把出队当成业务完成；画面中的“待处理”也按这一明确口径观察。
+再看独立的持续流量示例：每个完整1秒窗口进入2条任务，却只完成1条，未完成量就会每窗净增加1条。这里统计的未完成量包含尚未读取与已经读取但仍在处理的任务；日志留存条数则还可能包含已经处理成功的历史记录，不能拿来直接充当业务积压。
 
-<Figure src="/video-studio/episodes/message-queue/article/04.jpg" alt="教学流量每个完整秒窗进入两条任务、完成一条，累计未完成数量每窗增加一条" caption="教学计数：持续流入快于业务完成，未完成任务不断增加；数字不代表RabbitMQ性能基准。" seekTo={106.2} chapter="boundary" />
+Kafka让写入与后台处理能够按不同节奏接力，却没有让消费者或它依赖的业务系统瞬间变快。长期流入快于处理，积压和等待就会增加；保留策略与存储资源也有边界，应用需要监控实际滞后、剩余保留窗口与业务时限，不能默认消息会永远等着被处理。
 
-队列只能缓冲，无法消除长期的处理能力缺口。积压增加意味着等待更久，还会受到容量、保留期与溢出策略限制；具体系统需要结合业务决定如何限制流入、处理过期或提高真正受限环节的能力。本片不承诺无限排队、固定等待时长或任何故障下均无丢失。
-
-回到7042：已受理表示任务已经接住，处理完成表示相应业务结果已经成功。消息队列把这两个时刻分开，让后台按自己的能力继续工作，同时承担等待和有限容量的代价。
+回到7042：页面已受理，只说明本应用已按约定接住了任务；业务完成，要看实际业务结果；消费位点，则记录从哪里恢复。把这三个状态分开，才不会把Kafka返回的写入成功误当成订单处理成功。
 
 ## 参考资料
 
-以下3项均为RabbitMQ第一方资料，2026-10-27核验；精确原文、定位、固定源字节与论点映射由本revision的references.json、research.md及sources/evidence.json记录。
+本篇采用Apache Kafka 4.4.0官方文档与源码，核验日期2026-10-28，固定提交为`1156b2752aaa28eafc0b4c4d387e63356793268d`。出处和精确原文按论点对应，教学配置与产品通用保证分别说明。
 
-- **[R1] [RabbitMQ tutorial - Work Queues](https://www.rabbitmq.com/tutorials/tutorial-two-python)** · RabbitMQ。用于工作任务延后执行、生产者与消费者的职责。[本轮固定源](https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/tutorials/tutorial-two-python.md)。
-- **[R2] [Queues](https://www.rabbitmq.com/docs/queues)** · RabbitMQ。用于队列持久性、消息保留与消费者关系。[本轮固定源](https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/docs/queues.md)。
-- **[R3] [Consumer Acknowledgements and Publisher Confirms](https://www.rabbitmq.com/docs/confirms)** · RabbitMQ。用于发布确认与消费确认的独立边界、手动消费确认及消息移除。[本轮固定源](https://github.com/rabbitmq/rabbitmq-website/blob/a284a068ab720672b40ceed40f3f151d9829fb70/docs/confirms.md)。
+- **[R1] [Introduction](https://kafka.apache.org/44/getting-started/introduction/)** · Apache Kafka，4.4.0。[固定原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)。用于生产者/消费者、分区追加、消费不删除及按主题保留。
+- **[R2] [Design](https://kafka.apache.org/44/design/design/)** · Apache Kafka，4.4.0。[固定原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)。用于消费者进度、处理后保存位置和失败窗口。
+- **[R3] [Producer Configs](https://kafka.apache.org/44/configuration/producer-configs/)** · Apache Kafka，4.4.0。[固定原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/producer-configs.md)。用于写入确认和最少同步副本条件；同时核对[ProducerConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java)及[TopicConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/config/TopicConfig.java)。
+- **[A1] [KafkaConsumer.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L286)** · Apache Kafka，4.4.0。[完整原文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java)。用于下一待读位置与手动提交的具体API说明。
