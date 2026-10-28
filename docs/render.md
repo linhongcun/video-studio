@@ -81,11 +81,11 @@ MySQL系列使用[独立系列模板](../episodes-codex/_shared/mysql-covers/REA
 
 Kafka消息队列系列使用[独立封面模板](../episodes-codex/_shared/kafka-covers/README.md)，以暖炭灰、橙、冰蓝、Kafka标识和稳定MQ编号区分单集。正文与封面共用不可变style-v1；当前制作修订按meta.sourcePath定位。参考资料通过[Kafka配色入口](../episodes-codex/_shared/kafka-video/README.md)接入原题/机构卡，不改写旧引擎或旧冻结。
 
-Redis系列使用[独立模板](../episodes-codex/_shared/redis-covers/README.md)，固定冷银灰底、Redis红、石墨文字、原始Redis标记与真实EP编号。按当前meta.sourcePath定位实际修订安装，封面独立记录输入/产物SHA；旧工程算法编号、covers.json与编码冻结保持历史身份。当前跳表图按前向链接示例表达查55时在40下降、停于50/60之间，不将示意图当作小集合默认内存布局。新增题扩展同一catalog与机制图，不另起一套风格。
+Redis系列使用[当前独立模板](../episodes-codex/_shared/redis-covers-v2/README.md)，固定冷银灰底、Redis红、石墨文字、原始Redis标记与真实EP编号。按当前meta.sourcePath定位实际修订安装，封面独立记录输入/产物SHA；旧工程算法编号、covers.json与编码冻结保持历史身份。当前跳表图按前向链接示例表达查55时在40下降、停于50/60之间，不将示意图当作小集合默认内存布局。当前模板复用v1固定样式，默认生成新归入的EP.08/09，将其安装至各自`revisions/redis-style/`与发布根；EP.40封面保持原字节。新增题扩展当前catalog与机制图，不改旧v1输入。
 
 Redis正文沿[独立视觉入口](../episodes-codex/_shared/redis-video/README.md)读取不可变配色快照，当前实际入口为层高修订中的`remotion/src/redis-style/index.ts`，媒体与新冻结独立放`revisions/redis-style/`。保留原分镜、两种层高、完整AAC及旧封面输入，资料页同色；不要用历史`src/index.ts`或原混音命令覆盖新产物。
 
-当前Redis发布片另外通过[BT.709色彩派生](../episodes-codex/_shared/redis-video-bt709/README-v2.md)生成：独立冻结原正文与原清单，将全范围BT.601画面转换为有限范围BT.709，明确逐帧颜色参数，再追加同编码资料页。原视觉产物保持，实际发布使用`revisions/redis-style-bt709-v2/video.mp4`；不能只修改颜色标签。核对原时序、完整AAC与实际网页取色，静帧颜色正确不代表浏览器解码颜色正确。
+当前跳表发布片另外通过[BT.709色彩派生](../episodes-codex/_shared/redis-video-bt709/README-v2.md)生成：独立冻结原正文与原清单，将全范围BT.601画面转换为有限范围BT.709，明确逐帧颜色参数，再追加同编码资料页。原视觉产物保持，实际发布使用`revisions/redis-style-bt709-v2/video.mp4`；不能只修改颜色标签。核对原时序、完整AAC与实际网页取色，静帧颜色正确不代表浏览器解码颜色正确。
 
 其他系列封面由当期 `remotion/src/Cover.tsx` 和 `covers.json` 定义。当前 EP.14 的实际入口是：
 
@@ -97,6 +97,8 @@ npm run covers
 该脚本生成上层目录的 `cover-16x9.png/jpg`、`cover-4x3.png/jpg`、`cover-3x4.png/jpg`，并将 3:4 JPG 复制为 `poster.jpg`。其他期以自己的脚本为准。
 
 逐份打开实际产物，检查文字、裁切、水印和 4:3 安全区：内容 x 315..1125、底边 y < 918，且无 `COPYFIT`。水印按该尺寸的 watermarkZone，不能为了塞入内容安全区挪动水印。`meta.poster` 决定站点海报文件，`covers.json` 的 poster 约定也要一起核对。
+
+Redis应用场景EP.08/09使用[独立缓存视觉入口](../episodes-codex/_shared/redis-cache-video/README.md)，新源码在各期`remotion/src/redis-style/`，清单和最终媒体在`revisions/redis-style/`。默认生产先渲染无声画面、真实转换为有限范围BT.709并明确逐帧参数，再完整流拷贝原AAC，追加同编码原题/机构资料页；不用事后改旧冻结。新封面与媒体独立安装，原模型、分镜、文章发布稿、素材身份与两类缓存流程保留。
 
 ## 共享工具回归
 
