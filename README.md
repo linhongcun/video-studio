@@ -6,7 +6,7 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 
 - 线上站点：https://linhongcun.github.io/video-studio/
 - 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。默认不发快手（STATUS 中逐次明确授权除外），不发 X。小红书由村长自己发，运营和 Codex 默认不发（STATUS 中逐次明确授权除外）。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
-- 站点功能：按系列浏览（计算机网络 / Redis / 扛住高峰 / MySQL / 分布式 / Agent 开发 / LeetCode · 算法可视化 / 设计模式 / 趣味推理 / 工程算法 / 消息队列）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
+- 站点功能：按系列浏览（计算机网络 / Redis / 高并发、高可用、高性能 / MySQL / 分布式 / Agent 开发 / LeetCode · 算法可视化 / 设计模式 / 趣味推理 / 工程算法 / 消息队列）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
 - 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
@@ -32,10 +32,10 @@ GitHub 主干、Release 和站点沿用用户持续授权，完成制作与检�
 | 8 | Redis 系列 | 数据库明明有数据，为什么还要再存一份？ | [server-cache](https://linhongcun.github.io/video-studio/episodes/server-cache/) | 2026-10-13 |
 | 9 | Redis 系列 | 后台改了价格，页面怎么还是旧的？ | [cache-consistency](https://linhongcun.github.io/video-studio/episodes/cache-consistency/) | 2026-10-16 |
 | 10 | 消息队列 | 订单已提交，为什么还没处理完？ | [message-queue](https://linhongcun.github.io/video-studio/episodes/message-queue/) | 2026-10-13 |
-| 11 | 扛住高峰 | 抢票时，为什么总提示系统繁忙？ | [rate-limit](https://linhongcun.github.io/video-studio/episodes/rate-limit/) | 2026-10-13 |
-| 12 | 扛住高峰 | 手一抖点了两次支付，为什么只扣一次钱？ | [idempotency](https://linhongcun.github.io/video-studio/episodes/idempotency/) | 2026-10-13 |
-| 13 | 扛住高峰 | 一个服务出故障，为什么整个网站没跟着崩？ | [circuit-breaker](https://linhongcun.github.io/video-studio/episodes/circuit-breaker/) | 2026-10-14 |
-| 14 | 扛住高峰 | 搜索页和结算页，为什么两个价不一样？ | [degradation](https://linhongcun.github.io/video-studio/episodes/degradation/) | 2026-10-13 |
+| 11 | 高并发、高可用、高性能 | 抢票时，为什么总提示系统繁忙？ | [rate-limit](https://linhongcun.github.io/video-studio/episodes/rate-limit/) | 2026-10-13 |
+| 12 | 高并发、高可用、高性能 | 手一抖点了两次支付，为什么只扣一次钱？ | [idempotency](https://linhongcun.github.io/video-studio/episodes/idempotency/) | 2026-10-13 |
+| 13 | 高并发、高可用、高性能 | 一个服务出故障，为什么整个网站没跟着崩？ | [circuit-breaker](https://linhongcun.github.io/video-studio/episodes/circuit-breaker/) | 2026-10-14 |
+| 14 | 高并发、高可用、高性能 | 搜索页和结算页，为什么两个价不一样？ | [degradation](https://linhongcun.github.io/video-studio/episodes/degradation/) | 2026-10-13 |
 | 15 | MySQL | 加个索引，为啥就快了？ | [db-index](https://linhongcun.github.io/video-studio/episodes/db-index/) | 2026-10-14 |
 | 16 | MySQL | 扣了钱，对方没到账？ | [db-transaction](https://linhongcun.github.io/video-studio/episodes/db-transaction/) | 2026-10-14 |
 | 17 | MySQL | 两个人抢最后一件货，听谁的？ | [db-lock](https://linhongcun.github.io/video-studio/episodes/db-lock/) | 2026-10-15 |
@@ -70,19 +70,23 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 ## 消息队列
 
-独立系列从任务提交、排队到处理完成讲一条消息怎样接力，可以单独观看，不要求先看「扛住高峰」。首期为[EP.10《订单已提交，为什么还没处理完？》](https://linhongcun.github.io/video-studio/episodes/message-queue/)，约2分03秒（含5秒参考资料卡）；系列页见[消息队列](https://linhongcun.github.io/video-studio/series/message-queue/)。制作入口见[本期工程](episodes-codex/message-queue/README.md)。
+独立系列从任务提交、排队到处理完成讲一条消息怎样接力，与其他系列并列，可以独立观看。首期为[EP.10《订单已提交，为什么还没处理完？》](https://linhongcun.github.io/video-studio/episodes/message-queue/)，约2分03秒（含5秒参考资料卡）；系列页见[消息队列](https://linhongcun.github.io/video-studio/series/message-queue/)。制作入口见[本期工程](episodes-codex/message-queue/README.md)。
+
+## 高并发、高可用、高性能
+
+[独立系列](https://linhongcun.github.io/video-studio/series/peak/)从限流、幂等、熔断与降级四期出发，理解高峰流量、重复请求和服务故障的处理过程与边界。全站采用“系列 → 视频”两层结构，首页并列展示系列，系列目录直接列视频，不再保留“系统原理”中间分组。原`peak`目录与EP.11–14链接、内容时间和媒体保持。布局、兼容与验证见[本轮记录](docs/archive/2026-10/flat-learning-series/README.md)。
 
 ## 计算机网络
 
-[计算机网络独立系列](https://linhongcun.github.io/video-studio/series/request/)以现有7篇Web通信入门内容为范围，从浏览器请求出发，讲解HTTP、HTTPS、DNS、登录态、CDN、负载均衡与浏览器缓存。EP.01–07沿原顺序独立学习，不再作为系统原理的章节或前后课；系统原理从限流开始，保留扛住高峰；服务端缓存与缓存一致性归入Redis应用场景。原`request`系列ID、URL、EP编号、文章、媒体与内容时间保留，分类与发布状态见[本轮记录](docs/archive/2026-10/network-standalone-series/README.md)。
+[计算机网络独立系列](https://linhongcun.github.io/video-studio/series/request/)以现有7篇Web通信入门内容为范围，从浏览器请求出发，讲解HTTP、HTTPS、DNS、登录态、CDN、负载均衡与浏览器缓存。EP.01–07沿原顺序独立学习，不再作为系统原理的章节或前后课；限流、幂等、熔断与降级归入“高并发、高可用、高性能”独立系列；服务端缓存与缓存一致性归入Redis应用场景。原`request`系列ID、URL、EP编号、文章、媒体与内容时间保留，分类与发布状态见[本轮记录](docs/archive/2026-10/network-standalone-series/README.md)。
 
 ## MySQL
 
-[MySQL独立系列](https://linhongcun.github.io/video-studio/series/database/)以MySQL 8.4为背景，从InnoDB索引、事务与锁，到MySQL单主异步复制，后续持续扩充MySQL工作原理与设计取舍；具体存储引擎、复制模式和适用条件按单集说明。现有[EP.15 索引](https://linhongcun.github.io/video-studio/episodes/db-index/)、[EP.16 事务](https://linhongcun.github.io/video-studio/episodes/db-transaction/)、[EP.17 锁](https://linhongcun.github.io/video-studio/episodes/db-lock/)与[EP.18 主从复制](https://linhongcun.github.io/video-studio/episodes/db-replication/)归入这一独立学习方向，不再作为系统原理的章节或前后课。原期号、URL与首发身份保留，系列目录只展示实际已发布内容。
+[MySQL独立系列](https://linhongcun.github.io/video-studio/series/database/)以MySQL 8.4为背景，从InnoDB索引、事务与锁，到MySQL单主异步复制，后续持续扩充MySQL工作原理与设计取舍；具体存储引擎、复制模式和适用条件按单集说明。现有[EP.15 索引](https://linhongcun.github.io/video-studio/episodes/db-index/)、[EP.16 事务](https://linhongcun.github.io/video-studio/episodes/db-transaction/)、[EP.17 锁](https://linhongcun.github.io/video-studio/episodes/db-lock/)与[EP.18 主从复制](https://linhongcun.github.io/video-studio/episodes/db-replication/)归入这一独立系列，不再作为系统原理的章节或前后课。原期号、URL与首发身份保留，系列目录只展示实际已发布内容。
 
 ## 分布式
 
-[分布式独立系列](https://linhongcun.github.io/video-studio/series/distributed/)从分库分表、分布式 ID，进入事务入门与2PC、TCC、Saga、Outbox四种实现，共7篇已发布内容。系列内沿原学习顺序衔接，不再作为系统原理的章节或前后课；系统原理现保留扛住高峰；后台缓存两课归入Redis应用场景。原URL、EP编号、内容时间与媒体保留，历史事务合集继续只供回看。分类与发布状态见[本轮记录](docs/archive/2026-10/distributed-standalone-series/README.md)。
+[分布式独立系列](https://linhongcun.github.io/video-studio/series/distributed/)从分库分表、分布式 ID，进入事务入门与2PC、TCC、Saga、Outbox四种实现，共7篇已发布内容。系列内沿原学习顺序衔接，不再作为系统原理的章节或前后课；限流、幂等、熔断与降级归入“高并发、高可用、高性能”独立系列；后台缓存两课归入Redis应用场景。原URL、EP编号、内容时间与媒体保留，历史事务合集继续只供回看。分类与发布状态见[本轮记录](docs/archive/2026-10/distributed-standalone-series/README.md)。
 
 ## Redis
 

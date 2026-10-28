@@ -32,7 +32,8 @@ function episodeRuntime(showDrafts) {
 function learningRuntime(episodes) {
   const source = stripImports(fs.readFileSync(path.join(site, 'src/lib/learning.ts'), 'utf8'));
   const {code} = transformSync(source, {loader: 'ts'});
-  return vm.compileFunction(`${code}\nreturn {getLearningTracks, getTrackForSeries};`, ['getSeries', 'BASE'])(episodes.getSeries, '/video-studio/');
+  return vm.compileFunction(`${code}\nreturn {getLearningSeries, getLearningTracks, getTrackForSeries};`, ['getSeries', 'BASE'])(
+    episodes.getSeries, '/video-studio/');
 }
 const releasesSource = stripImports(fs.readFileSync(path.join(site, 'src/lib/releases.ts'), 'utf8'));
 const releaseCode = transformSync(releasesSource, {loader: 'ts'}).code;
@@ -323,51 +324,59 @@ if (process.argv.includes('--built')) {
   }
 }
 
-// Exercise the actual direction loader against published metadata. Every current
-// lesson must have one clear home; previous/next may cross chapters within that
-// direction, but must never imply that another direction is a prerequisite.
+// Exercise the actual series loader against published metadata. Every current
+// lesson has one series home and previous/next stays within that series.
 const learning = learningRuntime(published);
-const tracks = learning.getLearningTracks();
+const learningSeries = learning.getLearningSeries();
 const hasPublishedAgent = liveLessons.some((lesson) => lesson.series === 'agent');
 const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
-const directionForSeries = {
+const legacyTrackForSeries = {
   request: 'network', peak: 'systems', database: 'database', distributed: 'distributed',
   agent: 'agent', leetcode: 'algorithms', 'design-patterns': 'patterns', puzzles: 'puzzles',
   'engineering-algorithms': 'engineering', 'message-queue': 'message-queue', redis: 'redis',
 };
-const expectedDirections = new Set(liveLessons.map((lesson) => directionForSeries[lesson.series]));
-assert.equal(expectedDirections.has(undefined), false, 'Every published series needs a known learning direction');
-assert.deepEqual(Array.from(tracks, (track) => track.id).sort(), [...expectedDirections].sort(), 'Only nonempty published learning directions must be available');
-assert.ok(learningRuntime(preview).getLearningTracks().every((track) => track.episodes.every((e) => !e.draft && !e.archived)),
-  'Draft preview must not advertise unfinished lessons as published direction content');
+const expectedSeries = new Set(liveLessons.map((lesson) => lesson.series));
+assert.equal(expectedSeries.has(undefined), false, 'Every published lesson needs a primary series');
+assert.deepEqual(Array.from(learningSeries, (series) => series.id).sort(), [...expectedSeries].sort(),
+  'Each nonempty published series must have exactly one learning entry');
+assert.deepEqual(Array.from(learning.getLearningTracks(), (series) => series.id), Array.from(learningSeries, (series) => series.id),
+  'The compatibility loader must expose the same flat series catalog');
+assert.ok(learningRuntime(preview).getLearningSeries().every((series) => series.episodes.every((e) => !e.draft && !e.archived)),
+  'Draft preview must not advertise unfinished lessons as published series content');
 assert.equal(learning.getTrackForSeries(), undefined);
 assert.equal(learning.getTrackForSeries('unknown-series'), undefined);
-const assigned = tracks.flatMap((track) => Array.from(track.episodes, (e) => e.slug));
-assert.equal(new Set(assigned).size, assigned.length, 'A lesson must not appear in multiple directions');
-assert.deepEqual([...assigned].sort(), slugs(liveLessons).sort(), 'Every current lesson must be reachable through a direction');
-for (const track of tracks) {
-  assert.ok(track.start && track.episodes.some((e) => e.slug === track.start.slug), `${track.title} needs a published starting lesson`);
-  assert.ok(track.episodes.every((e) => !e.draft && !e.archived), `${track.title} must not advertise unavailable lessons`);
-  for (const series of track.series) {
-    assert.equal(learning.getTrackForSeries(series.id)?.id, track.id);
-  }
-  for (const lesson of track.episodes) {
+const assigned = learningSeries.flatMap((series) => Array.from(series.episodes, (e) => e.slug));
+assert.equal(new Set(assigned).size, assigned.length, 'A lesson must not appear in multiple series entries');
+assert.deepEqual([...assigned].sort(), slugs(liveLessons).sort(), 'Every current lesson must be reachable through its series');
+const seriesMetadata = readJson(path.join(site, 'src/content/series.json'));
+for (const series of learningSeries) {
+  assert.equal(series.title, seriesMetadata[series.id].title, 'Series titles must use the canonical metadata');
+  assert.equal(series.description, seriesMetadata[series.id].description, 'Series descriptions must use the canonical metadata');
+  assert.equal(series.href, `/video-studio/series/${series.id}/`, 'A series entry must lead directly to its video catalog');
+  assert.equal(series.start?.slug, series.episodes[0]?.slug, `${series.title} needs its first published lesson as the starting lesson`);
+  assert.ok(series.episodes.every((e) => !e.draft && !e.archived && e.series === series.id),
+    `${series.title} must contain only its own published lessons`);
+  assert.equal(learning.getTrackForSeries(series.id)?.id, series.id, 'Compatibility lookups must retain the real series identity');
+  for (const lesson of series.episodes) {
     const nav = published.seriesNav(lesson);
     for (const neighbor of [nav?.prev, nav?.next].filter(Boolean)) {
-      assert.equal(learning.getTrackForSeries(neighbor.series)?.id, track.id, `${lesson.slug} must not lead into unrelated ${neighbor.series}`);
+      assert.equal(neighbor.series, series.id, `${lesson.slug} must not lead into unrelated ${neighbor.series}`);
     }
   }
 }
-const systemsTrack = tracks.find((track) => track.id === 'systems');
-assert.equal(systemsTrack.start.slug, 'rate-limit', 'System fundamentals should start with traffic governance');
-assert.deepEqual(Array.from(systemsTrack.series, (series) => series.id), ['peak'],
-  'System fundamentals keep traffic governance after caching moves to Redis');
-const systemsSlugs = ['rate-limit', 'idempotency', 'circuit-breaker', 'degradation'];
-assert.deepEqual(slugs(systemsTrack.episodes), systemsSlugs, 'System fundamentals preserve the traffic-governance lesson order');
-const redisTrack = tracks.find((track) => track.id === 'redis');
-assert.deepEqual(slugs(redisTrack.episodes), ['server-cache', 'cache-consistency', 'redis-skiplist'],
+assert.equal(learningSeries.some((series) => series.id === 'systems' || series.title === '系统原理'), false,
+  'System fundamentals must not remain an intermediate grouping');
+const peakSeries = learningSeries.find((series) => series.id === 'peak');
+assert.ok(peakSeries, 'Traffic governance needs its own series');
+assert.equal(peakSeries.title, '高并发、高可用、高性能');
+assert.equal(peakSeries.start.slug, 'rate-limit');
+assert.equal(peakSeries.crossSeriesNavigation, false, 'The renamed series must explicitly stop cross-series lesson navigation');
+const peakSlugs = ['rate-limit', 'idempotency', 'circuit-breaker', 'degradation'];
+assert.deepEqual(slugs(peakSeries.episodes), peakSlugs, 'The renamed series preserves all four lessons and their order');
+const redisSeries = learningSeries.find((series) => series.id === 'redis');
+assert.deepEqual(slugs(redisSeries.episodes), ['server-cache', 'cache-consistency', 'redis-skiplist'],
   'Redis includes both caching application scenarios and its existing internal-mechanism lesson');
-assert.equal(redisTrack.start.slug, 'server-cache');
+assert.equal(redisSeries.start.slug, 'server-cache');
 assert.equal(learning.getTrackForSeries('cache'), undefined, 'Retired cache grouping must not remain a second home');
 for (const [slug, scenario] of [['server-cache', '商品查询缓存'], ['cache-consistency', '商品价格更新与缓存一致性']]) {
   const lesson = liveLessons.find((lesson) => lesson.slug === slug);
@@ -375,19 +384,18 @@ for (const [slug, scenario] of [['server-cache', '商品查询缓存'], ['cache-
   assert.equal(lesson.applicationScenario, scenario);
   assert.ok(lesson.tags.includes('Redis'));
 }
-for (const [index, lesson] of redisTrack.episodes.entries()) {
+for (const [index, lesson] of redisSeries.episodes.entries()) {
   const nav = published.seriesNav(lesson);
-  assert.equal(nav.prev?.slug, redisTrack.episodes[index - 1]?.slug, 'Redis previous lessons stay inside the series');
-  assert.equal(nav.next?.slug, redisTrack.episodes[index + 1]?.slug, 'Redis next lessons stay inside the series');
+  assert.equal(nav.prev?.slug, redisSeries.episodes[index - 1]?.slug, 'Redis previous lessons stay inside the series');
+  assert.equal(nav.next?.slug, redisSeries.episodes[index + 1]?.slug, 'Redis next lessons stay inside the series');
   assert.equal(nav.prevCross, undefined);
   assert.equal(nav.nextCross, undefined);
 }
-const networkTrack = tracks.find((track) => track.id === 'network');
-assert.ok(networkTrack, 'Computer networking needs an independent learning direction');
-assert.deepEqual(Array.from(networkTrack.series, (series) => series.id), ['request']);
-assert.deepEqual(slugs(networkTrack.episodes), networkSlugs, 'Computer networking preserves all seven published lessons in their established order');
-assert.equal(networkTrack.start.slug, 'http-request');
-assert.equal(learning.getTrackForSeries('request')?.id, 'network');
+const networkSeries = learningSeries.find((series) => series.id === 'request');
+assert.ok(networkSeries, 'Computer networking needs an independent series');
+assert.deepEqual(slugs(networkSeries.episodes), networkSlugs, 'Computer networking preserves all seven published lessons in their established order');
+assert.equal(networkSeries.start.slug, 'http-request');
+assert.equal(learning.getTrackForSeries('request')?.id, 'request');
 for (const runtime of [preview, published]) {
   for (const [index, slug] of networkSlugs.entries()) {
     const lesson = runtime.getEpisodes().find((episode) => episode.slug === slug);
@@ -397,17 +405,18 @@ for (const runtime of [preview, published]) {
     assert.equal(nav.prevCross, undefined, `${slug}: computer networking must not inherit another direction`);
     assert.equal(nav.nextCross, undefined, `${slug}: computer networking must not lead into another direction`);
   }
-  for (const [index, slug] of systemsSlugs.entries()) {
+  for (const [index, slug] of peakSlugs.entries()) {
     const nav = runtime.seriesNav(runtime.getEpisodes().find((episode) => episode.slug === slug));
-    assert.equal(nav.prev?.slug, systemsSlugs[index - 1], `${slug}: previous lesson must preserve the systems path`);
-    assert.equal(nav.next?.slug, systemsSlugs[index + 1], `${slug}: next lesson must preserve the systems path`);
+    assert.equal(nav.prev?.slug, peakSlugs[index - 1], `${slug}: previous lesson must preserve the traffic-governance order`);
+    assert.equal(nav.next?.slug, peakSlugs[index + 1], `${slug}: next lesson must preserve the traffic-governance order`);
+    assert.equal(nav.prevCross, undefined, `${slug}: the renamed series must not inherit another series`);
+    assert.equal(nav.nextCross, undefined, `${slug}: the renamed series must not lead into another series`);
   }
 }
-const distributedTrack = tracks.find((track) => track.id === 'distributed');
-assert.ok(distributedTrack, 'Distributed systems need an independent learning direction');
-assert.deepEqual(Array.from(distributedTrack.series, (series) => series.id), ['distributed']);
-assert.deepEqual(slugs(distributedTrack.episodes), distributedSlugs, 'Distributed systems preserve all seven published lessons in their established order');
-assert.equal(distributedTrack.start.slug, 'db-sharding');
+const distributedSeries = learningSeries.find((series) => series.id === 'distributed');
+assert.ok(distributedSeries, 'Distributed systems need an independent series');
+assert.deepEqual(slugs(distributedSeries.episodes), distributedSlugs, 'Distributed systems preserve all seven published lessons in their established order');
+assert.equal(distributedSeries.start.slug, 'db-sharding');
 assert.equal(learning.getTrackForSeries('distributed')?.id, 'distributed');
 for (const runtime of [preview, published]) {
   for (const [index, slug] of distributedSlugs.entries()) {
@@ -419,42 +428,42 @@ for (const runtime of [preview, published]) {
     assert.equal(nav.nextCross, undefined, `${slug}: distributed systems must not lead into another direction`);
   }
   assert.equal(runtime.seriesNav(runtime.getEpisodes().find((lesson) => lesson.slug === 'degradation')).next, undefined,
-    'The final systems lesson must not lead into distributed systems');
+    'The final traffic-governance lesson must not lead into distributed systems');
 }
 const mq = liveLessons.find((lesson) => lesson.slug === 'message-queue');
 assert.equal(mq.series, 'message-queue', 'MQ must have its own primary series');
 assert.equal(learning.getTrackForSeries(mq.series)?.id, 'message-queue');
-assert.equal(tracks.find((track) => track.id === 'message-queue')?.start.slug, mq.slug);
-assert.equal(tracks.find((track) => track.id === 'systems').episodes.some((lesson) => lesson.slug === mq.slug), false);
+assert.equal(learningSeries.find((series) => series.id === 'message-queue')?.start.slug, mq.slug);
+assert.equal(peakSeries.episodes.some((lesson) => lesson.slug === mq.slug), false);
 assert.equal(published.getSeries().find((series) => series.id === 'peak').episodes.some((lesson) => lesson.slug === mq.slug), false);
 assert.equal(published.seriesNav(mq).prev, undefined, 'MQ must not inherit a systems prerequisite');
 assert.equal(published.seriesNav(mq).next, undefined, 'The only MQ lesson must not lead into systems');
-const databaseTrack = tracks.find((track) => track.id === 'database');
+const databaseSeries = learningSeries.find((series) => series.id === 'database');
 const databaseSlugs = ['db-index', 'db-transaction', 'db-lock', 'db-replication'];
-assert.deepEqual(slugs(databaseTrack.episodes).slice(0, databaseSlugs.length), databaseSlugs, 'Database keeps its existing lesson order while allowing new lessons');
-assert.equal(databaseTrack.start.slug, 'db-index');
-assert.equal(tracks.find((track) => track.id === 'systems').series.some((series) => series.id === 'database'), false);
-for (const [index, lesson] of databaseTrack.episodes.entries()) {
+assert.deepEqual(slugs(databaseSeries.episodes).slice(0, databaseSlugs.length), databaseSlugs, 'Database keeps its existing lesson order while allowing new lessons');
+assert.equal(databaseSeries.start.slug, 'db-index');
+assert.equal(peakSeries.episodes.some((lesson) => lesson.series === 'database'), false);
+for (const [index, lesson] of databaseSeries.episodes.entries()) {
   const nav = published.seriesNav(lesson);
-  assert.equal(nav.prev?.slug, databaseTrack.episodes[index - 1]?.slug, 'Database previous lessons stay inside the series');
-  assert.equal(nav.next?.slug, databaseTrack.episodes[index + 1]?.slug, 'Database next lessons stay inside the series');
+  assert.equal(nav.prev?.slug, databaseSeries.episodes[index - 1]?.slug, 'Database previous lessons stay inside the series');
+  assert.equal(nav.next?.slug, databaseSeries.episodes[index + 1]?.slug, 'Database next lessons stay inside the series');
 }
-const agentTrack = tracks.find((track) => track.id === 'agent');
+const agentSeries = learningSeries.find((series) => series.id === 'agent');
 if (hasPublishedAgent) {
-  assert.ok(agentTrack, 'New published Agent lessons need their own learning direction');
-  assert.equal(retiredAgentSlugs.includes(agentTrack.start.slug), false, 'A new Agent direction must not start with a retired lesson');
+  assert.ok(agentSeries, 'New published Agent lessons need their own series');
+  assert.equal(retiredAgentSlugs.includes(agentSeries.start.slug), false, 'A new Agent series must not start with a retired lesson');
   assert.equal(learning.getTrackForSeries('agent')?.id, 'agent');
 } else {
-  assert.equal(agentTrack, undefined, 'An empty Agent direction must not advertise a removed starting lesson');
+  assert.equal(agentSeries, undefined, 'An empty Agent series must not advertise a removed starting lesson');
   assert.equal(learning.getTrackForSeries('agent'), undefined, 'The future Agent series must remain hidden until a new lesson is published');
 }
-assert.equal(tracks.find((t) => t.id === 'algorithms')?.start.slug, algorithmSlug);
-assert.equal(tracks.find((t) => t.id === 'patterns')?.start.slug, 'strategy-pattern', 'Design patterns must start with the published strategy lesson');
-assert.equal(learning.getTrackForSeries('design-patterns')?.id, 'patterns', 'Design patterns have their own learning direction');
+assert.equal(learningSeries.find((series) => series.id === 'leetcode')?.start.slug, algorithmSlug);
+assert.equal(learningSeries.find((series) => series.id === 'design-patterns')?.start.slug, 'strategy-pattern', 'Design patterns must start with the published strategy lesson');
+assert.equal(learning.getTrackForSeries('design-patterns')?.id, 'design-patterns', 'Design patterns retain their real series identity');
 if (puzzle) {
   assert.equal(puzzle.series, 'puzzles');
   assert.equal(learning.getTrackForSeries('puzzles')?.id, 'puzzles', 'Puzzles have their own learning direction');
-  assert.equal(tracks.find((track) => track.id === 'puzzles')?.start.slug, 'horse-racing', 'Puzzles start with the published horse-racing lesson');
+  assert.equal(learningSeries.find((series) => series.id === 'puzzles')?.start.slug, 'horse-racing', 'Puzzles start with the published horse-racing lesson');
   assert.equal(published.seriesNav(puzzle).prev, undefined, 'The first puzzle must not inherit a technical prerequisite');
   const puzzleChain = liveLessons.filter((lesson) => lesson.series === 'puzzles').sort(published.compareLessons);
   for (const [index, lesson] of puzzleChain.entries()) {
@@ -463,7 +472,7 @@ if (puzzle) {
     assert.equal(nav.next?.slug, puzzleChain[index + 1]?.slug, 'The last puzzle must not lead into another learning direction');
   }
 }
-console.log(`${tracks.length} learning directions passed: every published lesson has one home; independent directions remain outside the systems path.`);
+console.log(`${learningSeries.length} flat learning series passed: every published lesson has one series home; all lesson navigation remains within its series.`);
 
 if (process.argv.includes('--built')) {
   const dist = path.join(site, 'dist');
@@ -471,6 +480,12 @@ if (process.argv.includes('--built')) {
   const home = readPage('index.html');
   const learn = readPage('learn/index.html');
   const library = readPage('library/index.html');
+  const seriesFilter = /<select\b(?=[^>]*\bname="series")[^>]*>([\s\S]*?)<\/select>/.exec(library)?.[1];
+  assert.ok(seriesFilter, 'The library must expose its series filter');
+  const seriesChoices = [...seriesFilter.matchAll(/<option\b([^>]*)>([\s\S]*?)<\/option>/g)].map((option) => ({
+    value: /\bvalue="([^"]*)"/.exec(option[1])?.[1],
+    label: option[2].trim(),
+  }));
   for (const slug of retiredAgentSlugs) {
     assert.equal(fs.existsSync(path.join(dist, `episodes/${slug}`)), false, `${slug} page, captions and copied media must be absent from the build`);
     for (const [name, page] of [['home', home], ['learn', learn], ['library', library], ['rss', readPage('rss.xml')]]) {
@@ -482,19 +497,44 @@ if (process.argv.includes('--built')) {
   for (const href of ['/video-studio/learn/', '/video-studio/library/']) {
     assert.ok(home.includes(`href="${href}"`), `Home must expose ${href}`);
   }
-  for (const track of tracks) {
-    const fragment = new URL(track.href, 'https://linhongcun.github.io').hash.slice(1);
-    assert.ok(learn.includes(`id="${fragment}"`), `Missing destination for ${track.href}`);
-    assert.ok(home.includes(`href="${track.href}"`), `Home must expose ${track.title}`);
-    assert.ok(learn.includes(`href="/video-studio/episodes/${track.start.slug}/"`), `${track.title} must offer its published starting lesson`);
-    for (const series of track.series) {
-      assert.ok(learn.includes(`href="/video-studio/series/${series.id}/"`), `${track.title} must expose chapter ${series.title}`);
-      assert.ok(fs.existsSync(path.join(dist, `series/${series.id}/index.html`)), `Missing preserved series URL: ${series.id}`);
+  const breadcrumb = (page) => {
+    const match = /<nav\b[^>]*aria-label="面包屑"[^>]*>([\s\S]*?)<\/nav>/.exec(page);
+    assert.ok(match, 'A catalog or lesson page must expose its breadcrumb');
+    assert.equal(match[1].includes('/learn/#'), false, 'Breadcrumbs must not route through a retired intermediate direction');
+    return match[1];
+  };
+  for (const series of learningSeries) {
+    assert.ok(learn.includes(`id="${series.id}"`), `Missing series anchor: ${series.id}`);
+    const legacyAnchor = legacyTrackForSeries[series.id];
+    if (legacyAnchor) assert.ok(learn.includes(`id="${legacyAnchor}"`), `Missing destination for the shared /learn/#${legacyAnchor} link`);
+    assert.ok(home.includes(`href="${series.href}"`), `Home must lead directly to ${series.title}`);
+    assert.ok(learn.includes(`href="${series.href}"`), `Learning catalog must expose ${series.title}`);
+    assert.ok(learn.includes(`href="/video-studio/episodes/${series.start.slug}/"`), `${series.title} must offer its published starting lesson`);
+    assert.ok(seriesChoices.some((choice) => choice.value === series.id && choice.label === series.title),
+      `Missing flat series filter: ${series.title}`);
+    const seriesPage = readPage(`series/${series.id}/index.html`);
+    breadcrumb(seriesPage);
+    for (const lesson of series.episodes) {
+      assert.ok(seriesPage.includes(`href="/video-studio/episodes/${lesson.slug}/"`), `${series.title} is missing ${lesson.slug}`);
     }
   }
   for (const lesson of liveLessons) {
     assert.ok(library.includes(`href="/video-studio/episodes/${lesson.slug}/"`), `Full library is missing ${lesson.slug}`);
+    assert.ok(breadcrumb(readPage(`episodes/${lesson.slug}/index.html`)).includes(`href="/video-studio/series/${lesson.series}/"`),
+      `${lesson.slug} must link directly to its own series in the breadcrumb`);
   }
+  assert.equal(/<select\b[^>]*name="track"/.test(library), false, 'The library must not retain an intermediate learning-direction filter');
+  assert.equal(/<optgroup\b/.test(library), false, 'Series choices must form one flat list');
+  assert.equal(home.includes('系统原理'), false, 'Home must use the independent series name');
+  assert.equal(learn.includes('系统原理'), false, 'Learning catalog must use the independent series name');
+  assert.equal(library.includes('系统原理'), false, 'Library must use the independent series name');
+  for (const page of [home, learn, library, readPage('series/peak/index.html')]) {
+    assert.ok(page.includes('高并发、高可用、高性能'), 'The renamed series must be discoverable throughout the current catalog');
+  }
+  assert.ok(learn.includes('id="cache"'), 'The former cache learning anchor must remain addressable');
+  const cacheRedirect = readPage('series/cache/index.html');
+  assert.ok(cacheRedirect.includes('http-equiv="refresh"') && cacheRedirect.includes('url=/video-studio/series/redis/'),
+    'The historical cache series URL must continue redirecting to Redis');
   assert.equal(library.includes(`/episodes/${archiveSlug}/`), false, 'Historical compilation must stay outside the current library');
-  console.log('Built navigation passed: home, direction anchors, published starting lessons, all chapter URLs and the complete current library.');
+  console.log('Built navigation passed: direct series entries, legacy learning anchors, flat series filters, lesson breadcrumbs, cache redirect and complete current library.');
 }
