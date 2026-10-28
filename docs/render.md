@@ -81,6 +81,8 @@ MySQL系列使用[独立系列模板](../episodes-codex/_shared/mysql-covers/REA
 
 Kafka消息队列系列使用[独立封面模板](../episodes-codex/_shared/kafka-covers/README.md)，以暖炭灰、橙、冰蓝、Kafka标识和稳定MQ编号区分单集。正文与封面共用不可变style-v1；当前制作修订按meta.sourcePath定位。参考资料通过[Kafka配色入口](../episodes-codex/_shared/kafka-video/README.md)接入原题/机构卡，不改写旧引擎或旧冻结。
 
+Redis系列使用[独立模板](../episodes-codex/_shared/redis-covers/README.md)，固定冷银灰底、Redis红、石墨文字、原始Redis标记与真实EP编号。按当前meta.sourcePath定位实际修订安装，封面独立记录输入/产物SHA；旧工程算法编号、covers.json与编码冻结保持历史身份。当前跳表图按前向链接示例表达查55时在40下降、停于50/60之间，不将示意图当作小集合默认内存布局。新增题扩展同一catalog与机制图，不另起一套风格。
+
 其他系列封面由当期 `remotion/src/Cover.tsx` 和 `covers.json` 定义。当前 EP.14 的实际入口是：
 
 ```sh
