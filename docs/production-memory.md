@@ -2,7 +2,7 @@
 
 ## Redis系列封面统一（2026-10-28）
 
-用户要求先同步最新代码，再统一Redis系列封面。从clean最新2b418a9d/v0.85.1开工，当前独立系列仅《Redis 跳表》EP.40。使用冷银灰、Redis红、石墨文字与原始Redis标记，沿真实EP编号扩展，不将历史工程算法编号改写为新系列顺序；现有正文、完整题名、日期、URL与冻结保持。新题沿[共享入口](../episodes-codex/_shared/redis-covers/README.md)继续；本轮只做封面，未启动未来Redis候选制作。实际检查与发布状态见[本轮记录](archive/2026-10/redis-cover-style/README.md)，尚无用户新样式观看结论。
+用户要求先同步最新代码，再统一Redis系列封面。从clean最新2b418a9d/v0.85.1开工，当前独立系列仅《Redis 跳表》EP.40。使用冷银灰、Redis红、石墨文字与原始Redis标记，沿真实EP编号扩展，不将历史工程算法编号改写为新系列顺序；现有正文、完整题名、日期、URL与冻结保持。新题沿[共享入口](../episodes-codex/_shared/redis-covers/README.md)继续；本轮只做封面，未启动未来Redis候选制作。3比例/9文字压力、11安装图/2清单、2883保护/436冻结和完整站点检查通过；发布前整合分布式系列a442ab1c/v0.86.0，24新路径与保护/冻结零交集，版本顺延v0.86.1。实际检查与发布状态见[本轮记录](archive/2026-10/redis-cover-style/README.md)，尚无用户新样式观看结论。
 
 ## LeetCode正文延续封面（2026-10-28）
 
