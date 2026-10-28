@@ -1,6 +1,6 @@
 # Kafka系列方向、MQ01重制与统一视觉
 
-日期：2026-10-28（北京时间）。本地制作、正式媒体和站点验收已通过，当前待GitHub发布与线上回执。
+日期：2026-10-28（北京时间）。本地制作、正式媒体和站点验收已通过，已按v0.84.1发布并完成线上核验。
 
 从clean最新d7a5d768/v0.83.1开工，保留其他线程已上线的趣味推理新正文和所有系列。用户先要求MQ统一封面，随后明确收敛全系列到Kafka，并选择同步重制现有MQ01后再换封面。本轮保留EP.10、message-queue URL、原标题与创建/首发身份；新Kafka源在独立kafka-intro修订，旧root/mq-intro媒体、脚本、来源和冻结不改。
 
@@ -22,10 +22,20 @@
 - 第二次完整站点build通过49参考输出、48文章、74精确引文、55图；首次发现article-only来源副本缺episode，发布副本仅增身份键并记录前后SHA，160冻结源不改。学习路径与既有Release解析回归通过。
 - 1440/390共50定向UI检查和20次实际RVC/ffprobe精确PTS通过：播放/暂停、4Figure/4章节、24VTT与附录零cue、原文浮层/键盘/手机、Fullscreen API均过。实际代表截图已由独立复核与root查看；未测物理手机和原生全屏按钮。HTTP日志两次切页keepalive连接重置保留，不是UI失败。
 
-发布与线上完整GET结果后续按实际回执追加。
+发布与线上完整GET结果见下方实际回执。
 
 ## 发布前最新主干整合
 
 发布前再次fetch得到MySQL系列PR #409的`3b0ac58f` / v0.84.0，整合提交为`42fe01c2`，本轮最终发布版本顺延v0.84.1。新主干与Kafka160/旧MQ277冻结路径交集为零；462个非共同改动文件完整字节与mode等新上游，12个共享文字/版本文件经22项语义复核保留双方。原1826保护里1778保留旧值，48个DB发布文件精确采用上游新值，原baseline不改写。
 
 整合后完整站点build、冻结verify与学习路径通过。47/48个不同审查集合内的实际播放器/图文/JS/CSS运行源不变，保留原v0.83.2的50UI/20PTS实际报告；新v0.84.1另做18项有界入口/筛选/媒体绑定与4次精确PTS，Kafka1课/MySQL4课正确。只补采4张媒体稳定截图消除原生loading弧，数值检查与旧报告身份不改写。事实、SHA和截图见upstream-integration与site-qa/integration-0.84.1；没有重渲未变Kafka媒体。
+
+## 发布与线上核验
+
+[PR #410](https://github.com/linhongcun/video-studio/pull/410)合并为`212b2520fec5662997f0a5323194584d55e8008e`，与已验证分支树一致，Squash保留Codex联合署名。附注tag与[Release v0.84.1](https://github.com/linhongcun/video-studio/releases/tag/v0.84.1)指向该提交；Release后手动触发的[Pages 40641869113](https://github.com/linhongcun/video-studio/actions/runs/40641869113)以同一HEAD完成构建和部署。
+
+北京时间2026-10-28 14:10:56完成15项规范URL完整GET，共10,925,485字节：7个Pages媒体/字幕/图片、6个实际页面和2个固定合并提交下载均通过。完整视频SHA与成片一致，更新日志包含实际Release链接；封面ZIP和预览图均按完整字节校验。实际响应与部署身份见[online-verification.json](online-verification.json)、[deployment-status.json](deployment-status.json)和[publication.json](publication.json)。
+
+[新版MQ01](https://linhongcun.github.io/video-studio/episodes/message-queue/)与[Kafka系列](https://linhongcun.github.io/video-studio/series/message-queue/)已上线。后续8期未开工；外平台作品未重发。此次回执归档只改文档与证据，不另升版本或触发部署。
+
+规划总览[#308](https://github.com/linhongcun/video-studio/issues/308)已在上线核验后，将MQ01更新为v0.84.1已交付；操作前正文SHA匹配上一轮回读，并在PATCH前再次核对。总览保持开放、其余8期未开工、MQ15原号和旧#309/14取消题保持；没有新增评论。前后原件与SHA见[交付状态回执](issue-planning/delivery-update/operation-receipt.json)。

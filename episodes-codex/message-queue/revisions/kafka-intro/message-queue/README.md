@@ -26,3 +26,5 @@ bash episodes-codex/message-queue/revisions/kafka-intro/message-queue/render-fin
 站点仍episodes/message-queue，Kafka系列仍message-queue分类路径。新片/图文接入时保留历史日期与平台链接，仅更新真实修改日期、媒体范围、来源及sourcePath。GitHub按持续授权发布，外平台作品未重发。
 
 发布前整合MySQL最新主干3b0ac58f/v0.84.0，本轮版本顺延v0.84.1；实际冻结160输入与最终媒体不变，整合证明及有界站点复验见归档。
+
+已按[Release v0.84.1](https://github.com/linhongcun/video-studio/releases/tag/v0.84.1)发布，PR #410合并212b2520，Pages40641869113同HEAD成功。北京时间2026-10-28 14:10:56，15项完整GET/10,925,485字节核验通过；最终视频完整SHA为`6b840b276cd7dc4a3e679279b8919768668b054bfe0a6cde92b5009d22bd203b`。实际发布回执与线上响应见归档publication.json、online-verification.json。后续8期未开工，外平台作品未重发。
