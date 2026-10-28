@@ -31,6 +31,7 @@
 - [2026-10-28 · 分布式独立系列](2026-10/distributed-standalone-series/README.md)：现有7篇独立为学习方向，系统原理保留网络、缓存与流量治理；实际检查与发布状态见记录。
 - [2026-10-28 · LeetCode十一期正文延续封面](2026-10/leetcode-video-style/README.md)：深蓝/暖金/青色正文、完整Python和资料页、原音轨时序保真；状态见记录。
 
+- [2026-10-28 · Redis系列封面统一](2026-10/redis-cover-style/README.md)：冷银灰/Redis红、真实EP与跳表定位图，旧媒体和冻结保留；实际状态见记录。
 - [2026-10-28 · Kafka系列统一与MQ01重制](2026-10/kafka-series-style/README.md)：规划收敛Kafka、MQ01日志/消费位点新片与同色封面，旧输入保护；真实发布状态见记录。
 - [2026-10-28 · MySQL四期正文与系列范围统一](2026-10/mysql-video-style/README.md)：EP15–18墨绿正文、MySQL 8.4范围、三比例封面与独立音轨保真；状态见记录。
 
