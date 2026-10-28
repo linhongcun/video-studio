@@ -1,7 +1,7 @@
 import {BASE, getSeries, type Episode, type Series} from './episodes';
 
 export type LearningTrack = {
-  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles' | 'engineering' | 'message-queue' | 'database';
+  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles' | 'engineering' | 'message-queue' | 'database' | 'redis';
   title: string;
   eyebrow: string;
   description: string;
@@ -98,6 +98,16 @@ const definitions: TrackDefinition[] = [
     outcome: '看清MySQL怎样查找数据、协调事务与冲突访问，以及异步复制怎样传播更改，理解具体实现的条件与边界。',
     audience: '会基本编程，希望理解MySQL工作原理并持续深入的开发者。',
     seriesIds: ['database'],
+  },
+  {
+    id: 'redis',
+    number: '09',
+    title: 'Redis 系列',
+    eyebrow: '从数据结构理解 Redis',
+    description: '从跳表等数据结构出发，沿具体操作理解Redis内部机制、维护成本与适用边界。',
+    outcome: '看清Redis怎样组织数据，把查找和插入的每一步与底层结构对应起来。',
+    audience: '会基本编程，希望理解Redis数据结构与实现原理的开发者。',
+    seriesIds: ['redis'],
   },
 ];
 
