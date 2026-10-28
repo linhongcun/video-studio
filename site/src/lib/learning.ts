@@ -1,7 +1,7 @@
 import {BASE, getSeries, type Episode, type Series} from './episodes';
 
 export type LearningTrack = {
-  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles' | 'engineering' | 'message-queue' | 'database' | 'redis' | 'distributed';
+  id: 'systems' | 'agent' | 'algorithms' | 'patterns' | 'puzzles' | 'engineering' | 'message-queue' | 'database' | 'redis' | 'distributed' | 'network';
   title: string;
   eyebrow: string;
   description: string;
@@ -23,11 +23,11 @@ const definitions: TrackDefinition[] = [
     id: 'systems',
     number: '01',
     title: '系统原理',
-    eyebrow: '从一次请求开始',
-    description: '从浏览器与网络，到缓存和流量治理。沿着真实的数据流，理解请求怎样处理、系统怎样应对高峰与故障。',
-    outcome: '看懂请求怎样到达服务、缓存怎样协作，以及系统遇到高峰和故障时怎样继续工作。',
+    eyebrow: '从后台缓存与流量治理开始',
+    description: '从后台缓存与数据更新开始，理解限流、幂等、熔断与降级怎样帮助系统应对高峰和故障。',
+    outcome: '看懂缓存怎样减少读取压力、更新怎样保持一致，以及重复请求、高峰与故障怎样处理。',
     audience: '想建立计算机与后端基础，或补齐系统知识的开发者。',
-    seriesIds: ['request', 'cache', 'peak'],
+    seriesIds: ['cache', 'peak'],
   },
   {
     id: 'agent',
@@ -118,6 +118,16 @@ const definitions: TrackDefinition[] = [
     outcome: '看清数据怎样分布、标识怎样生成，以及多个服务怎样协调业务结果，理解各方案的条件、代价与失败处理。',
     audience: '会基本编程，希望理解分布式系统工作原理与设计取舍的开发者。',
     seriesIds: ['distributed'],
+  },
+  {
+    id: 'network',
+    number: '11',
+    title: '计算机网络',
+    eyebrow: '从一次网页请求理解网络',
+    description: '从Web通信入门，沿一次网页请求理解HTTP、HTTPS、DNS与登录态，再看CDN、负载均衡和浏览器缓存怎样参与请求处理。',
+    outcome: '看清名称解析、安全连接、登录状态、请求分发与缓存复用怎样共同完成一次网页访问。',
+    audience: '想理解浏览器与服务器怎样通信，建立计算机网络基础的开发者。',
+    seriesIds: ['request'],
   },
 ];
 

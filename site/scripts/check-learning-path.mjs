@@ -13,6 +13,7 @@ const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
 const introSlug = 'distributed-tx-intro', archiveSlug = 'distributed-tx';
 const mechanismSlugs = ['tx-2pc', 'tx-tcc', 'tx-saga', 'tx-outbox'];
 const distributedSlugs = ['db-sharding', 'global-id', introSlug, ...mechanismSlugs];
+const networkSlugs = ['http-request', 'https', 'dns', 'cookie-session', 'cdn', 'load-balancing', 'browser-cache'];
 const complete = process.argv.includes('--complete');
 const existingOnly = process.argv.includes('--existing-only');
 const stripImports = (text) => text.replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '');
@@ -330,7 +331,7 @@ const tracks = learning.getLearningTracks();
 const hasPublishedAgent = liveLessons.some((lesson) => lesson.series === 'agent');
 const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
 const directionForSeries = {
-  request: 'systems', cache: 'systems', peak: 'systems', database: 'database', distributed: 'distributed',
+  request: 'network', cache: 'systems', peak: 'systems', database: 'database', distributed: 'distributed',
   agent: 'agent', leetcode: 'algorithms', 'design-patterns': 'patterns', puzzles: 'puzzles',
   'engineering-algorithms': 'engineering', 'message-queue': 'message-queue', redis: 'redis',
 };
@@ -357,10 +358,33 @@ for (const track of tracks) {
     }
   }
 }
-assert.equal(tracks.find((t) => t.id === 'systems')?.start.slug, 'http-request', 'System fundamentals should start with the request');
 const systemsTrack = tracks.find((track) => track.id === 'systems');
-assert.deepEqual(Array.from(systemsTrack.series, (series) => series.id), ['request', 'cache', 'peak'],
-  'System fundamentals keep request, cache and traffic-governance chapters');
+assert.equal(systemsTrack.start.slug, 'server-cache', 'System fundamentals should start with application caching');
+assert.deepEqual(Array.from(systemsTrack.series, (series) => series.id), ['cache', 'peak'],
+  'System fundamentals keep application caching and traffic-governance chapters');
+const systemsSlugs = ['server-cache', 'cache-consistency', 'rate-limit', 'idempotency', 'circuit-breaker', 'degradation'];
+assert.deepEqual(slugs(systemsTrack.episodes), systemsSlugs, 'System fundamentals preserve the caching-to-traffic-governance lesson order');
+const networkTrack = tracks.find((track) => track.id === 'network');
+assert.ok(networkTrack, 'Computer networking needs an independent learning direction');
+assert.deepEqual(Array.from(networkTrack.series, (series) => series.id), ['request']);
+assert.deepEqual(slugs(networkTrack.episodes), networkSlugs, 'Computer networking preserves all seven published lessons in their established order');
+assert.equal(networkTrack.start.slug, 'http-request');
+assert.equal(learning.getTrackForSeries('request')?.id, 'network');
+for (const runtime of [preview, published]) {
+  for (const [index, slug] of networkSlugs.entries()) {
+    const lesson = runtime.getEpisodes().find((episode) => episode.slug === slug);
+    const nav = runtime.seriesNav(lesson);
+    assert.equal(nav.prev?.slug, networkSlugs[index - 1], `${slug}: previous lesson must stay in the network direction`);
+    assert.equal(nav.next?.slug, networkSlugs[index + 1], `${slug}: next lesson must stay in the network direction`);
+    assert.equal(nav.prevCross, undefined, `${slug}: computer networking must not inherit another direction`);
+    assert.equal(nav.nextCross, undefined, `${slug}: computer networking must not lead into another direction`);
+  }
+  for (const [index, slug] of systemsSlugs.entries()) {
+    const nav = runtime.seriesNav(runtime.getEpisodes().find((episode) => episode.slug === slug));
+    assert.equal(nav.prev?.slug, systemsSlugs[index - 1], `${slug}: previous lesson must preserve the systems path`);
+    assert.equal(nav.next?.slug, systemsSlugs[index + 1], `${slug}: next lesson must preserve the systems path`);
+  }
+}
 const distributedTrack = tracks.find((track) => track.id === 'distributed');
 assert.ok(distributedTrack, 'Distributed systems need an independent learning direction');
 assert.deepEqual(Array.from(distributedTrack.series, (series) => series.id), ['distributed']);

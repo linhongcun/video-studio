@@ -6,7 +6,7 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 
 - 线上站点：https://linhongcun.github.io/video-studio/
 - 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。默认不发快手（STATUS 中逐次明确授权除外），不发 X。小红书由村长自己发，运营和 Codex 默认不发（STATUS 中逐次明确授权除外）。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
-- 站点功能：按系列浏览（浏览器与网络 / 后台缓存 / 扛住高峰 / MySQL / 分布式 / Agent 开发 / LeetCode · 算法可视化 / 设计模式 / 趣味推理 / 工程算法 / 消息队列）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
+- 站点功能：按系列浏览（计算机网络 / 后台缓存 / 扛住高峰 / MySQL / 分布式 / Agent 开发 / LeetCode · 算法可视化 / 设计模式 / 趣味推理 / 工程算法 / 消息队列）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
 - 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
@@ -22,13 +22,13 @@ GitHub 主干、Release 和站点沿用用户持续授权，完成制作与检�
 
 | 期 | 系列 | 标题 | 站点 | 上线日期 |
 |---|---|---|---|---|
-| 1 | 浏览器与网络 | 浏览器输入网址后发生了什么？ | [http-request](https://linhongcun.github.io/video-studio/episodes/http-request/) | 2026-10-12 |
-| 2 | 浏览器与网络 | HTTPS 为什么安全？ | [https](https://linhongcun.github.io/video-studio/episodes/https/) | 2026-10-12 |
-| 3 | 浏览器与网络 | 输入网址后，怎么找到服务器？ | [dns](https://linhongcun.github.io/video-studio/episodes/dns/) | 2026-10-12 |
-| 4 | 浏览器与网络 | 网站怎么记住你已经登录？ | [cookie-session](https://linhongcun.github.io/video-studio/episodes/cookie-session/) | 2026-10-12 |
-| 5 | 浏览器与网络 | 网站离你那么远，为什么还这么快？ | [cdn](https://linhongcun.github.io/video-studio/episodes/cdn/) | 2026-10-12 |
-| 6 | 浏览器与网络 | 一台服务器忙不过来，怎么办？ | [load-balancing](https://linhongcun.github.io/video-studio/episodes/load-balancing/) | 2026-10-12 |
-| 7 | 浏览器与网络 | 同一个网页，第二次打开为什么快这么多？ | [browser-cache](https://linhongcun.github.io/video-studio/episodes/browser-cache/) | 2026-10-12 |
+| 1 | 计算机网络 | 浏览器输入网址后发生了什么？ | [http-request](https://linhongcun.github.io/video-studio/episodes/http-request/) | 2026-10-12 |
+| 2 | 计算机网络 | HTTPS 为什么安全？ | [https](https://linhongcun.github.io/video-studio/episodes/https/) | 2026-10-12 |
+| 3 | 计算机网络 | 输入网址后，怎么找到服务器？ | [dns](https://linhongcun.github.io/video-studio/episodes/dns/) | 2026-10-12 |
+| 4 | 计算机网络 | 网站怎么记住你已经登录？ | [cookie-session](https://linhongcun.github.io/video-studio/episodes/cookie-session/) | 2026-10-12 |
+| 5 | 计算机网络 | 网站离你那么远，为什么还这么快？ | [cdn](https://linhongcun.github.io/video-studio/episodes/cdn/) | 2026-10-12 |
+| 6 | 计算机网络 | 一台服务器忙不过来，怎么办？ | [load-balancing](https://linhongcun.github.io/video-studio/episodes/load-balancing/) | 2026-10-12 |
+| 7 | 计算机网络 | 同一个网页，第二次打开为什么快这么多？ | [browser-cache](https://linhongcun.github.io/video-studio/episodes/browser-cache/) | 2026-10-12 |
 | 8 | 后台缓存 | 数据库明明有数据，为什么还要再存一份？ | [server-cache](https://linhongcun.github.io/video-studio/episodes/server-cache/) | 2026-10-13 |
 | 9 | 后台缓存 | 后台改了价格，页面怎么还是旧的？ | [cache-consistency](https://linhongcun.github.io/video-studio/episodes/cache-consistency/) | 2026-10-16 |
 | 10 | 消息队列 | 订单已提交，为什么还没处理完？ | [message-queue](https://linhongcun.github.io/video-studio/episodes/message-queue/) | 2026-10-13 |
@@ -72,13 +72,17 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 独立系列从任务提交、排队到处理完成讲一条消息怎样接力，可以单独观看，不要求先看「扛住高峰」。首期为[EP.10《订单已提交，为什么还没处理完？》](https://linhongcun.github.io/video-studio/episodes/message-queue/)，约2分03秒（含5秒参考资料卡）；系列页见[消息队列](https://linhongcun.github.io/video-studio/series/message-queue/)。制作入口见[本期工程](episodes-codex/message-queue/README.md)。
 
+## 计算机网络
+
+[计算机网络独立系列](https://linhongcun.github.io/video-studio/series/request/)以现有7篇Web通信入门内容为范围，从浏览器请求出发，讲解HTTP、HTTPS、DNS、登录态、CDN、负载均衡与浏览器缓存。EP.01–07沿原顺序独立学习，不再作为系统原理的章节或前后课；系统原理从服务端缓存开始，保留后台缓存与扛住高峰。原`request`系列ID、URL、EP编号、文章、媒体与内容时间保留，分类与发布状态见[本轮记录](docs/archive/2026-10/network-standalone-series/README.md)。
+
 ## MySQL
 
 [MySQL独立系列](https://linhongcun.github.io/video-studio/series/database/)以MySQL 8.4为背景，从InnoDB索引、事务与锁，到MySQL单主异步复制，后续持续扩充MySQL工作原理与设计取舍；具体存储引擎、复制模式和适用条件按单集说明。现有[EP.15 索引](https://linhongcun.github.io/video-studio/episodes/db-index/)、[EP.16 事务](https://linhongcun.github.io/video-studio/episodes/db-transaction/)、[EP.17 锁](https://linhongcun.github.io/video-studio/episodes/db-lock/)与[EP.18 主从复制](https://linhongcun.github.io/video-studio/episodes/db-replication/)归入这一独立学习方向，不再作为系统原理的章节或前后课。原期号、URL与首发身份保留，系列目录只展示实际已发布内容。
 
 ## 分布式
 
-[分布式独立系列](https://linhongcun.github.io/video-studio/series/distributed/)从分库分表、分布式 ID，进入事务入门与2PC、TCC、Saga、Outbox四种实现，共7篇已发布内容。系列内沿原学习顺序衔接，不再作为系统原理的章节或前后课；系统原理保留浏览器与网络、后台缓存、扛住高峰三个部分。原URL、EP编号、内容时间与媒体保留，历史事务合集继续只供回看。分类与发布状态见[本轮记录](docs/archive/2026-10/distributed-standalone-series/README.md)。
+[分布式独立系列](https://linhongcun.github.io/video-studio/series/distributed/)从分库分表、分布式 ID，进入事务入门与2PC、TCC、Saga、Outbox四种实现，共7篇已发布内容。系列内沿原学习顺序衔接，不再作为系统原理的章节或前后课；系统原理现保留后台缓存、扛住高峰两个部分。原URL、EP编号、内容时间与媒体保留，历史事务合集继续只供回看。分类与发布状态见[本轮记录](docs/archive/2026-10/distributed-standalone-series/README.md)。
 
 ## 制作流程
 
