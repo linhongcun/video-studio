@@ -1,0 +1,260 @@
+#!/usr/bin/env python3
+"""Package two finalized Redis cache episodes and their six checked covers.
+
+Only writes under work/redis-cache-style. No rendering, publication metadata
+mutation, Git commit, upload or external-platform action occurs. Run after the
+parent has installed the final media and metadata.
+"""
+from __future__ import annotations
+import argparse
+from datetime import datetime, timezone, timedelta
+import hashlib
+from io import BytesIO
+import json
+from pathlib import Path, PurePosixPath
+import subprocess
+import zipfile
+
+ROOT = Path(__file__).resolve().parents[2]
+WORK = ROOT / 'work/redis-cache-style'
+RENDERER = ROOT / 'episodes-codex/_shared/redis-cache-video/render.py'
+EPISODES = {
+    'server-cache': {'ep': 8, 'body': 3491, 'frames': 3641, 'name': '服务端缓存', 'scenario': '商品查询缓存'},
+    'cache-consistency': {'ep': 9, 'body': 3464, 'frames': 3614, 'name': '缓存一致性', 'scenario': '商品价格更新与缓存一致性'},
+}
+SIZES = ('16x9', '4x3', '3x4')
+COLOR = {'pix_fmt': 'yuv420p', 'color_range': 'tv', 'color_space': 'bt709',
+         'color_transfer': 'bt709', 'color_primaries': 'bt709'}
+ZIP_NAME = 'redis-cache-style-20261028.zip'
+DELIVERY_BRANCH = 'delivery/redis-cache-style-20261028'
+DELIVERY_PATH = 'design/redis-cache-style-20261028'
+CST = timezone(timedelta(hours=8))
+MAX_BYTES = 95 * 1024 * 1024
+
+
+def digest(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def record(data: bytes) -> dict:
+    return {'bytes': len(data), 'sha256': digest(data)}
+
+
+def read(path: Path) -> dict:
+    return json.loads(path.read_text(encoding='utf-8'))
+
+
+def state(path: Path) -> dict:
+    data = path.read_bytes()
+    return {**record(data), 'mtimeNs': path.stat().st_mtime_ns}
+
+
+def safe_name(name: str) -> str:
+    path = PurePosixPath(name)
+    if (not name or path.is_absolute() or '\\' in name or '\x00' in name
+            or any(part in ('', '.', '..') for part in name.split('/'))
+            or ':' in path.parts[0]):
+        raise ValueError(f'Unsafe archive path: {name!r}')
+    return name
+
+
+def resolve_output(value: str) -> Path:
+    path = Path(value)
+    path = (ROOT / path).resolve() if not path.is_absolute() else path.resolve()
+    if not path.is_relative_to(WORK):
+        raise ValueError('Package output must stay under work/redis-cache-style')
+    return path
+
+
+def validate_zip(path: Path, expected: dict[str, bytes]) -> dict:
+    with zipfile.ZipFile(path) as archive:
+        names = archive.namelist()
+        if len(names) != 9 or len(names) != len(set(names)) or set(names) != set(expected):
+            raise ValueError('Expected exactly two videos, six covers and one Chinese README')
+        for name in names:
+            safe_name(name)
+        bad = archive.testzip()
+        if bad is not None:
+            raise ValueError(f'ZIP CRC mismatch: {bad}')
+        actual = {}
+        for name in names:
+            data = archive.read(name)
+            if data != expected[name]:
+                raise ValueError(f'ZIP member payload differs: {name}')
+            actual[name] = record(data)
+    return {'status': 'passed', 'allCRCVerified': True, 'allPathsSafe': True,
+            'allEntryBytesAndSHA256EqualSources': True, 'entries': actual}
+
+
+def package(output: Path) -> dict:
+    entries, protected, episodes, updated_times = {}, {}, [], []
+    def bind(path: Path) -> bytes:
+        path = path.resolve()
+        if not path.is_relative_to(ROOT) or not path.is_file():
+            raise ValueError(f'Missing actual final input: {path}')
+        if path not in protected:
+            protected[path] = state(path)
+        return path.read_bytes()
+    from PIL import Image
+    for slug, spec in EPISODES.items():
+        revision = ROOT / 'episodes-codex' / slug / 'revisions/redis-style'
+        published = ROOT / 'episodes' / slug
+        meta_path = published / 'meta.json'
+        result_path = revision / 'render-result.json'
+        media_path = revision / 'reference-appendix-media-check.json'
+        receipt_path = revision / 'reference-appendix.json'
+        manifest_path = revision / 'source-sha256.json'
+        baseline_path = revision / 'baseline-publication.json'
+        style_path = published / 'cover-style.json'
+        color_path = revision / 'color-encoding-check.json'
+        inputs = {path: bind(path) for path in (meta_path, result_path, media_path, receipt_path,
+                                               manifest_path, baseline_path, style_path, color_path)}
+        meta, result, media, receipt, source, baseline, style, color = [json.loads(inputs[path]) for path in inputs]
+        original = baseline['publishedMetadata']
+        if meta.get('slug') != slug or meta.get('ep') != spec['ep'] or meta.get('series') != 'redis' \
+                or meta.get('applicationScenario') != spec['scenario']:
+            raise ValueError(f'Wrong Redis episode/scenario: {slug}')
+        allowed_meta = {'updatedAt', 'burnedInCaptions'} | set(result.get('publicationMetadata', {}))
+        changed = {key for key in set(meta) | set(original) if meta.get(key) != original.get(key)}
+        if not changed <= allowed_meta:
+            raise ValueError(f'Original identity/scenario/sourcePath/fields changed: {slug}: {changed}')
+        for key in ('createdAt', 'publishedAt', 'firstRelease', 'title', 'sourcePath', 'applicationScenario'):
+            if meta.get(key) != original.get(key):
+                raise ValueError(f'Original metadata field changed: {slug}/{key}')
+        updated = datetime.fromisoformat(meta['updatedAt'])
+        old_updated = datetime.fromisoformat(original['updatedAt'])
+        if updated.tzinfo is None or old_updated.tzinfo is None or updated <= old_updated:
+            raise ValueError(f'Actual new timezone-aware video update is not installed: {slug}')
+        if meta['updatedAt'] != datetime.fromisoformat(result['createdAtUTC']).astimezone(CST).isoformat(timespec='seconds'):
+            raise ValueError(f'Published update time differs from actual final render timestamp: {slug}')
+        if meta.get('burnedInCaptions') is not True:
+            raise ValueError(f'Final verified burned-in caption identity missing: {slug}')
+        if result.get('episode') != slug or result.get('visualRevision') != 'redis-cache-style-v1' \
+                or result.get('colorEncoding') != COLOR \
+                or result.get('newProductionManifest') != str(manifest_path.relative_to(ROOT)) \
+                or result.get('newProductionManifestSHA256') != digest(inputs[manifest_path]):
+            raise ValueError(f'Final source/result identity differs: {slug}')
+        renderer = bind(RENDERER)
+        if source.get('inputs', {}).get(str(RENDERER.relative_to(ROOT))) != digest(renderer):
+            raise ValueError(f'Final frozen renderer binding differs: {slug}')
+        if result.get('bodyFrames') != spec['body'] or result.get('frames') != spec['frames'] \
+                or meta.get('finalVideoFrames') != spec['frames'] \
+                or meta.get('referenceAppendix', {}).get('from') != spec['body'] \
+                or meta.get('referenceAppendix', {}).get('durationInFrames') != 150:
+            raise ValueError(f'Original body + five-second reference timeline differs: {slug}')
+        movie_path = revision / 'video.mp4'
+        movie = bind(movie_path)
+        if result.get('sha256') != digest(movie) or result.get('bytes') != len(movie) \
+                or bind(published / 'video.mp4') != movie:
+            raise ValueError(f'Installed final MP4 differs from revision/result: {slug}')
+        for name in ('render-result.json', 'reference-appendix.json', 'reference-appendix-media-check.json'):
+            if bind(published / name) != bind(revision / name):
+                raise ValueError(f'Installed publication receipt differs: {slug}/{name}')
+        probe = json.loads(subprocess.check_output(['ffprobe', '-v', 'error', '-select_streams', 'v:0',
+            '-show_entries', 'stream=codec_name,width,height,r_frame_rate,avg_frame_rate,nb_frames,pix_fmt,color_range,color_space,color_transfer,color_primaries',
+            '-of', 'json', str(movie_path)], text=True))['streams'][0]
+        for key, expected in {**COLOR, 'codec_name': 'h264', 'width': 1920, 'height': 1080,
+                              'r_frame_rate': '30/1', 'avg_frame_rate': '30/1', 'nb_frames': str(spec['frames'])}.items():
+            if probe.get(key) != expected:
+                raise ValueError(f'Actual final stream field differs: {slug}/{key}: {probe.get(key)}')
+        audio = result.get('baselineAudioPreserved', {})
+        if audio.get('passed') is not True or audio.get('audioPacketsAndTimingEqual') is not True \
+                or audio.get('baselineSHA256') != baseline.get('baselineSHA256') \
+                or not audio.get('decodedAudioPCM'):
+            raise ValueError(f'Complete baseline AAC/PCM confirmation missing: {slug}')
+        if media.get('passed') is not True or media.get('outputSHA256') != digest(movie) \
+                or media.get('bodyFrames') != spec['body'] or media.get('finalFrames') != spec['frames'] \
+                or any(media.get(key) is not True for key in ('bodyDecodedFramesAndTimestampsEqual',
+                    'outputVideoTimelineContinuous', 'audioPacketsAndTimingEqual')):
+            raise ValueError(f'Whole appendix/body/audio receipt differs: {slug}')
+        if receipt.get('outputSHA256') != digest(movie) or receipt.get('presentation') != 'title-author' \
+                or receipt.get('bodyFrames') != spec['body'] or receipt.get('finalVideoFrames') != spec['frames']:
+            raise ValueError(f'Final actual reference appendix identity differs: {slug}')
+        if color.get('passed') is not True or color.get('output') != COLOR \
+                or color.get('allRawToNormalizedPresentationTimesEqual') is not True \
+                or color.get('allOriginalPublishedPresentationTimesEqual') is not True:
+            raise ValueError(f'Actual color conversion/timeline receipt differs: {slug}')
+        if style.get('ep') != spec['ep'] or style.get('style') != 'redis-covers-v2' \
+                or style.get('seriesSource') != 'episodes-codex/_shared/redis-covers-v2':
+            raise ValueError(f'Installed current Redis cover template differs: {slug}')
+        cover_rows = []
+        entries[f"EP{spec['ep']:02d}-{spec['name']}.mp4"] = movie
+        for size in SIZES:
+            path = published / f'cover-{size}.jpg'
+            data = bind(path)
+            expected = style['covers'][size]
+            if digest(data) != expected['jpgSha256']:
+                raise ValueError(f'Installed cover differs from cover-style: {slug}/{size}')
+            with Image.open(BytesIO(data)) as image:
+                if image.format != 'JPEG' or list(image.size) != expected['dimensions']:
+                    raise ValueError(f'Actual cover format/dimensions differ: {slug}/{size}')
+            name = f"covers/EP{spec['ep']:02d}/cover-{size}.jpg"
+            entries[name] = data
+            cover_rows.append({'path': str(path.relative_to(ROOT)), 'zipPath': name,
+                               'dimensions': expected['dimensions'], **record(data)})
+        updated_times.append(updated)
+        episodes.append({'slug': slug, 'ep': spec['ep'], 'title': meta['title'],
+            'applicationScenario': meta['applicationScenario'], 'updatedAt': meta['updatedAt'],
+            'createdAtOriginal': meta['createdAt'], 'publishedAtOriginal': meta['publishedAt'],
+            'firstReleaseOriginal': meta['firstRelease'], 'baselineCommit': baseline['baselineCommit'],
+            'sourcePathPreserved': meta['sourcePath'], 'frames': spec['frames'], 'bodyFrames': spec['body'],
+            'video': {'path': str(movie_path.relative_to(ROOT)), **record(movie)}, 'actualVideoStream': probe,
+            'renderResultSHA256': digest(inputs[result_path]), 'sourceManifestSHA256': digest(inputs[manifest_path]),
+            'finalMediaReceiptSHA256': digest(inputs[media_path]), 'coverManifestSHA256': digest(inputs[style_path]),
+            'covers': cover_rows})
+    readme = 'Redis 应用场景视频与封面交付说明\n\n'
+    for item in episodes:
+        readme += (f"EP.{item['ep']:02d} {item['title']}\n场景：{item['applicationScenario']}\n"
+                   f"视频更新时间：{item['updatedAt']}\n原创建：{item['createdAtOriginal']}；原首发：{item['publishedAtOriginal']}（{item['firstReleaseOriginal']}）\n"
+                   f"完整视频：1920×1080，30fps，{item['frames']}帧（{item['frames']/30:.3f}秒），含末尾5秒参考资料页。\n\n")
+    readme += ('封面、正文动画与资料页统一采用 Redis 跳表同系列的冷银灰、Redis红、石墨文字和原始标记。\n'
+               '保留原商品7042示例、配音、烧录字幕、章节时序与机制边界；视频使用有限范围BT.709编码。\n'
+               'EP.08由应用管理未命中查库、回填与命中；EP.09保持先更新数据库、再删除旧缓存及后续读回填，不承诺强一致。\n'
+               '包内三比例封面可按实际需要选用。此次只更新GitHub站点，没有向外部视频平台重发。\n\n包内文件与完整SHA-256：\n')
+    readme += '\n'.join(f'{digest(data)}  {name} ({len(data)}字节)' for name, data in entries.items())
+    readme += '\n\n技术检查不表示用户已观看认可，也不表示真机、逐字ASR或全片人工听辨。\n'
+    entries['说明.txt'] = readme.encode('utf-8')
+    if len(entries) != 9:
+        raise ValueError('Internal package member count differs')
+    output.mkdir(parents=True, exist_ok=True)
+    package_path = output / ZIP_NAME
+    if package_path.exists():
+        raise ValueError('ZIP already exists; preserve it and validate it rather than overwrite')
+    timestamp = max(updated_times).astimezone(CST).timetuple()[:6]
+    with zipfile.ZipFile(package_path, 'w', compression=zipfile.ZIP_STORED, allowZip64=True) as archive:
+        for name, data in entries.items():
+            info = zipfile.ZipInfo(safe_name(name), date_time=timestamp)
+            info.compress_type = zipfile.ZIP_STORED
+            info.create_system = 3
+            info.external_attr = 0o100644 << 16
+            archive.writestr(info, data)
+    if package_path.stat().st_size >= MAX_BYTES:
+        raise ValueError('ZIP exceeds conservative 95MiB Git file limit')
+    validation = validate_zip(package_path, entries)
+    for path, before in protected.items():
+        if state(path) != before:
+            raise ValueError(f'Production input bytes/SHA/mtime changed during packaging: {path}')
+    manifest = {'schemaVersion': 1, 'status': 'packaged-and-verified',
+        'createdAt': datetime.now(CST).isoformat(timespec='seconds'), 'episodes': episodes,
+        'productionInputsBytesSHA256AndMtimeUnchanged': True, 'protectedInputCount': len(protected),
+        'package': {'path': str(package_path.relative_to(ROOT)), 'file': ZIP_NAME,
+                    **record(package_path.read_bytes()), 'validation': validation},
+        'deliveryPlan': {'status': 'not-published', 'branch': DELIVERY_BRANCH, 'directory': DELIVERY_PATH,
+            'immutableURLTemplate': f'https://raw.githubusercontent.com/linhongcun/video-studio/DELIVERY_COMMIT_SHA/{DELIVERY_PATH}/{ZIP_NAME}',
+            'note': 'The explicit commit placeholder is a plan until the parent publishes and verifies the actual delivery commit.'}}
+    manifest_path = output / 'package-manifest.json'
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+    return {'manifest': str(manifest_path.relative_to(ROOT)), **record(manifest_path.read_bytes()),
+            'package': {key: value for key, value in manifest['package'].items() if key != 'validation'},
+            'members': len(entries), 'protectedInputsUnchanged': len(protected)}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--out-dir', default='work/redis-cache-style/delivery')
+    args = parser.parse_args()
+    print(json.dumps(package(resolve_output(args.out_dir)), ensure_ascii=False, indent=2))
+
+
+if __name__ == '__main__':
+    main()

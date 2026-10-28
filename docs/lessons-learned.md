@@ -534,3 +534,5 @@ EP.16第一版视频SHA前缀为`3085d678`，第二版为`6aa379dd`。用户已�
 - **案例：**Redis正文银灰版的预演、ffmpeg成片PNG与媒体身份均通过，实际Chromium全屏与Video→Canvas却把full-range背景显示成白色，封面衔接仍不一致。
 - **改法：**独立保留原冻结与媒体，做真实pc601→tv709像素转换，正文和资料统一编码，并用逐帧setparams明确range/matrix/primaries/transfer；不能仅修改标签或凭命令行flags推定实际信号齐全。第一次转换被缺失primaries/transfer的严格检查阻止，失败记录保持。
 - **验证：**新83项冻结、全4707帧PTS、完整AAC/PCM和附加时新正文解码帧保持；新双视口实际取色与ffmpeg相差不超过1级，银灰/红/石墨和全屏、资料、图文截图复验通过，见[本轮证据](archive/2026-10/redis-video-style/README.md)。此为实际Chromium路径的修复证据，不扩大为所有设备或浏览器已测试。
+
+- **Redis缓存扩展（2026-10-28）：**EP.08/09沿用已经过实际网页验证的limitedBT709转换，将像素转换、逐帧颜色参数与同编码资料默认纳入首次冻结流程；不等上线后另补色彩。原完整声音/时序保真，正文/资料编码小样先查实际五项信号，再做正式片与网页取色；见[本轮记录](archive/2026-10/redis-cache-style/README.md)。
