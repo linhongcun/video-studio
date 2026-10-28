@@ -331,7 +331,7 @@ const tracks = learning.getLearningTracks();
 const hasPublishedAgent = liveLessons.some((lesson) => lesson.series === 'agent');
 const puzzle = liveLessons.find((lesson) => lesson.slug === 'horse-racing');
 const directionForSeries = {
-  request: 'network', cache: 'systems', peak: 'systems', database: 'database', distributed: 'distributed',
+  request: 'network', peak: 'systems', database: 'database', distributed: 'distributed',
   agent: 'agent', leetcode: 'algorithms', 'design-patterns': 'patterns', puzzles: 'puzzles',
   'engineering-algorithms': 'engineering', 'message-queue': 'message-queue', redis: 'redis',
 };
@@ -359,11 +359,29 @@ for (const track of tracks) {
   }
 }
 const systemsTrack = tracks.find((track) => track.id === 'systems');
-assert.equal(systemsTrack.start.slug, 'server-cache', 'System fundamentals should start with application caching');
-assert.deepEqual(Array.from(systemsTrack.series, (series) => series.id), ['cache', 'peak'],
-  'System fundamentals keep application caching and traffic-governance chapters');
-const systemsSlugs = ['server-cache', 'cache-consistency', 'rate-limit', 'idempotency', 'circuit-breaker', 'degradation'];
-assert.deepEqual(slugs(systemsTrack.episodes), systemsSlugs, 'System fundamentals preserve the caching-to-traffic-governance lesson order');
+assert.equal(systemsTrack.start.slug, 'rate-limit', 'System fundamentals should start with traffic governance');
+assert.deepEqual(Array.from(systemsTrack.series, (series) => series.id), ['peak'],
+  'System fundamentals keep traffic governance after caching moves to Redis');
+const systemsSlugs = ['rate-limit', 'idempotency', 'circuit-breaker', 'degradation'];
+assert.deepEqual(slugs(systemsTrack.episodes), systemsSlugs, 'System fundamentals preserve the traffic-governance lesson order');
+const redisTrack = tracks.find((track) => track.id === 'redis');
+assert.deepEqual(slugs(redisTrack.episodes), ['server-cache', 'cache-consistency', 'redis-skiplist'],
+  'Redis includes both caching application scenarios and its existing internal-mechanism lesson');
+assert.equal(redisTrack.start.slug, 'server-cache');
+assert.equal(learning.getTrackForSeries('cache'), undefined, 'Retired cache grouping must not remain a second home');
+for (const [slug, scenario] of [['server-cache', '商品查询缓存'], ['cache-consistency', '商品价格更新与缓存一致性']]) {
+  const lesson = liveLessons.find((lesson) => lesson.slug === slug);
+  assert.equal(lesson.series, 'redis');
+  assert.equal(lesson.applicationScenario, scenario);
+  assert.ok(lesson.tags.includes('Redis'));
+}
+for (const [index, lesson] of redisTrack.episodes.entries()) {
+  const nav = published.seriesNav(lesson);
+  assert.equal(nav.prev?.slug, redisTrack.episodes[index - 1]?.slug, 'Redis previous lessons stay inside the series');
+  assert.equal(nav.next?.slug, redisTrack.episodes[index + 1]?.slug, 'Redis next lessons stay inside the series');
+  assert.equal(nav.prevCross, undefined);
+  assert.equal(nav.nextCross, undefined);
+}
 const networkTrack = tracks.find((track) => track.id === 'network');
 assert.ok(networkTrack, 'Computer networking needs an independent learning direction');
 assert.deepEqual(Array.from(networkTrack.series, (series) => series.id), ['request']);

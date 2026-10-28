@@ -15,7 +15,7 @@ export type Episode = {
   slug: string; ep: number; problemNumber?: number; episodePart?: string; lessonOrder?: number; firstRelease?: string; title: string; summary: string; duration: number; tags: string[];
   createdAt: string; updatedAt: string; publishedAt?: string; date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number; burnedInCaptions?: boolean;
   draft: boolean; legacy: boolean; archived: boolean; replacedBy?: string[]; related: {slug: string; label?: string}[];
-  learningGuide?: {slug: string; label: string}; series?: string; additionalSeries?: string[]; description?: string; platforms: Platform[]; readMin: number; sourcePath: string;
+  learningGuide?: {slug: string; label: string}; series?: string; applicationScenario?: string; additionalSeries?: string[]; description?: string; platforms: Platform[]; readMin: number; sourcePath: string;
 };
 export type Platform = {id: string; label: string; url: string};
 /** 平台链接：只渲染 meta.json platforms 里写了真实 URL 的平台，没写的不显示（绝不拼猜） */
@@ -195,6 +195,7 @@ export function getEpisodes({includeArchived = false}: {includeArchived?: boolea
         tags: meta.tags ?? [], ...dates, date: dates.publishedAt ?? dates.createdAt, poster: meta.poster, video: meta.video,
         duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, archived: !!meta.archived, related: meta.related ?? [],
         series: meta.series,
+        applicationScenario: meta.applicationScenario,
         additionalSeries: Array.isArray(meta.additionalSeries) ? meta.additionalSeries.filter((id: unknown) => typeof id === 'string' && id !== meta.series) : [],
         description: meta.description,
         platforms: platformsOf(meta), readMin: readingMinutes(slug),
