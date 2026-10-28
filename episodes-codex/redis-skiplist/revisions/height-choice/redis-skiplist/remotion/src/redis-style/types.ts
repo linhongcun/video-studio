@@ -1,0 +1,9 @@
+export type MainProps={hideSubtitles?:boolean;auditLayout?:boolean};
+export type CoverSize='16x9'|'4x3'|'3x4';
+export type Subtitle={text:string;from:number;to?:number;duration?:number};
+export type Shot={id:string;from:number;durationInFrames:number;visualType:string;voice?:any[];subtitles?:Subtitle[];cueFrames?:any;[key:string]:any};
+export type NodeRecord={id:string;value:number|null;height:number;forward:(string|null)[]};
+export type Snapshot={nodes:Record<string,NodeRecord>;levels:string[][];reachableBottom:string[]};
+export type SearchEvent={id?:number;level?:number;current:string;candidate:string;candidateValue:number;canAdvance:boolean;outcome:string;cursorAfter:string};
+export type Stage={raw:number;p:number;arrived:boolean;started:boolean;active:boolean;index:number};
+export type Link={from:string;to:string;level:number};

@@ -1,0 +1,104 @@
+{
+  "schemaVersion": 1,
+  "status": "passed-pre-freeze-independent-v2-bounded-source-review",
+  "reviewedAt": "2026-10-28T19:56:19+08:00",
+  "newHelpersSHA256": {
+    "render-v2.py": "3096736db13ab2e850f585ea4e02b2294a1c7d1e3a6364b979dcc302fd0f4033",
+    "references-v2.py": "fa773bbd8166eebeeadae45f06663c8d72bb449c6a55023de482092d4293f2f6",
+    "README-v2.md": "39f0d9dd57e88539e3b6be1f802751a1eb8d6288225e996e1940e33c6974af9f"
+  },
+  "previousV1HelpersStillOriginalSHA": true,
+  "normalizationInputBindings": 83,
+  "actualInputSHA256Mismatches": [],
+  "planCommand": [
+    "ffmpeg",
+    "-v",
+    "error",
+    "-n",
+    "-i",
+    "episodes-codex/redis-skiplist/revisions/redis-style/body.mp4",
+    "-map",
+    "0:v:0",
+    "-map",
+    "0:a:0",
+    "-vf",
+    "scale=in_range=pc:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709,format=yuv420p,setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "veryfast",
+    "-crf",
+    "18",
+    "-threads",
+    "4",
+    "-pix_fmt",
+    "yuv420p",
+    "-color_range",
+    "tv",
+    "-colorspace",
+    "bt709",
+    "-color_primaries",
+    "bt709",
+    "-color_trc",
+    "bt709",
+    "-fps_mode",
+    "passthrough",
+    "-video_track_timescale",
+    "90000",
+    "-c:a",
+    "copy",
+    "-map_metadata",
+    "-1",
+    "-movflags",
+    "+faststart",
+    "-metadata",
+    "comment=video-studio-redis-bt709-body:v1:redis-skiplist",
+    "episodes-codex/redis-skiplist/revisions/redis-style-bt709-v2/body.mp4"
+  ],
+  "reviewedBoundedChanges": {
+    "render-v2.py": "--- /workspace/work/video-studio/episodes-codex/_shared/redis-video-bt709/render.py\t2026-10-28 11:51:31.187579151 +0000\n+++ /workspace/work/video-studio/episodes-codex/_shared/redis-video-bt709/render-v2.py\t2026-10-28 11:54:37.306809675 +0000\n@@ -19,9 +19,10 @@\n HERE = Path(__file__).resolve().parent\n ROOT = HERE.parents[2]\n OLD = ROOT / 'episodes-codex/redis-skiplist/revisions/redis-style'\n-NEW = ROOT / 'episodes-codex/redis-skiplist/revisions/redis-style-bt709'\n+FAILED = ROOT / 'episodes-codex/redis-skiplist/revisions/redis-style-bt709'\n+NEW = ROOT / 'episodes-codex/redis-skiplist/revisions/redis-style-bt709-v2'\n REFERENCES = ROOT / 'episodes-codex/redis-skiplist/revisions/height-choice/redis-skiplist/references.json'\n-spec = importlib.util.spec_from_file_location('redis_bt709_refs', HERE / 'references.py')\n+spec = importlib.util.spec_from_file_location('redis_bt709_refs', HERE / 'references-v2.py')\n refs = importlib.util.module_from_spec(spec)\n spec.loader.exec_module(refs)\n engine = refs.engine\n@@ -43,7 +44,7 @@\n def command():\n     return ['ffmpeg', '-v', 'error', '-n', '-i', relative(OLD / 'body.mp4'),\n             '-map', '0:v:0', '-map', '0:a:0',\n-            '-vf', 'scale=in_range=pc:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709,format=yuv420p',\n+            '-vf', 'scale=in_range=pc:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709,format=yuv420p,setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709',\n             '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '18', '-threads', '4',\n             '-pix_fmt', 'yuv420p', '-color_range', 'tv', '-colorspace', 'bt709',\n             '-color_primaries', 'bt709', '-color_trc', 'bt709',\n@@ -54,10 +55,12 @@\n \n def input_bindings():\n     prior = read(OLD / 'source-sha256.json')\n-    files = {**prior['inputs'], **prior['externalInputs']}\n+    files = {**read(FAILED / 'source-sha256.json')['inputs'],\n+             **prior['inputs'], **prior['externalInputs']}\n     for path in [OLD / name for name in ('source-sha256.json', 'body.mp4', 'video.mp4', 'render-result.json',\n                  'reference-appendix.json', 'reference-appendix-media-check.json', 'baseline-audio-check.json')] \\\n-            + [HERE / name for name in ('render.py', 'references.py', 'README.md')]:\n+            + [HERE / name for name in ('render-v2.py', 'references-v2.py', 'README-v2.md')] \\\n+            + [FAILED / 'source-sha256.json', FAILED / 'body.mp4']:\n         files[relative(path)] = engine.sha(path)\n     baseline = prior['baseline']\n     files[baseline['path']] = baseline['sha256']\n@@ -86,13 +89,14 @@\n         path = Path(name) if Path(name).is_absolute() else ROOT / name\n         if engine.sha(path) != expected:\n             raise ValueError(f'Original frozen input differs: {name}')\n-    value = {'schemaVersion': 1, 'episode': 'redis-skiplist', 'visualRevision': 'redis-style-bt709-v1',\n+    value = {'schemaVersion': 1, 'episode': 'redis-skiplist', 'visualRevision': 'redis-style-bt709-v2',\n              'createdAtUTC': datetime.now(timezone.utc).isoformat(), 'inputs': input_bindings(),\n              'timeline': {'width': 1920, 'height': 1080, 'fps': 30, 'bodyFrames': 4557, 'finalVideoFrames': 4707},\n              'command': command(), 'workingDirectory': '.', 'versions': versions(),\n              'inputColorEncoding': {'pix_fmt': 'yuvj420p', 'color_range': 'pc', 'color_space': 'bt470bg'},\n              'outputColorEncoding': refs.COLOR,\n-             'policy': 'Independent color normalization; old frozen redis-style input, outputs and all historical evidence remain unchanged.'}\n+             'predecessorFailure': {'manifest': relative(FAILED / 'source-sha256.json'), 'body': relative(FAILED / 'body.mp4'), 'reason': 'Strict output gate rejected missing primaries/transfer despite encoder context flags. New explicit per-frame setparams is validated before this fresh freeze.'},\n+             'policy': 'Independent color normalization; old frozen redis-style and first rejected BT.709 input/output evidence remain unchanged.'}\n     engine.dump(manifest, value)\n     verify_inputs()\n     return {'status': 'frozen', 'manifest': relative(manifest), 'inputCount': len(value['inputs'])}\n@@ -156,7 +160,7 @@\n         raise ValueError('Final normalized video PTS differ from the preserved 4707-frame movie')\n     publication = {'finalVideoFrames': 4707, 'referenceAppendix': {'kind': 'references', 'from': 4557,\n                    'durationInFrames': 150, 'sources': 'references.json', 'manifest': 'reference-appendix.json'}}\n-    result = {'visualRevision': 'redis-style-bt709-v1', 'createdAtUTC': datetime.now(timezone.utc).isoformat(),\n+    result = {'visualRevision': 'redis-style-bt709-v2', 'createdAtUTC': datetime.now(timezone.utc).isoformat(),\n               'episode': 'redis-skiplist', 'width': 1920, 'height': 1080, 'fps': '30/1',\n               'frames': 4707, 'bodyFrames': 4557, 'seconds': 156.9, 'bytes': final.stat().st_size,\n               'sha256': engine.sha(final), 'audio': 'aac', 'audioSampleRate': 48000,\n",
+    "references-v2.py": "--- /workspace/work/video-studio/episodes-codex/_shared/redis-video-bt709/references.py\t2026-10-28 11:50:05.125348273 +0000\n+++ /workspace/work/video-studio/episodes-codex/_shared/redis-video-bt709/references-v2.py\t2026-10-28 11:54:37.304492322 +0000\n@@ -1,5 +1,5 @@\n #!/usr/bin/env python3\n-\"\"\"Independent limited-range BT.709 appendix adapter; old generators are unchanged.\"\"\"\n+\"\"\"Independent limited-range BT.709 appendix adapter v2; old generators are unchanged.\"\"\"\n from __future__ import annotations\n import importlib.util\n import json\n@@ -23,7 +23,7 @@\n def run(command):\n     command = [str(part) for part in command]\n     if command[0] == 'ffmpeg' and '-loop' in command and 'libx264' in command:\n-        command[-1:-1] = ['-vf', 'scale=in_range=pc:out_range=tv:out_color_matrix=bt709,format=yuv420p',\n+        command[-1:-1] = ['-vf', 'scale=in_range=pc:out_range=tv:out_color_matrix=bt709,format=yuv420p,setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709',\n                          '-colorspace', 'bt709', '-color_primaries', 'bt709', '-color_trc', 'bt709']\n     return engine.run(command)\n \n"
+  },
+  "actualTwoFrameTrialsReadOnlyProbed": [
+    {
+      "path": "work/redis-video-style/bt709-tag-trial/setparams.mp4",
+      "sha256": "6d68cf0c801c0598602229bfbb327bc117d6756cb3bed16ea2dc0586282b1fc2",
+      "streamAndFirstFrameColor": {
+        "pix_fmt": "yuv420p",
+        "color_range": "tv",
+        "color_space": "bt709",
+        "color_transfer": "bt709",
+        "color_primaries": "bt709"
+      },
+      "firstFrameSideDataTypes": [
+        "H.26[45] User Data Unregistered SEI message"
+      ]
+    },
+    {
+      "path": "work/redis-video-style/bt709-tag-trial/card-setparams.mp4",
+      "sha256": "ff8e9c776edc52db3333b928c99bb678f975a8aa5daa2f77e94d435c3d0c77e3",
+      "streamAndFirstFrameColor": {
+        "pix_fmt": "yuv420p",
+        "color_range": "tv",
+        "color_space": "bt709",
+        "color_transfer": "bt709",
+        "color_primaries": "bt709"
+      },
+      "firstFrameSideDataTypes": [
+        "H.26[45] User Data Unregistered SEI message"
+      ]
+    }
+  ],
+  "predecessorFailurePreservation": {
+    "manifest": "episodes-codex/redis-skiplist/revisions/redis-style-bt709/source-sha256.json",
+    "manifestSHA256": "594641986847634f06ce32cefbed0bbf0d1ce835dfdcdb6c673235aa01d1b97d",
+    "body": "episodes-codex/redis-skiplist/revisions/redis-style-bt709/body.mp4",
+    "bodySHA256": "51b0f32e26fdb7a3c1d6853d7b2202df926fbffb95afeebc3b157da2c2577fe5",
+    "retainedV1Bindings": 78
+  },
+  "conclusion": "Only framecolorproperties are explicitlyset AFTERactualscaleconversion; bothbodyandPNGcard encode use setparams tokeepprimaries/trc. New83bindingrevisionpreservesallold78plusv2helpersandv1failuremanifest/body. Noalgorithm,geometry,timing,voiceoroldfrozenfilechange.",
+  "limitations": [
+    "V2newfullnormalizationandactualbrowsercolour/legibilitymuststillpass.",
+    "Bothsmalltrialfirstframe/streamtagsactuallyread;thisdoesnotclaimnewfullmoviealreadyencodedorallnewframecolourmetadataread."
+  ]
+}

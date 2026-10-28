@@ -1,0 +1,82 @@
+#!/usr/bin/env python3
+"""Independent file/Git/timeline audit for the new Redis BT.709 derivative; no decode."""
+from pathlib import Path
+import argparse,datetime,hashlib,json,subprocess,sys
+ROOT=Path(__file__).resolve().parents[2]
+A=ROOT/'docs/archive/2026-10/redis-video-style'
+OLD=ROOT/'episodes-codex/redis-skiplist/revisions/redis-style'
+NEW=ROOT/'episodes-codex/redis-skiplist/revisions/redis-style-bt709-v2'
+PUB=ROOT/'episodes/redis-skiplist'
+def read(p):return json.loads(p.read_text())
+def sha(p):return hashlib.sha256(p.read_bytes()).hexdigest()
+def git(*args):return subprocess.check_output(['git',*args],cwd=ROOT)
+def blob(b):return hashlib.sha1(b'blob '+str(len(b)).encode()+b'\0'+b).hexdigest()
+def tree(ref):
+ out={}
+ for row in git('ls-tree','-rz',ref).split(b'\0'):
+  if not row:continue
+  m,n=row.split(b'\t',1);mode,typ,oid=m.decode().split();out[n.decode()]={'mode':mode,'type':typ,'gitBlobSHA1':oid}
+ return out
+
+def main():
+ ap=argparse.ArgumentParser();ap.add_argument('--candidate');ap.add_argument('--out',default=str(A/'independent-bt709-v2-file-audit.json'));args=ap.parse_args()
+ baseline=read(A/'preservation-baseline.json');oldmanifest=read(OLD/'source-sha256.json');manifest=read(NEW/'source-sha256.json')
+ selected=args.candidate or git('rev-parse','HEAD').decode().strip();t=tree(selected);index={}
+ for row in git('ls-files','--stage','-z').split(b'\0'):
+  if not row:continue
+  m,n=row.split(b'\t',1);mode,oid,stage=m.decode().split();index[n.decode()]={'mode':mode,'type':'blob','gitBlobSHA1':oid}
+ tags={row[2:].decode():row[:1].decode() for row in git('ls-files','-t','-z').split(b'\0') if row}
+ def current(path):
+  if args.candidate:return t.get(path)
+  p=ROOT/path
+  if p.is_file():return {'mode':index.get(path,{}).get('mode','100644'),'type':'blob','gitBlobSHA1':blob(p.read_bytes())}
+  return index.get(path) if tags.get(path)=='S' else None
+ permitted={'episodes/redis-skiplist/'+n for n in ['meta.json','video.mp4','reference-appendix.json','reference-appendix-media-check.json','article/height-one.jpg']}
+ unexpected=[];derived=[];kept=0
+ for p,v in baseline['protectedOriginalFiles'].items():
+  actual=current(p)
+  if actual==v:kept+=1
+  elif p in permitted:derived.append(p)
+  else:unexpected.append(p)
+ old_manifest_bad=[p for p,v in baseline['allExistingSourceManifestGitBlobs'].items() if current(p)!=v]
+ frozen=[]
+ for p,s in manifest['inputs'].items():
+  q=Path(p) if Path(p).is_absolute() else ROOT/p;frozen.append({'path':p,'expected':s,'actual':sha(q)})
+ bad=[x['path'] for x in frozen if x['expected']!=x['actual']]
+ # The first visual freeze remains an input contract, never rewritten for transformed pixels.
+ assert all(manifest['inputs'].get(k)==v for k,v in {**oldmanifest['inputs'],**oldmanifest['externalInputs']}.items())
+ assert len(oldmanifest['inputs'])==61 and len(oldmanifest['externalInputs'])==6 and len(oldmanifest['fontBindings'])==8
+ assert manifest['inputs'][str((OLD/'source-sha256.json').relative_to(ROOT))]==sha(OLD/'source-sha256.json')
+ assert manifest['timeline']=={'width':1920,'height':1080,'fps':30,'bodyFrames':4557,'finalVideoFrames':4707}
+ source_review=read(A/'independent-bt709-v2-source-review.json')
+ for n,s in source_review['newHelpersSHA256'].items():assert sha(ROOT/'episodes-codex/_shared/redis-video-bt709'/n)==s
+ result=read(NEW/'render-result.json');normalization=read(NEW/'normalization-check.json');media=read(NEW/'reference-appendix-media-check.json');refs=read(NEW/'reference-appendix.json')
+ movie=sha(NEW/'video.mp4');assert movie==sha(PUB/'video.mp4')==result['sha256']==media['outputSHA256']==refs['outputSHA256']
+ assert sha(NEW/'source-sha256.json')==result['newProductionManifestSHA256']
+ for n in ['render-result.json','reference-appendix.json','reference-appendix-media-check.json']:assert sha(NEW/n)==sha(PUB/n)
+ assert normalization['passed'] and normalization['sourceSHA256']==sha(OLD/'body.mp4') and normalization['outputSHA256']==sha(NEW/'body.mp4')
+ assert normalization['allVideoPTSAndDurationsEqual'] and normalization['audioPacketsAndTimingEqual'] and normalization['audioPacketCount']==7122
+ assert result['baselineAudioPreserved']==normalization
+ assert media['passed'] and media['bodyFrames']==4557 and media['finalFrames']==4707 and media['appendedFrames']==150
+ assert all(media[k] for k in ['bodyDecodedFramesAndTimestampsEqual','outputVideoTimelineContinuous','audioPacketsAndTimingEqual'])
+ assert media['decodedAudioPCM']==normalization['decodedAudioPCM'] and media['audioPacketPayloadAndTimingSHA256']==normalization['audioPacketPayloadAndTimingSHA256']
+ assert result['visualRevision']=='redis-style-bt709-v2' and result['frames']==4707 and result['bodyFrames']==4557
+ colors={'pix_fmt':'yuv420p','color_range':'tv','color_space':'bt709','color_transfer':'bt709','color_primaries':'bt709'}
+ probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_streams','-of','json',str(NEW/'video.mp4')]))['streams'][0]
+ assert all(probe.get(k)==v for k,v in colors.items()) and result['colorEncoding']==colors and refs['colorEncoding']==colors
+ packets=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_packets','-show_entries','packet=pts,duration','-of','json',str(NEW/'video.mp4')]))['packets']
+ presentation=sorted([[int(x['pts']),int(x['duration'])] for x in packets]);assert len(presentation)==4707 and probe['time_base']=='1/90000'
+ assert all(x==[i*3000,3000] for i,x in enumerate(presentation))
+ assert oldmanifest['baseline']['sha256']==normalization['baselineSHA256']
+ article=sha(PUB/'article.mdx');assert article==baseline['publishedArticleSHA256']==sha(OLD/'article.mdx')
+ meta=read(PUB/'meta.json');old=baseline['publishedMetadata'];changed=sorted(k for k in set(old)|set(meta) if old.get(k)!=meta.get(k));assert set(changed)=={'updatedAt','burnedInCaptions'} and meta['sourcePath']==old['sourcePath']
+ covers=[p for p in baseline['protectedOriginalFiles'] if Path(p).name.startswith('cover-') or Path(p).name in ['poster.jpg','cover-style.json']]
+ assert all(current(p)==baseline['protectedOriginalFiles'][p] for p in covers)
+ # Retained original static bibliography page remains bound by its immutable receipt.
+ oldrefs=read(OLD/'reference-appendix.json')
+ for page in oldrefs['appendix']['pages']:assert sha(OLD/'references'/page['file'])==page['sha256']
+ passed=not(unexpected or old_manifest_bad or bad)
+ report={'schemaVersion':1,'status':'passed' if passed else 'failed','checkedAt':datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).isoformat(timespec='seconds'),'baselineCommit':baseline['baselineCommit'],'candidateCommit':args.candidate,'worktreeHead':git('rev-parse','HEAD').decode().strip(),'protectedOriginalPaths':1456,'protectedUnchanged':kept,'allowedPublishedDerivations':derived,'protectedUnexpectedMismatches':unexpected,'oldSourceManifestCount':174,'oldSourceManifestMismatches':old_manifest_bad,'originalVisualFrozenInputs':61,'actualFontsRetained':6,'originalFontBindingsRetained':8,'newNormalizationInputCount':len(frozen),'newNormalizationInputs':frozen,'newInputMismatches':bad,'allOriginal61FontAndManifestBindingsRetained':True,'oldBodySHA256':sha(OLD/'body.mp4'),'oldFinalVideoSHA256':sha(OLD/'video.mp4'),'newBodySHA256':sha(NEW/'body.mp4'),'newFinalVideoSHA256':movie,'newColorEncoding':colors,'all4707ActualPresentationPTSAndDurationsPass':True,'actualPacketPresentationTimelineSHA256':hashlib.sha256(json.dumps(presentation).encode()).hexdigest(),'producerReceiptsBoundBySHA':{'normalization-check.json':sha(NEW/'normalization-check.json'),'reference-appendix-media-check.json':sha(NEW/'reference-appendix-media-check.json'),'render-result.json':sha(NEW/'render-result.json')},'audioPacketCount':7122,'completeOriginalAACAndPCMIdentityPass':True,'all4557NormalizedBodyDecodedFramesAndPTSRetainedWhenAppending':True,'changedMetadataFields':changed,'articleMDXSHA256':article,'currentFigureSHA256':sha(PUB/'article/height-one.jpg'),'coverAssetManifestCount':len(covers),'coverAssetsUnchanged':True,'limitations':['Actualnewcolournormalizationislossy;pixelidentitytotheoriginalfullrangebodyisnotclaimed.','ThisauditreadsallvideoPTS/durationsandfiles,doesnotredecodeorclaimfullhumanlistening.Theproduceraudio/appenddecodeproofsareSHA-boundabove.','BrowsercolourandactualformalPNGviewingarenewseparategates;originalpre-bt70924imageviewsarenotrelabeledasnewmediareview.','SparseabsentoriginalfilesuseGitblob/indexidentity;oldfreezeisnotrewritten.']}
+ Path(args.out).write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n');print(json.dumps({k:report[k] for k in ['status','protectedUnchanged','oldSourceManifestCount','newNormalizationInputCount','newFinalVideoSHA256','changedMetadataFields']}))
+ if not passed:sys.exit(1)
+if __name__=='__main__':main()

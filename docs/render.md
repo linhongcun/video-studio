@@ -83,6 +83,10 @@ Kafka消息队列系列使用[独立封面模板](../episodes-codex/_shared/kafk
 
 Redis系列使用[独立模板](../episodes-codex/_shared/redis-covers/README.md)，固定冷银灰底、Redis红、石墨文字、原始Redis标记与真实EP编号。按当前meta.sourcePath定位实际修订安装，封面独立记录输入/产物SHA；旧工程算法编号、covers.json与编码冻结保持历史身份。当前跳表图按前向链接示例表达查55时在40下降、停于50/60之间，不将示意图当作小集合默认内存布局。新增题扩展同一catalog与机制图，不另起一套风格。
 
+Redis正文沿[独立视觉入口](../episodes-codex/_shared/redis-video/README.md)读取不可变配色快照，当前实际入口为层高修订中的`remotion/src/redis-style/index.ts`，媒体与新冻结独立放`revisions/redis-style/`。保留原分镜、两种层高、完整AAC及旧封面输入，资料页同色；不要用历史`src/index.ts`或原混音命令覆盖新产物。
+
+当前Redis发布片另外通过[BT.709色彩派生](../episodes-codex/_shared/redis-video-bt709/README-v2.md)生成：独立冻结原正文与原清单，将全范围BT.601画面转换为有限范围BT.709，明确逐帧颜色参数，再追加同编码资料页。原视觉产物保持，实际发布使用`revisions/redis-style-bt709-v2/video.mp4`；不能只修改颜色标签。核对原时序、完整AAC与实际网页取色，静帧颜色正确不代表浏览器解码颜色正确。
+
 其他系列封面由当期 `remotion/src/Cover.tsx` 和 `covers.json` 定义。当前 EP.14 的实际入口是：
 
 ```sh
