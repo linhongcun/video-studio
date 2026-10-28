@@ -1,0 +1,146 @@
+---
+title: Redis 跳表：怎样跳过一段，找到插入位置？
+summary: 只用两层链接和一个游标，从查找55到接入55，讲清有序跳跃、原地下降和插入前驱，再说明随机层高与编码边界。
+chapters:
+  - { id: goal, title: 怎样少走几步找到位置 }
+  - { id: search, title: 加一层链接怎样跳过一段 }
+  - { id: insert, title: 按选定层高接入55 }
+  - { id: boundary, title: 额外链接换取跨越的机会 }
+related: ["bloom-filter", "consistent-hashing"]
+---
+
+## 怎样少走几步找到位置 {#goal}
+
+一条有序链表保存10、20、30、40、50、60、70、80。现在要把55插进去，首先要找到它应该放在哪里。沿底层逐项查看，可以在50与60之间定位；元素多时，每次从头走会访问许多节点。
+
+能不能利用“已经有序”这条信息，直接跳过一段？跳表为少量节点增加更远的前向链接。先在稀疏的上层向前走，不能继续时，再在**当前位置**下降到更细的一层。
+
+本例只有两层，目的是把动作看清。图中演示的是Redis启用跳表编码时的前向链接机制，**不是8项小集合的默认实际内存布局**。[^encoding]
+
+<SourceQuote sourceId="R1" supports="Redis文档说明这类有序集合实现同时包含跳表与哈希表；本文只展开跳表编码下的前向链接，小集合的紧凑编码另有边界。" />
+
+## 加一层链接怎样跳过一段 {#search}
+
+底层保持全部八个节点，上层只有40和70。查55时，始终只有一个当前游标：
+
+1. 从上层起点看40：40小于55，可以前进到40。由于有序，40之前的10、20、30都不会是55的插入前驱。
+2. 再看上层后继70：70大于55，**不能走到70**。游标仍在40，下降到底层。
+3. 在底层看50：50小于55，前进到50。
+4. 再看60：60大于55，停止前进。55应接在底层50和60之间。
+
+<figure>
+  <svg viewBox="0 0 640 250" role="img" aria-labelledby="skip-search-title skip-search-desc" style={{width: '100%', height: 'auto', display: 'block', background: '#0f172a', borderRadius: '16px'}}>
+    <title id="skip-search-title">查55时，先到40，再在40下降并到50</title>
+    <desc id="skip-search-desc">上层40的后继70过大，游标没有走到70，而是在40下降；底层50的后继60过大，55的位置在50与60之间。</desc>
+    <g font-family="sans-serif" text-anchor="middle">
+      <text x="320" y="28" fill="#e2e8f0" font-size="22">查55：先向前，不能前进时原地下降</text>
+      <g fill="none" stroke="#64748b" stroke-width="2">
+        <path d="M55 80H280M330 80H475M35 100V160M55 180H85M135 180H150M200 180H215M265 180H280M330 180H345M395 180H410M460 180H475M525 180H540" />
+      </g>
+      <g fill="none" stroke="#fbbf24" stroke-width="3">
+        <path d="M55 80H279m-8-6 8 6-8 6M305 101V159m-6-8 6 8 6-8M330 180H344m-6-5 6 5-6 5" />
+      </g>
+      <g fill="#1e293b" stroke="#64748b" stroke-width="2">
+        <rect x="15" y="60" width="40" height="40" rx="8" /><rect x="280" y="60" width="50" height="40" rx="8" stroke="#fbbf24" /><rect x="475" y="60" width="50" height="40" rx="8" />
+        <rect x="15" y="160" width="40" height="40" rx="8" /><rect x="85" y="160" width="50" height="40" rx="8" /><rect x="150" y="160" width="50" height="40" rx="8" /><rect x="215" y="160" width="50" height="40" rx="8" /><rect x="280" y="160" width="50" height="40" rx="8" stroke="#fbbf24" /><rect x="345" y="160" width="50" height="40" rx="8" stroke="#fbbf24" /><rect x="410" y="160" width="50" height="40" rx="8" /><rect x="475" y="160" width="50" height="40" rx="8" /><rect x="540" y="160" width="50" height="40" rx="8" />
+      </g>
+      <g fill="#e2e8f0" font-size="22"><text x="305" y="88">40</text><text x="500" y="88">70</text><text x="110" y="188">10</text><text x="175" y="188">20</text><text x="240" y="188">30</text><text x="305" y="188">40</text><text x="370" y="188">50</text><text x="435" y="188">60</text><text x="500" y="188">70</text><text x="565" y="188">80</text></g>
+      <g fill="#94a3b8" font-size="16"><text x="35" y="86">起点</text><text x="35" y="186">起点</text><text x="607" y="86">上层</text><text x="607" y="186">底层</text></g>
+      <text x="420" y="130" fill="#fbbf24" font-size="19">70过大，留在40下降</text>
+      <text x="320" y="232" fill="#cbd5e1" font-size="20">底层50 &lt; 55 &lt; 60，插入点在50与60之间</text>
+    </g>
+  </svg>
+  <figcaption>教学示意：上下对齐表示同一节点的不同层链接；金色表示已走的路径，不表示曾跳到70再退回。</figcaption>
+</figure>
+
+Redis8.4.0的`zslInsert`正是从最高层开始：比较当前节点的后继，后继小于目标才前进；不能继续时记录当前前驱，再下降。实际排序先比较score，相同score再比较member的字节字典序；本例分数互不相同，暂时只看分数。[^source][^sorted]
+
+## 按选定层高接入55 {#insert}
+
+刚才的查找还留下两个有用位置：底层前驱50，上层前驱40。插入55时，无需再把所有节点重新排序。
+
+**新节点不一定接入上层。** 如果55的层高是1，只把底层50→60改成50→55→60；整个跳表仍有两层，上层前向链接仍为40→70，55没有上层端口。层高在接线前就已确定，不能插入一层后为了演示再把同一次插入临时升为两层。[^source]
+
+<SourceQuote sourceId="A1" supports="源码说明新节点层高可以为1，较高层更少见；本节使用固定合法对照，不是随机过程回放。" />
+
+<Figure src="/video-studio/episodes/redis-skiplist/article/height-one.jpg"
+  alt="55只有底层链接，底层50指向55再指向60；上层40仍指向70，没有55的上层端口"
+  caption="教学示例：新55的层高为1，底层接好后插入即完成；整个跳表仍有两层。"
+  seekTo={88.9} chapter="insert" />
+
+下面回到相同的插入前状态，预先把55的层高固定为2，再分别接入：
+
+- 底层：原来50→60，改为50→55→60。
+- 上层：原来40→70，改为40→55→70。
+
+每层先让新55指向原来的后继，再让该层前驱指向55。上层40与底层50是不同前驱，新55在两层的后继也不同；不能把每一层都画成同一条链。其他前向链接保持原样。[^source]
+
+下面是可以直接运行的机制例子。它只处理互不相同的分数，固定本次新55的高度为2；不实现Redis的字典、排名span或底层反向链接。
+
+```python
+forward = [
+    {"HEAD": 10, 10: 20, 20: 30, 30: 40, 40: 50,
+     50: 60, 60: 70, 70: 80, 80: None},
+    {"HEAD": 40, 40: 70, 70: None},
+]
+target = 55
+cursor = "HEAD"
+predecessors = {}
+checks = []
+
+for level in (1, 0):
+    next_node = forward[level][cursor]
+    while next_node is not None:
+        checks.append(next_node)
+        if next_node >= target:
+            break
+        cursor = next_node
+        next_node = forward[level][cursor]
+    predecessors[level] = cursor
+
+assert checks == [40, 70, 50, 60]
+assert predecessors == {1: 40, 0: 50}
+
+# 本次固定为两层，每层都先接原后继，再改前驱。
+for level in (0, 1):
+    previous = predecessors[level]
+    forward[level][target] = forward[level][previous]
+    forward[level][previous] = target
+
+
+def order(level):
+    result = []
+    node = forward[level]["HEAD"]
+    while node is not None:
+        result.append(node)
+        node = forward[level][node]
+    return result
+
+
+assert order(0) == [10, 20, 30, 40, 50, 55, 60, 70, 80]
+assert order(1) == [40, 55, 70]
+print("底层：", order(0))
+print("上层：", order(1))
+```
+
+本例读取了40、70、50、60四个后继分数；沿底层逐项寻找会读10、20、30、40、50、60六个。这只是这一条固定路径，**不是每次都少两次，更不是生产性能测量**。
+
+## 额外链接换取跨越的机会 {#boundary}
+
+真实跳表不是每隔固定几个节点就建一层。Redis通过随机过程选择新节点层高，多数节点较低，较高节点更少。40和70在上层、本次55取得两层，都是为讲解固定的合法示例结果，不是Redis随机数生成器的实际回放。[^source]
+
+完整跳表允许更多层，再重复“向前比较、不能继续就原地下降”。在合适的随机层高规则下，它具有期望O(log n)的查找/插入效率，仍可能遇到较差的单次路径；**固定只有两层的教学图不能推出任意规模下都只需对数次比较**。
+
+额外链接需要空间和维护成本，换来跳过一段的机会。Redis的完整跳表还维护用于排名的span、底层backward指针等；按member快速定位的字典也有独立职责。这里不把前向链接示意称为完整内存布局。[^source]
+
+另外，**不是所有Redis有序集合都使用跳表**。较小集合可以使用listpack，超过相关配置阈值后转换为普通编码；本片讲的是跳表编码下的机制。[^encoding] 分数变化后，如果仍能留在原邻居之间，源码可能直接改score；需要换位置时才删除旧节点再插入，也不必全量重新排序。[^source]
+
+## 参考资料
+
+下面保留实际原题/原文件名、固定版本和编者说明。核对日期为2026-10-26，不将读取日期当文档发布日期。
+
+[^sorted]: Redis，**Redis sorted sets**。[固定官方文档](https://github.com/redis/docs/blob/fcc15c76a48baeb0dc08fc839242a7799c077080/content/develop/data-types/sorted-sets.md)；[官网入口](https://redis.io/docs/latest/develop/data-types/sorted-sets/)。**编者说明：**结合源码与紧凑编码文档限定适用范围，不据此声称所有小集合都使用跳表。
+
+[^source]: Redis，**t_zset.c**，Redis Open Source8.4.0 GA，固定提交`60ba86f3c8b4e1ec96451171753a0a38e5c45a0c`（2025-11-18）。[实际源码](https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/t_zset.c)。`zslRandomLevel`、`zslInsert`、`zslUpdateScore`支持本片的层高、向前/下降、链接接入及改分边界。**编者说明：**正文Python是前向链接教学模型，不是Redis服务端实测、随机层高回放或完整实现。
+
+[^encoding]: Redis，**Memory optimization**。[固定官方文档](https://github.com/redis/docs/blob/fcc15c76a48baeb0dc08fc839242a7799c077080/content/operate/oss_and_stack/management/optimization/memory-optimization.md)；[官网入口](https://redis.io/docs/latest/operate/oss_and_stack/management/optimization/memory-optimization/)。Redis>=7的listpack配置与自动转换部分说明紧凑编码边界；不把示例配置值当所有部署的固定条件。
