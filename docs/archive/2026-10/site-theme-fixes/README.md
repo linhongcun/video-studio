@@ -23,4 +23,10 @@ node site/scripts/check-learning-path.mjs --complete --built
 python3 episodes/_shared/tests/secret_scan.py
 ```
 
-合并及上线回执在部署和真实站点复核后记录；本次仅 GitHub 站点，不重发外平台。
+## 上线结果
+
+[PR #406](https://github.com/linhongcun/video-studio/pull/406) 已合并，发布 [v0.83.0](https://github.com/linhongcun/video-studio/releases/tag/v0.83.0)。初次 Pages `40619446002` 和 Release 后 Pages `40619470918` 均成功，发布提交为 `d285ea7121ebacc929a33948fa3ac4d38054a12b`；后者完成后再次确认线上版本、素材提交与日志版本。
+
+`online-browser-check.json` 记录桌面浅色、手机尺寸深色的 24 项生产站点检查，实际小字、三类底色、高亮、图框和封面极端背景的对比度均通过，主题切换与保存正常。使用原生 Chromium TLS 校验和环境代理，未绕过证书校验；12 张线上工作区截图中选存 4 张。`online-verification.json` 确认 98 份线上视频/海报的完整 SHA-256，以及首页、搜索、跳表文章、更新日志和抽查字幕正常。
+
+#401–405 已以 `completed` 关闭，状态快照见 `completed-issues.json`，发布回执见 `publication.json`。本次仅 GitHub 站点，不重发外平台。
