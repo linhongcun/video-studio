@@ -4,7 +4,7 @@
 
 用户要求继续统一数据库四期视频，并将本系列明确定位为MySQL。基线为d7a5d768/v0.83.1，原课号/问题/链接与通用数据库名词保持；当前显示名、系列介绍、标签、文章开头和画面范围明确为MySQL 8.4。索引、事务、锁采用InnoDB，复制采用MySQL单主异步示例，不把复制称为InnoDB复制。已有四期研究均基于24日实读的MySQL官方手册，当前技术审读未发现须因收口而重录的旁白；新视觉保留原声音与时序，原出处机构Oracle/MySQL仍按实际署名保留。
 
-正文采用现行墨绿/薄荷绿家族，新封面入口为`_shared/mysql-covers/`，正文为`_shared/mysql-video/`及各期`remotion/src/mysql-style/`，独立冻结在`revisions/mysql-style/`。旧database-covers、制作稿、分镜与冻结按历史身份保留。四期媒体制作与独立终审完成，完整AAC/PCM和时序保真；最终网站验收与发布真实状态见[本轮记录](archive/2026-10/mysql-video-style/README.md)，不预记新片观看反馈。
+正文采用现行墨绿/薄荷绿家族，新封面入口为`_shared/mysql-covers/`，正文为`_shared/mysql-video/`及各期`remotion/src/mysql-style/`，独立冻结在`revisions/mysql-style/`。旧database-covers、制作稿、分镜与冻结按历史身份保留。四期媒体制作、独立终审和最终双视口网站验收完成，完整AAC/PCM和时序保真；Release/部署实际身份与网络能力边界见[本轮记录](archive/2026-10/mysql-video-style/README.md)，不预记新片观看反馈。
 
 ## 视频正文延续系列封面（2026-10-28）
 
