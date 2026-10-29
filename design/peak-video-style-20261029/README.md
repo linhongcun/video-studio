@@ -1,11 +1,11 @@
-# 高并发、高可用、高性能视频与封面
+# 高并发、高可用、高性能四期视频与封面
 
-包含EP.11限流、EP.12幂等、EP.13熔断、EP.14降级四条高清成片和12张现行三比例封面。正文与资料页沿深青蓝、亮青、暖黄风格，保留原机制、配音与时序。
+EP.11限流、EP.12幂等、EP.13熔断、EP.14降级已按现行封面统一正文与资料页，保留原机制、配音和时序。
 
-包内17文件已逐项CRC与完整SHA核验。
+[下载四条成片与12张封面](https://raw.githubusercontent.com/linhongcun/video-studio/e5e090b0ff5425b6e8cbf09c4ade570357f0e273/design/peak-video-style-20261029/peak-video-style-20261029.zip)，共17文件，25,750,420字节，完整SHA-256：`96c3c372a8e8664a9c76217c0d8e290dc1e4aea13bd1385fe609d106d89be878`。远端完整GET及包内CRC/SHA已核验。
 
-- 文件：`peak-video-style-20261029.zip`
-- 字节：25750420
-- SHA-256：`96c3c372a8e8664a9c76217c0d8e290dc1e4aea13bd1385fe609d106d89be878`
+[v0.91.1正式Release](https://github.com/linhongcun/video-studio/releases/tag/v0.91.1) / [部署记录](https://github.com/linhongcun/video-studio/actions/runs/40811957314)：与主干合并提交一致，Release后Pages成功。实际发布与能力限制见[publication.json](publication.json)。
 
-主站正式发布身份与部署结果另在`publication.json`据实补齐。只上GitHub站点，不重发外平台。
+当前受管环境未能完成canonical线上文件完整SHA校验；本地浏览器/完整HTTP、正式部署和独立交付包完整远端下载结果分别记录，不相互替代。
+
+仅更新GitHub站点，没有向外平台重新投稿。
