@@ -506,6 +506,34 @@ if (process.argv.includes('--built')) {
   };
   unifiedNavigation(home, 'home', false);
   unifiedNavigation(library, 'library');
+  assert.equal(/<article\b(?=[^>]*\bclass="[^"]*\bseries-card\b)/.test(home), false,
+    'The homepage must not repeat the complete series catalog');
+  const heroActions = /<div\b(?=[^>]*\bclass="[^"]*\bhero-actions\b)[^>]*>([\s\S]*?)<\/div>/.exec(home)?.[1];
+  assert.ok(heroActions, 'The homepage must offer a direct next step');
+  const heroLinks = links(heroActions);
+  assert.deepEqual(heroLinks.map((link) => link.href), [catalogHref, '/video-studio/search/'],
+    'Homepage actions must lead directly to the sole catalog and to search');
+  assert.match(heroLinks[0].attributes, /\bclass="[^"]*\bbtn-primary\b/, 'The primary homepage action must open the learning catalog');
+  const recent = /<section\b(?=[^>]*\baria-labelledby="recent-title")[^>]*>([\s\S]*?)<\/section>/.exec(home)?.[1];
+  assert.ok(recent, 'The homepage must retain its recent-content preview');
+  assert.deepEqual(links(recent).filter((link) => link.href?.startsWith('/video-studio/episodes/')).map((link) => link.href),
+    Array.from(liveLessons.slice(0, 6), (lesson) => `/video-studio/episodes/${lesson.slug}/`),
+    'The homepage preview must contain exactly the six latest current lessons in publication order');
+  const homeRedirect = [...home.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)]
+    .find((match) => match[1].includes('location.replace') && match[1].includes('series'))?.[1];
+  assert.ok(homeRedirect, 'The homepage must preserve previously shared catalog links');
+  for (const [search, hash, shouldRedirect] of [
+    ['', '', false], ['', '#recent-title', false], ['?tag=Redis', '#recent-title', false],
+    ['?series=redis&sort=learning', '', true], ['?series=', '', true],
+    ['', '#learning-series', true], ['?tag=Redis', '#learning-series', true],
+    ['?series=redis&sort=learning', '#learning-series', true], ['?series=redis', '#cache', true],
+  ]) {
+    const destinations = [];
+    const location = {search, hash, replace: (url) => destinations.push(url)};
+    vm.runInNewContext(homeRedirect, {location, window: {location}, URLSearchParams}, {timeout: 1000});
+    assert.deepEqual(destinations, shouldRedirect ? [catalogHref + search + hash] : [],
+      `The homepage must redirect only legacy catalog links and preserve their query and anchor: ${search}${hash}`);
+  }
   assert.ok(library.includes('<title>学习内容 · IT小村</title>'), 'The catalog title must use its unified name');
   assert.match(learn, /<link\b(?=[^>]*\brel="canonical")(?=[^>]*\bhref="https:\/\/linhongcun\.github\.io\/video-studio\/library\/")[^>]*>/,
     'The legacy learning URL must identify the unified catalog as canonical');
@@ -544,7 +572,6 @@ if (process.argv.includes('--built')) {
     assert.ok(library.includes(`id="${series.id}"`), `Missing series anchor: ${series.id}`);
     const legacyAnchor = legacyTrackForSeries[series.id];
     if (legacyAnchor) assert.ok(library.includes(`id="${legacyAnchor}"`), `Missing destination for the shared /learn/#${legacyAnchor} link`);
-    assert.ok(home.includes(`href="${series.href}"`), `Home must lead directly to ${series.title}`);
     assert.ok(library.includes(`href="${series.href}"`), `Learning catalog must expose ${series.title}`);
     assert.ok(library.includes(`href="/video-studio/episodes/${series.start.slug}/"`), `${series.title} must offer its published starting lesson`);
     assert.ok(seriesChoices.some((choice) => choice.value === series.id && choice.label === series.title),
@@ -567,7 +594,7 @@ if (process.argv.includes('--built')) {
   assert.equal(/<optgroup\b/.test(library), false, 'Series choices must form one flat list');
   assert.equal(home.includes('系统原理'), false, 'Home must use the independent series name');
   assert.equal(library.includes('系统原理'), false, 'Library must use the independent series name');
-  for (const page of [home, library, readPage('series/peak/index.html')]) {
+  for (const page of [library, readPage('series/peak/index.html')]) {
     assert.ok(page.includes('高并发、高可用、高性能'), 'The renamed series must be discoverable throughout the current catalog');
   }
   assert.ok(library.includes('id="cache"'), 'The former cache learning anchor must remain addressable');
@@ -575,5 +602,5 @@ if (process.argv.includes('--built')) {
   assert.ok(cacheRedirect.includes('http-equiv="refresh"') && cacheRedirect.includes('url=/video-studio/series/redis/'),
     'The historical cache series URL must continue redirecting to Redis');
   assert.equal(library.includes(`/episodes/${archiveSlug}/`), false, 'Historical compilation must stay outside the current library');
-  console.log('Built navigation passed: one learning catalog across desktop/mobile/footer, query-and-anchor-preserving legacy redirect, direct series entries, legacy anchors, flat filters, lesson breadcrumbs, cache redirect and complete current library.');
+  console.log('Built navigation passed: one series catalog, homepage catalog/search actions and latest-six preview, legacy homepage/learning redirects, desktop/mobile/footer navigation, direct series entries, legacy anchors, flat filters, lesson breadcrumbs, cache redirect and complete current library.');
 }

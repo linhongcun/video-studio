@@ -1,12 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import EpisodeGrid from '../components/EpisodeGrid.astro';
-import TrackMark from '../components/TrackMark.astro';
-import {getEpisodes, BASE, epHref, fmtTime, asset} from '../lib/episodes';
+import {getEpisodes, BASE, asset} from '../lib/episodes';
 import {getLearningSeries} from '../lib/learning';
 const eps = getEpisodes();
 const latest = eps[0];
-const series = getLearningSeries();
+const seriesCount = getLearningSeries().length;
 ---
 <BaseLayout current="home" ogImage={latest && asset(latest.slug, latest.poster)}>
   <div class="container">
@@ -15,38 +14,28 @@ const series = getLearningSeries();
         <p class="hero-label"><span></span> IT小村 · 技术可视化学习站</p>
         <h1 id="home-title">把技术原理，<br />一步步<span>看明白。</span></h1>
         <p class="hero-description">跟着数据看过程，沿着问题理解原理。<br />用一支短片入门，再用图文和代码深入。</p>
-        <div class="hero-actions"><a class="btn btn-primary" href="#learning-series">选择一个系列 <span aria-hidden="true">↓</span></a><a class="hero-secondary" href={`${BASE}library/#all-content`}>浏览全部内容 →</a></div>
-        <p class="hero-note"><span class="num">{series.length}</span> 个系列 <span class="note-separator">/</span> <span class="num">{eps.length}</span> 篇视频与图文 <span class="note-separator">/</span> 持续更新</p>
+        <div class="hero-actions"><a class="btn btn-primary" href={`${BASE}library/`}>浏览学习内容 <span aria-hidden="true">→</span></a><a class="hero-secondary" href={`${BASE}search/`}>搜索知识点 ↗</a></div>
+        <p class="hero-note"><span class="num">{seriesCount}</span> 个系列 <span class="note-separator">/</span> <span class="num">{eps.length}</span> 篇视频与图文 <span class="note-separator">/</span> 持续更新</p>
       </div>
       <div class="hero-landscape" aria-hidden="true"><img src={`${BASE}brand/village-landscape.svg`} width="1200" height="520" alt="" decoding="async" /><span>从一个问题，走进技术的小村庄。</span></div>
     </section>
-    <section class="series-section" id="learning-series" aria-labelledby="series-title">
-      <div class="section-heading"><div><p class="eyebrow">EXPLORE SERIES</p><h2 id="series-title">选一个系列，开始看。</h2><p>每个系列对应一组视频，按兴趣选择，沿目录继续。</p></div><a class="text-link" href={`${BASE}library/#learning-series`}>查看所有课程目录 <span aria-hidden="true">→</span></a></div>
-      <div class="series-grid">{series.map((s) => <article class={`series-card series-${s.id}`}>
-        <a class="series-entry" href={s.href} aria-labelledby={`series-${s.id}-title`}>
-          <div class="series-top"><TrackMark id={s.id} /><span class="series-count">{s.episodes.length} 篇视频与图文</span></div>
-          <h3 id={`series-${s.id}-title`}>{s.title}</h3>
-          <p class="series-description">{s.description}</p>
-          <span class="series-browse">查看系列目录 <span aria-hidden="true">↗</span></span>
-        </a>
-        <a class="series-start" href={epHref(s.start.slug)}><span class="start-label">从这支短片开始 <span class="num">{fmtTime(s.start.duration)}</span></span><span class="start-title">{s.start.title}<span aria-hidden="true">→</span></span></a>
-      </article>)}</div>
-    </section>
     <section class="recent" aria-labelledby="recent-title">
-      <div class="section-heading"><div><p class="eyebrow">LATEST LESSONS</p><h2 id="recent-title">最近发布</h2></div><a class="text-link" href={`${BASE}library/`}>全部 {eps.length} 篇内容 <span aria-hidden="true">→</span></a></div>
+      <div class="section-heading"><div><p class="eyebrow">LATEST LESSONS</p><h2 id="recent-title">最近发布</h2></div><a class="text-link" href={`${BASE}library/#all-content`}>全部 {eps.length} 篇内容 <span aria-hidden="true">→</span></a></div>
       <EpisodeGrid episodes={eps.slice(0, 6)} />
     </section>
     <aside class="home-method"><div><span class="eyebrow">我们的讲解方式</span><h2>看清每一步，也讲清为什么。</h2><p>从具体问题出发，用连续动画展示机制，用图文补充边界、实现和资料来源。</p></div><a class="text-link" href={`${BASE}about/`}>认识 IT小村 <span aria-hidden="true">↗</span></a></aside>
   </div>
 </BaseLayout>
 <script is:inline define:vars={{library: `${BASE}library/`}}>
-  // 保留此前分享的首页系列筛选链接。
-  if (new URLSearchParams(location.search).has('series')) location.replace(library + location.search + location.hash);
+  // 保留此前分享的首页系列筛选和目录锚点链接。
+  if (new URLSearchParams(location.search).has('series') || location.hash === '#learning-series') {
+    location.replace(library + location.search + location.hash);
+  }
 </script>
 <style>
 .home-hero{margin-top:28px;padding:44px 48px;display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;border-radius:24px;background:var(--c-surface);border:1px solid var(--c-border);box-shadow:var(--shadow-1);overflow:hidden}.hero-copy,.hero-landscape{min-width:0}.hero-label{display:flex;gap:10px;align-items:center;font-size:12px;letter-spacing:.08em;color:var(--c-text-2);margin:0 0 22px}.hero-label span{width:6px;height:6px;border-radius:50%;background:var(--c-primary)}h1{font-size:clamp(38px,4.3vw,60px);line-height:1.22;letter-spacing:-.045em;font-weight:650;margin:0 0 20px}h1 span{color:var(--c-primary)}.hero-description{font-size:15px;line-height:1.9;color:var(--c-text-2);margin:0 0 26px}.hero-actions{display:flex;align-items:center;gap:24px;flex-wrap:wrap}.hero-actions .btn{gap:24px}.hero-secondary{color:var(--c-text);font-size:13px;text-decoration:none}.hero-note{margin:24px 0 0;color:var(--c-muted);font-size:12px}.hero-note>.num{color:var(--c-text)}.note-separator{margin:0 8px;color:var(--c-muted)}.hero-landscape{text-align:center;pointer-events:none;user-select:none}.hero-landscape img{display:block;width:100%;height:260px;object-fit:contain}.hero-landscape>span{font-size:11px;letter-spacing:.08em;color:var(--c-muted)}
-.series-section,.recent{margin-top:56px}.series-section{scroll-margin-top:calc(var(--header-h) + 24px)}.series-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}.series-card{display:flex;flex-direction:column;min-width:0;border:1px solid var(--c-border);border-radius:14px;background:var(--c-surface);overflow:hidden;transition:border-color var(--dur)}.series-card:hover{border-color:var(--c-primary-a40)}.series-entry{display:flex;flex-direction:column;flex:1;padding:24px;text-decoration:none;color:var(--c-text)}.series-top{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:20px}.series-top :global(svg){width:34px;height:34px;flex:none;color:var(--c-primary)}.series-leetcode .series-top :global(svg){color:var(--c-accent)}.series-design-patterns .series-top :global(svg){color:var(--c-secondary)}.series-count{font-size:11px;color:var(--c-text-2)}.series-entry h3{font-size:21px;line-height:1.5;letter-spacing:-.02em;margin:0 0 10px;text-wrap:balance}.series-entry:hover h3{color:var(--c-primary)}.series-description{font-size:13px;line-height:1.85;color:var(--c-text-2);margin:0 0 20px}.series-browse{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:auto;font-size:12px;color:var(--c-primary)}.series-browse>span{font-size:20px}.series-start{padding:16px 24px;background:var(--c-surface-2);color:var(--c-text);text-decoration:none;border-top:1px solid var(--c-border)}.start-label{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:var(--c-text-2);margin-bottom:5px}.start-title{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-size:13px;line-height:1.7}.start-title>span{color:var(--c-primary);flex:none}.series-start:hover .start-title{color:var(--c-primary)}
+.recent{margin-top:56px}
 .home-method{margin-top:56px;padding:30px 36px;background:var(--c-surface-2);border:1px solid var(--c-border);border-radius:16px;display:flex;align-items:center;justify-content:space-between;gap:32px}.home-method h2{font-size:24px;margin:6px 0 8px;line-height:1.5}.home-method p{margin:0;font-size:14px;color:var(--c-text-2)}.home-method>a{flex:none}
-@media(max-width:1100px){.home-hero{padding:36px 32px;gap:24px}.hero-landscape img{height:220px}.series-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:767px){.home-hero{grid-template-columns:1fr;margin-top:16px;padding:28px 24px 20px;gap:16px;border-radius:16px}.hero-label{font-size:10px;margin-bottom:18px}h1{font-size:38px;margin-bottom:16px}.hero-description{font-size:14px;margin-bottom:22px}.hero-actions{gap:18px}.hero-actions .btn{font-size:13px;min-height:44px;gap:14px;padding-inline:14px}.hero-secondary{font-size:12px}.hero-note{margin-top:20px;font-size:10px}.note-separator{margin-inline:5px}.hero-landscape img{height:135px}.hero-landscape>span{display:none}.series-section,.recent{margin-top:36px}.series-grid{grid-template-columns:1fr;gap:16px}.series-entry{padding:22px}.series-top{margin-bottom:14px}.series-entry h3{font-size:21px}.series-description{margin-bottom:16px}.series-start{padding:14px 22px}.home-method{margin-top:36px;padding:24px;flex-direction:column;align-items:flex-start;gap:20px}.home-method h2{font-size:21px}}
+@media(max-width:1100px){.home-hero{padding:36px 32px;gap:24px}.hero-landscape img{height:220px}}
+@media(max-width:767px){.home-hero{grid-template-columns:1fr;margin-top:16px;padding:28px 24px 20px;gap:16px;border-radius:16px}.hero-label{font-size:10px;margin-bottom:18px}h1{font-size:38px;margin-bottom:16px}.hero-description{font-size:14px;margin-bottom:22px}.hero-actions{gap:18px}.hero-actions .btn{font-size:13px;min-height:44px;gap:14px;padding-inline:14px}.hero-secondary{font-size:12px}.hero-note{margin-top:20px;font-size:10px}.note-separator{margin-inline:5px}.hero-landscape img{height:135px}.hero-landscape>span{display:none}.recent{margin-top:36px}.home-method{margin-top:36px;padding:24px;flex-direction:column;align-items:flex-start;gap:20px}.home-method h2{font-size:21px}}
 </style>
