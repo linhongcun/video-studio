@@ -3,16 +3,29 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import EpisodeGrid from '../../components/EpisodeGrid.astro';
 import EpisodeNumbering from '../../components/EpisodeNumbering.astro';
-import {BASE, getEpisodes, getTags} from '../../lib/episodes';
+import TrackMark from '../../components/TrackMark.astro';
+import {BASE, epHref, getEpisodes, getTags} from '../../lib/episodes';
 import {getLearningSeries} from '../../lib/learning';
 const episodes = getEpisodes();
 const series = getLearningSeries();
 const tags = getTags();
+const legacyAnchors: Record<string, string[]> = {peak: ['systems'], leetcode: ['algorithms'], 'design-patterns': ['patterns'], 'engineering-algorithms': ['engineering'], request: ['network'], redis: ['cache']};
 ---
-<BaseLayout title="全部内容" current="library" description="浏览 IT小村的技术与推理短片、图文，按高并发、高可用、高性能、计算机网络、分布式、Agent 开发、算法可视化、设计模式、趣味推理、工程算法、Kafka、MySQL、Redis等系列和知识点筛选。">
+<BaseLayout title="学习内容" current="library" description="在 IT小村按系列循序学习，或按系列、知识标签和学习顺序筛选全部短片、图文与代码。">
   <div class="container">
-    <Breadcrumb items={[{label: '首页', href: BASE}, {label: '全部内容'}]} />
-    <header class="page-intro"><p class="eyebrow">THE LIBRARY</p><h1>找到你想弄懂的那个问题。</h1><p>短片、图文与代码，都在这里。你可以按系列浏览，也可以直接搜索一个知识点。</p><a class="text-link" href={`${BASE}search/`}>搜索标题与正文 <span aria-hidden="true">↗</span></a></header>
+    <Breadcrumb items={[{label: '首页', href: BASE}, {label: '学习内容'}]} />
+    <header class="page-intro"><p class="eyebrow">LEARN & EXPLORE</p><h1>找到你想弄懂的那个问题。</h1><p>选一个系列循序学习，也可以筛选全部短片、图文与代码。</p><nav class="catalog-jump" aria-label="内容浏览方式"><a class="text-link" href="#learning-series">按系列学习 ↓</a><a class="text-link" href="#all-content">浏览全部内容 ↓</a><a class="text-link" href={`${BASE}search/`}>搜索标题与正文 <span aria-hidden="true">↗</span></a></nav></header>
+    <section class="series-overview" id="learning-series" aria-labelledby="series-title">
+      <div class="library-heading"><h2 id="series-title">按系列学习</h2><span>{series.length} 个系列</span></div>
+      <div class="series-catalog">{series.map((s) => <article class="series-card" id={s.id} aria-labelledby={`${s.id}-title`}>
+        {(legacyAnchors[s.id] ?? []).map((id) => <span class="legacy-anchor" id={id} aria-hidden="true"></span>)}
+        <div class="series-identity"><TrackMark id={s.id} /><span>{s.episodes.length} 篇视频与图文</span></div>
+        <h3 id={`${s.id}-title`}><a href={s.href}>{s.title}<span aria-hidden="true"> →</span></a></h3>
+        <a class="series-start" href={epHref(s.start.slug)}>从第一课开始 <span aria-hidden="true">↗</span></a>
+      </article>)}</div>
+    </section>
+    <section id="all-content" aria-labelledby="all-content-title">
+    <div class="library-heading"><h2 id="all-content-title">全部内容</h2><a href={`${BASE}tags/`}>查看标签索引 →</a></div>
     <form class="catalog-controls" aria-label="筛选内容" hidden>
       <div class="filter-fields">
         <label>系列<select name="series"><option value="">全部系列</option>{series.map((item) => <option value={item.id}>{item.title}</option>)}</select></label>
@@ -21,11 +34,11 @@ const tags = getTags();
       </div>
       <div class="filter-footer"><p id="catalog-count" role="status" aria-live="polite">共 {episodes.length} 篇内容</p><button class="reset" type="reset">重置筛选 <span aria-hidden="true">↺</span></button></div>
     </form>
-    <noscript><p>可以<a href={`${BASE}learn/`}>按学习系列浏览</a>，或<a href={`${BASE}tags/`}>查看知识标签</a>。</p></noscript>
-    <div class="library-heading"><h2>视频与图文</h2><a href={`${BASE}tags/`}>查看标签索引 →</a></div>
+    <noscript><p>下方列出全部内容，也可以<a href="#learning-series">按系列学习</a>，或<a href={`${BASE}tags/`}>查看知识标签</a>。</p></noscript>
     <EpisodeNumbering />
     <div id="library-grid"><EpisodeGrid episodes={episodes} /></div>
     <div class="catalog-empty surface" hidden><h2>这个组合暂时没有内容</h2><p>试试减少筛选条件，或搜索相关知识点。</p><button type="button" class="btn btn-primary" data-clear-filters>查看全部内容</button></div>
+    </section>
   </div>
 </BaseLayout>
 <script>
@@ -77,8 +90,17 @@ const tags = getTags();
   document.querySelector('[data-clear-filters]')!.addEventListener('click', reset);
   window.addEventListener('popstate', readUrl);
   readUrl();
+  if (!location.hash && (fields.series.value || fields.tag.value || fields.sort.value === 'learning')) {
+    const revealContent = () => document.getElementById('all-content')!.scrollIntoView({behavior: 'instant'});
+    if (document.readyState === 'complete') revealContent();
+    else window.addEventListener('load', revealContent, {once: true});
+  }
 </script>
 <style>
+.catalog-jump{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:20px}.catalog-jump a{display:inline-flex;align-items:center;min-height:44px;font-size:13px}.series-overview{margin-bottom:48px}.series-catalog{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.series-card{position:relative;min-width:0;padding:20px;border:1px solid var(--c-border);border-radius:12px;background:var(--c-surface)}.series-identity{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--c-text-2);font-size:11px}.series-identity :global(svg){width:28px;height:28px;flex:none;color:var(--c-primary)}.series-card h3{font-size:18px;line-height:1.6;margin:14px 0 4px}.series-card h3 a{color:var(--c-text);text-decoration:none}.series-card h3 a:hover{color:var(--c-primary)}.series-card h3 span{color:var(--c-primary);white-space:nowrap}.series-start{display:inline-flex;align-items:center;gap:8px;min-height:44px;font-size:12px;color:var(--c-text-2);text-decoration:none}.series-start:hover{color:var(--c-primary);text-decoration:underline}.series-card,#learning-series,#all-content,.legacy-anchor{scroll-margin-top:calc(var(--header-h) + 24px)}.legacy-anchor{position:absolute;top:0}.library-heading>span{font-size:12px;color:var(--c-text-2)}
+@media(max-width:1000px){.series-catalog{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:767px){.catalog-jump{gap:4px 20px}.series-overview{margin-bottom:36px}.series-catalog{gap:12px}.series-card{padding:16px}.series-card h3{font-size:16px}.series-identity{font-size:10px}.series-identity :global(svg){width:24px;height:24px}}
+@media(max-width:480px){.series-catalog{grid-template-columns:1fr}}
 .page-intro>.text-link{margin-top:16px}.catalog-controls{padding:24px 28px;border:1px solid var(--c-border);border-radius:14px;background:var(--c-surface);margin:0 0 36px}.filter-fields{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(2,minmax(0,1fr));gap:24px}.filter-fields label{min-width:0;display:flex;flex-direction:column;gap:9px;font-size:11px;font-weight:600;color:var(--c-text-2);letter-spacing:.02em}.filter-fields select{width:100%;min-height:44px;padding:8px 30px 8px 12px;background:var(--c-bg);color:var(--c-text);border:1px solid var(--c-border);border-radius:6px;font:inherit;font-size:13px;cursor:pointer}.filter-footer{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-top:20px;padding-top:16px;border-top:1px solid var(--c-border);font-size:11px;color:var(--c-text-2)}.filter-footer p{margin:0}.reset{padding:5px 0;min-height:32px;background:none;border:0;color:var(--c-primary);font:inherit;cursor:pointer}.reset span{margin-left:8px}.library-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:24px}.library-heading h2{font-size:20px;font-weight:600;margin:0}.library-heading a{font-size:12px;color:var(--c-text-2);text-decoration:none}.catalog-empty{padding:48px;text-align:center}.catalog-empty h2{font-size:22px}.catalog-empty p{color:var(--c-text-2);font-size:14px}
 @media(max-width:767px){.catalog-controls{padding:20px;margin-bottom:28px}.filter-fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.filter-fields label:first-child{grid-column:1/-1}.filter-fields select{font-size:12px}.library-heading h2{font-size:19px}.library-heading a{font-size:11px}.catalog-empty{padding:28px}}
 </style>
