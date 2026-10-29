@@ -1,5 +1,7 @@
 # EP.11《抢票时，为什么总提示系统繁忙？》
 
+> 当前系列视觉入口：[`remotion/src/peak-style/index.ts`](remotion/src/peak-style/index.ts)。正文与资料页沿现行深青蓝／亮青／暖黄封面；通过[共享制作入口](../_shared/peak-video/README.md)先预检、冻结，再生成完整成片。新产物位于 `revisions/peak-style/`；下文原入口保留历史身份，不用旧命令覆盖当前发布视频。
+
 2026-10-24用户授权EP01–14按今天Codex规格重制，本期为全新制作工程。只在本目录产出，不改线上旧文件；站点接入和发布由root统一完成。
 
 - research.md记录实际读取的官方正文、日期与边界。

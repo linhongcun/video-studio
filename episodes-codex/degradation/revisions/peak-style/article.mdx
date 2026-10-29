@@ -1,0 +1,54 @@
+---
+title: "搜索页和结算页，为什么两个价不一样？"
+summary: "少算一处非核心功能，保住下单。"
+related: []
+chapters:
+  - id: load
+    title: "搜索预估也消耗资源"
+  - id: degrade
+    title: "减少功能仍要交代清楚"
+  - id: boundary
+    title: "核心链路不能靠跳过校验维持"
+---
+
+视频使用同一件教学商品：标价199元，符合条件的红包减20元，结算确认179元。搜索与结算价格不同，来自示例系统临时关闭了搜索中的红包预估；这不是对所有网站差价原因的解释。
+
+## 搜索预估也消耗资源 {#load}
+
+平常搜索可能为很多商品预估优惠。高峰时，这些计算会与结算业务竞争资源。示例系统先减少搜索预估，保持商品搜索可用，把优惠核验留到结算。
+
+## 减少功能仍要交代清楚 {#degrade}
+
+降级是有计划地减少部分功能，让重要业务继续提供。搜索展示199元时，应明确标明未计红包、以结算为准；结算再按资格和规则核验，显示确认金额供用户决定。
+
+<SourceQuote sourceId="A1" supports="减少功能时需要向用户说明哪些能力保留、哪些发生变化；降级后的价格呈现也应交代清楚。" />
+
+<Figure src="/video-studio/episodes/degradation/article/01.jpg" alt="商品7042结算页面核验红包后显示确认价179元，提示用户确认后下单" caption="教学示例：搜索阶段减少预估计算，结算仍核验红包并展示确认价179元，再由用户决定是否下单。" seekTo={68} chapter="degrade" />
+
+## 核心链路不能靠跳过校验维持 {#boundary}
+
+结算、库存、支付的正确性仍然重要。核心校验失败不能假装成功；合适的方案可能是明确失败、只读或保留待完成状态。降级路径要更简单、经过测试并有监控，压力减轻后再逐步恢复。随意切到另一个脆弱依赖，可能使故障更严重。
+
+## 参考资料
+- [AWS Well-Architected — graceful degradation](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html)，实际访问2026-10-24。
+- [Microsoft Well-Architected — self-healing and self-preservation](https://learn.microsoft.com/en-us/azure/well-architected/reliability/self-preservation)，实际访问2026-10-24。
+- [AWS Builders Library — Avoiding fallback in distributed systems](https://aws.amazon.com/builders-library/avoiding-fallback-in-distributed-systems/)，实际访问2026-10-24。
+
+### 视频采用的资料
+以下两项资料支撑本片减少非核心功能、保留关键业务正确性，以及监控和恢复的边界。技术正文沿用2026-10-24（北京时间）的实际阅读记录；完整原题据本仓已保存的2026-10-22官方读取记录核对。本轮2026-10-26只整理和核对这些固定记录，没有重新读取官网正文或题名；旧文章、研究记录与公开来源全部保留。
+
+**[R1] REL05-BP01 Implement graceful degradation to transform applicable hard dependencies into soft dependencies**
+
+Amazon Web Services · AWS Well-Architected Framework · REL05-BP01：[官方资料](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html)；[既有技术实读记录（2026-10-24）](https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/degradation/research.md#L5)；[既有题名读取归档（2026-10-22）](https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes/_shared/storyboard/examples/degradation/sources/src/aws-gd.txt)。
+
+支持范围：依赖异常时仍应维持应用的核心功能，尽量限制局部失败对整体核心业务价值的影响。；本片按业务一致性边界减少搜索红包预估并保留结算核验；降级路径需要预先设计、测试并保持简单。
+
+边界：199元、20元红包和179元结算价均为教学数字，不是网站价格事实或统一降级策略。；保留核心功能不意味着跳过库存、支付等正确性校验；不能把失败假装成功。；不引用性能倍数、永不宕机或任意备用系统都安全的保证。
+
+**[R2] Architecture strategies for self-healing and self-preservation**
+
+Microsoft · Microsoft Azure Well-Architected Framework：[官方资料](https://learn.microsoft.com/en-us/azure/well-architected/reliability/self-preservation)；[既有技术实读记录（2026-10-24）](https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes-codex/degradation/research.md#L9)；[既有题名读取归档（2026-10-22）](https://github.com/linhongcun/video-studio/blob/61d3b984a594578a67bc34aa374cccd0326cd9d6/episodes/_shared/storyboard/examples/degradation/sources/src/azure-self.txt)。
+
+支持范围：通过监控和故障信号识别降级情形，维持关键业务流程，并向用户说明仍可用的功能及发生的变化。；关键依赖不可用时可以采用只读或保存待完成工作等情形；恢复措施取决于工作负载与可靠性目标，不能笼统承诺所有业务自动完成。
+
+边界：根据监控逐步恢复搜索预估是本片的说明性设计；旧研究明确不宣称统一自动恢复算法。；不把未完成支付或失败校验标成业务成功，也不将只读或待完成状态说成所有系统必选方案。；具体自愈、切换和恢复需适合实际系统并经过验证；文档并未证明本例的具体部署或压测结果。

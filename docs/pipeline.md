@@ -148,7 +148,7 @@ npm run render
 
 `npm run render` 先出 `out/voice.mp4`，再调用 `episodes/_shared/music/mix_bgm.py`，得到 `episodes-codex/degradation/video.mp4`。
 
-LeetCode正文当前沿[独立视觉入口](../episodes-codex/_shared/leetcode-video/README.md)保持封面风格，完整Python页与原题参考页分层保留；封面使用[共享系列入口](../episodes-codex/_shared/leetcode-covers/README.md)生成并安装三比例，不用旧期 `npm run covers` 覆盖当前模板。趣味推理同样通过[本系列入口](../episodes-codex/_shared/puzzles-covers/README.md)生成三比例；MySQL也用[独立系列入口](../episodes-codex/_shared/mysql-covers/README.md)生成三比例；Redis正文和资料页通过[独立视觉入口](../episodes-codex/_shared/redis-video/README.md)沿封面配色，保留实际层高模型与完整音轨，新媒体另冻结；EP.08/09应用场景使用[缓存视觉入口](../episodes-codex/_shared/redis-cache-video/README.md)在默认流程直接生成同色正文、BT.709画面与资料页；高并发、高可用、高性能同样通过[独立封面入口](../episodes-codex/_shared/peak-covers/README.md)生成三比例，原视频制作和冻结保持；其他系列运行当期 package.json 的 `npm run covers`，由本期 Cover.tsx 与 covers.json 生成；实际文件和安全区见 [render.md](render.md)。
+LeetCode正文当前沿[独立视觉入口](../episodes-codex/_shared/leetcode-video/README.md)保持封面风格，完整Python页与原题参考页分层保留；封面使用[共享系列入口](../episodes-codex/_shared/leetcode-covers/README.md)生成并安装三比例，不用旧期 `npm run covers` 覆盖当前模板。趣味推理同样通过[本系列入口](../episodes-codex/_shared/puzzles-covers/README.md)生成三比例；MySQL也用[独立系列入口](../episodes-codex/_shared/mysql-covers/README.md)生成三比例；Redis正文和资料页通过[独立视觉入口](../episodes-codex/_shared/redis-video/README.md)沿封面配色，保留实际层高模型与完整音轨，新媒体另冻结；EP.08/09应用场景使用[缓存视觉入口](../episodes-codex/_shared/redis-cache-video/README.md)在默认流程直接生成同色正文、BT.709画面与资料页；高并发、高可用、高性能通过[独立封面入口](../episodes-codex/_shared/peak-covers/README.md)生成三比例，正文与资料页沿[独立视觉入口](../episodes-codex/_shared/peak-video/README.md)保持深青蓝、亮青、暖黄与真实EP，原模型和历史冻结保留；其他系列运行当期 package.json 的 `npm run covers`，由本期 Cover.tsx 与 covers.json 生成；实际文件和安全区见 [render.md](render.md)。
 
 ## 8. 成片审与上线
 

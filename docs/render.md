@@ -102,6 +102,10 @@ npm run covers
 
 Redis应用场景EP.08/09使用[独立缓存视觉入口](../episodes-codex/_shared/redis-cache-video/README.md)，新源码在各期`remotion/src/redis-style/`，清单和最终媒体在`revisions/redis-style/`。默认生产先渲染无声画面、真实转换为有限范围BT.709并明确逐帧参数，再完整流拷贝原AAC，追加同编码原题/机构资料页；不用事后改旧冻结。新封面与媒体独立安装，原模型、分镜、文章发布稿、素材身份与两类缓存流程保留。
 
+## 高并发、高可用、高性能正文的当前视觉入口
+
+EP.11–14正文与资料页通过[独立系列入口](../episodes-codex/_shared/peak-video/README.md)延续现行深青蓝、亮青、暖黄封面。新源码在各期`remotion/src/peak-style/`，媒体和47/51/48/50项输入独立冻结在`revisions/peak-style/`；原模型、导航、配音、分镜、文章发布稿、封面和历史清单保持。先逐镜预检，再运行共享`render.py <slug> --freeze / --render / --verify`，不要用旧混音入口覆盖新版。默认流程完成真实limitedBT709像素转换、逐帧颜色参数、完整原AAC流拷贝和同色参考资料；实际网页颜色、字幕与全屏另查。
+
 ## 共享工具回归
 
 历史 EP.14 的 20 镜、5152 帧样例只保存在 [固定回归输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md)，用于共享工具测试，不是现行渲染工程。相关命令见 [validate.md](validate.md) 的「共享工具回归」。
