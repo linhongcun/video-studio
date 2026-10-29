@@ -20,7 +20,7 @@ ROOT = Path('/workspace/video-studio')
 OUT = Path('/workspace/work/peak-online')
 BASE = 'https://linhongcun.github.io/video-studio/'
 RAW = 'https://raw.githubusercontent.com/linhongcun/video-studio/'
-RELEASE = 'v0.89.3'  # Planned patch, confirmed by root before final prepare.
+RELEASE = 'v0.90.1'  # Planned patch, confirmed by root before final prepare.
 SERIES = 'peak'
 SERIES_TITLE = '高并发、高可用、高性能'
 CATALOG = ROOT / 'episodes-codex/_shared/peak-covers/catalog.json'
@@ -72,13 +72,25 @@ class PageEvidence(HTMLParser):
         self.series_cards = set()
         self.series_section = set()
         self.sections = []
+        self.anchor_hrefs = []
+        self.canonicals = []
+        self.robots = []
+        self.script_parts = []
+        self.in_script = False
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         if tag == 'section':
             self.sections.append(attrs.get('id'))
+        if tag == 'script':
+            self.in_script = True
+        if tag == 'link' and 'canonical' in attrs.get('rel', '').lower().split():
+            self.canonicals.append(attrs.get('href', ''))
+        if tag == 'meta' and attrs.get('name', '').lower() == 'robots':
+            self.robots.append(attrs.get('content', '').lower())
         if tag != 'a':
             return
+        self.anchor_hrefs.append(attrs.get('href', ''))
         path = urllib.parse.urlsplit(attrs.get('href', '')).path
         match = re.fullmatch(r'/video-studio/episodes/([a-z0-9-]+)/', path)
         if not match:
@@ -93,6 +105,12 @@ class PageEvidence(HTMLParser):
     def handle_endtag(self, tag):
         if tag == 'section' and self.sections:
             self.sections.pop()
+        if tag == 'script':
+            self.in_script = False
+
+    def handle_data(self, data):
+        if self.in_script:
+            self.script_parts.append(data)
 
 
 def check_page(job, text):
@@ -105,9 +123,28 @@ def check_page(job, text):
         if field in job:
             evidence[field] = sorted(values)
             evidence[field + 'Matches'] = sorted(values) == job[field]
+    if 'legacyRedirectTo' in job:
+        expected = urllib.parse.urljoin(BASE, job['legacyRedirectTo'])
+        canonical_targets = [urllib.parse.urljoin(BASE, value) for value in parsed.canonicals]
+        scripts = '\n'.join(parsed.script_parts)
+        target_match = re.search(r"\b(?:const|let|var)\s+target\s*=\s*([\"'])([^\"']+)\1", scripts)
+        script_target = urllib.parse.urljoin(BASE, target_match.group(2)) if target_match else None
+        compact = re.sub(r'\s+', '', scripts)
+        preserves = 'window.location.replace(target+window.location.search+window.location.hash)' in compact
+        fallback = expected in [urllib.parse.urljoin(BASE, value) for value in parsed.anchor_hrefs]
+        robots = any({'noindex', 'follow'} <= set(re.split(r'[\s,]+', value)) for value in parsed.robots)
+        contract = {'target': expected, 'canonicalTargets': canonical_targets,
+                    'canonicalMatches': canonical_targets == [expected],
+                    'scriptTarget': script_target, 'scriptTargetMatches': script_target == expected,
+                    'replacementPreservesSearchAndHash': preserves,
+                    'fallbackLinkMatches': fallback, 'robotsNoindexFollow': robots,
+                    'scope': 'complete GET of legacy HTML and its literal JS/canonical/fallback contract; no browser execution'}
+        contract['passed'] = all(contract[key] for key in ['canonicalMatches', 'scriptTargetMatches',
+                                  'replacementPreservesSearchAndHash', 'fallbackLinkMatches', 'robotsNoindexFollow'])
+        evidence['legacyRedirect'] = contract
     evidence['passed'] = not evidence['missing'] and all(
         evidence.get(field + 'Matches', True)
-        for field in ['episodeSet', 'seriesCardSet', 'seriesSectionSet'])
+        for field in ['episodeSet', 'seriesCardSet', 'seriesSectionSet']) and evidence.get('legacyRedirect', {}).get('passed', True)
     return evidence
 
 
@@ -157,9 +194,10 @@ def local_jobs():
          'episodeSet': SLUGS},
         {'path': '', 'contains': [SERIES_TITLE, RELEASE, 'series/peak/', 'series-peak',
                                  IDENTITIES['rate-limit']['title']]},
-        {'path': 'learn/', 'contains': [SERIES_TITLE, RELEASE, 'series/peak/', 'id="peak"'] + titles,
-         'seriesSectionSet': SLUGS},
-        {'path': 'library/', 'contains': [SERIES_TITLE, RELEASE, 'value="peak"', 'data-series="peak"'] + titles,
+        {'path': 'learn/', 'contains': ['学习系列与全部内容已合并。', '前往学习内容', 'data-pagefind-ignore="all"'],
+         'legacyRedirectTo': 'library/'},
+        {'path': 'library/', 'contains': [SERIES_TITLE, RELEASE, 'value="peak"', 'data-series="peak"',
+                      'id="learning-series"', 'id="all-content"', 'series/peak/'] + titles,
          'seriesCardSet': SLUGS},
         {'path': 'changelog/', 'contains': [RELEASE,
           'https://github.com/linhongcun/video-studio/releases/tag/' + RELEASE]},
@@ -231,6 +269,7 @@ def main():
         plan = {'preparedAt': now().isoformat(), 'release': RELEASE,
                 'localHead': local_head, 'catalogSha256': digest(CATALOG),
                 'seriesTitle': SERIES_TITLE, 'originalIdentities': IDENTITIES,
+                'entryContract': 'library/ unified canonical content; learn/ legacy JS replacement preserves search/hash',
                 'pagesRequests': 21, 'pagesByteRequests': 12,
                 'pagesPageRequests': 9, 'rawRequests': 2, 'requestCount': 23,
                 'jobs': jobs, 'networkRequestsExecuted': 0,

@@ -1,0 +1,278 @@
+from pathlib import Path
+import json,hashlib,subprocess,datetime,pprint
+root=Path('/workspace/video-studio');out=Path('/workspace/work/peak-online')
+identities={}
+for slug in ['rate-limit','idempotency','circuit-breaker','degradation']:
+ p=root/'episodes'/slug/'meta.json';m=json.loads(p.read_text());v=p.parent/'video.mp4'
+ identities[slug]={'ep':m['ep'],'title':m['title'],'sourcePath':m['sourcePath'],'metaSha256':hashlib.sha256(p.read_bytes()).hexdigest(),'videoBytes':v.stat().st_size,'videoSha256':hashlib.sha256(v.read_bytes()).hexdigest()}
+(out/'baseline-identities.json').write_text(json.dumps({'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'taskBaseline':'d3c163eff2a550255e8c81c1eea631178b7aaa58','observedHead':subprocess.check_output(['git','rev-parse','HEAD'],cwd=root,text=True).strip(),'coverOnly':True,'episodes':identities},ensure_ascii=False,indent=2)+'\n')
+script=r'''#!/usr/bin/env python3
+"""Prepare/verify four peak-series covers with 23 full canonical HTTPS GETs.
+
+--prepare is local-only. Live GETs require the exact merge SHA, run ID, and full
+successful workflow_dispatch status. No publish/deploy/issue/Git mutations occur.
+"""
+import argparse
+import concurrent.futures
+import datetime
+import hashlib
+import json
+import re
+import subprocess
+import urllib.request
+import urllib.parse
+from html.parser import HTMLParser
+from pathlib import Path
+
+ROOT = Path('/workspace/video-studio')
+OUT = Path('/workspace/work/peak-online')
+BASE = 'https://linhongcun.github.io/video-studio/'
+RAW = 'https://raw.githubusercontent.com/linhongcun/video-studio/'
+RELEASE = 'v0.89.3'  # Planned patch, confirmed by root before final prepare.
+SERIES = 'peak'
+SERIES_TITLE = '高并发、高可用、高性能'
+CATALOG = ROOT / 'episodes-codex/_shared/peak-covers/catalog.json'
+DELIVERY = 'design/peak-covers-20261029/'
+IDENTITIES = __IDENTITIES__
+SLUGS = sorted(IDENTITIES)
+
+
+def digest(path):
+    h = hashlib.sha256()
+    with path.open('rb') as stream:
+        while block := stream.read(1024 * 1024):
+            h.update(block)
+    return h.hexdigest()
+
+
+def now():
+    return datetime.datetime.now(datetime.timezone.utc)
+
+
+class PageEvidence(HTMLParser):
+    """Read the actual flat series->episode HTML; no old direction hierarchy."""
+    def __init__(self):
+        super().__init__()
+        self.all_episodes = set()
+        self.series_cards = set()
+        self.series_section = set()
+        self.sections = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        if tag == 'section':
+            self.sections.append(attrs.get('id'))
+        if tag != 'a':
+            return
+        path = urllib.parse.urlsplit(attrs.get('href', '')).path
+        match = re.fullmatch(r'/video-studio/episodes/([a-z0-9-]+)/', path)
+        if not match:
+            return
+        slug = match.group(1)
+        self.all_episodes.add(slug)
+        if attrs.get('data-series') == SERIES:
+            self.series_cards.add(slug)
+        if SERIES in self.sections:
+            self.series_section.add(slug)
+
+    def handle_endtag(self, tag):
+        if tag == 'section' and self.sections:
+            self.sections.pop()
+
+
+def check_page(job, text):
+    evidence = {'missing': [value for value in job['contains'] if value not in text]}
+    parsed = PageEvidence()
+    parsed.feed(text)
+    for field, values in [('episodeSet', parsed.all_episodes),
+                          ('seriesCardSet', parsed.series_cards),
+                          ('seriesSectionSet', parsed.series_section)]:
+        if field in job:
+            evidence[field] = sorted(values)
+            evidence[field + 'Matches'] = sorted(values) == job[field]
+    evidence['passed'] = not evidence['missing'] and all(
+        evidence.get(field + 'Matches', True)
+        for field in ['episodeSet', 'seriesCardSet', 'seriesSectionSet'])
+    return evidence
+
+
+def local_jobs():
+    package = json.loads((ROOT / 'site/package.json').read_text())
+    assert package['version'] == RELEASE.removeprefix('v'), 'local version differs from requested release'
+    series = json.loads((ROOT / 'site/src/content/series.json').read_text())
+    assert series[SERIES]['title'] == SERIES_TITLE
+    published = {}
+    for p in (ROOT / 'episodes').glob('*/meta.json'):
+        m = json.loads(p.read_text())
+        if m.get('series') == SERIES and not m.get('draft'):
+            published[m['slug']] = m
+    assert sorted(published) == SLUGS, 'published peak set changed'
+    catalog = json.loads(CATALOG.read_text())
+    assert catalog['series'] == SERIES
+    assert sorted(ep['slug'] for ep in catalog['episodes']) == SLUGS
+    entries = {ep['slug']: ep for ep in catalog['episodes']}
+    jobs = []
+    for slug, identity in IDENTITIES.items():
+        prefix = 'episodes/' + slug + '/'
+        meta_path = ROOT / prefix / 'meta.json'
+        meta = published[slug]
+        assert digest(meta_path) == identity['metaSha256'], 'cover-only task changed meta: ' + slug
+        assert meta['ep'] == identity['ep'] and meta['title'] == identity['title']
+        assert meta['sourcePath'] == identity['sourcePath']
+        assert meta['video'] == 'video.mp4' and meta['poster'] == 'cover-16x9.jpg'
+        assert entries[slug]['ep'] == identity['ep'] and entries[slug]['sourceTitle'] == identity['title']
+        video = ROOT / prefix / 'video.mp4'
+        assert video.stat().st_size == identity['videoBytes'] and digest(video) == identity['videoSha256'], 'cover-only task changed video: ' + slug
+        for name in ['video.mp4', 'cover-16x9.jpg', 'captions.vtt']:
+            built = ROOT / 'site/dist' / prefix / name
+            local = built if name == 'captions.vtt' else ROOT / prefix / name
+            expected = digest(local)
+            assert digest(built) == expected, 'built publication asset differs: ' + slug + '/' + name
+            jobs.append({'path': prefix + name, 'sha256': expected,
+                         'localPath': str(local), 'kind': 'bytes', 'surface': 'pages'})
+    assert len(jobs) == 12
+    pages = []
+    for slug, identity in IDENTITIES.items():
+        prefix = 'episodes/' + slug + '/'
+        pages.append({'path': prefix, 'contains': [identity['title'], SERIES_TITLE,
+                      RELEASE, 'series/peak/', prefix + 'cover-16x9.jpg', identity['sourcePath']]})
+    titles = [identity['title'] for identity in IDENTITIES.values()]
+    pages.extend([
+        {'path': 'series/peak/', 'contains': [SERIES_TITLE, RELEASE] + titles,
+         'episodeSet': SLUGS},
+        {'path': '', 'contains': [SERIES_TITLE, RELEASE, 'series/peak/', 'series-peak',
+                                 IDENTITIES['rate-limit']['title']]},
+        {'path': 'learn/', 'contains': [SERIES_TITLE, RELEASE, 'series/peak/', 'id="peak"'] + titles,
+         'seriesSectionSet': SLUGS},
+        {'path': 'library/', 'contains': [SERIES_TITLE, RELEASE, 'value="peak"', 'data-series="peak"'] + titles,
+         'seriesCardSet': SLUGS},
+        {'path': 'changelog/', 'contains': [RELEASE,
+          'https://github.com/linhongcun/video-studio/releases/tag/' + RELEASE]},
+    ])
+    assert len(pages) == 9
+    for page in pages:
+        job = dict(page, kind='page', surface='pages')
+        local_text = (ROOT / 'site/dist' / job['path'] / 'index.html').read_text()
+        if job['path'] != 'changelog/':
+            evidence = check_page(job, local_text)
+            assert evidence['passed'], 'local HTML evidence missing: ' + (job['path'] or '/') + ' ' + json.dumps(evidence, ensure_ascii=False)
+        jobs.append(job)
+    assert len(jobs) == 21
+    for name in ['peak-covers.zip', 'peak-preview.png']:
+        local = ROOT / DELIVERY / name
+        jobs.append({'path': DELIVERY + name, 'sha256': digest(local),
+                     'localPath': str(local), 'kind': 'bytes', 'surface': 'github-raw'})
+    assert len(jobs) == 23 and len({(j['surface'], j['path']) for j in jobs}) == 23
+    return jobs
+
+
+def fetch(job):
+    result = {'url': job['url'], 'path': job['path'], 'kind': job['kind'],
+              'surface': job['surface']}
+    try:
+        # Preserve urllib's inherited proxy/CA and standard TLS verification.
+        # No Range, query/cache-busting argument, custom route or TLS bypass.
+        request = urllib.request.Request(job['url'], headers={
+            'User-Agent': 'video-studio-peak-cover-release-verification'})
+        retained = []
+        h = hashlib.sha256()
+        size = 0
+        keep = job['kind'] == 'page' or job['path'].endswith(('.jpg', '.png'))
+        with urllib.request.urlopen(request, timeout=90) as response:
+            while block := response.read(1024 * 1024):
+                h.update(block)
+                size += len(block)
+                if keep:
+                    retained.append(block)
+            result.update(status=response.status, bytes=size,
+                          sha256=h.hexdigest(), finalUrl=response.url)
+        if job['kind'] == 'bytes':
+            result['expectedSha256'] = job['sha256']
+            result['passed'] = result['status'] == 200 and h.hexdigest() == job['sha256']
+        else:
+            evidence = check_page(job, b''.join(retained).decode('utf-8'))
+            result['pageEvidence'] = evidence
+            result['passed'] = result['status'] == 200 and evidence['passed']
+        if job['kind'] == 'bytes' and job['path'].endswith(('.jpg', '.png')):
+            target = OUT / 'fetched' / job['path']
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(b''.join(retained))
+    except Exception as exc:
+        result.update(passed=False, error=f'{type(exc).__name__}: {exc}')
+    return result
+
+
+def main():
+    parser = argparse.ArgumentParser(__doc__)
+    parser.add_argument('--prepare', action='store_true')
+    parser.add_argument('--merge-sha')
+    parser.add_argument('--run-id', type=int)
+    parser.add_argument('--deployment-status-file', type=Path)
+    args = parser.parse_args()
+    OUT.mkdir(exist_ok=True)
+    jobs = local_jobs()
+    local_head = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip()
+    if args.prepare:
+        plan = {'preparedAt': now().isoformat(), 'release': RELEASE,
+                'localHead': local_head, 'catalogSha256': digest(CATALOG),
+                'seriesTitle': SERIES_TITLE, 'originalIdentities': IDENTITIES,
+                'pagesRequests': 21, 'pagesByteRequests': 12,
+                'pagesPageRequests': 9, 'rawRequests': 2, 'requestCount': 23,
+                'jobs': jobs, 'networkRequestsExecuted': 0,
+                'changelogLocalCheck': 'Deferred until actual Release; live page must show the exact release and its real GitHub tag URL.'}
+        target = OUT / 'expected-assets.json'
+        target.write_text(json.dumps(plan, ensure_ascii=False, indent=2) + '\n')
+        print(json.dumps({'prepared': True, 'networkRequestsExecuted': 0,
+                          'requestsPlanned': 23, 'plan': str(target)}))
+        return
+    if not args.merge_sha or not re.fullmatch('[0-9a-f]{40}', args.merge_sha):
+        parser.error('--merge-sha must be the exact 40-character merged commit SHA')
+    if not args.run_id or not args.deployment_status_file:
+        parser.error('--run-id and --deployment-status-file are required')
+    deployment = json.loads(args.deployment_status_file.read_text())
+    assert deployment['headSha'] == args.merge_sha, 'deployment HEAD mismatch'
+    assert deployment['event'] == 'workflow_dispatch', 'not the requested manual deployment'
+    assert deployment['status'] == 'completed' and deployment['conclusion'] == 'success', 'deployment not successful'
+    assert deployment['databaseId'] == args.run_id, 'deployment ID mismatch'
+    prepared_path = OUT / 'expected-assets.json'
+    prepared = json.loads(prepared_path.read_text())
+    assert prepared['release'] == RELEASE and prepared['requestCount'] == 23
+    assert prepared['catalogSha256'] == digest(CATALOG), 'catalog changed since preparation'
+    assert prepared['originalIdentities'] == IDENTITIES, 'original identities changed since preparation'
+    assert prepared['jobs'] == jobs, 'local publication inputs changed; prepare a new explicit plan'
+    for job in jobs:
+        assert '?' not in job['path'] and '#' not in job['path'] and '..' not in job['path']
+        job['url'] = (BASE if job['surface'] == 'pages' else RAW + args.merge_sha + '/') + job['path']
+    started = now()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as pool:
+        results = list(pool.map(fetch, jobs))
+    finished = now()
+    report = {'checkedAt': finished.isoformat(), 'startedAt': started.isoformat(),
+              'checkedAtAsiaShanghai': finished.astimezone(datetime.timezone(datetime.timedelta(hours=8))).isoformat(),
+              'method': 'complete canonical HTTPS GET with default TLS verification; no range or cache-busting query',
+              'release': RELEASE, 'deploymentRunId': args.run_id,
+              'deploymentHead': args.merge_sha, 'deployment': deployment,
+              'localHeadAtVerification': local_head, 'expectedPlanSha256': digest(prepared_path),
+              'requests': results, 'passed': all(result['passed'] for result in results),
+              'requestCount': len(results), 'pagesRequestCount': 21,
+              'pagesByteRequestCount': 12, 'pagesPageRequestCount': 9,
+              'rawRequestCount': 2, 'totalBytes': sum(result.get('bytes', 0) for result in results)}
+    target = OUT / ('report-' + finished.strftime('%Y%m%dT%H%M%SZ') + '.json')
+    target.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+    if report['passed']:
+        (OUT / 'online-verification.json').write_text(target.read_text())
+    print(json.dumps({'passed': report['passed'], 'requests': len(results),
+                      'bytes': report['totalBytes'], 'failed': [result for result in results if not result['passed']],
+                      'report': str(target)}, ensure_ascii=False))
+    raise SystemExit(0 if report['passed'] else 1)
+
+
+if __name__ == '__main__':
+    main()
+'''
+script=script.replace('__IDENTITIES__',pprint.pformat(identities,width=110,sort_dicts=False))
+p=Path('/workspace/work/peak-verify-online.py');p.write_text(script)
+compile(script,str(p),'exec')
+status={'createdAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'plannedRelease':'v0.89.3','status':'checker syntax validated; waiting final assets/build/version before prepare','networkRequestsExecuted':0,'requestsPlanned':23,'scriptSha256':hashlib.sha256(p.read_bytes()).hexdigest()}
+(out/'preparation-status.json').write_text(json.dumps(status,ensure_ascii=False,indent=2)+'\n')
+print(json.dumps(status,ensure_ascii=False))

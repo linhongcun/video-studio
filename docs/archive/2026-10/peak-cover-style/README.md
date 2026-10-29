@@ -19,4 +19,12 @@
 
 初始原生海报截图有白色loading弧。额外8张数据ready和2张idle手机截图在readyState4/networkState1/暂停时仍有弧，没有隐藏控件或播放正文冒充封面；早期stable命名过早，原字节与真实功能结果保持，[勘误](site-qa/poster-state-erratum.json)明确未证明视觉稳定。手机控件会盖下部问题，不能把图片安全区等同全部原生控件状态无遮挡；非物理手机、未点原生全屏按钮。三轮HTTP keepalive重置分别10/10/2，浏览器pageerror0，日志保留。完整范围见[最终QA](site-qa/final-summary.json)。
 
-ZIP内24张完整图片逐字节匹配候选，预览与包完整SHA见[交付检查](delivery-check.json)。发布前多次fetch均仍为d3c163ef，当前版本v0.89.3；23项完整GET计划尚未执行，不预记上线。
+ZIP内24张完整图片逐字节匹配候选，预览与包完整SHA见[交付检查](delivery-check.json)。原v0.89.3本地验收前多次fetch仍为d3c163ef，23项完整GET计划未执行、无旧版上线；最终整合状态见下节。
+
+## 发布前统一入口整合
+
+首次合并前，新主干`3beb56c549b20e666023774b919fc414454abe87`已将学习系列与全部内容合为统一入口，版本v0.90.0。旧PR合并因版本冲突被拒，没有旧版tag/Release；本轮整合提交`1a5a0910`完整采用新运行文件，两个版本JSON取完整theirs后顺延v0.90.1。原12封面/ZIP不重做。
+
+14上游路径与2754保护/400冻结零交集，12非版本运行文件字节与mode等新上游；依赖图保持，episodes/episodes-codex/design树全等原封面提交90ae7716。完整构建与学习路径重新通过，原0.89.3报告、18图和补采勘误原位保持；新0.90.1另做26功能/18图/28原资产检查，未借旧通过结果追认新runtime。root另实看统一入口手机、桌面四卡列表和手机幂等海报。
+
+最终/library为统一主入口，/learn为legacy JS redirect且保留search/hash；首页/导航三入口、手机菜单、四卡筛选和四poster/播放暂停及代表Fullscreen API通过。原生弧仍按实况记录，不再补采或隐藏控件；本轮9次HTTP keepalive reset、pageerror0。见[上游证明](upstream-integration/integration-report.json)、[最终UI](site-qa/integration-0.90.1/report.json)。原0.89.3 checker/plan原字节另存online-plan-before-upstream，0网络身份保持；最终23GET计划按新入口真实契约prepare，等待发布。
