@@ -104,7 +104,7 @@ export default defineConfig({
     '/tags/全局唯一ID/': '/video-studio/tags/分布式ID/',
     '/series/cache/': '/video-studio/series/redis/',
   },
-  integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick/.test(p)}), mdx({remarkPlugins: [remarkHeadingId, remarkSvgAttributes], rehypePlugins: [rehypeReaderHeadings, rehypeSummary], syntaxHighlight: false})],
+  integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick|\/(?:learn|series|all)\/$/.test(p)}), mdx({remarkPlugins: [remarkHeadingId, remarkSvgAttributes], rehypePlugins: [rehypeReaderHeadings, rehypeSummary], syntaxHighlight: false})],
   vite: {
     plugins: [headingIdPre()],
     server: {fs: {allow: [fileURLToPath(new URL('..', import.meta.url))]}},
