@@ -1,6 +1,6 @@
 # 高并发、高可用、高性能系列封面统一
 
-日期：2026-10-29（北京时间）。本地封面、独立安装与站点验收已完成，发布与线上回执待执行。
+日期：2026-10-29（北京时间）。本地封面、独立安装与站点验收已完成，已按v0.90.1发布并通过线上核验。
 
 从clean最新d3c163ef/v0.89.2开工，保留最新系列并列结构、Redis两期新媒体和LC547矩阵开头。当前peak四期为EP.11限流、EP.12幂等、EP.13熔断、EP.14降级，完整原标题、元数据、媒体、日期、链接与旧冻结保持；只统一封面。
 
@@ -28,3 +28,11 @@ ZIP内24张完整图片逐字节匹配候选，预览与包完整SHA见[交付�
 14上游路径与2754保护/400冻结零交集，12非版本运行文件字节与mode等新上游；依赖图保持，episodes/episodes-codex/design树全等原封面提交90ae7716。完整构建与学习路径重新通过，原0.89.3报告、18图和补采勘误原位保持；新0.90.1另做26功能/18图/28原资产检查，未借旧通过结果追认新runtime。root另实看统一入口手机、桌面四卡列表和手机幂等海报。
 
 最终/library为统一主入口，/learn为legacy JS redirect且保留search/hash；首页/导航三入口、手机菜单、四卡筛选和四poster/播放暂停及代表Fullscreen API通过。原生弧仍按实况记录，不再补采或隐藏控件；本轮9次HTTP keepalive reset、pageerror0。见[上游证明](upstream-integration/integration-report.json)、[最终UI](site-qa/integration-0.90.1/report.json)。原0.89.3 checker/plan原字节另存online-plan-before-upstream，0网络身份保持；最终23GET计划按新入口真实契约prepare，等待发布。
+
+## 发布与线上核验
+
+[PR #427](https://github.com/linhongcun/video-studio/pull/427)合并为`1c18eb8d78937c8736b345df3bb89226e2314363`，与最终验收分支10ded7ac整树一致，保留Codex联合署名。附注tag和[Release v0.90.1](https://github.com/linhongcun/video-studio/releases/tag/v0.90.1)指向同一提交；Release后[Pages 40804410988](https://github.com/linhongcun/video-studio/actions/runs/40804410988)以同HEAD完成完整构建和部署。
+
+北京时间2026-10-29 10:11:21完成23项规范URL完整GET，共34,905,213字节，全200/pass。四期原视频、新横封、全文字幕12份资产完整SHA匹配；9实际页面包含完整原题、精确四课集合、新版本与真实Release链接，旧learn页面的JS跳转目标/canonical/search/hash保留及fallback/noindex契约按静态完整响应核对，不冒称本轮线上浏览器执行。2份固定合并提交下载的ZIP/preview字节与审定交付一致。实际状态、完整SHA与身份见[online-verification.json](online-verification.json)、[deployment-status.json](deployment-status.json)和[publication.json](publication.json)。
+
+[本系列](https://linhongcun.github.io/video-studio/series/peak/)已显示统一封面，[24张完整素材](../../../../design/peak-covers-20261029/README.md)可领取。本次没有issue写入或平台操作；后续视频沿模板继续。回执仅文档归档，不另升版本或触发部署。
