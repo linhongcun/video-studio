@@ -34,7 +34,9 @@ def audit():
         style = json.loads(style_path.read_text())
         checks.append(check('cover_palette_identical', style['palette'] == cover['palette'], palette=style['palette']))
     tree = subprocess.check_output(['git', 'ls-tree', '-r', BASE, '--', *[f'episodes-codex/{s}' for s in SLUGS]], cwd=ROOT, text=True).splitlines()
-    startup=json.loads((ROOT/'work/peak-video-style/preservation-baseline.json').read_text())['productionFiles']
+    startup_path=ROOT/'work/peak-video-style/preservation-baseline.json'
+    if not startup_path.exists():startup_path=ROOT/'docs/archive/2026-10/peak-video-style/preservation-baseline.json'
+    startup=json.loads(startup_path.read_text())['productionFiles']
     old_files = []
     for row in tree:
         entry,name=row.split('\t',1)

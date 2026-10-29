@@ -59,6 +59,8 @@ npm run stills -- /tmp/degradation-stills
 
 该入口输出首帧和各镜中段采样，不是完整的溢出或动态审片。静帧、运动小样、导航检查的入口与参数以各期 scripts 和 README 为准；没有对应脚本时不要从旧期复制命令。对状态切换、变焦中间态、返回总览和跨情景衔接要看连续片段。
 
+对于实际limitedBT709成片，文章JPEG截图还须明确转换为fullBT601的JPEG像素，例如在精确选帧后加入`scale=in_range=tv:out_range=pc:in_color_matrix=bt709:out_color_matrix=bt601,format=yuvj420p`。按实际输入颜色选择参数；不要仅贴标签。将JPEG在通用解码器中的实际色块与同帧PNG/播放器比较，避免视频颜色正确而配图偏色，见L059。
+
 ## 演示页页身色
 
 页身使用 `episodes/_shared/theme/pageTheme.ts` 的 `PAGE`：`bg` 为 `#0F172A`、`ink` 为 `#E5E7EB`。各期 `remotion/src/theme.ts` 从共享模块引入，不能另抄一套色值：
