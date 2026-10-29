@@ -480,6 +480,45 @@ if (process.argv.includes('--built')) {
   const home = readPage('index.html');
   const learn = readPage('learn/index.html');
   const library = readPage('library/index.html');
+  const catalogHref = '/video-studio/library/';
+  const links = (html) => [...html.matchAll(/<a\b([^>]*)>([\s\S]*?)<\/a>/g)].map((match) => ({
+    attributes: match[1],
+    href: /\bhref="([^"]*)"/.exec(match[1])?.[1],
+    text: match[2].replace(/<[^>]*>/g, '').trim(),
+  }));
+  const unifiedNavigation = (page, name, active = true) => {
+    assert.equal(links(page).some((link) => link.href?.startsWith('/video-studio/learn/')), false,
+      `${name} must link to the unified catalog rather than the compatibility URL`);
+    const navigation = [...page.matchAll(/<nav\b([^>]*)>([\s\S]*?)<\/nav>/g)];
+    for (const label of ['主导航', '移动端主导航', '页脚探索导航']) {
+      const nav = navigation.find((match) => match[1].includes(`aria-label="${label}"`));
+      assert.ok(nav, `${name} is missing ${label}`);
+      const catalogLinks = links(nav[2]).filter((link) => link.href === catalogHref);
+      assert.equal(catalogLinks.length, 1, `${name}: ${label} must expose exactly one learning catalog entry`);
+      assert.ok(catalogLinks[0].text.includes('学习内容'), `${name}: ${label} must use the unified catalog name`);
+      assert.equal(links(nav[2]).some((link) => /学习系列|全部内容/.test(link.text)), false,
+        `${name}: ${label} must not retain the duplicate catalog menus`);
+      if (label !== '页脚探索导航') {
+        assert.equal(catalogLinks[0].attributes.includes('aria-current="page"'), active,
+          `${name}: ${label} must highlight the unified catalog on its catalog, series and lesson pages`);
+      }
+    }
+  };
+  unifiedNavigation(home, 'home', false);
+  unifiedNavigation(library, 'library');
+  assert.ok(library.includes('<title>学习内容 · IT小村</title>'), 'The catalog title must use its unified name');
+  assert.match(learn, /<link\b(?=[^>]*\brel="canonical")(?=[^>]*\bhref="https:\/\/linhongcun\.github\.io\/video-studio\/library\/")[^>]*>/,
+    'The legacy learning URL must identify the unified catalog as canonical');
+  assert.ok(links(learn).some((link) => link.href === catalogHref), 'The compatibility page needs a usable static catalog link');
+  assert.equal(/<nav\b/.test(learn), false, 'The compatibility page must not retain a second catalog navigation');
+  const redirectScript = [...learn.matchAll(/<script\b[^>]*>([\s\S]*?)<\/script>/g)]
+    .find((match) => match[1].includes('window.location.replace'))?.[1];
+  assert.ok(redirectScript, 'The legacy learning URL needs a history-replacing redirect');
+  for (const [search, hash] of [['', ''], ['?series=redis&sort=learning', '#cache'], ['?tag=%E5%88%86%E5%B8%83%E5%BC%8FID', '#network']]) {
+    const destinations = [];
+    vm.runInNewContext(redirectScript, {window: {location: {search, hash, replace: (url) => destinations.push(url)}}}, {timeout: 1000});
+    assert.deepEqual(destinations, [catalogHref + search + hash], 'The legacy learning redirect must preserve its query and anchor exactly');
+  }
   const seriesFilter = /<select\b(?=[^>]*\bname="series")[^>]*>([\s\S]*?)<\/select>/.exec(library)?.[1];
   assert.ok(seriesFilter, 'The library must expose its series filter');
   const seriesChoices = [...seriesFilter.matchAll(/<option\b([^>]*)>([\s\S]*?)<\/option>/g)].map((option) => ({
@@ -493,48 +532,48 @@ if (process.argv.includes('--built')) {
     }
   }
   assert.equal(fs.existsSync(path.join(dist, 'series/agent/index.html')), hasPublishedAgent, 'The Agent catalog page must exist only when new Agent lessons are published');
-  assert.equal(learn.includes('id="agent"'), hasPublishedAgent, 'The learning page must expose Agent only when its series has published lessons');
-  for (const href of ['/video-studio/learn/', '/video-studio/library/']) {
-    assert.ok(home.includes(`href="${href}"`), `Home must expose ${href}`);
-  }
+  assert.equal(library.includes('id="agent"'), hasPublishedAgent, 'The catalog must expose Agent only when its series has published lessons');
+  assert.ok(home.includes(`href="${catalogHref}"`), 'Home must expose the unified learning catalog');
   const breadcrumb = (page) => {
     const match = /<nav\b[^>]*aria-label="面包屑"[^>]*>([\s\S]*?)<\/nav>/.exec(page);
     assert.ok(match, 'A catalog or lesson page must expose its breadcrumb');
-    assert.equal(match[1].includes('/learn/#'), false, 'Breadcrumbs must not route through a retired intermediate direction');
+    assert.equal(match[1].includes('/learn/'), false, 'Breadcrumbs must lead to the unified catalog rather than a compatibility URL');
     return match[1];
   };
   for (const series of learningSeries) {
-    assert.ok(learn.includes(`id="${series.id}"`), `Missing series anchor: ${series.id}`);
+    assert.ok(library.includes(`id="${series.id}"`), `Missing series anchor: ${series.id}`);
     const legacyAnchor = legacyTrackForSeries[series.id];
-    if (legacyAnchor) assert.ok(learn.includes(`id="${legacyAnchor}"`), `Missing destination for the shared /learn/#${legacyAnchor} link`);
+    if (legacyAnchor) assert.ok(library.includes(`id="${legacyAnchor}"`), `Missing destination for the shared /learn/#${legacyAnchor} link`);
     assert.ok(home.includes(`href="${series.href}"`), `Home must lead directly to ${series.title}`);
-    assert.ok(learn.includes(`href="${series.href}"`), `Learning catalog must expose ${series.title}`);
-    assert.ok(learn.includes(`href="/video-studio/episodes/${series.start.slug}/"`), `${series.title} must offer its published starting lesson`);
+    assert.ok(library.includes(`href="${series.href}"`), `Learning catalog must expose ${series.title}`);
+    assert.ok(library.includes(`href="/video-studio/episodes/${series.start.slug}/"`), `${series.title} must offer its published starting lesson`);
     assert.ok(seriesChoices.some((choice) => choice.value === series.id && choice.label === series.title),
       `Missing flat series filter: ${series.title}`);
     const seriesPage = readPage(`series/${series.id}/index.html`);
     breadcrumb(seriesPage);
+    unifiedNavigation(seriesPage, `series/${series.id}`);
     for (const lesson of series.episodes) {
       assert.ok(seriesPage.includes(`href="/video-studio/episodes/${lesson.slug}/"`), `${series.title} is missing ${lesson.slug}`);
     }
   }
   for (const lesson of liveLessons) {
     assert.ok(library.includes(`href="/video-studio/episodes/${lesson.slug}/"`), `Full library is missing ${lesson.slug}`);
-    assert.ok(breadcrumb(readPage(`episodes/${lesson.slug}/index.html`)).includes(`href="/video-studio/series/${lesson.series}/"`),
+    const lessonPage = readPage(`episodes/${lesson.slug}/index.html`);
+    assert.ok(breadcrumb(lessonPage).includes(`href="/video-studio/series/${lesson.series}/"`),
       `${lesson.slug} must link directly to its own series in the breadcrumb`);
+    unifiedNavigation(lessonPage, `episodes/${lesson.slug}`);
   }
   assert.equal(/<select\b[^>]*name="track"/.test(library), false, 'The library must not retain an intermediate learning-direction filter');
   assert.equal(/<optgroup\b/.test(library), false, 'Series choices must form one flat list');
   assert.equal(home.includes('系统原理'), false, 'Home must use the independent series name');
-  assert.equal(learn.includes('系统原理'), false, 'Learning catalog must use the independent series name');
   assert.equal(library.includes('系统原理'), false, 'Library must use the independent series name');
-  for (const page of [home, learn, library, readPage('series/peak/index.html')]) {
+  for (const page of [home, library, readPage('series/peak/index.html')]) {
     assert.ok(page.includes('高并发、高可用、高性能'), 'The renamed series must be discoverable throughout the current catalog');
   }
-  assert.ok(learn.includes('id="cache"'), 'The former cache learning anchor must remain addressable');
+  assert.ok(library.includes('id="cache"'), 'The former cache learning anchor must remain addressable');
   const cacheRedirect = readPage('series/cache/index.html');
   assert.ok(cacheRedirect.includes('http-equiv="refresh"') && cacheRedirect.includes('url=/video-studio/series/redis/'),
     'The historical cache series URL must continue redirecting to Redis');
   assert.equal(library.includes(`/episodes/${archiveSlug}/`), false, 'Historical compilation must stay outside the current library');
-  console.log('Built navigation passed: direct series entries, legacy learning anchors, flat series filters, lesson breadcrumbs, cache redirect and complete current library.');
+  console.log('Built navigation passed: one learning catalog across desktop/mobile/footer, query-and-anchor-preserving legacy redirect, direct series entries, legacy anchors, flat filters, lesson breadcrumbs, cache redirect and complete current library.');
 }
