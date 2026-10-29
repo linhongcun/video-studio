@@ -1,28 +1,21 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import Breadcrumb from '../../components/Breadcrumb.astro';
-import TrackMark from '../../components/TrackMark.astro';
-import {BASE, epHref, fmtTime} from '../../lib/episodes';
-import {getLearningSeries} from '../../lib/learning';
-const series = getLearningSeries();
-const legacyAnchors: Record<string, string[]> = {peak: ['systems'], leetcode: ['algorithms'], 'design-patterns': ['patterns'], 'engineering-algorithms': ['engineering'], request: ['network'], redis: ['cache']};
+import {BASE} from '../../lib/episodes';
+const target = `${BASE}library/`;
+const canonical = new URL(target, Astro.site).href;
 ---
-<BaseLayout title="学习系列" current="learn" description="按系列浏览 IT小村的短片与图文，选择高并发、高可用、高性能、计算机网络、分布式、算法、MySQL或Redis等系列，直接查看已发布视频。">
-  <div class="container">
-    <Breadcrumb items={[{label: '首页', href: BASE}, {label: '学习系列'}]} />
-    <header class="page-intro"><p class="eyebrow">LEARNING SERIES</p><h1>一个系列，一组视频。</h1><p>选一个你感兴趣的系列，直接开始看。每支短片都配有图文、代码或资料，帮助你继续深入。</p><span class="directory-count">{series.length} 个系列 · {series.reduce((total, s) => total + s.episodes.length, 0)} 篇视频与图文</span></header>
-    <nav class="series-directory" aria-label="系列直达">{series.map((s) => <a href={`#${s.id}`}>{s.title}<span class="num">{s.episodes.length}</span></a>)}</nav>
-    <div class="series-catalog">{series.map((s) => <section class={`series-card series-${s.id}`} id={s.id} aria-labelledby={`${s.id}-title`}>
-      {(legacyAnchors[s.id] ?? []).map((id) => <span class="legacy-anchor" id={id} aria-hidden="true"></span>)}
-      <header class="series-head"><div class="series-identity"><TrackMark id={s.id} /><span class="published">{s.episodes.length} 篇视频与图文</span></div><h2 id={`${s.id}-title`}><a href={s.href}>{s.title}<span aria-hidden="true">↗</span></a></h2><p class="series-description">{s.description}</p></header>
-      <ol class="series-lessons">{s.episodes.map((e, index) => <li><a href={epHref(e.slug)}><span class="lesson-number num">{String(index + 1).padStart(2, '0')}</span><span class="lesson-title">{e.applicationScenario && <small>应用场景 · {e.applicationScenario}</small>}{e.title}</span><span class="lesson-time num">{fmtTime(e.duration)} <span aria-hidden="true">→</span></span></a></li>)}</ol>
-      <footer class="series-footer"><a class="text-link" href={s.href}>查看系列详情 <span aria-hidden="true">↗</span></a><a href={epHref(s.start.slug)}>从第一课开始 →</a></footer>
-    </section>)}</div>
-    <p class="browse-note">想直接找一个知识点？<a href={`${BASE}search/`}>搜索内容</a>，或<a href={`${BASE}library/`}>浏览全部视频与图文</a>。</p>
-  </div>
-</BaseLayout>
-<style>
-.directory-count{display:block;margin-top:18px;font-size:12px;color:var(--c-primary)}.series-directory{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 32px}.series-directory a{display:inline-flex;align-items:center;gap:12px;padding:7px 12px;border:1px solid var(--c-border);border-radius:8px;background:var(--c-surface);color:var(--c-text);font-size:12px;text-decoration:none}.series-directory a:hover{border-color:var(--c-primary-a40);color:var(--c-primary)}.series-directory .num{font-size:10px;color:var(--c-muted)}.series-catalog{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start}.series-card{position:relative;min-width:0;background:var(--c-surface);border:1px solid var(--c-border);border-radius:16px;scroll-margin-top:calc(var(--header-h) + 24px)}.legacy-anchor{position:absolute;top:0;scroll-margin-top:calc(var(--header-h) + 24px)}.series-head{padding:28px 28px 20px}.series-identity{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:18px}.series-identity :global(svg){width:34px;height:34px;color:var(--c-primary);flex:none}.series-leetcode .series-identity :global(svg){color:var(--c-accent)}.series-design-patterns .series-identity :global(svg){color:var(--c-secondary)}.published{font-size:11px;color:var(--c-text-2)}.series-head h2{font-size:24px;line-height:1.5;letter-spacing:-.02em;margin:0 0 10px}.series-head h2 a{display:flex;align-items:baseline;justify-content:space-between;gap:16px;color:var(--c-text);text-decoration:none}.series-head h2 a>span{flex:none;color:var(--c-primary);font-size:20px}.series-head h2 a:hover{color:var(--c-primary)}.series-description{margin:0;color:var(--c-text-2);font-size:13px;line-height:1.85}.series-lessons{list-style:none;margin:0;padding:0 28px}.series-lessons li{border-top:1px solid var(--c-border)}.series-lessons a{display:flex;align-items:baseline;gap:12px;padding:12px 0;color:var(--c-text);text-decoration:none;line-height:1.8;font-size:13px}.series-lessons a:hover{color:var(--c-primary)}.lesson-number{flex:none;font-size:10px;color:var(--c-muted);width:17px}.lesson-title{flex:1;min-width:0}.lesson-title small{display:block;font-size:10px;color:var(--c-primary);margin-bottom:2px}.lesson-time{display:flex;gap:12px;align-items:baseline;white-space:nowrap;flex:none;font-size:10px;color:var(--c-text-2)}.lesson-time>span{font-size:14px;color:var(--c-primary)}.series-footer{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 28px;border-top:1px solid var(--c-border);margin-top:6px}.series-footer a{font-size:12px;text-decoration:none}.series-footer a:last-child{color:var(--c-text-2)}.series-footer a:hover{text-decoration:underline}.browse-note{font-size:14px;margin:40px 0 0;color:var(--c-text-2);text-align:center}
-@media(max-width:1000px){.series-head{padding:24px 22px 18px}.series-lessons{padding-inline:22px}.series-footer{padding-inline:22px}.series-head h2{font-size:22px}}
-@media(max-width:767px){.series-directory{gap:8px;margin-bottom:24px}.series-directory a{padding:6px 10px;font-size:11px}.series-directory .num{font-size:9px}.series-catalog{grid-template-columns:1fr;gap:20px}.series-card{border-radius:14px}.series-head{padding:22px 20px 18px}.series-head h2{font-size:22px}.series-identity{margin-bottom:14px}.series-lessons{padding-inline:20px}.series-lessons a{gap:9px;font-size:12px}.lesson-time{gap:8px}.lesson-number{width:15px}.series-footer{padding:16px 20px}.browse-note{text-align:left;font-size:13px}}
-</style>
+<!doctype html>
+<html lang="zh-CN" data-pagefind-ignore="all">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>学习内容 · IT小村</title>
+    <link rel="canonical" href={canonical} />
+    <meta name="robots" content="noindex,follow" />
+    <script is:inline define:vars={{target}}>
+      window.location.replace(target + window.location.search + window.location.hash);
+    </script>
+  </head>
+  <body>
+    <p>学习系列与全部内容已合并。<a href={target}>前往学习内容 →</a></p>
+  </body>
+</html>
