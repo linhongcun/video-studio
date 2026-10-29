@@ -59,6 +59,8 @@ npm run stills -- /tmp/degradation-stills
 
 该入口输出首帧和各镜中段采样，不是完整的溢出或动态审片。静帧、运动小样、导航检查的入口与参数以各期 scripts 和 README 为准；没有对应脚本时不要从旧期复制命令。对状态切换、变焦中间态、返回总览和跨情景衔接要看连续片段。
 
+对于实际limitedBT709成片，文章JPEG截图还须明确转换为fullBT601的JPEG像素，例如在精确选帧后加入`scale=in_range=tv:out_range=pc:in_color_matrix=bt709:out_color_matrix=bt601,format=yuvj420p`。按实际输入颜色选择参数；不要仅贴标签。将JPEG在通用解码器中的实际色块与同帧PNG/播放器比较，避免视频颜色正确而配图偏色，见L059。
+
 ## 演示页页身色
 
 页身使用 `episodes/_shared/theme/pageTheme.ts` 的 `PAGE`：`bg` 为 `#0F172A`、`ink` 为 `#E5E7EB`。各期 `remotion/src/theme.ts` 从共享模块引入，不能另抄一套色值：
@@ -101,6 +103,10 @@ npm run covers
 逐份打开实际产物，检查文字、裁切、水印和 4:3 安全区：内容 x 315..1125、底边 y < 918，且无 `COPYFIT`。水印按该尺寸的 watermarkZone，不能为了塞入内容安全区挪动水印。`meta.poster` 决定站点海报文件，`covers.json` 的 poster 约定也要一起核对。
 
 Redis应用场景EP.08/09使用[独立缓存视觉入口](../episodes-codex/_shared/redis-cache-video/README.md)，新源码在各期`remotion/src/redis-style/`，清单和最终媒体在`revisions/redis-style/`。默认生产先渲染无声画面、真实转换为有限范围BT.709并明确逐帧参数，再完整流拷贝原AAC，追加同编码原题/机构资料页；不用事后改旧冻结。新封面与媒体独立安装，原模型、分镜、文章发布稿、素材身份与两类缓存流程保留。
+
+## 高并发、高可用、高性能正文的当前视觉入口
+
+EP.11–14正文与资料页通过[独立系列入口](../episodes-codex/_shared/peak-video/README.md)延续现行深青蓝、亮青、暖黄封面。新源码在各期`remotion/src/peak-style/`，媒体和47/51/48/50项输入独立冻结在`revisions/peak-style/`；原模型、导航、配音、分镜、文章发布稿、封面和历史清单保持。先逐镜预检，再运行共享`render.py <slug> --freeze / --render / --verify`，不要用旧混音入口覆盖新版。默认流程完成真实limitedBT709像素转换、逐帧颜色参数、完整原AAC流拷贝和同色参考资料；实际网页颜色、字幕与全屏另查。
 
 ## 共享工具回归
 

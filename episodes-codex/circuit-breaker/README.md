@@ -1,5 +1,7 @@
 # EP.13 Codex重制工程
 
+> 当前系列视觉入口：[`remotion/src/peak-style/index.ts`](remotion/src/peak-style/index.ts)。正文与资料页沿现行深青蓝／亮青／暖黄封面；通过[共享制作入口](../_shared/peak-video/README.md)先预检、冻结，再生成完整成片。新产物位于 `revisions/peak-style/`；下文原入口保留历史身份，不用旧命令覆盖当前发布视频。
+
 2026-10-24 用户授权重制EP01–14，本期按今天EP15–17的因果动画经验重新制作。
 
 本工程重写脚本、文章和动态画面，权威来源核验在research.md；逐镜观看顺序在visual-direction.md，配音选段与能力边界在voice/substitutions.md。
