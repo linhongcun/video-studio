@@ -87,6 +87,8 @@ Redis正文沿[独立视觉入口](../episodes-codex/_shared/redis-video/README.
 
 当前跳表发布片另外通过[BT.709色彩派生](../episodes-codex/_shared/redis-video-bt709/README-v2.md)生成：独立冻结原正文与原清单，将全范围BT.601画面转换为有限范围BT.709，明确逐帧颜色参数，再追加同编码资料页。原视觉产物保持，实际发布使用`revisions/redis-style-bt709-v2/video.mp4`；不能只修改颜色标签。核对原时序、完整AAC与实际网页取色，静帧颜色正确不代表浏览器解码颜色正确。
 
+高并发、高可用、高性能系列使用[独立模板](../episodes-codex/_shared/peak-covers/README.md)，固定深青蓝底、亮青线条、暖黄强调、真实EP与限流/幂等/熔断/降级机制图。按当前meta.sourcePath定位制作根，三比例图与输入SHA独立记录；旧Cover、covers.json和冻结清单保持。后续单集沿同一catalog扩展原题与准确示例，不另起样式。
+
 其他系列封面由当期 `remotion/src/Cover.tsx` 和 `covers.json` 定义。当前 EP.14 的实际入口是：
 
 ```sh

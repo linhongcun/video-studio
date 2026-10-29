@@ -1,0 +1,54 @@
+{
+  "rate-limit": {
+    "ep": 11,
+    "title": "抢票时，为什么总提示系统繁忙？",
+    "coverMechanism": "教学容量2，甲乙扣额度放行，丙在额度0时被拒绝；可用额度按时间补充。",
+    "doNotImply": [
+      "被拒绝的丙在后台排队",
+      "限流等于并发上限",
+      "等待后一定成功或保证抢票公平",
+      "2格/每秒1是生产承载数字"
+    ],
+    "articleSha256": "eda072d5ded28bed6e56e18729eeb51c59b36d46d4cdf4d2ec13b675b0a90381",
+    "basis": "Existing published article read for cover fidelity; no new official-source or media audit claim."
+  },
+  "idempotency": {
+    "ep": 12,
+    "title": "手一抖点了两次支付，为什么只扣一次钱？",
+    "coverMechanism": "同一次支付使用同一7042标识，重复请求复用此前结果，业务仅扣30元一次，余额100变70。",
+    "doNotImply": [
+      "金额相同就必为同一操作",
+      "两个真正不同支付共用编号",
+      "先查后写即可可靠挡并发",
+      "所有接口永久返回逐字节相同报文"
+    ],
+    "articleSha256": "c33c5f8132a38ba02a396012fc9b6c359cf19779e38d1041c771fb17521f3b93",
+    "basis": "Existing published article read for cover fidelity; no new official-source or media audit claim."
+  },
+  "circuit-breaker": {
+    "ep": 13,
+    "title": "一个服务出故障，为什么整个网站没跟着崩？",
+    "coverMechanism": "针对可选运费险的失败调用暂停/快速不可用；订单主流程仍做必要校验，少量探测后再判断是否恢复。",
+    "doNotImply": [
+      "熔断修复了下游",
+      "无条件跳过库存支付仍下单成功",
+      "暂停所有网站流量",
+      "等一会就必然全量恢复"
+    ],
+    "articleSha256": "4562fa208c736ad4a9ad3db2e2f6e7746b6d072bd69ee3b326cbee3dc9306491",
+    "basis": "Existing published article read for cover fidelity; no new official-source or media audit claim."
+  },
+  "degradation": {
+    "ep": 14,
+    "title": "搜索页和结算页，为什么两个价不一样？",
+    "coverMechanism": "同一商品7042：搜索暂少算红包预估，显示199并交代未计红包；结算仍核验减20红包，确认179。",
+    "doNotImply": [
+      "缓存不一致或价格数据错误导致本例差价",
+      "降级允许跳过价格库存支付校验",
+      "所有真实网站差价皆是降级",
+      "搜索页199与结算179是同一时刻相同功能的保证"
+    ],
+    "articleSha256": "52b270ae33b80317cf0702bb0d347ae64fc50aa52afaf8282234c58cf40e4b31",
+    "basis": "Existing published article read for cover fidelity; no new official-source or media audit claim."
+  }
+}
