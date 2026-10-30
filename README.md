@@ -11,7 +11,7 @@ IT小村工作室的互联网开发技术与算法科普短视频项目。一条
 - 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
 
 <!-- batch-12-publication-archive:start -->
-固定原47期参考资料补齐已完成，当前48期发布视频均有原题与作者/机构附录；新期默认生成并继续核验。真实发布与检查范围见[完成归档](docs/archive/2026-10/reference-endcards-batch-12/README.md)，固定存量与新增视频分别见[清单](docs/reference-endcards/inventory.json)。
+固定原47期参考资料补齐已完成，该批48期发布视频均已补齐原题与作者/机构附录；新期默认生成并继续核验。真实发布与检查范围见[完成归档](docs/archive/2026-10/reference-endcards-batch-12/README.md)，固定存量与新增视频分别见[清单](docs/reference-endcards/inventory.json)。
 <!-- batch-12-publication-archive:end -->
 
 ## 已上线剧集
@@ -70,7 +70,7 @@ EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → 
 
 ## 消息队列
 
-独立系列从任务提交、排队到处理完成讲一条消息怎样接力，与其他系列并列，可以独立观看。首期为[EP.10《订单已提交，为什么还没处理完？》](https://linhongcun.github.io/video-studio/episodes/message-queue/)，约2分03秒（含5秒参考资料卡）；系列页见[消息队列](https://linhongcun.github.io/video-studio/series/message-queue/)。制作入口见[本期工程](episodes-codex/message-queue/README.md)。
+独立系列从任务提交、排队到处理完成讲一条消息怎样接力，与其他系列并列，可以独立观看。首期为[EP.10《订单已提交，为什么还没处理完？》](https://linhongcun.github.io/video-studio/episodes/message-queue/)，约2分08秒（含5秒参考资料卡）；系列页见[消息队列](https://linhongcun.github.io/video-studio/series/message-queue/)。制作入口见[本期工程](episodes-codex/message-queue/revisions/kafka-intro/message-queue/README.md)。第二期[MQ02 / EP.42《多个消费者：分工处理，还是每人一份？》](https://linhongcun.github.io/video-studio/episodes/kafka-consumer-groups/)约2分钟，用同一批订单事件对照独立消费组与组内分工；[本期制作与检查](episodes-codex/kafka-consumer-groups/README.md)。
 
 ## 高并发、高可用、高性能
 

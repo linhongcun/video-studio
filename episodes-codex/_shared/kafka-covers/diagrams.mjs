@@ -30,8 +30,19 @@ function mq01(){
    +box(30,345,540,65,C.blue)
    +text('consumer',300,389,'后台处理 · 消费者',32,C.blue);
 }
-export function diagram(slug,portrait=false){
- if(slug!=='message-queue')throw new RangeError(`Unsupported Kafka cover diagram: ${slug}`);
- return `<g data-kafka-diagram="${slug}" data-orientation="${portrait?'portrait':'landscape'}" font-family="${esc(style.fontFamily)}" shape-rendering="geometricPrecision" text-rendering="optimizeLegibility">${mq01()}</g>`;
+function mq02(){
+ let content=box(30,7,540,100,C.blue)+text('topic',300,45,'Kafka · 同一主题',30,C.blue)
+  +text('p0',158,85,'P0 · E01 / E03',24,C.orange)+text('p1',442,85,'P1 · E02 / E04',24,C.blue);
+ content+=`<path d="M158 115V132H86V162M442 115V132H514V162" fill="none" stroke="${C.orange}" stroke-width="3"/>`;
+ content+=box(20,170,560,119,C.orange)+text('notify-group',300,205,'通知组 · 组内分工',28,C.orange)
+  +box(39,220,246,54,C.edge,C.background,8)+box(315,220,246,54,C.edge,C.background,8)
+  +text('n1',162,257,'N1 ← P0',26,C.text)+text('n2',438,257,'N2 ← P1',26,C.text);
+ content+=`<path d="M30 70H7V341H30M570 70H593V341H570" fill="none" stroke="${C.blue}" stroke-width="3"/>`;
+ return content+box(30,310,540,100,C.blue)+text('points-group',300,348,'积分组 · 独立订阅',28,C.blue)
+  +text('points-all',300,390,'S1 ← P0 + P1 · 完整四条',25,C.text);
 }
-export const SUPPORTED_SLUGS=Object.freeze(['message-queue']);
+export function diagram(slug,portrait=false){
+ if(!SUPPORTED_SLUGS.includes(slug))throw new RangeError(`Unsupported Kafka cover diagram: ${slug}`);
+ return `<g data-kafka-diagram="${slug}" data-orientation="${portrait?'portrait':'landscape'}" font-family="${esc(style.fontFamily)}" shape-rendering="geometricPrecision" text-rendering="optimizeLegibility">${slug==='message-queue'?mq01():mq02()}</g>`;
+}
+export const SUPPORTED_SLUGS=Object.freeze(['message-queue','kafka-consumer-groups']);

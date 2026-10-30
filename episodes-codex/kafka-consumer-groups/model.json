@@ -1,0 +1,324 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-consumer-groups",
+  "kind": "deterministic-teaching-model-not-broker-measurement",
+  "topic": "orders",
+  "partitions": [
+    {
+      "id": "P0",
+      "records": [
+        {
+          "eventId": "E01",
+          "orderId": "7042",
+          "offset": 0
+        },
+        {
+          "eventId": "E03",
+          "orderId": "7044",
+          "offset": 1
+        }
+      ]
+    },
+    {
+      "id": "P1",
+      "records": [
+        {
+          "eventId": "E02",
+          "orderId": "7043",
+          "offset": 0
+        },
+        {
+          "eventId": "E04",
+          "orderId": "7045",
+          "offset": 1
+        }
+      ]
+    }
+  ],
+  "conditions": {
+    "kafkaVersion": "4.4.0",
+    "client": "Java KafkaConsumer 4.4.0 semantics",
+    "group.protocol": "classic",
+    "subscription": "all members subscribe orders",
+    "assignment": "legal stable assignments chosen explicitly for illustration",
+    "enable.auto.commit": false,
+    "initialPosition": "fresh groups without committed offsets; auto.offset.reset=earliest; retained beginning offset is 0",
+    "retention": "cleanup.policy=delete, retention.ms=604800000, retention.bytes=-1; all four records remain for entire example",
+    "producerPartitioning": "explicit P0/P1 assignment; not a key-hash claim",
+    "businessOutcome": "received records only; no claim of side-effect success or exactly-once business processing",
+    "crossPartitionOrder": "none"
+  },
+  "scenarios": [
+    {
+      "id": "wrong-shared",
+      "resetBefore": true,
+      "startOffsets": {
+        "P0": 0,
+        "P1": 0
+      },
+      "groups": [
+        {
+          "id": "shop",
+          "members": [
+            {
+              "id": "N1",
+              "role": "通知",
+              "partitions": [
+                "P0"
+              ],
+              "received": [
+                {
+                  "eventId": "E01",
+                  "orderId": "7042",
+                  "offset": 0,
+                  "partition": "P0"
+                },
+                {
+                  "eventId": "E03",
+                  "orderId": "7044",
+                  "offset": 1,
+                  "partition": "P0"
+                }
+              ]
+            },
+            {
+              "id": "S1",
+              "role": "积分",
+              "partitions": [
+                "P1"
+              ],
+              "received": [
+                {
+                  "eventId": "E02",
+                  "orderId": "7043",
+                  "offset": 0,
+                  "partition": "P1"
+                },
+                {
+                  "eventId": "E04",
+                  "orderId": "7045",
+                  "offset": 1,
+                  "partition": "P1"
+                }
+              ]
+            }
+          ],
+          "receivedEventIds": [
+            "E01",
+            "E02",
+            "E03",
+            "E04"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "separate-groups",
+      "resetBefore": true,
+      "startOffsets": {
+        "P0": 0,
+        "P1": 0
+      },
+      "groups": [
+        {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "role": "通知",
+              "partitions": [
+                "P0",
+                "P1"
+              ],
+              "received": [
+                {
+                  "eventId": "E01",
+                  "orderId": "7042",
+                  "offset": 0,
+                  "partition": "P0"
+                },
+                {
+                  "eventId": "E03",
+                  "orderId": "7044",
+                  "offset": 1,
+                  "partition": "P0"
+                },
+                {
+                  "eventId": "E02",
+                  "orderId": "7043",
+                  "offset": 0,
+                  "partition": "P1"
+                },
+                {
+                  "eventId": "E04",
+                  "orderId": "7045",
+                  "offset": 1,
+                  "partition": "P1"
+                }
+              ]
+            }
+          ],
+          "receivedEventIds": [
+            "E01",
+            "E02",
+            "E03",
+            "E04"
+          ]
+        },
+        {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "role": "积分",
+              "partitions": [
+                "P0",
+                "P1"
+              ],
+              "received": [
+                {
+                  "eventId": "E01",
+                  "orderId": "7042",
+                  "offset": 0,
+                  "partition": "P0"
+                },
+                {
+                  "eventId": "E03",
+                  "orderId": "7044",
+                  "offset": 1,
+                  "partition": "P0"
+                },
+                {
+                  "eventId": "E02",
+                  "orderId": "7043",
+                  "offset": 0,
+                  "partition": "P1"
+                },
+                {
+                  "eventId": "E04",
+                  "orderId": "7045",
+                  "offset": 1,
+                  "partition": "P1"
+                }
+              ]
+            }
+          ],
+          "receivedEventIds": [
+            "E01",
+            "E02",
+            "E03",
+            "E04"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scale-notify",
+      "resetBefore": true,
+      "startOffsets": {
+        "P0": 0,
+        "P1": 0
+      },
+      "groups": [
+        {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "role": "通知",
+              "partitions": [
+                "P0"
+              ],
+              "received": [
+                {
+                  "eventId": "E01",
+                  "orderId": "7042",
+                  "offset": 0,
+                  "partition": "P0"
+                },
+                {
+                  "eventId": "E03",
+                  "orderId": "7044",
+                  "offset": 1,
+                  "partition": "P0"
+                }
+              ]
+            },
+            {
+              "id": "N2",
+              "role": "通知",
+              "partitions": [
+                "P1"
+              ],
+              "received": [
+                {
+                  "eventId": "E02",
+                  "orderId": "7043",
+                  "offset": 0,
+                  "partition": "P1"
+                },
+                {
+                  "eventId": "E04",
+                  "orderId": "7045",
+                  "offset": 1,
+                  "partition": "P1"
+                }
+              ]
+            }
+          ],
+          "receivedEventIds": [
+            "E01",
+            "E02",
+            "E03",
+            "E04"
+          ]
+        },
+        {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "role": "积分",
+              "partitions": [
+                "P0",
+                "P1"
+              ],
+              "received": [
+                {
+                  "eventId": "E01",
+                  "orderId": "7042",
+                  "offset": 0,
+                  "partition": "P0"
+                },
+                {
+                  "eventId": "E03",
+                  "orderId": "7044",
+                  "offset": 1,
+                  "partition": "P0"
+                },
+                {
+                  "eventId": "E02",
+                  "orderId": "7043",
+                  "offset": 0,
+                  "partition": "P1"
+                },
+                {
+                  "eventId": "E04",
+                  "orderId": "7045",
+                  "offset": 1,
+                  "partition": "P1"
+                }
+              ]
+            }
+          ],
+          "receivedEventIds": [
+            "E01",
+            "E02",
+            "E03",
+            "E04"
+          ]
+        }
+      ]
+    }
+  ]
+}

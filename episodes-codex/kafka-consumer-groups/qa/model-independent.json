@@ -1,0 +1,75 @@
+{
+  "checkedAt": "2026-10-30T00:14:25.670460+00:00",
+  "executor": "Codex independent QA agent",
+  "status": "pass",
+  "scope": "Read model.py/model.json and independently compare all concrete scenario memberships and event sets with required 2-partition example and KafkaConsumer source group semantics. Not a second execution of implementation verifier, and not a Kafka runtime experiment.",
+  "modelSha256": "63de0891a44ed5f51e2c2d1e10824c2c7e9cbaee3c4b3a2198e3b73538362749",
+  "outcomes": {
+    "wrong-shared": {
+      "shop": {
+        "N1": [
+          "E01",
+          "E03"
+        ],
+        "S1": [
+          "E02",
+          "E04"
+        ]
+      }
+    },
+    "separate-groups": {
+      "notify": {
+        "N1": [
+          "E01",
+          "E03",
+          "E02",
+          "E04"
+        ]
+      },
+      "points": {
+        "S1": [
+          "E01",
+          "E03",
+          "E02",
+          "E04"
+        ]
+      }
+    },
+    "scale-notify": {
+      "notify": {
+        "N1": [
+          "E01",
+          "E03"
+        ],
+        "N2": [
+          "E02",
+          "E04"
+        ]
+      },
+      "points": {
+        "S1": [
+          "E01",
+          "E03",
+          "E02",
+          "E04"
+        ]
+      }
+    }
+  },
+  "sourceLocations": [
+    "sources/KafkaConsumer.java:96-123 (group.id, exclusive per-group partition assignment, logical subscriber)",
+    "sources/design.md:137-157 (consumer fetch positions and per-group partition ownership)",
+    "sources/design.md:248-255 (Share Groups are a distinct model)"
+  ],
+  "conclusions": [
+    "Wrong shared group gives notification E01/E03 and points E02/E04; each misses two required events.",
+    "Separate groups each get all four identities from the same retained P0/P1 logs; display sequence across partitions is not a total-order guarantee.",
+    "Notify expands to N1 owning P0 and N2 owning P1; points remains one member reading both partitions.",
+    "All examples explicitly use fresh groups without commits, earliest and retained beginning 0. Results do not promise all history for every new group.",
+    "Teaching scenario resets before third comparison avoid claiming membership change rewinds a live consumer group."
+  ],
+  "limitations": [
+    "No broker/client, live rebalance, business side effect, fault recovery or exactly-once execution validated.",
+    "No animation has yet been reviewed."
+  ]
+}

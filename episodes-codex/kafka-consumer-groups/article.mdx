@@ -1,0 +1,90 @@
+---
+title: '多个消费者：分工处理，还是每人一份？'
+summary: '通知与积分都需要每条订单事件，放在同一个消费组却各少一半。用两个分区、四条事件，看清Kafka的独立订阅与组内分工。'
+chapters:
+  - { id: problem, title: 为什么各少一半 }
+  - { id: separate, title: 不同组各读一份 }
+  - { id: scale, title: 同组实例怎样分工 }
+  - { id: boundary, title: 结论与条件 }
+related: [message-queue, observer-pattern]
+---
+
+## 为什么各少一半 {#problem}
+
+四笔订单已提交。通知服务需要逐笔发出通知，积分服务需要逐笔处理积分，所以两项业务都需要收到完整的四条订单事件。可两个服务各启动一个消费者后，通知只收到两条，积分也只收到两条。记录丢了吗？
+
+先看事件存在哪里。本例把四条虚构事件写进Kafka的同一个主题`orders`，主题包含两个分区：
+
+| 分区 | 位置0 | 位置1 |
+|---|---|---|
+| P0 | E01：订单7042 | E03：订单7044 |
+| P1 | E02：订单7043 | E04：订单7045 |
+
+事件ID用于贯穿追踪同一条事件。位置只在本分区内有意义，P0的位置0与P1的位置0是两条不同记录；表格也不表示两个分区之间存在全局顺序。
+
+两个服务各有一个消费者，负责订阅读取这些事件。问题在于：它们使用了相同的`group.id`，因此属于同一个消费组。对于本例的传统消费组，Kafka按分区把工作分给组内实例，而不是让每个实例都读到所有记录。
+
+在画面采用的稳定分配中，通知实例N1负责P0，收到E01、E03；积分实例S1负责P1，收到E02、E04。组内合计读到了全部四条，但任何一项业务都没得到它需要的完整集合。这是消费组划分不符合业务需求，不能从“各少两条”就认定Kafka丢失了记录。
+
+<SourceQuote sourceId="R2" supports="本例传统消费组在稳定分配状态下，每个分区在每个订阅组内由一个消费者读取，组内实例据此分工。" translation="主题分成多个全序分区；每个分区在每个订阅消费组内，在任一时刻由一个消费者消费。" />
+
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/01-shared.jpg" alt="同组中通知N1只收到P0的E01和E03，积分S1只收到P1的E02和E04；源日志保留四条" caption="教学示例：同组合计读到四条，但通知和积分各自都只收到一半。" seekTo={43.46666666666667} chapter="problem" />
+
+这里展示的是一组合法的分配结果。具体哪个实例得到哪个分区可以变化；只要通知和积分仍在同一个组内分工，就不能据此保证两项业务各自收到所有事件。
+
+## 不同组各读一份 {#separate}
+
+保持相同的四条记录，把两项业务拆成两个独立消费组：通知使用`notify`，积分使用`points`。为了比较读取归属，重新从两个分区的开头开始；这是一组重置后的教学对照，不是让真实业务把已做过的操作再做一遍。
+
+通知组只有N1一个实例，因此P0、P1都分给它。N1读完这两个分区，得到E01、E02、E03、E04。积分组也只有S1一个实例，同样读这两个分区，也得到完整的四条。
+
+两个组各自维护消费进度。通知读过某条记录，不会把积分组的进度一起推进，也不会把那条源记录从日志中移走。独立组遍历的是同一份保留日志，不需要为了新增订阅者，把源事件另存成第二份日志。
+
+<SourceQuote sourceId="R1" supports="消费不会因为记录被读过就将它删除；在记录仍保留且起始位置适当的条件下，另一个组可以再读取它。" translation="一个主题内的事件可按需要反复读取；与传统消息系统不同，事件不会因为已经消费就被删除。" />
+
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/02-separate.jpg" alt="通知组和积分组各有一个实例，均从两个分区收到完整的E01到E04，源记录保持原位" caption="教学示例：各用独立消费组后，两种业务分别读取完整的事件集合。" seekTo={74.4} chapter="separate" />
+
+“各读一份”描述本例各组收到完整的事件集合。它没有保证两个组同时读到、同时处理完，也没有保证邮件、积分等业务效果恰好发生一次。
+
+## 同组实例怎样分工 {#scale}
+
+接着仍用相同输入，从开头作另一组对照：通知业务需要扩展处理能力，于是在`notify`组内增加通知实例N2；积分组保持不变。
+
+等待分配稳定后，本例让N1负责P0，N2负责P1。N1收到E01、E03，N2收到E02、E04。两个通知实例是同一业务的分工者，组内合计仍是四条，并没有变成每个实例各收到四条。
+
+积分组独立存在，S1仍能读取P0、P1，收到完整四条。通知组成员数量的变化，不会把积分组变成与它共同分担的另一个实例。
+
+| 安排 | 通知业务收到什么 | 积分业务收到什么 |
+|---|---|---|
+| 两项业务误放同组 | N1：E01、E03 | S1：E02、E04 |
+| 两项业务各用独立组 | N1：完整四条 | S1：完整四条 |
+| 通知组增加实例 | N1：E01、E03；N2：E02、E04 | S1：仍完整四条 |
+
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/03-scaled.jpg" alt="通知组中N1读取P0的两条，N2读取P1的两条，积分组S1仍独立读取全部四条" caption="教学示例：通知组内两个实例分工2加2条，积分组仍能独立读取四条。" seekTo={98.53333333333333} chapter="scale" />
+
+对于本例两个分区的传统组，组内同时负责这些分区的实例最多两个；增加第三个实例不会凭空增加第三个分区。这只是分区分工的上限，实际处理速度还可能受业务代码、数据库或其他下游限制。本片没有做吞吐量实验，也不作性能倍数承诺。
+
+## 结论与条件 {#boundary}
+
+决定收到归属的关键，是业务需要怎样的订阅关系：需要各自完整读取的业务，使用不同消费组；同一业务的多个实例，放在组内按分区分工。分区属于哪个实例可以重新分配，组作为逻辑订阅者的职责仍然存在。
+
+这组示例固定Apache Kafka 4.4.0与传统`KafkaConsumer`语义，显式选择`group.protocol=classic`，各实例都订阅`orders`，只呈现分配稳定后的结果。Share Groups允许不同的分区与记录共享方式，不能直接套用本文的分区独占规则。传统组的新协议`consumer`也不等于Share Groups，本例选择classic只是固定讲解条件。
+
+还要区分“另一个组能读取”与“新组总能读到全部历史”。本例的必要前提是：
+
+- 每一组对照都从没有有效已提交位置的新组开始，`auto.offset.reset=earliest`选择最早可用位置；本例最早位置正好是0。
+- 四条记录全程仍在保留窗口内。示例设`cleanup.policy=delete`、`retention.ms=604800000`、`retention.bytes=-1`，没有在对照过程中删除记录。
+- 分区数量和输入保持相同，分区归属明确给定，读取原记录时保留源日志。
+
+`earliest`不会覆盖一个正常有效的既有提交位置，也不能找回已经按策略删除的记录。“从开头”始终是从当前可用的最早位置开始，不是无限历史。消费进度提交、故障重读、业务去重和重平衡过程是另外的问题。
+
+本片的四条事件、分区归属与各实例收到集合来自同一份确定性教学模型。模型逐条核对了组内唯一归属、组间完整集合及扩实例前后的结果；这不是实际Kafka Broker实验，也没有执行邮件或积分数据库副作用。画面中的“收到”只代表读取结果，业务完成仍需应用自行处理。
+
+## 参考资料
+
+以下均由Apache Kafka维护，版本固定为4.4.0，核验日期为2026-10-30（北京时间）；未见明确公开个人署名，使用机构署名。视频片尾保留文档原题与机构，完整来源如下。
+
+1. Apache Kafka：[Introduction](https://kafka.apache.org/44/getting-started/introduction/)。支持事件、主题、分区与消费后仍保留记录的基础关系。[本轮实读固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)。
+2. Apache Kafka：[Design](https://kafka.apache.org/44/design/design/)。支持传统消费组的分区分工，以及与Share Groups的边界。[本轮实读固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)。
+
+消费组身份、逻辑订阅与成员变化同时对照了同版本[KafkaConsumer.java的Consumer Groups and Topic Subscriptions](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L94-L131)。`group.protocol`与`auto.offset.reset`的选择条件核对了同版本[ConsumerConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/ConsumerConfig.java#L118-L190)。本轮实际读取的是官方固定提交的原始文件，没有将配置文档的生成页入口冒称为已读取全部HTML正文。
