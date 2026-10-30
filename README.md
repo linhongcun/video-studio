@@ -1,158 +1,120 @@
-# video-studio · IT小村工作室
+# IT小村 · 技术可视化学习站
 
-IT小村工作室的互联网开发技术与算法科普短视频项目。一条主线讲清楚一个问题，画面不用比喻。视频用代码生成（[Remotion](https://www.remotion.dev/)），每期配一篇图文文章。
+把技术原理，一步步看明白。
 
-做片的人从 [AGENTS.md](AGENTS.md) 进入，规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。手册、经验、策划和历史记录统一从[文档索引](docs/README.md)查找。
+IT小村用代码生成的动画短片、配套图文和可运行示例，讲清技术怎样工作、为什么这样设计，以及适用条件与取舍。`video-studio` 是学习站与内容制作系统的仓库，包含已发布内容、Remotion 动画源码、配音与媒体工具，以及资料核验、渲染和发布流程。
 
-- 线上站点：https://linhongcun.github.io/video-studio/
-- 发布平台：抖音（头条同步）、B站、微信视频号，以及本站。默认不发快手（STATUS 中逐次明确授权除外），不发 X。小红书由村长自己发，运营和 Codex 默认不发（STATUS 中逐次明确授权除外）。2026-10-16 的「发抖音、B站、快手」已废止，见 [docs/RULES.md](docs/RULES.md)。已上线 `meta.json` 里残留的快手链接是历史记录。
-- 站点功能：按系列浏览（计算机网络 / Redis / 高并发、高可用、高性能 / MySQL / 分布式 / Agent 开发 / LeetCode · 算法可视化 / 设计模式 / 趣味推理 / 其他 / 消息队列）、站内搜索（Pagefind）、[更新日志](https://linhongcun.github.io/video-studio/changelog/)（构建时读取 GitHub Releases，发 Release 后自动重新部署）
-- 订阅：[RSS](https://linhongcun.github.io/video-studio/rss.xml) · [站点地图](https://linhongcun.github.io/video-studio/sitemap-index.xml)
-- 成片：每期 `episodes/<slug>/video.mp4`，各版本变更见 [Releases](https://github.com/linhongcun/video-studio/releases)
+[进入学习站](https://linhongcun.github.io/video-studio/) · [浏览学习内容](https://linhongcun.github.io/video-studio/library/) · [搜索知识点](https://linhongcun.github.io/video-studio/search/) · [更新日志](https://linhongcun.github.io/video-studio/changelog/) · [RSS 订阅](https://linhongcun.github.io/video-studio/rss.xml)
 
-<!-- batch-12-publication-archive:start -->
-固定原47期参考资料补齐已完成，该批48期发布视频均已补齐原题与作者/机构附录；新期默认生成并继续核验。真实发布与检查范围见[完成归档](docs/archive/2026-10/reference-endcards-batch-12/README.md)，固定存量与新增视频分别见[清单](docs/reference-endcards/inventory.json)。
-<!-- batch-12-publication-archive:end -->
+## 学习内容
 
-## 已上线剧集
+[学习内容页](https://linhongcun.github.io/video-studio/library/)集中展示系列目录与全部内容，可以按系列、知识标签筛选，并按最新发布或学习顺序排列。完整目录、发布状态和内容日期由站点读取各期元数据生成。
 
-剧集信息来自各期的 `episodes/<slug>/meta.json`。当前制作入口由 `sourcePath` 指向 `episodes-codex/`；EP.01–21 已完成重制，完整版本记录见 [Releases](https://github.com/linhongcun/video-studio/releases) 和 [制作记忆](docs/production-memory.md)。已下架的隔离级别旧片和被替代工程已从工作树清理，仍可通过 Git 历史恢复，详见 [清理记录](docs/archive/2026-10/repository-cleanup.md)。
+| 系列 | 内容方向 |
+| --- | --- |
+| [高并发、高可用、高性能](https://linhongcun.github.io/video-studio/series/peak/) | 限流、幂等、熔断与降级，理解流量、重复请求和服务故障的处理过程。 |
+| [Agent 开发](https://linhongcun.github.io/video-studio/series/agent/) | 从已发布的 Skills 专题出发，理解 Agent 能力的组织方式与设计取舍。 |
+| [LeetCode · 算法可视化](https://linhongcun.github.io/video-studio/series/leetcode/) | 从题意和方法选择依据，走到算法的完整执行过程与 Python 实现。 |
+| [设计模式](https://linhongcun.github.io/video-studio/series/design-patterns/) | 从策略、观察者与适配器等模式理解职责拆分、变化隔离和对象协作，默认以 Java 展示实现。 |
+| [趣味推理](https://linhongcun.github.io/video-studio/series/puzzles/) | 赛马、过桥、倒水、三门与鸡蛋掉落，用连续过程解释判断和排除的依据。 |
+| [Kafka · 消息队列](https://linhongcun.github.io/video-studio/series/message-queue/) | 从 Kafka 入门到消费组，理解记录写入、任务处理与消费者分工。 |
+| [MySQL](https://linhongcun.github.io/video-studio/series/database/) | 以 MySQL 8.4 为背景，理解 InnoDB 索引、事务、锁与单主异步复制。 |
+| [Redis 系列](https://linhongcun.github.io/video-studio/series/redis/) | 从商品查询缓存与缓存一致性，深入跳表等内部机制。 |
+| [分布式](https://linhongcun.github.io/video-studio/series/distributed/) | 分库分表、分布式 ID，以及事务入门、两阶段提交、TCC、Saga 和 Outbox。 |
+| [计算机网络](https://linhongcun.github.io/video-studio/series/request/) | 沿网页请求理解 HTTP、HTTPS、DNS、登录态、CDN、负载均衡与浏览器缓存。 |
+| [其他](https://linhongcun.github.io/video-studio/series/engineering-algorithms/) | 一致性哈希、布隆过滤器等独立专题；以后没有明确系列的内容统一归入这里。 |
 
-GitHub 主干、Release 和站点沿用用户持续授权，完成制作与检查后自主发布；平台新发另行授权。状态以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准。
+各系列直接组织自己的视频与图文，可以按需要选择学习方向。系列名称与说明维护在 [`series.json`](site/src/content/series.json)，单期归属和发布信息维护在 `episodes/<slug>/meta.json`。
 
-| 期 | 系列 | 标题 | 站点 | 上线日期 |
-|---|---|---|---|---|
-| 1 | 计算机网络 | 浏览器输入网址后发生了什么？ | [http-request](https://linhongcun.github.io/video-studio/episodes/http-request/) | 2026-10-12 |
-| 2 | 计算机网络 | HTTPS 为什么安全？ | [https](https://linhongcun.github.io/video-studio/episodes/https/) | 2026-10-12 |
-| 3 | 计算机网络 | 输入网址后，怎么找到服务器？ | [dns](https://linhongcun.github.io/video-studio/episodes/dns/) | 2026-10-12 |
-| 4 | 计算机网络 | 网站怎么记住你已经登录？ | [cookie-session](https://linhongcun.github.io/video-studio/episodes/cookie-session/) | 2026-10-12 |
-| 5 | 计算机网络 | 网站离你那么远，为什么还这么快？ | [cdn](https://linhongcun.github.io/video-studio/episodes/cdn/) | 2026-10-12 |
-| 6 | 计算机网络 | 一台服务器忙不过来，怎么办？ | [load-balancing](https://linhongcun.github.io/video-studio/episodes/load-balancing/) | 2026-10-12 |
-| 7 | 计算机网络 | 同一个网页，第二次打开为什么快这么多？ | [browser-cache](https://linhongcun.github.io/video-studio/episodes/browser-cache/) | 2026-10-12 |
-| 8 | Redis 系列 | 数据库明明有数据，为什么还要再存一份？ | [server-cache](https://linhongcun.github.io/video-studio/episodes/server-cache/) | 2026-10-13 |
-| 9 | Redis 系列 | 后台改了价格，页面怎么还是旧的？ | [cache-consistency](https://linhongcun.github.io/video-studio/episodes/cache-consistency/) | 2026-10-16 |
-| 10 | 消息队列 | 订单已提交，为什么还没处理完？ | [message-queue](https://linhongcun.github.io/video-studio/episodes/message-queue/) | 2026-10-13 |
-| 11 | 高并发、高可用、高性能 | 抢票时，为什么总提示系统繁忙？ | [rate-limit](https://linhongcun.github.io/video-studio/episodes/rate-limit/) | 2026-10-13 |
-| 12 | 高并发、高可用、高性能 | 手一抖点了两次支付，为什么只扣一次钱？ | [idempotency](https://linhongcun.github.io/video-studio/episodes/idempotency/) | 2026-10-13 |
-| 13 | 高并发、高可用、高性能 | 一个服务出故障，为什么整个网站没跟着崩？ | [circuit-breaker](https://linhongcun.github.io/video-studio/episodes/circuit-breaker/) | 2026-10-14 |
-| 14 | 高并发、高可用、高性能 | 搜索页和结算页，为什么两个价不一样？ | [degradation](https://linhongcun.github.io/video-studio/episodes/degradation/) | 2026-10-13 |
-| 15 | MySQL | 加个索引，为啥就快了？ | [db-index](https://linhongcun.github.io/video-studio/episodes/db-index/) | 2026-10-14 |
-| 16 | MySQL | 扣了钱，对方没到账？ | [db-transaction](https://linhongcun.github.io/video-studio/episodes/db-transaction/) | 2026-10-14 |
-| 17 | MySQL | 两个人抢最后一件货，听谁的？ | [db-lock](https://linhongcun.github.io/video-studio/episodes/db-lock/) | 2026-10-15 |
-| 18 | MySQL | 刚改的昵称，怎么又变回去了？ | [db-replication](https://linhongcun.github.io/video-studio/episodes/db-replication/) | 2026-10-15 |
-| 19 | 分布式 | 订单太多，一个数据库装不下怎么办？ | [db-sharding](https://linhongcun.github.io/video-studio/episodes/db-sharding/) | 2026-10-15 |
-| 20 | 分布式 | 分布式 ID：两个订单，怎么撞成同一个号了？ | [global-id](https://linhongcun.github.io/video-studio/episodes/global-id/) | 2026-10-15 |
-| 21 · 入门 | 分布式 | 什么是分布式事务？ | [distributed-tx-intro](https://linhongcun.github.io/video-studio/episodes/distributed-tx-intro/) | 2026-10-24 |
-| 21 · 2PC | 分布式 | 两阶段提交，两个库怎么共同确认？ | [tx-2pc](https://linhongcun.github.io/video-studio/episodes/tx-2pc/) | 2026-10-24 |
-| 21 · TCC | 分布式 | TCC：先预留，再确认 | [tx-tcc](https://linhongcun.github.io/video-studio/episodes/tx-tcc/) | 2026-10-24 |
-| 21 · Saga | 分布式 | Saga：扣款成功，缺货了怎么办？ | [tx-saga](https://linhongcun.github.io/video-studio/episodes/tx-saga/) | 2026-10-24 |
-| 21 · 可靠消息 | 分布式 | 可靠消息：Outbox怎样把通知送出去？ | [tx-outbox](https://linhongcun.github.io/video-studio/episodes/tx-outbox/) | 2026-10-24 |
+## 视频、图文与源码一起看
 
-EP.21按最新观看反馈改为“概念入门 → 两阶段提交 → TCC → Saga → 可靠消息（Outbox）”。每个实现独立短片，用一个示例逐步展示成功、失败和适用边界。实际时长与完整检查见各片制作入口；本批版本v0.47.0。
+- **按问题查找**：站内搜索使用 Pagefind，检索标题、摘要与文章正文；首页展示最近发布的内容。
+- **边看边读**：视频章节、文章目录与配图时间点相互连接，可以从文章或截图回到对应视频片段；代码示例支持复制。
+- **核对资料**：文章中的“原文”入口可查看引用、出处与来源链接，配图支持放大；视频片尾列出参考资料原题与作者或机构。
+- **查看制作过程**：每篇的“幕后”提供脚本、分镜和动画源码，链接固定到该次站点构建的 Git 提交，便于追溯对应版本。
+- **在不同设备阅读**：响应式布局、中文字幕、章节操作，以及浅色、深色和跟随系统的主题模式。
+- **跟进更新**：通过 RSS 订阅新内容，通过站点更新日志与 [GitHub Releases](https://github.com/linhongcun/video-studio/releases)查看版本变化。
 
-原约6分29秒[多方案合集](https://linhongcun.github.io/video-studio/episodes/distributed-tx/)保留历史页面与媒体，从推荐学习路径和搜索移出，页面提供独立短片入口。旧制作冻结输入不改；不能将原有机器/抽帧检查当作用户已认可合集教学效果。最新反馈和复盘见[教训L012](docs/lessons-learned.md)。
+## 系统结构
 
-## 设计模式
+站点使用 **Astro + MDX** 构建，**Pagefind** 生成搜索索引，部署在 **GitHub Pages**。动画使用 **Remotion + React / TypeScript**，配音与媒体处理复用 Python、MiMo TTS 和 FFmpeg 工具。发布数据与制作工程分别维护，通过各期 `meta.json` 的 `sourcePath` 关联。
 
-独立系列每种模式制作一期，围绕“为什么需要、解决什么、什么时候值得用”展开，按具体内容选择图文、代码与动态表达。首期为[EP.23 · D01《策略模式：结算怎样换一种算价办法？》](https://linhongcun.github.io/video-studio/episodes/strategy-pattern/)，约2分27秒；同一100元订单展示稳定流程与变化策略，围绕共同约定、外侧选择、委托和独立维护解释设计思想；具体语言实现放在配套文章可选附录。制作与检查见[本期工程](episodes-codex/strategy-pattern/README.md)，选题池见[23种模式总览 #161](https://github.com/linhongcun/video-studio/issues/161)。
-
-## LeetCode · 算法可视化
-
-独立算法系列使用题号展示，不要求先看网络或分布式课程。首期为[LC.11《盛最多水的容器：为什么每次都移动短边？》](https://linhongcun.github.io/video-studio/episodes/container-most-water/)，22镜、约3分38秒，用同一组竖线讲清面积、整组排除依据和双指针扫描。完整Python实现与证明放配套文章，制作入口见[本期工程](episodes-codex/container-most-water/README.md)。本期只上站点。
-
-## 趣味推理
-
-独立系列从经典智力题出发，先交代完整题意，再用连续动画呈现每次比较、排除和信息变化。首期为[P01《25匹马赛跑：怎样用7场找出前三名？》](https://linhongcun.github.io/video-studio/episodes/horse-racing/)，18镜、约3分31秒；用同一组赛果展示“三匹确定更快”的排除见证，配套文章补充任意六场自适应策略的严格下界。制作与实际检查见[本期工程](episodes-codex/horse-racing/README.md)，后续选题见[首批10题总览 #204](https://github.com/linhongcun/video-studio/issues/204)。
-
-## 其他
-
-[其他](https://linhongcun.github.io/video-studio/series/engineering-algorithms/)收录没有明确系列的独立内容，现有[一致性哈希](https://linhongcun.github.io/video-studio/episodes/consistent-hashing/)和[布隆过滤器](https://linhongcun.github.io/video-studio/episodes/bloom-filter/)均归入这里，各篇可独立观看。后续内容有明确系列就归入对应系列，未指定系列时默认归入“其他”。原`engineering-algorithms`目录与链接保留；两期制作与检查分别见[一致性哈希工程](episodes-codex/consistent-hashing/README.md)和[布隆过滤器工程](episodes-codex/bloom-filter/README.md)。
-
-## 消息队列
-
-独立系列从任务提交、排队到处理完成讲一条消息怎样接力，与其他系列并列，可以独立观看。首期为[EP.10《订单已提交，为什么还没处理完？》](https://linhongcun.github.io/video-studio/episodes/message-queue/)，约2分08秒（含5秒参考资料卡）；系列页见[消息队列](https://linhongcun.github.io/video-studio/series/message-queue/)。制作入口见[本期工程](episodes-codex/message-queue/revisions/kafka-intro/message-queue/README.md)。第二期[MQ02 / EP.42《多个消费者：分工处理，还是每人一份？》](https://linhongcun.github.io/video-studio/episodes/kafka-consumer-groups/)约2分钟，用同一批订单事件对照独立消费组与组内分工；[本期制作与检查](episodes-codex/kafka-consumer-groups/README.md)。
-
-## 高并发、高可用、高性能
-
-[独立系列](https://linhongcun.github.io/video-studio/series/peak/)从限流、幂等、熔断与降级四期出发，理解高峰流量、重复请求和服务故障的处理过程与边界。全站采用“系列 → 视频”两层结构，首页并列展示系列，系列目录直接列视频，不再保留“系统原理”中间分组。原`peak`目录与EP.11–14链接、内容时间和媒体保持。布局、兼容与验证见[本轮记录](docs/archive/2026-10/flat-learning-series/README.md)。
-
-## 计算机网络
-
-[计算机网络独立系列](https://linhongcun.github.io/video-studio/series/request/)以现有7篇Web通信入门内容为范围，从浏览器请求出发，讲解HTTP、HTTPS、DNS、登录态、CDN、负载均衡与浏览器缓存。EP.01–07沿原顺序独立学习，不再作为系统原理的章节或前后课；限流、幂等、熔断与降级归入“高并发、高可用、高性能”独立系列；服务端缓存与缓存一致性归入Redis应用场景。原`request`系列ID、URL、EP编号、文章、媒体与内容时间保留，分类与发布状态见[本轮记录](docs/archive/2026-10/network-standalone-series/README.md)。
-
-## MySQL
-
-[MySQL独立系列](https://linhongcun.github.io/video-studio/series/database/)以MySQL 8.4为背景，从InnoDB索引、事务与锁，到MySQL单主异步复制，后续持续扩充MySQL工作原理与设计取舍；具体存储引擎、复制模式和适用条件按单集说明。现有[EP.15 索引](https://linhongcun.github.io/video-studio/episodes/db-index/)、[EP.16 事务](https://linhongcun.github.io/video-studio/episodes/db-transaction/)、[EP.17 锁](https://linhongcun.github.io/video-studio/episodes/db-lock/)与[EP.18 主从复制](https://linhongcun.github.io/video-studio/episodes/db-replication/)归入这一独立系列，不再作为系统原理的章节或前后课。原期号、URL与首发身份保留，系列目录只展示实际已发布内容。
-
-## 分布式
-
-[分布式独立系列](https://linhongcun.github.io/video-studio/series/distributed/)从分库分表、分布式 ID，进入事务入门与2PC、TCC、Saga、Outbox四种实现，共7篇已发布内容。系列内沿原学习顺序衔接，不再作为系统原理的章节或前后课；限流、幂等、熔断与降级归入“高并发、高可用、高性能”独立系列；后台缓存两课归入Redis应用场景。原URL、EP编号、内容时间与媒体保留，历史事务合集继续只供回看。分类与发布状态见[本轮记录](docs/archive/2026-10/distributed-standalone-series/README.md)。
-
-## Redis
-
-[Redis系列](https://linhongcun.github.io/video-studio/series/redis/)从应用场景到内部机制：EP.08《数据库明明有数据，为什么还要再存一份？》讲商品查询缓存，EP.09《后台改了价格，页面怎么还是旧的？》讲商品价格更新与缓存一致性，EP.40继续讲跳表。两条缓存视频作为应用场景独立展示，原题名、期号、URL、内容时间与媒体保持；旧`/series/cache/`入口转到Redis目录。它们讲应用管理的服务端缓存流程，以Redis共享缓存为实现示例，不将通用缓存流程改称Redis命令实战。
-
-## 制作流程
-
-完整清单在 [docs/pipeline.md](docs/pipeline.md)。顺序是：调研 → `script.md` / `article.mdx` / `pronunciation.md` → `storyboard.json` / `covers.json` → 配音冻结 → Deming 预检 → 渲染 → Nolan 与 Deming 审成片 → 按持续授权合并、Release、部署 GitHub 站点 → 线上文件核验；三个平台另行授权。
-
-「先讲比喻，再给术语」已废止。配音用冰糖，成片 −16 LUFS。不要再按「每句 −21 LUFS」或「渲染器一律追加 2 秒片尾」操作，这两句和现行脚本不一致，说明见 [docs/render.md](docs/render.md)。
-
-## 目录结构
-
-```
-AGENTS.md                   项目入口
-docs/                      规范、手册、经验与现行策划；入口 README.md
-   archive/                 已完成记录与保留原路径的历史证据索引
-episodes-codex/
-   <slug>/                  当前制作工程，以 meta.json.sourcePath 为准
-     remotion/              动画、逐期封面与渲染命令
-     voice/、voice.wav      配音原稿和选定素材
-     source-sha256.json     冻结输入清单
-   _shared/                 句级装配、冻结、编码检查与流程导航
-   _template/               新期入口
+```text
+site/
+  src/pages/              首页、学习内容、系列、文章、搜索与更新日志
+  src/components/         播放器、章节、原文引用、配图等共享组件
+  src/content/            系列与标签配置
+  scripts/                日期、资料、图文检查及媒体复制工具
 episodes/
-   <slug>/                  站点发布内容：meta、文章、分镜、字幕、MP4、JPG
-   _shared/                 共享配音、起音、混音、主题和有效回归样本
-site/                      Astro 站点（GitHub Pages）
+  <slug>/                 发布元数据、MDX、分镜、最终 MP4、封面与资料回执
+    article/              文章配图与来源证据
+  _shared/                配音、起音、混音与基础主题工具
+episodes-codex/
+  <slug>/                 制作文稿、配音、动画、冻结清单与修订记录
+  _shared/                系列视觉模板、句级装配、冻结与渲染工具
+  _template/              新期说明、图文骨架与参考资料接入片段
+design/                   品牌、封面等设计素材与制作记录
+docs/                     规范、手册、经验、项目记忆与历史归档
+AGENTS.md                 制作与协作入口
+CREDITS.md                第三方素材与署名
 ```
 
-发布目录不另存旧动画工程、WAV 或 PNG 原稿；幕后源码链接由 `meta.json.sourcePath` 指向制作工程。用户已要求删除A01/EP.22与A02/EP.28两期Agent试片，相关发布内容与制作工程退出当前目录；原`agent-intro-v2/`拼接依赖不再保留。旧工程可通过Git历史追溯，当前范围与发布验证见[撤下记录](docs/archive/2026-10/agent-video-retirement.md)。后续概念研究题库继续保留。
+`episodes/<slug>/` 是站点发布入口；当前制作源码的位置以 `meta.json.sourcePath` 及对应工程 README 为准。音频原稿、动画工程和冻结输入保留在制作目录，构建生成的站点媒体副本不提交到仓库。
 
-## 本地开发与渲染
+## 本地运行站点
 
-站点（`site/`，Astro）：
+使用 Node.js 与 npm；建议使用 Node.js 22 或 24 LTS。仓库中的 `episodes/` 发布媒体需要完整保留，站点预览使用已有成片，无需配置 TTS 密钥。
+
+在仓库根目录执行：
 
 ```sh
-cd site && npm ci
-npm run dev       # 本地预览（会先把各期视频、封面复制到站点）
-npm run build     # 构建到 site/dist
-npm run preview   # 预览构建结果
+npm --prefix site ci
+npm --prefix site run dev
 ```
 
-制作与渲染从当前期的 `episodes-codex/<slug>/README.md` 进入。例如：
+打开终端提示的地址，默认是 <http://localhost:4321/video-studio/>。
+
+构建与预览：
 
 ```sh
-cd episodes-codex/degradation/remotion && npm ci
-npm run render
-npm run covers
+npm --prefix site run build
+npm --prefix site run preview
 ```
 
-WAV、PNG 等制作原稿留在制作工程；站点使用检查通过的 MP4 与 JPG。冻结、封面和静帧检查见 [docs/render.md](docs/render.md)。
+`dev` 会先检查图文并复制媒体。`build` 依次检查内容日期、参考资料与图文，再复制视频、海报和文章图片，构建 Astro 页面与 Pagefind 索引，输出到 `site/dist/`。构建入口和依赖以 [`site/package.json`](site/package.json) 与锁文件为准。
 
-## 版本规则
+## 制作与维护
 
-- 版本号用三段式 `主.次.修订`，记在 `site/package.json`，每次发布打同名 tag 并发 Release。
-- 只改内容（文字修订、重配、重渲等）升修订号（patch），例如 v0.25.0 → v0.25.1。
-- 新增一期、新功能或站点改动升次版本号（minor），例如 v0.25.1 → v0.26.0。
-- 脚本、分镜和成片按质量流程核验；GitHub 站点沿用用户持续授权自主发布，平台发布另行授权。见 [AGENTS.md](AGENTS.md)。
+开始制作或修订前，先读 [AGENTS.md](AGENTS.md)，保护工作区并同步最新主干，再从[文档索引](docs/README.md)进入对应手册。现行规范以 [RULES.md](docs/RULES.md) 为准，完整步骤见[制作流程](docs/pipeline.md)。
 
-## 署名
+1. **调研与定稿**：核对公开来源，建立 `references.json`，同步编写脚本、配套图文、发音说明与分镜；明确题意、讲解主线、前置概念和适用边界。
+2. **配音与动画**：使用共享配音与时序工具，沿用对应系列的封面和正文视觉体系，先验证关键连续过程，再展开完整制作。
+3. **检查与冻结**：核验资料、配音、时序、版面和动态表达，冻结实际输入并记录 SHA-256；保留旧制作稿与历史证据的原路径和字节。
+4. **生成最终媒体**：按当前单期工程的入口渲染正文、适用的代码卡和参考资料附录，检查成片、字幕、章节、封面与媒体记录。
+5. **接入与发布**：将通过检查的产物接入 `episodes/`，验证站点阅读、视频回看和来源链接，按发布手册完成版本、部署及线上文件核验。
 
-背景音乐（原文见 [CREDITS.md](CREDITS.md)）：
+新制作或重制的视频默认包含经核验的参考资料附录；配套文章包含原文引用与有效正文配图。新期从[模板说明](episodes-codex/_template/README.md)进入，渲染命令、依赖和系列模板按当前工程及[渲染手册](docs/render.md)选择。
 
-"Wallpaper" Kevin MacLeod (incompetech.com)
-Licensed under Creative Commons: By Attribution 4.0 License
-http://creativecommons.org/licenses/by/4.0/
+视频制作还需要 FFmpeg / ffprobe、Python 依赖、浏览器与字体环境，具体版本见对应制作工具和单期工程。MiMo TTS 使用 `MIMO_API_KEY`，密钥按[配音手册](docs/voice.md)配置。
 
-配音、动画等其他署名见 [CREDITS.md](CREDITS.md)。
+| 要做的事 | 入口 |
+| --- | --- |
+| 查规范、现行任务与授权范围 | [AGENTS.md](AGENTS.md) · [RULES.md](docs/RULES.md) |
+| 开新期或重制 | [制作流程](docs/pipeline.md) · [新期模板](episodes-codex/_template/README.md) |
+| 写图文、核对引用与配图 | [调研模板](docs/research-template.md) · [图文写作说明](docs/article-style.md) |
+| 做配音、动画、封面与资料附录 | [配音](docs/voice.md) · [渲染](docs/render.md) · [共享制作工具](episodes-codex/_shared/README.md) |
+| 质检与上线 | [校验](docs/validate.md) · [质检清单](docs/qa.md) · [发布](docs/publish.md) |
+| 查已有经验和当前偏好 | [教训](docs/lessons-learned.md) · [成功经验](docs/successful-practices.md) · [项目制作记忆](docs/production-memory.md) |
+| 查重制、资料补齐与站点改版记录 | [历史归档索引](docs/archive/README.md) |
+
+## 版本与发布
+
+站点版本记在 [`site/package.json`](site/package.json)。视频或图文内容修订升 patch；新增一期、新功能或站点改动升 minor。发布使用对应 tag 与 GitHub Release，更新日志在构建时读取 Releases；完整发版步骤见[发布手册](docs/publish.md)。
+
+每期分别记录创建时间、最近一次实质内容修改时间和首次公开时间；更新已有内容时保留原 slug 与首发身份。历史版本和归档内容可通过发布记录与 Git 历史追溯。
+
+GitHub 主干与站点按现行授权和质量流程发布；B站、抖音等外部平台投稿另行授权，实际播放入口以各期页面的真实平台链接为准。
+
+## 署名与来源
+
+音乐、配音及其他第三方素材的出处与署名见 [CREDITS.md](CREDITS.md) 和对应工程说明；技术资料的完整来源见各期文章与研究记录。
