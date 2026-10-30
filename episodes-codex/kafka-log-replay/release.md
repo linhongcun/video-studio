@@ -1,6 +1,6 @@
 # MQ03 / EP43 发布记录
 
-2026-10-30（北京时间），制作issue#311，总览#308。当前状态：正式成片、图文和本地构建/浏览器检查通过，待GitHub发布与线上核验。
+2026-10-30（北京时间），制作issue#311，总览#308。当前状态：v0.95.0已合并发布并完成Pages与线上核验，#311已以completed关闭。
 
 ## 实际制作与复核
 
@@ -18,7 +18,7 @@ Kafka4.4.0固定提交1156b2752aaa28eafc0b4c4d387e63356793268d官方来源本轮
 
 ## 交付范围
 
-沿RULES STATUS持续授权，只上GitHub主干、Release与Pages；平台无本轮新发。成片/本地网页/线上结果实际完成后续记，线上完整文件及原生浏览器核验后才completed关闭311、同步308。没有逐字ASR、全片人工语义听辨、物理手机或学习效果实验，不预记用户观看认可。
+沿RULES STATUS持续授权，只上GitHub主干、Release与Pages；平台无本轮新发。实际成片/本地网页/线上结果见下文；已在完整文件与原生浏览器核验后completed关闭311并同步308。没有逐字ASR、全片人工语义听辨、物理手机或学习效果实验，不预记用户观看认可。
 
 正式编码后再次fetch并ff整合4f631ca7的README重写，保留新的学习站与制作系统文档结构，仅补MQ系列含日志重放的范围说明；实际170冻结输入与site运行代码无交集，见qa/upstream-after-freeze.json。
 
@@ -32,4 +32,12 @@ Kafka4.4.0固定提交1156b2752aaa28eafc0b4c4d387e63356793268d官方来源本轮
 
 本地46项实际浏览器和20次严格PTS检查通过，覆盖22条原生字幕默认off、4章/4图回看、四处引用的桌面hover/点击/手机tap/键盘关闭、实际播放/暂停及Fullscreen API、三课MQ系列。实际图像阅读结论与能力限制见qa/site-independent/report.json。
 
-本期复盘沿用既有短尾、渐进引入、结果状态与元数据闸门经验，不新增重复的通用规范条目。最终线上结果后续补入publication.json与本页。
+本期复盘沿用既有短尾、渐进引入、结果状态与元数据闸门经验，不新增重复的通用规范条目。最终线上结果见publication.json与下节。
+
+## 实际发布与线上核验
+
+[PR438](https://github.com/linhongcun/video-studio/pull/438)已squash合并e21e14570db934af7ede110e95b627d7b4190cdb，附注tag与[Release v0.95.0](https://github.com/linhongcun/video-studio/releases/tag/v0.95.0)发布后[Pages40991181077](https://github.com/linhongcun/video-studio/actions/runs/40991181077)成功。同SHA首push40991042825为避免重复部署主动取消，非媒体或构建故障，不改工作流、不取消其他提交的运行。
+
+北京时间2026-10-30T10:27:34开始的14项普通canonical GET通过，线上完整MP4、16:9海报、22cue VTT、四图SHA与审片版相同，4章/三课系列/内容库/首页/旧learn兼容/实际Release更新日志齐全。随后原生Chromium直接HTTPS完成46项交互、20次严格PTS解码和实际截图阅读，未用TLS绕过或HTTP回填。已实际查看桌面资料页、手机R3/R4原文、844模拟手机横屏资料页，四项题名署名完整且不被原生暂停控件遮挡；所看截图未见等待圈，不扩大为所有状态/物理手机结论。
+
+[#311](https://github.com/linhongcun/video-studio/issues/311)已于2026-10-30T02:33:27Z以completed关闭，[#308](https://github.com/linhongcun/video-studio/issues/308)为3/9交付，其余6题未开工、原14题取消保持。本轮收尾只补文档与检查证据，不改变已发布的媒体、文章、站点运行代码或170冻结输入。机器证据见[publication.json](publication.json)、[HTTP](online-verification.json)、[线上原生浏览器](qa/site-online-native/report.json)。
