@@ -1,0 +1,15 @@
+OBS VERSIONS {"mode":"setup","java":"21.0.12.1","kafka":"4.4.0","KafkaCommit":"1156b2752aaa28ea"}
+ASSERT PASS Kafka-client-4.4.0 actual="4.4.0"
+ASSERT PASS PostgreSQL18.0 actual="18.0"
+OBS DATABASE_VERSION {"JDBC":"42.7.8","server":"18.0","isolation":2}
+OBS FIXTURE_RESET {"markerCount":0,"accountRows":1,"points":0}
+ASSERT PASS seed-confirmed-P0-offset0 actual={"offset":0,"partition":0}
+ASSERT PASS max-poll-records-one actual=1
+ASSERT PASS same-E01-record actual={"offset":0,"partition":0,"value":"{\"eventId\":\"E01\",\"orderId\":\"7042\",\"accountId\":17,\"delta\":10}","key":"7042"}
+ASSERT PASS initial-committed-zero actual=0
+OBS GROUP_INITIALIZED_NO_BUSINESS {"businessHandlersExecuted":0,"committed":0,"group":"mq05-naive-20261030T152318.187770Z"}
+ASSERT PASS max-poll-records-one actual=1
+ASSERT PASS same-E01-record actual={"offset":0,"partition":0,"value":"{\"eventId\":\"E01\",\"orderId\":\"7042\",\"accountId\":17,\"delta\":10}","key":"7042"}
+ASSERT PASS initial-committed-zero actual=0
+OBS GROUP_INITIALIZED_NO_BUSINESS {"businessHandlersExecuted":0,"committed":0,"group":"mq05-dedup-20261030T152318.187770Z"}
+RESULT PASS mode=setup assertions=9

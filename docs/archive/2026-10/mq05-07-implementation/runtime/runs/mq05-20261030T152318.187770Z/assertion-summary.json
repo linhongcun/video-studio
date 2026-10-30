@@ -1,0 +1,55 @@
+{
+  "status": "pass",
+  "counts": {
+    "setup": 9,
+    "db-concurrency": 30,
+    "reset-before-naive": 2,
+    "naive-crash": 9,
+    "naive-replay": 10,
+    "reset-before-dedup": 2,
+    "dedup-crash": 10,
+    "dedup-replay": 11,
+    "verify-final": 6
+  },
+  "total": 89,
+  "noDedupReplayPoints": 20,
+  "dedupReplayPoints": 10,
+  "actualPostgresBlocking": [
+    {
+      "waitEvent": "transactionid",
+      "waitType": "Lock",
+      "blockingPids": "{124127}",
+      "B_state": "active",
+      "A_pid": 124127,
+      "B_pid": 124128
+    },
+    {
+      "waitEvent": "transactionid",
+      "waitType": "Lock",
+      "blockingPids": "{124135}",
+      "B_state": "active",
+      "A_pid": 124135,
+      "B_pid": 124136
+    }
+  ],
+  "transactionRaceOutcomes": [
+    {
+      "A_decision": "COMMIT",
+      "database": {
+        "markerCount": 1,
+        "accountRows": 1,
+        "points": 10
+      }
+    },
+    {
+      "A_decision": "ROLLBACK",
+      "database": {
+        "markerCount": 1,
+        "accountRows": 1,
+        "points": 10
+      }
+    }
+  ],
+  "physicalLogRecord": "E01 orders7042 P0@0",
+  "scope": "Real Kafka4.4 classic/RF1 and real PostgreSQL18.0, one local event, controlled worker halt after DB COMMIT/before independent Kafka offset commit; two PostgreSQL tasks compete, not two stable Kafka owners of one partition. No distributed DB+Kafka atomic transaction, production failover, benchmark or external service guarantee tested."
+}

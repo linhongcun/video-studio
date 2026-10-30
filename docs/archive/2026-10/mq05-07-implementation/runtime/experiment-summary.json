@@ -1,0 +1,65 @@
+{
+  "batch": "MQ05-MQ07 / EP45-47",
+  "requestedBatchBaseline": "f01411f7e2a2d1cef480cd0f6b73d4c29d7169f3",
+  "status": "all-three-real-minimal-runs-pass",
+  "actualPrintedAssertions": 121,
+  "experiments": [
+    {
+      "episode": "mq05",
+      "directory": "runs/mq05-20261030T152318.187770Z",
+      "actualPrintedAssertions": 89,
+      "assertionSummarySHA256": "e79d963d2ec156df3233b65eedef7047c4b839d0e7653215ab0b826a4e4a1853",
+      "sourceFiles": {
+        "Mq05Probe.java": "f8f4cfd1c8f8342f84d88c763fdbfa814bc20f80cf3ff1ee8bd003e5906f1efa"
+      },
+      "scope": "Real Kafka4.4 classic/RF1 and real PostgreSQL18.0, one local event, controlled worker halt after DB COMMIT/before independent Kafka offset commit; two PostgreSQL tasks compete, not two stable Kafka owners of one partition. No distributed DB+Kafka atomic transaction, production failover, benchmark or external service guarantee tested."
+    },
+    {
+      "episode": "mq06",
+      "directory": "runs/mq06-20261030T153232.189835Z",
+      "actualPrintedAssertions": 12,
+      "assertionSummarySHA256": "db574189de3326ef14e6b0987e9f1826d0c5eea652de9c91ac798fb3d056be85",
+      "sourceFiles": {
+        "KafkaProbeSupport.java": "df76dc8fba778f4095d839aa3c03541fa6cbca8d7a54f56a465b94c32ea3ec54",
+        "Mq06Probe.java": "477c9a8304d972749ea708b3abf251a69ebfe5925e62a0b8f7b7609906fa8100"
+      },
+      "scope": {
+        "benchmark": false,
+        "business": "real Java AtomicReference status projection and deterministic CountDownLatch scheduling; no payment/refund service or database executed",
+        "realLog": "Kafka4.4 orders,2 partitions,one producer/calling thread,key UTF8 7042"
+      }
+    },
+    {
+      "episode": "mq07",
+      "directory": "runs/mq07-20261030T153232.191596Z",
+      "actualPrintedAssertions": 20,
+      "assertionSummarySHA256": "a4105c9f36dbc81ed96225feba5cfc72be153343d3fc782257205e25298899c4",
+      "sourceFiles": {
+        "KafkaProbeSupport.java": "df76dc8fba778f4095d839aa3c03541fa6cbca8d7a54f56a465b94c32ea3ec54",
+        "Mq07Probe.java": "408e5383d4b6520d5bfb0f1734fbdd403c938c5b2ad96551af8ee6e643604f17"
+      },
+      "scope": {
+        "assignment": "Real Kafka4.4 classic Range,2 partitions,2 then12 dynamic members,stable+local-install observations",
+        "business": "Separate one-member group, actual polled records and controlled Java handler completion gate, not a production business service",
+        "throughput": "No benchmark, throughput rate, forecast or assumed-rate validation."
+      }
+    }
+  ],
+  "versions": {
+    "Kafka": "4.4.0",
+    "KafkaSourceCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "Java": "21.0.12.1",
+    "PostgreSQL": "18.0",
+    "PostgreSQLCommit": "3d6a828938a5fa0444275d3d2f67b64ec3199eb7",
+    "JDBC": "42.7.8"
+  },
+  "allTaskOwnedServersStopped": true,
+  "completedAt": "2026-10-30T15:39:44.024380+00:00",
+  "scopeLimits": [
+    "RF1 loopback only; no multi-replica/failover/network-unknown transaction test.",
+    "MQ05 database tasks compete, not two stable Kafka owners; DB and Kafka commits remain independent.",
+    "MQ06 actual application status projection/latch scheduling, no payment/refund service or DB effect.",
+    "MQ07 12-member assignment fixture and separate single-member business gate; no benchmark or rate assumptions validated."
+  ],
+  "productionSharedSiteGitTTSFreezeTouched": false
+}

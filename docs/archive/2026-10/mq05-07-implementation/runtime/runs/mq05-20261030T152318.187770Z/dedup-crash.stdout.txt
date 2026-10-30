@@ -1,0 +1,16 @@
+OBS VERSIONS {"KafkaCommit":"1156b2752aaa28ea","kafka":"4.4.0","java":"21.0.12.1","mode":"dedup-crash"}
+ASSERT PASS Kafka-client-4.4.0 actual="4.4.0"
+ASSERT PASS PostgreSQL18.0 actual="18.0"
+OBS DATABASE_VERSION {"isolation":2,"server":"18.0","JDBC":"42.7.8"}
+OBS CONSUMER_CONFIG {"auto.offset.reset":"earliest","bootstrap.servers":"127.0.0.1:34081","client.id":"dedup-crash","default.api.timeout.ms":"30000","enable.auto.commit":"false","group.id":"mq05-dedup-20261030T152318.187770Z","group.protocol":"classic","heartbeat.interval.ms":"1000","key.deserializer":"org.apache.kafka.common.serialization.StringDeserializer","max.poll.records":"1","partition.assignment.strategy":"org.apache.kafka.clients.consumer.RangeAssignor","request.timeout.ms":"15000","session.timeout.ms":"6000","value.deserializer":"org.apache.kafka.common.serialization.StringDeserializer"}
+ASSERT PASS max-poll-records-one actual=1
+ASSERT PASS same-E01-record actual={"key":"7042","value":"{\"eventId\":\"E01\",\"orderId\":\"7042\",\"accountId\":17,\"delta\":10}","partition":0,"offset":0}
+ASSERT PASS stored-offset-zero-before-handler actual=0
+ASSERT PASS position-is-next-one actual=1
+ASSERT PASS at-most-one-returned-event actual="E01"
+OBS INSERT_RETURNING {"task":"dedup-crash","returned":"E01","newRow":true}
+OBS DB_COMMIT {"databaseCommit":true,"task":"dedup-crash","updateRows":1,"points":10,"markerCount":1,"inserted":true}
+ASSERT PASS dedup-insert-result-matches-phase actual={"databaseCommit":true,"task":"dedup-crash","updateRows":1,"points":10,"markerCount":1,"inserted":true}
+ASSERT PASS database-committed-points-10 actual={"markerCount":1,"accountRows":1,"points":10}
+ASSERT PASS Kafka-still-zero-after-independent-DB-commit actual=0
+OBS PROCESS_HALT_BEFORE_KAFKA_COMMIT {"database":{"markerCount":1,"accountRows":1,"points":10},"KafkaCommitted":0,"group":"mq05-dedup-20261030T152318.187770Z","expectedExitCode":24}
