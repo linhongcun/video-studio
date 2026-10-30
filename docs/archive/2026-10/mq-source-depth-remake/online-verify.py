@@ -81,6 +81,9 @@ def main():
             chapters = list(dict.fromkeys(s['chapterId'] for s in board['scenes']))
             for chapter in chapters:
                 assert f'id="{chapter}"' in page
+            aliases = read(HERE / 'article-anchor-plan.json')['episodes'][slug]['aliasesBeforeHeading']
+            for old_id in aliases:
+                assert f'id="{old_id}"' in page, (slug, 'old anchor missing', old_id)
             fetch(f'episodes/{slug}/video.mp4', p / 'video.mp4')
             fetch(f'episodes/{slug}/' + m['poster'], p / m['poster'])
             vtt = ROOT / 'site/dist/episodes' / slug / 'captions.vtt'

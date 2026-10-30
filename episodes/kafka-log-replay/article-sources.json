@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-log-replay",
+  "sources": [
+    {
+      "id": "A1",
+      "organization": "Apache Kafka",
+      "title": "AbstractFetch.java",
+      "titleEvidence": {
+        "locator": "GitHub fixed-commit contents response name/path fields for AbstractFetch.java",
+        "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/sources/code-title-evidence.json"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java",
+      "supports": [
+        "Fetch请求起点实际使用客户端position.offset字段。"
+      ],
+      "sections": "lines 477–483; full implementation context read in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java",
+        "method": "Complete original source bytes checked by SHA; focused implementation reread. Reused recovery files preserve original retrieval date separately; current title metadata queried fresh.",
+        "sha256": "ecda83eb9f8652d0868cc009e198bdd6731810c2d89c47d0622a3a9099c3ba86"
+      },
+      "quotation": {
+        "text": "Uuid topicId = topicIds.getOrDefault(partition.topic(), Uuid.ZERO_UUID);\n                FetchRequest.PartitionData partitionData = new FetchRequest.PartitionData(topicId,\n                        position.offset,\n                        FetchRequest.INVALID_LOG_START_OFFSET,\n                        fetchConfig.fetchSize,\n                        position.currentLeader.epoch,\n                        Optional.empty());",
+        "locator": "AbstractFetch.java lines 477–483",
+        "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/sources/AbstractFetch.java"
+      },
+      "note": "Original source-code filename from fixed-commit repository metadata; no named personal author inferred. Actual execution code, not a running Kafka experiment."
+    },
+    {
+      "id": "A2",
+      "organization": "Apache Kafka",
+      "title": "CompletedFetch.java",
+      "titleEvidence": {
+        "locator": "GitHub fixed-commit contents response name/path fields for CompletedFetch.java",
+        "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/sources/code-title-evidence.json"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java",
+      "supports": [
+        "解析返回记录后算出记录offset加一作为下一位置。"
+      ],
+      "sections": "lines 286–290; full implementation context read in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java",
+        "method": "Complete original source bytes checked by SHA; focused implementation reread. Reused recovery files preserve original retrieval date separately; current title metadata queried fresh.",
+        "sha256": "2a7d902f7394f30c83db6ab5a47045362b98d8982746e7f7ae61408364713e6e"
+      },
+      "quotation": {
+        "text": "ConsumerRecord<K, V> record = parseRecord(deserializers, partition, leaderEpoch, timestampType, lastRecord);\n                records.add(record);\n                recordsRead++;\n                bytesRead += lastRecord.sizeInBytes();\n                nextFetchOffset = lastRecord.offset() + 1;",
+        "locator": "CompletedFetch.java lines 286–290",
+        "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/sources/CompletedFetch.java"
+      },
+      "note": "Original source-code filename from fixed-commit repository metadata; no named personal author inferred. Actual execution code, not a running Kafka experiment."
+    }
+  ]
+}

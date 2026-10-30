@@ -7,6 +7,7 @@ The Chromium path uses native transport only; no request fulfillment or TLS bypa
 from pathlib import Path
 from fractions import Fraction
 import argparse,base64,datetime,functools,hashlib,http.server,json,re,subprocess,threading,traceback,urllib.request,ssl
+from urllib.parse import urljoin
 from playwright.sync_api import sync_playwright
 R=next(p for p in Path(__file__).resolve().parents if (p/'AGENTS.md').is_file())
 D=None
@@ -69,6 +70,9 @@ def main():
     page.set_default_timeout(20000);page.on('pageerror',lambda e:report['errors'].append(str(e)))
     page.goto(base+'/series/message-queue/',wait_until='domcontentloaded');assert page.locator(f'a.lesson[href$="/episodes/{SLUG}/"]').count()==1;assert page.locator('a.lesson').count()==len(published_series);assert all(page.locator(f'a.lesson[href$="/episodes/{slug}/"]').count()==1 for slug in published_series);check('series includes all current published MQ lessons',w,{'slugs':published_series,'count':len(published_series)});snap(page,f'series-{w}')
     page.goto(base+f'/episodes/{SLUG}/',wait_until='domcontentloaded');assert page.locator('h1').inner_text()==meta['title'];assert meta['episodePart'] in page.locator('body').inner_text();assert not page.evaluate('document.documentElement.scrollWidth>innerWidth');check('episode identity and no overflow',w)
+    aliases=json.loads((R/'docs/archive/2026-10/mq-source-depth-remake/article-anchor-plan.json').read_text())['episodes'][SLUG]['aliasesBeforeHeading']
+    for old_id in aliases:assert page.locator(f'[id="{old_id}"]').count()==1
+    check('previous article anchor aliases remain unique',w,list(aliases))
     v=page.locator('video');v.scroll_into_view_if_needed();v.evaluate("async v=>{v.muted=true;v.preload='auto';const p=new Image();p.src=v.poster;await p.decode();v.load()}");page.wait_for_function('document.querySelector("video").readyState>=2');assert abs(v.evaluate('(v)=>v.duration')-total/30)<.002;check('metadata duration and poster decode',w);snap(page,f'poster-{w}')
     native_default=v.evaluate('(v)=>Array.from(v.querySelectorAll("track")).some(t=>t.default)');assert not native_default;check('native subtitles default off avoids double burned captions',w,{'trackDefault':native_default});page.evaluate('()=>{const v=document.querySelector("video");for(const t of v.textTracks)t.mode="hidden"}');page.wait_for_function('document.querySelector("video").textTracks[0]?.cues?.length>0');assert v.evaluate('(v)=>v.textTracks[0].cues.length')==len(json.loads((D/'voice/build.json').read_text())['sentences']);check('native VTT loaded',w,v.evaluate('(v)=>v.textTracks[0].cues.length'));page.evaluate('''()=>{const v=document.querySelector('video'),d=Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype,'currentTime');window.__qaAssigned=[];Object.defineProperty(v,'currentTime',{configurable:true,get(){return d.get.call(this)},set(t){window.__qaAssigned.push(t);return d.set.call(this,t)}})}''')
     v.evaluate('(v)=>v.play()');page.wait_for_function('!document.querySelector("video").paused&&document.querySelector("video").currentTime>.2');v.evaluate('(v)=>v.pause()');check('actual playback advance and pause',w)
@@ -107,9 +111,9 @@ def main():
     # Exercise the unmodified same-tab original-image link after the media checks.
     original_links=page.locator('figure .fig-image-link')
     assert original_links.count()==figures.count()
-    original_link=original_links.first;original_url=original_link.get_attribute('href');original_link.scroll_into_view_if_needed()
+    original_link=original_links.first;original_url=original_link.get_attribute('href');expected_original=urljoin(page.url,original_url);original_link.scroll_into_view_if_needed()
     with page.expect_navigation(wait_until='domcontentloaded'):original_link.click()
-    assert page.url.endswith(original_url) if original_url.startswith('/') else page.url==original_url
+    assert page.url==expected_original
     page.wait_for_function('document.images.length>0&&document.images[0].complete&&document.images[0].naturalWidth>0')
     check('original Figure image link opens actual decoded image',w,{'url':page.url})
     snap(page,f'original-image-{w}')

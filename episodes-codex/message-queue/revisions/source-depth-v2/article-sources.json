@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "episode": "message-queue",
+  "sources": [
+    {
+      "id": "A1",
+      "organization": "Apache Kafka",
+      "title": "StringSerializer",
+      "titleEvidence": {
+        "locator": "original class declaration",
+        "evidence": "episodes-codex/message-queue/revisions/source-depth-v2/sources/client/StringSerializer.java"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/serialization/StringSerializer.java",
+      "supports": [
+        "字符串先转换为所选字符集的字节；本例显式UTF-8，不等同完整Kafka批次二进制格式。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/serialization/StringSerializer.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "70df2dc8b49145785e3436cebb464f7f51daaccb6d502bf01b2a531f6bd100ce",
+        "evidence": "episodes-codex/message-queue/revisions/source-depth-v2/sources/client/source-evidence.json"
+      },
+      "quotation": {
+        "text": "return data.getBytes(encoding);",
+        "locator": "serialize(), line57",
+        "evidence": "episodes-codex/message-queue/revisions/source-depth-v2/sources/client/StringSerializer.java"
+      }
+    },
+    {
+      "id": "A2",
+      "organization": "Apache Kafka",
+      "title": "FileRecords",
+      "titleEvidence": {
+        "locator": "original class declaration",
+        "evidence": "episodes-codex/message-queue/revisions/source-depth-v2/sources/broker/FileRecords.java"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/record/internal/FileRecords.java",
+      "supports": [
+        "实际追加通过文件通道写入记录字节，和调用通知业务是不同动作；append不自动等于每条fsync。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/record/internal/FileRecords.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "84e20d6db76508e18e49baf199387d45e8ebca748d27efe9a72fe009d9125e3c",
+        "evidence": "episodes-codex/message-queue/revisions/source-depth-v2/sources/broker/source-evidence.json"
+      },
+      "quotation": {
+        "text": "int written = records.writeFullyTo(channel);",
+        "locator": "append(), line200",
+        "evidence": "episodes-codex/message-queue/revisions/source-depth-v2/sources/broker/FileRecords.java"
+      }
+    },
+    {
+      "id": "A3",
+      "organization": "Apache Kafka",
+      "title": "CompletedFetch",
+      "titleEvidence": {
+        "locator": "original class declaration",
+        "evidence": "episodes-codex/message-queue/revisions/source-depth-v2/sources/client/CompletedFetch.java"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java",
+      "supports": [
+        "客户端解析记录后把下一读取offset更新为当前记录offset+1，业务执行尚未由Kafka完成。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "2a7d902f7394f30c83db6ab5a47045362b98d8982746e7f7ae61408364713e6e",
+        "evidence": "episodes-codex/message-queue/revisions/source-depth-v2/sources/client/source-evidence.json"
+      },
+      "quotation": {
+        "text": "nextFetchOffset = lastRecord.offset() + 1;",
+        "locator": "fetchRecords(), line290",
+        "evidence": "episodes-codex/message-queue/revisions/source-depth-v2/sources/client/CompletedFetch.java"
+      }
+    }
+  ]
+}

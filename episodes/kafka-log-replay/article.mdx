@@ -1,130 +1,81 @@
 ---
 title: 'Kafka日志重放：消息读过了，为什么还能重读？'
-summary: '记录仍在日志里，读取位置与恢复位置各有职责。沿同一分区的两条订单事件，看懂消费进度提交、停组回退与日志保留的边界。'
+summary: '沿真实初始化赋值、Fetch参数和日志文件切片，把保留字节、客户端读取位置与消费组恢复值连成因果，解释重启重读及保留边界。'
 chapters:
-  - { id: problem, title: 先看日志和进度 }
-  - { id: position, title: 读取与恢复位置 }
-  - { id: replay, title: 停组回退再重读 }
-  - { id: boundary, title: 可重读的边界 }
+  - { id: problem, title: 旧记录与三个位置 }
+  - { id: read, title: 读取怎样推进当前位置 }
+  - { id: restore, title: 恢复值怎样决定再次读取 }
+  - { id: boundary, title: 提交与保留改变什么 }
 related: [message-queue, kafka-consumer-groups]
 ---
 
-## 先看日志和进度 {#problem}
+## 旧记录与三个位置 {#problem}
 
-通知服务已经读过一批订单事件，排查问题时却想再读一遍。Kafka为什么还能提供这些记录？因为记录本身和消费进度是两类数据：消息保存在分区日志里，消费者读取它们，消费组另外保存从哪里恢复。读取和提交进度都不会自动把原记录从日志中删除。
+订单7042的通知事件E01已经被消费者读到。消费者退出再启动，为什么仍可能读到**同一个offset、同一内容**的E01？本例追踪Kafka 4.4.0传统消费组的实际执行链：保存的恢复值先变成新消费者的读取位置，再进入Fetch请求，最终决定从日志文件的哪里取数据。
 
-<SourceQuote sourceId="R1" supports="记录不会因为已经消费就被删除，读取之后仍可能再次读取；是否仍可访问，还受到保留策略约束。" translation="主题中的事件可按需要反复读取；与传统消息系统不同，事件不会因为已消费就被删除。" />
+这里有三份不同所属的状态：Broker的分区日志保留记录字节；当前消费者在内存中维护position，表示下一次读取起点；消费组保存committed，表示成功提交的下一恢复位置。示例开始就已有notify组对orders/P0保存的committed=0，不是把新建组或缺少历史位置的默认值当作0。关闭自动提交，限定一个手工assign(P0)的消费者、一个分区和无压缩单记录批次，不演动态组分配；图和有限模型不冒充真实Broker或磁盘格式实测。
 
-沿用四笔虚构订单，固定一个主题`orders`和两个分区：
+<span id="position"></span>
 
-| 分区 | 位置0 | 位置1 |
-|---|---|---|
-| P0 | E01：订单7042 | E03：订单7044 |
-| P1 | E02：订单7043 | E04：订单7045 |
+## 读取怎样推进当前位置 {#read}
 
-这些位置编号叫作offset，只在本分区内定位记录。P0的位置0与P1的位置0互不替代；本例没有建立跨分区的全局顺序。
+Fetch请求带着起点0。Broker的LocalLog先按目标offset选取日志段，LogSegment再定位文件字节范围，返回这个范围的切片。FileRecords.slice创建的是同一file/channel上的范围视图，读取路径没有逐条删除或搬走日志记录。因此响应中有E01，并不意味着原文件已经没有它。
 
-通知和积分各用独立消费组。通知组有N1、N2、N3三个实例，但只有两个分区；在本例的稳定分配中，N1负责P0，N2负责P1，N3空闲。积分组只有S1，由它读取P0和P1。增加实例不会凭空增加分区，也不会让通知组的某个实例替积分组保存进度。
+<SourceQuote sourceId="R3" supports="LogSegment.read实际返回日志文件字节切片；读取本身不是逐条删除操作。" />
 
-为了聚焦，P1的两条记录在讲解开始前已经被两组处理完，恢复位置都已提交为2；后文只展开P0。此时通知组与积分组在P0的已提交位置都为0。
+<Figure src="/video-studio/episodes/kafka-log-replay/article/01-log-byte-range.jpg" alt="Broker日志保留E01，字节响应到达客户端，已提交恢复值仍为0。" caption="教学示例：日志读取返回同一文件的字节范围；原E01仍在日志中。" seekTo={35.833333333} chapter="read" />
 
-## 读取与恢复位置 {#position}
+收到的数据还要由客户端解析、返回给应用。CompletedFetch把下一读取位置算作记录offset加一，FetchCollector再把新的FetchPosition写回该分区的客户端状态。本例读到offset0，position便变成1；这一步没有提交消费组的committed。
 
-同一个分区，需要区分“下次准备读取哪里”与“重启后从哪里恢复”。它们都使用offset，但更新时间和用途不同。
+<SourceQuote sourceId="A2" supports="客户端按刚返回记录的offset加一计算下一读取位置，属于读取链中的执行更新。" />
 
-| 位置 | 保存在哪里、怎样变化 | 回答的问题 |
-|---|---|---|
-| 读取位置（position） | 当前拥有该分区的客户端内存状态，随`poll`收到记录推进 | 下一次准备返回哪条记录？ |
-| 已提交位置（committed offset） | 作为组的恢复进度保存，按本例的手动提交动作更新 | 重新启动后从哪条继续？ |
+<span id="replay"></span>
 
-<Figure src="/video-studio/episodes/kafka-log-replay/article/01-read-position.jpg" alt="P0原记录E01和E03保留；N1已读取E01，下一读取位置为1，应用尚未处理，已提交恢复位置仍为0" caption="教学示例：读到E01后读取位置已经到1，处理和恢复进度尚未完成。" seekTo={48.166666666666664} chapter="position" />
+## 恢复值怎样决定再次读取 {#restore}
 
-N1从P0读到E01，也就是位置0的记录。读取位置随这次返回前进到1，但应用还没有处理它，已提交位置仍为0。“读到”只说明客户端拿到了事件，不能据此认定通知已经发出。
+C1退出后，其内存position=1也随旧实例丢失。新消费者C2没有有效读取位置时，ClassicKafkaConsumer.updateFetchPositions先调用协调器初始化逻辑，查询该组、主题、分区的已提交值。查回的committed仍是0。
 
-接下来应用处理E01，成功后把**下一条的位置1**提交为恢复起点。保存1不是保存“E01的业务状态”，而是说明恢复时应从位置1继续。原来的E01仍在P0的位置0。
+ConsumerUtils.refreshCommittedOffsets会用返回的offset建立FetchPosition，并通过seekUnvalidated进入订阅状态更新。真正把这个对象装进新实例的是SubscriptionState中的赋值，随后还要满足相应的位置验证条件。本例固定分配、leader和相关epoch稳定，选择初始化与校验成功的路径。
 
-<SourceQuote sourceId="R2" supports="分区中的消费位置用下一条消息的offset表示，本例因此用1表示读完位置0之后的下一条起点。" translation="消费者在每个分区中的位置只需一个整数，即下一条将要消费的消息的偏移量。" />
+<SourceQuote sourceId="R1" supports="恢复代码从已提交offset构造FetchPosition并对仍分配给当前客户端的分区应用它。" />
+<SourceQuote sourceId="R2" supports="seek路径通过实际this.position赋值安装客户端位置，再进入相应校验；不是仅靠API注释推断。" />
 
-N1再读E03，读取位置前进到2；处理后提交2，两条记录的本轮处理就结束了。位置2是当前日志末端，表示等待下一条可读记录，不要求日志中已经有一条编号为2的消息。
+<Figure src="/video-studio/episodes/kafka-log-replay/article/02-restored-position.jpg" alt="新实例C2当前读取位置为0，组保存值为0，下方为this.position实际赋值。" caption="教学示例：保存的0先建立位置对象，再经实际赋值成为新客户端的position。" seekTo={81.2} chapter="restore" />
 
-| P0动作 | 读取位置 | 已提交恢复位置 | 应用处理情况 |
-|---|---:|---:|---|
-| 开始前 | 0 | 0 | 尚未处理 |
-| 读到E01 | 1 | 0 | E01尚未处理 |
-| 处理E01并提交下一条 | 1 | 1 | E01已处理 |
-| 读到E03 | 2 | 1 | E03尚未处理 |
-| 处理E03并提交下一条 | 2 | 2 | 两条已处理 |
+接下来AbstractFetch构造FetchRequest.PartitionData，起点实参就是当前position.offset。这个字段刚被装成0，下一请求便从0读。Broker再次读取仍保留的同一文件范围，E01又返回；记录身份、offset和内容都没变，没有额外生成一条业务事件。
 
-本例显式设置`enable.auto.commit=false`、`max.poll.records=1`，所以可以把每次返回一条记录的变化拆开观察。后一个参数限制每次`poll`返回多少条，不等于Broker底层每次只传输一条。实际程序若一次返回多条，应按实际批次和各分区的处理结果决定提交位置，不能提前提交尚未处理的后续记录。
+<SourceQuote sourceId="A1" supports="下一条Fetch请求实际使用客户端position.offset字段作为分区读取起点。" />
 
-业务完成与Kafka进度提交也不是一个原子操作。若应用已经完成业务，却在提交下一条位置前退出，恢复后仍可能再次拿到这条事件。消费幂等需要另外设计；本片没有把积分数据库、邮件等外部副作用与Kafka进度绑定成一个事务。
+<Figure src="/video-studio/episodes/kafka-log-replay/article/03-fetch-parameter.jpg" alt="客户端position0作为Fetch起点0，原日志E01未删除，下方突出实际请求实参。" caption="教学示例：下一Fetch起点直接取当前position.offset，恢复出的0进入读取请求。" seekTo={93.333333333} chapter="restore" />
 
-## 停组回退再重读 {#replay}
+## 提交与保留改变什么 {#boundary}
 
-先看独立消费组。积分组在P0也有自己的恢复位置，仍可从0读取E01、E03，再提交到2。积分组前进，不会改变通知组的位置；它拿到的是同一日志的记录，不会把这些记录消耗掉。
+回到“C1刚读到E01、position=1、committed=0”的同一状态，只改变一个条件：退出前成功提交下一恢复位置1。新实例就装回1，Fetch1不再返回offset0的E01，而日志中E01本身仍存在。提交的位置不是“最后完成的那条记录”，也不是数据库或通知业务完成的证明。
 
-如果通知组自己也想重放，需要改变自己的恢复起点。本例选择管理命令重置已提交位置，步骤是：先停止通知组全部实例，确认组已没有活跃成员；只把通知组P0的恢复位置由2改回0；最后重新启动通知组。
+主动seek到旧位置同样可以改变当前消费者的读取起点，但不会自动把消费组committed一起提交；进程再次退出时，两者仍要分别考虑。本文把这项API用法留作补充，视频主线只用重启初始化说明旧值怎样实际进入Fetch。
 
-<SourceQuote sourceId="R3" supports="通过消费组管理工具重置位置之前，需要先让消费者实例处于inactive状态，不能一边保持组内实例活跃一边按此操作重置。" translation="也要先确认消费者实例处于非活跃状态。" />
+重读必须以原日志仍保留为前提。示例先形成含E01的旧封闭段与新活动段，采用delete清理、关闭分层存储，并满足相应保留与高水位等条件。清理移除旧段后，日志起点推进到1；再请求0已经早于保留范围，源码会抛越界错误。把客户端或组进度改回0不能重新制造已清掉的字节。
 
-全部实例包括空闲的N3。没有分区可读，不等于它已退出消费组；只停止负责P0的N1还不够。本例整组停用期间没有一个仍在运行的读取位置，图中只保留已提交的恢复点。
+<SourceQuote sourceId="R4" supports="请求offset小于日志保留起点时实际抛OffsetOutOfRangeException；位点值不能代替已清理的原数据。" />
 
-下面是按Kafka 4.4.0工具语法写出的示例命令，使用示例地址，本文没有实际运行：
+<Figure src="/video-studio/episodes/kafka-log-replay/article/04-retention-boundary.jpg" alt="原E01旧段已清理，日志起点1，客户端和组值虽仍为0也无法读取旧字节。" caption="教学示例：旧封闭段清理后日志起点为1，请求0已越过保留边界。" seekTo={134.7} chapter="boundary" />
 
-```bash
-# 先停掉notify组全部实例，确认该组已无活跃成员。
-# 先预览：这里只选orders的0号分区。
-bin/kafka-consumer-groups.sh \
-  --bootstrap-server broker.example:9092 \
-  --group notify --topic orders:0 \
-  --reset-offsets --to-offset 0 --dry-run
+日志段内部还会借助稀疏offset索引找到不大于目标的近邻位置，再向前定位目标批次；它服务于“offset如何找到文件范围”，不是每条记录都占一个索引项。完整实现见LogSegment.translateOffset与OffsetIndex.lookup，视频不展开整套索引算法。时间保留也按段及条件处理，不是每条记录到某一秒就必然单独删除。
 
-# 核对预览范围与目标位置后，才执行。
-bin/kafka-consumer-groups.sh \
-  --bootstrap-server broker.example:9092 \
-  --group notify --topic orders:0 \
-  --reset-offsets --to-offset 0 --execute
-```
-
-`--dry-run`只显示计划，不改变已提交位置；`--execute`才执行。`--group notify`限定消费组，`--topic orders:0`进一步限定P0，因此P1的恢复位置仍是2，积分组的位置也都保持不变。这里使用CLI修改已提交位置，不是在活跃实例内部调用`seek`；两种机制不能混成同一个动作。
-
-<Figure src="/video-studio/episodes/kafka-log-replay/article/02-reset.jpg" alt="通知组三个实例全部停用，读取位置不存在，仅notify/P0已提交位置从2回到0，P1与积分组保持2，原日志保留" caption="教学示例：整组停用后，仅回退通知组P0的恢复起点，不改P1、积分组或日志。" seekTo={96.66666666666667} chapter="replay" />
-
-重新启动后，通知组的P0拥有者从保存的位置0恢复，再次读到E01和E03。事件ID、订单ID和offset都与原记录相同，不是重新生产了两笔订单。
-
-<Figure src="/video-studio/episodes/kafka-log-replay/article/03-replay.jpg" alt="通知组重启后从位置0再次读取原E01和E03，同一事件ID与offset保持，读取和已提交位置都到2" caption="教学示例：重新读到的仍是原日志里的两条事件，不是生产了新的订单。" seekTo={108.36666666666666} chapter="replay" />
-
-可重读不等于业务可以安全重做。若应用重放时再次发送通知或增加积分，真实副作用可能重复；应用仍需按业务要求控制去重、幂等或重放用途。本例只验证读取与位置变化，没有执行这些外部业务。
-
-## 可重读的边界 {#boundary}
-
-重放需要旧记录仍然可用。最后换一个条件：P0的位置0、1位于同一个旧日志段中，这个段已经封闭；后来它满足`delete`保留策略的清理条件，并且整段清理已完成。旧记录此时就不在可读日志里了。
-
-<SourceQuote sourceId="R4" supports="日志保留清理以段文件为单位，本例因此删除包含位置0、1的整个旧段，而不是按消费者逐条读取结果删除。" translation="保留清理始终以文件为单位进行。" />
-
-<Figure src="/video-studio/episodes/kafka-log-replay/article/04-retention.jpg" alt="包含P0位置0和1的旧封闭日志段已清理，E01和E03不再可读，最早可读位置为2" caption="教学示例：旧日志段已按条件清理，恢复位置不能重建已删除记录。" seekTo={119.06666666666666} chapter="boundary" />
-
-本例清理后，P0最早可用位置是2，日志末端也是2，暂时没有新记录。offset不会重新编号成0、1；恢复点也不能凭空重建已删除内容。即使再请求管理工具重置到0，该版本工具也会把低于最早可用位置的请求调整到当前起点2，而不是找回旧事件。
-
-这不是“某条消息到时便立刻消失”的逐条倒计时模型。保留条件、日志段滚动、清理调度与文件删除延迟都会影响实际时点；本片只展示旧封闭段已经满足条件、且清理已完成的结果。也不需要等所有消费组都读完才允许保留清理，落后的消费者同样可能失去旧数据。
-
-本例固定本地日志、`cleanup.policy=delete`、`remote.storage.enable=false`、`retention.ms=604800000`、`retention.bytes=-1`，先在记录仍保留时重放，再说明已清理后的边界。这些数值用于明确示例条件，不是通用容量建议，也不涉及分层存储或压缩主题的完整行为。
-
-另一个容易混淆的开关是`auto.offset.reset=earliest`：只有没有有效初始位置，或原位置已超出可用范围等需要重设的情况，客户端才按该策略选取可用起点。它不会覆盖正常有效的已提交位置，因此仅修改earliest不能让通知组从有效位置2主动回到0；更不能恢复已经删除的记录。
-
-这段讲解固定传统消费组和`group.protocol=classic`，只呈现选择好的稳定分配。读取位置的快照属于当前分区拥有者的客户端内存，不能当成Broker另外持久保存了一份“组级读取位置”。offset也不保证在所有Kafka场景中连续；本例专门选择两个连续普通记录，以突出读取、提交与恢复的关系。
-
-同一份可执行教学模型核对了读取位置和提交位置分别推进、另一组独立、活跃成员阻止重置、dry-run不修改、仅P0回退、重启重读相同记录，以及旧段清理后的边界。没有启动真实Kafka集群或执行管理命令，检查通过只说明这个有限模型内部一致。
-
-最初的问题由两部分共同回答：日志保留原消息，恢复位置决定从哪里继续。保留记录仍在，调整位置便能重新读取；旧记录已按策略清理，回退位置也无法把它们找回来。
+这次解释的核心是三个所有者之间的执行关系：日志保留原字节；position决定当前请求起点；committed决定重启初始化会装回什么。记录是否能重读，同时取决于恢复位置与日志保留范围。
 
 ## 参考资料
 
-以下均为Apache Kafka官方4.4.0资料，本轮核验日期为2026-10-30（北京时间）。文档未见明确公开个人署名，采用机构署名；视频片尾只显示原题与机构。
+下列原题保留官方固定提交的**源码文件名**，机构为Apache Kafka，版本4.4.0；本轮复读日期2026-10-30。恢复链原文在本会话较早完整获取后按SHA复用，存储读取/保留实现本轮新获取；检索与复读身份分开记录，不把模型说成产品实测。
 
-1. Apache Kafka：[Introduction](https://kafka.apache.org/44/getting-started/introduction/)。支持消费不删除与记录保留。[固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)。
-2. Apache Kafka：[Design](https://kafka.apache.org/44/design/design/)。支持消费位置、恢复与再次读取。[固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)。
-3. Apache Kafka：[Basic Kafka Operations](https://kafka.apache.org/44/operations/basic-kafka-operations/)。支持消费组重置前提及预览、执行的区别。[固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/operations/basic-kafka-operations.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/operations/basic-kafka-operations.md)。
-4. Apache Kafka：[Topic Configs](https://kafka.apache.org/44/configuration/topic-configs/)。支持日志段保留与清理配置。[固定提交文档入口](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/topic-configs.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/topic-configs.md)。配置正文同时核对同提交[TopicConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/config/TopicConfig.java#L35-L89)。
+- [ConsumerUtils.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerUtils.java)：从保存值构造读取位置。
+- [SubscriptionState.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/SubscriptionState.java)：实际位置赋值与验证状态。
+- [LogSegment.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/LogSegment.java)：按offset定位并返回文件字节切片。
+- [UnifiedLog.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java)：保留范围与旧段清理。
+- [AbstractFetch.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java)：当前读取位置进入Fetch实参。
+- [CompletedFetch.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java)：返回记录后的下一offset计算。
 
-两种位置与“提交下一条”交叉核对了[KafkaConsumer.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L72-L89)及其[手动提交说明](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L286-L288)。组inactive的检查见[ConsumerGroupCommand.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/tools/src/main/java/org/apache/kafka/tools/consumer/group/ConsumerGroupCommand.java#L631-L681)；分区范围和越界调整见[GroupOffsetsResetter.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/tools/src/main/java/org/apache/kafka/tools/GroupOffsetsResetter.java#L150-L172)。本轮实读的是官方固定提交文件，不把生成配置页面入口当成已经读取完整HTML正文。
+本轮完整实读的原始字节入口：[ConsumerUtils.java 原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerUtils.java)、[SubscriptionState.java 原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/SubscriptionState.java)、[LogSegment.java 原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/LogSegment.java)、[UnifiedLog.java 原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java)、[AbstractFetch.java 原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java)、[CompletedFetch.java 原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java)。
+
+
+本轮另有隔离Kafka 4.4.0/RF1运行记录，使用显式assign(P0)排除动态重平衡：已保存0后poll得到offset0，同时position=1而committed=0；关闭重开后再次读0；提交1再重开则读取offset1的后续E03。它直接支持“读取位置与已提交恢复值分离，恢复值决定新实例起点”，不代表本片通知业务、存储切片格式、retention清理或动态消费组已实测。[实际运行原始stdout](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-10/mq-source-depth-remake/runtime/runs/run-20261030T120117.612545Z/position.stdout.txt)。

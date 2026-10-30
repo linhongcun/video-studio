@@ -1,90 +1,103 @@
 ---
 title: '多个消费者：分工处理，还是每人一份？'
-summary: '通知与积分都需要每条订单事件，放在同一个消费组却各少一半。用两个分区、四条事件，看清Kafka的独立订阅与组内分工。'
+summary: '沿Kafka4.4.0经典消费组的范围分配，逐步算出分区归属表，再看结果怎样安装到消费者并决定Fetch请求。'
 chapters:
-  - { id: problem, title: 为什么各少一半 }
-  - { id: separate, title: 不同组各读一份 }
-  - { id: scale, title: 同组实例怎样分工 }
-  - { id: boundary, title: 结论与条件 }
-related: [message-queue, observer-pattern]
+  - { id: problem, title: 先看问题与输入 }
+  - { id: assignment, title: 分区归属表怎样算出 }
+  - { id: fetch, title: 安装列表后按表读取 }
+  - { id: independent, title: 另一个组为什么各得一份 }
+related: [message-queue, kafka-log-replay]
 ---
 
-## 为什么各少一半 {#problem}
+## 先看问题与输入 {#problem}
 
-四笔订单已提交。通知服务需要逐笔发出通知，积分服务需要逐笔处理积分，所以两项业务都需要收到完整的四条订单事件。可两个服务各启动一个消费者后，通知只收到两条，积分也只收到两条。记录丢了吗？
+通知和积分都需要四条订单事件，通知服务内部又有三个实例。为什么有的实例只读一半，第三个一直空闲，积分服务却仍能独立读全？关键是**分区归属表怎样计算、安装，以及读取请求是否按这张表构造**。
 
-先看事件存在哪里。本例把四条虚构事件写进Kafka的同一个主题`orders`，主题包含两个分区：
+本例只有主题 `orders`，P0保存E01/订单7042与E03/7044，P1保存E02/7043与E04/7045；各分区位置分别是0、1。通知组 `notify` 有三名成员，积分组 `points` 只有S1，两组从仍保留的开头位置0读取。示例数字不是性能测量。
 
-| 分区 | 位置0 | 位置1 |
-|---|---|---|
-| P0 | E01：订单7042 | E03：订单7044 |
-| P1 | E02：订单7043 | E04：订单7045 |
+实现固定Apache Kafka/Java客户端4.4.0，显式选择 `group.protocol=classic` 和 `RangeAssignor`。相同订阅只包含 `orders`；不设置 `group.instance.id` 或 `client.rack`。这组前提使我们能直接跟随常规范围分配，不是在介绍所有Kafka协议或默认策略。
 
-事件ID用于贯穿追踪同一条事件。位置只在本分区内有意义，P0的位置0与P1的位置0是两条不同记录；表格也不表示两个分区之间存在全局顺序。
+N1/N2/N3是本轮成员编号 `member-01`、`member-02`、`member-03` 的教学短名。排序依据是成员编号，既不是启动先后，也不是 `client.id` 显示名。取N1为本轮组内分配者只是示例选择，和“排序最前所以必为leader”无关。
 
-两个服务各有一个消费者，负责订阅读取这些事件。问题在于：它们使用了相同的`group.id`，因此属于同一个消费组。对于本例的传统消费组，Kafka按分区把工作分给组内实例，而不是让每个实例都读到所有记录。
+<span id="scale"></span>
 
-在画面采用的稳定分配中，通知实例N1负责P0，收到E01、E03；积分实例S1负责P1，收到E02、E04。组内合计读到了全部四条，但任何一项业务都没得到它需要的完整集合。这是消费组划分不符合业务需求，不能从“各少两条”就认定Kafka丢失了记录。
+## 分区归属表怎样算出 {#assignment}
 
-<SourceQuote sourceId="R2" supports="本例传统消费组在稳定分配状态下，每个分区在每个订阅组内由一个消费者读取，组内实例据此分工。" translation="主题分成多个全序分区；每个分区在每个订阅消费组内，在任一时刻由一个消费者消费。" />
+在经典组中，协调者按group.id聚合同组成员。成功入组后，本轮组内leader取得成员订阅信息，**由这个消费者客户端调用所选分配器计算**。协调者在Broker侧协调组状态，但不会按消息逐条轮流决定推给谁。
 
-<Figure src="/video-studio/episodes/kafka-consumer-groups/article/01-shared.jpg" alt="同组中通知N1只收到P0的E01和E03，积分S1只收到P1的E02和E04；源日志保留四条" caption="教学示例：同组合计读到四条，但通知和积分各自都只收到一半。" seekTo={43.46666666666667} chapter="problem" />
+`ConsumerCoordinator.onLeaderElected`把本组订阅与分区元数据交给分配器。Range先将分区按编号排序，将无静态身份的成员按member.id排序，并为所有成员创建空归属列表。然后逐主题计算：
 
-这里展示的是一组合法的分配结果。具体哪个实例得到哪个分区可以变化；只要通知和积分仍在同一个组内分工，就不能据此保证两项业务各自收到所有事件。
+| 输入 | 值 |
+|---|---|
+| 按编号排列的分区 | P0、P1 |
+| 按成员编号排列的成员 | N1、N2、N3 |
+| 每人的基础份额，2除以3取整数商 | 0 |
+| 剩余分区，2除以3的余数 | 2 |
 
-## 不同组各读一份 {#separate}
+<SourceQuote sourceId="R1" supports="这行实际执行代码说明每人基础份额来自分区数除以本组订阅该主题的成员数，采用整数除法。" />
 
-保持相同的四条记录，把两项业务拆成两个独立消费组：通知使用`notify`，积分使用`points`。为了比较读取归属，重新从两个分区的开头开始；这是一组重置后的教学对照，不是让真实业务把已做过的操作再做一遍。
+`maxAssignable`在基础份额上，给仍有余数时的当前成员多一个名额。`assignRanges`按排序扫描未分配集合，取允许的数量；`onAssigned`写入成员列表、减少余数，并移除已分配的分区标识：
 
-通知组只有N1一个实例，因此P0、P1都分给它。N1读完这两个分区，得到E01、E02、E03、E04。积分组也只有S1一个实例，同样读这两个分区，也得到完整的四条。
+1. N1可取一个，得到P0；待分配集合只剩P1，余数从2变1。
+2. N2可取一个，得到P1；待分配集合清空，余数从1变0。
+3. 没有剩余分区，循环结束，N3保留初始化的空列表。
 
-两个组各自维护消费进度。通知读过某条记录，不会把积分组的进度一起推进，也不会把那条源记录从日志中移走。独立组遍历的是同一份保留日志，不需要为了新增订阅者，把源事件另存成第二份日志。
+移出的是**尚未分配的分区候选标识**，不是把日志内的消息搬走。如果改成三个分区和三名成员，这个策略将算出每人一个，第三名就不再空闲。多主题时Range会按每个主题分别算，不保证所有主题合起来的全局工作量完全平均。
 
-<SourceQuote sourceId="R1" supports="消费不会因为记录被读过就将它删除；在记录仍保留且起始位置适当的条件下，另一个组可以再读取它。" translation="一个主题内的事件可按需要反复读取；与传统消息系统不同，事件不会因为已经消费就被删除。" />
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/01-assignment-table.jpg" alt="两次分配后，P0归N1、P1归N2；待分配集合为空，N3列表保持空。" caption="教学示例：两次分配后，P0归N1、P1归N2；待分配集合为空，N3列表保持空。" seekTo={86.066666667} chapter="assignment" />
 
-<Figure src="/video-studio/episodes/kafka-consumer-groups/article/02-separate.jpg" alt="通知组和积分组各有一个实例，均从两个分区收到完整的E01到E04，源记录保持原位" caption="教学示例：各用独立消费组后，两种业务分别读取完整的事件集合。" seekTo={74.4} chapter="separate" />
+算完的整张表经SyncGroup交回协调者。成功处理后，协调者为每名成员存下其assignment，并在各成员响应中带回对应列表。
 
-“各读一份”描述本例各组收到完整的事件集合。它没有保证两个组同时读到、同时处理完，也没有保证邮件、积分等业务效果恰好发生一次。
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/02-member-responses.jpg" alt="协调者为N1、N2、N3分别带回各自的分区列表。" caption="教学示例：协调者为N1、N2、N3分别带回各自的分区列表。" seekTo={97.500000000} chapter="assignment" />
 
-## 同组实例怎样分工 {#scale}
+<SourceQuote sourceId="R4" supports="协调者返回的是当前成员自己的assignment；这一行不是向组内所有人广播整张消息日志。" />
 
-接着仍用相同输入，从开头作另一组对照：通知业务需要扩展处理能力，于是在`notify`组内增加通知实例N2；积分组保持不变。
+## 安装列表后按表读取 {#fetch}
 
-等待分配稳定后，本例让N1负责P0，N2负责P1。N1收到E01、E03，N2收到E02、E04。两个通知实例是同一业务的分工者，组内合计仍是四条，并没有变成每个实例各收到四条。
+消费者取得自己的返回列表后，会反序列化、校验与当前订阅是否匹配，再调用 `subscriptions.assignFromSubscribed(assignedPartitions)`。`SubscriptionState`将这些分区安装为本地assignment状态，连同每分区读取位置等状态继续维护。
 
-积分组独立存在，S1仍能读取P0、P1，收到完整四条。通知组成员数量的变化，不会把积分组变成与它共同分担的另一个实例。
+<SourceQuote sourceId="R2" supports="这条真实调用把解析出的分区列表交给本地订阅状态，连接了协调结果和之后的读取路径。" />
 
-| 安排 | 通知业务收到什么 | 积分业务收到什么 |
-|---|---|---|
-| 两项业务误放同组 | N1：E01、E03 | S1：E02、E04 |
-| 两项业务各用独立组 | N1：完整四条 | S1：完整四条 |
-| 通知组增加实例 | N1：E01、E03；N2：E02、E04 | S1：仍完整四条 |
+正常客户端准备Fetch时，先从assignment中枚举可读取分区，再过滤暂停、无有效读取位置或已有待交付缓存等情况。`AbstractFetch.prepareFetchRequests`取得这些分区与各自位置，找到目标节点，并逐项加入请求。
 
-<Figure src="/video-studio/episodes/kafka-consumer-groups/article/03-scaled.jpg" alt="通知组中N1读取P0的两条，N2读取P1的两条，积分组S1仍独立读取全部四条" caption="教学示例：通知组内两个实例分工2加2条，积分组仍能独立读取四条。" seekTo={98.53333333333333} chapter="scale" />
+<SourceQuote sourceId="R3" supports="Fetch准备先取得可读取且尚无缓冲数据的分区集合，再沿这一集合构造请求；本例的集合来源是已安装的assignment。" />
 
-对于本例两个分区的传统组，组内同时负责这些分区的实例最多两个；增加第三个实例不会凭空增加第三个分区。这只是分区分工的上限，实际处理速度还可能受业务代码、数据库或其他下游限制。本片没有做吞吐量实验，也不作性能倍数承诺。
+在本例位置已经就绪、未暂停且节点可用的前提下，N1的本地列表只有P0，所以其请求填入P0；N2填入P1。N3的列表为空，这条数据读取路径就没有分区可填，但这不表示N3没有心跳、管理请求或任何网络流量。
 
-## 结论与条件 {#boundary}
+Broker按收到的分区请求返回数据。这里解释的是正常客户端如何准备请求，并不是说分区归属表本身就是Broker逐请求强制执行的安全权限，也不是业务恰好一次保证。成员变化后的完整重平衡、失败恢复和其他分配策略不在本片展开。
 
-决定收到归属的关键，是业务需要怎样的订阅关系：需要各自完整读取的业务，使用不同消费组；同一业务的多个实例，放在组内按分区分工。分区属于哪个实例可以重新分配，组作为逻辑订阅者的职责仍然存在。
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/03-assignment-fetch.jpg" alt="N1装入P0列表，按P0起点0准备请求并收到P0两条记录；原日志保留。" caption="教学示例：N1装入P0列表，按P0起点0准备请求并收到P0两条记录；原日志保留。" seekTo={109.600000000} chapter="fetch" />
 
-这组示例固定Apache Kafka 4.4.0与传统`KafkaConsumer`语义，显式选择`group.protocol=classic`，各实例都订阅`orders`，只呈现分配稳定后的结果。Share Groups允许不同的分区与记录共享方式，不能直接套用本文的分区独占规则。传统组的新协议`consumer`也不等于Share Groups，本例选择classic只是固定讲解条件。
+<span id="separate"></span>
 
-还要区分“另一个组能读取”与“新组总能读到全部历史”。本例的必要前提是：
+## 另一个组为什么各得一份 {#independent}
 
-- 每一组对照都从没有有效已提交位置的新组开始，`auto.offset.reset=earliest`选择最早可用位置；本例最早位置正好是0。
-- 四条记录全程仍在保留窗口内。示例设`cleanup.policy=delete`、`retention.ms=604800000`、`retention.bytes=-1`，没有在对照过程中删除记录。
-- 分区数量和输入保持相同，分区归属明确给定，读取原记录时保留源日志。
+积分服务用独立group.id，分配器只拿这个组的成员名单重新计算。两个分区、一个S1，基础份额为2、余数为0，所以它安装 `{P0,P1}` 并分别请求两个分区。这个结果不会撤销通知组三个人已经安装的归属。
 
-`earliest`不会覆盖一个正常有效的既有提交位置，也不能找回已经按策略删除的记录。“从开头”始终是从当前可用的最早位置开始，不是无限历史。消费进度提交、故障重读、业务去重和重平衡过程是另外的问题。
+两组有各自的读取/恢复进度。两组都从示例中仍保留的开头读取时，都能取得同样四条事件。通知组读过或提交进度不会删除日志；历史数据能否取到，仍取决于保留范围与具体起点，新组并非无条件取得全部历史。
 
-本片的四条事件、分区归属与各实例收到集合来自同一份确定性教学模型。模型逐条核对了组内唯一归属、组间完整集合及扩实例前后的结果；这不是实际Kafka Broker实验，也没有执行邮件或积分数据库副作用。画面中的“收到”只代表读取结果，业务完成仍需应用自行处理。
+本轮保留了真实源码执行与有限教学模型的独立记录：算法调用实验检验官方Range实现的具体分配结果；图中步骤按相同输入更新候选和归属表。两者不冒充完整Kafka集群、JoinGroup/SyncGroup/Fetch端到端运行。实际执行范围和命令在本修订研究记录中分别声明。
+
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/04-two-groups.jpg" alt="通知组按成员分工，积分组独立读到四条事件；同一份日志记录仍保留。" caption="教学示例：通知组按成员分工，积分组独立读到四条事件；同一份日志记录仍保留。" seekTo={147.733333333} chapter="independent" />
+
+<span id="boundary"></span>
+
+## 小结
+
+不同消费组各算自己的分区归属表；同组成员安装各自负责的分区列表。正常客户端再按列表准备读取请求，才形成了“组间各读一份、组内按分区分工”的结果。分区数限制、排序与份额都来自本例具体协议和策略，不能省略前提推广到所有Kafka消费方式。
 
 ## 参考资料
 
-以下均由Apache Kafka维护，版本固定为4.4.0，核验日期为2026-10-30（北京时间）；未见明确公开个人署名，使用机构署名。视频片尾保留文档原题与机构，完整来源如下。
+本轮核验日期2026-10-30，以下均为Apache Kafka官方4.4.0固定提交源码原始文件名；机构为Apache Kafka，无明确单一个人署名。完整原文、执行行与条件保留在制作目录的研究和源码映射中。
 
-1. Apache Kafka：[Introduction](https://kafka.apache.org/44/getting-started/introduction/)。支持事件、主题、分区与消费后仍保留记录的基础关系。[本轮实读固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)。
-2. Apache Kafka：[Design](https://kafka.apache.org/44/design/design/)。支持传统消费组的分区分工，以及与Share Groups的边界。[本轮实读固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)。
+- [RangeAssignor.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/RangeAssignor.java) — Apache Kafka；Apache Kafka 4.4.0 / 1156b2752aaa28eafc0b4c4d387e63356793268d。对应实现范围：TopicAssignmentState constructor, line249。
+- [ConsumerCoordinator.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java) — Apache Kafka；Apache Kafka 4.4.0 / 1156b2752aaa28eafc0b4c4d387e63356793268d。对应实现范围：onJoinComplete, line465。
+- [AbstractFetch.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java) — Apache Kafka；Apache Kafka 4.4.0 / 1156b2752aaa28eafc0b4c4d387e63356793268d。对应实现范围：prepareFetchRequests, line432。
+- [GroupMetadataManager.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/group-coordinator/src/main/java/org/apache/kafka/coordinator/group/GroupMetadataManager.java) — Apache Kafka；Apache Kafka 4.4.0 / 1156b2752aaa28eafc0b4c4d387e63356793268d。对应实现范围：propagateAssignment, line7962。
 
-消费组身份、逻辑订阅与成员变化同时对照了同版本[KafkaConsumer.java的Consumer Groups and Topic Subscriptions](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L94-L131)。`group.protocol`与`auto.offset.reset`的选择条件核对了同版本[ConsumerConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/ConsumerConfig.java#L118-L190)。本轮实际读取的是官方固定提交的原始文件，没有将配置文档的生成页入口冒称为已读取全部HTML正文。
+固定提交原始源码字节入口：
+
+- [RangeAssignor.java（原始文件）](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/RangeAssignor.java)。
+- [ConsumerCoordinator.java（原始文件）](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java)。
+- [AbstractFetch.java（原始文件）](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java)。
+- [GroupMetadataManager.java（原始文件）](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/group-coordinator/src/main/java/org/apache/kafka/coordinator/group/GroupMetadataManager.java)。

@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "createdAtUTC": "2026-10-30T12:51:27.975634+00:00",
+  "episode": "kafka-log-replay",
+  "inputs": {
+    "bodySHA256": "c668dec619e14a8790cfc6fca20dca6c4e1c17b8ae50f482c749fad836fb7c3e",
+    "referencesSHA256": "3c835490509e74ce202d00eadcfaebdc817a2ce0cf1761a6328ca4219f5b6b35",
+    "generatorSHA256": "97695193572a4757b993fa5eeae5541c03f52a1d90f2e0f2577d26582d873a9b",
+    "themeSHA256": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
+    "fontSHA256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+    "boldFontSHA256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb",
+    "secondsPerPage": 5
+  },
+  "body": "/workspace/video-studio/episodes-codex/kafka-log-replay/revisions/source-depth-v2/remotion/out/body.mp4",
+  "references": "/workspace/video-studio/episodes-codex/kafka-log-replay/revisions/source-depth-v2/references.json",
+  "output": "/workspace/video-studio/episodes-codex/kafka-log-replay/revisions/source-depth-v2/video.mp4",
+  "outputSHA256": "e481482f13c5ad13a7b8a47938831749c1fb82f6b59e1dd4f0030f74f1bfd4c5",
+  "bodyFrames": 4602,
+  "finalVideoFrames": 4752,
+  "fps": "30",
+  "durationSeconds": 158.4,
+  "appendix": {
+    "kind": "references",
+    "from": 4602,
+    "durationInFrames": 150,
+    "framesPerPage": 150,
+    "sourceIds": [
+      "R1",
+      "R2",
+      "R3",
+      "R4"
+    ],
+    "pages": [
+      {
+        "file": "references-01.png",
+        "sha256": "995ee6adad860509b767246735d4ed45e2ae4e3abce29e38ad0e71b7b27a1245"
+      }
+    ]
+  },
+  "audio": "No audio packets added; original AAC stream ends at its original endpoint.",
+  "bodyProductionInputs": "Body was rendered from the Kafka MQ03 source-depth-v2 production manifest with this revision’s new narration and timing; full-range BT.601 body pictures are converted once to limited BT.709 before mixing. Previously published episode inputs are preserved outside this revision directory.",
+  "tools": {
+    "ffmpeg": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers",
+    "pillow": "12.3.0",
+    "fontFaceIndex": 2
+  },
+  "presentation": "title-author",
+  "layout": {
+    "kind": "title-author-single-column",
+    "maxItemsPerPage": 4,
+    "renderedFields": [
+      "title",
+      "credit"
+    ],
+    "quotesRendered": false
+  },
+  "bibliography": [
+    {
+      "id": "R1",
+      "title": "ConsumerUtils.java",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R2",
+      "title": "SubscriptionState.java",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R3",
+      "title": "LogSegment.java",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R4",
+      "title": "UnifiedLog.java",
+      "credit": "Apache Kafka"
+    }
+  ],
+  "sourceTitles": [
+    {
+      "id": "R1",
+      "title": "ConsumerUtils.java"
+    },
+    {
+      "id": "R2",
+      "title": "SubscriptionState.java"
+    },
+    {
+      "id": "R3",
+      "title": "LogSegment.java"
+    },
+    {
+      "id": "R4",
+      "title": "UnifiedLog.java"
+    }
+  ],
+  "quotations": [
+    {
+      "id": "R1",
+      "text": "final ConsumerMetadata.LeaderAndEpoch leaderAndEpoch = metadata.currentLeader(tp);\n                    final SubscriptionState.FetchPosition position = new SubscriptionState.FetchPosition(\n                            offsetAndMetadata.offset(), offsetAndMetadata.leaderEpoch(),\n                            leaderAndEpoch);\n\n                    subscriptions.seekUnvalidated(tp, position);",
+      "locator": "ConsumerUtils.java lines 205–210",
+      "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/sources/ConsumerUtils.java"
+    },
+    {
+      "id": "R2",
+      "text": "private void seekValidated(FetchPosition position) {\n            transitionState(FetchStates.FETCHING, () -> {\n                this.position = position;\n                this.resetStrategy = null;\n                this.nextRetryTimeMs = null;\n            });\n        }\n\n        private void seekUnvalidated(FetchPosition fetchPosition) {\n            seekValidated(fetchPosition);\n            validatePosition(fetchPosition);",
+      "locator": "SubscriptionState.java lines 1195–1205",
+      "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/sources/SubscriptionState.java"
+    },
+    {
+      "id": "R3",
+      "text": "// calculate the length of the message set to read based on whether or not they gave us a maxOffset\n        int fetchSize = Math.min((int) (maxPositionOpt.get() - startPosition), adjustedMaxSize);\n\n        return new FetchDataInfo(offsetMetadata, log.slice(startPosition, fetchSize),\n            adjustedMaxSize < startOffsetAndSize.size, Optional.empty());",
+      "locator": "LogSegment.java lines 458–462",
+      "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/sources/LogSegment.java"
+    },
+    {
+      "id": "R4",
+      "text": "private void checkLogStartOffset(long offset) {\n        if (offset < logStartOffset) {\n            throw new OffsetOutOfRangeException(\"Received request for offset \" + offset + \" for partition \" + topicPartition() + \", \" +\n                    \"but we only have log segments starting from offset: \" + logStartOffset + \".\");\n        }",
+      "locator": "UnifiedLog.java lines 1646–1650",
+      "evidence": "episodes-codex/kafka-log-replay/revisions/source-depth-v2/sources/UnifiedLog.java"
+    }
+  ],
+  "dependencies": {
+    "oldEngine": "episodes-codex/_shared/append_references.py",
+    "oldEngineSHA256": "6688770d1221a115c9c1f591e3bffd14a6603d8c809c5b66f5e03e2fa4639f02",
+    "originalRenderer": "episodes-codex/_shared/append_references_original.py",
+    "originalRendererSHA256": "cacd1e138e3ccb030dc6d5aee9ca8c5ea3104edb802000780a015dee4acc3579",
+    "bibliographyRenderer": "episodes-codex/_shared/append_references_bibliography.py",
+    "bibliographyRendererSHA256": "fe2eb02aa15cb5fc1f39752bc34ecbb879459445721f9044da38ddf6e3fee70b",
+    "palette": "episodes-codex/_shared/kafka-covers/style-v1.json",
+    "paletteSHA256": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
+    "paletteAdapterLibrary": "episodes-codex/_shared/kafka-video/references.py",
+    "paletteAdapterLibrarySHA256": "7bd84a20c897d2890c26ca671f4d18b4e931d066e3298ea31337f16888274ba2",
+    "colorEncoding": {
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+    }
+  },
+  "colorEncoding": {
+    "pix_fmt": "yuv420p",
+    "color_range": "tv",
+    "color_space": "bt709",
+    "color_transfer": "bt709",
+    "color_primaries": "bt709"
+  }
+}

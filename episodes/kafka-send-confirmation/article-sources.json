@@ -5,28 +5,30 @@
     {
       "id": "A1",
       "organization": "Apache Kafka",
-      "title": "KafkaProducer",
+      "title": "ProducerStateEntry",
       "titleEvidence": {
-        "locator": "public class declaration; documented API/implementation class identifier",
-        "evidence": "episodes-codex/kafka-send-confirmation/sources/KafkaProducer.java"
+        "locator": "ProducerStateEntry.java class declaration line 34",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/ProducerStateEntry.java"
       },
-      "version": "Apache Kafka Java 4.4.0",
-      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java",
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/ProducerStateEntry.java",
       "supports": [
-        "producer幂等保证限定单个会话，应用用新producer会话重发同eventId不具备跨会话去重保证。"
+        "同一producerId的entry先比较epoch，再匹配完整first/last序号范围；近期缓存仅保留5个批次。"
       ],
+      "sections": "findDuplicateBatch128–136；addBatch88–103",
       "verification": {
         "status": "verified",
         "checkedAt": "2026-10-30",
-        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java",
+        "method": "Fresh fixed-commit official source HTTPS GET; actual focused execution paths read and mapped in implementation-map.json. Individual source class is used under its original declared symbol, not represented as a paper.",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/fetch-evidence.json",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/ProducerStateEntry.java",
         "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
-        "sha256": "ef8914cd6af41bc030eabc14a77d0625682796a19eae91f4990b30328aa45986",
-        "evidence": "episodes-codex/kafka-send-confirmation/sources/source-evidence.json"
+        "sha256": "8c72a984922de2fef0bf227ad3ddd3618953f22121084df3b7cb643d6fa54efe"
       },
       "quotation": {
-        "text": "Finally, the producer can only guarantee idempotence for messages sent within a single session.",
-        "locator": "class Javadoc line182",
-        "evidence": "episodes-codex/kafka-send-confirmation/sources/KafkaProducer.java"
+        "text": "return batch.producerEpoch() != producerEpoch ? Optional.empty() : batchWithSequenceRange(batch.baseSequence(), batch.lastSequence());",
+        "locator": "ProducerStateEntry.java line 129",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/ProducerStateEntry.java"
       }
     },
     {
@@ -34,26 +36,57 @@
       "organization": "Apache Kafka",
       "title": "ProducerBatch",
       "titleEvidence": {
-        "locator": "public class declaration; documented API/implementation class identifier",
-        "evidence": "episodes-codex/kafka-send-confirmation/sources/ProducerBatch.java"
+        "locator": "ProducerBatch.java class declaration line 60",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/ProducerBatch.java"
       },
-      "version": "Apache Kafka Java 4.4.0",
+      "version": "Apache Kafka 4.4.0",
       "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/ProducerBatch.java",
       "supports": [
-        "在途批次可先过期成为FAILED而Broker侧成功，直接支持最终发送失败但日志可能已存在的情景。"
+        "一次终态CAS触发完成结果、回调与Future等待释放；失败不被迟到成功翻转。"
       ],
+      "sections": "done281–313；completeFutureAndFireCallbacks316–342",
       "verification": {
         "status": "verified",
         "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official source HTTPS GET; actual focused execution paths read and mapped in implementation-map.json. Individual source class is used under its original declared symbol, not represented as a paper.",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/fetch-evidence.json",
         "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/ProducerBatch.java",
         "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
-        "sha256": "010a78f5460d71ab9106b5d3690cedc9ebfa1718209219dc1abc8bf3fdc6a06f",
-        "evidence": "episodes-codex/kafka-send-confirmation/sources/source-evidence.json"
+        "sha256": "010a78f5460d71ab9106b5d3690cedc9ebfa1718209219dc1abc8bf3fdc6a06f"
       },
       "quotation": {
-        "text": "An inflight batch expires before a response from the broker is received. The batch's final state is set to FAILED. But it could succeed on the broker and second time around batch.done() may try to set SUCCEEDED final state.",
-        "locator": "done() Javadoc lines265–267",
-        "evidence": "episodes-codex/kafka-send-confirmation/sources/javadoc-excerpts.json"
+        "text": "Final state, once set, is immutable.",
+        "locator": "ProducerBatch.java line 263",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/ProducerBatch.java"
+      }
+    },
+    {
+      "id": "A3",
+      "organization": "Apache Kafka",
+      "title": "ProducerAppendInfo",
+      "titleEvidence": {
+        "locator": "ProducerAppendInfo.java class declaration line 47",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/ProducerAppendInfo.java"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/ProducerAppendInfo.java",
+      "supports": [
+        "未命中重复仍校验生产者代次与序号规则，有效新批才可追加。"
+      ],
+      "sections": "checkSequence156–193；appendDataBatch223–232",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official source HTTPS GET; actual focused execution paths read and mapped in implementation-map.json. Individual source class is used under its original declared symbol, not represented as a paper.",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/fetch-evidence.json",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/ProducerAppendInfo.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "eef60827eca17608ca6909b52e26b14f011a968b1b208b14c9fe07c5d1f3df80"
+      },
+      "quotation": {
+        "text": "if (!(currentEntry.producerEpoch() == RecordBatch.NO_PRODUCER_EPOCH || inSequence(currentLastSeq, appendFirstSeq))) {",
+        "locator": "ProducerAppendInfo.java line 188",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/ProducerAppendInfo.java"
       }
     }
   ]

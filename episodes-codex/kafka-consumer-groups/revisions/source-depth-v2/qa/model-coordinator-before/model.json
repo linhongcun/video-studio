@@ -1,0 +1,3655 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-consumer-groups",
+  "kind": "finite-teaching-model-not-broker-experiment",
+  "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "conditions": {
+    "group.protocol": "classic",
+    "partition.assignment.strategy": "RangeAssignor",
+    "group.instance.id": null,
+    "client.rack": null,
+    "subscription": [
+      "orders"
+    ],
+    "positions": "valid starting offset0; unpaused; no delivery buffer; node available",
+    "memberAliases": {
+      "N1": "member-01",
+      "N2": "member-02",
+      "N3": "member-03",
+      "S1": "member-s1"
+    },
+    "leaderChoice": "N1 chosen for this example independently of Range member sorting",
+    "retention": "all four records retained throughout"
+  },
+  "partitions": [
+    {
+      "id": "P0",
+      "records": [
+        {
+          "eventId": "E01",
+          "orderId": "7042",
+          "offset": 0
+        },
+        {
+          "eventId": "E03",
+          "orderId": "7044",
+          "offset": 1
+        }
+      ]
+    },
+    {
+      "id": "P1",
+      "records": [
+        {
+          "eventId": "E02",
+          "orderId": "7043",
+          "offset": 0
+        },
+        {
+          "eventId": "E04",
+          "orderId": "7045",
+          "offset": 1
+        }
+      ]
+    }
+  ],
+  "timeline": [
+    {
+      "id": "initial",
+      "label": "同一日志，通知组与积分组尚未完成本次分配",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": false,
+          "assignments": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "N1": null,
+            "N2": null,
+            "N3": null
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": []
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "not-joined",
+        "group": null,
+        "leader": null,
+        "subscriptions": [],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [],
+        "sortedPartitions": [],
+        "base": null,
+        "remainder": null,
+        "unassigned": [],
+        "activeMember": null
+      }
+    },
+    {
+      "id": "notify-joined",
+      "label": "协调者收集同组订阅，N1取得完整本组名单",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": false,
+          "assignments": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "N1": null,
+            "N2": null,
+            "N3": null
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": []
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [],
+        "sortedPartitions": [],
+        "base": null,
+        "remainder": null,
+        "unassigned": [],
+        "activeMember": null
+      }
+    },
+    {
+      "id": "notify-inputs",
+      "label": "组内分配者拿到分区元数据与订阅列表",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": false,
+          "assignments": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "N1": null,
+            "N2": null,
+            "N3": null
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": []
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": null,
+        "remainder": null,
+        "unassigned": [
+          "P0",
+          "P1"
+        ],
+        "activeMember": null
+      }
+    },
+    {
+      "id": "notify-divided",
+      "label": "分区和成员排序，整数商0，余数2",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": false,
+          "assignments": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "N1": null,
+            "N2": null,
+            "N3": null
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": []
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 2,
+        "unassigned": [
+          "P0",
+          "P1"
+        ],
+        "activeMember": null
+      }
+    },
+    {
+      "id": "notify-assigned-n1",
+      "label": "N1取得P0，候选剩P1，余数1",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": false,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [],
+            "N3": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "N1": null,
+            "N2": null,
+            "N3": null
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": []
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 1,
+        "unassigned": [
+          "P1"
+        ],
+        "activeMember": "N1"
+      }
+    },
+    {
+      "id": "notify-assigned-n2",
+      "label": "N2取得P1，候选为空，N3仍空",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "N1": null,
+            "N2": null,
+            "N3": null
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": []
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "N2"
+      }
+    },
+    {
+      "id": "notify-sync-table",
+      "label": "完整归属表交回协调者",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "N1": null,
+            "N2": null,
+            "N3": null
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": []
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "sync-table",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": true
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "N2"
+      }
+    },
+    {
+      "id": "notify-responses",
+      "label": "各自的返回列表已形成，尚未当成本地安装状态",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": null,
+            "N2": null,
+            "N3": null
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": []
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "responses-ready",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": true
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "N2"
+      }
+    },
+    {
+      "id": "notify-installed",
+      "label": "消费者安装自己的分区列表，N3安装空列表",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": []
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "responses-ready",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": true
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "N2"
+      }
+    },
+    {
+      "id": "notify-fetch-n1",
+      "label": "N1从本地列表取P0，形成P0起点0请求",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [],
+            "N2": [],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "responses-ready",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": true
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "N2"
+      }
+    },
+    {
+      "id": "notify-received-n1",
+      "label": "N1按请求取得E01/E03，原日志保留",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "responses-ready",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": true
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "N2"
+      }
+    },
+    {
+      "id": "notify-fetch-n2",
+      "label": "N2只形成P1请求",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "N2",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "responses-ready",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": true
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "N2"
+      }
+    },
+    {
+      "id": "notify-received-n2",
+      "label": "N2收到E02/E04，N3列表空且无分区Fetch",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [
+              {
+                "eventId": "E02",
+                "orderId": "7043",
+                "offset": 0
+              },
+              {
+                "eventId": "E04",
+                "orderId": "7045",
+                "offset": 1
+              }
+            ],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "N2",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "responses-ready",
+        "group": "notify",
+        "leader": "N1",
+        "subscriptions": [
+          "N3:orders",
+          "N1:orders",
+          "N2:orders"
+        ],
+        "receivedWholeTable": true
+      },
+      "calculation": {
+        "group": "notify",
+        "inputMembers": [
+          "N3",
+          "N1",
+          "N2"
+        ],
+        "sortedMembers": [
+          "N1",
+          "N2",
+          "N3"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 0,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "N2"
+      }
+    },
+    {
+      "id": "points-inputs",
+      "label": "另一个group只用自己的S1名单计算",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [
+              {
+                "eventId": "E02",
+                "orderId": "7043",
+                "offset": 0
+              },
+              {
+                "eventId": "E04",
+                "orderId": "7045",
+                "offset": 1
+              }
+            ],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "N2",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": false,
+          "assignments": {
+            "S1": []
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "points",
+        "leader": "S1",
+        "subscriptions": [
+          "S1:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "points",
+        "inputMembers": [
+          "S1"
+        ],
+        "sortedMembers": [
+          "S1"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": null,
+        "remainder": null,
+        "unassigned": [
+          "P0",
+          "P1"
+        ],
+        "activeMember": null
+      }
+    },
+    {
+      "id": "points-calculated",
+      "label": "2除以1，S1得到P0和P1",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [
+              {
+                "eventId": "E02",
+                "orderId": "7043",
+                "offset": 0
+              },
+              {
+                "eventId": "E04",
+                "orderId": "7045",
+                "offset": 1
+              }
+            ],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "N2",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": true,
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "syncResponses": {},
+          "localAssignments": {
+            "S1": null
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "points",
+        "leader": "S1",
+        "subscriptions": [
+          "S1:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "points",
+        "inputMembers": [
+          "S1"
+        ],
+        "sortedMembers": [
+          "S1"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 2,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "S1"
+      }
+    },
+    {
+      "id": "points-installed",
+      "label": "S1安装两个分区，notify归属不变",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [
+              {
+                "eventId": "E02",
+                "orderId": "7043",
+                "offset": 0
+              },
+              {
+                "eventId": "E04",
+                "orderId": "7045",
+                "offset": 1
+              }
+            ],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "N2",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": true,
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "syncResponses": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "localAssignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": []
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "points",
+        "leader": "S1",
+        "subscriptions": [
+          "S1:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "points",
+        "inputMembers": [
+          "S1"
+        ],
+        "sortedMembers": [
+          "S1"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 2,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "S1"
+      }
+    },
+    {
+      "id": "points-fetch-p0",
+      "label": "S1请求P0",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [
+              {
+                "eventId": "E02",
+                "orderId": "7043",
+                "offset": 0
+              },
+              {
+                "eventId": "E04",
+                "orderId": "7045",
+                "offset": 1
+              }
+            ],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "N2",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": true,
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "syncResponses": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "localAssignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "received": {
+            "S1": []
+          },
+          "requests": [
+            {
+              "member": "S1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            }
+          ]
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "points",
+        "leader": "S1",
+        "subscriptions": [
+          "S1:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "points",
+        "inputMembers": [
+          "S1"
+        ],
+        "sortedMembers": [
+          "S1"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 2,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "S1"
+      }
+    },
+    {
+      "id": "points-received-p0",
+      "label": "S1独立收到P0两条",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [
+              {
+                "eventId": "E02",
+                "orderId": "7043",
+                "offset": 0
+              },
+              {
+                "eventId": "E04",
+                "orderId": "7045",
+                "offset": 1
+              }
+            ],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "N2",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": true,
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "syncResponses": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "localAssignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "received": {
+            "S1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ]
+          },
+          "requests": [
+            {
+              "member": "S1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            }
+          ]
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "points",
+        "leader": "S1",
+        "subscriptions": [
+          "S1:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "points",
+        "inputMembers": [
+          "S1"
+        ],
+        "sortedMembers": [
+          "S1"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 2,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "S1"
+      }
+    },
+    {
+      "id": "points-fetch-p1",
+      "label": "S1另请求P1",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [
+              {
+                "eventId": "E02",
+                "orderId": "7043",
+                "offset": 0
+              },
+              {
+                "eventId": "E04",
+                "orderId": "7045",
+                "offset": 1
+              }
+            ],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "N2",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": true,
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "syncResponses": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "localAssignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "received": {
+            "S1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ]
+          },
+          "requests": [
+            {
+              "member": "S1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "S1",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "points",
+        "leader": "S1",
+        "subscriptions": [
+          "S1:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "points",
+        "inputMembers": [
+          "S1"
+        ],
+        "sortedMembers": [
+          "S1"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 2,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "S1"
+      }
+    },
+    {
+      "id": "points-received-all",
+      "label": "两个group合计各得四条，N3保持空",
+      "groups": {
+        "notify": {
+          "id": "notify",
+          "members": [
+            {
+              "id": "N1",
+              "memberId": "member-01",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N2",
+              "memberId": "member-02",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            },
+            {
+              "id": "N3",
+              "memberId": "member-03",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "N1",
+          "computed": true,
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "syncResponses": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "localAssignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "received": {
+            "N1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              }
+            ],
+            "N2": [
+              {
+                "eventId": "E02",
+                "orderId": "7043",
+                "offset": 0
+              },
+              {
+                "eventId": "E04",
+                "orderId": "7045",
+                "offset": 1
+              }
+            ],
+            "N3": []
+          },
+          "requests": [
+            {
+              "member": "N1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "N2",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        },
+        "points": {
+          "id": "points",
+          "members": [
+            {
+              "id": "S1",
+              "memberId": "member-s1",
+              "subscription": [
+                "orders"
+              ],
+              "active": true
+            }
+          ],
+          "leader": "S1",
+          "computed": true,
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "syncResponses": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "localAssignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "received": {
+            "S1": [
+              {
+                "eventId": "E01",
+                "orderId": "7042",
+                "offset": 0
+              },
+              {
+                "eventId": "E03",
+                "orderId": "7044",
+                "offset": 1
+              },
+              {
+                "eventId": "E02",
+                "orderId": "7043",
+                "offset": 0
+              },
+              {
+                "eventId": "E04",
+                "orderId": "7045",
+                "offset": 1
+              }
+            ]
+          },
+          "requests": [
+            {
+              "member": "S1",
+              "partitions": [
+                "P0"
+              ],
+              "startOffsets": {
+                "P0": 0
+              }
+            },
+            {
+              "member": "S1",
+              "partitions": [
+                "P1"
+              ],
+              "startOffsets": {
+                "P1": 0
+              }
+            }
+          ]
+        }
+      },
+      "partitions": [
+        {
+          "id": "P0",
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ]
+        },
+        {
+          "id": "P1",
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ]
+        }
+      ],
+      "coordinator": {
+        "phase": "joined",
+        "group": "points",
+        "leader": "S1",
+        "subscriptions": [
+          "S1:orders"
+        ],
+        "receivedWholeTable": false
+      },
+      "calculation": {
+        "group": "points",
+        "inputMembers": [
+          "S1"
+        ],
+        "sortedMembers": [
+          "S1"
+        ],
+        "sortedPartitions": [
+          "P0",
+          "P1"
+        ],
+        "base": 2,
+        "remainder": 0,
+        "unassigned": [],
+        "activeMember": "S1"
+      }
+    }
+  ],
+  "crossCheckedAgainst": [
+    {
+      "kind": "actual-unmodified-Kafka-class-output",
+      "path": "experiment/actual.stdout.txt",
+      "sha256": "ccf289610493a02621d1957b057a942de0500f221606d241cc45891cd9a280f6",
+      "scope": "Range assignment and SubscriptionState eligibility, not full Broker/protocol execution"
+    }
+  ]
+}

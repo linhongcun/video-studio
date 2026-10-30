@@ -1,0 +1,1138 @@
+{
+  "schemaVersion": 1,
+  "episode": "message-queue",
+  "revision": "source-depth-v2",
+  "kind": "source-backed-finite-teaching-model-not-Kafka-runtime",
+  "eventData": {
+    "eventId": "E01",
+    "orderId": "7042",
+    "task": "notify-order"
+  },
+  "encodedValue": {
+    "text": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+    "encoding": "UTF-8",
+    "hex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+    "byteCount": 56,
+    "note": "Actual model value bytes only; not the entire Kafka binary record/batch/log format."
+  },
+  "conditions": {
+    "version": "Kafka/Java4.4.0",
+    "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "group.protocol": "classic",
+    "topic": "orders",
+    "partitionCount": 1,
+    "explicitPartition": "P0",
+    "compression.type": "none",
+    "recordFormat": "v2",
+    "serializer": "StringSerializer UTF-8",
+    "deserializer": "StringDeserializer UTF-8 then application JSON parse",
+    "acks": "all",
+    "enable.idempotence": true,
+    "replicationFactor": 1,
+    "min.insync.replicas": 1,
+    "currentISRCount": 1,
+    "enable.auto.commit": false,
+    "max.poll.records": 1,
+    "initialPosition": 0,
+    "retention": "source record retained throughout this finite example",
+    "websitePolicy": "reply accepted only after successful send; query business store separately",
+    "observerEventLabels": "eventId/orderId on log cards are decoded observer trace labels, not Broker interpretation or business dispatch",
+    "positionMeaning": "client in-memory next-read offset, not business status or persisted recovery offset",
+    "businessImplementation": "fictional app state machine separate from Kafka; notification provider not called",
+    "fileWrites": "source code establishes log file append; no per-record fsync guarantee or binary-layout emulation"
+  },
+  "timeline": [
+    {
+      "id": "initial",
+      "label": "提交前，日志为空，消费者暂停",
+      "event": {
+        "kind": "initial"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "editing",
+        "accepted": false,
+        "queryResult": null
+      },
+      "producer": {
+        "event": null,
+        "valueText": null,
+        "valueHex": null,
+        "buffered": false,
+        "requestSent": false,
+        "confirmed": false
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "none",
+        "response": "none",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "submitted",
+      "label": "网站收到订单提交，要留下通知任务",
+      "event": {
+        "kind": "submit"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "submitting",
+        "accepted": false,
+        "queryResult": null
+      },
+      "producer": {
+        "event": null,
+        "valueText": null,
+        "valueHex": null,
+        "buffered": false,
+        "requestSent": false,
+        "confirmed": false
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "none",
+        "response": "none",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "event-created",
+      "label": "同一E01是一份任务数据，不是可执行通知程序",
+      "event": {
+        "kind": "event-created"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "submitting",
+        "accepted": false,
+        "queryResult": null
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": null,
+        "valueHex": null,
+        "buffered": false,
+        "requestSent": false,
+        "confirmed": false
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "none",
+        "response": "none",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "value-encoded",
+      "label": "字段先成为文本，再编码为UTF-8字节",
+      "event": {
+        "kind": "serialize",
+        "payloadByteCount": 56
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "submitting",
+        "accepted": false,
+        "queryResult": null
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": false,
+        "confirmed": false
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "none",
+        "response": "none",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "producer-buffered",
+      "label": "已编码记录进入生产者本地待发送缓冲",
+      "event": {
+        "kind": "buffer"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "submitting",
+        "accepted": false,
+        "queryResult": null
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": true,
+        "requestSent": false,
+        "confirmed": false
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "none",
+        "response": "none",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "produce-sent",
+      "label": "后台向固定P0发送已编码记录",
+      "event": {
+        "kind": "produce-send"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "submitting",
+        "accepted": false,
+        "queryResult": null
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": false
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "in-flight",
+        "response": "none",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "log-appended",
+      "label": "从本分区下一编号0追加记录，并将下一编号改1",
+      "event": {
+        "kind": "append",
+        "assignedOffset": 0
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "submitting",
+        "accepted": false,
+        "queryResult": null
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": false
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "none",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "write-confirmed",
+      "label": "本例按固定配置收到发送成功",
+      "event": {
+        "kind": "confirm"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "submitting",
+        "accepted": false,
+        "queryResult": null
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "page-accepted",
+      "label": "页面已受理；通知程序暂停且业务仍待处理",
+      "event": {
+        "kind": "accepted"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": null
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "paused-waiting",
+      "label": "消费者未执行，查询业务仍为等待",
+      "event": {
+        "kind": "query"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": "waiting"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": true,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "none",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "consumer-resumed",
+      "label": "恢复消费者，准备从本地读取位置0拉取",
+      "event": {
+        "kind": "resume"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": "waiting"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": false,
+        "position": 0,
+        "fetchRequestedOffset": null,
+        "responseValueHex": null,
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "ready",
+        "returnRecord": "none"
+      }
+    },
+    {
+      "id": "record-fetched",
+      "label": "Fetch携P0/0，Kafka返回原记录的值字节",
+      "event": {
+        "kind": "fetch",
+        "requestedOffset": 0
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": "waiting"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": false,
+        "position": 0,
+        "fetchRequestedOffset": 0,
+        "responseValueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "decodedText": null,
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "sent",
+        "returnRecord": "received"
+      }
+    },
+    {
+      "id": "record-decoded",
+      "label": "客户端只解码回字符串，尚未交应用解析字段",
+      "event": {
+        "kind": "deserialize"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": "waiting"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": false,
+        "position": 0,
+        "fetchRequestedOffset": 0,
+        "responseValueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "decodedText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "sent",
+        "returnRecord": "received"
+      }
+    },
+    {
+      "id": "client-position-advanced",
+      "label": "客户端写下一读取位置1，尚未poll返回",
+      "event": {
+        "kind": "position-update"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": "waiting"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": false,
+        "position": 1,
+        "fetchRequestedOffset": 0,
+        "responseValueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "decodedText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "applicationEvent": null,
+        "pollReturned": false
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "sent",
+        "returnRecord": "received"
+      }
+    },
+    {
+      "id": "record-delivered",
+      "label": "poll已把解码文本交给应用",
+      "event": {
+        "kind": "poll-return"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": "waiting"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": false,
+        "position": 1,
+        "fetchRequestedOffset": 0,
+        "responseValueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "decodedText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "applicationEvent": null,
+        "pollReturned": true
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "sent",
+        "returnRecord": "received"
+      }
+    },
+    {
+      "id": "decoded-position-advanced",
+      "label": "应用解析同一E01字段，读取位置早已为1",
+      "event": {
+        "kind": "application-parse"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": "waiting"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": false,
+        "position": 1,
+        "fetchRequestedOffset": 0,
+        "responseValueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "decodedText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "applicationEvent": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "pollReturned": true
+      },
+      "business": {
+        "status": "waiting",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "sent",
+        "returnRecord": "received"
+      }
+    },
+    {
+      "id": "business-running",
+      "label": "应用业务代码被另行调用，读取位置1不代表完成",
+      "event": {
+        "kind": "business-start"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": "waiting"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": false,
+        "position": 1,
+        "fetchRequestedOffset": 0,
+        "responseValueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "decodedText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "applicationEvent": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "pollReturned": true
+      },
+      "business": {
+        "status": "running",
+        "executedEventIds": [],
+        "savedResults": {}
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "sent",
+        "returnRecord": "received"
+      }
+    },
+    {
+      "id": "business-completed",
+      "label": "通知模拟处理完成，单独保存E01业务结果",
+      "event": {
+        "kind": "business-complete"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "accepted",
+        "accepted": true,
+        "queryResult": "waiting"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": false,
+        "position": 1,
+        "fetchRequestedOffset": 0,
+        "responseValueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "decodedText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "applicationEvent": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "pollReturned": true
+      },
+      "business": {
+        "status": "completed",
+        "executedEventIds": [
+          "E01"
+        ],
+        "savedResults": {
+          "E01": "completed"
+        }
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "sent",
+        "returnRecord": "received"
+      }
+    },
+    {
+      "id": "page-completed",
+      "label": "页面查询业务结果后才显示通知完成",
+      "event": {
+        "kind": "query"
+      },
+      "website": {
+        "orderId": "7042",
+        "page": "completed",
+        "accepted": true,
+        "queryResult": "completed"
+      },
+      "producer": {
+        "event": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "valueText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "buffered": false,
+        "requestSent": true,
+        "confirmed": true
+      },
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "offset": 0,
+            "valueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+            "valueByteCount": 56
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "paused": false,
+        "position": 1,
+        "fetchRequestedOffset": 0,
+        "responseValueHex": "7b226576656e744964223a22453031222c226f726465724964223a2237303432222c227461736b223a226e6f746966792d6f72646572227d",
+        "decodedText": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"task\":\"notify-order\"}",
+        "applicationEvent": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "task": "notify-order"
+        },
+        "pollReturned": true
+      },
+      "business": {
+        "status": "completed",
+        "executedEventIds": [
+          "E01"
+        ],
+        "savedResults": {
+          "E01": "completed"
+        }
+      },
+      "network": {
+        "send": "received",
+        "response": "received",
+        "fetch": "sent",
+        "returnRecord": "received"
+      }
+    }
+  ]
+}

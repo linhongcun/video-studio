@@ -12,6 +12,12 @@ import subprocess
 ROOT = next(p for p in Path(__file__).resolve().parents if (p / 'AGENTS.md').is_file())
 HERE = Path(__file__).resolve().parent
 SLUGS = ['message-queue', 'kafka-consumer-groups', 'kafka-log-replay', 'kafka-send-confirmation']
+SUMMARIES = {
+    'message-queue': '沿同一订单事件展开编码、日志追加、按位置拉取与业务执行，理解已受理为什么还没完成。',
+    'kafka-consumer-groups': '从分区归属表的计算、安装与读取请求，解释同组怎样分工，不同组为什么各读一份。',
+    'kafka-log-replay': '跟踪保存的恢复值怎样装回内存并成为读取请求的起点，解释重启重读与日志保留边界。',
+    'kafka-send-confirmation': '展开批次缓冲、后台在途状态、结果完成与Broker判重，分清调用返回、发送证据和业务完成。',
+}
 
 
 def read(p):
@@ -20,6 +26,22 @@ def read(p):
 
 def sha(p):
     return hashlib.sha256(p.read_bytes()).hexdigest()
+
+
+def derived_article(slug, source):
+    plan = read(HERE / 'article-anchor-plan.json')['episodes'][slug]
+    assert sha(source) == plan['frozenSourceSHA256']
+    text = source.read_text()
+    grouped = {}
+    for old_id, heading in plan['aliasesBeforeHeading'].items():
+        grouped.setdefault(heading, []).append(old_id)
+    for heading, old_ids in grouped.items():
+        assert text.count(heading) == 1
+        aliases = ''.join(f'<span id="{old_id}"></span>\n' for old_id in old_ids)
+        text = text.replace(heading, aliases + '\n' + heading, 1)
+    relative_figures = text.count('<Figure src="article/')
+    text = text.replace('<Figure src="article/', f'<Figure src="/video-studio/episodes/{slug}/article/')
+    return text, {**plan, 'relativeFigureSourcesExpanded': relative_figures}
 
 
 def install(slug, stamp, preflight_only=False):
@@ -66,6 +88,7 @@ def install(slug, stamp, preflight_only=False):
         relative = str((dest / name).relative_to(ROOT))
         assert subprocess.check_output(['git', 'hash-object', str(dest / name)], text=True, cwd=ROOT).strip() == baseline_blobs[relative], ('Cover differs from startup baseline', slug, name)
     assert all(source.is_file() for source in sources), ('Missing publication source', slug)
+    article, anchor_plan = derived_article(slug, d / 'article.mdx')
     if preflight_only:
         return {'slug': slug, 'preflight': 'passed'}
     installed = {}
@@ -74,12 +97,16 @@ def install(slug, stamp, preflight_only=False):
         rel = source.relative_to(d)
         target = dest / rel
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(source, target)
-        assert sha(target) == sha(source)
+        if str(rel) == 'article.mdx':
+            target.write_text(article)
+        else:
+            shutil.copyfile(source, target)
+            assert sha(target) == sha(source)
         installed[str(rel)] = sha(target)
     current.update(updatedAt=stamp, sourcePath=str((d / 'remotion').relative_to(ROOT)),
                    targetDuration=result['seconds'], burnedInCaptions=True,
                    **result['publicationMetadata'])
+    current.update(summary=SUMMARIES[slug], description=SUMMARIES[slug])
     # Source owners may supply concise, content-specific descriptions without changing identity.
     for key in ['summary', 'description']:
         if isinstance(config.get(key), str) and config[key].strip():
@@ -90,6 +117,11 @@ def install(slug, stamp, preflight_only=False):
         assert sha(dest / name) == expected, ('Cover changed', slug, name)
     return {'slug': slug, 'production': str(d.relative_to(ROOT)), 'files': installed,
             'preservedCovers': protected_covers, 'videoSHA256': actual,
+            'articleDerivation': {'frozenSourceSHA256': anchor_plan['frozenSourceSHA256'],
+                                  'publishedSHA256': installed['article.mdx'],
+                                  'change': 'Legacy anchor spans and equivalent same-episode Figure source prefix normalization only; prose, quotes, Figure times/captions and actual image files unchanged',
+                                  'relativeFigureSourcesExpanded': anchor_plan['relativeFigureSourcesExpanded'],
+                                  'aliases': anchor_plan['aliasesBeforeHeading']},
             'frames': receipt['finalVideoFrames'], 'seconds': result['seconds']}
 
 

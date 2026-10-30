@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "kafka-send-confirmation",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Apache Kafka",
+      "title": "KafkaProducer",
+      "titleEvidence": {
+        "locator": "KafkaProducer.java class declaration line 248",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/KafkaProducer.java"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java",
+      "supports": [
+        "序列化与分区选择先于入缓冲；doSend返回本批附加所得Future。"
+      ],
+      "sections": "doSend 1065–1126；本地编码异常1147–1150",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official source HTTPS GET; actual focused execution paths read and mapped in implementation-map.json. Individual source class is used under its original declared symbol, not represented as a paper.",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/fetch-evidence.json",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "ef8914cd6af41bc030eabc14a77d0625682796a19eae91f4990b30328aa45986"
+      },
+      "quotation": {
+        "text": "return result.future;",
+        "locator": "KafkaProducer.java line 1126",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/KafkaProducer.java"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Apache Kafka",
+      "title": "RecordAccumulator",
+      "titleEvidence": {
+        "locator": "RecordAccumulator.java class declaration line 71",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/RecordAccumulator.java"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/RecordAccumulator.java",
+      "supports": [
+        "分区Deque组织ProducerBatch；首次出队赋生产者身份与本分区序号，重试已赋序号的原批不重分。"
+      ],
+      "sections": "append319–355/428–436；drain924–982",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official source HTTPS GET; actual focused execution paths read and mapped in implementation-map.json. Individual source class is used under its original declared symbol, not represented as a paper.",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/fetch-evidence.json",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/RecordAccumulator.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "b4a5f292542c401938a5e8d92041ff364c28640c12cde02bf6fa9c28134314d3"
+      },
+      "quotation": {
+        "text": "Deque<ProducerBatch> dq = topicInfo.batches.computeIfAbsent(effectivePartition, k -> new ArrayDeque<>());",
+        "locator": "RecordAccumulator.java line 320",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/RecordAccumulator.java"
+      }
+    },
+    {
+      "id": "R3",
+      "organization": "Apache Kafka",
+      "title": "Sender",
+      "titleEvidence": {
+        "locator": "Sender.java class declaration line 79",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/Sender.java"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/Sender.java",
+      "supports": [
+        "Sender记录在途批次，保存请求上下文P0到原批次映射；响应完成原批，delivery到期失败。"
+      ],
+      "sections": "sendProducerData380–453；sendProduceRequest896–947；completeBatch691–763",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official source HTTPS GET; actual focused execution paths read and mapped in implementation-map.json. Individual source class is used under its original declared symbol, not represented as a paper.",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/fetch-evidence.json",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/Sender.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "b64fe44411db577b7a5ad84c9abf51694c8be127badc6cc95ddf52bf817640d7"
+      },
+      "quotation": {
+        "text": "addToInflightBatches(batches);",
+        "locator": "Sender.java line 419",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/Sender.java"
+      }
+    },
+    {
+      "id": "R4",
+      "organization": "Apache Kafka",
+      "title": "UnifiedLog",
+      "titleEvidence": {
+        "locator": "UnifiedLog.java class declaration line 105",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/UnifiedLog.java"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java",
+      "supports": [
+        "按producerId查本分区生产者状态并判断重复；重复直接复用原offset，正常新增才append并更新生产者状态。"
+      ],
+      "sections": "analyzeAndValidateProducerState1402–1421；append1255–1280",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official source HTTPS GET; actual focused execution paths read and mapped in implementation-map.json. Individual source class is used under its original declared symbol, not represented as a paper.",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/fetch-evidence.json",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "da11dd8363b3521306e9bc2338f6474947266d59e825173a8c9025d15d85de4f"
+      },
+      "quotation": {
+        "text": "Optional<ProducerStateEntry> maybeLastEntry = producerStateManager.lastEntry(batch.producerId());",
+        "locator": "UnifiedLog.java line 1416",
+        "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/UnifiedLog.java"
+      }
+    }
+  ],
+  "scope": "Four original source-class symbols read at fixed official Kafka4.4.0 commit; full implementation map and supplementary exact evidence stay in article/research. No individual public byline was identified; institutional credit is Apache Kafka."
+}
