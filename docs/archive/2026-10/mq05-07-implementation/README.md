@@ -1,30 +1,45 @@
 # MQ05–MQ07实现机制短片
 
-2026-10-30，北京时间。用户在前四期重制后肯定实现深度与可理解性的平衡，并授权继续数期。本批按题库顺序制作三期，固定源码、独立配音前审稿、最小运行和声音信号检查已完成，三期独立动态复核后已冻结并完成正式编码，实际成片与12幅JPEG已全部通过非作者复核，本地网页226项动作/66严格PTS和实际图审通过，正式构建55份媒体附录、54篇文章与日期/RSS检查通过；当前准备合并发布，线上核验尚未执行，不预记交付完成。
+2026-10-30开工，2026-10-31北京时间完成交付。三期正式视频、配套图文与封面已随[PR #447](https://github.com/linhongcun/video-studio/pull/447)合并`dcaafde2e30c7fde688e0744d45f2e4e1131c46e`，附注tag/[Release v0.97.0](https://github.com/linhongcun/video-studio/releases/tag/v0.97.0)发布后[Pages41100736996](https://github.com/linhongcun/video-studio/actions/runs/41100736996)成功。31次普通canonical完整GET及线上原生226动作/66严格PTS和实际图审通过；#313/#314/#315在完成线上验收后以completed关闭。系列现7/9，MQ08/MQ15未开工，原14项取消保持。仅GitHub与本站，无外部平台新发。
 
-| 选题 | 新身份 | 核心实现因果 |
-|---|---|---|
-| [MQ05 / #313](https://github.com/linhongcun/video-studio/issues/313) | EP45 / kafka-consumer-idempotency | 同一逻辑键的唯一约束仲裁，去重与积分同一本地事务 |
-| [MQ06 / #314](https://github.com/linhongcun/video-studio/issues/314) | EP46 / kafka-message-ordering | 同Key路由、分区日志与应用完成顺序的连接 |
-| [MQ07 / #315](https://github.com/linhongcun/video-studio/issues/315) | EP47 / kafka-message-backlog | 分区归属、受限业务步骤与按分区计算的积压变化 |
+| 已交付 | 制作issue | 最终帧数 / 时长（30fps） | 完整MP4 SHA-256 |
+|---|---|---|---|
+| [MQ05 / EP45 · 消费幂等](https://linhongcun.github.io/video-studio/episodes/kafka-consumer-idempotency/) | #313 | 5647 / 188.2333秒 | `5d14be81eed533acea8738e0c883b3c44b298789e74a53d1b7a24a0624f66328` |
+| [MQ06 / EP46 · 消息保序](https://linhongcun.github.io/video-studio/episodes/kafka-message-ordering/) | #314 | 5116 / 170.5333秒 | `6e05b178ce8f183e475d0f2aac260988b7f056cf2ddd27ae17188c95b6dca4d8` |
+| [MQ07 / EP47 · 消息积压](https://linhongcun.github.io/video-studio/episodes/kafka-message-backlog/) | #315 | 6208 / 206.9333秒 | `81781a4d0973c4e2ec1d90505e3f5d009c1c07eb10b664a5e7ec9497da111bcf` |
 
-每期独立建立对象与必要条件，同一事件贯穿推导，短代码服务因果，复杂支线放图文。固定Kafka/Java4.4.0 commit `1156b2752aaa28eafc0b4c4d387e63356793268d`；MQ05另核PostgreSQL18.0 commit `3d6a828938a5fa0444275d3d2f67b64ec3199eb7`。源码事实、有限模型、真实最小运行和媒体/站点检查分别留证，配音前独立审确切旁白版本。
+每片含150帧原题/机构资料列表，共12幅从正式成片精确整数帧导出的正文图与80句旁白。[媒体清单](media-summary.json)、[发布记录](publication.json)、[issue关闭回执](issues-completed.json)记录确切身份。创建时间保留2026-10-30T23:02:51+08:00，实质内容安装时间为10-31T01:26:41+08:00；首发元数据在真实发布工作流开始10-31T01:36:34+08:00写入，明确不冒充实际部署完成时刻。
 
-开工clean最新主干`f01411f7e2a2d1cef480cd0f6b73d4c29d7169f3`，分支`codex/mq05-07-implementation-20261030`。[基线](baseline.json)保护1348份既有发布Gitblob与9051份旧MQ冻结实际文件的SHA/mtime；仅新增三个发布目录，不覆盖旧片。新依赖按当前保留工程锁文件fresh安装，系统字体在[本批账本](font-environment.json)单独记录。
+用户在上轮四期重制后肯定实现深度与可理解性的平衡，本批据此继续三题；此反馈针对上轮表达，不追认为本批已获观看认可或已测量学习效果。每期独立建立对象与条件，同一事件贯穿“结构保存什么→何时判断→状态为何变化”，必要术语随动作引入，完整旁支留文章。
 
-原封面catalog与renderer已在旧冻结中，因此以[独立输入](../../../../episodes-codex/_shared/kafka-covers-mq05-07/README.md)扩展本批，沿原不可变Kafka风格，不修改旧目录或重生成旧封面。封面图、实际声音、时序、文章原文与图位均须在正式冻结前定稿。
+## 实现与运行的实际范围
 
-[编辑闸门](qa/editorial-matrix.json)记录14/14/12镜、28/28/24句的确切旁白与全稿SHA。三套正式封面已经9张实际JPEG独立审图、12字体压力布局与严格安装核对；MQ07初版缺少同组条件，已保留旧证据并定向补字，MQ05/06的18份SVG/PNG/JPG逐字节保持。字体账本另补封面数字实际使用的DejaVu Sans Bold，原四个字体文件及绑定不变。
+固定Kafka/Java4.4.0 commit `1156b2752aaa28eafc0b4c4d387e63356793268d`；MQ05另核PostgreSQL18.0 commit `3d6a828938a5fa0444275d3d2f67b64ec3199eb7`。确切旁白版本先过[独立编辑闸门](qa/editorial-matrix.json)才进入TTS；原题、署名、原文和永久定位留在各期sources、references及article-sources中。
 
-本批实际运行分别完成MQ05的89项、MQ06的12项、MQ07的20项断言，按各run的真实范围留证。MQ05为本地Kafka与PostgreSQL的恢复及并发事务；MQ06投影是实际Java调度，不执行支付；MQ07的稳定分配与独立单成员poll门控分开，不是吞吐benchmark。媒体、声音信号和逐镜动态仍须各自验收，不能用实验数量替代讲解质量。
+- MQ05：同一逻辑业务与E01竞争非空、立即唯一键；冲突先等待未决事务结局再重查，只有本次RETURNING新行才放行业务增量，登记与积分在同一本地事务提交或回滚。Kafka恢复只解释重读前提。真实运行89断言核对退出/重启、并发提交/回滚及目标更新失败；先查后写等错误分支是教学反例，不声称全部另跑过真实实验。
+- MQ06：沿同Key路由、分区缓冲/日志、客户端收集到应用交付，再对照异步晚写与按订单串行完成。真实运行12断言使用实际Kafka记录和Java状态投影，不执行支付/退款。源码一次收集两条的合法路径，与实测两次poll各一条再聚合的范围分别说明。
+- MQ07：两分区、十二同组成员按member.id排序形成两份非空与十份空列表；实际Fetch/poll之后仍要等待本例串行业务。真实运行20断言分别核稳定分配与独立单成员组的业务门控，不是十二成员通知接口benchmark。教学逐分区账目以明确流入/完成假设推导增长与十步排空，不把已拉取、提交lag或日志长度冒充业务完成数。
 
-最终声音为5497/4966/6058正文帧，共80句，身份和实际信号范围见[声音闸门](qa/voice-stage-final.json)。7个新增同文候选请求最终替换6句，原take/初始候选与失败信号报告保持；未做逐字ASR或全片实时人工语义听辨。初次MQ05装配缺userScope元数据被canonical拦截，补字段后复用同一声轨、words字节相同；封面元数据与MQ06本体图像的等价范围也另行留证，未为元数据错误重配声音。
+共121项真实运行断言，[运行记录](runtime/)与有限模型/媒体检查分别留证；临时业务服务已停止并清理。MQ07 C01…C12是排序后教学别名，不冒充实际client.id或加入次序。
 
-仅GitHub与本站。总览[#308](https://github.com/linhongcun/video-studio/issues/308)当前仍4/9已交付，本批3题制作中，MQ08/MQ15未开工，原14题取消保持；完成Release后部署、完整线上文件与原生交互核验，再关闭对应制作issue。既有用户正向反馈针对上轮当前表达，不追认为本批已获观看认可或学习效果测量。
+## 冻结与成片
 
+开工已从clean最新`origin/main`的`f01411f7e2a2d1cef480cd0f6b73d4c29d7169f3`建立制作分支；正式编码、发布及环境恢复后再次核对。[基线保护](baseline.json)中的1348份既有发布Gitblob和9051份旧冻结实际文件SHA/mtime均保持，三期新增218/253/189项冻结声明，共660项，所有声明路径均已提交且与core blob一致。默认入口完成正文、真实limitedBT709转换、混音与资料附录；5个实际字体文件及绑定单列[环境账本](font-environment.json)。
 
-正式编码为5647/5116/6208帧（各含150帧原题/机构资料列表），实际媒体身份见[媒体清单](media-summary.json)。三个新清单分别218/253/189项，共660项声明，逐期只读验证通过；编码后再次核对9051份旧冻结输入与1348份既有发布文件不变。新增QA bundle缓存明确忽略，源码、原始take、失败/候选记录与实际复核证据保留。
+[声音闸门](qa/voice-stage-final.json)绑定5497/4966/6058正文帧。7个新增同文候选请求最终替换6句，原take、初始声音和失败信号报告保持；未做逐字ASR或全片实时人工语义听辨。初次装配缺userScope被canonical拦截，补元数据后复用同一声轨；MQ05初次冻结缺substitutions说明，未产生清单或开始编码，补生产说明后重走闸门，失败日志保留。MQ06封面元数据修正的等价范围另留证，没有为元数据错误重配声音。
 
-最终12幅文章JPEG已由根代理逐张实际查看，记录在[额外图像复核](qa/root-final-jpegs.json)；每期仍由非作者分别核实际MP4和全部4张JPEG，不能用额外审图替代该闸门。本地安装先保持draft并用SHOW_DRAFTS预览，首发时间只在正式发布工作流开始时写入，实际发布以Release后成功部署与线上核验为准。
+各期非作者独立完成实际动态、最终MP4完整视频/AAC解码与精确抽帧、所有四张JPEG审图。MQ05标题完成态抢先在编码前修正，MQ07真实排序输入及SVG/圆形边角误报逐点实核；原源、失败观察、局部复用证明与短片保持，不扩大DOM规则豁免。根代理另实际查看12张JPEG、三片实际资料首帧及本地/线上各6张关键页面图。
 
-正式首发元数据在实际工作流开始时写入，预览媒体/图文/运行代码逐SHA不变，见[发布阶段记录](publication.json)。本地原生控件在暂停截图遮暗底部字幕、受控preload/load海报出现加载弧等观察均保留，不宣称清洁海报或暂停字幕完全无遮挡。
+原共享Kafka封面catalog/renderer已在旧冻结中，本批使用[独立封面输入](../../../../episodes-codex/_shared/kafka-covers-mq05-07/README.md)，保留原style-v1视觉。9张最终JPEG实审、12项字体压力布局通过；MQ07初版缺同组条件已定向修正并保留旧证据，MQ05/06原18份SVG/PNG/JPG逐字节不变。最终JPEG截图做真实tv709→pc601转换；默认8bit正文转换有已测的小幅舍入色差，状态色与对比清楚，不宣称与源PNG逐像素相等。
+
+## 网站与实际线上验收
+
+先安装为draft并SHOW_DRAFTS预览，三期各自保持无publishedAt/firstRelease；本地原生Chromium226动作/66严格实际PTS及图审通过后才整批准备正式首发。正式构建通过55份媒体附录、54篇文章/113原文/79正文图、55条日期及构建页/RSS核验；三期预览与正式发布媒体/文章字节一致。新期本次共22原文模块、12章与80条VTT。
+
+[31完整GET](online-verification.json)无Range、cachebuster、重试或TLS绕过，三支完整MP4、3海报、3VTT和12图的SHA均与已验收文件一致，并检查实际入口、引用原文/URL、图位回看、七课目录、首发RSS和真实Release。此为完整传输证据，浏览器helper的空verifiedHttpResponses不冒充下载核验。
+
+[线上原生验收](qa/online-site-accepted.json)每期均重新执行实际播放推进/暂停、章节/四图回放、原文悬停/点击或点按/键盘、出处滚动可达、资料与正文Fullscreen、原图导航及主题边界。图像由实际查看或逐文件SHA与已实看本地图完全相同后有界复用；1440/390及844×390为模拟视口，不是物理手机。受控preload/load后海报加载弧、暂停原生控件/渐变遮暗底部字幕、手机细字小与长引用内部滚动如实记录，不宣称清洁首载或暂停字幕完全无遮挡，也未隐藏控件。
+
+GitHub曾出现502/504读取失败以及run/suite/单项检查/部署状态不一致、时间回填异常，[原回执](qa/github-deployment-state-diagnosis/)保留；只对本批重复push任务发起取消，没有重复dispatch或取消他人任务。随后实际workflow与Pages成功，加上完整GET与原生线上检查确认交付；不把控制面滞后归因为源码错误或未经核实的服务事件。环境恢复后旧输入保护和660声明再次验证通过。额外Release附件上传通道Forbidden，实际0份附件；三支正式MP4在main与本站，不能称已上传Release附件。
+
+提交前使用不变canonical密钥规则并逐项审查5个确切SHA/行号绑定的公开源码标识符，无未解决匹配；不宣称原始扫描器直接无告警。生成bundle与node_modules不提交，实际source/take/失败记录及已审16段短片保留。冻结制作README保持当时身份，当前交付以本归档为准。
