@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "kafka-log-replay",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Apache Kafka",
+      "title": "Introduction",
+      "titleEvidence": {
+        "locator": "frontmatter line2",
+        "evidence": "episodes-codex/kafka-log-replay/sources/introduction.md"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://kafka.apache.org/44/getting-started/introduction/",
+      "supports": [
+        "消费者读取与提交进度不删除源日志，重放以记录仍保留为前提。"
+      ],
+      "sections": "Main Concepts and Terminology; line81",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh complete HTTPS GETs of official fixed-commit Apache Kafka source through configured proxy; default TLS verification. Canonical kafka.apache.org HTML was not fetched. Relevant original-title and mechanism/API/config/tool paragraphs read directly; not a claim of reading every unrelated section.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "4d1e964464348e8d529a7a76b95b60ec25498428e7aaf3f9d3889b9d07b7247e",
+        "evidence": "episodes-codex/kafka-log-replay/sources/source-evidence.json"
+      },
+      "quotation": {
+        "text": "Events in a topic can be read as often as needed-unlike traditional messaging systems, events are not deleted after consumption.",
+        "locator": "line81",
+        "evidence": "episodes-codex/kafka-log-replay/sources/introduction.md"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Apache Kafka",
+      "title": "Design",
+      "titleEvidence": {
+        "locator": "frontmatter line2",
+        "evidence": "episodes-codex/kafka-log-replay/sources/design.md"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://kafka.apache.org/44/design/design/",
+      "supports": [
+        "分区位置表示下一条读取的offset；读取位置与已提交恢复位置分开。",
+        "先处理再提交位置存在失败重读窗口；回退位置支持再次读取。"
+      ],
+      "sections": "The Consumer / Consumer Position; Message Delivery Semantics",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh complete HTTPS GETs of official fixed-commit Apache Kafka source through configured proxy; default TLS verification. Canonical kafka.apache.org HTML was not fetched. Relevant original-title and mechanism/API/config/tool paragraphs read directly; not a claim of reading every unrelated section.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "60410c9c0e3b9f031a5da5b7241b0114345fdec15c72c6908d9e89424b8c6e6c",
+        "evidence": "episodes-codex/kafka-log-replay/sources/source-evidence.json"
+      },
+      "quotation": {
+        "text": "This means that the position of a consumer in each partition is just a single integer, the offset of the next message to consume.",
+        "locator": "line157",
+        "evidence": "episodes-codex/kafka-log-replay/sources/design.md"
+      }
+    },
+    {
+      "id": "R3",
+      "organization": "Apache Kafka",
+      "title": "Basic Kafka Operations",
+      "titleEvidence": {
+        "locator": "frontmatter line2",
+        "evidence": "episodes-codex/kafka-log-replay/sources/basic-kafka-operations.md"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://kafka.apache.org/44/operations/basic-kafka-operations/",
+      "supports": [
+        "CLI重置消费组位置之前需要消费者实例inactive；dry-run和execute分别是预览与执行。",
+        "重置应限定消费组与主题/分区；只改变本例notify组P0。"
+      ],
+      "sections": "Managing consumer groups / resetting offsets; lines238–259",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh complete HTTPS GETs of official fixed-commit Apache Kafka source through configured proxy; default TLS verification. Canonical kafka.apache.org HTML was not fetched. Relevant original-title and mechanism/API/config/tool paragraphs read directly; not a claim of reading every unrelated section.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/operations/basic-kafka-operations.md",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "81b2b59617362660383f86e2089cfacea95d79ec9efda9c42584c93c214e7864",
+        "evidence": "episodes-codex/kafka-log-replay/sources/source-evidence.json"
+      },
+      "quotation": {
+        "text": "Also, first make sure that the consumer instances are inactive.",
+        "locator": "line238",
+        "evidence": "episodes-codex/kafka-log-replay/sources/basic-kafka-operations.md"
+      }
+    },
+    {
+      "id": "R4",
+      "organization": "Apache Kafka",
+      "title": "Topic Configs",
+      "titleEvidence": {
+        "locator": "frontmatter line2",
+        "evidence": "episodes-codex/kafka-log-replay/sources/topic-configs.md"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://kafka.apache.org/44/configuration/topic-configs/",
+      "supports": [
+        "保留清理按日志段文件，不是每读一条删除一条，也不承诺到点立刻逐条删除。",
+        "本地delete策略下旧封闭段满足保留条件并完成清理后，已删除记录不可通过位置回退恢复。"
+      ],
+      "sections": "segment.bytes / retention.ms / cleanup.policy, generated from TopicConfig.java",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh complete HTTPS GETs of official fixed-commit Apache Kafka source through configured proxy; default TLS verification. Canonical kafka.apache.org HTML was not fetched. Relevant original-title and mechanism/API/config/tool paragraphs read directly; not a claim of reading every unrelated section.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/topic-configs.md",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "721b47b922bec4321fd7210b9b4ab1a4f01dc3e4ab32fa5dc964a03b1745ce05",
+        "evidence": "episodes-codex/kafka-log-replay/sources/source-evidence.json"
+      },
+      "quotation": {
+        "text": "Retention and cleaning is always done a file at a time",
+        "locator": "SEGMENT_BYTES_DOC, line36",
+        "evidence": "episodes-codex/kafka-log-replay/sources/TopicConfig.java"
+      }
+    }
+  ],
+  "scope": "Four actual original official document titles and institutional credits, one five-second page. Topic Configs frontmatter is read directly; generated config content is cross-checked in same-commit TopicConfig.java. Position/commit semantics additionally cross-checked in KafkaConsumer.java; CLI partition selection and inactive/range behavior additionally cross-checked in ConsumerGroupCommand.java and GroupOffsetsResetter.java. No canonical HTML or real Broker execution is claimed."
+}

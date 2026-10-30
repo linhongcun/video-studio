@@ -1,0 +1,828 @@
+{
+  "meta": {
+    "title": "Kafka日志重放：消息读过了，为什么还能重读？",
+    "episode": 43,
+    "episodePart": "Kafka MQ03 · 日志重放",
+    "slug": "kafka-log-replay",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 3943,
+    "finalVideoFrames": 3943,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "kafka-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户授权继续制作下一期MQ视频，按现行issue选择MQ03/#311；GitHub站点持续交付，平台无本轮新发。",
+    "palette": {
+      "bg": "#211D1B",
+      "text": "#FFF1E8"
+    },
+    "sampleDataLabel": "教学模型 · 传统消费组 · 逐条poll · P0聚焦",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "schemaVersion": 1,
+      "generator": "episodes-codex/_shared/kafka-covers/render.py",
+      "style": "kafka-covers-v1",
+      "number": "MQ03",
+      "ep": 43,
+      "sourceTitle": "Kafka日志重放：消息读过了，为什么还能重读？",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "centerRegion": {
+            "x1": 315,
+            "x2": 1125
+          },
+          "bottom15Y": 918
+        }
+      },
+      "binding": "Cover outputs and full generator input SHA are recorded separately in cover-style.json. Body uses immutable style-v1, not the growing episode catalog."
+    },
+    "discussionQuestion": "为什么读取位置已经前进，恢复位置却还可能没有变？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes-codex/_shared/kafka-covers/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "problem",
+      "chapterId": "problem",
+      "title": "先看日志和进度",
+      "from": 0,
+      "durationInFrames": 1061,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "problem",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 303,
+          "narration": "通知服务已经读过这批订单，排查问题时，还想重新读取。消息明明读过了，Kafka为什么还能再给一遍？",
+          "subtitles": [
+            {
+              "text": "通知服务已经读过这批订单，排查问题时，还想重新读取。",
+              "from": 0,
+              "to": 171,
+              "duration": 172
+            },
+            {
+              "text": "消息明明读过了，Kafka为什么还能再给一遍？",
+              "from": 172,
+              "to": 302,
+              "duration": 131
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 161.92,
+              "localStart": 9.0,
+              "localEnd": 161.92
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 172.42,
+              "wavEnd": 282.2,
+              "localStart": 172.42,
+              "localEnd": 282.2
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              172
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 9.0,
+            "wavTo": 282.2,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "已读订单还想重放。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "已读订单还想重放。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "problem",
+          "visualType": "logs",
+          "from": 303,
+          "durationInFrames": 395,
+          "narration": "先看当时怎样读取：事件保存在分区日志里，每条都有自己的位置编号。这个示例有两个分区；接下来只跟随零号分区的两条，位置是零和一。",
+          "subtitles": [
+            {
+              "text": "先看当时怎样读取：事件保存在分区日志里，每条都有自己的位置编号。",
+              "from": 0,
+              "to": 193,
+              "duration": 194
+            },
+            {
+              "text": "这个示例有两个分区；接下来只跟随零号分区的两条，位置是零和一。",
+              "from": 194,
+              "to": 394,
+              "duration": 201
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-logs-1",
+              "wavStart": 303.2,
+              "wavEnd": 487.16,
+              "localStart": 0.19999999999998863,
+              "localEnd": 184.16000000000003
+            },
+            {
+              "id": "02-logs-2",
+              "wavStart": 497.66,
+              "wavEnd": 677.78,
+              "localStart": 194.66000000000003,
+              "localEnd": 374.78
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              194
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 303.2,
+            "wavTo": 677.78,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "记录在日志里的位置。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "记录在日志里的位置。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "problem",
+          "visualType": "groups",
+          "from": 698,
+          "durationInFrames": 363,
+          "narration": "通知和积分各用一个消费组，分别保存自己的消费进度。通知组三个实例分工两个分区，只能有两个负责读取；我们跟着零号分区的那个看。",
+          "subtitles": [
+            {
+              "text": "通知和积分各用一个消费组，分别保存自己的消费进度。",
+              "from": 0,
+              "to": 146,
+              "duration": 147
+            },
+            {
+              "text": "通知组三个实例分工两个分区，只能有两个负责读取；我们跟着零号分区的那个看。",
+              "from": 147,
+              "to": 362,
+              "duration": 216
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-groups-1",
+              "wavStart": 698.78,
+              "wavEnd": 834.83,
+              "localStart": 0.7799999999999727,
+              "localEnd": 136.83000000000004
+            },
+            {
+              "id": "03-groups-2",
+              "wavStart": 845.33,
+              "wavEnd": 1040.13,
+              "localStart": 147.33000000000004,
+              "localEnd": 342.1300000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              147
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 698.78,
+            "wavTo": 1040.13,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "消费组保存各自的进度。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "消费组保存各自的进度。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "position",
+      "chapterId": "position",
+      "title": "读取与恢复位置",
+      "from": 1061,
+      "durationInFrames": 1118,
+      "shots": [
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "position",
+          "visualType": "read",
+          "from": 1061,
+          "durationInFrames": 393,
+          "narration": "读到位置零这条后，读取位置已经走到一，表示下次准备读哪里。但应用还没处理，已提交的位置仍是零；读到，不等于已经完成。",
+          "subtitles": [
+            {
+              "text": "读到位置零这条后，读取位置已经走到一，表示下次准备读哪里。",
+              "from": 0,
+              "to": 187,
+              "duration": 188
+            },
+            {
+              "text": "但应用还没处理，已提交的位置仍是零；读到，不等于已经完成。",
+              "from": 188,
+              "to": 392,
+              "duration": 205
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-read-1",
+              "wavStart": 1061.13,
+              "wavEnd": 1239.49,
+              "localStart": 0.13000000000010914,
+              "localEnd": 178.49
+            },
+            {
+              "id": "04-read-2",
+              "wavStart": 1249.99,
+              "wavEnd": 1433.29,
+              "localStart": 188.99,
+              "localEnd": 372.28999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              188
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 1061.13,
+            "wavTo": 1433.29,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "读到不等于已完成。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "读到不等于已完成。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "position",
+          "visualType": "commit",
+          "from": 1454,
+          "durationInFrames": 353,
+          "narration": "应用处理成功后，再把下一条的位置一，提交为恢复起点。已提交的位置，记的是重新启动时从哪里继续，不是把日志里的记录删掉。",
+          "subtitles": [
+            {
+              "text": "应用处理成功后，再把下一条的位置一，提交为恢复起点。",
+              "from": 0,
+              "to": 143,
+              "duration": 144
+            },
+            {
+              "text": "已提交的位置，记的是重新启动时从哪里继续，不是把日志里的记录删掉。",
+              "from": 144,
+              "to": 352,
+              "duration": 209
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-commit-1",
+              "wavStart": 1454.29,
+              "wavEnd": 1588.27,
+              "localStart": 0.2899999999999636,
+              "localEnd": 134.26999999999998
+            },
+            {
+              "id": "05-commit-2",
+              "wavStart": 1598.77,
+              "wavEnd": 1786.25,
+              "localStart": 144.76999999999998,
+              "localEnd": 332.25
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              144
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 1454.29,
+            "wavTo": 1786.25,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "提交下一条的恢复位置。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "提交下一条的恢复位置。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "position",
+          "visualType": "retained",
+          "from": 1807,
+          "durationInFrames": 372,
+          "narration": "接着读位置一这条，处理后把恢复位置提交到二，这一段就读完了。你看，位置零和一的原记录都还在，读取和提交都没有把它们移走。",
+          "subtitles": [
+            {
+              "text": "接着读位置一这条，处理后把恢复位置提交到二，这一段就读完了。",
+              "from": 0,
+              "to": 178,
+              "duration": 179
+            },
+            {
+              "text": "你看，位置零和一的原记录都还在，读取和提交都没有把它们移走。",
+              "from": 179,
+              "to": 371,
+              "duration": 193
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-retained-1",
+              "wavStart": 1807.25,
+              "wavEnd": 1976.35,
+              "localStart": 0.25,
+              "localEnd": 169.3499999999999
+            },
+            {
+              "id": "06-retained-2",
+              "wavStart": 1986.85,
+              "wavEnd": 2158.1,
+              "localStart": 179.8499999999999,
+              "localEnd": 351.0999999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              179
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 1807.25,
+            "wavTo": 2158.1,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "读完仍然保留原记录。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "读完仍然保留原记录。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "replay",
+      "chapterId": "replay",
+      "title": "停组回退再重读",
+      "from": 2179,
+      "durationInFrames": 1081,
+      "shots": [
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "replay",
+          "visualType": "independent",
+          "from": 2179,
+          "durationInFrames": 327,
+          "narration": "积分组有自己的恢复位置，从零开始，还能读取相同的两条。它读到哪里，不会改动通知组的进度，也不会消耗掉原日志。",
+          "subtitles": [
+            {
+              "text": "积分组有自己的恢复位置，从零开始，还能读取相同的两条。",
+              "from": 0,
+              "to": 166,
+              "duration": 167
+            },
+            {
+              "text": "它读到哪里，不会改动通知组的进度，也不会消耗掉原日志。",
+              "from": 167,
+              "to": 326,
+              "duration": 160
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-independent-1",
+              "wavStart": 2179.1,
+              "wavEnd": 2335.76,
+              "localStart": 0.09999999999990905,
+              "localEnd": 156.76000000000022
+            },
+            {
+              "id": "07-independent-2",
+              "wavStart": 2346.26,
+              "wavEnd": 2485.76,
+              "localStart": 167.26000000000022,
+              "localEnd": 306.7600000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              167
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 2179.1,
+            "wavTo": 2485.76,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "另一组独立读取。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "另一组独立读取。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "replay",
+          "visualType": "reset",
+          "from": 2506,
+          "durationInFrames": 403,
+          "narration": "要重放，先停用通知组的所有实例，再把零号分区的恢复位置，从二改回零。一号分区和积分组的进度不变；回退的是这一个组、这一个分区。",
+          "subtitles": [
+            {
+              "text": "要重放，先停用通知组的所有实例，再把零号分区的恢复位置，从二改回零。",
+              "from": 0,
+              "to": 225,
+              "duration": 226
+            },
+            {
+              "text": "一号分区和积分组的进度不变；回退的是这一个组、这一个分区。",
+              "from": 226,
+              "to": 402,
+              "duration": 177
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-reset-1",
+              "wavStart": 2506.76,
+              "wavEnd": 2721.56,
+              "localStart": 0.7600000000002183,
+              "localEnd": 215.55999999999995
+            },
+            {
+              "id": "08-reset-2",
+              "wavStart": 2732.06,
+              "wavEnd": 2888.15,
+              "localStart": 226.05999999999995,
+              "localEnd": 382.1500000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              226
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 2506.76,
+            "wavTo": 2888.15,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "停用整组，只回退P0。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "停用整组，只回退P0。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "replay",
+          "visualType": "replay",
+          "from": 2909,
+          "durationInFrames": 351,
+          "narration": "重启通知组后，它按保存的位置零，重新读到刚才的两条订单事件。重放可能再次触发业务，重复效果还需要应用自行控制。",
+          "subtitles": [
+            {
+              "text": "重启通知组后，它按保存的位置零，重新读到刚才的两条订单事件。",
+              "from": 0,
+              "to": 173,
+              "duration": 174
+            },
+            {
+              "text": "重放可能再次触发业务，重复效果还需要应用自行控制。",
+              "from": 174,
+              "to": 350,
+              "duration": 177
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-replay-1",
+              "wavStart": 2909.15,
+              "wavEnd": 3073.41,
+              "localStart": 0.15000000000009095,
+              "localEnd": 164.40999999999985
+            },
+            {
+              "id": "09-replay-2",
+              "wavStart": 3083.91,
+              "wavEnd": 3239.35,
+              "localStart": 174.90999999999985,
+              "localEnd": 330.3499999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              174
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 2909.15,
+            "wavTo": 3239.35,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "重启后从保存的位置重读。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "重启后从保存的位置重读。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "可重读的边界",
+      "from": 3260,
+      "durationInFrames": 683,
+      "shots": [
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "boundary",
+          "visualType": "retention",
+          "from": 3260,
+          "durationInFrames": 321,
+          "narration": "但能重读，有一个前提：旧记录还在保留范围里。如果旧日志段已经按策略清理，回退位置也找不回删掉的记录。",
+          "subtitles": [
+            {
+              "text": "但能重读，有一个前提：旧记录还在保留范围里。",
+              "from": 0,
+              "to": 140,
+              "duration": 141
+            },
+            {
+              "text": "如果旧日志段已经按策略清理，回退位置也找不回删掉的记录。",
+              "from": 141,
+              "to": 320,
+              "duration": 180
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-retention-1",
+              "wavStart": 3260.35,
+              "wavEnd": 3391.07,
+              "localStart": 0.34999999999990905,
+              "localEnd": 131.07000000000016
+            },
+            {
+              "id": "10-retention-2",
+              "wavStart": 3401.57,
+              "wavEnd": 3560.58,
+              "localStart": 141.57000000000016,
+              "localEnd": 300.5799999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              141
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 3260.35,
+            "wavTo": 3560.58,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "旧日志段清理后的边界。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "旧日志段清理后的边界。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 3581,
+          "durationInFrames": 362,
+          "narration": "所以，Kafka把消息保存在日志里，消费组另外保存恢复位置。读过还能重读，靠的是保留日志和可以调整的恢复起点。",
+          "subtitles": [
+            {
+              "text": "所以，Kafka把消息保存在日志里，消费组另外保存恢复位置。",
+              "from": 0,
+              "to": 176,
+              "duration": 177
+            },
+            {
+              "text": "读过还能重读，靠的是保留日志和可以调整的恢复起点。",
+              "from": 177,
+              "to": 361,
+              "duration": 185
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-recap-1",
+              "wavStart": 3581.58,
+              "wavEnd": 3747.79,
+              "localStart": 0.5799999999999272,
+              "localEnd": 166.78999999999996
+            },
+            {
+              "id": "11-recap-2",
+              "wavStart": 3758.29,
+              "wavEnd": 3903.92,
+              "localStart": 177.28999999999996,
+              "localEnd": 322.9200000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              177
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f75a80c + words.json 9cbce432 + script.md 8f593de8",
+            "wavFrom": 3581.58,
+            "wavTo": 3903.92,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "日志保存消息，位点保存起点。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "direction": "日志保存消息，位点保存起点。对象与动作按本期model.json阶段对应，结果说明只在实际状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,3016 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-log-replay",
+  "kind": "deterministic-teaching-model-not-broker-measurement",
+  "topic": "orders",
+  "partitions": [
+    {
+      "id": "P0",
+      "records": [
+        {
+          "eventId": "E01",
+          "orderId": "7042",
+          "offset": 0
+        },
+        {
+          "eventId": "E03",
+          "orderId": "7044",
+          "offset": 1
+        }
+      ]
+    },
+    {
+      "id": "P1",
+      "records": [
+        {
+          "eventId": "E02",
+          "orderId": "7043",
+          "offset": 0
+        },
+        {
+          "eventId": "E04",
+          "orderId": "7045",
+          "offset": 1
+        }
+      ]
+    }
+  ],
+  "conditions": {
+    "kafkaVersion": "4.4.0",
+    "client": "Java KafkaConsumer 4.4.0 semantics",
+    "group.protocol": "classic",
+    "max.poll.records": 1,
+    "enable.auto.commit": false,
+    "cleanup.policy": "delete",
+    "retention.ms": 604800000,
+    "retention.bytes": -1,
+    "remote.storage.enable": false,
+    "assignment": "one chosen legal stable assignment; N3 is an active but idle member",
+    "positionDefinition": "snapshot of the active partition owner client in-memory next-read position, not broker-persisted group-level read state",
+    "initialP1": "both groups processed E02/E04 and committed next offset 2 before this video starts",
+    "initialP0": "both groups have valid committed next offset 0; auto.offset.reset is not a rewind instruction",
+    "retentionBranch": "closed old P0 segment [0,2) has met deletion conditions and cleanup completes; not immediate per-record expiry",
+    "resetScope": "inactive notify only, orders:0 only; requested next offset 0; dry-run then execute",
+    "businessSideEffects": "not executed; repeated handling observations are not safe repeated external effects",
+    "crossPartitionOrder": "not asserted"
+  },
+  "timeline": [
+    {
+      "id": "initial",
+      "label": "两组P1已完成，聚焦P0的下一条位置0",
+      "branch": "main",
+      "event": {
+        "kind": "initial"
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 0,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 0,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-poll-e01",
+      "label": "通知收到E01，读取位置推进，恢复点尚未变",
+      "branch": "main",
+      "event": {
+        "kind": "poll",
+        "group": "notify",
+        "partition": "P0",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "offset": 0
+        }
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 1,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 0,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-process-e01",
+      "label": "应用处理E01，尚未提交消费进度",
+      "branch": "main",
+      "event": {
+        "kind": "process",
+        "group": "notify",
+        "partition": "P0",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "offset": 0
+        }
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 1,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 0,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-commit-e01",
+      "label": "通知提交下一条位置1",
+      "branch": "main",
+      "event": {
+        "kind": "commit",
+        "group": "notify",
+        "partition": "P0",
+        "nextOffset": 1
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 1,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 1,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 0,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-poll-e03",
+      "label": "通知收到E03，读取位置推进，恢复点尚未变",
+      "branch": "main",
+      "event": {
+        "kind": "poll",
+        "group": "notify",
+        "partition": "P0",
+        "record": {
+          "eventId": "E03",
+          "orderId": "7044",
+          "offset": 1
+        }
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 1,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 0,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-process-e03",
+      "label": "应用处理E03，尚未提交消费进度",
+      "branch": "main",
+      "event": {
+        "kind": "process",
+        "group": "notify",
+        "partition": "P0",
+        "record": {
+          "eventId": "E03",
+          "orderId": "7044",
+          "offset": 1
+        }
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 1,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 0,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-commit-e03",
+      "label": "通知提交下一条位置2",
+      "branch": "main",
+      "event": {
+        "kind": "commit",
+        "group": "notify",
+        "partition": "P0",
+        "nextOffset": 2
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 0,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "points-poll-e01",
+      "label": "积分独立读取E01",
+      "branch": "main",
+      "event": {
+        "kind": "poll",
+        "group": "points",
+        "partition": "P0",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "offset": 0
+        }
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 1,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "points-commit-e01",
+      "label": "积分独立处理并提交1",
+      "branch": "main",
+      "event": {
+        "kind": "process-commit",
+        "group": "points",
+        "partition": "P0",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "offset": 0
+        },
+        "nextOffset": 1
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 1,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 1,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "points-poll-e03",
+      "label": "积分独立读取E03",
+      "branch": "main",
+      "event": {
+        "kind": "poll",
+        "group": "points",
+        "partition": "P0",
+        "record": {
+          "eventId": "E03",
+          "orderId": "7044",
+          "offset": 1
+        }
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 1,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "points-commit-e03",
+      "label": "积分独立处理并提交2",
+      "branch": "main",
+      "event": {
+        "kind": "process-commit",
+        "group": "points",
+        "partition": "P0",
+        "record": {
+          "eventId": "E03",
+          "orderId": "7044",
+          "offset": 1
+        },
+        "nextOffset": 2
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-inactive",
+      "label": "停止通知组全部实例，包括空闲N3",
+      "branch": "main",
+      "event": {
+        "kind": "stop-group",
+        "group": "notify"
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [],
+          "assignments": {},
+          "position": {
+            "P0": null,
+            "P1": null
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "reset-dry-run",
+      "label": "预览：仅通知组P0计划重置到0，尚未修改",
+      "branch": "main",
+      "event": {
+        "kind": "reset-dry-run",
+        "group": "notify",
+        "partition": "P0",
+        "requestedOffset": 0,
+        "preparedOffset": 0,
+        "executed": false
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [],
+          "assignments": {},
+          "position": {
+            "P0": null,
+            "P1": null
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "reset-p0",
+      "label": "执行：仅通知组P0恢复点由2变0",
+      "branch": "main",
+      "event": {
+        "kind": "reset-execute",
+        "group": "notify",
+        "partition": "P0",
+        "requestedOffset": 0,
+        "preparedOffset": 0,
+        "executed": true
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [],
+          "assignments": {},
+          "position": {
+            "P0": null,
+            "P1": null
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-restart",
+      "label": "重新启动，P0从已提交位置0恢复读取",
+      "branch": "main",
+      "event": {
+        "kind": "restart",
+        "group": "notify"
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 0,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "replay-poll-e01",
+      "label": "通知再次读取原日志中的E01",
+      "branch": "main",
+      "event": {
+        "kind": "poll",
+        "group": "notify",
+        "partition": "P0",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "offset": 0
+        },
+        "replay": true
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 1,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 0,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "replay-commit-e01",
+      "label": "本例重新处理并提交1",
+      "branch": "main",
+      "event": {
+        "kind": "process-commit",
+        "group": "notify",
+        "partition": "P0",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "offset": 0
+        },
+        "nextOffset": 1,
+        "replay": true
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 1,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 1,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03",
+              "E01"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "replay-poll-e03",
+      "label": "通知再次读取原日志中的E03",
+      "branch": "main",
+      "event": {
+        "kind": "poll",
+        "group": "notify",
+        "partition": "P0",
+        "record": {
+          "eventId": "E03",
+          "orderId": "7044",
+          "offset": 1
+        },
+        "replay": true
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 1,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03",
+              "E01"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "replay-commit-e03",
+      "label": "本例重新处理并提交2",
+      "branch": "main",
+      "event": {
+        "kind": "process-commit",
+        "group": "notify",
+        "partition": "P0",
+        "record": {
+          "eventId": "E03",
+          "orderId": "7044",
+          "offset": 1
+        },
+        "nextOffset": 2,
+        "replay": true
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03",
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "retention-eligible",
+      "label": "另一边界：旧封闭段满足保留条件，尚未完成清理",
+      "branch": "retention",
+      "event": {
+        "kind": "retention-eligible",
+        "partition": "P0"
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03",
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "offset": 0
+            },
+            {
+              "eventId": "E03",
+              "orderId": "7044",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": true,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "retention-cleaned",
+      "label": "旧封闭段整段已清理，最早可用位置成为2",
+      "branch": "retention",
+      "event": {
+        "kind": "retention-cleaned",
+        "partition": "P0"
+      },
+      "groups": {
+        "notify": {
+          "activeMembers": [
+            "N1",
+            "N2",
+            "N3"
+          ],
+          "assignments": {
+            "N1": [
+              "P0"
+            ],
+            "N2": [
+              "P1"
+            ],
+            "N3": []
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03",
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        },
+        "points": {
+          "activeMembers": [
+            "S1"
+          ],
+          "assignments": {
+            "S1": [
+              "P0",
+              "P1"
+            ]
+          },
+          "position": {
+            "P0": 2,
+            "P1": 2
+          },
+          "committed": {
+            "P0": 2,
+            "P1": 2
+          },
+          "processed": {
+            "P0": [
+              "E01",
+              "E03"
+            ],
+            "P1": [
+              "E02",
+              "E04"
+            ]
+          }
+        }
+      },
+      "log": {
+        "P0": {
+          "startOffset": 2,
+          "endOffset": 2,
+          "records": [],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": true,
+              "deleted": true
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        },
+        "P1": {
+          "startOffset": 0,
+          "endOffset": 2,
+          "records": [
+            {
+              "eventId": "E02",
+              "orderId": "7043",
+              "offset": 0
+            },
+            {
+              "eventId": "E04",
+              "orderId": "7045",
+              "offset": 1
+            }
+          ],
+          "segments": [
+            {
+              "baseOffset": 0,
+              "endOffset": 2,
+              "closed": true,
+              "retentionEligible": false,
+              "deleted": false
+            },
+            {
+              "baseOffset": 2,
+              "endOffset": 2,
+              "closed": false,
+              "retentionEligible": false,
+              "deleted": false
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
