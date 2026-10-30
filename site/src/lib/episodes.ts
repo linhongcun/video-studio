@@ -7,6 +7,12 @@ import seriesMeta from '../content/series.json';
 export const REPO = 'https://github.com/linhongcun/video-studio';
 export const VERSION = pkg.version;
 export const BASE = import.meta.env.BASE_URL;
+// 保留原分类 ID 与链接；没有明确、有效系列的内容统一归入“其他”。
+const DEFAULT_SERIES = 'engineering-algorithms';
+const resolveSeriesId = (id?: string): string => {
+  const key = typeof id === 'string' ? id.trim() : '';
+  return Object.hasOwn(seriesMeta, key) ? key : DEFAULT_SERIES;
+};
 const EP_DIR = path.resolve(process.cwd(), '../episodes');
 const articles = import.meta.glob('../../../episodes/*/article.mdx', {eager: true}) as Record<string, any>;
 
@@ -194,7 +200,7 @@ export function getEpisodes({includeArchived = false}: {includeArchived?: boolea
         slug, ep: meta.ep ?? 0, problemNumber: meta.problemNumber, episodePart: meta.episodePart, lessonOrder: meta.lessonOrder, firstRelease: meta.firstRelease, learningGuide: meta.learningGuide, replacedBy: meta.replacedBy, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
         tags: meta.tags ?? [], ...dates, date: dates.publishedAt ?? dates.createdAt, poster: meta.poster, video: meta.video,
         duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, archived: !!meta.archived, related: meta.related ?? [],
-        series: meta.series,
+        series: resolveSeriesId(meta.series),
         applicationScenario: meta.applicationScenario,
         additionalSeries: Array.isArray(meta.additionalSeries) ? meta.additionalSeries.filter((id: unknown) => typeof id === 'string' && id !== meta.series) : [],
         description: meta.description,
@@ -295,7 +301,8 @@ export type Series = {id: string; title: string; description: string; order: num
 /** 归档内容仍保留系列归属；这不把它重新加入现行课程或前后课导航。 */
 export function seriesFor(e: Pick<Episode, 'series'>): Omit<Series, 'episodes'> | undefined {
   const meta = seriesMeta as Record<string, Omit<Series, 'id' | 'episodes'>>;
-  return e.series && meta[e.series] ? {id: e.series, ...meta[e.series]} : undefined;
+  const id = resolveSeriesId(e.series);
+  return {id, ...meta[id]};
 }
 export function getSeries(): Series[] {
   const meta = seriesMeta as Record<string, {title: string; description: string; order: number; crossSeriesNavigation?: boolean; independentLessons?: boolean}>;

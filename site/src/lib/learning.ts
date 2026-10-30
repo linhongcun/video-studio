@@ -50,9 +50,9 @@ const definitions: SeriesDefinition[] = [
   {
     id: 'engineering-algorithms',
     number: '06',
-    eyebrow: '从系统问题理解算法',
-    outcome: '看清算法如何解决具体问题，理解它依赖的条件、维护成本与适用边界。',
-    audience: '会基本编程，希望理解后端与分布式系统实现原理的开发者。',
+    eyebrow: '按兴趣探索独立专题',
+    outcome: '从感兴趣的问题出发，理解具体机制、条件与适用边界。',
+    audience: '对独立技术专题感兴趣的学习者，可按各篇内容选择观看。',
   },
   {
     id: 'message-queue',
