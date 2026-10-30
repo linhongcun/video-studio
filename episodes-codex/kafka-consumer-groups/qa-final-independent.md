@@ -13,3 +13,7 @@
 主要证据：[审稿](qa/editorial-independent.json)、[配音](qa/voice-independent.json)、[模型](qa/model-independent.json)、[动态](qa/motion-independent-final.json)、[正式编码](qa/encoded-independent/report.json)、[本地网站](qa/site-independent/report.json)、[横屏与主题补验](qa/site-supplement/report.json)。上线后规范URL完整媒体/海报SHA、字幕、章节、入口与真实Release仍需另验。
 
 能力限制：无逐字ASR、全片人工语义听辨、真实Kafka集群/重平衡、物理手机或新手理解实验；不把技术检查写成用户观看认可。
+
+## 线上浏览器收尾
+
+Release后Pages成功后，规范URL通过原生Chromium直接HTTPS运行39项双视口动作与18次严格PTS实际解码，页面错误为空；未使用经CA urllib回填选项或任何TLS绕过。四章、三图回看、两处原文、实际播放/暂停、资料精确首/中/末及Fullscreen API通过。实际查看5张线上原图，另补844×390横屏资料页，文字与底部控件分离；该补图保留原生等待弧的真实状态，不称无等待弧或稳定界面。规范媒体完整GET/SHA与Release/部署身份由根任务另验。[线上浏览器证据](qa/site-online-native/report.json)。
