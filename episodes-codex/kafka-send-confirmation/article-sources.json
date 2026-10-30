@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-send-confirmation",
+  "sources": [
+    {
+      "id": "A1",
+      "organization": "Apache Kafka",
+      "title": "KafkaProducer",
+      "titleEvidence": {
+        "locator": "public class declaration; documented API/implementation class identifier",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/KafkaProducer.java"
+      },
+      "version": "Apache Kafka Java 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java",
+      "supports": [
+        "producer幂等保证限定单个会话，应用用新producer会话重发同eventId不具备跨会话去重保证。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "ef8914cd6af41bc030eabc14a77d0625682796a19eae91f4990b30328aa45986",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/source-evidence.json"
+      },
+      "quotation": {
+        "text": "Finally, the producer can only guarantee idempotence for messages sent within a single session.",
+        "locator": "class Javadoc line182",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/KafkaProducer.java"
+      }
+    },
+    {
+      "id": "A2",
+      "organization": "Apache Kafka",
+      "title": "ProducerBatch",
+      "titleEvidence": {
+        "locator": "public class declaration; documented API/implementation class identifier",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/ProducerBatch.java"
+      },
+      "version": "Apache Kafka Java 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/ProducerBatch.java",
+      "supports": [
+        "在途批次可先过期成为FAILED而Broker侧成功，直接支持最终发送失败但日志可能已存在的情景。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/ProducerBatch.java",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "010a78f5460d71ab9106b5d3690cedc9ebfa1718209219dc1abc8bf3fdc6a06f",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/source-evidence.json"
+      },
+      "quotation": {
+        "text": "An inflight batch expires before a response from the broker is received. The batch's final state is set to FAILED. But it could succeed on the broker and second time around batch.done() may try to set SUCCEEDED final state.",
+        "locator": "done() Javadoc lines265–267",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/javadoc-excerpts.json"
+      }
+    }
+  ]
+}

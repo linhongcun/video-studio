@@ -61,8 +61,23 @@ function mq03(){
   +text('restart',300,393,'重启后，从位置0重新读取',24,C.text);
  return content+`<path d="M30 328H7V111H30M20 104L30 111L20 118" fill="none" stroke="${C.orange}" stroke-width="3" stroke-linejoin="round"/>`;
 }
+/** MQ04: send return and confirmed RecordMetadata are separate producer evidence. */
+function mq04(){
+ let content=box(30,7,540,80,C.orange)
+  +text('send-return',300,43,'生产者 · 调用send返回',30,C.orange)
+  +text('future-pending',300,74,'返回Future ≠ 已确认成功',23,C.text)
+  +box(30,128,540,125,C.blue)
+  +text('send-log',300,170,'Kafka · 分区日志',31,C.blue)
+  +text('send-record',300,226,'P0 · 位置0 · E01',29,C.text)
+  +box(30,294,540,116,C.success)
+  +text('confirmed-result',300,332,'发送确认成功',30,C.success)
+  +text('metadata',300,367,'元数据定位：P0 / 位置0',25,C.text)
+  +text('business-boundary',300,399,'不代表消费者业务已完成',24,C.muted);
+ return content+`<path d="M300 94V120M293 112L300 120L307 112" fill="none" stroke="${C.orange}" stroke-width="3"/>`
+  +`<path d="M300 260V286M293 278L300 286L307 278" fill="none" stroke="${C.success}" stroke-width="3"/>`;
+}
 export function diagram(slug,portrait=false){
  if(!SUPPORTED_SLUGS.includes(slug))throw new RangeError(`Unsupported Kafka cover diagram: ${slug}`);
- return `<g data-kafka-diagram="${slug}" data-orientation="${portrait?'portrait':'landscape'}" font-family="${esc(style.fontFamily)}" shape-rendering="geometricPrecision" text-rendering="optimizeLegibility">${slug==='message-queue'?mq01():slug==='kafka-consumer-groups'?mq02():mq03()}</g>`;
+ return `<g data-kafka-diagram="${slug}" data-orientation="${portrait?'portrait':'landscape'}" font-family="${esc(style.fontFamily)}" shape-rendering="geometricPrecision" text-rendering="optimizeLegibility">${slug==='message-queue'?mq01():slug==='kafka-consumer-groups'?mq02():slug==='kafka-log-replay'?mq03():mq04()}</g>`;
 }
-export const SUPPORTED_SLUGS=Object.freeze(['message-queue','kafka-consumer-groups','kafka-log-replay']);
+export const SUPPORTED_SLUGS=Object.freeze(['message-queue','kafka-consumer-groups','kafka-log-replay','kafka-send-confirmation']);

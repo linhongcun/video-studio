@@ -1,0 +1,204 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-send-confirmation",
+  "issue": 312,
+  "episodeNumber": 44,
+  "mqNumber": "MQ04",
+  "baseline": "2c54aa7c5f4e3236500728d3078b356d06625099",
+  "branch": "codex/mq04-20261030",
+  "checkedAt": "2026-10-30T09:04:09.386583+00:00",
+  "status": "source-model-voice-motion-and-formal-media-passed-site-delegated",
+  "productionApproval": true,
+  "issueRead": {
+    "url": "https://github.com/linhongcun/video-studio/issues/312",
+    "method": "GitHub connector fetch_issue; full issue body read in this task"
+  },
+  "guidanceInputs": [
+    {
+      "file": "AGENTS.md",
+      "sha256": "f318fec1bbb78d66a106cd4106c5387768ef87af1a824faee6db6b96add34ae8"
+    },
+    {
+      "file": "docs/RULES.md",
+      "sha256": "e896a44682ba95e8a273a8ff855e279ed74362b6bc8a6149ac2993d9fa314f43"
+    },
+    {
+      "file": "docs/pipeline.md",
+      "sha256": "7a3de24c0584e31f201b1f82c247236a5377d3d7a4379832028c085c783aa4d0"
+    },
+    {
+      "file": "docs/validate.md",
+      "sha256": "613457c9e50a59fb3c56f40ff572858255a94381429334234c0bbd8f2669b800"
+    },
+    {
+      "file": "docs/render.md",
+      "sha256": "c951aae1395e69f31f3be9d54c703f3f689980416a4a5db18c487b389f14335a"
+    },
+    {
+      "file": "docs/qa.md",
+      "sha256": "a2e4471eb9288a77e1028b792e2eeb0eeb86aec4d8509d03c5581d7bbe90caba"
+    },
+    {
+      "file": "docs/lessons-learned.md",
+      "sha256": "ccffef50f1248bcbbf5f20dc86a64bb7cf787a6107d912ee03ce4b1af23e7d02"
+    },
+    {
+      "file": "docs/successful-practices.md",
+      "sha256": "b11e816551b80c9fbf807b19935950f28881e17a0d99920be7d8dde331da2cbc"
+    },
+    {
+      "file": "docs/production-memory.md",
+      "sha256": "a3eb21b3bb96ffc9dfa1cf4372f87a8ea8e5840782a6c30aab0ab9d304d9603a"
+    },
+    {
+      "file": "episodes-codex/_shared/kafka-video/README.md",
+      "sha256": "2addb7e80cf2722f41a14c963aa507321520364aca7c4e7e347f96bd50fa9ec0"
+    }
+  ],
+  "guidanceScope": "Current AGENTS and principal rule/manual entries reread; lessons/success/memory refreshed for generic editorial, motion, ownership/freeze, voice, citation/color/browser and MQ01-MQ03 cases. Prior MQ02/MQ03 experience reused within stated scope.",
+  "sourceReview": {
+    "method": "Read research-owned local complete source snapshots and recorded fixed-commit evidence; independent interpretation, no redundant download and no runtime Broker experiment.",
+    "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "reviewed": [
+      {
+        "file": "sources/KafkaProducer.java",
+        "lines": [
+          "165-182",
+          "1048-1162"
+        ],
+        "sha256": "ef8914cd6af41bc030eabc14a77d0625682796a19eae91f4990b30328aa45986"
+      },
+      {
+        "file": "sources/ProducerConfig.java",
+        "lines": [
+          "133-185",
+          "368-379"
+        ],
+        "sha256": "912b886014d69a943a9702cce7fb82b3466a35f5d16a64ea0383bf3a541840b4"
+      },
+      {
+        "file": "sources/Sender.java",
+        "lines": [
+          "172-220",
+          "344-382"
+        ],
+        "sha256": "b64fe44411db577b7a5ad84c9abf51694c8be127badc6cc95ddf52bf817640d7"
+      },
+      {
+        "file": "sources/FutureRecordMetadata.java",
+        "lines": [
+          "55-90"
+        ],
+        "sha256": "5480e7036982190b21b8b27c5ae5b00ffc1a30bbcc0889ddf13e31350d8cdcdb"
+      }
+    ],
+    "deliveryTimeoutConclusion": "Technically possible: an in-flight batch can expire with final Kafka TimeoutException while the record has already been appended and no successful response reached the producer. Scenario must explicitly fix this truth/observation split.",
+    "getTimeoutDistinction": "Future.get(timeout) throws java.util.concurrent.TimeoutException for waiting only and does not finalize/cancel the original send."
+  },
+  "checklist": [
+    {
+      "id": "editorial-entry",
+      "phase": "script-and-real-preview",
+      "expect": "首帧具体发送对象与目的，2秒内标题/冲突，2至5秒升级同一冲突；15秒内建立发送方想确认什么；结尾回答怎样才算本例发送成功及未知边界。首次术语随对象/动作建立，源码/config明细不占满首屏。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "scope-and-config",
+      "phase": "research-model",
+      "expect": "固定Kafka/Broker与Java客户端4.4.0、acks、enable.idempotence、retries、delivery.timeout.ms、request.timeout.ms、linger.ms、max.in.flight及事务/分区条件；合理性包括delivery timeout不小于request timeout加linger。仅必要条件进正文，其余明列研究/脚本前言。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "future-return",
+      "phase": "script-model-preview",
+      "expect": "send返回Future仅表示结果句柄，不等于ACK、写入或消费；当前pending是所选时序，不泛化到每次返回都pending（ApiException可返回已失败Future）。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "success-evidence",
+      "phase": "script-model-preview",
+      "expect": "成功回调无exception且取得有效RecordMetadata；topic/partition/offset对应实际同一日志记录。确认仅及本例acks条件，消费读取/业务结果单独保持未完成，不把acks=all说成所有配置副本刷稳定介质。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "same-event-three-branches",
+      "phase": "script-model-preview",
+      "expect": "正常、未知、本地序列化失败从相同逻辑eventId/空初始日志明确重置；正常成功记录不延续入下一比较支。切换前有可读总览和口头承接；分支的发送者观察/日志真值/返回结果分别显示。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "final-delivery-timeout",
+      "phase": "research-model-preview",
+      "expect": "未知分支选最终Kafka delivery timeout回调，而非Future.get(timeout)局部等候到期。已追加记录且成功响应持续不可见直至最终期限；内部重试仍无第二条业务记录；最终Future/callback失败，晚响应不能令原结果改为成功。模型真值与发送者知识分列。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "local-serialization-failure",
+      "phase": "script-model-preview",
+      "expect": "明确固定的本地序列化失败发生在accumulator append/Produce前，send同步抛SerializationException，本例无已取得的Future/成功metadata，也无对应日志追加；不从这一个确定负例推出所有异常未写入。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "idempotence-versus-resend",
+      "phase": "research-model-preview",
+      "expect": "内部重试是同一发送批次/序列，幂等避免其重复追加；应用第二次send同eventId是另一次发送，eventId/业务身份不变而可能新offset。应用重发仅后续新session或明确恢复后示意，不保证未决序列下立即可发送；不承诺消费/外部副作用恰好一次。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "bounded-model",
+      "phase": "model-independent",
+      "expect": "逐快照独立核对日志记录、offset、senderKnowledge、Future/callback终态、消费状态、重置前提；验证快照不可被后续引用污染。有限教学模型/故障场景与真实Broker/网络实验分开记录。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "real-motion",
+      "phase": "real-storyboard-preview",
+      "expect": "最终真实配音board后bundle，明确hideSubtitles/showSubtitles；采样所有因果边界±1、传输中间态、分支重置、首2/5/15秒、总结与文章图位；真实无字幕连续小样覆盖发送/确认、未知/重发、本地失败重置。可见字形/copyfit/低对比/运动包络实际图复核。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "voice-and-encoded",
+      "phase": "voice-and-final",
+      "expect": "独立源take/裁尾/PCM整轨信号检查，实际响度与能力边界；默认资料附录后按整数解码帧n抽取关键相邻帧/各资料页首中尾、完整解码与冻结媒体SHA。",
+      "status": "passed-in-stated-source-or-artifact-scope"
+    },
+    {
+      "id": "site-and-online",
+      "phase": "publication",
+      "expect": "使用publication代理负责的helper，不覆盖。当前成片四图/字幕/章节/双视口实际播放、精确RVFC/ffprobePTS、原文弹层/键盘/原生控件和手机模拟横屏资料实图；成功部署后canonical原生Chromium，普通完整GET/SHA由root。",
+      "status": "delegated-to-publication-agent-actual-browser-reports-separate"
+    }
+  ],
+  "limitations": [
+    "All independent content/model/voice/motion/final-media checks completed in stated scope; local/canonical browser executed and reported by publication agent.",
+    "No actual Kafka Broker/producer/network injection/ISR/disk/consumer side-effect experiment.",
+    "No ASR, full semantic listening, physical-phone or novice comprehension test claimed."
+  ],
+  "ownership": "Only current episode QA files written; no production/shared files or helper ownership changed and no commit.",
+  "priorEpisodePreservation": {
+    "report": "preservation-independent.json",
+    "oldFrozenDeclarations": [
+      160,
+      159,
+      170
+    ],
+    "uniqueProtectedInputsIncludingManifests": 431,
+    "baselinePublishedFiles": 1306,
+    "passedCurrentCandidate": true,
+    "scope": "Installed final candidate: old431 frozen input+manifest bytes/mtime remain; every1306 baseline episodes Git blob unchanged, all24 additions stay inside newMQ04.",
+    "passedInstalledFinalCandidate": true,
+    "newPublishedFileCount": 24,
+    "oldFilesChanged": 0,
+    "protectedBytesAndMtimeUnchanged": true
+  },
+  "publicationOwnership": "Publication agent alone writes/executes site-independent.py, publish.py and online_verify.py. Independent QA owns content/model/voice/motion/encoded reports; no helper overwrite.",
+  "currentReports": [
+    "editorial-independent.json",
+    "model-independent.json",
+    "voice-independent.json",
+    "preservation-independent.json",
+    "motion-independent-final.json",
+    "encoded-independent.json"
+  ],
+  "productionApprovalMeaning": "Independent current-production-media acceptance for GitHub publication workflow; no user viewing/permission/comprehension approval inferred."
+}

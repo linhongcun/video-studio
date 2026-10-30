@@ -1,0 +1,828 @@
+{
+  "meta": {
+    "title": "Kafka发送确认：消息发出后，怎样才算发送成功？",
+    "episode": 44,
+    "episodePart": "Kafka MQ04 · 发送确认",
+    "slug": "kafka-send-confirmation",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 3417,
+    "finalVideoFrames": 3417,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "kafka-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户继续授权消息队列系列按issue制作；本期选择MQ04/#312。GitHub站点持续交付，平台无本轮新发。",
+    "palette": {
+      "bg": "#211D1B",
+      "text": "#FFF1E8"
+    },
+    "sampleDataLabel": "教学模型 · Kafka 4.4.0 · 发送方观察与实际日志分列",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "schemaVersion": 1,
+      "generator": "episodes-codex/_shared/kafka-covers/render.py",
+      "style": "kafka-covers-v1",
+      "number": "MQ04",
+      "ep": 44,
+      "sourceTitle": "Kafka发送确认：消息发出后，怎样才算发送成功？",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "centerRegion": {
+            "x1": 315,
+            "x2": 1125
+          },
+          "bottom15Y": 918
+        }
+      },
+      "binding": "Cover outputs and full generator input SHA are recorded separately in cover-style.json. Body uses immutable style-v1, not the growing episode catalog."
+    },
+    "discussionQuestion": "为什么发送最终超时，仍不能断定Kafka日志没有这条记录？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes-codex/_shared/kafka-covers/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "problem",
+      "chapterId": "problem",
+      "title": "发送之后知道什么",
+      "from": 0,
+      "durationInFrames": 645,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "problem",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 295,
+          "narration": "网站的发送调用已经返回，就能显示发送成功吗？有时Kafka已经记下来了，发送方却只等到超时。",
+          "subtitles": [
+            {
+              "text": "网站的发送调用已经返回，就能显示发送成功吗？",
+              "from": 0,
+              "to": 136,
+              "duration": 137
+            },
+            {
+              "text": "有时Kafka已经记下来了，发送方却只等到超时。",
+              "from": 137,
+              "to": 294,
+              "duration": 158
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 126.66,
+              "localStart": 9.0,
+              "localEnd": 126.66
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 137.16,
+              "wavEnd": 274.94,
+              "localStart": 137.16,
+              "localEnd": 274.94
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              137
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 9.0,
+            "wavTo": 274.94,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "订单7042通知发送检查功能，状态“待确认”，业务“通知待处理”；提出冲突，禁止先泄露某个分支为真实结局。",
+          "direction": "订单7042通知发送检查功能，状态“待确认”，业务“通知待处理”；提出冲突，禁止先泄露某个分支为真实结局。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "problem",
+          "visualType": "overview",
+          "from": 295,
+          "durationInFrames": 350,
+          "narration": "先分清发送方、Kafka日志和下游业务。这次分别看发送成功、结果未知、确定未发送，判断每种结果能证明什么。",
+          "subtitles": [
+            {
+              "text": "先分清发送方、Kafka日志和下游业务。",
+              "from": 0,
+              "to": 122,
+              "duration": 123
+            },
+            {
+              "text": "这次分别看发送成功、结果未知、确定未发送，判断每种结果能证明什么。",
+              "from": 123,
+              "to": 349,
+              "duration": 227
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-overview-1",
+              "wavStart": 295.94,
+              "wavEnd": 407.99,
+              "localStart": 0.9399999999999977,
+              "localEnd": 112.99000000000001
+            },
+            {
+              "id": "02-overview-2",
+              "wavStart": 418.49,
+              "wavEnd": 624.51,
+              "localStart": 123.49000000000001,
+              "localEnd": 329.51
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              123
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 295.94,
+            "wavTo": 624.51,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "三列机制稀疏总览，三路径normal/unknown/serialization；分支不是同一次发送连续经历的三个结局。",
+          "direction": "三列机制稀疏总览，三路径normal/unknown/serialization；分支不是同一次发送连续经历的三个结局。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "confirmed",
+      "chapterId": "confirmed",
+      "title": "拿到成功证据",
+      "from": 645,
+      "durationInFrames": 904,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "confirmed",
+          "visualType": "send",
+          "from": 645,
+          "durationInFrames": 261,
+          "narration": "先调用发送，返回一个以后查询结果的对象。在这个示例里，记录暂存本地，后台还没发完。",
+          "subtitles": [
+            {
+              "text": "先调用发送，返回一个以后查询结果的对象。",
+              "from": 0,
+              "to": 112,
+              "duration": 113
+            },
+            {
+              "text": "在这个示例里，记录暂存本地，后台还没发完。",
+              "from": 113,
+              "to": 260,
+              "duration": 148
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-send-1",
+              "wavStart": 645.51,
+              "wavEnd": 748.43,
+              "localStart": 0.5099999999999909,
+              "localEnd": 103.42999999999995
+            },
+            {
+              "id": "03-send-2",
+              "wavStart": 758.93,
+              "wavEnd": 885.18,
+              "localStart": 113.92999999999995,
+              "localEnd": 240.17999999999995
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              113
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 645.51,
+            "wavTo": 885.18,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "正常分支；E01在本地缓冲，send返回Future（结果对象）、pending，本例调度下日志空。",
+          "direction": "正常分支；E01在本地缓冲，send返回Future（结果对象）、pending，本例调度下日志空。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "confirmed",
+          "visualType": "confirmed",
+          "from": 906,
+          "durationInFrames": 332,
+          "narration": "后台把记录写进零号分区，并收到本例要求的成功响应。这个结果对象显示成功，带回分区零、位置零，给出这次发送的证据。",
+          "subtitles": [
+            {
+              "text": "后台把记录写进零号分区，并收到本例要求的成功响应。",
+              "from": 0,
+              "to": 143,
+              "duration": 144
+            },
+            {
+              "text": "这个结果对象显示成功，带回分区零、位置零，给出这次发送的证据。",
+              "from": 144,
+              "to": 331,
+              "duration": 188
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-confirmed-1",
+              "wavStart": 906.18,
+              "wavEnd": 1039.81,
+              "localStart": 0.17999999999994998,
+              "localEnd": 133.80999999999995
+            },
+            {
+              "id": "04-confirmed-2",
+              "wavStart": 1050.31,
+              "wavEnd": 1217.52,
+              "localStart": 144.30999999999995,
+              "localEnd": 311.52
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              144
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 906.18,
+            "wavTo": 1217.52,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先追加E01@P0/0，再回传成功，Future成功RecordMetadata；不让成功标签先于回传抵达。",
+          "direction": "先追加E01@P0/0，再回传成功，Future成功RecordMetadata；不让成功标签先于回传抵达。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "confirmed",
+          "visualType": "business",
+          "from": 1238,
+          "durationInFrames": 311,
+          "narration": "可下游通知还没处理，订单业务并没有因此完成。发送确认，只回答了这次写入结果，不替下游确认业务成功。",
+          "subtitles": [
+            {
+              "text": "可下游通知还没处理，订单业务并没有因此完成。",
+              "from": 0,
+              "to": 129,
+              "duration": 130
+            },
+            {
+              "text": "发送确认，只回答了这次写入结果，不替下游确认业务成功。",
+              "from": 130,
+              "to": 310,
+              "duration": 181
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-business-1",
+              "wavStart": 1238.52,
+              "wavEnd": 1357.94,
+              "localStart": 0.5199999999999818,
+              "localEnd": 119.94000000000005
+            },
+            {
+              "id": "05-business-2",
+              "wavStart": 1368.44,
+              "wavEnd": 1528.02,
+              "localStart": 130.44000000000005,
+              "localEnd": 290.02
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              130
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 1238.52,
+            "wavTo": 1528.02,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "正常结果回全局，发送方已确认，日志E01保留，下游仍待处理，明确三列边界。",
+          "direction": "正常结果回全局，发送方已确认，日志E01保留，下游仍待处理，明确三列边界。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "unknown",
+      "chapterId": "unknown",
+      "title": "写入与结果未知",
+      "from": 1549,
+      "durationInFrames": 1182,
+      "shots": [
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "unknown",
+          "visualType": "unknown",
+          "from": 1549,
+          "durationInFrames": 251,
+          "narration": "回到相同的初始状态，再发送这条事件。这次记录已经写入，但成功响应一直没有被发送方收到。",
+          "subtitles": [
+            {
+              "text": "回到相同的初始状态，再发送这条事件。",
+              "from": 0,
+              "to": 97,
+              "duration": 98
+            },
+            {
+              "text": "这次记录已经写入，但成功响应一直没有被发送方收到。",
+              "from": 98,
+              "to": 250,
+              "duration": 153
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-unknown-1",
+              "wavStart": 1549.02,
+              "wavEnd": 1636.6,
+              "localStart": 0.01999999999998181,
+              "localEnd": 87.59999999999991
+            },
+            {
+              "id": "06-unknown-2",
+              "wavStart": 1647.1,
+              "wavEnd": 1779.85,
+              "localStart": 98.09999999999991,
+              "localEnd": 230.8499999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              98
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 1549.02,
+            "wavTo": 1779.85,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确reset至空日志，聚焦unknown；E01再追加@0，屏蔽成功响应；“实际已写入”在日志观察栏，“仍待结果”在发送方栏。",
+          "direction": "明确reset至空日志，聚焦unknown；E01再追加@0，屏蔽成功响应；“实际已写入”在日志观察栏，“仍待结果”在发送方栏。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "unknown",
+          "visualType": "auto-retry",
+          "from": 1800,
+          "durationInFrames": 333,
+          "narration": "客户端遇到可重试的失败，会在期限内自动重试。本例开启生产幂等，同一批次的重试，没有追加第二条记录。",
+          "subtitles": [
+            {
+              "text": "客户端遇到可重试的失败，会在期限内自动重试。",
+              "from": 0,
+              "to": 142,
+              "duration": 143
+            },
+            {
+              "text": "本例开启生产幂等，同一批次的重试，没有追加第二条记录。",
+              "from": 143,
+              "to": 332,
+              "duration": 190
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-auto-retry-1",
+              "wavStart": 1800.85,
+              "wavEnd": 1932.95,
+              "localStart": 0.849999999999909,
+              "localEnd": 132.95000000000005
+            },
+            {
+              "id": "07-auto-retry-2",
+              "wavStart": 1943.45,
+              "wavEnd": 2112.89,
+              "localStart": 143.45000000000005,
+              "localEnd": 312.8899999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              143
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 1800.85,
+            "wavTo": 2112.89,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "自动retry保留producer/session A和batch序列身份，读回同一offset0，没有新增日志记录。时间轴明示“省略等待，非实时时长”。",
+          "direction": "自动retry保留producer/session A和batch序列身份，读回同一offset0，没有新增日志记录。时间轴明示“省略等待，非实时时长”。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "unknown",
+          "visualType": "timeout",
+          "from": 2133,
+          "durationInFrames": 290,
+          "narration": "总发送期限到达，结果对象最终失败，回调报告超时。发送方没有成功证据，不能据此断定日志里没有记录。",
+          "subtitles": [
+            {
+              "text": "总发送期限到达，结果对象最终失败，回调报告超时。",
+              "from": 0,
+              "to": 153,
+              "duration": 154
+            },
+            {
+              "text": "发送方没有成功证据，不能据此断定日志里没有记录。",
+              "from": 154,
+              "to": 289,
+              "duration": 136
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-timeout-1",
+              "wavStart": 2133.89,
+              "wavEnd": 2277.3,
+              "localStart": 0.8899999999998727,
+              "localEnd": 144.30000000000018
+            },
+            {
+              "id": "08-timeout-2",
+              "wavStart": 2287.8,
+              "wavEnd": 2402.84,
+              "localStart": 154.80000000000018,
+              "localEnd": 269.84000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              154
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 2133.89,
+            "wavTo": 2402.84,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "delivery timeout最终Kafka TimeoutException；后台将同一最终结果传给Future与应用回调（两种观察方式，非两次确认）；Future failed、sender结果未知、日志实际E01@0同时可见，后续不将原Future改成功。",
+          "direction": "delivery timeout最终Kafka TimeoutException；后台将同一最终结果传给Future与应用回调（两种观察方式，非两次确认）；Future failed、sender结果未知、日志实际E01@0同时可见，后续不将原Future改成功。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "unknown",
+          "visualType": "app-resend",
+          "from": 2423,
+          "durationInFrames": 308,
+          "narration": "若应用重启后，把同一事件重新调用发送，这是一笔新的发送。这次成功写到位置一，虽然事件编号与原来相同。",
+          "subtitles": [
+            {
+              "text": "若应用重启后，把同一事件重新调用发送，这是一笔新的发送。",
+              "from": 0,
+              "to": 157,
+              "duration": 158
+            },
+            {
+              "text": "这次成功写到位置一，虽然事件编号与原来相同。",
+              "from": 158,
+              "to": 307,
+              "duration": 150
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-app-resend-1",
+              "wavStart": 2423.84,
+              "wavEnd": 2571.34,
+              "localStart": 0.8400000000001455,
+              "localEnd": 148.34000000000015
+            },
+            {
+              "id": "09-app-resend-2",
+              "wavStart": 2581.84,
+              "wavEnd": 2710.25,
+              "localStart": 158.84000000000015,
+              "localEnd": 287.25
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              158
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 2423.84,
+            "wavTo": 2710.25,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先关闭A，B新producer/session再次send E01，追加@1并成功；自动retry与应用重新send视觉身份分开；原E01@0仍在。",
+          "direction": "先关闭A，B新producer/session再次send E01，追加@1并成功；自动retry与应用重新send视觉身份分开；原E01@0仍在。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "确定未发与业务边界",
+      "from": 2731,
+      "durationInFrames": 686,
+      "shots": [
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "boundary",
+          "visualType": "local-error",
+          "from": 2731,
+          "durationInFrames": 327,
+          "narration": "再回到初始状态，换成发送前就无法编码的内容。本地序列化直接报错，这条记录没进待发送缓冲，日志仍然为空。",
+          "subtitles": [
+            {
+              "text": "再回到初始状态，换成发送前就无法编码的内容。",
+              "from": 0,
+              "to": 133,
+              "duration": 134
+            },
+            {
+              "text": "本地序列化直接报错，这条记录没进待发送缓冲，日志仍然为空。",
+              "from": 134,
+              "to": 326,
+              "duration": 193
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-local-error-1",
+              "wavStart": 2731.25,
+              "wavEnd": 2855.48,
+              "localStart": 0.25,
+              "localEnd": 124.48000000000002
+            },
+            {
+              "id": "10-local-error-2",
+              "wavStart": 2865.98,
+              "wavEnd": 3037.41,
+              "localStart": 134.98000000000002,
+              "localEnd": 306.40999999999985
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              134
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 2731.25,
+            "wavTo": 3037.41,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确reset空日志，序列化器同步抛SerializationException，send未返回Future，无Produce箭头；只断言本条记录没发送。",
+          "direction": "明确reset空日志，序列化器同步抛SerializationException，send未返回Future，无Produce箭头；只断言本条记录没发送。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 3058,
+          "durationInFrames": 359,
+          "narration": "所以，要分清调用返回、发送确认和业务完成。超时可能结果未知；确定的本地编码失败，才是本例明确没发出去的对照。",
+          "subtitles": [
+            {
+              "text": "所以，要分清调用返回、发送确认和业务完成。",
+              "from": 0,
+              "to": 136,
+              "duration": 137
+            },
+            {
+              "text": "超时可能结果未知；确定的本地编码失败，才是本例明确没发出去的对照。",
+              "from": 137,
+              "to": 358,
+              "duration": 222
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-recap-1",
+              "wavStart": 3058.41,
+              "wavEnd": 3185.24,
+              "localStart": 0.4099999999998545,
+              "localEnd": 127.23999999999978
+            },
+            {
+              "id": "11-recap-2",
+              "wavStart": 3195.74,
+              "wavEnd": 3377.95,
+              "localStart": 137.73999999999978,
+              "localEnd": 319.9499999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              137
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 2dc60dc3 + words.json 1b7c8f72 + script.md 2ba7287b",
+            "wavFrom": 3058.41,
+            "wavTo": 3377.95,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回稀疏三路径结果，成功证据/超时未知/本地未发各一简短标签；下游业务仍为独立边界，片尾资料。",
+          "direction": "回稀疏三路径结果，成功证据/超时未知/本地未发各一简短标签；下游业务仍为独立边界，片尾资料。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

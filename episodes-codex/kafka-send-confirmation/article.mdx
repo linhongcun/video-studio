@@ -1,0 +1,120 @@
+---
+title: 'Kafka发送确认：消息发出后，怎样才算发送成功？'
+summary: 'send调用返回、成功回执与超时异常各能证明什么？沿同一订单事件区分发送方观察、Kafka日志实际与下游业务，理解自动重试和应用重发的边界。'
+chapters:
+  - { id: problem, title: 发送之后知道什么 }
+  - { id: confirmed, title: 拿到成功证据 }
+  - { id: unknown, title: 写入与结果未知 }
+  - { id: boundary, title: 确定未发与业务边界 }
+related: [message-queue, kafka-log-replay, kafka-consumer-groups]
+---
+
+## 发送之后知道什么 {#problem}
+
+网站发送订单7042的通知事件E01，发送调用已经返回，页面就能显示“发送成功”了吗？先分清三个对象：网站的发送方知道什么、Kafka日志实际保存了什么、下游通知业务是否完成。它们的状态不能互相代替。
+
+本例固定Apache Kafka与Java客户端4.4.0，`orders`主题只有一个分区P0，使用`acks=all`与生产者幂等。正常、结果未知和本地序列化失败三个分支都从同一份空日志、同一事件身份和下游待处理状态开始；每次切换分支都重新对照。未知分支中的应用重发则保留原日志，是同一情景继续发生的动作。
+
+本文是一组官方文档与源码约束下的有限教学模型，没有运行真实Broker、Java客户端、网络故障注入或通知业务。模型显示的“日志实际”是为了说明机制而提供的观察视角，不是应用仅凭错误就能获得的信息。
+
+## 拿到成功证据 {#confirmed}
+
+Java生产者的`send`是异步接口。在本例选定的调度中，记录进入本地待发送缓冲，调用返回一个`Future<RecordMetadata>`，后台还在发送。这个Future是以后查询结果的对象，拿到它不等于已经拿到成功确认。
+
+异步也不等于调用保证立即返回。首次等待主题元数据，或本地缓冲没有可用空间，都可能使调用阻塞；Future返回时也可能已经完成。这里只选择“返回时仍待定”的正常调度，便于把动作逐步展开。
+
+后台把E01追加到P0的位置0，并收到满足本例确认条件的成功响应，发送结果才变为成功。成功的`RecordMetadata`带回主题、分区、offset等信息，本例对应`orders / P0 / 0`，可以定位这次写入的记录。
+
+<SourceQuote sourceId="R2" supports="acks规定生产者将一次请求视为完成所需的确认条件；这里讨论的是生产请求的结果。" translation="生产者要求Leader收到多少确认，才把一次请求视为完成。" />
+
+成功结果可以通过Future读取，也可以通过应用提供的callback接收。它们观察的是同一次发送完成，没有第二次业务确认。实际程序应检查发送错误或成功结果，不因为有一个metadata对象就直接报成功；错误路径中可能存在没有有效offset的metadata。
+
+下游通知此时仍然待处理。RecordMetadata没有包含“通知已发出”或“订单全部业务已完成”的证明；业务结果需要相应服务完成处理，并通过业务自己的状态来确认。
+
+<Figure src="/video-studio/episodes/kafka-send-confirmation/article/01-confirmed.jpg" alt="发送方已取得P0位置0的成功结果，Kafka日志保存E01，右侧下游通知仍待处理" caption="教学模型：成功结果定位了本次写入，不能替下游通知确认业务完成。" seekTo={40.666666667} chapter="confirmed" />
+
+## 写入与结果未知 {#unknown}
+
+回到相同的初始状态，重新演示E01的发送，只改变响应条件：Kafka实际已追加E01到P0的位置0，也满足了本例要求的确认条件，但成功响应始终没有被发送方处理。
+
+这时客户端遇到请求级可重试错误，可以在总发送期限内自动重试。不能把一次连接中断或请求等待到期，直接画成整次发送的最终失败。
+
+本例显式开启producer幂等。内部自动retry继续使用原producer会话和同一批次的序列身份，Broker不会因此把同一批次追加成第二条。画面只展开一次代表性retry，省略其余可能的重试与等待；动画不是实时时长，也不是网络性能测量。
+
+如果直到`delivery.timeout.ms`到期，原批次及其重试的成功响应仍然没有被客户端处理，批次会以超时异常完成失败。这里是producer最终的发送失败：callback收到Kafka的`org.apache.kafka.common.errors.TimeoutException`；若用没有短等待参数的Future `get()`读取失败，则由`ExecutionException`包装该异常作为cause。
+
+这与`Future.get(timeout)`因为调用方只愿等一小会儿而抛出的`java.util.concurrent.TimeoutException`不同。后者只表示本次等待到期，本身不把底层发送变成最终失败。本例使用的是前一种delivery终态路径。
+
+尽管发送方最终拿到了错误，日志中仍可能已有记录。这个示例的实际日志里就有E01@0，发送者却没有成功证据；另一个同样超时的情景也可能尚未追加。仅凭这类超时，不能确定写入发生与否。
+
+<Figure src="/video-studio/episodes/kafka-send-confirmation/article/02-timeout-unknown.jpg" alt="原发送结果已最终超时失败，发送方缺少成功证据，实际日志却已有E01位于P0位置0" caption="教学模型：最终delivery超时与实际已追加同时成立；错误本身不能证明日志为空。" seekTo={80.166666667} chapter="unknown" />
+
+<SourceQuote sourceId="R1" supports="发送侧遇到网络错误时，不能确定错误发生在消息提交前还是提交后，因此错误本身不足以证明未写入。" translation="生产者尝试发布消息而遇到网络错误时，无法确定错误发生在消息提交之前还是之后。" />
+
+Kafka 4.4.0的`ProducerBatch`源码还直接说明：在途批次可能在收到响应之前过期并成为FAILED，但Broker侧可能已成功。已经交付给应用的失败终态不会因为迟到成功响应而改成成功；源码依据见文末固定提交链接。
+
+<SourceQuote sourceId="A2" supports="源码直接给出了在途批次过期成为FAILED、但Broker侧可能已成功的情景；这不是应用从超时异常就知道已追加。" translation="在途批次可能在收到Broker响应之前过期，最终状态被设为FAILED；但它在Broker侧可能已成功，后来再次调用batch.done()时可能尝试设置SUCCEEDED终态。" />
+
+接着展示一种业务重发风险：应用关闭旧producer A，换一个新producer B，又对同一个eventId E01调用`send`。这是**新的应用发送**，有新的producer会话与批次身份，可以在P0的位置1再追加一条E01。第一条E01@0不会消失。
+
+<Figure src="/video-studio/episodes/kafka-send-confirmation/article/03-application-resend.jpg" alt="新producer B的应用发送成功到P0位置1，原会话A的失败结果保持，两条日志都有eventId E01" caption="教学模型：内部自动重试与新应用发送分开；同eventId的新发送可得到另一条日志记录。" seekTo={90.433333333} chapter="unknown" />
+
+这不表示producer幂等失效。它负责原批次内部重试的去重，不按eventId或消息key替应用识别“这是同一笔业务”。新会话的序列值也可能重新从0开始，但会话身份不同，不能把两个0当成同一次发送。
+
+<SourceQuote sourceId="A1" supports="producer幂等保证限定于单个会话，本例关闭A、在新会话B重新发送同eventId，不能据此期待跨会话业务去重。" translation="最后，生产者只能对单个会话内发送的消息提供幂等保证。" />
+
+这组对照用于说明风险，不能当成“超时后直接重发”的建议。恢复时应结合应用可靠状态和业务要求处理未知结果；如果重发可能触发通知、积分等副作用，还需要消费侧按业务身份控制重复效果。本片不实现消费幂等，也不保证业务恰好一次。
+
+## 确定未发与业务边界 {#boundary}
+
+再回到共同起点，这次提供一份本地无法编码的内容。本例自定义序列化器在`send`内部同步抛出`SerializationException`，发生在把记录加入待发送缓冲之前。因此该记录没有进入缓冲，也没有作为Produce记录发出，日志保持为空。
+
+<Figure src="/video-studio/episodes/kafka-send-confirmation/article/04-serialization-error.jpg" alt="本地序列化同步失败，send未返回Future，没有Produce记录发出，Kafka日志仍为空" caption="教学模型：固定的本地编码错误发生在加入待发送缓冲之前，本条记录明确未发送。" seekTo={101.333333333} chapter="boundary" />
+
+这个确定的本地错误没有先返回Future，不应先画pending，再等待异步callback。序列化前仍可能获取主题元数据，所以“这条记录没发送”也不能扩大成“整个调用没有发生任何网络访问”。
+
+这里的结论只针对这条已经明确的本地错误路径。不能把所有异常都概括成确定未发送，也不能把所有超时都概括成实际已写入。三种结果分别保留它们能提供的证据：
+
+| 发送方观察 | 本例能得出的结论 | 仍不能替代的结论 |
+|---|---|---|
+| send返回Future | 得到了查询这次发送结果的对象 | 尚不能据此确认写入成功 |
+| 成功结果带P0/offset0 | 这次写入满足本例的成功确认条件 | 不证明下游通知已完成 |
+| 最终delivery超时 | 这次发送未取得成功结果 | 不能仅凭它判定日志已有或没有记录 |
+| 固定的本地序列化同步失败 | 本条记录尚未加入发送缓冲、未作为Produce记录发出 | 不能推广成其他错误都明确未写入 |
+
+本例完整条件如下。这些值用于固定教学语义，不是通用调优建议。
+
+```text
+Kafka / Java客户端：4.4.0
+Topic：orders，分区：1（显式指定P0）
+replication.factor=3，min.insync.replicas=2，当前ISR=3
+acks=all
+enable.idempotence=true
+retries=2147483647
+max.in.flight.requests.per.connection=1
+request.timeout.ms=45000
+delivery.timeout.ms=120000
+linger.ms=0
+max.block.ms=60000
+retry.backoff.ms=100
+retry.backoff.max.ms=1000
+replica.lag.time.max.ms=30000
+不设置transactional.id，非事务发送
+```
+
+幂等所需的acks、retries与max.in.flight条件都显式满足；delivery总期限也满足大于等于request期限与linger之和。请求等待期限高于本例的replica.lag.time.max.ms。由于一条记录独占本批次，不混入更早建立的批次截止时间。
+
+当前ISR为3时，`acks=all`要求当前ISR都确认，不是“minISR是2，所以只等2个就返回”。本片不展开副本机制，更不把成功回执写成任意故障零丢失、全部配置副本已刷入永久介质的承诺。
+
+有限模型保留了发送方观察和实际日志的不同状态，核对了内部retry不新增记录、最终失败不被迟到响应翻成成功、应用新send可生成新offset，以及同步本地错误没有Future等边界。下游业务始终未执行，模型检查也不代替真实集群实验。
+
+## 参考资料
+
+以下由Apache Kafka维护，版本固定为4.4.0，核验日期为2026-10-30（北京时间）。未见明确公开个人作者署名，使用机构署名；视频片尾只显示原题与机构。
+
+1. Apache Kafka：[Design](https://kafka.apache.org/44/design/design/)。支持生产结果未知与消息处理语义边界。[固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)。
+2. Apache Kafka：[Producer Configs](https://kafka.apache.org/44/configuration/producer-configs/)。支持acks、delivery期限、retry与幂等配置前提。[固定提交文档入口](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/producer-configs.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/producer-configs.md)。实际生成配置说明交叉核对同提交[ProducerConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java#L131-L182)。
+
+异步调用与成功metadata核对[KafkaProducer.java的send说明](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L923-L951)；应用级re-send边界见[同文件177–182行](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L177-L182)。最终过期但Broker可能成功的直接说明见[ProducerBatch.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/ProducerBatch.java#L263-L303)，过期异常路径见[Sender.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/Sender.java#L362-L375)。
+
+Future等待与错误包装见[FutureRecordMetadata.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/FutureRecordMetadata.java#L69-L99)；序列化在缓冲追加之前的顺序见[KafkaProducer.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L1080-L1111)；minISR与acksall边界见[TopicConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/config/TopicConfig.java#L218-L227)。本轮实际读到的是官方固定提交文件，没有把生成配置入口冒称为完整HTML正文已核验。
