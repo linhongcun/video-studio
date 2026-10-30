@@ -32,7 +32,7 @@
 
 ## 新期制作记录
 
-- [MQ01–MQ04实现原理重制](2026-10/mq-source-depth-remake/README.md)：补足源码因果并保持易懂，当前研究与审稿，最终交付状态以记录为准。
+- [MQ01–MQ04实现原理重制](2026-10/mq-source-depth-remake/README.md)：四期补足源码实现因果，v0.96.1已上线；完整媒体与原生线上核验通过，#443已completed关闭。
 
 - [2026-10-30 · Kafka MQ04 发送确认](2026-10/kafka-send-confirmation/README.md)：调用返回、成功结果与最终未知分支；EP44/v0.96.0，线上完整媒体与播放器核验通过，#312已关闭，MQ进度4/9。
 - [2026-10-30 · Kafka MQ03 日志重放](2026-10/kafka-log-replay/README.md)：读取与恢复位置、停组回退和保留边界；EP43/v0.95.0，制作、Pages及线上完整媒体/播放器核验通过。

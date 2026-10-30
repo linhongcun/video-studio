@@ -1,7 +1,7 @@
 # MQ01 · 存储与执行的源码机制修订
 
 <!-- mq-source-depth-current-status -->
-当前：本修订已正式冻结、编码，并通过非作者成片及本地网页复核。完整媒体SHA、实际范围和发布进度见[批次记录](../../../../docs/archive/2026-10/mq-source-depth-remake/README.md)。下文保留制作阶段记录；GitHub上线状态以后续实际回执为准。
+当前：本修订已随v0.96.1更新原页面，通过非作者成片、本地及原生线上复核，重制#443已completed关闭。完整媒体SHA与实际检查范围见[批次记录](../../../../docs/archive/2026-10/mq-source-depth-remake/README.md)。下文保留制作阶段记录。
 <!-- /mq-source-depth-current-status -->
 
 保留EP10 / `message-queue` / 《订单已提交，为什么还没处理完？》、创建/首发身份与旧封面。制作基线`923305b49cea1b18d7fc7e4dd8ac70ad830bc673`，批次[#443](https://github.com/linhongcun/video-studio/issues/443)。本目录是全新输入与配音/时序/模型/动画，旧冻结、takes、QA、媒体没有被覆盖。没有复制旧输出或旧验证结果作为新验收。
