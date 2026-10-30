@@ -1,0 +1,75 @@
+{
+  "passed": true,
+  "operation": "pixel conversion full-range BT.601 to limited BT.709, not relabeling",
+  "command": [
+    "ffmpeg",
+    "-v",
+    "error",
+    "-y",
+    "-i",
+    "episodes-codex/kafka-log-replay/remotion/out/color-raw-probe.mp4",
+    "-map",
+    "0:v:0",
+    "-map",
+    "0:a:0",
+    "-vf",
+    "scale=in_range=pc:out_range=tv:in_color_matrix=bt601:out_color_matrix=bt709,format=yuv420p,setparams=range=limited:color_primaries=bt709:color_trc=bt709:colorspace=bt709",
+    "-c:v",
+    "libx264",
+    "-preset",
+    "veryfast",
+    "-crf",
+    "18",
+    "-threads",
+    "4",
+    "-pix_fmt",
+    "yuv420p",
+    "-color_range",
+    "tv",
+    "-colorspace",
+    "bt709",
+    "-color_primaries",
+    "bt709",
+    "-color_trc",
+    "bt709",
+    "-fps_mode",
+    "passthrough",
+    "-video_track_timescale",
+    "90000",
+    "-c:a",
+    "copy",
+    "-map_metadata",
+    "-1",
+    "-movflags",
+    "+faststart",
+    "episodes-codex/kafka-log-replay/remotion/out/color-bt709-probe.mp4"
+  ],
+  "input": {
+    "pix_fmt": "yuvj420p",
+    "color_range": "pc",
+    "color_space": "bt470bg",
+    "color_transfer": null,
+    "color_primaries": null
+  },
+  "output": {
+    "pix_fmt": "yuv420p",
+    "color_range": "tv",
+    "color_space": "bt709",
+    "color_transfer": "bt709",
+    "color_primaries": "bt709"
+  },
+  "decodedFirstFrameColor": {
+    "pix_fmt": "yuv420p",
+    "color_range": "tv",
+    "color_space": "bt709",
+    "color_primaries": "bt709",
+    "color_transfer": "bt709",
+    "side_data_list": [
+      {
+        "side_data_type": "H.26[45] User Data Unregistered SEI message"
+      }
+    ]
+  },
+  "frames": 10,
+  "outputSHA256": "3ae6c9beee01764303a05a8f9cdd252ff1e55a2a0687a3d6a8c747ebd0195866"
+}

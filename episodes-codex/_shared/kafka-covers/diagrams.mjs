@@ -41,8 +41,28 @@ function mq02(){
  return content+box(30,310,540,100,C.blue)+text('points-group',300,348,'积分组 · 独立订阅',28,C.blue)
   +text('points-all',300,390,'S1 ← P0 + P1 · 完整四条',25,C.text);
 }
+/** MQ03: retained P0 log and an explicit inactive-group committed-offset reset. */
+function mq03(){
+ let content=box(30,7,540,192,C.blue)
+  +text('replay-log',300,47,'Kafka · P0保留日志',31,C.blue);
+ for(const [i,event] of ['E01','E03'].entries()){
+  const x=54+i*270;
+  content+=box(x,67,222,86,C.edge,C.background,9)
+   +text(`replay-offset-${i}`,x+111,99,`位置 ${i}`,24,C.muted)
+   +text(`replay-event-${i}`,x+111,139,event,31,C.text);
+ }
+ content+=text('replay-retained',300,183,'读取与提交，都不删除记录',26,C.text);
+ content+=box(30,244,540,166,C.orange)
+  +text('reset-inactive',300,281,'通知组停用后 · 仅重置P0',27,C.orange)
+  +text('reset-label',300,312,'已提交恢复位点',22,C.muted)
+  +text('reset-before',156,361,'2',39,C.muted)
+  +text('reset-arrow',300,360,'→',37,C.orange)
+  +text('reset-after',444,361,'0',39,C.orange)
+  +text('restart',300,393,'重启后，从位置0重新读取',24,C.text);
+ return content+`<path d="M30 328H7V111H30M20 104L30 111L20 118" fill="none" stroke="${C.orange}" stroke-width="3" stroke-linejoin="round"/>`;
+}
 export function diagram(slug,portrait=false){
  if(!SUPPORTED_SLUGS.includes(slug))throw new RangeError(`Unsupported Kafka cover diagram: ${slug}`);
- return `<g data-kafka-diagram="${slug}" data-orientation="${portrait?'portrait':'landscape'}" font-family="${esc(style.fontFamily)}" shape-rendering="geometricPrecision" text-rendering="optimizeLegibility">${slug==='message-queue'?mq01():mq02()}</g>`;
+ return `<g data-kafka-diagram="${slug}" data-orientation="${portrait?'portrait':'landscape'}" font-family="${esc(style.fontFamily)}" shape-rendering="geometricPrecision" text-rendering="optimizeLegibility">${slug==='message-queue'?mq01():slug==='kafka-consumer-groups'?mq02():mq03()}</g>`;
 }
-export const SUPPORTED_SLUGS=Object.freeze(['message-queue','kafka-consumer-groups']);
+export const SUPPORTED_SLUGS=Object.freeze(['message-queue','kafka-consumer-groups','kafka-log-replay']);
