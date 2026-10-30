@@ -1,0 +1,130 @@
+---
+title: 'Kafka发送确认：消息发出后，怎样才算发送成功？'
+summary: '跟着E01进入分区批次队列、Sender在途集合和Broker日志，看成功回应如何完成原Future，再用同批重传与新会话重发解释写入结果。'
+chapters:
+  - { id: problem, title: 发送为何尚未确认 }
+  - { id: mechanism, title: 缓冲、在途与成功回应 }
+  - { id: retry, title: 缺回应时怎样认出重传 }
+  - { id: boundary, title: 发送证据的边界 }
+related: [message-queue, kafka-log-replay]
+---
+
+## 发送为何尚未确认 {#problem}
+
+网站向Kafka发送订单7042的通知事件E01。发送方法已经返回，页面能否立即显示“发送成功”？又为什么有时Kafka已经记下了事件，发送方最后却只得到超时？
+
+要看清这个问题，需要把记录实际经过的结构与发送方能观察到的结果对应起来：调用方先把记录交到按分区组织的本地批次队列，后台Sender取出可发送的批次并等待回应；成功回应完成的是原来那一批记录所关联的结果对象。下游通知业务是否完成，是另外一条处理链。
+
+本文固定Apache Kafka和Java客户端4.4.0，官方提交为`1156b2752aaa28eafc0b4c4d387e63356793268d`。只跟踪`orders`主题P0的一条记录、一批发送；数组、队列、身份数字与故障情景均为源码约束的教学示例，不是实际Broker或网络故障注入的日志。
+
+<span id="confirmed"></span>
+
+## 缓冲、在途与成功回应 {#mechanism}
+
+### 记录先装进本分区的批次
+
+`KafkaProducer.doSend`先取得必要的主题元数据，进行编码、选择分区，再调用`RecordAccumulator.append`。这里的缓冲不是把所有记录混在一张清单里：每个有效分区对应一个批次队列，记录可以加入该分区尚未装满的末批；需要新批时，创建`ProducerBatch`并放到队尾。
+
+<SourceQuote sourceId="R2" supports="有效分区各自映射到一个ProducerBatch双端队列，记录按该分区批次组织。" translation="为有效分区取得其批次队列；没有时创建新的双端队列。" />
+
+调用方取得的Future与本批的完成结果相连。`ProducerBatch.tryAppend`为单条记录保存共享的`ProduceRequestResult`与批内下标，同时保存回调；`KafkaProducer`将这个Future交回调用方。它不是一条由Broker返回的成功证明。本片选择调用返回时仍待定的合法调度；实际调用也可能等待元数据或缓冲空间，甚至在返回前已经完成发送。
+
+<SourceQuote sourceId="R1" supports="doSend在本地append之后返回该次append所得Future，而非在这里等待Broker成功响应。" translation="返回这次附加记录所关联的结果对象。" />
+
+### 后台为什么还要保存“在途”批次
+
+Sender先检查可发送条件与目标连接，再从相关分区的队首取批，把它记入在途集合并构造Produce请求。在途集合保存的是还在等待回应的批次，不是“已经确认成功”的清单。
+
+<SourceQuote sourceId="R3" supports="Sender把取出的批次登记到在途集合，继续跟踪尚未完成回应的发送。" translation="将这些批次登记到在途集合。" />
+
+<Figure src="article/01-sender-inflight.jpg" caption="B1已从P0队列取出并保留在途；原F1仍等待同一批次的完成结果。" alt="B1已从P0队列取出并保留在途；原F1仍等待同一批次的完成结果。" seekTo={56.500000000} />
+
+本次请求R1还保存了“P0对应哪一批”的映射。收到R1的分区回应时，后台借这张请求上下文找到原批次，而不是仅凭一个分区号，从任意批次里选一个结果来完成。
+
+### 成功结果怎样回到原Future
+
+Broker对新批完成有效性检查、追加日志，并按本例`acks=all`等固定条件产生成功回应。回应抵达Sender后，原批次进入完成路径：填入返回位置，调用记录回调，最后解除Future等待。回调和Future是同一次发送完成的两种观察方式，不是两次独立确认。
+
+<Figure src="article/02-original-future-complete.jpg" caption="R1成功回应通过请求上下文找到原B1，同一次批次完成通知回调并解除原F1等待。" alt="R1成功回应通过请求上下文找到原B1，同一次批次完成通知回调并解除原F1等待。" seekTo={79.333333333} />
+
+对E01，本例返回P0、位置0，能够定位这一次写入。下游通知仍可能尚未处理；发送成功结果不会替业务宣告完成，也不会将原日志删除。
+
+<span id="unknown"></span>
+
+## 缺回应时怎样认出重传 {#retry}
+
+### 先重置对照，再保留原批次身份
+
+保持同一个E01，将日志重置为空重新对照。此次Broker已经追加E01，但成功回应没有被发送方处理。客户端遇到可重试失败后，会重新发送原批次，而不是把应用事件重新当作一次新的`send`。
+
+这批发送在**首次出队发送时**已经带上了发送者当前身份与本分区的序号。第10镜只是展开查看原有标记，没有在重试发生后补造身份。本例的对应关系是：
+
+| 图中标记 | 实际记录批字段 | 本例值 |
+|---|---|---|
+| 发送者A | `producerId` | 501 |
+| A的当前代次 | `producerEpoch` | 0 |
+| 本分区批序号范围 | `baseSequence` / `lastSequence` | 0..0 |
+
+`RecordAccumulator`只给尚未分配序号的批次设置这些字段；已有序号的原批重试不重分身份或序号。本片不展开事务、生产者身份恢复和序号环绕，也不把这个范围当成跨分区全局序号。
+
+### Broker认的是发送身份与序号，不是eventId
+
+Broker的`UnifiedLog`先用收到的`producerId`找到本分区内该发送者的状态，再用`ProducerStateEntry.findDuplicateBatch`比较相同代次与完整序号范围。业务`eventId`或key没有参与这次重复批判断。
+
+<SourceQuote sourceId="R4" supports="Broker先用批中的producerId查找已保存的生产者状态，而不是使用业务事件编号查询。" translation="使用收到批次中的生产者ID，取得该生产者最近保存的状态。" />
+
+<SourceQuote sourceId="A1" supports="同一producerId对应的状态要求代次相同，再匹配完整的起始/末尾序号范围；仅有同一业务编号不足以命中。" translation="代次不同就不命中；代次相同才查找完整序号范围对应的已知批次。" />
+
+命中原批时，Broker直接返回原来的位置0，并跳过再次追加。日志末端不会先增加再回滚，原E01@0也没有被响应“取走”。
+
+<Figure src="article/03-broker-duplicate.jpg" caption="收到的A·0和完整序号范围0..0匹配近期状态，Broker复用原位置0，日志仍一条。" alt="收到的A·0和完整序号范围0..0匹配近期状态，Broker复用原位置0，日志仍一条。" seekTo={124.733333333} />
+
+这里有一个重要前提：本例原批的近期状态仍被保存。4.4.0的`ProducerStateEntry`最多保留近期五批元数据，代次改变还会清空旧批元数据；它不是永久保存全部业务事件的去重表。本例单批、单记录、`max.in.flight=1`，重试期间没有让旧批状态被后来的批次挤出。
+
+### 没有成功回应，为什么最后仍可能失败
+
+本例进一步固定：原请求及内部重试的成功回应，在总发送期限内都没有被客户端处理。虽然Broker认出了重复批并能返回原位置，发送方F1仍然没有成功证据。
+
+Sender在总`delivery.timeout.ms`到达时，以Kafka的`TimeoutException`完成失败；这与调用者给`Future.get`设置一次很短的等待时间不同。批次终态只能完成一次，迟到成功不能把已失败的F1翻成成功；失败也不会撤销远端已经追加的E01。
+
+<SourceQuote sourceId="A2" supports="ProducerBatch的终态一旦设置便不再改变；源码CAS执行路径与迟到成功分支共同支持失败不翻转的边界。" translation="终态一旦设置，就是不可变的。" />
+
+### 应用新会话重发，为什么可新增一条
+
+若应用关闭A，再建立非事务生产者B重新调用`send(E01)`，本例B取得新的`producerId=902`。它不是A原批次的自动重传：B没有继承A的旧批元数据，只能按自己的有效初始序号接受校验。通过校验后，同一个业务E01可以追加到位置1。
+
+未命中重复并不意味着无条件追加。Broker还会检查代次和序号规则；非法顺序可能直接报错。本例选择的是一个合法的新发送。
+
+<Figure src="article/04-new-session-append.jpg" caption="新会话B的合法发送追加E01到位置1并完成F2；旧F1仍失败，原E01@0保留。" alt="新会话B的合法发送追加E01到位置1并完成F2；旧F1仍失败，原E01@0保留。" seekTo={150.333333333} />
+
+因此，生产幂等解决的是相应发送身份与批次序号下的重复发送问题，不会自动把任意应用重发都认成同一个业务操作。消费或业务效果的去重，仍需要其自己的规则。
+
+## 发送证据的边界 {#boundary}
+
+再看一个确定未发送的短对照：同一空日志起点，本地编码直接失败。由于该错误发生在入批次缓冲之前，此记录没有产生相应Produce发送，也没有先返回等待结果的Future。这只是本例明确固定的同步编码错误，不能把所有异常都概括为“肯定没写入”；在编码前取得元数据也可能涉及网络，所以不能说整个调用绝无网络访问。
+
+本片固定Java客户端4.4.0、非事务发送、P0一记录一批、`acks=all`、`enable.idempotence=true`、`max.in.flight.requests.per.connection=1`、`linger.ms=0`、`request.timeout.ms=45000`、`delivery.timeout.ms=120000`。RF3、minISR2、当前ISR3稳定满足本例确认前提；正文不展开副本选举或MQ15的ISR确认算法，不承诺所有副本刷盘、任意故障零丢失。等待被压缩，动画不是实时计时或性能测试。
+
+本轮还做了一个范围明确的源码级单元实验：Java21直接编译未修改的官方`ProducerStateEntry`与`BatchMetadata`，链接官方Kafka4.4.0接口，以动态代理RecordBatch只提供被测试的代次/序号字段。15项条件检查通过，包括相同代次/完整范围命中、变更代次或范围不命中、近期五批保留边界。它没有运行真实Broker、ProducerStateManager、网络或序列化记录，不能扩大成端到端Kafka实测。动画另由82项断言通过的有限模型驱动，二者分别记录。
+
+## 小结
+
+调用返回，不代表已经发送成功。成功结果来自内部对**同一批次**的回应与完成，能给出本次写入的证据；缺少成功结果时，日志仍可能已有记录。同批重传靠发送者身份和序号识别，应用的新发送与下游业务完成还各有自己的边界。
+
+## 参考资料
+
+以下原始类符号来自Apache Kafka官方4.4.0固定提交，机构为Apache Kafka，核验日期2026-10-30（北京时间）；未见明确公开个人署名。片尾仅保留四个原题与机构；完整调用链与内部差异条件另见制作研究记录。
+
+- Apache Kafka：[KafkaProducer](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java)；doSend 1065–1126；本地编码异常1147–1150。[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java)。
+
+- Apache Kafka：[RecordAccumulator](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/RecordAccumulator.java)；append319–355/428–436；drain924–982。[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/RecordAccumulator.java)。
+
+- Apache Kafka：[Sender](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/Sender.java)；sendProducerData380–453；sendProduceRequest896–947；completeBatch691–763。[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/Sender.java)。
+
+- Apache Kafka：[UnifiedLog](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java)；analyzeAndValidateProducerState1402–1421；append1255–1280。[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java)。
+
+- Apache Kafka：[ProducerStateEntry](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/ProducerStateEntry.java)；findDuplicateBatch128–136；addBatch88–103。[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/ProducerStateEntry.java)。
+
+- Apache Kafka：[ProducerBatch](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/ProducerBatch.java)；done281–313；completeFutureAndFireCallbacks316–342。[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/ProducerBatch.java)。
+
+- Apache Kafka：[ProducerAppendInfo](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/ProducerAppendInfo.java)；checkSequence156–193；appendDataBatch223–232。[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/ProducerAppendInfo.java)。

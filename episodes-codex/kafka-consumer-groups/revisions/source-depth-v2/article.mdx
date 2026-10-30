@@ -1,0 +1,97 @@
+---
+title: '多个消费者：分工处理，还是每人一份？'
+summary: '沿Kafka4.4.0经典消费组的范围分配，逐步算出分区归属表，再看结果怎样安装到消费者并决定Fetch请求。'
+chapters:
+  - { id: problem, title: 先看问题与输入 }
+  - { id: assignment, title: 分区归属表怎样算出 }
+  - { id: fetch, title: 安装列表后按表读取 }
+  - { id: independent, title: 另一个组为什么各得一份 }
+related: [message-queue, kafka-log-replay]
+---
+
+## 先看问题与输入 {#problem}
+
+通知和积分都需要四条订单事件，通知服务内部又有三个实例。为什么有的实例只读一半，第三个一直空闲，积分服务却仍能独立读全？关键是**分区归属表怎样计算、安装，以及读取请求是否按这张表构造**。
+
+本例只有主题 `orders`，P0保存E01/订单7042与E03/7044，P1保存E02/7043与E04/7045；各分区位置分别是0、1。通知组 `notify` 有三名成员，积分组 `points` 只有S1，两组从仍保留的开头位置0读取。示例数字不是性能测量。
+
+实现固定Apache Kafka/Java客户端4.4.0，显式选择 `group.protocol=classic` 和 `RangeAssignor`。相同订阅只包含 `orders`；不设置 `group.instance.id` 或 `client.rack`。这组前提使我们能直接跟随常规范围分配，不是在介绍所有Kafka协议或默认策略。
+
+N1/N2/N3是本轮成员编号 `member-01`、`member-02`、`member-03` 的教学短名。排序依据是成员编号，既不是启动先后，也不是 `client.id` 显示名。取N1为本轮组内分配者只是示例选择，和“排序最前所以必为leader”无关。
+
+## 分区归属表怎样算出 {#assignment}
+
+在经典组中，协调者按group.id聚合同组成员。成功入组后，本轮组内leader取得成员订阅信息，**由这个消费者客户端调用所选分配器计算**。协调者在Broker侧协调组状态，但不会按消息逐条轮流决定推给谁。
+
+`ConsumerCoordinator.onLeaderElected`把本组订阅与分区元数据交给分配器。Range先将分区按编号排序，将无静态身份的成员按member.id排序，并为所有成员创建空归属列表。然后逐主题计算：
+
+| 输入 | 值 |
+|---|---|
+| 按编号排列的分区 | P0、P1 |
+| 按成员编号排列的成员 | N1、N2、N3 |
+| 每人的基础份额，2除以3取整数商 | 0 |
+| 剩余分区，2除以3的余数 | 2 |
+
+<SourceQuote sourceId="R1" supports="这行实际执行代码说明每人基础份额来自分区数除以本组订阅该主题的成员数，采用整数除法。" />
+
+`maxAssignable`在基础份额上，给仍有余数时的当前成员多一个名额。`assignRanges`按排序扫描未分配集合，取允许的数量；`onAssigned`写入成员列表、减少余数，并移除已分配的分区标识：
+
+1. N1可取一个，得到P0；待分配集合只剩P1，余数从2变1。
+2. N2可取一个，得到P1；待分配集合清空，余数从1变0。
+3. 没有剩余分区，循环结束，N3保留初始化的空列表。
+
+移出的是**尚未分配的分区候选标识**，不是把日志内的消息搬走。如果改成三个分区和三名成员，这个策略将算出每人一个，第三名就不再空闲。多主题时Range会按每个主题分别算，不保证所有主题合起来的全局工作量完全平均。
+
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/01-assignment-table.jpg" alt="两次分配后，P0归N1、P1归N2；待分配集合为空，N3列表保持空。" caption="教学示例：两次分配后，P0归N1、P1归N2；待分配集合为空，N3列表保持空。" seekTo={86.066666667} chapter="assignment" />
+
+算完的整张表经SyncGroup交回协调者。成功处理后，协调者为每名成员存下其assignment，并在各成员响应中带回对应列表。
+
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/02-member-responses.jpg" alt="协调者为N1、N2、N3分别带回各自的分区列表。" caption="教学示例：协调者为N1、N2、N3分别带回各自的分区列表。" seekTo={97.500000000} chapter="assignment" />
+
+<SourceQuote sourceId="R4" supports="协调者返回的是当前成员自己的assignment；这一行不是向组内所有人广播整张消息日志。" />
+
+## 安装列表后按表读取 {#fetch}
+
+消费者取得自己的返回列表后，会反序列化、校验与当前订阅是否匹配，再调用 `subscriptions.assignFromSubscribed(assignedPartitions)`。`SubscriptionState`将这些分区安装为本地assignment状态，连同每分区读取位置等状态继续维护。
+
+<SourceQuote sourceId="R2" supports="这条真实调用把解析出的分区列表交给本地订阅状态，连接了协调结果和之后的读取路径。" />
+
+正常客户端准备Fetch时，先从assignment中枚举可读取分区，再过滤暂停、无有效读取位置或已有待交付缓存等情况。`AbstractFetch.prepareFetchRequests`取得这些分区与各自位置，找到目标节点，并逐项加入请求。
+
+<SourceQuote sourceId="R3" supports="Fetch准备先取得可读取且尚无缓冲数据的分区集合，再沿这一集合构造请求；本例的集合来源是已安装的assignment。" />
+
+在本例位置已经就绪、未暂停且节点可用的前提下，N1的本地列表只有P0，所以其请求填入P0；N2填入P1。N3的列表为空，这条数据读取路径就没有分区可填，但这不表示N3没有心跳、管理请求或任何网络流量。
+
+Broker按收到的分区请求返回数据。这里解释的是正常客户端如何准备请求，并不是说分区归属表本身就是Broker逐请求强制执行的安全权限，也不是业务恰好一次保证。成员变化后的完整重平衡、失败恢复和其他分配策略不在本片展开。
+
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/03-assignment-fetch.jpg" alt="N1装入P0列表，按P0起点0准备请求并收到P0两条记录；原日志保留。" caption="教学示例：N1装入P0列表，按P0起点0准备请求并收到P0两条记录；原日志保留。" seekTo={109.600000000} chapter="fetch" />
+
+## 另一个组为什么各得一份 {#independent}
+
+积分服务用独立group.id，分配器只拿这个组的成员名单重新计算。两个分区、一个S1，基础份额为2、余数为0，所以它安装 `{P0,P1}` 并分别请求两个分区。这个结果不会撤销通知组三个人已经安装的归属。
+
+两组有各自的读取/恢复进度。两组都从示例中仍保留的开头读取时，都能取得同样四条事件。通知组读过或提交进度不会删除日志；历史数据能否取到，仍取决于保留范围与具体起点，新组并非无条件取得全部历史。
+
+本轮保留了真实源码执行与有限教学模型的独立记录：算法调用实验检验官方Range实现的具体分配结果；图中步骤按相同输入更新候选和归属表。两者不冒充完整Kafka集群、JoinGroup/SyncGroup/Fetch端到端运行。实际执行范围和命令在本修订研究记录中分别声明。
+
+<Figure src="/video-studio/episodes/kafka-consumer-groups/article/04-two-groups.jpg" alt="通知组按成员分工，积分组独立读到四条事件；同一份日志记录仍保留。" caption="教学示例：通知组按成员分工，积分组独立读到四条事件；同一份日志记录仍保留。" seekTo={147.733333333} chapter="independent" />
+
+## 小结
+
+不同消费组各算自己的分区归属表；同组成员安装各自负责的分区列表。正常客户端再按列表准备读取请求，才形成了“组间各读一份、组内按分区分工”的结果。分区数限制、排序与份额都来自本例具体协议和策略，不能省略前提推广到所有Kafka消费方式。
+
+## 参考资料
+
+本轮核验日期2026-10-30，以下均为Apache Kafka官方4.4.0固定提交源码原始文件名；机构为Apache Kafka，无明确单一个人署名。完整原文、执行行与条件保留在制作目录的研究和源码映射中。
+
+- [RangeAssignor.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/RangeAssignor.java) — Apache Kafka；Apache Kafka 4.4.0 / 1156b2752aaa28eafc0b4c4d387e63356793268d。对应实现范围：TopicAssignmentState constructor, line249。
+- [ConsumerCoordinator.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java) — Apache Kafka；Apache Kafka 4.4.0 / 1156b2752aaa28eafc0b4c4d387e63356793268d。对应实现范围：onJoinComplete, line465。
+- [AbstractFetch.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java) — Apache Kafka；Apache Kafka 4.4.0 / 1156b2752aaa28eafc0b4c4d387e63356793268d。对应实现范围：prepareFetchRequests, line432。
+- [GroupMetadataManager.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/group-coordinator/src/main/java/org/apache/kafka/coordinator/group/GroupMetadataManager.java) — Apache Kafka；Apache Kafka 4.4.0 / 1156b2752aaa28eafc0b4c4d387e63356793268d。对应实现范围：propagateAssignment, line7962。
+
+固定提交原始源码字节入口：
+
+- [RangeAssignor.java（原始文件）](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/RangeAssignor.java)。
+- [ConsumerCoordinator.java（原始文件）](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java)。
+- [AbstractFetch.java（原始文件）](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java)。
+- [GroupMetadataManager.java（原始文件）](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/group-coordinator/src/main/java/org/apache/kafka/coordinator/group/GroupMetadataManager.java)。

@@ -1,42 +1,44 @@
 {
   "schemaVersion": 1,
-  "createdAtUTC": "2026-10-30T00:28:57.551126+00:00",
+  "createdAtUTC": "2026-10-30T12:59:47.568238+00:00",
   "episode": "kafka-consumer-groups",
   "inputs": {
-    "bodySHA256": "2325bebbf6c3718dbdcd720a7c6a0d6b9c4f94afa9841ee7cf5723b0f8dfaebf",
-    "referencesSHA256": "d37ef7c5381c47ba6a8900573baaa447a094686ad5f15ce43d1c587d07d57380",
-    "generatorSHA256": "fc235f2a2c995d8df43f70ef1c7b29f7d1b03b59f5630c99403352b0557082ad",
+    "bodySHA256": "08d28518c2b8fef04190b554f557da632f89108574c8a9a2f2e6e3382c885429",
+    "referencesSHA256": "d55c409387096a85a281a523ef6aca1f24695d9ec9cf5feede01a73acd530f6d",
+    "generatorSHA256": "f4cd95be711c261863a7ea104c03bd5fb3d086984f8b35f1c186d1439baf8603",
     "themeSHA256": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
     "fontSHA256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
     "boldFontSHA256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb",
     "secondsPerPage": 5
   },
-  "body": "/workspace/video-studio/episodes-codex/kafka-consumer-groups/remotion/out/body.mp4",
-  "references": "/workspace/video-studio/episodes-codex/kafka-consumer-groups/references.json",
-  "output": "/workspace/video-studio/episodes-codex/kafka-consumer-groups/video.mp4",
-  "outputSHA256": "6476246b240a58f5c9904a6606aec5501b66fe00e945169f127f5187258d33af",
-  "bodyFrames": 3445,
-  "finalVideoFrames": 3595,
+  "body": "/workspace/video-studio/episodes-codex/kafka-consumer-groups/revisions/source-depth-v2/remotion/out/body.mp4",
+  "references": "/workspace/video-studio/episodes-codex/kafka-consumer-groups/revisions/source-depth-v2/references.json",
+  "output": "/workspace/video-studio/episodes-codex/kafka-consumer-groups/revisions/source-depth-v2/video.mp4",
+  "outputSHA256": "43b1115336b22f14e257352690d12bfc65e663bfb3c18c4dc35b8feef9325159",
+  "bodyFrames": 4926,
+  "finalVideoFrames": 5076,
   "fps": "30",
-  "durationSeconds": 119.83333333333333,
+  "durationSeconds": 169.2,
   "appendix": {
     "kind": "references",
-    "from": 3445,
+    "from": 4926,
     "durationInFrames": 150,
     "framesPerPage": 150,
     "sourceIds": [
       "R1",
-      "R2"
+      "R2",
+      "R3",
+      "R4"
     ],
     "pages": [
       {
         "file": "references-01.png",
-        "sha256": "e5284c19ce998f5e91c01f73083a86f79e201d587e4cf358705f20e8655cc745"
+        "sha256": "0ae3a91feab98ca774e5ba86ac9d91f9e35a2ee448abed5185416f302adf8dd0"
       }
     ]
   },
   "audio": "No audio packets added; original AAC stream ends at its original endpoint.",
-  "bodyProductionInputs": "Body was rendered from the independent Kafka MQ02 production manifest with its new narration and timing; full-range BT.601 body pictures are converted once to limited BT.709 before mixing. Earlier MQ01 inputs remain unchanged.",
+  "bodyProductionInputs": "Body was rendered from the independent Kafka MQ02 source-depth-v2 production manifest with its new narration and timing; full-range BT.601 body pictures are converted once to limited BT.709 before mixing. Earlier published production inputs remain unchanged.",
   "tools": {
     "ffmpeg": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers",
     "pillow": "12.3.0",
@@ -55,37 +57,67 @@
   "bibliography": [
     {
       "id": "R1",
-      "title": "Introduction",
+      "title": "RangeAssignor.java",
       "credit": "Apache Kafka"
     },
     {
       "id": "R2",
-      "title": "Design",
+      "title": "ConsumerCoordinator.java",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R3",
+      "title": "AbstractFetch.java",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R4",
+      "title": "GroupMetadataManager.java",
       "credit": "Apache Kafka"
     }
   ],
   "sourceTitles": [
     {
       "id": "R1",
-      "title": "Introduction"
+      "title": "RangeAssignor.java"
     },
     {
       "id": "R2",
-      "title": "Design"
+      "title": "ConsumerCoordinator.java"
+    },
+    {
+      "id": "R3",
+      "title": "AbstractFetch.java"
+    },
+    {
+      "id": "R4",
+      "title": "GroupMetadataManager.java"
     }
   ],
   "quotations": [
     {
       "id": "R1",
-      "text": "Events in a topic can be read as often as needed-unlike traditional messaging systems, events are not deleted after consumption.",
-      "locator": "introduction.md line81",
-      "evidence": "episodes-codex/kafka-consumer-groups/sources/introduction.md"
+      "text": "numPartitionsPerConsumer = consumers.isEmpty() ? 0 : partitionInfos.size() / consumers.size();",
+      "locator": "TopicAssignmentState constructor, line249",
+      "evidence": "episodes-codex/kafka-consumer-groups/revisions/source-depth-v2/sources/RangeAssignor.java"
     },
     {
       "id": "R2",
-      "text": "Our topic is divided into a set of totally ordered partitions, each of which is consumed by exactly one consumer within each subscribing consumer group at any given time.",
-      "locator": "design.md line157",
-      "evidence": "episodes-codex/kafka-consumer-groups/sources/design.md"
+      "text": "subscriptions.assignFromSubscribed(assignedPartitions);",
+      "locator": "onJoinComplete, line465",
+      "evidence": "episodes-codex/kafka-consumer-groups/revisions/source-depth-v2/sources/ConsumerCoordinator.java"
+    },
+    {
+      "id": "R3",
+      "text": "List<TopicPartition> unbuffered = fetchablePartitions(buffered);",
+      "locator": "prepareFetchRequests, line432",
+      "evidence": "episodes-codex/kafka-consumer-groups/revisions/source-depth-v2/sources/AbstractFetch.java"
+    },
+    {
+      "id": "R4",
+      "text": ".setAssignment(member.assignment())",
+      "locator": "propagateAssignment, line7962",
+      "evidence": "episodes-codex/kafka-consumer-groups/revisions/source-depth-v2/sources/GroupMetadataManager.java"
     }
   ],
   "dependencies": {

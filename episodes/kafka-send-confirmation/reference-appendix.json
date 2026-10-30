@@ -1,42 +1,44 @@
 {
   "schemaVersion": 1,
-  "createdAtUTC": "2026-10-30T09:33:49.083488+00:00",
+  "createdAtUTC": "2026-10-30T13:08:56.488808+00:00",
   "episode": "kafka-send-confirmation",
   "inputs": {
-    "bodySHA256": "468acd010e67b0fb060422a69cfdeba7c4f16dcb017ebb1b8052eb0935fd06e0",
-    "referencesSHA256": "9fbc66d9dc749486b78236f9e4515017e148997fe0ae804bef2dbf4b309522ff",
-    "generatorSHA256": "76d8a49d0e405d32cd39eb28b24eca5cdc080d2ba47751b2efcb0a8765a87d5b",
+    "bodySHA256": "c39f6b584684648432d2567b7d0d61e5fa15f9cfa921c619672515c9b1627987",
+    "referencesSHA256": "d6b725bd92ac762b6181cfbc8b35a6074954563f3abd92fdd1856cb7a18552ee",
+    "generatorSHA256": "a3d3f6911ef1ca2b621b812c03f612620363b8ffc62bb1fd4739c895181498ac",
     "themeSHA256": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
     "fontSHA256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
     "boldFontSHA256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb",
     "secondsPerPage": 5
   },
-  "body": "/workspace/video-studio/episodes-codex/kafka-send-confirmation/remotion/out/body.mp4",
-  "references": "/workspace/video-studio/episodes-codex/kafka-send-confirmation/references.json",
-  "output": "/workspace/video-studio/episodes-codex/kafka-send-confirmation/video.mp4",
-  "outputSHA256": "a3dd3f640b0032e363d7010410b496c6321a951b2e6c257ee2fde1efda3c2e13",
-  "bodyFrames": 3417,
-  "finalVideoFrames": 3567,
+  "body": "/workspace/video-studio/episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/remotion/out/body.mp4",
+  "references": "/workspace/video-studio/episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/references.json",
+  "output": "/workspace/video-studio/episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/video.mp4",
+  "outputSHA256": "4808932ac56cc5192446e3dfb419e8cc7ec3b0afb48ef5c8e61cd74467b778e4",
+  "bodyFrames": 5262,
+  "finalVideoFrames": 5412,
   "fps": "30",
-  "durationSeconds": 118.9,
+  "durationSeconds": 180.4,
   "appendix": {
     "kind": "references",
-    "from": 3417,
+    "from": 5262,
     "durationInFrames": 150,
     "framesPerPage": 150,
     "sourceIds": [
       "R1",
-      "R2"
+      "R2",
+      "R3",
+      "R4"
     ],
     "pages": [
       {
         "file": "references-01.png",
-        "sha256": "a600d9742023467cb6dff21d1798f60eead8eeae923914d53eb1eeabc9fec61f"
+        "sha256": "a9290430d933f43379852da7b39116ce7947f768800e8a52325489d338d85250"
       }
     ]
   },
   "audio": "No audio packets added; original AAC stream ends at its original endpoint.",
-  "bodyProductionInputs": "Body was rendered from the independent Kafka MQ04 production manifest with its new narration and timing; full-range BT.601 body pictures are converted once to limited BT.709 before mixing. Earlier MQ01, MQ02 and MQ03 inputs remain unchanged.",
+  "bodyProductionInputs": "Body was rendered from the independent Kafka MQ04 production manifest with its new narration and timing; full-range BT.601 body pictures are converted once to limited BT.709 before mixing. This source-depth-v2 revision retains the existing episode identity while earlier MQ04 frozen inputs remain historical evidence.",
   "tools": {
     "ffmpeg": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers",
     "pillow": "12.3.0",
@@ -55,37 +57,67 @@
   "bibliography": [
     {
       "id": "R1",
-      "title": "Design",
+      "title": "KafkaProducer",
       "credit": "Apache Kafka"
     },
     {
       "id": "R2",
-      "title": "Producer Configs",
+      "title": "RecordAccumulator",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R3",
+      "title": "Sender",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R4",
+      "title": "UnifiedLog",
       "credit": "Apache Kafka"
     }
   ],
   "sourceTitles": [
     {
       "id": "R1",
-      "title": "Design"
+      "title": "KafkaProducer"
     },
     {
       "id": "R2",
-      "title": "Producer Configs"
+      "title": "RecordAccumulator"
+    },
+    {
+      "id": "R3",
+      "title": "Sender"
+    },
+    {
+      "id": "R4",
+      "title": "UnifiedLog"
     }
   ],
   "quotations": [
     {
       "id": "R1",
-      "text": "If a producer attempts to publish a message and experiences a network error, it cannot be sure if this error happened before or after the message was committed.",
-      "locator": "Message Delivery Semantics, line191",
-      "evidence": "episodes-codex/kafka-send-confirmation/sources/design.md"
+      "text": "return result.future;",
+      "locator": "KafkaProducer.java line 1126",
+      "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/KafkaProducer.java"
     },
     {
       "id": "R2",
-      "text": "The number of acknowledgments the producer requires the leader to have received before considering a request complete.",
-      "locator": "ACKS_DOC, line133",
-      "evidence": "episodes-codex/kafka-send-confirmation/sources/ProducerConfig.java"
+      "text": "Deque<ProducerBatch> dq = topicInfo.batches.computeIfAbsent(effectivePartition, k -> new ArrayDeque<>());",
+      "locator": "RecordAccumulator.java line 320",
+      "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/RecordAccumulator.java"
+    },
+    {
+      "id": "R3",
+      "text": "addToInflightBatches(batches);",
+      "locator": "Sender.java line 419",
+      "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/Sender.java"
+    },
+    {
+      "id": "R4",
+      "text": "Optional<ProducerStateEntry> maybeLastEntry = producerStateManager.lastEntry(batch.producerId());",
+      "locator": "UnifiedLog.java line 1416",
+      "evidence": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2/sources/UnifiedLog.java"
     }
   ],
   "dependencies": {

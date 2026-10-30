@@ -1,0 +1,109 @@
+---
+title: '订单已提交，为什么还没处理完？'
+summary: '沿订单7042的一条通知任务，从字段编码、分区日志追加，到消费者按位置拉取和业务执行，看清Kafka怎样把存储与处理分开。'
+chapters:
+  - { id: problem, title: 为什么已受理还没完成 }
+  - { id: store, title: 任务怎样变成日志记录 }
+  - { id: execute, title: 消费者怎样取出执行 }
+  - { id: result, title: 回到页面看业务结果 }
+related: [kafka-consumer-groups, kafka-log-replay, kafka-send-confirmation]
+---
+
+## 为什么已受理还没完成 {#problem}
+
+你提交订单7042，网站已经回复“已受理”，通知状态却仍是等待。请求成功与后台做完，为什么不是同一件事？
+
+先把这次流程拆开：网站留下“需要发送订单通知”这份任务数据，消费者程序稍后执行通知。Kafka负责保存和提供这些记录，不会因为收到一条任务，就自动调用订单系统的通知函数。
+
+这里跟随同一事件E01，只有一个主题`orders`、一个分区P0。网站在本例发送成功后回复已受理；页面另外查询应用的业务状态。消费者起初暂停，等记录保存后再恢复读取。它是一条完整路径，不是把不同故障结局接成同一次提交。
+
+这组数据和页面是明确的教学示例。Kafka执行依据来自固定4.4.0源码；应用通知、业务状态与页面策略由本例定义，不用于推断真实网站的内部实现。
+
+## 任务怎样变成日志记录 {#store}
+
+网站首先生成通知所需的数据：
+
+```json
+{"eventId":"E01","orderId":"7042","task":"notify-order"}
+```
+
+这些字段由应用定义。eventId让我们追踪同一任务，orderId说明它对应哪笔订单；task表示本例应用应做什么。对Kafka来说，记录内容最终是字节，不是一段要交给Broker解释执行的业务程序。
+
+本例先把字段组织成JSON文本，再用`StringSerializer`按UTF-8编码。实际实现先执行序列化，拿到字节后才加入生产者待发送缓冲，后台再发往显式指定的P0。
+
+<Figure src="/video-studio/episodes/message-queue/article/01-value-bytes.jpg" alt="同一E01值内容的UTF-8字节预览，右侧是网站的本地待发送缓冲与后台发送状态" caption="教学示例：字段先编码为值字节，再进入发送路径；字节数只对应值内容。" seekTo={44.500000000} chapter="store" />
+
+<SourceQuote sourceId="A1" supports="本例的字符串值通过实际getBytes编码成字节；这是值的编码，不是整条Kafka批次的全部二进制格式。" />
+
+Broker收到记录后，沿着目标分区的日志执行追加。这个例子里P0原来为空，下一可追加位置是0；日志追加路径从当前末尾取得编号，把这条普通新记录分配到位置0。
+
+这不是应用根据订单号生成offset，也不是从整个Kafka集群领取一个全局序号。固定无压缩、格式v2的路径里，验证器按记录推进编号；之后把编码后的记录批次接到当前活跃日志段，日志的下一可追加位置变为1。
+
+<SourceQuote sourceId="A2" supports="实际追加路径将记录字节写入日志文件通道；这个存储动作与调用通知业务是两件事，也不等同每条立即fsync。" />
+
+源码里最能说明因果的三步是：从本分区`logEndOffset`取得下一编号，向活跃段追加记录，再把`logEndOffset`更新为`lastOffset+1`。因此“这条记录编号0”和“下一条从1开始”来自同一份分区日志状态。
+
+offset是逻辑记录位置，不是字节地址。Kafka实际按记录批次和日志段组织内容，格式v2有批次基准offset及记录相对offset；动画中的简化字段和字节预览，不是完整二进制布局，更不是一条消息一个文件。
+
+这条存储链处理的是记录、编号和文件字节。通知程序仍然可以暂停，业务状态也仍然等待，因为追加日志没有调用本例通知函数。
+
+<Figure src="/video-studio/episodes/message-queue/article/02-log-appended.jpg" alt="P0日志已保存E01在位置0，下一可追加位置变为1，通知消费者仍暂停" caption="教学示例：日志追加改变记录与下一编号，尚未执行通知业务。" seekTo={67.666666667} chapter="store" />
+
+网站收到满足本例配置的发送成功结果后，才把任务已受理回给页面。这里的成功说明任务已经进入本例确认范围，不证明通知已发出。单次日志文件append也不等于每条立即`fsync`，本片没有以此作任意故障零丢失的承诺。
+
+## 消费者怎样取出执行 {#execute}
+
+恢复消费者后，它主动发起Fetch请求，请求里带上分区与下一读取位置。本例的客户端从P0的位置0开始，因此可以取得E01。
+
+<SourceQuote sourceId="R2" supports="Kafka消费者通过向目标分区的Broker发出Fetch请求来读取记录；本例再用实际请求字段解释从哪个位置开始。" />
+
+真正的请求构造代码把客户端的`position.offset`装进`FetchRequest.PartitionData`。所以“从0取”不是画面随意安排的箭头，而是一个决定返回记录范围的具体请求参数。如果本例改从1开始，这次就不会返回原来位置0的记录。
+
+返回的是记录的数据，原日志仍在P0。读取不会把那一格从日志搬到消费者里，也不会因为读过就删除它。
+
+<SourceQuote sourceId="R1" supports="事件不会因已消费而从主题中删除，原日志保留和业务是否完成需要分别观察；保留策略仍会限制历史可读范围。" translation="主题中的事件可按需要反复读取；与传统消息系统不同，事件不会因为已消费就被删除。" />
+
+客户端的`StringDeserializer`先把值字节还原为字符串，应用再解析JSON，读出同一个E01和订单7042。反序列化不是自动执行业务，也不等于客户端已经替应用把JSON解析成任意业务对象。
+
+读取路径同时更新客户端的下一位置。实际代码用刚解析的记录offset加1，得到本例的位置1；随后写入客户端读取状态，再把记录通过`poll`返回应用。
+
+<SourceQuote sourceId="A3" supports="解析记录的实现把下一读取位置更新为刚读记录offset加1；本例读到0后下一位置变1，更新本身不是业务完成。" />
+
+于是出现一个关键中间态：读取位置已经是1，通知仍然没有完成。这个1只是消费者下次准备从哪里继续，既不是通知结果，也不是本片要展开的持久化恢复位点。
+
+<Figure src="/video-studio/episodes/message-queue/article/03-read-position.jpg" alt="应用得到同一E01字段，客户端下一读取位置已经为1，但通知业务仍待处理" caption="教学示例：客户端按位置取出记录，推进读取位置，再交给应用；这不是业务完成状态。" seekTo={103.666666667} chapter="execute" />
+
+应用拿到这条数据后，还要显式调用通知功能。模拟处理成功，再单独保存`E01 → completed`的业务结果。日志中的E01仍然存在，日志末尾和读取位置也不会因为通知完成而再跳一次。
+
+## 回到页面看业务结果 {#result}
+
+页面再次查询业务状态，读到E01已经完成，这时才显示通知成功。只检查Kafka里有一条记录，或者看到客户端已经读过它，都不能替代这次业务查询。
+
+<Figure src="/video-studio/episodes/message-queue/article/04-business-result.jpg" alt="订单7042页面查询独立保存的E01业务结果，通知状态才显示发送完成" caption="教学示例：页面查看应用保存的业务结果，不用日志存在替代完成判断。" seekTo={140.500000000} chapter="result" />
+
+| 检查点 | 本例保存或观察的内容 | 还不能代表什么 |
+|---|---|---|
+| 日志已经追加 | E01位于P0/0，下一可追加位置为1 | 通知不一定执行过 |
+| 客户端已经读取 | 同一E01交给应用，下一读取位置为1 | 通知不一定完成 |
+| 应用业务完成 | 本例单独保存E01的通知成功结果 | 需要页面再读取相应业务状态 |
+
+这个分离让接收任务与执行任务不必同时发生。消费者暂停时，任务仍能被保存；但存储不会凭空增加业务处理能力，生产者确认也不会替消费者执行通知。
+
+本例固定Kafka/Java4.4.0、classic消费组、StringSerializer/StringDeserializer UTF-8、无压缩、格式v2，producer显式指定唯一分区P0。演示用单节点RF1、minISR1、acks=all，源记录在流程期间保留；这不是高可用部署建议。消费者`enable.auto.commit=false`、`max.poll.records=1`，初始读取位置为0。副本确认、Sender批次调度、消费组分工、恢复位点和消费幂等各有独立课程，这里保留它们与当前机制相接的边界。
+
+本目录的有限模型确实生成并解码了示例JSON的UTF-8值字节，核对了追加后编号变化、暂停时业务等待、带位置拉取、读取先于业务完成，以及页面另查结果。它不是完整Kafka二进制日志仿真，也没有调用真实通知服务；不能把这些模型输出当成Broker运行日志。
+
+## 参考资料与实现入口
+
+资料固定Apache Kafka/Java4.4.0，核验日期2026-10-30（北京时间），无明确个人署名时使用Apache Kafka机构署名。视频片尾显示实际文档原题与机构，完整版本与源码位置留在这里。
+
+1. Apache Kafka：[Introduction](https://kafka.apache.org/44/getting-started/introduction/)。支持生产者、消费者、主题分区及消费不删除记录。[固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/getting-started/introduction.md)。
+2. Apache Kafka：[Design](https://kafka.apache.org/44/design/design/)。支持按分区Fetch及消费位置。[固定提交原文](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)；[本轮读取的原始字节](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md)。
+
+实际执行路径另读取了以下固定提交源码，没有只停在API说明或注释：
+
+- 字段编码与缓冲顺序：[KafkaProducer.doSend](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L1080-L1111)、[StringSerializer](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/serialization/StringSerializer.java#L34-L57)。
+- 按本分区日志末尾分配编号：[UnifiedLog](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java#L1150-L1182)、[无压缩LogValidator](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/LogValidator.java#L237-L264)。
+- 追加活跃段与更新末尾：[LocalLog](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/LocalLog.java#L529-L532)、[FileRecords](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/record/internal/FileRecords.java#L195-L209)。
+- 带读取位置构造请求：[AbstractFetch](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java#L477-L484)；解码：[StringDeserializer](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/serialization/StringDeserializer.java#L56-L60)。
+- 更新下一读取位置再返回应用：[CompletedFetch](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java#L269-L290)、[FetchCollector](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L204)、[ClassicKafkaConsumer.poll](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java#L662-L679)。

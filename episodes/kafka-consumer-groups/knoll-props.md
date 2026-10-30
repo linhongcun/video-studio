@@ -1,13 +1,11 @@
-# 制作说明
+# MQ02 · 制作说明
 
-身份：MQ02 / EP42 / kafka-consumer-groups。选题issue #310，总览#308。开工清洁工作树，从最新origin/main 68d2d2dbea525f08fce8a10441b77bec243d9ca7建立codex/mq-next-20261030。
+本期独立source-depth-v2重制，13镜26句、四章，当前正文4926帧/164.2秒；对应voice SHA见words.json。根与独立QA已审定脚本/实现主线后才请求TTS，使用共享prep/gen/build/place/onset算法，不复制它们。本机无全片人工语义听辨/逐字ASR宣称。
 
-一个问题：多个消费者为什么有时分工，有时各读完整一份？10镜20句，三个对照共用四事件与两分区，05/08明确重置同一起始位置。时长由实际冰糖配音确定，不把上一期参数当固定片长。
+真实实现依据：固定1156b275…源码，Range/AbstractPartitionAssignor计算表，经典coordinator/客户端交换和安装assignment，SubscriptionState/AbstractFetch枚举列表构造请求。实际编译执行的三份未修改源码与驱动、命令、原始输出在experiment/；这是内存类执行，不是Broker/协议网络实验。有限教学状态在model.json，用真实实验的归属结果交叉核验，图义检查另外完成。
 
-配音：共享voice/prep.py/gen.py/build.py，卡夫卡仅送模替换，字幕保持Kafka；共享句级装配与起音实现，实体public/audio/voice.wav。尚未完成的逐字ASR/全片人工听辨不标通过。
+Main读取真实storyboard和20个深拷贝教学快照。06/07商、余数、候选集合与表格同源；09请求只选已安装P0，10 N3无分区Fetch，11积分组独立表，12两组各自四条而原日志保留。画面数据不随字幕重新计算，不用代码名巡览替代解释。渲染读取实际Kafka style-v1与本地背景副本，右上末镜显示IT小村·原创。
 
-视觉：不可变Kafka style-v1与本期背景副本，主体显示组边界、分区归属、事件读取副本和累计接收集合；记录不被读走。无全局排序、业务成功、恰好一次或故障零丢失宣称。
+目录嵌套适配：ROOT动态查AGENTS；check-references.mjs仅显式提供真实slug给共享checkSources，保持全部原有规则；pipeline-tools.py动态解析共享混音路径；render.py私有函数命名空间仅选择本地来源adapter和资料adapter，不改共享引擎。依赖按本修订锁文件fresh npm ci。
 
-引用：研究与references.json同步；正文后5秒原题/机构列表，字幕与人声在资料页前结束。实际配图选秒数在真实时序后、正式冻结前确定。
-
-流程：来源预检→配音/装配/起音→独立动态预检与封面安全区→停止写源/冻结→默认npm render（含资料卡）→实际编码/网页检查→GitHub站点交付与完整线上SHA→completed关闭#310并更新#308。仅GitHub站点；其他平台无本轮新发。
+来源和字体、实际共享style/references、模型/图位、代码、选定配音/分镜及研究证据都在本修订冻结声明中；此阶段不执行freeze或正式渲染，root统一闸门与串行渲染锁。默认render会先来源/冻结预检，再正文pc601→tv709实际转换、共享混音和同色title-author片尾。旧封面由root发布时原字节复用。

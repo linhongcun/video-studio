@@ -1,81 +1,104 @@
 # Kafka发送确认：消息发出后，怎样才算发送成功？
 
-唯一问题：send调用返回、发送成功结果与最终超时，各能证明什么，哪些结果仍然未知。
+MQ04 / EP44，保留原标题与URL。本轮新声新画面，不复用旧媒体或旧验收。开工主干923305b49cea1b18d7fc7e4dd8ac70ad830bc673，目录仅本revision。
 
-身份：EP.44 / Kafka MQ04 · 发送确认。主线沿订单7042的通知事件E01；固定orders主题P0，所有分支初始日志为空，下游通知待处理。正常、未知、序列化失败三个分支先总览再聚焦，切换必须明确重置；未知分支内部的应用重新send是同分支继续，不重置日志。
+唯一问题：send返回为何不是发送确认；成功、缺回应与重传时，哪些内部状态决定结果。详见outline.md与implementation-map.json；所有画面来自固定版本真实代码约束的教学模型，不冒充真实Broker/网络实验。
 
-画面沿不可变Kafka style-v1。发送方观察、Kafka日志实际内容、下游业务三列固定，事件E01与订单7042始终对应；本例日志追加时显示记录从无到有，回应沿独立回路回到发送方。原记录不被响应或读取移走。先让观众看到查询结果的对象，再标Future；不把send保证为立即返回或保证返回时总为pending，本片仅选择返回时仍pending的正常调度。
+视觉：Kafka style-v1；调用方/F1、本地P0批次队列、Sender在途、Kafka日志和近期生产者状态，分层渐进展开。P1最多淡背景，不成为第二条示例。正常链先完整走通，09/14显式重置空日志，13是缺回应分支的后续新应用send，不重置原日志。保留本批E01与F1身份；箭头流动与结构状态同源。
 
-固定Apache Kafka/Java客户端4.4.0；acks=all，enable.idempotence=true，retries=2147483647，max.in.flight.requests.per.connection=1，request.timeout.ms=45000，delivery.timeout.ms=120000，linger.ms=0，max.block.ms=60000；一条记录独占本批次，元数据已可用。Topic一个分区、RF3/minISR2/currentISR3，非事务，固定前提满足，不在本片展开副本机制。waiting动画非真实时长，省略等待须明示。
+设置：Kafka/Java4.4.0固定commit1156b2752aaa28eafc0b4c4d387e63356793268d，orders/P0，一记录一批、非事务；acks=all、enable.idempotence=true、max.in.flight=1、linger.ms=0；其余确认/重试配置沿本轮research固定。成功范围满足本例acks条件，不画副本轨道或承诺全部刷盘。实际调度可在send返回前完成，本片仅固定返回时仍待定的示例。Future/callback由同一次批次完成驱动，不画成两次确认或声称二者固定同时可见。
 
-未知分支不是Future.get短等待超时：记录已追加且满足本例acks条件，但该批次及其内部自动重试的全部成功响应在总期限前均未被处理；请求失败先触发可重试，最终delivery到期以Kafka TimeoutException完成失败，Future.get对应ExecutionException(cause)。最终失败不会被迟到成功响应改写。关闭旧producer A，应用新producer B再次send同一eventId，为新的应用发送，允许追加offset1；不把producer幂等说成失效，不把eventId当producer去重序列。
+本批发送标记映射：A=producerId501、epoch0、sequence0..0；B=producerId902、epoch0、sequence0..0。首次出队发送时已分配本批标记（不是重试后新加）；10镜只是展开查看。先看“发送者当前身份 A·0 + 批序号0..0”保持不变，再按动作出现producerId/epoch/sequence小标签，口播不背字段定义。Broker只在本例近期状态仍保留时复用offset0；未命中仍需有效epoch/序号校验，不能直接else无条件append。
 
-本地失败分支选择自定义序列化器在send内同步抛SerializationException，先于accumulator.append，因此该记录未入待发送缓冲，未发送该Produce；不说没有任何元数据网络请求。它没有先返回Future，不显示pending或callback；只是这一确定本地错误可判本条未发送，不把所有异常统一为确定失败。
-
-正文后无旁白5秒原题/机构资料列表。文章Figure按实际storyboard时序由root补完再冻结。全部为官方主张约束的有限教学模型，非Broker/网络故障注入实测，不展示伪造终端输出。
+正文不展示源码长卡，最多可在11镜用两行明确“教学伪代码”的条件提示，非必要时只用结构与状态对照。完整调用链/异步回调顺序、幂等状态有限保留和其他失败边界留文章。正文后5秒无旁白原题/机构简表。
 
 ### 01 problem
 
-旁白：网站的发送调用已经返回，就能显示发送成功吗？有时Kafka已经记下来了，发送方却只等到超时。
-画面：订单7042通知发送检查功能，状态“待确认”，业务“通知待处理”；提出冲突，禁止先泄露某个分支为真实结局。
-出处：R1/R2及research.md。
+旁白：网站把订单通知发给Kafka，发送调用返回了，就能显示成功吗？也可能消息已经写入，发送方最后却只等到超时。
+画面：发送调用返回，就能显示成功吗？；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
 ### 02 overview
 
-旁白：先分清发送方、Kafka日志和下游业务。这次分别看发送成功、结果未知、确定未发送，判断每种结果能证明什么。
-画面：三列机制稀疏总览，三路径normal/unknown/serialization；分支不是同一次发送连续经历的三个结局。
-出处：R1/R2及research.md。
+旁白：先跟着同一条事件，看记录怎样走到Kafka，结果又怎样回来。本地缓冲、后台发送和Kafka日志，分别记着不同的状态。
+画面：沿一条事件看内部接力；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
-### 03 send
+### 03 buffer
 
-旁白：先调用发送，返回一个以后查询结果的对象。在这个示例里，记录暂存本地，后台还没发完。
-画面：正常分支；E01在本地缓冲，send返回Future（结果对象）、pending，本例调度下日志空。
-出处：R1及KafkaProducer.java927–951。
+旁白：事件先编码、选好分区，加入这个分区的批次队列。同一分区可合成一批发送，这里只跟踪零号分区的一条事件。
+画面：记录先进入分区批次队列；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
-### 04 confirmed
+### 04 future
 
-旁白：后台把记录写进零号分区，并收到本例要求的成功响应。这个结果对象显示成功，带回分区零、位置零，给出这次发送的证据。
-画面：先追加E01@P0/0，再回传成功，Future成功RecordMetadata；不让成功标签先于回传抵达。
-出处：R1/R2及ProducerConfig.java133–150。
+旁白：调用交回一个等待这次结果的对象，叫作Future。它连着这批记录的完成结果；此刻记录还在本地，结果仍然待定。
+画面：结果对象，连着原来的这批记录；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
-### 05 business
+### 05 inflight
 
-旁白：可下游通知还没处理，订单业务并没有因此完成。发送确认，只回答了这次写入结果，不替下游确认业务成功。
-画面：正常结果回全局，发送方已确认，日志E01保留，下游仍待处理，明确三列边界。
-出处：R1/R2及research.md。
+旁白：后台取出满足发送条件的批次，记入在途集合后发出。在途集合记着哪些批次还在等响应，原来的结果对象继续等。
+画面：后台取出批次，登记在途，再发请求；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
-### 06 unknown
+### 06 append
 
-旁白：回到相同的初始状态，再发送这条事件。这次记录已经写入，但成功响应一直没有被发送方收到。
-画面：明确reset至空日志，聚焦unknown；E01再追加@0，屏蔽成功响应；“实际已写入”在日志观察栏，“仍待结果”在发送方栏。
-出处：R1及ProducerBatch.java263–273。
+旁白：Kafka校验这批记录后，把事件追加在位置零。还会保存这批发送的身份、序号和原位置，后面识别重传要用它们。
+画面：先追加记录，再保存本批发送状态；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
-### 07 auto-retry
+### 07 confirm
 
-旁白：客户端遇到可重试的失败，会在期限内自动重试。本例开启生产幂等，同一批次的重试，没有追加第二条记录。
-画面：自动retry保留producer/session A和batch序列身份，读回同一offset0，没有新增日志记录。时间轴明示“省略等待，非实时时长”。
-出处：R1/R2及ProducerConfig.java307–318。
+旁白：成功响应回来，后台按分区找到刚才那一批，填入返回的位置。同一次完成通知回调，也让原来的结果对象结束等待，给出成功结果。
+画面：成功回应完成原来的结果对象；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
-### 08 timeout
+### 08 business
 
-旁白：总发送期限到达，结果对象最终失败，回调报告超时。发送方没有成功证据，不能据此断定日志里没有记录。
-画面：delivery timeout最终Kafka TimeoutException；后台将同一最终结果传给Future与应用回调（两种观察方式，非两次确认）；Future failed、sender结果未知、日志实际E01@0同时可见，后续不将原Future改成功。
-出处：R1及Sender.java185–216/362–375、ProducerBatch.java263–303。
+旁白：这才是本例的发送成功证据，能定位到零号分区、位置零。下游通知还没处理，写入确认不会替业务宣告完成。
+画面：发送成功，仍不等于业务完成；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
-### 09 app-resend
+### 09 missing-response
 
-旁白：若应用重启后，把同一事件重新调用发送，这是一笔新的发送。这次成功写到位置一，虽然事件编号与原来相同。
-画面：先关闭A，B新producer/session再次send E01，追加@1并成功；自动retry与应用重新send视觉身份分开；原E01@0仍在。
-出处：R1及KafkaProducer.java177–182。
+旁白：现在回到空日志，重新对照同一条事件。这次记录已经追加，但成功响应没有回来，发送方仍在等结果。
+画面：共同起点重置：已追加，却缺少回应；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
-### 10 local-error
+### 10 same-batch
 
-旁白：再回到初始状态，换成发送前就无法编码的内容。本地序列化直接报错，这条记录没进待发送缓冲，日志仍然为空。
-画面：明确reset空日志，序列化器同步抛SerializationException，send未返回Future，无Produce箭头；只断言本条记录没发送。
-出处：R1及KafkaProducer.java1080–1111。
+旁白：遇到可重试失败，后台重传原批次，保留这批发送的标记。重传时仍带着同一个发送者身份，以及原来的批次序号。
+画面：重传原批，发送标记保持不变；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
 
-### 11 recap
+### 11 broker-dedup
 
-旁白：所以，要分清调用返回、发送确认和业务完成。超时可能结果未知；确定的本地编码失败，才是本例明确没发出去的对照。
-画面：回稀疏三路径结果，成功证据/超时未知/本地未发各一简短标签；下游业务仍为独立边界，片尾资料。
-出处：R1/R2及research.md。
+旁白：Kafka找到这个发送者的已存状态，核对身份和完整批序号，认出还是刚才那一批。于是返回原位置零，跳过追加；业务事件编号并不参与这个判断。
+画面：Broker认出旧批，复用原位置；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
+
+### 12 timeout
+
+旁白：可本例的成功响应一直没被处理，总发送期限终于到达。结果对象和回调都报告失败，已经写下的事件却不会因此消失。
+画面：总期限到达，结果失败但记录仍在；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
+
+### 13 new-session
+
+旁白：如果应用关闭旧生产者，再用新会话重发同一事件，发送者身份就换了。这是新的发送，通过校验后可追加到位置一，不是原批次的自动重试。
+画面：新会话重发，已是新的发送；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
+
+### 14 local-failure
+
+旁白：再回到空日志，看一个确定未发出的短对照。本地编码直接失败，事件还没进批次缓冲，也没有先返回等待对象。
+画面：一眼对照：入缓冲前就编码失败；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
+
+### 15 recap
+
+旁白：调用返回，不代表已经发送成功；收到成功结果，才有本次发送的证据。无成功回应可能仍已写入；同批重传认发送身份和序号，不认业务编号。
+画面：调用返回、发送证据、业务完成，各看哪一步；按outline镜表和implementation-map对应条件逐步显示，完成态不得抢先。
+出处：implementation-map.json对应镜号；原始来源见research.md。
+

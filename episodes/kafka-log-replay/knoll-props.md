@@ -1,13 +1,13 @@
-# 制作说明
+# MQ03 source-depth-v2 制作说明
 
-身份：MQ03 / EP43 / kafka-log-replay，issue#311，总览#308。清洁工作区fetch后从9e44109511cac1b0fb54d8aa9383b9d7dfe9074b建立codex/mq03-20261030。新期Remotion按当前锁文件fresh安装，仅复用共享基础设施源码，不继承MQ02回执或冻结。
+当前12镜24句、4章，正文4602帧/153.4秒。voice.wav完整SHA-256 486e6876c1139746f206cf854f5996a8d314d95f64d782b82e02c2dc6a6e27e4，整轨公开音频为实体副本；24句新配，11-retention-1原a短尾0.0806秒被拦截，仅同文选b约0.43秒，另12-recap-1原a的18满幅样本风险也仅同文选无满幅b，最终两个b、22个a保持。声学/句级时序与ASR/人工语义听辨分开。
 
-11镜22句，时长由真实冰糖配音决定。两分区四事件沿同一ID，P1背景进度固定2，P0沿poll/process/commit→独立组→整组停用/reset/restart→保留边界展开。max.poll.records=1与关闭自动提交固定，inactive时读取位置不存在，不把其已提交位置混成业务状态。
+共享voice/prep/gen/build、assemble_sentence_episode、place_v2和onset原实现未复制。nested ROOT由AGENTS定位；来源检查通过本地check-references.mjs显式传真实slug，默认render适配本地CHECKER与Kafka BT709附录，不改共享模块。fresh npmci使用当前MQ04锁图，新工程自己的node_modules，不指向旧ignored目录。
 
-共享voice/prep/gen/build与句级装配负责实际PCM和时序，Kafka仅送模替换为卡夫卡，字幕保持原稿。public/audio/voice.wav必须为实体副本。声学/来源检查、逐字ASR和全片人工语义听辨的实际范围分开记录，不找用户代替质量检查。
+Main逐镜读取本期model.json的23份深拷贝快照，101有限断言；动作由本期真实voice localStart/localEnd驱动。DOM暴露模型态、文字/COPYFIT、移动体、position/committed/log-slice身份，独立QA按真实图义与时序复核。
 
-制作默认沿MQ02已验证limited BT.709正文转换、同色资料adapter与完整附录流程，本期声明/来源/冻结清单/封面输入快照全部重新生成。任何写源修改须先停止预演/排队/编码，明确负责人停写后再冻结。
+默认render完整正文混音后追加title-author资料页，4个实际官方源码文件名与Apache Kafka机构，默认5秒，无原文/定位上屏；pc601→limitedBT709转换与正文/附录编码一致。最终帧数与实际MP4身份由根放行编码后的回执确定，不能把短clip或预期帧数当最终成片。
 
-正式流程：来源预检及独立审稿→配音与声学时序→独立连续动态图/封面→文章图位定秒数→冻结真实输入→默认render含5秒资料列表→成片完整解码与实际编码图→图文截图与本地网页→PR/Release/Pages→普通canonical完整SHA及原生浏览器线上检查→completed关闭311/同步308。仅GitHub站点，无平台新发；技术通过不预记用户观看认可。
+文章四图精确整数帧/秒数在article-figure-plan.json与MDX已定，正式编码前作为输入；截图之后由根select整数帧并从limited709明确转换到full601 JPEG。读取/恢复链有根的RF1 assign(P0)隔离真实实验交叉支持，影片业务、retention/动态组/文件格式演示仍是模型，不泛称已实测。
 
-制作中再次fetch并整合主干72b841c1（v0.94.0）；保留“其他”分类与新站点指导，MQ03明确仍归message-queue。13项上游改动与本期模型、声音、动画、封面及共享渲染输入零交集，候选Release顺延v0.95.0；实际交集记录见qa/upstream-integration.json。
+本代理只做到类型/PNG/短clip自查与独立动态预检交接；不冻结、不正式编码、不写发布目录或站点/git，由根统一放行。

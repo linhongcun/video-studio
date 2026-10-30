@@ -1,0 +1,866 @@
+{
+  "meta": {
+    "title": "Kafka日志重放：消息读过了，为什么还能重读？",
+    "episode": 43,
+    "episodePart": "Kafka MQ03 · 日志重放",
+    "slug": "kafka-log-replay",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 4602,
+    "finalVideoFrames": 4602,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "kafka-series-canvas",
+    "visualRevision": 2,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户要求MQ01–MQ04重制，增加真实源码实现因果且保持可理解；本修订只处理既有EP43，身份/标题/封面保持，根代理统一冻结/正式编码与站点交付。",
+    "palette": {
+      "bg": "#211D1B",
+      "text": "#FFF1E8"
+    },
+    "sampleDataLabel": "实现教学模型 · Kafka 4.4.0 · 日志/内存/恢复值分列",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {},
+    "discussionQuestion": "消费者position已经到1，为什么重启还可能重新请求offset0？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes-codex/_shared/kafka-covers/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "problem",
+      "chapterId": "problem",
+      "title": "旧记录与三个位置",
+      "from": 0,
+      "durationInFrames": 758,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "problem",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 330,
+          "narration": "事件已经读到，消费者一重启，怎么又读到了同一条？这次沿实际读取路径，看看旧记录和恢复位置各自发生了什么。",
+          "subtitles": [
+            {
+              "text": "事件已经读到，消费者一重启，怎么又读到了同一条？",
+              "from": 0,
+              "to": 152,
+              "duration": 153
+            },
+            {
+              "text": "这次沿实际读取路径，看看旧记录和恢复位置各自发生了什么。",
+              "from": 153,
+              "to": 329,
+              "duration": 177
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 142.8,
+              "localStart": 9.0,
+              "localEnd": 142.8
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 153.3,
+              "wavEnd": 309.24,
+              "localStart": 153.3,
+              "localEnd": 309.24
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              153
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 9.0,
+            "wavTo": 309.24,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "为什么同一事件又读到了；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "为什么同一事件又读到了；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "problem",
+          "visualType": "records",
+          "from": 330,
+          "durationInFrames": 428,
+          "narration": "Kafka的零号分区里，事件一保存在位置零；这个编号叫日志偏移量。消费者还有当前读取位置，以及消费组已保存的恢复位置；本例的恢复值已经是零。",
+          "subtitles": [
+            {
+              "text": "Kafka的零号分区里，事件一保存在位置零；这个编号叫日志偏移量。",
+              "from": 0,
+              "to": 200,
+              "duration": 201
+            },
+            {
+              "text": "消费者还有当前读取位置，以及消费组已保存的恢复位置；本例的恢复值已经是零。",
+              "from": 201,
+              "to": 427,
+              "duration": 227
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-records-1",
+              "wavStart": 330.24,
+              "wavEnd": 520.99,
+              "localStart": 0.2400000000000091,
+              "localEnd": 190.99
+            },
+            {
+              "id": "02-records-2",
+              "wavStart": 531.49,
+              "wavEnd": 737.02,
+              "localStart": 201.49,
+              "localEnd": 407.02
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              201
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 330.24,
+            "wavTo": 737.02,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先把三份状态分开；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "先把三份状态分开；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "read",
+      "chapterId": "read",
+      "title": "读取怎样推进当前位置",
+      "from": 758,
+      "durationInFrames": 1087,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "read",
+          "visualType": "read-bytes",
+          "from": 758,
+          "durationInFrames": 399,
+          "narration": "读取请求带着起点零，Broker先定位日志段，再取出相应字节范围返回。源码返回的是日志文件的切片，原来的事件一仍保留在文件里。",
+          "subtitles": [
+            {
+              "text": "读取请求带着起点零，Broker先定位日志段，再取出相应字节范围返回。",
+              "from": 0,
+              "to": 224,
+              "duration": 225
+            },
+            {
+              "text": "源码返回的是日志文件的切片，原来的事件一仍保留在文件里。",
+              "from": 225,
+              "to": 398,
+              "duration": 174
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-read-bytes-1",
+              "wavStart": 758.02,
+              "wavEnd": 973.07,
+              "localStart": 0.01999999999998181,
+              "localEnd": 215.07000000000005
+            },
+            {
+              "id": "03-read-bytes-2",
+              "wavStart": 983.57,
+              "wavEnd": 1136.41,
+              "localStart": 225.57000000000005,
+              "localEnd": 378.4100000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              225
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 758.02,
+            "wavTo": 1136.41,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "按位置读原日志字节；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "按位置读原日志字节；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "read",
+          "visualType": "advance",
+          "from": 1157,
+          "durationInFrames": 319,
+          "narration": "客户端收到事件一后，先用记录位置加一，算出下一次读取位置。再把一写回客户端状态，所以继续读取时会从一开始。",
+          "subtitles": [
+            {
+              "text": "客户端收到事件一后，先用记录位置加一，算出下一次读取位置。",
+              "from": 0,
+              "to": 165,
+              "duration": 166
+            },
+            {
+              "text": "再把一写回客户端状态，所以继续读取时会从一开始。",
+              "from": 166,
+              "to": 318,
+              "duration": 153
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-advance-1",
+              "wavStart": 1157.41,
+              "wavEnd": 1313.27,
+              "localStart": 0.41000000000008185,
+              "localEnd": 156.26999999999998
+            },
+            {
+              "id": "04-advance-2",
+              "wavStart": 1323.77,
+              "wavEnd": 1455.6,
+              "localStart": 166.76999999999998,
+              "localEnd": 298.5999999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              166
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 1157.41,
+            "wavTo": 1455.6,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "推进的只是客户端读取位置；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "推进的只是客户端读取位置；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "read",
+          "visualType": "separate",
+          "from": 1476,
+          "durationInFrames": 369,
+          "narration": "当前读取位置在这个消费者的内存里，保存的恢复位置则属于消费组。本例关闭自动提交，刚才只是读取，没有把已保存的零改成一。",
+          "subtitles": [
+            {
+              "text": "当前读取位置在这个消费者的内存里，保存的恢复位置则属于消费组。",
+              "from": 0,
+              "to": 202,
+              "duration": 203
+            },
+            {
+              "text": "本例关闭自动提交，刚才只是读取，没有把已保存的零改成一。",
+              "from": 203,
+              "to": 368,
+              "duration": 166
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-separate-1",
+              "wavStart": 1476.6,
+              "wavEnd": 1668.62,
+              "localStart": 0.599999999999909,
+              "localEnd": 192.6199999999999
+            },
+            {
+              "id": "05-separate-2",
+              "wavStart": 1679.12,
+              "wavEnd": 1824.41,
+              "localStart": 203.1199999999999,
+              "localEnd": 348.4100000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              203
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 1476.6,
+            "wavTo": 1824.41,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "当前位置不等于持久恢复点；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "当前位置不等于持久恢复点；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "restore",
+      "chapterId": "restore",
+      "title": "恢复值怎样决定再次读取",
+      "from": 1845,
+      "durationInFrames": 1391,
+      "shots": [
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "restore",
+          "visualType": "restart",
+          "from": 1845,
+          "durationInFrames": 332,
+          "narration": "消费者退出，内存里的当前读取位置也就丢了。新消费者没有有效读取位置，就向保存组进度的协调服务查询已提交的值。",
+          "subtitles": [
+            {
+              "text": "消费者退出，内存里的当前读取位置也就丢了。",
+              "from": 0,
+              "to": 123,
+              "duration": 124
+            },
+            {
+              "text": "新消费者没有有效读取位置，就向保存组进度的协调服务查询已提交的值。",
+              "from": 124,
+              "to": 331,
+              "duration": 208
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-restart-1",
+              "wavStart": 1845.41,
+              "wavEnd": 1959.28,
+              "localStart": 0.41000000000008185,
+              "localEnd": 114.27999999999997
+            },
+            {
+              "id": "06-restart-2",
+              "wavStart": 1969.78,
+              "wavEnd": 2156.54,
+              "localStart": 124.77999999999997,
+              "localEnd": 311.53999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              124
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 1845.41,
+            "wavTo": 2156.54,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "退出后从哪里取得位置；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "退出后从哪里取得位置；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "restore",
+          "visualType": "restore",
+          "from": 2177,
+          "durationInFrames": 372,
+          "narration": "查到零以后，恢复代码先用零建立读取位置对象。接着执行这句赋值，把它装进新消费者的当前状态；当前读取位置又成了零。",
+          "subtitles": [
+            {
+              "text": "查到零以后，恢复代码先用零建立读取位置对象。",
+              "from": 0,
+              "to": 145,
+              "duration": 146
+            },
+            {
+              "text": "接着执行这句赋值，把它装进新消费者的当前状态；当前读取位置又成了零。",
+              "from": 146,
+              "to": 371,
+              "duration": 226
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-restore-1",
+              "wavStart": 2177.54,
+              "wavEnd": 2312.51,
+              "localStart": 0.5399999999999636,
+              "localEnd": 135.51000000000022
+            },
+            {
+              "id": "07-restore-2",
+              "wavStart": 2323.01,
+              "wavEnd": 2528.24,
+              "localStart": 146.01000000000022,
+              "localEnd": 351.2399999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              146
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 2177.54,
+            "wavTo": 2528.24,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "把保存的恢复值装回内存；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "把保存的恢复值装回内存；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "restore",
+          "visualType": "fetch",
+          "from": 2549,
+          "durationInFrames": 331,
+          "narration": "构造下一次读取请求时，代码使用的正是当前读取位置。字段现在是零，请求起点就是零，不会因为以前读过而自己变成一。",
+          "subtitles": [
+            {
+              "text": "构造下一次读取请求时，代码使用的正是当前读取位置。",
+              "from": 0,
+              "to": 140,
+              "duration": 141
+            },
+            {
+              "text": "字段现在是零，请求起点就是零，不会因为以前读过而自己变成一。",
+              "from": 141,
+              "to": 330,
+              "duration": 190
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-fetch-1",
+              "wavStart": 2549.24,
+              "wavEnd": 2679.56,
+              "localStart": 0.23999999999978172,
+              "localEnd": 130.55999999999995
+            },
+            {
+              "id": "08-fetch-2",
+              "wavStart": 2690.06,
+              "wavEnd": 2859.44,
+              "localStart": 141.05999999999995,
+              "localEnd": 310.44000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              141
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 2549.24,
+            "wavTo": 2859.44,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "当前值怎样进入读取请求；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "当前值怎样进入读取请求；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "restore",
+          "visualType": "reread",
+          "from": 2880,
+          "durationInFrames": 356,
+          "narration": "Broker再按零读取同一日志范围，事件一就又返回了。偏移量和内容都没变；重复读取来自恢复的起点，不是新生成了一条记录。",
+          "subtitles": [
+            {
+              "text": "Broker再按零读取同一日志范围，事件一就又返回了。",
+              "from": 0,
+              "to": 154,
+              "duration": 155
+            },
+            {
+              "text": "偏移量和内容都没变；重复读取来自恢复的起点，不是新生成了一条记录。",
+              "from": 155,
+              "to": 355,
+              "duration": 201
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-reread-1",
+              "wavStart": 2880.44,
+              "wavEnd": 3025.03,
+              "localStart": 0.44000000000005457,
+              "localEnd": 145.0300000000002
+            },
+            {
+              "id": "09-reread-2",
+              "wavStart": 3035.53,
+              "wavEnd": 3215.87,
+              "localStart": 155.5300000000002,
+              "localEnd": 335.8699999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              155
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 2880.44,
+            "wavTo": 3215.87,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "同一字节再次返回同一记录；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "同一字节再次返回同一记录；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "提交与保留改变什么",
+      "from": 3236,
+      "durationInFrames": 1366,
+      "shots": [
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "boundary",
+          "visualType": "committed-one",
+          "from": 3236,
+          "durationInFrames": 444,
+          "narration": "回到刚读完事件一的同一状态，这次在退出前成功提交下一位置一。重启就把一装回内存，再从一读；文件里仍有事件一，但这次不再从零读取它。",
+          "subtitles": [
+            {
+              "text": "回到刚读完事件一的同一状态，这次在退出前成功提交下一位置一。",
+              "from": 0,
+              "to": 180,
+              "duration": 181
+            },
+            {
+              "text": "重启就把一装回内存，再从一读；文件里仍有事件一，但这次不再从零读取它。",
+              "from": 181,
+              "to": 443,
+              "duration": 263
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-committed-one-1",
+              "wavStart": 3236.87,
+              "wavEnd": 3407.37,
+              "localStart": 0.8699999999998909,
+              "localEnd": 171.3699999999999
+            },
+            {
+              "id": "10-committed-one-2",
+              "wavStart": 3417.87,
+              "wavEnd": 3659.78,
+              "localStart": 181.8699999999999,
+              "localEnd": 423.7800000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              181
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 3236.87,
+            "wavTo": 3659.78,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "只改变是否提交这一条件；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "只改变是否提交这一条件；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "boundary",
+          "visualType": "retention",
+          "from": 3680,
+          "durationInFrames": 408,
+          "narration": "重读还有一个前提：原日志仍被保留。保留策略清理装着事件一的旧封闭段后，日志起点越过零；再取零已越界，改位置也找不回旧字节。",
+          "subtitles": [
+            {
+              "text": "重读还有一个前提：原日志仍被保留。",
+              "from": 0,
+              "to": 125,
+              "duration": 126
+            },
+            {
+              "text": "保留策略清理装着事件一的旧封闭段后，日志起点越过零；再取零已越界，改位置也找不回旧字节。",
+              "from": 126,
+              "to": 407,
+              "duration": 282
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-retention-1",
+              "wavStart": 3680.78,
+              "wavEnd": 3796.0,
+              "localStart": 0.7800000000002001,
+              "localEnd": 116.0
+            },
+            {
+              "id": "11-retention-2",
+              "wavStart": 3806.5,
+              "wavEnd": 4067.48,
+              "localStart": 126.5,
+              "localEnd": 387.48
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              126
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 3680.78,
+            "wavTo": 4067.48,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "旧字节清理后就不能再读；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "旧字节清理后就不能再读；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 4088,
+          "durationInFrames": 514,
+          "narration": "日志保存原记录，当前读取位置决定这次从哪里取，已提交位置决定重启时装回什么。把这三份状态分开，就能解释读过为何能再读，以及为什么旧日志清理后不能凭位置复原。",
+          "subtitles": [
+            {
+              "text": "日志保存原记录，当前读取位置决定这次从哪里取，已提交位置决定重启时装回什么。",
+              "from": 0,
+              "to": 248,
+              "duration": 249
+            },
+            {
+              "text": "把这三份状态分开，就能解释读过为何能再读，以及为什么旧日志清理后不能凭位置复原。",
+              "from": 249,
+              "to": 513,
+              "duration": 265
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-recap-1",
+              "wavStart": 4088.48,
+              "wavEnd": 4326.93,
+              "localStart": 0.4800000000000182,
+              "localEnd": 238.9300000000003
+            },
+            {
+              "id": "12-recap-2",
+              "wavStart": 4337.43,
+              "wavEnd": 4562.61,
+              "localStart": 249.4300000000003,
+              "localEnd": 474.6099999999997
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              249
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 486e6876 + words.json e0add9e9 + script.md 220dc8a6",
+            "wavFrom": 4088.48,
+            "wavTo": 4562.61,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回到为什么能重读；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "direction": "回到为什么能重读；主对象始终为同一E01，按当前动作推进，结果不先于赋值/读操作出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}
