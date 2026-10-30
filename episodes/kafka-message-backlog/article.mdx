@@ -1,0 +1,75 @@
+同一个通知服务从两个消费者扩到十二个，未完成订单通知仍在增加。这里先跟清楚“谁得到哪个分区”，再沿同一事件看“谁真正完成通知”；实例数与业务完成能力不是同一个数。
+
+本文固定Kafka/Java4.4.0、classic消费组、显式RangeAssignor、orders主题两分区、所有成员同组同订阅，无静态成员身份或机架偏好。只讨论稳定分配后的正常客户端路径；不模拟重平衡瞬态的在途业务转交。吞吐和秒数均为下述教学应用的假设，不是Kafka或通知接口benchmark。
+
+## 十二个实例，怎样只得到两份非空列表 {#assignment}
+
+本例原有两位成员，在扩容后的member.id排序中排第七和第十二；新增十位后先重新计算。C01至C12是排好序后的教学别名，不是client.id、到达先后，也不保证真实运行随机产生的成员ID恰好对应这些别名。
+
+RangeAssignor先为每个成员建立空列表，再按成员顺序计算范围。两个分区除以十二：整数商为0，余数为2。前两位各得到一个额外分区，分出去的候选从待分配集合移除；候选耗尽后退出，余下十份列表仍为空。实际源码不是把日志事件逐条轮流推给十二人。
+
+<SourceQuote sourceId="R1" supports="分配状态构造时用整数除法算基础份额，用余数算额外分区名额。" />
+
+<Figure src="/video-studio/episodes/kafka-message-backlog/article/01-twelve-member-assignment.jpg" alt="P0归C01、P1归C02，其余十人空列表，待分配集合为空。" caption="本例按成员编号排序，两个分区只产生两份非空列表；旧C07/C12不保证继续持有。" chapter="assignment" seekTo={75} />
+
+这里的上限是“稳定分配中有多少成员持有分区”，不是Kafka禁止应用创建更多业务线程。本文应用随后明确采用每分区串行通知，不把这项应用选择扩大为所有消费者的固定并发模型。
+
+## 分配列表怎样约束真实拉取 {#processing}
+
+新列表被安装到客户端的assignment集合。SubscriptionState.fetchablePartitions遍历这份集合，并检查位置有效、未暂停、未撤销等状态；AbstractFetch排除已有缓冲的分区后，构造带分区和position.offset的读取请求。本例所有正常前提满足时，C01只能从P0候选构造请求，C02从P1，空列表成员没有分区可放进这条数据Fetch路径；这些成员仍可发送心跳或其他控制通信。
+
+<SourceQuote sourceId="R2" supports="协调结果在客户端被写入本地分区状态集合。" />
+
+<SourceQuote sourceId="R3" supports="请求准备显式读取经过本地状态筛选的分区候选列表。" />
+
+共同起点放在这轮分配稳定之后，才写入并跟踪E01等同批新事件；没有把旧拥有者尚未完成的通知随分配表重算清除。E01是订单7042的通知事件，进入P0位置0。FetchCollector交付记录并推进客户端读取位置，ClassicKafkaConsumer.poll把记录容器交还应用；这条返回语句没有替应用执行本文的通知调用。
+
+<SourceQuote sourceId="R4" supports="正常poll路径把ConsumerRecords交还应用；本文通知调用由应用另行执行。" />
+
+<Figure src="/video-studio/episodes/kafka-message-backlog/article/02-poll-is-not-done.jpg" alt="E01已从P0拉到应用，position前进，但通知仍等待业务成功。" caption="读取位置前进与业务成功是不同动作；原日志仍保留。" chapter="processing" seekTo={108.666666667} />
+
+应用在每个分区内串行调用通知接口，只有成功返回才记业务完成。本例不另建并行业务工作池，也不演失败重试；下面是明确标注的应用教学伪代码，不是Kafka源码：
+
+```text
+for each record returned for this partition:
+    notifyAndWaitForSuccess(record)
+    markBusinessDone(record.eventId)
+```
+
+官方应用示例同样把插入数据库列为poll之后的独立调用；该示例是Javadoc中的应用说明，不是Kafka内部自动执行业务的实现。
+
+<SourceQuote sourceId="A1" supports="官方应用示例包含独立业务写入调用，帮助区分poll与应用处理；不据此主张该示例是客户端内部数据库实现。" />
+
+## 业务未完成量，不能用读进度替代 {#backlog}
+
+先作教学假设：每个一秒步长开始时，P0/P1各新进2条；每个步长结束时，各区串行通知最多成功1条。这不是测量结果。两个有非空列表的实例合计最多完成2条；扩容后其余十个持空列表的实例，没有增加这个应用路径的处理通道；其中包含本例失去分区的两位原成员。
+
+第一步进4、完成2、未完成2。五步累计进20、完成10；两区各剩5条，业务未完成合计10。模型逐事件记账，未完成=未拉取+已返回但业务未完成；不从日志保留条数推断业务积压。
+
+<Figure src="/video-studio/episodes/kafka-message-backlog/article/03-per-partition-growth.jpg" alt="教学五步累计进入20条完成10条，P0/P1各5条未完成。" caption="4进/2完是本例分区路由与应用能力假设，不是实测吞吐。" chapter="backlog" seekTo={144} />
+
+例如首次poll后，读取位置已合计前进2，但E01/E02都还在等通知成功，此时4条业务事件仍未完成。相反，本模型关闭自动提交且刻意不提交时，即便随后30条业务都完成，committed lag仍可为30；它表示恢复进度落后，不等于还有30条通知未完成。实际运维还要结合应用完成指标、失败、重试和在途状态，不能把lag一概当业务积压。本文不展开这些故障路径。
+
+## 改变流入，怎样按分区排空 {#drain}
+
+只改变一个条件：从每秒4条降到每秒1条，并明确让新事件逐秒交替进入P0/P1；通知步骤仍每区最多完成1条。从各区5条存量起，每步实际完成量为min（该区可用事件数，1），不靠总量公式掩盖热分区。
+
+前两步的区内未完成量依次从[5,5]到[5,4]、[4,4]；十步后到[0,0]。若1条/秒全部进入P0，P1排空后便会空闲，P0的输入与处理能力持平，不能照搬“十秒清空”的结论。
+
+<Figure src="/video-studio/episodes/kafka-message-backlog/article/04-alternating-input-drain.jpg" alt="新输入逐步交替P0/P1，两区按可用量完成，十步后未完成为零。" caption="交替路由与每区实际完成共同保证本例排空；清空后只有1条可用时只完成1条。" chapter="drain" seekTo={180.6} />
+
+因此，扩容前先看分区归属能否给新增实例带来工作，再找应用哪一步限制真正完成。针对该步骤改善能力或降低进入量，才能讨论排空；只增加进程、只提高拉取批量，不能自动证明业务完成变快。本文选择降流入作对照，不扩展为通用压缩、批量或重试调参教程。
+
+
+
+## 真实观察的适用范围
+
+本轮另有[实际运行证据](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-10/mq05-07-implementation/runtime/runs/mq07-20261030T153232.191596Z/assertion-summary.json)。两段观察独立进行：先看两分区从2到12动态成员的稳定分配，仅2份非空，原两位本次均被新成员替换；再用独立单成员组实际poll两条记录，并以业务latch控制完成时点。latch等待时读取位置已前进、业务完成为0，释放后完成2条，再提交进度。它不是十二成员同一业务的吞吐测试，也不验证本文假设速率、通知API副作用或清空时间。
+
+## 参考资料
+
+- [RangeAssignor.java（R1）](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/RangeAssignor.java)；[固定原文全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/RangeAssignor.java)。
+- [SubscriptionState.java（R2）](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/SubscriptionState.java)；[固定原文全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/SubscriptionState.java)。
+- [AbstractFetch.java（R3）](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java)；[固定原文全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java)。
+- [ClassicKafkaConsumer.java（R4）](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java)；[固定原文全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java)。
+- [KafkaConsumer.java（A1）](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java)；[固定原文全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java)。

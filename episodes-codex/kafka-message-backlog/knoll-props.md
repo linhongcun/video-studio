@@ -1,0 +1,9 @@
+# MQ07 制作状态与入口
+
+根统一准备/生成新voice、build、assemble、place与onset；owner只准备薄入口，没有自行执行这些命令。scriptSHA2233c8413548fffbd929a57dd0cdec4318ddfb198e46777d981d196a161d5486，规范旁白SHAbe954468d143a8907bb9aab1bd07d66dd1bc11f5289b4b9b76648ba61eec148d已独立审定且保持。根已接受最终voice SHA f4f478dcedbd17e10df0f50ed6ae5f724726f5f5ef580f99db4d4fcca49c2803，body6058帧；实际storyboard SHA a26c7ac995ac0770eb17272ee7d9a2689b221fcae34622b1ad6c941197c8bb4e。初始6112帧仅保留候选身份，后续动态不沿用初始时序。
+
+fresh npm ci257包；新Main/model/plan/文章是本期输入，没有复制旧声音、takes、QA或冻结输出。14张早期无声布局PNG仅检查静态排布；新qa-self-finaltiming独立绑定最终voice/board，实际98PNG、5连续短窗/162顺序解码时点完成作者自审。默认字幕正文PNG与双层props关闭字幕的短窗分开记录，作者实看范围及限制见该目录report与clip-decode-review。脚本和voice params保持批准字节；episode-config授权字段由根补充，不由owner同时写。
+
+本地prepare.py先调用未修改shared来源检查，再canonical voice/prep；assemble.py调用未修改句级装配，只增加palette/sampleDataLabel/styleContract元数据。render.py只替换canonical pipeline的本地CHECKER与Kafka参考附录adapter；normalize-color.py沿已验证full601→limited709像素转换，默认字幕正文混音后追加title-author简表。四来源一页5秒，无原文/版本/定位上屏；整机音轨/图位/附录必须按真实结果验，不用此说明推断已编码。
+
+freeze-inputs.json声明实际共享style/背景/附录adapter、新封面源、字体账本、本地pipeline/model/原始来源与真实运行证据。freeze.py有实际board及整数图位门禁；四图已定2250/3260/4320/5418，MDX seekTo同步。当前仅作者动态自审完成，未执行freeze或正式render；须独立跨审及根统一锁放行正式生产。

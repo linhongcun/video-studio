@@ -1,0 +1,1045 @@
+{
+  "meta": {
+    "title": "消费幂等：已经处理过，为什么还会再来一遍？",
+    "episode": 45,
+    "episodePart": "Kafka MQ05 · 消费幂等",
+    "slug": "kafka-consumer-idempotency",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5509,
+    "finalVideoFrames": 5509,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "kafka-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户在上轮MQ重制后肯定深度与易懂程度，并授权继续数期；本批按题库制作MQ05–MQ07，仅GitHub与本站，脚本与实现因果独立审稿通过后配音，完成质量检查再发布。",
+    "palette": {
+      "bg": "#211D1B",
+      "text": "#FFF1E8"
+    },
+    "sampleDataLabel": "实现教学模型 · Kafka4.4.0 / PostgreSQL18.0",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "style": "kafka-covers-v1-mq05-07",
+      "ep": 45,
+      "number": "MQ05",
+      "planningIssue": 313,
+      "productionRoot": "episodes-codex/kafka-consumer-idempotency",
+      "seriesSource": "episodes-codex/_shared/kafka-covers-mq05-07",
+      "sourceSha256": {
+        "template.mjs": "67c1f64ff8f7359ed89f6f7654e24cc51d4c957edf74ce01ce12efd54fe3c4b5",
+        "diagrams.mjs": "36fdb069deb8a5313625024809e2b159f31c846ecd05ea8695a4b5657c5d53d8",
+        "catalog.json": "115aeb33ad0c2c340672a30782479c86429eb288eb7e7a9a591db60d21cd2280",
+        "../kafka-covers/style-v1.json": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
+        "plan-layout.json": "59c7a383b22fa5c81efea2bea7c5438008388c479a2ebf0119c0988fc3582920",
+        "../kafka-covers/background.png": "199dc512fdcf0ce3fc6d23323a91b673ed9925cfbf9ff42fe963e74eb0b3e9a2",
+        "render.py": "2c9996a1e83eba2aba38567f692bd7f7d057a40a4f0c8289deaad4c0d037b7ba",
+        "README.md": "d41ca0f584062f4ad140cd5103d355ba33ce43f5dfc286f02a91f6837419a217",
+        "../middleware-identity/apachekafka-original.svg": "2505c5b688c18c8fd5dd8e888561eb7b23a56a75d291ff17e8ee18770193f3e8",
+        "../middleware-identity/LICENSE.txt": "121194741d4a915b9f5890fdd6dd95121f9b1f816517c792358d72d7c838d664",
+        "../middleware-identity/source.json": "6a0b66d82e92dc4159f5bae8ea956e88896bca227c961f8a9f3797f4d195b267",
+        "../middleware-identity/NOTICE.md": "506f3da9e99fd2cef2aa9a040b1854fceff7ab4ad80d778d3d32a449ce43d220"
+      },
+      "sitePoster": "cover-16x9.jpg",
+      "portraitPoster": "poster.jpg",
+      "covers": {
+        "16x9": {
+          "dimensions": [
+            1920,
+            1080
+          ],
+          "jpgSha256": "cb5d032cc20925a85137a5e7b20a95249d5174493da9726d9ebd14ed1fdce0ef",
+          "pngSha256": "29812a4fe6918aa98c397d48fffbe8e2b9ab9786677d1d8a417d4468ec9f77da"
+        },
+        "3x4": {
+          "dimensions": [
+            1080,
+            1440
+          ],
+          "jpgSha256": "2d2124941a55fa448b5e56fcee135a846ee70a045de589a1c2bd21b1b1ec3c9f",
+          "pngSha256": "bff9aac1b35489ca960c11611a51367537d4fddd7483b8e3c21b0e4840b586aa"
+        },
+        "4x3": {
+          "dimensions": [
+            1440,
+            1080
+          ],
+          "jpgSha256": "9a37c1d24dd49db47fbff7255e421e6f5c4257200316f5c8afa6e076f95627ae",
+          "pngSha256": "fc983d943c2ec60c0952464bfc5ea273c55684882b9a83539fde790881697b76"
+        }
+      }
+    },
+    "discussionQuestion": "两个普通查询都没看见登记，为什么第二次INSERT仍要等待？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes-codex/_shared/kafka-covers/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "problem",
+      "chapterId": "problem",
+      "title": "重来与重复不是同一件事",
+      "from": 0,
+      "durationInFrames": 1155,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "problem",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 362,
+          "narration": "订单已经给账户加了十分，服务一重启，怎么又多了十分？我们跟着同一个订单事件，看看怎样让它再来一次，也不重复加分。",
+          "subtitles": [
+            {
+              "text": "订单已经给账户加了十分，服务一重启，怎么又多了十分？",
+              "from": 0,
+              "to": 190,
+              "duration": 191
+            },
+            {
+              "text": "我们跟着同一个订单事件，看看怎样让它再来一次，也不重复加分。",
+              "from": 191,
+              "to": 361,
+              "duration": 171
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 180.87,
+              "localStart": 9.0,
+              "localEnd": 180.87
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 191.37,
+              "wavEnd": 341.98,
+              "localStart": 191.37,
+              "localEnd": 341.98
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              191
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 9.0,
+            "wavTo": 341.98,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "教学订单积分页面：订单7042、账户17、E01，本次应加10；已到账10→重启后显示20引出问题。事件身份原位保留，不把两次读取画成生产两条记录。",
+          "direction": "教学订单积分页面：订单7042、账户17、E01，本次应加10；已到账10→重启后显示20引出问题。事件身份原位保留，不把两次读取画成生产两条记录。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "problem",
+          "visualType": "gap",
+          "from": 362,
+          "durationInFrames": 429,
+          "narration": "本例一次只取一条，关闭自动提交；应用已把十分提交到数据库，却还没把下一读取位置一提交给Kafka。它在这个空隙退出，重启仍从保存的零读到原事件。",
+          "subtitles": [
+            {
+              "text": "本例一次只取一条，关闭自动提交；应用已把十分提交到数据库，却还没把下一读取位置一提交给Kafka。",
+              "from": 0,
+              "to": 267,
+              "duration": 268
+            },
+            {
+              "text": "它在这个空隙退出，重启仍从保存的零读到原事件。",
+              "from": 268,
+              "to": 428,
+              "duration": 161
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-gap-1",
+              "wavStart": 362.98,
+              "wavEnd": 619.74,
+              "localStart": 0.9800000000000182,
+              "localEnd": 257.74
+            },
+            {
+              "id": "02-gap-2",
+              "wavStart": 630.24,
+              "wavEnd": 770.58,
+              "localStart": 268.24,
+              "localEnd": 408.58000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              268
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 362.98,
+            "wavTo": 770.58,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "Kafka日志P0/E01@0、数据库已提交10、Kafka组恢复值0三对象；poll内存位置1弱化旁注，DB先COMMIT，Kafka尚未commit1便退出；新实例从0收到同E01。只突出两个提交边界。",
+          "direction": "Kafka日志P0/E01@0、数据库已提交10、Kafka组恢复值0三对象；poll内存位置1弱化旁注，DB先COMMIT，Kafka尚未commit1便退出；新实例从0收到同E01。只突出两个提交边界。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "problem",
+          "visualType": "duplicate",
+          "from": 791,
+          "durationInFrames": 364,
+          "narration": "不做判断就再加十分，积分便从十变成二十。日志里的还是同一个事件，重复来自业务已经完成，恢复进度却还没记住。",
+          "subtitles": [
+            {
+              "text": "不做判断就再加十分，积分便从十变成二十。",
+              "from": 0,
+              "to": 137,
+              "duration": 138
+            },
+            {
+              "text": "日志里的还是同一个事件，重复来自业务已经完成，恢复进度却还没记住。",
+              "from": 138,
+              "to": 363,
+              "duration": 226
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-duplicate-1",
+              "wavStart": 791.58,
+              "wavEnd": 919.43,
+              "localStart": 0.5800000000000409,
+              "localEnd": 128.42999999999995
+            },
+            {
+              "id": "03-duplicate-2",
+              "wavStart": 929.93,
+              "wavEnd": 1134.19,
+              "localStart": 138.92999999999995,
+              "localEnd": 343.19000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              138
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 791.58,
+            "wavTo": 1134.19,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第二次处理同E01，第二次积分COMMIT后对外10→20；日志仍一条E01@0，界面将两次业务增量并列标清。",
+          "direction": "第二次处理同E01，第二次积分COMMIT后对外10→20；日志仍一条E01@0，界面将两次业务增量并列标清。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "claim",
+      "chapterId": "claim",
+      "title": "查询为什么不能认领",
+      "from": 1155,
+      "durationInFrames": 980,
+      "shots": [
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "claim",
+          "visualType": "query-race",
+          "from": 1155,
+          "durationInFrames": 345,
+          "narration": "先回到积分为零、没有登记的共同起点，让两个处理尝试重叠。它们都先查询是否处理过，也都看到没有，接着分别加分。",
+          "subtitles": [
+            {
+              "text": "先回到积分为零、没有登记的共同起点，让两个处理尝试重叠。",
+              "from": 0,
+              "to": 185,
+              "duration": 186
+            },
+            {
+              "text": "它们都先查询是否处理过，也都看到没有，接着分别加分。",
+              "from": 186,
+              "to": 344,
+              "duration": 159
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-query-race-1",
+              "wavStart": 1155.19,
+              "wavEnd": 1331.29,
+              "localStart": 0.19000000000005457,
+              "localEnd": 176.28999999999996
+            },
+            {
+              "id": "04-query-race-2",
+              "wavStart": 1341.79,
+              "wavEnd": 1479.92,
+              "localStart": 186.78999999999996,
+              "localEnd": 324.9200000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              186
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 1155.19,
+            "wavTo": 1479.92,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确reset到积分0/登记空；两个数据库任务T1/T2查询相同('points','E01')均未见。两条独立加分路径出现，说明“未查到”没有取得排他处理资格；不声称同组稳定分区有两个拥有者。",
+          "direction": "明确reset到积分0/登记空；两个数据库任务T1/T2查询相同('points','E01')均未见。两条独立加分路径出现，说明“未查到”没有取得排他处理资格；不声称同组稳定分区有两个拥有者。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "claim",
+          "visualType": "too-late",
+          "from": 1500,
+          "durationInFrames": 315,
+          "narration": "如果两次加分已经各自提交，再补一条处理标记就太迟了。后来的重复键冲突，也不能撤销之前已经提交的第二次加分。",
+          "subtitles": [
+            {
+              "text": "如果两次加分已经各自提交，再补一条处理标记就太迟了。",
+              "from": 0,
+              "to": 152,
+              "duration": 153
+            },
+            {
+              "text": "后来的重复键冲突，也不能撤销之前已经提交的第二次加分。",
+              "from": 153,
+              "to": 314,
+              "duration": 162
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-too-late-1",
+              "wavStart": 1500.92,
+              "wavEnd": 1643.34,
+              "localStart": 0.9200000000000728,
+              "localEnd": 143.33999999999992
+            },
+            {
+              "id": "05-too-late-2",
+              "wavStart": 1653.84,
+              "wavEnd": 1794.17,
+              "localStart": 153.83999999999992,
+              "localEnd": 294.1700000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              153
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 1500.92,
+            "wavTo": 1794.17,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "不安全路径先后提交两个+10，已提交积分20；随后T1补登记成功/T2补登记冲突跳过，但两个旧积分COMMIT不回退。突出分开的提交边界，绝不把“同事务先查再唯一插入并正确回滚”误判为必然重复。",
+          "direction": "不安全路径先后提交两个+10，已提交积分20；随后T1补登记成功/T2补登记冲突跳过，但两个旧积分COMMIT不回退。突出分开的提交边界，绝不把“同事务先查再唯一插入并正确回滚”误判为必然重复。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "claim",
+          "visualType": "identity",
+          "from": 1815,
+          "durationInFrames": 320,
+          "narration": "再回到相同起点，把积分业务和事件编号组成一个去重键。不同进程处理同一个业务事件，也必须使用这个相同的键。",
+          "subtitles": [
+            {
+              "text": "再回到相同起点，把积分业务和事件编号组成一个去重键。",
+              "from": 0,
+              "to": 173,
+              "duration": 174
+            },
+            {
+              "text": "不同进程处理同一个业务事件，也必须使用这个相同的键。",
+              "from": 174,
+              "to": 319,
+              "duration": 146
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-identity-1",
+              "wavStart": 1815.17,
+              "wavEnd": 1979.31,
+              "localStart": 0.17000000000007276,
+              "localEnd": 164.30999999999995
+            },
+            {
+              "id": "06-identity-2",
+              "wavStart": 1989.81,
+              "wavEnd": 2114.95,
+              "localStart": 174.80999999999995,
+              "localEnd": 299.9499999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              174
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 1815.17,
+            "wavTo": 2114.95,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "reset0/空；键结构两格：逻辑业务points＋事件E01。T1、T2都映射到同一键；“进程ID”不进入键。登记表唯一约束旁注两个NOT NULL字段/立即主键。",
+          "direction": "reset0/空；键结构两格：逻辑业务points＋事件E01。T1、T2都映射到同一键；“进程ID”不进入键。登记表唯一约束旁注两个NOT NULL字段/立即主键。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "arbitrate",
+      "chapterId": "arbitrate",
+      "title": "等待后怎样决定谁加分",
+      "from": 2135,
+      "durationInFrames": 1656,
+      "shots": [
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "arbitrate",
+          "visualType": "pending",
+          "from": 2135,
+          "durationInFrames": 372,
+          "narration": "第一个事务先插入这个键，只有本次确实插入成功，应用才增加积分。登记和加分先留在同一笔未提交事务里，对外仍是零分。",
+          "subtitles": [
+            {
+              "text": "第一个事务先插入这个键，只有本次确实插入成功，应用才增加积分。",
+              "from": 0,
+              "to": 190,
+              "duration": 191
+            },
+            {
+              "text": "登记和加分先留在同一笔未提交事务里，对外仍是零分。",
+              "from": 191,
+              "to": 371,
+              "duration": 181
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-pending-1",
+              "wavStart": 2135.95,
+              "wavEnd": 2315.87,
+              "localStart": 0.9499999999998181,
+              "localEnd": 180.8699999999999
+            },
+            {
+              "id": "07-pending-2",
+              "wavStart": 2326.37,
+              "wavEnd": 2486.98,
+              "localStart": 191.3699999999999,
+              "localEnd": 351.98
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              191
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 2135.95,
+            "wavTo": 2486.98,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "T1在BEGIN/COMMIT边框中插入('points','E01')，RETURNING E01→条件门打开→暂存+10；未提交的新登记与积分新版本并列，公共已提交积分保持0。",
+          "direction": "T1在BEGIN/COMMIT边框中插入('points','E01')，RETURNING E01→条件门打开→暂存+10；未提交的新登记与积分新版本并列，公共已提交积分保持0。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "arbitrate",
+          "visualType": "waiting",
+          "from": 2507,
+          "durationInFrames": 530,
+          "narration": "真正检查并写入索引时，同一个键要争用同一把短写锁；检查到写入之间，写锁持续保护。第二个尝试查到同键的未决事务，会先等待结局再重新检查；等待时不占着内部锁。",
+          "subtitles": [
+            {
+              "text": "真正检查并写入索引时，同一个键要争用同一把短写锁；检查到写入之间，写锁持续保护。",
+              "from": 0,
+              "to": 293,
+              "duration": 294
+            },
+            {
+              "text": "第二个尝试查到同键的未决事务，会先等待结局再重新检查；等待时不占着内部锁。",
+              "from": 294,
+              "to": 529,
+              "duration": 236
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-waiting-1",
+              "wavStart": 2507.98,
+              "wavEnd": 2791.04,
+              "localStart": 0.9800000000000182,
+              "localEnd": 284.03999999999996
+            },
+            {
+              "id": "08-waiting-2",
+              "wavStart": 2801.54,
+              "wavEnd": 3016.88,
+              "localStart": 294.53999999999996,
+              "localEnd": 509.8800000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              294
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 2507.98,
+            "wavTo": 3016.88,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回看刚才T1检查并登记时的同键候选索引页，标注短页写锁；检查到插入受保护，完成后释放。随后回到T1暂存登记带事务身份的当前状态；T2在ON CONFLICT预查中遇未决行，等待T1结局时没有占着索引页锁，不提前显示重复/成功。普通SELECT空结果与冲突检查看到未决行分开，回看有明确时间标签，不暗中倒退状态。",
+          "direction": "回看刚才T1检查并登记时的同键候选索引页，标注短页写锁；检查到插入受保护，完成后释放。随后回到T1暂存登记带事务身份的当前状态；T2在ON CONFLICT预查中遇未决行，等待T1结局时没有占着索引页锁，不提前显示重复/成功。普通SELECT空结果与冲突检查看到未决行分开，回看有明确时间标签，不暗中倒退状态。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "arbitrate",
+          "visualType": "committed",
+          "from": 3037,
+          "durationInFrames": 368,
+          "narration": "第一笔事务提交，登记和十分一起成为已提交结果。等待者醒来重新检查，发现键已存在，这次插入不做操作，也没有返回新行。",
+          "subtitles": [
+            {
+              "text": "第一笔事务提交，登记和十分一起成为已提交结果。",
+              "from": 0,
+              "to": 144,
+              "duration": 145
+            },
+            {
+              "text": "等待者醒来重新检查，发现键已存在，这次插入不做操作，也没有返回新行。",
+              "from": 145,
+              "to": 367,
+              "duration": 223
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-committed-1",
+              "wavStart": 3037.88,
+              "wavEnd": 3171.5,
+              "localStart": 0.8800000000001091,
+              "localEnd": 134.5
+            },
+            {
+              "id": "09-committed-2",
+              "wavStart": 3182.0,
+              "wavEnd": 3384.27,
+              "localStart": 145.0,
+              "localEnd": 347.27
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              145
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 3037.88,
+            "wavTo": 3384.27,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "T1 COMMIT后，已提交登记1/积分10同时更新；T2重扫同键，DO NOTHING与RETURNING ∅明确出现，不把已有E01当成返回行。索引检查/事务提交/普通可见数据三层分开。",
+          "direction": "T1 COMMIT后，已提交登记1/积分10同时更新；T2重扫同键，DO NOTHING与RETURNING ∅明确出现，不把已有E01当成返回行。索引检查/事务提交/普通可见数据三层分开。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "arbitrate",
+          "visualType": "skip-and-progress",
+          "from": 3405,
+          "durationInFrames": 386,
+          "narration": "应用根据这个返回结果跳过加分，而不是把没报错当成插入成功。以后再读到同一事件，也走相同判断；数据库提交后，再单独保存Kafka进度。",
+          "subtitles": [
+            {
+              "text": "应用根据这个返回结果跳过加分，而不是把没报错当成插入成功。",
+              "from": 0,
+              "to": 165,
+              "duration": 166
+            },
+            {
+              "text": "以后再读到同一事件，也走相同判断；数据库提交后，再单独保存Kafka进度。",
+              "from": 166,
+              "to": 385,
+              "duration": 220
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-skip-and-progress-1",
+              "wavStart": 3405.27,
+              "wavEnd": 3560.83,
+              "localStart": 0.2699999999999818,
+              "localEnd": 155.82999999999993
+            },
+            {
+              "id": "10-skip-and-progress-2",
+              "wavStart": 3571.33,
+              "wavEnd": 3770.27,
+              "localStart": 166.32999999999993,
+              "localEnd": 365.27
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              166
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 3405.27,
+            "wavTo": 3770.27,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "RETURNING为空→应用UPDATE不执行，积分仍10；可重读同E01再空返回。最后DB COMMIT已成功才Kafka提交P0→1，两个独立确认动作按顺序完成；不提交未处理记录。",
+          "direction": "RETURNING为空→应用UPDATE不执行，积分仍10；可重读同E01再空返回。最后DB COMMIT已成功才Kafka提交P0→1，两个独立确认动作按顺序完成；不提交未处理记录。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "atomic",
+      "chapterId": "atomic",
+      "title": "登记与积分为何同事务",
+      "from": 3791,
+      "durationInFrames": 1718,
+      "shots": [
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "atomic",
+          "visualType": "rollback",
+          "from": 3791,
+          "durationInFrames": 373,
+          "narration": "现在回到第一笔未提交、第二个正在等待的相同状态，只改变第一笔的结局。如果业务中途失败并回滚，这笔登记和加分都不生效。",
+          "subtitles": [
+            {
+              "text": "现在回到第一笔未提交、第二个正在等待的相同状态，只改变第一笔的结局。",
+              "from": 0,
+              "to": 200,
+              "duration": 201
+            },
+            {
+              "text": "如果业务中途失败并回滚，这笔登记和加分都不生效。",
+              "from": 201,
+              "to": 372,
+              "duration": 172
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-rollback-1",
+              "wavStart": 3791.27,
+              "wavEnd": 3982.39,
+              "localStart": 0.2699999999999818,
+              "localEnd": 191.38999999999987
+            },
+            {
+              "id": "11-rollback-2",
+              "wavStart": 3992.89,
+              "wavEnd": 4143.34,
+              "localStart": 201.88999999999987,
+              "localEnd": 352.34000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              201
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 3791.27,
+            "wavTo": 4143.34,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "reset到T1暂存登记/+10、T2等待、公共积分0；T1业务失败，ROLLBACK使两项标为“未生效”。保留灰色历史版本示意，不表现物理立即清除。",
+          "direction": "reset到T1暂存登记/+10、T2等待、公共积分0；T1业务失败，ROLLBACK使两项标为“未生效”。保留灰色历史版本示意，不表现物理立即清除。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "atomic",
+          "visualType": "takeover",
+          "from": 4164,
+          "durationInFrames": 438,
+          "narration": "等待者再次检查，已回滚的登记不再阻挡它，于是插入成功后才加十分并提交。只要最终成功提交的仍是一份登记和一次加分，谁接手完成都不影响这个结果。",
+          "subtitles": [
+            {
+              "text": "等待者再次检查，已回滚的登记不再阻挡它，于是插入成功后才加十分并提交。",
+              "from": 0,
+              "to": 226,
+              "duration": 227
+            },
+            {
+              "text": "只要最终成功提交的仍是一份登记和一次加分，谁接手完成都不影响这个结果。",
+              "from": 227,
+              "to": 437,
+              "duration": 211
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-takeover-1",
+              "wavStart": 4164.34,
+              "wavEnd": 4381.07,
+              "localStart": 0.3400000000001455,
+              "localEnd": 217.0699999999997
+            },
+            {
+              "id": "12-takeover-2",
+              "wavStart": 4391.57,
+              "wavEnd": 4581.27,
+              "localStart": 227.5699999999997,
+              "localEnd": 417.27000000000044
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              227
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 4164.34,
+            "wavTo": 4581.27,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "T2醒来重检→新插入返回E01→在自己的事务内暂存+10→COMMIT；公共积分0→10，只有一条有效登记。失败T1记录留“未生效”作为对照，不混成两条成功标记。",
+          "direction": "T2醒来重检→新插入返回E01→在自己的事务内暂存+10→COMMIT；公共积分0→10，只有一条有效登记。失败T1记录留“未生效”作为对照，不混成两条成功标记。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "atomic",
+          "visualType": "split-transaction",
+          "from": 4602,
+          "durationInFrames": 436,
+          "narration": "再看把登记先单独提交的做法，从积分零、尚无登记重新开始。如果登记提交后就退出，重试会因为已有登记而跳过，反而把该加的十分漏掉。",
+          "subtitles": [
+            {
+              "text": "再看把登记先单独提交的做法，从积分零、尚无登记重新开始。",
+              "from": 0,
+              "to": 207,
+              "duration": 208
+            },
+            {
+              "text": "如果登记提交后就退出，重试会因为已有登记而跳过，反而把该加的十分漏掉。",
+              "from": 208,
+              "to": 435,
+              "duration": 228
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-split-transaction-1",
+              "wavStart": 4602.27,
+              "wavEnd": 4800.03,
+              "localStart": 0.27000000000043656,
+              "localEnd": 198.02999999999975
+            },
+            {
+              "id": "13-split-transaction-2",
+              "wavStart": 4810.53,
+              "wavEnd": 5017.67,
+              "localStart": 208.52999999999975,
+              "localEnd": 415.6700000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              208
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 4602.27,
+            "wavTo": 5017.67,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "reset0/空；错误分支登记先COMMIT，积分尚0即故障；重试INSERT返回空→跳过加分，形成“有效登记1/积分0”的可见漏处理状态。明确这是拆开本地事务的独立反例。",
+          "direction": "reset0/空；错误分支登记先COMMIT，积分尚0即故障；重试INSERT返回空→跳过加分，形成“有效登记1/积分0”的可见漏处理状态。明确这是拆开本地事务的独立反例。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "14",
+          "scriptShot": 14,
+          "chapterId": "atomic",
+          "visualType": "recap",
+          "from": 5038,
+          "durationInFrames": 471,
+          "narration": "所以，成功登记才加分，两者必须在同一笔数据库事务里一起提交或回滚。这允许事件再次出现，却约束这座数据库里的积分结果只生效一次，这才是消费幂等。",
+          "subtitles": [
+            {
+              "text": "所以，成功登记才加分，两者必须在同一笔数据库事务里一起提交或回滚。",
+              "from": 0,
+              "to": 209,
+              "duration": 210
+            },
+            {
+              "text": "这允许事件再次出现，却约束这座数据库里的积分结果只生效一次，这才是消费幂等。",
+              "from": 210,
+              "to": 470,
+              "duration": 261
+            }
+          ],
+          "voice": [
+            {
+              "id": "14-recap-1",
+              "wavStart": 5038.67,
+              "wavEnd": 5238.05,
+              "localStart": 0.6700000000000728,
+              "localEnd": 200.05000000000018
+            },
+            {
+              "id": "14-recap-2",
+              "wavStart": 5248.55,
+              "wavEnd": 5469.41,
+              "localStart": 210.55000000000018,
+              "localEnd": 431.40999999999985
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              210
+            ]
+          },
+          "timing": {
+            "source": "voice.wav b51471d3 + words.json b56b82a4 + script.md fffe0eca",
+            "wavFrom": 5038.67,
+            "wavTo": 5469.41,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回顾正确流程而非偷偷恢复错误现场：新登记成功→同事务加分→DB COMMIT→独立Kafka进度；重复/并发请求只在新登记成功时执行积分修改。正文后默认无旁白title-author参考资料。",
+          "direction": "回顾正确流程而非偷偷恢复错误现场：新登记成功→同事务加分→DB COMMIT→独立Kafka进度；重复/并发请求只在新登记成功时执行积分修改。正文后默认无旁白title-author参考资料。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

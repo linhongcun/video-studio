@@ -1,0 +1,30 @@
+OBS VERSIONS {"KafkaCommit":"1156b2752aaa28ea","java":"21.0.12.1","KafkaVersion":"4.4.0","probe":"mq06"}
+ASSERT PASS Kafka-client4.4.0 actual="4.4.0"
+OBS TOPIC_CREATED {"replicationFactor":1,"name":"orders","partitions":2}
+ASSERT PASS key-UTF8-bytes actual="NzA0Mg=="
+OBS PRODUCER_CONFIG {"acks":"all","bootstrap.servers":"127.0.0.1:45261","default.api.timeout.ms":"25000","delivery.timeout.ms":"60000","enable.idempotence":"true","key.serializer":"org.apache.kafka.common.serialization.StringSerializer","linger.ms":"0","max.in.flight.requests.per.connection":"1","request.timeout.ms":"15000","value.serializer":"org.apache.kafka.common.serialization.StringSerializer"}
+OBS PRODUCE_CONFIRMED {"key":"7042","eventId":"E01","partition":0,"payload":"{\"eventId\":\"E01\",\"orderId\":\"7042\",\"status\":\"PAID\"}","offset":0}
+OBS PRODUCE_CONFIRMED {"key":"7042","eventId":"E02","partition":0,"payload":"{\"eventId\":\"E02\",\"orderId\":\"7042\",\"status\":\"REFUNDED\"}","offset":1}
+ASSERT PASS actual-same-key-partition actual=[{"offset":0,"partition":0},{"offset":1,"partition":0}]
+ASSERT PASS actual-log-positions-zero-one actual=[0,1]
+OBS CONSUMER_CONFIG {"auto.offset.reset":"earliest","bootstrap.servers":"127.0.0.1:45261","client.id":"mq06-single-poll-thread","default.api.timeout.ms":"25000","enable.auto.commit":"false","group.id":"mq06-20261030T153232.189835Z","group.protocol":"classic","heartbeat.interval.ms":"1000","key.deserializer":"org.apache.kafka.common.serialization.StringDeserializer","max.poll.records":"1","partition.assignment.strategy":"org.apache.kafka.clients.consumer.RangeAssignor","request.timeout.ms":"15000","session.timeout.ms":"10000","value.deserializer":"org.apache.kafka.common.serialization.StringDeserializer"}
+OBS POLL_DELIVERED {"key":"7042","offset":0,"partition":0,"value":"{\"eventId\":\"E01\",\"orderId\":\"7042\",\"status\":\"PAID\"}"}
+OBS POLL_DELIVERED {"key":"7042","offset":1,"partition":0,"value":"{\"eventId\":\"E02\",\"orderId\":\"7042\",\"status\":\"REFUNDED\"}"}
+ASSERT PASS two-records-actually-polled actual=2
+ASSERT PASS poll-preserves-this-partition-order actual=[{"key":"7042","offset":0,"partition":0,"value":"{\"eventId\":\"E01\",\"orderId\":\"7042\",\"status\":\"PAID\"}"},{"key":"7042","offset":1,"partition":0,"value":"{\"eventId\":\"E02\",\"orderId\":\"7042\",\"status\":\"REFUNDED\"}"}]
+ASSERT PASS poll-position-two actual=2
+OBS SERIAL_COMPLETE {"projection":"PAID","eventId":"E01"}
+OBS SERIAL_COMPLETE {"projection":"REFUNDED","eventId":"E02"}
+ASSERT PASS serial-completes-E01-then-E02 actual={"completionOrder":["E01","E02"],"finalProjection":"REFUNDED"}
+OBS PROJECTION_RESET_SAME_INPUT {"projection":"PENDING","source":"same two previously polled ConsumerRecords, no new Produce"}
+OBS ASYNC_SUBMIT {"offset":0,"eventId":"E01"}
+OBS ASYNC_SUBMIT {"offset":1,"eventId":"E02"}
+ASSERT PASS payment-started-before-writing actual="PENDING"
+OBS ASYNC_COMPLETE {"projection":"REFUNDED","eventId":"E02"}
+ASSERT PASS refund-completes-before-payment-write actual={"projection":"REFUNDED","completionOrder":["E02"]}
+OBS ASYNC_COMPLETE {"projection":"PAID","eventId":"E01"}
+ASSERT PASS async-completion-reverses-despite-same-log actual={"completionOrder":["E02","E01"],"finalProjection":"PAID"}
+ASSERT PASS log-unchanged-by-application-schedule actual={"1":0,"0":2}
+OBS FINAL_LOG_ENDS {"1":0,"0":2}
+OBS SCOPE {"benchmark":false,"business":"real Java AtomicReference status projection and deterministic CountDownLatch scheduling; no payment/refund service or database executed","realLog":"Kafka4.4 orders,2 partitions,one producer/calling thread,key UTF8 7042"}
+RESULT PASS probe=mq06 assertions=12

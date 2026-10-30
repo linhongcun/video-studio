@@ -1,0 +1,915 @@
+{
+  "meta": {
+    "title": "消息积压：加了十台消费者，为什么还越排越长？",
+    "episode": 47,
+    "episodePart": "Kafka MQ07 · 消息积压",
+    "slug": "kafka-message-backlog",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 6058,
+    "finalVideoFrames": 6058,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "kafka-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户在上轮MQ重制后肯定深度与易懂程度，并授权继续数期；本批按题库制作MQ05–MQ07，仅GitHub与本站，脚本与实现因果独立审稿通过后配音，完成质量检查再发布。",
+    "palette": {
+      "bg": "#211D1B",
+      "text": "#FFF1E8"
+    },
+    "sampleDataLabel": "教学事件/假设速率，非benchmark",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "style": "kafka-covers-v1-mq05-07",
+      "ep": 47,
+      "number": "MQ07",
+      "planningIssue": 315,
+      "productionRoot": "episodes-codex/kafka-message-backlog",
+      "seriesSource": "episodes-codex/_shared/kafka-covers-mq05-07",
+      "sourceSha256": {
+        "template.mjs": "67c1f64ff8f7359ed89f6f7654e24cc51d4c957edf74ce01ce12efd54fe3c4b5",
+        "diagrams.mjs": "36fdb069deb8a5313625024809e2b159f31c846ecd05ea8695a4b5657c5d53d8",
+        "catalog.json": "115aeb33ad0c2c340672a30782479c86429eb288eb7e7a9a591db60d21cd2280",
+        "../kafka-covers/style-v1.json": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
+        "plan-layout.json": "59c7a383b22fa5c81efea2bea7c5438008388c479a2ebf0119c0988fc3582920",
+        "../kafka-covers/background.png": "199dc512fdcf0ce3fc6d23323a91b673ed9925cfbf9ff42fe963e74eb0b3e9a2",
+        "render.py": "2c9996a1e83eba2aba38567f692bd7f7d057a40a4f0c8289deaad4c0d037b7ba",
+        "README.md": "d41ca0f584062f4ad140cd5103d355ba33ce43f5dfc286f02a91f6837419a217",
+        "../middleware-identity/apachekafka-original.svg": "2505c5b688c18c8fd5dd8e888561eb7b23a56a75d291ff17e8ee18770193f3e8",
+        "../middleware-identity/LICENSE.txt": "121194741d4a915b9f5890fdd6dd95121f9b1f816517c792358d72d7c838d664",
+        "../middleware-identity/source.json": "6a0b66d82e92dc4159f5bae8ea956e88896bca227c961f8a9f3797f4d195b267",
+        "../middleware-identity/NOTICE.md": "506f3da9e99fd2cef2aa9a040b1854fceff7ab4ad80d778d3d32a449ce43d220"
+      },
+      "sitePoster": "cover-16x9.jpg",
+      "portraitPoster": "poster.jpg",
+      "covers": {
+        "16x9": {
+          "dimensions": [
+            1920,
+            1080
+          ],
+          "jpgSha256": "c60b7301a0282d934050eb56f50b6aa704548f92deee066b70fdde2396f2d2f5",
+          "pngSha256": "03391bd9f3cf6a2c457c7ad422b5a229de52398d5b1a0c171ff6a4a956cda030"
+        },
+        "3x4": {
+          "dimensions": [
+            1080,
+            1440
+          ],
+          "jpgSha256": "6c73f2f05fe4ee2576ec2ebc6757d0c1e7fc97821c650929787527884d449c43",
+          "pngSha256": "841b3346b3ba2689182cd48e62480012b91052b231dac0fc0b03dbca3e94bcbf"
+        },
+        "4x3": {
+          "dimensions": [
+            1440,
+            1080
+          ],
+          "jpgSha256": "6bdf23f64be7dd3394d212b4b20a5693fa92ff0bcda05d3cde69c314ea7652f3",
+          "pngSha256": "39c44ec12764b455b0ca02d9a7bbb97d00aecd9d17788cfc1ee561cc9877f631"
+        }
+      }
+    },
+    "discussionQuestion": "已经poll到的事件，为什么还属于业务未完成？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes-codex/_shared/kafka-covers/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "assignment",
+      "chapterId": "assignment",
+      "title": "分区归属怎样限制拉取",
+      "from": 0,
+      "durationInFrames": 2328,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "assignment",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 431,
+          "narration": "订单通知还没做完，就把消费者从两个加到了十二个，未完成的事件却还在增加。加的十个实例究竟卡在哪，得把分区归属、拉取记录和业务完成连起来看。",
+          "subtitles": [
+            {
+              "text": "订单通知还没做完，就把消费者从两个加到了十二个，未完成的事件却还在增加。",
+              "from": 0,
+              "to": 225,
+              "duration": 226
+            },
+            {
+              "text": "加的十个实例究竟卡在哪，得把分区归属、拉取记录和业务完成连起来看。",
+              "from": 226,
+              "to": 430,
+              "duration": 205
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 215.59,
+              "localStart": 9.0,
+              "localEnd": 215.59
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 226.09,
+              "wavEnd": 410.86,
+              "localStart": 226.09,
+              "localEnd": 410.86
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              226
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 9.0,
+            "wavTo": 410.86,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "通知服务/同组2→12；此处是问题示意，不伪装实测监控。",
+          "direction": "通知服务/同组2→12；此处是问题示意，不伪装实测监控。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "assignment",
+          "visualType": "two-members",
+          "from": 431,
+          "durationInFrames": 446,
+          "narration": "先只比较分工，通知任务还没启动；同一个通知组订阅订单主题，里面只有两个分区。原来两个成员各负责一个分区；加入十个新成员后，先等这轮重新分配稳定。",
+          "subtitles": [
+            {
+              "text": "先只比较分工，通知任务还没启动；同一个通知组订阅订单主题，里面只有两个分区。",
+              "from": 0,
+              "to": 215,
+              "duration": 216
+            },
+            {
+              "text": "原来两个成员各负责一个分区；加入十个新成员后，先等这轮重新分配稳定。",
+              "from": 216,
+              "to": 445,
+              "duration": 230
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-two-members-1",
+              "wavStart": 431.86,
+              "wavEnd": 637.48,
+              "localStart": 0.8600000000000136,
+              "localEnd": 206.48000000000002
+            },
+            {
+              "id": "02-two-members-2",
+              "wavStart": 647.98,
+              "wavEnd": 856.51,
+              "localStart": 216.98000000000002,
+              "localEnd": 425.51
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              216
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 431.86,
+            "wavTo": 856.51,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "只比归属，不带入旧在途业务；P0/P1，旧C07/C12。",
+          "direction": "只比归属，不带入旧在途业务；P0/P1，旧C07/C12。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "assignment",
+          "visualType": "member-order",
+          "from": 877,
+          "durationInFrames": 477,
+          "narration": "本例采用经典消费组的范围分配，先按成员编号排序，再确定各自的分区列表。把排好序的十二位简称C一到C十二；原来的两位在本例排第七和第十二，老成员不会自动保住原分区。",
+          "subtitles": [
+            {
+              "text": "本例采用经典消费组的范围分配，先按成员编号排序，再确定各自的分区列表。",
+              "from": 0,
+              "to": 197,
+              "duration": 198
+            },
+            {
+              "text": "把排好序的十二位简称C一到C十二；原来的两位在本例排第七和第十二，老成员不会自动保住原分区。",
+              "from": 198,
+              "to": 476,
+              "duration": 279
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-member-order-1",
+              "wavStart": 877.51,
+              "wavEnd": 1064.7,
+              "localStart": 0.5099999999999909,
+              "localEnd": 187.70000000000005
+            },
+            {
+              "id": "03-member-order-2",
+              "wavStart": 1075.2,
+              "wavEnd": 1333.61,
+              "localStart": 198.20000000000005,
+              "localEnd": 456.6099999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              198
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 877.51,
+            "wavTo": 1333.61,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "C01…C12是按member.id排序后的别名，非client.id/到达顺序；无静态身份/机架偏好。",
+          "direction": "C01…C12是按member.id排序后的别名，非client.id/到达顺序；无静态身份/机架偏好。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "assignment",
+          "visualType": "quota",
+          "from": 1354,
+          "durationInFrames": 496,
+          "narration": "源码用分区数除以成员数，取整数商作每人的基础份额，再计算余数。两个分区除以十二，基础是零、余数是二；十二份列表先是空的，接着才分这两个额外名额。",
+          "subtitles": [
+            {
+              "text": "源码用分区数除以成员数，取整数商作每人的基础份额，再计算余数。",
+              "from": 0,
+              "to": 225,
+              "duration": 226
+            },
+            {
+              "text": "两个分区除以十二，基础是零、余数是二；十二份列表先是空的，接着才分这两个额外名额。",
+              "from": 226,
+              "to": 495,
+              "duration": 270
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-quota-1",
+              "wavStart": 1354.61,
+              "wavEnd": 1570.27,
+              "localStart": 0.6099999999999,
+              "localEnd": 216.26999999999998
+            },
+            {
+              "id": "04-quota-2",
+              "wavStart": 1580.77,
+              "wavEnd": 1829.1,
+              "localStart": 226.76999999999998,
+              "localEnd": 475.0999999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              226
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 1354.61,
+            "wavTo": 1829.1,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "实际执行短窗：整数商/余数；0与2分步出现，不先给结果。",
+          "direction": "实际执行短窗：整数商/余数；0与2分步出现，不先给结果。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "assignment",
+          "visualType": "allocate",
+          "from": 1850,
+          "durationInFrames": 478,
+          "narration": "先把零号分区放进第一位的列表，再从待分配集合移走；一号分区同样给第二位。两个都分完，剩下十份列表仍为空；这次换了持有者，稳定态却仍只有两份非空列表。",
+          "subtitles": [
+            {
+              "text": "先把零号分区放进第一位的列表，再从待分配集合移走；一号分区同样给第二位。",
+              "from": 0,
+              "to": 225,
+              "duration": 226
+            },
+            {
+              "text": "两个都分完，剩下十份列表仍为空；这次换了持有者，稳定态却仍只有两份非空列表。",
+              "from": 226,
+              "to": 477,
+              "duration": 252
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-allocate-1",
+              "wavStart": 1850.1,
+              "wavEnd": 2066.46,
+              "localStart": 0.09999999999990905,
+              "localEnd": 216.46000000000004
+            },
+            {
+              "id": "05-allocate-2",
+              "wavStart": 2076.96,
+              "wavEnd": 2307.59,
+              "localStart": 226.96000000000004,
+              "localEnd": 457.59000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              226
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 1850.1,
+            "wavTo": 2307.59,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "候选P0/P1逐个减少，表逐行更新；C07/C12空；先分后显示完成。",
+          "direction": "候选P0/P1逐个减少，表逐行更新；C07/C12空；先分后显示完成。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "processing",
+      "chapterId": "processing",
+      "title": "拉到记录为何还没做完",
+      "from": 2328,
+      "durationInFrames": 1533,
+      "shots": [
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "processing",
+          "visualType": "fetch",
+          "from": 2328,
+          "durationInFrames": 506,
+          "narration": "现在从分工稳定后的共同起点，跟踪同一批新订单事件，事件一进入零号分区的日志。客户端装好自己的列表，再从中挑可拉取分区；空列表没有分区可填进读取请求，但实例仍能有心跳等通信。",
+          "subtitles": [
+            {
+              "text": "现在从分工稳定后的共同起点，跟踪同一批新订单事件，事件一进入零号分区的日志。",
+              "from": 0,
+              "to": 224,
+              "duration": 225
+            },
+            {
+              "text": "客户端装好自己的列表，再从中挑可拉取分区；空列表没有分区可填进读取请求，但实例仍能有心跳等通信。",
+              "from": 225,
+              "to": 505,
+              "duration": 281
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-fetch-1",
+              "wavStart": 2328.59,
+              "wavEnd": 2542.6,
+              "localStart": 0.5900000000001455,
+              "localEnd": 214.5999999999999
+            },
+            {
+              "id": "06-fetch-2",
+              "wavStart": 2553.1,
+              "wavEnd": 2813.78,
+              "localStart": 225.0999999999999,
+              "localEnd": 485.7800000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              225
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 2328.59,
+            "wavTo": 2813.78,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "显式切到新业务追踪起点；首批E01/E02/E03/E04；C01/P0与C02/P1有效位置0、未暂停。",
+          "direction": "显式切到新业务追踪起点；首批E01/E02/E03/E04；C01/P0与C02/P1有效位置0、未暂停。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "processing",
+          "visualType": "poll",
+          "from": 2834,
+          "durationInFrames": 504,
+          "narration": "第一位请求零号分区，客户端把事件一交给应用；这一步叫拉取返回，日志原记录还在。读取位置可以已经前进，可通知接口还没完成；已经拿到记录，不等于已经完成这条订单通知。",
+          "subtitles": [
+            {
+              "text": "第一位请求零号分区，客户端把事件一交给应用；这一步叫拉取返回，日志原记录还在。",
+              "from": 0,
+              "to": 230,
+              "duration": 231
+            },
+            {
+              "text": "读取位置可以已经前进，可通知接口还没完成；已经拿到记录，不等于已经完成这条订单通知。",
+              "from": 231,
+              "to": 503,
+              "duration": 273
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-poll-1",
+              "wavStart": 2834.78,
+              "wavEnd": 3055.43,
+              "localStart": 0.7800000000002001,
+              "localEnd": 221.42999999999984
+            },
+            {
+              "id": "07-poll-2",
+              "wavStart": 3065.93,
+              "wavEnd": 3317.17,
+              "localStart": 231.92999999999984,
+              "localEnd": 483.1700000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              231
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 2834.78,
+            "wavTo": 3317.17,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "assigned→Fetch→poll返回本地；E01仍待业务；position1与done0分开，原日志不移除。",
+          "direction": "assigned→Fetch→poll返回本地；E01仍待业务；position1与done0分开，原日志不移除。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "processing",
+          "visualType": "business",
+          "from": 3338,
+          "durationInFrames": 523,
+          "narration": "本例应用在每个分区内串行处理，必须等当前通知接口成功返回，才记完成并处理下一条。先假设这一步每路每秒只能完成一条；两路合计两条，另外十个空列表实例不能分担这条应用路径。",
+          "subtitles": [
+            {
+              "text": "本例应用在每个分区内串行处理，必须等当前通知接口成功返回，才记完成并处理下一条。",
+              "from": 0,
+              "to": 241,
+              "duration": 242
+            },
+            {
+              "text": "先假设这一步每路每秒只能完成一条；两路合计两条，另外十个空列表实例不能分担这条应用路径。",
+              "from": 242,
+              "to": 522,
+              "duration": 281
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-business-1",
+              "wavStart": 3338.17,
+              "wavEnd": 3569.64,
+              "localStart": 0.17000000000007276,
+              "localEnd": 231.63999999999987
+            },
+            {
+              "id": "08-business-2",
+              "wavStart": 3580.14,
+              "wavEnd": 3840.99,
+              "localStart": 242.13999999999987,
+              "localEnd": 502.9899999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              242
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 3338.17,
+            "wavTo": 3840.99,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "应用伪代码notifyAndWait→markDone；教学每路1/s；不是Kafka强制只准两个业务线程。",
+          "direction": "应用伪代码notifyAndWait→markDone；教学每路1/s；不是Kafka强制只准两个业务线程。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "backlog",
+      "chapterId": "backlog",
+      "title": "怎样按业务完成计算积压",
+      "from": 3861,
+      "durationInFrames": 1042,
+      "shots": [
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "backlog",
+          "visualType": "growth",
+          "from": 3861,
+          "durationInFrames": 548,
+          "narration": "同时假设每秒新进四条，两个分区各两条；每路只完成一条，剩下的继续等业务处理。沿这段流程运行五个教学步长，总共进来二十条、完成十条，还没完成的就是十条；实例变多没有增加这里的处理容量。",
+          "subtitles": [
+            {
+              "text": "同时假设每秒新进四条，两个分区各两条；每路只完成一条，剩下的继续等业务处理。",
+              "from": 0,
+              "to": 220,
+              "duration": 221
+            },
+            {
+              "text": "沿这段流程运行五个教学步长，总共进来二十条、完成十条，还没完成的就是十条；实例变多没有增加这里的处理容量。",
+              "from": 221,
+              "to": 547,
+              "duration": 327
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-growth-1",
+              "wavStart": 3861.99,
+              "wavEnd": 4071.89,
+              "localStart": 0.9899999999997817,
+              "localEnd": 210.88999999999987
+            },
+            {
+              "id": "09-growth-2",
+              "wavStart": 4082.39,
+              "wavEnd": 4388.49,
+              "localStart": 221.38999999999987,
+              "localEnd": 527.4899999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              221
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 3861.99,
+            "wavTo": 4388.49,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "教学假设4进/2完，非benchmark；每区独立计数，增长tick1→5；E01在完成集合。",
+          "direction": "教学假设4进/2完，非benchmark；每区独立计数，增长tick1→5；E01在完成集合。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "backlog",
+          "visualType": "metrics",
+          "from": 4409,
+          "durationInFrames": 494,
+          "narration": "这里的积压数的是业务还没做完的事件，包括还没拉到的，也包括已拉到但通知尚未完成的。日志留存条数、读取位置和已提交位置各有用途，都不能直接替代这份业务完成账。",
+          "subtitles": [
+            {
+              "text": "这里的积压数的是业务还没做完的事件，包括还没拉到的，也包括已拉到但通知尚未完成的。",
+              "from": 0,
+              "to": 253,
+              "duration": 254
+            },
+            {
+              "text": "日志留存条数、读取位置和已提交位置各有用途，都不能直接替代这份业务完成账。",
+              "from": 254,
+              "to": 493,
+              "duration": 240
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-metrics-1",
+              "wavStart": 4409.49,
+              "wavEnd": 4652.93,
+              "localStart": 0.4899999999997817,
+              "localEnd": 243.9300000000003
+            },
+            {
+              "id": "10-metrics-2",
+              "wavStart": 4663.43,
+              "wavEnd": 4882.32,
+              "localStart": 254.4300000000003,
+              "localEnd": 473.3199999999997
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              254
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 4409.49,
+            "wavTo": 4882.32,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "保留日志/未读/本地处理中/业务完成四区域；不把committed lag当完整业务未完成量。",
+          "direction": "保留日志/未读/本地处理中/业务完成四区域；不把committed lag当完整业务未完成量。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "drain",
+      "chapterId": "drain",
+      "title": "改变什么才会排空",
+      "from": 4903,
+      "durationInFrames": 1155,
+      "shots": [
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "drain",
+          "visualType": "drain",
+          "from": 4903,
+          "durationInFrames": 608,
+          "narration": "只改变流入：降到每秒一条，并逐秒交替投向两个分区；通知步骤仍保持每路每秒最多一条。两区起初各有五条存量，按各自实际可处理的数量完成，十秒后清空；清空后若只来一条，就只完成一条，不会减出负数。",
+          "subtitles": [
+            {
+              "text": "只改变流入：降到每秒一条，并逐秒交替投向两个分区；通知步骤仍保持每路每秒最多一条。",
+              "from": 0,
+              "to": 263,
+              "duration": 264
+            },
+            {
+              "text": "两区起初各有五条存量，按各自实际可处理的数量完成，十秒后清空；清空后若只来一条，就只完成一条，不会减出负数。",
+              "from": 264,
+              "to": 607,
+              "duration": 344
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-drain-1",
+              "wavStart": 4903.32,
+              "wavEnd": 5156.53,
+              "localStart": 0.31999999999970896,
+              "localEnd": 253.52999999999975
+            },
+            {
+              "id": "11-drain-2",
+              "wavStart": 5167.03,
+              "wavEnd": 5490.69,
+              "localStart": 264.02999999999975,
+              "localEnd": 587.6899999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              264
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 4903.32,
+            "wavTo": 5490.69,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "只降流入；P0/P1逐秒交替，min(可用量,1)每区计数，10→0，补清空后1进1完。",
+          "direction": "只降流入；P0/P1逐秒交替，min(可用量,1)每区计数，10→0，补清空后1进1完。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "drain",
+          "visualType": "recap",
+          "from": 5511,
+          "durationInFrames": 547,
+          "narration": "所以，加实例前先看分区怎样分，拉到记录后再看业务究竟卡在哪一步。本例只有两个分区、每区串行通知；多十个消费者没增加处理通道，只有让真正完成能力超过流入，积压才会逐步排空。",
+          "subtitles": [
+            {
+              "text": "所以，加实例前先看分区怎样分，拉到记录后再看业务究竟卡在哪一步。",
+              "from": 0,
+              "to": 193,
+              "duration": 194
+            },
+            {
+              "text": "本例只有两个分区、每区串行通知；多十个消费者没增加处理通道，只有让真正完成能力超过流入，积压才会逐步排空。",
+              "from": 194,
+              "to": 546,
+              "duration": 353
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-recap-1",
+              "wavStart": 5511.69,
+              "wavEnd": 5695.46,
+              "localStart": 0.6899999999995998,
+              "localEnd": 184.46000000000004
+            },
+            {
+              "id": "12-recap-2",
+              "wavStart": 5705.96,
+              "wavEnd": 6018.9,
+              "localStart": 194.96000000000004,
+              "localEnd": 507.89999999999964
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              194
+            ]
+          },
+          "timing": {
+            "source": "voice.wav f4f478dc + words.json 5d9db476 + script.md 2233c841",
+            "wavFrom": 5511.69,
+            "wavTo": 6018.9,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回应原标题；限定本例串行应用与分区分布，不泛化为所有业务只能两线程。",
+          "direction": "回应原标题；限定本例串行应用与分区分布，不泛化为所有业务只能两线程。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

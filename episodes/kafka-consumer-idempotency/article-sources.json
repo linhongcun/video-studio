@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-consumer-idempotency",
+  "sources": [
+    {
+      "id": "A1",
+      "organization": "Apache Kafka",
+      "title": "FetchCollector.java",
+      "titleEvidence": {
+        "locator": "Fixed-commit GitHub contents response name/path fields: FetchCollector.java",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/kafka/title-evidence.json"
+      },
+      "version": "Apache Kafka4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L185",
+      "supports": [
+        "读取推进客户端内存position，不查询积分业务是否已成功。"
+      ],
+      "sections": "FetchCollector.java lines178–185; execution chain in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java",
+        "method": "Fresh official fixed-commit HTTPS GET; targeted execution reading plus API cross-check, no runtime assertion",
+        "sha256": "66961cb214088a240b32e1729228cfefd2643b06c8aad4501f3444242dda4656"
+      },
+      "quotation": {
+        "text": "                if (nextInLineFetch.nextFetchOffset() > position.offset) {\n                    SubscriptionState.FetchPosition nextPosition = new SubscriptionState.FetchPosition(\n                            nextInLineFetch.nextFetchOffset(),\n                            nextInLineFetch.lastEpoch(),\n                            position.currentLeader);\n                    log.trace(\"Updating fetch position from {} to {} for partition {} and returning {} records from `poll()`\",\n                            position, nextPosition, tp, partRecords.size());\n                    subscriptions.position(tp, nextPosition);",
+        "locator": "FetchCollector.java lines178–185",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/kafka/FetchCollector.java"
+      },
+      "note": "Official Apache Kafka source filename; no individual author inferred from committers."
+    },
+    {
+      "id": "A2",
+      "organization": "PostgreSQL Global Development Group",
+      "title": "heapam.c",
+      "titleEvidence": {
+        "locator": "heapam.c original source-file header/name and fixed-commit repository path",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+      },
+      "version": "PostgreSQL18.0",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam.c#L3768-L3778",
+      "supports": [
+        "UPDATE新版本xmin当前XID。"
+      ],
+      "sections": "heapam.c lines3768–3778; implementation context in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam.c",
+        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
+        "sha256": "300ae37b2a28ee1755ea20753dacdbd65bc747b2707edf09fa8c3816f4d93a8f"
+      },
+      "quotation": {
+        "text": "\t/*\n\t * Prepare the new tuple with the appropriate initial values of Xmin and\n\t * Xmax, as well as initial infomask bits as computed above.\n\t */\n\tnewtup->t_data->t_infomask &= ~(HEAP_XACT_MASK);\n\tnewtup->t_data->t_infomask2 &= ~(HEAP2_XACT_MASK);\n\tHeapTupleHeaderSetXmin(newtup->t_data, xid);\n\tHeapTupleHeaderSetCmin(newtup->t_data, cid);\n\tnewtup->t_data->t_infomask |= HEAP_UPDATED | infomask_new_tuple;\n\tnewtup->t_data->t_infomask2 |= infomask2_new_tuple;\n\tHeapTupleHeaderSetXmax(newtup->t_data, xmax_new_tuple);",
+        "locator": "heapam.c lines3768–3778",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/access/heap/heapam.c"
+      },
+      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+    },
+    {
+      "id": "A3",
+      "organization": "PostgreSQL Global Development Group",
+      "title": "xact.c",
+      "titleEvidence": {
+        "locator": "xact.c original source-file header/name and fixed-commit repository path",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+      },
+      "version": "PostgreSQL18.0",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/transam/xact.c#L1843-L1851",
+      "supports": [
+        "回滚记XID树aborted。"
+      ],
+      "sections": "xact.c lines1843–1851; implementation context in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/transam/xact.c",
+        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
+        "sha256": "75b012c0b047d1dc905a30975c244beec366e45eac0dbf109fd21bcd611a8e39"
+      },
+      "quotation": {
+        "text": "\t/*\n\t * Mark the transaction aborted in clog.  This is not absolutely necessary\n\t * but we may as well do it while we are here; also, in the subxact case\n\t * it is helpful because XactLockTableWait makes use of it to avoid\n\t * waiting for already-aborted subtransactions.  It is OK to do it without\n\t * having flushed the ABORT record to disk, because in event of a crash\n\t * we'd be assumed to have aborted anyway.\n\t */\n\tTransactionIdAbortTree(xid, nchildren, children);",
+        "locator": "xact.c lines1843–1851",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/access/transam/xact.c"
+      },
+      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+    },
+    {
+      "id": "A4",
+      "organization": "PostgreSQL Global Development Group",
+      "title": "heapam_visibility.c",
+      "titleEvidence": {
+        "locator": "heapam_visibility.c original source-file header/name and fixed-commit repository path",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+      },
+      "version": "PostgreSQL18.0",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam_visibility.c#L1129-L1137",
+      "supports": [
+        "旧积分行xmax回滚则仍可见。"
+      ],
+      "sections": "heapam_visibility.c lines1129–1137; implementation context in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam_visibility.c",
+        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
+        "sha256": "d36989d5724e58d4499281643f74b004057ce5c1df409f39bd2c3653ce481c3f"
+      },
+      "quotation": {
+        "text": "\t\tif (XidInMVCCSnapshot(HeapTupleHeaderGetRawXmax(tuple), snapshot))\n\t\t\treturn true;\n\n\t\tif (!TransactionIdDidCommit(HeapTupleHeaderGetRawXmax(tuple)))\n\t\t{\n\t\t\t/* it must have aborted or crashed */\n\t\t\tSetHintBits(tuple, buffer, HEAP_XMAX_INVALID,\n\t\t\t\t\t\tInvalidTransactionId);\n\t\t\treturn true;",
+        "locator": "heapam_visibility.c lines1129–1137",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/access/heap/heapam_visibility.c"
+      },
+      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+    },
+    {
+      "id": "A5",
+      "organization": "PostgreSQL Global Development Group",
+      "title": "nodeModifyTable.c",
+      "titleEvidence": {
+        "locator": "nodeModifyTable.c original source-file header/name and fixed-commit repository path",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+      },
+      "version": "PostgreSQL18.0",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/nodeModifyTable.c#L1332-L1333",
+      "supports": [
+        "成功INSERT执行RETURNING。"
+      ],
+      "sections": "nodeModifyTable.c lines1332–1333; implementation context in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/nodeModifyTable.c",
+        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
+        "sha256": "d265878582203339053fa21866c65109cc8e69ff2f11a7195e32a3548b94c061"
+      },
+      "quotation": {
+        "text": "\t\tresult = ExecProcessReturning(context, resultRelInfo, CMD_INSERT,\n\t\t\t\t\t\t\t\t\t  oldSlot, slot, planSlot);",
+        "locator": "nodeModifyTable.c lines1332–1333",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/executor/nodeModifyTable.c"
+      },
+      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+    }
+  ]
+}

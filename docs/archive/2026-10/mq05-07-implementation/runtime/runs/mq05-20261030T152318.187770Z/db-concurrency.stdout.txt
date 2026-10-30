@@ -1,0 +1,56 @@
+OBS VERSIONS {"java":"21.0.12.1","mode":"db-concurrency","KafkaCommit":"1156b2752aaa28ea","kafka":"4.4.0"}
+ASSERT PASS Kafka-client-4.4.0 actual="4.4.0"
+ASSERT PASS PostgreSQL18.0 actual="18.0"
+OBS DATABASE_VERSION {"JDBC":"42.7.8","isolation":2,"server":"18.0"}
+OBS FIXTURE_RESET {"markerCount":0,"accountRows":1,"points":0}
+ASSERT PASS at-most-one-returned-event actual="E01"
+ASSERT PASS A-new-key actual="A-commit"
+ASSERT PASS A-updates-one-row actual="A-commit"
+ASSERT PASS A-sees-uncommitted-ten actual=10
+ASSERT PASS outsider-sees-uncommitted-neither-marker-nor-points actual={"markerCount":0,"accountRows":1,"points":0}
+ASSERT PASS B-task-started actual="A-commit"
+OBS ACTUAL_POSTGRES_BLOCKING {"waitEvent":"transactionid","waitType":"Lock","blockingPids":"{124127}","B_state":"active","A_pid":124127,"B_pid":124128}
+ASSERT PASS B-actually-blocked-before-A-decision actual={"waitEvent":"transactionid","waitType":"Lock","blockingPids":"{124127}","B_state":"active","A_pid":124127,"B_pid":124128}
+ASSERT PASS at-most-one-returned-event actual=""
+OBS A_TRANSACTION_DECISION {"decision":"COMMIT","sameInitialFixture":true}
+OBS INSERT_RETURNING {"returned":"","newRow":false,"task":"B-after-A-commit"}
+OBS DB_COMMIT {"points":10,"markerCount":1,"inserted":false,"databaseCommit":true,"task":"B-after-A-commit","updateRows":0}
+ASSERT PASS B-gains-key-only-if-A-rolled-back actual={"points":10,"markerCount":1,"inserted":false,"databaseCommit":true,"task":"B-after-A-commit","updateRows":0}
+ASSERT PASS B-update-count actual={"points":10,"markerCount":1,"inserted":false,"databaseCommit":true,"task":"B-after-A-commit","updateRows":0}
+ASSERT PASS exactly-ten-and-one-marker-after-race actual={"markerCount":1,"accountRows":1,"points":10}
+OBS RACE_FINAL {"A_decision":"COMMIT","database":{"markerCount":1,"accountRows":1,"points":10}}
+OBS FIXTURE_RESET {"markerCount":0,"accountRows":1,"points":0}
+ASSERT PASS at-most-one-returned-event actual="E01"
+ASSERT PASS A-new-key actual="A-rollback"
+ASSERT PASS A-updates-one-row actual="A-rollback"
+ASSERT PASS A-sees-uncommitted-ten actual=10
+ASSERT PASS outsider-sees-uncommitted-neither-marker-nor-points actual={"markerCount":0,"accountRows":1,"points":0}
+ASSERT PASS B-task-started actual="A-rollback"
+OBS ACTUAL_POSTGRES_BLOCKING {"waitEvent":"transactionid","waitType":"Lock","blockingPids":"{124135}","B_state":"active","A_pid":124135,"B_pid":124136}
+ASSERT PASS B-actually-blocked-before-A-decision actual={"waitEvent":"transactionid","waitType":"Lock","blockingPids":"{124135}","B_state":"active","A_pid":124135,"B_pid":124136}
+OBS A_TRANSACTION_DECISION {"decision":"ROLLBACK","sameInitialFixture":true}
+ASSERT PASS at-most-one-returned-event actual="E01"
+OBS INSERT_RETURNING {"returned":"E01","newRow":true,"task":"B-after-A-rollback"}
+OBS DB_COMMIT {"points":10,"markerCount":1,"inserted":true,"databaseCommit":true,"task":"B-after-A-rollback","updateRows":1}
+ASSERT PASS B-gains-key-only-if-A-rolled-back actual={"points":10,"markerCount":1,"inserted":true,"databaseCommit":true,"task":"B-after-A-rollback","updateRows":1}
+ASSERT PASS B-update-count actual={"points":10,"markerCount":1,"inserted":true,"databaseCommit":true,"task":"B-after-A-rollback","updateRows":1}
+ASSERT PASS exactly-ten-and-one-marker-after-race actual={"markerCount":1,"accountRows":1,"points":10}
+OBS RACE_FINAL {"A_decision":"ROLLBACK","database":{"markerCount":1,"accountRows":1,"points":10}}
+OBS FIXTURE_RESET {"markerCount":0,"accountRows":0}
+ASSERT PASS at-most-one-returned-event actual="E01"
+OBS INSERT_RETURNING {"returned":"E01","newRow":true,"task":"missing-account"}
+OBS DB_ROLLBACK {"insertWasNew":true,"error":"UPDATE must affect exactly1 row, actual=0","task":"missing-account","errorType":"Mq05Probe$BusinessRowsException","updateRowsBeforeFailure":0}
+OBS EXPECTED_MISSING_ACCOUNT_FAILURE {"error":"UPDATE must affect exactly1 row, actual=0"}
+ASSERT PASS missing-target-rolled-back-marker actual={"markerCount":0,"accountRows":0}
+OBS FIXTURE_RESET {"markerCount":0,"accountRows":1,"points":2147483647}
+ASSERT PASS at-most-one-returned-event actual="E01"
+OBS INSERT_RETURNING {"returned":"E01","newRow":true,"task":"integer-overflow"}
+OBS DB_ROLLBACK {"insertWasNew":true,"error":"ERROR: integer out of range","task":"integer-overflow","errorType":"org.postgresql.util.PSQLException","updateRowsBeforeFailure":0}
+OBS EXPECTED_UPDATE_SQL_FAILURE {"error":"ERROR: integer out of range","SQLState":"22003"}
+ASSERT PASS update-error-rolled-back-marker-and-points actual={"markerCount":0,"accountRows":1,"points":2147483647}
+OBS FIXTURE_RESET {"markerCount":0,"accountRows":1,"points":0}
+ASSERT PASS at-most-one-returned-event actual="E01"
+OBS INSERT_RETURNING {"returned":"E01","newRow":true,"task":"retry-after-failure"}
+OBS DB_COMMIT {"points":10,"markerCount":1,"inserted":true,"databaseCommit":true,"task":"retry-after-failure","updateRows":1}
+ASSERT PASS later-valid-attempt-can-acquire-key actual={"points":10,"markerCount":1,"inserted":true,"databaseCommit":true,"task":"retry-after-failure","updateRows":1}
+RESULT PASS mode=db-concurrency assertions=30

@@ -1,0 +1,129 @@
+---
+title: '消息保序：订单已退款，为什么又变回已支付？'
+summary: '用订单7042的支付与退款两条有效事件，连接同key路由、分区日志、客户端返回列表和应用实际完成顺序。'
+chapters:
+  - { id: problem, title: 问题与输入 }
+  - { id: log, title: 同键怎样写进同分区 }
+  - { id: delivery, title: 从日志到按序交付 }
+  - { id: completion, title: 完成顺序由谁保持 }
+related: ['kafka-consumer-groups', 'kafka-send-confirmation']
+---
+
+## 已退款，页面为什么又显示已支付？ {#problem}
+
+教学示例中，订单7042已经先完成支付、后完成退款。上游各产生一条不同的有效事件：`E01 = OrderPaid`，`E02 = OrderRefunded`。下游应用只根据事件更新订单状态页的投影：处理E01写“已支付”，处理E02写“已退款”。这里没有再次扣款或再次退款，页面状态倒退也不表示退款资金被撤回。
+
+我们要保护的是这条已确定的业务先后。先固定一个生产者、一个调用线程，成功完成E01发送后再发送E02；主题`orders`始终有两个分区。Kafka可以保存进入同一分区的顺序，却不会替两个互不协调的上游生产者决定“支付与退款谁在业务上先发生”。
+
+本文固定Kafka及Java客户端4.4.0，源码commit为`1156b2752aaa28eafc0b4c4d387e63356793268d`。消费者显式选择`group.protocol=classic`与`RangeAssignor`，只有一个成员，关闭自动提交；发送配置为`acks=all`、`enable.idempotence=true`和`max.in.flight.requests.per.connection=1`，主线没有发送故障。后面的并发分支只改变应用处理调度，不改变消息与日志。
+
+## 相同订单编号怎样进入同一分区 {#log}
+
+两条记录都使用字符串`7042`作为key。客户端先调用key序列化器；本例使用没有改编码的`StringSerializer`，其UTF8字节为`37 30 34 32`。在没有显式指定partition、没有自定义partitioner、且没有忽略key的前提下，`KafkaProducer.partition`把这些字节交给内建分区规则。
+
+<SourceQuote sourceId="A1" supports="调用路径先序列化key，再计算分区并入分区缓冲；具体分支条件见同文件partition执行段。" />
+<SourceQuote sourceId="A2" supports="本例没有改编码，StringSerializer字段初始值是UTF8。" />
+
+实际计算表达式是：
+
+```java
+return Utils.toPositive(Utils.murmur2(serializedKey)) % numPartitions;
+```
+
+固定输入字节与分区数，结果也是固定的。本轮运行真实Kafka4.4.0的`StringSerializer`、`Utils`和`BuiltInPartitioner`得到：
+
+```text
+key=7042 utf8Hex=37303432
+murmur2Signed=1934056876 positive=1934056876
+partitions=2 selected=0
+```
+
+所以本例两条记录都选择P0，P1为空。这个计算不是用“同订单”这层业务含义分区，而是用相同序列化字节和相同分区数；不同key也可能碰巧落在同一分区。真实类计算记录在`experiments/key-route-result.json`，它没有发送网络请求，也不是Broker实测。
+
+<SourceQuote sourceId="R1" supports="内建分区函数真实执行对key字节的murmur2、转非负和分区数取余。" />
+
+<Figure src="/video-studio/episodes/kafka-message-ordering/article/01-key-route.jpg" alt="E01和E02都使用key7042，相同字节经hash后对2取余得到P0。" caption="相同UTF8键字节，经固定两分区的实际规则，两条事件都选P0。" chapter="log" seekTo={54.733333333} />
+
+客户端按topic和partition保存待发送批次。`RecordAccumulator`为选中的分区取得双端队列：能追加到末批时继续追加，需创建新批时则`addLast`放在队尾；后台检查队头并`pollFirst`取出。本例先完成E01发送再发E02，图中各画为一批B1、B2。真实批次可以包含多条记录，合批不改变我们选定的先后输入。
+
+<SourceQuote sourceId="R2" supports="新批次确实加入该分区队列尾部；队头检查及pollFirst的另一执行段见研究映射。" />
+
+Broker对leader追加在日志锁内从当前log end开始分配offset，验证通过后追加并更新日志末尾。新空P0先写E01得到0，再写E02得到1。它没有把业务时间戳排序，也没有把事件名“退款”当作优先级。
+
+<SourceQuote sourceId="A3" supports="追加路径的offset计数器从当前分区日志末尾开始；完整锁、校验、append和末尾更新链见执行映射。" />
+
+## 客户端按什么顺序交给应用 {#delivery}
+
+消费者请求P0保留开头0。`CompletedFetch`按批次迭代器、记录迭代器往后取记录，解析后`records.add(record)`加在本次结果列表末尾，因此先得到E01@0，再得到E02@1。原日志中的两条记录保持不动。
+
+这里有两个不同的变量：`CompletedFetch.nextFetchOffset`在内部扫描循环中按`lastRecord.offset() + 1`前进；外层`FetchCollector`等这次`fetchRecords`返回后，才把汇总出的下一位置写进`SubscriptionState.position`。如果本次同时返回两条，本例客户端当前位置从0更新到2，不是每把一条放进临时列表就安装一次当前位置1。
+
+<SourceQuote sourceId="R3" supports="这句更新的是CompletedFetch内部nextFetchOffset；列表追加与外层position安装的层级不可混用。" />
+<SourceQuote sourceId="A4" supports="外层FetchCollector在记录收集返回后才实际安装客户端position。" />
+
+随后classic客户端构造`ConsumerRecords`，P0对应的列表仍是`[E01,E02]`。本文只讨论同一分区的顺序，不把多个分区的返回列表说成全局业务顺序。
+
+<Figure src="/video-studio/episodes/kafka-message-ordering/article/02-log-and-delivery.jpg" alt="P0日志和本次交给应用的列表并排，两条有效事件都按E01、E02排列。" caption="P0日志保留E01@0、E02@1，客户端按同一顺序收集并交给应用。" chapter="delivery" seekTo={81.000000000} />
+
+## 到达有序，业务为什么仍能反过来完成 {#completion}
+
+先看正确的串行对照：应用等待E01实际写入状态页投影后，才处理E02，页面就从待支付变成已支付，最后成为已退款。以下只是表达调度关系的教学伪代码，`await`要求等待真实写入完成：
+
+```text
+for record in P0返回列表:
+    await 写入订单状态(record)
+```
+
+现在明确回到**同一份P0日志、相同读取起点和相同的待支付页面**，只改应用调度。仍先提交E01、再提交E02，但交给两个任务并发执行：
+
+```text
+for record in P0返回列表:
+    提交给工作线程(() => 写入订单状态(record))
+```
+
+循环按序提交，不代表循环等着前一个任务完成。受控反例把E01的任务停在实际写入前；E02后启动，却先把投影写成已退款；随后放开E01，迟完成的支付任务写入已支付，覆盖了刚才的投影。Kafka日志和交付顺序都是E01→E02，应用完成顺序却是E02→E01。
+
+KafkaConsumer文档也明确指出，把消费与处理分开后，较早的数据可能由于线程执行时机而较晚处理。这里使用可控屏障解释允许发生的交错，不把等待时间当作性能测量；客户端poll仍由消费线程调用，没有把KafkaConsumer并发交给两个工作线程。
+
+<SourceQuote sourceId="R4" supports="消费与处理解耦时，跨处理线程的有序需要额外安排，不能从按序交付推定按序完成。" />
+
+<Figure src="/video-studio/episodes/kafka-message-ordering/article/03-concurrent-final.jpg" alt="日志和交付仍是E01、E02，业务完成却为E02、E01，状态投影最终已支付。" caption="同日志的并发对照：退款先写完，先到的支付任务后写完，页面变回已支付。" chapter="completion" seekTo={127.500000000} />
+
+## 把同一订单的完成顺序接起来
+
+应用可以按订单key组织自己的队列。对于7042，一次只放行一个处理任务；当前任务的真实状态写入完成后，再移除队头、放行下一条。这样E01完成后才开始E02，最终仍是已退款。其他订单可以放到各自队列并行处理，不必把整个服务都压到一个工作线程。
+
+这是一种应用调度策略，不是Kafka替应用自动串行了所有业务。如果处理函数只是发起另一个异步请求就返回，仍然需要等待那个实际写入的完成；按序“启动”或按序“submit”都不能代替按序完成。
+
+<Figure src="/video-studio/episodes/kafka-message-ordering/article/04-per-order-serial.jpg" alt="7042队列等待支付状态写完，才放行退款状态写入，最终为已退款。" caption="按订单等待前一条实际写入完成，再放行下一条，最终状态为已退款。" chapter="completion" seekTo={140.466666667} />
+
+## 条件改变时，哪些保证需要重新核对
+
+- **多个生产者：**同key只能选择同分区，日志只会保存真实追加先后。若外部业务因果尚未协调，不能从同key推导“支付一定先于退款”。
+- **分区数变化：**相同hash换了取余数，映射可能变化。例如本例1934056876对2取余为0，对3取余为1；旧记录仍在原P0，新记录可能去P1，不能继续按固定同分区的前提推理。
+- **忽略key、指定分区或自定义路由：**会改走其他条件分支；“同业务订单编号”还需要同样序列化成同样key字节。
+- **发送重试：**配置需要单独核对。禁用幂等且允许多个请求在途时，前批重试可能晚于后批写入；本例固定的配置及成功先后收窄了这个分支。幂等相关约束不等于应用线程有序。
+- **提交恢复点：**并发处理还需安排何时安全提交消费进度，不能把客户端已经返回两条当成两条业务都完成。本文不再展开另一条完整恢复机制。
+
+E01和E02是不同有效事件。把它们当作同一个消息去重，或者只说“打开幂等”，都没有解释这里的页面覆盖问题。要判断一次保序方案，至少要分别问：输入业务先后是否已确定、记录怎样进入同一分区并交付、同一订单的实际写入是否按顺序完成。
+
+
+## 实际对照记录
+
+本轮另在真实Kafka4.4.0的两分区主题上执行了单生产者发送：相同UTF8 key7042，E01成功后才发E02，实际返回P0@0、P0@1。classic+Range单成员消费者按这个顺序取到了两条；实验的`max.poll.records=1`，先汇总两次真实poll返回的记录，再保留同一个列表比较两种应用调度。
+
+应用投影使用实际Java `AtomicReference`，每轮都从PENDING开始。串行执行完成E01→E02、最终REFUNDED；双任务用`CountDownLatch`让E01等待写入、E02先写后释放E01，实际完成E02→E01、最终PAID。Broker的日志末尾仍是P0=2、P1=0，物理日志仍保留两条。这证明该受控交错能发生，并不代表真实资金系统或数据库行为，也不是处理速度测量。前面客户端一次收集两条的图是按源码说明的合法教学路径，不冒充实验中每次poll的记录数量。
+
+## 参考资料
+
+固定Apache Kafka/Java客户端4.4.0，commit `1156b2752aaa28eafc0b4c4d387e63356793268d`；本轮实际访问2026-10-30。机构署名依据同commit的Apache Kafka NOTICE，没有推定个人作者。
+
+- R1 Apache Kafka, [BuiltInPartitioner](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/BuiltInPartitioner.java)；[固定commit原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/BuiltInPartitioner.java)。
+- R2 Apache Kafka, [RecordAccumulator](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/RecordAccumulator.java)；[固定commit原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/RecordAccumulator.java)。
+- R3 Apache Kafka, [CompletedFetch](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java)；[固定commit原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java)。
+- R4 Apache Kafka, [KafkaConsumer](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java)；[固定commit原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java)。
+- A1 Apache Kafka, [KafkaProducer](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java)；[固定commit原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java)。
+- A2 Apache Kafka, [StringSerializer](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/serialization/StringSerializer.java)；[固定commit原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/serialization/StringSerializer.java)。
+- A3 Apache Kafka, [UnifiedLog](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java)；[固定commit原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java)。
+- A4 Apache Kafka, [FetchCollector](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java)；[固定commit原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java)。
+- A5 Apache Kafka, [ProducerConfig](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java)；[固定commit原文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java)。

@@ -1,0 +1,2797 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-consumer-idempotency",
+  "kind": "finite-teaching-state-machine-not-Broker-or-database-experiment",
+  "versions": {
+    "kafka": "4.4.0",
+    "kafkaCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "postgresql": "18.0",
+    "postgresqlCommit": "3d6a828938a5fa0444275d3d2f67b64ec3199eb7"
+  },
+  "conditions": {
+    "group.protocol": "classic",
+    "group.id": "points",
+    "enable.auto.commit": false,
+    "max.poll.records": 1,
+    "databaseIsolation": "Read Committed",
+    "key": [
+      "points",
+      "E01"
+    ],
+    "keyConstraint": "NOT NULL immediate non-deferrable PRIMARY KEY",
+    "concurrency": "Database processing attempts of the same logical business, not two stable same-group owners ofP0",
+    "retention": "E01 and processed key retained for whole example",
+    "transactionScope": "Only processed_events and account_points; Kafka offset is separate",
+    "excluded": [
+      "physical speculative tuple/index layout",
+      "page latch implementation",
+      "physical rollback cleanup timing",
+      "external side effects",
+      "higher isolation serialization failure",
+      "full rebalance protocol"
+    ]
+  },
+  "event": {
+    "eventId": "E01",
+    "orderId": "7042",
+    "accountId": 17,
+    "delta": 10,
+    "partition": "P0",
+    "offset": 0
+  },
+  "key": [
+    "points",
+    "E01"
+  ],
+  "timeline": [
+    {
+      "id": "initial",
+      "branch": "redelivery",
+      "label": "账户0分，日志一条E01，组保存下一位置0",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 0,
+        "instance": "C1",
+        "alive": true,
+        "received": [],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {},
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "record-delivered",
+      "branch": "redelivery",
+      "label": "poll返回同E01，客户端下一位置1",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C1",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {},
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "business-committed-offset-old",
+      "branch": "redelivery",
+      "label": "第一次无去重业务已提交10，Kafka恢复值仍0",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C1",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": []
+        },
+        "transactions": {},
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "crashed-before-offset-commit",
+      "branch": "redelivery",
+      "label": "在DB提交与Kafka进度提交之间退出",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": null,
+        "instance": "C1",
+        "alive": false,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": []
+        },
+        "transactions": {},
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "restored-zero",
+      "branch": "redelivery",
+      "label": "新实例从保存0恢复",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 0,
+        "instance": "C2",
+        "alive": true,
+        "received": [],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": []
+        },
+        "transactions": {},
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "same-record-redelivered",
+      "branch": "redelivery",
+      "label": "原日志同E01再次返回",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": []
+        },
+        "transactions": {},
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "unguarded-twenty",
+      "branch": "redelivery",
+      "label": "不作资格判断，再提交一次+10成为20",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 20,
+          "processed": []
+        },
+        "transactions": {},
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "query-reset",
+      "branch": "query-race",
+      "label": "回到0分和空登记，两个DB处理任务重叠",
+      "resetBefore": true,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "both-select-absent",
+      "branch": "query-race",
+      "label": "两个普通查询都未见已提交登记，没有取得资格",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "unsafe-first-award-committed",
+      "branch": "query-race",
+      "label": "错误分支先单独提交第一次+10",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "unsafe-second-award-committed",
+      "branch": "query-race",
+      "label": "错误分支已单独提交第二次+10",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 20,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "unsafe-late-mark",
+      "branch": "query-race",
+      "label": "先加分提交后，T1才补登记",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 20,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "unsafe-conflict-too-late",
+      "branch": "query-race",
+      "label": "后补登记发现冲突也不能撤销已提交积分20",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 20,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "skipped-existing",
+            "returning": [],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "safe-reset",
+      "branch": "commit-wins",
+      "label": "相同0分空登记起点，稳定逻辑键points/E01",
+      "resetBefore": true,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "index-check-protected",
+      "branch": "commit-wins",
+      "label": "索引检查到插入的短内部保护，不等于等待期间持页锁",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": "T1"
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "t1-insert-returned",
+      "branch": "commit-wins",
+      "label": "本次插入成功返回E01，事务仍未提交",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": "T1",
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "t1-award-pending",
+      "branch": "commit-wins",
+      "label": "同事务暂存登记和+10，公共积分仍0",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 10,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": "T1",
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "t2-ordinary-select-absent",
+      "branch": "commit-wins",
+      "label": "普通查询不可见T1未提交登记，不代表唯一检查无冲突",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 10,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": "T1",
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "t2-waits-for-t1",
+      "branch": "commit-wins",
+      "label": "同键未决事务使T2等待，没有返回成功或永久重复",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 10,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "waiting",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "waiting",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": "T1",
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": "T1",
+          "waitingAttempts": [
+            "T2"
+          ],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "t1-committed",
+      "branch": "commit-wins",
+      "label": "T1登记与10分成为同一提交结果，等待者尚未重检",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "waiting",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "waiting",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": "T1",
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [
+            "T2"
+          ],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "t2-rechecked-existing",
+      "branch": "commit-wins",
+      "label": "T2重检，确认已有键，DO NOTHING返回空",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "skipped-existing",
+            "returning": [],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "t2-skipped-award",
+      "branch": "commit-wins",
+      "label": "本次无新登记，UPDATE未执行，积分10",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "skipped-existing",
+            "returning": [],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "redelivery-skipped",
+      "branch": "commit-wins",
+      "label": "同E01再来仍返回空，不重复增量",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "skipped-existing",
+            "returning": [],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          },
+          "R": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "skipped-existing",
+            "returning": [],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "offset-committed-separately",
+      "branch": "commit-wins",
+      "label": "DB事务完成后，Kafka下一恢复位置另一步提交1",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 1,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "skipped-existing",
+            "returning": [],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          },
+          "R": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "skipped-existing",
+            "returning": [],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "rollback-reset-pending",
+      "branch": "rollback-wins",
+      "label": "回到T1两项未提交/T2等待的同一状态，只改T1结局",
+      "resetBefore": true,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 10,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "waiting",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "waiting",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": "T1",
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": "T1",
+          "waitingAttempts": [
+            "T2"
+          ],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "t1-aborted",
+      "branch": "rollback-wins",
+      "label": "T1登记与积分均不生效，物理清理不建模",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "aborted",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "aborted-not-effective",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "waiting",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "waiting",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": "T1",
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [
+            "T2"
+          ],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": [
+          {
+            "owner": "T1",
+            "registrationWasPending": true,
+            "deltaWasPending": 10,
+            "outcome": "aborted-not-effective",
+            "physicalBytesRemoved": "not-modeled"
+          }
+        ]
+      },
+      "note": null
+    },
+    {
+      "id": "t2-insert-after-abort",
+      "branch": "rollback-wins",
+      "label": "T2重检后本次插入成功返回E01",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "aborted",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "aborted-not-effective",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": "T2",
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": [
+          {
+            "owner": "T1",
+            "registrationWasPending": true,
+            "deltaWasPending": 10,
+            "outcome": "aborted-not-effective",
+            "physicalBytesRemoved": "not-modeled"
+          }
+        ]
+      },
+      "note": null
+    },
+    {
+      "id": "t2-award-pending",
+      "branch": "rollback-wins",
+      "label": "T2自己的同一事务暂存+10，公共积分仍0",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "aborted",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "aborted-not-effective",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 10,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": true
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": "T2",
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": [
+          {
+            "owner": "T1",
+            "registrationWasPending": true,
+            "deltaWasPending": 10,
+            "outcome": "aborted-not-effective",
+            "physicalBytesRemoved": "not-modeled"
+          }
+        ]
+      },
+      "note": null
+    },
+    {
+      "id": "t2-committed-after-abort",
+      "branch": "rollback-wins",
+      "label": "接手者提交一份登记和一次+10，结果仍10",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 10,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "aborted",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "aborted-not-effective",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": true
+          },
+          "T2": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": false,
+            "updateExecuted": true
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": [
+          {
+            "owner": "T1",
+            "registrationWasPending": true,
+            "deltaWasPending": 10,
+            "outcome": "aborted-not-effective",
+            "physicalBytesRemoved": "not-modeled"
+          }
+        ]
+      },
+      "note": null
+    },
+    {
+      "id": "split-reset",
+      "branch": "split-transaction",
+      "label": "独立反例重新从0分/空登记开始",
+      "resetBefore": true,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": []
+        },
+        "transactions": {
+          "T1": {
+            "status": "active",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "not-attempted",
+            "returning": null,
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "mark-only-committed",
+      "branch": "split-transaction",
+      "label": "错误分支只提交登记，积分还没做",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "failed-after-mark",
+      "branch": "split-transaction",
+      "label": "登记单独提交后退出，留下有效登记1/积分0",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    },
+    {
+      "id": "split-skips-needed-award",
+      "branch": "split-transaction",
+      "label": "重试返回空并跳过，使该加的10分遗漏",
+      "resetBefore": false,
+      "event": {
+        "eventId": "E01",
+        "orderId": "7042",
+        "accountId": 17,
+        "delta": 10,
+        "partition": "P0",
+        "offset": 0
+      },
+      "kafka": {
+        "groupId": "points",
+        "committedNextOffset": 0,
+        "position": 1,
+        "instance": "C2",
+        "alive": true,
+        "received": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "accountId": 17,
+            "delta": 10,
+            "partition": "P0",
+            "offset": 0
+          }
+        ]
+      },
+      "database": {
+        "committed": {
+          "points": 0,
+          "processed": [
+            [
+              "points",
+              "E01"
+            ]
+          ]
+        },
+        "transactions": {
+          "T1": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "inserted-new",
+            "returning": [
+              "E01"
+            ],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          },
+          "T2": {
+            "status": "committed",
+            "key": [
+              "points",
+              "E01"
+            ],
+            "registration": "skipped-existing",
+            "returning": [],
+            "pendingDelta": 0,
+            "waitsFor": null,
+            "ordinarySelectSawKey": null,
+            "updateExecuted": false
+          }
+        },
+        "index": {
+          "key": [
+            "points",
+            "E01"
+          ],
+          "uncommittedOwner": null,
+          "waitingAttempts": [],
+          "shortInternalGuard": null
+        },
+        "retiredWriteOutcomes": []
+      },
+      "note": null
+    }
+  ]
+}

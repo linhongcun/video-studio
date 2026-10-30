@@ -1,0 +1,59 @@
+{
+  "checkedAtUTC": "2026-10-30T15:33:13.533633+00:00",
+  "reviewer": "/root/mq_qa independent of production author",
+  "baseCommit": "f01411f7e2a2d1cef480cd0f6b73d4c29d7169f3",
+  "episode": "kafka-consumer-idempotency",
+  "ep": 45,
+  "issue": 313,
+  "status": "approved-for-TTS",
+  "canEnterTTS": true,
+  "blockers": [],
+  "scriptSHA256": "fffe0eca9a3d4b377bee3d7b3c502fcd03be0af2cc31f023fc3a6ac7b7cab3d5",
+  "narrationSHA256": "521b47d9fa0cacf069758fb9bab59856b9bef1738782c12a42ae98f078d1a7fe",
+  "narrationDefinition": "UTF8 ''.join(re.findall(r'^旁白：(.*)$', script, re.M)); no separator or trailingLF",
+  "alternateLFSHA256": "9c573cc49ed4e2d1d4ef803f22085a2b2a6ca3b82c6e66329e61761ee6c8fae3",
+  "shots": 14,
+  "sentences": 28,
+  "question": "同一E01重来或DB处理尝试重叠时，怎样只让本地积分生效一次",
+  "editorialJudgement": "Only script/scene directions suffice to follow the concrete business context, introduced objects, actors, internal state changes and one changed-condition comparison; ending directly answers opening. Names/snippets/assertion counts are not substituted for causal explanation.",
+  "causalChain": [
+    "DB已提交10但Kafka恢复值仍0→确定在提交offset前退出→同E01重来，无判断则20",
+    "两个普通查询都空不构成认领；已分别提交积分后，补唯一标记不能撤回既有积分",
+    "稳定业务points+事件E01构成同一立即唯一键；T1本次INSERT返回新行才暂存+10，对外仍0",
+    "真实btree插入检查到索引写入同页短写锁连续保护；T2预查遇未决行结束内部扫描再等事务，并重查",
+    "T1提交→同事务登记/+10成为已提交状态；T2重查DO NOTHING无新行→应用不UPDATE",
+    "回到同一未决态只改T1回滚→两项均不生效→T2新登记并加分提交；独立标记先提交反例说明为何不能拆本地事务"
+  ],
+  "necessaryConditionsPresentInScriptAndPlan": [
+    "E01身份稳定且唯一键含逻辑业务，不用进程ID；两个DB尝试不是稳定组双拥有P0",
+    "PostgreSQL18.0/ReadCommitted/立即非延迟主键、非空字段、账户存在、UPDATE行数校验",
+    "Kafka4.4.0/classic手动提交单条poll；DB提交后再独立提交Kafka，不声称分布式原子或外部副作用一次"
+  ],
+  "actualTargetedSourceRead": [
+    "sources/postgresql/src/backend/access/nbtree/nbtinsert.c:187-232,574-579",
+    "sources/postgresql/src/backend/executor/execIndexing.c:781-784,862-890",
+    "sources/postgresql/src/backend/executor/nodeModifyTable.c:1121-1139,1164-1227,1332-1333",
+    "sources/postgresql/src/backend/access/heap/heapam.c:2282-2290,3768-3778",
+    "sources/postgresql/src/backend/access/transam/xact.c:1843-1851,2359-2389",
+    "sources/postgresql/src/backend/access/heap/heapam_visibility.c:1063-1087,1129-1137",
+    "sources/kafka/FetchCollector.java:178-185",
+    "sources/kafka/ClassicKafkaConsumer.java:752-765",
+    "sources/kafka/ConsumerUtils.java:192-210"
+  ],
+  "priorReviewCorrections": [
+    "08原受保护步骤的表述明确为同键争同一短写锁、检查到写入持续保护，等待未决事务时不持内部锁。属于配音前源码/叙事修订，未制造动态失败证据。"
+  ],
+  "preliminaryModelAndVisualRequirements": [
+    "08必须显式标回看刚才T1索引写入，再回当前T2预查等待，不能偷偷倒退事务状态",
+    "T1/T2暂存+10与公共积分0分栏；COMMIT后才公共10，ROLLBACK不画物理字节立即清空",
+    "RETURNING空与新行、查询竞态/正常/回滚/拆事务的reset和结尾正确机制回顾均须实帧复核"
+  ],
+  "currentPlanSHA256": "3bc817f6f68ba161b38059b2482f56500a940d14c5b3c5674c6aafd0eda7f05d",
+  "currentModelSHA256": "cd18c7d4302eb1c91dbbe424dfa26a3bc8ff6f4cd20258d62e6d05e41f4fa138",
+  "runtimeEvidenceScope": "Source execution facts, finite teaching model and actual Broker/DB/application runtime evidence remain separate. Runtime receipts are independently owned by deploy_diagnosis; this editorial gate does not claim their execution, full model acceptance, sound quality, actual animation or media pass.",
+  "limits": [
+    "No semantic listening/ASR or exact timing exists yet; source voice/media gates remain pending.",
+    "No formal freeze/render/site/git action authorized by this report; root retains production/release gate.",
+    "Qualitative S023 supports chosen style; no novice comprehension measurement is claimed."
+  ]
+}

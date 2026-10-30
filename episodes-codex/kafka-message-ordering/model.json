@@ -1,0 +1,2334 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-message-ordering",
+  "kind": "finite-teaching-model-not-Kafka-runtime",
+  "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "events": [
+    {
+      "eventId": "E01",
+      "type": "OrderPaid",
+      "orderId": "7042",
+      "key": "7042",
+      "targetStatus": "PAID"
+    },
+    {
+      "eventId": "E02",
+      "type": "OrderRefunded",
+      "orderId": "7042",
+      "key": "7042",
+      "targetStatus": "REFUNDED"
+    }
+  ],
+  "keyRoute": {
+    "key": "7042",
+    "encoding": "UTF-8",
+    "hex": "37303432",
+    "murmur2Signed": 1934056876,
+    "positiveHash": 1934056876,
+    "partitionCount": 2,
+    "partition": "P0"
+  },
+  "conditions": {
+    "sourceBusinessOrder": "Paid happened before Refunded; events notify downstream projection only",
+    "singleProducer": true,
+    "singleSendThread": true,
+    "E01SendCompleteBeforeE02": true,
+    "partitionCountStable": 2,
+    "explicitPartition": null,
+    "customPartitioner": false,
+    "partitioner.ignore.keys": false,
+    "keySerializer": "StringSerializer UTF-8",
+    "acks": "all",
+    "enable.idempotence": true,
+    "max.in.flight.requests.per.connection": 1,
+    "consumerProtocol": "classic",
+    "partition.assignment.strategy": "RangeAssignor",
+    "consumerMembers": 1,
+    "enable.auto.commit": false,
+    "initialFetchOffset": 0,
+    "projectionMeaning": "State read model for order7042; no funds transfer",
+    "asyncInterleaving": "latch-controlled teaching interleaving; not a latency measurement"
+  },
+  "commonRetainedLogSHA256": "2c9bcc4e4c4fc349c378c460df77e874c1a5c46afec589acbcd09fa035f6ee18",
+  "timeline": [
+    {
+      "id": "initial",
+      "label": "两个已发生的有效事件，确定先支付后退款",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {},
+        "routing": {},
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": []
+      },
+      "log": {
+        "P0": [],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "same-key-bytes",
+      "label": "两条订单7042都序列化成相同字节",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {},
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": []
+      },
+      "log": {
+        "P0": [],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "same-partition",
+      "label": "1934056876对2取余0，两条都选P0",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": []
+      },
+      "log": {
+        "P0": [],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "paid-queued",
+      "label": "B1在P0队列尾，含E01",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [
+            {
+              "batchId": "B1",
+              "eventIds": [
+                "E01"
+              ]
+            }
+          ],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": []
+      },
+      "log": {
+        "P0": [],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "paid-inflight",
+      "label": "后台取P0队头B1，只有这一请求在途",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [
+          {
+            "batchId": "B1",
+            "eventIds": [
+              "E01"
+            ]
+          }
+        ],
+        "sentComplete": []
+      },
+      "log": {
+        "P0": [],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "paid-appended",
+      "label": "先完成E01发送，P0写入offset0",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "refund-queued",
+      "label": "E01完成后B2入P0队列尾",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [
+            {
+              "batchId": "B2",
+              "eventIds": [
+                "E02"
+              ]
+            }
+          ],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "refund-inflight",
+      "label": "E01完成后，后台取P0队头B2",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [
+          {
+            "batchId": "B2",
+            "eventIds": [
+              "E02"
+            ]
+          }
+        ],
+        "sentComplete": [
+          "E01"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "both-appended",
+      "label": "P0按先后保留E01@0和E02@1",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "collector-paid",
+      "label": "迭代取记录0，加入内部列表，客户端position仍0",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 1,
+        "buffer": [
+          "E01"
+        ],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "collector-buffered-both",
+      "label": "记录1接在内部列表后面，客户端position仍0",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": []
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "collector-both",
+      "label": "收集完成，position更新到2，按E01/E02返回应用",
+      "branch": "write",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "serial-paid-running",
+      "label": "应用先处理支付投影",
+      "branch": "serial",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PENDING",
+        "dispatchOrder": [
+          "E01"
+        ],
+        "tasks": {
+          "E01": "running",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "serial-paid-done",
+      "label": "支付处理实际写成PAID",
+      "branch": "serial",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PAID",
+        "dispatchOrder": [
+          "E01"
+        ],
+        "tasks": {
+          "E01": "complete",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [
+          "E01"
+        ],
+        "writes": [
+          {
+            "eventId": "E01",
+            "projection": "PAID",
+            "writeOrdinal": 1
+          }
+        ]
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "serial-refund-running",
+      "label": "上一条写完才处理退款",
+      "branch": "serial",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "PAID",
+        "dispatchOrder": [
+          "E01",
+          "E02"
+        ],
+        "tasks": {
+          "E01": "complete",
+          "E02": "running"
+        },
+        "completionOrder": [
+          "E01"
+        ],
+        "writes": [
+          {
+            "eventId": "E01",
+            "projection": "PAID",
+            "writeOrdinal": 1
+          }
+        ]
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "serial-refund-done",
+      "label": "最后写成REFUNDED",
+      "branch": "serial",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "serial",
+        "projection": "REFUNDED",
+        "dispatchOrder": [
+          "E01",
+          "E02"
+        ],
+        "tasks": {
+          "E01": "complete",
+          "E02": "complete"
+        },
+        "completionOrder": [
+          "E01",
+          "E02"
+        ],
+        "writes": [
+          {
+            "eventId": "E01",
+            "projection": "PAID",
+            "writeOrdinal": 1
+          },
+          {
+            "eventId": "E02",
+            "projection": "REFUNDED",
+            "writeOrdinal": 2
+          }
+        ]
+      },
+      "event": {
+        "kind": "initial"
+      }
+    },
+    {
+      "id": "async-reset",
+      "label": "独立对照：同一保留日志、投影回PENDING、读取从0开始",
+      "branch": "concurrent",
+      "resetBefore": true,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "concurrent",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "async-delivered",
+      "label": "客户端依旧返回E01在前E02在后",
+      "branch": "concurrent",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "concurrent",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "async-paid-paused",
+      "label": "先提交的支付任务已启动，在实际写入前等待屏障",
+      "branch": "concurrent",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "concurrent",
+        "projection": "PENDING",
+        "dispatchOrder": [
+          "E01"
+        ],
+        "tasks": {
+          "E01": "paused-before-write",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "async-refund-running",
+      "label": "后提交的退款任务并发运行",
+      "branch": "concurrent",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "concurrent",
+        "projection": "PENDING",
+        "dispatchOrder": [
+          "E01",
+          "E02"
+        ],
+        "tasks": {
+          "E01": "paused-before-write",
+          "E02": "running"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "async-refund-done",
+      "label": "退款先完成，投影REFUNDED，支付任务尚未结束",
+      "branch": "concurrent",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "concurrent",
+        "projection": "REFUNDED",
+        "dispatchOrder": [
+          "E01",
+          "E02"
+        ],
+        "tasks": {
+          "E01": "paused-before-write",
+          "E02": "complete"
+        },
+        "completionOrder": [
+          "E02"
+        ],
+        "writes": [
+          {
+            "eventId": "E02",
+            "projection": "REFUNDED",
+            "writeOrdinal": 1
+          }
+        ]
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "async-paid-resumed",
+      "label": "释放屏障，支付任务继续",
+      "branch": "concurrent",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "concurrent",
+        "projection": "REFUNDED",
+        "dispatchOrder": [
+          "E01",
+          "E02"
+        ],
+        "tasks": {
+          "E01": "running",
+          "E02": "complete"
+        },
+        "completionOrder": [
+          "E02"
+        ],
+        "writes": [
+          {
+            "eventId": "E02",
+            "projection": "REFUNDED",
+            "writeOrdinal": 1
+          }
+        ]
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "async-paid-done",
+      "label": "支付后完成覆盖投影为PAID；日志与交付顺序都没变",
+      "branch": "concurrent",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "concurrent",
+        "projection": "PAID",
+        "dispatchOrder": [
+          "E01",
+          "E02"
+        ],
+        "tasks": {
+          "E01": "complete",
+          "E02": "complete"
+        },
+        "completionOrder": [
+          "E02",
+          "E01"
+        ],
+        "writes": [
+          {
+            "eventId": "E02",
+            "projection": "REFUNDED",
+            "writeOrdinal": 1
+          },
+          {
+            "eventId": "E01",
+            "projection": "PAID",
+            "writeOrdinal": 2
+          }
+        ]
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "ordered-reset",
+      "label": "正确对照：再次固定相同日志和起始页面，只改为按订单串行",
+      "branch": "per-order",
+      "resetBefore": true,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 0,
+          "P1": 0
+        },
+        "scanOffset": 0,
+        "buffer": [],
+        "returned": []
+      },
+      "application": {
+        "mode": "per-order-serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "ordered-delivered",
+      "label": "同样E01/E02返回，在7042的应用队列中等候",
+      "branch": "per-order",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "per-order-serial",
+        "projection": "PENDING",
+        "dispatchOrder": [],
+        "tasks": {
+          "E01": "not-dispatched",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "ordered-paid-running",
+      "label": "仅放行7042当前一条支付任务",
+      "branch": "per-order",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "per-order-serial",
+        "projection": "PENDING",
+        "dispatchOrder": [
+          "E01"
+        ],
+        "tasks": {
+          "E01": "running",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [],
+        "writes": []
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "ordered-paid-done",
+      "label": "支付实际写完才能放行下一条",
+      "branch": "per-order",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "per-order-serial",
+        "projection": "PAID",
+        "dispatchOrder": [
+          "E01"
+        ],
+        "tasks": {
+          "E01": "complete",
+          "E02": "not-dispatched"
+        },
+        "completionOrder": [
+          "E01"
+        ],
+        "writes": [
+          {
+            "eventId": "E01",
+            "projection": "PAID",
+            "writeOrdinal": 1
+          }
+        ]
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "ordered-refund-running",
+      "label": "现在放行退款任务",
+      "branch": "per-order",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "per-order-serial",
+        "projection": "PAID",
+        "dispatchOrder": [
+          "E01",
+          "E02"
+        ],
+        "tasks": {
+          "E01": "complete",
+          "E02": "running"
+        },
+        "completionOrder": [
+          "E01"
+        ],
+        "writes": [
+          {
+            "eventId": "E01",
+            "projection": "PAID",
+            "writeOrdinal": 1
+          }
+        ]
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    },
+    {
+      "id": "ordered-refund-done",
+      "label": "按订单完成E01/E02，最终REFUNDED",
+      "branch": "per-order",
+      "resetBefore": false,
+      "producer": {
+        "sourceOrder": [
+          "E01",
+          "E02"
+        ],
+        "encoded": {
+          "E01": "37303432",
+          "E02": "37303432"
+        },
+        "routing": {
+          "E01": "P0",
+          "E02": "P0"
+        },
+        "queue": {
+          "P0": [],
+          "P1": []
+        },
+        "inflight": [],
+        "sentComplete": [
+          "E01",
+          "E02"
+        ]
+      },
+      "log": {
+        "P0": [
+          {
+            "eventId": "E01",
+            "type": "OrderPaid",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "PAID",
+            "partition": "P0",
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "type": "OrderRefunded",
+            "orderId": "7042",
+            "key": "7042",
+            "targetStatus": "REFUNDED",
+            "partition": "P0",
+            "offset": 1
+          }
+        ],
+        "P1": []
+      },
+      "consumer": {
+        "position": {
+          "P0": 2,
+          "P1": 0
+        },
+        "scanOffset": 2,
+        "buffer": [
+          "E01",
+          "E02"
+        ],
+        "returned": [
+          "E01",
+          "E02"
+        ]
+      },
+      "application": {
+        "mode": "per-order-serial",
+        "projection": "REFUNDED",
+        "dispatchOrder": [
+          "E01",
+          "E02"
+        ],
+        "tasks": {
+          "E01": "complete",
+          "E02": "complete"
+        },
+        "completionOrder": [
+          "E01",
+          "E02"
+        ],
+        "writes": [
+          {
+            "eventId": "E01",
+            "projection": "PAID",
+            "writeOrdinal": 1
+          },
+          {
+            "eventId": "E02",
+            "projection": "REFUNDED",
+            "writeOrdinal": 2
+          }
+        ]
+      },
+      "event": {
+        "kind": "reset-common-log-and-projection"
+      }
+    }
+  ]
+}
