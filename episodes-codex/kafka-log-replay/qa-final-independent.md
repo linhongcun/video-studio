@@ -1,6 +1,6 @@
 # MQ03 独立质检
 
-执行者：Codex独立质检代理，2026-10-30。当前结论：**正式成片及本地站点通过，可发布GitHub站点并继续线上核验**。
+执行者：Codex独立质检代理，2026-10-30。当前结论：**正式成片、本地与线上原生浏览器独立质检通过；结合发布阶段的普通完整GET/SHA证据，可关闭#311**。
 
 - 独立审读11镜22句、新手因果链及21份模型快照。当前读取位置、已提交下一条恢复位置、停整组后仅notify/P0回退、P1/points不变、旧封闭段清理边界符合固定Kafka4.4来源。模型中的position是当前分区拥有者的客户端内存快照，不是Broker持久保存的组级游标。
 - 最终22句来源文本与选段记录一致，22段PCM与整轨逐样本相同，头尾及间隔PCM全零。最短抛弃尾0.345秒、最长句内静音0.42秒，无最终信号筛查旗标；原06句2的a候选短尾风险由根任务保留，最终使用b。声学通过不代表逐字ASR或语义听辨通过。
@@ -11,6 +11,10 @@
 - 最新本地站点46项实际浏览器动作、20次严格RVFC/ffprobePTS帧身份核对通过：1440桌面与390触屏模拟、实际播放/暂停、22条原生字幕默认关闭、4章/4图回看精确赋值、4处原文悬停/点击固定/点按/键盘Esc、三课目录、Fullscreen API及明暗主题边界。实际查看5张UI原图，844×390横屏资料清楚且不被底部控件遮挡。390竖屏内嵌资料较小，不等同横屏可读性。
 - 冻结后README-only上游变动与170制作输入及站点运行代码无交集；有界保留既有视频和本地浏览器证据，不称重建或重跑。
 
-主要证据：[审稿](qa/editorial-independent.json)、[模型](qa/model-independent.json)、[配音](qa/voice-independent.json)、[动态](qa/preflight-v1.json)、[封面](qa/cover-independent.json)、[正式编码](qa/encoded-independent.json)、[本地网站](qa/site-independent/report.json)。线上规范URL完整媒体/海报SHA、字幕、章节、入口及真实Release/部署身份须由发布阶段另验。
+主要证据：[审稿](qa/editorial-independent.json)、[模型](qa/model-independent.json)、[配音](qa/voice-independent.json)、[动态](qa/preflight-v1.json)、[封面](qa/cover-independent.json)、[正式编码](qa/encoded-independent.json)、[本地网站](qa/site-independent/report.json)。线上规范URL的普通完整媒体/海报GET与SHA，以及Release/部署身份由发布阶段记录；本代理的线上浏览器证据如下。
 
 能力限制：未执行真实Kafka Broker/adminCLI/retention调度或业务副作用实验，无逐字ASR、全片人工语义听辨、物理手机或新手理解实验，不将技术通过写成用户观看认可。
+
+线上补验（2026-10-30）：Release后Pages目标run `40991181077` 成功、head `e21e1457` 的身份由根任务确认后，直接访问 `https://linhongcun.github.io/video-studio`。Chromium 154.0.8037.57 原生HTTPS完成46项动作、20次严格RVFC/ffprobePTS帧身份核对，`errors=[]`；没有使用TLS绕过或HTTP回填。线上视频目标SHA与正式成片一致。
+
+实际逐张查看线上桌面首资料页、390宽R3/R4原文弹层及844×390手机模拟横屏资料页。4项原题及Apache Kafka署名均完整，横屏文字位于原生暂停控件上方；所看截屏未出现等待转圈。弹层的原文、译文、编者说明、题名、作者、固定原文位置及入口可读且未越界。保留实际控件与实际页面状态，没有遮盖或重绘。在线视口模拟与Fullscreen API范围同本地边界，不冒称物理手机。详见[线上报告](qa/site-online-native/report.json)及报告列出的4张原始UI截图。
