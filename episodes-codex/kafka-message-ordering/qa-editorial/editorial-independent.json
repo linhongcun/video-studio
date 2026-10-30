@@ -1,0 +1,58 @@
+{
+  "checkedAtUTC": "2026-10-30T15:33:13.533633+00:00",
+  "reviewer": "/root/mq_qa independent of production author",
+  "baseCommit": "f01411f7e2a2d1cef480cd0f6b73d4c29d7169f3",
+  "episode": "kafka-message-ordering",
+  "ep": 46,
+  "issue": 314,
+  "status": "approved-for-TTS",
+  "canEnterTTS": true,
+  "blockers": [],
+  "scriptSHA256": "8f59f6ecc18de846be931242071e8d360f21049432d79d104a9b736f05d921cc",
+  "narrationSHA256": "807340e9e14ac6de4edd05be158529d9fcf971f2475c930d0a4f338712c4548b",
+  "narrationDefinition": "UTF8 ''.join(re.findall(r'^旁白：(.*)$', script, re.M)); no separator or trailingLF",
+  "alternateLFSHA256": "c436a454e56808851a0b810d2a2522ac8ab05dbaa64ba21b28469591005bf4f8",
+  "shots": 14,
+  "sentences": 28,
+  "question": "日志与交付按支付E01、退款E02先后，页面为何仍被晚完成的E01写回已支付",
+  "editorialJudgement": "Only script/scene directions suffice to follow the concrete business context, introduced objects, actors, internal state changes and one changed-condition comparison; ending directly answers opening. Names/snippets/assertion counts are not substituted for causal explanation.",
+  "causalChain": [
+    "先建立外部已发生的支付/退款两个有效事件，只更新下游订单投影，不再次资金操作",
+    "同订单key7042→StringSerializer字节37303432→真实BuiltInPartitioner计算1934056876%2=0，两条到P0",
+    "同一调用线程先等E01发送完成再发E02；P0批次队列尾入头出，正常日志追加E01@0、E02@1",
+    "CompletedFetch顺日志逐条append内部列表；内部scanOffset1/2与客户端position区分，收集完成后position0→2并返回[E01,E02]",
+    "正常应用依次实际写完→PAID再REFUNDED；独立同日志/同起始页面对照只改并发任务",
+    "先启动E01卡在写入前，E02先写REFUNDED，后放行E01写PAID；日志/交付未改，完成顺序反转",
+    "再次同输入重置，应用按订单等上一条真正写完才放行下一条；不同订单可另排队，多个源的业务先后仍是输入前提"
+  ],
+  "necessaryConditionsPresentInScriptAndPlan": [
+    "Kafka4.4.0/Java；固定2分区、非空Stringkey、ignore.keys=false、无显式partition/自定义partitioner",
+    "单producer/调用线程、无故障主路、E01发送完成后E02；单成员classic消费者，不并发操作KafkaConsumer",
+    "E01/E02是两条不同有效事件；串行业务由应用安排，不把幂等去重/同key当业务完成保证"
+  ],
+  "actualTargetedSourceRead": [
+    "sources/KafkaProducer.java:1078-1111,1556-1575",
+    "sources/BuiltInPartitioner.java:411-413",
+    "sources/RecordAccumulator.java:407-437,914-954",
+    "sources/CompletedFetch.java:270-290",
+    "sources/FetchCollector.java:168-204",
+    "sources/Fetch.java:126-143",
+    "sources/UnifiedLog.java:1276 and retained fixedversion append path"
+  ],
+  "priorReviewCorrections": [
+    "07原把每次列表追加与客户端position加一混用已纠正；目前scanOffset/buffer与外层position/returned分开。该问题为源码/计划审读纠偏，不称实拍动态失败。"
+  ],
+  "preliminaryModelAndVisualRequirements": [
+    "同key字节/hash/分区的对应必须逐步呈现，不靠方法名或同时铺满三段解释",
+    "内部列表先[E01]再[E01,E02]时客户端position仍0；收集后才2/返回",
+    "异步与正确串行各自显式reset同日志/投影；只有真实写入完成时才改页面/完成顺序标题"
+  ],
+  "currentPlanSHA256": "7672c2257d09ab357e762c40d7937ba83efdcb3e25565403e65a451a5c9ff6cc",
+  "currentModelSHA256": "52ac5a2da7358bff43ce73d5e98ebcac3d5bf41fa751b4d2b684ef1a51c50f2a",
+  "runtimeEvidenceScope": "Source execution facts, finite teaching model and actual Broker/DB/application runtime evidence remain separate. Runtime receipts are independently owned by deploy_diagnosis; this editorial gate does not claim their execution, full model acceptance, sound quality, actual animation or media pass.",
+  "limits": [
+    "No semantic listening/ASR or exact timing exists yet; source voice/media gates remain pending.",
+    "No formal freeze/render/site/git action authorized by this report; root retains production/release gate.",
+    "Qualitative S023 supports chosen style; no novice comprehension measurement is claimed."
+  ]
+}

@@ -1,0 +1,151 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-message-ordering",
+  "sources": [
+    {
+      "id": "A1",
+      "organization": "Apache Kafka",
+      "title": "KafkaProducer.java",
+      "titleEvidence": {
+        "locator": "GitHub Contents API .name at fixed commit1156b2752aaa28eafc0b4c4d387e63356793268d; https://api.github.com/repos/apache/kafka/contents/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java?ref=1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/title-metadata/KafkaProducer.java.json"
+      },
+      "version": "Apache Kafka / Java client 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java",
+      "supports": [
+        "key先序列化，再在内建key分区路径传入hash分区器；无自定义路由且未ignore key。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official raw source read; executed path/conditions mapped in implementation-map.json. Original source filename verified with fixed-commit GitHub Contents API .name; full unmodified response stored by titleEvidence.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "ef8914cd6af41bc030eabc14a77d0625682796a19eae91f4990b30328aa45986"
+      },
+      "quotation": {
+        "text": "serializedKey = keySerializerPlugin.get().serialize(record.topic(), record.headers(), record.key());",
+        "locator": "KafkaProducer.java line1080",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/KafkaProducer.java"
+      },
+      "sections": "1078-1111 serialization→partition→accumulator; 1556-1575 explicit/custom/key/ignore branches"
+    },
+    {
+      "id": "A2",
+      "organization": "Apache Kafka",
+      "title": "StringSerializer.java",
+      "titleEvidence": {
+        "locator": "GitHub Contents API .name at fixed commit1156b2752aaa28eafc0b4c4d387e63356793268d; https://api.github.com/repos/apache/kafka/contents/clients/src/main/java/org/apache/kafka/common/serialization/StringSerializer.java?ref=1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/title-metadata/StringSerializer.java.json"
+      },
+      "version": "Apache Kafka / Java client 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/serialization/StringSerializer.java",
+      "supports": [
+        "StringSerializer默认UTF8，本例没有改编码。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official raw source read; executed path/conditions mapped in implementation-map.json. Original source filename verified with fixed-commit GitHub Contents API .name; full unmodified response stored by titleEvidence.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/serialization/StringSerializer.java",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "70df2dc8b49145785e3436cebb464f7f51daaccb6d502bf01b2a531f6bd100ce"
+      },
+      "quotation": {
+        "text": "private Charset encoding = StandardCharsets.UTF_8;",
+        "locator": "StringSerializer.java line34",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/StringSerializer.java"
+      },
+      "sections": "33-57 UTF8 field/config/serialize"
+    },
+    {
+      "id": "A3",
+      "organization": "Apache Kafka",
+      "title": "UnifiedLog.java",
+      "titleEvidence": {
+        "locator": "GitHub Contents API .name at fixed commit1156b2752aaa28eafc0b4c4d387e63356793268d; https://api.github.com/repos/apache/kafka/contents/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java?ref=1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/title-metadata/UnifiedLog.java.json"
+      },
+      "version": "Apache Kafka / Java client 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java",
+      "supports": [
+        "leader追加从当前日志末尾开始分配offset，并在锁内追加；LogValidator/LocalLog进一步更新。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official raw source read; executed path/conditions mapped in implementation-map.json. Original source filename verified with fixed-commit GitHub Contents API .name; full unmodified response stored by titleEvidence.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "da11dd8363b3521306e9bc2338f6474947266d59e825173a8c9025d15d85de4f"
+      },
+      "quotation": {
+        "text": "PrimitiveRef.LongRef offset = PrimitiveRef.ofLong(localLog.logEndOffset());",
+        "locator": "UnifiedLog.java line1158",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/UnifiedLog.java"
+      },
+      "sections": "1150-1182 locked log end/validation offset allocation; 1269-1278 append nonduplicate"
+    },
+    {
+      "id": "A4",
+      "organization": "Apache Kafka",
+      "title": "FetchCollector.java",
+      "titleEvidence": {
+        "locator": "GitHub Contents API .name at fixed commit1156b2752aaa28eafc0b4c4d387e63356793268d; https://api.github.com/repos/apache/kafka/contents/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java?ref=1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/title-metadata/FetchCollector.java.json"
+      },
+      "version": "Apache Kafka / Java client 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java",
+      "supports": [
+        "整次fetchRecords返回后，外层FetchCollector才安装客户端position；不把内部扫描位置冒充当前状态逐条变化。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official raw source read; executed path/conditions mapped in implementation-map.json. Original source filename verified with fixed-commit GitHub Contents API .name; full unmodified response stored by titleEvidence.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "66961cb214088a240b32e1729228cfefd2643b06c8aad4501f3444242dda4656"
+      },
+      "quotation": {
+        "text": "subscriptions.position(tp, nextPosition);",
+        "locator": "FetchCollector.java line185",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/FetchCollector.java"
+      },
+      "sections": "125-135 collect same partition result; 163-185 scan result then update SubscriptionState.position; 202-205 Fetch.forPartition"
+    },
+    {
+      "id": "A5",
+      "organization": "Apache Kafka",
+      "title": "ProducerConfig.java",
+      "titleEvidence": {
+        "locator": "GitHub Contents API .name at fixed commit1156b2752aaa28eafc0b4c4d387e63356793268d; https://api.github.com/repos/apache/kafka/contents/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java?ref=1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/title-metadata/ProducerConfig.java.json"
+      },
+      "version": "Apache Kafka / Java client 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java",
+      "supports": [
+        "配置分支与重试/幂等边界；本例更严格固定max.in.flight=1，不把幂等当应用完成有序。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official raw source read; executed path/conditions mapped in implementation-map.json. Original source filename verified with fixed-commit GitHub Contents API .name; full unmodified response stored by titleEvidence.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "912b886014d69a943a9702cce7fb82b3466a35f5d16a64ea0383bf3a541840b4"
+      },
+      "quotation": {
+        "text": "// max.in.flight.requests.per.connection should be less than or equal to 5 when idempotence producer enabled to ensure message ordering",
+        "locator": "ProducerConfig.java line294",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/ProducerConfig.java"
+      },
+      "sections": "294-324 inflight/retry ordering bounds; 370-375 idempotence conditions"
+    }
+  ]
+}

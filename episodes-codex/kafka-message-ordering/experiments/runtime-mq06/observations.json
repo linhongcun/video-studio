@@ -1,0 +1,155 @@
+[
+  {
+    "kind": "VERSIONS",
+    "data": {
+      "KafkaCommit": "1156b2752aaa28ea",
+      "java": "21.0.12.1",
+      "KafkaVersion": "4.4.0",
+      "probe": "mq06"
+    }
+  },
+  {
+    "kind": "TOPIC_CREATED",
+    "data": {
+      "replicationFactor": 1,
+      "name": "orders",
+      "partitions": 2
+    }
+  },
+  {
+    "kind": "PRODUCER_CONFIG",
+    "data": {
+      "acks": "all",
+      "bootstrap.servers": "127.0.0.1:45261",
+      "default.api.timeout.ms": "25000",
+      "delivery.timeout.ms": "60000",
+      "enable.idempotence": "true",
+      "key.serializer": "org.apache.kafka.common.serialization.StringSerializer",
+      "linger.ms": "0",
+      "max.in.flight.requests.per.connection": "1",
+      "request.timeout.ms": "15000",
+      "value.serializer": "org.apache.kafka.common.serialization.StringSerializer"
+    }
+  },
+  {
+    "kind": "PRODUCE_CONFIRMED",
+    "data": {
+      "key": "7042",
+      "eventId": "E01",
+      "partition": 0,
+      "payload": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"status\":\"PAID\"}",
+      "offset": 0
+    }
+  },
+  {
+    "kind": "PRODUCE_CONFIRMED",
+    "data": {
+      "key": "7042",
+      "eventId": "E02",
+      "partition": 0,
+      "payload": "{\"eventId\":\"E02\",\"orderId\":\"7042\",\"status\":\"REFUNDED\"}",
+      "offset": 1
+    }
+  },
+  {
+    "kind": "CONSUMER_CONFIG",
+    "data": {
+      "auto.offset.reset": "earliest",
+      "bootstrap.servers": "127.0.0.1:45261",
+      "client.id": "mq06-single-poll-thread",
+      "default.api.timeout.ms": "25000",
+      "enable.auto.commit": "false",
+      "group.id": "mq06-20261030T153232.189835Z",
+      "group.protocol": "classic",
+      "heartbeat.interval.ms": "1000",
+      "key.deserializer": "org.apache.kafka.common.serialization.StringDeserializer",
+      "max.poll.records": "1",
+      "partition.assignment.strategy": "org.apache.kafka.clients.consumer.RangeAssignor",
+      "request.timeout.ms": "15000",
+      "session.timeout.ms": "10000",
+      "value.deserializer": "org.apache.kafka.common.serialization.StringDeserializer"
+    }
+  },
+  {
+    "kind": "POLL_DELIVERED",
+    "data": {
+      "key": "7042",
+      "offset": 0,
+      "partition": 0,
+      "value": "{\"eventId\":\"E01\",\"orderId\":\"7042\",\"status\":\"PAID\"}"
+    }
+  },
+  {
+    "kind": "POLL_DELIVERED",
+    "data": {
+      "key": "7042",
+      "offset": 1,
+      "partition": 0,
+      "value": "{\"eventId\":\"E02\",\"orderId\":\"7042\",\"status\":\"REFUNDED\"}"
+    }
+  },
+  {
+    "kind": "SERIAL_COMPLETE",
+    "data": {
+      "projection": "PAID",
+      "eventId": "E01"
+    }
+  },
+  {
+    "kind": "SERIAL_COMPLETE",
+    "data": {
+      "projection": "REFUNDED",
+      "eventId": "E02"
+    }
+  },
+  {
+    "kind": "PROJECTION_RESET_SAME_INPUT",
+    "data": {
+      "projection": "PENDING",
+      "source": "same two previously polled ConsumerRecords, no new Produce"
+    }
+  },
+  {
+    "kind": "ASYNC_SUBMIT",
+    "data": {
+      "offset": 0,
+      "eventId": "E01"
+    }
+  },
+  {
+    "kind": "ASYNC_SUBMIT",
+    "data": {
+      "offset": 1,
+      "eventId": "E02"
+    }
+  },
+  {
+    "kind": "ASYNC_COMPLETE",
+    "data": {
+      "projection": "REFUNDED",
+      "eventId": "E02"
+    }
+  },
+  {
+    "kind": "ASYNC_COMPLETE",
+    "data": {
+      "projection": "PAID",
+      "eventId": "E01"
+    }
+  },
+  {
+    "kind": "FINAL_LOG_ENDS",
+    "data": {
+      "1": 0,
+      "0": 2
+    }
+  },
+  {
+    "kind": "SCOPE",
+    "data": {
+      "benchmark": false,
+      "business": "real Java AtomicReference status projection and deterministic CountDownLatch scheduling; no payment/refund service or database executed",
+      "realLog": "Kafka4.4 orders,2 partitions,one producer/calling thread,key UTF8 7042"
+    }
+  }
+]

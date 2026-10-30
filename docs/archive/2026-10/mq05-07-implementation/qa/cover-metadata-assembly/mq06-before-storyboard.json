@@ -1,0 +1,1001 @@
+{
+  "meta": {
+    "title": "消息保序：订单已退款，为什么又变回已支付？",
+    "episode": 46,
+    "episodePart": "Kafka MQ06 · 消息保序",
+    "slug": "kafka-message-ordering",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 4966,
+    "finalVideoFrames": 4966,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "kafka-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户在上轮MQ重制后肯定深度与易懂程度，并授权继续数期；本批按题库制作MQ05–MQ07，仅GitHub与本站，脚本与实现因果独立审稿通过后配音，完成质量检查再发布。",
+    "palette": {
+      "bg": "#211D1B",
+      "text": "#FFF1E8"
+    },
+    "sampleDataLabel": "Kafka4.4.0固定源码 · 教学输入与受控交错",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "status": "root-owned-new-series-cover-branch",
+      "slug": "kafka-message-ordering",
+      "ep": 46,
+      "title": "消息保序：订单已退款，为什么又变回已支付？"
+    },
+    "discussionQuestion": "按序submit两个任务，为什么不等于按序写完订单状态？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes-codex/_shared/kafka-covers/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "problem",
+      "chapterId": "problem",
+      "title": "问题与输入",
+      "from": 0,
+      "durationInFrames": 1028,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "problem",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 268,
+          "narration": "订单已经退款，页面却又显示已支付。明明先收到支付、再收到退款，为什么最终状态反了？",
+          "subtitles": [
+            {
+              "text": "订单已经退款，页面却又显示已支付。",
+              "from": 0,
+              "to": 118,
+              "duration": 119
+            },
+            {
+              "text": "明明先收到支付、再收到退款，为什么最终状态反了？",
+              "from": 119,
+              "to": 267,
+              "duration": 149
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 108.58,
+              "localStart": 9.0,
+              "localEnd": 108.58
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 119.08,
+              "wavEnd": 247.28,
+              "localStart": 119.08,
+              "localEnd": 247.28
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              119
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 9.0,
+            "wavTo": 247.28,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "订单7042的状态页教学示例，先显示已退款，稍后被晚到的支付处理完成写回已支付；这里只提出可观察问题，不伪装真实后台。",
+          "direction": "订单7042的状态页教学示例，先显示已退款，稍后被晚到的支付处理完成写回已支付；这里只提出可观察问题，不伪装真实后台。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "problem",
+          "visualType": "events",
+          "from": 268,
+          "durationInFrames": 378,
+          "narration": "先分清两条已经发生的事件：支付成功，和之后的退款成功。它们都属于订单七零四二，通知下游改页面状态，不是让它再扣款或退款。",
+          "subtitles": [
+            {
+              "text": "先分清两条已经发生的事件：支付成功，和之后的退款成功。",
+              "from": 0,
+              "to": 174,
+              "duration": 175
+            },
+            {
+              "text": "它们都属于订单七零四二，通知下游改页面状态，不是让它再扣款或退款。",
+              "from": 175,
+              "to": 377,
+              "duration": 203
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-events-1",
+              "wavStart": 268.28,
+              "wavEnd": 433.02,
+              "localStart": 0.2799999999999727,
+              "localEnd": 165.01999999999998
+            },
+            {
+              "id": "02-events-2",
+              "wavStart": 443.52,
+              "wavEnd": 625.81,
+              "localStart": 175.51999999999998,
+              "localEnd": 357.80999999999995
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              175
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 268.28,
+            "wavTo": 625.81,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "业务先完成收款，再完成退款；E01支付、E02退款两卡，唯一eventId与同一个orderId分开。页面是订单状态投影，不再实际执行收退款。",
+          "direction": "业务先完成收款，再完成退款；E01支付、E02退款两卡，唯一eventId与同一个orderId分开。页面是订单状态投影，不再实际执行收退款。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "problem",
+          "visualType": "roadmap",
+          "from": 646,
+          "durationInFrames": 382,
+          "narration": "这次把先后顺序分成三段看：怎样写入日志，怎样交给消费者，以及业务怎样完成。先固定一个生产者，按支付、退款的顺序发送。",
+          "subtitles": [
+            {
+              "text": "这次把先后顺序分成三段看：怎样写入日志，怎样交给消费者，以及业务怎样完成。",
+              "from": 0,
+              "to": 226,
+              "duration": 227
+            },
+            {
+              "text": "先固定一个生产者，按支付、退款的顺序发送。",
+              "from": 227,
+              "to": 381,
+              "duration": 155
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-roadmap-1",
+              "wavStart": 646.81,
+              "wavEnd": 862.8,
+              "localStart": 0.8099999999999454,
+              "localEnd": 216.79999999999995
+            },
+            {
+              "id": "03-roadmap-2",
+              "wavStart": 873.3,
+              "wavEnd": 1007.96,
+              "localStart": 227.29999999999995,
+              "localEnd": 361.96000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              227
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 646.81,
+            "wavTo": 1007.96,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "简明常驻导航“写入日志→交付记录→业务完成”；输入两卡顺序已给定，不把Kafka当成决定外部业务先后的工具。",
+          "direction": "简明常驻导航“写入日志→交付记录→业务完成”；输入两卡顺序已给定，不把Kafka当成决定外部业务先后的工具。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "log",
+      "chapterId": "log",
+      "title": "同键怎样写进同分区",
+      "from": 1028,
+      "durationInFrames": 1091,
+      "shots": [
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "log",
+          "visualType": "key-bytes",
+          "from": 1028,
+          "durationInFrames": 284,
+          "narration": "两条记录都把订单编号作为分组的键。客户端先把这个键编码成字节，相同的编号就得到相同字节。",
+          "subtitles": [
+            {
+              "text": "两条记录都把订单编号作为分组的键。",
+              "from": 0,
+              "to": 105,
+              "duration": 106
+            },
+            {
+              "text": "客户端先把这个键编码成字节，相同的编号就得到相同字节。",
+              "from": 106,
+              "to": 283,
+              "duration": 178
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-key-bytes-1",
+              "wavStart": 1028.96,
+              "wavEnd": 1124.13,
+              "localStart": 0.9600000000000364,
+              "localEnd": 96.13000000000011
+            },
+            {
+              "id": "04-key-bytes-2",
+              "wavStart": 1134.63,
+              "wavEnd": 1291.16,
+              "localStart": 106.63000000000011,
+              "localEnd": 263.1600000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              106
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 1028.96,
+            "wavTo": 1291.16,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "E01与E02各自key=7042变为相同UTF8字节37 30 34 32；key先从具体订单归属引入，暂不显示hash算法名称。",
+          "direction": "E01与E02各自key=7042变为相同UTF8字节37 30 34 32；key先从具体订单归属引入，暂不显示hash算法名称。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "log",
+          "visualType": "route",
+          "from": 1312,
+          "durationInFrames": 365,
+          "narration": "没有另指定分区时，内建规则对这些字节做哈希，再按分区数取余。固定两个分区，本例两次都算出零，所以都进入零号分区。",
+          "subtitles": [
+            {
+              "text": "没有另指定分区时，内建规则对这些字节做哈希，再按分区数取余。",
+              "from": 0,
+              "to": 190,
+              "duration": 191
+            },
+            {
+              "text": "固定两个分区，本例两次都算出零，所以都进入零号分区。",
+              "from": 191,
+              "to": 364,
+              "duration": 174
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-route-1",
+              "wavStart": 1312.16,
+              "wavEnd": 1493.05,
+              "localStart": 0.16000000000008185,
+              "localEnd": 181.04999999999995
+            },
+            {
+              "id": "05-route-2",
+              "wavStart": 1503.55,
+              "wavEnd": 1656.65,
+              "localStart": 191.54999999999995,
+              "localEnd": 344.6500000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              191
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 1312.16,
+            "wavTo": 1656.65,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "读取固定源码的实际规则；1934056876 % 2 = 0，两份相同输入落P0。P1仍为空；显式标明未忽略key、无自定义路由、分区数稳定。不是不同key必然不同区。",
+          "direction": "读取固定源码的实际规则；1934056876 % 2 = 0，两份相同输入落P0。P1仍为空；显式标明未忽略key、无自定义路由、分区数稳定。不是不同key必然不同区。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "log",
+          "visualType": "queue-log",
+          "from": 1677,
+          "durationInFrames": 442,
+          "narration": "客户端按分区保存待发批次，新批排在队尾，后台取队头。本例先完成支付发送再发退款，日志便先写支付，再写退款，位置是零和一。",
+          "subtitles": [
+            {
+              "text": "客户端按分区保存待发批次，新批排在队尾，后台取队头。",
+              "from": 0,
+              "to": 185,
+              "duration": 186
+            },
+            {
+              "text": "本例先完成支付发送再发退款，日志便先写支付，再写退款，位置是零和一。",
+              "from": 186,
+              "to": 441,
+              "duration": 256
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-queue-log-1",
+              "wavStart": 1677.65,
+              "wavEnd": 1852.63,
+              "localStart": 0.650000000000091,
+              "localEnd": 175.6300000000001
+            },
+            {
+              "id": "06-queue-log-2",
+              "wavStart": 1863.13,
+              "wavEnd": 2098.05,
+              "localStart": 186.1300000000001,
+              "localEnd": 421.0500000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              186
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 1677.65,
+            "wavTo": 2098.05,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "同一P0队列，B1内E01先出队并追加offset0，随后B2内E02追加offset1；两个完整记录都留在日志。每次只有一请求在途，合批旁支留文。",
+          "direction": "同一P0队列，B1内E01先出队并追加offset0，随后B2内E02追加offset1；两个完整记录都留在日志。每次只有一请求在途，合批旁支留文。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "delivery",
+      "chapterId": "delivery",
+      "title": "从日志到按序交付",
+      "from": 2119,
+      "durationInFrames": 696,
+      "shots": [
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "delivery",
+          "visualType": "collect",
+          "from": 2119,
+          "durationInFrames": 341,
+          "narration": "再看读取：客户端顺着分区记录往后取，依次放到本次返回列表的末尾。于是交给应用的列表里，支付在前，退款在后。",
+          "subtitles": [
+            {
+              "text": "再看读取：客户端顺着分区记录往后取，依次放到本次返回列表的末尾。",
+              "from": 0,
+              "to": 200,
+              "duration": 201
+            },
+            {
+              "text": "于是交给应用的列表里，支付在前，退款在后。",
+              "from": 201,
+              "to": 340,
+              "duration": 140
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-collect-1",
+              "wavStart": 2119.05,
+              "wavEnd": 2309.83,
+              "localStart": 0.0500000000001819,
+              "localEnd": 190.82999999999993
+            },
+            {
+              "id": "07-collect-2",
+              "wavStart": 2320.33,
+              "wavEnd": 2439.5,
+              "localStart": 201.32999999999993,
+              "localEnd": 320.5
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              201
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 2119.05,
+            "wavTo": 2439.5,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "P0日志offset0/1不动，读取副本先依次加入内部P0列表，随后作为ConsumerRecords交给应用；只演列表追加E01、E02，不把内部扫描游标当成客户端逐条更新position。客户端position由FetchCollector在本次收集完成后才从0更新到2。实际循环与更新有动作，不只宣告“有序”。",
+          "direction": "P0日志offset0/1不动，读取副本先依次加入内部P0列表，随后作为ConsumerRecords交给应用；只演列表追加E01、E02，不把内部扫描游标当成客户端逐条更新position。客户端position由FetchCollector在本次收集完成后才从0更新到2。实际循环与更新有动作，不只宣告“有序”。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "delivery",
+          "visualType": "serial",
+          "from": 2460,
+          "durationInFrames": 355,
+          "narration": "如果应用处理完支付，再处理退款，页面就先改成已支付，最后改成已退款。这时日志顺序、交付顺序和完成顺序一致。",
+          "subtitles": [
+            {
+              "text": "如果应用处理完支付，再处理退款，页面就先改成已支付，最后改成已退款。",
+              "from": 0,
+              "to": 200,
+              "duration": 201
+            },
+            {
+              "text": "这时日志顺序、交付顺序和完成顺序一致。",
+              "from": 201,
+              "to": 354,
+              "duration": 154
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-serial-1",
+              "wavStart": 2460.5,
+              "wavEnd": 2651.43,
+              "localStart": 0.5,
+              "localEnd": 191.42999999999984
+            },
+            {
+              "id": "08-serial-2",
+              "wavStart": 2661.93,
+              "wavEnd": 2794.18,
+              "localStart": 201.92999999999984,
+              "localEnd": 334.17999999999984
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              201
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 2460.5,
+            "wavTo": 2794.18,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "同一个处理位置；支付状态写入完成后才启动退款写入，订单投影待支付→已支付→已退款。结果脚注等最后写入完成后出现。",
+          "direction": "同一个处理位置；支付状态写入完成后才启动退款写入，订单投影待支付→已支付→已退款。结果脚注等最后写入完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "completion",
+      "chapterId": "completion",
+      "title": "完成顺序由谁保持",
+      "from": 2815,
+      "durationInFrames": 2151,
+      "shots": [
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "completion",
+          "visualType": "reset",
+          "from": 2815,
+          "durationInFrames": 327,
+          "narration": "现在回到相同日志、相同起始页面，只改应用的执行方式。仍按原顺序读出两条，这次把它们交给两个任务并发处理。",
+          "subtitles": [
+            {
+              "text": "现在回到相同日志、相同起始页面，只改应用的执行方式。",
+              "from": 0,
+              "to": 140,
+              "duration": 141
+            },
+            {
+              "text": "仍按原顺序读出两条，这次把它们交给两个任务并发处理。",
+              "from": 141,
+              "to": 326,
+              "duration": 186
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-reset-1",
+              "wavStart": 2815.18,
+              "wavEnd": 2946.11,
+              "localStart": 0.1799999999998363,
+              "localEnd": 131.11000000000013
+            },
+            {
+              "id": "09-reset-2",
+              "wavStart": 2956.61,
+              "wavEnd": 3121.57,
+              "localStart": 141.61000000000013,
+              "localEnd": 306.57000000000016
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              141
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 2815.18,
+            "wavTo": 3121.57,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确独立对照重置，日志仍E01@0/E02@1，投影回待支付；不是退款后真实业务倒退。按序交付副本，然后先后提交两个任务，不并发使用KafkaConsumer。",
+          "direction": "明确独立对照重置，日志仍E01@0/E02@1，投影回待支付；不是退款后真实业务倒退。按序交付副本，然后先后提交两个任务，不并发使用KafkaConsumer。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "completion",
+          "visualType": "refund-first",
+          "from": 3142,
+          "durationInFrames": 350,
+          "narration": "支付任务先启动，却在写页面状态前停住；退款任务后启动，先完成写入。页面已经显示已退款，可支付任务还没结束。",
+          "subtitles": [
+            {
+              "text": "支付任务先启动，却在写页面状态前停住；退款任务后启动，先完成写入。",
+              "from": 0,
+              "to": 211,
+              "duration": 212
+            },
+            {
+              "text": "页面已经显示已退款，可支付任务还没结束。",
+              "from": 212,
+              "to": 349,
+              "duration": 138
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-refund-first-1",
+              "wavStart": 3142.57,
+              "wavEnd": 3343.58,
+              "localStart": 0.5700000000001637,
+              "localEnd": 201.57999999999993
+            },
+            {
+              "id": "10-refund-first-2",
+              "wavStart": 3354.08,
+              "wavEnd": 3471.6,
+              "localStart": 212.07999999999993,
+              "localEnd": 329.5999999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              212
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 3142.57,
+            "wavTo": 3471.6,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "支付任务卡在“写入前”等待屏障，退款任务执行写入并完成，投影=已退款；明确受控交错、无性能时间承诺。",
+          "direction": "支付任务卡在“写入前”等待屏障，退款任务执行写入并完成，投影=已退款；明确受控交错、无性能时间承诺。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "completion",
+          "visualType": "late-paid",
+          "from": 3492,
+          "durationInFrames": 363,
+          "narration": "支付任务随后继续，把页面写成已支付，覆盖了刚才的退款状态。日志没有乱，按序交付也没有乱，反过来的是业务完成顺序。",
+          "subtitles": [
+            {
+              "text": "支付任务随后继续，把页面写成已支付，覆盖了刚才的退款状态。",
+              "from": 0,
+              "to": 164,
+              "duration": 165
+            },
+            {
+              "text": "日志没有乱，按序交付也没有乱，反过来的是业务完成顺序。",
+              "from": 165,
+              "to": 362,
+              "duration": 198
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-late-paid-1",
+              "wavStart": 3492.6,
+              "wavEnd": 3646.66,
+              "localStart": 0.599999999999909,
+              "localEnd": 154.65999999999985
+            },
+            {
+              "id": "11-late-paid-2",
+              "wavStart": 3657.16,
+              "wavEnd": 3834.27,
+              "localStart": 165.15999999999985,
+              "localEnd": 342.27
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              165
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 3492.6,
+            "wavTo": 3834.27,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "放开支付任务，晚写已支付；日志/E01→E02、交付/E01→E02和完成/E02→E01并排。两条仍是有效不同事件，幂等去重不能把退款删掉。",
+          "direction": "放开支付任务，晚写已支付；日志/E01→E02、交付/E01→E02和完成/E02→E01并排。两条仍是有效不同事件，幂等去重不能把退款删掉。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "completion",
+          "visualType": "per-order-serial",
+          "from": 3855,
+          "durationInFrames": 389,
+          "narration": "所以应用还要按订单串行：上一条真正写完，才放行这个订单的下一条。不同订单可以另排队，同一订单不能只按提交任务的先后判断完成。",
+          "subtitles": [
+            {
+              "text": "所以应用还要按订单串行：上一条真正写完，才放行这个订单的下一条。",
+              "from": 0,
+              "to": 208,
+              "duration": 209
+            },
+            {
+              "text": "不同订单可以另排队，同一订单不能只按提交任务的先后判断完成。",
+              "from": 209,
+              "to": 388,
+              "duration": 180
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-per-order-serial-1",
+              "wavStart": 3855.27,
+              "wavEnd": 4053.9,
+              "localStart": 0.2699999999999818,
+              "localEnd": 198.9000000000001
+            },
+            {
+              "id": "12-per-order-serial-2",
+              "wavStart": 4064.4,
+              "wavEnd": 4223.46,
+              "localStart": 209.4000000000001,
+              "localEnd": 368.46000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              209
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 3855.27,
+            "wavTo": 4223.46,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "再次同输入重置到待支付，7042的应用队列只放行一个任务；支付写完→释放退款→退款写完。其他订单示意一个小独立通道，避免暗示全部服务只能单线程。",
+          "direction": "再次同输入重置到待支付，7042的应用队列只放行一个任务；支付写完→释放退款→退款写完。其他订单示意一个小独立通道，避免暗示全部服务只能单线程。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "completion",
+          "visualType": "boundary",
+          "from": 4244,
+          "durationInFrames": 331,
+          "narration": "同一个键只帮记录选择同一个分区，不替多个生产者决定业务先后。如果来源本身先后没安排好，就要先解决这个输入条件。",
+          "subtitles": [
+            {
+              "text": "同一个键只帮记录选择同一个分区，不替多个生产者决定业务先后。",
+              "from": 0,
+              "to": 174,
+              "duration": 175
+            },
+            {
+              "text": "如果来源本身先后没安排好，就要先解决这个输入条件。",
+              "from": 175,
+              "to": 330,
+              "duration": 156
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-boundary-1",
+              "wavStart": 4244.46,
+              "wavEnd": 4408.84,
+              "localStart": 0.4600000000000364,
+              "localEnd": 164.84000000000015
+            },
+            {
+              "id": "13-boundary-2",
+              "wavStart": 4419.34,
+              "wavEnd": 4554.06,
+              "localStart": 175.34000000000015,
+              "localEnd": 310.0600000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              175
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 4244.46,
+            "wavTo": 4554.06,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "只用两名生产者的抽象候选箭头，不新增日志offset；显式“同key≠多个来源的业务时钟”，不演未定义竞态为唯一输出。分区扩容与重试配置留文章。",
+          "direction": "只用两名生产者的抽象候选箭头，不新增日志offset；显式“同key≠多个来源的业务时钟”，不演未定义竞态为唯一输出。分区扩容与重试配置留文章。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "14",
+          "scriptShot": 14,
+          "chapterId": "completion",
+          "visualType": "recap",
+          "from": 4575,
+          "durationInFrames": 391,
+          "narration": "这次状态变回已支付，原因是先到的支付任务最后才写页面。要保住订单顺序，就要同时接好同分区的有序交付，和应用按订单完成的顺序。",
+          "subtitles": [
+            {
+              "text": "这次状态变回已支付，原因是先到的支付任务最后才写页面。",
+              "from": 0,
+              "to": 170,
+              "duration": 171
+            },
+            {
+              "text": "要保住订单顺序，就要同时接好同分区的有序交付，和应用按订单完成的顺序。",
+              "from": 171,
+              "to": 390,
+              "duration": 220
+            }
+          ],
+          "voice": [
+            {
+              "id": "14-recap-1",
+              "wavStart": 4575.06,
+              "wavEnd": 4735.86,
+              "localStart": 0.06000000000040018,
+              "localEnd": 160.85999999999967
+            },
+            {
+              "id": "14-recap-2",
+              "wavStart": 4746.36,
+              "wavEnd": 4926.28,
+              "localStart": 171.35999999999967,
+              "localEnd": 351.27999999999975
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              171
+            ]
+          },
+          "timing": {
+            "source": "voice.wav a4f16ecb + words.json fb85bdb2 + script.md 8f59f6ec",
+            "wavFrom": 4575.06,
+            "wavTo": 4926.28,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回收三段链，日志[E01,E02]、交付[E01,E02]、按订单完成[E01,E02]与最终已退款；标明这是正确对照结果，末镜品牌“IT小村 · 原创”。",
+          "direction": "回收三段链，日志[E01,E02]、交付[E01,E02]、按订单完成[E01,E02]与最终已退款；标明这是正确对照结果，末镜品牌“IT小村 · 原创”。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

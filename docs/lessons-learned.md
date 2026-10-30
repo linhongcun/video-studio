@@ -128,6 +128,8 @@
 
 - **布隆过滤器的等待与拒绝（2026-10-26）：**全一判定后尚未发起查库的停留段，以及同步、恢复阶段，曾因共用未放行条件而误画拒绝叉号。应将判定结果与执行阶段分开：等待和维护采用中性路径，拒绝标记只用于明确零位拒绝或错误拦截。修前源码与实际相邻帧已保留；修后连续片段实看和独立SVG路径检查均通过，见[动态复核](../episodes-codex/bloom-filter/qa-motion-independent.md)与[链接检查](../episodes-codex/bloom-filter/qa-query-link-independent.md)。这是正式编码前的修复，位值与文字边界通过不能代替状态语义复核。
 
+- **MQ05编码前复核（2026-10-31，北京时间）：**正文卡值合法，05标题却在两次积分提交完成前先说“补登记已经太迟”。保留旧Main、失败图与片段，仅给标题增加提交状态守卫，1586→1587的实际转场、其余13镜视觉等价和最终MP4复核通过；音轨与模型不变。标题的完成时态也要绑定当前状态，不能只审卡内数字。见[失败及定向修复](../episodes-codex/kafka-consumer-idempotency/qa-independent/preflight-observations/05-title-before-awards/)与[本批记录](archive/2026-10/mq05-07-implementation/README.md)。
+
 ## L011 目录忽略规则没有排除同名软链接
 
 - **案例：**2026-10-24，EP.21入门篇复用本机`node_modules`软链接。提交收尾检查发现原`node_modules/`规则只忽略目录，软链接仍被纳入分支提交；在合并前移出版本控制，未重写已经推送的提交。

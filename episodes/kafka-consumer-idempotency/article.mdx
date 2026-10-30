@@ -1,0 +1,159 @@
+---
+title: '消费幂等：已经处理过，为什么还会再来一遍？'
+summary: '沿同一订单事件，解释业务与消费进度之间的重读窗口，以及唯一键、等待重检和同一本地事务怎样避免重复积分。'
+chapters:
+  - { id: problem, title: 重来与重复不是同一件事 }
+  - { id: claim, title: 查询为什么不能认领 }
+  - { id: arbitrate, title: 等待后怎样决定谁加分 }
+  - { id: atomic, title: 登记与积分为何同事务 }
+related: []
+---
+
+## 重来与重复不是同一件事 {#problem}
+
+订单7042产生事件E01：给账户17加10分。账户起初是0分。应用第一次处理后，数据库已经提交10分，进程却在保存Kafka消费进度之前退出。重启后，同一E01可能再次出现；如果直接再加一次，账户就变成20分。
+
+这里有两件已经分开的事实：**数据库提交了积分**，**Kafka保存了哪一个恢复位置**。本例的Kafka日志中只有P0@0的一条E01，原记录在演示期间保留；初始已保存的下一恢复位置为0，消费者关闭自动提交，一次poll只取一条。
+
+poll返回E01时，客户端内存里的下一读取位置可以已经到1。这只是客户端读取状态：更新它的执行代码没有询问积分数据库是否处理成功。应用必须在该记录处理完成后，另行提交下一位置1；数据库本地事务不会替它完成这一步。
+
+<SourceQuote sourceId="A1" supports="客户端在返回记录前更新自己的position；这段代码没有把位置更新与积分业务提交绑定。" />
+
+如果进程在数据库提交之后、Kafka位置提交之前失败，新实例会查询仍保存的0，把它装回当前读取位置，再读到原来的E01。Kafka官方手动提交说明也明确列出了这个失败窗口。
+
+<SourceQuote sourceId="R1" supports="数据库操作成功后、消费位置提交前失败，接手者会从旧提交位置再次消费；这说明重读窗口，不保证业务操作本身幂等。" />
+
+<Figure src="/video-studio/episodes/kafka-consumer-idempotency/article/01-two-commits.jpg" alt="数据库已提交10分，Kafka恢复值仍为0；这两个提交之间的失败会留下重读窗口。" caption="数据库已提交10分，Kafka恢复值仍为0；这两个提交之间的失败会留下重读窗口。" seekTo={18.766666667} chapter="problem" />
+
+所以我们要约束的是重复处理造成的积分增量，而不是假装记录永远不会再来。下面固定Apache Kafka/Java客户端4.4.0、classic组协议，以及PostgreSQL18.0的Read Committed隔离级别；所有数值都是同一组教学输入。
+
+## 查询为什么不能认领 {#claim}
+
+先回到账户0分、尚无处理登记的共同起点。两个处理尝试T1、T2都查“E01处理过吗”，它们可能都得到“没有”。这次查询只是各自在当时可见数据上的观察，没有认领同一事件的排他处理资格。
+
+一个明显不安全的顺序是：先查；没有就加分并单独提交；最后补处理标记。T1、T2都可能先提交各自的10分，最终得到20分。即使补标记时有唯一约束、第二个登记发生冲突，它也不能撤销更早已经独立提交的第二次加分。
+
+这并不表示所有“先SELECT”的程序都会错。如果后面仍由唯一约束仲裁，而且冲突时能回滚同一事务内尚未提交的加分，结果可以不同。关键在于，不能把普通查询空结果当成资格，也不能指望后来的冲突回滚此前的另一个已提交事务。
+
+我们使用下面两个表：
+
+```sql
+CREATE TABLE processed_events (
+    logical_consumer text NOT NULL,
+    event_id text NOT NULL,
+    PRIMARY KEY (logical_consumer, event_id)
+);
+
+CREATE TABLE account_points (
+    account_id bigint PRIMARY KEY,
+    points int NOT NULL
+);
+INSERT INTO account_points VALUES (17, 0);
+```
+
+去重键是`('points', 'E01')`。`points`表示稳定的逻辑消费业务，E01表示这次业务事件。两个进程、恢复后的新实例或重叠任务处理同一事件时，都要用这一个键。如果把进程ID放进键，两个进程会得到不同的键，数据库便没有理由把它们当作同一次业务。
+
+本例的主键立即检查、不可延迟，两个字段都非空。它不是所有事件共用一个全局最大序号；新的合法事件要有自己的身份，不因迟到就一律丢弃。
+
+## 等待后怎样决定谁加分 {#arbitrate}
+
+T1开始本地数据库事务，先尝试登记这个键：
+
+```sql
+INSERT INTO processed_events (logical_consumer, event_id)
+VALUES ('points', 'E01')
+ON CONFLICT (logical_consumer, event_id) DO NOTHING
+RETURNING event_id;
+```
+
+如果本次确实插入了新行，`RETURNING`返回E01；应用才允许执行`points = points + 10`。登记和积分暂时都在T1内，尚未COMMIT。T1自己可以看到自己的修改，其他普通查询仍看不到这两个未提交的新版本；我们把公共已提交积分继续标为0。
+
+T2也登记同一键时，唯一约束不能只依赖普通查询的可见结果。PostgreSQL会扫描潜在冲突，包含尚未对普通查询可见的行。真正的索引检查与插入由内部锁保护，防止两个并发插入者各自完成“没有同键”的判断；需要等另一个事务时，内部锁会释放，之后重新搜索。
+
+<SourceQuote sourceId="R4" supports="同键插入者争用相同候选叶页的写锁，检查到插入保持保护；等待事务时释放内部锁并重新搜索。该短引不表示应用事务全程持有整页锁。" />
+
+如果冲突行属于尚未结束的T1，T2等待其结局，再重新扫描。普通SELECT没有看见T1的登记，与唯一检查发现T1的未决冲突可以同时成立。
+
+<SourceQuote sourceId="R3" supports="冲突行受未决事务影响时，执行路径等待投机决定或事务XID，再goto retry重扫；不是立即当成永久重复。" />
+
+<Figure src="/video-studio/episodes/kafka-consumer-idempotency/article/02-key-wait.jpg" alt="普通查询未见登记，唯一检查仍遇到同键的未决事务，第二次尝试必须等后重查。" caption="普通查询未见登记，唯一检查仍遇到同键的未决事务，第二次尝试必须等后重查。" seekTo={100.033333333} chapter="arbitrate" />
+
+如果T1提交，登记和10分一起成为该事务的已提交结果。T2醒来重查，确认已有有效键，它的`DO NOTHING`不再插入，也不返回新行。应用看到空返回，就跳过加分；“SQL没有报错”不能代替“本次插入成功”。
+
+<SourceQuote sourceId="R2" supports="DO NOTHING冲突分支直接return NULL，没有产生本次插入行；它不会把已有登记作为RETURNING的新行交给应用。" />
+
+成功INSERT的路径才调用处理RETURNING的执行函数。
+
+<SourceQuote sourceId="A5" supports="成功插入后的执行路径处理RETURNING，与冲突DO NOTHING提前返回空的路径不同。" />
+
+<Figure src="/video-studio/episodes/kafka-consumer-idempotency/article/03-returning-gate.jpg" alt="第一笔提交后，第二次插入重检发现已有键，RETURNING为空；本次没有新登记行，应跳过积分增量。" caption="第一笔提交后，第二次插入重检发现已有键，RETURNING为空；本次没有新登记行，应跳过积分增量。" seekTo={112.266666667} chapter="arbitrate" />
+
+这套判断同样用于后来再读到的E01：已有有效登记，本次没有新行，就不再产生积分增量。这里的T1、T2是数据库处理尝试，可能来自应用重试或恢复交接的重叠；不意味着稳定classic消费组能把同一P0同时分给两个成员。
+
+## 登记与积分为何同事务 {#atomic}
+
+回到T1登记和+10都未提交、T2正在等待的相同状态，只改变T1的结局。如果T1遇到业务错误并ROLLBACK，它的登记和积分新版本都不成为有效结果。T2重新检查后，已回滚的登记不再阻挡它；这次T2可以插入成功、得到E01，再在自己的事务内加10分并提交。最终仍是一个有效登记和10分。
+
+这并不是两张表各自猜测对方成功。PostgreSQL的新登记行和积分UPDATE的新版本都记录当前事务身份。提交或回滚是这个事务的结局，读取快照按事务状态决定版本是否可见。
+
+<SourceQuote sourceId="A2" supports="积分UPDATE的新版本被写入当前事务XID；新登记INSERT也使用当前XID，相关执行路径和永久定位在研究记录中。" />
+
+回滚把事务树标记为aborted；新登记与新积分版本因相同事务结局不生效，被回滚更新的旧积分版本仍可见。它不等于ROLLBACK立刻物理擦除文件字节，版本清理是另一件事。
+
+<SourceQuote sourceId="A3" supports="回滚执行路径记录事务XID树的aborted状态；该原文支持事务结局，不支持立即清除所有物理字节。" />
+<SourceQuote sourceId="A4" supports="旧行的更新事务若回滚，旧版本仍可作为有效版本读取。" />
+
+<Figure src="/video-studio/episodes/kafka-consumer-idempotency/article/04-local-atomicity.jpg" alt="前一事务回滚后，接手者成功登记并在同一事务加10分，最终仍是一份有效登记和10分。" caption="前一事务回滚后，接手者成功登记并在同一事务加10分，最终仍是一份有效登记和10分。" seekTo={152.166666667} chapter="atomic" />
+
+还需要排除另一个错误顺序：先单独提交登记，再去做积分。从0分、无登记开始，如果登记提交后进程就退出，重试看到已登记便跳过，留下“登记存在、积分仍是0”的漏处理。唯一约束只能仲裁登记，不能自动替业务写对事务边界。
+
+下面是应用门槛的最小示例，使用Psycopg3，连接以`autocommit=True`建立，让`transaction()`明确开启这次顶层本地事务。它是对应本例的应用代码，不是PostgreSQL内部源码：
+
+```python
+def add_points_once(conn, event):
+    with conn.transaction():
+        inserted = conn.execute(
+            """INSERT INTO processed_events(logical_consumer, event_id)
+               VALUES (%s, %s)
+               ON CONFLICT (logical_consumer, event_id) DO NOTHING
+               RETURNING event_id""",
+            ("points", event["eventId"]),
+        ).fetchone()
+        if inserted is None:
+            return False              # 本次没有新登记，不加分
+
+        updated = conn.execute(
+            """UPDATE account_points SET points = points + %s
+               WHERE account_id = %s""",
+            (event["delta"], event["accountId"]),
+        ).rowcount
+        if updated != 1:
+            raise RuntimeError("目标账户未恰好更新一行")
+        # 异常离开：整笔回滚；正常离开：登记与积分一起COMMIT。
+    return True
+```
+
+账户不存在时必须让异常触发整笔回滚，不能吞掉错误然后只提交处理标记。新处理或确认重复的本地事务正常结束后，应用才单独提交Kafka的下一消费位置；如果这一步失败，重读仍可能发生，但有效去重登记会让重试跳过本地积分增量。
+
+这项保证有明确范围：两张表属于同一本地数据库事务；示例期间登记保留，事件ID稳定且在业务作用域内唯一。删除登记后再重放、同一事件每次换ID、把不同业务错误地共用身份，都可能改变结果。邮件、支付接口等库外副作用不在这笔事务里，需要下游幂等、可事务化出站记录等其他安排；开启生产者幂等也不会自动使消费端积分操作幂等。更高数据库隔离级别还可能产生序列化失败，需要按实际错误重试。
+
+消费幂等允许记录再次出现。关键是用数据库实际仲裁的唯一登记作为增量入口，再让登记和业务修改共享一个事务结局。
+
+## 参考资料
+
+- Apache Kafka，**KafkaConsumer.java**，Kafka4.4.0：[手动提交与失败窗口](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L250-L256)。实际客户端位置/提交/恢复执行映射见本期研究及文中的A1。
+- PostgreSQL Global Development Group，**nodeModifyTable.c**，PostgreSQL18.0：[DO NOTHING、投机插入及RETURNING](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/nodeModifyTable.c#L1164-L1179)。
+- PostgreSQL Global Development Group，**execIndexing.c**，PostgreSQL18.0：[未决冲突等待后重检](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/execIndexing.c#L862-L890)。
+- PostgreSQL Global Development Group，**nbtinsert.c**，PostgreSQL18.0：[同键索引检查与插入的内部保护](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/nbtree/nbtinsert.c#L187-L203)。
+- 文章执行补充：**FetchCollector.java**、**heapam.c**、**xact.c**、**heapam_visibility.c**及成功INSERT的RETURNING调用，固定提交与精确原文见相邻引用。本轮实际读取日期2026-10-30，原始GET和完整字节校验保留于本期来源证据。
+
+原始固定版本文件（供逐字核对，非另一个版本）：
+
+- [KafkaConsumer.java 原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java)；[精确执行位置](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L250-L256)。
+- [nodeModifyTable.c 原始文件](https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/nodeModifyTable.c)；[精确执行位置](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/nodeModifyTable.c#L1164-L1179)。
+- [execIndexing.c 原始文件](https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/execIndexing.c)；[精确执行位置](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/execIndexing.c#L862-L890)。
+- [nbtinsert.c 原始文件](https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/nbtree/nbtinsert.c)；[精确执行位置](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/nbtree/nbtinsert.c#L187-L203)。
+- [FetchCollector.java 原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java)；[精确执行位置](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L185)。
+- [heapam.c 原始文件](https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam.c)；[精确执行位置](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam.c#L3768-L3778)。
+- [xact.c 原始文件](https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/transam/xact.c)；[精确执行位置](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/transam/xact.c#L1843-L1851)。
+- [heapam_visibility.c 原始文件](https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam_visibility.c)；[精确执行位置](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam_visibility.c#L1129-L1137)。

@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "kafka-message-ordering",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Apache Kafka",
+      "title": "BuiltInPartitioner",
+      "titleEvidence": {
+        "locator": "BuiltInPartitioner.java class declaration line40",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/BuiltInPartitioner.java"
+      },
+      "version": "Apache Kafka / Java client 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/BuiltInPartitioner.java",
+      "supports": [
+        "在内建有key路径，相同序列化字节和固定分区数得到相同分区。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official raw source read; executed path/conditions mapped in implementation-map.json. Source symbols are original class declarations, not article titles.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/BuiltInPartitioner.java",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "cc877cce99ae44b963bcffb5ff890c85404615cf172d63ebc943de441fe6c5a0"
+      },
+      "quotation": {
+        "text": "return Utils.toPositive(Utils.murmur2(serializedKey)) % numPartitions;",
+        "locator": "BuiltInPartitioner.java line412",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/BuiltInPartitioner.java"
+      },
+      "sections": "408-413 actual hash+positive+mod return"
+    },
+    {
+      "id": "R2",
+      "organization": "Apache Kafka",
+      "title": "RecordAccumulator",
+      "titleEvidence": {
+        "locator": "RecordAccumulator.java class declaration line71",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/RecordAccumulator.java"
+      },
+      "version": "Apache Kafka / Java client 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/RecordAccumulator.java",
+      "supports": [
+        "新批次加入该分区双端队列的尾部；出队另见pollFirst执行段。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official raw source read; executed path/conditions mapped in implementation-map.json. Source symbols are original class declarations, not article titles.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/internals/RecordAccumulator.java",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "b4a5f292542c401938a5e8d92041ff364c28640c12cde02bf6fa9c28134314d3"
+      },
+      "quotation": {
+        "text": "dq.addLast(batch);",
+        "locator": "RecordAccumulator.java line433",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/RecordAccumulator.java"
+      },
+      "sections": "319-328 per-partition deque and append under lock; 428-436 create single-record batch/addLast; 470-485 append last batch if room; 924-980 peekFirst/backoff/pollFirst/record batch"
+    },
+    {
+      "id": "R3",
+      "organization": "Apache Kafka",
+      "title": "CompletedFetch",
+      "titleEvidence": {
+        "locator": "CompletedFetch.java class declaration line59",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/CompletedFetch.java"
+      },
+      "version": "Apache Kafka / Java client 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java",
+      "supports": [
+        "内部记录扫描循环逐条加入结果列表，并推进内部nextFetchOffset；SubscriptionState.position在外层collector结束后更新。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official raw source read; executed path/conditions mapped in implementation-map.json. Source symbols are original class declarations, not article titles.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "2a7d902f7394f30c83db6ab5a47045362b98d8982746e7f7ae61408364713e6e"
+      },
+      "quotation": {
+        "text": "nextFetchOffset = lastRecord.offset() + 1;",
+        "locator": "CompletedFetch.java line290",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/CompletedFetch.java"
+      },
+      "sections": "187-243 record/batch iterators; 269-290 ArrayList/nextFetchedRecord/add/scan next offset"
+    },
+    {
+      "id": "R4",
+      "organization": "Apache Kafka",
+      "title": "KafkaConsumer",
+      "titleEvidence": {
+        "locator": "KafkaConsumer.java class declaration line453",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/KafkaConsumer.java"
+      },
+      "version": "Apache Kafka / Java client 4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java",
+      "supports": [
+        "消费与应用多线程处理分离后，先交付的数据可能后完成，顺序责任属于应用调度。"
+      ],
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh fixed-commit official raw source read; executed path/conditions mapped in implementation-map.json. Source symbols are original class declarations, not article titles.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "1c23d1e4e7d597cec4f412e306a7a51efb3ecdfbe1513c20a8684eb29941ff0d"
+      },
+      "quotation": {
+        "text": "Guaranteeing order across the processors requires particular care as the threads will execute independently an earlier chunk of data may actually be processed after a later chunk of data just due to the luck of thread execution timing. For processing that has no ordering requirements this is not a problem.",
+        "locator": "KafkaConsumer.java529-531, continuous prose after Javadoc layout normalization",
+        "evidence": "episodes-codex/kafka-message-ordering/sources/source-evidence.json"
+      },
+      "sections": "519-538 decoupled processor timing and ordering responsibility"
+    }
+  ]
+}

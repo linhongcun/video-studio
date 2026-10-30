@@ -1,0 +1,86 @@
+{
+  "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "kind": "read-execution-to-story-map",
+  "chain": [
+    {
+      "shots": [
+        "02",
+        "03"
+      ],
+      "structure": "externally determined business-event input",
+      "input": "E01 OrderPaid before E02 OrderRefunded for7042",
+      "condition": "One producer/calling thread completes first send before starting second; projection only",
+      "stateChange": "sourceOrder fixed[E01,E02]",
+      "cause": "Kafka does not invent an external business order across separate producers",
+      "source": "KafkaConsumer.java519-538 scheduling scope plus explicitly selected teaching input"
+    },
+    {
+      "shots": [
+        "04",
+        "05"
+      ],
+      "structure": "serialized key bytes and key partition branch",
+      "input": "String7042 →UTF8 37303432",
+      "condition": "no explicit partition/custom partitioner; nonnull key; ignore.keys=false; partitionCount2 fixed",
+      "stateChange": "both hash1934056876 %2 =0; routing E01/E02→P0",
+      "cause": "BuiltInPartitioner actual deterministic expression uses same bytes andsame modulus",
+      "source": "KafkaProducer.java1078-1111,1556-1575;StringSerializer.java33-57;BuiltInPartitioner.java411-413",
+      "actualClassExperiment": "experiments/key-route-result.json"
+    },
+    {
+      "shots": [
+        "06"
+      ],
+      "structure": "topicInfo.batches[P0] Deque<ProducerBatch>",
+      "input": "B1[E01], thenB2[E02] after first send completion",
+      "condition": "same producer/partition; single inflight; no fault main path",
+      "stateChange": "addLast→peekFirst/pollFirst→locked leader log append offset0 then1",
+      "cause": "per-partition FIFO batches plus selected send order; Broker assigns increasing offsets from log end, not business timestamps",
+      "source": "RecordAccumulator.java319-328,428-436,470-485,924-980;UnifiedLog.java1150-1182,1269-1278;LogValidator.java230-264;LocalLog.java529-532"
+    },
+    {
+      "shots": [
+        "07"
+      ],
+      "structure": "CompletedFetch record iterator, temporary ArrayList; outer SubscriptionState position",
+      "input": "P0 retained E01@0,E02@1 from fetch start0",
+      "condition": "assigned/fetchable partition, matching fetch start, unpaused, ordinary valid nontransactional records",
+      "stateChange": "records.next→records.add(E01)→records.add(E02); internal nextFetchOffset0→1→2; onlyafter fetchRecords returns outer position0→2; ConsumerRecords P0 list[E01,E02]",
+      "cause": "consumer client collects partition records in iterator order; app completion not involved",
+      "source": "CompletedFetch.java187-243,269-290;FetchCollector.java163-205;ClassicKafkaConsumer.java648-681;ConsumerRecords.java76-92"
+    },
+    {
+      "shots": [
+        "08",
+        "09",
+        "10",
+        "11"
+      ],
+      "structure": "application task dispatch order vs completed state writes",
+      "input": "same retained log, same ordered delivered list, same PENDING projection",
+      "condition": "serial vs concurrent dispatch is the only branch change; latch pauses E01 before write; E02 writes first",
+      "stateChange": "serial writesPAID→REFUNDED; concurrent writesREFUNDED→PAID",
+      "cause": "submission order does not join/await task completion; last completed unconditional projection write wins",
+      "source": "KafkaConsumer.java519-538 API cross-check; actual teaching update/write model inmodel.py; runtime latch fixture remains separately reported"
+    },
+    {
+      "shots": [
+        "12",
+        "13",
+        "14"
+      ],
+      "structure": "application per-order queue with one active writer per key",
+      "input": "reset same log/readstart/projection; delivered[E01,E02]",
+      "condition": "next7042 handler starts only when prior actual write completes; other keys may run independently",
+      "stateChange": "writeE01 done→releaseE02→writeE02done; finalREFUNDED",
+      "cause": "ordered completion supplied by application, not automatically by Kafka or idempotence",
+      "source": "model.py finite application fixture; KafkaConsumer.java529-538 scope; ProducerConfig.java294-324/370-375 boundaries"
+    }
+  ],
+  "evidenceClassesSeparate": {
+    "source": "fixed-commit real execution code",
+    "actualClass": "real StringSerializer/Utils/BuiltInPartitioner run, noBroker",
+    "model": "finite snapshots, notKafka scheduler",
+    "brokerAndLatchRun": "Independent /root/deploy_diagnosis run mq06-20261030T153232.189835Z passed12; byte-identical local snapshot experiments/runtime-mq06. Runtime max.poll.records1 combines2poll outputs, film two-record collection is a separate legal source-level teaching path; Java AtomicReference/latch, notbank/DB."
+  }
+}

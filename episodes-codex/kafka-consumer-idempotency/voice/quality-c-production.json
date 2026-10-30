@@ -1,0 +1,84 @@
+{
+  "startedAtUTC": "2026-10-30T16:04:48.640191+00:00",
+  "status": "produced-await-independent-signal-review",
+  "producerSHA256": "70656c889c7ee49255909aa163100e9be7e2d86991514b4c57649c74861f5ed8",
+  "narrationSHA256": "521b47d9fa0cacf069758fb9bab59856b9bef1738782c12a42ae98f078d1a7fe",
+  "scriptSHA256": "fffe0eca9a3d4b377bee3d7b3c502fcd03be0af2cc31f023fc3a6ac7b7cab3d5",
+  "parameterSHA256": "9326ce90087c1aa9bdad289595a182525a23a015f86859853982726145a453fe",
+  "previousVoiceSHA256": "b51471d3889bfa69c5f9b90d36447d42859f8e5c37c511d0955ca90e575f9b29",
+  "sameTextCandidateIds": [
+    "01-problem-1"
+  ],
+  "steps": [
+    {
+      "step": "generate",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/video-studio/episodes/_shared/voice/gen.py",
+        "--dir",
+        "/workspace/video-studio/episodes-codex/kafka-consumer-idempotency",
+        "--jobs",
+        "jobs-quality-c.json"
+      ],
+      "exit": 0,
+      "log": "voice/quality-c-generate.log",
+      "logSHA256": "d117fa006ba9208500b2930ce69cbde436c647afa917cb7396a9bc9111a46dd2"
+    },
+    {
+      "step": "build",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/video-studio/episodes/_shared/voice/build.py",
+        "--dir",
+        "/workspace/video-studio/episodes-codex/kafka-consumer-idempotency"
+      ],
+      "exit": 0,
+      "log": "voice/quality-c-build.log",
+      "logSHA256": "585e7177e3c726ce75523840b801208318beac063017303c1e51ae1d5633d496"
+    },
+    {
+      "step": "assemble",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/video-studio/episodes-codex/kafka-consumer-idempotency/assemble.py"
+      ],
+      "exit": 0,
+      "log": "voice/quality-c-assemble.log",
+      "logSHA256": "073f7e322091d6530113b80b924f7332ef940385c6114ad0ec7df70ba85c3f2d"
+    },
+    {
+      "step": "place",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/video-studio/episodes/_shared/place_v2.py",
+        "--dir",
+        "/workspace/video-studio/episodes-codex/kafka-consumer-idempotency",
+        "--mode",
+        "whole"
+      ],
+      "exit": 0,
+      "log": "voice/quality-c-place.log",
+      "logSHA256": "d86efec20e72e0d2648eaf6273e0560e92d43a3eb7e9dccb797b360a96748f3c"
+    },
+    {
+      "step": "onset",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python3",
+        "/workspace/video-studio/episodes/_shared/label_onset_strict.py",
+        "--dir",
+        "/workspace/video-studio/episodes-codex/kafka-consumer-idempotency",
+        "--out",
+        "/workspace/video-studio/episodes-codex/kafka-consumer-idempotency/onset-quality-c.txt"
+      ],
+      "exit": 0,
+      "log": "voice/quality-c-onset.log",
+      "logSHA256": "c9b029a0f91d61b0edc95e2bbd04b2177118e390729a13dc576173a7e5646ae0"
+    }
+  ],
+  "voiceSHA256": "38b6b8e30f21b6ff572531603f8ab4b9cc1050c18c38a03d2fa85d5810bfcb39",
+  "bodyFrames": 5497,
+  "otherSelectedTakeCount": 27,
+  "otherSelectedTakeBytesUnchanged": true,
+  "finishedAtUTC": "2026-10-30T16:05:10.867603+00:00",
+  "scope": "Targeted same-text signal-risk alternatives; does not assert old takes had semantic errors or claim ASR/full semantic listening."
+}

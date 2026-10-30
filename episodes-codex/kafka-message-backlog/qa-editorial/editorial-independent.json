@@ -1,0 +1,55 @@
+{
+  "checkedAtUTC": "2026-10-30T15:33:13.533633+00:00",
+  "reviewer": "/root/mq_qa independent of production author",
+  "baseCommit": "f01411f7e2a2d1cef480cd0f6b73d4c29d7169f3",
+  "episode": "kafka-message-backlog",
+  "ep": 47,
+  "issue": 315,
+  "status": "approved-for-TTS",
+  "canEnterTTS": true,
+  "blockers": [],
+  "scriptSHA256": "2233c8413548fffbd929a57dd0cdec4318ddfb198e46777d981d196a161d5486",
+  "narrationSHA256": "be954468d143a8907bb9aab1bd07d66dd1bc11f5289b4b9b76648ba61eec148d",
+  "narrationDefinition": "UTF8 ''.join(re.findall(r'^旁白：(.*)$', script, re.M)); no separator or trailingLF",
+  "alternateLFSHA256": "77624cd828158974f241825e027a3fb28d693751816e3f90f94336c33acef501",
+  "shots": 12,
+  "sentences": 24,
+  "question": "同组消费者2→12后，为何这条串行通知路径的业务未完成量仍增长",
+  "editorialJudgement": "Only script/scene directions suffice to follow the concrete business context, introduced objects, actors, internal state changes and one changed-condition comparison; ending directly answers opening. Names/snippets/assertion counts are not substituted for causal explanation.",
+  "causalChain": [
+    "先只比同订阅2区的稳定分工，不启动业务；member-id排序后的12个别名，不保证老成员保有",
+    "Range整数商0余2；依次放P0/P1并从候选移除，C01/C02非空，其余10份空，含原C07/C12",
+    "稳定分工后另设共同起点才引入E01；本地安装列表→挑可拉取分区→请求/返回E01，原日志仍在",
+    "position已前进也不是通知完成；应用每分区只串行等待一个通知成功，之后才markDone/下一条",
+    "教学每区每秒进2完1，沿首个业务步骤延长至5步：总进20/完10、各区余5；积压包括未拉与已拉未完成",
+    "只改流入总1/s且两区交替；每路完成min(可用,1)，10步30进30完为0；清空后下一步只1进1完不负数"
+  ],
+  "necessaryConditionsPresentInScriptAndPlan": [
+    "Kafka4.4.0/Java/classic/Range；同组同订阅2分区、12动态成员、无静态/机架偏好、有效位置未暂停、无失败重试",
+    "12成员稳定拥有最多2份非空列表是组内归属上限；业务并发2来自本例每分区串行且无offload，不是Kafka普遍线程上限",
+    "4/s与1/s均明示教学假设及分区分布；业务完成账不替换为committed lag、读取位置或日志留存数"
+  ],
+  "actualTargetedSourceRead": [
+    "sources/RangeAssignor.java:152-171,238-250,280-289",
+    "sources/SubscriptionState.java:315-328,486-496",
+    "sources/AbstractFetch.java:432-442,477-484",
+    "outline-source-map.md and model selectedstates"
+  ],
+  "priorReviewCorrections": [
+    "提纲阶段已补低流入按两区交替，避免把总容量2/s误作任意路由都净清1/s；并将旧分工比较放在业务启动前，不抹旧在途。",
+    "封面已补同组条件；稿件本来有同组与其余十份空列表，不把新增十位都说成空。"
+  ],
+  "preliminaryModelAndVisualRequirements": [
+    "分配完成/本地安装/Fetch/业务done各按对应状态出现；空列表不等于无心跳通信",
+    "镜08的第一教学步与镜09累计5步连贯，不把先前4进2完另加成第6步",
+    "增长/降低流入逐区显示输入、未读、在途与完成，教学钟与视频真实秒数分开；结尾不泛化跨业务并发"
+  ],
+  "currentPlanSHA256": "57ed51f4cc55a886bb742ee89a39b87a4d1edf5182e018a97c060ff64c64000d",
+  "currentModelSHA256": "0aff834993c7bd8254236dd1e672a9c51d4b3cbbc5566a7886ce9c35320f464f",
+  "runtimeEvidenceScope": "Source execution facts, finite teaching model and actual Broker/DB/application runtime evidence remain separate. Runtime receipts are independently owned by deploy_diagnosis; this editorial gate does not claim their execution, full model acceptance, sound quality, actual animation or media pass.",
+  "limits": [
+    "No semantic listening/ASR or exact timing exists yet; source voice/media gates remain pending.",
+    "No formal freeze/render/site/git action authorized by this report; root retains production/release gate.",
+    "Qualitative S023 supports chosen style; no novice comprehension measurement is claimed."
+  ]
+}

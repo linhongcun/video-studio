@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "kafka-consumer-idempotency",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Apache Kafka",
+      "title": "KafkaConsumer.java",
+      "titleEvidence": {
+        "locator": "Fixed-commit GitHub contents response name/path fields: KafkaConsumer.java",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/kafka/title-evidence.json"
+      },
+      "version": "Apache Kafka4.4.0",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L250-L256",
+      "supports": [
+        "业务数据库操作成功后、Kafka offset提交前失败，会从旧提交位置再次读取；此API说明由实际position/commit/recovery实现交叉核对。"
+      ],
+      "sections": "KafkaConsumer.java lines250–256; execution chain in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java",
+        "method": "Fresh official fixed-commit HTTPS GET; targeted execution reading plus API cross-check, no runtime assertion",
+        "sha256": "1c23d1e4e7d597cec4f412e306a7a51efb3ecdfbe1513c20a8684eb29941ff0d"
+      },
+      "quotation": {
+        "text": " * To avoid this, we will manually commit the offsets only after the corresponding records have been inserted into the\n * database. This gives us exact control of when a record is considered consumed. This raises the opposite possibility:\n * the process could fail in the interval after the insert into the database but before the commit (even though this\n * would likely just be a few milliseconds, it is a possibility). In this case the process that took over consumption\n * would consume from last committed offset and would repeat the insert of the last batch of data. Used in this way\n * Kafka provides what is often called \"at-least-once\" delivery guarantees, as each record will likely be delivered one\n * time but in failure cases could be duplicated.",
+        "locator": "KafkaConsumer.java lines250–256",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/kafka/KafkaConsumer.java"
+      },
+      "note": "Official Apache Kafka source filename; no individual author inferred from committers."
+    },
+    {
+      "id": "R2",
+      "organization": "PostgreSQL Global Development Group",
+      "title": "nodeModifyTable.c",
+      "titleEvidence": {
+        "locator": "nodeModifyTable.c original source-file header/name and fixed-commit repository path",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+      },
+      "version": "PostgreSQL18.0",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/nodeModifyTable.c#L1164-L1179",
+      "supports": [
+        "DO NOTHING冲突分支return NULL。"
+      ],
+      "sections": "nodeModifyTable.c lines1164–1179; implementation context in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/nodeModifyTable.c",
+        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
+        "sha256": "d265878582203339053fa21866c65109cc8e69ff2f11a7195e32a3548b94c061"
+      },
+      "quotation": {
+        "text": "\t\t\t\t\t/*\n\t\t\t\t\t * In case of ON CONFLICT DO NOTHING, do nothing. However,\n\t\t\t\t\t * verify that the tuple is visible to the executor's MVCC\n\t\t\t\t\t * snapshot at higher isolation levels.\n\t\t\t\t\t *\n\t\t\t\t\t * Using ExecGetReturningSlot() to store the tuple for the\n\t\t\t\t\t * recheck isn't that pretty, but we can't trivially use\n\t\t\t\t\t * the input slot, because it might not be of a compatible\n\t\t\t\t\t * type. As there's no conflicting usage of\n\t\t\t\t\t * ExecGetReturningSlot() in the DO NOTHING case...\n\t\t\t\t\t */\n\t\t\t\t\tAssert(onconflict == ONCONFLICT_NOTHING);\n\t\t\t\t\tExecCheckTIDVisible(estate, resultRelInfo, &conflictTid,\n\t\t\t\t\t\t\t\t\t\tExecGetReturningSlot(estate, resultRelInfo));\n\t\t\t\t\tInstrCountTuples2(&mtstate->ps, 1);\n\t\t\t\t\treturn NULL;",
+        "locator": "nodeModifyTable.c lines1164–1179",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/executor/nodeModifyTable.c"
+      },
+      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+    },
+    {
+      "id": "R3",
+      "organization": "PostgreSQL Global Development Group",
+      "title": "execIndexing.c",
+      "titleEvidence": {
+        "locator": "execIndexing.c original source-file header/name and fixed-commit repository path",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+      },
+      "version": "PostgreSQL18.0",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/execIndexing.c#L862-L890",
+      "supports": [
+        "未决事务等待后重启扫描。"
+      ],
+      "sections": "execIndexing.c lines862–890; implementation context in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/execIndexing.c",
+        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
+        "sha256": "7a8fe37dc36ff14198f5585c2e15c5620817e7221ab24821a66196409168220d"
+      },
+      "quotation": {
+        "text": "\t\t/*\n\t\t * At this point we have either a conflict or a potential conflict.\n\t\t *\n\t\t * If an in-progress transaction is affecting the visibility of this\n\t\t * tuple, we need to wait for it to complete and then recheck (unless\n\t\t * the caller requested not to).  For simplicity we do rechecking by\n\t\t * just restarting the whole scan --- this case probably doesn't\n\t\t * happen often enough to be worth trying harder, and anyway we don't\n\t\t * want to hold any index internal locks while waiting.\n\t\t */\n\t\txwait = TransactionIdIsValid(DirtySnapshot.xmin) ?\n\t\t\tDirtySnapshot.xmin : DirtySnapshot.xmax;\n\n\t\tif (TransactionIdIsValid(xwait) &&\n\t\t\t(waitMode == CEOUC_WAIT ||\n\t\t\t (waitMode == CEOUC_LIVELOCK_PREVENTING_WAIT &&\n\t\t\t  DirtySnapshot.speculativeToken &&\n\t\t\t  TransactionIdPrecedes(GetCurrentTransactionId(), xwait))))\n\t\t{\n\t\t\treason_wait = indexInfo->ii_ExclusionOps ?\n\t\t\t\tXLTW_RecheckExclusionConstr : XLTW_InsertIndex;\n\t\t\tindex_endscan(index_scan);\n\t\t\tif (DirtySnapshot.speculativeToken)\n\t\t\t\tSpeculativeInsertionWait(DirtySnapshot.xmin,\n\t\t\t\t\t\t\t\t\t\t DirtySnapshot.speculativeToken);\n\t\t\telse\n\t\t\t\tXactLockTableWait(xwait, heap,\n\t\t\t\t\t\t\t\t  &existing_slot->tts_tid, reason_wait);\n\t\t\tgoto retry;",
+        "locator": "execIndexing.c lines862–890",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/executor/execIndexing.c"
+      },
+      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+    },
+    {
+      "id": "R4",
+      "organization": "PostgreSQL Global Development Group",
+      "title": "nbtinsert.c",
+      "titleEvidence": {
+        "locator": "nbtinsert.c original source-file header/name and fixed-commit repository path",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+      },
+      "version": "PostgreSQL18.0",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/nbtree/nbtinsert.c#L187-L203",
+      "supports": [
+        "同key候选叶页写锁跨检查和插入；partial不等待。"
+      ],
+      "sections": "nbtinsert.c lines187–203; implementation context in research.md",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
+        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/nbtree/nbtinsert.c",
+        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
+        "sha256": "199671bec6b07b80100ea41632cef4b03a9525df75a2ede2b8fe155b637dcba7"
+      },
+      "quotation": {
+        "text": "\t * NOTE: obviously, _bt_check_unique can only detect keys that are already\n\t * in the index; so it cannot defend against concurrent insertions of the\n\t * same key.  We protect against that by means of holding a write lock on\n\t * the first page the value could be on, with omitted/-inf value for the\n\t * implicit heap TID tiebreaker attribute.  Any other would-be inserter of\n\t * the same key must acquire a write lock on the same page, so only one\n\t * would-be inserter can be making the check at one time.  Furthermore,\n\t * once we are past the check we hold write locks continuously until we\n\t * have performed our insertion, so no later inserter can fail to see our\n\t * insertion.  (This requires some care in _bt_findinsertloc.)\n\t *\n\t * If we must wait for another xact, we release the lock while waiting,\n\t * and then must perform a new search.\n\t *\n\t * For a partial uniqueness check, we don't wait for the other xact. Just\n\t * let the tuple in and return false for possibly non-unique, or true for\n\t * definitely unique.",
+        "locator": "nbtinsert.c lines187–203",
+        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/access/nbtree/nbtinsert.c"
+      },
+      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+    }
+  ]
+}
