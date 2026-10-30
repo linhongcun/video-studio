@@ -1,8 +1,8 @@
 # MQ01–MQ04实现原理重制
 
-2026-10-30，北京时间。用户授权重制已发布四期MQ，增加实现深度并保持容易理解，本轮优先于继续MQ05。任务[#443](https://github.com/linhongcun/video-studio/issues/443)，系列[#308](https://github.com/linhongcun/video-studio/issues/308)。当前四条正式成片、图文、独立编码检查与本地网页验收已完成；GitHub合并、Release及线上核验待执行，不预记已上线。
+2026-10-30，北京时间。用户授权重制已发布四期MQ，增加实现深度并保持容易理解，本轮优先于继续MQ05。任务[#443](https://github.com/linhongcun/video-studio/issues/443)，系列[#308](https://github.com/linhongcun/video-studio/issues/308)。四条正式成片与图文已由PR #444合并，随v0.96.1更新原页面；Release后Pages与线上完整文件、原生交互及实际审图均已通过，#443已以completed关闭。
 
-开工从clean最新`923305b49cea1b18d7fc7e4dd8ac70ad830bc673`建立`codex/mq01-04-source-remake-20261030`。保留原EP、slug、题名、创建/首发时间、封面与既有平台链接；新生产目录各为`episodes-codex/<slug>/revisions/source-depth-v2/`。旧#309–#312的completed与原交付保持历史身份，本轮上线核验后关闭新#443。
+开工从clean最新`923305b49cea1b18d7fc7e4dd8ac70ad830bc673`建立`codex/mq01-04-source-remake-20261030`。保留原EP、slug、题名、创建/首发时间、封面与既有平台链接；新生产目录各为`episodes-codex/<slug>/revisions/source-depth-v2/`。旧#309–#312的completed与原交付保持历史身份，新#443已在本轮上线核验后以completed关闭。
 
 | 身份 | 正文中的实现因果 | 实际成片 | 冻结输入项 |
 |---|---|---|---|
@@ -39,6 +39,16 @@ fresh npm ci后完整[站点构建](site-build.log)通过52日期/52参考输出
 
 [密钥复核](qa/secret-review.json)使用未修改的canonical规则；一处官方KafkaApis.scala参数类型产生误报，按完整固定源SHA/行号/公开URL逐项核对，未放宽其他规则。Remotion生成bundle和浏览器下载缓存作为可重建输出忽略，实际来源/图像/短片继续保留。
 
-当前仅完成制作与本地验收，远程交付后再补真实回执。没有逐字ASR、全片实时人工语义听辨、物理手机或学习效果实验，也没有新版用户观看认可；仅GitHub与本站，无外部平台重发。
+本批实际交付见[发布回执](publication.json)。没有逐字ASR、全片实时人工语义听辨、物理手机或学习效果实验，也没有新版用户观看认可；仅GitHub与本站，无外部平台重发。
+
+## 实际发布与线上闭环
+
+[PR #444](https://github.com/linhongcun/video-studio/pull/444)合并为`d033d2ba520fe6829caa7c62c95f1c50ee2ccd1b`；远端[附注tag](annotated-tag-verification.json)精确指向该提交。[Release v0.96.1](https://github.com/linhongcun/video-studio/releases/tag/v0.96.1)于2026-10-30T13:44:45Z发出后，[Pages 41065814951](https://github.com/linhongcun/video-studio/actions/runs/41065814951)在同一HEAD成功。只取消本次同HEAD、Release前自动push的41065674817，未改他人运行。
+
+[38项普通canonical完整GET](online-verification.json)通过，未用Range、缓存参数或重试：四条完整MP4（合计32,126,145字节）、四海报、四VTT及16幅JPG与本地完整SHA一致；16章/106cue、旧锚点、四课目录、入口和真实Release/更新日志通过。
+
+线上原生Chromium另完成[MQ01](site-online/message-queue/report.json)52、[MQ02](site-online/kafka-consumer-groups/report.json)50、[MQ03](site-online/kafka-log-replay/report.json)54、[MQ04](site-online/kafka-send-confirmation/report.json)54项动作，各20次严格实际PTS；合计210/80，与本地结果分开留证。四份报告均已实际审图，根代理另[实际打开5图](qa/root-visual-online.json)。HTTPS原生验证，无TLS忽略或HTTP回填；初始海报加载弧/原生控件及早期lazy图状态原样保留，不称清洁初始海报，后续实际播放和交互正常。1440/390/844均为模拟视口，未测物理手机。
+
+线上核验后[#443](issues/443-after.json)以completed关闭，[#308](issues/308-after.json)同步重制交付；仍4/9核心题已交付、5题未制作、14题取消。旧#309–#312及各首发Release/QA保持历史身份，本轮不扩展为外平台重发。没有逐字ASR、全片实时人工语义听辨、学习效果实验或新版用户观看认可。
 
 MQ04新制作README本身属于204项编码前冻结输入，仍保留准备阶段身份；其他三份未冻结README补充当前状态。当前交付状态统一以本批记录及实际回执为准，未修改任何冻结README。

@@ -1,7 +1,7 @@
 # MQ03 · source-depth-v2
 
 <!-- mq-source-depth-current-status -->
-当前：本修订已正式冻结、编码，并通过非作者成片及本地网页复核。完整媒体SHA、实际范围和发布进度见[批次记录](../../../../docs/archive/2026-10/mq-source-depth-remake/README.md)。下文保留制作阶段记录；GitHub上线状态以后续实际回执为准。
+当前：本修订已随v0.96.1更新原页面，通过非作者成片、本地及原生线上复核，重制#443已completed关闭。完整媒体SHA与实际检查范围见[批次记录](../../../../docs/archive/2026-10/mq-source-depth-remake/README.md)。下文保留制作阶段记录。
 <!-- /mq-source-depth-current-status -->
 
 保留 EP43、`kafka-log-replay`、原标题《Kafka日志重放：消息读过了，为什么还能重读？》与已发布封面。本目录是源码深度重制的新输入；基线 `923305b49cea1b18d7fc7e4dd8ac70ad830bc673`，只在本目录制作，不替换旧源或发布目录。
