@@ -21,3 +21,8 @@
 独立从正式MP4一次整数解码n取55张，实际查看全部10张联系图；全视频解码同时启用xerror/err_detect，退出0，不再重复空解码。03结果对象、04追加/响应、06重置/追加、07内部retry、08最终超时与新标题副行、09关闭A/新B同E01追加1/成功、10重置与本地同步报错均在相邻编码帧核对。四个文章图位与同一状态匹配。3416末正文字幕保留，精确3417资料首卡无烧录字幕残留；3492/3566中/末卡只显示《Design》《Producer Configs》及Apache Kafka署名。见[正式编码报告](qa/encoded-independent.json)。完整音频/AAC/正文及附录同源核验由根任务verify.py --final另记，不冒充本代理重复执行。
 
 网站实际动作、严格PTS和手机模拟横屏/原文弹层图由publication代理负责，使用其[本地浏览器报告](qa/site-independent/report.json)与后续线上报告；本代理没有覆盖其helper或把媒体通过写成浏览器/真机通过。
+
+
+## 发布后实际补充（root / publication执行）
+
+PR #440合并8d852e2c并发布v0.96.0，Release后Pages41035467904成功。14次普通canonical完整GET比对视频/海报/VTT/四图及四课/四章/22cue/真实Release通过；publication代理直接HTTPS原生Chromium线上48项动作/20严格PTS和A2亮暗触摸滚动两项通过并实看，root另看线上三张实际截图。没有TLS忽略或HTTP回填；这些网站动作不由本篇独立媒体QA冒称重复执行。#312已在核验后以completed关闭，#308当前4/9已交付，其余5未开工。详见online-verification.json、qa/site-online-native/report.json与publication.json。
