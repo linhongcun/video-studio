@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "episode": "MQ01",
+  "revision": "episodes-codex/message-queue/revisions/source-depth-v2",
+  "checkedAt": "2026-10-30T11:57:33.306652+00:00",
+  "reviewType": "independent-source-causality-and-beginner-editorial",
+  "status": "can-enter-TTS-selected-narration",
+  "canEnterTTS": true,
+  "blockers": [],
+  "scriptSha256AtReview": "242bd9d1a5811d160f7aec81c67c72cefc967eb85e04cae03e6f019c0be40f70",
+  "narration11OrMoreParagraphsJoinedNewlineSha256": "ef4752ffbb0f4027ccb31d5dcc6cc01cb383537848bb1339ed388a4333fa885a",
+  "narrationConcatenatedSha256": "628b33773e0387efd427a70d8627c08cde90b8d2eb91b346d446d88ad3774c1a",
+  "shots": 13,
+  "sentences": 26,
+  "singleQuestion": "任务为什么可以先被Kafka存起来，再由消费者执行，因此已受理还不是已完成。",
+  "causalityActuallyInNarration": [
+    "事件是待处理任务数据，Broker不执行通知业务程序。",
+    "编码字节先入发送缓冲，Broker从本分区日志末尾取得编号0，追加后末尾变1；不是依据订单号或业务完成数分配。",
+    "消费者Fetch带当前读取位置0，取出同一日志内容；客户端解码并把读取位置推进1，应用业务尚未执行。",
+    "应用另行调用通知/保存业务完成，页面查询业务结果；保留日志与业务状态由不同操作更新。"
+  ],
+  "sourceReviewed": [
+    "broker/UnifiedLog.java1148-1183",
+    "broker/LocalLog.java529-532",
+    "broker/FileRecords.java195-209",
+    "client/AbstractFetch.java466-486",
+    "client/CompletedFetch.java fetch/decode/nextFetchOffset paths",
+    "client/FetchCollector.java172-189",
+    "client/StringSerializer.java53-59",
+    "client/StringDeserializer.java56-62",
+    "sources/broker/notes.md"
+  ],
+  "easyToUnderstandReview": "从订单通知页面进入，两步总览后沿同一E01逐步展开存储和执行。无源码方法名口播，committed/幂等/ISR/索引不另起主线；13镜约3分钟仍是一条机制链，不以旧2分钟删关键原因。",
+  "nonNarrationClarificationsBeforeFreeze": [
+    "文首应由Broker而非客户端从logEndOffset取得追加编号。",
+    "StringDeserializer只还原文本；直接显示字段须标应用解析。UTF8任务内容字节长度不当作完整Kafka记录/批次大小，逻辑offset不当字节地址。"
+  ],
+  "pending": [
+    "实际模型状态和输入映射",
+    "真实TTS时序/信号/发音能力范围",
+    "真实无字幕动作及2/5/15秒图、编号/字节/所属容器可读性",
+    "冻结与实际成片/附录/网页"
+  ],
+  "limitations": "定向源码解释与稿件因果审查；未执行Broker/实际文件持久性/业务程序实验，未做模型、动画、音频或用户理解测试。"
+}

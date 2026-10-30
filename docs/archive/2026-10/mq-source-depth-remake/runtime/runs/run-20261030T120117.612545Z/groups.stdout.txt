@@ -1,0 +1,36 @@
+MODE groups kafkaClientVersion=4.4.0 kafkaClientCommit=1156b2752aaa28ea
+JAVA 21.0.12.1 BOOTSTRAP 127.0.0.1:19092
+ASSERT PASS client-is-4.4.0 observed=4.4.0
+CONSUMER_CONFIG {auto.offset.reset=earliest, bootstrap.servers=127.0.0.1:19092, client.id=notify-N1, default.api.timeout.ms=20000, enable.auto.commit=false, group.id=notify, group.instance.id=N1, group.protocol=classic, heartbeat.interval.ms=1000, key.deserializer=org.apache.kafka.common.serialization.StringDeserializer, max.poll.records=1, partition.assignment.strategy=org.apache.kafka.clients.consumer.RangeAssignor, request.timeout.ms=10000, session.timeout.ms=10000, value.deserializer=org.apache.kafka.common.serialization.StringDeserializer}
+ASSIGNED_PAUSED client=notify-N3 partitions=[]
+ASSIGNED_PAUSED client=notify-N1 partitions=[mq-depth-orders-0]
+ASSIGNED_PAUSED client=notify-N2 partitions=[mq-depth-orders-1]
+ASSIGNED_PAUSED client=points-S1 partitions=[mq-depth-orders-0, mq-depth-orders-1]
+ASSERT PASS classic-groups-stable observed={notify=(groupId=notify, isSimpleConsumerGroup=false, members=(memberId=N1-084df61f-bea8-4a84-bd32-e2c3846c4dba, groupInstanceId=N1, rackId=null, clientId=notify-N1, host=/127.0.0.1, assignment=(topicPartitions=mq-depth-orders-0), targetAssignment=Optional.empty, memberEpoch=null, upgraded=null),(memberId=N3-e1347215-34c1-4894-90be-bdb82741a0cf, groupInstanceId=N3, rackId=null, clientId=notify-N3, host=/127.0.0.1, assignment=(topicPartitions=), targetAssignment=Optional.empty, memberEpoch=null, upgraded=null),(memberId=N2-6a515b0a-fb8c-4cd2-bc14-94e66189e88c, groupInstanceId=N2, rackId=null, clientId=notify-N2, host=/127.0.0.1, assignment=(topicPartitions=mq-depth-orders-1), targetAssignment=Optional.empty, memberEpoch=null, upgraded=null), partitionAssignor=range, type=Classic, groupState=Stable, coordinator=127.0.0.1:19092 (id: 1 rack: null isFenced: false), authorizedOperations=null, groupEpoch=null, targetAssignmentEpoch=null), points=(groupId=points, isSimpleConsumerGroup=false, members=(memberId=S1-94fbff82-d400-435a-8807-77fdd46ec2f2, groupInstanceId=S1, rackId=null, clientId=points-S1, host=/127.0.0.1, assignment=(topicPartitions=mq-depth-orders-0,mq-depth-orders-1), targetAssignment=Optional.empty, memberEpoch=null, upgraded=null), partitionAssignor=range, type=Classic, groupState=Stable, coordinator=127.0.0.1:19092 (id: 1 rack: null isFenced: false), authorizedOperations=null, groupEpoch=null, targetAssignmentEpoch=null)}
+ADMIN_GROUP notify=(groupId=notify, isSimpleConsumerGroup=false, members=(memberId=N1-084df61f-bea8-4a84-bd32-e2c3846c4dba, groupInstanceId=N1, rackId=null, clientId=notify-N1, host=/127.0.0.1, assignment=(topicPartitions=mq-depth-orders-0), targetAssignment=Optional.empty, memberEpoch=null, upgraded=null),(memberId=N3-e1347215-34c1-4894-90be-bdb82741a0cf, groupInstanceId=N3, rackId=null, clientId=notify-N3, host=/127.0.0.1, assignment=(topicPartitions=), targetAssignment=Optional.empty, memberEpoch=null, upgraded=null),(memberId=N2-6a515b0a-fb8c-4cd2-bc14-94e66189e88c, groupInstanceId=N2, rackId=null, clientId=notify-N2, host=/127.0.0.1, assignment=(topicPartitions=mq-depth-orders-1), targetAssignment=Optional.empty, memberEpoch=null, upgraded=null), partitionAssignor=range, type=Classic, groupState=Stable, coordinator=127.0.0.1:19092 (id: 1 rack: null isFenced: false), authorizedOperations=null, groupEpoch=null, targetAssignmentEpoch=null)
+ADMIN_GROUP points=(groupId=points, isSimpleConsumerGroup=false, members=(memberId=S1-94fbff82-d400-435a-8807-77fdd46ec2f2, groupInstanceId=S1, rackId=null, clientId=points-S1, host=/127.0.0.1, assignment=(topicPartitions=mq-depth-orders-0,mq-depth-orders-1), targetAssignment=Optional.empty, memberEpoch=null, upgraded=null), partitionAssignor=range, type=Classic, groupState=Stable, coordinator=127.0.0.1:19092 (id: 1 rack: null isFenced: false), authorizedOperations=null, groupEpoch=null, targetAssignmentEpoch=null)
+ASSERT PASS notify-three-members-two-partitions-0-1-1 observed=[0, 1, 1]
+STABLE_MEMBER group=notify client=notify-N1 instance=Optional[N1] assignment=[mq-depth-orders-0]
+STABLE_MEMBER group=notify client=notify-N3 instance=Optional[N3] assignment=[]
+STABLE_MEMBER group=notify client=notify-N2 instance=Optional[N2] assignment=[mq-depth-orders-1]
+ASSERT PASS notify-partition-ownership-exclusive observed=[mq-depth-orders-0, mq-depth-orders-1]
+ASSERT PASS points-own-member-gets-both observed=(topicPartitions=mq-depth-orders-0,mq-depth-orders-1)
+ASSERT PASS no-poll-records-before-stable-reading-gate observed=[notify-N1:[], notify-N2:[], notify-N3:[], points-S1:[]]
+READ group=notify client=notify-N2 partition=1 offset=0 eventId=E02 value={"eventId":"E02","orderId":"7043"}
+READ group=points client=points-S1 partition=0 offset=0 eventId=E01 value={"eventId":"E01","orderId":"7042"}
+READ group=notify client=notify-N1 partition=0 offset=0 eventId=E01 value={"eventId":"E01","orderId":"7042"}
+READ group=notify client=notify-N1 partition=0 offset=1 eventId=E03 value={"eventId":"E03","orderId":"7044"}
+READ group=notify client=notify-N2 partition=1 offset=1 eventId=E04 value={"eventId":"E04","orderId":"7045"}
+READ group=points client=points-S1 partition=0 offset=1 eventId=E03 value={"eventId":"E03","orderId":"7044"}
+READ group=points client=points-S1 partition=1 offset=0 eventId=E02 value={"eventId":"E02","orderId":"7043"}
+READ group=points client=points-S1 partition=1 offset=1 eventId=E04 value={"eventId":"E04","orderId":"7045"}
+ASSERT PASS notify-group-received-all-four observed=[E01, E02, E03, E04]
+ASSERT PASS points-group-independently-received-all-four observed=[E01, E02, E03, E04]
+ASSERT PASS same-E01-read-in-both-groups observed=notify and points E01 present
+ASSERT PASS stable-notify-run-four-observations observed=4
+ASSERT PASS points-run-four-observations observed=[0:0:E01, 0:1:E03, 1:0:E02, 1:1:E04]
+REVOKED client=notify-N1 partitions=[mq-depth-orders-0]
+REVOKED client=points-S1 partitions=[mq-depth-orders-0, mq-depth-orders-1]
+REVOKED client=notify-N2 partitions=[mq-depth-orders-1]
+ASSERT PASS worker-threads-stopped observed=[notify-N1:false, notify-N2:false, notify-N3:false, points-S1:false]
+RESULT PASS mode=groups assertions=12

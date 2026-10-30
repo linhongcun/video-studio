@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "episode": "MQ04",
+  "revision": "episodes-codex/kafka-send-confirmation/revisions/source-depth-v2",
+  "checkedAt": "2026-10-30T12:05:34.633971+00:00",
+  "status": "can-enter-TTS-selected-narration",
+  "canEnterTTS": true,
+  "blockers": [],
+  "scriptSha256AtReview": "a9a16a96ef42ab56dabe69ebefe21fa861c7a890ab0fd4f1a1be5436e825da1b",
+  "narrationParagraphsJoinedNewlineSha256": "d01f1007451485493075ef0f6c1b09076cf66b80bed2d9122ae30c06a2056f4a",
+  "narrationConcatenatedSha256": "5ea0d2b3545b15e085bd730942a1a30efb9b8246a3681c82180c2aa1bfe1506f",
+  "shots": 15,
+  "sentences": 30,
+  "causalityActuallyInNarration": [
+    "E01编码选P0入分区批次队列，记录Future挂本批完成结果；拿到对象时本例尚在本地。",
+    "Sender取满足条件的批次并登记inflight再发出；响应通过请求/分区关联回原批，完成结果交给原Future与回调。",
+    "Broker先校验并追加，保存本分区生产者近期批次身份、序号范围与offset。",
+    "同批重传保留原身份与序号；按producerId查状态，核对epoch及完整seqrange命中原批，复用旧offset而不append。",
+    "缺回应直至delivery期限使原Future最终失败但日志仍在；关闭A新会话B是新的发送，经过校验可追加同eventId到1。",
+    "本地序列化失败在入批缓冲前同步throw，与已返回Future的未知分支独立重置。"
+  ],
+  "selectedSourceReview": [
+    "sources/KafkaProducer.java doSend / RecordAccumulator.java partition deque and record future",
+    "sources/ProducerBatch.java completeFutureAndFireCallbacks / Sender.java send/response/expiry",
+    "sources/UnifiedLog.java1402-1424 producer lookup and duplicate result",
+    "sources/UnifiedLog.java1255-1280 duplicate vs append branch",
+    "sources/ProducerStateEntry.java128-136 epoch plus complete sequence range",
+    "implementation-map.json actual-execution map / outline.md"
+  ],
+  "scopeAndVisualClarifications": [
+    "outline03/04职责须与最新script一致，10标记只展开早已分配的字段，不能到重试才补身份。",
+    "07图按请求上下文的P0关联原批，不误画凭分区从任意批次里查找。",
+    "duplicate直接返回旧offset且不增logEnd，不先append再撤销；Broker发出回应不等于客户端处理回应。",
+    "近期状态仍保留与未命中还要校验的条件明确；不扩大为永久去重、业务去重或任意错误均未写入。"
+  ],
+  "easyToUnderstandReview": "同一事件/固定输入、稀疏整体到当前结构，先动作后名称；不靠方法名巡览解释深度。代码为必要短映射或可选，无ISR/事务/全协议并行机制课。",
+  "pending": [
+    "实际有限模型及其源事实/运行事实分界",
+    "真实配音文本/时序/信号与能力范围",
+    "实际图像/真无字幕短clip/完成态和各容器所属",
+    "冻结、实际MP4、资料附录及网站"
+  ],
+  "limitations": "本项是定向执行源码与稿件/计划的因果审查；未以此宣称真实Broker/网络/持久性实验、模型/音频/动画通过或用户理解认可。"
+}

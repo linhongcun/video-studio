@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "episode": "MQ03",
+  "revision": "episodes-codex/kafka-log-replay/revisions/source-depth-v2",
+  "checkedAt": "2026-10-30T12:05:34.633770+00:00",
+  "status": "can-enter-TTS-selected-narration",
+  "canEnterTTS": true,
+  "blockers": [],
+  "scriptSha256AtReview": "220dc8a626d45a3b3ec7e124e2637878522dc70deb5034af4c2c776081e1e387",
+  "narrationParagraphsJoinedNewlineSha256": "3f8eda76d3c4e8e40ae95ac259c11be77121f33d28ca1ae3eb8c7d3a48741502",
+  "narrationConcatenatedSha256": "be881db294e6e111b020847c83f4cc44986a7b46d65952409d3946c72f2912f7",
+  "shots": 12,
+  "sentences": 24,
+  "causalityActuallyInNarration": [
+    "读offset0的字节切片不删除日志；客户端收到记录后计算next=offset+1并写回内存状态。",
+    "关闭自动提交时，读取只改position，预先保存的committed0保持；退出丢弃旧实例内存。",
+    "新客户端缺有效位置，查询已有committed0，构造FetchPosition再执行this.position赋值。",
+    "下一FetchRequest起点读取当前position.offset0，所以再次返回同一文件里的同E01。",
+    "从刚读完未提交的共同状态改为成功commit1后，同一恢复链装入1，不再从0读取；保留清理是字节不存在的必要边界。"
+  ],
+  "selectedSourceReview": [
+    "sources/ClassicKafkaConsumer.java1205-1217 updateFetchPositions",
+    "sources/ConsumerCoordinator.java947-956 initWithCommittedOffsetsIfNeeded",
+    "sources/ConsumerUtils.java202-210 refreshCommittedOffsets",
+    "sources/SubscriptionState.java1195-1205 seekValidated/seekUnvalidated",
+    "sources/AbstractFetch.java477-483 position.offset FetchRequest field",
+    "sources/LogSegment.java439-461 read/slice",
+    "outline-source-map.md full selected execution map"
+  ],
+  "scopeAndVisualClarifications": [
+    "初始committed0明确是已有保存值，非新组默认值；恢复是复制值入新内存，不是移动保存值。",
+    "正文实际代码仅07赋值/08请求字段两处；03slice和04+1改为图动作，源码依据不增加源码卡。",
+    "首屏图应明确订单通知服务/E01，避免只靠技术词建立场景；保留条件与无分层存储如实标明。"
+  ],
+  "easyToUnderstandReview": "同一事件/固定输入、稀疏整体到当前结构，先动作后名称；不靠方法名巡览解释深度。代码为必要短映射或可选，无ISR/事务/全协议并行机制课。",
+  "pending": [
+    "实际有限模型及其源事实/运行事实分界",
+    "真实配音文本/时序/信号与能力范围",
+    "实际图像/真无字幕短clip/完成态和各容器所属",
+    "冻结、实际MP4、资料附录及网站"
+  ],
+  "limitations": "本项是定向执行源码与稿件/计划的因果审查；未以此宣称真实Broker/网络/持久性实验、模型/音频/动画通过或用户理解认可。"
+}

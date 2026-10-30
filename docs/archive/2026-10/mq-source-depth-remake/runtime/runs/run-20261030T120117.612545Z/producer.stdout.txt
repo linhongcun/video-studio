@@ -1,0 +1,18 @@
+MODE producer kafkaClientVersion=4.4.0 kafkaClientCommit=1156b2752aaa28ea
+JAVA 21.0.12.1 BOOTSTRAP 127.0.0.1:19092
+ASSERT PASS client-is-4.4.0 observed=4.4.0
+PRODUCER_CONFIG {acks=all, bootstrap.servers=127.0.0.1:19092, client.id=mq-depth-producer, compression.type=none, default.api.timeout.ms=20000, delivery.timeout.ms=60000, enable.idempotence=true, key.serializer=org.apache.kafka.common.serialization.StringSerializer, linger.ms=0, max.block.ms=30000, max.in.flight.requests.per.connection=1, request.timeout.ms=10000, retries=3, value.serializer=org.apache.kafka.common.serialization.StringSerializer}
+CLUSTER id=SegP0VGuTLudnk9zN4_sDQ
+TOPIC {mq-depth-orders=(name=mq-depth-orders, internal=false, partitions=(partition=0, leader=127.0.0.1:19092 (id: 1 rack: null isFenced: false), replicas=127.0.0.1:19092 (id: 1 rack: null isFenced: false), isr=127.0.0.1:19092 (id: 1 rack: null isFenced: false), elr=, lastKnownElr=),(partition=1, leader=127.0.0.1:19092 (id: 1 rack: null isFenced: false), replicas=127.0.0.1:19092 (id: 1 rack: null isFenced: false), isr=127.0.0.1:19092 (id: 1 rack: null isFenced: false), elr=, lastKnownElr=), authorizedOperations=null)}
+PRODUCE_CONFIRMED eventId=E01 partition=0 offset=0 value={"eventId":"E01","orderId":"7042"}
+ASSERT PASS confirmed-position-E01 observed=mq-depth-orders-0@0
+ASSERT PASS E01-confirmed-before-any-consumer-constructed observed=P0 endOffset=1 constructedConsumers=0 businessHandlersInvoked=0
+PRODUCE_CONFIRMED eventId=E02 partition=1 offset=0 value={"eventId":"E02","orderId":"7043"}
+ASSERT PASS confirmed-position-E02 observed=mq-depth-orders-1@0
+PRODUCE_CONFIRMED eventId=E03 partition=0 offset=1 value={"eventId":"E03","orderId":"7044"}
+ASSERT PASS confirmed-position-E03 observed=mq-depth-orders-0@1
+PRODUCE_CONFIRMED eventId=E04 partition=1 offset=1 value={"eventId":"E04","orderId":"7045"}
+ASSERT PASS confirmed-position-E04 observed=mq-depth-orders-1@1
+ASSERT PASS two-records-each-partition observed={mq-depth-orders-0=ListOffsetsResultInfo(offset=2, timestamp=-1, leaderEpoch=Optional[0]), mq-depth-orders-1=ListOffsetsResultInfo(offset=2, timestamp=-1, leaderEpoch=Optional[0])}
+BUSINESS no business callback exists in this probe; no notifications, points updates or external effects executed.
+RESULT PASS mode=producer assertions=7
