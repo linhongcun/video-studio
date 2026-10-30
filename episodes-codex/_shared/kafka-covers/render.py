@@ -50,6 +50,7 @@ def main():
     parser=argparse.ArgumentParser(__doc__)
     parser.add_argument('--out-dir',type=Path,required=True)
     parser.add_argument('--install',action='store_true')
+    parser.add_argument('--slug',action='append',help='Render/install only these catalog slugs; omitted means all published episodes')
     parser.add_argument('--repo',type=Path,default=REPO)
     args=parser.parse_args()
     out,repo=args.out_dir.resolve(),args.repo.resolve()
@@ -60,6 +61,9 @@ def main():
         m=json.loads(p.read_text())
         if m.get('series')==catalog['series'] and not m.get('draft'): actual[m['slug']]=m
     assert set(actual)=={e['slug'] for e in episodes}, 'Catalog must cover all published series episodes'
+    if args.slug:
+        assert set(args.slug).issubset({e['slug'] for e in episodes}), 'Unknown selected Kafka episode'
+        episodes=[e for e in episodes if e['slug'] in args.slug]
     for ep in episodes:
         m=actual[ep['slug']]
         assert m['ep']==ep['ep'] and m['title']==ep['sourceTitle'], 'Published identity/title mismatch'
@@ -93,7 +97,7 @@ def main():
         return
     out.mkdir(parents=True,exist_ok=True)
     subprocess.run(['node',str(HERE/'template.mjs'),'--out-dir',str(out)],check=True)
-    report={'schemaVersion':1,'style':catalog['version'],'checkedAt':datetime.now(timezone.utc).isoformat(),'inputs':inputs,'images':[],'plannedTypography':[],'installed':False}
+    report={'selectedSlugs':[e['slug'] for e in episodes],'schemaVersion':1,'style':catalog['version'],'checkedAt':datetime.now(timezone.utc).isoformat(),'inputs':inputs,'images':[],'plannedTypography':[],'installed':False}
     with sync_playwright() as pw:
         browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
         report['runtime']={'chromium':browser.version,'playwright':importlib.metadata.version('playwright')}

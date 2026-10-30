@@ -1,0 +1,763 @@
+{
+  "meta": {
+    "title": "多个消费者：分工处理，还是每人一份？",
+    "episode": 42,
+    "episodePart": "Kafka MQ02 · 消费组",
+    "slug": "kafka-consumer-groups",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 3445,
+    "finalVideoFrames": 3445,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "kafka-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "按用户本轮要求从MQ现行issue选题继续制作，选择MQ02/#310；仅GitHub站点交付。",
+    "palette": {
+      "bg": "#211D1B",
+      "text": "#FFF1E8"
+    },
+    "sampleDataLabel": "教学示例 · 传统消费组 · 稳定分配",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "schemaVersion": 1,
+      "generator": "episodes-codex/_shared/kafka-covers/render.py",
+      "style": "kafka-covers-v1",
+      "number": "MQ02",
+      "ep": 42,
+      "sourceTitle": "多个消费者：分工处理，还是每人一份？",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "centerRegion": {
+            "x1": 315,
+            "x2": 1125
+          },
+          "bottom15Y": 918
+        }
+      },
+      "binding": "Cover outputs and full generator input SHA are recorded separately in cover-style.json. Body uses immutable style-v1, not the growing episode catalog."
+    },
+    "discussionQuestion": "为什么给同组增加实例，不会让每个实例都收到全部事件？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes-codex/_shared/kafka-covers/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "problem",
+      "chapterId": "problem",
+      "title": "为什么各少一半",
+      "from": 0,
+      "durationInFrames": 1312,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "problem",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 393,
+          "narration": "四笔订单都已提交，通知服务和积分服务，都需要收到每一笔订单事件。可通知只收到两条，积分也只收到两条，另外两条去哪了？",
+          "subtitles": [
+            {
+              "text": "四笔订单都已提交，通知服务和积分服务，都需要收到每一笔订单事件。",
+              "from": 0,
+              "to": 206,
+              "duration": 207
+            },
+            {
+              "text": "可通知只收到两条，积分也只收到两条，另外两条去哪了？",
+              "from": 207,
+              "to": 392,
+              "duration": 186
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 197.36,
+              "localStart": 9.0,
+              "localEnd": 197.36
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 207.86,
+              "wavEnd": 372.3,
+              "localStart": 207.86,
+              "localEnd": 372.3
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              207
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 9.0,
+            "wavTo": 372.3,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "需求；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "需求；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "problem",
+          "visualType": "logs",
+          "from": 393,
+          "durationInFrames": 315,
+          "narration": "订单事件写进Kafka，保存在同一个主题里。这个示例有两个分区，每个分区各存两条，四条记录都还在。",
+          "subtitles": [
+            {
+              "text": "订单事件写进Kafka，保存在同一个主题里。",
+              "from": 0,
+              "to": 133,
+              "duration": 134
+            },
+            {
+              "text": "这个示例有两个分区，每个分区各存两条，四条记录都还在。",
+              "from": 134,
+              "to": 314,
+              "duration": 181
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-logs-1",
+              "wavStart": 393.3,
+              "wavEnd": 517.14,
+              "localStart": 0.30000000000001137,
+              "localEnd": 124.13999999999999
+            },
+            {
+              "id": "02-logs-2",
+              "wavStart": 527.64,
+              "wavEnd": 687.47,
+              "localStart": 134.64,
+              "localEnd": 294.47
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              134
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 393.3,
+            "wavTo": 687.47,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "日志；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "日志；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "problem",
+          "visualType": "shared",
+          "from": 708,
+          "durationInFrames": 285,
+          "narration": "两个服务各有一个消费者，负责读取事件。但它们用了同一个消费组，也就是共同分工的一组消费者。",
+          "subtitles": [
+            {
+              "text": "两个服务各有一个消费者，负责读取事件。",
+              "from": 0,
+              "to": 122,
+              "duration": 123
+            },
+            {
+              "text": "但它们用了同一个消费组，也就是共同分工的一组消费者。",
+              "from": 123,
+              "to": 284,
+              "duration": 162
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-shared-1",
+              "wavStart": 708.47,
+              "wavEnd": 821.07,
+              "localStart": 0.4700000000000273,
+              "localEnd": 113.07000000000005
+            },
+            {
+              "id": "03-shared-2",
+              "wavStart": 831.57,
+              "wavEnd": 972.39,
+              "localStart": 123.57000000000005,
+              "localEnd": 264.39
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              123
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 708.47,
+            "wavTo": 972.39,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "同组；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "同组；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "problem",
+          "visualType": "wrong-read",
+          "from": 993,
+          "durationInFrames": 319,
+          "narration": "在稳定分配下，通知读零号分区，积分读一号分区。所以各自只收到两条；同一个消费组里，不是每个实例都收到一份。",
+          "subtitles": [
+            {
+              "text": "在稳定分配下，通知读零号分区，积分读一号分区。",
+              "from": 0,
+              "to": 140,
+              "duration": 141
+            },
+            {
+              "text": "所以各自只收到两条；同一个消费组里，不是每个实例都收到一份。",
+              "from": 141,
+              "to": 318,
+              "duration": 178
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-wrong-read-1",
+              "wavStart": 993.39,
+              "wavEnd": 1123.68,
+              "localStart": 0.38999999999998636,
+              "localEnd": 130.68000000000006
+            },
+            {
+              "id": "04-wrong-read-2",
+              "wavStart": 1134.18,
+              "wavEnd": 1291.23,
+              "localStart": 141.18000000000006,
+              "localEnd": 298.23
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              141
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 993.39,
+            "wavTo": 1291.23,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "分工；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "分工；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "separate",
+      "chapterId": "separate",
+      "title": "不同组各读一份",
+      "from": 1312,
+      "durationInFrames": 928,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "separate",
+          "visualType": "reset",
+          "from": 1312,
+          "durationInFrames": 373,
+          "narration": "现在保留相同的四条记录，把两组都从开头读取，重新对照。通知用通知组，积分用积分组，让不同业务各有自己的消费组。",
+          "subtitles": [
+            {
+              "text": "现在保留相同的四条记录，把两组都从开头读取，重新对照。",
+              "from": 0,
+              "to": 179,
+              "duration": 180
+            },
+            {
+              "text": "通知用通知组，积分用积分组，让不同业务各有自己的消费组。",
+              "from": 180,
+              "to": 372,
+              "duration": 193
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-reset-1",
+              "wavStart": 1312.23,
+              "wavEnd": 1482.08,
+              "localStart": 0.2300000000000182,
+              "localEnd": 170.07999999999993
+            },
+            {
+              "id": "05-reset-2",
+              "wavStart": 1492.58,
+              "wavEnd": 1664.73,
+              "localStart": 180.57999999999993,
+              "localEnd": 352.73
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              180
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 1312.23,
+            "wavTo": 1664.73,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "拆组；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "拆组；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "separate",
+          "visualType": "notify-read",
+          "from": 1685,
+          "durationInFrames": 274,
+          "narration": "通知组只有一个实例，两个分区都分给它。它依次读取两个分区，四条订单事件就都收到了。",
+          "subtitles": [
+            {
+              "text": "通知组只有一个实例，两个分区都分给它。",
+              "from": 0,
+              "to": 127,
+              "duration": 128
+            },
+            {
+              "text": "它依次读取两个分区，四条订单事件就都收到了。",
+              "from": 128,
+              "to": 273,
+              "duration": 146
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-notify-read-1",
+              "wavStart": 1685.73,
+              "wavEnd": 1803.04,
+              "localStart": 0.7300000000000182,
+              "localEnd": 118.03999999999996
+            },
+            {
+              "id": "06-notify-read-2",
+              "wavStart": 1813.54,
+              "wavEnd": 1938.61,
+              "localStart": 128.53999999999996,
+              "localEnd": 253.6099999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              128
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 1685.73,
+            "wavTo": 1938.61,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "独立订阅；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "独立订阅；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "separate",
+          "visualType": "points-read",
+          "from": 1959,
+          "durationInFrames": 281,
+          "narration": "积分组也有自己的读取进度，同样读取这两个分区。通知组读过的记录仍然保留，积分组也能收到完整的四条。",
+          "subtitles": [
+            {
+              "text": "积分组也有自己的读取进度，同样读取这两个分区。",
+              "from": 0,
+              "to": 130,
+              "duration": 131
+            },
+            {
+              "text": "通知组读过的记录仍然保留，积分组也能收到完整的四条。",
+              "from": 131,
+              "to": 280,
+              "duration": 150
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-points-read-1",
+              "wavStart": 1959.61,
+              "wavEnd": 2080.29,
+              "localStart": 0.6099999999999,
+              "localEnd": 121.28999999999996
+            },
+            {
+              "id": "07-points-read-2",
+              "wavStart": 2090.79,
+              "wavEnd": 2219.36,
+              "localStart": 131.78999999999996,
+              "localEnd": 260.3600000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              131
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 1959.61,
+            "wavTo": 2219.36,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "独立订阅；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "独立订阅；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "scale",
+      "chapterId": "scale",
+      "title": "同组实例怎样分工",
+      "from": 2240,
+      "durationInFrames": 724,
+      "shots": [
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "scale",
+          "visualType": "scale",
+          "from": 2240,
+          "durationInFrames": 385,
+          "narration": "再从开头对照：通知组增加一个实例，看看同一批事件怎样分工。等分配稳定，两个通知实例各读一个分区，而不是每个都读全部分区。",
+          "subtitles": [
+            {
+              "text": "再从开头对照：通知组增加一个实例，看看同一批事件怎样分工。",
+              "from": 0,
+              "to": 188,
+              "duration": 189
+            },
+            {
+              "text": "等分配稳定，两个通知实例各读一个分区，而不是每个都读全部分区。",
+              "from": 189,
+              "to": 384,
+              "duration": 196
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-scale-1",
+              "wavStart": 2240.36,
+              "wavEnd": 2418.65,
+              "localStart": 0.36000000000012733,
+              "localEnd": 178.6500000000001
+            },
+            {
+              "id": "08-scale-2",
+              "wavStart": 2429.15,
+              "wavEnd": 2604.79,
+              "localStart": 189.1500000000001,
+              "localEnd": 364.78999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              189
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 2240.36,
+            "wavTo": 2604.79,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "组内扩展；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "组内扩展；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "scale",
+          "visualType": "scaled-read",
+          "from": 2625,
+          "durationInFrames": 339,
+          "narration": "第一个通知实例收到两条，第二个收到另外两条，组内合起来仍是四条。积分组的订阅不受影响，它依然能收到完整的四条。",
+          "subtitles": [
+            {
+              "text": "第一个通知实例收到两条，第二个收到另外两条，组内合起来仍是四条。",
+              "from": 0,
+              "to": 202,
+              "duration": 203
+            },
+            {
+              "text": "积分组的订阅不受影响，它依然能收到完整的四条。",
+              "from": 203,
+              "to": 338,
+              "duration": 136
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-scaled-read-1",
+              "wavStart": 2625.79,
+              "wavEnd": 2817.95,
+              "localStart": 0.7899999999999636,
+              "localEnd": 192.94999999999982
+            },
+            {
+              "id": "09-scaled-read-2",
+              "wavStart": 2828.45,
+              "wavEnd": 2943.29,
+              "localStart": 203.44999999999982,
+              "localEnd": 318.28999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              203
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 2625.79,
+            "wavTo": 2943.29,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "结果；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "结果；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "结论与条件",
+      "from": 2964,
+      "durationInFrames": 481,
+      "shots": [
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 2964,
+          "durationInFrames": 481,
+          "narration": "所以，需要各自完整读取的业务，用不同消费组；同一业务的实例，在组内按分区分工。这里演示的是传统消费组，能读到哪些历史记录，还取决于起始位置和保留策略。",
+          "subtitles": [
+            {
+              "text": "所以，需要各自完整读取的业务，用不同消费组；同一业务的实例，在组内按分区分工。",
+              "from": 0,
+              "to": 237,
+              "duration": 238
+            },
+            {
+              "text": "这里演示的是传统消费组，能读到哪些历史记录，还取决于起始位置和保留策略。",
+              "from": 238,
+              "to": 480,
+              "duration": 243
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-recap-1",
+              "wavStart": 2964.29,
+              "wavEnd": 3192.03,
+              "localStart": 0.2899999999999636,
+              "localEnd": 228.0300000000002
+            },
+            {
+              "id": "10-recap-2",
+              "wavStart": 3202.53,
+              "wavEnd": 3405.47,
+              "localStart": 238.5300000000002,
+              "localEnd": 441.4699999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              238
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 21f2fcd4 + words.json 5437cfde + script.md 97a64169",
+            "wavFrom": 2964.29,
+            "wavTo": 3405.47,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "结论；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "direction": "结论；同一组E01–E04持续对应，按本镜状态渐进展示。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}
