@@ -1,6 +1,6 @@
 # MQ02 / EP42 发布记录
 
-日期：2026-10-30（北京时间）。制作选题#310，总览#308。当前状态：成片、本地构建及双视口浏览器检查通过，待GitHub发布与线上核验。
+日期：2026-10-30（北京时间）。制作选题#310，总览#308。当前状态：已合并、发布v0.93.0、部署Pages并完成线上核验；#310已以completed关闭。
 
 ## 实际制作与审查
 
@@ -12,7 +12,7 @@ Apache Kafka 4.4.0官方固定提交1156b2752aaa28eafc0b4c4d387e63356793268d已�
 
 独立动态预检累计335个实际PNG/DOM采样，三段真无字幕连续预演及83个顺序抽帧已实际查看。结果文字先于完成、日志事件字色过暗均在正式编码前拦截修正，修前源与图保留；最终颜色与水印的两处差异按定向检查覆盖，不把中间报告改记为最终全跑。范围见qa/motion-independent-final.json。
 
-三比例封面已生成、审图与安装；style-v1保持，mutable封面输入以本期cover-inputs精确快照冻结，避免下一题扩catalog造成旧片冻结失效。正文及资料卡limited BT.709适配已用真实10+150帧短片验证。正式输入清单SHA为d9da6b078bdb43c6360ff6fb33f51110ca84a2668fabcf2e904c0e3d5ddd8edc（159项）；实际编码与网页结果待后续记录。
+三比例封面已生成、审图与安装；style-v1保持，mutable封面输入以本期cover-inputs精确快照冻结，避免下一题扩catalog造成旧片冻结失效。正文及资料卡limited BT.709适配已用真实10+150帧短片验证。正式输入清单SHA为d9da6b078bdb43c6360ff6fb33f51110ca84a2668fabcf2e904c0e3d5ddd8edc（159项）；实际编码与网页结果见下文。
 
 ## 授权与边界
 
@@ -24,8 +24,16 @@ Apache Kafka 4.4.0官方固定提交1156b2752aaa28eafc0b4c4d387e63356793268d已�
 
 独立实际编码检查73帧、10张contact与关键原图通过，见`qa/encoded-independent/report.json`；原正文3444仍保留尾句字幕，3445起资料页无正文字幕。文章制作稿未改，按1304/2232/2956精确帧生成三幅JPEG并实际查看，明确BT.709→BT.601像素转换，图意和回看时间一致。
 
-站点fresh依赖完整build通过：50个资料输出（含1归档）、49篇当前文章、76处原文和58幅有效图；当前源码/页面/媒体版本为v0.93.0。浏览器和远程发布结果待后续记录。
+站点fresh依赖完整build通过：50个资料输出（含1归档）、49篇当前文章、76处原文和58幅有效图；当前源码/页面/媒体版本为v0.93.0。后续浏览器和远程发布结果见下文。
 
 ## 本地实际浏览器
 
 39项交互和18次严格实际解码通过：桌面/模拟手机播放、暂停、四章、三图回看、两处精确原文hover/点击/点按/键盘关闭、原生VTT默认off避免双字幕、资料首中尾和Fullscreen API。实际检查范围与截图见`qa/site-independent/report.json`。root另实际查看桌面资料暂停全屏与手机原文浮层，文字可读且无主要控件遮挡；物理手机/原生移动端播放器范围未冒称。
+
+## 实际发布与线上收尾
+
+[PR #434](https://github.com/linhongcun/video-studio/pull/434)实际squash合并为`c9a8a6e97f82b5bdef140f86e797eff8cc0748ee`，附注tag与[Release v0.93.0](https://github.com/linhongcun/video-studio/releases/tag/v0.93.0)已发布。自动push运行40980541655在浅fetch阶段停留超过10分钟后取消，释放队列；Release后[Pages40980598757](https://github.com/linhongcun/video-studio/actions/runs/40980598757)成功，不把已取消运行写为成片或站点构建失败。
+
+北京时间2026-10-30 08:50:14开始的13项普通canonical GET通过，线上完整MP4、海报、VTT、三幅文章图SHA均与审片版一致，4章/20cue、系列/内容库/首页/旧learn兼容入口及真实Release更新日志齐全。随后线上原生Chromium直接HTTPS完成双视口39项交互、18次严格PTS解码和实际截图复核，未启TLS或HTTP回填。真实横屏补图中中心原生等待弧保留，未遮题名与机构，不称无等待弧或物理真机。
+
+[#310](https://github.com/linhongcun/video-studio/issues/310)于2026-10-30T00:53:39Z以completed关闭，[#308](https://github.com/linhongcun/video-studio/issues/308)同步为2/9交付，其余7题未开工、14题取消保持。实际机器证据为[publication.json](publication.json)、[HTTP](online-verification.json)与[线上原生浏览器](qa/site-online-native/report.json)。本次收尾只补检查/文档，不改变已上线的媒体、文章或159个冻结输入。

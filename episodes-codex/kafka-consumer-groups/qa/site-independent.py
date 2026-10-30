@@ -5,7 +5,7 @@ Local mode serves site/dist with byte ranges. --base selects the deployed site.
 """
 from pathlib import Path
 from fractions import Fraction
-import argparse,base64,datetime,functools,hashlib,http.server,json,re,subprocess,threading,traceback
+import argparse,base64,datetime,functools,hashlib,http.server,json,re,subprocess,threading,traceback,urllib.request,ssl
 from playwright.sync_api import sync_playwright
 R=Path(__file__).resolve().parents[3]
 D=Path(__file__).resolve().parents[1]
@@ -38,14 +38,14 @@ class RangeHandler(http.server.SimpleHTTPRequestHandler):
   except (BrokenPipeError,ConnectionResetError):pass
 SEEK=r'''async({time,pts})=>{const v=document.querySelector('video');v.pause();return await new Promise((resolve,reject)=>{let seeked=false,md=null,cb=null;const t=setTimeout(()=>{if(cb)v.cancelVideoFrameCallback(cb);reject(Error('Exact frame timeout '+time+' expected '+pts))},15000);const finish=()=>{if(!seeked||!md)return;clearTimeout(t);const c=document.createElement('canvas');c.width=v.videoWidth;c.height=v.videoHeight;c.getContext('2d').drawImage(v,0,0);resolve({currentTime:v.currentTime,mediaTime:md.mediaTime,paused:v.paused,seeking:v.seeking,readyState:v.readyState,activeCues:v.textTracks[0]?.activeCues?.length??null,png:c.toDataURL('image/png')})};const next=(t,m)=>{if(Math.abs(m.mediaTime-pts)<.0000011){md=m;finish()}else cb=v.requestVideoFrameCallback(next)};cb=v.requestVideoFrameCallback(next);v.addEventListener('seeked',()=>{seeked=true;finish()},{once:true});v.currentTime=time})}'''
 def main():
- ap=argparse.ArgumentParser();ap.add_argument('--base');ap.add_argument('--out',type=Path,default=D/'qa/site-independent');args=ap.parse_args();OUT=args.out.resolve();OUT.mkdir(parents=True,exist_ok=True)
+ ap=argparse.ArgumentParser();ap.add_argument('--base');ap.add_argument('--verified-http-route',action='store_true');ap.add_argument('--out',type=Path,default=D/'qa/site-independent');args=ap.parse_args();OUT=args.out.resolve();OUT.mkdir(parents=True,exist_ok=True)
  P=R/'episodes'/SLUG;meta=json.loads((P/'meta.json').read_text());receipt=json.loads((D/'reference-appendix.json').read_text());sb=json.loads((D/'storyboard.json').read_text());body=meta['referenceAppendix']['from'];total=meta['finalVideoFrames']
  assert sha(P/'video.mp4')==sha(D/'video.mp4')==receipt['outputSHA256']
  if not args.base:assert sha(R/'site/dist/episodes'/SLUG/'video.mp4')==sha(P/'video.mp4')
  probe=json.loads(subprocess.check_output(['ffprobe','-v','error','-select_streams','v:0','-show_entries','stream=time_base,nb_frames:frame=best_effort_timestamp','-show_frames','-show_streams','-of','json',str(P/'video.mp4')],text=True));tb=Fraction(probe['streams'][0]['time_base']);pts=[Fraction(f['best_effort_timestamp'])*tb for f in probe['frames']];assert len(pts)==total and len(set(pts))==total
  chapters=[{'id':s['chapterId'],'start':s['from']/30}for s in sb['scenes']]
  sources={s['id']:s for fn in ['references.json','article-sources.json']if(P/fn).exists()for s in json.loads((P/fn).read_text())['sources']}
- report={'startedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'executor':'Codex independent QA agent','base':args.base or 'local built site','videoSha256':sha(P/'video.mp4'),'bodyFrames':body,'finalFrames':total,'checks':[],'screenshots':[],'exactFrames':[],'errors':[],'pass':False,'limitations':['Chromium simulated desktop/mobile viewport, no physical phone or native mobile video chrome claim.','Fullscreen tested through user-gesture Fullscreen API, not hidden native controls.','No word ASR, full semantic listening or audience comprehension claim.']}
+ report={'startedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'executor':'Codex independent QA agent','base':args.base or 'local built site','videoSha256':sha(P/'video.mp4'),'bodyFrames':body,'finalFrames':total,'checks':[],'screenshots':[],'exactFrames':[],'errors':[],'verifiedHttpResponses':[],'pass':False,'limitations':['Chromium simulated desktop/mobile viewport, no physical phone or native mobile video chrome claim.','Fullscreen tested through user-gesture Fullscreen API, not hidden native controls.','No word ASR, full semantic listening or audience comprehension claim.']}
  def check(name,width,detail=None):report['checks'].append({'name':name,'width':width,'pass':True,'detail':detail})
  def snap(page,name):
   f=OUT/(name+'.png');page.screenshot(path=str(f));report['screenshots'].append({'file':f.name,'sha256':sha(f)})
@@ -57,7 +57,20 @@ def main():
   with sync_playwright() as pw:
    browser=pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox','--autoplay-policy=no-user-gesture-required']);report['browserVersion']=browser.version
    for w,h in [(1440,1000),(390,844)]:
-    ctx=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=1,is_mobile=w<600,has_touch=w<600,reduced_motion='reduce');ctx.add_init_script("localStorage.setItem('vs:sticky-off','1')");page=ctx.new_page();page.set_default_timeout(20000);page.on('pageerror',lambda e:report['errors'].append(str(e)))
+    ctx=browser.new_context(viewport={'width':w,'height':h},device_scale_factor=1,is_mobile=w<600,has_touch=w<600,reduced_motion='reduce');ctx.add_init_script("localStorage.setItem('vs:sticky-off','1')");page=ctx.new_page()
+    if args.verified_http_route:
+     assert args.base and args.base.startswith('https://')
+     report['browserTransport']='CanonicalURL browser actions with explicitly verified-CA urllib response fulfillment; Chromium TLS transport is not claimed. urllib preserves inherited environment proxy and TLS certificate verification.'
+     def verified_route(route,request):
+      if not request.url.startswith(base+'/'):route.continue_();return
+      assert request.method=='GET'
+      headers={'Accept-Encoding':'identity'}
+      if request.headers.get('range'):headers['Range']=request.headers['range']
+      with urllib.request.urlopen(urllib.request.Request(request.url,headers=headers),context=ssl.create_default_context(),timeout=45)as response:
+       body=response.read();status=response.status;rh={k:v for k,v in response.headers.items()if k.lower()in ['content-type','content-range','accept-ranges','cache-control']}
+      report['verifiedHttpResponses'].append({'url':request.url,'status':status,'bytes':len(body),'sha256':hashlib.sha256(body).hexdigest(),'range':headers.get('Range')});route.fulfill(status=status,headers=rh,body=body)
+     page.route('**/*',verified_route)
+    page.set_default_timeout(20000);page.on('pageerror',lambda e:report['errors'].append(str(e)))
     page.goto(base+'/series/message-queue/',wait_until='domcontentloaded');assert page.locator(f'a.lesson[href$="/episodes/{SLUG}/"]').count()==1;assert page.locator('a.lesson').count()>=2;check('series includes MQ01 and MQ02',w);snap(page,f'series-{w}')
     page.goto(base+f'/episodes/{SLUG}/',wait_until='domcontentloaded');assert page.locator('h1').inner_text()==meta['title'];assert 'MQ02' in page.locator('body').inner_text();assert not page.evaluate('document.documentElement.scrollWidth>innerWidth');check('episode identity and no overflow',w)
     v=page.locator('video');v.scroll_into_view_if_needed();v.evaluate("async v=>{v.muted=true;v.preload='auto';const p=new Image();p.src=v.poster;await p.decode();v.load()}");page.wait_for_function('document.querySelector("video").readyState>=2');assert abs(v.evaluate('(v)=>v.duration')-total/30)<.002;check('metadata duration and poster decode',w);snap(page,f'poster-{w}')
