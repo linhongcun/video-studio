@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "checkedAt": "2026-10-30T09:11:17.448324+00:00",
+  "executor": "Codex independent QA agent",
+  "status": "pass-editorial-and-technical-for-selected-narration",
+  "blockers": [],
+  "scriptSha256AtReview": "2ba7287b0ab34c9c981b2f357f9f3ca238e85fbdbe4434d6200ade3e7569158b",
+  "planSha256": "605051b0bc637ecb0c4865fd77d7ed9c9127ae23f7650f737f662a4d00613e51",
+  "pronunciationSha256": "0847f0c5e83a201dbcbbff1bc1bfdcc55e8d87af17ac7f2188238c10e1dde99d",
+  "narrationHashes": {
+    "definition11ParagraphsJoinedNewline": "cb45b7fcf32969ce7b652a86224b0032a579080320d039bcc94d71625308e696",
+    "definition22SentencesConcatenatedNoSeparator": "9a19f0311121d1c57176b37116577ee5501a8d0e1358a18c91e9f9abd2a90570"
+  },
+  "shots": 11,
+  "sentences": 22,
+  "scriptSentsExactTextMatch": true,
+  "promise": "网站的发送调用返回以后能否显示发送成功；正常成功和最终超时分别证明什么，本地确定未发送为何不同。",
+  "reviews": [
+    {
+      "item": "scenario-and-beginner-premise",
+      "pass": true,
+      "evidence": "01从网站发送检查功能和订单7042通知事件E01进入，已返回调用与待确认冲突；02分清发送方、日志真值、下游业务，之后才引入Future结果对象。无须假设观众知道生产者回调/幂等。"
+    },
+    {
+      "item": "one-causal-line-and-terms",
+      "pass": true,
+      "evidence": "03结果对象待定→04追加且响应抵达后成功metadata→05保持下游未处理；06改响应条件→07内部重试幂等→08最终超时→09新会话应用重发；10本地同步失败，11回收同一发送结果问题。关键术语随已示范动作给出，不讲副本选举/ISR细节或消费者去重实现。"
+    },
+    {
+      "item": "three-branch-navigation",
+      "pass": true,
+      "evidence": "02稀疏总览、05正常结果回全局、06口头回相同初始状态、10再回初始状态。09在未知分支内继续，明确不清除原@0。必须由实际Main保持三支固定位置和重置可读时间。"
+    },
+    {
+      "item": "Future-wording-and-synchronous-serialization",
+      "pass": true,
+      "evidence": "已采纳网站为调用者、Future称以后查询结果的对象/结果对象。仅所选正常调度pending，local分支选序列化同步throw且无Future/callback，未泛化所有异常为未发送。"
+    },
+    {
+      "item": "timeout-and-resend-boundary",
+      "pass": true,
+      "evidence": "最终delivery timeout callback失败，不混淆Future.get(timeout)；旧A终态保持，关闭后新B同eventId重新send有独立offset1。acks=all当前ISR条件固定，不声称任意故障零丢失、全副本稳定介质或业务恰好一次。"
+    },
+    {
+      "item": "ending",
+      "pass": true,
+      "evidence": "11直接回答调用返回/发送确认/业务完成不同，最终超时未知与本地确定未发对照；不追加另问题、证明或引流。"
+    }
+  ],
+  "realTimingEntryReview": {
+    "storyboardSha256AtReview": "025456b02dda2be12cc5eb7ffdf82f55b81874c84d1e80af9b94b9db08183331",
+    "bodyFrames": 3417,
+    "firstShotFrames": 295,
+    "firstSendShotFrom": 645,
+    "checkpoints": [
+      {
+        "seconds": 2,
+        "frame": 60,
+        "expected": "在网站已返回调用/发送待确认的同一冲突内；标题和主体需实际可见。"
+      },
+      {
+        "seconds": 5,
+        "frame": 150,
+        "expected": "仍为同一冲突，反常的可能已写入但等到超时；须标为问题/示意，不伪称真实当前结局。"
+      },
+      {
+        "seconds": 15,
+        "frame": 450,
+        "expected": "总览中已分清三方并定位正常/未知/本地未发三条对照。第一完整send展开从21.5秒开始；前两镜都直接服务同一结果判断，没有范围常识支线。"
+      }
+    ],
+    "status": "timing-and-editorial-context-reviewed-actual-visual-pending"
+  },
+  "sourceAndModel": "See model-independent.json for independent100 direct-data/source integrity checks over17 snapshots; no author model.verify rerun or Broker experiment.",
+  "remaining": [
+    "Actual2/5/15-second images, first term visual dwell, three-branch reset and no-subtitle continuous motion wait for Main.",
+    "No full semantic listening, word ASR or novice/user-comprehension approval claimed."
+  ],
+  "narrationOwnership": "Locked root-selected text; later non-narration source/visual annotations may change whole script SHA before final assemble/freeze and must be identity-reconciled."
+}

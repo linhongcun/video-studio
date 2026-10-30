@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "kafka-send-confirmation",
+  "heading": "参考资料",
+  "checkedAt": "2026-10-30",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Apache Kafka",
+      "title": "Design",
+      "titleEvidence": {
+        "locator": "frontmatter line2",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/design.md"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://kafka.apache.org/44/design/design/",
+      "supports": [
+        "发送调用返回、写入结果与消费业务完成分属不同边界。",
+        "原批次发送结果可能最终失败而日志已追加，调用方不能据超时断言未写入。",
+        "生产者幂等的自动retry与应用再次send同eventId分开；本例用新producer重发展示新记录风险。"
+      ],
+      "sections": "Message Delivery Semantics; KafkaProducer/ProducerBatch same-commit cross-check",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh complete HTTPS GETs of official fixed-commit Apache Kafka source through configured proxy; default TLS verification. Canonical kafka.apache.org HTML was not fetched. Relevant original-title and mechanism/API/config paragraphs read directly; not a claim of reading every unrelated section.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/design/design.md",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "60410c9c0e3b9f031a5da5b7241b0114345fdec15c72c6908d9e89424b8c6e6c",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/source-evidence.json"
+      },
+      "quotation": {
+        "text": "If a producer attempts to publish a message and experiences a network error, it cannot be sure if this error happened before or after the message was committed.",
+        "locator": "Message Delivery Semantics, line191",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/design.md"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Apache Kafka",
+      "title": "Producer Configs",
+      "titleEvidence": {
+        "locator": "frontmatter line2",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/producer-configs.md"
+      },
+      "version": "Apache Kafka 4.4.0",
+      "url": "https://kafka.apache.org/44/configuration/producer-configs/",
+      "supports": [
+        "acks限定生产者成功确认前提，不替下游业务确认完成。",
+        "delivery.timeout.ms约束等待与可重试错误的总期限，独立于一次get(timeout)短等待。",
+        "固定幂等要求的acks、retries及max.in.flight约束，避免默认值冲突。"
+      ],
+      "sections": "acks / delivery.timeout.ms / retries / enable.idempotence; generated from ProducerConfig.java",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-10-30",
+        "method": "Fresh complete HTTPS GETs of official fixed-commit Apache Kafka source through configured proxy; default TLS verification. Canonical kafka.apache.org HTML was not fetched. Relevant original-title and mechanism/API/config paragraphs read directly; not a claim of reading every unrelated section.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/docs/configuration/producer-configs.md",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "7b14676d8e8c272c19b613b25d3c338c8a334529782bdcc3e8f215fea285abbe",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/source-evidence.json"
+      },
+      "quotation": {
+        "text": "The number of acknowledgments the producer requires the leader to have received before considering a request complete.",
+        "locator": "ACKS_DOC, line133",
+        "evidence": "episodes-codex/kafka-send-confirmation/sources/ProducerConfig.java"
+      }
+    }
+  ],
+  "scope": "Two actual official document titles with institutional credits. Producer Configs frontmatter is read directly; generated configuration prose is cross-checked in same-commit ProducerConfig.java and TopicConfig.java. The exact delivery-timeout terminal path, immutable failed Future and synchronous serializer error are cross-checked in retained KafkaProducer/ProducerBatch/Sender/FutureRecordMetadata sources; no canonical HTML or Kafka runtime experiment is claimed."
+}

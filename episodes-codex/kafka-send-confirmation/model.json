@@ -1,0 +1,1231 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-send-confirmation",
+  "kind": "deterministic-teaching-model-not-broker-measurement",
+  "event": {
+    "eventId": "E01",
+    "orderId": "7042",
+    "topic": "orders",
+    "partition": "P0"
+  },
+  "partitions": [
+    {
+      "id": "P0",
+      "records": []
+    }
+  ],
+  "conditions": {
+    "kafkaVersion": "4.4.0",
+    "client": "Java KafkaProducer 4.4.0 semantics",
+    "acks": "all",
+    "enable.idempotence": true,
+    "retries": 2147483647,
+    "max.in.flight.requests.per.connection": 1,
+    "request.timeout.ms": 45000,
+    "delivery.timeout.ms": 120000,
+    "linger.ms": 0,
+    "max.block.ms": 60000,
+    "retry.backoff.ms": 100,
+    "retry.backoff.max.ms": 1000,
+    "topic.partitionCount": 1,
+    "topic.replicationFactor": 3,
+    "topic.min.insync.replicas": 2,
+    "currentISRCount": 3,
+    "replica.lag.time.max.ms": 30000,
+    "transactional.id": null,
+    "serializer": "chosen custom event serializer accepts valid payload; rejects the local-error payload with SerializationException before accumulator.append",
+    "initialState": "same empty orders/P0 log and pending consumer business in all three branches",
+    "sendReturnScheduling": "this normal/unknown example returns Future while pending; not an API guarantee that Future is always pending at return",
+    "unknownFault": "all successful ProduceResponses for original batch and its automatic retries remain unprocessed by client until delivery expiry; actual Broker append succeeds",
+    "automaticRetrySchedule": "one representative retry is expanded; additional waiting/retries are omitted, not an exact network/client timing simulation",
+    "deliveryFailure": "terminal Kafka TimeoutException in callback; Future.get wraps cause in ExecutionException; not Future.get(timeout) waiting timeout",
+    "failedCallbackMetadata": "no valid success metadata is used; callback metadata is not asserted always null",
+    "applicationResend": "after original attempt terminal failure, old producer A is closed; new producer B calls send again with same eventId",
+    "consumerBusiness": "never executed; confirmation does not imply business completion",
+    "timePresentation": "waiting compressed and explicitly marked non-real-time; no latency measurement",
+    "idempotenceScope": "automatic retry identity is producer session plus batch sequence, not eventId/key; no application/business exactly-once claim"
+  },
+  "branches": [
+    {
+      "id": "normal",
+      "title": "发送成功",
+      "initialSnapshot": "normal-initial",
+      "finalSnapshot": "normal-business-pending"
+    },
+    {
+      "id": "unknown",
+      "title": "结果未知",
+      "initialSnapshot": "unknown-initial",
+      "unknownSnapshot": "unknown-delivery-timeout",
+      "finalSnapshot": "unknown-app-resend-confirmed"
+    },
+    {
+      "id": "serialization",
+      "title": "确定未发送",
+      "initialSnapshot": "serialization-initial",
+      "finalSnapshot": "serialization-thrown"
+    }
+  ],
+  "timeline": [
+    {
+      "id": "normal-initial",
+      "branch": "normal",
+      "resetBefore": true,
+      "label": "正常：从共同空日志起点开始",
+      "event": {
+        "kind": "initial"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 0,
+        "currentSendId": null,
+        "batchSequence": null,
+        "sendReturn": "none",
+        "futureState": "none",
+        "callbackResult": "none",
+        "senderObservedResult": "not-called",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": false
+      },
+      "attempts": [],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "none",
+        "response": "none"
+      }
+    },
+    {
+      "id": "normal-buffered",
+      "branch": "normal",
+      "resetBefore": false,
+      "label": "send返回结果对象，本例此时待后台发送",
+      "event": {
+        "kind": "send-return"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "pending",
+        "callbackResult": "none",
+        "senderObservedResult": "pending",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": true,
+        "recordProduceSent": false
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "pending",
+          "callbackResult": "none",
+          "senderObservedResult": "pending",
+          "error": null,
+          "metadata": null,
+          "terminal": false,
+          "appendOffset": null
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "buffered",
+        "response": "none"
+      }
+    },
+    {
+      "id": "normal-appended",
+      "branch": "normal",
+      "resetBefore": false,
+      "label": "实际日志已追加E01@0，成功响应返回途中",
+      "event": {
+        "kind": "append"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "pending",
+        "callbackResult": "none",
+        "senderObservedResult": "pending",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "pending",
+          "callbackResult": "none",
+          "senderObservedResult": "pending",
+          "error": null,
+          "metadata": null,
+          "terminal": false,
+          "appendOffset": 0
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "in-flight",
+        "response": "in-flight"
+      }
+    },
+    {
+      "id": "normal-confirmed",
+      "branch": "normal",
+      "resetBefore": false,
+      "label": "成功结果带回P0/offset0",
+      "event": {
+        "kind": "success"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "success",
+        "callbackResult": "success",
+        "senderObservedResult": "confirmed",
+        "error": null,
+        "metadata": {
+          "topic": "orders",
+          "partition": "P0",
+          "offset": 0
+        },
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "success",
+          "callbackResult": "success",
+          "senderObservedResult": "confirmed",
+          "error": null,
+          "metadata": {
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0
+          },
+          "terminal": true,
+          "appendOffset": 0
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "in-flight",
+        "response": "received-success"
+      }
+    },
+    {
+      "id": "normal-business-pending",
+      "branch": "normal",
+      "resetBefore": false,
+      "label": "发送确认已到，下游通知仍待处理",
+      "event": {
+        "kind": "business-boundary"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "success",
+        "callbackResult": "success",
+        "senderObservedResult": "confirmed",
+        "error": null,
+        "metadata": {
+          "topic": "orders",
+          "partition": "P0",
+          "offset": 0
+        },
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "success",
+          "callbackResult": "success",
+          "senderObservedResult": "confirmed",
+          "error": null,
+          "metadata": {
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0
+          },
+          "terminal": true,
+          "appendOffset": 0
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "in-flight",
+        "response": "received-success"
+      }
+    },
+    {
+      "id": "unknown-initial",
+      "branch": "unknown",
+      "resetBefore": true,
+      "label": "重置到同样的空日志起点，只改变响应条件",
+      "event": {
+        "kind": "initial"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 0,
+        "currentSendId": null,
+        "batchSequence": null,
+        "sendReturn": "none",
+        "futureState": "none",
+        "callbackResult": "none",
+        "senderObservedResult": "not-called",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": false
+      },
+      "attempts": [],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "none",
+        "response": "none"
+      }
+    },
+    {
+      "id": "unknown-buffered",
+      "branch": "unknown",
+      "resetBefore": false,
+      "label": "同一事件再次演示，Future仍待定",
+      "event": {
+        "kind": "send-return"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "pending",
+        "callbackResult": "none",
+        "senderObservedResult": "pending",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": true,
+        "recordProduceSent": false
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "pending",
+          "callbackResult": "none",
+          "senderObservedResult": "pending",
+          "error": null,
+          "metadata": null,
+          "terminal": false,
+          "appendOffset": null
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "buffered",
+        "response": "none"
+      }
+    },
+    {
+      "id": "unknown-appended",
+      "branch": "unknown",
+      "resetBefore": false,
+      "label": "已追加E01@0，但成功响应不可见",
+      "event": {
+        "kind": "append",
+        "successfulResponseProcessed": false
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "pending",
+        "callbackResult": "none",
+        "senderObservedResult": "pending",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "pending",
+          "callbackResult": "none",
+          "senderObservedResult": "pending",
+          "error": null,
+          "metadata": null,
+          "terminal": false,
+          "appendOffset": 0
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "in-flight",
+        "response": "withheld"
+      }
+    },
+    {
+      "id": "unknown-request-timeout",
+      "branch": "unknown",
+      "resetBefore": false,
+      "label": "请求级可重试失败，尚未到总发送期限",
+      "event": {
+        "kind": "request-timeout",
+        "deliveryDeadlineReached": false
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "pending",
+        "callbackResult": "none",
+        "senderObservedResult": "pending",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "pending",
+          "callbackResult": "none",
+          "senderObservedResult": "pending",
+          "error": null,
+          "metadata": null,
+          "terminal": false,
+          "appendOffset": 0
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "none",
+        "response": "request-timeout-retriable"
+      }
+    },
+    {
+      "id": "unknown-auto-retry",
+      "branch": "unknown",
+      "resetBefore": false,
+      "label": "同会话同批次自动重试，日志仍仅一条",
+      "event": {
+        "kind": "automatic-retry",
+        "representativeRetry": true,
+        "waitingOmitted": true
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "pending",
+        "callbackResult": "none",
+        "senderObservedResult": "pending",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "pending",
+          "callbackResult": "none",
+          "senderObservedResult": "pending",
+          "error": null,
+          "metadata": null,
+          "terminal": false,
+          "appendOffset": 0
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 1,
+      "links": {
+        "send": "retry",
+        "response": "withheld"
+      }
+    },
+    {
+      "id": "unknown-delivery-timeout",
+      "branch": "unknown",
+      "resetBefore": false,
+      "label": "总期限到，发送结果最终失败；日志实际已有记录",
+      "event": {
+        "kind": "delivery-timeout",
+        "elapsedDeliveryMs": 120000,
+        "successfulResponseProcessed": false
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "failed",
+        "callbackResult": "delivery-timeout",
+        "senderObservedResult": "unknown",
+        "error": {
+          "type": "org.apache.kafka.common.errors.TimeoutException",
+          "callbackException": "org.apache.kafka.common.errors.TimeoutException",
+          "futureGetException": "java.util.concurrent.ExecutionException",
+          "futureGetCause": "org.apache.kafka.common.errors.TimeoutException",
+          "reason": "delivery.timeout.ms reached without successful response processed"
+        },
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "failed",
+          "callbackResult": "delivery-timeout",
+          "senderObservedResult": "unknown",
+          "error": {
+            "type": "org.apache.kafka.common.errors.TimeoutException",
+            "callbackException": "org.apache.kafka.common.errors.TimeoutException",
+            "futureGetException": "java.util.concurrent.ExecutionException",
+            "futureGetCause": "org.apache.kafka.common.errors.TimeoutException",
+            "reason": "delivery.timeout.ms reached without successful response processed"
+          },
+          "metadata": null,
+          "terminal": true,
+          "appendOffset": 0
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 1,
+      "links": {
+        "send": "none",
+        "response": "delivery-expired"
+      }
+    },
+    {
+      "id": "unknown-producer-closed",
+      "branch": "unknown",
+      "resetBefore": false,
+      "label": "关闭旧producer A，旧Future保持失败",
+      "event": {
+        "kind": "producer-close"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": false,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "failed",
+        "callbackResult": "delivery-timeout",
+        "senderObservedResult": "unknown",
+        "error": {
+          "type": "org.apache.kafka.common.errors.TimeoutException",
+          "callbackException": "org.apache.kafka.common.errors.TimeoutException",
+          "futureGetException": "java.util.concurrent.ExecutionException",
+          "futureGetCause": "org.apache.kafka.common.errors.TimeoutException",
+          "reason": "delivery.timeout.ms reached without successful response processed"
+        },
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "failed",
+          "callbackResult": "delivery-timeout",
+          "senderObservedResult": "unknown",
+          "error": {
+            "type": "org.apache.kafka.common.errors.TimeoutException",
+            "callbackException": "org.apache.kafka.common.errors.TimeoutException",
+            "futureGetException": "java.util.concurrent.ExecutionException",
+            "futureGetCause": "org.apache.kafka.common.errors.TimeoutException",
+            "reason": "delivery.timeout.ms reached without successful response processed"
+          },
+          "metadata": null,
+          "terminal": true,
+          "appendOffset": 0
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 1,
+      "links": {
+        "send": "none",
+        "response": "none"
+      }
+    },
+    {
+      "id": "unknown-app-resend-buffered",
+      "branch": "unknown",
+      "resetBefore": false,
+      "label": "应用新producer B再次send同eventId，为新发送",
+      "event": {
+        "kind": "application-resend"
+      },
+      "producer": {
+        "sessionId": "B",
+        "active": true,
+        "applicationSendCount": 2,
+        "currentSendId": "send-2",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "pending",
+        "callbackResult": "none",
+        "senderObservedResult": "pending",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": true,
+        "recordProduceSent": false
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "failed",
+          "callbackResult": "delivery-timeout",
+          "senderObservedResult": "unknown",
+          "error": {
+            "type": "org.apache.kafka.common.errors.TimeoutException",
+            "callbackException": "org.apache.kafka.common.errors.TimeoutException",
+            "futureGetException": "java.util.concurrent.ExecutionException",
+            "futureGetCause": "org.apache.kafka.common.errors.TimeoutException",
+            "reason": "delivery.timeout.ms reached without successful response processed"
+          },
+          "metadata": null,
+          "terminal": true,
+          "appendOffset": 0
+        },
+        {
+          "applicationSendId": "send-2",
+          "producerSession": "B",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "pending",
+          "callbackResult": "none",
+          "senderObservedResult": "pending",
+          "error": null,
+          "metadata": null,
+          "terminal": false,
+          "appendOffset": null
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 1
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 1,
+      "links": {
+        "send": "buffered",
+        "response": "none"
+      }
+    },
+    {
+      "id": "unknown-app-resend-appended",
+      "branch": "unknown",
+      "resetBefore": false,
+      "label": "新的应用发送追加E01@1，原@0仍在",
+      "event": {
+        "kind": "append"
+      },
+      "producer": {
+        "sessionId": "B",
+        "active": true,
+        "applicationSendCount": 2,
+        "currentSendId": "send-2",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "pending",
+        "callbackResult": "none",
+        "senderObservedResult": "pending",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "failed",
+          "callbackResult": "delivery-timeout",
+          "senderObservedResult": "unknown",
+          "error": {
+            "type": "org.apache.kafka.common.errors.TimeoutException",
+            "callbackException": "org.apache.kafka.common.errors.TimeoutException",
+            "futureGetException": "java.util.concurrent.ExecutionException",
+            "futureGetCause": "org.apache.kafka.common.errors.TimeoutException",
+            "reason": "delivery.timeout.ms reached without successful response processed"
+          },
+          "metadata": null,
+          "terminal": true,
+          "appendOffset": 0
+        },
+        {
+          "applicationSendId": "send-2",
+          "producerSession": "B",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "pending",
+          "callbackResult": "none",
+          "senderObservedResult": "pending",
+          "error": null,
+          "metadata": null,
+          "terminal": false,
+          "appendOffset": 1
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          },
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 1,
+            "attemptIdentity": {
+              "applicationSendId": "send-2",
+              "producerSession": "B",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 2
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 1,
+      "links": {
+        "send": "in-flight",
+        "response": "in-flight"
+      }
+    },
+    {
+      "id": "unknown-app-resend-confirmed",
+      "branch": "unknown",
+      "resetBefore": false,
+      "label": "第二次应用发送成功，两条具有相同eventId",
+      "event": {
+        "kind": "success"
+      },
+      "producer": {
+        "sessionId": "B",
+        "active": true,
+        "applicationSendCount": 2,
+        "currentSendId": "send-2",
+        "batchSequence": 0,
+        "sendReturn": "future",
+        "futureState": "success",
+        "callbackResult": "success",
+        "senderObservedResult": "confirmed",
+        "error": null,
+        "metadata": {
+          "topic": "orders",
+          "partition": "P0",
+          "offset": 1
+        },
+        "payloadInAccumulator": false,
+        "recordProduceSent": true
+      },
+      "attempts": [
+        {
+          "applicationSendId": "send-1",
+          "producerSession": "A",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "failed",
+          "callbackResult": "delivery-timeout",
+          "senderObservedResult": "unknown",
+          "error": {
+            "type": "org.apache.kafka.common.errors.TimeoutException",
+            "callbackException": "org.apache.kafka.common.errors.TimeoutException",
+            "futureGetException": "java.util.concurrent.ExecutionException",
+            "futureGetCause": "org.apache.kafka.common.errors.TimeoutException",
+            "reason": "delivery.timeout.ms reached without successful response processed"
+          },
+          "metadata": null,
+          "terminal": true,
+          "appendOffset": 0
+        },
+        {
+          "applicationSendId": "send-2",
+          "producerSession": "B",
+          "batchSequence": 0,
+          "eventId": "E01",
+          "futureState": "success",
+          "callbackResult": "success",
+          "senderObservedResult": "confirmed",
+          "error": null,
+          "metadata": {
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 1
+          },
+          "terminal": true,
+          "appendOffset": 1
+        }
+      ],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 0,
+            "attemptIdentity": {
+              "applicationSendId": "send-1",
+              "producerSession": "A",
+              "batchSequence": 0
+            }
+          },
+          {
+            "eventId": "E01",
+            "orderId": "7042",
+            "topic": "orders",
+            "partition": "P0",
+            "offset": 1,
+            "attemptIdentity": {
+              "applicationSendId": "send-2",
+              "producerSession": "B",
+              "batchSequence": 0
+            }
+          }
+        ],
+        "endOffset": 2
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 1,
+      "links": {
+        "send": "in-flight",
+        "response": "received-success"
+      }
+    },
+    {
+      "id": "serialization-initial",
+      "branch": "serialization",
+      "resetBefore": true,
+      "label": "再回共同空日志起点，本地内容无法编码",
+      "event": {
+        "kind": "initial"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 0,
+        "currentSendId": null,
+        "batchSequence": null,
+        "sendReturn": "none",
+        "futureState": "none",
+        "callbackResult": "none",
+        "senderObservedResult": "not-called",
+        "error": null,
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": false
+      },
+      "attempts": [],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "none",
+        "response": "none"
+      }
+    },
+    {
+      "id": "serialization-thrown",
+      "branch": "serialization",
+      "resetBefore": false,
+      "label": "序列化同步抛错，该记录未入缓冲且日志空",
+      "event": {
+        "kind": "serialization-error"
+      },
+      "producer": {
+        "sessionId": "A",
+        "active": true,
+        "applicationSendCount": 1,
+        "currentSendId": "send-1",
+        "batchSequence": null,
+        "sendReturn": "throws",
+        "futureState": "none",
+        "callbackResult": "none",
+        "senderObservedResult": "definitely-not-sent",
+        "error": {
+          "type": "org.apache.kafka.common.errors.SerializationException",
+          "surface": "send throws synchronously"
+        },
+        "metadata": null,
+        "payloadInAccumulator": false,
+        "recordProduceSent": false
+      },
+      "attempts": [],
+      "log": {
+        "topic": "orders",
+        "partition": "P0",
+        "records": [],
+        "endOffset": 0
+      },
+      "consumer": {
+        "businessComplete": false,
+        "status": "通知待处理",
+        "handledEventIds": []
+      },
+      "automaticRetryCount": 0,
+      "links": {
+        "send": "none",
+        "response": "none"
+      }
+    }
+  ]
+}
