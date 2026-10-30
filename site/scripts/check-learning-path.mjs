@@ -17,13 +17,18 @@ const networkSlugs = ['http-request', 'https', 'dns', 'cookie-session', 'cdn', '
 const complete = process.argv.includes('--complete');
 const existingOnly = process.argv.includes('--existing-only');
 const stripImports = (text) => text.replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '');
-function episodeRuntime(showDrafts) {
+function episodeRuntime(showDrafts, metaOverrides = new Map()) {
   const source = stripImports(fs.readFileSync(path.join(site, 'src/lib/episodes.ts'), 'utf8'))
     .replace('import.meta.env.BASE_URL', "'/video-studio/'")
     .replace(/^const articles = .*;$/m, 'const articles = {};');
   const {code} = transformSync(source, {loader: 'ts'});
-  return vm.compileFunction(`${code}\nreturn {getEpisodes, getSeries, getRelated, seriesNav, epLabel, learningGuideFor, archiveReplacementsFor, compareLessons};`,
-    ['fs', 'path', 'pkg', 'tagsMeta', 'seriesMeta', 'process'])(fs, path,
+  const runtimeFs = {...fs, readFileSync(file, encoding) {
+    if (!metaOverrides.has(file)) return fs.readFileSync(file, encoding);
+    assert.equal(encoding, 'utf8', 'Metadata fixtures must use the real loader text read');
+    return metaOverrides.get(file);
+  }};
+  return vm.compileFunction(`${code}\nreturn {getEpisodes, getSeries, getRelated, seriesNav, seriesFor, epLabel, learningGuideFor, archiveReplacementsFor, compareLessons};`,
+    ['fs', 'path', 'pkg', 'tagsMeta', 'seriesMeta', 'process'])(runtimeFs, path,
     readJson(path.join(site, 'package.json')),
     readJson(path.join(site, 'src/content/tags.json')),
     readJson(path.join(site, 'src/content/series.json')),
@@ -68,6 +73,52 @@ assert.equal(preview.learningGuideFor({...intro, learningGuide: {slug: archiveSl
 
 const published = episodeRuntime(false);
 const liveLessons = published.getEpisodes();
+// Override one real metadata read in memory so the actual loader, catalog and
+// raw series lookup agree without changing publication files or their hashes.
+const defaultSeriesId = 'engineering-algorithms';
+const fallbackSlug = 'consistent-hashing';
+const fallbackMetaPath = path.join(site, '../episodes', fallbackSlug, 'meta.json');
+const fallbackMeta = readJson(fallbackMetaPath);
+const originalSeries = published.getSeries();
+const other = originalSeries.find((series) => series.id === defaultSeriesId);
+assert.equal(other.title, '其他');
+assert.equal(other.independentLessons, true, 'Other topics must be presented as independent lessons');
+assert.deepEqual(slugs(other.episodes), ['consistent-hashing', 'bloom-filter']);
+const seriesCases = [
+  {name: 'missing'},
+  {name: 'empty', value: ''},
+  {name: 'whitespace', value: ' \t\n '},
+  {name: 'null', value: null},
+  {name: 'unknown', value: 'unknown-series'},
+  {name: 'prototype', value: '__proto__'},
+  {name: 'constructor', value: 'constructor'},
+  {name: 'inherited method', value: 'toString'},
+  {name: 'explicit default', value: defaultSeriesId},
+  {name: 'known', value: 'request', expected: 'request'},
+  {name: 'trimmed known', value: ' \tredis\n ', expected: 'redis'},
+];
+for (const test of seriesCases) {
+  const meta = {...fallbackMeta};
+  if (Object.hasOwn(test, 'value')) meta.series = test.value;
+  else delete meta.series;
+  const runtime = episodeRuntime(false, new Map([[fallbackMetaPath, JSON.stringify(meta)]]));
+  const rows = runtime.getEpisodes();
+  const expected = test.expected ?? defaultSeriesId;
+  assert.equal(rows.length, liveLessons.length, `${test.name}: normalization must not lose published lessons`);
+  assert.equal(rows.find((lesson) => lesson.slug === fallbackSlug).series, expected, `${test.name}: loaded primary series`);
+  assert.equal(runtime.seriesFor(meta).id, expected, `${test.name}: raw metadata lookup must match the catalog`);
+  assert.equal(runtime.seriesFor(meta).title, expected === defaultSeriesId ? '其他' : originalSeries.find((series) => series.id === expected).title);
+  const groups = runtime.getSeries();
+  assert.deepEqual(Array.from(groups, (series) => series.id), Array.from(originalSeries, (series) => series.id),
+    `${test.name}: preserve the published series catalog`);
+  for (const original of originalSeries) {
+    const expectedSlugs = slugs(original.episodes).filter((slug) => slug !== fallbackSlug);
+    if (original.id === expected) expectedSlugs.push(fallbackSlug);
+    assert.deepEqual(slugs(groups.find((series) => series.id === original.id).episodes).sort(), expectedSlugs.sort(),
+      `${test.name}: ${original.id} must retain every other published lesson`);
+  }
+}
+console.log(`Other-category defaults passed: ${seriesCases.length} real-loader metadata cases; explicit series and published memberships preserved.`);
 assert.ok(published.getEpisodes({includeArchived: true}).some((e) => e.slug === archiveSlug));
 assert.equal(liveLessons.some((e) => e.slug === archiveSlug), false);
 assert.deepEqual(slugs(episodesForRelease({tag: 'v0.45.5', kind: '修正', eps: [21]}, history)), [archiveSlug]);
@@ -437,7 +488,14 @@ assert.equal(learningSeries.find((series) => series.id === 'message-queue')?.sta
 assert.equal(peakSeries.episodes.some((lesson) => lesson.slug === mq.slug), false);
 assert.equal(published.getSeries().find((series) => series.id === 'peak').episodes.some((lesson) => lesson.slug === mq.slug), false);
 assert.equal(published.seriesNav(mq).prev, undefined, 'MQ must not inherit a systems prerequisite');
-assert.equal(published.seriesNav(mq).next, undefined, 'The only MQ lesson must not lead into systems');
+const mqSlugs = ['message-queue', 'kafka-consumer-groups'];
+assert.deepEqual(slugs(learningSeries.find((series) => series.id === 'message-queue').episodes), mqSlugs,
+  'MQ preserves its first lesson and the published consumer-groups follow-up');
+for (const [index, slug] of mqSlugs.entries()) {
+  const nav = published.seriesNav(liveLessons.find((lesson) => lesson.slug === slug));
+  assert.equal(nav.prev?.slug, mqSlugs[index - 1], `${slug}: previous MQ lesson must stay within the series`);
+  assert.equal(nav.next?.slug, mqSlugs[index + 1], `${slug}: next MQ lesson must stay within the series`);
+}
 const databaseSeries = learningSeries.find((series) => series.id === 'database');
 const databaseSlugs = ['db-index', 'db-transaction', 'db-lock', 'db-replication'];
 assert.deepEqual(slugs(databaseSeries.episodes).slice(0, databaseSlugs.length), databaseSlugs, 'Database keeps its existing lesson order while allowing new lessons');
