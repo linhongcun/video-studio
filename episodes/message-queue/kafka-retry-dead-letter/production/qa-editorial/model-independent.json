@@ -1,0 +1,130 @@
+{
+  "checkedAtUTC": "2026-11-01T09:18:08.786439+00:00",
+  "reviewer": "/root/mq_qa",
+  "status": "passed-focused-independent-model-review",
+  "kind": "finite teaching-state inspection, not Broker or filesystem experiment",
+  "modelSHA256": "a5f5e25f1b55b7fbf419611aaa52690c6eac1b79a705e9b02f66775d99026685",
+  "modelSourceSHA256": "6361e3ac08b6b9dafb6281aba64532aee5f762b8ac1a22a41b98f799bd125d0d",
+  "authorVerificationSHA256": "b8df30d9fc14174ddbdb735ea13c32d19ce44ee37048a7722be2c6703b167041",
+  "authorChecks": 106,
+  "snapshotsActuallyInspected": 41,
+  "independentCausalChecks": [
+    {
+      "claim": "调用前先保存预留；保存与实际调用是两个阶段",
+      "stateIds": [
+        "first-reserved",
+        "first-in-flight"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "到期以前poll只维护消费者、不新增调用；到期本身还未调用",
+      "stateIds": [
+        "before-deadline",
+        "second-ready"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "重启先读持久IN_FLIGHT；重持原事件后才按未知恢复，不清零预算",
+      "stateIds": [
+        "crashed-in-flight",
+        "restored-two",
+        "reacquired-two"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "对照分支从声明的同一前提完整重置，不复活上一路完成现场",
+      "stateIds": [
+        "third-ready-common",
+        "exhaust-reset-two",
+        "permanent-reset",
+        "dlq-envelope",
+        "dlq-fail-reset",
+        "duplicate-reset"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "物理追加、取得DLQ确认、保存确认、原commit回调完成依次分开",
+      "stateIds": [
+        "dlq-appended-unconfirmed",
+        "dlq-confirmed",
+        "dlq-source-commit-pending",
+        "dlq-source-committed"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "相同发送错误可配空日志或已追加日志；都不越过原记录",
+      "stateIds": [
+        "dlq-final-failure",
+        "dlq-error-may-have-record"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "新进程丢弃旧Future但保留日志；重复DLQ不重新消耗业务名额",
+      "stateIds": [
+        "duplicate-first-ack",
+        "duplicate-restored",
+        "duplicate-second-confirmed"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "全部41个有限态保持源日志、预算与提交边界；不是对任意运行的证明",
+      "stateIds": [
+        "held-ready",
+        "first-reserved",
+        "first-in-flight",
+        "first-backoff",
+        "before-deadline",
+        "second-ready",
+        "second-reserved",
+        "second-in-flight",
+        "crashed-in-flight",
+        "restored-two",
+        "reacquired-two",
+        "third-before-deadline",
+        "third-ready-common",
+        "third-reserved",
+        "third-in-flight",
+        "third-success",
+        "success-source-commit-pending",
+        "success-committed",
+        "exhaust-reset-two",
+        "exhaust-third-in-flight",
+        "budget-exhausted",
+        "permanent-reset",
+        "permanent-in-flight",
+        "permanent-pending",
+        "dlq-envelope",
+        "dlq-send-pending",
+        "dlq-appended-unconfirmed",
+        "dlq-ack-before-journal",
+        "dlq-confirmed",
+        "dlq-source-commit-pending",
+        "dlq-source-committed",
+        "dlq-fail-reset",
+        "dlq-final-failure",
+        "dlq-error-may-have-record",
+        "duplicate-reset",
+        "duplicate-first-ack",
+        "duplicate-crashed",
+        "duplicate-restored",
+        "duplicate-second-send",
+        "duplicate-second-confirmed",
+        "duplicate-source-committed"
+      ],
+      "passed": true
+    }
+  ],
+  "correctionEvidence": "independent-model-observations/restart-transient-state/",
+  "limits": [
+    "Read-only model JSON and source inspection; author generator was not run and no production file was rewritten.",
+    "These selected finite states do not prove all concurrency, crashes, disk failures or real Kafka outcomes."
+  ],
+  "canEnterTTS": "Final editorial report owns the TTS gate."
+}

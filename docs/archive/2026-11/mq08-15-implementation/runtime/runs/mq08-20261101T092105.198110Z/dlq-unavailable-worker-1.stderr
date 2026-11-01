@@ -1,0 +1,22 @@
+2026-11-01T09:21:42,114 WARN  org.apache.kafka.clients.NetworkClient - [Producer clientId=mq08-dlq] The metadata response from the cluster reported a recoverable issue with correlation id 5 : {mq08-dlq-unavailable-6c5a9b47-dlq=UNKNOWN_TOPIC_OR_PARTITION}
+2026-11-01T09:21:42,267 WARN  org.apache.kafka.clients.NetworkClient - [Producer clientId=mq08-dlq] The metadata response from the cluster reported a recoverable issue with correlation id 6 : {mq08-dlq-unavailable-6c5a9b47-dlq=UNKNOWN_TOPIC_OR_PARTITION}
+2026-11-01T09:21:42,512 WARN  org.apache.kafka.clients.NetworkClient - [Producer clientId=mq08-dlq] The metadata response from the cluster reported a recoverable issue with correlation id 7 : {mq08-dlq-unavailable-6c5a9b47-dlq=UNKNOWN_TOPIC_OR_PARTITION}
+2026-11-01T09:21:42,971 WARN  org.apache.kafka.clients.NetworkClient - [Producer clientId=mq08-dlq] The metadata response from the cluster reported a recoverable issue with correlation id 8 : {mq08-dlq-unavailable-6c5a9b47-dlq=UNKNOWN_TOPIC_OR_PARTITION}
+2026-11-01T09:21:43,801 WARN  org.apache.kafka.clients.NetworkClient - [Producer clientId=mq08-dlq] The metadata response from the cluster reported a recoverable issue with correlation id 9 : {mq08-dlq-unavailable-6c5a9b47-dlq=UNKNOWN_TOPIC_OR_PARTITION}
+java.lang.IllegalStateException: single application DLQ send failed; keep DLQ_PENDING, exit, no original commit
+	at Mq08Worker.dlqFailed(Mq08Worker.java:259)
+	at Mq08Worker.advance(Mq08Worker.java:231)
+	at Mq08Worker.run(Mq08Worker.java:129)
+	at Mq08Worker.main(Mq08Worker.java:73)
+Caused by: java.util.concurrent.ExecutionException: org.apache.kafka.common.errors.TimeoutException: Topic mq08-dlq-unavailable-6c5a9b47-dlq not present in metadata after 2000 ms.
+	at org.apache.kafka.clients.producer.KafkaProducer$FutureFailure.<init>(KafkaProducer.java:1612)
+	at org.apache.kafka.clients.producer.KafkaProducer.doSend(KafkaProducer.java:1142)
+	at org.apache.kafka.clients.producer.KafkaProducer.send(KafkaProducer.java:1043)
+	at org.apache.kafka.clients.producer.KafkaProducer.send(KafkaProducer.java:921)
+	at Mq08Worker.lambda$advance$5(Mq08Worker.java:220)
+	at java.base/java.util.concurrent.FutureTask.run(FutureTask.java:317)
+	at java.base/java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1144)
+	at java.base/java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:642)
+	at java.base/java.lang.Thread.run(Thread.java:1583)
+Caused by: org.apache.kafka.common.errors.TimeoutException: Topic mq08-dlq-unavailable-6c5a9b47-dlq not present in metadata after 2000 ms.
+Caused by: org.apache.kafka.common.errors.UnknownTopicOrPartitionException: This server does not host this topic-partition.

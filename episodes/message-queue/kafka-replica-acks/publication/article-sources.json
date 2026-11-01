@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "kafka-replica-acks",
+  "heading": "参考资料",
+  "checkedAt": "2026-11-01",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "A1",
+      "organization": "Apache Kafka",
+      "title": "Replica.java",
+      "titleEvidence": {
+        "locator": "Fixed commit GitHub Contents API .name = Replica.java; https://api.github.com/repos/apache/kafka/contents/server/src/main/java/org/apache/kafka/server/replica/Replica.java?ref=1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/Replica.java.metadata.json"
+      },
+      "version": "Apache Kafka / Java4.4.0; fixed commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/server/src/main/java/org/apache/kafka/server/replica/Replica.java",
+      "supports": [
+        "Leader把Follower Fetch报告的offset metadata存为ReplicaState；随后才能据该已知位置评估共同进度。"
+      ],
+      "sections": "Replica.java:46–101",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-01",
+        "method": "Fresh fixed-commit official raw GET and raw Contents API response; .name/path/base64 decoded bytes verified. Read only listed execution/config contexts; not all downloaded files or all lines. Apache Kafka official repository/NOTICE supports institution; no public individual author attribution in these files, so author omitted.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/server/src/main/java/org/apache/kafka/server/replica/Replica.java",
+        "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "65dcc03df028a130f2326237042b152a9526c25c9338a8968ddbbd9418b2f396"
+      },
+      "quotation": {
+        "text": "return new ReplicaState(\n                followerStartOffset,\n                followerFetchOffsetMetadata,\n                Math.max(leaderEndOffset, currentReplicaState.lastFetchLeaderLogEndOffset()),\n                followerFetchTimeMs,\n                lastCaughtUpTime,\n                Optional.of(brokerEpoch)\n            );\n        });",
+        "locator": "Replica.java lines93–101",
+        "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/Replica.java"
+      }
+    },
+    {
+      "id": "A2",
+      "organization": "Apache Kafka",
+      "title": "UnifiedLog.java",
+      "titleEvidence": {
+        "locator": "Fixed commit GitHub Contents API .name = UnifiedLog.java; https://api.github.com/repos/apache/kafka/contents/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java?ref=1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/UnifiedLog.java.metadata.json"
+      },
+      "version": "Apache Kafka / Java4.4.0; fixed commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java",
+      "supports": [
+        "本地追加的flush由独立flushInterval条件触发；不能从acksall这一等待条件推断所有副本每次都fsync。"
+      ],
+      "sections": "UnifiedLog.java:1268–1302; UnifiedLog.java:2250–2296",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-01",
+        "method": "Fresh fixed-commit official raw GET and raw Contents API response; .name/path/base64 decoded bytes verified. Read only listed execution/config contexts; not all downloaded files or all lines. Apache Kafka official repository/NOTICE supports institution; no public individual author attribution in these files, so author omitted.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java",
+        "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "da11dd8363b3521306e9bc2338f6474947266d59e825173a8c9025d15d85de4f"
+      },
+      "quotation": {
+        "text": "if (localLog.unflushedMessages() >= config().flushInterval) flush(false);",
+        "locator": "UnifiedLog.java line1300",
+        "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/UnifiedLog.java"
+      }
+    },
+    {
+      "id": "A3",
+      "organization": "Apache Kafka",
+      "title": "TopicConfig.java",
+      "titleEvidence": {
+        "locator": "Fixed commit GitHub Contents API .name = TopicConfig.java; https://api.github.com/repos/apache/kafka/contents/clients/src/main/java/org/apache/kafka/common/config/TopicConfig.java?ref=1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/TopicConfig.java.metadata.json"
+      },
+      "version": "Apache Kafka / Java4.4.0; fixed commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/config/TopicConfig.java",
+      "supports": [
+        "配置文档明确RF3且ISR3时acksall须三份确认，即使minISR小于3；ELR开启会改变语义，因此本例显式关闭。"
+      ],
+      "sections": "TopicConfig.java:218–232",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-01",
+        "method": "Fresh fixed-commit official raw GET and raw Contents API response; .name/path/base64 decoded bytes verified. Read only listed execution/config contexts; not all downloaded files or all lines. Apache Kafka official repository/NOTICE supports institution; no public individual author attribution in these files, so author omitted.",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/config/TopicConfig.java",
+        "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/source-evidence.json",
+        "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "sha256": "2bd0e971dd2996b437390e5a327e25f4ae66972d78867afb217b4b0540480497"
+      },
+      "quotation": {
+        "text": "public static final String MIN_IN_SYNC_REPLICAS_DOC = \"Specifies the <i>minimum</i> number of in-sync replicas (including the leader) \" +\n        \"required for a write to succeed when a producer sets <code>acks</code> to \\\"all\\\" (or \\\"-1\\\"). In the <code>acks=all</code> \" +\n        \"case, every in-sync replica must acknowledge a write for it to be considered successful. E.g., if a topic has \" +\n        \"<code>replication.factor</code> of 3 and the ISR set includes all three replicas, then all three replicas must acknowledge an \" +\n        \"<code>acks=all</code> write for it to succeed, even if <code>min.insync.replicas</code> happens to be less than 3. \" +\n        \"If <code>acks=all</code> and the current ISR set contains fewer than <code>min.insync.replicas</code> members, then the producer \" +\n        \"will raise an exception (either <code>NotEnoughReplicas</code> or <code>NotEnoughReplicasAfterAppend</code>).<br> \" +\n        \"Regardless of the <code>acks</code> setting, the messages will not be visible to the consumers until \" +\n        \"they are replicated to all in-sync replicas and the <code>min.insync.replicas</code> condition is met.<br> \" +\n        \"When used together, <code>min.insync.replicas</code> and <code>acks</code> allow you to enforce greater durability guarantees. \" +\n        \"A typical scenario would be to create a topic with a replication factor of 3, \" +\n        \"set <code>min.insync.replicas</code> to 2, and produce with <code>acks</code> of \\\"all\\\". \" +\n        \"This ensures that a majority of replicas must persist a write before it's considered successful by the producer and it's visible to consumers.\" +\n        \"<p>Note that when the Eligible Leader Replicas feature is enabled, the semantics of this config changes. Please refer to <a href=\\\"https://kafka.apache.org/documentation/#eligible_leader_replicas\\\">the ELR section</a> for more info.</p>\";",
+        "locator": "TopicConfig.java lines219–232",
+        "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/TopicConfig.java"
+      }
+    }
+  ]
+}

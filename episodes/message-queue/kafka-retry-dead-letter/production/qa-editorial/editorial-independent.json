@@ -1,0 +1,168 @@
+{
+  "checkedAtUTC": "2026-11-01T09:19:13.557855+00:00",
+  "reviewer": "/root/mq_qa",
+  "status": "approved-for-TTS-only",
+  "canEnterTTS": true,
+  "production": "episodes/message-queue/kafka-retry-dead-letter/production",
+  "issue": 316,
+  "mq": "MQ08",
+  "ep": 48,
+  "scriptSHA256": "621c6d3122619b772c2cff04f1a0cd319d4e8acc9d51c84b70712c9c09a8a53f",
+  "narrationSHA256": "bb8438b59500e17fd37d4e2851f6a7f2eb0ab37bb17bfc761988f536e7378364",
+  "narrationHashDefinition": "SHA256 UTF8 of ''.join(re.findall(r'^旁白：(.*)$', script, re.M)); no separators/trailing LF. Whole scriptSHA256 hashes raw complete file bytes.",
+  "shots": 15,
+  "sentences": 30,
+  "narrationCodepoints": 922,
+  "reviewedInputs": [
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/script.md",
+      "sha256": "621c6d3122619b772c2cff04f1a0cd319d4e8acc9d51c84b70712c9c09a8a53f"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/plan.json",
+      "sha256": "37dfe7631c78c72bd11f248c35017a49ddefef2da7f2cb37e0fd8ec024c6d5e3"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/episode-config.json",
+      "sha256": "eaadb672a1130f66a70536463f2bd68164cba9f173e4ef7014d19f5c7983abcb"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/pronunciation.md",
+      "sha256": "c721a2d28590892fedc30a4292663e1e51d08b23955a464e3ad4605399fcda08"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/research.md",
+      "sha256": "04bbf6be8a11c34f1b0a6cbc372645ffcffeb369fa881f341eb93aa51c9dabf3"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/source-chain-notes.md",
+      "sha256": "3abe20d5324de7e2eb209b65bd048070bc1302e8c9fa8f60936fcf428b33d622"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/references.json",
+      "sha256": "e8dc11e40750c5bc2e20d84168522c259b5df6d440e8f19ee1f4a98cec179ccd"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/article.mdx",
+      "sha256": "0244b88a98efd61f0a5b85d795b5f37b7c8e16ae0e824bb43fbdaa182e67a250"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/model.json",
+      "sha256": "a5f5e25f1b55b7fbf419611aaa52690c6eac1b79a705e9b02f66775d99026685"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/build_model.py",
+      "sha256": "6361e3ac08b6b9dafb6281aba64532aee5f762b8ac1a22a41b98f799bd125d0d"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/model-verification.json",
+      "sha256": "b8df30d9fc14174ddbdb735ea13c32d19ce44ee37048a7722be2c6703b167041"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/examples/Mq08Core.java",
+      "sha256": "0fddc873cd1cfc40237cae7c03f556e23c8b665f2e371004698e3b677b9d0914"
+    },
+    {
+      "path": "episodes/message-queue/kafka-retry-dead-letter/production/examples/Mq08Worker.java",
+      "sha256": "c9fb87fb65dcd670a63085b91d73816430a2a98f1de6683db97df3892b0852fd"
+    }
+  ],
+  "singleQuestion": "同一通知失败后，应用如何限制跨重启的重试预算，并在不提前越过原记录的前提下留下处置出口？",
+  "editorialFindings": [
+    {
+      "dimension": "opening-and-ending",
+      "result": "开头以订单通知反复失败阻塞E02建立冲突，结尾回收保存预算/到期判断/两次确认和待处置≠业务成功；首镜就是同事件主图，不靠技术标题代替使用场景。实际2/5/15秒留待真实配音后的动态核验。"
+    },
+    {
+      "dimension": "implementation-causality",
+      "result": "正文03–06演键notify:E01中totalStarted/phase/deadline的保存、读取与判断；先预留再调用解释崩溃预算，保留未知结果解释仍需业务幂等。04由本地pause门与持续poll区分Kafka交付维护和应用业务重试。"
+    },
+    {
+      "dimension": "observable-two-boundaries",
+      "result": "11先等待有效DLQ metadata后保存confirmed，12另等显式原offset提交成功回调再resume；14用未保存确认的进程退出窗口推导重复DLQ，而非只宣读“非原子”。"
+    },
+    {
+      "dimension": "beginner-prerequisites",
+      "result": "单消费者/P0/一次交付一条就地建立，调用名额包括首次；名额不是实际完成次数，进行中崩溃不误称失败。Future/metadata/类名仅画面辅助，口播用成功分区和位置等具体对象，不需要观众读源码才能补出主链。"
+    },
+    {
+      "dimension": "branch-navigation",
+      "result": "07成功/08耗尽从第三次之前共同前提对照；09回未尝试起点；10回耗尽路径；13/14发送前reset。15已明确业务成功直接原commit、可重试回等待、待处置才经过DLQ确认，避免错误线性串联。"
+    },
+    {
+      "dimension": "scope",
+      "result": "自定义应用协议、有限虚拟模型、待独立真实运行分别标记。只承诺同机同状态目录的进程恢复；不声称跨机再均衡/硬件断电/原子事务/恰好一次。复杂支线留文章，关键为何仍由正文兑现。"
+    }
+  ],
+  "sourceChecks": [
+    {
+      "id": "R1",
+      "rawSourceSHA256": "1c9a717d04f5b8abc24097f7b28fee887d3543417928a0ecb20870969cd64567",
+      "continuousQuoteExact": true,
+      "officialOriginalFilenameMatchesTitle": true,
+      "sourceURL": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java#L978-L984"
+    },
+    {
+      "id": "R2",
+      "rawSourceSHA256": "66961cb214088a240b32e1729228cfefd2643b06c8aad4501f3444242dda4656",
+      "continuousQuoteExact": true,
+      "officialOriginalFilenameMatchesTitle": true,
+      "sourceURL": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L125-L130"
+    },
+    {
+      "id": "R3",
+      "rawSourceSHA256": "ef8914cd6af41bc030eabc14a77d0625682796a19eae91f4990b30328aa45986",
+      "continuousQuoteExact": true,
+      "officialOriginalFilenameMatchesTitle": true,
+      "sourceURL": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L1108-L1126"
+    },
+    {
+      "id": "R4",
+      "rawSourceSHA256": "47070d2ca1798a4bedfa20271fe24e5eeeb7a9922ed555292dab89af7b98944b",
+      "continuousQuoteExact": true,
+      "officialOriginalFilenameMatchesTitle": true,
+      "sourceURL": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java#L1103-L1115"
+    }
+  ],
+  "sourcePreflight": {
+    "command": "node site/scripts/check-references.mjs --sources episodes/message-queue/kafka-retry-dead-letter/production",
+    "exitCode": 0,
+    "sources": 4,
+    "actualResult": "Reference source preflight passed; editorial source reading separately completed."
+  },
+  "sourceImplementationActuallyRead": [
+    "ClassicKafkaConsumer647–744/978–1003; SubscriptionState925–941/1222–1254; FetchCollector84–186: poll coordination and local paused delivery gate.",
+    "ConsumerCoordinator510–546/1037–1133/1280–1309: asynchronous commit request, completion queue and callback delivery during subsequent poll.",
+    "Sender671–734/757–767, ProducerBatch281–345, FutureRecordMetadata61–102, and exact KafkaProducer1108–1126 quote: pending/failed/successful DLQ result boundaries.",
+    "Mq08Core complete213lines and Mq08Worker owner loop/advance branches/configuration: persist-before-invoke, recovery, executor isolation, explicit async commit callback."
+  ],
+  "modelReview": "model-independent.json",
+  "closedBeforeTTS": [
+    {
+      "item": "restart must discard current old Producer Future/metadata",
+      "evidence": "independent-model-observations/restart-transient-state/resolution.json",
+      "resolvedModelSHA256": "a5f5e25f1b55b7fbf419611aaa52690c6eac1b79a705e9b02f66775d99026685"
+    },
+    {
+      "item": "04 poll purpose, 15 deadline/reserve order and success-versus-DLQ recap fork; source notes match actual async commit",
+      "scope": "script画面/来源/模型澄清，canonical旁白仍为初稿bb8438…；未因这些修订重录。"
+    }
+  ],
+  "blockers": [],
+  "laterRequirements": [
+    "Actual generated voice selected text/PCM/tail-signal checks; this approval does not certify audio pronunciation.",
+    "Fresh actual PNG/DOM and no-subtitle continuous dynamic review must include counter increment-before-call, restart raw/read/recover stages, all explicit reset transitions, DLQ append/metadata/journal/original-commit adjacent thresholds and actual four article figure frames.",
+    "No formal freeze/render until root accepts final timing, actual figures plan and dynamic/source guard.",
+    "Original article Figure slots still have no fabricated seconds/frames or visual acceptance; fill measured final timing before freeze.",
+    "Independent Kafka runtime remains separate and was not declared passed by this editorial review."
+  ],
+  "notClaimed": [
+    "Broker experiment",
+    "filesystem crash durability experiment",
+    "real notification delivery",
+    "ASR or full human audio listening",
+    "physical phone",
+    "user understanding or learning-effect validation",
+    "freeze/render/publication approval"
+  ]
+}

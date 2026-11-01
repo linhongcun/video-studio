@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-11-01T10:24:40.826Z",
+  "scope": "Actual existing site parseArticle; initial failures before freeze",
+  "episodes": [
+    {
+      "slug": "kafka-retry-dead-letter",
+      "pass": true
+    },
+    {
+      "slug": "kafka-replica-acks",
+      "pass": false,
+      "articleSHA256": "93cac5f78945f7d997f147b15db828a9002079266c713498804304c2aae8bcd0",
+      "error": {
+        "message": "Unexpected character `2` (U+0032) before name, expected a character that can start a name, such as a letter, `$`, or `_`",
+        "line": 64,
+        "column": 27,
+        "reason": "Unexpected character `2` (U+0032) before name, expected a character that can start a name, such as a letter, `$`, or `_`"
+      },
+      "bodyContext": [
+        "再次从空日志开始，先把ISR稳定为[B1,B2]，B3不参与且不满足额外近期追齐候选。两份达到最小门槛，E01追加后还要等当前这两份都跟到1、HW到1，才能成功。它不等不在当前集合的第三份，但也不是只要“数量等于二”就忽略具体复制进度。",
+        "",
+        "若稳定名单只剩[B1]，all请求在前置判断看到1<2，就在本次追加前被拒绝。第12镜限定这一明确分支。本轮真实ISR1测试在发送前后各副本物理LEO均为0，官方日志快照无记录，返回NotEnoughReplicas；这项实际结果独立于模型空数组。",
+        "",
+        "<Figure src=\"/video-studio/episodes/kafka-replica-acks/article/04-before-append-rejected.jpg\" alt=\"从相同空日志重置后，稳定ISR只有B1，1小于minISR2，本次all在追加前被拒绝，三日志仍为空。\" caption=\"这是本次前置准入失败的结果，不能推广为所有发送失败均未写入。\" chapter=\"min-isr\" seekTo={165.466666667} />"
+      ]
+    }
+  ]
+}

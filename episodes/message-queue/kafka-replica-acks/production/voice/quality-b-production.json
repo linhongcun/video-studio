@@ -1,0 +1,85 @@
+{
+  "startedAtUTC": "2026-11-01T10:11:55.357264+00:00",
+  "status": "produced-await-independent-signal-review",
+  "producerSHA256": "70656c889c7ee49255909aa163100e9be7e2d86991514b4c57649c74861f5ed8",
+  "narrationSHA256": "03057d2617ca879886f16b4452dd579137465d39fce3a6bea9819e82672d49b3",
+  "scriptSHA256": "619e9a37ac6560c56c36e5d331b4ee45d45851bbed19c5c27aa48d14ad20b147",
+  "parameterSHA256": "9326ce90087c1aa9bdad289595a182525a23a015f86859853982726145a453fe",
+  "previousVoiceSHA256": "5962b55224cb2706d940bcbacfb753a047345b15d141c87de8f85a17cc7331a7",
+  "sameTextCandidateIds": [
+    "04-leader-loss-1",
+    "12-one-isr-2"
+  ],
+  "steps": [
+    {
+      "step": "generate",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/video-studio/episodes/_shared/voice/gen.py",
+        "--dir",
+        "/workspace/video-studio/episodes/message-queue/kafka-replica-acks/production",
+        "--jobs",
+        "jobs-quality-b.json"
+      ],
+      "exit": 0,
+      "log": "voice/quality-b-generate.log",
+      "logSHA256": "d117fa006ba9208500b2930ce69cbde436c647afa917cb7396a9bc9111a46dd2"
+    },
+    {
+      "step": "build",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/video-studio/episodes/_shared/voice/build.py",
+        "--dir",
+        "/workspace/video-studio/episodes/message-queue/kafka-replica-acks/production"
+      ],
+      "exit": 0,
+      "log": "voice/quality-b-build.log",
+      "logSHA256": "5e317778f96aeabbed8b41ed7782c7142a474a3565ff90af337b960d5b2a2654"
+    },
+    {
+      "step": "assemble",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/video-studio/episodes/message-queue/kafka-replica-acks/production/assemble.py"
+      ],
+      "exit": 0,
+      "log": "voice/quality-b-assemble.log",
+      "logSHA256": "d5d8e4f25831e76d2990b9c46e3570d24b4364be800914aface7cbaafd03be2c"
+    },
+    {
+      "step": "place",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/video-studio/episodes/_shared/place_v2.py",
+        "--dir",
+        "/workspace/video-studio/episodes/message-queue/kafka-replica-acks/production",
+        "--mode",
+        "whole"
+      ],
+      "exit": 0,
+      "log": "voice/quality-b-place.log",
+      "logSHA256": "0d9794798819ffc61a2ae9c05faaa6c3de58b48b5d3acba4b2792add273be02e"
+    },
+    {
+      "step": "onset",
+      "command": [
+        "/opt/codex/runtimes/codex-primary-runtime/dependencies/python/bin/python",
+        "/workspace/video-studio/episodes/_shared/label_onset_strict.py",
+        "--dir",
+        "/workspace/video-studio/episodes/message-queue/kafka-replica-acks/production",
+        "--out",
+        "/workspace/video-studio/episodes/message-queue/kafka-replica-acks/production/onset-quality-b.txt"
+      ],
+      "exit": 0,
+      "log": "voice/quality-b-onset.log",
+      "logSHA256": "0d61f5256a8af940564162e5e0a90f2581bc71736fb6ea996bbd4b7141ac8079"
+    }
+  ],
+  "voiceSHA256": "388aa7072e3329d76360aca4063c20b901d642bdad256307869a40200286b9d9",
+  "bodyFrames": 5460,
+  "otherSelectedTakeCount": 24,
+  "otherSelectedTakeBytesUnchanged": true,
+  "finishedAtUTC": "2026-11-01T10:12:17.060946+00:00",
+  "scope": "Targeted same-text signal-risk alternatives; does not assert old takes had semantic errors or claim ASR/full semantic listening."
+}

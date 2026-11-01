@@ -1,0 +1,213 @@
+{
+  "checkedAtUTC": "2026-11-01T10:26:08.289Z",
+  "command": "existing exported parseArticle from site/scripts/check-articles.mjs",
+  "articleSHA256": "867a1c096333e15a67cb7df333f71c3fc184f1721e00450fcf4a1b0cdc5cd120",
+  "pass": true,
+  "ASTcomponents": [
+    {
+      "name": "Figure",
+      "attributes": [
+        {
+          "name": "src",
+          "value": "/video-studio/episodes/kafka-replica-acks/article/01-leader-ack-takeover.jpg"
+        },
+        {
+          "name": "alt",
+          "value": "acks1已经向网站返回成功，原B1离线日志保留E01，但clean接管的新主B2日志没有E01。"
+        },
+        {
+          "name": "caption",
+          "value": "本例成功回应只等到主追加；新主缺失与原主离线字节仍在是不同事实。"
+        },
+        {
+          "name": "chapter",
+          "value": "leader"
+        },
+        {
+          "name": "seekTo",
+          "value": "54.033333333"
+        }
+      ]
+    },
+    {
+      "name": "SourceQuote",
+      "attributes": [
+        {
+          "name": "sourceId",
+          "value": "R5"
+        },
+        {
+          "name": "supports",
+          "value": "新主候选必须满足目标ISR或特定ELR条件以及可用性测试；本例ELR关闭，所以采用存活ISR中的clean候选。"
+        }
+      ]
+    },
+    {
+      "name": "SourceQuote",
+      "attributes": [
+        {
+          "name": "sourceId",
+          "value": "A3"
+        },
+        {
+          "name": "supports",
+          "value": "原文明确RF3且ISR3时all需要当前三份跟上，minISR可以小于三；它同时区分追加前后副本不足异常，并提醒ELR开启会改变语义。"
+        }
+      ]
+    },
+    {
+      "name": "SourceQuote",
+      "attributes": [
+        {
+          "name": "sourceId",
+          "value": "R2"
+        },
+        {
+          "name": "supports",
+          "value": "所需位置被设为本次追加的lastOffset加一；本例最后offset为零，所以完成目标为一。"
+        }
+      ]
+    },
+    {
+      "name": "SourceQuote",
+      "attributes": [
+        {
+          "name": "sourceId",
+          "value": "R3"
+        },
+        {
+          "name": "supports",
+          "value": "跟随线程把响应中的records追加到自己的分区日志，并从响应学习主副本的HW；这不是从主日志中删除记录。"
+        }
+      ]
+    },
+    {
+      "name": "SourceQuote",
+      "attributes": [
+        {
+          "name": "sourceId",
+          "value": "A1"
+        },
+        {
+          "name": "supports",
+          "value": "Follower请求携带的offset metadata被写进新的ReplicaState，说明Leader保存的是收到的进度报告，而不是直接观察另一份日志。"
+        }
+      ]
+    },
+    {
+      "name": "Figure",
+      "attributes": [
+        {
+          "name": "src",
+          "value": "/video-studio/episodes/kafka-replica-acks/article/02-third-still-pending.jpg"
+        },
+        {
+          "name": "alt",
+          "value": "B1/B2实际拥有E01，Leader已知末尾为1、1、0，ISR仍三份，HW0，网站结果仍等待。"
+        },
+        {
+          "name": "caption",
+          "value": "已拥有两份与当前三份集合的共同进度到达目标，是两个不同条件。"
+        },
+        {
+          "name": "chapter",
+          "value": "replication"
+        },
+        {
+          "name": "seekTo",
+          "value": "109.366666667"
+        }
+      ]
+    },
+    {
+      "name": "SourceQuote",
+      "attributes": [
+        {
+          "name": "sourceId",
+          "value": "R1"
+        },
+        {
+          "name": "supports",
+          "value": "这段完成检查先比较HW与requiredOffset；达到后仍检查有效minISR，并区分成功与追加后副本不足错误。它不单独证明追加前准入或HW怎样计算。"
+        }
+      ]
+    },
+    {
+      "name": "SourceQuote",
+      "attributes": [
+        {
+          "name": "sourceId",
+          "value": "R4"
+        },
+        {
+          "name": "supports",
+          "value": "每个待确认分区调用验证器；只有验证结果有错误或hasEnough为真时，才清除等待标志并保存该错误状态。"
+        }
+      ]
+    },
+    {
+      "name": "Figure",
+      "attributes": [
+        {
+          "name": "src",
+          "value": "/video-studio/episodes/kafka-replica-acks/article/03-high-watermark-one.jpg"
+        },
+        {
+          "name": "alt",
+          "value": "三份P0日志都保留E01@0，Leader已知末尾全为1，HW1涵盖E01，成功响应已返回网站。"
+        },
+        {
+          "name": "caption",
+          "value": "本例先完成复制与进度获知，再推进HW，最后把成功回复返回网站。"
+        },
+        {
+          "name": "chapter",
+          "value": "replication"
+        },
+        {
+          "name": "seekTo",
+          "value": "124.400000000"
+        }
+      ]
+    },
+    {
+      "name": "Figure",
+      "attributes": [
+        {
+          "name": "src",
+          "value": "/video-studio/episodes/kafka-replica-acks/article/04-before-append-rejected.jpg"
+        },
+        {
+          "name": "alt",
+          "value": "从相同空日志重置后，稳定ISR只有B1，1小于minISR2，本次all在追加前被拒绝，三日志仍为空。"
+        },
+        {
+          "name": "caption",
+          "value": "这是本次前置准入失败的结果，不能推广为所有发送失败均未写入。"
+        },
+        {
+          "name": "chapter",
+          "value": "min-isr"
+        },
+        {
+          "name": "seekTo",
+          "value": "165.466666667"
+        }
+      ]
+    },
+    {
+      "name": "SourceQuote",
+      "attributes": [
+        {
+          "name": "sourceId",
+          "value": "A2"
+        },
+        {
+          "name": "supports",
+          "value": "本地追加后的flush受未刷盘消息数量与flushInterval条件控制；这条独立判断不能由acksall本身替代。"
+        }
+      ]
+    }
+  ],
+  "scope": "Actual site syntax preparation and MDX parser; not full publication check or site browser validation before final media/JPEG export."
+}

@@ -1,0 +1,193 @@
+{
+  "createdAtUTC": "2026-11-01T09:03:41.692529+00:00",
+  "reviewer": "/root/mq_qa",
+  "baseline": "8769a592856fe2618e5daf3d84849bf4b052e22b",
+  "branch": "codex/mq08-15-implementation-20261101",
+  "stage": "pre-script-review-preparation",
+  "canEnterTTS": false,
+  "narrationHashDefinition": "SHA256(UTF8(''.join(re.findall(r'^旁白：(.*)$',script,re.M)))) with no line separators or trailing LF; scriptSHA256 is complete raw script.md bytes",
+  "currentPathsOnly": true,
+  "oldProductionOrQAUsedAsNewAuthorization": false,
+  "rulesRead": [
+    {
+      "path": "AGENTS.md",
+      "sha256": "00841915e4a257bf88f6d802f466a81642ff5ffc34068bd1bc13e31ef615d268",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "docs/RULES.md",
+      "sha256": "89ec209e340d01da82ba5dd737f8df092173790d3eddc6cbac958686d6de8710",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "docs/pipeline.md",
+      "sha256": "c1973b2b16cdd52ec7ec866440721fcc663201de523684d8eacaa96b9c0f36a7",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "docs/research-template.md",
+      "sha256": "6ea2c452dcaf61b95329edb748994822e462e8024fbceab040b676b425e670b3",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "docs/article-style.md",
+      "sha256": "88ffe6ec7b6b7915831937629297351433dd1439c26e6e6d2a0e6304bf7738b6",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "docs/voice.md",
+      "sha256": "1c2ab3e1dd4e1dcde64d325aa1f8f2871fed83949bc3d695358c9e916996d016",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "docs/render.md",
+      "sha256": "7b0cf6e87bec0b85202d23c7fa6c41263435a0c5fbcc921ead0b70d324f862db",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "docs/validate.md",
+      "sha256": "15e1577deb24b0a1777506b2bc52322be51b0bee4a83b7f4c9502e118e0375ad",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "docs/qa.md",
+      "sha256": "f8a07ef36d4f0c49af4d7e661997904f91ec5797e2cf93832d39e16ddb801b13",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "docs/lessons-learned.md",
+      "sha256": "8a077031ea6c771f88d1c1f373c17acea1f7ff3560dd4dbf24b4fe6b80941f83",
+      "scope": "current rule sections relevant to editorial, source, voice, image/article and media QA; L060 and S023 explicitly read"
+    },
+    {
+      "path": "docs/successful-practices.md",
+      "sha256": "116718ca1f7a28466804f5b289233c532a2cf19c10bd5c059979ab52ede07f5e",
+      "scope": "current rule sections relevant to editorial, source, voice, image/article and media QA; L060 and S023 explicitly read"
+    },
+    {
+      "path": "docs/production-memory.md",
+      "sha256": "4720feee17b64ca32c0017bfb30b02c3b9564f42e51f1e6e032eb444e424f6b6",
+      "scope": "current relevant instructions read"
+    },
+    {
+      "path": "episodes/_shared/kafka-video/README.md",
+      "sha256": "2addb7e80cf2722f41a14c963aa507321520364aca7c4e7e347f96bd50fa9ec0",
+      "scope": "current relevant instructions read"
+    }
+  ],
+  "episodes": [
+    {
+      "mq": "MQ08",
+      "ep": 48,
+      "issue": 316,
+      "issueURL": "https://github.com/linhongcun/video-studio/issues/316",
+      "production": "episodes/message-queue/kafka-retry-dead-letter/production",
+      "canEnterTTS": false,
+      "scriptSHA256": null,
+      "narrationSHA256": null,
+      "reason": "Exact candidate script, model and implementation map have not been handed off.",
+      "singleQuestion": "应用如何停止无效重试，同时留下可修复的记录且不提前跳过原消息？",
+      "causalChecks": [
+        "同一eventId：原P0日志保留、客户端position与已提交恢复位置、应用业务尝试和DLQ处置分开；不画Broker nack/requeue或ACK删除。",
+        "持久预算键/计数/下一可尝试时间有实际结构和读写顺序。解释重启如何读回以及崩溃窗口；若调用前预留预算，明确预留可能并未实际调用，不能声称精确调用次数。",
+        "pause改变本地分区可交付状态，已poll到的记录仍由应用保留；短poll持续驱动协调者/网络。实际处理/状态持久化不得长期阻塞超max.poll.interval。",
+        "暂时恢复、永久拒绝、预算耗尽、DLQ目标不可用从明确共同前提分支；间隔由应用调度，不暗称普通Topic自动延时。",
+        "DLQ成功metadata/callback后才允许提交原offset+1；失败/未知不能预记已处置。DLQ写入与原offset提交非原子，ack后崩溃可重读/重写DLQ。",
+        "死信保存eventId/原topic分区offset/原因/尝试记录；待人工检查修复不等于业务成功，受控回放的幂等与顺序边界清楚。"
+      ],
+      "sourceReadNow": [
+        {
+          "path": "episodes/message-queue/kafka-retry-dead-letter/production/sources/ClassicKafkaConsumer.java",
+          "sha256": "1c9a717d04f5b8abc24097f7b28fee887d3543417928a0ecb20870969cd64567",
+          "fixedCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+          "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java",
+          "actualReadLineRanges": [
+            [
+              641,
+              744
+            ],
+            [
+              971,
+              1003
+            ]
+          ],
+          "scope": "read-only review of owner fresh-download bytes; no independent Broker run"
+        },
+        {
+          "path": "episodes/message-queue/kafka-retry-dead-letter/production/sources/SubscriptionState.java",
+          "sha256": "40576f4460ae196bd871b89c8767f6ec18897466610ae5538014290d89131d4c",
+          "fixedCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+          "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/SubscriptionState.java",
+          "actualReadLineRanges": [
+            [
+              925,
+              941
+            ],
+            [
+              1222,
+              1254
+            ]
+          ],
+          "scope": "read-only review of owner fresh-download bytes; no independent Broker run"
+        },
+        {
+          "path": "episodes/message-queue/kafka-retry-dead-letter/production/sources/FetchCollector.java",
+          "sha256": "66961cb214088a240b32e1729228cfefd2643b06c8aad4501f3444242dda4656",
+          "fixedCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+          "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java",
+          "actualReadLineRanges": [
+            [
+              84,
+              151
+            ]
+          ],
+          "scope": "read-only review of owner fresh-download bytes; no independent Broker run"
+        }
+      ]
+    },
+    {
+      "mq": "MQ15",
+      "ep": 49,
+      "issue": 323,
+      "issueURL": "https://github.com/linhongcun/video-studio/issues/323",
+      "production": "episodes/message-queue/kafka-replica-acks/production",
+      "canEnterTTS": false,
+      "scriptSHA256": null,
+      "narrationSHA256": null,
+      "reason": "Exact candidate script, model and implementation map have not been handed off.",
+      "singleQuestion": "同样三个副本，成功确认到底证明哪些副本已有记录，何时仍应拒绝写入？",
+      "causalChecks": [
+        "固定Kafka4.4.0/Java客户端、RF3、minISR2、显式关闭幂等、ELR和unclean选主；ISR为实际当前集合，不能把副本总数或在线数替代它。",
+        "同一E01从Leader追加、Follower Fetch复制、Leader得知复制进度到HW和producer结果；每副本实际记录/log end与当前ISR/HW分开可读。",
+        "acks1/all先恢复完全相同的日志、ISR和生产者结果状态；acks1只依据Leader追加，all不是等集群所有机器、也不是凑够minISR2即结束。",
+        "ISR仍三者时第三者落后导致all待定；成员退出ISR改变完成集合时要说明触发/观察条件；ISR不足minISR时all不得冒充成功。",
+        "Leader故障前后核已有记录与可接管副本；模型不能以节点在线代替日志证据，也不展开KRaft投票。",
+        "成功不代表fsync或业务消费，未收到成功不代表未写；实际故障时点/日志/producer证据和有限模型分开，不承诺任意故障无丢失。"
+      ],
+      "sourceReadNow": [],
+      "sourceReview": "Await owner fixed-source handoff; no prior episode/source QA claimed for this implementation."
+    }
+  ],
+  "editorialAcceptance": [
+    "开头建立实际业务使用与冲突，结尾回答同一问题；仅凭本片信息能解释关键状态为什么变化。",
+    "结构保存什么→谁读取→条件如何判断→更新什么→为什么有此结果；去掉方法名和术语仍能复述。",
+    "必要术语在对象/动作后出现；短码只服务当前因果，不做类名巡览，不靠加速塞多机制。",
+    "模型状态/配置和源码路径对应；改一个关键条件的反例可逐项推导；来源数量、断言数量不作为深度证明。",
+    "精确scriptSHA256与无分隔narrationSHA256绑定独立结论；未完整审读前canEnterTTS保持false。"
+  ],
+  "laterStagesPending": [
+    "selected text/raw signal/PCM and sentence-tail voice checks",
+    "actual no-subtitle fresh PNG/DOM and necessary continuous clips including branch resets, completion guards and fixed article figures",
+    "read-only freeze identities and actual default final MP4 full video+AAC decode, integer-n frames/refs boundaries and actual JPEG review",
+    "native local/online browser after root signals"
+  ],
+  "notPerformed": [
+    "TTS",
+    "production freeze",
+    "formal rendering",
+    "shared-tool edits",
+    "Broker runtime experiment",
+    "human full semantic audio review",
+    "learning-effect measurement"
+  ]
+}

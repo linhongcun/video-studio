@@ -1,0 +1,169 @@
+{
+  "schemaVersion": 1,
+  "createdAtUTC": "2026-11-01T10:59:48.823692+00:00",
+  "episode": "kafka-replica-acks",
+  "inputs": {
+    "bodySHA256": "5c274083fdb5c767f0f4b0bb6ea8ec37109766d38a8521c273bbc90c68754b9a",
+    "referencesSHA256": "04c29abc1f40b09cfde960095941fd05627dd08f9bc5f00c223d87b574069d7c",
+    "generatorSHA256": "67b7058ebf583f1c71b6455158458ae513037fefaafa894704713f487a79ef46",
+    "themeSHA256": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
+    "fontSHA256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
+    "boldFontSHA256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb",
+    "secondsPerPage": 5
+  },
+  "body": "/workspace/video-studio/episodes/message-queue/kafka-replica-acks/production/remotion/out/body.mp4",
+  "references": "/workspace/video-studio/episodes/message-queue/kafka-replica-acks/production/references.json",
+  "output": "/workspace/video-studio/episodes/message-queue/kafka-replica-acks/production/video.mp4",
+  "outputSHA256": "a2bac66754660c7e6f83d826c834b6fa19f6fc5976ffef65bb07c216a072d694",
+  "bodyFrames": 5460,
+  "finalVideoFrames": 5760,
+  "fps": "30",
+  "durationSeconds": 192.0,
+  "appendix": {
+    "kind": "references",
+    "from": 5460,
+    "durationInFrames": 300,
+    "framesPerPage": 150,
+    "sourceIds": [
+      "R1",
+      "R2",
+      "R3",
+      "R4",
+      "R5"
+    ],
+    "pages": [
+      {
+        "file": "references-01.png",
+        "sha256": "59455930b74e3d7c913ff1d08a25bd6e69d468b135082c63abdf7d4f90947d17"
+      },
+      {
+        "file": "references-02.png",
+        "sha256": "e6a2db269afb4dae03d60aa4377876602903020078c72c237a1b8ed1fffda494"
+      }
+    ]
+  },
+  "audio": "No audio packets added; original AAC stream ends at its original endpoint.",
+  "bodyProductionInputs": "Body was rendered from this episode (kafka-replica-acks) production manifest with its own narration and measured timing; full-range BT.601 body pictures are converted once to limited BT.709 before mixing. Existing published production inputs remain unchanged.",
+  "tools": {
+    "ffmpeg": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers",
+    "pillow": "12.3.0",
+    "fontFaceIndex": 2
+  },
+  "presentation": "title-author",
+  "layout": {
+    "kind": "title-author-single-column",
+    "maxItemsPerPage": 4,
+    "renderedFields": [
+      "title",
+      "credit"
+    ],
+    "quotesRendered": false
+  },
+  "bibliography": [
+    {
+      "id": "R1",
+      "title": "Partition.scala",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R2",
+      "title": "ReplicaManager.scala",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R3",
+      "title": "ReplicaFetcherThread.scala",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R4",
+      "title": "DelayedProduce.java",
+      "credit": "Apache Kafka"
+    },
+    {
+      "id": "R5",
+      "title": "PartitionChangeBuilder.java",
+      "credit": "Apache Kafka"
+    }
+  ],
+  "sourceTitles": [
+    {
+      "id": "R1",
+      "title": "Partition.scala"
+    },
+    {
+      "id": "R2",
+      "title": "ReplicaManager.scala"
+    },
+    {
+      "id": "R3",
+      "title": "ReplicaFetcherThread.scala"
+    },
+    {
+      "id": "R4",
+      "title": "DelayedProduce.java"
+    },
+    {
+      "id": "R5",
+      "title": "PartitionChangeBuilder.java"
+    }
+  ],
+  "quotations": [
+    {
+      "id": "R1",
+      "text": "val minIsr = effectiveMinIsr(leaderLog)\n        if (leaderLog.highWatermark >= requiredOffset) {\n          /*\n           * The topic may be configured not to accept messages if there are not enough replicas in ISR\n           * in this scenario the request was already appended locally and then added to the purgatory before the ISR was shrunk\n           */\n          if (minIsr <= curMaximalIsr.size)\n            (true, Errors.NONE)\n          else\n            (true, Errors.NOT_ENOUGH_REPLICAS_AFTER_APPEND)\n        } else\n          (false, Errors.NONE)",
+      "locator": "Partition.scala lines968–979",
+      "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/Partition.scala"
+    },
+    {
+      "id": "R2",
+      "text": "result.logAppendSummary.lastOffset + 1, // required offset",
+      "locator": "ReplicaManager.scala line840",
+      "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/ReplicaManager.scala"
+    },
+    {
+      "id": "R3",
+      "text": "// Append the leader's messages to the log\n    val logAppendInfo = partition.appendRecordsToFollowerOrFutureReplica(records, isFuture = false, partitionLeaderEpoch)\n\n    if (logTrace)\n      trace(\"Follower has replica log end offset %d after appending %d bytes of messages for partition %s\"\n        .format(log.logEndOffset, records.sizeInBytes, topicPartition))\n    val leaderLogStartOffset = partitionData.logStartOffset\n\n    // For the follower replica, we do not need to keep its segment base offset and physical position.\n    // These values will be computed upon becoming leader or handling a preferred read replica fetch.\n    var maybeUpdateHighWatermarkMessage = s\"but did not update replica high watermark\"\n    log.maybeUpdateHighWatermark(partitionData.highWatermark).ifPresent { newHighWatermark =>\n      maybeUpdateHighWatermarkMessage = s\"and updated replica high watermark to $newHighWatermark\"\n      partitionsWithNewHighWatermark += topicPartition",
+      "locator": "ReplicaFetcherThread.scala lines132–145",
+      "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/ReplicaFetcherThread.scala"
+    },
+    {
+      "id": "R4",
+      "text": "PartitionStatusValidator.Result result = statusValidator.validate(topicIdPartition.topicPartition(), status.requiredOffset);\n\n                // Update the partition status to reflect Case A, B, or C:\n                Errors errors = result.error;\n                if (errors != Errors.NONE || result.hasEnough()) {\n                    status.setAcksPending(false);\n                    status.responseStatus.error = errors;\n                }",
+      "locator": "DelayedProduce.java lines148–155",
+      "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/DelayedProduce.java"
+    },
+    {
+      "id": "R5",
+      "text": "return (targetIsr.contains(replica) || (targetIsr.isEmpty() && targetElr.contains(replica))) &&\n            isAcceptableLeader.test(replica);",
+      "locator": "PartitionChangeBuilder.java lines320–321",
+      "evidence": "episodes/message-queue/kafka-replica-acks/production/sources/PartitionChangeBuilder.java"
+    }
+  ],
+  "dependencies": {
+    "oldEngine": "episodes/_shared/append_references.py",
+    "oldEngineSHA256": "eb2f977335d3047fd3db9de36095195e133070fcb96f8f8b9410b464bb462a26",
+    "originalRenderer": "episodes/_shared/append_references_original.py",
+    "originalRendererSHA256": "3378ec5192d608f8937868f52a1271957e51ceb008a3c18934fc564efe57ea45",
+    "bibliographyRenderer": "episodes/_shared/append_references_bibliography.py",
+    "bibliographyRendererSHA256": "f7c738e396ead5a161751a7fd03e7c58fe5ee832409fec95d7881b3a5043015a",
+    "palette": "episodes/_shared/kafka-covers/style-v1.json",
+    "paletteSHA256": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
+    "paletteAdapterLibrary": "episodes/_shared/kafka-video/references.py",
+    "paletteAdapterLibrarySHA256": "7bd84a20c897d2890c26ca671f4d18b4e931d066e3298ea31337f16888274ba2",
+    "colorEncoding": {
+      "pix_fmt": "yuv420p",
+      "color_range": "tv",
+      "color_space": "bt709",
+      "color_transfer": "bt709",
+      "color_primaries": "bt709"
+    }
+  },
+  "colorEncoding": {
+    "pix_fmt": "yuv420p",
+    "color_range": "tv",
+    "color_space": "bt709",
+    "color_transfer": "bt709",
+    "color_primaries": "bt709"
+  }
+}

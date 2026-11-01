@@ -1,0 +1,4847 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-replica-acks",
+  "kind": "finite-teaching-model",
+  "sourceCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "event": {
+    "eventId": "E01",
+    "orderId": "7042",
+    "partition": "P0",
+    "offset": 0,
+    "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+  },
+  "conditions": {
+    "kafkaVersion": "4.4.0",
+    "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "topic": {
+      "partitions": 1,
+      "partition": 0,
+      "replication.factor": 3,
+      "min.insync.replicas": 2,
+      "unclean.leader.election.enable": false
+    },
+    "clusterFeatures": {
+      "eligible.leader.replicas.version": 0
+    },
+    "producer": {
+      "client": "Kafka Java4.4.0",
+      "enable.idempotence": false,
+      "retries": 0,
+      "max.in.flight.requests.per.connection": 1,
+      "linger.ms": 0,
+      "compression.type": "none",
+      "key.serializer": "org.apache.kafka.common.serialization.StringSerializer",
+      "value.serializer": "org.apache.kafka.common.serialization.StringSerializer",
+      "transactional.id": null,
+      "acksByBranch": {
+        "leader-only": "1",
+        "all-three": "all",
+        "all-two": "all",
+        "all-one-rejected": "all"
+      }
+    },
+    "event": {
+      "eventId": "E01",
+      "orderId": "7042",
+      "partition": "P0",
+      "offset": 0,
+      "singleProducer": true,
+      "singleApplicationSendPerBranch": true,
+      "noApplicationResend": true
+    },
+    "stableModelScope": {
+      "stableISRWithinEachSend": true,
+      "noPendingISRExpansionOrShrink": true,
+      "noExtraRecentlyCaughtUpEligibleCandidate": true,
+      "normalNonTransactionalAppend": true,
+      "controllerRolesNotDataReplicaVoting": true,
+      "failureCases": "One data-Broker failure; no disk erasure/fsync/disk failure proof."
+    },
+    "resets": "Each acks/ISR branch starts with the same empty P0 logs and config apart from declared acks/ISR membership. Selected acks1 trace delays both followers inside their currentISR lag allowance. Runtime uses independent empty topics, not deleting a published log.",
+    "runtimeStatus": "Independent three-node real runtime passed 7 branches/34 assertions; 33 physical snapshots officially decoded with 21 valid batch CRCs. Exact accepted report and scopes: runtime-cross-evidence.json. Teaching intermediate instruction states are not measured timings."
+  },
+  "stateScope": "Instruction-order explanatory snapshots, not timestamps or a complete broker/controller implementation. State quantities/source/scheduling assumptions must not be called measured runtime.",
+  "timeline": [
+    {
+      "id": "acks1-initial",
+      "label": "三份空日志，稳定ISR3",
+      "branch": "leader-only",
+      "resetBefore": true,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "1",
+        "sendCallCount": 0,
+        "future": "not-sent",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": false,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "initial",
+        "record": null
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 0,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "acks1-sent",
+      "label": "单条发送等待回复",
+      "branch": "leader-only",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "1",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": false,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "producer-send",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 0,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "acks1-appended",
+      "label": "主日志E01@0，另外两份仍空",
+      "branch": "leader-only",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "1",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": false,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "leader-append",
+        "to": "B1",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 1,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "acks1-response",
+      "label": "主追加后即可发成功响应",
+      "branch": "leader-only",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "1",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "in-flight",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": false,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "produce-response",
+        "to": "website",
+        "from": "B1"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 1,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "acks1-success",
+      "label": "网站收到成功；本例只有主日志有E01",
+      "branch": "leader-only",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "1",
+        "sendCallCount": 1,
+        "future": "success",
+        "response": "delivered",
+        "error": null,
+        "successMetadata": {
+          "partition": "P0",
+          "offset": 0
+        },
+        "ackEvidence": {
+          "leaderId": "B1",
+          "leaderHadRecord": true,
+          "highWatermark": 0,
+          "isr": [
+            "B1",
+            "B2",
+            "B3"
+          ],
+          "physicalCopies": 1
+        }
+      },
+      "admission": {
+        "applies": false,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "response-delivered",
+        "to": "website"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 1,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "acks1-leader-down",
+      "label": "只停原主，离线字节保留",
+      "branch": "leader-only",
+      "resetBefore": false,
+      "leaderId": null,
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": null,
+      "leaderKnownNext": {
+        "B1": null,
+        "B2": null,
+        "B3": null
+      },
+      "replicas": {
+        "B1": {
+          "available": false,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "offline",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "1",
+        "sendCallCount": 1,
+        "future": "success",
+        "response": "delivered",
+        "error": null,
+        "successMetadata": {
+          "partition": "P0",
+          "offset": 0
+        },
+        "ackEvidence": {
+          "leaderId": "B1",
+          "leaderHadRecord": true,
+          "highWatermark": 0,
+          "isr": [
+            "B1",
+            "B2",
+            "B3"
+          ],
+          "physicalCopies": 1
+        }
+      },
+      "admission": {
+        "applies": false,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "selecting-clean",
+        "cleanEligible": [
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "single-broker-failure",
+        "broker": "B1"
+      },
+      "hwCalculation": {
+        "participants": [],
+        "positions": {},
+        "candidate": null,
+        "underMinISR": false
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "acks1-takeover-missing",
+      "label": "clean接管后的新主日志没有E01",
+      "branch": "leader-only",
+      "resetBefore": false,
+      "leaderId": "B2",
+      "isr": [
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": null,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": false,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "offline",
+          "inISR": false
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "1",
+        "sendCallCount": 1,
+        "future": "success",
+        "response": "delivered",
+        "error": null,
+        "successMetadata": {
+          "partition": "P0",
+          "offset": 0
+        },
+        "ackEvidence": {
+          "leaderId": "B1",
+          "leaderHadRecord": true,
+          "highWatermark": 0,
+          "isr": [
+            "B1",
+            "B2",
+            "B3"
+          ],
+          "physicalCopies": 1
+        }
+      },
+      "admission": {
+        "applies": false,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable-after-clean",
+        "cleanEligible": [
+          "B2",
+          "B3"
+        ],
+        "selected": "B2",
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "clean-election",
+        "selected": "B2",
+        "scope": "Stable result after control-plane recovery, not controller-vote simulation."
+      },
+      "hwCalculation": {
+        "participants": [
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-initial",
+      "label": "同E01/配置，从三份空日志重置",
+      "branch": "all-three",
+      "resetBefore": true,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 0,
+        "future": "not-sent",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "initial",
+        "record": null
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 0,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-sent",
+      "label": "等待同步副本的单条发送",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "producer-send",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 0,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-admitted",
+      "label": "3>=2，追加前准入通过",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "admission-check"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 0,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-appended",
+      "label": "主追加E01@0；requiredOffset1/HW0",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "leader-append",
+        "to": "B1",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 1,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-b2-fetch0",
+      "label": "B2从自己末尾0拉取",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "fetch-request",
+        "from": "B2",
+        "to": "B1",
+        "requestOffset": 0,
+        "record": null
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 1,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-b2-copy",
+      "label": "响应携带记录副本，原主日志不动",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "fetch-response-copy",
+        "from": "B1",
+        "to": "B2",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        },
+        "originalRetained": true
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 1,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-b2-appended",
+      "label": "B2实际末尾1，Leader暂知0",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "follower-append",
+        "to": "B2",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 2,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-b2-reported",
+      "label": "下一次Fetch1使Leader获知B2已追齐",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "fetch-progress-report",
+        "to": "B1",
+        "requestOffset": 1,
+        "from": "B2"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 2,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-wait-third",
+      "label": "已知[1,1,0]；HW0，min2不等于只等2份",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "check-common-progress"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 2,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-b3-fetch0",
+      "label": "第三份仍从末尾0拉取",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "fetch-request",
+        "from": "B3",
+        "to": "B1",
+        "requestOffset": 0,
+        "record": null
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 2,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-b3-copy",
+      "label": "第三份响应副本在途中",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "fetch-response-copy",
+        "from": "B1",
+        "to": "B3",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        },
+        "originalRetained": true
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 2,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-b3-appended",
+      "label": "第三份已写1，Leader尚未知",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "follower-append",
+        "to": "B3",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1,
+          "B3": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 3,
+      "livePhysicalCopies": 3,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-hw-ready",
+      "label": "下次Fetch1报告后HW推进1，涵盖E01@0",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 1,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 1
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "fetch-progress-report-and-hw",
+        "to": "B1",
+        "requestOffset": 1,
+        "from": "B3"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1,
+          "B3": 1
+        },
+        "candidate": 1,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 3,
+      "livePhysicalCopies": 3,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": true
+    },
+    {
+      "id": "all3-response",
+      "label": "完成检查已满足，成功响应在途",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 1,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 1
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "in-flight",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "produce-response",
+        "to": "website",
+        "from": "B1"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1,
+          "B3": 1
+        },
+        "candidate": 1,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 3,
+      "livePhysicalCopies": 3,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": true
+    },
+    {
+      "id": "all3-success",
+      "label": "成功回复已到达网站",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 1,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 1
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "success",
+        "response": "delivered",
+        "error": null,
+        "successMetadata": {
+          "partition": "P0",
+          "offset": 0
+        },
+        "ackEvidence": {
+          "leaderId": "B1",
+          "leaderHadRecord": true,
+          "highWatermark": 1,
+          "isr": [
+            "B1",
+            "B2",
+            "B3"
+          ],
+          "physicalCopies": 3
+        }
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "response-delivered",
+        "to": "website"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1,
+          "B3": 1
+        },
+        "candidate": 1,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 3,
+      "livePhysicalCopies": 3,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": true
+    },
+    {
+      "id": "all3-settled",
+      "label": "成功后的后续拉取已使副本进度收敛",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 1,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 1
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "success",
+        "response": "delivered",
+        "error": null,
+        "successMetadata": {
+          "partition": "P0",
+          "offset": 0
+        },
+        "ackEvidence": {
+          "leaderId": "B1",
+          "leaderHadRecord": true,
+          "highWatermark": 1,
+          "isr": [
+            "B1",
+            "B2",
+            "B3"
+          ],
+          "physicalCopies": 3
+        }
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "follow-up-hw-propagation",
+        "scope": "Selected settled fault injection point; not an additional condition for producer success."
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1,
+          "B3": 1
+        },
+        "candidate": 1,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 3,
+      "livePhysicalCopies": 3,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": true
+    },
+    {
+      "id": "all3-leader-down",
+      "label": "只停原主，另外两份保留记录",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": null,
+      "isr": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": null,
+      "leaderKnownNext": {
+        "B1": null,
+        "B2": null,
+        "B3": null
+      },
+      "replicas": {
+        "B1": {
+          "available": false,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "offline",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "success",
+        "response": "delivered",
+        "error": null,
+        "successMetadata": {
+          "partition": "P0",
+          "offset": 0
+        },
+        "ackEvidence": {
+          "leaderId": "B1",
+          "leaderHadRecord": true,
+          "highWatermark": 1,
+          "isr": [
+            "B1",
+            "B2",
+            "B3"
+          ],
+          "physicalCopies": 3
+        }
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 3,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "selecting-clean",
+        "cleanEligible": [
+          "B2",
+          "B3"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "single-broker-failure",
+        "broker": "B1"
+      },
+      "hwCalculation": {
+        "participants": [],
+        "positions": {},
+        "candidate": null,
+        "underMinISR": false
+      },
+      "totalPhysicalCopies": 3,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all3-takeover-retained",
+      "label": "clean接管后新主保留E01",
+      "branch": "all-three",
+      "resetBefore": false,
+      "leaderId": "B2",
+      "isr": [
+        "B2",
+        "B3"
+      ],
+      "maximalISR": [
+        "B2",
+        "B3"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 1,
+      "leaderKnownNext": {
+        "B1": null,
+        "B2": 1,
+        "B3": 1
+      },
+      "replicas": {
+        "B1": {
+          "available": false,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "offline",
+          "inISR": false
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B3": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "success",
+        "response": "delivered",
+        "error": null,
+        "successMetadata": {
+          "partition": "P0",
+          "offset": 0
+        },
+        "ackEvidence": {
+          "leaderId": "B1",
+          "leaderHadRecord": true,
+          "highWatermark": 1,
+          "isr": [
+            "B1",
+            "B2",
+            "B3"
+          ],
+          "physicalCopies": 3
+        }
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable-after-clean",
+        "cleanEligible": [
+          "B2",
+          "B3"
+        ],
+        "selected": "B2",
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "clean-election",
+        "selected": "B2",
+        "scope": "Stable result, not controller vote simulation."
+      },
+      "hwCalculation": {
+        "participants": [
+          "B2",
+          "B3"
+        ],
+        "positions": {
+          "B2": 1,
+          "B3": 1
+        },
+        "candidate": 1,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 3,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": true
+    },
+    {
+      "id": "all2-initial",
+      "label": "再次同数据空日志重置，稳定ISR2",
+      "branch": "all-two",
+      "resetBefore": true,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 0,
+        "future": "not-sent",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "initial",
+        "record": null
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 0,
+          "B2": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all2-sent",
+      "label": "两份名单上的单条all发送",
+      "branch": "all-two",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "producer-send",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 0,
+          "B2": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all2-admitted",
+      "label": "2>=2，准入通过",
+      "branch": "all-two",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "admission-check"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 0,
+          "B2": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all2-appended",
+      "label": "主追加但共同进度仍0",
+      "branch": "all-two",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "leader-append",
+        "to": "B1",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 1,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all2-b2-fetch0",
+      "label": "当前第二份Fetch0",
+      "branch": "all-two",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "fetch-request",
+        "from": "B2",
+        "to": "B1",
+        "requestOffset": 0,
+        "record": null
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 1,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all2-b2-copy",
+      "label": "响应记录副本",
+      "branch": "all-two",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "fetch-response-copy",
+        "from": "B1",
+        "to": "B2",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        },
+        "originalRetained": true
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 1,
+      "livePhysicalCopies": 1,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all2-b2-appended",
+      "label": "第二份已写，但Leader尚未知",
+      "branch": "all-two",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "follower-append",
+        "to": "B2",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 0
+        },
+        "candidate": 0,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 2,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all2-hw-ready",
+      "label": "当前两份已知1，HW1",
+      "branch": "all-two",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 1,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": true
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "fetch-progress-report-and-hw",
+        "to": "B1",
+        "requestOffset": 1,
+        "from": "B2"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1
+        },
+        "candidate": 1,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 2,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": true
+    },
+    {
+      "id": "all2-response",
+      "label": "当前集合完成，成功响应在途",
+      "branch": "all-two",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 1,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "in-flight",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "produce-response",
+        "to": "website",
+        "from": "B1"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1
+        },
+        "candidate": 1,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 2,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": true
+    },
+    {
+      "id": "all2-success",
+      "label": "当前稳定ISR2的all成功",
+      "branch": "all-two",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1",
+        "B2"
+      ],
+      "maximalISR": [
+        "B1",
+        "B2"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": 1,
+      "highWatermark": 1,
+      "leaderKnownNext": {
+        "B1": 1,
+        "B2": 1,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 1,
+          "nextOffset": 1,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": true,
+          "records": [
+            {
+              "eventId": "E01",
+              "orderId": "7042",
+              "partition": "P0",
+              "offset": 0,
+              "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+            }
+          ],
+          "localHW": 0,
+          "nextOffset": 1,
+          "role": "follower",
+          "inISR": true
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "success",
+        "response": "delivered",
+        "error": null,
+        "successMetadata": {
+          "partition": "P0",
+          "offset": 0
+        },
+        "ackEvidence": {
+          "leaderId": "B1",
+          "leaderHadRecord": true,
+          "highWatermark": 1,
+          "isr": [
+            "B1",
+            "B2"
+          ],
+          "physicalCopies": 2
+        }
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": true,
+        "currentISRSize": 2,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": true,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1",
+          "B2"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "response-delivered",
+        "to": "website"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1",
+          "B2"
+        ],
+        "positions": {
+          "B1": 1,
+          "B2": 1
+        },
+        "candidate": 1,
+        "underMinISR": false,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 2,
+      "livePhysicalCopies": 2,
+      "activeLeaderHasEvent": true,
+      "completionConditionNow": true
+    },
+    {
+      "id": "all1-initial",
+      "label": "同数据空日志重置，稳定ISR1",
+      "branch": "all-one-rejected",
+      "resetBefore": true,
+      "leaderId": "B1",
+      "isr": [
+        "B1"
+      ],
+      "maximalISR": [
+        "B1"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 0,
+        "future": "not-sent",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 1,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "initial",
+        "record": null
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1"
+        ],
+        "positions": {
+          "B1": 0
+        },
+        "candidate": 0,
+        "underMinISR": true,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all1-sent",
+      "label": "单条all请求到达，尚未追加",
+      "branch": "all-one-rejected",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1"
+      ],
+      "maximalISR": [
+        "B1"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "none",
+        "error": null,
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": false,
+        "passed": null,
+        "currentISRSize": 1,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "producer-send",
+        "record": {
+          "eventId": "E01",
+          "orderId": "7042",
+          "partition": "P0",
+          "offset": 0,
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1"
+        ],
+        "positions": {
+          "B1": 0
+        },
+        "candidate": 0,
+        "underMinISR": true,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all1-response",
+      "label": "1<2，在append调用前拒绝",
+      "branch": "all-one-rejected",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1"
+      ],
+      "maximalISR": [
+        "B1"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "pending",
+        "response": "in-flight",
+        "error": "NOT_ENOUGH_REPLICAS",
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": false,
+        "currentISRSize": 1,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "pre-append-rejection"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1"
+        ],
+        "positions": {
+          "B1": 0
+        },
+        "candidate": 0,
+        "underMinISR": true,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    },
+    {
+      "id": "all1-rejected",
+      "label": "本次失败回复到网站，日志仍空",
+      "branch": "all-one-rejected",
+      "resetBefore": false,
+      "leaderId": "B1",
+      "isr": [
+        "B1"
+      ],
+      "maximalISR": [
+        "B1"
+      ],
+      "extraCatchupCandidates": [],
+      "minISR": 2,
+      "requiredOffset": null,
+      "highWatermark": 0,
+      "leaderKnownNext": {
+        "B1": 0,
+        "B2": 0,
+        "B3": 0
+      },
+      "replicas": {
+        "B1": {
+          "available": true,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "leader",
+          "inISR": true
+        },
+        "B2": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        },
+        "B3": {
+          "available": false,
+          "records": [],
+          "localHW": 0,
+          "nextOffset": 0,
+          "role": "offline",
+          "inISR": false
+        }
+      },
+      "producer": {
+        "acks": "all",
+        "sendCallCount": 1,
+        "future": "failed",
+        "response": "delivered",
+        "error": "NOT_ENOUGH_REPLICAS",
+        "successMetadata": null,
+        "ackEvidence": null
+      },
+      "admission": {
+        "applies": true,
+        "evaluated": true,
+        "passed": false,
+        "currentISRSize": 1,
+        "minimum": 2
+      },
+      "delayedProduce": {
+        "created": false,
+        "acksPending": false
+      },
+      "controller": {
+        "mode": "stable",
+        "cleanEligible": [
+          "B1"
+        ],
+        "selected": null,
+        "eligibleLeaderReplicasFeature": 0,
+        "uncleanLeaderElection": false
+      },
+      "consumer": {
+        "businessCompleted": false
+      },
+      "fsyncProvenByThisAck": false,
+      "event": {
+        "kind": "failure-delivered"
+      },
+      "hwCalculation": {
+        "participants": [
+          "B1"
+        ],
+        "positions": {
+          "B1": 0
+        },
+        "candidate": 0,
+        "underMinISR": true,
+        "scope": "Stable ISR; no pending expansion or additional caught-up eligible replica."
+      },
+      "totalPhysicalCopies": 0,
+      "livePhysicalCopies": 0,
+      "activeLeaderHasEvent": false,
+      "completionConditionNow": false
+    }
+  ]
+}

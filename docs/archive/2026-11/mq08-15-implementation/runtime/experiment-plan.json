@@ -1,0 +1,51 @@
+{
+  "createdAtUTC": "2026-11-01T09:10:33.653827+00:00",
+  "status": "planned-not-executed",
+  "scope": "Real Kafka4.4.0 finite local Java experiments; teaching models/animation outputs are separate. Only this new runtime archive and owned /tmp services may be written.",
+  "resources": {
+    "javaRuntime": "21.0.12.1",
+    "compiler": "java -m jdk.compiler/com.sun.tools.javac.Main; version21.0.12.1 actually verified",
+    "cpuQuota": 4,
+    "memoryLimitBytes": 17179869184,
+    "tmpInitiallyFreeGB": 9.44,
+    "oldKafkaDistributionPresent": false,
+    "services": "Isolated loopback ports; owned process groups and data directories; stop all on completion/failure."
+  },
+  "network": {
+    "environment": "current/running/connected",
+    "policy": "enforced restricted",
+    "vpnConfigured": false,
+    "trust": "Inherited proxy/CA; TLS verification enabled. No Docker or policy bypass."
+  },
+  "mq08Contract": {
+    "sourceOwner": "/root/mq_research + mq08_examples",
+    "source": "episodes/message-queue/kafka-retry-dead-letter/production/examples",
+    "consumer": "Single classic owner, one partition,max.poll.records1,enable.auto.commit=false,explicit initial committed0. Pause partition during async handler/backoff but continue owner poll.",
+    "journal": "Single-volume durable local logicalHandler/eventId budget and outcome; exclusive process lock; started attempts including first <=3; journal before invoking handler. Not distributed or global exactly-once storage.",
+    "cases": [
+      "temporary,temporary,success => attempts3, business success, noDLQ, originalcommit1",
+      "permanent refusal => no further business retry, DLQFutureack before originalcommit1",
+      "temporary failure exhausts attempts3 => DLQ ack then commit1",
+      "missingDLQ/autocreatefalse => actualsend failure, originalcommit0",
+      "crashafter-begin => samejournal restart preserves consumed budget and originalre-read",
+      "crashafter-handler-success-before-journal => unknown effect window, sameevent re-read, remainingbudget only",
+      "crashafter-DLQ-ack-before-journal => DLQ duplicate window reproduced, originalcommit0",
+      "crashafter-DLQ-journal-before-commit => restart re-read, confirmedlocalDLQ not resent, originalcommit1"
+    ]
+  },
+  "mq15Contract": {
+    "sourceOwner": "/root/mq_animation",
+    "cluster": "3combined KRaft localbrokers/controllers; CLIENT direct, REPLICATION listener via owned transparent loopbackproxy, CONTROLLER direct. RF3/minISR2/ELRactualfeature0/uncleanfalse.",
+    "producer": "Explicit enable.idempotencefalse/retries0/max.in.flight1,acks1 vsall; delivery/requesttimeouts recorded.",
+    "cases": [
+      "ISR3 healthy ack1 andall actualproducerreturn/log evidence",
+      "pause one follower briefly while preserving2/3controllerquorum; ISRstill3, two replicasLEO1 vsstopped0,allFuturepending/HWbelow1; resume enablesack",
+      "stableISR2 allsuccess with two actualcopies",
+      "gate all follower data Fetch via leader REPLICATION proxy while3controllersalive; waitactualISR1; allNotEnoughReplicas and noappend",
+      "gate leader REPLICATION; ack1localappend; proveLEOleader1/followers0+ISR3beforefault; killleader whilegateheld; cleanelection on survivingISR replica; recordretention/loss from realcopies. Do not claim powerloss or benchmark."
+    ],
+    "measurement": "ISR/leader from Adminmetadata; producerFuture/error separately; realper-replica logrecords/LEO/HW measured where available; no sleep-race result accepted."
+  },
+  "successClaimPolicy": "No planned case is described as passed until actual raw output and assertions exist. Retain failed attempts before repair.",
+  "cleanup": "Only owned isolated broker/controller/proxy processes and temporary business data; retain raw evidence/code/config/logs in this archive."
+}

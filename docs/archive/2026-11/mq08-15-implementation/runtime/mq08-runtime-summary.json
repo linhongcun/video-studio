@@ -1,0 +1,186 @@
+{
+  "createdAtUTC": "2026-11-01T09:32:07.808121+00:00",
+  "kind": "real-Kafka-runtime-result-summary-not-a-video-freeze",
+  "episode": "MQ08 / kafka-retry-dead-letter",
+  "pass": true,
+  "report": "runs/mq08-20261101T092105.198110Z/report.json",
+  "reportSHA256": "dd06c78fef4ece9320440325e17e5410f632855e56fb3204f91e0aaf84039555",
+  "runIndex": "runs/mq08-20261101T092105.198110Z/files-sha256.json",
+  "runIndexSHA256": "57a2247cbd8628c9a4da6768d10db75819e1fb37a20fdaef0ed8f9d9b38aeb30",
+  "indexedRunFiles": 153,
+  "indexedRunFilesIndependentlyRehashed": true,
+  "version": "4.4.0",
+  "commit": "1156b2752aaa28ea",
+  "workerSHA256": "a1ea6e69bf3f5ce87dbd367a45d11a00b1abe1cf02c9002c8e75dac6dfbdaf99",
+  "actualCases": 8,
+  "assertions": 151,
+  "workerJvms": 15,
+  "actualHalt86Count": 6,
+  "cases": [
+    {
+      "case": "temporary-recovery",
+      "workerJvms": 1,
+      "durableReservationOrdinals": [
+        1,
+        2,
+        3
+      ],
+      "simulatedHandlerInvocations": 3,
+      "finalOriginalCommitted": 1,
+      "finalDlqRecords": 0,
+      "snapshotTags": [
+        "initial",
+        "final"
+      ]
+    },
+    {
+      "case": "permanent",
+      "workerJvms": 1,
+      "durableReservationOrdinals": [
+        1
+      ],
+      "simulatedHandlerInvocations": 1,
+      "finalOriginalCommitted": 1,
+      "finalDlqRecords": 1,
+      "snapshotTags": [
+        "initial",
+        "final"
+      ]
+    },
+    {
+      "case": "budget-exhausted",
+      "workerJvms": 1,
+      "durableReservationOrdinals": [
+        1,
+        2,
+        3
+      ],
+      "simulatedHandlerInvocations": 3,
+      "finalOriginalCommitted": 1,
+      "finalDlqRecords": 1,
+      "snapshotTags": [
+        "initial",
+        "final"
+      ]
+    },
+    {
+      "case": "dlq-unavailable",
+      "workerJvms": 2,
+      "durableReservationOrdinals": [
+        1
+      ],
+      "simulatedHandlerInvocations": 1,
+      "finalOriginalCommitted": 1,
+      "finalDlqRecords": 1,
+      "snapshotTags": [
+        "initial",
+        "failed-dlq",
+        "after-repair-same-journal"
+      ]
+    },
+    {
+      "case": "restart-budget",
+      "workerJvms": 4,
+      "durableReservationOrdinals": [
+        1,
+        2,
+        3
+      ],
+      "simulatedHandlerInvocations": 0,
+      "finalOriginalCommitted": 1,
+      "finalDlqRecords": 1,
+      "snapshotTags": [
+        "initial",
+        "after-halt-1",
+        "after-halt-2",
+        "after-halt-3",
+        "final"
+      ]
+    },
+    {
+      "case": "success-before-journal",
+      "workerJvms": 2,
+      "durableReservationOrdinals": [
+        1,
+        2
+      ],
+      "simulatedHandlerInvocations": 2,
+      "finalOriginalCommitted": 1,
+      "finalDlqRecords": 0,
+      "snapshotTags": [
+        "initial",
+        "after-halt",
+        "final"
+      ]
+    },
+    {
+      "case": "dlq-ack-before-journal",
+      "workerJvms": 2,
+      "durableReservationOrdinals": [
+        1
+      ],
+      "simulatedHandlerInvocations": 1,
+      "finalOriginalCommitted": 1,
+      "finalDlqRecords": 2,
+      "snapshotTags": [
+        "initial",
+        "after-halt",
+        "final"
+      ]
+    },
+    {
+      "case": "dlq-journal-before-commit",
+      "workerJvms": 2,
+      "durableReservationOrdinals": [
+        1
+      ],
+      "simulatedHandlerInvocations": 1,
+      "finalOriginalCommitted": 1,
+      "finalDlqRecords": 1,
+      "snapshotTags": [
+        "initial",
+        "after-halt",
+        "final"
+      ]
+    }
+  ],
+  "realIoScope": [
+    "One real loopback Kafka4.4.0 RF1 combined KRaft broker, classic manual-commit single consumer, one P0 and max.poll.records1.",
+    "Each case seeded fresh physical E01/order7042@0 and E02@1; explicit initial committed0. Independent Admin+assign-only read consumer inspect physical original/DLQ logs and offsets.",
+    "Actual Java child-process halt/restart; same single local state directory/journal is reused, with ordinary local fsync+atomicrename and process lock. Old group member expiration is observed before restart to retain a single stable owner.",
+    "Missing DLQ topic with Broker/client auto-create disabled is the concrete DLQ-unavailability injection.",
+    "Worker owner keeps polling while its partition is paused during fixture handler/backoff/DLQ send/offset callback; actual due-time checks precede the next reservation."
+  ],
+  "interpretation": [
+    "Temporary failure succeeds on third invocation without DLQ; permanent rejection uses one invocation; three temporary failures exhaust budget and produce DLQ.",
+    "Missing DLQ send future fails; originalcommitted stays0. After creating DLQ, the same journal resumes without another handler invocation and finally commits1.",
+    "Three separate after-begin halts durably consume reservations1/2/3 before any handler call. On the fourth process, unknown-outcome exhausted budget goes to DLQ. This conservatively consumes reserved budget; it is not evidence that three real notifications were invoked.",
+    "A successful fixture result not yet journaled is invoked again after restart with reservation2, showing the unknown-business-result window.",
+    "A confirmed DLQ write not yet journaled leaves sourcecommitted0/DLQ1; new-process replay sends again and actual DLQ log has two equal payloads at offsets0/1, then sourcecommitted1.",
+    "A journaled DLQ confirmation before sourcecommit leaves sourcecommitted0/DLQ1; replay skips handler and DLQsend, commits1, and actual DLQ remains one record."
+  ],
+  "failureBoundary": {
+    "firstCompilerFailure": "failures/compile-01",
+    "originalAuthorSnapshot": "mq08-source-snapshot",
+    "reason": "Kafka4.4 moved AppInfoParser to utils.internals. Author corrected one Worker import; runtime Probe corrected separately. Original compile outputs/source preserved. No Kafka behavioral failure hidden."
+  },
+  "currentHarnessIdentityAtCollection": {
+    "run_mq08.py": "fc742d4fc9c66f125c16c8bb4f088d12e916ca25337806072f5841faabdc5bc3",
+    "Mq08RuntimeProbe.java": "0fa9fe3d8c01a58e497f3845e346f58d9fddfb630d21f3bf19949f04e28128a3",
+    "client-log4j2.yaml": "ab2ce39ec440d6b0a66fc1d6a5d63e9eb2dac4c74f5ff54e54e8a4899998adee",
+    "broker-log4j2.yaml": "1158054e39f29c7b0822c110c608066d80cc3887ab140257301316e01b28c4ef",
+    "prepare_dependencies.py": "5ad0432a744ea8df29ac547a3165d00803a4ba595a569cf8fade1ce9fb25c8d0"
+  },
+  "cleanup": {
+    "brokerStopped": true,
+    "temporaryDataRemoved": true,
+    "brokerExit": 143
+  },
+  "limitations": [
+    "Business handler is explicitly a finite simulated classification/delay fixture, not a live notification HTTP service; a real broker/process/journal test does not measure external side effects.",
+    "Local stable logical handler/event key journal is not global distributed storage, a distributed transaction, an exactly-once claim or permanent-failure semantics for all systems.",
+    "Process Runtime.halt/SIGTERM tests are not power-loss or fsync reliability proofs; no throughput/benchmark or real-device/media validation claim.",
+    "Author pure-core44check test is a separate record and not included in this151real-runtime assertion count.",
+    "No prior batch runtime was rerun or overwritten; only new archive and owned /tmp services used."
+  ]
+}

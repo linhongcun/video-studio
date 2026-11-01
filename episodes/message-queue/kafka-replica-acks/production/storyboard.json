@@ -1,0 +1,980 @@
+{
+  "meta": {
+    "title": "Kafka 多副本确认：写入成功，到底哪些副本已经跟上？",
+    "episode": 49,
+    "episodePart": "Kafka MQ15 · 多副本确认",
+    "slug": "kafka-replica-acks",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5460,
+    "finalVideoFrames": 5460,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "kafka-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户持续授权从issue推进Kafka消息队列视频，沿已认可的同事件实现因果方法完成制作、独立审查与GitHub本站上线；本批MQ08/MQ15，不包含外部平台发布。",
+    "palette": {
+      "bg": "#211D1B",
+      "text": "#FFF1E8"
+    },
+    "sampleDataLabel": "单条教学事件/受控调度，非时延或吞吐实测",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "style": "kafka-covers-v1-mq08-15",
+      "ep": 49,
+      "number": "MQ15",
+      "planningIssue": 323,
+      "productionRoot": "episodes/message-queue/kafka-replica-acks/production",
+      "seriesSource": "episodes/_shared/kafka-covers-mq08-15",
+      "sourceSha256": {
+        "template.mjs": "67c1f64ff8f7359ed89f6f7654e24cc51d4c957edf74ce01ce12efd54fe3c4b5",
+        "diagrams.mjs": "345255a37971b7bf85ec3d0483a906251ec841dbd3f359204ce293ccc83d2af7",
+        "catalog.json": "bad1594a8bf1033f7ef2e1fb625761752eead01146a0e922987a55774480283f",
+        "../kafka-covers/style-v1.json": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
+        "plan-layout.json": "5d703ee73f1b0db2e72419d27c9178ce32358afc70a4e57c9efd5028df87df21",
+        "../kafka-covers/background.png": "199dc512fdcf0ce3fc6d23323a91b673ed9925cfbf9ff42fe963e74eb0b3e9a2",
+        "render.py": "6231fc0dce7931743eea2611a7f262c91525e7efea2bf560c9319026a96c5d23",
+        "README.md": "8a21d4a345fa1af3edd08ec7a10e98feefb85a1f55145d35bb8675edd6062717",
+        "../middleware-identity/apachekafka-original.svg": "2505c5b688c18c8fd5dd8e888561eb7b23a56a75d291ff17e8ee18770193f3e8",
+        "../middleware-identity/LICENSE.txt": "121194741d4a915b9f5890fdd6dd95121f9b1f816517c792358d72d7c838d664",
+        "../middleware-identity/source.json": "6a0b66d82e92dc4159f5bae8ea956e88896bca227c961f8a9f3797f4d195b267",
+        "../middleware-identity/NOTICE.md": "506f3da9e99fd2cef2aa9a040b1854fceff7ab4ad80d778d3d32a449ce43d220"
+      },
+      "sitePoster": "cover-16x9.jpg",
+      "portraitPoster": "poster.jpg",
+      "covers": {
+        "16x9": {
+          "dimensions": [
+            1920,
+            1080
+          ],
+          "jpgSha256": "a1698d7dd968eb1b762cff243471f294afb5659d51d0aee8b4ea9800aaf08987",
+          "pngSha256": "5aa528dde9247724bbda7d05cdd1ee33bb12aeb6cbdfcb6ac61f470f07d617f8"
+        },
+        "3x4": {
+          "dimensions": [
+            1080,
+            1440
+          ],
+          "jpgSha256": "37c2f991f8473f64934638705eef129403f448da8d1aec0e787ea515cbcff7a2",
+          "pngSha256": "881b76c1e025103d489751ce769ae63a9a3d8c0c1c5d55b7d98d7e206635cfb1"
+        },
+        "4x3": {
+          "dimensions": [
+            1440,
+            1080
+          ],
+          "jpgSha256": "f0e639fd3e798d2371e27b9cafbd7e75483b105286491aa9fabdc655d738fe6c",
+          "pngSha256": "ae879e1d5aa2ae409345471d133a9b333d9a641c6328c469f20d18725ddcb80e"
+        }
+      }
+    },
+    "discussionQuestion": "最小同步副本数为二，为什么同步名单仍有三份时不能只等两份？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes/_shared/kafka-covers/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "leader",
+      "chapterId": "leader",
+      "title": "主副本确认",
+      "from": 0,
+      "durationInFrames": 1641,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "leader",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 297,
+          "narration": "网站发送订单七零四二的事件一，等卡夫卡返回成功。这个成功，到底说明零号分区的哪几份副本已经跟上？",
+          "subtitles": [
+            {
+              "text": "网站发送订单七零四二的事件一，等卡夫卡返回成功。",
+              "from": 0,
+              "to": 147,
+              "duration": 148
+            },
+            {
+              "text": "这个成功，到底说明零号分区的哪几份副本已经跟上？",
+              "from": 148,
+              "to": 296,
+              "duration": 149
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 137.96,
+              "localStart": 9.0,
+              "localEnd": 137.96
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 148.46,
+              "wavEnd": 276.34,
+              "localStart": 148.46,
+              "localEnd": 276.34
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              148
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 9.0,
+            "wavTo": 276.34,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "真实功能示意，网站的“发送订单事件E01”与“等待写入确认”任务；不套浏览器壳、不先显示成功。三个P0日志空间作为后续机制落点，顶部稀疏四段导航。",
+          "direction": "真实功能示意，网站的“发送订单事件E01”与“等待写入确认”任务；不套浏览器壳、不先显示成功。三个P0日志空间作为后续机制落点，顶部稀疏四段导航。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "leader",
+          "visualType": "replicas",
+          "from": 297,
+          "durationInFrames": 474,
+          "narration": "本例只看同一分区的三份数据副本，一份主副本接收写入，两份跟随副本复制它的日志。先从三份空日志开始，位置都为零；这里的位置，指下一条将写在哪里。",
+          "subtitles": [
+            {
+              "text": "本例只看同一分区的三份数据副本，一份主副本接收写入，两份跟随副本复制它的日志。",
+              "from": 0,
+              "to": 248,
+              "duration": 249
+            },
+            {
+              "text": "先从三份空日志开始，位置都为零；这里的位置，指下一条将写在哪里。",
+              "from": 249,
+              "to": 473,
+              "duration": 225
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-replicas-1",
+              "wavStart": 297.34,
+              "wavEnd": 536.12,
+              "localStart": 0.339999999999975,
+              "localEnd": 239.12
+            },
+            {
+              "id": "02-replicas-2",
+              "wavStart": 546.62,
+              "wavEnd": 750.58,
+              "localStart": 249.62,
+              "localEnd": 453.58000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              249
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 297.34,
+            "wavTo": 750.58,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "B1为主副本，B2/B3为跟随副本，P0三条日志固定空间，下一位置0。简明条件条RF3/minISR2、ELR关闭、unclean关闭、单条/无幂等重试；其他机器不参加此分区。",
+          "direction": "B1为主副本，B2/B3为跟随副本，P0三条日志固定空间，下一位置0。简明条件条RF3/minISR2、ELR关闭、unclean关闭、单条/无幂等重试；其他机器不参加此分区。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "leader",
+          "visualType": "leader-ack",
+          "from": 771,
+          "durationInFrames": 355,
+          "narration": "先选只确认主副本的方式。主副本把事件一放在位置零，末尾变成一，就可以回复成功；它不用等另外两份复制完成。",
+          "subtitles": [
+            {
+              "text": "先选只确认主副本的方式。",
+              "from": 0,
+              "to": 81,
+              "duration": 82
+            },
+            {
+              "text": "主副本把事件一放在位置零，末尾变成一，就可以回复成功；它不用等另外两份复制完成。",
+              "from": 82,
+              "to": 354,
+              "duration": 273
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-leader-ack-1",
+              "wavStart": 771.58,
+              "wavEnd": 842.73,
+              "localStart": 0.5800000000000409,
+              "localEnd": 71.73000000000002
+            },
+            {
+              "id": "03-leader-ack-2",
+              "wavStart": 853.23,
+              "wavEnd": 1105.5,
+              "localStart": 82.23000000000002,
+              "localEnd": 334.5
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              82
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 771.58,
+            "wavTo": 1105.5,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "acks=1，调用后pending；B1追加E01@0/下一位置1，再由B1发送成功响应，抵达网站后才成功。B2/B3日志保持空；原记录不移动；选定复制尚未完成的调度。",
+          "direction": "acks=1，调用后pending；B1追加E01@0/下一位置1，再由B1发送成功响应，抵达网站后才成功。B2/B3日志保持空；原记录不移动；选定复制尚未完成的调度。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "leader",
+          "visualType": "leader-loss",
+          "from": 1126,
+          "durationInFrames": 515,
+          "narration": "选定这次还没来得及复制的调度，只停掉主节点，另两份还没有事件一。控制面让其中存活的一份接管，新主日志里却找不到这条已经确认的记录；原主离线日志中的字节仍可能保留。",
+          "subtitles": [
+            {
+              "text": "选定这次还没来得及复制的调度，只停掉主节点，另两份还没有事件一。",
+              "from": 0,
+              "to": 183,
+              "duration": 184
+            },
+            {
+              "text": "控制面让其中存活的一份接管，新主日志里却找不到这条已经确认的记录；原主离线日志中的字节仍可能保留。",
+              "from": 184,
+              "to": 514,
+              "duration": 331
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-leader-loss-1",
+              "wavStart": 1126.5,
+              "wavEnd": 1299.95,
+              "localStart": 0.5,
+              "localEnd": 173.95000000000005
+            },
+            {
+              "id": "04-leader-loss-2",
+              "wavStart": 1310.45,
+              "wavEnd": 1620.24,
+              "localStart": 184.45000000000005,
+              "localEnd": 494.24
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              184
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 1126.5,
+            "wavTo": 1620.24,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "B1停止服务但灰色离线日志保留E01。控制面从存活ISR中选择B2为新主，B2/B3日志仍空；只标“新主没有E01”，不说所有物理字节消失、不演数据副本相互投票。",
+          "direction": "B1停止服务但灰色离线日志保留E01。控制面从存活ISR中选择B2为新主，B2/B3日志仍空；只标“新主没有E01”，不说所有物理字节消失、不演数据副本相互投票。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "replication",
+      "chapterId": "replication",
+      "title": "复制进度怎样确认",
+      "from": 1641,
+      "durationInFrames": 2473,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "replication",
+          "visualType": "all-reset",
+          "from": 1641,
+          "durationInFrames": 402,
+          "narration": "重置成同样的三份空日志，这次改为等待同步副本的确认方式。这份跟进名单叫同步副本集合，此刻有三份；我们把最小同步数量固定为二。",
+          "subtitles": [
+            {
+              "text": "重置成同样的三份空日志，这次改为等待同步副本的确认方式。",
+              "from": 0,
+              "to": 165,
+              "duration": 166
+            },
+            {
+              "text": "这份跟进名单叫同步副本集合，此刻有三份；我们把最小同步数量固定为二。",
+              "from": 166,
+              "to": 401,
+              "duration": 236
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-all-reset-1",
+              "wavStart": 1641.24,
+              "wavEnd": 1797.25,
+              "localStart": 0.2400000000000091,
+              "localEnd": 156.25
+            },
+            {
+              "id": "05-all-reset-2",
+              "wavStart": 1807.75,
+              "wavEnd": 2022.1,
+              "localStart": 166.75,
+              "localEnd": 381.0999999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              166
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 1641.24,
+            "wavTo": 2022.1,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "显式“相同E01 · 从空日志重置”，acks=all，稳定ISR=[B1,B2,B3]，minISR=2。先用已有三份对象形成名单再出现ISR简称；不是“所有集群机器”，也不是名单中每份已持有新记录。",
+          "direction": "显式“相同E01 · 从空日志重置”，acks=all，稳定ISR=[B1,B2,B3]，minISR=2。先用已有三份对象形成名单再出现ISR简称；不是“所有集群机器”，也不是名单中每份已持有新记录。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "replication",
+          "visualType": "admission",
+          "from": 2043,
+          "durationInFrames": 400,
+          "narration": "系统先检查名单中至少有两份；三份够数，才把事件一追加到主副本。它写在位置零，所以这次复制完成，要让共同进度越过它、到达下一位置一。",
+          "subtitles": [
+            {
+              "text": "系统先检查名单中至少有两份；三份够数，才把事件一追加到主副本。",
+              "from": 0,
+              "to": 187,
+              "duration": 188
+            },
+            {
+              "text": "它写在位置零，所以这次复制完成，要让共同进度越过它、到达下一位置一。",
+              "from": 188,
+              "to": 399,
+              "duration": 212
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-admission-1",
+              "wavStart": 2043.1,
+              "wavEnd": 2221.24,
+              "localStart": 0.09999999999990905,
+              "localEnd": 178.23999999999978
+            },
+            {
+              "id": "06-admission-2",
+              "wavStart": 2231.74,
+              "wavEnd": 2422.26,
+              "localStart": 188.73999999999978,
+              "localEnd": 379.2600000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              188
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 2043.1,
+            "wavTo": 2422.26,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "3≥2先通过准入，B1才追加E01@0/LEO1；本条requiredOffset=1（下一位置），HW仍0，Producer pending。先对象/动作后简称，用同一条记录解释0→1。",
+          "direction": "3≥2先通过准入，B1才追加E01@0/LEO1；本条requiredOffset=1（下一位置），HW仍0，Producer pending。先对象/动作后简称，用同一条记录解释0→1。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "replication",
+          "visualType": "copy-second",
+          "from": 2443,
+          "durationInFrames": 404,
+          "narration": "第二份从自己的末尾位置零发起拉取，主副本返回事件一的一份副本。第二份也把它写在位置零，末尾变为一，主副本原来的记录仍在。",
+          "subtitles": [
+            {
+              "text": "第二份从自己的末尾位置零发起拉取，主副本返回事件一的一份副本。",
+              "from": 0,
+              "to": 212,
+              "duration": 213
+            },
+            {
+              "text": "第二份也把它写在位置零，末尾变为一，主副本原来的记录仍在。",
+              "from": 213,
+              "to": 403,
+              "duration": 191
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-copy-second-1",
+              "wavStart": 2443.26,
+              "wavEnd": 2645.74,
+              "localStart": 0.2600000000002183,
+              "localEnd": 202.73999999999978
+            },
+            {
+              "id": "07-copy-second-2",
+              "wavStart": 2656.24,
+              "wavEnd": 2826.61,
+              "localStart": 213.23999999999978,
+              "localEnd": 383.6100000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              213
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 2443.26,
+            "wavTo": 2826.61,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "B2→B1 Fetch(0)，B1→B2仅移动响应副本；到达后B2追加同E01@0，实际末尾1。Leader“已知B2进度”仍0，B1原记录始终不动；不用移动文字卡穿过日志。",
+          "direction": "B2→B1 Fetch(0)，B1→B2仅移动响应副本；到达后B2追加同E01@0，实际末尾1。Leader“已知B2进度”仍0，B1原记录始终不动；不用移动文字卡穿过日志。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "replication",
+          "visualType": "report-second",
+          "from": 2847,
+          "durationInFrames": 454,
+          "narration": "但主副本得等第二份下一次带位置一来拉取，才知道它已经写到哪。第三份仍是零，三份的共同进度就停在零；这条边界叫高水位，不会因为已有两份就放行。",
+          "subtitles": [
+            {
+              "text": "但主副本得等第二份下一次带位置一来拉取，才知道它已经写到哪。",
+              "from": 0,
+              "to": 177,
+              "duration": 178
+            },
+            {
+              "text": "第三份仍是零，三份的共同进度就停在零；这条边界叫高水位，不会因为已有两份就放行。",
+              "from": 178,
+              "to": 453,
+              "duration": 276
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-report-second-1",
+              "wavStart": 2847.61,
+              "wavEnd": 3014.53,
+              "localStart": 0.6100000000001273,
+              "localEnd": 167.5300000000002
+            },
+            {
+              "id": "08-report-second-2",
+              "wavStart": 3025.03,
+              "wavEnd": 3280.74,
+              "localStart": 178.0300000000002,
+              "localEnd": 433.7399999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              178
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 2847.61,
+            "wavTo": 3280.74,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "B2再次Fetch(1)抵达，Leader已知进度[1,1,0]；稳定本例共同位置min=0，标出HW涵盖offset<0，E01@0尚不在其中。minISR2≠固定只等2份，all保持pending。实际末尾与Leader已知进度两列。",
+          "direction": "B2再次Fetch(1)抵达，Leader已知进度[1,1,0]；稳定本例共同位置min=0，标出HW涵盖offset<0，E01@0尚不在其中。minISR2≠固定只等2份，all保持pending。实际末尾与Leader已知进度两列。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "replication",
+          "visualType": "copy-third",
+          "from": 3301,
+          "durationInFrames": 451,
+          "narration": "第三份也拉取、写入，再用下一次请求把位置一报回。三份都已跨过事件一，高水位才推进到一；等待中的发送这时才满足条件，成功回复再返回网站。",
+          "subtitles": [
+            {
+              "text": "第三份也拉取、写入，再用下一次请求把位置一报回。",
+              "from": 0,
+              "to": 156,
+              "duration": 157
+            },
+            {
+              "text": "三份都已跨过事件一，高水位才推进到一；等待中的发送这时才满足条件，成功回复再返回网站。",
+              "from": 157,
+              "to": 450,
+              "duration": 294
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-copy-third-1",
+              "wavStart": 3301.74,
+              "wavEnd": 3448.24,
+              "localStart": 0.7399999999997817,
+              "localEnd": 147.23999999999978
+            },
+            {
+              "id": "09-copy-third-2",
+              "wavStart": 3458.74,
+              "wavEnd": 3731.94,
+              "localStart": 157.73999999999978,
+              "localEnd": 430.94000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              157
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 3301.74,
+            "wavTo": 3731.94,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "B3 Fetch0/响应副本/同offset追加/再Fetch1报告，Leader已知[1,1,1]→HW1（涵盖E01@0）→等待完成条件成立→成功响应回到网站。完成文字只在对应状态完成后出现。",
+          "direction": "B3 Fetch0/响应副本/同offset追加/再Fetch1报告，Leader已知[1,1,1]→HW1（涵盖E01@0）→等待完成条件成立→成功响应回到网站。完成文字只在对应状态完成后出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "replication",
+          "visualType": "all-survives",
+          "from": 3752,
+          "durationInFrames": 362,
+          "narration": "这次在复制完成后，只停掉主节点，另外两份仍保留事件一。控制面从存活的同步副本里选出新主，已有记录仍能保留下来。",
+          "subtitles": [
+            {
+              "text": "这次在复制完成后，只停掉主节点，另外两份仍保留事件一。",
+              "from": 0,
+              "to": 175,
+              "duration": 176
+            },
+            {
+              "text": "控制面从存活的同步副本里选出新主，已有记录仍能保留下来。",
+              "from": 176,
+              "to": 361,
+              "duration": 186
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-all-survives-1",
+              "wavStart": 3752.94,
+              "wavEnd": 3918.26,
+              "localStart": 0.9400000000000546,
+              "localEnd": 166.26000000000022
+            },
+            {
+              "id": "10-all-survives-2",
+              "wavStart": 3928.76,
+              "wavEnd": 4093.78,
+              "localStart": 176.76000000000022,
+              "localEnd": 341.7800000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              176
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 3752.94,
+            "wavTo": 4093.78,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先显示复制与进度已收敛的all结果，再单故障。B1离线但其日志不抹除，B2/B3各有E01；控制面按clean资格选新主；本镜只示意稳定接管结果，非KRaft投票/重平衡实录。",
+          "direction": "先显示复制与进度已收敛的all结果，再单故障。B1离线但其日志不抹除，B2/B3各有E01；控制面按clean资格选新主；本镜只示意稳定接管结果，非KRaft投票/重平衡实录。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "min-isr",
+      "chapterId": "min-isr",
+      "title": "同步数量的门槛",
+      "from": 4114,
+      "durationInFrames": 870,
+      "shots": [
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "min-isr",
+          "visualType": "two-isr",
+          "from": 4114,
+          "durationInFrames": 440,
+          "narration": "再从空日志比较，这次同步名单已经稳定为主副本加一份跟随副本。两份达到门槛，并且都追过事件一，便可成功；第三份不在当前名单里，这次不用等它。",
+          "subtitles": [
+            {
+              "text": "再从空日志比较，这次同步名单已经稳定为主副本加一份跟随副本。",
+              "from": 0,
+              "to": 195,
+              "duration": 196
+            },
+            {
+              "text": "两份达到门槛，并且都追过事件一，便可成功；第三份不在当前名单里，这次不用等它。",
+              "from": 196,
+              "to": 439,
+              "duration": 244
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-two-isr-1",
+              "wavStart": 4114.78,
+              "wavEnd": 4299.82,
+              "localStart": 0.7799999999997453,
+              "localEnd": 185.8199999999997
+            },
+            {
+              "id": "11-two-isr-2",
+              "wavStart": 4310.32,
+              "wavEnd": 4533.61,
+              "localStart": 196.3199999999997,
+              "localEnd": 419.6099999999997
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              196
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 4114.78,
+            "wavTo": 4533.61,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确同数据空日志重置，稳定ISR=[B1,B2]，B3不可用且不满足额外追齐候选；2≥2→追加→B2 Fetch/追加/再报告→当前集合HW1→网站成功。不要把ISR变化接在刚才已处理完的日志后“补齐”。",
+          "direction": "明确同数据空日志重置，稳定ISR=[B1,B2]，B3不可用且不满足额外追齐候选；2≥2→追加→B2 Fetch/追加/再报告→当前集合HW1→网站成功。不要把ISR变化接在刚才已处理完的日志后“补齐”。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "min-isr",
+          "visualType": "one-isr",
+          "from": 4554,
+          "durationInFrames": 430,
+          "narration": "又回到空日志，名单如果只剩主副本，一小于门槛二。这次请求就在追加前被拒绝，日志仍为空；但这不能推广成所有发送失败都没有写入。",
+          "subtitles": [
+            {
+              "text": "又回到空日志，名单如果只剩主副本，一小于门槛二。",
+              "from": 0,
+              "to": 174,
+              "duration": 175
+            },
+            {
+              "text": "这次请求就在追加前被拒绝，日志仍为空；但这不能推广成所有发送失败都没有写入。",
+              "from": 175,
+              "to": 429,
+              "duration": 255
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-one-isr-1",
+              "wavStart": 4554.61,
+              "wavEnd": 4718.91,
+              "localStart": 0.6099999999996726,
+              "localEnd": 164.90999999999985
+            },
+            {
+              "id": "12-one-isr-2",
+              "wavStart": 4729.41,
+              "wavEnd": 4963.75,
+              "localStart": 175.40999999999985,
+              "localEnd": 409.75
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              175
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 4554.61,
+            "wavTo": 4963.75,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "稳定ISR=[B1]，其余两份不参与；acksall/minISR2，准入1<2→NOT_ENOUGH_REPLICAS→网站失败。只有本次前置检查拒绝而无追加，不把afterappend或timeout一律画空。本轮独立运行确证该稳定ISR1分支为追加前NotEnoughReplicas且物理末尾前后均0，不推广到其他失败。",
+          "direction": "稳定ISR=[B1]，其余两份不参与；acksall/minISR2，准入1<2→NOT_ENOUGH_REPLICAS→网站失败。只有本次前置检查拒绝而无追加，不把afterappend或timeout一律画空。本轮独立运行确证该稳定ISR1分支为追加前NotEnoughReplicas且物理末尾前后均0，不推广到其他失败。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "确认的边界",
+      "from": 4984,
+      "durationInFrames": 476,
+      "shots": [
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 4984,
+          "durationInFrames": 476,
+          "narration": "所以要一起看确认方式、当前同步名单和高水位，最小数量二不等于固定只等两份。确认写入与复制，也不等于每块磁盘都已强制刷盘，更不等于订单通知已经完成。",
+          "subtitles": [
+            {
+              "text": "所以要一起看确认方式、当前同步名单和高水位，最小数量二不等于固定只等两份。",
+              "from": 0,
+              "to": 236,
+              "duration": 237
+            },
+            {
+              "text": "确认写入与复制，也不等于每块磁盘都已强制刷盘，更不等于订单通知已经完成。",
+              "from": 237,
+              "to": 475,
+              "duration": 239
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-recap-1",
+              "wavStart": 4984.75,
+              "wavEnd": 5210.73,
+              "localStart": 0.75,
+              "localEnd": 226.72999999999956
+            },
+            {
+              "id": "13-recap-2",
+              "wavStart": 5221.23,
+              "wavEnd": 5420.92,
+              "localStart": 237.22999999999956,
+              "localEnd": 436.9200000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              237
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 388aa707 + words.json d0471c02 + script.md 619e9a37",
+            "wavFrom": 4984.75,
+            "wavTo": 5420.92,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "抽象回收“acks1：主追加可回复”“acksall：数量门槛+本例HW越过记录”“刷盘/消费业务：未由这次确认证明”；不合并分支日志、不让原记录跨分支复活。末镜水印IT小村 · 原创，之后由默认同色入口追加原题/机构资料页。",
+          "direction": "抽象回收“acks1：主追加可回复”“acksall：数量门槛+本例HW越过记录”“刷盘/消费业务：未由这次确认证明”；不合并分支日志、不让原记录跨分支复活。末镜水印IT小村 · 原创，之后由默认同色入口追加原题/机构资料页。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

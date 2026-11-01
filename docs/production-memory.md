@@ -1,5 +1,11 @@
 # 项目制作记忆
 
+## MQ08与MQ15继续制作（2026-11-01）
+
+用户授权下一批MQ，按题库剩余两题推进MQ08/#316重试与死信（EP48 / kafka-retry-dead-letter）、MQ15/#323多副本确认（EP49 / kafka-replica-acks），MQ15保留稳定号。先同步最新8769a592及实体目录重构，旧输入/历史身份保留；新D/P使用episodes/message-queue/<slug>/{production,publication}，当前57实体对检查通过。两题已完成固定源码与独立编辑审查，真实最小运行185项断言通过，服务已停止；已完成240/344输入冻结、两支正式编码与独立成片/8图复核，本地原生140动作/48严格PTS与实际图审、正式生产构建通过，首发工作流已开始，GitHub上线与线上验收待完成。详细原始结果与能力边界见[本批记录](archive/2026-11/mq08-15-implementation/README.md)。
+
+继续以同一事件解释结构、判断和状态变化，真实运行与教学模型/自编应用协议分开。重试篇固定同机保留目录的预算和poll门控，不冒充分布式状态或Kafka内建DLX；副本篇固定ISR/minISR、ELR与unclean关闭，不把minISR当应答人数。仅GitHub与本站，完成全部质量与线上核验后才关闭两issue；当前7/9，原14题取消保持。详见[本批记录](archive/2026-11/mq08-15-implementation/README.md)。
+
 ## MQ05–MQ07已交付（2026-10-31，北京时间）
 
 延续上轮已获定性认可的实现推导方式，按题库完成MQ05消费幂等（EP45/#313）、MQ06消息保序（EP46/#314）、MQ07消息积压（EP47/#315）。[PR #447](https://github.com/linhongcun/video-studio/pull/447)合并dcaafde2，附注tag/Release v0.97.0后Pages41100736996成功；三片5647/5116/6208帧，均含150帧实际资料片尾，12幅成片图与80句旁白齐全。

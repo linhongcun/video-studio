@@ -1,0 +1,103 @@
+---
+title: 'Kafka 多副本确认：写入成功，到底哪些副本已经跟上？'
+summary: '沿一条订单事件区分实际日志、主副本已知进度与成功回执，解释为什么最小同步数量二不等于固定只等两份。'
+chapters:
+  - { id: leader, title: 主副本确认 }
+  - { id: replication, title: 复制进度怎样确认 }
+  - { id: min-isr, title: 同步数量的门槛 }
+  - { id: boundary, title: 确认的边界 }
+related: []
+---
+
+网站发送订单7042的E01，等Kafka返回成功。这个成功是只说明主副本已经追加，还是说明跟随副本也已有同一条记录？要沿着同一条E01，看清本地日志、Leader获知的复制进度，以及成功响应的返回条件。
+
+本文固定Kafka/Java4.4.0、commit `1156b2752aaa28eafc0b4c4d387e63356793268d`。P0只有三份数据副本，min.insync.replicas=2；ELR feature level0、非同步选主关闭。单producer、每分支单次单条发送，幂等显式关闭、retries=0、inflight=1。分支各自从相同空日志开始，ISR稳定、无待加入或额外近期追齐候选；复制暂停和单节点故障是选定调度，不是默认延迟或发生概率。
+
+{/* PREVOICE：四幅图的目标状态已确定，真实声轨后再填写整数frame/30与seekTo。当前不是编码或发布定稿，尚未生成/验收实际图片。 */}
+
+## 只确认主副本，成功之后还可能缺哪份 {#leader}
+
+一份数据副本是本分区的一份日志。这里B1接收P0写入，B2/B3跟随复制；别名只标本例角色，不表示Broker编号或启动次序决定谁当主。其他分区和不持有P0副本的机器，不参加这条记录的复制等待。
+
+空日志的下一位置是0。E01写到offset0之后，该日志的末尾/下一位置成为1；这个“1”不表示有一条业务已经完成，只表示这份日志下一次从哪里继续。
+
+选择`acks=1`时，Leader成功追加E01@0后即可生成成功回复，不等待两份Follower的复制条件。实际执行在`ReplicaManager.delayedProduceRequestRequired`中，仅对`requiredAcks==-1`且存在成功追加的情况安装复制等待操作；否则走立即回复分支。它不要求Follower直接给Producer各发一条回执。
+
+选定一个复制还没来得及完成的窗口：B1日志有E01，B2/B3仍空，但短时落后尚未使它们退出ISR。网站已经收到成功，此时只停掉B1，控制面可从存活、仍具clean资格的ISR副本中选出新Leader；新Leader日志没有E01。原主离线日志的字节仍可能存在，因此“切换后的新主没有这条已确认记录”不等于“所有物理字节都凭空消失”。原主重入后的截断/恢复另有流程，本文不展开。
+
+<Figure src="/video-studio/episodes/kafka-replica-acks/article/01-leader-ack-takeover.jpg" alt="acks1已经向网站返回成功，原B1离线日志保留E01，但clean接管的新主B2日志没有E01。" caption="本例成功回应只等到主追加；新主缺失与原主离线字节仍在是不同事实。" chapter="leader" />
+
+ELR和非同步选主关闭时，`PartitionChangeBuilder.isValidNewLeader`将资格限制在目标ISR及可用性条件中。本例展示这项资格选择与接管后的稳定结果，不画三份数据副本相互投票，不把数据复制替换为KRaft控制面共识。
+
+<SourceQuote sourceId="R5" supports="新主候选必须满足目标ISR或特定ELR条件以及可用性测试；本例ELR关闭，所以采用存活ISR中的clean候选。" />
+
+## 同样三份空日志，等待同步副本怎样完成 {#replication}
+
+把场景重置为同一E01、相同空日志，改为`acks=all`。正在跟进本分区的副本名单称ISR，包含Leader；它不是“全部集群机器”，也不表示名单里每份已经拥有刚到来的新记录。
+
+系统先检查当前名单数量与最小门槛。`Partition.appendRecordsToLeader`在调用`leaderLog.appendAsLeader`之前执行：若all请求的ISR数量小于有效minISR，直接拒绝。此时三份大于等于二，可以追加。这个准入判断不等于“等够两个副本就完成”；配置文档也明确举出RF3/ISR3时，minISR即使小于3，all仍需当前三份跟上。
+
+<SourceQuote sourceId="A3" supports="原文明确RF3且ISR3时all需要当前三份跟上，minISR可以小于三；它同时区分追加前后副本不足异常，并提醒ELR开启会改变语义。" />
+
+E01仍写在offset0。`ReplicaManager`为这次请求保存的所需位置是`lastOffset+1`，所以目标是1。HW采用不包含末端的边界：HW为0尚未涵盖E01@0，HW为1才涵盖offset小于1的这条记录。
+
+<SourceQuote sourceId="R2" supports="所需位置被设为本次追加的lastOffset加一；本例最后offset为零，所以完成目标为一。" />
+
+先让B2从自己的末尾0发起Fetch。Leader返回E01的副本，B2在同一offset0追加，自己的末尾变成1；B1原日志仍然保留。Follower处理响应时实际调用追加到自己的日志，不是把Leader日志中的记录移走。
+
+<SourceQuote sourceId="R3" supports="跟随线程把响应中的records追加到自己的分区日志，并从响应学习主副本的HW；这不是从主日志中删除记录。" />
+
+写好之后，B2的下一次Fetch使用位置1。Leader收到请求，才将报告的offset metadata写入本地保存的`ReplicaState`。B2实际末尾已到1，和Leader何时获知它到1，是两个动作。跟随线程如何以`lastOffset+1`更新下次Fetch状态，见同固定版本的[AbstractFetcherThread.scala执行段](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/AbstractFetcherThread.scala#L380-L393)。
+
+<SourceQuote sourceId="A1" supports="Follower请求携带的offset metadata被写进新的ReplicaState，说明Leader保存的是收到的进度报告，而不是直接观察另一份日志。" />
+
+现在Leader已知的位置是[B1=1,B2=1,B3=0]。在本例稳定集合、无额外追齐候选的条件下，共同进度取最小值0，HW不能跨过E01。minISR=2已经通过准入，但第三份仍在当前ISR，不能把all误解为只等两份。
+
+<Figure src="/video-studio/episodes/kafka-replica-acks/article/02-third-still-pending.jpg" alt="B1/B2实际拥有E01，Leader已知末尾为1、1、0，ISR仍三份，HW0，网站结果仍等待。" caption="已拥有两份与当前三份集合的共同进度到达目标，是两个不同条件。" chapter="replication" />
+
+再让B3经历Fetch0、追加E01@0、下一次Fetch1报告。Leader获知三份都到1，才可推进HW到1。`checkEnoughReplicasReachOffset`检查HW是否达到所需位置，并在达到后检查minISR；本例数量仍够，完成条件成立。
+
+<SourceQuote sourceId="R1" supports="这段完成检查先比较HW与requiredOffset；达到后仍检查有效minISR，并区分成功与追加后副本不足错误。它不单独证明追加前准入或HW怎样计算。" />
+
+`DelayedProduce`对待确认分区重复调用完成判据；条件未满足则继续等待，满足或出现错误才结束该分区的等待。错误返回不等于成功。这里完成条件满足且错误为NONE，随后成功响应返回网站，网站才得到本次成功结果。
+
+<SourceQuote sourceId="R4" supports="每个待确认分区调用验证器；只有验证结果有错误或hasEnough为真时，才清除等待标志并保存该错误状态。" />
+
+<Figure src="/video-studio/episodes/kafka-replica-acks/article/03-high-watermark-one.jpg" alt="三份P0日志都保留E01@0，Leader已知末尾全为1，HW1涵盖E01，成功响应已返回网站。" caption="本例先完成复制与进度获知，再推进HW，最后把成功回复返回网站。" chapter="replication" />
+
+此后在复制与进度已收敛的时刻，只停掉主节点。两份存活ISR副本各有E01，控制面可选择具clean资格的新Leader，接管后仍保留这条记录。这是与acks1窗口独立起点的单Broker故障对照，不是多盘同时损坏、全部副本离线或无条件永不丢数据的证明。后续Fetch传播HW不是Producer成功必须额外等待的条件；图中只是选择了稳定故障注入点，没有模拟完整选主初始化协议。
+
+## 最小数量二，到底约束什么 {#min-isr}
+
+再次从空日志开始，先把ISR稳定为[B1,B2]，B3不参与且不满足额外近期追齐候选。两份达到最小门槛，E01追加后还要等当前这两份都跟到1、HW到1，才能成功。它不等不在当前集合的第三份，但也不是只要“数量等于二”就忽略具体复制进度。
+
+若稳定名单只剩[B1]，all请求在前置判断看到1<2，就在本次追加前被拒绝。第12镜限定这一明确分支。本轮真实ISR1测试在发送前后各副本物理LEO均为0，官方日志快照无记录，返回NotEnoughReplicas；这项实际结果独立于模型空数组。
+
+<Figure src="/video-studio/episodes/kafka-replica-acks/article/04-before-append-rejected.jpg" alt="从相同空日志重置后，稳定ISR只有B1，1小于minISR2，本次all在追加前被拒绝，三日志仍为空。" caption="这是本次前置准入失败的结果，不能推广为所有发送失败均未写入。" chapter="min-isr" />
+
+更一般的错误必须看阶段：本版`Partition.checkEnoughReplicasReachOffset`在已经追加、HW达到所需位置后，如果集合已不足minISR，可返回`NOT_ENOUGH_REPLICAS_AFTER_APPEND`。发送期限耗尽或响应未被处理也不能单凭错误推断没有写入。本片把ISR过渡留在这里，不用新增一套协议动画掩盖当前稳定路径。
+
+本版HW计算还考虑maximalISR和近期追齐且满足加入资格的副本；因此“当前ISR位置的最小值”只是本例的稳定条件简化，不是完整通用算法。4.4在underMinISR时直接不推进HW；acks1绕过all准入并不意味着只剩主副本也自动把HW推到本地末尾。
+
+## 成功确认没有替代哪些工作 {#boundary}
+
+本例确认的是写入与复制条件。刷盘由另一些设置和执行路径控制，例如本地追加后的`unflushedMessages>=flushInterval`才触发对应flush；不能从acksall独立推断每块磁盘在每次确认前都执行了fsync。
+
+<SourceQuote sourceId="A2" supports="本地追加后的flush受未刷盘消息数量与flushInterval条件控制；这条独立判断不能由acksall本身替代。" />
+
+消费者取到记录和订单通知成功，又是后续层次。这些教学分支没有启动通知接口，也没有把Producer成功标成业务完成。确认方式、当前同步名单与HW要一起看；最小数量二不是固定只等两份，更不是业务处理人数或控制器投票数量。
+
+## 来源与验证范围
+
+以下均为Apache Kafka官方固定commit源文件，版本Kafka/Java4.4.0，访问日期2026-11-01（北京时间）。文件原题由GitHub Contents API `.name`核对，没有明确个人作者署名，机构记Apache Kafka；原始raw、题名响应、NOTICE与精确原文范围保留在本期sources。除SourceQuote外，完整执行对应见本期research.md/outline-source-map.md。
+
+- [Partition.scala](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/cluster/Partition.scala)（[原始全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/cluster/Partition.scala)）：追加前门槛、Follower进度与HW、追加后完成判断。
+- [ReplicaManager.scala](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/ReplicaManager.scala)（[原始全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/ReplicaManager.scala)）：requiredOffset=lastOffset+1，acksall的等待安装与acks1回复路径。
+- [ReplicaFetcherThread.scala](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/ReplicaFetcherThread.scala)（[原始全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/ReplicaFetcherThread.scala)）：Follower追加同一响应记录与学习HW。
+- [DelayedProduce.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/server/src/main/java/org/apache/kafka/server/purgatory/DelayedProduce.java)（[原始全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/server/src/main/java/org/apache/kafka/server/purgatory/DelayedProduce.java)）：未满足继续等待、完成回调返回响应。
+- [PartitionChangeBuilder.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/metadata/src/main/java/org/apache/kafka/controller/PartitionChangeBuilder.java)（[原始全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/metadata/src/main/java/org/apache/kafka/controller/PartitionChangeBuilder.java)）：本例clean候选与选主范围，不是数据副本相互投票。
+- [Replica.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/server/src/main/java/org/apache/kafka/server/replica/Replica.java)（[原始全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/server/src/main/java/org/apache/kafka/server/replica/Replica.java)）：Leader保存Follower报告的进度。
+- [UnifiedLog.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java)（[原始全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/storage/src/main/java/org/apache/kafka/storage/internals/log/UnifiedLog.java)）：追加后的独立flush条件与刷盘实现。
+- [TopicConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/config/TopicConfig.java)（[原始全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/config/TopicConfig.java)）：minISR不是all固定等待份数，ELR开启会改变相关语义。
+
+model.py的39份快照与有限检查是教学模型，未冒充Broker实测或受众理解研究。本轮独立三节点运行已验证：稳定ISR3的all成功、单慢副本仍在ISR时Leader/快副本已写而HW0/all仍等待、ISR2成功、ISR1前置拒绝，以及acks1/acksall单Leader故障对照；另有健康acks1基线。33份实际物理日志快照经官方工具解码，21个记录批次CRC有效。执行源码、配置、观察、最终修复回执和映射见[实际运行记录](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/mq08-15-implementation/runtime/mq15/README.md)。实验使用独立空topic与透明复制Fetch门控，不是每个教学指令时点、时延benchmark、断电刷盘或多盘故障验证；两次失败尝试保留，没有通过改名把原false回执覆盖为true。图片目标状态已定，实际声音后再定整数帧与回看时间，成片后实际抽图验收。
