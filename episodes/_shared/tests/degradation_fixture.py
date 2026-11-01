@@ -1,6 +1,6 @@
 """Pinned historical inputs for the EP.14 v0.45.0 regression tests.
 
-Live episodes/degradation is free to evolve. These bytes come from the named
+Live episodes/peak/degradation/publication is free to evolve. These bytes come from the named
 Git revision and are checked before running the existing golden assertions.
 """
 import hashlib

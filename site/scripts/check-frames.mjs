@@ -5,16 +5,17 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {execFileSync} from 'node:child_process';
+import {episodeDirectory, listEpisodes, resolveRepoPath} from './episode-paths.mjs';
 const root = path.resolve(path.dirname(new URL(import.meta.url).pathname), '../../episodes');
 const endCard = JSON.parse(fs.readFileSync(path.join(root, '_shared/branding/spec.json'), 'utf8')).endCard?.frames ?? 0;
-const slugs = process.argv.slice(2).length ? process.argv.slice(2) : fs.readdirSync(root).filter((s) => fs.existsSync(path.join(root, s, 'video.mp4')));
+const slugs = process.argv.slice(2).length ? process.argv.slice(2) : listEpisodes().filter(({directory}) => fs.existsSync(path.join(directory, 'video.mp4'))).map(({slug}) => slug);
 let bad = 0;
 for (const slug of slugs) {
-  const dir = path.join(root, slug);
+  const dir = episodeDirectory(slug);
   const sb = JSON.parse(fs.readFileSync(path.join(dir, 'storyboard.json'), 'utf8')).meta ?? {};
   const metaPath = path.join(dir, 'meta.json');
   const meta = fs.existsSync(metaPath) ? JSON.parse(fs.readFileSync(metaPath, 'utf8')) : {};
-  const mainTsx = path.join(dir, 'remotion/src/Main.tsx');
+  const mainTsx = path.join(meta.sourcePath ? resolveRepoPath(meta.sourcePath) : path.join(episodeDirectory(slug, {kind: 'production'}), 'remotion'), 'src/Main.tsx');
   const src = fs.existsSync(mainTsx) ? fs.readFileSync(mainTsx, 'utf8') : '';
   const m = src.match(/TAIL_HOLD[^=]*=\s*\{([^}]*)\}/);
   const tail = m ? [...m[1].matchAll(/:\s*(\d+)/g)].reduce((a, x) => a + Number(x[1]), 0) : null;

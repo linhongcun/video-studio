@@ -3,6 +3,7 @@ import path from 'node:path';
 import pkg from '../../package.json';
 import tagsMeta from '../content/tags.json';
 import seriesMeta from '../content/series.json';
+import {episodeDirectory, listEpisodes} from '../../scripts/episode-paths.mjs';
 
 export const REPO = 'https://github.com/linhongcun/video-studio';
 export const VERSION = pkg.version;
@@ -14,7 +15,9 @@ const resolveSeriesId = (id?: string): string => {
   return Object.hasOwn(seriesMeta, key) ? key : DEFAULT_SERIES;
 };
 const EP_DIR = path.resolve(process.cwd(), '../episodes');
-const articles = import.meta.glob('../../../episodes/*/article.mdx', {eager: true}) as Record<string, any>;
+const articles = import.meta.glob('../../../episodes/*/*/publication/article.mdx', {eager: true}) as Record<string, any>;
+const articleFor = (slug: string) => Object.entries(articles).find(([file]) => file.split('/').at(-3) === slug)?.[1];
+const episodePath = (slug: string) => episodeDirectory(slug);
 
 export type Chapter = {id: string; title: string; start: number; frame: number; fmStart?: number; inArticle?: boolean};
 export type Episode = {
@@ -32,7 +35,7 @@ const platformsOf = (m: any): Platform[] => PLATFORMS
 
 /** 阅读时长：去掉 frontmatter / import / 代码块 / 标签后，中文按字 + 英文按词，约 400 字每分钟 */
 function readingMinutes(slug: string) {
-  const f = path.join(EP_DIR, slug, 'article.mdx');
+  const f = path.join(episodePath(slug), 'article.mdx');
   if (!fs.existsSync(f)) return 0;
   const t = fs.readFileSync(f, 'utf8').replace(/^---[\s\S]*?\n---/, '').replace(/```[\s\S]*?```/g, '')
     .replace(/^(import|export) .*$/gm, '').replace(/<[^>]+>/g, '').replace(/\{#[\w-]+\}/g, '');
@@ -43,9 +46,9 @@ function readingMinutes(slug: string) {
 
 /** draft: true 的期数默认不发布；本地预览可用 SHOW_DRAFTS=1 npm run build 查看 */
 export const SHOW_DRAFTS = process.env.SHOW_DRAFTS === '1';
-const readMeta = (slug: string) => JSON.parse(fs.readFileSync(path.join(EP_DIR, slug, 'meta.json'), 'utf8'));
+const readMeta = (slug: string) => JSON.parse(fs.readFileSync(path.join(episodePath(slug), 'meta.json'), 'utf8'));
 export function getAllMeta() {
-  return fs.readdirSync(EP_DIR).filter((s) => fs.existsSync(path.join(EP_DIR, s, 'meta.json'))).map((s) => ({slug: s, ...readMeta(s)}));
+  return listEpisodes().map(({slug}) => ({slug, ...readMeta(slug)}));
 }
 /** 相关期数：已发布的给链接，草稿只显示“制作中”。meta.json 的 related 可写 slug 字符串或 {slug, label}；按期号升序显示 */
 export function getRelated(e: Episode) {
@@ -64,7 +67,7 @@ const readJson = (p: string) => JSON.parse(fs.readFileSync(p, 'utf8'));
 
 /** 每个 shot 的实际帧数：remotion/src/timing.json 的 duration 优先，否则 storyboard 的 durationInFrames */
 function shotPlan(slug: string) {
-  const dir = path.join(EP_DIR, slug);
+  const dir = episodePath(slug);
   const sb = readJson(path.join(dir, 'storyboard.json'));
   const tPath = path.join(dir, 'remotion/src/timing.json');
   const timing = fs.existsSync(tPath) ? readJson(tPath) : {};
@@ -85,8 +88,8 @@ function shotPlan(slug: string) {
 
 /** 章节：chapters.txt 优先；否则合并连续同章的分镜，起点按实际帧数计算。 */
 export function computeChapters(slug: string, fm: any[] = []) {
-  const storyboardPath = path.join(EP_DIR, slug, 'storyboard.json');
-  const chaptersPath = path.join(EP_DIR, slug, 'chapters.txt');
+  const storyboardPath = path.join(episodePath(slug), 'storyboard.json');
+  const chaptersPath = path.join(episodePath(slug), 'chapters.txt');
   const hasStoryboard = fs.existsSync(storyboardPath);
   const hasChapters = fs.existsSync(chaptersPath);
   if (!hasStoryboard && !hasChapters) {
@@ -134,7 +137,7 @@ export function computeChapters(slug: string, fm: any[] = []) {
   const brandPath = path.join(EP_DIR, '_shared/branding/spec.json');
   const endCard = fs.existsSync(brandPath) ? readJson(brandPath).endCard?.frames ?? 0 : 0;
   // episode meta.json finalVideoFrames 优先（分镜冻结后不改 storyboard 哈希，如 EP.01 v6）
-  const metaPath = path.join(EP_DIR, slug, 'meta.json');
+  const metaPath = path.join(episodePath(slug), 'meta.json');
   const epMeta = fs.existsSync(metaPath) ? readJson(metaPath) : {};
   const finalFrames = Number.isFinite(epMeta.finalVideoFrames) ? epMeta.finalVideoFrames
     : Number.isFinite(sbMeta.finalVideoFrames) ? sbMeta.finalVideoFrames : total + endCard;
@@ -145,10 +148,10 @@ export function computeChapters(slug: string, fm: any[] = []) {
 
 /** WebVTT 字幕优先使用冻结的镜内 from/to；旧稿没有完整时序时按字数分配。 */
 export function buildVtt(slug: string) {
-  if (!fs.existsSync(path.join(EP_DIR, slug, 'storyboard.json'))) return 'WEBVTT\n';
+  if (!fs.existsSync(path.join(episodePath(slug), 'storyboard.json'))) return 'WEBVTT\n';
   const {fps, scenes} = shotPlan(slug);
-  const meta = readJson(path.join(EP_DIR, slug, 'storyboard.json')).meta;
-  const metaPath = path.join(EP_DIR, slug, 'meta.json');
+  const meta = readJson(path.join(episodePath(slug), 'storyboard.json')).meta;
+  const metaPath = path.join(episodePath(slug), 'meta.json');
   const epMeta = fs.existsSync(metaPath) ? readJson(metaPath) : {};
   const card = meta?.unvoicedEndCard ?? meta?.javaEndCard ?? epMeta.referenceAppendix;
   const cardFrom = Number.isInteger(card?.from) && card.from >= 0
@@ -187,13 +190,12 @@ export function buildVtt(slug: string) {
 
 let cache: Episode[] | null = null;
 export function getEpisodes({includeArchived = false}: {includeArchived?: boolean} = {}): Episode[] {
-  if (!cache) cache = fs.readdirSync(EP_DIR)
-    .filter((slug) => fs.existsSync(path.join(EP_DIR, slug, 'meta.json')))
+  if (!cache) cache = listEpisodes().map(({slug}) => slug)
     .filter((slug) => SHOW_DRAFTS || !readMeta(slug).draft)
     .map((slug) => {
-      const meta = readJson(path.join(EP_DIR, slug, 'meta.json'));
+      const meta = readJson(path.join(episodePath(slug), 'meta.json'));
       const dates = episodeDates(meta);
-      const mod = articles[`../../../episodes/${slug}/article.mdx`];
+      const mod = articleFor(slug);
       const fm = mod?.frontmatter ?? {};
       const {chapters, duration, fps} = computeChapters(slug, fm.chapters);
       return {
@@ -205,7 +207,7 @@ export function getEpisodes({includeArchived = false}: {includeArchived?: boolea
         additionalSeries: Array.isArray(meta.additionalSeries) ? meta.additionalSeries.filter((id: unknown) => typeof id === 'string' && id !== meta.series) : [],
         description: meta.description,
         platforms: platformsOf(meta), readMin: readingMinutes(slug),
-        sourcePath: meta.sourcePath ?? `episodes/${slug}/remotion`,
+        sourcePath: meta.sourcePath ?? path.relative(path.dirname(EP_DIR), episodeDirectory(slug, {kind: 'production'})),
         burnedInCaptions: meta.burnedInCaptions === true,
       };
     })

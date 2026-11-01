@@ -4,9 +4,9 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import {transformSync} from 'esbuild';
+import {listEpisodes} from './episode-paths.mjs';
 
 const site = path.resolve(import.meta.dirname, '..');
-const root = path.resolve(site, '../episodes');
 const source = fs.readFileSync(path.join(site, 'src/lib/episodes.ts'), 'utf8');
 const dateSource = source.slice(source.indexOf('/** 历史日期'), source.indexOf('/** NEW 根据'));
 const {code} = transformSync(dateSource.replace(/^export /gm, ''), {loader: 'ts'});
@@ -35,10 +35,7 @@ let total = 0;
 const built = process.argv.includes('--built');
 const library = built ? fs.readFileSync(path.join(site, 'dist/library/index.html'), 'utf8') : '';
 const rss = built ? fs.readFileSync(path.join(site, 'dist/rss.xml'), 'utf8') : '';
-for (const slug of fs.readdirSync(root)) {
-  const file = path.join(root, slug, 'meta.json');
-  if (!fs.existsSync(file)) continue;
-  const meta = JSON.parse(fs.readFileSync(file, 'utf8'));
+for (const {slug, meta} of listEpisodes()) {
   assert.ok(meta.createdAt && meta.updatedAt, `${slug}: explicitly record both content dates`);
   const dates = episodeDates(meta);
   total++;

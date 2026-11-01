@@ -15,7 +15,7 @@ function fixture(t, slug = 'new-video') {
   fs.mkdirSync(path.join(root, 'docs'));
   fs.writeFileSync(path.join(root, 'docs/evidence.md'),
     'Synthetic test evidence; no published citation.\nReference fixture\n' + originalQuotation + '\n');
-  const episode = path.join(root, 'episodes', slug);
+  const episode = path.join(root, 'episodes', 'request', slug, 'publication');
   fs.mkdirSync(episode, {recursive: true});
   const refs = {schemaVersion: 1, presentation: 'original-title-quote', episode: slug, checkedAt: '2026-10-25', sources: [{
     id: 'R1', organization: 'Synthetic fixture', title: 'Reference fixture', version: '2026',

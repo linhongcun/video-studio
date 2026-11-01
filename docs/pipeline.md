@@ -1,8 +1,10 @@
 # 做片流程
 
-从调研做到站点发版。命令只列仓库里真实存在的脚本。现行工程参考 `episodes-codex/db-lock/`、`episodes-codex/db-transaction/` 及各期 README；开新期的目录说明在 [../episodes-codex/_template/README.md](../episodes-codex/_template/README.md)。规范在 [RULES.md](RULES.md)。
+从调研做到站点发版。命令只列仓库里真实存在的脚本。现行工程参考 `episodes/database/db-lock/production/`、`episodes/database/db-transaction/production/` 及各期 README；开新期的目录说明在 [../episodes/_template/README.md](../episodes/_template/README.md)。规范在 [RULES.md](RULES.md)。
 
-制作目录统一使用 `episodes-codex/<slug>/`，`episodes/<slug>/` 只保存站点发布数据。已被替代的旧制作工程已清理；[固定历史输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md)仍用于共享工具回归，旧制作说明在 `docs/examples/`。每期实际命令、哈希定义和能力边界以当前工程 README 为准。
+制作目录统一使用 `episodes/<series>/<slug>/production/`，`episodes/<series>/<slug>/publication/` 只保存站点发布数据。已被替代的旧制作工程已清理；[固定历史输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md)仍用于共享工具回归，旧制作说明在 `docs/examples/`。每期实际命令、哈希定义和能力边界以当前工程 README 为准。
+
+本次实体分类迁移保留旧冻结清单与回执字节，原路径和历史输入按[迁移记录](archive/2026-11/episode-layout/README.md)追溯。已适配路径的当前代码不是旧片已编码输入；后续重制或重渲必须先对当前实际源码重新冻结，不直接拿旧清单开始渲染。
 
 制作与发布范围按 [RULES.md 的 STATUS](RULES.md#status) 执行。2026-10-24 起，用户交办或已确定选题的视频做好并检查后，可自主合并、发布 Release、部署 GitHub 站点；不再逐期等待用户批准。平台新发仍须另行授权。
 
@@ -10,6 +12,7 @@
 
 - [ ] 开工前已保护工作区、拉取并整合最新主干；记录基线SHA，检查重构/删除及共享脚本、源码入口、锁文件与依赖位置；同步后重读更新手册，再开始复制或修改工程
 - [ ] 新期记录实际 `createdAt`、`updatedAt`（初始相同）；修改既有期保留创建与首发时间，实质内容修改才刷新 `updatedAt`，按北京时间显示当前版本，详见 [视频时间与版本](publish.md#视频时间与版本)
+- [ ] 新增或调整系列归属后，同步本期实体目录、有效 `meta.series` 与 `sourcePath`，运行 `python3 scripts/check-layout.py --write-index` 更新系列工程索引；发布前运行 `python3 scripts/check-layout.py`，索引随变更提交，避免部署因目录或计数过期失败
 - [ ] 调研笔记里的每条事实都有公开链接和访问日期
 - [ ] 片尾参考资料已按核心论点选定，机构/作者、标题、年份或版本及完整链接可追溯；配套文章能找到完整资料与论点对应关系
 - [ ] `presentation: title-author` 的 `title` 是实读文档原题，`titleEvidence` 可定位；有明确公开署名才填写非空 `author`，否则省略并显示 `organization`；完整出处与必要原文留文章或研究
@@ -46,7 +49,7 @@
 
 ## 1. 调研
 
-交付物：本期 `research.md` 等公开出处清单及 `references.json`，在脚本和文章中记录事实来源、访问日期及适用边界。参考当前 `episodes-codex/degradation/research.md`，格式见 [research-template.md](research-template.md)。
+交付物：本期 `research.md` 等公开出处清单及 `references.json`，在脚本和文章中记录事实来源、访问日期及适用边界。参考当前 `episodes/peak/degradation/production/research.md`，格式见 [research-template.md](research-template.md)。
 
 内部 handoff、旧分镜、对话不能当引用。
 
@@ -80,7 +83,7 @@
 | 文件 | 作用 |
 |---|---|
 | `script.md` | 旁白、画面、屏幕文字、出处。旁白以「旁白：」为准 |
-| `article.mdx` | 站点文章。前置信息包括：`title`、`summary`、`chapters`、`related`；按 [图文模板](../episodes-codex/_template/article.mdx) 准备 `SourceQuote`，编码前定好 `Figure` 图位并冻结，成片后生成和核对图片 |
+| `article.mdx` | 站点文章。前置信息包括：`title`、`summary`、`chapters`、`related`；按 [图文模板](../episodes/_template/article.mdx) 准备 `SourceQuote`，编码前定好 `Figure` 图位并冻结，成片后生成和核对图片 |
 | `pronunciation.md` | 多音字和整词读法，三列表：文本、读法、出现镜号 |
 | `references.json` 等片尾清单 | 原题与署名清单、完整出处及内部论点映射；视频只显原题与作者/机构，完整链接留配套文章 |
 
@@ -92,11 +95,11 @@
 
 ## 3. 分镜与封面
 
-制作目录交付 `storyboard.json`、`covers.json`、`knoll-props.md`。分镜字段见 [storyboard-schema.md](storyboard-schema.md)，实际结构与生成代码以本期工程为准；LeetCode封面默认使用已获用户认可的[共享系列模板](../episodes-codex/_shared/leetcode-covers/README.md)，新增题扩展catalog与题图并沿同一布局渲染；趣味推理使用[对应共享模板](../episodes-codex/_shared/puzzles-covers/README.md)，按新题扩展目录与示意；MySQL使用[MySQL系列入口](../episodes-codex/_shared/mysql-covers/README.md)，保持真实EP与机制边界；设计模式使用[本系列入口](../episodes-codex/_shared/design-pattern-covers/README.md)，以D编号和准确职责图扩展；Kafka消息队列使用[本系列入口](../episodes-codex/_shared/kafka-covers/README.md)，核对稳定MQ编号和真实Kafka机制，正文沿不可变style-v1；Redis使用[本系列入口](../episodes-codex/_shared/redis-covers-v2/README.md)，保持冷银灰/Redis红、真实EP与单集机制图，按当前sourcePath安装；高并发、高可用、高性能使用[本系列入口](../episodes-codex/_shared/peak-covers/README.md)，保留真实EP与原题，按对应限流/幂等/熔断/降级机制扩展；其他系列封面由本期 `remotion/src/Cover.tsx` 读取。不要将历史 EP.14 的 20 镜、5152 帧或旧组件当作新期模板。
+制作目录交付 `storyboard.json`、`covers.json`、`knoll-props.md`。分镜字段见 [storyboard-schema.md](storyboard-schema.md)，实际结构与生成代码以本期工程为准；LeetCode封面默认使用已获用户认可的[共享系列模板](../episodes/_shared/leetcode-covers/README.md)，新增题扩展catalog与题图并沿同一布局渲染；趣味推理使用[对应共享模板](../episodes/_shared/puzzles-covers/README.md)，按新题扩展目录与示意；MySQL使用[MySQL系列入口](../episodes/_shared/mysql-covers/README.md)，保持真实EP与机制边界；设计模式使用[本系列入口](../episodes/_shared/design-pattern-covers/README.md)，以D编号和准确职责图扩展；Kafka消息队列使用[本系列入口](../episodes/_shared/kafka-covers/README.md)，核对稳定MQ编号和真实Kafka机制，正文沿不可变style-v1；Redis使用[本系列入口](../episodes/_shared/redis-covers-v2/README.md)，保持冷银灰/Redis红、真实EP与单集机制图，按当前sourcePath安装；高并发、高可用、高性能使用[本系列入口](../episodes/_shared/peak-covers/README.md)，保留真实EP与原题，按对应限流/幂等/熔断/降级机制扩展；其他系列封面由本期 `remotion/src/Cover.tsx` 读取。不要将历史 EP.14 的 20 镜、5152 帧或旧组件当作新期模板。
 
 在脚本与制作说明中确定“正文收束 → 本期既有代码卡（如有）→ 参考资料”的顺序、原题与作者/机构的列表位置、每页最多4项和默认每页5秒停留。资料卡不覆盖代码、尾句或原字幕；无旁白资料区间由追加记录明确声明，不为此改写已核验正文的句级时序。
 
-制作说明可参考 [模板](knoll-props.template.md)，也可在制作阶段运行 `python3 episodes/_shared/make_knoll_props.py --dir EPDIR` 生成骨架，再按真实实现填写。`docs/examples/` 中旧 EP.14 全文只服务历史 fixture。新期入口见 [制作模板](../episodes-codex/_template/README.md)。
+制作说明可参考 [模板](knoll-props.template.md)，也可在制作阶段运行 `python3 episodes/_shared/make_knoll_props.py --dir EPDIR` 生成骨架，再按真实实现填写。`docs/examples/` 中旧 EP.14 全文只服务历史 fixture。新期入口见 [制作模板](../episodes/_template/README.md)。
 
 ## 4. 配音
 
@@ -108,7 +111,7 @@ python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --
 
 密钥只读环境变量 `MIMO_API_KEY` 或 `--env` 指向的已忽略文件，不写入仓库。提交前运行 `python3 episodes/_shared/tests/secret_scan.py`。
 
-脚本到整轨复用 `episodes/_shared/voice/`：准备句子、合成 takes、选段、修改送模文本、按 `voice/params.json` 构建音轨。具体装配顺序按本期 README。现行句级工程可复用 [共享装配工具](../episodes-codex/_shared/README.md)，已有逐字 ASR 管线的能力和参数见 [voice/README.md](../episodes/_shared/voice/README.md)。选段与读音记录在 `voice/picks.json` 和 `voice/substitutions.md`。ASR、听辨和声学边界分别记录，不能冒充未完成的检查。
+脚本到整轨复用 `episodes/_shared/voice/`：准备句子、合成 takes、选段、修改送模文本、按 `voice/params.json` 构建音轨。具体装配顺序按本期 README。现行句级工程可复用 [共享装配工具](../episodes/_shared/README.md)，已有逐字 ASR 管线的能力和参数见 [voice/README.md](../episodes/_shared/voice/README.md)。选段与读音记录在 `voice/picks.json` 和 `voice/substitutions.md`。ASR、听辨和声学边界分别记录，不能冒充未完成的检查。
 
 整轨就位后，在仓根执行下列本期步骤；`EPDIR` 指制作目录，不是站点副本：
 
@@ -121,7 +124,7 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 
 ## 5. 冻结 SHA-256
 
-定稿后按本期 README 调用冻结器。当前 EP.14 用 `episodes-codex/degradation/freeze.py` 写快照和 `source-sha256.json`，`verify-freeze.py` 逐文件只读核对完整 SHA-256。句级导航工程的共享冻结入口见其 README；不能假定所有期都用同一冻结器。
+定稿后按本期 README 调用冻结器。当前 EP.14 用 `episodes/peak/degradation/production/freeze.py` 写快照和 `source-sha256.json`，`verify-freeze.py` 逐文件只读核对完整 SHA-256。句级导航工程的共享冻结入口见其 README；不能假定所有期都用同一冻结器。
 
 `words.json` 的 `audioSha256` 对应实际音轨全文，`scriptSha256` 的输入定义按本期装配代码和 README。分镜 `meta.timingSource` 和镜头 `timing.source` 对应实际音轨与时序输入。检查不一致时先查原因，不能重写清单追认旧成片未采用的源码。详见 [validate.md](validate.md)。
 
@@ -137,23 +140,23 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 
 ## 7. 渲染
 
-新片使用[新期模板](../episodes-codex/_template/README.md)的默认参考资料入口：先检查来源，再生成正文，最后自动追加资料卡；不能以只运行 `render:body` 作为最终成片交付。命令与输出说明见 [render.md](render.md)。
+新片使用[新期模板](../episodes/_template/README.md)的默认参考资料入口：先检查来源，再生成正文，最后自动追加资料卡；不能以只运行 `render:body` 作为最终成片交付。命令与输出说明见 [render.md](render.md)。
 
 下列为尚未迁移的现行EP.14正文入口参考，不代替新片默认流程：
 
 ```sh
-cd episodes-codex/degradation/remotion
+cd episodes/peak/degradation/production/remotion
 npm ci
 npm run render
 ```
 
-`npm run render` 先出 `out/voice.mp4`，再调用 `episodes/_shared/music/mix_bgm.py`，得到 `episodes-codex/degradation/video.mp4`。
+`npm run render` 先出 `out/voice.mp4`，再调用 `episodes/_shared/music/mix_bgm.py`，得到 `episodes/peak/degradation/production/video.mp4`。
 
-LeetCode正文当前沿[独立视觉入口](../episodes-codex/_shared/leetcode-video/README.md)保持封面风格，完整Python页与原题参考页分层保留；封面使用[共享系列入口](../episodes-codex/_shared/leetcode-covers/README.md)生成并安装三比例，不用旧期 `npm run covers` 覆盖当前模板。趣味推理同样通过[本系列入口](../episodes-codex/_shared/puzzles-covers/README.md)生成三比例；MySQL也用[独立系列入口](../episodes-codex/_shared/mysql-covers/README.md)生成三比例；Redis正文和资料页通过[独立视觉入口](../episodes-codex/_shared/redis-video/README.md)沿封面配色，保留实际层高模型与完整音轨，新媒体另冻结；EP.08/09应用场景使用[缓存视觉入口](../episodes-codex/_shared/redis-cache-video/README.md)在默认流程直接生成同色正文、BT.709画面与资料页；高并发、高可用、高性能通过[独立封面入口](../episodes-codex/_shared/peak-covers/README.md)生成三比例，正文与资料页沿[独立视觉入口](../episodes-codex/_shared/peak-video/README.md)保持深青蓝、亮青、暖黄与真实EP，原模型和历史冻结保留；其他系列运行当期 package.json 的 `npm run covers`，由本期 Cover.tsx 与 covers.json 生成；实际文件和安全区见 [render.md](render.md)。
+LeetCode正文当前沿[独立视觉入口](../episodes/_shared/leetcode-video/README.md)保持封面风格，完整Python页与原题参考页分层保留；封面使用[共享系列入口](../episodes/_shared/leetcode-covers/README.md)生成并安装三比例，不用旧期 `npm run covers` 覆盖当前模板。趣味推理同样通过[本系列入口](../episodes/_shared/puzzles-covers/README.md)生成三比例；MySQL也用[独立系列入口](../episodes/_shared/mysql-covers/README.md)生成三比例；Redis正文和资料页通过[独立视觉入口](../episodes/_shared/redis-video/README.md)沿封面配色，保留实际层高模型与完整音轨，新媒体另冻结；EP.08/09应用场景使用[缓存视觉入口](../episodes/_shared/redis-cache-video/README.md)在默认流程直接生成同色正文、BT.709画面与资料页；高并发、高可用、高性能通过[独立封面入口](../episodes/_shared/peak-covers/README.md)生成三比例，正文与资料页沿[独立视觉入口](../episodes/_shared/peak-video/README.md)保持深青蓝、亮青、暖黄与真实EP，原模型和历史冻结保留；其他系列运行当期 package.json 的 `npm run covers`，由本期 Cover.tsx 与 covers.json 生成；实际文件和安全区见 [render.md](render.md)。
 
 ## 8. 成片审与上线
 
-完成动态表达与实际成片复核，记录执行者、检查结果和能力限制。通过后沿用 STATUS 的持续授权，按 [publish.md](publish.md) 接入 `episodes/<slug>/`、更新元数据与版本、合并站点 PR、打 tag、发 Release，再部署并核验线上文件；不再逐期等待用户 widget 批准。收到反馈后修正、重新检查和发布。平台新发需用户另行明确授权。
+完成动态表达与实际成片复核，记录执行者、检查结果和能力限制。通过后沿用 STATUS 的持续授权，按 [publish.md](publish.md) 接入 `episodes/<series>/<slug>/publication/`、更新元数据与版本、合并站点 PR、打 tag、发 Release，再部署并核验线上文件；不再逐期等待用户 widget 批准。收到反馈后修正、重新检查和发布。平台新发需用户另行明确授权。
 
 接入后运行 `npm --prefix site run check:references`，该项也由 `npm run build` 在复制媒体之前自动执行。新片及旧slug重制/换片必须包含完整资料清单、文章链接、实际片尾及相符的SHA/区间记录；只补文章或空标题不能通过。存量名单仅允许未接入附录且原视频SHA与固定基线相同的旧片渐进处理，不得改写名单或基线规避。机器检查之后仍须实际看成片资料卡、原生播放器暂停和手机全屏，确认文字可读、控件不遮主要信息且无原字幕残留。
 

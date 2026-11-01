@@ -1,6 +1,6 @@
 # 图文写作说明
 
-规范以 [RULES 的配套图文](RULES.md#配套图文) 为准。本文说明如何在现有站点落实；起稿用 [article.mdx 模板](../episodes-codex/_template/article.mdx)。
+规范以 [RULES 的配套图文](RULES.md#配套图文) 为准。本文说明如何在现有站点落实；起稿用 [article.mdx 模板](../episodes/_template/article.mdx)。
 
 ## 阅读结构
 
@@ -36,18 +36,20 @@
     "verification": {
       "status": "verified",
       "checkedAt": "实际阅读日期",
-      "evidence": "episodes/your-episode/article/source-evidence.md"
+      "evidence": "episodes/request/your-episode/publication/article/source-evidence.md"
     },
     "quotation": {
       "text": "从实读文档复制的连续原文",
       "locator": "真实小标题、段落或页码",
-      "evidence": "episodes/your-episode/article/source-evidence.md"
+      "evidence": "episodes/request/your-episode/publication/article/source-evidence.md"
     }
   }]
 }
 ```
 
 以上只是字段示例，不能作为真实来源发布。证据文件应保存实读原文及必要上下文、公开URL、实际读取日期；不能把 `supports`、搜索摘要、旧中文核验概括当作原句。固定版本链接可写 `verification.sourceUrl`。核验补充来源的机构、原题和署名，有明确个人署名才填写 `author`。引用旧证据保留历史访问日期，新增来源用本轮实际阅读日期；无需为了更换卡片样式重新访问不变的原文。
+
+上述证据路径是仓库内的新实体路径；`Figure.src` 继续使用站点的 `/video-studio/episodes/<slug>/article/…` URL。本次目录迁移保留与既有媒体回执绑定的来源JSON字节，历史 `evidence` 路径由共享解析器映射到新文件，不能为修目录而改变原资料SHA或追认原文已重新阅读。
 
 可用 `translation="……"` 附译文。原文不会因译文或编者解释而改写。短引只支持其中实际写出的部分：题意可说明输入与限制，不能代替算法正确性证明；教学假设不能冒充真实系统记录。
 
@@ -56,8 +58,8 @@
 优先复用清楚的正文示意图，或从最终视频提取与邻近文字一致的关键状态。选择动作已完成、标注可读的时刻，避免空白、淡入淡出和片尾资料页。示例命令中的时间、路径都须按本期实际替换：
 
 ```sh
-mkdir -p episodes/your-episode/article
-ffmpeg -ss 42.5 -i episodes/your-episode/video.mp4 -frames:v 1 -q:v 2 episodes/your-episode/article/01.jpg
+mkdir -p episodes/request/your-episode/publication/article
+ffmpeg -ss 42.5 -i episodes/request/your-episode/publication/video.mp4 -frames:v 1 -q:v 2 episodes/request/your-episode/publication/article/01.jpg
 ```
 
 ```mdx
@@ -73,11 +75,11 @@ ffmpeg -ss 42.5 -i episodes/your-episode/video.mp4 -frames:v 1 -q:v 2 episodes/y
 
 制作目录的 `article.mdx` 是编码前冻结输入。分镜和时序定稿后，先写好并启用 `Figure` 的图片路径、预定秒数、章节、图注及alt，随文章一起冻结；此时图片文件可以尚未生成，不能标记为已经看图验收。冻结前已有的 `article-sources.json` 及其原文/核验依据也纳入本期实际输入清单，因为MDX中的sourceId并不包含真正引文内容。
 
-成片后按预定图位生成截图、实际查看并核对图意与回看时间，只增加图片文件，不修改冻结制作稿。若实际选图需要更换时间、图注或其他文稿内容，保留原制作稿和冻结清单，另存站点发布派生稿，再接入 `episodes/<slug>/article.mdx`；本期记录写明制作稿SHA、发布稿SHA、实际差异与原因。成片后新增或调整的文章来源、证据和图片也保存各文件SHA，不追认为原编码输入。来源更正若影响视频内容，应按实际影响返工视频，不能只改图文记录。
+成片后按预定图位生成截图、实际查看并核对图意与回看时间，只增加图片文件，不修改冻结制作稿。若实际选图需要更换时间、图注或其他文稿内容，保留原制作稿和冻结清单，另存站点发布派生稿，再接入 `episodes/<series>/<slug>/publication/article.mdx`；本期记录写明制作稿SHA、发布稿SHA、实际差异与原因。成片后新增或调整的文章来源、证据和图片也保存各文件SHA，不追认为原编码输入。来源更正若影响视频内容，应按实际影响返工视频，不能只改图文记录。
 
 ## 接入与验收
 
-最终媒体产生后补图，将发布稿、文章独有资料JSON及 `article/` 中图片与证据接入 `episodes/<slug>/`。运行：
+最终媒体产生后补图，将发布稿、文章独有资料JSON及 `article/` 中图片与证据接入 `episodes/<series>/<slug>/publication/`。运行：
 
 ```sh
 npm --prefix site run check:articles

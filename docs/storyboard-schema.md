@@ -1,8 +1,8 @@
 # 分镜字段
 
-以下字段说明适用于上一轮 EP.14 的固定历史 fixture。现行制作在 `episodes-codex/<slug>/`，字段、生成和检查入口以本期装配脚本、README 及冻结分镜为准；哈希定义按本期冻结文件记录。站点目录已是当前发布数据，不能用它复现旧范例。
+以下字段说明适用于上一轮 EP.14 的固定历史 fixture。现行制作在 `episodes/<series>/<slug>/production/`，字段、生成和检查入口以本期装配脚本、README 及冻结分镜为准；哈希定义按本期冻结文件记录。站点目录已是当前发布数据，不能用它复现旧范例。
 
-本历史范例来自 [degradation-v0.45.0 固定输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md) 的 `storyboard.json` 与 `covers.json`（冻结稿前缀分别为 `6265993b`、`8cb7aafb`，`meta.slug` 为 `degradation-v1`）。制作说明模板见 [knoll-props.template.md](knoll-props.template.md)，历史全文见 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。旧渲染工程已清理，历史字段行为以固定输入和共享 spec 为参照；新期组件行为以对应 Codex 工程实际源码为准，不为满足旧样例补字段。
+本历史范例来自 [degradation-v0.45.0 固定输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md) 的 `storyboard.json` 与 `covers.json`（冻结稿前缀分别为 `6265993b`、`8cb7aafb`，`meta.slug` 为 `degradation-v1`）。制作说明模板见 [knoll-props.template.md](knoll-props.template.md)，历史全文见 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。旧渲染工程已清理，历史字段行为以固定输入和共享 spec 为参照；新期组件行为以对应单期工程实际源码为准，不为满足旧样例补字段。
 
 本文件只写字段和「怎样生成」。检查项与阈值的判定在 [validate.md](validate.md)，规范原文在 [RULES.md](RULES.md)，步骤顺序在 [pipeline.md](pipeline.md)。
 

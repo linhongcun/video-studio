@@ -1,20 +1,22 @@
 # 校验
 
-规范以 [RULES.md](RULES.md) 为准，逐项顺序见 [qa.md](qa.md)。当前工程在 `episodes-codex/<slug>/`，先读该期 README；旧期的校验器和制作入口已随被替代工程清理。通用共享工具仍在 `episodes/_shared/`，不要复制起音、铺轨或配音算法。
+规范以 [RULES.md](RULES.md) 为准，逐项顺序见 [qa.md](qa.md)。当前工程在 `episodes/<series>/<slug>/production/`，先读该期 README；旧期的校验器和制作入口已随被替代工程清理。通用共享工具仍在 `episodes/_shared/`，不要复制起音、铺轨或配音算法。
+
+本次目录迁移保留旧冻结清单与回执字节；路径适配后的源码不是原成片的已编码输入。旧制作身份按[迁移账本与固定基线](archive/2026-11/episode-layout/README.md)追溯，当前渲染冻结检查仍应拒绝改变后的输入；后续重渲在新修订中冻结实际源码，并保留旧清单。目录迁移检查不能写成重新编码或审片通过。
 
 ## 当前工程入口
 
 每期实际入口以 README 为准。当前 EP.14 的只读冻结核对为：
 
 ```sh
-python3 episodes-codex/degradation/verify-freeze.py
+python3 episodes/peak/degradation/production/verify-freeze.py
 ```
 
 它逐文件核对 `source-sha256.json` 的完整 SHA-256，缺文件或字节不一致会失败。不能通过重写清单把已编码媒体未采用的源码追认为通过。
 
 制作阶段，当前 EP.14 的 `check-inputs.py` 核对脚本与音轨哈希、实体公开音轨、音频样本数、镜头和字幕帧、术语停留、配音位置、封面元数据；它会写入本期 `precheck-report.json`。`freeze.py` 会写冻结快照与清单，只能在输入定稿后执行。检查已发布工程时不重跑这类写入步骤。
 
-独立句级装配工程的通用入口与字段见 [episodes-codex/_shared/README.md](../episodes-codex/_shared/README.md)。其装配、检查、冻结、编码检查分别承担不同阶段，不将某一期的入口假定为全系列统一入口。
+独立句级装配工程的通用入口与字段见 [episodes/_shared/README.md](../episodes/_shared/README.md)。其装配、检查、冻结、编码检查分别承担不同阶段，不将某一期的入口假定为全系列统一入口。
 
 ## 参考资料：渲染前与发布前
 
@@ -24,11 +26,11 @@ python3 episodes-codex/degradation/verify-freeze.py
 node site/scripts/check-references.mjs --sources EPDIR
 ```
 
-`EPDIR` 指 `episodes-codex/<slug>`。缺来源、原题/署名依据，未核验或题文不符时先修正，不启动昂贵的正文编码；字段通过并不表示工具已经阅读原文或确认论点真实，技术审稿仍须逐项核对实际题名、作者/机构及论点上下文。有保留研究摘录时仍核对原句与证据，不自行改词、拼接或添加省略；摘录与位置只用于文章或研究，不进入视频。
+`EPDIR` 指 `episodes/<series>/<slug>/production`。缺来源、原题/署名依据，未核验或题文不符时先修正，不启动昂贵的正文编码；字段通过并不表示工具已经阅读原文或确认论点真实，技术审稿仍须逐项核对实际题名、作者/机构及论点上下文。有保留研究摘录时仍核对原句与证据，不自行改词、拼接或添加省略；摘录与位置只用于文章或研究，不进入视频。
 
-采用新期默认入口时，`python3 episodes-codex/_shared/render_with_references.py EPDIR --verify` 复核本期来源、冻结输入与最终媒体，并只写QA报告。不要对已编码工程重跑会改写输入的准备步骤来追认通过。
+采用新期默认入口时，`python3 episodes/_shared/render_with_references.py EPDIR --verify` 复核本期来源、冻结输入与最终媒体，并只写QA报告。不要对已编码工程重跑会改写输入的准备步骤来追认通过。
 
-成片和资料文件接入 `episodes/<slug>/` 后，从仓根检查最终交付：
+成片和资料文件接入 `episodes/<series>/<slug>/publication/` 后，从仓根检查最终交付：
 
 ```sh
 npm --prefix site run check:references
@@ -62,7 +64,7 @@ npm --prefix site run check:articles
 python3 episodes/_shared/label_onset_strict.py --dir EPDIR --out /tmp/label-onset-strict.txt
 ```
 
-`EPDIR` 是本期 `episodes-codex/<slug>`。分镜模式不加 `--words`，因为它只列规则起音而不检查标签。退出码 0 表示无 FAIL、NOT FOUND、MISMATCH。已批准的 `--exc 06,18` 只把相应镜号前缀的窗口越界改记 EXCEPTION，不抵消缺失或不一致。wav 默认读取期根 `voice.wav`，没有则读 `remotion/public/audio/voice.wav`。
+`EPDIR` 是本期 `episodes/<series>/<slug>/production`。分镜模式不加 `--words`，因为它只列规则起音而不检查标签。退出码 0 表示无 FAIL、NOT FOUND、MISMATCH。已批准的 `--exc 06,18` 只把相应镜号前缀的窗口越界改记 EXCEPTION，不抵消缺失或不一致。wav 默认读取期根 `voice.wav`，没有则读 `remotion/public/audio/voice.wav`。
 
 期目录从仓根定位共享模块，或使用已有薄包装；不复制算法函数体。旧冻结分镜中的 module/checker 字符串可能记录旧路径，实际实现以仓内这两份共享文件为准。
 

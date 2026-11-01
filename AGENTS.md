@@ -2,7 +2,7 @@
 
 给 Codex 或同类 coding agent。做一期之前先读本文件，再按下面的手册往下走。规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
 
-文档入口见 [docs/README.md](docs/README.md)，已完成记录见[历史索引](docs/archive/README.md)。整理文档时先查[文档维护规范](docs/RULES.md#文档维护)，保护冻结输入和历史证据的原路径与字节。
+文档入口见 [docs/README.md](docs/README.md)，已完成记录见[历史索引](docs/archive/README.md)。整理文档时先查[文档维护规范](docs/RULES.md#文档维护)，保护冻结输入和历史证据的字节与制作身份；获授权的实体目录迁移按账本追溯原路径。
 
 制作或重制视频前，先读 [教训](docs/lessons-learned.md) 和 [成功经验](docs/successful-practices.md)，再用 [项目制作记忆](docs/production-memory.md) 确认用户偏好和案例状态。每期制作、返工和收到用户反馈时都检查是否需要更新记录：新发现的错误与已经验证有效的做法分别追加到这两份文件，写清案例、改法与验证方式；尚未验证的指导先记到项目记忆，验证后再补证据。没有新发现时不凑条目；单期参数不自动变成新规范。
 
@@ -10,7 +10,7 @@
 
 本仓没有 `share/RULES.md`。2026-10-16 那份团队规范里的冲突条已经写进 `docs/RULES.md` 的废止节。旧工程和旧站规划已清理，不要从 Git 历史恢复「比喻优先」和「发布含快手」。
 
-2026-10-25用户进一步强调：参考资料附录必须从新片制作流程中默认生成，避免上线后返工补齐。开新期按[新期模板](episodes-codex/_template/README.md)准备 `references.json`，调研、脚本、分镜、冻结和渲染同步接入；正式编码前检查来源清单，发布前检查实际附录。存量暂缓仅限已登记、视频SHA仍为基线字节且尚未接入附录的旧片；旧slug后续重制或换片也必须带齐，不得扩大豁免名单。
+2026-10-25用户进一步强调：参考资料附录必须从新片制作流程中默认生成，避免上线后返工补齐。开新期按[新期模板](episodes/_template/README.md)准备 `references.json`，调研、脚本、分镜、冻结和渲染同步接入；正式编码前检查来源清单，发布前检查实际附录。存量暂缓仅限已登记、视频SHA仍为基线字节且尚未接入附录的旧片；旧slug后续重制或换片也必须带齐，不得扩大豁免名单。
 
 当前参考资料片尾采用 `presentation: title-author` 的简洁列表，只显示实际文档原题与作者或机构，每页最多4项、默认5秒。`title` 与 `titleEvidence` 继续核对原题；有明确公开个人署名时填写非空字符串 `author`，未明确署名时省略该字段并显示 `organization`，不把维护账号或Git提交者推定为作者。摘录、定位、年份/版本、核验日期、链接和说明不出现在视频资料列表中，完整出处与必要原文保留在文章或研究记录。这项指导取代此前双行原题/摘录卡的默认样式，原题与真实性要求不变；旧QA、发布记录和冻结输入保留历史身份。具体审查按[调研模板](docs/research-template.md)执行。
 
@@ -22,7 +22,7 @@
 
 ## 配套图文
 
-2026-10-26配套图文要求见 [RULES 的配套图文](docs/RULES.md#配套图文) 与 [写作说明](docs/article-style.md)：每篇当前文章至少有精确原文引用模块和有效正文配图，统一 `SourceQuote` / `Figure` 样式。引用默认由共享组件提供段末「原文」入口与按需浮层，写法和来源数据不变，新期自动沿用；复核桌面悬停/点击、手机点按和键盘访问，默认折叠不算缺引用。新期文稿从 [图文模板](episodes-codex/_template/article.mdx) 起草，编码前定好图位并随文章、已有文章来源及证据冻结，成片后生成核验关键帧；需要改稿时按写作说明制作带SHA记录的站点派生稿。发布前运行 `npm --prefix site run check:articles` 并检查实际阅读与回看操作。存量站点文章的派生不改写已编码制作稿和旧冻结清单。
+2026-10-26配套图文要求见 [RULES 的配套图文](docs/RULES.md#配套图文) 与 [写作说明](docs/article-style.md)：每篇当前文章至少有精确原文引用模块和有效正文配图，统一 `SourceQuote` / `Figure` 样式。引用默认由共享组件提供段末「原文」入口与按需浮层，写法和来源数据不变，新期自动沿用；复核桌面悬停/点击、手机点按和键盘访问，默认折叠不算缺引用。新期文稿从 [图文模板](episodes/_template/article.mdx) 起草，编码前定好图位并随文章、已有文章来源及证据冻结，成片后生成核验关键帧；需要改稿时按写作说明制作带SHA记录的站点派生稿。发布前运行 `npm --prefix site run check:articles` 并检查实际阅读与回看操作。存量站点文章的派生不改写已编码制作稿和旧冻结清单。
 
 ## 提交署名
 
@@ -77,14 +77,17 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 
 | 路径 | 本仓实际情况 |
 |---|---|
-| `episodes/` | 站点发布内容：元数据、文章、字幕、分镜、MP4 和 JPG；制作源码及 WAV、PNG 原稿留在 `episodes-codex/` |
-| `episodes/degradation/` | EP.14 站点数据副本；当前制作工程在 `episodes-codex/degradation/` |
-| `episodes-codex/` | EP.01–21 的当前 Codex 制作目录，另有 EP.21 前置入门 `distributed-tx-intro/` 与独立短片 `tx-2pc/`、`tx-tcc/`、`tx-saga/`、`tx-outbox/`。EP.01–14 本轮状态见 [批次记录](docs/archive/2026-10/codex-remake-ep01-14.md)；开新期入口见 [`episodes-codex/_template/README.md`](episodes-codex/_template/README.md) |
+| `episodes/<series>/<slug>/` | 按现有系列组织的单期实体目录；系列键沿用 `site/src/content/series.json`，不按制作工具分类 |
+| `episodes/<series>/<slug>/production/` | 制作文稿、WAV、PNG原稿、动画工程、修订与冻结证据；当前动画修订以发布元数据的 `sourcePath` 为准 |
+| `episodes/<series>/<slug>/publication/` | 站点读取的元数据、发布文章、字幕、分镜、最终MP4、JPG及资料回执 |
 | `*-backup/` | 各角色备份。本仓没有这些目录 |
 | `share/` | 本仓没有。规范不要写回这里 |
-| `episodes/_shared/` | 页身色、水印规范、混音、MiMo TTS，以及起音、铺轨、制作说明与配音整轨工具；固定回归样本仍保留 |
+| `episodes/_shared/` | 合并后的唯一共享目录：页身色、水印、混音、TTS、起音、铺轨、整轨、句级装配、系列模板、冻结与渲染；固定回归样本仍保留 |
+| `episodes/_template/` | 新期说明、图文骨架与参考资料接入片段 |
 | `docs/` | 下面这些手册。制作说明模板是 `docs/knoll-props.template.md` |
 | `site/` | Astro 站点。`site/package.json` 的 `version` 是三段式版本号 |
+
+用户已明确授权将原制作与发布目录实体合并、按系列分类，替代此次迁移涉及的“保持原物理路径”约束。新期直接建立 `episodes/<series>/<slug>/{production,publication}/`，在发布 `meta.json` 中填写有效系列及新 `sourcePath`。旧冻结清单、来源JSON、QA和渲染回执随目录迁移但保留原字节，旧路径通过[迁移记录与账本](docs/archive/2026-11/episode-layout/README.md)及固定基线 `28dfb2fa` 追溯，不保留旧根目录软链。路径适配后的代码须在后续编码前重新冻结实际输入，不能把迁移检查视为重新制作、审片或用户认可。
 
 2026-10-25 清理已被替代的旧工程，记录见[旧工程清理](docs/archive/2026-10/repository-cleanup.md)。当前制作入口以各期 `meta.json.sourcePath` 为准。用户随后明确要求删除两期Agent试片：A01/EP.22与A02/EP.28的发布目录及相关制作工程一并移除，原先保护`agent-intro-v2/video.mp4`拼接依赖的说明随第三版删除而失效。后续仍推进Skills、MCP、Subagent、Goal等11项概念研究候选；删除前工程与检查通过固定Git提交追溯。当前删除范围与发布验证见[撤下记录](docs/archive/2026-10/agent-video-retirement.md)，不从历史恢复这两期为现行课程。
 
@@ -98,8 +101,8 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 6. [docs/render.md](docs/render.md)
 7. [docs/validate.md](docs/validate.md)
 8. [docs/publish.md](docs/publish.md)
-9. 新拆分短片的句级装配/时序/冻结/编码检查共用 [episodes-codex/_shared/README.md](episodes-codex/_shared/README.md)，不复制配音整轨或起音算法。
-10. [episodes-codex/_template/README.md](episodes-codex/_template/README.md)
+9. 新拆分短片的句级装配/时序/冻结/编码检查共用 [episodes/_shared/README.md](episodes/_shared/README.md)，不复制配音整轨或起音算法。
+10. [episodes/_template/README.md](episodes/_template/README.md)
 11. [docs/knoll-props.template.md](docs/knoll-props.template.md) — 制作说明模板；EP.14 全文在 [docs/examples/knoll-props.degradation.md](docs/examples/knoll-props.degradation.md)
 
 ## 禁止

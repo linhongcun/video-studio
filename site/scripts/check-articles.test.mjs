@@ -12,7 +12,7 @@ const picture = '<Figure src="/video-studio/episodes/example/article/handshake.j
 function fixture(t, content = `${quote}\n\n${picture}`) {
   const repoRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'article-check-'));
   t.after(() => fs.rmSync(repoRoot, {recursive: true, force: true}));
-  const episode = path.join(repoRoot, 'episodes/example');
+  const episode = path.join(repoRoot, 'episodes/request/example/publication');
   fs.mkdirSync(path.join(episode, 'article'), {recursive: true});
   const source = {
     id: 'A1', title: 'Transmission protocol', organization: 'Standards group', version: '2026',

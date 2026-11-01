@@ -1,7 +1,7 @@
-// 把每期的视频与封面从 episodes/<slug>/ 拷进 site/public/episodes/<slug>/（构建产物的一部分，不入库）
+// 从各系列单期的 publication/ 复制媒体，公开 URL 仍为 /episodes/<slug>/。
 import fs from 'node:fs';
 import path from 'node:path';
-const root = path.resolve(import.meta.dirname, '../../episodes');
+import {episodeDirectory, listEpisodes} from './episode-paths.mjs';
 const out = path.resolve(import.meta.dirname, '../public/episodes');
 const imageTypes = /\.(?:avif|gif|jpe?g|png|svg|webp)$/i;
 function copyArticleImages(directory, destination) {
@@ -18,19 +18,16 @@ function copyArticleImages(directory, destination) {
   }
 }
 fs.rmSync(out, {recursive: true, force: true});
-for (const slug of fs.readdirSync(root)) {
-  const metaPath = path.join(root, slug, 'meta.json');
-  if (!fs.existsSync(metaPath)) continue;
-  const meta = JSON.parse(fs.readFileSync(metaPath, 'utf8'));
+for (const {slug, directory, meta} of listEpisodes()) {
   if (meta.draft && process.env.SHOW_DRAFTS !== '1') { console.log(`[copy-assets] ${slug}: draft，跳过`); continue; }
   fs.mkdirSync(path.join(out, slug), {recursive: true});
   for (const f of [meta.video, meta.poster].filter(Boolean)) {
-    const src = path.join(root, slug, f);
+    const src = path.join(directory, f);
     if (!fs.existsSync(src)) { if (meta.draft) { console.warn(`[copy-assets] ${slug}: draft 缺少 ${f}`); continue; } throw new Error(`[copy-assets] 缺少文件: ${src}`); }
     fs.copyFileSync(src, path.join(out, slug, f));
     console.log(`[copy-assets] ${slug}/${f}`);
   }
-  const articleImages = path.join(root, slug, 'article');
+  const articleImages = path.join(directory, 'article');
   if (fs.existsSync(articleImages)) copyArticleImages(articleImages, path.join(out, slug, 'article'));
 }
 
@@ -43,7 +40,7 @@ const redirectHtml = `<!doctype html><html lang="zh-CN"><head><meta charset="utf
 const legacy = path.resolve(import.meta.dirname, '../public/videos/http-request');
 fs.rmSync(path.resolve(import.meta.dirname, '../public/videos'), {recursive: true, force: true});
 fs.mkdirSync(legacy, {recursive: true});
-fs.copyFileSync(path.join(root, FULL, 'video.mp4'), path.join(legacy, 'video.mp4'));
+fs.copyFileSync(path.join(episodeDirectory(FULL), 'video.mp4'), path.join(legacy, 'video.mp4'));
 fs.writeFileSync(path.join(legacy, 'index.html'), redirectHtml);
 const quick = path.join(out, 'http-request-quick');
 fs.mkdirSync(quick, {recursive: true});

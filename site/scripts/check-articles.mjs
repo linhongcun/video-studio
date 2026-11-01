@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import {pathToFileURL} from 'node:url';
 import {createProcessor} from '@mdx-js/mdx';
+import {episodeDirectory, listEpisodes} from './episode-paths.mjs';
 import {REPO_ROOT, readArticleSources, validateArticleSource, articleImageFile} from './article-sources.mjs';
 
 function require(condition, message) { if (!condition) throw new Error(message); }
@@ -57,7 +58,7 @@ function durationOf(root, meta) {
 }
 
 export function checkArticle(slug, {repoRoot = REPO_ROOT} = {}) {
-  const dir = path.join(repoRoot, 'episodes', slug);
+  const dir = episodeDirectory(slug, {repoRoot});
   const meta = JSON.parse(fs.readFileSync(path.join(dir, 'meta.json'), 'utf8'));
   const tree = parseArticle(fs.readFileSync(path.join(dir, 'article.mdx'), 'utf8'));
   const sources = readArticleSources(slug, {repoRoot});
@@ -120,10 +121,7 @@ export function checkArticle(slug, {repoRoot = REPO_ROOT} = {}) {
 export function checkArticles({repoRoot = REPO_ROOT} = {}) {
   const results = [];
   const failures = [];
-  for (const slug of fs.readdirSync(path.join(repoRoot, 'episodes')).sort()) {
-    const metaFile = path.join(repoRoot, 'episodes', slug, 'meta.json');
-    if (!fs.existsSync(metaFile)) continue;
-    const meta = JSON.parse(fs.readFileSync(metaFile, 'utf8'));
+  for (const {slug, meta} of listEpisodes({repoRoot})) {
     if (meta.draft || meta.archived) continue;
     try { results.push(checkArticle(slug, {repoRoot})); }
     catch (error) { failures.push(`${slug}: ${error.message}`); }

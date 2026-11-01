@@ -8,6 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import {transformSync} from 'esbuild';
+import {listEpisodes} from './episode-paths.mjs';
 
 const ROOT = path.resolve(import.meta.dirname, '../..');
 const EP_DIR = path.join(ROOT, 'episodes');
@@ -22,7 +23,7 @@ function realBuildVtt(text, io = fs) {
   assert.ok(start >= 0 && end > start, 'Actual buildVtt source block not found');
   const extracted = text.slice(start, end).replace(/^export /gm, '');
   const {code} = transformSync(extracted, {loader: 'ts'});
-  return vm.compileFunction(`${code}\nreturn buildVtt;`, ['fs', 'path', 'EP_DIR'])(io, path, EP_DIR);
+  return vm.compileFunction(`${code}\nreturn buildVtt;`, ['fs', 'path', 'EP_DIR', 'episodePath'])(io, path, EP_DIR, (slug) => path.join(EP_DIR, slug));
 }
 
 function frozenIO(files) {
@@ -37,10 +38,11 @@ function frozenIO(files) {
 }
 
 function capture() {
-  const slugs = fs.readdirSync(EP_DIR).filter((slug) => fs.existsSync(path.join(EP_DIR, slug, 'meta.json'))).sort();
+  const episodes = listEpisodes();
+  const slugs = episodes.map(({slug}) => slug).sort();
   const files = {};
-  for (const slug of slugs) for (const name of ['meta.json', 'storyboard.json', 'remotion/src/timing.json']) {
-    const file = path.join(EP_DIR, slug, name);
+  for (const {slug, directory} of episodes) for (const name of ['meta.json', 'storyboard.json', 'remotion/src/timing.json']) {
+    const file = path.join(directory, name);
     if (fs.existsSync(file)) files[path.join(slug, name)] = fs.readFileSync(file, 'utf8');
   }
   const source = fs.readFileSync(SOURCE, 'utf8');

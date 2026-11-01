@@ -24,7 +24,7 @@ IT小村用代码生成的动画短片、配套图文和可运行示例，讲清
 | [计算机网络](https://linhongcun.github.io/video-studio/series/request/) | 沿网页请求理解 HTTP、HTTPS、DNS、登录态、CDN、负载均衡与浏览器缓存。 |
 | [其他](https://linhongcun.github.io/video-studio/series/engineering-algorithms/) | 一致性哈希、布隆过滤器等独立专题；以后没有明确系列的内容统一归入这里。 |
 
-各系列直接组织自己的视频与图文，可以按需要选择学习方向。系列名称与说明维护在 [`series.json`](site/src/content/series.json)，单期归属和发布信息维护在 `episodes/<slug>/meta.json`。
+各系列直接组织自己的视频与图文，可以按需要选择学习方向。仓库内容统一存放在 `episodes/<series>/<slug>/`，每期的 `production/` 保存制作材料，`publication/` 保存发布内容。系列名称与说明维护在 [`series.json`](site/src/content/series.json)，单期归属和发布信息维护在 `publication/meta.json`。
 
 ## 视频、图文与源码一起看
 
@@ -46,12 +46,11 @@ site/
   src/content/            系列与标签配置
   scripts/                日期、资料、图文检查及媒体复制工具
 episodes/
-  <slug>/                 发布元数据、MDX、分镜、最终 MP4、封面与资料回执
-    article/              文章配图与来源证据
-  _shared/                配音、起音、混音与基础主题工具
-episodes-codex/
-  <slug>/                 制作文稿、配音、动画、冻结清单与修订记录
-  _shared/                系列视觉模板、句级装配、冻结与渲染工具
+  <series>/<slug>/
+    production/           制作文稿、配音、动画、冻结清单与修订记录
+    publication/          发布元数据、MDX、分镜、最终 MP4、封面与资料回执
+      article/            文章配图与来源证据
+  _shared/                配音、起音、混音、主题、系列模板、冻结与渲染工具
   _template/              新期说明、图文骨架与参考资料接入片段
 design/                   品牌、封面等设计素材与制作记录
 docs/                     规范、手册、经验、项目记忆与历史归档
@@ -59,7 +58,9 @@ AGENTS.md                 制作与协作入口
 CREDITS.md                第三方素材与署名
 ```
 
-`episodes/<slug>/` 是站点发布入口；当前制作源码的位置以 `meta.json.sourcePath` 及对应工程 README 为准。音频原稿、动画工程和冻结输入保留在制作目录，构建生成的站点媒体副本不提交到仓库。
+目录按现有系列实际归并，当前制作源码的位置以 `publication/meta.json.sourcePath` 及对应工程 README 为准，可能位于 `production/revisions/` 中。共用工具与新期模板分别集中在 `episodes/_shared/`、`episodes/_template/`；构建生成的站点媒体副本不提交到仓库。
+
+本次目录合并按用户授权执行。旧冻结清单、来源JSON、QA和媒体回执保留原字节，原路径通过[迁移记录与账本](docs/archive/2026-11/episode-layout/README.md)解读；迁移前制作输入可在固定基线 `28dfb2fa` 追溯。本次路径适配不代表重新制作或审片，后续重渲须冻结当前新路径下的实际源码，不能改写旧清单认可新输入。
 
 ## 本地运行站点
 
@@ -89,20 +90,20 @@ npm --prefix site run preview
 
 1. **调研与定稿**：核对公开来源，建立 `references.json`，同步编写脚本、配套图文、发音说明与分镜；明确题意、讲解主线、前置概念和适用边界。
 2. **配音与动画**：使用共享配音与时序工具，沿用对应系列的封面和正文视觉体系，先验证关键连续过程，再展开完整制作。
-3. **检查与冻结**：核验资料、配音、时序、版面和动态表达，冻结实际输入并记录 SHA-256；保留旧制作稿与历史证据的原路径和字节。
+3. **检查与冻结**：核验资料、配音、时序、版面和动态表达，冻结实际输入并记录 SHA-256；保留旧制作身份与历史证据字节，迁移路径通过账本追溯。
 4. **生成最终媒体**：按当前单期工程的入口渲染正文、适用的代码卡和参考资料附录，检查成片、字幕、章节、封面与媒体记录。
-5. **接入与发布**：将通过检查的产物接入 `episodes/`，验证站点阅读、视频回看和来源链接，按发布手册完成版本、部署及线上文件核验。
+5. **接入与发布**：将通过检查的产物接入本期 `publication/`，验证站点阅读、视频回看和来源链接，按发布手册完成版本、部署及线上文件核验。
 
-新制作或重制的视频默认包含经核验的参考资料附录；配套文章包含原文引用与有效正文配图。新期从[模板说明](episodes-codex/_template/README.md)进入，渲染命令、依赖和系列模板按当前工程及[渲染手册](docs/render.md)选择。
+新制作或重制的视频默认包含经核验的参考资料附录；配套文章包含原文引用与有效正文配图。新期从[模板说明](episodes/_template/README.md)进入，渲染命令、依赖和系列模板按当前工程及[渲染手册](docs/render.md)选择。
 
 视频制作还需要 FFmpeg / ffprobe、Python 依赖、浏览器与字体环境，具体版本见对应制作工具和单期工程。MiMo TTS 使用 `MIMO_API_KEY`，密钥按[配音手册](docs/voice.md)配置。
 
 | 要做的事 | 入口 |
 | --- | --- |
 | 查规范、现行任务与授权范围 | [AGENTS.md](AGENTS.md) · [RULES.md](docs/RULES.md) |
-| 开新期或重制 | [制作流程](docs/pipeline.md) · [新期模板](episodes-codex/_template/README.md) |
+| 开新期或重制 | [制作流程](docs/pipeline.md) · [新期模板](episodes/_template/README.md) |
 | 写图文、核对引用与配图 | [调研模板](docs/research-template.md) · [图文写作说明](docs/article-style.md) |
-| 做配音、动画、封面与资料附录 | [配音](docs/voice.md) · [渲染](docs/render.md) · [共享制作工具](episodes-codex/_shared/README.md) |
+| 做配音、动画、封面与资料附录 | [配音](docs/voice.md) · [渲染](docs/render.md) · [共享制作工具](episodes/_shared/README.md) |
 | 质检与上线 | [校验](docs/validate.md) · [质检清单](docs/qa.md) · [发布](docs/publish.md) |
 | 查已有经验和当前偏好 | [教训](docs/lessons-learned.md) · [成功经验](docs/successful-practices.md) · [项目制作记忆](docs/production-memory.md) |
 | 查重制、资料补齐与站点改版记录 | [历史归档索引](docs/archive/README.md) |
