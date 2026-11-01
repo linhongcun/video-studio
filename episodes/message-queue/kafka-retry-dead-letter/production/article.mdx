@@ -1,0 +1,123 @@
+---
+title: '重试与死信：失败消息，为什么不能一直重试？'
+summary: '用同一条订单通知解释持久化调用预算、暂停与到期判断，以及死信确认和原消费进度之间的两个边界。'
+chapters:
+  - { id: budget, title: 重试由谁控制 }
+  - { id: recover, title: 重启后还剩几次 }
+  - { id: disposition, title: 失败怎样退出 }
+  - { id: boundary, title: 哪些保证仍有限 }
+related: []
+---
+
+订单7042的通知事件E01已从Kafka取出，通知服务却临时不可用。立即再试也许能等到服务恢复，也可能让同一事件一直占着处理机会，后面的E02始终轮不到。
+
+下面固定一个消费者、一个原分区P0，原日志依次保存E01@0、E02@1。Java客户端和Broker版本为Apache Kafka4.4.0，消费者使用classic协议、关闭自动提交、每次poll至多返回一条。示例期间原记录仍保留。本例选择让同分区后续事件等待，优先把当前事件处理到明确的成功或待处置阶段；这有顺序上的收益，也有队头阻塞的代价。
+
+## 重试由谁控制 {#budget}
+
+Kafka不会替这段业务程序决定“这次值得再试”“等多久”“何时停止”。这里没有nack/requeue，也没有普通Topic自带的自动延时功能。取到E01后，应用保留这个ConsumerRecord，并pause P0；重试时直接再次调用保存的E01，不需要让Broker先收回再交付，也不需要为了重试而resume。
+
+源码里的pause沿ClassicKafkaConsumer委托到SubscriptionState，只把分区的paused标志设为true。它不调用seek，不回滚已经前移的读取位置，也不调用业务函数。
+
+<SourceQuote sourceId="R1" supports="pause修改本地分区状态，没有重新调用业务、退回消息或设置重试计时器。" />
+
+后续poll收集记录时，FetchCollector发现该分区暂停，会把尚未交付的CompletedFetch放回客户端缓冲，留待以后resume再评估。因此客户端可能已经预取E02，但应用尚未收到E02；max.poll.records=1限制的是一次poll的交付数量，不是网络预取数量。
+
+<SourceQuote sourceId="R2" supports="暂停分区尚未交付的取回结果留在客户端缓冲；这不是把已交付E01放回Broker。" />
+
+应用自己的本机状态以稳定的逻辑处理身份和事件编号为键：`notify:E01`。进程A、进程B都读取同一份状态，不用进程ID作预算身份。示例还校验原topic、P0、offset、payload的SHA、原key、group和策略，防止把另一个事件借用到这份状态。
+
+三个名额包含第一次。每次发起业务调用前，应用先把`totalStarted+1`和`IN_FLIGHT`保存成功；保存失败便停止，不调用业务。这个先后顺序避免“已经调用却来不及记次数，重启又从零开始”的无界漏洞。代价是保存后尚未真正调用便退出，也会消耗一个名额：它是至多三个获准开始的预算，不保证恰好发生三次或完成三次调用。
+
+状态保存使用同目录临时文件、文件force、原子替换、目录force，并持有贯穿进程生命周期的文件锁。这是同机、保留同一state目录的进程退出/恢复协议；不是分布式共享状态服务，也没有做断电或硬件故障实验。完整实现见文末应用代码。
+
+## 重启后还剩几次 {#recover}
+
+第一次调用返回临时不可用，应用把状态写成BACKOFF，并保存`readyAtMs`。主循环只有在“现在已经到期，且totalStarted小于3”时，才允许预留下一个名额；先判断，再保存，再调用，顺序不能颠倒。
+
+退避时消费者owner线程继续短poll，维护组状态并处理客户端网络事件。业务fixture和producer.send放在独立受控executor，避免业务等待或send的元数据等待卡住owner。`poll(Duration.ofMillis(50))`是本例等待上限参数，不是操作系统保证每50毫秒执行一次。暂停没有自动恢复定时器；到期判断属于应用。
+
+若第二个名额已保存、调用仍进行中便退出，重启读回的仍是2和IN_FLIGHT。上一次业务是否生效可能未知，恢复代码保留这两个已用名额，转为新的BACKOFF；到期后只剩第三个名额可用。因此实际通知服务仍需按notify:E01实现业务幂等：本地journal无法和远端通知副作用组成一笔事务。
+
+<Figure src="/video-studio/episodes/kafka-retry-dead-letter/article/01-durable-budget.jpg" alt="同一状态目录恢复已占用的两个名额；上次结果未知，剩余一个名额，不因进程重启清零。" caption="同一状态目录恢复已占用的两个名额；上次结果未知，剩余一个名额，不因进程重启清零。" seekTo={73.733333333} chapter="recover" />
+
+如果第三次返回成功，应用先记BUSINESS_DONE，再用显式Map提交P0的下一位置1。只有提交成功回调到达，才记COMMITTED并resume，后续E02才可继续交付。示例worker在resume后、下一次poll前退出，所以真实运行只会证明E02没有提前交给业务，以及分区已恢复交付资格；不会冒称E02的业务也已执行。
+
+## 失败怎样退出 {#disposition}
+
+从“已占2个名额，第三次尚未开始”的共同状态改变一个条件：第三次仍临时失败。计数已经达到3，应用不再发起第四次调用，转为DLQ_PENDING。另一条独立分支从未尝试的共同起点开始：如果首次就收到明确的永久业务拒绝，直接进入DLQ_PENDING，无需用完剩余名额。temporary/permanent是应用业务规则，不能把任意网络异常或代码异常一律分类为永久拒绝。
+
+<Figure src="/video-studio/episodes/kafka-retry-dead-letter/article/02-exhausted.jpg" alt="第三次临时失败后，三个调用名额已满，条件判断挡住第四次调用，原进度仍为0。" caption="第三次临时失败后，三个调用名额已满，条件判断挡住第四次调用，原进度仍为0。" seekTo={103.800000000} chapter="disposition" />
+
+DLQ_PENDING表示等待处置，不表示原通知成功。应用另外向普通死信Topic发送一条新记录，保留eventId/orderId、逻辑业务身份、原topic/partition/offset、已用次数、原因和原始key/value。原记录仍在原日志中，DLQ不是把原日志中的字节搬走。Kafka key设为notify:E01便于后续识别，但相同key不会自动替应用去重。
+
+应用send返回的Future只是结果对象。真实实现会先把记录加入生产者accumulator，随后返回result.future；网络发送和结果完成发生在后续路径。
+
+<SourceQuote sourceId="R3" supports="send把记录加入发送缓冲并返回Future；方法返回本身不能用作DLQ写入成功的证据。" />
+
+本例显式acks=all和enable.idempotence=true。owner先检查send任务完成，再检查Kafka delivery Future的isDone；只有终态成功get到RecordMetadata，才保存DLQ_CONFIRMED。没有使用“短get等待超时”冒充producer最终失败。传输内部retry由producer负责，与三个业务调用名额分别计数。
+
+<Figure src="/video-studio/episodes/kafka-retry-dead-letter/article/03-dlq-confirmed.jpg" alt="死信发送成功并记入本机确认状态，原消费进度尚未提交；两个边界仍然分开。" caption="死信发送成功并记入本机确认状态，原消费进度尚未提交；两个边界仍然分开。" seekTo={145.133333333} chapter="disposition" />
+
+DLQ_CONFIRMED之后才发起原P0→1的commitAsync。它有独立的OffsetCommit请求与完成队列；只有后续poll驱动成功回调，应用才结束原事件。方法返回、DLQ成功和原进度成功是三个不同观察点。
+
+<SourceQuote sourceId="R4" supports="异步原进度提交独立发送OffsetCommit请求，并把成功放入完成队列；应用等待成功回调，不能把commitAsync返回当成完成。" />
+
+下面是便于阅读的应用逻辑摘写，不冒充Kafka源码。具体线程和持久化异常处理以完整Java程序为准：
+
+```java
+if (readyOrBackoff && now >= readyAt && totalStarted < 3) {
+    journal.begin(now);       // 先保存IN_FLIGHT及已用次数；失败便不调用
+    handlerTask = invoke(savedE01);
+}
+// temporary：还有名额则保存BACKOFF，否则DLQ_PENDING
+// permanent：直接DLQ_PENDING；success：BUSINESS_DONE
+if (dlqFutureIsTerminalSuccess) {
+    journal.confirmDlq(metadata);
+}
+if (phase == BUSINESS_DONE || phase == DLQ_CONFIRMED) {
+    commitAsync(Map.of(P0, offsetPlusOne), successCallback);
+}
+// 成功回调后：保存COMMITTED，再resume；不是上述方法返回后就结束
+```
+
+## 哪些保证仍有限 {#boundary}
+
+死信目标不可用时，send可能同步抛错，也可能返回最终失败的Future。应用保留DLQ_PENDING和原进度，非零退出，不自动无限重发，也不先提交原记录。修复目标后，保留相同目录重启，才再次尝试该待处置记录。发送异常本身不能证明目标日志必为空；某些故障下服务端已追加、发送者却没有成功结果，重发仍可能重复。
+
+即使明确收到了成功metadata，仍有退出空隙：DLQ已写成，本机尚未记下DLQ_CONFIRMED，原进度也未提交。恢复看到的还是pending和旧原进度，可能重读E01并再次send，得到DLQ中的新offset。幂等producer的协议重试不会把新进程的新send按eventId合并。
+
+<Figure src="/video-studio/episodes/kafka-retry-dead-letter/article/04-duplicate-window.jpg" alt="确认尚未记住就退出，恢复后又发同一事件，死信日志可能留下E01的两个不同位置。" caption="确认尚未记住就退出，恢复后又发同一事件，死信日志可能留下E01的两个不同位置。" seekTo={184.166666667} chapter="boundary" />
+
+本机确认状态可以缩小这个窗口：如果DLQ_CONFIRMED已经保存，重启可跳过重复send，只补原进度。如果Kafka原提交其实已成功、本机COMMITTED尚未保存，启动先查询committed并与原offset+1对照，补记完成，不先poll到E02才决定。但文件状态、DLQ写入和原进度提交仍是不同边界；本片不用Kafka事务，也不宣称exactly-once。
+
+本例等待一个事件时，整个原分区的后续交付受阻。实际系统若另选多分区、并发in-flight、重试Topic或再均衡交接，必须重新设计顺序、预算共享和所有权；本机单事件目录不能直接扩张成跨机器保证。`readyAtMs`使用系统时间，时钟调整会影响等待长短；它不改变已经占用的总名额。
+
+死信还需要明确的保留期、告警、检查和受控回放流程。修复后重新执行同一事件，仍需业务幂等和顺序考虑。转存成功只证明问题记录被保留到这次确认边界，不等于原通知已经送达，也不是对任意故障的永不丢失保证。
+
+### 示例配置与程序
+
+consumer显式配置classic、enable.auto.commit=false、max.poll.records=1、allow.auto.create.topics=false、auto.offset.reset=earliest、default.api.timeout.ms=2000、session.timeout.ms=6000、heartbeat.interval.ms=1000。earliest只在没有有效恢复位置时适用；max.poll.interval.ms本例未改，固定版本默认300000毫秒。持续poll仍是必要条件，不能用较大上限替代应用调度。
+
+producer显式acks=all、enable.idempotence=true、max.block.ms=2000、delivery.timeout.ms=3000、request.timeout.ms=1000、linger.ms=0。3000满足delivery timeout不小于request timeout加linger的配置约束；这些是短时隔离实验参数，不是生产建议。retries未覆盖固定版本默认Integer.MAX_VALUE，但重试受delivery超时/错误分类限制。验证缺失目标时Broker还须关闭auto.create.topics.enable，不能凭consumer的禁止自动建Topic配置限制producer。
+
+可执行应用、纯核心检查与运行命令：
+
+- [Mq08Core.java](https://github.com/linhongcun/video-studio/blob/main/episodes/message-queue/kafka-retry-dead-letter/production/examples/Mq08Core.java)：本机journal与状态判断。
+- [Mq08Worker.java](https://github.com/linhongcun/video-studio/blob/main/episodes/message-queue/kafka-retry-dead-letter/production/examples/Mq08Worker.java)：真实Kafka I/O与有界业务fixture。
+- [README及运行合同](https://github.com/linhongcun/video-studio/blob/main/episodes/message-queue/kafka-retry-dead-letter/production/examples/README.md)：编译、四种结果和进程退出钩子。
+
+业务handler仅返回可控的temporary/permanent/success，没有调用真实通知服务。有限Python模型、纯Java核心/子进程检查和独立Kafka运行分别记录；未完成的运行不会提前写成实测结果。
+
+独立最小运行使用真实Kafka4.4.0、单节点RF1与保留状态目录的15个worker进程，共8条独立路径/151项断言通过：包括四种基础结果、保存名额后尚未调用就退出、业务返回后未记成功、DLQ确认前后两个退出窗口。ACK尚未记入journal时重启，实际DLQ中出现同E01的两个offset；确认已保存时重启，则只补原提交而不再次send。业务仍是受控返回，不是真实通知。运行将退避设为500毫秒、handler等待700毫秒来观察持续poll；示意模型的400毫秒是另一个教学输入。辅助E02的订单字段在运行中为7042，图示为7043，未交给业务；核心E01/7042与状态判断相同。完整原始命令、实际记录和范围见[运行记录](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/mq08-15-implementation/runtime/runs/mq08-20261101T092105.198110Z/report.json)。
+
+## 参考资料
+
+核心源码固定Apache Kafka4.4.0 commit `1156b2752aaa28eafc0b4c4d387e63356793268d`，机构Apache Kafka，实际读取日期2026-11-01（北京时间）。公开仓库未给这些源文件明确的个人文献署名，不从提交者推定作者。
+
+- R1：[《ClassicKafkaConsumer.java》](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java#L978-L984)。Apache Kafka，4.4.0；pause delegates to subscription state without retrying the application handler [固定原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java)。
+- R2：[《FetchCollector.java》](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L125-L130)。Apache Kafka，4.4.0；Paused completed fetches are held back from delivery [固定原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java)。
+- R3：[《KafkaProducer.java》](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L1108-L1126)。Apache Kafka，4.4.0；send appends to accumulator and returns the send future [固定原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java)。
+- R4：[《ConsumerCoordinator.java》](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java#L1103-L1115)。Apache Kafka，4.4.0；commitAsync发送独立OffsetCommit请求，成功结果进入completedOffsetCommits队列，后续poll调用完成回调；Worker等成功回调才结束原事件。 [固定原始文件](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java)。
+
+配置交叉核对：[ConsumerConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/ConsumerConfig.java#L652-L663)、[ProducerConfig.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java#L174-L185)，均本轮新鲜读取。完整永久行号、调用链、下载SHA与引用上下文保存在制作研究记录。

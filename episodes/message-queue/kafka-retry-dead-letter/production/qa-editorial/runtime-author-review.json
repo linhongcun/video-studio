@@ -1,0 +1,236 @@
+{
+  "checkedAt": "2026-11-01T09:28:19.016351+00:00",
+  "runtimeReport": "docs/archive/2026-11/mq08-15-implementation/runtime/runs/mq08-20261101T092105.198110Z/report.json",
+  "runtimeReportSHA256": "dd06c78fef4ece9320440325e17e5410f632855e56fb3204f91e0aaf84039555",
+  "authorWorkerSHA256": "a1ea6e69bf3f5ce87dbd367a45d11a00b1abe1cf02c9002c8e75dac6dfbdaf99",
+  "scope": "Actual original Kafka records/group offsets, local files and child JVMs; handler returns controlled outcomes, no real notification endpoint.",
+  "cases": [
+    {
+      "name": "temporary-recovery",
+      "processes": 1,
+      "exitCodes": [
+        0
+      ],
+      "snapshotChecks": [
+        {
+          "tag": "initial",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "final",
+          "committed": 1,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        }
+      ]
+    },
+    {
+      "name": "permanent",
+      "processes": 1,
+      "exitCodes": [
+        0
+      ],
+      "snapshotChecks": [
+        {
+          "tag": "initial",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "final",
+          "committed": 1,
+          "sourceRecords": 2,
+          "dlqRecords": 1
+        }
+      ]
+    },
+    {
+      "name": "budget-exhausted",
+      "processes": 1,
+      "exitCodes": [
+        0
+      ],
+      "snapshotChecks": [
+        {
+          "tag": "initial",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "final",
+          "committed": 1,
+          "sourceRecords": 2,
+          "dlqRecords": 1
+        }
+      ]
+    },
+    {
+      "name": "dlq-unavailable",
+      "processes": 2,
+      "exitCodes": [
+        1,
+        0
+      ],
+      "snapshotChecks": [
+        {
+          "tag": "initial",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "failed-dlq",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "after-repair-same-journal",
+          "committed": 1,
+          "sourceRecords": 2,
+          "dlqRecords": 1
+        }
+      ]
+    },
+    {
+      "name": "restart-budget",
+      "processes": 4,
+      "exitCodes": [
+        86,
+        86,
+        86,
+        0
+      ],
+      "snapshotChecks": [
+        {
+          "tag": "initial",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "after-halt-1",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "after-halt-2",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "after-halt-3",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "final",
+          "committed": 1,
+          "sourceRecords": 2,
+          "dlqRecords": 1
+        }
+      ]
+    },
+    {
+      "name": "success-before-journal",
+      "processes": 2,
+      "exitCodes": [
+        86,
+        0
+      ],
+      "snapshotChecks": [
+        {
+          "tag": "initial",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "after-halt",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "final",
+          "committed": 1,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        }
+      ]
+    },
+    {
+      "name": "dlq-ack-before-journal",
+      "processes": 2,
+      "exitCodes": [
+        86,
+        0
+      ],
+      "snapshotChecks": [
+        {
+          "tag": "initial",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "after-halt",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 1
+        },
+        {
+          "tag": "final",
+          "committed": 1,
+          "sourceRecords": 2,
+          "dlqRecords": 2
+        }
+      ]
+    },
+    {
+      "name": "dlq-journal-before-commit",
+      "processes": 2,
+      "exitCodes": [
+        86,
+        0
+      ],
+      "snapshotChecks": [
+        {
+          "tag": "initial",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 0
+        },
+        {
+          "tag": "after-halt",
+          "committed": 0,
+          "sourceRecords": 2,
+          "dlqRecords": 1
+        },
+        {
+          "tag": "final",
+          "committed": 1,
+          "sourceRecords": 2,
+          "dlqRecords": 1
+        }
+      ]
+    }
+  ],
+  "inputDifferences": "runtime backoff500ms/handler700ms; finite model virtual backoff400ms. Runtime E02 auxiliary payload uses order7042 while illustration/model/README auxiliary E02 uses7043; E02 is never passed to handler, core E01/order7042 identical.",
+  "actualRead": [
+    "report assertions/case events/all8 snapshots",
+    "dlq-ack-before-journal-after-halt.stdout",
+    "dlq-ack-before-journal-final.stdout",
+    "restart-budget-worker-3.stdout",
+    "restart-budget-worker-4.stdout",
+    "dlq-unavailable-worker-1.stdout"
+  ],
+  "limits": "Not an independent rerun or real notification, distributed sharing, hardware crash, replication or benchmark test."
+}

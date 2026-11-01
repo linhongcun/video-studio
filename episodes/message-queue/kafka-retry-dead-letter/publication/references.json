@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "kafka-retry-dead-letter",
+  "heading": "参考资料",
+  "checkedAt": "2026-11-01",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Apache Kafka",
+      "title": "ClassicKafkaConsumer.java",
+      "titleEvidence": {
+        "locator": "GitHub Contents API name and path at fixed commit",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/sources/ClassicKafkaConsumer.github-contents.json"
+      },
+      "version": "Apache Kafka 4.4.0; commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java#L978-L984",
+      "supports": [
+        "pause delegates to subscription state without retrying the application handler"
+      ],
+      "sections": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java:978-984",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-01",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/source-chain-notes.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java",
+        "method": "Fresh official fixed-commit raw HTTPS GET plus targeted execution reading; exact continuous quote checked against original saved bytes. No runtime claim.",
+        "sha256": "1c9a717d04f5b8abc24097f7b28fee887d3543417928a0ecb20870969cd64567"
+      },
+      "quotation": {
+        "text": "    public void pause(Collection<TopicPartition> partitions) {\n        acquireAndEnsureOpen();\n        try {\n            log.debug(\"Pausing partitions {}\", partitions);\n            for (TopicPartition partition: partitions) {\n                subscriptions.pause(partition);\n            }",
+        "locator": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java:978-984",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/sources/ClassicKafkaConsumer.java"
+      },
+      "note": "Original source filename from official GitHub Contents API. Apache Kafka project repository institution; no personal document author inferred from Git commits."
+    },
+    {
+      "id": "R2",
+      "organization": "Apache Kafka",
+      "title": "FetchCollector.java",
+      "titleEvidence": {
+        "locator": "GitHub Contents API name and path at fixed commit",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/sources/FetchCollector.github-contents.json"
+      },
+      "version": "Apache Kafka 4.4.0; commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L125-L130",
+      "supports": [
+        "Paused completed fetches are held back from delivery"
+      ],
+      "sections": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java:125-130",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-01",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/source-chain-notes.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java",
+        "method": "Fresh official fixed-commit raw HTTPS GET plus targeted execution reading; exact continuous quote checked against original saved bytes. No runtime claim.",
+        "sha256": "66961cb214088a240b32e1729228cfefd2643b06c8aad4501f3444242dda4656"
+      },
+      "quotation": {
+        "text": "                } else if (subscriptions.isPaused(nextInLineFetch.partition)) {\n                    // when the partition is paused we add the records back to the completedFetches queue instead of draining\n                    // them so that they can be returned on a subsequent poll if the partition is resumed at that time\n                    log.debug(\"Skipping fetching records for assigned partition {} because it is paused\", nextInLineFetch.partition);\n                    pausedCompletedFetches.add(nextInLineFetch);\n                    fetchBuffer.setNextInLineFetch(null);",
+        "locator": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java:125-130",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/sources/FetchCollector.java"
+      },
+      "note": "Original source filename from official GitHub Contents API. Apache Kafka project repository institution; no personal document author inferred from Git commits."
+    },
+    {
+      "id": "R3",
+      "organization": "Apache Kafka",
+      "title": "KafkaProducer.java",
+      "titleEvidence": {
+        "locator": "GitHub Contents API name and path at fixed commit",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/sources/KafkaProducer.github-contents.json"
+      },
+      "version": "Apache Kafka 4.4.0; commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L1108-L1126",
+      "supports": [
+        "send appends to accumulator and returns the send future"
+      ],
+      "sections": "clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java:1108-1126",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-01",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/source-chain-notes.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java",
+        "method": "Fresh official fixed-commit raw HTTPS GET plus targeted execution reading; exact continuous quote checked against original saved bytes. No runtime claim.",
+        "sha256": "ef8914cd6af41bc030eabc14a77d0625682796a19eae91f4990b30328aa45986"
+      },
+      "quotation": {
+        "text": "            // Append the record to the accumulator.  Note, that the actual partition may be\n            // calculated there and can be accessed via appendCallbacks.topicPartition.\n            RecordAccumulator.RecordAppendResult result = accumulator.append(record.topic(), partition, timestamp, serializedKey,\n                    serializedValue, headers, appendCallbacks, remainingWaitMs, nowMs, cluster);\n            assert appendCallbacks.getPartition() != RecordMetadata.UNKNOWN_PARTITION;\n\n            // Add the partition to the transaction (if in progress) after it has been successfully\n            // appended to the accumulator. We cannot do it before because the partition may be\n            // unknown. Note that the `Sender` will refuse to dequeue\n            // batches from the accumulator until they have been added to the transaction.\n            if (transactionManager != null) {\n                transactionManager.maybeAddPartition(appendCallbacks.topicPartition());\n            }\n\n            if (result.batchIsFull || result.newBatchCreated) {\n                log.trace(\"Waking up the sender since topic {} partition {} is either full or getting a new batch\", record.topic(), appendCallbacks.getPartition());\n                this.sender.wakeup();\n            }\n            return result.future;",
+        "locator": "clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java:1108-1126",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/sources/KafkaProducer.java"
+      },
+      "note": "Original source filename from official GitHub Contents API. Apache Kafka project repository institution; no personal document author inferred from Git commits."
+    },
+    {
+      "id": "R4",
+      "organization": "Apache Kafka",
+      "title": "ConsumerCoordinator.java",
+      "titleEvidence": {
+        "locator": "GitHub Contents API name and path at fixed commit",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/sources/ConsumerCoordinator.github-contents.json"
+      },
+      "version": "Apache Kafka 4.4.0; commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java#L1103-L1115",
+      "supports": [
+        "commitAsync发送独立OffsetCommit请求，成功结果进入completedOffsetCommits队列，后续poll调用完成回调；Worker等成功回调才结束原事件。"
+      ],
+      "sections": "ConsumerCoordinator.java:1041-1051,1103-1132; Worker explicit commitAsync callback",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-01",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/source-chain-notes.md",
+        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java",
+        "method": "Fresh official fixed-commit raw HTTPS GET plus targeted execution reading; exact continuous quote checked against original saved bytes. No runtime claim.",
+        "sha256": "47070d2ca1798a4bedfa20271fe24e5eeeb7a9922ed555292dab89af7b98944b"
+      },
+      "quotation": {
+        "text": "    private RequestFuture<Void> doCommitOffsetsAsync(final Map<TopicPartition, OffsetAndMetadata> offsets, final OffsetCommitCallback callback) {\n        RequestFuture<Void> future = sendOffsetCommitRequest(offsets);\n        inFlightAsyncCommits.incrementAndGet();\n        final OffsetCommitCallback cb = callback == null ? defaultOffsetCommitCallback : callback;\n        future.addListener(new RequestFutureListener<>() {\n            @Override\n            public void onSuccess(Void value) {\n                inFlightAsyncCommits.decrementAndGet();\n\n                if (interceptors != null)\n                    interceptors.onCommit(offsets);\n                completedOffsetCommits.add(new OffsetCommitCompletion(cb, offsets, null));\n            }",
+        "locator": "ConsumerCoordinator.java:1103-1115",
+        "evidence": "episodes/message-queue/kafka-retry-dead-letter/production/sources/ConsumerCoordinator.java"
+      },
+      "note": "Original source filename from official GitHub Contents API. Apache Kafka project repository institution; no personal document author inferred from Git commits."
+    }
+  ]
+}

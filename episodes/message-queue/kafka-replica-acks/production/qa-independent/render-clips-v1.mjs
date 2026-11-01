@@ -1,0 +1,15 @@
+// Independent additional bounded causal motion previews; no formal film render.
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {createRequire} from 'node:module';
+const D=path.resolve(path.dirname(new URL(import.meta.url).pathname),'..'),REM=path.join(D,'remotion'),Q=path.join(D,'qa-independent/clips-v1'),req=createRequire(path.join(REM,'package.json'));
+const {bundle}=req('@remotion/bundler'),{openBrowser,selectComposition,renderMedia}=req('@remotion/renderer'),webpack=req('webpack');
+const sha=p=>crypto.createHash('sha256').update(fs.readFileSync(p)).digest('hex');
+const sources=['script.md','storyboard.json','words.json','voice.wav','model.json','remotion/src/Main.tsx','remotion/src/data.ts','remotion/src/theme.ts'];const hashes=Object.fromEntries(sources.map(f=>[f,sha(path.join(D,f))]));
+if(sha(path.join(REM,'public/audio/voice.wav'))!==hashes['voice.wav'])throw Error('Actual public WAV must equal root voice WAV');
+const spec=JSON.parse(fs.readFileSync(path.join(Q,'spec.json'),'utf8'));if(fs.existsSync(path.join(Q,'report.json')))throw Error('Preserve previous clip report');
+const props={showSubtitles:false,hideSubtitles:true},report={kind:'independent-additional-causal-motion-preview-not-formal-render',createdAtUTC:new Date().toISOString(),sourceHashes:hashes,props,clips:[],visualReviewed:false,machinePass:false};const save=()=>fs.writeFileSync(path.join(Q,'report.json'),JSON.stringify(report,null,2)+'\n');save();
+const url=await bundle({entryPoint:path.join(REM,'src/index.ts'),publicDir:path.join(REM,'public'),outDir:path.join(Q,'bundle'),enableCaching:false,webpackOverride:c=>({...c,resolve:{...c.resolve,alias:{...c.resolve?.alias,'@storyboard':path.join(D,'storyboard.json')},modules:[path.join(REM,'node_modules'),'node_modules']},plugins:[...(c.plugins??[]),new webpack.DefinePlugin({__HAS_VOICE_AUDIO__:true})]})});
+const browser=await openBrowser('chrome',{browserExecutable:'/usr/bin/chromium',logLevel:'error'});
+try{const comp=await selectComposition({serveUrl:url,id:'Main',inputProps:props,puppeteerInstance:browser,logLevel:'error'});comp.props={...comp.props,...props};report.resolvedProps=comp.props;
+ for(const clip of spec.clips){if(!Number.isInteger(clip.from)||!Number.isInteger(clip.to)||clip.to<clip.from||clip.to-clip.from>1200)throw Error('Bounded integer frame window required');const file=path.join(Q,clip.name+'.mp4');await renderMedia({serveUrl:url,composition:comp,outputLocation:file,codec:'h264',crf:20,concurrency:2,inputProps:props,frameRange:[clip.from,clip.to],puppeteerInstance:browser,logLevel:'error'});report.clips.push({...clip,file:path.relative(D,file),sha256:sha(file),frames:clip.to-clip.from+1});save();}
+ report.sourceUnchanged=Object.entries(hashes).every(([f,h])=>sha(path.join(D,f))===h);report.machinePass=report.sourceUnchanged&&report.clips.length===spec.clips.length;save();console.log(JSON.stringify({clips:report.clips.length,machinePass:report.machinePass}));
+}catch(e){report.failure={name:e.name,message:e.message};save();throw e;}finally{await browser.close({silent:true});}

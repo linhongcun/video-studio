@@ -1,0 +1,7 @@
+# Kafka MQ08与MQ15独立封面输入
+
+沿既有不可变kafka-covers/style-v1.json、background.png、ApacheKafka真实logo与许可建立本批两个新目录输入，不修改历史catalog/renderer或重生成旧封面。productionRoot使用当前实体目录，publication由现行episode_paths解析；MQ15保持稳定号，实际期号为EP49。
+
+本模块生成三比例SVG，Chromium按实际字体渲染PNG/JPEG并检查COPYFIT、中心4:3安全区和文字分组间距；两题与MQ100压力布局只验证字体排版，不算额外成片。render后实际审看六张JPEG，确认输入及全部图片SHA保持，再用同入口--install安装同一批图与cover-style.json。字体文件和实际绑定另在本批font-environment.json留证。
+
+MQ08画面显示应用保存预算、到期后重试及确认DLQ后另提交原进度，不表示Kafka有自动DLX。MQ15以本例三个数据副本、当前ISR及minISR=2展示复制确认，ELR/unclean均关闭，不声称确认等于刷盘或消费完成。文案为本期原创解释，资料原题继续使用references的真实原题而不取封面题名。

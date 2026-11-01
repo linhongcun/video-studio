@@ -1,0 +1,74 @@
+[
+  {
+    "title": "ClassicKafkaConsumer.java",
+    "organization": "Apache Kafka",
+    "authorOmittedReason": "No explicit personal document author; Git commit/tag authors are not treated as document authors.",
+    "titleEvidence": {
+      "locator": "GitHub Contents API name and path at fixed commit",
+      "evidence": "sources/ClassicKafkaConsumer.github-contents.json"
+    },
+    "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java#L978-L984",
+    "version": "Apache Kafka 4.4.0; commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "supports": "pause delegates to subscription state without retrying the application handler",
+    "quotation": {
+      "text": "    public void pause(Collection<TopicPartition> partitions) {\n        acquireAndEnsureOpen();\n        try {\n            log.debug(\"Pausing partitions {}\", partitions);\n            for (TopicPartition partition: partitions) {\n                subscriptions.pause(partition);\n            }\n",
+      "locator": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java:978-984",
+      "evidence": "sources/ClassicKafkaConsumer.java"
+    },
+    "verification": "Fresh official raw GET, HTTP 200; excerpt is an exact continuous slice of saved raw bytes. This is a candidate evidence record, not the final references.json."
+  },
+  {
+    "title": "FetchCollector.java",
+    "organization": "Apache Kafka",
+    "authorOmittedReason": "No explicit personal document author; Git commit/tag authors are not treated as document authors.",
+    "titleEvidence": {
+      "locator": "GitHub Contents API name and path at fixed commit",
+      "evidence": "sources/FetchCollector.github-contents.json"
+    },
+    "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L125-L130",
+    "version": "Apache Kafka 4.4.0; commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "supports": "Paused completed fetches are held back from delivery",
+    "quotation": {
+      "text": "                } else if (subscriptions.isPaused(nextInLineFetch.partition)) {\n                    // when the partition is paused we add the records back to the completedFetches queue instead of draining\n                    // them so that they can be returned on a subsequent poll if the partition is resumed at that time\n                    log.debug(\"Skipping fetching records for assigned partition {} because it is paused\", nextInLineFetch.partition);\n                    pausedCompletedFetches.add(nextInLineFetch);\n                    fetchBuffer.setNextInLineFetch(null);\n",
+      "locator": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java:125-130",
+      "evidence": "sources/FetchCollector.java"
+    },
+    "verification": "Fresh official raw GET, HTTP 200; excerpt is an exact continuous slice of saved raw bytes. This is a candidate evidence record, not the final references.json."
+  },
+  {
+    "title": "ConsumerCoordinator.java",
+    "organization": "Apache Kafka",
+    "authorOmittedReason": "No explicit personal document author; Git commit/tag authors are not treated as document authors.",
+    "titleEvidence": {
+      "locator": "GitHub Contents API name and path at fixed commit",
+      "evidence": "sources/ConsumerCoordinator.github-contents.json"
+    },
+    "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java#L1161-L1176",
+    "version": "Apache Kafka 4.4.0; commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "supports": "commitSync waits on a distinct offset-commit request and checks its success",
+    "quotation": {
+      "text": "            RequestFuture<Void> future = sendOffsetCommitRequest(offsets);\n            client.poll(future, timer);\n\n            // We may have had in-flight offset commits when the synchronous commit began. If so, ensure that\n            // the corresponding callbacks are invoked prior to returning in order to preserve the order that\n            // the offset commits were applied.\n            invokeCompletedOffsetCommitCallbacks();\n\n            if (future.succeeded()) {\n                if (interceptors != null)\n                    interceptors.onCommit(offsets);\n                return true;\n            }\n\n            if (future.failed() && !future.isRetriable())\n                throw future.exception();\n",
+      "locator": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java:1161-1176",
+      "evidence": "sources/ConsumerCoordinator.java"
+    },
+    "verification": "Fresh official raw GET, HTTP 200; excerpt is an exact continuous slice of saved raw bytes. This is a candidate evidence record, not the final references.json."
+  },
+  {
+    "title": "KafkaProducer.java",
+    "organization": "Apache Kafka",
+    "authorOmittedReason": "No explicit personal document author; Git commit/tag authors are not treated as document authors.",
+    "titleEvidence": {
+      "locator": "GitHub Contents API name and path at fixed commit",
+      "evidence": "sources/KafkaProducer.github-contents.json"
+    },
+    "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L1108-L1126",
+    "version": "Apache Kafka 4.4.0; commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "supports": "send appends to accumulator and returns the send future",
+    "quotation": {
+      "text": "            // Append the record to the accumulator.  Note, that the actual partition may be\n            // calculated there and can be accessed via appendCallbacks.topicPartition.\n            RecordAccumulator.RecordAppendResult result = accumulator.append(record.topic(), partition, timestamp, serializedKey,\n                    serializedValue, headers, appendCallbacks, remainingWaitMs, nowMs, cluster);\n            assert appendCallbacks.getPartition() != RecordMetadata.UNKNOWN_PARTITION;\n\n            // Add the partition to the transaction (if in progress) after it has been successfully\n            // appended to the accumulator. We cannot do it before because the partition may be\n            // unknown. Note that the `Sender` will refuse to dequeue\n            // batches from the accumulator until they have been added to the transaction.\n            if (transactionManager != null) {\n                transactionManager.maybeAddPartition(appendCallbacks.topicPartition());\n            }\n\n            if (result.batchIsFull || result.newBatchCreated) {\n                log.trace(\"Waking up the sender since topic {} partition {} is either full or getting a new batch\", record.topic(), appendCallbacks.getPartition());\n                this.sender.wakeup();\n            }\n            return result.future;\n",
+      "locator": "clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java:1108-1126",
+      "evidence": "sources/KafkaProducer.java"
+    },
+    "verification": "Fresh official raw GET, HTTP 200; excerpt is an exact continuous slice of saved raw bytes. This is a candidate evidence record, not the final references.json."
+  }
+]

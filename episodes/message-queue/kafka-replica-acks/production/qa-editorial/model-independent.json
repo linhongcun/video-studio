@@ -1,0 +1,135 @@
+{
+  "checkedAtUTC": "2026-11-01T09:50:29.788256+00:00",
+  "reviewer": "/root/mq_qa",
+  "status": "passed-focused-independent-model-review",
+  "kind": "read-only finite teaching trace/source inspection, not Kafka runtime",
+  "modelSHA256": "9bde1c8d763f820695f67cb7e5679eb5dcaffb518797a4fe5e1822b0b49a84fb",
+  "modelSourceSHA256": "81ae4eab0fad4e3b9cdcefbff5415565174b24c557c3224639ac17e832ce787a",
+  "authorVerificationSHA256": "0c3fbe09d9b91744b57d8e98e68c85348757676eba928957125efd8f25e20ba2",
+  "authorChecks": 505,
+  "snapshotsActuallyInspected": 39,
+  "independentCausalChecks": [
+    {
+      "claim": "acks/ISR分支明确从空日志和未发送状态重置；acks1/all3主对照仅确认方式变化",
+      "states": [
+        "acks1-initial",
+        "all3-initial",
+        "all2-initial",
+        "all1-initial"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "acks1成功只在响应抵达后成立，复制仍仅主一份且HW0",
+      "states": [
+        "acks1-appended",
+        "acks1-response",
+        "acks1-success"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "单主故障后新主无E01，但离线旧主字节仍留；不冒充所有盘被删除",
+      "states": [
+        "acks1-leader-down",
+        "acks1-takeover-missing"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "实物复制和Leader得知进度分开；ISR3时两份已写并不满足all",
+      "states": [
+        "all3-b2-appended",
+        "all3-b2-reported",
+        "all3-wait-third"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "第三份写好后再报告，HW跨过offset0，再发响应到网站才成功",
+      "states": [
+        "all3-b3-appended",
+        "all3-hw-ready",
+        "all3-response",
+        "all3-success"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "all完成后选定已收敛的单故障时点；存活ISR候选保留原字节，未模拟KRaft投票",
+      "states": [
+        "all3-settled",
+        "all3-leader-down",
+        "all3-takeover-retained"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "当前稳定ISR2追齐可成功；ISR1这个前置拒绝分支无追加，不推广为所有错误皆未写",
+      "states": [
+        "all2-success",
+        "all1-response",
+        "all1-rejected"
+      ],
+      "passed": true
+    },
+    {
+      "claim": "全部39有限态遵守声明的稳定集合/同记录/已知进度边界；确认不证明刷盘或业务完成",
+      "states": [
+        "acks1-initial",
+        "acks1-sent",
+        "acks1-appended",
+        "acks1-response",
+        "acks1-success",
+        "acks1-leader-down",
+        "acks1-takeover-missing",
+        "all3-initial",
+        "all3-sent",
+        "all3-admitted",
+        "all3-appended",
+        "all3-b2-fetch0",
+        "all3-b2-copy",
+        "all3-b2-appended",
+        "all3-b2-reported",
+        "all3-wait-third",
+        "all3-b3-fetch0",
+        "all3-b3-copy",
+        "all3-b3-appended",
+        "all3-hw-ready",
+        "all3-response",
+        "all3-success",
+        "all3-settled",
+        "all3-leader-down",
+        "all3-takeover-retained",
+        "all2-initial",
+        "all2-sent",
+        "all2-admitted",
+        "all2-appended",
+        "all2-b2-fetch0",
+        "all2-b2-copy",
+        "all2-b2-appended",
+        "all2-hw-ready",
+        "all2-response",
+        "all2-success",
+        "all1-initial",
+        "all1-sent",
+        "all1-response",
+        "all1-rejected"
+      ],
+      "passed": true
+    }
+  ],
+  "limits": [
+    "No author generator execution or production writes.",
+    "Stable ISR and no pending/maximal expansion or additional recently-caught-up eligible candidate are essential scope assumptions.",
+    "39 selected instruction-order states do not reproduce real broker/controller timestamps, election protocol, disk durability or arbitrary failures."
+  ],
+  "canEnterTTS": "Final editorial report owns the TTS gate.",
+  "boundedIdentityUpdate": {
+    "priorModelSHA256": "e5d9e0025e2baa90ac110482dc4d12f0ffead99e4671074da2af512f7ee6a49e",
+    "currentModelSHA256": "9bde1c8d763f820695f67cb7e5679eb5dcaffb518797a4fe5e1822b0b49a84fb",
+    "wholePriorModelSHAReconstructed": true,
+    "wholePriorSourceSHAReconstructed": true,
+    "onlyChanges": "Record payload string changed from E01|order=7042 to exact runtime JSON payload, plus conditions.runtimeStatus textual actual-runtime status. All 39 transition/state fields otherwise byte-equivalent under the proved substitutions; eight prior independent causal checks remain applicable."
+  }
+}

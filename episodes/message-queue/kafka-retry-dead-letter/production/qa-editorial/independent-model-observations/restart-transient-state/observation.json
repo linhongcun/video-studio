@@ -1,0 +1,355 @@
+{
+  "checkedAtUTC": "2026-11-01T09:11:20.082806+00:00",
+  "reviewer": "/root/mq_qa",
+  "kind": "source/model preflight finding; no rendered failure claimed",
+  "status": "needs-author-correction-before-final-editorial-gate",
+  "modelSHA256": "ed74a34442938bbb98e9825398b514ff1390402a6f14e08f3df3c2f3a9b01a12",
+  "finding": "duplicate-restored retains the crashed producer current successful Future/result/metadata and same process B identity; only the persistent journal and Broker log should survive the process restart. The current result must reset or be explicitly isolated as old-process history.",
+  "states": {
+    "duplicate-first-ack": {
+      "id": "duplicate-first-ack",
+      "label": "DLQ@0成功，但journal仍pending",
+      "scenario": "duplicate-window",
+      "journal": {
+        "key": {
+          "logicalHandler": "notify",
+          "eventId": "E01"
+        },
+        "phase": "DLQ_PENDING",
+        "totalStarted": 3,
+        "maxStarted": 3,
+        "readyAtMs": 0,
+        "reason": "temporary_budget_exhausted",
+        "dlqMetadata": null,
+        "storage": "same-machine-retained-state-directory",
+        "persisted": true
+      },
+      "consumer": {
+        "process": "B",
+        "active": true,
+        "paused": true,
+        "heldEventId": "E01",
+        "position": 1,
+        "committedNextOffset": 0,
+        "pollCount": 7,
+        "sourceCommitState": "not-requested",
+        "nextEventReleased": false
+      },
+      "source": {
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": 7042,
+            "topic": "orders",
+            "partition": 0,
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "orderId": 7043,
+            "topic": "orders",
+            "partition": 0,
+            "offset": 1
+          }
+        ],
+        "retainedInExample": true
+      },
+      "clock": {
+        "nowMs": 900
+      },
+      "business": {
+        "invocations": 3,
+        "lastResult": "temporary",
+        "knownComplete": false,
+        "earlierOutcomeUnknown": true
+      },
+      "dlq": {
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": 7042,
+            "partition": 0,
+            "offset": 0,
+            "logicalHandler": "notify",
+            "source": {
+              "eventId": "E01",
+              "orderId": 7042,
+              "topic": "orders",
+              "partition": 0,
+              "offset": 0
+            },
+            "totalStarted": 3,
+            "reason": "temporary_budget_exhausted",
+            "applicationSend": 1
+          }
+        ],
+        "applicationSends": 1,
+        "futureState": "success",
+        "senderObservedResult": "confirmed",
+        "metadata": {
+          "topic": "orders-dlq",
+          "partition": 0,
+          "offset": 0
+        }
+      }
+    },
+    "duplicate-crashed": {
+      "id": "duplicate-crashed",
+      "label": "未记确认就退出，原commit仍0",
+      "scenario": "duplicate-window",
+      "journal": {
+        "key": {
+          "logicalHandler": "notify",
+          "eventId": "E01"
+        },
+        "phase": "DLQ_PENDING",
+        "totalStarted": 3,
+        "maxStarted": 3,
+        "readyAtMs": 0,
+        "reason": "temporary_budget_exhausted",
+        "dlqMetadata": null,
+        "storage": "same-machine-retained-state-directory",
+        "persisted": true
+      },
+      "consumer": {
+        "process": "B",
+        "active": false,
+        "paused": true,
+        "heldEventId": null,
+        "position": null,
+        "committedNextOffset": 0,
+        "pollCount": 7,
+        "sourceCommitState": "not-requested",
+        "nextEventReleased": false
+      },
+      "source": {
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": 7042,
+            "topic": "orders",
+            "partition": 0,
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "orderId": 7043,
+            "topic": "orders",
+            "partition": 0,
+            "offset": 1
+          }
+        ],
+        "retainedInExample": true
+      },
+      "clock": {
+        "nowMs": 900
+      },
+      "business": {
+        "invocations": 3,
+        "lastResult": "temporary",
+        "knownComplete": false,
+        "earlierOutcomeUnknown": true
+      },
+      "dlq": {
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": 7042,
+            "partition": 0,
+            "offset": 0,
+            "logicalHandler": "notify",
+            "source": {
+              "eventId": "E01",
+              "orderId": 7042,
+              "topic": "orders",
+              "partition": 0,
+              "offset": 0
+            },
+            "totalStarted": 3,
+            "reason": "temporary_budget_exhausted",
+            "applicationSend": 1
+          }
+        ],
+        "applicationSends": 1,
+        "futureState": "success",
+        "senderObservedResult": "confirmed",
+        "metadata": {
+          "topic": "orders-dlq",
+          "partition": 0,
+          "offset": 0
+        }
+      }
+    },
+    "duplicate-restored": {
+      "id": "duplicate-restored",
+      "label": "同目录pending、重读原E01",
+      "scenario": "duplicate-window",
+      "journal": {
+        "key": {
+          "logicalHandler": "notify",
+          "eventId": "E01"
+        },
+        "phase": "DLQ_PENDING",
+        "totalStarted": 3,
+        "maxStarted": 3,
+        "readyAtMs": 0,
+        "reason": "temporary_budget_exhausted",
+        "dlqMetadata": null,
+        "storage": "same-machine-retained-state-directory",
+        "persisted": true
+      },
+      "consumer": {
+        "process": "B",
+        "active": true,
+        "paused": true,
+        "heldEventId": "E01",
+        "position": 1,
+        "committedNextOffset": 0,
+        "pollCount": 8,
+        "sourceCommitState": "not-requested",
+        "nextEventReleased": false
+      },
+      "source": {
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": 7042,
+            "topic": "orders",
+            "partition": 0,
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "orderId": 7043,
+            "topic": "orders",
+            "partition": 0,
+            "offset": 1
+          }
+        ],
+        "retainedInExample": true
+      },
+      "clock": {
+        "nowMs": 1000
+      },
+      "business": {
+        "invocations": 3,
+        "lastResult": "temporary",
+        "knownComplete": false,
+        "earlierOutcomeUnknown": true
+      },
+      "dlq": {
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": 7042,
+            "partition": 0,
+            "offset": 0,
+            "logicalHandler": "notify",
+            "source": {
+              "eventId": "E01",
+              "orderId": 7042,
+              "topic": "orders",
+              "partition": 0,
+              "offset": 0
+            },
+            "totalStarted": 3,
+            "reason": "temporary_budget_exhausted",
+            "applicationSend": 1
+          }
+        ],
+        "applicationSends": 1,
+        "futureState": "success",
+        "senderObservedResult": "confirmed",
+        "metadata": {
+          "topic": "orders-dlq",
+          "partition": 0,
+          "offset": 0
+        }
+      }
+    },
+    "duplicate-second-send": {
+      "id": "duplicate-second-send",
+      "label": "新进程又一次应用send，同一事件编号",
+      "scenario": "duplicate-window",
+      "journal": {
+        "key": {
+          "logicalHandler": "notify",
+          "eventId": "E01"
+        },
+        "phase": "DLQ_PENDING",
+        "totalStarted": 3,
+        "maxStarted": 3,
+        "readyAtMs": 0,
+        "reason": "temporary_budget_exhausted",
+        "dlqMetadata": null,
+        "storage": "same-machine-retained-state-directory",
+        "persisted": true
+      },
+      "consumer": {
+        "process": "B",
+        "active": true,
+        "paused": true,
+        "heldEventId": "E01",
+        "position": 1,
+        "committedNextOffset": 0,
+        "pollCount": 8,
+        "sourceCommitState": "not-requested",
+        "nextEventReleased": false
+      },
+      "source": {
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": 7042,
+            "topic": "orders",
+            "partition": 0,
+            "offset": 0
+          },
+          {
+            "eventId": "E02",
+            "orderId": 7043,
+            "topic": "orders",
+            "partition": 0,
+            "offset": 1
+          }
+        ],
+        "retainedInExample": true
+      },
+      "clock": {
+        "nowMs": 1000
+      },
+      "business": {
+        "invocations": 3,
+        "lastResult": "temporary",
+        "knownComplete": false,
+        "earlierOutcomeUnknown": true
+      },
+      "dlq": {
+        "records": [
+          {
+            "eventId": "E01",
+            "orderId": 7042,
+            "partition": 0,
+            "offset": 0,
+            "logicalHandler": "notify",
+            "source": {
+              "eventId": "E01",
+              "orderId": 7042,
+              "topic": "orders",
+              "partition": 0,
+              "offset": 0
+            },
+            "totalStarted": 3,
+            "reason": "temporary_budget_exhausted",
+            "applicationSend": 1
+          }
+        ],
+        "applicationSends": 2,
+        "futureState": "pending",
+        "senderObservedResult": "pending",
+        "metadata": null
+      }
+    }
+  },
+  "requestedCorrection": "Use a new process session marker, reset current DLQ Future/senderObservedResult/metadata before the new application send, preserve physical DLQ records/global historical send count and DLQ_PENDING journal. Do not change narration merely to conceal stale state."
+}

@@ -1,0 +1,1110 @@
+{
+  "meta": {
+    "title": "重试与死信：失败消息，为什么不能一直重试？",
+    "episode": 48,
+    "episodePart": "Kafka MQ08 · 重试与死信",
+    "slug": "kafka-retry-dead-letter",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 6018,
+    "finalVideoFrames": 6018,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "kafka-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户已授权继续MQ系列，本批按题库制作MQ08及MQ15；本期应用有限重试与DLQ，不展开Kafka事务。只GitHub与本站，独立编辑审批确切SHA后由根配音、完成检查再发布。",
+    "palette": {
+      "bg": "#211D1B",
+      "text": "#FFF1E8"
+    },
+    "sampleDataLabel": "应用策略教学 · 真实运行单独留证",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "style": "kafka-covers-v1-mq08-15",
+      "ep": 48,
+      "number": "MQ08",
+      "planningIssue": 316,
+      "productionRoot": "episodes/message-queue/kafka-retry-dead-letter/production",
+      "seriesSource": "episodes/_shared/kafka-covers-mq08-15",
+      "sourceSha256": {
+        "template.mjs": "67c1f64ff8f7359ed89f6f7654e24cc51d4c957edf74ce01ce12efd54fe3c4b5",
+        "diagrams.mjs": "345255a37971b7bf85ec3d0483a906251ec841dbd3f359204ce293ccc83d2af7",
+        "catalog.json": "bad1594a8bf1033f7ef2e1fb625761752eead01146a0e922987a55774480283f",
+        "../kafka-covers/style-v1.json": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
+        "plan-layout.json": "5d703ee73f1b0db2e72419d27c9178ce32358afc70a4e57c9efd5028df87df21",
+        "../kafka-covers/background.png": "199dc512fdcf0ce3fc6d23323a91b673ed9925cfbf9ff42fe963e74eb0b3e9a2",
+        "render.py": "6231fc0dce7931743eea2611a7f262c91525e7efea2bf560c9319026a96c5d23",
+        "README.md": "8a21d4a345fa1af3edd08ec7a10e98feefb85a1f55145d35bb8675edd6062717",
+        "../middleware-identity/apachekafka-original.svg": "2505c5b688c18c8fd5dd8e888561eb7b23a56a75d291ff17e8ee18770193f3e8",
+        "../middleware-identity/LICENSE.txt": "121194741d4a915b9f5890fdd6dd95121f9b1f816517c792358d72d7c838d664",
+        "../middleware-identity/source.json": "6a0b66d82e92dc4159f5bae8ea956e88896bca227c961f8a9f3797f4d195b267",
+        "../middleware-identity/NOTICE.md": "506f3da9e99fd2cef2aa9a040b1854fceff7ab4ad80d778d3d32a449ce43d220"
+      },
+      "sitePoster": "cover-16x9.jpg",
+      "portraitPoster": "poster.jpg",
+      "covers": {
+        "16x9": {
+          "dimensions": [
+            1920,
+            1080
+          ],
+          "jpgSha256": "24a3a7a9789e3bb293e6d4dd31b857d65642d67b67c107af5dcaa4ce384a979f",
+          "pngSha256": "614d672b2de8e51155781d18efe75f343c52a9a71b818e81b7416b3d9b7fa524"
+        },
+        "3x4": {
+          "dimensions": [
+            1080,
+            1440
+          ],
+          "jpgSha256": "db5f851eebcc5f9c594d36b8aa94b5aa3f7a3d7c5dee431e5c701021a639ddb1",
+          "pngSha256": "0cbb6fdf40a830ccacd01204264f9f425e4bcd8c682fd25be1031962af6965a8"
+        },
+        "4x3": {
+          "dimensions": [
+            1440,
+            1080
+          ],
+          "jpgSha256": "370779a2cc2d922f7dc9e470a78e86c8f4f68a141bcffc34bd493d12a7b532fb",
+          "pngSha256": "e45080e8a4b667c66c4ff6a9a014af28c33c432c5ef7f29fde5c06f2d0a4e627"
+        }
+      }
+    },
+    "discussionQuestion": "进程重启后，剩余重试次数从哪里恢复？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes/_shared/kafka-covers/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "budget",
+      "chapterId": "budget",
+      "title": "重试由谁控制",
+      "from": 0,
+      "durationInFrames": 1534,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "budget",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 336,
+          "narration": "同一个订单通知一直失败，应用就一直重试，后面的通知怎么办？跟着这个事件，看看怎样给重试设界限，也给失败留出口。",
+          "subtitles": [
+            {
+              "text": "同一个订单通知一直失败，应用就一直重试，后面的通知怎么办？",
+              "from": 0,
+              "to": 160,
+              "duration": 161
+            },
+            {
+              "text": "跟着这个事件，看看怎样给重试设界限，也给失败留出口。",
+              "from": 161,
+              "to": 335,
+              "duration": 175
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 151.32,
+              "localStart": 9.0,
+              "localEnd": 151.32
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 161.82,
+              "wavEnd": 315.25,
+              "localStart": 161.82,
+              "localEnd": 315.25
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              161
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 9.0,
+            "wavTo": 315.25,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "错误对照：P0日志保留E01@0和E02@1；应用反复调用同一E01，E02等待。有限展示4次循环，不称真实程序无限实验。",
+          "direction": "错误对照：P0日志保留E01@0和E02@1；应用反复调用同一E01，E02等待。有限展示4次循环，不称真实程序无限实验。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "budget",
+          "visualType": "held-record",
+          "from": 336,
+          "durationInFrames": 404,
+          "narration": "本例只有一个消费者和一个分区，一次取一条，关闭自动提交。应用保留已取到的事件，暂停后续交付；原记录还在日志里，同分区的后续事件也要等。",
+          "subtitles": [
+            {
+              "text": "本例只有一个消费者和一个分区，一次取一条，关闭自动提交。",
+              "from": 0,
+              "to": 159,
+              "duration": 160
+            },
+            {
+              "text": "应用保留已取到的事件，暂停后续交付；原记录还在日志里，同分区的后续事件也要等。",
+              "from": 160,
+              "to": 403,
+              "duration": 244
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-held-record-1",
+              "wavStart": 336.25,
+              "wavEnd": 485.55,
+              "localStart": 0.25,
+              "localEnd": 149.55
+            },
+            {
+              "id": "02-held-record-2",
+              "wavStart": 496.05,
+              "wavEnd": 719.95,
+              "localStart": 160.05,
+              "localEnd": 383.95000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              160
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 336.25,
+            "wavTo": 719.95,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "建立P0/E01@0/E02@1；应用持有E01，原已提交恢复位置0。pause改本地paused flag，Fetch交付门关闭；不画退回Broker或自动重试。",
+          "direction": "建立P0/E01@0/E02@1；应用持有E01，原已提交恢复位置0。pause改本地paused flag，Fetch交付门关闭；不画退回Broker或自动重试。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "budget",
+          "visualType": "reserve",
+          "from": 740,
+          "durationInFrames": 386,
+          "narration": "应用给同一通知业务、同一事件三个调用名额，包含第一次。调用前，先把已用次数加一、记为进行中并保存在本机；保存成功才调用。",
+          "subtitles": [
+            {
+              "text": "应用给同一通知业务、同一事件三个调用名额，包含第一次。",
+              "from": 0,
+              "to": 168,
+              "duration": 169
+            },
+            {
+              "text": "调用前，先把已用次数加一、记为进行中并保存在本机；保存成功才调用。",
+              "from": 169,
+              "to": 385,
+              "duration": 217
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-reserve-1",
+              "wavStart": 740.95,
+              "wavEnd": 898.59,
+              "localStart": 0.9500000000000455,
+              "localEnd": 158.59000000000003
+            },
+            {
+              "id": "03-reserve-2",
+              "wavStart": 909.09,
+              "wavEnd": 1105.65,
+              "localStart": 169.09000000000003,
+              "localEnd": 365.6500000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              169
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 740.95,
+            "wavTo": 1105.65,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "本地保留state目录，键notify/E01；journal reserved0→1/IN_FLIGHT，持久化完成后才业务调用；再返回temporary。目录锁/完整身份校验留文章。",
+          "direction": "本地保留state目录，键notify/E01；journal reserved0→1/IN_FLIGHT，持久化完成后才业务调用；再返回temporary。目录锁/完整身份校验留文章。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "budget",
+          "visualType": "deadline",
+          "from": 1126,
+          "durationInFrames": 408,
+          "narration": "第一次是临时不可用，应用记下下次尝试时间，暂时不再调用业务。等待时仍短间隔轮询Kafka；暂停挡住新交付，计时和重试由应用负责。",
+          "subtitles": [
+            {
+              "text": "第一次是临时不可用，应用记下下次尝试时间，暂时不再调用业务。",
+              "from": 0,
+              "to": 165,
+              "duration": 166
+            },
+            {
+              "text": "等待时仍短间隔轮询Kafka；暂停挡住新交付，计时和重试由应用负责。",
+              "from": 166,
+              "to": 407,
+              "duration": 242
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-deadline-1",
+              "wavStart": 1126.65,
+              "wavEnd": 1281.89,
+              "localStart": 0.650000000000091,
+              "localEnd": 155.8900000000001
+            },
+            {
+              "id": "04-deadline-2",
+              "wavStart": 1292.39,
+              "wavEnd": 1513.48,
+              "localStart": 166.3900000000001,
+              "localEnd": 387.48
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              166
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 1126.65,
+            "wavTo": 1513.48,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "记录BACKOFF/readyAtMs（画面称下次尝试时间），now<deadline门关闭，poll owner继续以维护成员活跃，不触发handler；E01由应用持有/E02等待。时间轴压缩并标示非实时，不无界sleep，不用普通Topic冒充延时。",
+          "direction": "记录BACKOFF/readyAtMs（画面称下次尝试时间），now<deadline门关闭，poll owner继续以维护成员活跃，不触发handler；E01由应用持有/E02等待。时间轴压缩并标示非实时，不无界sleep，不用普通Topic冒充延时。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "recover",
+      "chapterId": "recover",
+      "title": "重启后还剩几次",
+      "from": 1534,
+      "durationInFrames": 1174,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "recover",
+          "visualType": "crash-after-start",
+          "from": 1534,
+          "durationInFrames": 378,
+          "narration": "到时间且还有名额，应用先保存第二次预留，再开始调用。假设此时进程退出，第二个名额已经占用，业务是否完成却可能不知道。",
+          "subtitles": [
+            {
+              "text": "到时间且还有名额，应用先保存第二次预留，再开始调用。",
+              "from": 0,
+              "to": 166,
+              "duration": 167
+            },
+            {
+              "text": "假设此时进程退出，第二个名额已经占用，业务是否完成却可能不知道。",
+              "from": 167,
+              "to": 377,
+              "duration": 211
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-crash-after-start-1",
+              "wavStart": 1534.48,
+              "wavEnd": 1690.51,
+              "localStart": 0.4800000000000182,
+              "localEnd": 156.51
+            },
+            {
+              "id": "05-crash-after-start-2",
+              "wavStart": 1701.01,
+              "wavEnd": 1891.08,
+              "localStart": 167.01,
+              "localEnd": 357.0799999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              167
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 1534.48,
+            "wavTo": 1891.08,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "now达到deadline与reserved<3两条件成立；journal1→2/IN_FLIGHT保存后调用，再crash；业务结果标未知，绝不标已失败。",
+          "direction": "now达到deadline与reserved<3两条件成立；journal1→2/IN_FLIGHT保存后调用，再crash；业务结果标未知，绝不标已失败。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "recover",
+          "visualType": "restart-journal",
+          "from": 1912,
+          "durationInFrames": 384,
+          "narration": "重启仍用原来的状态目录，读回已用两次和进行中状态。上次结果按未知处理，只剩一个名额；重调业务仍需幂等，不能重新领三次。",
+          "subtitles": [
+            {
+              "text": "重启仍用原来的状态目录，读回已用两次和进行中状态。",
+              "from": 0,
+              "to": 166,
+              "duration": 167
+            },
+            {
+              "text": "上次结果按未知处理，只剩一个名额；重调业务仍需幂等，不能重新领三次。",
+              "from": 167,
+              "to": 383,
+              "duration": 217
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-restart-journal-1",
+              "wavStart": 1912.08,
+              "wavEnd": 2069.09,
+              "localStart": 0.07999999999992724,
+              "localEnd": 157.09000000000015
+            },
+            {
+              "id": "06-restart-journal-2",
+              "wavStart": 2079.59,
+              "wavEnd": 2275.09,
+              "localStart": 167.59000000000015,
+              "localEnd": 363.09000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              167
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 1912.08,
+            "wavTo": 2275.09,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "进程B读取相同journal键/2/IN_FLIGHT，恢复为BACKOFF并设置下一时间；显示剩1。旁注预留写成但调用未开始也会占名额；不承诺精确3次实际调用。",
+          "direction": "进程B读取相同journal键/2/IN_FLIGHT，恢复为BACKOFF并设置下一时间；显示剩1。旁注预留写成但调用未开始也会占名额；不承诺精确3次实际调用。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "recover",
+          "visualType": "temporary-success",
+          "from": 2296,
+          "durationInFrames": 412,
+          "narration": "先看服务恢复：到下一尝试时间，第三个名额保存成功，再调用原事件。业务返回成功，应用另行提交原分区的下一位置一，成功后再放行后续事件。",
+          "subtitles": [
+            {
+              "text": "先看服务恢复：到下一尝试时间，第三个名额保存成功，再调用原事件。",
+              "from": 0,
+              "to": 207,
+              "duration": 208
+            },
+            {
+              "text": "业务返回成功，应用另行提交原分区的下一位置一，成功后再放行后续事件。",
+              "from": 208,
+              "to": 411,
+              "duration": 204
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-temporary-success-1",
+              "wavStart": 2296.09,
+              "wavEnd": 2494.18,
+              "localStart": 0.09000000000014552,
+              "localEnd": 198.17999999999984
+            },
+            {
+              "id": "07-temporary-success-2",
+              "wavStart": 2504.68,
+              "wavEnd": 2687.66,
+              "localStart": 208.67999999999984,
+              "localEnd": 391.65999999999985
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              208
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 2296.09,
+            "wavTo": 2687.66,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "reserved2→3保存→handler success→BUSINESS_DONE→独立commit P0:1成功→resume；E02才可交付。原日志E01/E02仍在。",
+          "direction": "reserved2→3保存→handler success→BUSINESS_DONE→独立commit P0:1成功→resume；E02才可交付。原日志E01/E02仍在。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "disposition",
+      "chapterId": "disposition",
+      "title": "失败怎样退出",
+      "from": 2708,
+      "durationInFrames": 1988,
+      "shots": [
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "disposition",
+          "visualType": "budget-exhausted",
+          "from": 2708,
+          "durationInFrames": 424,
+          "narration": "回到已用两个名额、第三次尚未开始的相同状态，只改成服务仍失败。第三次也失败，已用次数达到三，判断便挡住第四次调用，转为等待处置。",
+          "subtitles": [
+            {
+              "text": "回到已用两个名额、第三次尚未开始的相同状态，只改成服务仍失败。",
+              "from": 0,
+              "to": 192,
+              "duration": 193
+            },
+            {
+              "text": "第三次也失败，已用次数达到三，判断便挡住第四次调用，转为等待处置。",
+              "from": 193,
+              "to": 423,
+              "duration": 231
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-budget-exhausted-1",
+              "wavStart": 2708.66,
+              "wavEnd": 2890.81,
+              "localStart": 0.6599999999998545,
+              "localEnd": 182.80999999999995
+            },
+            {
+              "id": "08-budget-exhausted-2",
+              "wavStart": 2901.31,
+              "wavEnd": 3111.91,
+              "localStart": 193.30999999999995,
+              "localEnd": 403.90999999999985
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              193
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 2708.66,
+            "wavTo": 3111.91,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "显式reset共同recover-ready-two，不复活成功现场；预留3/临时失败→DLQ_PENDING，尝试4的调用门关闭。",
+          "direction": "显式reset共同recover-ready-two，不复活成功现场；预留3/临时失败→DLQ_PENDING，尝试4的调用门关闭。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "disposition",
+          "visualType": "permanent-reject",
+          "from": 3132,
+          "durationInFrames": 388,
+          "narration": "如果一开始就是明确的永久业务拒绝，不必用完三个名额。回到未尝试的起点，第一次返回永久拒绝，应用直接转为等待处置。",
+          "subtitles": [
+            {
+              "text": "如果一开始就是明确的永久业务拒绝，不必用完三个名额。",
+              "from": 0,
+              "to": 151,
+              "duration": 152
+            },
+            {
+              "text": "回到未尝试的起点，第一次返回永久拒绝，应用直接转为等待处置。",
+              "from": 152,
+              "to": 387,
+              "duration": 236
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-permanent-reject-1",
+              "wavStart": 3132.91,
+              "wavEnd": 3273.88,
+              "localStart": 0.9099999999998545,
+              "localEnd": 141.8800000000001
+            },
+            {
+              "id": "09-permanent-reject-2",
+              "wavStart": 3284.38,
+              "wavEnd": 3499.51,
+              "localStart": 152.3800000000001,
+              "localEnd": 367.5100000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              152
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 3132.91,
+            "wavTo": 3499.51,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "reset原E01已持有/0次/commit0；先预留1，再fixture永久拒绝→DLQ_PENDING，剩余2不调用。分类由应用业务规则决定，不将任意异常判永久。",
+          "direction": "reset原E01已持有/0次/commit0；先预留1，再fixture永久拒绝→DLQ_PENDING，剩余2不调用。分类由应用业务规则决定，不将任意异常判永久。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "disposition",
+          "visualType": "dlq-envelope",
+          "from": 3520,
+          "durationInFrames": 406,
+          "narration": "应用把原事件、来源位置、已用次数和失败原因整理成死信记录。死信只是另一个普通主题，保存问题供后续检查，不代表通知业务成功。",
+          "subtitles": [
+            {
+              "text": "应用把原事件、来源位置、已用次数和失败原因整理成死信记录。",
+              "from": 0,
+              "to": 198,
+              "duration": 199
+            },
+            {
+              "text": "死信只是另一个普通主题，保存问题供后续检查，不代表通知业务成功。",
+              "from": 199,
+              "to": 405,
+              "duration": 207
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-dlq-envelope-1",
+              "wavStart": 3520.51,
+              "wavEnd": 3708.85,
+              "localStart": 0.5100000000002183,
+              "localEnd": 188.8499999999999
+            },
+            {
+              "id": "10-dlq-envelope-2",
+              "wavStart": 3719.35,
+              "wavEnd": 3905.02,
+              "localStart": 199.3499999999999,
+              "localEnd": 385.02
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              199
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 3520.51,
+            "wavTo": 3905.02,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确切回已耗3次的耗尽路径；显示DLQ envelope原E01+source orders/P0@0+reserved3+reason；业务状态“未获成功确认”。无自动修复/自动回放箭头。",
+          "direction": "明确切回已耗3次的耗尽路径；显示DLQ envelope原E01+source orders/P0@0+reserved3+reason；业务状态“未获成功确认”。无自动修复/自动回放箭头。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "disposition",
+          "visualType": "dlq-confirm",
+          "from": 3926,
+          "durationInFrames": 446,
+          "narration": "发出死信后，先等这次发送的最终结果，调用返回不等于写成。只有取得成功的分区和位置，才记住转存已经确认；此时原消费位置仍是零。",
+          "subtitles": [
+            {
+              "text": "发出死信后，先等这次发送的最终结果，调用返回不等于写成。",
+              "from": 0,
+              "to": 193,
+              "duration": 194
+            },
+            {
+              "text": "只有取得成功的分区和位置，才记住转存已经确认；此时原消费位置仍是零。",
+              "from": 194,
+              "to": 445,
+              "duration": 252
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-dlq-confirm-1",
+              "wavStart": 3926.02,
+              "wavEnd": 4110.1,
+              "localStart": 0.01999999999998181,
+              "localEnd": 184.10000000000036
+            },
+            {
+              "id": "11-dlq-confirm-2",
+              "wavStart": 4120.6,
+              "wavEnd": 4351.03,
+              "localStart": 194.60000000000036,
+              "localEnd": 425.02999999999975
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              194
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 3926.02,
+            "wavTo": 4351.03,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "producer send返回Future pending，DLQ日志追加E01@0后成功metadata，journal DLQ_CONFIRMED；原commit0保持。acks=all/RF1实验范围，不展开副本。",
+          "direction": "producer send返回Future pending，DLQ日志追加E01@0后成功metadata，journal DLQ_CONFIRMED；原commit0保持。acks=all/RF1实验范围，不展开副本。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "disposition",
+          "visualType": "commit-source",
+          "from": 4372,
+          "durationInFrames": 324,
+          "narration": "接着再单独提交原记录的下一位置一，成功后才恢复后续交付。死信发送和原位置提交，是先后两件事，不是一次原子提交。",
+          "subtitles": [
+            {
+              "text": "接着再单独提交原记录的下一位置一，成功后才恢复后续交付。",
+              "from": 0,
+              "to": 151,
+              "duration": 152
+            },
+            {
+              "text": "死信发送和原位置提交，是先后两件事，不是一次原子提交。",
+              "from": 152,
+              "to": 323,
+              "duration": 172
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-commit-source-1",
+              "wavStart": 4372.03,
+              "wavEnd": 4513.99,
+              "localStart": 0.02999999999974534,
+              "localEnd": 141.98999999999978
+            },
+            {
+              "id": "12-commit-source-2",
+              "wavStart": 4524.49,
+              "wavEnd": 4675.49,
+              "localStart": 152.48999999999978,
+              "localEnd": 303.4899999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              152
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 4372.03,
+            "wavTo": 4675.49,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "DLQ_CONFIRMED且原commit0→offset request in-flight→success原1/journal COMMITTED→resume P0；E02出现可处理。死信不等于原业务完成。",
+          "direction": "DLQ_CONFIRMED且原commit0→offset request in-flight→success原1/journal COMMITTED→resume P0；E02出现可处理。死信不等于原业务完成。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "哪些保证仍有限",
+      "from": 4696,
+      "durationInFrames": 1322,
+      "shots": [
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "boundary",
+          "visualType": "dlq-unavailable",
+          "from": 4696,
+          "durationInFrames": 409,
+          "narration": "再回到发送死信前，只把目标改成不可用。如果发送最终报错，应用保留等待处置和原位置零，停止这个流程，不能假装已经转存或跳过去。",
+          "subtitles": [
+            {
+              "text": "再回到发送死信前，只把目标改成不可用。",
+              "from": 0,
+              "to": 127,
+              "duration": 128
+            },
+            {
+              "text": "如果发送最终报错，应用保留等待处置和原位置零，停止这个流程，不能假装已经转存或跳过去。",
+              "from": 128,
+              "to": 408,
+              "duration": 281
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-dlq-unavailable-1",
+              "wavStart": 4696.49,
+              "wavEnd": 4813.78,
+              "localStart": 0.4899999999997817,
+              "localEnd": 117.77999999999975
+            },
+            {
+              "id": "13-dlq-unavailable-2",
+              "wavStart": 4824.28,
+              "wavEnd": 5084.19,
+              "localStart": 128.27999999999975,
+              "localEnd": 388.1899999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              128
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 4696.49,
+            "wavTo": 5084.19,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "reset耗尽/DLQ_PENDING/原0/目标空；真实最终发送失败→pending/terminal error，不能由短get超时判断最终失败。目标日志有无不据异常一概断定；E02仍受阻。",
+          "direction": "reset耗尽/DLQ_PENDING/原0/目标空；真实最终发送失败→pending/terminal error，不能由短get超时判断最终失败。目标日志有无不据异常一概断定；E02仍受阻。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "14",
+          "scriptShot": 14,
+          "chapterId": "boundary",
+          "visualType": "double-boundary",
+          "from": 5105,
+          "durationInFrames": 438,
+          "narration": "还有一个空隙：死信已经写成，本机没来得及记住结果，原位置也没提交。重启后原事件仍会再来，应用可能再写一份死信；同一事件也可能占两个位置。",
+          "subtitles": [
+            {
+              "text": "还有一个空隙：死信已经写成，本机没来得及记住结果，原位置也没提交。",
+              "from": 0,
+              "to": 195,
+              "duration": 196
+            },
+            {
+              "text": "重启后原事件仍会再来，应用可能再写一份死信；同一事件也可能占两个位置。",
+              "from": 196,
+              "to": 437,
+              "duration": 242
+            }
+          ],
+          "voice": [
+            {
+              "id": "14-double-boundary-1",
+              "wavStart": 5105.19,
+              "wavEnd": 5290.67,
+              "localStart": 0.18999999999959982,
+              "localEnd": 185.67000000000007
+            },
+            {
+              "id": "14-double-boundary-2",
+              "wavStart": 5301.17,
+              "wavEnd": 5522.38,
+              "localStart": 196.17000000000007,
+              "localEnd": 417.3800000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              196
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 5105.19,
+            "wavTo": 5522.38,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "reset发送前；DLQ E01@0确认→在本地DLQ_CONFIRMED保存前crash→原commit0/journalpending→restart重读E01→新应用send→DLQ E01@1；保留两条原身份相同的记录。另小注若本地已记确认则可直接补原commit，但仍非原子/跨机保证。",
+          "direction": "reset发送前；DLQ E01@0确认→在本地DLQ_CONFIRMED保存前crash→原commit0/journalpending→restart重读E01→新应用send→DLQ E01@1；保留两条原身份相同的记录。另小注若本地已记确认则可直接补原commit，但仍非原子/跨机保证。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "15",
+          "scriptShot": 15,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 5543,
+          "durationInFrames": 475,
+          "narration": "有限重试由保存的预算和到期判断控制，进程重启也不随意清零。确认死信后还要确认原位置，待处置不等于业务成功；修复后的回放仍要防重复。",
+          "subtitles": [
+            {
+              "text": "有限重试由保存的预算和到期判断控制，进程重启也不随意清零。",
+              "from": 0,
+              "to": 200,
+              "duration": 201
+            },
+            {
+              "text": "确认死信后还要确认原位置，待处置不等于业务成功；修复后的回放仍要防重复。",
+              "from": 201,
+              "to": 474,
+              "duration": 274
+            }
+          ],
+          "voice": [
+            {
+              "id": "15-recap-1",
+              "wavStart": 5543.38,
+              "wavEnd": 5734.29,
+              "localStart": 0.38000000000010914,
+              "localEnd": 191.28999999999996
+            },
+            {
+              "id": "15-recap-2",
+              "wavStart": 5744.79,
+              "wavEnd": 5978.96,
+              "localStart": 201.78999999999996,
+              "localEnd": 435.96000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              201
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 0f352895 + words.json e0ae7c84 + script.md 621c6d31",
+            "wavFrom": 5543.38,
+            "wavTo": 5978.96,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "收回稀疏分支：到期且有余额→保存名额→调用；业务成功直接原commit；临时失败且余名额返回等待门；永久拒绝或预算满才待处置→确认DLQ→另commit原进度；公共日志和状态不伪造恢复为成功现场。IT小村·原创。",
+          "direction": "收回稀疏分支：到期且有余额→保存名额→调用；业务成功直接原commit；临时失败且余名额返回等待门；永久拒绝或预算满才待处置→确认DLQ→另commit原进度；公共日志和状态不伪造恢复为成功现场。IT小村·原创。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

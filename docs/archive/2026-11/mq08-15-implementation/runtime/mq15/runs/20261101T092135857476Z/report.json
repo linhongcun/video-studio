@@ -1,0 +1,143 @@
+{
+  "startedAtUTC": "2026-11-01T09:21:35.857707+00:00",
+  "tempDir": "/tmp/mq08-15-runtime/mq15-20261101T092135857476Z",
+  "out": "/workspace/video-studio/docs/archive/2026-11/mq08-15-implementation/runtime/mq15/runs/20261101T092135857476Z",
+  "version": "4.4.0",
+  "sourceCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "pass": false,
+  "cases": {
+    "healthy-acks1": {
+      "topic": "mq15-healthy-acks1-135857476z",
+      "result": {
+        "label": "healthy-acks1",
+        "state": "success",
+        "topic": "mq15-healthy-acks1-135857476z",
+        "partition": 0,
+        "offset": 0
+      },
+      "snapshot": "healthy-acks1"
+    },
+    "healthy-all": {
+      "topic": "mq15-healthy-all-135857476z",
+      "result": {
+        "label": "healthy-all",
+        "state": "success",
+        "topic": "mq15-healthy-all-135857476z",
+        "partition": 0,
+        "offset": 0
+      },
+      "snapshot": "healthy-all"
+    }
+  },
+  "sources": {
+    "Mq15Probe.java": "e73cecadfe2a532081a42b277b674dd28f51be58f3041ea147e2418ae79d68f0",
+    "run_mq15.py": "112901e01061754a7025cd1f397e8f0a0bf7af04803195740d64e88f1a797f23"
+  },
+  "cleanup": {
+    "brokerPIDs": {
+      "1": 6208,
+      "2": 6209,
+      "3": 6210
+    },
+    "allTrackedBrokersExited": true,
+    "allProxyListenersClosed": true,
+    "ownTemporaryDataRemoved": true
+  },
+  "dependencyIdentity": {
+    "filesManifest": "/workspace/video-studio/docs/archive/2026-11/mq08-15-implementation/runtime/dependencies/kafka-distribution-files-sha256.json",
+    "manifestSHA256": "f6b7c50743917bd657bea2d7bc94d3b4aac9e5ddad687d2f27507df7d51eb922",
+    "archiveSHA512": "f5ceba8a265ab6bb2d68362b1f6859a95e15d60ef92ba83b43fdf065b557dc18e98d6383c15b9977320e25b3a2c8b6f11decb17b0fa6c0f163423793a0eb95cb"
+  },
+  "ports": {
+    "1": {
+      "client": 57557,
+      "backend": 48721,
+      "proxy": 47867,
+      "controller": 51053
+    },
+    "2": {
+      "client": 47747,
+      "backend": 50183,
+      "proxy": 57135,
+      "controller": 37165
+    },
+    "3": {
+      "client": 52567,
+      "backend": 39037,
+      "proxy": 38087,
+      "controller": 35775
+    }
+  },
+  "clusterId": "dhra3uaPSEeVixMrQsRHUQ",
+  "features": {
+    "version": "4.4.0",
+    "commit": "1156b2752aaa28ea",
+    "supported": {
+      "eligible.leader.replicas.version": {
+        "min": 0,
+        "max": 1
+      },
+      "group.version": {
+        "min": 0,
+        "max": 1
+      },
+      "kraft.version": {
+        "min": 0,
+        "max": 1
+      },
+      "metadata.version": {
+        "min": 7,
+        "max": 33
+      },
+      "share.version": {
+        "min": 0,
+        "max": 2
+      },
+      "streams.version": {
+        "min": 0,
+        "max": 1
+      },
+      "transaction.version": {
+        "min": 0,
+        "max": 2
+      }
+    },
+    "finalized": {
+      "group.version": {
+        "min": 1,
+        "max": 1
+      },
+      "metadata.version": {
+        "min": 33,
+        "max": 33
+      },
+      "share.version": {
+        "min": 2,
+        "max": 2
+      },
+      "streams.version": {
+        "min": 1,
+        "max": 1
+      },
+      "transaction.version": {
+        "min": 2,
+        "max": 2
+      }
+    },
+    "epoch": 20
+  },
+  "error": {
+    "type": "AssertionError",
+    "message": "{'atUTC': '2026-11-01T09:21:58.018460157Z', 'command': 'meta|mq15-slow-current-isr-135857476z', 'ok': False, 'exception': 'java.util.concurrent.TimeoutException', 'message': 'java.util.concurrent.TimeoutException'}",
+    "traceback": "Traceback (most recent call last):\n  File \"/workspace/video-studio/docs/archive/2026-11/mq08-15-implementation/runtime/mq15/run_mq15.py\", line 150, in main\n    topic=create('slow-current-isr');m=meta(topic);controller=probe.cmd('controller')['leaderId'];slow=next(n for n in m['isr']if n!=m['leader']and n!=controller);fast=next(n for n in m['isr']if n not in [m['leader'],slow]);probe.cmd('prepare','all',topic);os.killpg(proc[slow].pid,signal.SIGSTOP);stop_at=NOW();probe.cmd('send','slow-all',topic,'all','{\"eventId\":\"E01\",\"orderId\":7042}');wait('two physical replicas',lambda:physical(T,topic)[fast]['physicalLEO']==1,timeout=8);before=snapshot('slow-before-resume',topic);v=probe.cmd('result','slow-all');ck('ISR3 all still pending despite two copies',len(before['metadata']['isr'])==3 and before['physical'][slow]['physicalLEO']==0 and before['physical'][fast]['physicalLEO']==1 and before['physical'][m['leader']]['physicalLEO']==1 and v['state']=='pending',{'snapshot':before,'future':v,'slow':slow,'fast':fast});ck('slow ISR3 consumer HW below offset1',before['consumerEndOffset']<1,before['consumerEndOffset']);os.killpg(proc[slow].pid,signal.SIGCONT);v=future('slow-all');wait_isr(topic,3);after=snapshot('slow-after-resume',topic);ck('slow resumed copy acknowledged',after['physical'][slow]['physicalLEO']==1 and v['state']=='success',after);report['cases']['slow-current-isr']={'topic':topic,'slow':slow,'fast':fast,'controllerLeader':controller,'SIGSTOPatUTC':stop_at,'before':'slow-before-resume','after':'slow-after-resume'};emit('slow third ISR member held ackall pending; resume passed')\n                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/video-studio/docs/archive/2026-11/mq08-15-implementation/runtime/mq15/run_mq15.py\", line 119, in snapshot\n    m=meta(topic);v={'atUTC':NOW(),'label':label,'topic':topic,'metadata':m,'physical':physical(T,topic)}\n      ^^^^^^^^^^^\n  File \"/workspace/video-studio/docs/archive/2026-11/mq08-15-implementation/runtime/mq15/run_mq15.py\", line 113, in meta\n    def meta(topic):return probe.cmd('meta',topic)\n                           ^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/workspace/video-studio/docs/archive/2026-11/mq08-15-implementation/runtime/mq15/run_mq15.py\", line 71, in cmd\n    assert x['ok'],x\n           ~^^^^^^\nAssertionError: {'atUTC': '2026-11-01T09:21:58.018460157Z', 'command': 'meta|mq15-slow-current-isr-135857476z', 'ok': False, 'exception': 'java.util.concurrent.TimeoutException', 'message': 'java.util.concurrent.TimeoutException'}\n"
+  },
+  "finishedAtUTC": "2026-11-01T09:22:13.612620+00:00",
+  "assertions": 15,
+  "observations": 2,
+  "limits": [
+    "Loopback Java process and TCP replication gate tests, not throughput benchmarking or machine powerloss.",
+    "Actual protocol observer consumer endOffsets is separately reported from physical replica LEO parsed from copied record batches and checked using official DumpLogSegments.",
+    "Combined KRaft controllers share each broker JVM. One SIGSTOP/kill leaves two controllers available; dual replication gate preserves all controller listeners/processes.",
+    "No claim that offline former leader bytes disappear: ack1loss case explicitly preserves the former leader physical E01 while the clean elected leader has no record."
+  ]
+}

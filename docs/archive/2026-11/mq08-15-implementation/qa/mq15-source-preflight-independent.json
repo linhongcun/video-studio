@@ -1,0 +1,104 @@
+{
+  "checkedAtUTC": "2026-11-01T09:05:36.735987+00:00",
+  "reviewer": "/root/mq_qa",
+  "stage": "independent pre-script source review",
+  "canEnterTTS": false,
+  "fixedCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "sources": [
+    {
+      "path": "episodes/message-queue/kafka-replica-acks/production/sources/Partition.scala",
+      "sha256": "0b518021311f6d004bb35e07c7830b256d807a81254c8a66c28616143fab0aea",
+      "gitBlobSHA1": "96bc3ddebf48e21f8fcdef67cc1261d8e734978c",
+      "apiBase64BytesEqual": true,
+      "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/cluster/Partition.scala",
+      "actualReadLineRanges": [
+        [
+          239,
+          251
+        ],
+        [
+          763,
+          809
+        ],
+        [
+          947,
+          1059
+        ],
+        [
+          1219,
+          1249
+        ]
+      ]
+    },
+    {
+      "path": "episodes/message-queue/kafka-replica-acks/production/sources/ReplicaManager.scala",
+      "sha256": "466d12be1616ea5f1165cf0ab10a43e4872bf2623a0d9487841188033c37b474",
+      "gitBlobSHA1": "3a5c0fd47f621e6b56c85cfc2ffd1746785b8329",
+      "apiBase64BytesEqual": true,
+      "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/ReplicaManager.scala",
+      "actualReadLineRanges": [
+        [
+          638,
+          702
+        ],
+        [
+          872,
+          918
+        ],
+        [
+          1355,
+          1371
+        ]
+      ]
+    },
+    {
+      "path": "episodes/message-queue/kafka-replica-acks/production/sources/ReplicaFetcherThread.scala",
+      "sha256": "cb0ab91a7939981d812b7cbb86d9811002a7bc2570c8c441ebe743020e62f01e",
+      "gitBlobSHA1": "4e4ad9772c24e92baadbccecd0581313458d8ff4",
+      "apiBase64BytesEqual": true,
+      "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/ReplicaFetcherThread.scala",
+      "actualReadLineRanges": [
+        [
+          124,
+          177
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "hw-under-min-isr",
+      "kind": "source fact and prospective model/editorial check, no actual candidate failure claimed",
+      "evidence": "Partition.scala1010–1014 +1219–1243",
+      "fact": "ISR低于minISR时HW不推进；acks1绕过all准入后仍可本地追加并返回，不能由本地追加推出HW前进。"
+    },
+    {
+      "id": "all-two-gates",
+      "kind": "source fact",
+      "evidence": "Partition.scala947–979 +1234–1240; ReplicaManager.scala878–917/1361–1366",
+      "fact": "all先核追加前ISR下限，再由延迟请求核HW达到requiredOffset并检查完成时minISR；可能已经追加但以AFTER_APPEND错误结束。acks1不进入这个复制延迟等待。"
+    },
+    {
+      "id": "hw-scope",
+      "kind": "scope condition required for simplified depiction",
+      "evidence": "Partition.scala1018–1032",
+      "fact": "真实HW候选既考虑maximalISR，也保守等待近期已追上且可加入ISR的副本。若正文用当前ISR最小已知进度解释，需要固定稳定ISR且无待加入副本，不宣称通用绝对公式。"
+    },
+    {
+      "id": "copy-versus-known-progress",
+      "kind": "source fact and prospective timing check",
+      "evidence": "ReplicaFetcherThread.scala132–145; Partition.scala767–805",
+      "fact": "Follower处理响应先追加到自己的日志；Leader经Follower后续Fetch请求更新已知进度再尝试推进HW。这两处状态不可在无协议动作时同时跳变。"
+    }
+  ],
+  "sentToAuthorAndRoot": true,
+  "notPerformed": [
+    "Broker experiment",
+    "candidate script acceptance",
+    "TTS",
+    "source mutation",
+    "production freeze",
+    "render"
+  ],
+  "sourceReadingIsNotProofOfTeachingClarity": true
+}

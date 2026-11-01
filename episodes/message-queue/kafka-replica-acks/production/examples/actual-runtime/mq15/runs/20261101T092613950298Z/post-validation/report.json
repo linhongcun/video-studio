@@ -1,0 +1,767 @@
+{
+  "schemaVersion": 1,
+  "createdAtUTC": "2026-11-01T09:34:14.225319+00:00",
+  "kind": "actual-Kafka44-RF3-controlled-runtime-with-retained-post-validation-repair",
+  "pass": true,
+  "runtimeExecutor": "/root/deploy_diagnosis/mq15_runtime",
+  "rawRunReport": "runs/20261101T092613950298Z/report.json",
+  "rawRunReportSHA256": "f8c2d933564f3cb784f43a4816397994486e82c0c584a357e1407d65859b5056",
+  "rawRunStillPassFalse": true,
+  "status": "All seven real broker branches passed; the later official dump filename failure is closed by byte-identical numeric-name copies and successful official decode without rerunning brokers.",
+  "executedSources": {
+    "run_mq15.py": {
+      "file": "runs/20261101T092613950298Z/executed-run_mq15.py",
+      "sha256": "c20800c1524195fea152932e96d4c88e1bf45d6e9d99895286db0c95938f1c4e"
+    },
+    "Mq15Probe.java": {
+      "file": "runs/20261101T092613950298Z/executed-Mq15Probe.java",
+      "sha256": "e73cecadfe2a532081a42b277b674dd28f51be58f3041ea147e2418ae79d68f0"
+    }
+  },
+  "actualKafkaVersion": "4.4.0",
+  "actualKafkaCommitId": "1156b2752aaa28ea",
+  "fixedFullSourceCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "dependencyIdentity": {
+    "filesManifest": "/workspace/video-studio/docs/archive/2026-11/mq08-15-implementation/runtime/dependencies/kafka-distribution-files-sha256.json",
+    "manifestSHA256": "f6b7c50743917bd657bea2d7bc94d3b4aac9e5ddad687d2f27507df7d51eb922",
+    "archiveSHA512": "f5ceba8a265ab6bb2d68362b1f6859a95e15d60ef92ba83b43fdf065b557dc18e98d6383c15b9977320e25b3a2c8b6f11decb17b0fa6c0f163423793a0eb95cb"
+  },
+  "actualELRFeatureLine": "Feature: eligible.leader.replicas.version          SupportedMinVersion: 0                SupportedMaxVersion: 1                FinalizedVersionLevel: 0                Epoch: 22",
+  "ELRZeroInterpretation": "Admin finalizedFeatures omits zero entries; the official kafka-features describe output explicitly reports FinalizedVersionLevel0. The storage format also explicitly requested this feature at0.",
+  "consumerEndOffsetsEvidence": {
+    "sourceAudit": "hw-source-evidence/chain-audit.json",
+    "sourceAuditSHA256": "a771f884b07ab4a4a1b0e4c9672abe8de8650cf931ad38adf543074637aa19e0",
+    "fixedPartitionBranch": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/cluster/Partition.scala#L1433-L1474",
+    "interpretation": "The observation consumer explicitly uses read_uncommitted; this ListOffsets consumer request returns leader highWatermark, not physicalLEO. Replica physical bytes are measured separately."
+  },
+  "producerConfig": {
+    "enable.idempotence": false,
+    "retries": 0,
+    "max.in.flight.requests.per.connection": 1,
+    "request.timeout.ms": 120000,
+    "delivery.timeout.ms": 150000,
+    "compression.type": "none",
+    "acksBranches": [
+      "1",
+      "all"
+    ],
+    "notes": "Exactly one E01 JSON/order7042/key7042 to P0 in each initially empty topic. Same acks-specific producer object may be reused across distinct topics; no concurrent business sends except a single observed pending future."
+  },
+  "clusterConfig": {
+    "RF": 3,
+    "minISR": 2,
+    "uncleanLeaderElection": false,
+    "eligibleLeaderReplicasFeature": 0,
+    "processRoles": "Three isolated combined broker/controller JVMs",
+    "listeners": "CLIENT direct, REPLICATION through owned per-leader TCP proxy, CONTROLLER direct",
+    "followerGate": "Actual request header clientId broker-<replicaId>-fetcher-0 identifies the sender; gate closes that existing connection before producing and rejects subsequent matching requests. ApiKey1/version18/clientIds were captured. Other broker/controller CLIENT paths remain reachable.",
+    "wholeLeaderReplicationGate": "Before acks1 loss test, close both existing data connections and reject new data connections; keep this gate closed until old leader is killed and a clean new leader is observed.",
+    "proxySourceEvidence": [
+      "sources/ReplicaFetcherManager.scala",
+      "sources/ReplicaFetcherThread.scala"
+    ],
+    "noSIGSTOPInAcceptedRun": true
+  },
+  "realCases": {
+    "healthy-acks1": {
+      "topic": "mq15-healthy-acks1-613950298z",
+      "result": {
+        "label": "healthy-acks1",
+        "state": "success",
+        "topic": "mq15-healthy-acks1-613950298z",
+        "partition": 0,
+        "offset": 0
+      },
+      "snapshot": "healthy-acks1"
+    },
+    "healthy-all": {
+      "topic": "mq15-healthy-all-613950298z",
+      "result": {
+        "label": "healthy-all",
+        "state": "success",
+        "topic": "mq15-healthy-all-613950298z",
+        "partition": 0,
+        "offset": 0
+      },
+      "snapshot": "healthy-all"
+    },
+    "slow-current-isr": {
+      "topic": "mq15-slow-current-isr-613950298z",
+      "slow": 3,
+      "fast": 2,
+      "controllerLeader": 2,
+      "singleFollowerGateClosedAtUTC": "2026-11-01T09:26:26.671561+00:00",
+      "before": "slow-before-resume",
+      "after": "slow-after-resume"
+    },
+    "stable-isr2": {
+      "topic": "mq15-stable-isr2-613950298z",
+      "replicationGatedFollower": 3,
+      "result": {
+        "label": "isr2-all",
+        "state": "success",
+        "topic": "mq15-stable-isr2-613950298z",
+        "partition": 0,
+        "offset": 0
+      },
+      "snapshot": "isr2-ack"
+    },
+    "stable-isr1": {
+      "topic": "mq15-stable-isr1-613950298z",
+      "leader": 1,
+      "result": {
+        "label": "isr1-all",
+        "state": "failure",
+        "exception": "org.apache.kafka.common.errors.NotEnoughReplicasException",
+        "message": "Messages are rejected since there are fewer in-sync replicas than required."
+      },
+      "before": "isr1-before-send",
+      "after": "isr1-after-reject"
+    },
+    "all-leader-failure": {
+      "topic": "mq15-healthy-all-613950298z",
+      "oldLeader": 1,
+      "newLeader": 2,
+      "records": [
+        {
+          "offset": 0,
+          "key": "7042",
+          "value": "{\"eventId\":\"E01\",\"orderId\":7042}"
+        }
+      ],
+      "snapshot": "all-after-clean-election"
+    },
+    "acks1-leader-failure": {
+      "topic": "mq15-acks1-loss-613950298z",
+      "oldLeader": 1,
+      "newLeader": 2,
+      "result": {
+        "label": "acks1-loss",
+        "state": "success",
+        "topic": "mq15-acks1-loss-613950298z",
+        "partition": 0,
+        "offset": 0
+      },
+      "before": "acks1-before-kill",
+      "after": "acks1-after-clean-election",
+      "newLeaderVisibleRecords": []
+    }
+  },
+  "observedSnapshotFacts": [
+    {
+      "snapshot": "healthy-acks1",
+      "atUTC": "2026-11-01T09:26:26.030634+00:00",
+      "topic": "mq15-healthy-acks1-613950298z",
+      "leader": 1,
+      "ISR": [
+        1,
+        2,
+        3
+      ],
+      "physicalLEO": {
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 1
+    },
+    {
+      "snapshot": "healthy-all",
+      "atUTC": "2026-11-01T09:26:26.572678+00:00",
+      "topic": "mq15-healthy-all-613950298z",
+      "leader": 1,
+      "ISR": [
+        1,
+        2,
+        3
+      ],
+      "physicalLEO": {
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 1
+    },
+    {
+      "snapshot": "slow-before-resume",
+      "atUTC": "2026-11-01T09:26:27.080271+00:00",
+      "topic": "mq15-slow-current-isr-613950298z",
+      "leader": 1,
+      "ISR": [
+        1,
+        2,
+        3
+      ],
+      "physicalLEO": {
+        "1": 1,
+        "2": 1,
+        "3": 0
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 0
+    },
+    {
+      "snapshot": "slow-after-resume",
+      "atUTC": "2026-11-01T09:26:28.813635+00:00",
+      "topic": "mq15-slow-current-isr-613950298z",
+      "leader": 1,
+      "ISR": [
+        1,
+        2,
+        3
+      ],
+      "physicalLEO": {
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 1
+    },
+    {
+      "snapshot": "isr2-ack",
+      "atUTC": "2026-11-01T09:26:53.912018+00:00",
+      "topic": "mq15-stable-isr2-613950298z",
+      "leader": 1,
+      "ISR": [
+        1,
+        2
+      ],
+      "physicalLEO": {
+        "1": 1,
+        "2": 1,
+        "3": 0
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 1
+    },
+    {
+      "snapshot": "isr1-before-send",
+      "atUTC": "2026-11-01T09:27:23.849411+00:00",
+      "topic": "mq15-stable-isr1-613950298z",
+      "leader": 1,
+      "ISR": [
+        1
+      ],
+      "physicalLEO": {
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 0
+    },
+    {
+      "snapshot": "isr1-after-reject",
+      "atUTC": "2026-11-01T09:27:23.957217+00:00",
+      "topic": "mq15-stable-isr1-613950298z",
+      "leader": 1,
+      "ISR": [
+        1
+      ],
+      "physicalLEO": {
+        "1": 0,
+        "2": 0,
+        "3": 0
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 0
+    },
+    {
+      "snapshot": "all-before-leader-kill",
+      "atUTC": "2026-11-01T09:27:24.802450+00:00",
+      "topic": "mq15-healthy-all-613950298z",
+      "leader": 1,
+      "ISR": [
+        1,
+        2,
+        3
+      ],
+      "physicalLEO": {
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 1
+    },
+    {
+      "snapshot": "all-after-clean-election",
+      "atUTC": "2026-11-01T09:27:33.306384+00:00",
+      "topic": "mq15-healthy-all-613950298z",
+      "leader": 2,
+      "ISR": [
+        2,
+        3
+      ],
+      "physicalLEO": {
+        "1": 1,
+        "2": 1,
+        "3": 1
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 1
+    },
+    {
+      "snapshot": "acks1-before-kill",
+      "atUTC": "2026-11-01T09:27:38.708987+00:00",
+      "topic": "mq15-acks1-loss-613950298z",
+      "leader": 1,
+      "ISR": [
+        1,
+        2,
+        3
+      ],
+      "physicalLEO": {
+        "1": 1,
+        "2": 0,
+        "3": 0
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 0
+    },
+    {
+      "snapshot": "acks1-after-clean-election",
+      "atUTC": "2026-11-01T09:27:48.000268+00:00",
+      "topic": "mq15-acks1-loss-613950298z",
+      "leader": 2,
+      "ISR": [
+        2,
+        3
+      ],
+      "physicalLEO": {
+        "1": 1,
+        "2": 0,
+        "3": 0
+      },
+      "leaderHWViaReadUncommittedConsumerEndOffsets": 0
+    }
+  ],
+  "passedRealRunAssertions": 34,
+  "officialPhysicalLogValidation": {
+    "officialTool": "kafka-dump-log.sh --print-data-log --deep-iteration",
+    "exit": 0,
+    "emptyAndNonemptySnapshotsValidated": 33,
+    "byteIdentityPairs": 33,
+    "recordBatchCRCsValid": 21,
+    "validation": [
+      {
+        "snapshot": "acks1-after-clean-election",
+        "node": 1,
+        "sha256": "68f57ad2e224bfc64c890558745c321a52ffd840adca581032b063888d50a869",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "acks1-after-clean-election",
+        "node": 2,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "acks1-after-clean-election",
+        "node": 3,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "acks1-before-kill",
+        "node": 1,
+        "sha256": "68f57ad2e224bfc64c890558745c321a52ffd840adca581032b063888d50a869",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "acks1-before-kill",
+        "node": 2,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "acks1-before-kill",
+        "node": 3,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "all-after-clean-election",
+        "node": 1,
+        "sha256": "3dd2b8bf49de10dd1bee0291a854d9fa2cbce01e725fbbfef92204aa31b03518",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "all-after-clean-election",
+        "node": 2,
+        "sha256": "3dd2b8bf49de10dd1bee0291a854d9fa2cbce01e725fbbfef92204aa31b03518",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "all-after-clean-election",
+        "node": 3,
+        "sha256": "3dd2b8bf49de10dd1bee0291a854d9fa2cbce01e725fbbfef92204aa31b03518",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "all-before-leader-kill",
+        "node": 1,
+        "sha256": "3dd2b8bf49de10dd1bee0291a854d9fa2cbce01e725fbbfef92204aa31b03518",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "all-before-leader-kill",
+        "node": 2,
+        "sha256": "3dd2b8bf49de10dd1bee0291a854d9fa2cbce01e725fbbfef92204aa31b03518",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "all-before-leader-kill",
+        "node": 3,
+        "sha256": "3dd2b8bf49de10dd1bee0291a854d9fa2cbce01e725fbbfef92204aa31b03518",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "healthy-acks1",
+        "node": 1,
+        "sha256": "b70efa9cc0b183ea6012820e28e752f2b10ca3cac2e0107e3d0b01ab80fa12da",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "healthy-acks1",
+        "node": 2,
+        "sha256": "b70efa9cc0b183ea6012820e28e752f2b10ca3cac2e0107e3d0b01ab80fa12da",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "healthy-acks1",
+        "node": 3,
+        "sha256": "b70efa9cc0b183ea6012820e28e752f2b10ca3cac2e0107e3d0b01ab80fa12da",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "healthy-all",
+        "node": 1,
+        "sha256": "3dd2b8bf49de10dd1bee0291a854d9fa2cbce01e725fbbfef92204aa31b03518",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "healthy-all",
+        "node": 2,
+        "sha256": "3dd2b8bf49de10dd1bee0291a854d9fa2cbce01e725fbbfef92204aa31b03518",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "healthy-all",
+        "node": 3,
+        "sha256": "3dd2b8bf49de10dd1bee0291a854d9fa2cbce01e725fbbfef92204aa31b03518",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "isr1-after-reject",
+        "node": 1,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "isr1-after-reject",
+        "node": 2,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "isr1-after-reject",
+        "node": 3,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "isr1-before-send",
+        "node": 1,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "isr1-before-send",
+        "node": 2,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "isr1-before-send",
+        "node": 3,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "isr2-ack",
+        "node": 1,
+        "sha256": "c8e3ad35b0222bbd81efd1f000e5a7b900a2e9e703079d5befe1442b7651e6e0",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "isr2-ack",
+        "node": 2,
+        "sha256": "c8e3ad35b0222bbd81efd1f000e5a7b900a2e9e703079d5befe1442b7651e6e0",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "isr2-ack",
+        "node": 3,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      },
+      {
+        "snapshot": "slow-after-resume",
+        "node": 1,
+        "sha256": "7631348992dddee0f730a7d9467b96c79713b75d48a6ab9b26218b90f58809bd",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "slow-after-resume",
+        "node": 2,
+        "sha256": "7631348992dddee0f730a7d9467b96c79713b75d48a6ab9b26218b90f58809bd",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "slow-after-resume",
+        "node": 3,
+        "sha256": "7631348992dddee0f730a7d9467b96c79713b75d48a6ab9b26218b90f58809bd",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "slow-before-resume",
+        "node": 1,
+        "sha256": "7631348992dddee0f730a7d9467b96c79713b75d48a6ab9b26218b90f58809bd",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "slow-before-resume",
+        "node": 2,
+        "sha256": "7631348992dddee0f730a7d9467b96c79713b75d48a6ab9b26218b90f58809bd",
+        "physicalLEO": 1,
+        "crcValidBatches": 1,
+        "payloads": [
+          "{\"eventId\":\"E01\",\"orderId\":7042}"
+        ]
+      },
+      {
+        "snapshot": "slow-before-resume",
+        "node": 3,
+        "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "physicalLEO": 0,
+        "crcValidBatches": 0,
+        "payloads": []
+      }
+    ],
+    "stdout": "runs/20261101T092613950298Z/post-validation/official-log-dump.stdout",
+    "stdoutSHA256": "15e748daf72ff7eb9b788ad127c69ad8ef2ceeccb36fa05ccbedfe2a439dba56",
+    "stderrEmpty": true
+  },
+  "retainedFailures": [
+    {
+      "path": "failures/compile-appinfoparser-v1",
+      "reason": "Kafka4.4 AppInfoParser moved to utils.internals; fixed only own runtime probe and retained original source/error."
+    },
+    {
+      "path": "runs/20261101T092135857476Z",
+      "reason": "Whole-JVM SIGSTOP caused observer Admin.describeTopics to target paused CLIENT listener and timeout. Own services stopped. Replaced with exact follower data gate; this first run is not claimed fully passed."
+    },
+    {
+      "path": "runs/20261101T092613950298Z/official-log-dump.stderr",
+      "reason": "Copied segments had basename node1-0.log, which official DumpLogSegments parses as a numeric base offset and rejects. Original failed command/output/report preserved. Correctly named copies have identical bytes and were fully decoded successfully."
+    }
+  ],
+  "brokerErrorScope": [
+    {
+      "file": "broker1-start1.log",
+      "classification": "Expected actual ISR1 preappend NotEnoughReplicasException, same failure returned to the producer."
+    },
+    {
+      "file": "broker3-start1.log",
+      "classification": "NotControllerException on wantShutDown=true broker heartbeat after observed cases, while sequentially stopping the final combined JVMs; retained raw errors, not claimed error-free service shutdown. All tracked PIDs exited and ports are now closed."
+    }
+  ],
+  "cleanup": {
+    "brokerPIDs": {
+      "1": 15249,
+      "2": 11851,
+      "3": 11852
+    },
+    "allTrackedBrokersExited": true,
+    "allProxyListenersClosed": true,
+    "ownTemporaryDataRemoved": true,
+    "postAuditAll12PortsClosed": [
+      {
+        "node": 1,
+        "role": "client",
+        "port": 48071,
+        "connectRefused": true
+      },
+      {
+        "node": 1,
+        "role": "backend",
+        "port": 43675,
+        "connectRefused": true
+      },
+      {
+        "node": 1,
+        "role": "proxy",
+        "port": 44849,
+        "connectRefused": true
+      },
+      {
+        "node": 1,
+        "role": "controller",
+        "port": 34727,
+        "connectRefused": true
+      },
+      {
+        "node": 2,
+        "role": "client",
+        "port": 59393,
+        "connectRefused": true
+      },
+      {
+        "node": 2,
+        "role": "backend",
+        "port": 55507,
+        "connectRefused": true
+      },
+      {
+        "node": 2,
+        "role": "proxy",
+        "port": 60041,
+        "connectRefused": true
+      },
+      {
+        "node": 2,
+        "role": "controller",
+        "port": 53561,
+        "connectRefused": true
+      },
+      {
+        "node": 3,
+        "role": "client",
+        "port": 39005,
+        "connectRefused": true
+      },
+      {
+        "node": 3,
+        "role": "backend",
+        "port": 52645,
+        "connectRefused": true
+      },
+      {
+        "node": 3,
+        "role": "proxy",
+        "port": 35393,
+        "connectRefused": true
+      },
+      {
+        "node": 3,
+        "role": "controller",
+        "port": 57571,
+        "connectRefused": true
+      }
+    ]
+  },
+  "limits": [
+    "Finite loopback process/replication-network faults, not powerloss, disk durability, throughput benchmarking or arbitrary distributed failures.",
+    "No distributed transaction or exactly-once business-effect claim.",
+    "Ack1 loss means the clean new leader lacks E01; the offline former leader still physically contains E01, explicitly preserved in snapshots.",
+    "Healthy ack1 was later observed on all three replicas; this does not mean ack1 required three copies at the moment it replied.",
+    "The test proves its gated cases and configurations; it does not claim every production failure has the same outcome.",
+    "This is runtime evidence, not animation/teaching-model output, production media review or an independent code-review gate."
+  ]
+}

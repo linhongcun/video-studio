@@ -1,0 +1,130 @@
+{
+  "createdAtUTC": "2026-11-01T09:30:20.728566+00:00",
+  "commit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "kind": "fixed-source-read-audit-not-runtime-experiment",
+  "conclusion": "For Kafka4.4.0 classic KafkaConsumer.endOffsets with explicitly read_uncommitted and current leader request, the latest offset returned is the leader high watermark, not its physical log end. It may throw OffsetNotAvailable while the leader epoch start exceeds HW. Physical replica LEO requires separate evidence.",
+  "executionChain": [
+    {
+      "file": "KafkaConsumer.java",
+      "startLine": 1735,
+      "endLine": 1739,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L1735-L1739",
+      "sourceSHA256": "1c23d1e4e7d597cec4f412e306a7a51efb3ecdfbe1513c20a8684eb29941ff0d",
+      "reason": "Contract: read_uncommitted endOffsets is HW, read_committed is LSO.",
+      "exactExcerpt": "     * Get the end offsets for the given partitions. In the default {@code read_uncommitted} isolation level, the end\n     * offset is the high watermark (that is, the offset of the last successfully replicated message plus one). For\n     * {@code read_committed} consumers, the end offset is the last stable offset (LSO), which is the minimum of\n     * the high watermark and the smallest offset of any open transaction. Finally, if the partition has never been\n     * written to, the end offset is 0."
+    },
+    {
+      "file": "KafkaConsumer.java",
+      "startLine": 1730,
+      "endLine": 1732,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L1730-L1732",
+      "sourceSHA256": "1c23d1e4e7d597cec4f412e306a7a51efb3ecdfbe1513c20a8684eb29941ff0d",
+      "reason": "Public API delegates the request.",
+      "exactExcerpt": "    public Map<TopicPartition, Long> endOffsets(Collection<TopicPartition> partitions) {\n        return delegate.endOffsets(partitions);\n    }"
+    },
+    {
+      "file": "ClassicKafkaConsumer.java",
+      "startLine": 1055,
+      "endLine": 1062,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ClassicKafkaConsumer.java#L1055-L1062",
+      "sourceSHA256": "1c9a717d04f5b8abc24097f7b28fee887d3543417928a0ecb20870969cd64567",
+      "reason": "Classic implementation calls offsetFetcher.endOffsets.",
+      "exactExcerpt": "    @Override\n    public Map<TopicPartition, Long> endOffsets(Collection<TopicPartition> partitions, Duration timeout) {\n        acquireAndEnsureOpen();\n        try {\n            return offsetFetcher.endOffsets(partitions, time.timer(timeout));\n        } finally {\n            release();\n        }"
+    },
+    {
+      "file": "OffsetFetcher.java",
+      "startLine": 199,
+      "endLine": 201,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/OffsetFetcher.java#L199-L201",
+      "sourceSHA256": "c69d1f576c420892175f7ed5f599de09189a8f3994bab8e230f8a85ab9112f21",
+      "reason": "endOffsets uses ListOffsetsRequest.LATEST_TIMESTAMP.",
+      "exactExcerpt": "    public Map<TopicPartition, Long> endOffsets(Collection<TopicPartition> partitions, Timer timer) {\n        return beginningOrEndOffset(partitions, ListOffsetsRequest.LATEST_TIMESTAMP, timer, false);\n    }"
+    },
+    {
+      "file": "OffsetFetcher.java",
+      "startLine": 226,
+      "endLine": 241,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/OffsetFetcher.java#L226-L241",
+      "sourceSHA256": "c69d1f576c420892175f7ed5f599de09189a8f3994bab8e230f8a85ab9112f21",
+      "reason": "Build target timestamps, fetch offsets and return fetched offsets.",
+      "exactExcerpt": "    }\n\n    private Map<TopicPartition, Long> beginningOrEndOffset(Collection<TopicPartition> partitions,\n                                                           long timestamp,\n                                                           Timer timer,\n                                                           boolean updatePartitionEndOffsetsFlag) {\n        metadata.addTransientTopics(topicsForPartitions(partitions));\n        try {\n            Map<TopicPartition, Long> timestampsToSearch = partitions.stream()\n                    .distinct()\n                    .collect(Collectors.toMap(Function.identity(), tp -> timestamp));\n\n            ListOffsetResult result = fetchOffsetsByTimes(timestampsToSearch, timer, false, updatePartitionEndOffsetsFlag);\n\n            return result.fetchedOffsets.entrySet().stream()\n                    .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().offset));"
+    },
+    {
+      "file": "OffsetFetcher.java",
+      "startLine": 431,
+      "endLine": 440,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/OffsetFetcher.java#L431-L440",
+      "sourceSHA256": "c69d1f576c420892175f7ed5f599de09189a8f3994bab8e230f8a85ab9112f21",
+      "reason": "Consumer ListOffsets builder receives the configured isolationLevel.",
+      "exactExcerpt": "    private RequestFuture<ListOffsetResult> sendListOffsetRequest(final Node node,\n                                                                  final Map<TopicPartition, ListOffsetsPartition> timestampsToSearch,\n                                                                  boolean requireTimestamp) {\n        ListOffsetsRequest.Builder builder = ListOffsetsRequest.Builder\n                .forConsumer(requireTimestamp, isolationLevel)\n                .setTargetTimes(ListOffsetsRequest.toListOffsetsTopics(timestampsToSearch))\n                .setTimeoutMs(requestTimeoutMs);\n\n        log.debug(\"Sending ListOffsetRequest {} to broker {}\", builder, node);\n        return client.send(node, builder)"
+    },
+    {
+      "file": "ListOffsetsRequest.java",
+      "startLine": 58,
+      "endLine": 85,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/requests/ListOffsetsRequest.java#L58-L85",
+      "sourceSHA256": "8e511e8c6660814d1be2476a14cefe8902ce2eca7453c3724684f981068253a4",
+      "reason": "forConsumer sets CONSUMER_REPLICA_ID and isolationLevel.",
+      "exactExcerpt": "    public static class Builder extends AbstractRequest.Builder<ListOffsetsRequest> {\n        private final ListOffsetsRequestData data;\n\n        public static Builder forConsumer(boolean requireTimestamp,\n                                          IsolationLevel isolationLevel) {\n            return forConsumer(requireTimestamp, isolationLevel, false, false, false, false);\n        }\n\n        public static Builder forConsumer(boolean requireTimestamp,\n                                          IsolationLevel isolationLevel,\n                                          boolean requireMaxTimestamp,\n                                          boolean requireEarliestLocalTimestamp,\n                                          boolean requireTieredStorageTimestamp,\n                                          boolean requireEarliestPendingUploadTimestamp) {\n            short minVersion = ApiKeys.LIST_OFFSETS.oldestVersion();\n            if (requireEarliestPendingUploadTimestamp)\n                minVersion = 11;\n            else if (requireTieredStorageTimestamp)\n                minVersion = 9;\n            else if (requireEarliestLocalTimestamp)\n                minVersion = 8;\n            else if (requireMaxTimestamp)\n                minVersion = 7;\n            else if (isolationLevel == IsolationLevel.READ_COMMITTED)\n                minVersion = 2;\n            else if (requireTimestamp)\n                minVersion = 1;\n            return new Builder(minVersion, ApiKeys.LIST_OFFSETS.latestVersion(), CONSUMER_REPLICA_ID, isolationLevel);"
+    },
+    {
+      "file": "ListOffsetsRequest.java",
+      "startLine": 92,
+      "endLine": 100,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/common/requests/ListOffsetsRequest.java#L92-L100",
+      "sourceSHA256": "8e511e8c6660814d1be2476a14cefe8902ce2eca7453c3724684f981068253a4",
+      "reason": "Request data stores replicaId and isolationLevel.",
+      "exactExcerpt": "        private Builder(short oldestAllowedVersion,\n                        short latestAllowedVersion,\n                        int replicaId,\n                        IsolationLevel isolationLevel) {\n            super(ApiKeys.LIST_OFFSETS, oldestAllowedVersion, latestAllowedVersion);\n            data = new ListOffsetsRequestData()\n                      .setIsolationLevel(isolationLevel.id())\n                      .setReplicaId(replicaId);\n        }"
+    },
+    {
+      "file": "KafkaApis.scala",
+      "startLine": 825,
+      "endLine": 827,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/KafkaApis.scala#L825-L827",
+      "sourceSHA256": "566b4b3b04de40d47b44ad17854d580dd1ba419dfba3ac989352c3a3c8073df8",
+      "reason": "Broker passes request isolation/replica id to ReplicaManager.fetchOffset.",
+      "exactExcerpt": "      replicaManager.fetchOffset(authorizedRequestInfo, offsetRequest.duplicatePartitions().asScala,\n        offsetRequest.isolationLevel(), offsetRequest.replicaId(), clientId, correlationId, version,\n        buildErrorResponse, sendResponseCallback, offsetRequest.timeoutMs())"
+    },
+    {
+      "file": "ReplicaManager.scala",
+      "startLine": 1483,
+      "endLine": 1494,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/ReplicaManager.scala#L1483-L1494",
+      "sourceSHA256": "466d12be1616ea5f1165cf0ab10a43e4872bf2623a0d9487841188033c37b474",
+      "reason": "CONSUMER_REPLICA_ID makes isolationLevel Some, rather than replica/internal None.",
+      "exactExcerpt": "            val fetchOnlyFromLeader = replicaId != ListOffsetsRequest.DEBUGGING_REPLICA_ID\n            val isClientRequest = replicaId == ListOffsetsRequest.CONSUMER_REPLICA_ID\n            val isolationLevelOpt = if (isClientRequest)\n              Some(isolationLevel)\n            else\n              None\n\n            val resultHolder = fetchOffsetForTimestamp(topicPartition,\n              partition.timestamp,\n              isolationLevelOpt,\n              if (partition.currentLeaderEpoch == ListOffsetsResponse.UNKNOWN_EPOCH) Optional.empty() else Optional.of(partition.currentLeaderEpoch),\n              fetchOnlyFromLeader)"
+    },
+    {
+      "file": "ReplicaManager.scala",
+      "startLine": 1585,
+      "endLine": 1592,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/server/ReplicaManager.scala#L1585-L1592",
+      "sourceSHA256": "466d12be1616ea5f1165cf0ab10a43e4872bf2623a0d9487841188033c37b474",
+      "reason": "ReplicaManager delegates to partition.fetchOffsetForTimestamp.",
+      "exactExcerpt": "  def fetchOffsetForTimestamp(topicPartition: TopicPartition,\n                              timestamp: Long,\n                              isolationLevel: Option[IsolationLevel],\n                              currentLeaderEpoch: Optional[Integer],\n                              fetchOnlyFromLeader: Boolean): OffsetResultHolder = {\n    val partition = getPartitionOrException(topicPartition)\n    partition.fetchOffsetForTimestamp(timestamp, isolationLevel, currentLeaderEpoch, fetchOnlyFromLeader, remoteLogManager)\n  }"
+    },
+    {
+      "file": "Partition.scala",
+      "startLine": 1433,
+      "endLine": 1445,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/cluster/Partition.scala#L1433-L1445",
+      "sourceSHA256": "0b518021311f6d004bb35e07c7830b256d807a81254c8a66c28616143fab0aea",
+      "reason": "Actual execution selects localLog.highWatermark for READ_UNCOMMITTED, logEndOffset only for None.",
+      "exactExcerpt": "  def fetchOffsetForTimestamp(timestamp: Long,\n                              isolationLevel: Option[IsolationLevel],\n                              currentLeaderEpoch: Optional[Integer],\n                              fetchOnlyFromLeader: Boolean,\n                              remoteLogManager: Option[RemoteLogManager] = None): OffsetResultHolder = inReadLock(leaderIsrUpdateLock, () => {\n    // decide whether to only fetch from leader\n    val localLog = localLogWithEpochOrThrow(currentLeaderEpoch, fetchOnlyFromLeader)\n\n    val lastFetchableOffset = isolationLevel match {\n      case Some(IsolationLevel.READ_COMMITTED) => localLog.lastStableOffset\n      case Some(IsolationLevel.READ_UNCOMMITTED) => localLog.highWatermark\n      case None => localLog.logEndOffset\n    }"
+    },
+    {
+      "file": "Partition.scala",
+      "startLine": 1468,
+      "endLine": 1474,
+      "permanentLink": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/core/src/main/scala/kafka/cluster/Partition.scala#L1468-L1474",
+      "sourceSHA256": "0b518021311f6d004bb35e07c7830b256d807a81254c8a66c28616143fab0aea",
+      "reason": "LATEST returns lastFetchableOffset, subject to OffsetNotAvailable while epoch HW lags.",
+      "exactExcerpt": "    // If we're in the lagging HW state after a leader election, throw OffsetNotAvailable for \"latest\" offset\n    // or for a timestamp lookup that is beyond the last fetchable offset.\n    timestamp match {\n      case ListOffsetsRequest.LATEST_TIMESTAMP =>\n        maybeOffsetsError.map(e => throw e)\n          .getOrElse(new OffsetResultHolder(new TimestampAndOffset(RecordBatch.NO_TIMESTAMP, lastFetchableOffset, Optional.of(leaderEpoch))))\n      case ListOffsetsRequest.EARLIEST_TIMESTAMP | ListOffsetsRequest.EARLIEST_LOCAL_TIMESTAMP =>"
+    }
+  ],
+  "unusedFailedCandidate": "FetchIsolation.java under storage/internals/log was a404 and is not needed/used in this chain; original lookup metadata retained.",
+  "limitations": [
+    "Source execution-path review only, not a new broker experiment.",
+    "Do not substitute read_committed, replication/debugging requests, or a stale local cache for this explicit consumer endOffsets call."
+  ]
+}
