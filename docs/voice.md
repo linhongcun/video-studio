@@ -1,6 +1,6 @@
 # 配音
 
-音色、响度和起音以 [RULES.md](RULES.md) 为准。制作音轨保存在 `episodes-codex/<slug>/`；站点目录只保留发布所需数据，不存配音整轨。参考当前 `episodes-codex/db-lock/`、`episodes-codex/http-request/` 的 README、选中 takes、铺轨及冻结检查。历史逐字 ASR 范例单独保存在固定 fixture，不能与现行句级声学数据混用。
+音色、响度和起音以 [RULES.md](RULES.md) 为准。制作音轨保存在 `episodes/<series>/<slug>/production/`；站点目录只保留发布所需数据，不存配音整轨。参考当前 `episodes/database/db-lock/production/`、`episodes/request/http-request/production/` 的 README、选中 takes、铺轨及冻结检查。历史逐字 ASR 范例单独保存在固定 fixture，不能与现行句级声学数据混用。
 
 ## 合成一句
 
@@ -16,7 +16,7 @@ python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --
 
 复用 `episodes/_shared/voice/` 的 `prep.py`、`gen.py`、`build.py`，按 `voice/params.json` 构建整轨。选段写入 `voice/picks.json`，送模文本修订及能力边界写入 `voice/substitutions.md`；保留已选中 takes，不因普通复核重新请求非确定性 TTS。
 
-当前句级工程通过本期 `assemble.py` 或 [共享句级装配](../episodes-codex/_shared/README.md) 建立 `words.json`、字幕、镜头边界和句首声学起音。`asrModel: none`、`wordAlignment: false` 时，兼容 words/chars 字段不代表完成逐字 ASR。具体参数与顺序按本期 README，不把旧 EP.14 的镜数或停留秒数当成统一值。
+当前句级工程通过本期 `assemble.py` 或 [共享句级装配](../episodes/_shared/README.md) 建立 `words.json`、字幕、镜头边界和句首声学起音。`asrModel: none`、`wordAlignment: false` 时，兼容 words/chars 字段不代表完成逐字 ASR。具体参数与顺序按本期 README，不把旧 EP.14 的镜数或停留秒数当成统一值。
 
 已有逐字 ASR 管线的工具仍在 [voice/README.md](../episodes/_shared/voice/README.md)：`asr.py` / `asr_full.py`、`onsets.py`、`lastword_fix.py`、`cues_rule.py`、`shot_frames.py`、`selfcheck.py`。只有模型、运行结果和检查均实际完成时才记录对应能力；不能因历史管线存在就自动填写通过。
 

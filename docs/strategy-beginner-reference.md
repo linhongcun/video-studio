@@ -1,10 +1,10 @@
 # 策略模式：新手理解路径复盘与讲稿草案
 
-**最新纠正（2026-10-25）：**用户观看由本稿落实的v0.54.4后，指出内容偏函数/参数语法，设计模式应讲与语言无关的思想。以下保留为上一轮参考与实现讲解的历史，不能继续作为“函数传参就是策略模式主线”的依据。当前方向以RULES的设计模式教学节和L030为准：变化隔离、职责、共同约定、选择与委托、替换边界和成本先行；具体语言仅入可选实现附录。当前[11镜设计思想稿](../episodes-codex/strategy-pattern/script.md)与[本期发布记录](../episodes-codex/strategy-pattern/release.md)是最新制作依据。
+**最新纠正（2026-10-25）：**用户观看由本稿落实的v0.54.4后，指出内容偏函数/参数语法，设计模式应讲与语言无关的思想。以下保留为上一轮参考与实现讲解的历史，不能继续作为“函数传参就是策略模式主线”的依据。当前方向以RULES的设计模式教学节和L030为准：变化隔离、职责、共同约定、选择与委托、替换边界和成本先行；具体语言仅入可选实现附录。当前[11镜设计思想稿](../episodes/design-patterns/strategy-pattern/production/script.md)与[本期发布记录](../episodes/design-patterns/strategy-pattern/production/release.md)是最新制作依据。
 
 2026-10-24（北京时间）的参考阶段记录。用户观看章节衔接修订版后反馈：内容仍然复杂，新手难以理解；推荐 Refactoring.Guru 的内容布局。当时线上媒体为v0.54.1，本文件先完成参考拆解和讲稿草案；它本身不是媒体或学习效果验证。
 
-2026-10-25上一轮实施：用户授权参考后制作，采用[13镜实现讲解稿](../episodes-codex/strategy-pattern/revisions/v0.54.4/script.md)。当时实际交付与核验见[v0.54.4历史记录](../episodes-codex/strategy-pattern/revisions/v0.54.4/release.md)，不作为最新设计思想方向的验证。
+2026-10-25上一轮实施：用户授权参考后制作，采用[13镜实现讲解稿](../episodes/design-patterns/strategy-pattern/production/revisions/v0.54.4/script.md)。当时实际交付与核验见[v0.54.4历史记录](../episodes/design-patterns/strategy-pattern/production/revisions/v0.54.4/release.md)，不作为最新设计思想方向的验证。
 
 v0.54.4历史成片约2分43秒，曾经Release后Pages部署及完整文件核验通过；用户后续仍指出偏语法。保留该事实与限制，不将旧草案或技术检查当成用户认可。
 

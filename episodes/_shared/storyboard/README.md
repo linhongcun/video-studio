@@ -36,7 +36,7 @@ python3 -B episodes/_shared/label_onset_strict.py --storyboard $O/storyboard.jso
 
 ## 历史 EP.14 v0.45.0 范例（`examples/degradation/`）
 
-EP.14 降级（`meta.slug` `degradation-v1`）的整套 spec：`covers_spec.py`、`layout_spec.py`、`build_spec.py`、`validate_spec.py`，配套的 `narration.py`、`sources/ref-sources.md`、`sources/src/*.txt` 也保存在该范例目录；`repo-inputs.json` 把其余输入指到固定历史 fixture（`episodes/_shared/tests/fixtures/degradation-v0.45.0/`）和已有 `episodes/_shared/tests/golden/degradation/voice/`。fixture 提取自提交 `c1da2a1eef696d8bd08c9b078d7b833d75308498`，不随站点 `episodes/degradation/` 的新成片变化。
+EP.14 降级（`meta.slug` `degradation-v1`）的整套 spec：`covers_spec.py`、`layout_spec.py`、`build_spec.py`、`validate_spec.py`，配套的 `narration.py`、`sources/ref-sources.md`、`sources/src/*.txt` 也保存在该范例目录；`repo-inputs.json` 把其余输入指到固定历史 fixture（`episodes/_shared/tests/fixtures/degradation-v0.45.0/`）和已有 `episodes/_shared/tests/golden/degradation/voice/`。fixture 提取自提交 `c1da2a1eef696d8bd08c9b078d7b833d75308498`，不随站点 `episodes/peak/degradation/publication/` 的新成片变化。
 
 ```sh
 sh episodes/_shared/storyboard/examples/degradation/rerun.sh [OUTDIR]

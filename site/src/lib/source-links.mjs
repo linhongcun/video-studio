@@ -1,7 +1,8 @@
 import {execFileSync} from 'node:child_process';
-import {fileURLToPath} from 'node:url';
+import path from 'node:path';
+import {episodeDirectory, REPO_ROOT} from '../../scripts/episode-paths.mjs';
 
-const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url));
+const repositoryRoot = REPO_ROOT;
 const repository = 'https://github.com/linhongcun/video-studio';
 const rawRepository = 'https://raw.githubusercontent.com/linhongcun/video-studio';
 let snapshot;
@@ -25,7 +26,7 @@ export function episodeSourceLinks({slug, sourcePath}) {
     if (parts.some((part) => !part || part === '.' || part === '..')) throw new Error(`无效制作文件路径：${value}`);
     return parts.map(encodeURIComponent).join('/');
   };
-  const episodePath = encodePath(`episodes/${slug}`);
+  const episodePath = encodePath(path.relative(repositoryRoot, episodeDirectory(slug)).split(path.sep).join('/'));
   return [
     ...[['脚本', 'script.md'], ['分镜', 'storyboard.json']].map(([label, file]) => ({
       label, file,

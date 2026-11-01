@@ -7,6 +7,7 @@ import vm from 'node:vm';
 import {gunzipSync} from 'node:zlib';
 import {createHash} from 'node:crypto';
 import {transformSync} from 'esbuild';
+import {episodeDirectory, listEpisodes, REPO_ROOT} from './episode-paths.mjs';
 
 const site = path.resolve(import.meta.dirname, '..');
 const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -28,11 +29,11 @@ function episodeRuntime(showDrafts, metaOverrides = new Map()) {
     return metaOverrides.get(file);
   }};
   return vm.compileFunction(`${code}\nreturn {getEpisodes, getSeries, getRelated, seriesNav, seriesFor, epLabel, learningGuideFor, archiveReplacementsFor, compareLessons};`,
-    ['fs', 'path', 'pkg', 'tagsMeta', 'seriesMeta', 'process'])(runtimeFs, path,
+    ['fs', 'path', 'pkg', 'tagsMeta', 'seriesMeta', 'process', 'episodeDirectory', 'listEpisodes', 'REPO_ROOT'])(runtimeFs, path,
     readJson(path.join(site, 'package.json')),
     readJson(path.join(site, 'src/content/tags.json')),
     readJson(path.join(site, 'src/content/series.json')),
-    {cwd: () => site, env: {SHOW_DRAFTS: showDrafts ? '1' : '0'}});
+    {cwd: () => site, env: {SHOW_DRAFTS: showDrafts ? '1' : '0'}}, episodeDirectory, listEpisodes, REPO_ROOT);
 }
 function learningRuntime(episodes) {
   const source = stripImports(fs.readFileSync(path.join(site, 'src/lib/learning.ts'), 'utf8'));
@@ -44,11 +45,11 @@ const releasesSource = stripImports(fs.readFileSync(path.join(site, 'src/lib/rel
 const releaseCode = transformSync(releasesSource, {loader: 'ts'}).code;
 const {episodesForRelease, parseEpisodeSlugs} = vm.compileFunction(`${releaseCode}\nreturn {episodesForRelease, parseEpisodeSlugs};`, ['fs', 'path'])(fs, path);
 const slugs = (rows) => Array.from(rows, (e) => e.slug);
-const introArticle = fs.readFileSync(path.join(site, '../episodes', introSlug, 'article.mdx'), 'utf8');
+const introArticle = fs.readFileSync(path.join(episodeDirectory(introSlug), 'article.mdx'), 'utf8');
 assert.equal(introArticle.includes('../distributed-tx/'), false, 'Published intro article must not lead back to the compilation');
 for (const slug of mechanismSlugs) {
   assert.ok(introArticle.includes(`../${slug}/`), `Missing independent lesson link: ${slug}`);
-  const config = readJson(path.join(site, '../episodes-codex', slug, 'episode-config.json'));
+  const config = readJson(path.join(episodeDirectory(slug, {kind: 'production'}), 'episode-config.json'));
   assert.ok(introArticle.includes(config.title), `Intro article title is stale for ${slug}`);
 }
 const linkedOrder = mechanismSlugs.map((slug) => introArticle.lastIndexOf(`../${slug}/`));
@@ -77,7 +78,7 @@ const liveLessons = published.getEpisodes();
 // raw series lookup agree without changing publication files or their hashes.
 const defaultSeriesId = 'engineering-algorithms';
 const fallbackSlug = 'consistent-hashing';
-const fallbackMetaPath = path.join(site, '../episodes', fallbackSlug, 'meta.json');
+const fallbackMetaPath = path.join(episodeDirectory(fallbackSlug), 'meta.json');
 const fallbackMeta = readJson(fallbackMetaPath);
 const originalSeries = published.getSeries();
 const other = originalSeries.find((series) => series.id === defaultSeriesId);
@@ -172,7 +173,7 @@ if (process.argv.includes('--built')) {
   assert.equal(archivePage.includes('class="pager"'), false);
   assert.equal((text(`episodes/${archiveSlug}/captions.vtt`).match(/-->/g) ?? []).length, 76);
   const movie = fs.readFileSync(path.join(dist, `episodes/${archiveSlug}/video.mp4`));
-  const archiveSource = fs.readFileSync(path.join(site, '../episodes', archiveSlug, 'video.mp4'));
+  const archiveSource = fs.readFileSync(path.join(episodeDirectory(archiveSlug), 'video.mp4'));
   assert.equal(createHash('sha256').update(movie).digest('hex'), createHash('sha256').update(archiveSource).digest('hex'),
     'Built archive media must match the current published source, including its reference appendix');
   for (const rel of ['index.html', 'series/distributed/index.html', 'tags/分布式事务/index.html', 'rss.xml']) {
@@ -359,14 +360,14 @@ if (process.argv.includes('--built')) {
       assert.ok(page.includes(`id="${chapter.id}"`), `Missing article anchor ${chapter.id}`);
       assert.ok(page.includes(`data-id="${chapter.id}" data-start="${chapter.start}"`), `Missing timed chapter ${chapter.id}`);
     }
-    const storyboard = readJson(path.join(site, '../episodes', algorithmSlug, 'storyboard.json'));
+    const storyboard = readJson(path.join(episodeDirectory(algorithmSlug), 'storyboard.json'));
     const narration = storyboard.scenes.flatMap((s) => s.shots.flatMap((sh) => sh.subtitles.map((sub) => sub.text)));
     const captions = text(`${route}captions.vtt`).trim().split(/\r?\n\s*\r?\n/).slice(1)
       .map((cue) => cue.split(/\r?\n/).slice(1).join('\n'));
     assert.equal(narration.length, 44, 'The frozen lesson must contain all 44 narration sentences');
     assert.deepEqual(captions, narration, 'Published subtitles must match every frozen narration sentence in order');
     for (const file of [algorithm.video, algorithm.poster]) {
-      const source = fs.readFileSync(path.join(site, '../episodes', algorithmSlug, file));
+      const source = fs.readFileSync(path.join(episodeDirectory(algorithmSlug), file));
       const built = fs.readFileSync(path.join(dist, route, file));
       assert.equal(createHash('sha256').update(built).digest('hex'), createHash('sha256').update(source).digest('hex'),
         `Built ${file} differs from the approved source`);
@@ -488,9 +489,10 @@ assert.equal(learningSeries.find((series) => series.id === 'message-queue')?.sta
 assert.equal(peakSeries.episodes.some((lesson) => lesson.slug === mq.slug), false);
 assert.equal(published.getSeries().find((series) => series.id === 'peak').episodes.some((lesson) => lesson.slug === mq.slug), false);
 assert.equal(published.seriesNav(mq).prev, undefined, 'MQ must not inherit a systems prerequisite');
-const mqSlugs = ['message-queue', 'kafka-consumer-groups'];
+const mqSlugs = ['message-queue', 'kafka-consumer-groups', 'kafka-log-replay',
+  'kafka-send-confirmation', 'kafka-consumer-idempotency', 'kafka-message-ordering', 'kafka-message-backlog'];
 assert.deepEqual(slugs(learningSeries.find((series) => series.id === 'message-queue').episodes), mqSlugs,
-  'MQ preserves its first lesson and the published consumer-groups follow-up');
+  'MQ preserves all seven published lessons in their established order');
 for (const [index, slug] of mqSlugs.entries()) {
   const nav = published.seriesNav(liveLessons.find((lesson) => lesson.slug === slug));
   assert.equal(nav.prev?.slug, mqSlugs[index - 1], `${slug}: previous MQ lesson must stay within the series`);

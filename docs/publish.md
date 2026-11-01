@@ -8,7 +8,7 @@
 
 ## 站点内容
 
-一期在站点上可见，需要 `episodes/<slug>/meta.json` 的 `draft` 为 `false`，以及同目录的 `article.mdx`、`video.mp4`、海报。列表和页面由 `site/src/lib/episodes.ts` 读取 `episodes/*/meta.json`。有明确系列时，`series` 填 `site/src/content/series.json` 里的对应键；没有明确系列时归入“其他”，使用沿用的 `engineering-algorithms` 键，未填写、为空白或键无法识别时也由站点默认归入这里。“其他”中的主题可独立观看，不安排必修的前后课；分类口径见 [RULES.md](RULES.md#站点分类)。新增系列时同步添加标题、简介与顺序。LeetCode题号写`problemNumber`用于展示LC.N，内部整数`ep`继续用于排序和Release关联；独立算法系列不接入原技术系列的前后课学习链。
+一期在站点上可见，需要 `episodes/<series>/<slug>/publication/meta.json` 的 `draft` 为 `false`，以及同目录的 `article.mdx`、`video.mp4`、海报。列表和页面由 `site/src/lib/episodes.ts` 通过共享目录发现入口读取 `episodes/*/*/publication/meta.json`。有明确系列时，`series` 填 `site/src/content/series.json` 里的对应键；没有明确系列时归入“其他”，明确填写沿用的 `engineering-algorithms` 键。仓库元数据的系列必须是有效键且与实体目录一致，空白、未知或错配先修复再发布；站点展示层的旧数据兼容回退不能替代仓库检查。“其他”中的主题可独立观看，不安排必修的前后课；分类口径见 [RULES.md](RULES.md#站点分类)。新增系列时同步添加标题、简介与顺序。LeetCode题号写`problemNumber`用于展示LC.N，内部整数`ep`继续用于排序和Release关联；独立算法系列不接入原技术系列的前后课学习链。
 
 `draft: true` 的期默认不进构建。本地要看草稿：
 
@@ -17,7 +17,7 @@ cd site
 SHOW_DRAFTS=1 npm run build
 ```
 
-现行重制的制作目录按 [../AGENTS.md](../AGENTS.md) 是 `episodes-codex/<slug>/`，已包含 `db-index/`、`db-transaction/`、`db-lock/` 工程。站点仍只读取 `episodes/<slug>/`；将检查通过的冻结产物接入该目录，slug 与 `meta.json` 的 `slug` 一致。分镜内部 slug（如 `degradation-v1`）不要当成站点路径。
+现行重制的制作目录按 [../AGENTS.md](../AGENTS.md) 是 `episodes/<series>/<slug>/production/`，已包含 `db-index/`、`db-transaction/`、`db-lock/` 工程。站点仍只读取 `episodes/<series>/<slug>/publication/`；将检查通过的冻结产物接入该目录，slug 与 `meta.json` 的 `slug` 一致。分镜内部 slug（如 `degradation-v1`）不要当成站点路径。
 
 ## 本地站点
 
@@ -60,7 +60,7 @@ gh workflow run deploy.yml --ref main
 
 下面每条命令都在仓库或本机工具里，发布前已核对：`sha256sum`、`cut`、`site/package.json` 的 `npm ci` 与 `npm run build`、`git tag`、`git push`，以及 `gh release create`、`gh workflow run`、`gh run list`、`gh run cancel`、`gh run watch`。工作流文件是 `.github/workflows/deploy.yml`，含 `workflow_dispatch`。
 
-1. 把制作目录 `episodes-codex/<slug>/` 中检查通过并冻结的 `video.mp4`、`cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg` 及站点所需数据复制到 `episodes/<slug>/`。配音 WAV、制作 PNG 和完整制作工程保留在制作目录；站点所需的 meta、article、script、storyboard 等数据仍随发布同步，幕后说明链接需要的脚本和研究资料继续保留。若用户已观看批准，使用同一份批准文件，不重新生成未经观看的替代品；按持续授权自主发布时使用完成检查的冻结文件。站点只读 `episodes/<slug>/`。保存各文件完整 SHA-256，并在部署后核对完整值；以下 sha8 只便于展示：
+1. 把制作目录 `episodes/<series>/<slug>/production/` 中检查通过并冻结的 `video.mp4`、`cover-16x9.jpg`、`cover-4x3.jpg`、`cover-3x4.jpg` 及站点所需数据复制到 `episodes/<series>/<slug>/publication/`。配音 WAV、制作 PNG 和完整制作工程保留在制作目录；站点所需的 meta、article、script、storyboard 等数据仍随发布同步，幕后说明链接需要的脚本和研究资料继续保留。若用户已观看批准，使用同一份批准文件，不重新生成未经观看的替代品；按持续授权自主发布时使用完成检查的冻结文件。站点只读 `episodes/<series>/<slug>/publication/`。保存各文件完整 SHA-256，并在部署后核对完整值；以下 sha8 只便于展示：
 
 ```sh
 sha256sum <file> | cut -c1-8
@@ -68,7 +68,7 @@ sha256sum <file> | cut -c1-8
 
 新制作或重制视频同时复制本期 `references.json`、`reference-appendix.json`、`reference-appendix-media-check.json` 及文章出处。使用最终 `video.mp4`，不能把 `remotion/out/body.mp4` 当成发布成片。按 `render-result.json.publicationMetadata` 填写 `meta.referenceAppendix` 和 `meta.finalVideoFrames`，核对实际MP4完整SHA与附录回执一致；正文分镜和 `words.json` 保留各自真实范围。
 
-2. 改 `site/package.json` 的 `version`：只改成片或文章升修订号；新一期或站点功能升次版本号。改该期 `meta.json`：`draft` 设为 `false`，首次公开才写 `publishedAt`；按[视频时间与版本](#视频时间与版本)维护两个内容时间，重发保留 `createdAt` 与 `publishedAt`，实质内容修改才更新 `updatedAt`。将 `sourcePath` 明确设为对应当前制作目录（如 `episodes-codex/db-replication/remotion`），让页面“源码”指向当前工程。旧制作目录已清理，不依赖缺省旧路径。本地先构建通过：
+2. 改 `site/package.json` 的 `version`：只改成片或文章升修订号；新一期或站点功能升次版本号。改该期 `meta.json`：`draft` 设为 `false`，首次公开才写 `publishedAt`；按[视频时间与版本](#视频时间与版本)维护两个内容时间，重发保留 `createdAt` 与 `publishedAt`，实质内容修改才更新 `updatedAt`。将 `sourcePath` 明确设为对应当前制作目录（如 `episodes/database/db-replication/production/remotion`），让页面“源码”指向当前工程。旧制作目录已清理，不依赖缺省旧路径。本地先构建通过：
 
 ```sh
 cd site
@@ -130,7 +130,7 @@ LC.1、LC.70、LC.206重发及本次D01策略模式投稿的授权范围见STATU
 ### 平台发布前版本闸门
 
 1. 开始投稿前检查工作区并保护已有改动，`git fetch origin --prune`，整合最新`origin/main`，重新读更新后的规范。记录检查时间、远端提交完整SHA和实际本地基线；“此前已拉过”不能代替本轮检查。
-2. 从最新`episodes/<slug>/`发布目录核对成片、封面、脚本与章节，并与当前提交及制作验收记录逐项对应。不能仅凭文件名、修改时间、旧材料JSON或ignored制作缓存认定是最新版；制作目录与发布目录不一致时先查清，不上传。
+2. 从最新`episodes/<series>/<slug>/publication/`发布目录核对成片、封面、脚本与章节，并与当前提交及制作验收记录逐项对应。不能仅凭文件名、修改时间、旧材料JSON或ignored制作缓存认定是最新版；制作目录与发布目录不一致时先查清，不上传。
 3. 为本批建立独立上传目录，复制核验过的媒体并生成清单：题号/slug、基线提交、来源路径、完整SHA-256、时长和封面版本。副本文件名包含slug和版本标识，冻结后不覆盖；在文件选择器中只选清单中的确定路径，上传前再次核对完整SHA-256。标题、简介与章节也从同版脚本生成。
 4. 每个平台批次开始前，以及中断恢复后，再次fetch并比较上游变化与本批媒体、脚本、章节和封面输入。有关变化时先整合、重做核对及上传副本，再继续；无关变化则记录差异与无交集依据。批次耗时较长时在下一条投稿前复核，不能只做最开始一次同步。
 5. 逐平台查重，区分旧版、同版、审核中和已删除的稿件；用户已明确本轮有手动删改，记录消失不能直接归因为审核失败或平台故障。存在同版投稿时不另建重复稿，版本与旧稿状态不清时先查清。

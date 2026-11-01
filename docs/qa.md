@@ -1,10 +1,12 @@
 # Deming 质检清单
 
-规范以 [RULES.md](RULES.md) 为准，具体命令和阈值见 [validate.md](validate.md)。制作输入在 `episodes-codex/<slug>/`，站点副本在 `episodes/<slug>/`。按本期 README、`source-sha256.json` 和 `qa-final.md` 确认媒体身份及实际检查范围。
+规范以 [RULES.md](RULES.md) 为准，具体命令和阈值见 [validate.md](validate.md)。制作输入在 `episodes/<series>/<slug>/production/`，站点副本在 `episodes/<series>/<slug>/publication/`。按本期 README、`source-sha256.json` 和 `qa-final.md` 确认媒体身份及实际检查范围。
 
 预检在配音、分镜冻结之后，渲染之前；成片审在渲染之后。预检不过先修正输入，再按 [pipeline.md](pipeline.md) 第 5 步重新冻结。GitHub 发布沿用 STATUS 的持续授权，平台新发另行授权。
 
 检查已发布工程时优先只读入口，报告写入 `/tmp`；会改写分镜、音轨或冻结清单的命令用于制作阶段，不能用来掩盖校验失败。
+
+目录实体迁移的证明范围是路径映射、文件身份和当前入口；旧片的冻结与QA按[迁移记录](archive/2026-11/episode-layout/README.md)及原基线追溯。适配路径的源码需在后续编码前单独冻结，不沿用旧片的检查结果作为当前代码重新制作的验收。
 
 ## 预检
 

@@ -5,15 +5,17 @@ import path from 'node:path';
 import vm from 'node:vm';
 import {transformSync} from 'esbuild';
 import {load} from 'js-yaml';
+import {episodeDirectory, listEpisodes} from './episode-paths.mjs';
 
 const root = path.resolve(import.meta.dirname, '../../episodes');
 const source = path.resolve(import.meta.dirname, '../src/lib/episodes.ts');
 function readCompute(file, fileSystem = fs) {
   const text = fs.readFileSync(file, 'utf8');
   // Run the actual chapter code without Astro's unrelated import.meta.glob imports.
-  const chapterCode = text.slice(text.indexOf('const readJson ='), text.indexOf('/** WebVTT'));
+  const chapterCode = text.slice(text.indexOf('const readJson ='), text.indexOf('/** WebVTT'))
+    .replaceAll('path.join(EP_DIR, slug', 'path.join(episodePath(slug)');
   const {code} = transformSync(chapterCode.replace(/^export /gm, ''), {loader: 'ts'});
-  return vm.compileFunction(`${code}\nreturn computeChapters;`, ['fs', 'path', 'EP_DIR'])(fileSystem, path, root);
+  return vm.compileFunction(`${code}\nreturn computeChapters;`, ['fs', 'path', 'EP_DIR', 'episodePath'])(fileSystem, path, root, episodeDirectory);
 }
 const before = readCompute(process.argv[2] ?? source);
 const after = readCompute(source);
@@ -23,8 +25,8 @@ const fallback = readCompute(source, {
 });
 
 console.log('Episode                 Before  After');
-for (const slug of fs.readdirSync(root).filter((s) => fs.existsSync(path.join(root, s, 'meta.json')))) {
-  const article = path.join(root, slug, 'article.mdx');
+for (const {slug, directory} of listEpisodes()) {
+  const article = path.join(directory, 'article.mdx');
   const frontmatter = fs.existsSync(article) ? fs.readFileSync(article, 'utf8').match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] : '';
   const fm = (load(frontmatter ?? '') ?? {}).chapters ?? [];
   const old = before(slug, fm);
@@ -45,7 +47,7 @@ for (const slug of fs.readdirSync(root).filter((s) => fs.existsSync(path.join(ro
 
 const actual = after('cache-consistency');
 const formatted = actual.chapters.map((c) => `${String(Math.floor(c.start / 60)).padStart(2, '0')}:${String(c.start % 60).padStart(2, '0')} ${c.title}`);
-const chapterFile = path.join(root, 'cache-consistency/chapters.txt');
+const chapterFile = path.join(episodeDirectory('cache-consistency'), 'chapters.txt');
 if (fs.existsSync(chapterFile)) {
   const lines = fs.readFileSync(chapterFile, 'utf8').trim().split(/\r?\n/);
   assert.deepEqual(formatted, lines);

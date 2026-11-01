@@ -14,7 +14,7 @@
 
 后续用户交办或已确定选题的视频，完成制作和质量检查后，可自主合并 GitHub 主干、发布 Release、部署 GitHub Pages，不再逐期等待用户观看或用 widget 重复批准。资料核验、动态动画复核、配音与时序、媒体及部署后完整 SHA 检查继续执行；执行者和能力限制如实记录，缺失的逐字 ASR 或人工听辨不得伪称通过。用户反馈后修正并重新发布。
 
-持续授权仅覆盖 GitHub 主干与站点，不包含抖音、B站、视频号等平台新发；平台仍须用户另行明确授权。制作目录为 `episodes-codex/<slug>/`，站点读取 `episodes/<slug>/`。选题按用户交办及当前制作任务推进。
+持续授权仅覆盖 GitHub 主干与站点，不包含抖音、B站、视频号等平台新发；平台仍须用户另行明确授权。制作目录为 `episodes/<series>/<slug>/production/`，站点读取 `episodes/<series>/<slug>/publication/`。选题按用户交办及当前制作任务推进。
 
 同日用户补充要求：以后视频制作完成、合并上线并核验后，关闭对应制作或重制 issue，状态理由为 `completed`，无需逐期另行确认；#69 已按此指令关闭。关闭制作 issue 不代表未执行的平台事项已经完成，平台发布授权范围保持不变。
 
@@ -67,13 +67,13 @@
 - 题目本身已有可视场景时，直接使用其中的对象、空间和动作建立问题与推导。爬楼梯就演示人在台阶上走一阶或两阶、具体落脚和最后一步的来源；数字、计数与程序随后绑定这些对象。原题场景不是无关比喻，上条不能扩大成“不画人物或楼梯”。场景须参与因果过程，不能只在数字板背后放装饰背景。
 - 内容本身是网页、地址栏或 DevTools 时用浏览器壳。讲解用的表、图、流程图用干净全屏 canvas，不套外壳。
 - 演示页身深色：`pageBg` `#0F172A`，`pageInk` `#E5E7EB`，定义在 `episodes/_shared/theme/pageTheme.ts`。禁止大面积纯白页身。浏览器框和 DevTools 仍用各期 `remotion/src/theme.ts` 的 `P`。
-- 封面 4:3 安全区：内容落在 x 315..1125、y < 918。`episodes/degradation/covers.json` 里对应字段是 `sizes["4x3"].centerRegion` 与 `bottom15Y`。水印走该尺寸的 `watermarkZone`。封面文字不许溢出，检查时不得出现 `COPYFIT`。
+- 封面 4:3 安全区：内容落在 x 315..1125、y < 918。`episodes/peak/degradation/publication/covers.json` 里对应字段是 `sizes["4x3"].centerRegion` 与 `bottom15Y`。水印走该尺寸的 `watermarkZone`。封面文字不许溢出，检查时不得出现 `COPYFIT`。
 - 系列封面保持稳定的字体、配色、标识和构图，以题名、题号和对应示例区分单集。LeetCode 现有11片的统一模板已获用户对视觉效果的认可，后续新增题目默认沿用同一模板，按内容替换单集文字与题图；现行入口与独立SHA记录见[封面渲染](render.md#封面)；趣味推理当前使用独立紫色系列模板，新题沿对应共享入口扩展；MySQL当前使用独立墨绿系列模板，按真实EP与单集机制扩展；设计模式当前使用暖砂/靛蓝系列模板，以D编号与职责关系区分模式；Kafka消息队列使用独立暖炭灰/橙/冰蓝模板、Kafka标识与稳定MQ编号；Redis使用独立冷银灰/Redis红模板、原始产品标识与真实EP编号，按单集机制扩展题图；高并发、高可用、高性能系列使用深青蓝/亮青/暖黄模板、真实EP与各自机制图；其他系列按后续任务推进，不为统一封面改写已编码视频或旧冻结源。
-- 数据库学习方向当前统一显示为MySQL。现有四期以MySQL 8.4为技术范围，索引/事务/锁明确InnoDB前提，复制明确单主异步示例；普通名词“数据库”、逻辑范围及来源机构Oracle/MySQL按实际含义保留。当前封面和正文分别使用[MySQL封面](../episodes-codex/_shared/mysql-covers/README.md)与[正文入口](../episodes-codex/_shared/mysql-video/README.md)，不改写旧database系列冻结记录。
-- 视频正文延续本系列现行封面的字体、配色、线条与系列标识，减少点击后视觉切换。首批为趣味推理P01–P05；按题目保留各自场景和动作，强调、排除与确认状态继续有明确含义。趣味推理当前正文入口见[共享制作说明](../episodes-codex/_shared/puzzles-video/README.md)，LeetCode沿[本系列正文入口](../episodes-codex/_shared/leetcode-video/README.md)保持深蓝/暖金/青色与完整Python/资料页分层，不为样式统一压缩推理或改变原题关系。
+- 数据库学习方向当前统一显示为MySQL。现有四期以MySQL 8.4为技术范围，索引/事务/锁明确InnoDB前提，复制明确单主异步示例；普通名词“数据库”、逻辑范围及来源机构Oracle/MySQL按实际含义保留。当前封面和正文分别使用[MySQL封面](../episodes/_shared/mysql-covers/README.md)与[正文入口](../episodes/_shared/mysql-video/README.md)，不改写旧database系列冻结记录。
+- 视频正文延续本系列现行封面的字体、配色、线条与系列标识，减少点击后视觉切换。首批为趣味推理P01–P05；按题目保留各自场景和动作，强调、排除与确认状态继续有明确含义。趣味推理当前正文入口见[共享制作说明](../episodes/_shared/puzzles-video/README.md)，LeetCode沿[本系列正文入口](../episodes/_shared/leetcode-video/README.md)保持深蓝/暖金/青色与完整Python/资料页分层，不为样式统一压缩推理或改变原题关系。
 - 示例域名用 `.example`（RFC 2606）。画面上的示例数字写明「示例」。
 
-- 消息队列系列统一以Apache Kafka为具体实现，按实际日志、消费组、位点、保留与确认语义制作，不将其他MQ的逐条ACK删除模型套用到Kafka。稳定MQ号沿issue规划，不是发布序；MQ15不改为MQ09。当前MQ01同步重制为Kafka后再安装Kafka封面；后续正文与封面沿[共享Kafka入口](../episodes-codex/_shared/kafka-covers/README.md)保持一致。新增题扩展目录与机制图，旧片只依赖不可变style-v1，不因题库扩容重写冻结。
+- 消息队列系列统一以Apache Kafka为具体实现，按实际日志、消费组、位点、保留与确认语义制作，不将其他MQ的逐条ACK删除模型套用到Kafka。稳定MQ号沿issue规划，不是发布序；MQ15不改为MQ09。当前MQ01同步重制为Kafka后再安装Kafka封面；后续正文与封面沿[共享Kafka入口](../episodes/_shared/kafka-covers/README.md)保持一致。新增题扩展目录与机制图，旧片只依赖不可变style-v1，不因题库扩容重写冻结。
 
 ## 开头
 
@@ -116,7 +116,7 @@
 
 - 音色「冰糖」（`episodes/_shared/tts/mimo_say.py`，模型 `mimo-v2.5-tts`）。
 - 成片响度 −16 LUFS。混音脚本 `episodes/_shared/music/mix_bgm.py` 的 `--lufs` 默认就是 −16，真峰值目标 −2.0 dBTP。
-- 起音：静音之后第一个摩擦音、爆破音或浊音，阈值 ≥ −45 dB。标签对齐到 onset −6..+2 帧。分镜里的写法是 `max(1, floor(onsetLocal) − 2) + d`，窗口 `[-6, 2]`，见 `episodes/degradation/storyboard.json` 的 `meta.onsetRule`。
+- 起音：静音之后第一个摩擦音、爆破音或浊音，阈值 ≥ −45 dB。标签对齐到 onset −6..+2 帧。分镜里的写法是 `max(1, floor(onsetLocal) − 2) + d`，窗口 `[-6, 2]`，见 `episodes/peak/degradation/publication/storyboard.json` 的 `meta.onsetRule`。
 - 算法实现是 `episodes/_shared/onset_rule.py`（类 `Rule`）。检查器是 `episodes/_shared/label_onset_strict.py`，只 import 这一份。冻结分镜 `meta.onsetRule.module` 与 `meta.onsetRule.checker` 仍写着仓外路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py` 和同目录的 `label_onset_strict.py`，对应仓内这两份，不要再复制。import 见 [voice.md](voice.md) 和 [validate.md](validate.md)。
 
 ## 出处
@@ -152,8 +152,9 @@
 
 ## 站点分类
 
+- 仓库按 `episodes/<series>/<slug>/` 实际存放内容，每期的 `production/` 保存制作材料与修订，`publication/` 保存站点发布数据，共享工具集中在 `episodes/_shared/`，新期模板在 `episodes/_template/`。新期在所属系列下同时建立这两处目录，维护发布 `meta.json.series` 与实际 `sourcePath`；当前动画修订不一定是制作根目录的 `remotion/`。
 - 原“工程算法”分类显示为“其他”，沿用`engineering-algorithms`键与URL，现有一致性哈希和布隆过滤器归入其中。
-- 内容有明确系列时归入对应系列；没有明确系列时统一归入“其他”。`meta.json`的`series`未填写、为空白或无法识别时，站点默认归入“其他”；明确填写时使用`site/src/content/series.json`中的有效键。
+- 内容有明确系列时归入对应系列；没有明确系列时统一归入“其他”。仓库保存的发布 `meta.json.series` 必须是 `site/src/content/series.json` 中的有效键并与实体系列目录一致，“其他”明确填写 `engineering-algorithms`；目录错配或无效归属应在仓库检查时报错。站点展示层对旧数据输入中未填写、空白或无法识别的系列保留归入“其他”的兼容逻辑，不能依赖该回退掩盖实体目录错误。
 - “其他”中的各篇是可独立观看的主题，不按连续课程安排必修的前后课。分类调整不改写原视频、制作稿、冻结清单与历史编号。
 
 ## 发布
@@ -177,8 +178,9 @@
 - 文档总入口为 [README.md](README.md)。`docs/` 顶层保留现行规范、长期手册、模板、经验记忆与仍在维护的策划；规范继续只在本文件维护。
 - 新的一次性任务记录与检查报告集中放在 `docs/archive/YYYY-MM/<任务名>/`，文首注明任务、日期和实际状态，完成后接入[历史索引](archive/README.md)。可复用的制作代码放共享工具目录，不随工作记录散落。
 - 收尾时把已验证的通用结论提炼到教训或成功经验，尚未验证的指导记入制作记忆；逐次执行日志、旧备选和回执留在任务记录，不整段复制进长期手册。
-- 移动或删除前检查 Markdown 入链、脚本路径、参考资料证据与冻结清单。已经绑定 SHA、原文或实际制作依赖的材料保留原路径与字节，在历史索引说明用途；不能为整理目录重写旧冻结清单或追认旧 QA。
+- 移动或删除前检查 Markdown 入链、脚本路径、参考资料证据与冻结清单。通常已经绑定 SHA、原文或实际制作依赖的材料保留原路径与字节；用户已明确授权的本次实体合并按[目录迁移记录](archive/2026-11/episode-layout/README.md)执行，替代涉及文件保持原物理路径的要求。旧冻结清单、来源JSON、QA和回执保持原字节，旧路径与输入身份通过迁移账本及固定基线 `28dfb2fa` 追溯，不能重写清单或追认旧 QA。
 - 可迁移材料同步修复本地链接，保留旧路径到新位置的映射；历史回执中的原路径与 SHA 不改写。未被引用、可重建的临时输出放临时目录或已忽略的 `out/`，不将唯一来源、选定素材和检查证据当作临时文件清除。
+- 本次目录迁移中，当前代码可以适配新路径，前后SHA由独立账本记录；历史制作输入在固定基线中保留。目录与路径检查不代表重新编码、审片或用户认可，后续渲染须对当前实际输入单独冻结，不能让旧清单自动接受改变后的源码。已编码来源JSON中的历史证据路径通过共享解析器映射，不能为修路径改写与附录回执绑定的资料SHA。
 
 ## 仍然有效（2026-10-16，与上一节不冲突）
 

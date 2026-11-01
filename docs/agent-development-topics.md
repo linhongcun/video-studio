@@ -10,7 +10,7 @@
 
 ## 首片已上线
 
-用户随后授权自选最有把握的一期制作，已选择[Skills #139](https://github.com/linhongcun/video-studio/issues/139)。新EP.31 / agent-skills为12镜24句、约3分8秒；以接口兼容审查解释方法包、渐进加载、资料读取与脚本执行、上下文开销。已按v0.62.0合并上线，独立成片、本地站点与20个普通canonical GET核验通过，尚无用户观看结论。其他10项继续作为研究候选，原两期仍保持撤下。实际状态见[本期记录](../episodes-codex/agent-skills/README.md)，下方研究设计不再解释为全部未启动。
+用户随后授权自选最有把握的一期制作，已选择[Skills #139](https://github.com/linhongcun/video-studio/issues/139)。新EP.31 / agent-skills为12镜24句、约3分8秒；以接口兼容审查解释方法包、渐进加载、资料读取与脚本执行、上下文开销。已按v0.62.0合并上线，独立成片、本地站点与20个普通canonical GET核验通过，尚无用户观看结论。其他10项继续作为研究候选，原两期仍保持撤下。实际状态见[本期记录](../episodes/agent/agent-skills/production/README.md)，下方研究设计不再解释为全部未启动。
 
 ## 优先研究池
 

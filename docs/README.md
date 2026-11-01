@@ -2,6 +2,8 @@
 
 这里区分现行手册、持续维护的记录与已完成任务的历史证据。项目概览见[仓库 README](../README.md)，协作入口见 [AGENTS.md](../AGENTS.md)。
 
+内容统一放在 `episodes/<series>/<slug>/`：`production/` 是制作工程与修订，`publication/` 是站点读取的发布内容；共享工具在 `episodes/_shared/`，新期模板在 `episodes/_template/`。本次按用户授权完成实体合并；旧路径、冻结身份与适配代码前后SHA见[迁移记录](archive/2026-11/episode-layout/README.md)，这次整理不代表重新制作或审片，重渲仍须冻结当前实际输入。
+
 ## 规范与制作手册
 
 [RULES.md](RULES.md) 是规范的唯一真源；下列手册说明具体步骤和工具，本页只提供入口。
@@ -19,7 +21,7 @@
 | [发布](publish.md) | 站点与平台流程、版本和视频日期维护 |
 | [制作说明模板](knoll-props.template.md) | 交接记录格式；[EP.14 示例](examples/knoll-props.degradation.md) |
 
-开新期使用[新期模板](../episodes-codex/_template/README.md)；共享句级装配、时序、冻结和编码入口见[制作工具说明](../episodes-codex/_shared/README.md)。
+开新期使用[新期模板](../episodes/_template/README.md)；共享句级装配、时序、冻结和编码入口见[制作工具说明](../episodes/_shared/README.md)。
 
 ## 经验与项目记忆
 
@@ -42,11 +44,11 @@
 `reference-endcards/` 中各批次的 README、检查报告和发布回执保留当次版本身份；已完成批次的入口也收录在[历史索引](archive/README.md)。
 
 <!-- batch-12-publication-archive:start -->
-固定原47期的参考资料附录已全部补齐，当前48期发布视频均有附录。新片继续按现行模板默认生成与核验；完成范围、真实发布版本与边界见[最后一批归档](archive/2026-10/reference-endcards-batch-12/README.md)及[存量清单](reference-endcards/inventory.json)。旧来源/冻结证据保持原路径。
+固定原47期的参考资料附录已全部补齐，该批完成时48期发布视频均有附录。新片继续按现行模板默认生成与核验；完成范围、真实发布版本与边界见[最后一批归档](archive/2026-10/reference-endcards-batch-12/README.md)及[存量清单](reference-endcards/inventory.json)。旧来源与冻结证据字节保留，本次实体迁移涉及的原路径按迁移账本解读。
 <!-- batch-12-publication-archive:end -->
 
 ## 历史任务与证据
 
-[归档与历史任务索引](archive/README.md)汇总已完成的重制、修订、站点改版、仓库清理及平台整理记录。部分任务目录保留原路径，以保持冻结清单、脚本依赖和证据引用；保留位置不表示仍在制作。
+[归档与历史任务索引](archive/README.md)汇总已完成的重制、修订、站点改版、仓库清理及平台整理记录。历史记录的正文、原路径与SHA保留当次制作身份；原路径因本次实体分类迁移发生变化时，通过迁移账本定位新文件，或从固定基线查看原输入。部分任务目录仍保留原位置，保留位置不表示仍在制作。
 
-查当前单期工程时，先看 `episodes/<slug>/meta.json` 的 `sourcePath`，再读对应制作目录的 README 和最新发布记录。历史报告中的帧数、SHA、版本号和检查结果只证明所列输入与当次产物；旧草案、候选构建和修前失败记录不能代替当前成片依据，技术检查也不等于用户已观看认可。
+查当前单期工程时，先看 `episodes/<series>/<slug>/publication/meta.json` 的 `sourcePath`，再读对应制作目录的 README 和最新发布记录。历史报告中的帧数、SHA、版本号和检查结果只证明所列输入与当次产物；旧草案、候选构建和修前失败记录不能代替当前成片依据，技术检查也不等于用户已观看认可。

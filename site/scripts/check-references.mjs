@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import {fileURLToPath} from 'node:url';
+import {episodeSlug, listEpisodes, resolveRepoPath} from './episode-paths.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const require = (condition, message) => { if (!condition) throw new Error(message); };
@@ -48,7 +49,7 @@ function https(value) {
 function checkTextEvidence(repoRoot, record, text, label) {
   require(record && typeof record === 'object' && !Array.isArray(record)
     && nonempty(record.locator), `${label}: original-text evidence needs a locator`);
-  const file = within(repoRoot, record.evidence, `${label} evidence`);
+  const file = evidenceFile(repoRoot, record.evidence, `${label} evidence`);
   const raw = fs.readFileSync(file, 'utf8');
   let texts = [raw];
   if (path.extname(file).toLowerCase() === '.json') {
@@ -66,7 +67,14 @@ function checkTextEvidence(repoRoot, record, text, label) {
   require(texts.some((value) => value.includes(text)), `${label}: exact original text missing from evidence record`);
 }
 
-export function checkSources(episodeDir, {repoRoot = ROOT, sources = 'references.json', slug = path.basename(episodeDir)} = {}) {
+function evidenceFile(repoRoot, relative, label) {
+  require(nonempty(relative), `${label}: missing path`);
+  const file = resolveRepoPath(relative, {repoRoot});
+  require(fs.statSync(file).isFile(), `${label}: file missing`);
+  return file;
+}
+
+export function checkSources(episodeDir, {repoRoot = ROOT, sources = 'references.json', slug = episodeSlug(episodeDir)} = {}) {
   const refsFile = within(episodeDir, sources, 'references');
   const refs = read(refsFile);
   require(refs.schemaVersion === 1 && refs.episode === slug, 'reference schema/episode differs');
@@ -90,7 +98,7 @@ export function checkSources(episodeDir, {repoRoot = ROOT, sources = 'references
     const verification = source.verification;
     require(verification?.status === 'verified' && validDate(verification.checkedAt),
       `${source.id}: source must be verified with a real checkedAt date`);
-    within(repoRoot, verification.evidence, `${source.id} verification evidence`);
+    evidenceFile(repoRoot, verification.evidence, `${source.id} verification evidence`);
     checkTextEvidence(repoRoot, source.titleEvidence, source.title, `${source.id} original title`);
     if (Object.hasOwn(source, 'quotation')) {
       require(source.quotation && nonempty(source.quotation.text), `${source.id}: quotation needs original text`);
@@ -105,7 +113,7 @@ export function checkSources(episodeDir, {repoRoot = ROOT, sources = 'references
 
 export function checkEpisode(episodeDir, {repoRoot = ROOT} = {}) {
   const meta = read(path.join(episodeDir, 'meta.json'));
-  const slug = path.basename(episodeDir);
+  const slug = episodeSlug(episodeDir);
   require(meta.slug === slug, 'published slug differs from folder');
   const appendix = meta.referenceAppendix;
   require(appendix?.kind === 'references', 'missing referenceAppendix declaration');
@@ -187,13 +195,8 @@ export function checkPublished({repoRoot = ROOT, legacySlugs, legacyVideoSHA256 
   }
   const summary = {validated: [], legacyDeferred: [], drafts: []};
   const problems = [];
-  const episodes = path.join(repoRoot, 'episodes');
-  for (const slug of fs.readdirSync(episodes).sort()) {
-    const directory = path.join(episodes, slug);
-    const metaFile = path.join(directory, 'meta.json');
-    if (!fs.existsSync(metaFile)) continue;
+  for (const {slug, directory, meta} of listEpisodes({repoRoot})) {
     try {
-      const meta = read(metaFile);
       if (meta.draft === true) { summary.drafts.push(slug); continue; }
       const declared = Object.hasOwn(meta, 'referenceAppendix')
         || ['references.json', 'reference-appendix.json', 'reference-appendix-media-check.json']
