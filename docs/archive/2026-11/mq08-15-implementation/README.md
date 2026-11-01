@@ -1,13 +1,13 @@
 # MQ08与MQ15实现机制短片
 
-2026-11-01（北京时间）按#308剩余两题开工；两期已完成源码、独立编辑、真实运行、配音与动态检查，正式成片、八张JPEG、本地原生网页与生产构建验收通过，正进入GitHub发布。当前尚未发布，实际进度见stage.json，最终GitHub/线上结果另记publication.json；只含GitHub与本站。
+2026-11-01（北京时间）按#308剩余两题开工；两期已完成源码、独立编辑、真实运行、声音/动态及正式媒体检查，随v0.98.0正式上线，完整线上文件与原生交互核验通过；#316/#323已completed关闭，#308当前9/9。实际进度见stage.json，GitHub/线上结果见publication.json；只含GitHub与本站。
 
 |题库 / issue|EP / slug|主线|冻结输入|正文帧|
 |---|---|---|---:|---:|
 |MQ08 / #316|48 / kafka-retry-dead-letter|保存调用预算、进程恢复、死信确认与原进度两个边界|240|6018|
 |MQ15 / #323|49 / kafka-replica-acks|本地追加、主已知复制进度、当前ISR与成功回应|344|5460|
 
-MQ15保留稳定题库号。新制作分支基于最新origin/main `8769a592856fe2618e5daf3d84849bf4b052e22b`，使用`episodes/message-queue/<slug>/{production,publication}`，共享入口为`episodes/_shared`；两期依当前锁文件新装依赖，未复用旧目录缓存。编码前再次fetch，主干与冻结依赖无交集，拟定站点版本v0.98.0尚未发布。
+MQ15保留稳定题库号。新制作分支基于最新origin/main `8769a592856fe2618e5daf3d84849bf4b052e22b`，使用`episodes/message-queue/<slug>/{production,publication}`，共享入口为`episodes/_shared`；两期依当前锁文件新装依赖，未复用旧目录缓存。编码前再次fetch，主干与冻结依赖无交集，实际站点首发版本为v0.98.0，首发工作流开始于2026-11-01T19:24:29+08:00；Release与部署完成时间分别留证。
 
 26583份既有受控文件（含1314份发布文件）的SHA及mtime基线在baseline.json，旧共享与迁移账本保持。唯一允许的现有episode变动为自动生成索引episodes/README.md。旧ignored缓存保留到仓外，初次layout拦截及处置在qa/legacy-cache-quarantine.json；随后57实体对/11系列检查通过。旧manifest不追认新路径代码，新两期冻结实际Python/JS resolver及当前输入。
 
@@ -31,4 +31,11 @@ MQ15为D/qa-independent/preflight-final.json：39态、199当前有效采样，7
 
 ## 正式媒体与发布门禁
 
-正式默认入口已生成正文、真实limitedBT709混音及参考资料附录；MQ08实际6168帧/205.6秒，MQ15实际5760帧/192秒，完整SHA见media.json。160/149个最终整数n及全部资料页/字幕边界已独立审读，两支完整视频及AAC解码通过。8张709→601JPEG实际逐张审图，并与同n成片PNG比较；本批未把源PNG当成最终JPEG。已安装同字节草稿并完成SHOW_DRAFTS构建，原生双视口140动作/48严格PTS及具名实际图审已通过；已在实际发布工作流开始时写首发字段，生产构建57资料输出/56当前文章、153页及built日期/RSS通过，GitHub合并、Release与Release后Pages仍待执行。线上普通完整GET与浏览器自身媒体Range分别留证。模拟视口不冒充物理手机，没有全片语义听辨、ASR或学习效果测量，不预记本批用户观看认可。
+正式默认入口已生成正文、真实limitedBT709混音及参考资料附录；MQ08实际6168帧/205.6秒，MQ15实际5760帧/192秒，完整SHA见media.json。160/149个最终整数n及全部资料页/字幕边界已独立审读，两支完整视频及AAC解码通过。8张709→601JPEG实际逐张审图，并与同n成片PNG比较；本批未把源PNG当成最终JPEG。已安装同字节草稿并完成SHOW_DRAFTS构建，原生双视口140动作/48严格PTS及具名实际图审已通过；已在实际发布工作流开始时写首发字段，生产构建57资料输出/56当前文章、153页及built日期/RSS通过，已由[PR #452](https://github.com/linhongcun/video-studio/pull/452)合并89801224，附注tag/[Release v0.98.0](https://github.com/linhongcun/video-studio/releases/tag/v0.98.0)在11:36:35Z发布，[Release后主干Pages41302647076](https://github.com/linhongcun/video-studio/actions/runs/41302647076)及同SHA deployment7472546295在11:47:16Z成功。线上23次普通完整GET全部通过，完整视频/海报/VTT/八图SHA、八章/56cue、九课目录、入口/RSS/实际Release与更新日志均核对。另完成线上原生140动作/48严格PTS，118图路径按24张新图实际审看、94项具名本地同字节证据闭合；原机器字节和各reviewer回执保持。普通完整GET与浏览器自身媒体Range分别留证。模拟视口不冒充物理手机，没有全片语义听辨、ASR或学习效果测量，不预记本批用户观看认可。
+
+## 交付入口与收尾
+
+- [MQ08 / EP48 · 重试与死信](https://linhongcun.github.io/video-studio/episodes/kafka-retry-dead-letter/)：6168帧/205.6秒，完整SHA `3bc86801fe653e778ce6796fd74a9d79469accddd52c5013238b767bc8ef76f7`。
+- [MQ15 / EP49 · Kafka多副本确认](https://linhongcun.github.io/video-studio/episodes/kafka-replica-acks/)：5760帧/192秒，完整SHA `a2bac66754660c7e6f83d826c834b6fa19f6fc5976ffef65bb07c216a072d694`。
+
+两个制作issue仅在部署、完整文件及原生线上验收通过后以completed关闭；总览保持稳定MQ号，9个核心题齐，原14项取消保持。原生海报加载弧、暂停控件遮暗字幕、长引用可见范围与模拟视口限制按实际截图声明，不伪称clean海报、物理手机或完整语义听辨。原始工具/审计失败、旧源/声/图/片均保留；源/运行/媒体保护与索引见qa和runtime。最后提交仅归档交付事实与经验，生产/发布和站点产品树保持本次已核验字节，不新增版本。
