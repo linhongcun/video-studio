@@ -1,27 +1,27 @@
 {
   "schemaVersion": 1,
-  "createdAtUTC": "2026-10-30T17:02:47.983469+00:00",
+  "createdAtUTC": "2026-11-02T08:06:51.574158+00:00",
   "episode": "kafka-consumer-idempotency",
   "inputs": {
-    "bodySHA256": "317c8b663b4cdc9e8676f05ef94535560fd7bf72c15955460cfc789ff6da3f0e",
-    "referencesSHA256": "4715757519f198605f4ac8da568b41792ced2df7ae48a2d0d457a5eb1816cb16",
-    "generatorSHA256": "49d5de360d849a4e0224d91b73bc03ed28f1ad0086350a5cabfcc55463d75c3e",
+    "bodySHA256": "19ecca61ffa92636b322bb7876727f7b3f102c43a010876c9bf98884c476fb91",
+    "referencesSHA256": "06ce93dd04b72cb98dc3c862076bbfd5f4e3a404bd57d76ca50ede21d9414e85",
+    "generatorSHA256": "67b7058ebf583f1c71b6455158458ae513037fefaafa894704713f487a79ef46",
     "themeSHA256": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
     "fontSHA256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a",
     "boldFontSHA256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb",
     "secondsPerPage": 5
   },
-  "body": "/workspace/video-studio/episodes-codex/kafka-consumer-idempotency/remotion/out/body.mp4",
-  "references": "/workspace/video-studio/episodes-codex/kafka-consumer-idempotency/references.json",
-  "output": "/workspace/video-studio/episodes-codex/kafka-consumer-idempotency/video.mp4",
-  "outputSHA256": "5d14be81eed533acea8738e0c883b3c44b298789e74a53d1b7a24a0624f66328",
-  "bodyFrames": 5497,
-  "finalVideoFrames": 5647,
+  "body": "/workspace/video-studio/episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/remotion/out/body.mp4",
+  "references": "/workspace/video-studio/episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/references.json",
+  "output": "/workspace/video-studio/episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/video.mp4",
+  "outputSHA256": "cb719590bf400e1e2e7489ba853671ccb7d18a8497ff3bb7f386f2203400fb6b",
+  "bodyFrames": 4884,
+  "finalVideoFrames": 5034,
   "fps": "30",
-  "durationSeconds": 188.23333333333332,
+  "durationSeconds": 167.8,
   "appendix": {
     "kind": "references",
-    "from": 5497,
+    "from": 4884,
     "durationInFrames": 150,
     "framesPerPage": 150,
     "sourceIds": [
@@ -33,12 +33,12 @@
     "pages": [
       {
         "file": "references-01.png",
-        "sha256": "9ab401737b394f33e43e757b044a5fc2592984180f78a9c9d213d0bcb5790229"
+        "sha256": "a6142e696340d546b6a4cd9536cde638fcb3ffb8f2dd1625923c9c9c9780d7fc"
       }
     ]
   },
   "audio": "No audio packets added; original AAC stream ends at its original endpoint.",
-  "bodyProductionInputs": "Body is rendered from the Kafka MQ05 production manifest and this episode’s measured narration/timing; full-range BT.601 body pictures are converted once to limited BT.709 before mixing. No old episode inputs or receipts are used as this episode’s results.",
+  "bodyProductionInputs": "Body was rendered from this episode (kafka-consumer-idempotency) production manifest with its own narration and measured timing; full-range BT.601 body pictures are converted once to limited BT.709 before mixing. Existing published production inputs remain unchanged.",
   "tools": {
     "ffmpeg": "ffmpeg version 7.1.5-0+deb13u1 Copyright (c) 2000-2026 the FFmpeg developers",
     "pillow": "12.3.0",
@@ -62,17 +62,17 @@
     },
     {
       "id": "R2",
-      "title": "nodeModifyTable.c",
-      "credit": "PostgreSQL Global Development Group"
+      "title": "ConsumerUtils.java",
+      "credit": "Apache Kafka"
     },
     {
       "id": "R3",
-      "title": "execIndexing.c",
-      "credit": "PostgreSQL Global Development Group"
+      "title": "AbstractFetch.java",
+      "credit": "Apache Kafka"
     },
     {
       "id": "R4",
-      "title": "nbtinsert.c",
+      "title": "Transactions",
       "credit": "PostgreSQL Global Development Group"
     }
   ],
@@ -83,53 +83,53 @@
     },
     {
       "id": "R2",
-      "title": "nodeModifyTable.c"
+      "title": "ConsumerUtils.java"
     },
     {
       "id": "R3",
-      "title": "execIndexing.c"
+      "title": "AbstractFetch.java"
     },
     {
       "id": "R4",
-      "title": "nbtinsert.c"
+      "title": "Transactions"
     }
   ],
   "quotations": [
     {
       "id": "R1",
-      "text": " * To avoid this, we will manually commit the offsets only after the corresponding records have been inserted into the\n * database. This gives us exact control of when a record is considered consumed. This raises the opposite possibility:\n * the process could fail in the interval after the insert into the database but before the commit (even though this\n * would likely just be a few milliseconds, it is a possibility). In this case the process that took over consumption\n * would consume from last committed offset and would repeat the insert of the last batch of data. Used in this way\n * Kafka provides what is often called \"at-least-once\" delivery guarantees, as each record will likely be delivered one\n * time but in failure cases could be duplicated.",
-      "locator": "KafkaConsumer.java lines250–256",
-      "evidence": "episodes-codex/kafka-consumer-idempotency/sources/kafka/KafkaConsumer.java"
+      "text": " * To avoid this, we will manually commit the offsets only after the corresponding records have been inserted into the\n * database. This gives us exact control of when a record is considered consumed. This raises the opposite possibility:\n * the process could fail in the interval after the insert into the database but before the commit (even though this\n * would likely just be a few milliseconds, it is a possibility). In this case the process that took over consumption\n * would consume from last committed offset and would repeat the insert of the last batch of data. Used in this way\n * Kafka provides what is often called \"at-least-once\" delivery guarantees, as each record will likely be delivered one\n * time but in failure cases could be duplicated.\n",
+      "locator": "KafkaConsumer.java:250-256",
+      "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.java"
     },
     {
       "id": "R2",
-      "text": "\t\t\t\t\t/*\n\t\t\t\t\t * In case of ON CONFLICT DO NOTHING, do nothing. However,\n\t\t\t\t\t * verify that the tuple is visible to the executor's MVCC\n\t\t\t\t\t * snapshot at higher isolation levels.\n\t\t\t\t\t *\n\t\t\t\t\t * Using ExecGetReturningSlot() to store the tuple for the\n\t\t\t\t\t * recheck isn't that pretty, but we can't trivially use\n\t\t\t\t\t * the input slot, because it might not be of a compatible\n\t\t\t\t\t * type. As there's no conflicting usage of\n\t\t\t\t\t * ExecGetReturningSlot() in the DO NOTHING case...\n\t\t\t\t\t */\n\t\t\t\t\tAssert(onconflict == ONCONFLICT_NOTHING);\n\t\t\t\t\tExecCheckTIDVisible(estate, resultRelInfo, &conflictTid,\n\t\t\t\t\t\t\t\t\t\tExecGetReturningSlot(estate, resultRelInfo));\n\t\t\t\t\tInstrCountTuples2(&mtstate->ps, 1);\n\t\t\t\t\treturn NULL;",
-      "locator": "nodeModifyTable.c lines1164–1179",
-      "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/executor/nodeModifyTable.c"
+      "text": "                // so we need to ignore seeking if that's the case\n                if (subscriptions.isAssigned(tp)) {\n                    final ConsumerMetadata.LeaderAndEpoch leaderAndEpoch = metadata.currentLeader(tp);\n                    final SubscriptionState.FetchPosition position = new SubscriptionState.FetchPosition(\n                            offsetAndMetadata.offset(), offsetAndMetadata.leaderEpoch(),\n                            leaderAndEpoch);\n\n                    subscriptions.seekUnvalidated(tp, position);\n",
+      "locator": "ConsumerUtils.java:203-210",
+      "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/ConsumerUtils.java"
     },
     {
       "id": "R3",
-      "text": "\t\t/*\n\t\t * At this point we have either a conflict or a potential conflict.\n\t\t *\n\t\t * If an in-progress transaction is affecting the visibility of this\n\t\t * tuple, we need to wait for it to complete and then recheck (unless\n\t\t * the caller requested not to).  For simplicity we do rechecking by\n\t\t * just restarting the whole scan --- this case probably doesn't\n\t\t * happen often enough to be worth trying harder, and anyway we don't\n\t\t * want to hold any index internal locks while waiting.\n\t\t */\n\t\txwait = TransactionIdIsValid(DirtySnapshot.xmin) ?\n\t\t\tDirtySnapshot.xmin : DirtySnapshot.xmax;\n\n\t\tif (TransactionIdIsValid(xwait) &&\n\t\t\t(waitMode == CEOUC_WAIT ||\n\t\t\t (waitMode == CEOUC_LIVELOCK_PREVENTING_WAIT &&\n\t\t\t  DirtySnapshot.speculativeToken &&\n\t\t\t  TransactionIdPrecedes(GetCurrentTransactionId(), xwait))))\n\t\t{\n\t\t\treason_wait = indexInfo->ii_ExclusionOps ?\n\t\t\t\tXLTW_RecheckExclusionConstr : XLTW_InsertIndex;\n\t\t\tindex_endscan(index_scan);\n\t\t\tif (DirtySnapshot.speculativeToken)\n\t\t\t\tSpeculativeInsertionWait(DirtySnapshot.xmin,\n\t\t\t\t\t\t\t\t\t\t DirtySnapshot.speculativeToken);\n\t\t\telse\n\t\t\t\tXactLockTableWait(xwait, heap,\n\t\t\t\t\t\t\t\t  &existing_slot->tts_tid, reason_wait);\n\t\t\tgoto retry;",
-      "locator": "execIndexing.c lines862–890",
-      "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/executor/execIndexing.c"
+      "text": "                Uuid topicId = topicIds.getOrDefault(partition.topic(), Uuid.ZERO_UUID);\n                FetchRequest.PartitionData partitionData = new FetchRequest.PartitionData(topicId,\n                        position.offset,\n                        FetchRequest.INVALID_LOG_START_OFFSET,\n                        fetchConfig.fetchSize,\n                        position.currentLeader.epoch,\n                        Optional.empty());\n                builder.add(partition, partitionData);\n",
+      "locator": "AbstractFetch.java:477-484",
+      "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/AbstractFetch.java"
     },
     {
       "id": "R4",
-      "text": "\t * NOTE: obviously, _bt_check_unique can only detect keys that are already\n\t * in the index; so it cannot defend against concurrent insertions of the\n\t * same key.  We protect against that by means of holding a write lock on\n\t * the first page the value could be on, with omitted/-inf value for the\n\t * implicit heap TID tiebreaker attribute.  Any other would-be inserter of\n\t * the same key must acquire a write lock on the same page, so only one\n\t * would-be inserter can be making the check at one time.  Furthermore,\n\t * once we are past the check we hold write locks continuously until we\n\t * have performed our insertion, so no later inserter can fail to see our\n\t * insertion.  (This requires some care in _bt_findinsertloc.)\n\t *\n\t * If we must wait for another xact, we release the lock while waiting,\n\t * and then must perform a new search.\n\t *\n\t * For a partial uniqueness check, we don't wait for the other xact. Just\n\t * let the tuple in and return false for possibly non-unique, or true for\n\t * definitely unique.",
-      "locator": "nbtinsert.c lines187–203",
-      "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/access/nbtree/nbtinsert.c"
+      "text": "The updates made\n    so far by an open transaction are invisible to other transactions\n    until the transaction completes, whereupon all the updates become\n    visible simultaneously.",
+      "locator": "postgres-advanced.sgml:212-215",
+      "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-advanced.sgml"
     }
   ],
   "dependencies": {
-    "oldEngine": "episodes-codex/_shared/append_references.py",
-    "oldEngineSHA256": "6688770d1221a115c9c1f591e3bffd14a6603d8c809c5b66f5e03e2fa4639f02",
-    "originalRenderer": "episodes-codex/_shared/append_references_original.py",
-    "originalRendererSHA256": "cacd1e138e3ccb030dc6d5aee9ca8c5ea3104edb802000780a015dee4acc3579",
-    "bibliographyRenderer": "episodes-codex/_shared/append_references_bibliography.py",
-    "bibliographyRendererSHA256": "fe2eb02aa15cb5fc1f39752bc34ecbb879459445721f9044da38ddf6e3fee70b",
-    "palette": "episodes-codex/_shared/kafka-covers/style-v1.json",
+    "oldEngine": "episodes/_shared/append_references.py",
+    "oldEngineSHA256": "eb2f977335d3047fd3db9de36095195e133070fcb96f8f8b9410b464bb462a26",
+    "originalRenderer": "episodes/_shared/append_references_original.py",
+    "originalRendererSHA256": "3378ec5192d608f8937868f52a1271957e51ceb008a3c18934fc564efe57ea45",
+    "bibliographyRenderer": "episodes/_shared/append_references_bibliography.py",
+    "bibliographyRendererSHA256": "f7c738e396ead5a161751a7fd03e7c58fe5ee832409fec95d7881b3a5043015a",
+    "palette": "episodes/_shared/kafka-covers/style-v1.json",
     "paletteSHA256": "4bbdabfa7a966af4707860f82251d42a7df013d2dc85d48697377499582a6585",
-    "paletteAdapterLibrary": "episodes-codex/_shared/kafka-video/references.py",
+    "paletteAdapterLibrary": "episodes/_shared/kafka-video/references.py",
     "paletteAdapterLibrarySHA256": "7bd84a20c897d2890c26ca671f4d18b4e931d066e3298ea31337f16888274ba2",
     "colorEncoding": {
       "pix_fmt": "yuv420p",

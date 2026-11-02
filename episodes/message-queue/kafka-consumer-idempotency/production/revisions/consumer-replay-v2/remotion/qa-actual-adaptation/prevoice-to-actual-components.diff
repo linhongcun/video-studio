@@ -1,0 +1,11 @@
+--- prevoice-components.tsx
++++ src/components.tsx
+@@ -12,7 +12,7 @@
+  const consumer=v.consumer,db=v.db,records=v.log.records,position=consumer.position,committed=v.group.committed.P0,returned=consumer.returned??[],owner=consumer.owner;
+  const halted=!consumer.active&&v.action==='process-halt',activeText=consumer.active?`进程 ${owner??'等待归属'}`:'没有活动消费进程';
+  const positionText=position===null?'尚未安装读取位置':`下次读取位置：${position}`;
+- const loadedText=consumer.committedLoaded===null?'尚未取得恢复位置':`已查得恢复位置：${consumer.committedLoaded}`;
++ const loadedText=consumer.committedLoaded===null?'启动恢复值：尚未取得':`启动时取得的恢复值：${consumer.committedLoaded}`;
+  const actualKey=db.processedKeys?.join(' / ')||'无业务去重标记',pendingKey=db.pendingKeys?.join(' / ')||'';
+  return <><Box x={90}y={430}w={490}h={355}color={C.blue}owner="retained-kafka-log"/><T x={115}y={449}w={440}size={28}color={C.blue}><span style={{display:'inline-flex',gap:11,alignItems:'center'}}><KafkaMark kind="kafka"size={29}/>Kafka · 原分区日志</span></T>
+  <div data-log-slot style={{position:'absolute',left:115,top:515,width:440,height:72,border:`2px ${records.length?'solid':'dashed'} ${records.length?C.orange:C.edge}`,borderRadius:10}}/>

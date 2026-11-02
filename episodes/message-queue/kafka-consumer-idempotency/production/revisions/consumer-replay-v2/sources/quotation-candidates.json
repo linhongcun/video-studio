@@ -1,0 +1,86 @@
+[
+  {
+    "id": "kafka-kafkaconsumer",
+    "organization": "Apache Kafka",
+    "title": "KafkaConsumer.java",
+    "titleEvidence": {
+      "locator": "GitHub Contents API name/path at commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "evidence": "sources/KafkaConsumer.github-contents.json"
+    },
+    "authorOmittedReason": "No explicit personal document authorship; no Git tagger or committer inferred as author.",
+    "version": "Apache Kafka 4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L250-L256",
+    "supports": [
+      "External database success can precede a failed process before Kafka offset commit, so the successor consumes from last committed offset"
+    ],
+    "quotation": {
+      "text": " * To avoid this, we will manually commit the offsets only after the corresponding records have been inserted into the\n * database. This gives us exact control of when a record is considered consumed. This raises the opposite possibility:\n * the process could fail in the interval after the insert into the database but before the commit (even though this\n * would likely just be a few milliseconds, it is a possibility). In this case the process that took over consumption\n * would consume from last committed offset and would repeat the insert of the last batch of data. Used in this way\n * Kafka provides what is often called \"at-least-once\" delivery guarantees, as each record will likely be delivered one\n * time but in failure cases could be duplicated.\n",
+      "locator": "clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java:250-256",
+      "evidence": "sources/KafkaConsumer.java"
+    },
+    "verification": "Fresh HTTPS GET HTTP 200, SHA checked; GitHub Contents name/path/blob content checked against raw; quotation is exact continuous raw lines. Candidate only, not final references.json."
+  },
+  {
+    "id": "kafka-consumercoordinator",
+    "organization": "Apache Kafka",
+    "title": "ConsumerCoordinator.java",
+    "titleEvidence": {
+      "locator": "GitHub Contents API name/path at commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "evidence": "sources/ConsumerCoordinator.github-contents.json"
+    },
+    "authorOmittedReason": "No explicit personal document authorship; no Git tagger or committer inferred as author.",
+    "version": "Apache Kafka 4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java#L947-L956",
+    "supports": [
+      "Initializing consumer fetches group committed offsets before restoring local position"
+    ],
+    "quotation": {
+      "text": "    public boolean initWithCommittedOffsetsIfNeeded(Timer timer) {\n        final Set<TopicPartition> initializingPartitions = subscriptions.initializingPartitions();\n        final Map<TopicPartition, OffsetAndMetadata> offsets = fetchCommittedOffsets(initializingPartitions, timer);\n\n        // \"offsets\" will be null if the offset fetch requests did not receive responses within the given timeout\n        if (offsets == null)\n            return false;\n\n        refreshCommittedOffsets(offsets, this.metadata, this.subscriptions);\n        return true;\n",
+      "locator": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerCoordinator.java:947-956",
+      "evidence": "sources/ConsumerCoordinator.java"
+    },
+    "verification": "Fresh HTTPS GET HTTP 200, SHA checked; GitHub Contents name/path/blob content checked against raw; quotation is exact continuous raw lines. Candidate only, not final references.json."
+  },
+  {
+    "id": "kafka-abstractfetch",
+    "organization": "Apache Kafka",
+    "title": "AbstractFetch.java",
+    "titleEvidence": {
+      "locator": "GitHub Contents API name/path at commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "evidence": "sources/AbstractFetch.github-contents.json"
+    },
+    "authorOmittedReason": "No explicit personal document authorship; no Git tagger or committer inferred as author.",
+    "version": "Apache Kafka 4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java#L477-L484",
+    "supports": [
+      "The restored position.offset is placed in the Fetch request partition data"
+    ],
+    "quotation": {
+      "text": "                Uuid topicId = topicIds.getOrDefault(partition.topic(), Uuid.ZERO_UUID);\n                FetchRequest.PartitionData partitionData = new FetchRequest.PartitionData(topicId,\n                        position.offset,\n                        FetchRequest.INVALID_LOG_START_OFFSET,\n                        fetchConfig.fetchSize,\n                        position.currentLeader.epoch,\n                        Optional.empty());\n                builder.add(partition, partitionData);\n",
+      "locator": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java:477-484",
+      "evidence": "sources/AbstractFetch.java"
+    },
+    "verification": "Fresh HTTPS GET HTTP 200, SHA checked; GitHub Contents name/path/blob content checked against raw; quotation is exact continuous raw lines. Candidate only, not final references.json."
+  },
+  {
+    "id": "kafka-fetchcollector",
+    "organization": "Apache Kafka",
+    "title": "FetchCollector.java",
+    "titleEvidence": {
+      "locator": "GitHub Contents API name/path at commit 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "evidence": "sources/FetchCollector.github-contents.json"
+    },
+    "authorOmittedReason": "No explicit personal document authorship; no Git tagger or committer inferred as author.",
+    "version": "Apache Kafka 4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+    "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L186",
+    "supports": [
+      "poll collection advances the local position before records are returned"
+    ],
+    "quotation": {
+      "text": "                if (nextInLineFetch.nextFetchOffset() > position.offset) {\n                    SubscriptionState.FetchPosition nextPosition = new SubscriptionState.FetchPosition(\n                            nextInLineFetch.nextFetchOffset(),\n                            nextInLineFetch.lastEpoch(),\n                            position.currentLeader);\n                    log.trace(\"Updating fetch position from {} to {} for partition {} and returning {} records from `poll()`\",\n                            position, nextPosition, tp, partRecords.size());\n                    subscriptions.position(tp, nextPosition);\n                    positionAdvanced = true;\n",
+      "locator": "clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java:178-186",
+      "evidence": "sources/FetchCollector.java"
+    },
+    "verification": "Fresh HTTPS GET HTTP 200, SHA checked; GitHub Contents name/path/blob content checked against raw; quotation is exact continuous raw lines. Candidate only, not final references.json."
+  }
+]

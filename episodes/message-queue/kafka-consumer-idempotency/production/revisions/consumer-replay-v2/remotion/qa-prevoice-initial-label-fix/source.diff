@@ -1,0 +1,22 @@
+--- components-before-initial-label.tsx
++++ components.tsx
+@@ -10,7 +10,7 @@
+ export const ModelView:React.FC<{v:any;children:React.ReactNode}>=({v,children})=><div data-model-state={v.id}data-branch={v.branch}data-reset-from={v.resetFrom??''}data-client-owner={v.consumer.owner??'none'}data-client-active={String(v.consumer.active)}data-client-position={v.consumer.position??'none'}data-committed-loaded={v.consumer.committedLoaded??'none'}data-fetch-offset={v.consumer.fetchOffset??'none'}data-returned={JSON.stringify(v.consumer.returned)}data-group-committed={v.group.committed.P0}data-db-points={v.db.points}data-processed-keys={JSON.stringify(v.db.processedKeys)}data-db-transaction={v.db.transaction}data-db-effect={v.db.effect}data-producer-send-count={v.log.producerSendCount}data-log-append-count={v.log.appendCount}data-log-records={JSON.stringify(v.log.records)}>{children}</div>;
+ export const World:React.FC<{v:any;terms?:boolean;showKey?:boolean;intro?:boolean}>=({v,terms=false,showKey=false,intro=false})=>{
+  const consumer=v.consumer,db=v.db,records=v.log.records,position=consumer.position,committed=v.group.committed.P0,returned=consumer.returned??[],owner=consumer.owner;
+- const activeText=consumer.active?`进程 ${owner??'等待归属'}`:'没有活动消费进程';
++ const halted=!consumer.active&&v.action==='process-halt',activeText=consumer.active?`进程 ${owner??'等待归属'}`:'没有活动消费进程';
+  const positionText=position===null?'尚未安装读取位置':`下次读取位置：${position}`;
+  const loadedText=consumer.committedLoaded===null?'尚未取得恢复位置':`已查得恢复位置：${consumer.committedLoaded}`;
+  const actualKey=db.processedKeys?.join(' / ')||'无业务去重标记',pendingKey=db.pendingKeys?.join(' / ')||'';
+@@ -23,8 +23,8 @@
+  <T x={115}y={672}w={440}size={23}color={C.blue}>{terms?'已提交位置 committed':'Kafka 保存的恢复位置'}：{committed}</T>
+  <T x={115}y={725}w={440}size={21}color={C.muted}>积分消费组 points · 持久保存</T>
+  <Box x={710}y={430}w={490}h={355}color={consumer.active?C.orange:C.edge}owner="consumer-memory"/><T x={735}y={449}w={440}size={28}color={consumer.active?C.orange:C.muted}>{activeText} · 本地内存</T>
+- <T x={735}y={523}w={440}size={27}>{consumer.active?positionText:'读取位置：已随进程消失'}</T>
+- <T x={735}y={580}w={440}size={22}color={C.muted}>{consumer.active?loadedText:'不继承旧进程的内存位置'}</T>
++ <T x={735}y={523}w={440}size={27}>{consumer.active?positionText:halted?'读取位置：已随进程消失':'读取位置：尚未建立'}</T>
++ <T x={735}y={580}w={440}size={22}color={C.muted}>{consumer.active?loadedText:halted?'不继承旧进程的内存位置':'甲尚未开始首次读取'}</T>
+  <T x={735}y={645}w={440}size={25}color={C.blue}>{consumer.fetchOffset===null?'尚无本次 Fetch 请求':`本次 Fetch(P0, ${consumer.fetchOffset})`}</T>
+  <T x={735}y={707}w={440}size={23}color={returned.length?C.text:C.muted}>{returned.length?'交给应用：'+returned.map((r:any)=>r.eventId??r).join(' / '):v.action==='poll-return'?'本次返回：空列表':'本次尚未交付记录'}</T>
+  <Box x={1340}y={430}w={490}h={355}color={C.orange}owner="external-database"/><T x={1365}y={449}w={440}size={28}color={C.orange}><span style={{display:'inline-flex',gap:11,alignItems:'center'}}><DBMark/>业务数据库 · 积分</span></T>

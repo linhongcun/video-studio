@@ -1,0 +1,200 @@
+[
+  {
+    "id": "01",
+    "slug": "problem",
+    "visualType": "problem",
+    "chapterId": "problem",
+    "chapterTitle": "为什么会重来",
+    "cues": [],
+    "modelState": "db-committed",
+    "modelStages": [
+      "db-committed"
+    ],
+    "causalFocus": "Kafka恢复主因果",
+    "resetFrom": null
+  },
+  {
+    "id": "02",
+    "slug": "one-record",
+    "visualType": "one-record",
+    "chapterId": "problem",
+    "chapterTitle": "为什么会重来",
+    "cues": [],
+    "modelState": "one-appended",
+    "modelStages": [
+      "one-appended"
+    ],
+    "causalFocus": "Kafka恢复主因果",
+    "resetFrom": "one-appended"
+  },
+  {
+    "id": "03",
+    "slug": "first-poll",
+    "visualType": "first-poll",
+    "chapterId": "positions",
+    "chapterTitle": "读取与恢复位置",
+    "cues": [],
+    "modelState": "a-position-installed",
+    "modelStages": [
+      "a-position-installed",
+      "a-fetch-sent",
+      "a-polled"
+    ],
+    "causalFocus": "Kafka恢复主因果",
+    "resetFrom": null
+  },
+  {
+    "id": "04",
+    "slug": "two-positions",
+    "visualType": "two-positions",
+    "chapterId": "positions",
+    "chapterTitle": "读取与恢复位置",
+    "cues": [],
+    "modelState": "a-polled",
+    "modelStages": [
+      "a-polled"
+    ],
+    "causalFocus": "Kafka恢复主因果",
+    "resetFrom": null
+  },
+  {
+    "id": "05",
+    "slug": "database-commit",
+    "visualType": "database-commit",
+    "chapterId": "positions",
+    "chapterTitle": "读取与恢复位置",
+    "cues": [],
+    "modelState": "first-db-pending",
+    "modelStages": [
+      "first-db-pending",
+      "db-committed"
+    ],
+    "causalFocus": "Kafka恢复主因果",
+    "resetFrom": null
+  },
+  {
+    "id": "06",
+    "slug": "crash-gap",
+    "visualType": "crash-gap",
+    "chapterId": "replay",
+    "chapterTitle": "同一记录怎样重来",
+    "cues": [],
+    "modelState": "db-committed",
+    "modelStages": [
+      "db-committed",
+      "a-halted"
+    ],
+    "causalFocus": "Kafka恢复主因果",
+    "resetFrom": null
+  },
+  {
+    "id": "07",
+    "slug": "restore-offset",
+    "visualType": "restore-offset",
+    "chapterId": "replay",
+    "chapterTitle": "同一记录怎样重来",
+    "cues": [],
+    "modelState": "b-offset-requested",
+    "modelStages": [
+      "b-offset-requested",
+      "b-committed-loaded",
+      "b-position-installed"
+    ],
+    "causalFocus": "Kafka恢复主因果",
+    "resetFrom": null
+  },
+  {
+    "id": "08",
+    "slug": "fetch-same-record",
+    "visualType": "fetch-same-record",
+    "chapterId": "replay",
+    "chapterTitle": "同一记录怎样重来",
+    "cues": [],
+    "modelState": "b-position-installed",
+    "modelStages": [
+      "b-position-installed",
+      "b-fetch-sent",
+      "b-polled-same"
+    ],
+    "causalFocus": "Kafka恢复主因果",
+    "resetFrom": null
+  },
+  {
+    "id": "09",
+    "slug": "repeated-effect",
+    "visualType": "repeated-effect",
+    "chapterId": "replay",
+    "chapterTitle": "同一记录怎样重来",
+    "cues": [],
+    "modelState": "b-polled-same",
+    "modelStages": [
+      "b-polled-same",
+      "unguarded-db-pending",
+      "unguarded-twenty"
+    ],
+    "causalFocus": "Kafka恢复主因果",
+    "resetFrom": null
+  },
+  {
+    "id": "10",
+    "slug": "commit-too-early",
+    "visualType": "commit-too-early",
+    "chapterId": "guard",
+    "chapterTitle": "怎样避免重复效果",
+    "cues": [],
+    "modelState": "early-reset",
+    "modelStages": [
+      "early-reset",
+      "early-commit-requested",
+      "early-committed",
+      "early-a-halted",
+      "early-b-offset-requested",
+      "early-b-committed-loaded",
+      "early-b-position-installed",
+      "early-b-fetch-sent",
+      "early-b-poll-empty"
+    ],
+    "causalFocus": "提交顺序反例",
+    "resetFrom": "a-polled"
+  },
+  {
+    "id": "11",
+    "slug": "bind-business-key",
+    "visualType": "bind-business-key",
+    "chapterId": "guard",
+    "chapterTitle": "怎样避免重复效果",
+    "cues": [],
+    "modelState": "guard-reset",
+    "modelStages": [
+      "guard-reset",
+      "guard-first-db-pending",
+      "guard-db-committed",
+      "guard-a-halted",
+      "guard-b-offset-requested",
+      "guard-b-committed-loaded",
+      "guard-b-position-installed",
+      "guard-b-fetch-sent",
+      "guard-b-polled-same"
+    ],
+    "causalFocus": "简单本地业务保护",
+    "resetFrom": "a-polled"
+  },
+  {
+    "id": "12",
+    "slug": "idempotent-effect",
+    "visualType": "idempotent-effect",
+    "chapterId": "guard",
+    "chapterTitle": "怎样避免重复效果",
+    "cues": [],
+    "modelState": "guard-b-polled-same",
+    "modelStages": [
+      "guard-b-polled-same",
+      "guard-duplicate-skipped",
+      "guard-commit-requested",
+      "guard-committed",
+      "guard-final"
+    ],
+    "causalFocus": "简单本地业务保护",
+    "resetFrom": null
+  }
+]

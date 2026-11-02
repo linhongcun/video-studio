@@ -1,0 +1,77 @@
+{
+  "kind": "independent-old-mq05-focus-review-for-consumer-replay-v2",
+  "reviewer": "/root/mq_qa",
+  "checkedAtUTC": "2026-11-02T06:47:23.064787+00:00",
+  "baseline": "01cd181caf24d4a8ce846c0eb8faeeab8f0054e2",
+  "oldSHA256": {
+    "script.md": "fffe0eca9a3d4b377bee3d7b3c502fcd03be0af2cc31f023fc3a6ac7b7cab3d5",
+    "research.md": "a68fc7ded197a67dfd71118697e4c9ee0e313d0057940e75119e8cc2cd293285",
+    "model.json": "cd18c7d4302eb1c91dbbe424dfa26a3bc8ff6f4cd20258d62e6d05e41f4fa138",
+    "storyboard.json": "c79ef3670ebf23386855080144f32b46852a222ee8f5895d7ea05179c6750580",
+    "voice.wav": "38b6b8e30f21b6ff572531603f8ab4b9cc1050c18c38a03d2fa85d5810bfcb39",
+    "source-sha256.json": "44f469344ef7dfbc8df19801eec53de1d025e773ac49497180a65d124d102f45",
+    "qa-final-independent/review.json": "672734067b98436f6101ecb13e93c8468feda190324691089427a9f727e4ff18",
+    "qa-final-independent/encoded-independent.json": "9aaa32c1da9630192c39e61abfff7b55fa732f2c3c60415b5044ae97659fc21d",
+    "qa-final-independent/encoded-evidence/frame-00563.png": "d10da4c3157714631889a4a38e82b5f6312842a89fac4239e24d6bcf6aea547c",
+    "qa-final-independent/encoded-evidence/frame-03001.png": "0e3ff83f4288a099fd2de2acd22bc81ed73b73c1234bfa4f349dc8f49845ff0f"
+  },
+  "oldPublicationVideo": {
+    "file": "episodes/message-queue/kafka-consumer-idempotency/publication/video.mp4",
+    "sha256": "5d14be81eed533acea8738e0c883b3c44b298789e74a53d1b7a24a0624f66328"
+  },
+  "oldNarrationSHA256": "521b47d9fa0cacf069758fb9bab59856b9bef1738782c12a42ae98f078d1a7fe",
+  "oldBodyFrames": 5497,
+  "explicitKafkaReplayShots": [
+    "02",
+    "03"
+  ],
+  "explicitKafkaReplayFrames": 792,
+  "seconds": 26.4,
+  "bodyFraction": 0.1440785883209023,
+  "actualOldEncodedPNGsPersonallyOpened": [
+    {
+      "frame": 563,
+      "file": "qa-final-independent/encoded-evidence/frame-00563.png",
+      "sha256": "d10da4c3157714631889a4a38e82b5f6312842a89fac4239e24d6bcf6aea547c"
+    },
+    {
+      "frame": 3001,
+      "file": "qa-final-independent/encoded-evidence/frame-03001.png",
+      "sha256": "0e3ff83f4288a099fd2de2acd22bc81ed73b73c1234bfa4f349dc8f49845ff0f"
+    }
+  ],
+  "gaps": [
+    {
+      "finding": "正文重心在数据库处理资格，题目为什么重来的解释过短。",
+      "evidence": "旧前言显式Kafka恢复只作前提；02–03仅26.4s/14.4%，04起主体是查询竞态、短页锁、等待重检、RETURNING、事务回滚。",
+      "newAcceptance": "消费者读取/提交/重启恢复与提前提交反例成为主体，PG并发细节移文章。"
+    },
+    {
+      "finding": "旧02同镜合并DB COMMIT、Kafka未提交、退出、新实例读回，读到1仅作旁注。",
+      "evidence": "f563确有DB10/Kafka0/日志同一条和小字客户端1，但没有逐步展开B查询committed0、安装position0、请求Fetch0。",
+      "newAcceptance": "让新手仅凭稿和图就能复述每个位置值从哪里来、谁修改、为何再次读原offset0。"
+    },
+    {
+      "finding": "缺少Kafka提前提交导致业务漏做的对应反例。",
+      "evidence": "旧13的漏处理来自数据库标记与积分拆事务，没有展示Kafka1先成功、DB尚未做时重启从1越过原记录。",
+      "newAcceptance": "明确reset后演earlycommit/halt/恢复1/积分0，称业务漏处理，不说物理消息被删除。"
+    }
+  ],
+  "historicalRuntimeRead": {
+    "file": "docs/archive/2026-10/mq05-07-implementation/runtime/runs/mq05-20261030T152318.187770Z/assertion-summary.json",
+    "sha256": "e79d963d2ec156df3233b65eedef7047c4b839d0e7653215ab0b826a4e4a1853",
+    "oldRunDate": "2026-10-30",
+    "assertions": 89,
+    "naiveReplayPoints": 20,
+    "dedupReplayPoints": 10,
+    "scope": "Read historical89 summary, already contains DB commit then controlled halt before Kafka commit and same E01@0 replay; not rerun/re-dated or claimed new. New three branches belong to independent current runtime executor."
+  },
+  "historicalGuidance": {
+    "file": "docs/research-template.md",
+    "line": 72,
+    "scope": "Old MQ05-specific PG-primary guidance conflicts with this new user-directed revision; current user instruction prevails. No inferred approval block or old-source rewrite."
+  },
+  "oldTechnicalQAUnchanged": true,
+  "newRevisionAccepted": false,
+  "limitations": "Full old script/research and two retained encoded PNGs actually read/opened; no new whole-film playback, semantic listening or user learning claim."
+}

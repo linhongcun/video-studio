@@ -1,0 +1,41 @@
+from pathlib import Path
+import sys,json,hashlib,datetime,argparse,re
+sys.dont_write_bytecode=True
+import numpy as np,soundfile as sf
+from scipy.signal import resample_poly
+ap=argparse.ArgumentParser(description='Read-only selected voice/text/PCM/signal screening; no phoneme or semantic listening.');ap.add_argument('production',type=Path);ap.add_argument('--out',type=Path);ap.add_argument('--stage',choices=['initial','replacement','resume'],default='initial');ap.add_argument('--candidate',choices=['b','c','d'],default='b');args=ap.parse_args();D=args.production.resolve();R=next(p for p in D.parents if(p/'AGENTS.md').is_file());sys.path.insert(0,str(R/'episodes/_shared'));from episode_paths import production_directory,episode_slug
+assert D.is_relative_to(production_directory(episode_slug(D),root=R));OUT=args.out.resolve()if args.out else D/'qa-voice/voice-independent.json';assert OUT.is_relative_to(D)and not OUT.exists(),'Preserve prior signal report and choose a new --out';sys.path.insert(0,str(R/'episodes/_shared/voice'));import common
+V=D/'voice';b=json.loads((V/'build.json').read_text());sents=json.loads((V/'sents.json').read_text());rows=[];flags=[]
+sha=lambda p:hashlib.sha256(p.read_bytes()).hexdigest();inputs={n:sha(D/n)for n in ['script.md','voice.wav','voice/build.json','voice/sents.json','voice/params.json','voice/picks.json','words.json','storyboard.json','remotion/public/audio/voice.wav']};initial=json.loads((V/'initial-production.json').read_text());approval=json.loads((D/'qa-editorial/editorial-independent.json').read_text());narration=''.join(re.findall(r'^旁白：(.*)$',(D/'script.md').read_text(),re.M));assert approval['canEnterTTS']is True and approval['scriptSHA256']==inputs['script.md'];assert approval['narrationSHA256']==hashlib.sha256(narration.encode()).hexdigest();assert ''.join(s['text']for s in sents)==narration;assert inputs['remotion/public/audio/voice.wav']==inputs['voice.wav'];assert initial['voiceParametersSHA256']==inputs['voice/params.json']
+if initial['scriptSHA256']!=inputs['script.md'] or args.stage=='resume':
+ assert args.stage in ['resume','replacement']
+ ready=json.loads((V/'assembly-header-resume.json').read_text());assert ready['status']=='produced-existing-takes-await-independent-signal-review'and ready['newScriptSHA256']==inputs['script.md'];assert ready['newTTSRequests']==0 and ready['rebuildAudio']is False and initial['status']=='failed';assert all(x['exit']==0 for x in ready['steps']);assert ready['narrationSHA256']==initial['narrationSHA256']==approval['narrationSHA256']
+ if args.stage=='resume':assert ready['voiceSHA256']==inputs['voice.wav']
+if args.stage=='initial':assert initial['status']=='initial-produced-await-independent-signal-review'and initial['voiceSHA256']==inputs['voice.wav']
+if args.stage=='replacement':
+ quality=json.loads((V/f'quality-{args.candidate}-production.json').read_text());assert quality['status']=='produced-await-independent-signal-review'and quality['voiceSHA256']==inputs['voice.wav'];assert quality['scriptSHA256']==inputs['script.md']and quality['parameterSHA256']==inputs['voice/params.json']and quality['narrationSHA256']==approval['narrationSHA256'];assert all(x['exit']==0 for x in quality['steps'])
+assert len(sents)==approval['sentences'];generated={x['sentence']:x['sha256']for x in initial['generatedTakes']}
+assert len(sents)==len(b['sentences'])
+audio,sr=sf.read(D/'voice.wav',dtype='float64');assert sr==48000 and audio.ndim==1;assert len(audio)==b['summary']['samples']==b['summary']['frames']*1600
+assert hashlib.sha256((D/'voice.wav').read_bytes()).hexdigest()==b['summary']['sha']
+for s,row in zip(sents,b['sentences']):
+ assert s['id']==row['id'] and s['text']==row['text'] and s['tts']==row['tts']
+ take=V/'takes'/f"{s['id']}-{row['take']}.wav";txt=V/'takes'/f"{s['id']}-{row['take']}.txt.json";assert json.loads(txt.read_text())==s['tts']
+ assert row['take']==json.loads((V/'picks.json').read_text()).get(s['id'],'a')
+ if args.stage in ['initial','resume']:assert row['take']=='a'and sha(take)==generated[s['id']]
+ raw=common.load(str(take));cut,tail=common.cut(raw);sentence,r=sf.read(V/'sentences'/f"{s['id']}.wav",dtype='float64');assert r==48000
+ track=audio[row['startSample']:row['endSample']];assert np.array_equal(track,sentence)
+ quiet=np.max(np.abs(sentence[:len(sentence)//480*480]).reshape(-1,480),axis=1)<=.005;edges=np.flatnonzero(np.diff(np.r_[False,quiet,False].astype(np.int8)));inner=float(np.max(edges[1::2]-edges[::2],initial=0))/100;assert round(tail,2)==row['tailCut']
+ idx=np.flatnonzero(np.abs(cut)>.01);leading=idx[0]/48000 if len(idx) else None;ending=(len(cut)-1-idx[-1])/48000 if len(idx) else None
+ peak=float(np.max(np.abs(raw)));clipped=int(np.sum(np.abs(raw)>=.9999));risk=[]
+ if tail<.25:risk.append('throwaway tail under250ms')
+ if max(inner,row['maxInnerSilenceS'])>=.5:risk.append('sentence silence at least500ms')
+ if clipped:risk.append('raw clipped samples')
+ if risk:flags.append({'id':s['id'],'risks':risk})
+ rows.append({'id':s['id'],'takeSha256':hashlib.sha256(take.read_bytes()).hexdigest(),'tailAfterLastGapSeconds':round(tail,4),'cutLeadingAbove01Seconds':round(leading,4),'cutTrailingBelow01Seconds':round(ending,4),'selectedSentenceMatchesTrackPCM':True,'maxInnerSilenceSeconds':inner,'independent10msWindowSilenceMatchesBuild':abs(inner-row['maxInnerSilenceS'])<1e-9,'buildBeforeInt16MaxInnerSilenceSeconds':row['maxInnerSilenceS'],'take':row['take'],'rawPeak':peak,'rawClippedSamples':clipped,'flags':risk})
+gaps=[(0,b['sentences'][0]['startSample'])]+[(a['endSample'],c['startSample'])for a,c in zip(b['sentences'],b['sentences'][1:])]+[(b['sentences'][-1]['endSample'],len(audio))]
+assert all(np.max(np.abs(audio[a:z]),initial=0)==0 for a,z in gaps)
+assert all(sha(D/n)==value for n,value in inputs.items());words=json.loads((D/'words.json').read_text());board=json.loads((D/'storyboard.json').read_text());assert words['audioSha256']==inputs['voice.wav']and words['scriptSha256']==inputs['script.md'];assert words['durationFrames']==board['meta']['durationInFrames']==b['summary']['frames'];actual_lufs=common.lufs(audio.astype(np.float32));assert abs(actual_lufs-b['summary']['track_lufs'])<=.1
+r={'stage':args.stage,'readinessReceipt':(f'voice/quality-{args.candidate}-production.json'if args.stage=='replacement'else'voice/assembly-header-resume.json'if args.stage=='resume'else'voice/initial-production.json'),'originalInitialStatus':initial['status'],'inputSHA256':inputs,'approvalScriptSHA256':approval['scriptSHA256'],'approvalNarrationSHA256':approval['narrationSHA256'],'canonicalCutSHA256':sha(R/'episodes/_shared/voice/common.py'),'independentlyMeasuredTrackLUFS':actual_lufs,'sourceInputsUnchanged':True,'checkedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),'executor':'/root/mq_qa independent voice signal reviewer','status':'pass-signal-screening'if not flags else 'signal-flags-require-review','voiceSha256':hashlib.sha256((D/'voice.wav').read_bytes()).hexdigest(),'samples':len(audio),'frames':len(audio)//1600,'loudnessFromSharedActualBuild':b['summary']['track_lufs'],'measuredTruePeakDbTP':float(20*np.log10(np.max(np.abs(resample_poly(audio,4,1))))),'sourceBuildSha256':hashlib.sha256((V/'build.json').read_bytes()).hexdigest(),'allTextsAndTtsRequestRecordsMatched':True,'allSelectedSentencePcmMatchActualTrack':True,'allSilentGapPcmZero':True,'sentences':rows,'flags':flags,'limitations':['Shared cut implementation is reused rather than copied or replaced. Build floating-point and actual int16 PCM silence windows are recorded separately; a threshold-boundary difference is not a missing-word diagnosis.','Amplitude, pauses, truncation risk and request text provenance checked. No phoneme/word recognition or full human semantic listening was performed.','No signal flag does not establish all spoken words/tones are correct.']}
+OUT.parent.mkdir(parents=True,exist_ok=True)
+OUT.write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n');print(json.dumps({'status':r['status'],'sentences':len(rows),'flags':flags,'tailMin':min(x['tailAfterLastGapSeconds']for x in rows),'innerSilenceMax':max(x['maxInnerSilenceSeconds']for x in rows),'truePeakDbTP':r['measuredTruePeakDbTP']},ensure_ascii=False))

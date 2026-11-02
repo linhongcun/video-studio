@@ -1,0 +1,93 @@
+{
+  "at": "2026-11-02T07:02:39.280151+00:00",
+  "authorization": "Root explicitly allowed non-narration initialization API and model fixedInput correction before first TTS gate; coverPolicy six→original EP45 covers.",
+  "changes": {
+    "script.md": {
+      "before": "1701cd7ef893c63001727c32221db76da652df4ab84baaf2eeee095945652713",
+      "after": "d21acba191edf8415fa41d11e59ffa2ee7f5b91dd5a3994ab60097ccb25bcb8a",
+      "diff": [
+        "--- before/script.md",
+        "+++ after/script.md",
+        "@@ -2,7 +2,7 @@",
+        " ",
+        " 唯一问题：生产者只追加一条记录，为什么消费者重启后仍可能把同一业务做两次。Kafka恢复链占正文前九镜，数据库只用简单业务键与同一本地事务承接解法，不讲索引锁或并发仲裁内部。",
+        " ",
+        "-固定Apache Kafka4.4.0 Java客户端/commit1156b2752aaa28eafc0b4c4d387e63356793268d，group.protocol=classic，enable.auto.commit=false，max.poll.records=1；同一组points只有A随后B一个稳定拥有者。唯一记录E01/order7042/account17/+10，orders/P0/offset0。原记录在本例保留，开始前显式commitSync({P0:0})建立持久恢复值0；auto.offset.reset=earliest仅在无有效提交值时作回退，不是本例重读原因。账户初始0，受控进程退出发生在外部数据库COMMIT成功之后、Kafka offset1提交之前。数据库与Kafka是两个提交边界。",
+        "+固定Apache Kafka4.4.0 Java客户端/commit1156b2752aaa28eafc0b4c4d387e63356793268d，group.protocol=classic，enable.auto.commit=false，max.poll.records=1；同一组points只有A随后B一个稳定拥有者。唯一记录E01/order7042/account17/+10，orders/P0/offset0。原记录在本例保留，开始前显式设置并确认P0组恢复值0（实测Admin.alterConsumerGroupOffsets；consumer的commit1在业务之后）；auto.offset.reset=earliest仅在无有效提交值时作回退，不是本例重读原因。账户初始0，受控进程退出发生在外部数据库COMMIT成功之后、Kafka offset1提交之前。数据库与Kafka是两个提交边界。",
+        " ",
+        " 画面把三处状态分开：Kafka原日志/组恢复值，当前消费者内存position，外部数据库已提交积分/业务键。A退出清除内存位置，B先查询已提交值、收到0，再安装本地position0，随后Fetch请求携带0，取得的ConsumerRecord仍是原offset0。没有producer重发、新日志追加或记录搬走。数据库内未提交值不冒充已完成效果。",
+        " "
+      ]
+    },
+    "build_model.py": {
+      "before": "9082540954244c812f5e92c422d4248e75f84402e0b1a14fe7ddfa05c6749cda",
+      "after": "4f5dda0557b5a1cf320e5889aa4e883d287c98cae46358907f947468fd1ce73e",
+      "diff": [
+        "--- before/build_model.py",
+        "+++ after/build_model.py",
+        "@@ -150,7 +150,7 @@",
+        " model = dict(schemaVersion=1, kind=\"finite-teaching-model-not-kafka-or-database-runtime\",",
+        "              fixedInput=dict(kafkaVersion=\"4.4.0\", commit=\"1156b2752aaa28eafc0b4c4d387e63356793268d\",",
+        "                              groupProtocol=\"classic\", enableAutoCommit=False, maxPollRecords=1,",
+        "-                             initialCommittedOffsetEstablishedBy=\"explicit commitSync({P0:0})\",",
+        "+                             initialCommittedOffsetEstablishedBy=\"Admin.alterConsumerGroupOffsets({P0:0}), broker-confirmed before first consumer\",",
+        "                              businessKey=\"points:E01\", retained=True), snapshots=states)",
+        " b = (json.dumps(model, ensure_ascii=False, indent=2)+\"\\n\").encode()",
+        " (D/\"model.json\").write_bytes(b)"
+      ]
+    },
+    "model.json": {
+      "before": "bc73b40873e5499c3469f3e32a57de112d2d8460c7f41594674b7a0da58591aa",
+      "after": "694254cb37a5d25eafe1eb41f9f28460f3d9b3c8b8777bd527d6d4dffecf99a5",
+      "diff": [
+        "--- before/model.json",
+        "+++ after/model.json",
+        "@@ -7,7 +7,7 @@",
+        "     \"groupProtocol\": \"classic\",",
+        "     \"enableAutoCommit\": false,",
+        "     \"maxPollRecords\": 1,",
+        "-    \"initialCommittedOffsetEstablishedBy\": \"explicit commitSync({P0:0})\",",
+        "+    \"initialCommittedOffsetEstablishedBy\": \"Admin.alterConsumerGroupOffsets({P0:0}), broker-confirmed before first consumer\",",
+        "     \"businessKey\": \"points:E01\",",
+        "     \"retained\": true",
+        "   },"
+      ]
+    },
+    "model-verification.json": {
+      "before": "c93ac08c29d663cea81077b47c328eda4dbcc76af046fa856879f3b0cecde548",
+      "after": "37d0d1f992490dfbfdd043a012bbfa26103d7369e9233322883d6520ce8287bb",
+      "diff": [
+        "--- before/model-verification.json",
+        "+++ after/model-verification.json",
+        "@@ -1,7 +1,7 @@",
+        " {",
+        "   \"status\": \"passed\",",
+        "   \"kind\": \"finite-teaching-model-not-kafka-or-database-runtime\",",
+        "-  \"modelSHA256\": \"bc73b40873e5499c3469f3e32a57de112d2d8460c7f41594674b7a0da58591aa\",",
+        "+  \"modelSHA256\": \"694254cb37a5d25eafe1eb41f9f28460f3d9b3c8b8777bd527d6d4dffecf99a5\",",
+        "   \"checks\": 94,",
+        "   \"snapshots\": 36,",
+        "   \"assertions\": ["
+      ]
+    },
+    "episode-config.json": {
+      "before": "209b066c739bfa8854d9c74df7b27696285ed51f284f5a83957846b6826eb1be",
+      "after": "e0685e51139da0b4d06d3054bf1cc86d6bae1c08bf67b20268206eb157d4dd43",
+      "diff": [
+        "--- before/episode-config.json",
+        "+++ after/episode-config.json",
+        "@@ -21,7 +21,7 @@",
+        "   \"shotCount\": 12,",
+        "   \"style\": \"kafka-series-canvas\",",
+        "   \"visualRevision\": 2,",
+        "-  \"coverPolicy\": \"沿用原EP45六幅封面、题名与首发v0.97.0身份，由根安装，不重画、不改旧封面字节。\",",
+        "+  \"coverPolicy\": \"沿用原EP45封面、题名与首发v0.97.0身份，由根安装，不重画、不改旧封面字节。\",",
+        "   \"tagline\": \"同一条记录，恢复后为何再次执行\",",
+        "   \"discussionQuestion\": \"数据库已提交，Kafka进度尚未提交，重启会从哪里继续？\",",
+        "   \"scope\": \"Kafka同组恢复值到Fetch实参解释同一offset重读，正文前九镜为WHY；简单同事务业务键避免重复效果。\","
+      ]
+    }
+  },
+  "canonicalNarrationUnchanged": true,
+  "visibleSnapshotFieldsUnchanged": true
+}

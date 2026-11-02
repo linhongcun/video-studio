@@ -1,0 +1,94 @@
+{
+  "kind": "independent-consumer-replay-editorial-gate-prepared",
+  "reviewer": "/root/mq_qa",
+  "preparedAtUTC": "2026-11-02T06:47:23.064787+00:00",
+  "baseline": "01cd181caf24d4a8ce846c0eb8faeeab8f0054e2",
+  "status": "awaiting-complete-exact-author-package",
+  "canEnterTTS": false,
+  "scriptSHA256": null,
+  "narrationSHA256": null,
+  "narrationDefinition": "sha256(UTF8(''.join(re.findall(r'^旁白：(.*)$', script, re.M)))) no separator/trailingLF",
+  "criteria": [
+    {
+      "id": "single-append",
+      "requiredEvidence": "同一E01/P0@0，producer只有一次追加，原日志保留；不靠第二次send制造重复。",
+      "status": "pending"
+    },
+    {
+      "id": "position-versus-committed",
+      "requiredEvidence": "A poll后内存position1，Kafka组持久committed仍0；下一条语义与保存位置先随动作解释。",
+      "status": "pending"
+    },
+    {
+      "id": "two-commit-gap",
+      "requiredEvidence": "DB+10提交成功→尚未提交Kafka1即halt；A内存消失、DB10保留，不能正常close偷偷提交。",
+      "status": "pending"
+    },
+    {
+      "id": "restore-fetch-chain",
+      "requiredEvidence": "A退出后B取得P0：OffsetFetch读committed0→安装B.position0→Fetch0→同E01/offset0；不继承A.position1。",
+      "status": "pending"
+    },
+    {
+      "id": "unguarded20",
+      "requiredEvidence": "B不判断便再+10提交，10到20；物理原记录仍一条，重复交付与重复生效分清。",
+      "status": "pending"
+    },
+    {
+      "id": "earlycommit-loss",
+      "requiredEvidence": "从DB0/committed0明确reset：先确认Kafka1→DB执行前halt→B从1读、积分0；是业务漏做，不是删除Kafka字节。",
+      "status": "pending"
+    },
+    {
+      "id": "business-idempotency",
+      "requiredEvidence": "稳定logicalConsumer+eventId登记与积分同一DB事务；重读同事件跳过增量、维持10，再另行确认Kafka1。",
+      "status": "pending"
+    },
+    {
+      "id": "ownership-and-guarantee",
+      "requiredEvidence": "classic单分区稳定单owner，A已死B再接手；Kafka与外部DB非原子事务，producer幂等/EOS不自动保证外部积分恰一次。",
+      "status": "pending"
+    },
+    {
+      "id": "mainline-weight",
+      "requiredEvidence": "正文目标至少约2/3解释消费者读取/提交/恢复与提前提交反例；不再把PG索引细节作主体。比例服从因果易懂性，配音后按实际时长复核。",
+      "status": "pending"
+    },
+    {
+      "id": "source-model-runtime",
+      "requiredEvidence": "固定4.4.0/commit/classic/manual/单条poll/保留前提；源码事实、有限模型、新真实三分支与历史89运行日期分别记录。",
+      "status": "pending"
+    },
+    {
+      "id": "strict-format",
+      "requiredEvidence": "真实prep前缀parser与assemble严格整行parser均匹配所有镜；### NN english-slug后换行，中文标题另行，每镜一旁白行两句；plan/config必需字段齐。只读预检，不用运行TTS探测。",
+      "status": "pending"
+    },
+    {
+      "id": "exact-gate-package",
+      "requiredEvidence": "确切scriptSHA/canonical narrationSHA、refs、执行映射、model验证、article及4图状态计划齐且无阻塞，才canEnterTTS=true；实际图位待voice，不假填时间或claim完整听审。",
+      "status": "pending"
+    }
+  ],
+  "canonicalAssemblerRequiredConfigKeys": [
+    "shotCount",
+    "title",
+    "episodePart",
+    "slug",
+    "style",
+    "userScope",
+    "sampleDataLabel",
+    "discussionQuestion"
+  ],
+  "canonicalParsers": {
+    "episodes/_shared/voice/prep.py": "1d1bef91646a1ae8850da4b8979d6a395e2ee4fb98a43ec51d5d9feb81678cb9",
+    "episodes/_shared/assemble_sentence_episode.py": "55e494e0b7f9e2350e7d2ba15be6e2333e606b9d83eb618079abf4c38abe1ac5"
+  },
+  "oldFocusReview": {
+    "file": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/qa-editorial/old-focus-review.json",
+    "sha256": "ec2d1c3485adb71323b4f3dbce3f8e84062b76955f6c04d88765116d8ba361a0"
+  },
+  "oldTitleSlugEPDatesFirstReleaseCoversPlatformsPreserved": true,
+  "TTSFreezeOrRenderExecuted": false,
+  "onlyNewQAOutputsWritten": true
+}

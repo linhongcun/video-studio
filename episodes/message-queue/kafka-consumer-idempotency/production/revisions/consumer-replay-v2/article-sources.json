@@ -1,0 +1,174 @@
+{
+  "schemaVersion": 1,
+  "episode": "kafka-consumer-idempotency",
+  "sources": [
+    {
+      "id": "A1",
+      "organization": "Apache Kafka",
+      "title": "FetchCollector.java",
+      "titleEvidence": {
+        "locator": "Official GitHub Contents API name/path at 1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/FetchCollector.github-contents.json"
+      },
+      "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L186",
+      "supports": [
+        "poll收集记录时写入本地下一读取位置，返回应用前已经推进。"
+      ],
+      "sections": "FetchCollector.java:178-186",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/FetchCollector.java",
+        "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L186",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
+      },
+      "quotation": {
+        "text": "                if (nextInLineFetch.nextFetchOffset() > position.offset) {\n                    SubscriptionState.FetchPosition nextPosition = new SubscriptionState.FetchPosition(\n                            nextInLineFetch.nextFetchOffset(),\n                            nextInLineFetch.lastEpoch(),\n                            position.currentLeader);\n                    log.trace(\"Updating fetch position from {} to {} for partition {} and returning {} records from `poll()`\",\n                            position, nextPosition, tp, partRecords.size());\n                    subscriptions.position(tp, nextPosition);\n                    positionAdvanced = true;\n",
+        "locator": "FetchCollector.java:178-186",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/FetchCollector.java"
+      }
+    },
+    {
+      "id": "A2",
+      "organization": "Apache Kafka",
+      "title": "CompletedFetch.java",
+      "titleEvidence": {
+        "locator": "Fresh official raw URL filename and source-manifest.json file path",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/source-manifest.json"
+      },
+      "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java#L334-L338",
+      "supports": [
+        "新的ConsumerRecord对象保留响应记录原topic/partition/record.offset，不是新日志记录。"
+      ],
+      "sections": "CompletedFetch.java:334-338",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/CompletedFetch.java",
+        "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java#L334-L338",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
+      },
+      "quotation": {
+        "text": "        return new ConsumerRecord<>(partition.topic(), partition.partition(), record.offset(),\n                record.timestamp(), timestampType,\n                keyBytes == null ? ConsumerRecord.NULL_SIZE : keyBytes.remaining(),\n                valueBytes == null ? ConsumerRecord.NULL_SIZE : valueBytes.remaining(),\n                key, value, headers, leaderEpoch);\n",
+        "locator": "CompletedFetch.java:334-338",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/CompletedFetch.java"
+      }
+    },
+    {
+      "id": "A3",
+      "organization": "PostgreSQL Global Development Group",
+      "title": "Primary Keys",
+      "titleEvidence": {
+        "locator": "sect2 id=ddl-constraints-primary-keys, title Primary Keys, line1003",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-ddl.sgml"
+      },
+      "version": "PostgreSQL18.0; 3d6a828938a5fa0444275d3d2f67b64ec3199eb7",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ddl.sgml#L1003-L1053",
+      "supports": [
+        "业务键用logicalHandler与eventId组成非空唯一主键。"
+      ],
+      "sections": "postgres-ddl.sgml:1015-1017",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-ddl.sgml",
+        "sourceUrl": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ddl.sgml#L1003-L1053",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "PostgreSQL Global Development Group: official project source and COPYRIGHT, no personal author inferred."
+      },
+      "quotation": {
+        "text": "A primary key constraint indicates that a column, or group of columns,\n    can be used as a unique identifier for rows in the table.  This\n    requires that the values be both unique and not null.",
+        "locator": "postgres-ddl.sgml:1015-1017",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-ddl.sgml"
+      }
+    },
+    {
+      "id": "A4",
+      "organization": "PostgreSQL Global Development Group",
+      "title": "INSERT",
+      "titleEvidence": {
+        "locator": "refentrytitle INSERT line12, refname INSERT line18",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-insert.sgml"
+      },
+      "version": "PostgreSQL18.0; 3d6a828938a5fa0444275d3d2f67b64ec3199eb7",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ref/insert.sgml#L89-L101",
+      "supports": [
+        "RETURNING只返回本次实际插入或更新的行，DO NOTHING冲突不返回旧行。"
+      ],
+      "sections": "postgres-insert.sgml:97-98",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-insert.sgml",
+        "sourceUrl": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ref/insert.sgml#L89-L101",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "PostgreSQL Global Development Group: official project source and COPYRIGHT, no personal author inferred."
+      },
+      "quotation": {
+        "text": "Only rows that were successfully\n   inserted or updated will be returned.",
+        "locator": "postgres-insert.sgml:97-98",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-insert.sgml"
+      }
+    },
+    {
+      "id": "A5",
+      "organization": "Apache Kafka",
+      "title": "KafkaConsumer.java",
+      "titleEvidence": {
+        "locator": "Official GitHub Contents API name/path at 1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.github-contents.json"
+      },
+      "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L82-L89",
+      "supports": [
+        "poll自动推进本地position；committed用于故障恢复。"
+      ],
+      "sections": "KafkaConsumer.java:82-89",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.java",
+        "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L82-L89",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
+      },
+      "quotation": {
+        "text": " * The {@link #position(TopicPartition) position} of the consumer gives the offset of the next record that will be given\n * out. It will be one larger than the highest offset the consumer has seen in that partition. It automatically advances\n * every time the consumer receives messages in a call to {@link #poll(Duration)}.\n * <p>\n * The {@link #commitSync() committed position} is the last offset that has been stored securely. Should the\n * process fail and restart, this is the offset that the consumer will recover to. The consumer can either automatically commit\n * offsets periodically; or it can choose to control this committed position manually by calling one of the commit APIs\n * (e.g. {@link #commitSync() commitSync} and {@link #commitAsync(OffsetCommitCallback) commitAsync}).\n",
+        "locator": "KafkaConsumer.java:82-89",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.java"
+      }
+    },
+    {
+      "id": "A6",
+      "organization": "Apache Kafka",
+      "title": "KafkaProducer.java",
+      "titleEvidence": {
+        "locator": "Fresh official fixed-commit source URL filename KafkaProducer.java",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaProducer.java.get.json"
+      },
+      "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L165-L168",
+      "supports": [
+        "生产者幂等针对生产重试，事务生产者可原子发送到多个Kafka分区；不自动提交本例外部DB。"
+      ],
+      "sections": "KafkaProducer.java:165-168",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaProducer.java",
+        "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L165-L168",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
+      },
+      "quotation": {
+        "text": " * From Kafka 0.11, the KafkaProducer supports two additional modes: the idempotent producer and the transactional producer.\n * The idempotent producer strengthens Kafka's delivery semantics from at least once to exactly once delivery. In particular\n * producer retries will no longer introduce duplicates. The transactional producer allows an application to send messages\n * to multiple partitions (and topics!) atomically.\n",
+        "locator": "KafkaProducer.java:165-168",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaProducer.java"
+      }
+    }
+  ]
+}

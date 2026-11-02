@@ -1,0 +1,197 @@
+{
+  "kind": "independent-read-only-current-source-preflight",
+  "checkedAtUTC": "2026-11-02T07:02:52.631Z",
+  "pass": true,
+  "sourceInputsSHA256": {
+    "references.json": "06ce93dd04b72cb98dc3c862076bbfd5f4e3a404bd57d76ca50ede21d9414e85",
+    "article-sources.json": "f1b2a4a73241b7068944e69f818e90bafa6655a1b79ecdc3118178f8d9a32888"
+  },
+  "coreSources": {
+    "refs": {
+      "schemaVersion": 1,
+      "episode": "kafka-consumer-idempotency",
+      "heading": "参考资料",
+      "presentation": "title-author",
+      "checkedAt": "2026-11-02",
+      "sources": [
+        {
+          "id": "R1",
+          "organization": "Apache Kafka",
+          "title": "KafkaConsumer.java",
+          "titleEvidence": {
+            "locator": "Official GitHub Contents API name/path at 1156b2752aaa28eafc0b4c4d387e63356793268d",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.github-contents.json"
+          },
+          "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+          "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L250-L256",
+          "supports": [
+            "数据库写成而Kafka提交前故障，接手者会从last committed offset重读。",
+            "position与committed分别控制当前读取和重启恢复。"
+          ],
+          "sections": "KafkaConsumer.java:250-256",
+          "verification": {
+            "status": "verified",
+            "checkedAt": "2026-11-02",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.java",
+            "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L250-L256",
+            "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+            "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
+          },
+          "quotation": {
+            "text": " * To avoid this, we will manually commit the offsets only after the corresponding records have been inserted into the\n * database. This gives us exact control of when a record is considered consumed. This raises the opposite possibility:\n * the process could fail in the interval after the insert into the database but before the commit (even though this\n * would likely just be a few milliseconds, it is a possibility). In this case the process that took over consumption\n * would consume from last committed offset and would repeat the insert of the last batch of data. Used in this way\n * Kafka provides what is often called \"at-least-once\" delivery guarantees, as each record will likely be delivered one\n * time but in failure cases could be duplicated.\n",
+            "locator": "KafkaConsumer.java:250-256",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.java"
+          }
+        },
+        {
+          "id": "R2",
+          "organization": "Apache Kafka",
+          "title": "ConsumerUtils.java",
+          "titleEvidence": {
+            "locator": "Official GitHub Contents API name/path at 1156b2752aaa28eafc0b4c4d387e63356793268d",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/ConsumerUtils.github-contents.json"
+          },
+          "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+          "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerUtils.java#L203-L210",
+          "supports": [
+            "非空committed值在分区仍assigned时构造FetchPosition并安装到新客户端。"
+          ],
+          "sections": "ConsumerUtils.java:203-210",
+          "verification": {
+            "status": "verified",
+            "checkedAt": "2026-11-02",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/ConsumerUtils.java",
+            "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerUtils.java#L203-L210",
+            "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+            "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
+          },
+          "quotation": {
+            "text": "                // so we need to ignore seeking if that's the case\n                if (subscriptions.isAssigned(tp)) {\n                    final ConsumerMetadata.LeaderAndEpoch leaderAndEpoch = metadata.currentLeader(tp);\n                    final SubscriptionState.FetchPosition position = new SubscriptionState.FetchPosition(\n                            offsetAndMetadata.offset(), offsetAndMetadata.leaderEpoch(),\n                            leaderAndEpoch);\n\n                    subscriptions.seekUnvalidated(tp, position);\n",
+            "locator": "ConsumerUtils.java:203-210",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/ConsumerUtils.java"
+          }
+        },
+        {
+          "id": "R3",
+          "organization": "Apache Kafka",
+          "title": "AbstractFetch.java",
+          "titleEvidence": {
+            "locator": "Official GitHub Contents API name/path at 1156b2752aaa28eafc0b4c4d387e63356793268d",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/AbstractFetch.github-contents.json"
+          },
+          "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+          "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java#L477-L484",
+          "supports": [
+            "客户端将本地position.offset放进FetchRequest分区读取实参。"
+          ],
+          "sections": "AbstractFetch.java:477-484",
+          "verification": {
+            "status": "verified",
+            "checkedAt": "2026-11-02",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/AbstractFetch.java",
+            "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java#L477-L484",
+            "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+            "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
+          },
+          "quotation": {
+            "text": "                Uuid topicId = topicIds.getOrDefault(partition.topic(), Uuid.ZERO_UUID);\n                FetchRequest.PartitionData partitionData = new FetchRequest.PartitionData(topicId,\n                        position.offset,\n                        FetchRequest.INVALID_LOG_START_OFFSET,\n                        fetchConfig.fetchSize,\n                        position.currentLeader.epoch,\n                        Optional.empty());\n                builder.add(partition, partitionData);\n",
+            "locator": "AbstractFetch.java:477-484",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/AbstractFetch.java"
+          }
+        },
+        {
+          "id": "R4",
+          "organization": "PostgreSQL Global Development Group",
+          "title": "Transactions",
+          "titleEvidence": {
+            "locator": "sect1 id=tutorial-transactions, title Transactions, line141",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-advanced.sgml"
+          },
+          "version": "PostgreSQL18.0; 3d6a828938a5fa0444275d3d2f67b64ec3199eb7",
+          "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/advanced.sgml#L141-L242",
+          "supports": [
+            "业务登记和积分在同一本地事务中一起对其他事务可见；不包含Kafka提交。"
+          ],
+          "sections": "postgres-advanced.sgml:212-215",
+          "verification": {
+            "status": "verified",
+            "checkedAt": "2026-11-02",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-advanced.sgml",
+            "sourceUrl": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/advanced.sgml#L141-L242",
+            "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+            "authorEvidence": "PostgreSQL Global Development Group: official project source and COPYRIGHT, no personal author inferred."
+          },
+          "quotation": {
+            "text": "The updates made\n    so far by an open transaction are invisible to other transactions\n    until the transaction completes, whereupon all the updates become\n    visible simultaneously.",
+            "locator": "postgres-advanced.sgml:212-215",
+            "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-advanced.sgml"
+          }
+        }
+      ]
+    },
+    "refsFile": "/workspace/video-studio/episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/references.json"
+  },
+  "articleQuoteSources": [
+    {
+      "id": "R1",
+      "title": "KafkaConsumer.java",
+      "sourceSHA256": "1c23d1e4e7d597cec4f412e306a7a51efb3ecdfbe1513c20a8684eb29941ff0d",
+      "exactLiteralContinuousQuote": true
+    },
+    {
+      "id": "R2",
+      "title": "ConsumerUtils.java",
+      "sourceSHA256": "de5b550023fb7db49ee61c1d6d6da3627902df428206845bbbdf5295f9484606",
+      "exactLiteralContinuousQuote": true
+    },
+    {
+      "id": "R3",
+      "title": "AbstractFetch.java",
+      "sourceSHA256": "ecda83eb9f8652d0868cc009e198bdd6731810c2d89c47d0622a3a9099c3ba86",
+      "exactLiteralContinuousQuote": true
+    },
+    {
+      "id": "R4",
+      "title": "Transactions",
+      "sourceSHA256": "5918df8a7c43616fcacfab07ff286e0a9dae647c4b55fbefb26baee0da76888f",
+      "exactLiteralContinuousQuote": true
+    },
+    {
+      "id": "A1",
+      "title": "FetchCollector.java",
+      "sourceSHA256": "66961cb214088a240b32e1729228cfefd2643b06c8aad4501f3444242dda4656",
+      "exactLiteralContinuousQuote": true
+    },
+    {
+      "id": "A2",
+      "title": "CompletedFetch.java",
+      "sourceSHA256": "2a7d902f7394f30c83db6ab5a47045362b98d8982746e7f7ae61408364713e6e",
+      "exactLiteralContinuousQuote": true
+    },
+    {
+      "id": "A3",
+      "title": "Primary Keys",
+      "sourceSHA256": "34b30c89e23f2456db1d31a8b3f81322155cdd172a71d15d78968ab8da7762b8",
+      "exactLiteralContinuousQuote": true
+    },
+    {
+      "id": "A4",
+      "title": "INSERT",
+      "sourceSHA256": "d4092be48788906014c243abf41edd189131f6d7239ae8d55f002db0a0d7e980",
+      "exactLiteralContinuousQuote": true
+    },
+    {
+      "id": "A5",
+      "title": "KafkaConsumer.java",
+      "sourceSHA256": "1c23d1e4e7d597cec4f412e306a7a51efb3ecdfbe1513c20a8684eb29941ff0d",
+      "exactLiteralContinuousQuote": true
+    },
+    {
+      "id": "A6",
+      "title": "KafkaProducer.java",
+      "sourceSHA256": "ef8914cd6af41bc030eabc14a77d0625682796a19eae91f4990b30328aa45986",
+      "exactLiteralContinuousQuote": true
+    }
+  ],
+  "scope": "Shared source checks plus all10 literal-continuous quoted texts independently checked against current saved raw source; does not approve narrative or runtime alone."
+}

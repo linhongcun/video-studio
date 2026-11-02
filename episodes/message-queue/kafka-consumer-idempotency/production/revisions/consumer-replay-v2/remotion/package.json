@@ -1,0 +1,24 @@
+{
+  "name": "kafka-consumer-replay-v2",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check:types": "tsc --noEmit",
+    "studio": "remotion studio src/index.ts --no-open --port=4345",
+    "studio:prevoice": "remotion studio src/prevoice/index.ts --no-open --port=4346",
+    "render:voice": "remotion render src/index.ts Main out/voice.mp4 --codec=h264 --crf=20 --concurrency=2 --browser-executable=/usr/bin/chromium --bundle-cache=false",
+    "check:references": "python3 ../pipeline-tools.py references",
+    "render": "python3 ../render.py ..",
+    "render:normalize": "python3 ../normalize-color.py",
+    "render:mix": "python3 ../pipeline-tools.py mix",
+    "render:body": "npm run render:voice && npm run render:normalize && npm run render:mix",
+    "verify:references": "python3 ../render.py .. --verify"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.534",
+    "typescript": "^7.0.2"
+  }
+}
