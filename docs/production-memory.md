@@ -1,5 +1,11 @@
 # 项目制作记忆
 
+## Redis 三期完成制作，发布中（2026-11-02，北京时间）
+
+用户在将 Redis 选题 issue 归入对应系列后，授权制作 Sentinel #296（EP50 / redis-sentinel）、Cluster 故障转移 #297（EP51 / redis-cluster-failover）、近似 LRU #302（EP52 / redis-lru）。三期已完成独立源码/叙事、真实进程实验、配音/动态、正式媒体与图文验收，正在按 v0.99.0 交付 GitHub 站点；线上核验及 issue 收尾以[本批记录](archive/2026-11/redis-mechanisms/README.md)为准。
+
+沿 Redis 银灰/红色视觉和真实 EP，新目录与锁文件依赖基于 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`。Cluster 当前动画入口是 `production/revisions/pre-release-state-text/remotion`：原冻源/成片保留，只修正阶段文字，326项新冻结与6980包AAC保真已验；另两期257/193项冻结保持。已完成跳表 EP40、既有缓存和通用滑动窗口候选保持原范围。实际检查与用户观看认可分开，不将模拟视口、信号检查或源码模型当作全片听审/ASR/学习效果。
+
 ## MQ08与MQ15已交付（2026-11-01，北京时间）
 
 按题库剩余两题完成MQ08/#316重试与死信（EP48）和MQ15/#323多副本确认（EP49），保留稳定MQ15号。先同步8769a592实体目录重构，使用episodes/message-queue/<slug>/{production,publication}与现行锁安装，旧输入和迁移账本保持。

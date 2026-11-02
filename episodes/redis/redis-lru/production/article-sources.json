@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "episode": "redis-lru",
+  "checkedAt": "2026-11-02",
+  "sources": [
+    {
+      "id": "A1",
+      "organization": "Redis",
+      "title": "evict.c",
+      "titleEvidence": {
+        "locator": "Official GitHub Contents API name=evict.c, path=src/evict.c",
+        "evidence": "episodes/redis/redis-lru/production/sources/redis-evict-api.json"
+      },
+      "version": "Redis 8.4.0, fixed commit 60ba86f3c8b4e1ec96451171753a0a38e5c45a0c",
+      "url": "https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/evict.c",
+      "supports": [
+        "使用候选时查询键是否存在，ghost被跳过；并非重新计算池内全部候选当前空闲值。"
+      ],
+      "sections": "performEvictions lines639–647",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/redis/redis-lru/production/research.md",
+        "method": "Read listed official fixed source sections and saved raw GitHub API responses/decoded source. Official repository and stored license identify Redis institution; copyright/byline not inferred as personal author.",
+        "sha256": "055df29733f8529ef3e4dfbb5d4860548caa837d7c2eeeb5220edcace0ca55c1"
+      },
+      "quotation": {
+        "text": "/* If the key exists, is our pick. Otherwise it is\n                     * a ghost and we need to try the next element. */\n                    if (de) {\n                        bestkey = kvobjGetKey(dictGetKV(de));\n                        break;\n                    } else {\n                        /* Ghost... Iterate again. */\n                    }",
+        "locator": "performEvictions lines639–647",
+        "evidence": "episodes/redis/redis-lru/production/sources/evict.c"
+      }
+    },
+    {
+      "id": "A2",
+      "organization": "Redis",
+      "title": "Key eviction",
+      "titleEvidence": {
+        "locator": "Official source frontmatter title: Key eviction",
+        "evidence": "episodes/redis/redis-lru/production/sources/key-eviction.md"
+      },
+      "version": "Redis docs fixed commit 8e40c52452233daad74a303d3714586f53640a36; no publication date stated",
+      "url": "https://github.com/redis/docs/blob/8e40c52452233daad74a303d3714586f53640a36/content/develop/reference/eviction/index.md",
+      "supports": [
+        "提高采样量会增加CPU成本，应观察自身负载命中情况；不保证任意访问模式收益。"
+      ],
+      "sections": "Approximated LRU algorithm, CPU/sample-size paragraph",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/redis/redis-lru/production/research.md",
+        "method": "Read listed official fixed source sections and saved raw GitHub API responses/decoded source. Official repository and stored license identify Redis institution; copyright/byline not inferred as personal author.",
+        "sha256": "4aeb875ac8edeb46400048a8d4b10fd1cf98980933cd2026d7ae747910493927"
+      },
+      "quotation": {
+        "text": "However you can raise the sample size to 10 at the cost of some additional CPU\nusage to closely approximate true LRU, and check if this makes a\ndifference in your cache misses rate.",
+        "locator": "Approximated LRU algorithm, CPU/sample-size paragraph",
+        "evidence": "episodes/redis/redis-lru/production/sources/key-eviction.md"
+      }
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "reviewer": "/root/redis_editorial",
+  "reviewedAt": "2026-11-02T14:40:24.620514+08:00",
+  "slug": "redis-cluster-failover",
+  "verdict": "PASS article/source and inspected runtime evidence",
+  "inputs": {
+    "script.md": "93036e099145cd3fbf096a1eeb16d1a9b917d7b3a3596facb993e10322b45d7a",
+    "research.md": "2455211026987c1a38a00c2fb1e1d98ebc2d878555452425b387e3b84f2e8ee7",
+    "article.mdx": "419dd11559b52cddb16b44027ad80df62f94c16852f6ef72ee7e2be53f66a6f0",
+    "references.json": "18851dd230ff3fb76bb5ebb59cae7e2beaecec91317f820c8b2020c4b011dd71",
+    "article-sources.json": "a9f405b48c638efba92ae91461f8f576955334f55f77aa6acf2dd91513be64cc",
+    "actual-runtime.py": "787495cf76690157b7d55a08c404669aa187f4a5281138626d7463c2e51ca2b2"
+  },
+  "article": {
+    "readComplete": true,
+    "mdxParseExecuted": true,
+    "quoteIds": [
+      "R1",
+      "R2",
+      "A1",
+      "A2",
+      "A3",
+      "A4"
+    ],
+    "continuousQuotesExactInEvidence": true,
+    "claimSupportReview": [
+      "A1 local PFAIL vs time-window majority FAIL",
+      "A3 configurable replica data-age eligibility, no complete-copy promise",
+      "R1 majority master ACK authorization",
+      "R2 executable integer-half-plus1 threshold, not erroneous source comment",
+      "A4 greater configEpoch leads other nodes to accept slot ownership",
+      "A2 async replication supports acknowledged-write loss window"
+    ],
+    "boundaries": [
+      "Slot-serving masters are voters; candidate replica has no self vote",
+      "Normal lastVoteEpoch uniqueness distinguished from model unique-voter set; no invented receiver-side dedup table",
+      "currentEpoch election vs configEpoch slot configuration differentiated",
+      "CRC16 slots not classic hash ring; promotion not resharding",
+      "Manual FORCE/TAKEOVER excluded"
+    ],
+    "figures": [
+      {
+        "src": "article/01-failure.jpg",
+        "plannedSeekSeconds": 40,
+        "chapter": "failure",
+        "target": "FAIL report majority, replica not yet promoted"
+      },
+      {
+        "src": "article/02-authorized.jpg",
+        "plannedSeekSeconds": 94,
+        "chapter": "election",
+        "target": "second valid ACK received, two-of-original-three"
+      },
+      {
+        "src": "article/03-minority.jpg",
+        "plannedSeekSeconds": 120,
+        "chapter": "takeover",
+        "target": "independent reset, one ACK, still replica"
+      }
+    ],
+    "figureStatus": "Preliminary positions only; measured frame targets and actual images not yet reviewed"
+  },
+  "runtime": {
+    "reviewMethod": "Read author script, raw result/snapshots/logs and preserved failed attempt; independent JSON/log assertions, no services rerun",
+    "resultSHA256": "f2db65a4482342ce4487ed22c92e140a671eb60f5e556f059f2630745511a4ba",
+    "sourceCommit": "60ba86f3c8b4e1ec96451171753a0a38e5c45a0c",
+    "binarySHA256": "e0680450f4ef36186ba4a1864c094265e64e0d176028dd0839036eb677be40c5",
+    "success": {
+      "voters": [
+        "16601",
+        "16602"
+      ],
+      "candidate": "16603",
+      "epoch": 7,
+      "slotRange": [
+        0,
+        5460
+      ],
+      "allFiveCapturedLiveViewsConverged": true,
+      "knownReplicatedValueRetained": "before-failover",
+      "limit": "WAIT ran before fault; does not test unreplicated write loss"
+    },
+    "minority": {
+      "beforeVoteMasterFAILConfirmedAt": [
+        "16601",
+        "16602"
+      ],
+      "candidateGatedWith": "SIGSTOP/SIGCONT",
+      "CStoppedBeforeCandidateResumed": true,
+      "onlyBGrants": true,
+      "candidateRemains": "slave",
+      "observationWindowSeconds": 4,
+      "limit": "Controlled localhost scheduling, not a general partition or failover-timing guarantee"
+    },
+    "preservedFailure": {
+      "path": "episodes/redis/redis-cluster-failover/production/examples/actual-runtime-attempt1-preserved",
+      "resultSHA256": "e40d794298cdd44499101b714ad7aa07738a396d7e8bb9dea1b529a0a3fe82f2",
+      "originalScriptSHA256": "77eac90cac8cb934584402bf6c125b62f5d99e92b42d4ebcad9227ecf7895142",
+      "reason": "Harness mistakenly accepted fail? as fail and resumed before confirmed failure; candidate-election wait timed out",
+      "fixDiff": [
+        "-        until('B-C-confirm-A-FAIL',lambda:all('fail' in next((l.split()[2] for l in cli(p,'CLUSTER','NODES').splitlines() if l.startswith(ids[0])),'') for p in PORTS[1:3]),12)",
+        "+        until('B-C-confirm-A-FAIL',lambda:all('fail' in next((l.split()[2] for l in cli(p,'CLUSTER','NODES').splitlines() if l.startswith(ids[0])),'').split(',') for p in PORTS[1:3]),12)"
+      ],
+      "scope": "Only exact comma-separated flag membership changed; product binaries/protocol unchanged; both scenarios reran with new outputs preserved separately"
+    }
+  },
+  "limits": [
+    "No dynamic/encoded video or actual figure/browser acceptance implied",
+    "No all-path fault tolerance proof, power-loss reproduction, benchmark, ASR or listening claim"
+  ]
+}

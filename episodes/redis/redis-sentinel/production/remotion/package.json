@@ -1,0 +1,27 @@
+{
+  "name": "redis-sentinel",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "check:types": "tsc --noEmit",
+    "studio": "remotion studio src/index.ts --no-open --port=4349",
+    "check:references": "python3 ../pipeline-tools.py references",
+    "render": "python3 ../render.py ..",
+    "render:voice": "remotion render src/index.ts Main out/voice.mp4 --codec=h264 --crf=20 --concurrency=2 --browser-executable=/usr/bin/chromium --bundle-cache=false",
+    "render:normalize": "python3 ../normalize-color.py",
+    "render:mix": "python3 ../pipeline-tools.py mix",
+    "render:body": "npm run render:voice && npm run render:normalize && npm run render:mix",
+    "verify:references": "python3 ../render.py .. --verify"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
+    "remotion": "4.0.534",
+    "typescript": "^7.0.2"
+  },
+  "devDependencies": {
+    "@types/react": "18.3.24",
+    "@types/react-dom": "18.3.7"
+  }
+}

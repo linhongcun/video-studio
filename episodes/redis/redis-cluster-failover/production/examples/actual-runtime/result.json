@@ -1,0 +1,37 @@
+{
+  "passed": true,
+  "startedAt": "2026-11-02T14:33:46.058167+08:00",
+  "finishedAt": "2026-11-02T14:34:08.439900+08:00",
+  "version": "Redis server v=8.4.0 sha=00000000:1 malloc=libc bits=64 build=ac4826f6e6bb4ee8",
+  "binarySHA256": "e0680450f4ef36186ba4a1864c094265e64e0d176028dd0839036eb677be40c5",
+  "sourceCommit": "60ba86f3c8b4e1ec96451171753a0a38e5c45a0c",
+  "scenarios": [
+    {
+      "name": "majority-success",
+      "passed": true,
+      "originalSlotMasters": 3,
+      "expectedThreshold": 2,
+      "promotedNode": "04c2b03787817287c614b794dfd504f9fdba0857",
+      "slots": [
+        0,
+        5460
+      ],
+      "valueRetained": "before-failover",
+      "note": "WAIT completed before fault; this does not test loss of unreplicated writes."
+    },
+    {
+      "name": "one-vote-only",
+      "passed": true,
+      "originalSlotMasters": 3,
+      "reachableSlotMasters": 1,
+      "candidateRole": "slave",
+      "noPromotionObservedSeconds": 4,
+      "note": "Candidate SIGSTOP gated until FAIL confirmed by B/C; C killed before candidate resumed. Not a general network partition or timing guarantee."
+    }
+  ],
+  "limits": [
+    "Six localhost processes; process kill/SIGSTOP, no physical power loss",
+    "Known replicated value retained in success only; asynchronous data loss covered by source/model, not this experiment",
+    "No benchmark or all possible protocol paths tested"
+  ]
+}

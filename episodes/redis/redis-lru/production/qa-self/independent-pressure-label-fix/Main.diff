@@ -1,0 +1,16 @@
+--- Main.before.tsx
++++ Main.after.tsx
+@@ -84,11 +84,11 @@
+  }
+  if(id==='evict'){
+   const pick=ease(f,18,80);const gone=ease(f,90,140);const inserted=ease(f,150,210);
+-  return <g data-model-state={gone>.99?'first-evicted':'first-existence-check'}><Headline title="选中 C，腾出位置给 I" note="已有候选中的最旧者；A90仍未入池"/><KeyRow selected={['C']} removed={gone>.99?['C']:[]}/><g opacity={gone<1?1:0}><rect x={X(2)-4} y="344" width="176" height="155" rx="20" fill={C.bg} opacity={gone}/></g>{inserted>0&&<KeyCard name="I" age="0" x={X(2)} opacity={inserted}/>}<Pool entries={gone>.99?retained:first} selected={gone<1?'C':''}/><g opacity={pick}><Badge x="1500" y="575" w="250" text="C 存在 ✓"/></g><Txt x="220" y="824" size={30} fill={C.redDark} opacity={ease(f,second,second+25)}>A 保留</Txt><Txt x="1745" y="824" size={29} fill={C.muted} anchor="end">D / E 候选保留</Txt></g>;
++  return <g data-model-state={gone>.99?'first-evicted':'first-existence-check'}><Headline title="选中 C，腾出位置给 I" note="已有候选中的最旧者；A90仍未入池"/><KeyRow selected={['C']} removed={gone>.99?['C']:[]}/><g opacity={gone<1?1:0}><rect x={X(2)-4} y="344" width="176" height="155" rx="20" fill={C.bg} opacity={gone}/></g>{inserted>0&&<KeyCard name="I" age="0" x={X(2)} opacity={inserted}/>}<Pool entries={gone>.99?retained:first} selected={gone<1?'C':''}/><g opacity={pick}><Badge x="1500" y="575" w="250" text={gone>.99?"删除前检查通过":"C 存在 ✓"}/></g><Txt x="220" y="824" size={30} fill={C.redDark} opacity={ease(f,second,second+25)}>A 保留</Txt><Txt x="1745" y="824" size={29} fill={C.muted} anchor="end">D / E 候选保留</Txt></g>;
+  }
+  if(id==='retained'){
+   const fresh=['F','G','H'];const entries=combined.filter((e:Entry)=>retained.some((r:Entry)=>r.key===e.key)||ease(f,20+fresh.indexOf(e.key)*60,80+fresh.indexOf(e.key)*60)>.99);
+-  return <g data-model-state="second-populating-with-retained-DE"><Headline title="再要空间：补入新样本，保留旧候选" note="连续两轮示例：同一粗粒度时钟，期间没有额外读取"/><KeyRow names={afterFirst} ages={{...idle0,I:0}} selected={['F','G','H']} dim/><Pressure name="J"/><Pool entries={entries} fresh={fresh} selected="D"/>{fresh.map((k,i)=><Flying key={k} name={k} score={idle0[k]} fromX={X(afterFirst.indexOf(k))} toX={poolX(idle0[k])} p={ease(f,20+i*60,80+i*60)}/>)}</g>;
++  return <g data-model-state="second-populating-with-retained-DE"><Headline title="再要空间：补入新样本，保留旧候选" note="连续两轮示例：同一粗粒度时钟，期间没有额外读取"/><KeyRow names={afterFirst} ages={{...idle0,I:0}} selected={['F','G','H']} dim/><Badge x="1480" y="805" w="270" text="写入 J · 需要空间"/><Pool entries={entries} fresh={fresh} selected="D"/>{fresh.map((k,i)=><Flying key={k} name={k} score={idle0[k]} fromX={X(afterFirst.indexOf(k))} toX={poolX(idle0[k])} p={ease(f,20+i*60,80+i*60)}/>)}</g>;
+  }
+  if(id==='reuse'){
+   const gone=ease(f,second+5,second+50);return <g data-model-state={gone>.99?'second-evicted':'retained-D-selected'}><Headline title="这次选 D：它来自上轮保留" note="本轮新样本 F40 / G30 / H20，都没有旧候选 D60 更大"/><KeyRow names={gone>.99?afterSecond:afterFirst} ages={{...idle0,I:0,J:0}} selected={gone>.99?['J']:['D']}/><Pool entries={gone>.99?combined.filter((e:Entry)=>e.key!=='D'):combined} fresh={['F','G','H']} selected={gone>.99?'':'D'}/><Badge x="1490" y="576" w="270" text={gone>.99?'D 已删，J 写入':'D 存在 → 选中'}/></g>;
