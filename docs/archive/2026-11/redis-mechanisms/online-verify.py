@@ -149,6 +149,7 @@ def main():
             m = read(p / 'meta.json')
             d = resolve_repo_path(m['sourcePath'], root=ROOT).parent
             assert d.is_relative_to(base_d)
+            assert d.relative_to(ROOT).as_posix() == expected['sourceProduction']
             assert m['draft'] is False and m['firstRelease'] == args.release
             assert m['createdAt'] == expected['createdAt']
             assert m['ep'] == expected['ep'] and m['title'] == expected['title']

@@ -34,7 +34,7 @@
 
 ## 新期制作记录
 
-- [Redis Sentinel / Cluster / 近似 LRU 三期](2026-11/redis-mechanisms/README.md) — 2026-11-02 获授权开工，EP50–52；当前为配音与动画制作，实际阶段和后续交付见本批记录。
+- [Redis Sentinel / Cluster / 近似 LRU 三期](2026-11/redis-mechanisms/README.md) — 2026-11-02 获授权开工，EP50–52；制作与本地验收完成，v0.99.0 发布及线上实际结果见本批记录。
 
 - [MQ05–MQ07实现机制短片](2026-10/mq05-07-implementation/README.md) — EP45–47已随v0.97.0交付；固定源码、121项真实运行与660声明、31完整GET、线上226动作/66严格PTS及图审通过，三issue completed，MQ现7/9。
 

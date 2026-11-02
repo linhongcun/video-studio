@@ -1,0 +1,955 @@
+{
+  "meta": {
+    "title": "Redis Cluster：一个副本，怎样获得接管哈希槽的授权？",
+    "episode": 51,
+    "episodePart": "Redis 系列 · Cluster 自动故障转移",
+    "slug": "redis-cluster-failover",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 4466,
+    "finalVideoFrames": 4466,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "redis-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "按用户本轮授权制作Redis #297，并在独立检查通过后按持续授权交付GitHub站点；不包含外部平台新发。",
+    "palette": {
+      "background": "#EEF1F5",
+      "surface": "#FAFBFC",
+      "edge": "#C4CCD6",
+      "text": "#182737",
+      "muted": "#586A7D",
+      "red": "#C83235",
+      "redDark": "#9F2029",
+      "redSoft": "#F8E1E0",
+      "link": "#8D9BAC"
+    },
+    "sampleDataLabel": "三主三副本、固定消息先后与轮次为教学示意；非时延或吞吐实验",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "style": "redis-covers-v3",
+      "ep": 51,
+      "number": "EP.51",
+      "productionRoot": "episodes/redis/redis-cluster-failover/production/covers",
+      "currentRemotionRoot": "episodes/redis/redis-cluster-failover/production",
+      "seriesSource": "episodes/_shared/redis-covers-v3",
+      "sourceSha256": {
+        "template.mjs": "89584029ef7f3e8226755762873f2cf321db6790e8a6676ab6ae69444af7a0bb",
+        "diagrams.mjs": "a9ae26b00007222a784a85a0fa01955b2538dc2b1355afd2fe9486756b07e9cb",
+        "catalog.json": "1c32617d2769652fb887343fbd54ab05c98341b486421616ab7806e853adf2e8",
+        "style-v1.json": "21e6550b39c5d248c1fcdddaa402d87a4a8c7e80e72093f7247c052f6da592b5",
+        "plan-layout.json": "fff32b5c3205ead4da3e5f3826d5c0708b83c4d7cae20994a41a5dc0d7be96eb",
+        "background.png": "be8ceff6d52964c90241216e2e0fc17b1c92c6079f9b8d7a856d66465c5a3905",
+        "render.py": "da3212b3364395ade945b096f4e86d5f2fbe054615d09b6c4a166a1750fb6d4b",
+        "README.md": "b785255d83fa76a03c640a2c7096a0a8a5dc55212ada85b2b3037547ac82c554",
+        "../middleware-identity/redis-original.svg": "4707378b190878f36f7e6e1c01fa3ee7e7884c76101809d191dddd943a2e6bdb",
+        "../middleware-identity/LICENSE.txt": "121194741d4a915b9f5890fdd6dd95121f9b1f816517c792358d72d7c838d664",
+        "../middleware-identity/source.json": "6a0b66d82e92dc4159f5bae8ea956e88896bca227c961f8a9f3797f4d195b267",
+        "../middleware-identity/NOTICE.md": "506f3da9e99fd2cef2aa9a040b1854fceff7ab4ad80d778d3d32a449ce43d220"
+      },
+      "fontInputs": [
+        {
+          "family": "Noto Sans CJK SC",
+          "weight": "regular",
+          "actualFamily": "Noto Sans CJK SC",
+          "actualStyle": "Regular",
+          "file": "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+          "sha256": "b76b0433203017ca80401b2ee0dd69350349871c4b19d504c34dbdd80541690a"
+        },
+        {
+          "family": "Noto Sans CJK SC",
+          "weight": "bold",
+          "actualFamily": "Noto Sans CJK SC",
+          "actualStyle": "Bold",
+          "file": "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc",
+          "sha256": "faa5f3656a78b2e2d450d27fe8382c778bc2b6bb5ea29c986664a6a435056ceb"
+        },
+        {
+          "family": "DejaVu Sans",
+          "weight": "regular",
+          "actualFamily": "DejaVu Sans",
+          "actualStyle": "Book",
+          "file": "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+          "sha256": "57f73e11f51999432bf7ab22ce55b6f945d5eca1bf824404cfa9ec2e3718c84e"
+        },
+        {
+          "family": "DejaVu Sans",
+          "weight": "bold",
+          "actualFamily": "DejaVu Sans",
+          "actualStyle": "Bold",
+          "file": "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+          "sha256": "a4c5bc453ca281d90ea079e596da7ae0dfeb5777497c29ec254e76d97ff6f890"
+        }
+      ],
+      "sitePoster": "cover-16x9.jpg",
+      "portraitPoster": "poster.jpg",
+      "covers": {
+        "16x9": {
+          "dimensions": [
+            1920,
+            1080
+          ],
+          "jpgSha256": "3cd021107cadd428af52416f75e48bbec72c86fbcbc4520327e5572be3b47843",
+          "pngSha256": "1210385aae540dc2a1a7c113dce989cfd2c4ce4c23394316dd2db58161ab685c"
+        },
+        "3x4": {
+          "dimensions": [
+            1080,
+            1440
+          ],
+          "jpgSha256": "7ff1a036ea1b67e4e70bb3d794482d1a4f4730f004be389a4a1234f4036985ad",
+          "pngSha256": "c6846fde7ad300d7d817bfd78161982ed9d76e9532454cb49e2a0e0a0e9d63fd"
+        },
+        "4x3": {
+          "dimensions": [
+            1440,
+            1080
+          ],
+          "jpgSha256": "75eea8c637081a62b23dcfddd820f184b886af8410ba5f1bb810d9dfe35e5abf",
+          "pngSha256": "1f47dff45d079cd6df49110c360455c3cfba65dd865bfb1955ce609d1b8e3bf7"
+        }
+      }
+    },
+    "discussionQuestion": "为什么主甲离线后，不能把三位持槽主节点的多数门槛临时降成一票？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening."
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "failure",
+      "chapterId": "failure",
+      "title": "先确认旧主故障",
+      "from": 0,
+      "durationInFrames": 1305,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "failure",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 249,
+          "narration": "主节点甲失联了，旁边明明还有它的副本。为什么这个副本不能立刻接管原来的数据？",
+          "subtitles": [
+            {
+              "text": "主节点甲失联了，旁边明明还有它的副本。",
+              "from": 0,
+              "to": 139,
+              "duration": 140
+            },
+            {
+              "text": "为什么这个副本不能立刻接管原来的数据？",
+              "from": 140,
+              "to": 248,
+              "duration": 109
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 129.64,
+              "localStart": 9.0,
+              "localEnd": 129.64
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 140.14,
+              "wavEnd": 228.02,
+              "localStart": 140.14,
+              "localEnd": 228.02
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              140
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 9.0,
+            "wavTo": 228.02,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第一帧即主甲变灰、复制连接中断，甲副本旁的“接管？”保持问号；原槽徽标仍归主甲，不能在得到授权前搬走。乙丙暂退成背景身份。",
+          "direction": "第一帧即主甲变灰、复制连接中断，甲副本旁的“接管？”保持问号；原槽徽标仍归主甲，不能在得到授权前搬走。乙丙暂退成背景身份。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "failure",
+          "visualType": "topology",
+          "from": 249,
+          "durationInFrames": 359,
+          "narration": "本例有三个主节点，各自负责一段哈希槽，每个主节点还有一个复制数据的副本。接下来只看主节点甲失联后，它的副本怎样接管甲的那段槽。",
+          "subtitles": [
+            {
+              "text": "本例有三个主节点，各自负责一段哈希槽，每个主节点还有一个复制数据的副本。",
+              "from": 0,
+              "to": 193,
+              "duration": 194
+            },
+            {
+              "text": "接下来只看主节点甲失联后，它的副本怎样接管甲的那段槽。",
+              "from": 194,
+              "to": 358,
+              "duration": 165
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-topology-1",
+              "wavStart": 249.02,
+              "wavEnd": 433.06,
+              "localStart": 0.020000000000010232,
+              "localEnd": 184.06
+            },
+            {
+              "id": "02-topology-2",
+              "wavStart": 443.56,
+              "wavEnd": 587.79,
+              "localStart": 194.56,
+              "localEnd": 338.78999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              194
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 249.02,
+            "wavTo": 587.79,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "三主各一段槽从左到右展开，下方副本与各自上方主节点连线；只高亮甲与甲副本的关系。槽是键空间归属，不画成一致性哈希环。",
+          "direction": "三主各一段槽从左到右展开，下方副本与各自上方主节点连线；只高亮甲与甲副本的关系。槽是键空间归属，不画成一致性哈希环。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "failure",
+          "visualType": "suspicion",
+          "from": 608,
+          "durationInFrames": 305,
+          "narration": "主节点乙发出探测，等过超时时间还没等到甲的回复。乙先把甲记为疑似故障，这只是乙自己的判断。",
+          "subtitles": [
+            {
+              "text": "主节点乙发出探测，等过超时时间还没等到甲的回复。",
+              "from": 0,
+              "to": 145,
+              "duration": 146
+            },
+            {
+              "text": "乙先把甲记为疑似故障，这只是乙自己的判断。",
+              "from": 146,
+              "to": 304,
+              "duration": 159
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-suspicion-1",
+              "wavStart": 608.79,
+              "wavEnd": 743.85,
+              "localStart": 0.7899999999999636,
+              "localEnd": 135.85000000000002
+            },
+            {
+              "id": "03-suspicion-2",
+              "wavStart": 754.35,
+              "wavEnd": 892.51,
+              "localStart": 146.35000000000002,
+              "localEnd": 284.51
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              146
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 608.79,
+            "wavTo": 892.51,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "探测脉冲乙→甲，无回包，乙的本地视图出现“疑似故障 PFAIL”；甲副本角色仍为副本，选票栏尚未出现。",
+          "direction": "探测脉冲乙→甲，无回包，乙的本地视图出现“疑似故障 PFAIL”；甲副本角色仍为副本，选票栏尚未出现。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "failure",
+          "visualType": "failure",
+          "from": 913,
+          "durationInFrames": 392,
+          "narration": "乙还要收集其他主节点在有效时间内的故障报告。本例乙和丙都判断甲故障，达到三个主节点中的多数，才确认故障并传播出去。",
+          "subtitles": [
+            {
+              "text": "乙还要收集其他主节点在有效时间内的故障报告。",
+              "from": 0,
+              "to": 135,
+              "duration": 136
+            },
+            {
+              "text": "本例乙和丙都判断甲故障，达到三个主节点中的多数，才确认故障并传播出去。",
+              "from": 136,
+              "to": 391,
+              "duration": 256
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-failure-1",
+              "wavStart": 913.51,
+              "wavEnd": 1038.51,
+              "localStart": 0.5099999999999909,
+              "localEnd": 125.50999999999999
+            },
+            {
+              "id": "04-failure-2",
+              "wavStart": 1049.01,
+              "wavEnd": 1284.0,
+              "localStart": 136.01,
+              "localEnd": 371.0
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              136
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 913.51,
+            "wavTo": 1284.0,
+            "holdFrames": 21,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "丙的有效报告到乙，乙的本地判断与丙报告明确标为“故障判断2/3”，随后FAIL状态传播至甲副本；报告不用选票形状或“授权”字样，避免与后面投票混淆。",
+          "direction": "丙的有效报告到乙，乙的本地判断与丙报告明确标为“故障判断2/3”，随后FAIL状态传播至甲副本；报告不用选票形状或“授权”字样，避免与后面投票混淆。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "election",
+      "chapterId": "election",
+      "title": "副本怎样获得授权",
+      "from": 1305,
+      "durationInFrames": 1590,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "election",
+          "visualType": "eligibility",
+          "from": 1305,
+          "durationInFrames": 506,
+          "narration": "甲的副本收到确认故障后，还要检查自己能否参选，例如与旧主断开复制的时间不能过长。满足条件后先短暂等待；同一个主节点若有多个副本，复制进度会影响谁更早尝试。",
+          "subtitles": [
+            {
+              "text": "甲的副本收到确认故障后，还要检查自己能否参选，例如与旧主断开复制的时间不能过长。",
+              "from": 0,
+              "to": 250,
+              "duration": 251
+            },
+            {
+              "text": "满足条件后先短暂等待；同一个主节点若有多个副本，复制进度会影响谁更早尝试。",
+              "from": 251,
+              "to": 505,
+              "duration": 255
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-eligibility-1",
+              "wavStart": 1305.0,
+              "wavEnd": 1545.89,
+              "localStart": 0.0,
+              "localEnd": 240.8900000000001
+            },
+            {
+              "id": "05-eligibility-2",
+              "wavStart": 1556.39,
+              "wavEnd": 1790.51,
+              "localStart": 251.3900000000001,
+              "localEnd": 485.51
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              251
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 1305.0,
+            "wavTo": 1790.51,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "甲副本旁顺序显示“旧主已确认故障”“本例数据新鲜度合格”“等待后参选”三项，只有当前项放大；不凭空添加第二副本。排名差异只做右侧小注，不演出没有建立的竞争者。",
+          "direction": "甲副本旁顺序显示“旧主已确认故障”“本例数据新鲜度合格”“等待后参选”三项，只有当前项放大；不凭空添加第二副本。排名差异只做右侧小注，不演出没有建立的竞争者。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "election",
+          "visualType": "request",
+          "from": 1811,
+          "durationInFrames": 375,
+          "narration": "轮到甲的副本尝试时，它提高本次选举的轮次，再向主节点请求授权。图中从第五轮进入第六轮，旧轮次迟到的回复不能混进这一轮。",
+          "subtitles": [
+            {
+              "text": "轮到甲的副本尝试时，它提高本次选举的轮次，再向主节点请求授权。",
+              "from": 0,
+              "to": 180,
+              "duration": 181
+            },
+            {
+              "text": "图中从第五轮进入第六轮，旧轮次迟到的回复不能混进这一轮。",
+              "from": 181,
+              "to": 374,
+              "duration": 194
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-request-1",
+              "wavStart": 1811.51,
+              "wavEnd": 1981.77,
+              "localStart": 0.5099999999999909,
+              "localEnd": 170.76999999999998
+            },
+            {
+              "id": "06-request-2",
+              "wavStart": 1992.27,
+              "wavEnd": 2165.68,
+              "localStart": 181.26999999999998,
+              "localEnd": 354.67999999999984
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              181
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 1811.51,
+            "wavTo": 2165.68,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "甲副本轮次5→6，发出带“轮次6”的请求到三个原持槽主节点；甲离线无响应，乙丙可达。旧轮次回复用虚线停在轮次核验外，不计数。",
+          "direction": "甲副本轮次5→6，发出带“轮次6”的请求到三个原持槽主节点；甲离线无响应，乙丙可达。旧轮次回复用虚线停在轮次核验外，不计数。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "election",
+          "visualType": "first-vote",
+          "from": 2186,
+          "durationInFrames": 365,
+          "narration": "只有持有槽的主节点能投票，副本不能给自己凑上一票。乙检查甲已确认故障、轮次也有效，投出本轮唯一的一票；一票还不够。",
+          "subtitles": [
+            {
+              "text": "只有持有槽的主节点能投票，副本不能给自己凑上一票。",
+              "from": 0,
+              "to": 147,
+              "duration": 148
+            },
+            {
+              "text": "乙检查甲已确认故障、轮次也有效，投出本轮唯一的一票；一票还不够。",
+              "from": 148,
+              "to": 364,
+              "duration": 217
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-first-vote-1",
+              "wavStart": 2186.68,
+              "wavEnd": 2324.14,
+              "localStart": 0.6799999999998363,
+              "localEnd": 138.13999999999987
+            },
+            {
+              "id": "07-first-vote-2",
+              "wavStart": 2334.64,
+              "wavEnd": 2530.7,
+              "localStart": 148.63999999999987,
+              "localEnd": 344.6999999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              148
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 2186.68,
+            "wavTo": 2530.7,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "副本侧标注“候选，不计自票”，乙的“轮次6尚未投”变“本轮已投”；乙→甲副本的授权回包抵达才使计数0→1，门槛一直显示“三个持槽主节点，需要2票”。",
+          "direction": "副本侧标注“候选，不计自票”，乙的“轮次6尚未投”变“本轮已投”；乙→甲副本的授权回包抵达才使计数0→1，门槛一直显示“三个持槽主节点，需要2票”。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "election",
+          "visualType": "majority",
+          "from": 2551,
+          "durationInFrames": 344,
+          "narration": "丙的授权回复也抵达，甲的副本才拿到三位主节点中的两票。多数按集群持槽主节点计算，不能因为甲离线，就把门槛降成一票。",
+          "subtitles": [
+            {
+              "text": "丙的授权回复也抵达，甲的副本才拿到三位主节点中的两票。",
+              "from": 0,
+              "to": 161,
+              "duration": 162
+            },
+            {
+              "text": "多数按集群持槽主节点计算，不能因为甲离线，就把门槛降成一票。",
+              "from": 162,
+              "to": 343,
+              "duration": 182
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-majority-1",
+              "wavStart": 2551.7,
+              "wavEnd": 2703.36,
+              "localStart": 0.6999999999998181,
+              "localEnd": 152.36000000000013
+            },
+            {
+              "id": "08-majority-2",
+              "wavStart": 2713.86,
+              "wavEnd": 2874.98,
+              "localStart": 162.86000000000013,
+              "localEnd": 323.98
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              162
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 2551.7,
+            "wavTo": 2874.98,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "丙→甲副本的第二张授权回包抵达，计数1→2后出现“接管资格已获授权”；甲仍算原三主的分母，不能把只剩乙丙的在线数重算多数。",
+          "direction": "丙→甲副本的第二张授权回包抵达，计数1→2后出现“接管资格已获授权”；甲仍算原三主的分母，不能把只剩乙丙的在线数重算多数。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "takeover",
+      "chapterId": "takeover",
+      "title": "接管槽与少数对照",
+      "from": 2895,
+      "durationInFrames": 780,
+      "shots": [
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "takeover",
+          "visualType": "takeover",
+          "from": 2895,
+          "durationInFrames": 359,
+          "narration": "获得授权后，甲的副本提升为新主节点，接管甲原来负责的槽。它用更高的配置轮次宣布新的槽归属，其他节点收到后更新自己的记录。",
+          "subtitles": [
+            {
+              "text": "获得授权后，甲的副本提升为新主节点，接管甲原来负责的槽。",
+              "from": 0,
+              "to": 191,
+              "duration": 192
+            },
+            {
+              "text": "它用更高的配置轮次宣布新的槽归属，其他节点收到后更新自己的记录。",
+              "from": 192,
+              "to": 358,
+              "duration": 167
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-takeover-1",
+              "wavStart": 2895.98,
+              "wavEnd": 3076.55,
+              "localStart": 0.9800000000000182,
+              "localEnd": 181.55000000000018
+            },
+            {
+              "id": "09-takeover-2",
+              "wavStart": 3087.05,
+              "wavEnd": 3233.57,
+              "localStart": 192.05000000000018,
+              "localEnd": 338.57000000000016
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              192
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 2895.98,
+            "wavTo": 3233.57,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "甲副本身份变“新主”，原0–5460槽归属徽标从旧主位置连续转交到新主；配置轮次6的通告抵达乙丙，其小型槽表同步更新。槽归属移动不能画成故障节点把缺失数据搬来。",
+          "direction": "甲副本身份变“新主”，原0–5460槽归属徽标从旧主位置连续转交到新主；配置轮次6的通告抵达乙丙，其小型槽表同步更新。槽归属移动不能画成故障节点把缺失数据搬来。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "takeover",
+          "visualType": "minority",
+          "from": 3254,
+          "durationInFrames": 421,
+          "narration": "再看一个独立对照：甲的故障已经确认，但投票时只有乙能回复。就算甲的副本也在这边，一张主节点选票仍不足两票，它不能自行接管。",
+          "subtitles": [
+            {
+              "text": "再看一个独立对照：甲的故障已经确认，但投票时只有乙能回复。",
+              "from": 0,
+              "to": 186,
+              "duration": 187
+            },
+            {
+              "text": "就算甲的副本也在这边，一张主节点选票仍不足两票，它不能自行接管。",
+              "from": 187,
+              "to": 420,
+              "duration": 234
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-minority-1",
+              "wavStart": 3254.57,
+              "wavEnd": 3430.52,
+              "localStart": 0.5700000000001637,
+              "localEnd": 176.51999999999998
+            },
+            {
+              "id": "10-minority-2",
+              "wavStart": 3441.02,
+              "wavEnd": 3654.75,
+              "localStart": 187.01999999999998,
+              "localEnd": 400.75
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              187
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 3254.57,
+            "wavTo": 3654.75,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "显式标“独立对照，重新从参选前开始”，旧主仍FAIL，甲副本恢复副本身份与旧槽归属；丙变为此次投票时不可达。只有乙回包，计数1/2停住，候选无自票、不晋升。",
+          "direction": "显式标“独立对照，重新从参选前开始”，旧主仍FAIL，甲副本恢复副本身份与旧槽归属；丙变为此次投票时不可达。只有乙回包，计数1/2停住，候选无自票、不晋升。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "授权的边界",
+      "from": 3675,
+      "durationInFrames": 791,
+      "shots": [
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "boundary",
+          "visualType": "data-boundary",
+          "from": 3675,
+          "durationInFrames": 383,
+          "narration": "拿到多数授权，证明的是接管资格，不是所有业务写入都已复制。Redis采用异步复制，旧主最后确认的写入如果还没到副本，换主后仍可能丢失。",
+          "subtitles": [
+            {
+              "text": "拿到多数授权，证明的是接管资格，不是所有业务写入都已复制。",
+              "from": 0,
+              "to": 163,
+              "duration": 164
+            },
+            {
+              "text": "Redis采用异步复制，旧主最后确认的写入如果还没到副本，换主后仍可能丢失。",
+              "from": 164,
+              "to": 382,
+              "duration": 219
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-data-boundary-1",
+              "wavStart": 3675.75,
+              "wavEnd": 3829.43,
+              "localStart": 0.75,
+              "localEnd": 154.42999999999984
+            },
+            {
+              "id": "11-data-boundary-2",
+              "wavStart": 3839.93,
+              "wavEnd": 4037.53,
+              "localStart": 164.92999999999984,
+              "localEnd": 362.5300000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              164
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 3675.75,
+            "wavTo": 4037.53,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回到已完成的成功分支并明确标注，聚焦旧主与新主的数据区：旧主离线保留“已确认但未复制”的末条，副本只有已复制记录；不无声抹掉旧主字节，不凭选票生成缺失数据。",
+          "direction": "回到已完成的成功分支并明确标注，聚焦旧主与新主的数据区：旧主离线保留“已确认但未复制”的末条，副本只有已复制记录；不无声抹掉旧主字节，不凭选票生成缺失数据。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 4058,
+          "durationInFrames": 408,
+          "narration": "所以这次接管有两道不同的判断：先确认旧主故障，再由多数主节点授权副本。候选拿到足够选票后，才能以新的槽归属成为主节点。",
+          "subtitles": [
+            {
+              "text": "所以这次接管有两道不同的判断：先确认旧主故障，再由多数主节点授权副本。",
+              "from": 0,
+              "to": 226,
+              "duration": 227
+            },
+            {
+              "text": "候选拿到足够选票后，才能以新的槽归属成为主节点。",
+              "from": 227,
+              "to": 407,
+              "duration": 181
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-recap-1",
+              "wavStart": 4058.53,
+              "wavEnd": 4275.06,
+              "localStart": 0.5300000000002001,
+              "localEnd": 217.0600000000004
+            },
+            {
+              "id": "12-recap-2",
+              "wavStart": 4285.56,
+              "wavEnd": 4426.84,
+              "localStart": 227.5600000000004,
+              "localEnd": 368.84000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              227
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e0644821 + words.json c8b5bb42 + script.md 93036e09",
+            "wavFrom": 4058.53,
+            "wavTo": 4426.84,
+            "holdFrames": 39,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回收固定全局路径“确认故障→多数授权→发布新槽归属”，当前新主保持在甲副本原位置；分别用故障报告、授权回包、槽表三种对象回顾实际动作，结尾IT小村·原创。",
+          "direction": "回收固定全局路径“确认故障→多数授权→发布新槽归属”，当前新主保持在甲副本原位置；分别用故障报告、授权回包、槽表三种对象回顾实际动作，结尾IT小村·原创。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

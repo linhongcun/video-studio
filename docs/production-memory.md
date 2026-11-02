@@ -1,10 +1,10 @@
 # 项目制作记忆
 
-## Redis 三期启动（2026-11-02，北京时间）
+## Redis 三期完成制作，发布中（2026-11-02，北京时间）
 
-用户在将 Redis 选题 issue 归入对应系列后，进一步授权制作剩余三期：Sentinel #296（EP50 / redis-sentinel）、Cluster 故障转移 #297（EP51 / redis-cluster-failover）、近似 LRU #302（EP52 / redis-lru）。已完成跳表 EP40 保持，不将通用滑动窗口限流自动扩入本批。
+用户在将 Redis 选题 issue 归入对应系列后，授权制作 Sentinel #296（EP50 / redis-sentinel）、Cluster 故障转移 #297（EP51 / redis-cluster-failover）、近似 LRU #302（EP52 / redis-lru）。三期已完成独立源码/叙事、真实进程实验、配音/动态、正式媒体与图文验收，正在按 v0.99.0 交付 GitHub 站点；线上核验及 issue 收尾以[本批记录](archive/2026-11/redis-mechanisms/README.md)为准。
 
-开工先同步最新主干 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`，使用现行系列实体目录与锁文件；沿 Redis 银灰/红色封面及正文风格。三题并行调研，逐片独立审稿、动态、配音、冻结及正式媒体检查；按既有授权交付 GitHub 站点并完成线上核验后才关闭 issue。当前为资料复核与脚本阶段，不预记完成或用户观看认可。实际状态见[本批记录](archive/2026-11/redis-mechanisms/README.md)。
+沿 Redis 银灰/红色视觉和真实 EP，新目录与锁文件依赖基于 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`。Cluster 当前动画入口是 `production/revisions/pre-release-state-text/remotion`：原冻源/成片保留，只修正阶段文字，326项新冻结与6980包AAC保真已验；另两期257/193项冻结保持。已完成跳表 EP40、既有缓存和通用滑动窗口候选保持原范围。实际检查与用户观看认可分开，不将模拟视口、信号检查或源码模型当作全片听审/ASR/学习效果。
 
 ## MQ08与MQ15已交付（2026-11-01，北京时间）
 

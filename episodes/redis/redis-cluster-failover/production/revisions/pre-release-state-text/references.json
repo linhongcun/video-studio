@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "redis-cluster-failover",
+  "heading": "参考资料",
+  "checkedAt": "2026-11-02",
+  "timezone": "Asia/Shanghai",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Redis",
+      "title": "Redis cluster specification",
+      "titleEvidence": {
+        "locator": "YAML frontmatter title",
+        "evidence": "episodes/redis/redis-cluster-failover/production/sources/cluster-spec.md"
+      },
+      "version": "Official docs saved 2026-11-02; blob2b03f5d63c83e9b293a6c9e98cd42faafa15ff46",
+      "url": "https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/",
+      "supports": [
+        "合格副本请求主节点选票，获得多数授权后晋升；不是Sentinel负责人选举。"
+      ],
+      "sections": "Replica election and promotion; line833",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/redis/redis-cluster-failover/production/research.md",
+        "method": "Fresh official GitHub Contents API GET; decoded bytes read at listed sections; no individual author inferred",
+        "sha256": "c2630e8a57a52d451f780afaaaee45f2a5018f15f18555d163e1c5aa0dbc84c2"
+      },
+      "quotation": {
+        "text": "Once the replica receives ACKs from the majority of masters, it wins the election.",
+        "locator": "Replica election and promotion; line833",
+        "evidence": "episodes/redis/redis-cluster-failover/production/sources/cluster-spec.md"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Redis",
+      "title": "cluster_legacy.c",
+      "titleEvidence": {
+        "locator": "GitHub Contents API name",
+        "evidence": "episodes/redis/redis-cluster-failover/production/sources/redis-cluster-legacy.response.json"
+      },
+      "version": "Redis 8.4.0 fixed commit60ba86f3c8b4e1ec96451171753a0a38e5c45a0c",
+      "url": "https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/cluster_legacy.c",
+      "supports": [
+        "实际多数门槛按持槽主节点size整除2加1；同轮投票与晋升前置见执行段。"
+      ],
+      "sections": "clusterHandleSlaveFailover line4295; clusterSendFailoverAuthIfNeeded4042–4145",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/redis/redis-cluster-failover/production/research.md",
+        "method": "Fresh official GitHub Contents API GET; decoded bytes read at listed sections; no individual author inferred",
+        "sha256": "549726d3781f02b0f0700a2e58f62842d228a2a59bb1304a4df40e82779e80ce"
+      },
+      "quotation": {
+        "text": "int needed_quorum = (server.cluster->size / 2) + 1;",
+        "locator": "clusterHandleSlaveFailover line4295; clusterSendFailoverAuthIfNeeded4042–4145",
+        "evidence": "episodes/redis/redis-cluster-failover/production/sources/redis-cluster-legacy.c"
+      }
+    }
+  ]
+}
