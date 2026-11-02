@@ -1,0 +1,101 @@
+{
+  "recordedAtUTC": "2026-11-02T06:25:20.837859+00:00",
+  "scope": "Read-only toolchain audit plus explicitly requested scratch Redis source download/build; no repository or remote mutations.",
+  "runtimeManifest": "/workspace/work/redis-batch/runtime/runtime-manifest.json",
+  "tools": {
+    "node": "24.19.0",
+    "npm": "11.9.0",
+    "ffmpeg": "7.1.5-0+deb13u1",
+    "chromium": "154.0.8037.57 /usr/bin/chromium",
+    "gcc": "14.2.0",
+    "make": "4.4.1",
+    "python": "3.12.14"
+  },
+  "python": {
+    "voiceInterpreter": "/workspace/.venvs/video-studio/bin/python",
+    "voiceAvailable": [
+      "numpy",
+      "scipy",
+      "soundfile"
+    ],
+    "voiceMissing": [
+      "Pillow",
+      "requests",
+      "faster_whisper",
+      "parselmouth",
+      "torch",
+      "redis"
+    ],
+    "defaultAvailable": [
+      "numpy",
+      "scipy",
+      "Pillow"
+    ],
+    "defaultMissing": [
+      "soundfile",
+      "requests",
+      "faster_whisper",
+      "parselmouth",
+      "torch",
+      "redis"
+    ],
+    "referenceRequirement": "episodes/_shared/requirements-reference-appendix.txt: Pillow==12.3.0",
+    "ttsBindingPresent": true,
+    "ttsNetworkInvoked": false,
+    "asrCapability": "No ASR module or model found in checked environments; shared historic pipeline existing is not current capability."
+  },
+  "site": {
+    "packageVersion": "0.98.0",
+    "dependenciesInstalled": true,
+    "astro": "5.18.2",
+    "mdx": "4.3.14",
+    "pagefind": "1.5.2",
+    "existingDistTimestamp": "2026-11-01 15:15 UTC",
+    "freshBuildRun": false,
+    "reason": "Avoid concurrent site writes and expensive build during author preparation."
+  },
+  "assembly": {
+    "basis": "episodes/message-queue/kafka-replica-acks/production/",
+    "files": [
+      "prepare.py",
+      "assemble.py",
+      "freeze.py",
+      "verify.py",
+      "render.py",
+      "render-final.sh",
+      "pipeline-tools.py",
+      "normalize-color.py",
+      "check-references.mjs",
+      "references-renderer.py"
+    ],
+    "voiceShared": "episodes/_shared/voice/{prep.py,gen.py,build.py}",
+    "timingShared": "episodes/_shared/{assemble_sentence_episode.py,place_v2.py,label_onset_strict.py,check_sentence_episode.py}",
+    "renderShared": "episodes/_shared/render_with_references.py",
+    "freshNpmCiRequired": true,
+    "remotionVersion": "4.0.534",
+    "typeScriptVersion": "7.0.2",
+    "renderLock": "/tmp/video-studio-render.lock"
+  },
+  "redisStyle": {
+    "imports": [
+      "episodes/_shared/redis-video/Frame.tsx",
+      "episodes/_shared/redis-video/theme.ts",
+      "episodes/_shared/redis-video/style-v1.json"
+    ],
+    "header": "RedisHeader requires real ep and accepts short title/chapter; fixed x570 title and x768 chapter can collide with long titles, inspect actual text bounds.",
+    "palette": "cool-silver #EEF1F5 / Redis red #C83235 / graphite #182737",
+    "referenceMapping": "success->red; redis palette has no success field",
+    "coverBasis": "episodes/_shared/redis-covers-v2/; do not mutate old frozen catalogs/styles or use old installer for new slugs without local adapter."
+  },
+  "pitfalls": [
+    "Do not copy Kafka identity/palette/archival declarations into new Redis wrappers.",
+    "Old shared redis-video/references.py is for historical skiplist restyling and declares preserving original narration/timing; new episodes need local truthful adapter.",
+    "MQ15 normalize-color.py performs real full-range BT601 to limited BT709 pixel conversion, then checks stream and decoded frame tags. Merely setting flags gives wrong silver/red colors.",
+    "New bibliography must match limited BT709 body and same real color conversion. Preserve immutable shared appenders and freeze actual adapter dependencies.",
+    "Reference list is title-author, four entries/page, five seconds/page; source research/title evidence and article quotes need real paths.",
+    "Source tarball redis-server --version reports sha00000000; provenance is official tag+commit GET evidence and archive SHA, not that field.",
+    "Build uses libc/noTLS/O2; any LRU memory experiment must report actual allocator/config/INFO, not performance guarantees.",
+    "Final reference appendix frames differ from body voice/storyboard frames; verification must keep both identities.",
+    "No new TTS, ASR, site build, video render, freeze, or episode/shared mutations performed by this audit."
+  ]
+}

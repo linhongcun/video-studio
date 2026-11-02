@@ -19,7 +19,7 @@ IT小村用代码生成的动画短片、配套图文和可运行示例，讲清
 | [趣味推理](https://linhongcun.github.io/video-studio/series/puzzles/) | 赛马、过桥、倒水、三门与鸡蛋掉落，用连续过程解释判断和排除的依据。 |
 | [Kafka · 消息队列](https://linhongcun.github.io/video-studio/series/message-queue/) | 从 Kafka 入门到消费组、日志重放与发送确认，理解记录写入、消费者分工、重读和发送结果的边界。 |
 | [MySQL](https://linhongcun.github.io/video-studio/series/database/) | 以 MySQL 8.4 为背景，理解 InnoDB 索引、事务、锁与单主异步复制。 |
-| [Redis 系列](https://linhongcun.github.io/video-studio/series/redis/) | 从商品查询缓存与缓存一致性，深入跳表等内部机制。 |
+| [Redis 系列](https://linhongcun.github.io/video-studio/series/redis/) | 从缓存应用出发，深入跳表、内存淘汰与 Sentinel / Cluster 故障转移。 |
 | [分布式](https://linhongcun.github.io/video-studio/series/distributed/) | 分库分表、分布式 ID，以及事务入门、两阶段提交、TCC、Saga 和 Outbox。 |
 | [计算机网络](https://linhongcun.github.io/video-studio/series/request/) | 沿网页请求理解 HTTP、HTTPS、DNS、登录态、CDN、负载均衡与浏览器缓存。 |
 | [其他](https://linhongcun.github.io/video-studio/series/engineering-algorithms/) | 一致性哈希、布隆过滤器等独立专题；以后没有明确系列的内容统一归入这里。 |

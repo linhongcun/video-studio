@@ -1,5 +1,11 @@
 # 项目制作记忆
 
+## Redis 三期启动（2026-11-02，北京时间）
+
+用户在将 Redis 选题 issue 归入对应系列后，进一步授权制作剩余三期：Sentinel #296（EP50 / redis-sentinel）、Cluster 故障转移 #297（EP51 / redis-cluster-failover）、近似 LRU #302（EP52 / redis-lru）。已完成跳表 EP40 保持，不将通用滑动窗口限流自动扩入本批。
+
+开工先同步最新主干 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`，使用现行系列实体目录与锁文件；沿 Redis 银灰/红色封面及正文风格。三题并行调研，逐片独立审稿、动态、配音、冻结及正式媒体检查；按既有授权交付 GitHub 站点并完成线上核验后才关闭 issue。当前为资料复核与脚本阶段，不预记完成或用户观看认可。实际状态见[本批记录](archive/2026-11/redis-mechanisms/README.md)。
+
 ## MQ08与MQ15已交付（2026-11-01，北京时间）
 
 按题库剩余两题完成MQ08/#316重试与死信（EP48）和MQ15/#323多副本确认（EP49），保留稳定MQ15号。先同步8769a592实体目录重构，使用episodes/message-queue/<slug>/{production,publication}与现行锁安装，旧输入和迁移账本保持。

@@ -1,0 +1,68 @@
+{
+  "reviewer": "/root/redis_editorial",
+  "reviewedAt": "2026-11-02T14:35:51.841498+08:00",
+  "kind": "independent inspection of author-run source/scripts/raw reports/logs; no Redis service rerun",
+  "sentinel": {
+    "verdict": "PASS core runtime evidence",
+    "report": "episodes/redis/redis-sentinel/production/examples/actual-runtime/20261102T142937+0800/report.json",
+    "reportSHA256": "dc941a98fb16b8efd0dad9b37d4ed4deedbb9cadd51d7eaf6fb1c31eca9a0a19",
+    "script": "episodes/redis/redis-sentinel/production/examples/run_sentinel.py",
+    "scriptSHA256": "10c4740559032f924e8855570f55b2ad0ac7fb3521d87c95a91eb9618099d2bf",
+    "observed": [
+      "Known5 preserved, quorum2, only2active yields ODOWN+NOQUORUM, both replicas stay replicas in16 snapshots over8seconds",
+      "Fresh majority3 case elects Sentinel16504 and selects replica16502",
+      "Replica16501 priority0 remains replica following promoted16502; role and post-failover data checks in author script"
+    ],
+    "limits": [
+      "Process termination/local loopback; no packet-loss network partition, power loss, or data-loss reproduction",
+      "Priority0 exclusion observed; the teaching900/800offset contrast is not this runtime trace",
+      "Final captured master address views not fully converged:16504 still16500 while16503/16505 advertise16502. Do not claim runtime proved all Sentinel views converged."
+    ],
+    "finalSentinelViews": {
+      "16503": "16502",
+      "16504": "16500",
+      "16505": "16502"
+    }
+  },
+  "lru": {
+    "verdict": "PASS observed approximate-eviction counterexample",
+    "report": "episodes/redis/redis-lru/production/runtime/result.json",
+    "reportSHA256": "af647069050b73220eca52f7b550e2ccad20450d7862a2bdef76900b4f8257ff",
+    "script": "episodes/redis/redis-lru/production/runtime_verify.py",
+    "scriptSHA256": "4eb504f4fedcd9fd01b27c73e54f8e585c5079f96bd08856d703255910e69ae9",
+    "observed": {
+      "sampleCount": 1,
+      "agesBeforePressureSeconds": {
+        "A": 8,
+        "B": 7,
+        "C": 6,
+        "D": 5,
+        "E": 4,
+        "F": 3,
+        "G": 2,
+        "H": 1
+      },
+      "evicted": [
+        "D"
+      ],
+      "oldestASurvives": true,
+      "evictedDelta": 1,
+      "expiredDelta": 0
+    },
+    "limits": [
+      "One actual random result; no hidden sample/pool exposure or RNG control",
+      "Samples1 differs from scripted samples3 teaching path and must remain separate",
+      "No hit-rate/throughput/latency guarantee; no product proof of exact CDE/FGH sample sequence"
+    ],
+    "inspectionDoesNotTouchRecency": {
+      "expire.cSHA256": "a1495842f7aaad620b2f75d388a2b2a9811bfdf9d76c9b826ab5e6de5215a643",
+      "object.cSHA256": "daa383316e2009dda0fc0293b4cff3c4914178700c2788bb71d08cc88fdb82f2",
+      "ttl": "ttlGenericCommand uses LOOKUP_NOTOUCH",
+      "object": "kvobjCommandLookup uses LOOKUP_NOTOUCH|LOOKUP_NONOTIFY"
+    }
+  },
+  "cluster": {
+    "status": "runtime script inspected; result not yet reviewed",
+    "note": "Warned author to preserve attempts because original script root was not timestamped."
+  }
+}

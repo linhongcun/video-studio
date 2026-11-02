@@ -1,0 +1,1614 @@
+{
+  "meta": {
+    "title": "Redis Sentinel：主节点失联后，谁有资格决定换主？",
+    "episode": 50,
+    "episodePart": "Redis 系列 · Sentinel",
+    "slug": "redis-sentinel",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 4439,
+    "finalVideoFrames": 4439,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "redis-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户已授权制作Redis相关issue视频；本期#296 / EP50。仅GitHub站点，实际检查后按持续授权发布；不预记用户认可或外平台发布。",
+    "palette": {
+      "bg": "#EEF1F5",
+      "text": "#182737"
+    },
+    "sampleDataLabel": "教学示例 · 固定五哨兵 / quorum 2",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "title": "Redis Sentinel：主节点失联后，谁有资格决定换主？",
+      "ep": 50,
+      "template": "episodes/_shared/redis-covers-v3",
+      "manifest": "covers/cover-style.json",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080,
+          "textBoxes": [
+            {
+              "id": "series",
+              "text": "Redis 系列",
+              "x": 230,
+              "y": 94,
+              "w": 226.375,
+              "h": 66
+            },
+            {
+              "id": "watermark",
+              "text": "IT小村",
+              "x": 1702.296875,
+              "y": 111,
+              "w": 85.703125,
+              "h": 42
+            },
+            {
+              "id": "number",
+              "text": "EP.50",
+              "x": 192.421875,
+              "y": 299,
+              "w": 114.15625,
+              "h": 44
+            },
+            {
+              "id": "title-0",
+              "text": "Sentinel",
+              "x": 126,
+              "y": 394,
+              "w": 641.28125,
+              "h": 232
+            },
+            {
+              "id": "question-0",
+              "text": "主节点失联后，",
+              "x": 132,
+              "y": 686,
+              "w": 294.015625,
+              "h": 61
+            },
+            {
+              "id": "question-1",
+              "text": "谁有资格决定换主？",
+              "x": 132,
+              "y": 741,
+              "w": 378.015625,
+              "h": 61
+            },
+            {
+              "id": "diagram-caption",
+              "text": "授权与副本选择 · 教学示例",
+              "x": 978,
+              "y": 308,
+              "w": 323.8125,
+              "h": 37
+            },
+            {
+              "id": "diagram-s-example",
+              "text": "5个 Sentinel · 先选本次负责人",
+              "x": 1191.1015625,
+              "y": 388.1499938964844,
+              "w": 347.796875,
+              "h": 35
+            },
+            {
+              "id": "diagram-s1-label",
+              "text": "S1 当选",
+              "x": 1010.5828247070312,
+              "y": 440.2833251953125,
+              "w": 83.23431396484375,
+              "h": 35
+            },
+            {
+              "id": "diagram-s1-value",
+              "text": "自投1票",
+              "x": 1013.7703247070312,
+              "y": 476.797607421875,
+              "w": 76.85931396484375,
+              "h": 31
+            },
+            {
+              "id": "diagram-s2-label",
+              "text": "S2",
+              "x": 1193.9124755859375,
+              "y": 440.2833251953125,
+              "w": 29.375,
+              "h": 35
+            },
+            {
+              "id": "diagram-s2-value",
+              "text": "投给S1",
+              "x": 1174.1937255859375,
+              "y": 476.797607421875,
+              "w": 68.8125,
+              "h": 31
+            },
+            {
+              "id": "diagram-s3-label",
+              "text": "S3",
+              "x": 1350.3125,
+              "y": 440.2833251953125,
+              "w": 29.375,
+              "h": 35
+            },
+            {
+              "id": "diagram-s3-value",
+              "text": "投给S1",
+              "x": 1330.59375,
+              "y": 476.797607421875,
+              "w": 68.8125,
+              "h": 31
+            },
+            {
+              "id": "diagram-s4-label",
+              "text": "S4",
+              "x": 1506.71240234375,
+              "y": 440.2833251953125,
+              "w": 29.375,
+              "h": 35
+            },
+            {
+              "id": "diagram-s4-value",
+              "text": "未投此票",
+              "x": 1478.58740234375,
+              "y": 476.797607421875,
+              "w": 85.625,
+              "h": 31
+            },
+            {
+              "id": "diagram-s5-label",
+              "text": "S5",
+              "x": 1663.112548828125,
+              "y": 440.2833251953125,
+              "w": 29.375,
+              "h": 35
+            },
+            {
+              "id": "diagram-s5-value",
+              "text": "未投此票",
+              "x": 1634.987548828125,
+              "y": 476.797607421875,
+              "w": 85.625,
+              "h": 31
+            },
+            {
+              "id": "diagram-s-majority",
+              "text": "3 / 5 多数授权",
+              "x": 1289.4375,
+              "y": 530.585693359375,
+              "w": 151.125,
+              "h": 35.00006103515625
+            },
+            {
+              "id": "diagram-s-select-label",
+              "text": "S1 再筛选并提升副本",
+              "x": 1263.9453125,
+              "y": 583.8571166992188,
+              "w": 202.109375,
+              "h": 31
+            },
+            {
+              "id": "diagram-s-old-master-label",
+              "text": "旧主 M",
+              "x": 1081.047607421875,
+              "y": 620.8880615234375,
+              "w": 74.5,
+              "h": 35
+            },
+            {
+              "id": "diagram-s-old-master-value",
+              "text": "失联",
+              "x": 1096.891357421875,
+              "y": 668.5737915039062,
+              "w": 42.8125,
+              "h": 31
+            },
+            {
+              "id": "diagram-s-replica-r1-label",
+              "text": "R1 · 排除",
+              "x": 1307.84375,
+              "y": 620.8880615234375,
+              "w": 114.3125,
+              "h": 35
+            },
+            {
+              "id": "diagram-s-replica-r1-value",
+              "text": "priority 0 · 900",
+              "x": 1281.6640625,
+              "y": 668.5737915039062,
+              "w": 166.671875,
+              "h": 31
+            },
+            {
+              "id": "diagram-s-replica-r2-label",
+              "text": "R2 · 提升",
+              "x": 1554.546142578125,
+              "y": 620.8880615234375,
+              "w": 114.3125,
+              "h": 35
+            },
+            {
+              "id": "diagram-s-replica-r2-value",
+              "text": "priority 100 · 800",
+              "x": 1515.733642578125,
+              "y": 668.5737915039062,
+              "w": 191.9375,
+              "h": 31
+            }
+          ],
+          "jpgSHA256": "c2e95f49078622c5f0244906dfa92c3cac7afbb99e6acd3b71e52aabb49e1b1e",
+          "pngSHA256": "d2dfbb77f18c4c560fc095ac6cd6bb5a261c0b3d0c422194aa0d4001302cc9cc",
+          "watermarkZone": {
+            "x": 1702.296875,
+            "y": 111,
+            "w": 85.703125,
+            "h": 42
+          }
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440,
+          "textBoxes": [
+            {
+              "id": "series",
+              "text": "Redis 系列",
+              "x": 194,
+              "y": 98,
+              "w": 206.6875,
+              "h": 61
+            },
+            {
+              "id": "watermark",
+              "text": "IT小村",
+              "x": 898.296875,
+              "y": 111,
+              "w": 85.703125,
+              "h": 42
+            },
+            {
+              "id": "number",
+              "text": "EP.50",
+              "x": 156.421875,
+              "y": 269,
+              "w": 114.15625,
+              "h": 44
+            },
+            {
+              "id": "title-0",
+              "text": "Sentinel",
+              "x": 90,
+              "y": 348,
+              "w": 559.125,
+              "h": 202
+            },
+            {
+              "id": "question-0",
+              "text": "主节点失联后，",
+              "x": 96,
+              "y": 593,
+              "w": 252.015625,
+              "h": 52
+            },
+            {
+              "id": "question-1",
+              "text": "谁有资格决定换主？",
+              "x": 96,
+              "y": 643,
+              "w": 324.015625,
+              "h": 52
+            },
+            {
+              "id": "diagram-s-example",
+              "text": "5个 Sentinel · 先选本次负责人",
+              "x": 353.0703125,
+              "y": 846,
+              "w": 373.859375,
+              "h": 37
+            },
+            {
+              "id": "diagram-s1-label",
+              "text": "S1 当选",
+              "x": 159.265625,
+              "y": 902,
+              "w": 89.46875,
+              "h": 37
+            },
+            {
+              "id": "diagram-s1-value",
+              "text": "自投1票",
+              "x": 162.7109375,
+              "y": 941,
+              "w": 82.578125,
+              "h": 34
+            },
+            {
+              "id": "diagram-s2-label",
+              "text": "S2",
+              "x": 356.2109375,
+              "y": 902,
+              "w": 31.578125,
+              "h": 37
+            },
+            {
+              "id": "diagram-s2-value",
+              "text": "投给S1",
+              "x": 335.03125,
+              "y": 941,
+              "w": 73.9375,
+              "h": 34
+            },
+            {
+              "id": "diagram-s3-label",
+              "text": "S3",
+              "x": 524.2109375,
+              "y": 902,
+              "w": 31.578125,
+              "h": 37
+            },
+            {
+              "id": "diagram-s3-value",
+              "text": "投给S1",
+              "x": 503.03125,
+              "y": 941,
+              "w": 73.9375,
+              "h": 34
+            },
+            {
+              "id": "diagram-s4-label",
+              "text": "S4",
+              "x": 692.2109375,
+              "y": 902,
+              "w": 31.578125,
+              "h": 37
+            },
+            {
+              "id": "diagram-s4-value",
+              "text": "未投此票",
+              "x": 662,
+              "y": 941,
+              "w": 92,
+              "h": 34
+            },
+            {
+              "id": "diagram-s5-label",
+              "text": "S5",
+              "x": 860.2109375,
+              "y": 902,
+              "w": 31.578125,
+              "h": 37
+            },
+            {
+              "id": "diagram-s5-value",
+              "text": "未投此票",
+              "x": 830,
+              "y": 941,
+              "w": 92,
+              "h": 34
+            },
+            {
+              "id": "diagram-s-majority",
+              "text": "3 / 5 多数授权",
+              "x": 458.7734375,
+              "y": 999,
+              "w": 162.453125,
+              "h": 37
+            },
+            {
+              "id": "diagram-s-select-label",
+              "text": "S1 再筛选并提升副本",
+              "x": 431.421875,
+              "y": 1056,
+              "w": 217.15625,
+              "h": 34
+            },
+            {
+              "id": "diagram-s-old-master-label",
+              "text": "旧主 M",
+              "x": 234.953125,
+              "y": 1096,
+              "w": 80.09375,
+              "h": 37
+            },
+            {
+              "id": "diagram-s-old-master-value",
+              "text": "失联",
+              "x": 252,
+              "y": 1147,
+              "w": 46,
+              "h": 34
+            },
+            {
+              "id": "diagram-s-replica-r1-label",
+              "text": "R1 · 排除",
+              "x": 478.5546875,
+              "y": 1096,
+              "w": 122.890625,
+              "h": 37
+            },
+            {
+              "id": "diagram-s-replica-r1-value",
+              "text": "priority 0 · 900",
+              "x": 450.4609375,
+              "y": 1147,
+              "w": 179.078125,
+              "h": 34
+            },
+            {
+              "id": "diagram-s-replica-r2-label",
+              "text": "R2 · 提升",
+              "x": 743.5546875,
+              "y": 1096,
+              "w": 122.890625,
+              "h": 37
+            },
+            {
+              "id": "diagram-s-replica-r2-value",
+              "text": "priority 100 · 800",
+              "x": 701.890625,
+              "y": 1147,
+              "w": 206.21875,
+              "h": 34
+            },
+            {
+              "id": "portrait-boundary",
+              "text": "Sentinel 选负责人，再由负责人选副本",
+              "x": 96,
+              "y": 765,
+              "w": 433.390625,
+              "h": 36
+            }
+          ],
+          "jpgSHA256": "ea884c66113278d2377d979820c111d2dbed8780e80c6b7aa5310360e3767c4c",
+          "pngSHA256": "b4a4fe03508496fb86b4678f8982e38a8da631d2c5e516ab5e3f65c41c680b5c",
+          "watermarkZone": {
+            "x": 898.296875,
+            "y": 111,
+            "w": 85.703125,
+            "h": 42
+          }
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "textBoxes": [
+            {
+              "id": "series",
+              "text": "Redis 系列",
+              "x": 460.5,
+              "y": 73.25,
+              "w": 155.015625,
+              "h": 46
+            },
+            {
+              "id": "watermark",
+              "text": "IT小村",
+              "x": 988.71875,
+              "y": 83.75,
+              "w": 64.521240234375,
+              "h": 31
+            },
+            {
+              "id": "number",
+              "text": "EP.50",
+              "x": 432.3125,
+              "y": 202,
+              "w": 85.625,
+              "h": 33
+            },
+            {
+              "id": "title-0",
+              "text": "Sentinel",
+              "x": 382.5,
+              "y": 260.5,
+              "w": 419.34375,
+              "h": 152
+            },
+            {
+              "id": "question-0",
+              "text": "主节点失联后，",
+              "x": 387,
+              "y": 445.25,
+              "w": 189,
+              "h": 39
+            },
+            {
+              "id": "question-1",
+              "text": "谁有资格决定换主？",
+              "x": 387,
+              "y": 482.75,
+              "w": 243,
+              "h": 39
+            },
+            {
+              "id": "diagram-s-example",
+              "text": "5个 Sentinel · 先选本次负责人",
+              "x": 579.796875,
+              "y": 634,
+              "w": 280.89068603515625,
+              "h": 29
+            },
+            {
+              "id": "diagram-s1-label",
+              "text": "S1 当选",
+              "x": 434.4453125,
+              "y": 676,
+              "w": 67.109375,
+              "h": 29
+            },
+            {
+              "id": "diagram-s1-value",
+              "text": "自投1票",
+              "x": 437.03125,
+              "y": 706,
+              "w": 61.9375,
+              "h": 25
+            },
+            {
+              "id": "diagram-s2-label",
+              "text": "S2",
+              "x": 582.15625,
+              "y": 676,
+              "w": 23.6875,
+              "h": 29
+            },
+            {
+              "id": "diagram-s2-value",
+              "text": "投给S1",
+              "x": 566.2734375,
+              "y": 706,
+              "w": 55.453125,
+              "h": 25
+            },
+            {
+              "id": "diagram-s3-label",
+              "text": "S3",
+              "x": 708.15625,
+              "y": 676,
+              "w": 23.6875,
+              "h": 29
+            },
+            {
+              "id": "diagram-s3-value",
+              "text": "投给S1",
+              "x": 692.2734375,
+              "y": 706,
+              "w": 55.453125,
+              "h": 25
+            },
+            {
+              "id": "diagram-s4-label",
+              "text": "S4",
+              "x": 834.15625,
+              "y": 676,
+              "w": 23.6875,
+              "h": 29
+            },
+            {
+              "id": "diagram-s4-value",
+              "text": "未投此票",
+              "x": 811.4921875,
+              "y": 706,
+              "w": 69.015625,
+              "h": 25
+            },
+            {
+              "id": "diagram-s5-label",
+              "text": "S5",
+              "x": 960.15625,
+              "y": 676,
+              "w": 23.6875,
+              "h": 29
+            },
+            {
+              "id": "diagram-s5-value",
+              "text": "未投此票",
+              "x": 937.4921875,
+              "y": 706,
+              "w": 69.015625,
+              "h": 25
+            },
+            {
+              "id": "diagram-s-majority",
+              "text": "3 / 5 多数授权",
+              "x": 659.078125,
+              "y": 748.75,
+              "w": 121.84375,
+              "h": 29
+            },
+            {
+              "id": "diagram-s-select-label",
+              "text": "S1 再筛选并提升副本",
+              "x": 638.5703125,
+              "y": 792.25,
+              "w": 162.859375,
+              "h": 25.00006103515625
+            },
+            {
+              "id": "diagram-s-old-master-label",
+              "text": "旧主 M",
+              "x": 491.21875,
+              "y": 821.5,
+              "w": 60.0625,
+              "h": 29
+            },
+            {
+              "id": "diagram-s-old-master-value",
+              "text": "失联",
+              "x": 503.9921875,
+              "y": 860.5,
+              "w": 34.515625,
+              "h": 25.00006103515625
+            },
+            {
+              "id": "diagram-s-replica-r1-label",
+              "text": "R1 · 排除",
+              "x": 673.9140625,
+              "y": 821.5,
+              "w": 92.6571044921875,
+              "h": 29
+            },
+            {
+              "id": "diagram-s-replica-r1-value",
+              "text": "priority 0 · 900",
+              "x": 652.84375,
+              "y": 860.5,
+              "w": 134.3125,
+              "h": 25.00006103515625
+            },
+            {
+              "id": "diagram-s-replica-r2-label",
+              "text": "R2 · 提升",
+              "x": 872.6640625,
+              "y": 821.5,
+              "w": 92.171875,
+              "h": 29
+            },
+            {
+              "id": "diagram-s-replica-r2-value",
+              "text": "priority 100 · 800",
+              "x": 841.4140625,
+              "y": 860.5,
+              "w": 154.671875,
+              "h": 25.00006103515625
+            },
+            {
+              "id": "portrait-boundary",
+              "text": "Sentinel 选负责人，再由负责人选副本",
+              "x": 387,
+              "y": 573.5,
+              "w": 325.280517578125,
+              "h": 27
+            }
+          ],
+          "jpgSHA256": "56217acb95de1e291592da3cd128cf8a29358451c593d63e81be4ea2c571805c",
+          "pngSHA256": "5421ad0dc2a1ba0624bab1c4d9653d1d496ddff545d28f3dfa217074383a27fb",
+          "centerRegion": {
+            "x": 315,
+            "w": 810
+          },
+          "bottom15Y": 918,
+          "watermarkZone": {
+            "x": 988.71875,
+            "y": 83.75,
+            "w": 64.521240234375,
+            "h": 31
+          }
+        }
+      },
+      "poster": {
+        "file": "poster.jpg",
+        "sameAs": "3x4"
+      },
+      "scope": "Real shared Redis template render; measured text boxes and actual JPG/PNG digests."
+    },
+    "discussionQuestion": "两份故障判断与三张授权票分别解决什么？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes/_shared/redis-video/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "failure",
+      "chapterId": "failure",
+      "title": "两份报告只确认故障",
+      "from": 0,
+      "durationInFrames": 1321,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "failure",
+          "visualType": "conflict",
+          "from": 0,
+          "durationInFrames": 349,
+          "narration": "主节点失联，两个哨兵都判断它故障，为什么还不能换主？关键在于，确认故障和获得换主授权，是两件事。",
+          "subtitles": [
+            {
+              "text": "主节点失联，两个哨兵都判断它故障，为什么还不能换主？",
+              "from": 0,
+              "to": 174,
+              "duration": 175
+            },
+            {
+              "text": "关键在于，确认故障和获得换主授权，是两件事。",
+              "from": 175,
+              "to": 348,
+              "duration": 174
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-conflict-1",
+              "wavStart": 9.0,
+              "wavEnd": 164.63,
+              "localStart": 9.0,
+              "localEnd": 164.63
+            },
+            {
+              "id": "01-conflict-2",
+              "wavStart": 175.13,
+              "wavEnd": 328.2,
+              "localStart": 175.13,
+              "localEnd": 328.2
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              175
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 9.0,
+            "wavTo": 328.2,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "首帧显示失联主节点和两份来自哨兵的报告；“故障确认 2/2”亮起，“换主授权 2/3”仍未通过。R2副本尚未变化。标题与冲突同时出现，不能提前画成已晋升。",
+          "direction": "首帧显示失联主节点和两份来自哨兵的报告；“故障确认 2/2”亮起，“换主授权 2/3”仍未通过。R2副本尚未变化。标题与冲突同时出现，不能提前画成已晋升。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "failure",
+          "visualType": "roles",
+          "from": 349,
+          "durationInFrames": 301,
+          "narration": "这里一主两副本保存业务数据，五个哨兵负责监控和协调。哨兵不接管业务数据，副本也不参与这一轮哨兵投票。",
+          "subtitles": [
+            {
+              "text": "这里一主两副本保存业务数据，五个哨兵负责监控和协调。",
+              "from": 0,
+              "to": 156,
+              "duration": 157
+            },
+            {
+              "text": "哨兵不接管业务数据，副本也不参与这一轮哨兵投票。",
+              "from": 157,
+              "to": 300,
+              "duration": 144
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-roles-1",
+              "wavStart": 349.2,
+              "wavEnd": 495.89,
+              "localStart": 0.19999999999998863,
+              "localEnd": 146.89
+            },
+            {
+              "id": "02-roles-2",
+              "wavStart": 506.39,
+              "wavEnd": 629.28,
+              "localStart": 157.39,
+              "localEnd": 280.28
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              157
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 349.2,
+            "wavTo": 629.28,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "稳定左右分区，左边五个Sentinel哨兵S1至S5，右边Redis主节点M与副本R1、R2；只沿M到R1/R2移动数据片。分组标题直接标角色，不让数据副本举票。",
+          "direction": "稳定左右分区，左边五个Sentinel哨兵S1至S5，右边Redis主节点M与副本R1、R2；只沿M到R1/R2移动数据片。分组标题直接标角色，不让数据副本举票。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "failure",
+          "visualType": "subjective",
+          "from": 650,
+          "durationInFrames": 344,
+          "narration": "先看一个哨兵，它持续收不到主节点的有效回复，超过配置时间后，形成自己的故障判断。这叫主观下线，还不能独自决定换主。",
+          "subtitles": [
+            {
+              "text": "先看一个哨兵，它持续收不到主节点的有效回复，超过配置时间后，形成自己的故障判断。",
+              "from": 0,
+              "to": 229,
+              "duration": 230
+            },
+            {
+              "text": "这叫主观下线，还不能独自决定换主。",
+              "from": 230,
+              "to": 343,
+              "duration": 114
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-subjective-1",
+              "wavStart": 650.28,
+              "wavEnd": 869.75,
+              "localStart": 0.2799999999999727,
+              "localEnd": 219.75
+            },
+            {
+              "id": "03-subjective-2",
+              "wavStart": 880.25,
+              "wavEnd": 973.39,
+              "localStart": 230.25,
+              "localEnd": 323.39
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              230
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 650.28,
+            "wavTo": 973.39,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "S1到M的探测往返先正常，再只有请求没有回复；配置等待区间走完后S1变红，显示“主观下线”。S2至S5不随之自动变红。",
+          "direction": "S1到M的探测往返先正常，再只有请求没有回复；配置等待区间走完后S1变红，显示“主观下线”。S2至S5不随之自动变红。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "failure",
+          "visualType": "objective",
+          "from": 994,
+          "durationInFrames": 327,
+          "narration": "接着它向其他哨兵询问，收到了同样认为主节点失联的报告。本例故障确认数设为二，两份判断凑齐，才进入客观下线。",
+          "subtitles": [
+            {
+              "text": "接着它向其他哨兵询问，收到了同样认为主节点失联的报告。",
+              "from": 0,
+              "to": 157,
+              "duration": 158
+            },
+            {
+              "text": "本例故障确认数设为二，两份判断凑齐，才进入客观下线。",
+              "from": 158,
+              "to": 326,
+              "duration": 169
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-objective-1",
+              "wavStart": 994.39,
+              "wavEnd": 1141.66,
+              "localStart": 0.38999999999998636,
+              "localEnd": 147.66000000000008
+            },
+            {
+              "id": "04-objective-2",
+              "wavStart": 1152.16,
+              "wavEnd": 1300.64,
+              "localStart": 158.16000000000008,
+              "localEnd": 306.6400000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              158
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 994.39,
+            "wavTo": 1300.64,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "S1向S2发查询，S2报告回到S1，计数由1/2到2/2；故障确认通过标记出现，但授权栏保持未通过。",
+          "direction": "S1向S2发查询，S2报告回到S1，计数由1/2到2/2；故障确认通过标记出现，但授权栏保持未通过。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "authorization",
+      "chapterId": "authorization",
+      "title": "投票授权的是哨兵",
+      "from": 1321,
+      "durationInFrames": 1361,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "authorization",
+          "visualType": "executor",
+          "from": 1321,
+          "durationInFrames": 351,
+          "narration": "这时要选的，是负责执行换主的哨兵，不是新的主节点。每轮投票都有编号，同一哨兵在同一轮只能投给一个执行者。",
+          "subtitles": [
+            {
+              "text": "这时要选的，是负责执行换主的哨兵，不是新的主节点。",
+              "from": 0,
+              "to": 165,
+              "duration": 166
+            },
+            {
+              "text": "每轮投票都有编号，同一哨兵在同一轮只能投给一个执行者。",
+              "from": 166,
+              "to": 350,
+              "duration": 185
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-executor-1",
+              "wavStart": 1321.64,
+              "wavEnd": 1476.51,
+              "localStart": 0.6400000000001,
+              "localEnd": 155.51
+            },
+            {
+              "id": "05-executor-2",
+              "wavStart": 1487.01,
+              "wavEnd": 1651.91,
+              "localStart": 166.01,
+              "localEnd": 330.9100000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              166
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 1321.64,
+            "wavTo": 1651.91,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先聚焦左侧，标出“本轮执行者：候选S1”；投票轮次示例7。投票槽明确记录“第7轮→S1”，右侧R1/R2维持副本身份。",
+          "direction": "先聚焦左侧，标出“本轮执行者：候选S1”；投票轮次示例7。投票槽明确记录“第7轮→S1”，右侧R1/R2维持副本身份。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "authorization",
+          "visualType": "two-votes",
+          "from": 1672,
+          "durationInFrames": 341,
+          "narration": "如果只能联系上这两个哨兵，候选执行者最多拿到两票。但已知哨兵总数仍是五，多数授权至少需要三票。",
+          "subtitles": [
+            {
+              "text": "如果只能联系上这两个哨兵，候选执行者最多拿到两票。",
+              "from": 0,
+              "to": 164,
+              "duration": 165
+            },
+            {
+              "text": "但已知哨兵总数仍是五，多数授权至少需要三票。",
+              "from": 165,
+              "to": 340,
+              "duration": 176
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-two-votes-1",
+              "wavStart": 1672.91,
+              "wavEnd": 1826.69,
+              "localStart": 0.9100000000000819,
+              "localEnd": 154.69000000000005
+            },
+            {
+              "id": "06-two-votes-2",
+              "wavStart": 1837.19,
+              "wavEnd": 1992.94,
+              "localStart": 165.19000000000005,
+              "localEnd": 320.94000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              165
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 1672.91,
+            "wavTo": 1992.94,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "S1自投与S2投S1分步落入候选槽，授权票从0到1到2。S3/S4/S5不可达但保留在已知五个哨兵中，门槛始终3，不从在线两台重算。",
+          "direction": "S1自投与S2投S1分步落入候选槽，授权票从0到1到2。S3/S4/S5不可达但保留在已知五个哨兵中，门槛始终3，不从在线两台重算。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "authorization",
+          "visualType": "blocked",
+          "from": 2013,
+          "durationInFrames": 338,
+          "narration": "所以，两个哨兵可以确认故障，却没有足够授权继续换主。副本保持原角色，不会因为两份故障报告就自行晋升。",
+          "subtitles": [
+            {
+              "text": "所以，两个哨兵可以确认故障，却没有足够授权继续换主。",
+              "from": 0,
+              "to": 174,
+              "duration": 175
+            },
+            {
+              "text": "副本保持原角色，不会因为两份故障报告就自行晋升。",
+              "from": 175,
+              "to": 337,
+              "duration": 163
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-blocked-1",
+              "wavStart": 2013.94,
+              "wavEnd": 2177.74,
+              "localStart": 0.9400000000000546,
+              "localEnd": 164.73999999999978
+            },
+            {
+              "id": "07-blocked-2",
+              "wavStart": 2188.24,
+              "wavEnd": 2330.57,
+              "localStart": 175.23999999999978,
+              "localEnd": 317.57000000000016
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              175
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 2013.94,
+            "wavTo": 2330.57,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回到同一全局，故障确认2/2通过，授权2/3停止；两条关卡分别显示。控制命令路径在S1处停止，R2仍为副本。",
+          "direction": "回到同一全局，故障确认2/2通过，授权2/3停止；两条关卡分别显示。控制命令路径在S1处停止，R2仍为副本。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "authorization",
+          "visualType": "majority",
+          "from": 2351,
+          "durationInFrames": 331,
+          "narration": "换一种条件，第三个哨兵也可达，并在同一轮投给这个执行者。三票达到门槛，才由当选哨兵继续挑选副本。",
+          "subtitles": [
+            {
+              "text": "换一种条件，第三个哨兵也可达，并在同一轮投给这个执行者。",
+              "from": 0,
+              "to": 179,
+              "duration": 180
+            },
+            {
+              "text": "三票达到门槛，才由当选哨兵继续挑选副本。",
+              "from": 180,
+              "to": 330,
+              "duration": 151
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-majority-1",
+              "wavStart": 2351.57,
+              "wavEnd": 2520.93,
+              "localStart": 0.5700000000001637,
+              "localEnd": 169.92999999999984
+            },
+            {
+              "id": "08-majority-2",
+              "wavStart": 2531.43,
+              "wavEnd": 2661.59,
+              "localStart": 180.42999999999984,
+              "localEnd": 310.59000000000015
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              180
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 2351.57,
+            "wavTo": 2661.59,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确“独立对照：回到投票前；三台哨兵可达”，先清空两票再重新分步投出S1/S2/S3三票；S1获得本轮执行权，随后视线才移到右边数据节点。不是把两个相反结果串成同一次投票。",
+          "direction": "明确“独立对照：回到投票前；三台哨兵可达”，先清空两票再重新分步投出S1/S2/S3三票；S1获得本轮执行权，随后视线才移到右边数据节点。不是把两个相反结果串成同一次投票。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "promotion",
+      "chapterId": "promotion",
+      "title": "执行者再挑选副本",
+      "from": 2682,
+      "durationInFrames": 1037,
+      "shots": [
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "promotion",
+          "visualType": "eligible",
+          "from": 2682,
+          "durationInFrames": 333,
+          "narration": "挑选之前，要排除不可用、断连过久或优先级为零的副本。本例副本一虽有更多数据，但优先级为零，仍不能晋升。",
+          "subtitles": [
+            {
+              "text": "挑选之前，要排除不可用、断连过久或优先级为零的副本。",
+              "from": 0,
+              "to": 157,
+              "duration": 158
+            },
+            {
+              "text": "本例副本一虽有更多数据，但优先级为零，仍不能晋升。",
+              "from": 158,
+              "to": 332,
+              "duration": 175
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-eligible-1",
+              "wavStart": 2682.59,
+              "wavEnd": 2830.31,
+              "localStart": 0.5900000000001455,
+              "localEnd": 148.30999999999995
+            },
+            {
+              "id": "09-eligible-2",
+              "wavStart": 2840.81,
+              "wavEnd": 2994.69,
+              "localStart": 158.80999999999995,
+              "localEnd": 312.69000000000005
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              158
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 2682.59,
+            "wavTo": 2994.69,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "S1依次检查R1/R2；R1示例进度900、priority0，R2进度800、priority100且其他检查合格。R1在资格过滤阶段划去，R2留下；数据进度不被画成单独决定因素。其余排序规则在文章展开。",
+          "direction": "S1依次检查R1/R2；R1示例进度900、priority0，R2进度800、priority100且其他检查合格。R1在资格过滤阶段划去，R2留下；数据进度不被画成单独决定因素。其余排序规则在文章展开。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "promotion",
+          "visualType": "promote",
+          "from": 3015,
+          "durationInFrames": 352,
+          "narration": "执行者向合格副本发送晋升命令，还要观察它是否真的变成主节点。命令发出后先等角色报告，确认成功，再继续配置其他副本。",
+          "subtitles": [
+            {
+              "text": "执行者向合格副本发送晋升命令，还要观察它是否真的变成主节点。",
+              "from": 0,
+              "to": 188,
+              "duration": 189
+            },
+            {
+              "text": "命令发出后先等角色报告，确认成功，再继续配置其他副本。",
+              "from": 189,
+              "to": 351,
+              "duration": 163
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-promote-1",
+              "wavStart": 3015.69,
+              "wavEnd": 3194.45,
+              "localStart": 0.6900000000000546,
+              "localEnd": 179.44999999999982
+            },
+            {
+              "id": "10-promote-2",
+              "wavStart": 3204.95,
+              "wavEnd": 3346.0,
+              "localStart": 189.94999999999982,
+              "localEnd": 331.0
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              189
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 3015.69,
+            "wavTo": 3346.0,
+            "holdFrames": 21,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "S1到R2发送晋升控制命令；R2收到后角色由副本切换主节点，INFO角色报告返回S1。只有收到报告后第二关中的“已晋升”才亮起，不把命令已排队当成功。",
+          "direction": "S1到R2发送晋升控制命令；R2收到后角色由副本切换主节点，INFO角色报告返回S1。只有收到报告后第二关中的“已晋升”才亮起，不把命令已排队当成功。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "promotion",
+          "visualType": "reconfigure",
+          "from": 3367,
+          "durationInFrames": 352,
+          "narration": "随后，其他副本改为跟随新主节点，新的地址也会传播出去。支持哨兵的客户端查询新地址，再连接新主节点恢复访问。",
+          "subtitles": [
+            {
+              "text": "随后，其他副本改为跟随新主节点，新的地址也会传播出去。",
+              "from": 0,
+              "to": 184,
+              "duration": 185
+            },
+            {
+              "text": "支持哨兵的客户端查询新地址，再连接新主节点恢复访问。",
+              "from": 185,
+              "to": 351,
+              "duration": 167
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-reconfigure-1",
+              "wavStart": 3367.0,
+              "wavEnd": 3541.57,
+              "localStart": 0.0,
+              "localEnd": 174.57000000000016
+            },
+            {
+              "id": "11-reconfigure-2",
+              "wavStart": 3552.07,
+              "wavEnd": 3698.37,
+              "localStart": 185.07000000000016,
+              "localEnd": 331.3699999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              185
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 3367.0,
+            "wavTo": 3698.37,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "R1到旧M的复制关系退出，R2到R1新复制关系建立；S1配置传播到可达哨兵。客户端先向哨兵查询，获得R2地址，再连R2，不能画成Sentinel转发业务请求。",
+          "direction": "R1到旧M的复制关系退出，R2到R1新复制关系建立；S1配置传播到可达哨兵。客户端先向哨兵查询，获得R2地址，再连R2，不能画成Sentinel转发业务请求。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "换主授权与数据保证",
+      "from": 3719,
+      "durationInFrames": 720,
+      "shots": [
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "boundary",
+          "visualType": "boundary",
+          "from": 3719,
+          "durationInFrames": 325,
+          "narration": "但获得多数授权，不代表所有已确认写入都已经复制完。Redis 使用异步复制，换主仍可能丢失获选副本尚未收到的写入。",
+          "subtitles": [
+            {
+              "text": "但获得多数授权，不代表所有已确认写入都已经复制完。",
+              "from": 0,
+              "to": 152,
+              "duration": 153
+            },
+            {
+              "text": "Redis 使用异步复制，换主仍可能丢失获选副本尚未收到的写入。",
+              "from": 153,
+              "to": 324,
+              "duration": 172
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-boundary-1",
+              "wavStart": 3719.37,
+              "wavEnd": 3861.79,
+              "localStart": 0.36999999999989086,
+              "localEnd": 142.78999999999996
+            },
+            {
+              "id": "12-boundary-2",
+              "wavStart": 3872.29,
+              "wavEnd": 4023.89,
+              "localStart": 153.28999999999996,
+              "localEnd": 304.8899999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              153
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 3719.37,
+            "wavTo": 4023.89,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "独立边界示例：旧M已有记录w42，R2尚无w42；标注“异步复制窗口”。故障后新主R2仍无该记录，旧M离线数据不画成物理消失；该示意不冒充运行实验结果。",
+          "direction": "独立边界示例：旧M已有记录w42，R2尚无w42；标注“异步复制窗口”。故障后新主R2仍无该记录，旧M离线数据不画成物理消失；该示意不冒充运行实验结果。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "13",
+          "scriptShot": 13,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 4044,
+          "durationInFrames": 395,
+          "narration": "回看整个过程，先确认故障，再授权一个哨兵执行，最后由它筛选并提升副本。两份报告和三张授权票，解决的是不同问题。",
+          "subtitles": [
+            {
+              "text": "回看整个过程，先确认故障，再授权一个哨兵执行，最后由它筛选并提升副本。",
+              "from": 0,
+              "to": 209,
+              "duration": 210
+            },
+            {
+              "text": "两份报告和三张授权票，解决的是不同问题。",
+              "from": 210,
+              "to": 394,
+              "duration": 185
+            }
+          ],
+          "voice": [
+            {
+              "id": "13-recap-1",
+              "wavStart": 4044.89,
+              "wavEnd": 4243.71,
+              "localStart": 0.8899999999998727,
+              "localEnd": 199.71000000000004
+            },
+            {
+              "id": "13-recap-2",
+              "wavStart": 4254.21,
+              "wavEnd": 4402.1,
+              "localStart": 210.21000000000004,
+              "localEnd": 358.10000000000036
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              210
+            ]
+          },
+          "timing": {
+            "source": "voice.wav e1807fc3 + words.json 0ebdbd68 + script.md fdc1b5c6",
+            "wavFrom": 4044.89,
+            "wavTo": 4402.1,
+            "holdFrames": 36,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回到简明全局链，故障确认→执行者授权→资格筛选与晋升依次高亮；每一项关联回真实对象和计数。最后保留新主R2与复制关系，收束后进入无字幕、无旁白的参考资料简表。",
+          "direction": "回到简明全局链，故障确认→执行者授权→资格筛选与晋升依次高亮；每一项关联回真实对象和计数。最后保留新主R2与复制关系，收束后进入无字幕、无旁白的参考资料简表。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

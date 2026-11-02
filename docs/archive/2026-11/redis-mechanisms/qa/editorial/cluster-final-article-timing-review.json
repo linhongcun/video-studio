@@ -1,0 +1,60 @@
+{
+  "kind": "independent-current-MDX-and-measured-target-review",
+  "articleSHA256": "ce0f3715b1cdc0b6db82e784f9a30f8ab003c143eca5d2cc43e3e956f3263692",
+  "figurePlanSHA256": "c7e6c455dbc19bffb7dfc7bf9000847b301c111775d22e9c3beccb3735d500f9",
+  "parseExecuted": true,
+  "quotes": [
+    {
+      "sourceId": "A1",
+      "supports": "PFAIL是本地疑似状态；FAIL由有效时间内多数主节点的故障判断确认，不能把本地超时直接画成副本接管。"
+    },
+    {
+      "sourceId": "A3",
+      "supports": "自动参选检查副本复制断连时间以限制过旧数据；具体界限可配置，不是保证与旧主完全相同。"
+    },
+    {
+      "sourceId": "R1",
+      "supports": "副本需要得到多数主节点的ACK才能赢得正常故障转移选举；候选与投票人角色不同。"
+    },
+    {
+      "sourceId": "R2",
+      "supports": "固定8.4.0执行代码用cluster size整除2加1计算门槛；本例原三主需要两票。"
+    },
+    {
+      "sourceId": "A4",
+      "supports": "其他节点依据更高configEpoch接受新主所声明的同一槽归属；不是所有节点在副本自封时无条件改路由。"
+    },
+    {
+      "sourceId": "A2",
+      "supports": "Redis Cluster使用异步复制；选举多数不是每条业务写入已经同步到多数副本的证明。"
+    }
+  ],
+  "figures": [
+    {
+      "src": "/video-studio/episodes/redis-cluster-failover/article/01-failure.jpg",
+      "alt": "乙的本地判断加丙的有效报告达到原三主中的多数，确认甲故障；甲副本仍未晋升",
+      "caption": "教学示例：确认故障的报告与下一阶段的授权选票分别计数。",
+      "seekTo": 42.166666666666664,
+      "chapter": "failure"
+    },
+    {
+      "src": "/video-studio/episodes/redis-cluster-failover/article/02-authorized.jpg",
+      "alt": "乙丙的本轮授权均已抵达甲副本，票数达到原三主中的两票；甲离线仍在原分母中",
+      "caption": "教学示例：第二个授权回复抵达后才达到多数；候选副本不投自票。",
+      "seekTo": 95.33333333333333,
+      "chapter": "election"
+    },
+    {
+      "src": "/video-studio/episodes/redis-cluster-failover/article/03-minority.jpg",
+      "alt": "独立对照中只有乙授权，丙不可达；甲副本得到一票仍保持副本身份，旧槽归属未被接管",
+      "caption": "教学示例：已知旧主故障，仍可能因本次授权不足而不能接管。",
+      "seekTo": 121.06666666666666,
+      "chapter": "takeover"
+    }
+  ],
+  "allMeasuredTargetsMatch": true,
+  "currentArticleReadComplete": true,
+  "sourceContextReview": "Six exact excerpts unchanged from independently context-reviewed cluster-editorial-v1.json, current prose reread; no claim changes observed.",
+  "actualFigures": "Source image meaning independently assigned to series_audit; final extracted JPEGs pending.",
+  "pass": true
+}

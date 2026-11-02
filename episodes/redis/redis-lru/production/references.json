@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "redis-lru",
+  "heading": "参考资料",
+  "checkedAt": "2026-11-02",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Redis",
+      "title": "Key eviction",
+      "titleEvidence": {
+        "locator": "Official source frontmatter title: Key eviction",
+        "evidence": "episodes/redis/redis-lru/production/sources/key-eviction.md"
+      },
+      "version": "Redis docs fixed commit 8e40c52452233daad74a303d3714586f53640a36; no publication date stated",
+      "url": "https://github.com/redis/docs/blob/8e40c52452233daad74a303d3714586f53640a36/content/develop/reference/eviction/index.md",
+      "supports": [
+        "Redis采用随机抽样的近似LRU，不维持每次淘汰的精确全局排名。",
+        "maxmemory容量淘汰与TTL到期不同；采样数量影响成本。"
+      ],
+      "sections": "Approximated LRU algorithm, opening paragraph",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/redis/redis-lru/production/research.md",
+        "method": "Read listed official fixed source sections and saved raw GitHub API responses/decoded source. Official repository and stored license identify Redis institution; copyright/byline not inferred as personal author.",
+        "sha256": "4aeb875ac8edeb46400048a8d4b10fd1cf98980933cd2026d7ae747910493927"
+      },
+      "quotation": {
+        "text": "The Redis LRU algorithm uses an approximation of the least recently used\nkeys rather than calculating them exactly. It samples a small number of keys\nat random and then evicts the ones with the longest time since last access.",
+        "locator": "Approximated LRU algorithm, opening paragraph",
+        "evidence": "episodes/redis/redis-lru/production/sources/key-eviction.md"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Redis",
+      "title": "evict.c",
+      "titleEvidence": {
+        "locator": "Official GitHub Contents API name=evict.c, path=src/evict.c",
+        "evidence": "episodes/redis/redis-lru/production/sources/redis-evict-api.json"
+      },
+      "version": "Redis 8.4.0, fixed commit 60ba86f3c8b4e1ec96451171753a0a38e5c45a0c",
+      "url": "https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/evict.c",
+      "supports": [
+        "固定16项的候选池保存跨performEvictions调用的已采样候选，按采样时idle升序保留较好项。",
+        "填池后从较旧端检查键存在，跳过ghost，再删除实际选中的键。"
+      ],
+      "sections": "lines24–29; EVPOOL_SIZE line36; evictionPoolPopulate lines134–224; performEvictions lines575–645",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/redis/redis-lru/production/research.md",
+        "method": "Read listed official fixed source sections and saved raw GitHub API responses/decoded source. Official repository and stored license identify Redis institution; copyright/byline not inferred as personal author.",
+        "sha256": "055df29733f8529ef3e4dfbb5d4860548caa837d7c2eeeb5220edcace0ca55c1"
+      },
+      "quotation": {
+        "text": "/* To improve the quality of the LRU approximation we take a set of keys\n * that are good candidate for eviction across performEvictions() calls.\n *\n * Entries inside the eviction pool are taken ordered by idle time, putting\n * greater idle times to the right (ascending order).",
+        "locator": "lines24–29; EVPOOL_SIZE line36; evictionPoolPopulate lines134–224; performEvictions lines575–645",
+        "evidence": "episodes/redis/redis-lru/production/sources/evict.c"
+      }
+    }
+  ]
+}

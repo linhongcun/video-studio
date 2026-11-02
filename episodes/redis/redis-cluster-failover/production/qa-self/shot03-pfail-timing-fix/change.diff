@@ -1,0 +1,11 @@
+--- Main-before.tsx
++++ remotion/src/Main.tsx
+@@ -83,7 +83,7 @@
+  <Node id="C"v={v}alpha={boundary?0:1}status={minority?'本次不可达':n>=8&&v.votes.includes('C')?'本轮已授权':'持槽主节点 · 有投票资格'}/>
+  <Node id="A1"v={v}focus={focus==='A1'}status={v.candidateRole==='master'?'接管甲原来的槽':n>=6?'候选副本 · 没有自票':'复制甲的数据'}/>
+  {n===2&&<><Node id="B1"v={v}status="只复制乙的数据"/><Node id="C1"v={v}status="只复制丙的数据"/></>}
+- {(n===3||n===4)&&<Panel x={730}y={655}w={1060}h={206}red={v.failure==='FAIL'}><T x={765}y={704}w={990}size={30}color={C.red}>{n===3?'乙的本地视图':'故障报告阶段 · 不是授权选票'}</T><T x={765}y={763}w={990}size={36}>{v.failure==='FAIL'?'乙判断 + 丙近期报告 = 多数确认':'甲：疑似故障 PFAIL'}</T><T x={765}y={818}w={990}size={25}color={C.muted}>{v.failure==='FAIL'?'确认故障 FAIL 已形成，向可达节点传播':'本地疑似状态不能直接触发晋升'}</T></Panel>}
++ {(n===3||n===4)&&<Panel x={730}y={655}w={1060}h={206}red={v.failure==='FAIL'}><T x={765}y={704}w={990}size={30}color={C.red}>{n===3?'乙的本地视图':'故障报告阶段 · 不是授权选票'}</T><T x={765}y={763}w={990}size={36}>{v.failure==='FAIL'?'乙判断 + 丙近期报告 = 多数确认':n===3&&v.failure!=='PFAIL'?'等待甲的有效回复':'甲：疑似故障 PFAIL'}</T><T x={765}y={818}w={990}size={25}color={C.muted}>{v.failure==='FAIL'?'确认故障 FAIL 已形成，向可达节点传播':n===3&&v.failure!=='PFAIL'?'尚未形成疑似故障':'本地疑似状态不能直接触发晋升'}</T></Panel>}
+  {n===5&&<Panel x={730}y={655}w={1060}h={206}><T x={765}y={701}w={990}size={30}color={C.red}>合格副本，再安排尝试时间</T>{['旧主已FAIL且原来持有槽','复制断连时间在允许范围内','短暂等待；多个副本时，进度影响先后'].map((t,i)=><T key={t}x={765}y={748+i*40}w={990}size={26}alpha={i===0?1:i===1?ease(f,tm.early(.30),tm.early(.40)):late}>{'✓ '+t}</T>)}</Panel>}
+  {(n>=6&&n<=10)&&<Panel x={730}y={655}w={1060}h={206}red={v.authorized}>
+  <T x={765}y={703}w={990}size={29}color={C.red}>{n===9?'新主公布配置轮次6的槽归属':`选举轮次 ${v.electionEpoch} · 三个持槽主节点，需要2票`}</T>
