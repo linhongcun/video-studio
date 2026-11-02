@@ -1,6 +1,6 @@
 # Redis Sentinel / Cluster / 近似 LRU 三期
 
-2026-11-02（北京时间）按用户授权制作 Redis 相关待安排选题。三期已完成制作、独立来源/叙事/声音/动态/正式媒体、图文和本地原生播放器检查，进入 **v0.99.0 GitHub 站点发布流程**。本页与 `stage.json` 记录当前阶段；实际发布及线上回执随后记入 `publication.json`，此处不预记线上完成。已交付跳表 EP40 和既有缓存两期保持。
+2026-11-02（北京时间）按用户授权制作 Redis 相关待安排选题。三期已完成制作、独立来源/叙事/声音/动态/正式媒体、图文及本地与线上原生播放器检查，并由 **v0.99.0 交付 GitHub 站点**。实际发布身份与回执见 [publication.json](publication.json)。已交付跳表 EP40 和既有缓存两期保持。
 
 | issue | EP / slug | 正式媒体 | 当前冻结输入 | 源码 |
 | --- | --- | --- | ---: | --- |
@@ -28,4 +28,14 @@
 
 ## 发布范围
 
-本批仅 GitHub 与本站。首发字段按实际站点发布流程启动时刻写入，创建时间只归一至站点支持的毫秒精度，原值保留在日期格式回执；不重设创建日期。Release 后需再次部署，并完成普通 canonical 完整 GET/SHA、原生播放器与 RSS/实际更新日志检查，才关闭 #296/#297/#302；#294 同步实际交付状态。未执行全片人工语义听辨、逐字 ASR、物理手机或学习效果实验，不预记用户已观看认可。
+本批仅 GitHub 与本站。首发字段按实际站点发布流程启动时刻写入，创建时间只归一至站点支持的毫秒精度，原值保留在日期格式回执；不重设创建日期。[制作PR #455](https://github.com/linhongcun/video-studio/pull/455) squash 合并 `7971d833e37b145eac5ccf66901773beba5cd0a6`，附注 tag 与 [Release v0.99.0](https://github.com/linhongcun/video-studio/releases/tag/v0.99.0) 后再次手动 [Pages41417179935](https://github.com/linhongcun/video-studio/actions/runs/41417179935) 于17:09:32（北京时间）成功。完整核验后已回填并关闭 #296/#297/#302 为 completed；#294 保持 open，总览更新为6已交付、1待安排、2取消，其中Redis4含已交付跳表，其他2已交付、1待安排。未执行全片人工语义听辨、逐字 ASR、物理手机或学习效果实验，不预记用户已观看认可。
+
+## 线上核验与收尾
+
+[26次普通 canonical 完整 GET](qa/online-full-get-after-release.json)在 Release 后手动部署成功后执行，三支 MP4、海报、VTT 与七图的完整 SHA 全匹配；系列6课、首页/内容库/兼容学习入口、章节/原文、RSS首发时间、实际 Release 和更新日志链接通过。无 Range、cache-busting、TLS忽略或请求回填。
+
+线上原生浏览器在初次成功部署后执行，三期分别50/68/58动作、18/20/18严格PTS；手动部署与初次同主干、同媒体，后续完整GET闭合最终发布字节。56张实际 canonical 解码PNG与具名当前本地PNG全部逐字节相同，见[像素身份](qa/site-online-pixel-identity.json)。实际页面图审另存 [Sentinel](qa/site-online/redis-sentinel/visual-review.json)、[Cluster](qa/site-online-review/redis-cluster-failover.json)、[LRU](qa/site-online-review/redis-lru.json)及[未参与制作的LRU同伴图审](qa/site-online-review/redis-lru-peer.json)。
+
+目录的三张桌面封面已实际等待解码并看图；390目录按既有响应式CSS隐藏缩略图，文字卡正常。第一次补验误等待隐藏lazy IMG的decode而由root中止，原失败回执保留，改按真实可见性补验；无产品代码变动，见[补验与实图结论](qa/site-online-thumbnail-visual-review.json)。各期首屏loading弧、原生暂停控件压暗/遮底字幕及竖屏细字小仍如实记录。
+
+此前57期与196份旧冻结清单保持原字节。密钥扫描原始失败中的48个旧公开源码/协议常量均与基线同字节，新增/变化/未解决命中均0；生成预演bundle中的Remotion公开常量由source-map定位，缓存本机保留并排除Git传输，原日志未改，见[扫描复核](qa/secret-scan-final-review.json)。issue更新前后快照及研究段落保护验证见[issues-closeout](qa/issues-closeout/)。

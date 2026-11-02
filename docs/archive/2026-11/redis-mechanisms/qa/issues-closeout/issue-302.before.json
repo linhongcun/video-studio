@@ -1,0 +1,40 @@
+{
+  "fetchedAtUTC": "2026-11-02T09:12:00.595Z",
+  "content": [
+    {
+      "type": "text",
+      "text": "Action completed."
+    }
+  ],
+  "structuredContent": {
+    "issue": {
+      "url": "https://github.com/linhongcun/video-studio/issues/302",
+      "title": "[Redis / EP52] 近似 LRU：为什么未必淘汰真正最久没用的键？",
+      "issue_number": 302,
+      "body": "<!-- engineering-algorithms:2026-10-25:ea08 -->\n\n## 状态与定位\n\n**制作中：2026-11-02 已获批开始本题视频及配套图文制作。** 当前进入资料复核、脚本与机制设计阶段，尚未完成配音、动画或成片验收。身份为 **Redis 系列 / EP52 / `redis-lru`**。\n\n所属系列：**Redis 系列**（`redis`）。首批选题索引：[原工程算法选题总览 #294](https://github.com/linhongcun/video-studio/issues/294)。原 EA08 仅保留为历史策划检索编号，不作为 Redis 系列期号，本次制作分配 EP52 与 `redis-lru`，不按旧 EA 号重排 Redis 系列。\n\n2026-11-02 先完成系列归类，随后获授权正式制作。开工已同步最新主干 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`，制作分支 `codex/redis-mechanisms-20261102`；工程使用 `episodes/redis/redis-lru/{production,publication}`。完成资料、独立脚本/动态/成片检查后按既有授权交付 GitHub 站点，再以 completed 关闭。\n\n## 一个核心问题\n\n内存装满后应该删谁？教材里的精确 LRU 与 Redis 为控制维护成本采用的近似策略，差异怎样影响结果？\n\n## 拟讲的因果主线\n\n1. 建立固定内存容量和访问序列，区分到期删除与为腾空间执行的淘汰。\n2. 用精确 LRU 的最近访问顺序作为参照，说明持续维护顺序也有成本。\n3. 改用 Redis 的随机采样与候选池，挑选较久未访问的键；演示本次候选中最旧，不一定是全局最旧。\n4. 调整采样规模，解释近似程度与 CPU 成本的取舍；图文以 LFU 的概率计数、衰减补充“近期频繁”和“最近访问”的区别。\n\n## 可视化与图文方向\n\n同一访问轨迹对照精确顺序与抽样候选，抽中哪些键明确标出。演示一个可复现的近似差异，不用一次随机结果推出普遍命中率收益。\n\n## 准确性、适用边界与内容增量\n\n- 本题以明确的 allkeys-lru 等配置为前提；volatile 系列候选范围、noeviction 等策略不能混为一套。\n- Redis 的 LRU 是近似算法；不要直接用哈希表加双向链表动画宣称其真实实现。\n- LFU 不是每次访问都精确加一，也不永久保留历史热点；它结合概率计数与衰减，优先放图文，容量不足再另议拆题。\n- TTL 过期与 maxmemory 淘汰不同；内存账目和具体可淘汰范围按选定版本核验。\n- 与现有缓存命中/失效片的增量，是容量约束下的选择算法及近似与维护成本的取舍。\n\n## 第一方资料初核\n\n访问日期：**2026-10-25（北京时间）**。下列为本轮选题初核，未标发布日期的动态文档如实注明；不将资料阅读等同于产品实测或成片质量通过。\n\n- [Redis：Key eviction / Approximated LRU algorithm / LFU eviction](https://redis.io/docs/latest/develop/reference/eviction/)，第一方现行文档，未标发布日期，本轮已读。LRU 短引：“It samples a small number of keys at random”；LFU 短引：“a probabilistic counter” 与 “combined with a decay period”.\n- 页面说明 LFU 自 Redis 4.0 提供；本题不制作所有淘汰策略大全，正式开工重新固定版本和 maxmemory / policy / samples 等配置。\n\n## 后续安排制作时的专项核验\n\n- [ ] 固定访问序列与候选抽样以复现近似差异，另用实际 Redis 配置验证相关行为；示意、模拟与真实命中率实测分别记录，不承诺增大样本一定改善所有负载。\n- [ ] 重新核验第一方资料，固定产品版本、配置与支持主张；按[调研格式](https://github.com/linhongcun/video-studio/blob/main/docs/research-template.md)记录短引、日期和适用边界。\n- [ ] 开拍前确认一个可跟随的核心机制及必要前置；按[现行规范](https://github.com/linhongcun/video-studio/blob/main/docs/RULES.md)完成因果动画与正式媒体检查，检查和用户观看结论分别记录。\n- [ ] 仅在后续获安排制作、完成交付及核验后，才按届时授权以 completed 关闭，并同步系列总览。\n",
+      "state": "open",
+      "user": {
+        "login": "linhongcun",
+        "name": "linhongcun",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/230383104?v=4",
+        "id": 230383104
+      },
+      "assignees": null,
+      "labels": null,
+      "milestone": null,
+      "state_reason": null,
+      "comments": 0,
+      "created_at": "2026-10-25T13:15:13Z",
+      "updated_at": "2026-11-02T06:22:34Z",
+      "closed_at": null,
+      "display_url": "https://github.com/linhongcun/video-studio/issues/302",
+      "display_title": "[Redis / EP52] 近似 LRU：为什么未必淘汰真正最久没用的键？"
+    },
+    "url": "https://github.com/linhongcun/video-studio/issues/302",
+    "title": "[Redis / EP52] 近似 LRU：为什么未必淘汰真正最久没用的键？",
+    "display_url": "https://github.com/linhongcun/video-studio/issues/302",
+    "display_title": "[Redis / EP52] 近似 LRU：为什么未必淘汰真正最久没用的键？"
+  },
+  "isError": false
+}
