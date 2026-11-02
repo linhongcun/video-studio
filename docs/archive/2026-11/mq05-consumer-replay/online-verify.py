@@ -87,7 +87,15 @@ def verify_entry_pages(library, home, learn, slugs):
     for slug in slugs:
         href = f'/video-studio/episodes/{slug}/'
         assert any(a.get('href') == href for a in library.attrs('a')), ('library missing revised episode', slug)
-        assert any(a.get('href') == href for a in home.attrs('a')), ('home missing revised episode', slug)
+    expected_home = PageInventory((ROOT / 'site/dist/index.html').read_text())
+    def cards(doc):
+        return [(a.get('href'), a.get('data-date')) for a in doc.attrs('a')
+                if 'card' in a.get('class', '').split()]
+    expected_cards = cards(expected_home)
+    assert len(expected_cards) == 6, 'Current source intentionally shows six first-publication recent cards'
+    assert cards(home) == expected_cards, 'Deployed homepage must match the rebuilt recent6, including concurrent Redis'
+    # A remake retains its original publishedAt and need not be in recent6.
+    assert any(a.get('href') == '/video-studio/library/#all-content' for a in home.attrs('a'))
     assert any(a.get('href') == '/video-studio/series/message-queue/' for a in library.attrs('a'))
     assert any(a.get('href') == '/video-studio/library/' for a in learn.attrs('a'))
     assert 'location.replace' in ''.join(learn.text), 'learn compatibility redirect missing'
@@ -195,7 +203,7 @@ def main():
         entry_pages = [fetch(path) for path in ['library/', '', 'learn/']]
         verify_entry_pages(*entry_pages, [m['slug'] for m in metas])
         report['entryContentVerified'] = ['library links to the revised episode and MQ series',
-                                          'home recent links to the revised episode', 'learn fallback and JS redirect to library']
+                                          'home six recent cards match rebuilt first-publication order; revised EP45 remains in library and MQ series', 'learn fallback and JS redirect to library']
         changelog = PageInventory(fetch('changelog/'))
         release_url = 'https://github.com/linhongcun/video-studio/releases/tag/' + args.release
         assert any(a.get('href') == release_url for a in changelog.attrs('a')), 'Actual Release link missing from changelog'

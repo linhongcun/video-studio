@@ -33,3 +33,13 @@
 ## 合入并行主干
 
 提交前origin/main已到b19ae154，保留Redis三期v0.99.0及其收尾#455/#456。3815条上游变更与469冻结输入无交集，MQ成片cb719…、媒体/源审和首发身份保持；站点修订号由未发布候选0.98.1顺延0.99.1，原发布流程开始时间保持。当前记忆/教训合并两边内容，保留上游L061，本轮条目用L062/L063，旧局部记录中的L061指当时草拟号。详见version-resolution.json。
+
+## 交付完成
+
+[PR457](https://github.com/linhongcun/video-studio/pull/457) squash合并8eb1b603，附注tag与[Release v0.99.1](https://github.com/linhongcun/video-studio/releases/tag/v0.99.1)后，手动[Pages41423515242](https://github.com/linhongcun/video-studio/actions/runs/41423515242)与deployment7489083734成功。仅取消本批同head的preRelease push41423370219以释放队列，未取消其他任务。
+
+15次普通canonical完整GET核视频/海报/VTT/四图全部SHA、四章/24cue/10引用、九课及入口、RSS原首发和实际Release。并行Redis新首发使EP45按原首发排序为第8，因此首页验收按真实recent6 href/date而非伪造本期新首发；旧helper/差异与独立17项/5负例保留。
+
+线上native86动作/22严格PTS通过；63PNG路径中10新unique实际打开，53逐SHA和完整bytes绑定39个具名本地已实看代表，共49unique。22实际在线canvas与本地同n图逐字节相等，精确RGB数学证据有界复用，不再重复解码参考。原机器/颜色FAIL保持，未绕TLS/请求回填/Range冒充完整GET。海报加载弧、系列部分初始缩略图占位、暂停控件遮暗字幕、长原文内部滚动、390细字及模拟非真机范围如实保留。
+
+[#454](https://github.com/linhongcun/video-studio/issues/454)已于实际线上验收后completed关闭，#313/#308保持completed历史。publication.json汇总准确提交/媒体/冻结身份与证据SHA。只上GitHub及本站，无平台投稿、完整语义听审/ASR、用户新版认可或学习效果声明。
