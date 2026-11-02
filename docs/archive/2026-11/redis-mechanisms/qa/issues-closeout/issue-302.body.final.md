@@ -1,0 +1,57 @@
+<!-- engineering-algorithms:2026-10-25:ea08 -->
+
+## 状态与定位
+
+**已交付并完成线上核验：Redis 系列 / EP52 / `redis-lru`，v0.99.0。** 视频与配套图文已发布至 GitHub 站点；本 issue 以 completed 关闭。
+
+所属系列：**Redis 系列**（`redis`）。首批选题索引：[原工程算法选题总览 #294](https://github.com/linhongcun/video-studio/issues/294)。原 EA08 仅保留为历史策划检索编号，不作为 Redis 系列期号，本次制作分配 EP52 与 `redis-lru`，不按旧 EA 号重排 Redis 系列。
+
+2026-11-02 先完成系列归类，随后获授权正式制作。开工已同步最新主干 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`，制作分支 `codex/redis-mechanisms-20261102`；工程使用 `episodes/redis/redis-lru/{production,publication}`。本期已完成资料、独立脚本/动态/成片检查及 GitHub 站点交付与线上核验。
+
+## 已交付记录（v0.99.0，2026-11-02）
+
+- 内容：沿同一组键展示随机采样、跨轮保留的候选池与失效候选检查，说明池内较旧不等于全局最旧；区分 TTL 过期与容量淘汰。
+- 交付物：视频、配套文章、官方参考资料尾页与三比例封面；12镜24句、4章，正文4313帧加150帧资料页，共4463帧 / 148.766667秒（30fps）。成片 SHA-256：`e72b0e787c4120cec4084cd39d73c3ed46d151b7282ad583546265c07183097a`。
+- 验证范围：固定 Redis 8.4.0 的 allkeys-lru / maxmemory 本地实验与可复现采样教学模型分别记录；单次实际淘汰结果不解释为通用命中率基准。 [独立最终媒体 QA](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/redis-mechanisms/qa/lru-encoded-initial/independent-final-decision.json)已在本地通过；技术检查不代表用户已观看认可。
+- 发布：[制作 PR #455](https://github.com/linhongcun/video-studio/pull/455)；合并/站点提交 `7971d833e37b145eac5ccf66901773beba5cd0a6`；[Release v0.99.0](https://github.com/linhongcun/video-studio/releases/tag/v0.99.0)（2026-11-02T09:00:16Z）；Release 后[手动 Pages 部署](https://github.com/linhongcun/video-studio/actions/runs/41417179935) completed/success，09:09:33Z 完成。
+- 线上交付：[成片与图文](https://linhongcun.github.io/video-studio/episodes/redis-lru/)。[原生 Chromium 报告](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/redis-mechanisms/qa/site-online/redis-lru/report.json)本期 58 项检查、18 个严格 PTS 通过；三期合计 176 项/56 PTS。此轮浏览器验收在首轮 Pages 41416454968 成功后执行，早于上述手动部署完成，不记作后者完成后的重跑。
+- 最终发布核验：[26 项完整 canonical GET 证据](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/redis-mechanisms/qa/online-full-get-after-release.json)于上述手动部署成功后、09:09:58Z 检查完成，全部通过：三期 MP4/海报/VTT/七张图 SHA、Redis 六课目录、首页/目录/learn、RSS 与真实 Release/changelog。
+- 验收范围：桌面与模拟移动视口、播放/章节/图文回放/引用/字幕及资料尾页；原生控件与视口限制保留在报告中。不宣称物理真机、逐字听审或用户理解反馈。
+- 仅本次 GitHub 仓库、Release 与 Pages 范围；无外部平台投稿。下方原始提案与开工前核验清单保留为研究/分类历史，实际完成范围以本节与交付凭据为准。
+
+## 一个核心问题
+
+内存装满后应该删谁？教材里的精确 LRU 与 Redis 为控制维护成本采用的近似策略，差异怎样影响结果？
+
+## 拟讲的因果主线
+
+1. 建立固定内存容量和访问序列，区分到期删除与为腾空间执行的淘汰。
+2. 用精确 LRU 的最近访问顺序作为参照，说明持续维护顺序也有成本。
+3. 改用 Redis 的随机采样与候选池，挑选较久未访问的键；演示本次候选中最旧，不一定是全局最旧。
+4. 调整采样规模，解释近似程度与 CPU 成本的取舍；图文以 LFU 的概率计数、衰减补充“近期频繁”和“最近访问”的区别。
+
+## 可视化与图文方向
+
+同一访问轨迹对照精确顺序与抽样候选，抽中哪些键明确标出。演示一个可复现的近似差异，不用一次随机结果推出普遍命中率收益。
+
+## 准确性、适用边界与内容增量
+
+- 本题以明确的 allkeys-lru 等配置为前提；volatile 系列候选范围、noeviction 等策略不能混为一套。
+- Redis 的 LRU 是近似算法；不要直接用哈希表加双向链表动画宣称其真实实现。
+- LFU 不是每次访问都精确加一，也不永久保留历史热点；它结合概率计数与衰减，优先放图文，容量不足再另议拆题。
+- TTL 过期与 maxmemory 淘汰不同；内存账目和具体可淘汰范围按选定版本核验。
+- 与现有缓存命中/失效片的增量，是容量约束下的选择算法及近似与维护成本的取舍。
+
+## 第一方资料初核
+
+访问日期：**2026-10-25（北京时间）**。下列为本轮选题初核，未标发布日期的动态文档如实注明；不将资料阅读等同于产品实测或成片质量通过。
+
+- [Redis：Key eviction / Approximated LRU algorithm / LFU eviction](https://redis.io/docs/latest/develop/reference/eviction/)，第一方现行文档，未标发布日期，本轮已读。LRU 短引：“It samples a small number of keys at random”；LFU 短引：“a probabilistic counter” 与 “combined with a decay period”.
+- 页面说明 LFU 自 Redis 4.0 提供；本题不制作所有淘汰策略大全，正式开工重新固定版本和 maxmemory / policy / samples 等配置。
+
+## 后续安排制作时的专项核验
+
+- [ ] 固定访问序列与候选抽样以复现近似差异，另用实际 Redis 配置验证相关行为；示意、模拟与真实命中率实测分别记录，不承诺增大样本一定改善所有负载。
+- [ ] 重新核验第一方资料，固定产品版本、配置与支持主张；按[调研格式](https://github.com/linhongcun/video-studio/blob/main/docs/research-template.md)记录短引、日期和适用边界。
+- [ ] 开拍前确认一个可跟随的核心机制及必要前置；按[现行规范](https://github.com/linhongcun/video-studio/blob/main/docs/RULES.md)完成因果动画与正式媒体检查，检查和用户观看结论分别记录。
+- [ ] 仅在后续获安排制作、完成交付及核验后，才按届时授权以 completed 关闭，并同步系列总览。
