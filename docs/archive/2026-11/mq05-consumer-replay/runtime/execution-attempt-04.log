@@ -1,0 +1,20 @@
+java-version exit 0 expected 0
+postgres-version exit 0 expected 0
+compile exit 0 expected 0
+initdb exit 0 expected 0
+postgres listener-ready
+cluster-id exit 0 expected 0
+format-storage exit 0 expected 0
+broker listener-ready
+unsafe-setup exit 0 expected 0
+unsafe-A-halt exit 86 expected 86
+unsafe-after-A exit 0 expected 0
+unsafe-B-restart exit 0 expected 0
+unsafe-after-B exit 0 expected 0
+unsafe-physical-log exit 0 expected 0
+{"status": "failed", "error": "AssertionError(('unsafe', 'No actual Fetch offset witness', 'ientId=mq05-unsafe-B, groupId=points-unsafe-20261102t065255-705934z] Sending read_uncommitted FullFetchRequest(toSend=(), canUseTopicIds=True) to broker 127.0.0.1:59609 (id: 1 rack: null isFenced: false)\\n2026-11-02T06:53:14,053 DEBUG AbstractFetch [Consumer clientId=mq05-unsafe-B, groupId=points-unsafe-20261102t065255-705934z] Adding pending request for node 127.0.0.1:59609 (id: 1 rack: null isFenced: false)\\n2026-11-02T06:53:14,059 DEBUG AbstractFetch [Consumer clientId=mq05-unsafe-B, groupId=points-unsafe-20261102t065255-705934z] Removing pending request for fetch session: 432228143 for node: 127.0.0.1:59609 (id: 1 rack: null isFenced: false)\\n2026-11-02T06:53:14,060 DEBUG AbstractFetch [Consumer clientId=mq05-unsafe-B, groupId=points-unsafe-20261102t065255-705934z] Successfully sent a close message for fetch session: 432228143 to node: 127.0.0.1:59609 (id: 1 rack: null isFenced: false)\\n'))", "cases": 0, "assertions": 33, "cleanupStopped": [{"process": "broker", "pid": 17999, "exitCode": 143, "stopped": true, "atUTC": "2026-11-02T06:53:17.330186+00:00"}, {"process": "postgres", "pid": 17148, "exitCode": 0, "stopped": true, "atUTC": "2026-11-02T06:53:17.337490+00:00"}], "ports": [{"port": 59609, "closed": true}, {"port": 45767, "closed": true}, {"port": 37787, "closed": true}], "run": "/workspace/video-studio/docs/archive/2026-11/mq05-consumer-replay/runtime/runs/recovery-20261102T065255.705934Z"}
+Traceback (most recent call last):
+  File "/workspace/video-studio/docs/archive/2026-11/mq05-consumer-replay/runtime/run_experiment.py", line 75, in <module>
+    fetch=(O/(branch+'-B-restart.stderr.txt')).read_text();wanted=1 if branch=='early-commit'else 0;fetchLines=[line for line in fetch.splitlines()if 'fetchOffset='+str(wanted)in line and topic in line];assert fetchLines,(branch,'No actual Fetch offset witness',fetch[-900:])
+                                                                                                                                                                                                                  ^^^^^^^^^^
+AssertionError: ('unsafe', 'No actual Fetch offset witness', 'ientId=mq05-unsafe-B, groupId=points-unsafe-20261102t065255-705934z] Sending read_uncommitted FullFetchRequest(toSend=(), canUseTopicIds=True) to broker 127.0.0.1:59609 (id: 1 rack: null isFenced: false)\n2026-11-02T06:53:14,053 DEBUG AbstractFetch [Consumer clientId=mq05-unsafe-B, groupId=points-unsafe-20261102t065255-705934z] Adding pending request for node 127.0.0.1:59609 (id: 1 rack: null isFenced: false)\n2026-11-02T06:53:14,059 DEBUG AbstractFetch [Consumer clientId=mq05-unsafe-B, groupId=points-unsafe-20261102t065255-705934z] Removing pending request for fetch session: 432228143 for node: 127.0.0.1:59609 (id: 1 rack: null isFenced: false)\n2026-11-02T06:53:14,060 DEBUG AbstractFetch [Consumer clientId=mq05-unsafe-B, groupId=points-unsafe-20261102t065255-705934z] Successfully sent a close message for fetch session: 432228143 to node: 127.0.0.1:59609 (id: 1 rack: null isFenced: false)\n')

@@ -1,0 +1,236 @@
+{
+  "schemaVersion": 1,
+  "kind": "fresh-mq05-consumer-recovery-runtime-v1",
+  "atUTC": "2026-11-02T07:03:51.105146+00:00",
+  "pass": true,
+  "baseline": "01cd181c",
+  "branch": "codex/mq05-consumer-replay-20261102",
+  "acceptedReport": "runs/recovery-20261102T065614.804079Z/report.json",
+  "acceptedReportSHA256": "382286a24fa2eaf6956b0955f21a9395c39e7acbdc5df917ba16e595a6937ad2",
+  "sourceFile": "runs/recovery-20261102T065614.804079Z/Mq05ReplayProbe.java",
+  "sourceSHA256": "3828e759e492b09682f5f26fc12a6bec7b41b8f7e6c3dccedf0fc053b86448d0",
+  "sourceFixedKafkaFullCommit": "1156b2752aaa28eafc0b4c4d387e63356793268d",
+  "actualKafkaVersion": "4.4.0",
+  "actualKafkaBuildCommit": "1156b2752aaa28ea",
+  "actualPostgresVersion": "18.0",
+  "postgresSourceCommit": "3d6a828938a5fa0444275d3d2f67b64ec3199eb7",
+  "actualJavaVersion": "21.0.12.1",
+  "actualJDBCVersion": "42.7.8",
+  "freshOfficialDistributionDownloads": true,
+  "cases": 3,
+  "actualAssertions": 91,
+  "primaryProbeJVMs": 15,
+  "probeBreakdown": {
+    "setupWithSingleProducer": 3,
+    "consumerAIntentionalHalt86": 3,
+    "sequentialSameGroupConsumerB": 3,
+    "readOnlyAdminDBSnapshotProcesses": 6
+  },
+  "intentionalHalts": 3,
+  "results": [
+    {
+      "case": "unsafe",
+      "initialDurableCommitted": 0,
+      "physicalRecordCount": 1,
+      "physicalRecordOffset": 0,
+      "afterA": {
+        "LEO": 1,
+        "logStart": 0,
+        "committed": 0,
+        "database": {
+          "accountRows": 1,
+          "markerCount": 0,
+          "eventMarkerCount": 0,
+          "points": 10
+        }
+      },
+      "restartActualFetchOffset": 0,
+      "afterB": {
+        "LEO": 1,
+        "database": {
+          "points": 20,
+          "eventMarkerCount": 0,
+          "markerCount": 0,
+          "accountRows": 1
+        },
+        "committed": 1,
+        "logStart": 0
+      }
+    },
+    {
+      "case": "safe",
+      "initialDurableCommitted": 0,
+      "physicalRecordCount": 1,
+      "physicalRecordOffset": 0,
+      "afterA": {
+        "LEO": 1,
+        "logStart": 0,
+        "committed": 0,
+        "database": {
+          "accountRows": 1,
+          "markerCount": 1,
+          "eventMarkerCount": 1,
+          "points": 10
+        }
+      },
+      "restartActualFetchOffset": 0,
+      "afterB": {
+        "LEO": 1,
+        "logStart": 0,
+        "committed": 1,
+        "database": {
+          "accountRows": 1,
+          "markerCount": 1,
+          "eventMarkerCount": 1,
+          "points": 10
+        }
+      }
+    },
+    {
+      "case": "early-commit",
+      "initialDurableCommitted": 0,
+      "physicalRecordCount": 1,
+      "physicalRecordOffset": 0,
+      "afterA": {
+        "database": {
+          "points": 0,
+          "accountRows": 1,
+          "markerCount": 0,
+          "eventMarkerCount": 0
+        },
+        "LEO": 1,
+        "logStart": 0,
+        "committed": 1
+      },
+      "restartActualFetchOffset": 1,
+      "afterB": {
+        "LEO": 1,
+        "logStart": 0,
+        "committed": 1,
+        "database": {
+          "accountRows": 1,
+          "markerCount": 0,
+          "eventMarkerCount": 0,
+          "points": 0
+        }
+      }
+    }
+  ],
+  "mainStdoutAndNetworkEvidence": {
+    "unsafe": {
+      "setup": {
+        "file": "runs/recovery-20261102T065614.804079Z/unsafe-setup.stdout.txt",
+        "sha256": "d4d342a2a3bfc58794caf90115eba9deb50618194803c422c0923dfafe817642"
+      },
+      "A-halt": {
+        "file": "runs/recovery-20261102T065614.804079Z/unsafe-A-halt.stdout.txt",
+        "sha256": "39d2b980b52dcd6a2f31d2968a46b4d3e235dc8edefaf3100931c5ab386c4953"
+      },
+      "after-A": {
+        "file": "runs/recovery-20261102T065614.804079Z/unsafe-after-A.stdout.txt",
+        "sha256": "d6ac35ca73e97adf38927924cb20bcf4986b19f680d6a7ad968a3d7df69b019d"
+      },
+      "B-restart": {
+        "file": "runs/recovery-20261102T065614.804079Z/unsafe-B-restart.stdout.txt",
+        "sha256": "af2bd3ecf307cb9267c321d19efe5282637c5d0c2211b2531b346154558e0798"
+      },
+      "after-B": {
+        "file": "runs/recovery-20261102T065614.804079Z/unsafe-after-B.stdout.txt",
+        "sha256": "5617764b66410b8ed2354f7a7bd74ec0c12fdbaf2a31cc2dd7d6c320cff0ef3c"
+      },
+      "actualFetchAndMetadata": {
+        "restartNetworkLog": "runs/recovery-20261102T065614.804079Z/unsafe-B-restart.stderr.txt",
+        "restartNetworkLogSHA256": "f43b5e5da560c8949fc3ddadec16c3377c92e06e8e169843f12679e78ef5bf35",
+        "setupNetworkLog": "runs/recovery-20261102T065614.804079Z/unsafe-setup.stderr.txt",
+        "setupNetworkLogSHA256": "47d9481b5ff3b13a9048a69b6c52736bdf2240136d458977b4fd9b8594f4f9a6"
+      }
+    },
+    "safe": {
+      "setup": {
+        "file": "runs/recovery-20261102T065614.804079Z/safe-setup.stdout.txt",
+        "sha256": "b4db3fe90958a575b03716a2a09a759bcffe3d72d042b212f8d52ccdfed159a9"
+      },
+      "A-halt": {
+        "file": "runs/recovery-20261102T065614.804079Z/safe-A-halt.stdout.txt",
+        "sha256": "368206a19c3413c1db1a7ea2245b0df52dc9f0cfa8676fcf0b5db32ac77085b1"
+      },
+      "after-A": {
+        "file": "runs/recovery-20261102T065614.804079Z/safe-after-A.stdout.txt",
+        "sha256": "7f91890071dd2270488f4294cd243909294b4506c9f8ed02bd6269e9f5a00d11"
+      },
+      "B-restart": {
+        "file": "runs/recovery-20261102T065614.804079Z/safe-B-restart.stdout.txt",
+        "sha256": "912f71e6186b47127a5f04fd1a1f1d20018418483970b2a492e89ee7f33b3842"
+      },
+      "after-B": {
+        "file": "runs/recovery-20261102T065614.804079Z/safe-after-B.stdout.txt",
+        "sha256": "7eba107c21032c9efc101cd4517b7905a3be8a04ee2887597ec292775c280f82"
+      },
+      "actualFetchAndMetadata": {
+        "restartNetworkLog": "runs/recovery-20261102T065614.804079Z/safe-B-restart.stderr.txt",
+        "restartNetworkLogSHA256": "806e957c1c81c4ca75c03d222c27699ebaf455131fd582ea15a71ada257ccdd5",
+        "setupNetworkLog": "runs/recovery-20261102T065614.804079Z/safe-setup.stderr.txt",
+        "setupNetworkLogSHA256": "3d9035aa4383a140832450411e4ca1180b175552c3f8fb597f25b151261421c9"
+      }
+    },
+    "early-commit": {
+      "setup": {
+        "file": "runs/recovery-20261102T065614.804079Z/early-commit-setup.stdout.txt",
+        "sha256": "1870ec1f789cdcdf4276a678df45b18a75d910dde4112148b83483d87c792c2e"
+      },
+      "A-halt": {
+        "file": "runs/recovery-20261102T065614.804079Z/early-commit-A-halt.stdout.txt",
+        "sha256": "56a5117ec1874f9ce72bab57e048ae316dd8e5bec64a762888d06abd9a9b7ebb"
+      },
+      "after-A": {
+        "file": "runs/recovery-20261102T065614.804079Z/early-commit-after-A.stdout.txt",
+        "sha256": "45a4a005eb76f08b16c32e21a69302bc9b6d2cc544eec722469d801873822dfb"
+      },
+      "B-restart": {
+        "file": "runs/recovery-20261102T065614.804079Z/early-commit-B-restart.stdout.txt",
+        "sha256": "f865908a8f8f38f6c456fae257871c50a5b9580d3544d84682f9201e57d9cbc8"
+      },
+      "after-B": {
+        "file": "runs/recovery-20261102T065614.804079Z/early-commit-after-B.stdout.txt",
+        "sha256": "c738b5a3fa647ca9458c0b781b73f2da5b7815fe0fe56a001981c7c9c00ae39c"
+      },
+      "actualFetchAndMetadata": {
+        "restartNetworkLog": "runs/recovery-20261102T065614.804079Z/early-commit-B-restart.stderr.txt",
+        "restartNetworkLogSHA256": "af19fc4b9d64cc7f7aa57a668a2d8f7e6471d786459dff4a940b9c8ace3c26d3",
+        "setupNetworkLog": "runs/recovery-20261102T065614.804079Z/early-commit-setup.stderr.txt",
+        "setupNetworkLogSHA256": "f619bc7226b9dd10f4da23a7351e08e7db4cff284aee6754467d5a627949c970"
+      }
+    }
+  },
+  "cleanupProof": "cleanup-final.json",
+  "retainedFailedAttempts": [
+    {
+      "kind": "pre-execution Python syntax",
+      "paths": [
+        "failures/orchestrator-syntax-01",
+        "failures/orchestrator-syntax-02"
+      ],
+      "servicesStarted": false
+    },
+    {
+      "kind": "idempotent true/retries0 rejected before seed constructor",
+      "run": "runs/recovery-20261102T065048.830992Z",
+      "scope": "No seed append; services cleaned; raw failed report retained."
+    },
+    {
+      "kind": "unsafe actual recovery passed but required detailed Fetch log unavailable in initial logger",
+      "run": "runs/recovery-20261102T065255.705934Z",
+      "scope": "No whole-run acceptance; NetworkClient body evidence was added before next fresh accepted run. Original logs/source/report retained."
+    }
+  ],
+  "immutableIndex": "runtime-files-sha256.json",
+  "readOnlyVerifier": "python3 docs/archive/2026-11/mq05-consumer-replay/runtime/verify_records.py",
+  "limits": [
+    "No concurrent stable consumer ownership or PG concurrency suite; just three finite recovery branches.",
+    "Application calls producer.send once per new topic, idempotence=true/retries3; same record recovery is driven by durable consumer position, not producer resending.",
+    "Early commit advances the group position while physical E01offset0 remains; it does not delete the record.",
+    "Full actual logs retained. Kafka protocol apiKey enums, cluster/topic/member IDs and process-local endpoints are generated public fixture data, not credentials.",
+    "No benchmark/powerloss/distributedDBatomicity claim, and real runtime is separate from the author finite teaching model.",
+    "No oldruntime or production/source/TTS/freeze/site files modified."
+  ]
+}

@@ -1,0 +1,152 @@
+---
+title: '消费幂等：已经处理过，为什么还会再来一遍？'
+summary: '生产者只写入一条记录，消费者仍可能在重启后重读。沿同一 E01 追踪内存读取位置、Kafka 已提交位置与外部数据库结果，解释重复处理的来源和业务幂等的作用。'
+chapters:
+  - { id: problem, title: 一条记录为什么能处理两次 }
+  - { id: positions, title: 读到哪里与重启从哪里读 }
+  - { id: replay, title: 已提交位置怎样变成读取请求 }
+  - { id: guard, title: 允许重来，避免重复生效 }
+related:
+  - kafka-log-replay
+  - kafka-send-confirmation
+---
+
+## 一条记录为什么能处理两次 {#problem}
+
+订单 7042 产生一条积分事件 E01，要求给账户 17 加 10 分。生产者只写入一次，Kafka 的 `orders` 主题 P0 分区中只有这一条记录，位置是 offset 0。账户初始 0 分，消费者甲处理后已经变成 10 分。若甲在某个空隙退出，接手的消费者乙仍可能读到这条记录，再把账户加到 20 分。
+
+这里不需要生产者重发，也没有第二条日志记录。问题在于三个地方分别保存了不同的状态：Kafka 日志保存事件；消费者内存保存当前读到哪里；Kafka 为这个消费组保存恢复位置。外部数据库又单独保存积分结果。
+
+本例固定 Apache Kafka 4.4.0 Java 客户端与传统 `classic` 消费组，关闭自动提交。甲退出后乙才接手同一个组 `points` 的 P0，始终只有一个当前拥有者。事件在演示期间仍可从日志读取，不发生保留清理、压缩删除、日志截断或应用主动跳转。
+
+## 读到哪里与重启从哪里读 {#positions}
+
+演示准备时，应用已显式提交并确认 `P0 → 0`。这个 0 是实际存在的组恢复值，不能用“没有提交值时从 earliest 开始”的配置回退来替代。
+
+甲请求从 0 读取，拿到 E01@0。客户端解析记录后，把下一读取位置推进到 1，再将结果从 `poll` 返回应用。这份 `position=1` 位于甲进程自己的分区状态中，表示后续从哪里继续读取。
+
+实际执行中，`CompletedFetch` 先计算下一位置，`FetchCollector` 再调用 `subscriptions.position(tp, nextPosition)` 更新客户端状态。这段路径没有向数据库查询积分，也没有把该组的已提交位置改成 1。
+
+<SourceQuote sourceId="A1" supports="收集记录时更新的是当前客户端的分区读取位置，随后才返回 poll 结果；它不是 offset commit。" />
+
+Kafka 保存的 `committed=0` 则用于故障后恢复。它与内存中的 position 都表示“下一次从哪里读”，但保存者、寿命和更新动作不同。一次成功的 `poll` 不等于业务完成；本例关闭了自动提交，所以应用没有显式提交 1 时，组恢复值仍是 0。
+
+<SourceQuote sourceId="A5" supports="API 区分自动随 poll 前移的 position 与用于进程失败后恢复的 committed position。" />
+
+甲随后把 E01 交给积分业务。数据库事务将账户从 0 加到 10，并成功 `COMMIT`。这说明数据库中的积分已完成；它不说明 Kafka 的 offset 已提交。就在数据库提交之后、应用调用 Kafka 的进度提交之前，甲退出：内存中的 1 随进程消失，而日志中的 E01@0、数据库的 10 分、Kafka 保存的 0 都还在。
+
+Kafka 的消费者 API 本身就讨论了这个窗口：数据库插入完成后、offset 提交前发生进程故障，接手者会从上次已提交位置读取并可能重复数据库操作。这里说的是可能重复，不是每个消费者每次都会重复。
+
+<SourceQuote sourceId="R1" supports="外部数据库已经写成，而 Kafka offset 尚未提交时发生进程失败，接手者可能从 last committed offset 重新交付同一批数据。" />
+
+{/* 真实最终声轨后启用：article/consumer-replay-01-commit-gap.jpg；chapter=positions；图意为 DB10、甲 position1、Kafka committed0。不得用估计时间冻结。 */}
+
+## 已提交位置怎样变成读取请求 {#replay}
+
+乙没有甲的内存 position。它获得分区后，客户端发现缺少有效读取位置，先向协调者发送带有组名 `points` 与分区 P0 的 `OffsetFetch` 请求。返回值是 Kafka 为这个组保存的 0，不是数据库中是否已经加分的结果。
+
+收到恢复值与安装本地位置是两步。`ConsumerUtils.refreshCommittedOffsets` 检查提交值非空、分区仍分配给本消费者，然后用 `offsetAndMetadata.offset()` 构造 `FetchPosition`，交给 `seekUnvalidated`。本例在位置校验等条件满足后，乙的本地 position 就是 0。
+
+<SourceQuote sourceId="R2" supports="仍拥有该分区时，客户端把已提交 offset 构造成新的 FetchPosition 并安装；新进程没有继承旧进程的 position。" />
+
+接着，读取请求生成代码取出当前 position，将 `position.offset` 填入 `FetchRequest.PartitionData`。因此这个请求携带的起点也是 0。恢复值不是停在一个说明标签上，而是实际参与了下一次网络读取参数的构造。
+
+<SourceQuote sourceId="R3" supports="分区读取请求的 offset 实参直接来自本地 position.offset；恢复到 0 会让本例从 0 请求。" />
+
+日志仍保存 E01@0，所以本例返回的还是同一个事件、同一个分区、同一个 offset。客户端会创建新的 Java `ConsumerRecord` 对象，但其 offset 来自响应记录的 `record.offset()`；新的对象不等于新追加的 Kafka 记录。乙的 position 又会推进到 1。
+
+<SourceQuote sourceId="A2" supports="交付对象使用原始响应记录的 topic、partition 和 record.offset，保留原日志位置。" />
+
+{/* 真实最终声轨后启用：article/consumer-replay-02-fetch-zero.jpg；chapter=replay；图意为 B 的 Fetch0 读回同 E01@0。 */}
+
+如果业务逻辑只是“收到 E01 就加 10 分”，第二次业务尝试会再次提交加分，10 就变成 20。Kafka 不知道“账户已经加过分”，也不会替外部数据库决定应该跳过哪一次业务操作。记录仍只有一条，重复发生在业务处理层。
+
+## 允许重来，避免重复生效 {#guard}
+
+### 为什么不能靠提前提交解决
+
+先完整回到第一次业务之前：日志仍只有 E01@0，甲已取到记录，数据库 0 分，Kafka 恢复值 0。若甲先成功提交 `P0 → 1`，然后在数据库加分前退出，乙恢复时会安装 position1 并请求从 1 读取。
+
+本例日志末尾就是 1，因而没有新记录可交付；E01@0 仍在日志中，却已位于这次恢复起点之前，账户仍为 0。这里丢失的是一次应当发生的业务处理，不是物理日志记录被删除。提交顺序改变了故障后更倾向重复还是漏处理，不能把两个独立提交变成一个原子操作。
+
+{/* 真实最终声轨后启用：article/consumer-replay-03-early-commit.jpg；chapter=guard；图意为 Kafka1、B Fetch1 空、DB0，原 E01@0 尚在。 */}
+
+### 业务键与效果一起提交
+
+正确方案同样先回到第一次业务之前。应用使用稳定键 `(logical_handler='points', event_id='E01')` 标识“积分业务已经处理 E01”，而不是使用进程甲或进程乙的身份。第一次处理时，登记这个键与给账户加 10 分放在同一本地数据库事务里。
+
+提交后，要么登记和积分一起存在，要么本次未提交的修改都不成为已提交效果。第二次拿到 E01 时，应用发现同一业务键已经存在，便跳过加分，再提交 Kafka 下一恢复位置 1。结果是日志一条、业务尝试两次、加分效果一次；消费幂等保护的是重复尝试时的业务结果。
+
+<SourceQuote sourceId="R4" supports="同一本地事务中的修改在完成后一起可见；本例把登记与积分放进这个范围，Kafka offset 提交不在其中。" />
+
+下面是应用方案示意，不是 Kafka 源码，也不声称 Kafka 认识 `event_id` 的业务含义：
+
+```sql
+CREATE TABLE processed_event (
+  logical_handler text NOT NULL,
+  event_id text NOT NULL,
+  PRIMARY KEY (logical_handler, event_id)
+);
+CREATE TABLE account_points (
+  account_id bigint PRIMARY KEY,
+  points integer NOT NULL
+);
+INSERT INTO account_points VALUES (17, 0);
+```
+
+<SourceQuote sourceId="A3" supports="复合主键为同一业务与事件提供非空唯一身份，不以进程重启为由更换业务键。" />
+
+```text
+开始本地数据库事务
+INSERT processed_event('points', 'E01')
+  ON CONFLICT DO NOTHING RETURNING event_id
+如果本次确实插入了一行：
+  UPDATE account_points SET points = points + 10 WHERE account_id = 17
+  要求恰好更新一行；否则回滚并报错
+如果本次没有插入行：
+  跳过加分；不把旧登记当作本次新插入
+COMMIT 本地数据库事务
+成功后单独 commitSync({P0: OffsetAndMetadata(1)})
+```
+
+`RETURNING` 只返回本次实际插入或更新的行，冲突后 `DO NOTHING` 不会把已有行当作新插入结果返回。插入失败、积分更新失败或目标账户不存在时，应用必须回滚，不能留下一个没有对应积分效果的“已处理”标记。并发唯一约束的索引内部不属于本篇 Kafka 恢复主线；不能用普通“先查不存在”替代数据库的唯一性约束。
+
+<SourceQuote sourceId="A4" supports="RETURNING 的返回行对应本次成功插入或更新；冲突跳过不能按新插入加分。" />
+
+{/* 真实最终声轨后启用：article/consumer-replay-04-idempotent-result.jpg；chapter=guard；图意为 DB10、同一业务键、Kafka1、尝试2/效果1。 */}
+
+### 保证到哪里
+
+- **生产者幂等和确认不同于消费业务幂等。** 前者处理 Kafka 生产重试及写入确认；本例生产者只发送一次，也没有任何生产重试造成的新日志记录，因此开启它们不能阻止乙重新执行外部数据库加分。
+- **Kafka 事务也有参与范围。** 它可以把 Kafka 输出记录与消费 offset 放到 Kafka 事务中，例如 consume-transform-produce；它不会因应用另写一条数据库 `COMMIT`，就自动把这个外部提交纳入同一事务。本例没有建立这种跨系统原子协议，不宣称端到端 exactly-once。
+- **同一本地数据库是本例边界。** 若副作用是发邮件、扣另一套系统的款、调用外部 HTTP API，仅把本库的“已处理”标记与本库积分绑在一起，并不能原子地覆盖外部副作用，需要目标接口幂等或其他专门协议。
+- **恢复前提会改变结果。** 换组、主动 seek、没有有效提交值、记录已被清理，或在 Kafka commit 请求已发出之后才故障，均不能直接套用“保存的 0 必定不变”。自动提交、再均衡交接和多分区并行还要按真实配置与处理顺序另行设计。
+
+<SourceQuote sourceId="A6" supports="生产者幂等针对 producer retries，事务生产者可原子写多个 Kafka 分区；这些能力不等同于本例外部数据库重复加分的保护。" />
+
+Kafka 的恢复位置回答的是“这个组下次从哪里读”。外部数据库的业务键回答的是“这个业务对这个事件是否已经生效”。让两者各自承担正确职责，才解释了为什么可能再次交付，又为什么第二次不该再加分。
+
+## 参考资料
+
+以下均于 2026-11-02 从官方固定版本重新 GET 并定向实读。Apache Kafka 使用 4.4.0、commit `1156b2752aaa28eafc0b4c4d387e63356793268d`；PostgreSQL 使用 18.0、commit `3d6a828938a5fa0444275d3d2f67b64ec3199eb7`。源码文件保留原始文件名为题名，未将提交者推定为个人作者。
+
+- R1，Apache Kafka：[KafkaConsumer.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L250-L256)，数据库成功后、offset 提交前的故障窗口。
+- R2，Apache Kafka：[ConsumerUtils.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/ConsumerUtils.java#L203-L210)，提交值安装为本地读取位置。
+- R3，Apache Kafka：[AbstractFetch.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/AbstractFetch.java#L477-L484)，读取请求 offset 的实参来源。
+- R4，PostgreSQL Global Development Group：[Transactions](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/advanced.sgml#L141-L242)，同一本地事务的完成与可见性。
+- A1，Apache Kafka：[FetchCollector.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L186)，poll 返回前的 position 更新。
+- A2，Apache Kafka：[CompletedFetch.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java#L334-L338)，交付对象保留原 offset。
+- A3，PostgreSQL Global Development Group：[Primary Keys](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ddl.sgml#L1003-L1053)，业务键约束。
+- A4，PostgreSQL Global Development Group：[INSERT](https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ref/insert.sgml#L89-L101)，RETURNING 只返回实际插入或更新的行。
+- A5，Apache Kafka：[KafkaConsumer.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L82-L89)，position 与 committed position。
+- A6，Apache Kafka：[KafkaProducer.java](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L165-L168)，幂等生产与事务生产的对象；另见 [sendOffsetsToTransaction](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L742-L762) 的 consume-transform-produce 范围。
+
+### 本轮实际运行
+
+2026-11-02 的独立最小运行覆盖上述三个分支，91 项真实断言通过。它使用 Java 21.0.12.1、Kafka 4.4.0/固定构建 commit1156b2752aaa28ea、PostgreSQL 18.0 固定源码构建，单节点 RF1/ISR1；每分支建立隔离的新空主题、组与数据库 schema，初始账户 17 为 0 分。准备程序用 `Admin.alterConsumerGroupOffsets` 显式设置组恢复值 0 并查询确认，后续消费者提交 1 才用 `commitSync`，没有用 earliest 回退冒充已存的 0。
+
+三个分支都只调用一次生产发送；物理日志 dump 都只有 E01@P0offset0，起点 0、末尾 1。A 真实 halt86 退出后才启动同组 B；NetworkClient 实际 Fetch 请求体见证无防护、保护方案从 0 读取，提前提交从 1 读取。无防护分支 DB10→20；保护分支 DB10/一标记→重读但不加分→Kafka1；提前提交分支恢复1、有限空poll，DB始终0且原offset0尚在。这是实测恢复请求与业务结果，有限模型本身仍不是 Broker 模拟器。
+
+可核对本轮 [运行报告](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/mq05-consumer-replay/runtime/runs/recovery-20261102T065614.804079Z/report.json)、[完整探针](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/mq05-consumer-replay/runtime/runs/recovery-20261102T065614.804079Z/Mq05ReplayProbe.java)、[实际命令](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/mq05-consumer-replay/runtime/runs/recovery-20261102T065614.804079Z/commands.json)与[依赖身份](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/mq05-consumer-replay/runtime/runs/recovery-20261102T065614.804079Z/dependency-inputs.json)。报告 SHA-256 为 `382286a24fa2eaf6956b0955f21a9395c39e7acbdc5df917ba16e595a6937ad2`。实际使用的 topic/group 带分支与运行后缀用于隔离，正文中的 orders/points 是简写；无防护探针完成20分后另提交Kafka1，正文第09镜停在20分/组0以展示空隙，不把展示截点当作完整探针收尾。
+
+首次幂等生产参数 retries0 被客户端构造校验拒绝，Fetch请求证据不足的早期候选也保留；通过的运行使用幂等开启、acks=all、retries3与实际NetworkClient请求体，不称所有候选均成功。服务和自有临时数据已清理，原始证据保留。范围是有限进程故障和本地数据库，不是断电、性能或普遍恰好一次证明。2026-10-30 旧 MQ05 的 89 项运行证据仍是历史，旧批121项为多期汇总，均未冒称本轮新结果。

@@ -1,0 +1,97 @@
+{
+  "reviewer": "/root/mq_qa",
+  "checkedAtUTC": "2026-11-02T07:11:32.110444+00:00",
+  "status": "approved-exact-content-for-TTS",
+  "canEnterTTS": true,
+  "blockers": [],
+  "shots": 12,
+  "sentences": 24,
+  "scriptSHA256": "d21acba191edf8415fa41d11e59ffa2ee7f5b91dd5a3994ab60097ccb25bcb8a",
+  "narrationSHA256": "935cdf7538bc75d4ece5b546f8263aaf4967837a42afcbc5e1f34d897e642d3f",
+  "narrationDefinition": "UTF-8 of ''.join(re.findall(r'^旁白：(.*)$', script, re.M)), no separators or terminal LF",
+  "exactInputs": {
+    "script.md": "d21acba191edf8415fa41d11e59ffa2ee7f5b91dd5a3994ab60097ccb25bcb8a",
+    "plan.json": "738b1ddf00d966f3564f69bc70df57caa0c1ceef69c8bedd765fcbdde2fcd00b",
+    "model.json": "694254cb37a5d25eafe1eb41f9f28460f3d9b3c8b8777bd527d6d4dffecf99a5",
+    "build_model.py": "4f5dda0557b5a1cf320e5889aa4e883d287c98cae46358907f947468fd1ce73e",
+    "model-verification.json": "37d0d1f992490dfbfdd043a012bbfa26103d7369e9233322883d6520ce8287bb",
+    "research.md": "2cd4d2c322f22dd94d40a474e3a1b4bcc71ee384d2a9b2b88eefc49e21e1bda7",
+    "source-chain-notes.md": "61cf9befef6afdc2587da6d4e18b2d1881283f31188d4926332f56c4ae7771c8",
+    "references.json": "06ce93dd04b72cb98dc3c862076bbfd5f4e3a404bd57d76ca50ede21d9414e85",
+    "article-sources.json": "f1b2a4a73241b7068944e69f818e90bafa6655a1b79ecdc3118178f8d9a32888",
+    "article.mdx": "e38354d4e95b6d98f60c91b156cf3ea8c467c1cda5c8421d060be6b5e279f215",
+    "article-figure-plan.json": "dbab9333c45baa0decb256fd0b22fa619cfcc5e72f770d639337ddb163a39878",
+    "episode-config.json": "e0685e51139da0b4d06d3054bf1cc86d6bae1c08bf67b20268206eb157d4dd43",
+    "README.md": "3fef641cc5cc30766eab991373bf121ce7dd09c4bacda492841d5973a1f1947a",
+    "knoll-props.md": "ecbeee1bd9342f437cae2a9688422129846ec67b500c4e9e73be6ff9f93328dc",
+    "pronunciation.md": "308eb7d19eb68b2a23b887a8c087dd0b8142954a997e2b112bd9c8e45e7613b0"
+  },
+  "authorReady": {
+    "path": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/qa-editorial/author-ready.json",
+    "sha256": "9e6d0394a6319956a8c7b4ad1cbd5b92e0c04092ec6d317a0a7de25f8160891f"
+  },
+  "evidenceReports": {
+    "format-independent.json": {
+      "path": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/qa-editorial/format-independent.json",
+      "sha256": "8fef8b159388682f74cc248c2393ff8ee089d80cc940bcf949d70d9726d41fe1"
+    },
+    "model-independent.json": {
+      "path": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/qa-editorial/model-independent.json",
+      "sha256": "6f87ae76b074884e953ec252ff65392f1a799bdeee3c2e45a9771882ee74b3e1"
+    },
+    "runtime-independent.json": {
+      "path": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/qa-editorial/runtime-independent.json",
+      "sha256": "e980f5e51a79963b391ce9ade4909c715a44450625bdf9cd4aa07f88d09749ea"
+    },
+    "source-preflight-independent.json": {
+      "path": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/qa-editorial/source-preflight-independent.json",
+      "sha256": "3c3590b812beb405cc7223cb71d617e20920e69e5b9b4b631034eaddcafab1d3"
+    },
+    "consumer-source-chain-read.preliminary.json": {
+      "path": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/qa-editorial/consumer-source-chain-read.preliminary.json",
+      "sha256": "b2858461b1606f277586a533402df8e781514ff5d5c9ff2e32fa6935060b7845"
+    },
+    "old-focus-review.json": {
+      "path": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/qa-editorial/old-focus-review.json",
+      "sha256": "ec2d1c3485adb71323b4f3dbce3f8e84062b76955f6c04d88765116d8ba361a0"
+    }
+  },
+  "independentVerdict": {
+    "oneQuestion": "为什么生产者只写一次，消费者重启仍会再次执行同一事件的业务？",
+    "completeCausalChain": [
+      "A从Fetch0取到原offset0，客户端内存position成为1，但Kafka保存的组恢复值仍0。",
+      "DB先提交10分，随后进程A在提交Kafka1之前退出；原日志、DB10、组恢复0持久保留，A内存丢失。",
+      "新进程B查询组恢复值0，安装为自己的position0；请求构造读取该值，再以Fetch0取回原E01@offset0。",
+      "缺少业务防护时第二次执行加分成为20；不是第二次生产或物理日志多一条。",
+      "提前提交Kafka1的独立重置分支会在业务未做时退出，B从1开始，原offset0仍在但本业务漏做。",
+      "另一独立重置分支从首次业务开始，将稳定业务键points:E01和10分同一数据库事务提交；B同样重读0，但已处理键让第二次尝试跳过加分，随后另行提交Kafka1。"
+    ],
+    "noviceProgression": "先给同一原始记录，再引入两个位置的不同归属与生命周期；字段跟随真实动作变化，随后退出、恢复、请求构造和业务后果逐步展开。",
+    "focusEstimate": {
+      "firstNineShotNarrationCharacters": 569,
+      "allNarrationCharacters": 805,
+      "share": 0.7068322981366459,
+      "basis": "字符占比估计，非实际声音/帧时长测量。实际声轨后重新确认Kafka主因果仍占主要正文。"
+    },
+    "sourceDepth": "实际说明内存position更新、OffsetFetch恢复值安装、Fetch.position.offset请求字段与独立OffsetCommit；没有用类名、引用数量或测试数量代替口播因果。",
+    "guardScope": "外部DB的业务键与副作用同事务；Kafka offset独立提交，未声称Kafka事务自动覆盖外部DB。"
+  },
+  "separateEvidenceKinds": {
+    "fixedSource": "Kafka4.4.0固定commit实现与契约、PostgreSQL事务/唯一键/RETURNING资料，十段引用逐字连续核对。",
+    "finiteModel": "当前36快照、作者94项教学断言；独立只读因果投影核验，不是Broker或数据库运行。",
+    "actualRuntime": "新独立三分支91运行断言；抽核原始NetworkClient FETCH0/0/1、恢复值0/0/1、HALT86、单物理记录CRC与DB20/10/0。保留此前失败run，未重跑。"
+  },
+  "boundedCorrection": {
+    "reason": "新实测初始化用Admin.alterConsumerGroupOffsets，原非旁白前言/模型元数据曾写commitSync；作者在首次正式gate前改为明确设置并确认0。",
+    "narrationUnchanged": true,
+    "all36ModelSnapshotsUnchanged": true,
+    "beforeDirectory": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/qa-editorial/initial-offset-api-correction"
+  },
+  "laterRequiredNotClaimed": [
+    "真实声轨文本/PCM/静音和裁尾风险审查；未ASR或人类全片语义听辨。",
+    "真实最终storyboard后按实际整数帧落实四幅Figure及MDX，不用null时序冻结。",
+    "作者正式停写后独立fresh PNG/DOM、无字幕连续小样和三分支完整重置。",
+    "正式成片全解码、字幕和正文/资料边界、实际JPEG图义与浏览器验收。"
+  ],
+  "writerActionsExecutedByReviewer": false
+}

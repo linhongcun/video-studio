@@ -1,0 +1,60 @@
+{
+  "status": "planned-not-yet-executed",
+  "atUTC": "2026-11-02T06:42:50.815447+00:00",
+  "baseline": "01cd181c",
+  "branch": "codex/mq05-consumer-replay-20261102",
+  "kafka": "4.4.0",
+  "postgres": "18.0",
+  "temporaryRoot": "/tmp/mq05-consumer-replay-20261102",
+  "input": {
+    "record": "E01",
+    "orderId": 7042,
+    "accountId": 17,
+    "delta": 10,
+    "partition": 0,
+    "offset": 0,
+    "oneProducerSendPerBranch": true
+  },
+  "consumer": {
+    "group.protocol": "classic",
+    "enable.auto.commit": false,
+    "max.poll.records": 1,
+    "instances": "A halted before sequential B starts; no stable concurrent owners"
+  },
+  "cases": [
+    {
+      "id": "unsafe",
+      "start": "DBpoints0, durable Kafka committed0; exactly one E01 at P0offset0",
+      "A": "poll record0, position1/committed0; DB +10COMMIT; halt86 before Kafka commit1",
+      "B": "same group reads stored0/Fetch0, receives same record0; DB +10 again; Kafka commit1",
+      "expectedPoints": 20
+    },
+    {
+      "id": "safe",
+      "start": "Fresh topic/group and points0 plus no markers before first DB tx",
+      "A": "INSERT key(points,E01) and UPDATE+10 same DB tx/COMMIT; halt86 before Kafka commit1",
+      "B": "same group returns same record0; duplicate insert0 rows => no UPDATE; Kafka commit1",
+      "expectedPoints": 10,
+      "markerCount": 1
+    },
+    {
+      "id": "early-commit",
+      "start": "Fresh topic/group and DBpoints0; one E01offset0",
+      "A": "poll position1/committed0; commitKafka1; halt86 before DB tx",
+      "B": "same group restores1, bounded poll yields no record; original logoffset0 still retained",
+      "expectedPoints": 0
+    }
+  ],
+  "observations": [
+    "Explicit Admin alterConsumerGroupOffsets0 setup and broker query, never equate resetearliest with durable0",
+    "Admin LEO/logcount1, same event/offset, actual positions/committed offsets and independent DB snapshots before/after",
+    "Official physical log dump with records retained per branch",
+    "Raw commands/stdout/stderr/times/versions and assertions; intentional halt86 is checked separately from successful workers"
+  ],
+  "cleanup": "Own only processes/data/ports; stop in finally; immutable final file index after cleanup",
+  "limits": [
+    "Not powerloss/replicateddurability/concurrentconsumerownering/benchmark",
+    "Actual runtime evidence is separate from the finite teaching animation model",
+    "No oldruntime/source/helper output rewritten"
+  ]
+}

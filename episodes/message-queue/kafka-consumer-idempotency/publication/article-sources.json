@@ -7,145 +7,168 @@
       "organization": "Apache Kafka",
       "title": "FetchCollector.java",
       "titleEvidence": {
-        "locator": "Fixed-commit GitHub contents response name/path fields: FetchCollector.java",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/kafka/title-evidence.json"
+        "locator": "Official GitHub Contents API name/path at 1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/FetchCollector.github-contents.json"
       },
-      "version": "Apache Kafka4.4.0",
-      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L185",
+      "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L186",
       "supports": [
-        "读取推进客户端内存position，不查询积分业务是否已成功。"
+        "poll收集记录时写入本地下一读取位置，返回应用前已经推进。"
       ],
-      "sections": "FetchCollector.java lines178–185; execution chain in research.md",
+      "sections": "FetchCollector.java:178-186",
       "verification": {
         "status": "verified",
-        "checkedAt": "2026-10-30",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
-        "sourceUrl": "https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java",
-        "method": "Fresh official fixed-commit HTTPS GET; targeted execution reading plus API cross-check, no runtime assertion",
-        "sha256": "66961cb214088a240b32e1729228cfefd2643b06c8aad4501f3444242dda4656"
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/FetchCollector.java",
+        "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/FetchCollector.java#L178-L186",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
       },
       "quotation": {
-        "text": "                if (nextInLineFetch.nextFetchOffset() > position.offset) {\n                    SubscriptionState.FetchPosition nextPosition = new SubscriptionState.FetchPosition(\n                            nextInLineFetch.nextFetchOffset(),\n                            nextInLineFetch.lastEpoch(),\n                            position.currentLeader);\n                    log.trace(\"Updating fetch position from {} to {} for partition {} and returning {} records from `poll()`\",\n                            position, nextPosition, tp, partRecords.size());\n                    subscriptions.position(tp, nextPosition);",
-        "locator": "FetchCollector.java lines178–185",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/kafka/FetchCollector.java"
-      },
-      "note": "Official Apache Kafka source filename; no individual author inferred from committers."
+        "text": "                if (nextInLineFetch.nextFetchOffset() > position.offset) {\n                    SubscriptionState.FetchPosition nextPosition = new SubscriptionState.FetchPosition(\n                            nextInLineFetch.nextFetchOffset(),\n                            nextInLineFetch.lastEpoch(),\n                            position.currentLeader);\n                    log.trace(\"Updating fetch position from {} to {} for partition {} and returning {} records from `poll()`\",\n                            position, nextPosition, tp, partRecords.size());\n                    subscriptions.position(tp, nextPosition);\n                    positionAdvanced = true;\n",
+        "locator": "FetchCollector.java:178-186",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/FetchCollector.java"
+      }
     },
     {
       "id": "A2",
-      "organization": "PostgreSQL Global Development Group",
-      "title": "heapam.c",
+      "organization": "Apache Kafka",
+      "title": "CompletedFetch.java",
       "titleEvidence": {
-        "locator": "heapam.c original source-file header/name and fixed-commit repository path",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+        "locator": "Fresh official raw URL filename and source-manifest.json file path",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/source-manifest.json"
       },
-      "version": "PostgreSQL18.0",
-      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam.c#L3768-L3778",
+      "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java#L334-L338",
       "supports": [
-        "UPDATE新版本xmin当前XID。"
+        "新的ConsumerRecord对象保留响应记录原topic/partition/record.offset，不是新日志记录。"
       ],
-      "sections": "heapam.c lines3768–3778; implementation context in research.md",
+      "sections": "CompletedFetch.java:334-338",
       "verification": {
         "status": "verified",
-        "checkedAt": "2026-10-30",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
-        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam.c",
-        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
-        "sha256": "300ae37b2a28ee1755ea20753dacdbd65bc747b2707edf09fa8c3816f4d93a8f"
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/CompletedFetch.java",
+        "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/internals/CompletedFetch.java#L334-L338",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
       },
       "quotation": {
-        "text": "\t/*\n\t * Prepare the new tuple with the appropriate initial values of Xmin and\n\t * Xmax, as well as initial infomask bits as computed above.\n\t */\n\tnewtup->t_data->t_infomask &= ~(HEAP_XACT_MASK);\n\tnewtup->t_data->t_infomask2 &= ~(HEAP2_XACT_MASK);\n\tHeapTupleHeaderSetXmin(newtup->t_data, xid);\n\tHeapTupleHeaderSetCmin(newtup->t_data, cid);\n\tnewtup->t_data->t_infomask |= HEAP_UPDATED | infomask_new_tuple;\n\tnewtup->t_data->t_infomask2 |= infomask2_new_tuple;\n\tHeapTupleHeaderSetXmax(newtup->t_data, xmax_new_tuple);",
-        "locator": "heapam.c lines3768–3778",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/access/heap/heapam.c"
-      },
-      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+        "text": "        return new ConsumerRecord<>(partition.topic(), partition.partition(), record.offset(),\n                record.timestamp(), timestampType,\n                keyBytes == null ? ConsumerRecord.NULL_SIZE : keyBytes.remaining(),\n                valueBytes == null ? ConsumerRecord.NULL_SIZE : valueBytes.remaining(),\n                key, value, headers, leaderEpoch);\n",
+        "locator": "CompletedFetch.java:334-338",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/CompletedFetch.java"
+      }
     },
     {
       "id": "A3",
       "organization": "PostgreSQL Global Development Group",
-      "title": "xact.c",
+      "title": "Primary Keys",
       "titleEvidence": {
-        "locator": "xact.c original source-file header/name and fixed-commit repository path",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+        "locator": "sect2 id=ddl-constraints-primary-keys, title Primary Keys, line1003",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-ddl.sgml"
       },
-      "version": "PostgreSQL18.0",
-      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/transam/xact.c#L1843-L1851",
+      "version": "PostgreSQL18.0; 3d6a828938a5fa0444275d3d2f67b64ec3199eb7",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ddl.sgml#L1003-L1053",
       "supports": [
-        "回滚记XID树aborted。"
+        "业务键用logicalHandler与eventId组成非空唯一主键。"
       ],
-      "sections": "xact.c lines1843–1851; implementation context in research.md",
+      "sections": "postgres-ddl.sgml:1015-1017",
       "verification": {
         "status": "verified",
-        "checkedAt": "2026-10-30",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
-        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/transam/xact.c",
-        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
-        "sha256": "75b012c0b047d1dc905a30975c244beec366e45eac0dbf109fd21bcd611a8e39"
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-ddl.sgml",
+        "sourceUrl": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ddl.sgml#L1003-L1053",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "PostgreSQL Global Development Group: official project source and COPYRIGHT, no personal author inferred."
       },
       "quotation": {
-        "text": "\t/*\n\t * Mark the transaction aborted in clog.  This is not absolutely necessary\n\t * but we may as well do it while we are here; also, in the subxact case\n\t * it is helpful because XactLockTableWait makes use of it to avoid\n\t * waiting for already-aborted subtransactions.  It is OK to do it without\n\t * having flushed the ABORT record to disk, because in event of a crash\n\t * we'd be assumed to have aborted anyway.\n\t */\n\tTransactionIdAbortTree(xid, nchildren, children);",
-        "locator": "xact.c lines1843–1851",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/access/transam/xact.c"
-      },
-      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+        "text": "A primary key constraint indicates that a column, or group of columns,\n    can be used as a unique identifier for rows in the table.  This\n    requires that the values be both unique and not null.",
+        "locator": "postgres-ddl.sgml:1015-1017",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-ddl.sgml"
+      }
     },
     {
       "id": "A4",
       "organization": "PostgreSQL Global Development Group",
-      "title": "heapam_visibility.c",
+      "title": "INSERT",
       "titleEvidence": {
-        "locator": "heapam_visibility.c original source-file header/name and fixed-commit repository path",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+        "locator": "refentrytitle INSERT line12, refname INSERT line18",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-insert.sgml"
       },
-      "version": "PostgreSQL18.0",
-      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam_visibility.c#L1129-L1137",
+      "version": "PostgreSQL18.0; 3d6a828938a5fa0444275d3d2f67b64ec3199eb7",
+      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ref/insert.sgml#L89-L101",
       "supports": [
-        "旧积分行xmax回滚则仍可见。"
+        "RETURNING只返回本次实际插入或更新的行，DO NOTHING冲突不返回旧行。"
       ],
-      "sections": "heapam_visibility.c lines1129–1137; implementation context in research.md",
+      "sections": "postgres-insert.sgml:97-98",
       "verification": {
         "status": "verified",
-        "checkedAt": "2026-10-30",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
-        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/access/heap/heapam_visibility.c",
-        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
-        "sha256": "d36989d5724e58d4499281643f74b004057ce5c1df409f39bd2c3653ce481c3f"
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-insert.sgml",
+        "sourceUrl": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/doc/src/sgml/ref/insert.sgml#L89-L101",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "PostgreSQL Global Development Group: official project source and COPYRIGHT, no personal author inferred."
       },
       "quotation": {
-        "text": "\t\tif (XidInMVCCSnapshot(HeapTupleHeaderGetRawXmax(tuple), snapshot))\n\t\t\treturn true;\n\n\t\tif (!TransactionIdDidCommit(HeapTupleHeaderGetRawXmax(tuple)))\n\t\t{\n\t\t\t/* it must have aborted or crashed */\n\t\t\tSetHintBits(tuple, buffer, HEAP_XMAX_INVALID,\n\t\t\t\t\t\tInvalidTransactionId);\n\t\t\treturn true;",
-        "locator": "heapam_visibility.c lines1129–1137",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/access/heap/heapam_visibility.c"
-      },
-      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+        "text": "Only rows that were successfully\n   inserted or updated will be returned.",
+        "locator": "postgres-insert.sgml:97-98",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/postgres-insert.sgml"
+      }
     },
     {
       "id": "A5",
-      "organization": "PostgreSQL Global Development Group",
-      "title": "nodeModifyTable.c",
+      "organization": "Apache Kafka",
+      "title": "KafkaConsumer.java",
       "titleEvidence": {
-        "locator": "nodeModifyTable.c original source-file header/name and fixed-commit repository path",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/retrievals.json"
+        "locator": "Official GitHub Contents API name/path at 1156b2752aaa28eafc0b4c4d387e63356793268d",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.github-contents.json"
       },
-      "version": "PostgreSQL18.0",
-      "url": "https://github.com/postgres/postgres/blob/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/nodeModifyTable.c#L1332-L1333",
+      "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L82-L89",
       "supports": [
-        "成功INSERT执行RETURNING。"
+        "poll自动推进本地position；committed用于故障恢复。"
       ],
-      "sections": "nodeModifyTable.c lines1332–1333; implementation context in research.md",
+      "sections": "KafkaConsumer.java:82-89",
       "verification": {
         "status": "verified",
-        "checkedAt": "2026-10-30",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/research.md",
-        "sourceUrl": "https://raw.githubusercontent.com/postgres/postgres/3d6a828938a5fa0444275d3d2f67b64ec3199eb7/src/backend/executor/nodeModifyTable.c",
-        "method": "Fresh official fixed-commit HTTPS GET, implementation code and branch context read; original quote bytes verified",
-        "sha256": "d265878582203339053fa21866c65109cc8e69ff2f11a7195e32a3548b94c061"
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.java",
+        "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java#L82-L89",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
       },
       "quotation": {
-        "text": "\t\tresult = ExecProcessReturning(context, resultRelInfo, CMD_INSERT,\n\t\t\t\t\t\t\t\t\t  oldSlot, slot, planSlot);",
-        "locator": "nodeModifyTable.c lines1332–1333",
-        "evidence": "episodes-codex/kafka-consumer-idempotency/sources/postgresql/src/backend/executor/nodeModifyTable.c"
+        "text": " * The {@link #position(TopicPartition) position} of the consumer gives the offset of the next record that will be given\n * out. It will be one larger than the highest offset the consumer has seen in that partition. It automatically advances\n * every time the consumer receives messages in a call to {@link #poll(Duration)}.\n * <p>\n * The {@link #commitSync() committed position} is the last offset that has been stored securely. Should the\n * process fail and restart, this is the offset that the consumer will recover to. The consumer can either automatically commit\n * offsets periodically; or it can choose to control this committed position manually by calling one of the commit APIs\n * (e.g. {@link #commitSync() commitSync} and {@link #commitAsync(OffsetCommitCallback) commitAsync}).\n",
+        "locator": "KafkaConsumer.java:82-89",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaConsumer.java"
+      }
+    },
+    {
+      "id": "A6",
+      "organization": "Apache Kafka",
+      "title": "KafkaProducer.java",
+      "titleEvidence": {
+        "locator": "Fresh official fixed-commit source URL filename KafkaProducer.java",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaProducer.java.get.json"
       },
-      "note": "Official PostgreSQL repository and retained source-file header; institutional credit, no named personal author inferred."
+      "version": "Apache Kafka4.4.0; 1156b2752aaa28eafc0b4c4d387e63356793268d",
+      "url": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L165-L168",
+      "supports": [
+        "生产者幂等针对生产重试，事务生产者可原子发送到多个Kafka分区；不自动提交本例外部DB。"
+      ],
+      "sections": "KafkaProducer.java:165-168",
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaProducer.java",
+        "sourceUrl": "https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/producer/KafkaProducer.java#L165-L168",
+        "method": "Fresh fixed-commit official HTTPS GET; raw bytes, title and exact continuous quotation read this round.",
+        "authorEvidence": "No explicit personal document author; official Apache repository identity in sources/kafka-repository.json."
+      },
+      "quotation": {
+        "text": " * From Kafka 0.11, the KafkaProducer supports two additional modes: the idempotent producer and the transactional producer.\n * The idempotent producer strengthens Kafka's delivery semantics from at least once to exactly once delivery. In particular\n * producer retries will no longer introduce duplicates. The transactional producer allows an application to send messages\n * to multiple partitions (and topics!) atomically.\n",
+        "locator": "KafkaProducer.java:165-168",
+        "evidence": "episodes/message-queue/kafka-consumer-idempotency/production/revisions/consumer-replay-v2/sources/KafkaProducer.java"
+      }
     }
   ]
 }

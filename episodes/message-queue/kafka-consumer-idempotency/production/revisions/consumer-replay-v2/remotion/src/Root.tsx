@@ -1,0 +1,11 @@
+import React from 'react';
+import {Composition} from 'remotion';
+import storyboard from '@storyboard';
+import {Main} from './Main';
+import {parseBoard} from './data';
+const meta=storyboard.meta??{};
+if(meta.provisionalTiming||meta.pendingAudio||meta.prevoice||meta.timingSource?.kind==='PREVOICE_ESTIMATED')throw Error('Main requires the root-accepted measured storyboard; use separate Prevoice entry for estimates.');
+const {video}=parseBoard(storyboard);
+if(!video.durationInFrames)throw Error('Measured Main has no actual shots');
+const MeasuredMain:React.FC<{showSubtitles?:boolean;hideSubtitles?:boolean}>=props=><Main storyboard={storyboard} {...props}/>;
+export const RemotionRoot=()=> <Composition id="Main" component={MeasuredMain} {...video}/>;
