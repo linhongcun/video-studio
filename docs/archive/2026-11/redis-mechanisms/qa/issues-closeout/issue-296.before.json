@@ -1,0 +1,40 @@
+{
+  "fetchedAtUTC": "2026-11-02T09:12:00.595Z",
+  "content": [
+    {
+      "type": "text",
+      "text": "Action completed."
+    }
+  ],
+  "structuredContent": {
+    "issue": {
+      "url": "https://github.com/linhongcun/video-studio/issues/296",
+      "title": "[Redis / EP50] Sentinel：主节点失联后，谁有资格决定换主？",
+      "issue_number": 296,
+      "body": "<!-- engineering-algorithms:2026-10-25:ea02 -->\n\n## 状态与定位\n\n**制作中：2026-11-02 已获批开始本题视频及配套图文制作。** 当前进入资料复核、脚本与机制设计阶段，尚未完成配音、动画或成片验收。身份为 **Redis 系列 / EP50 / `redis-sentinel`**。\n\n所属系列：**Redis 系列**（`redis`）。首批选题索引：[原工程算法选题总览 #294](https://github.com/linhongcun/video-studio/issues/294)。原 EA02 仅保留为历史策划检索编号，不作为 Redis 系列期号，本次制作分配 EP50 与 `redis-sentinel`，不按旧 EA 号重排 Redis 系列。\n\n2026-11-02 先完成系列归类，随后获授权正式制作。开工已同步最新主干 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`，制作分支 `codex/redis-mechanisms-20261102`；工程使用 `episodes/redis/redis-sentinel/{production,publication}`。完成资料、独立脚本/动态/成片检查后按既有授权交付 GitHub 站点，再以 completed 关闭。\n\n## 一个核心问题\n\n一个 Sentinel 认为主节点故障，为什么不能立即提升任意副本？“选 Sentinel”与“选新主节点”分别是谁做的？\n\n## 拟讲的因果主线\n\n1. 用 1 主 2 副本与 5 个 Sentinel 建立两类对象：业务数据节点与监控/协调者。\n2. 超时形成主观下线 SDOWN；收集达到配置 quorum 的故障判断，形成客观下线 ODOWN。\n3. Sentinel 在 epoch 内投票，选出本次执行故障转移的负责人；单独展示授权票数。\n4. 负责人先排除不合格副本，再按 priority、复制进度等条件选择副本，提升为新主节点，重新配置其他副本并传播配置。\n5. 用“quorum=2、只有2个 Sentinel 可达”的对照说明：确认故障后仍可能因不足多数授权而不能换主。\n\n## 可视化与图文方向\n\n票从 Sentinel 发给候选 Sentinel；选举结束后，负责人再检查 Redis 副本状态。故障确认票数与授权票数分两步展示，不能让副本举票或用一个“票数够了”跳过整个过程。\n\n## 准确性、适用边界与内容增量\n\n- 选票对象是负责故障转移的 Sentinel；Redis 副本不是在这一轮相互投票争当主节点。\n- 设 N 为当前已知 Sentinel 总数（含自己），授权门槛为 max(floor(N/2)+1, quorum)，不是以当前在线数重算多数；正式演示记录各节点实际已知成员视图。\n- 副本选择先检查可用性、断连时长及 priority=0 等限制，再按较小 priority、较大 replication offset、较小 run ID 排序；不能说数据最新者一定当选。\n- Sentinel 与 Redis Cluster 自动故障转移是不同部署和协议。本题不把 Sentinel 描述成完整 Raft 日志共识。\n- Redis 异步复制意味着换主可能丢失部分已确认写入；多数授权不提供业务数据零丢失保证。\n\n## 第一方资料初核\n\n访问日期：**2026-10-25（北京时间）**。下列为本轮选题初核，未标发布日期的动态文档如实注明；不将资料阅读等同于产品实测或成片质量通过。\n\n- [Redis Sentinel：Quorum / Configuration epochs / Replica selection](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/)，第一方文档，未标发布日期，本轮已读。短引：“a majority of Sentinels (or more than the majority if the quorum is set to a number greater than the majority).”\n- 适用 Sentinel 2，Redis 2.8 起稳定提供；早期 Sentinel 1 不作为本题模型。正式制作重新固定 Redis 版本与配置，不能仅凭版本起点代替当前实测。\n\n## 后续安排制作时的专项核验\n\n- [ ] 核对 SDOWN、ODOWN、epoch、授权门槛及副本筛选的顺序；至少覆盖确认故障但无授权、多数可达正常换主、priority=0 不晋升三种情景。\n- [ ] 重新核验第一方资料，固定产品版本、配置与支持主张；按[调研格式](https://github.com/linhongcun/video-studio/blob/main/docs/research-template.md)记录短引、日期和适用边界。\n- [ ] 开拍前确认一个可跟随的核心机制及必要前置；按[现行规范](https://github.com/linhongcun/video-studio/blob/main/docs/RULES.md)完成因果动画与正式媒体检查，检查和用户观看结论分别记录。\n- [ ] 仅在后续获安排制作、完成交付及核验后，才按届时授权以 completed 关闭，并同步系列总览。\n",
+      "state": "open",
+      "user": {
+        "login": "linhongcun",
+        "name": "linhongcun",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/230383104?v=4",
+        "id": 230383104
+      },
+      "assignees": null,
+      "labels": null,
+      "milestone": null,
+      "state_reason": null,
+      "comments": 0,
+      "created_at": "2026-10-25T13:15:07Z",
+      "updated_at": "2026-11-02T06:22:31Z",
+      "closed_at": null,
+      "display_url": "https://github.com/linhongcun/video-studio/issues/296",
+      "display_title": "[Redis / EP50] Sentinel：主节点失联后，谁有资格决定换主？"
+    },
+    "url": "https://github.com/linhongcun/video-studio/issues/296",
+    "title": "[Redis / EP50] Sentinel：主节点失联后，谁有资格决定换主？",
+    "display_url": "https://github.com/linhongcun/video-studio/issues/296",
+    "display_title": "[Redis / EP50] Sentinel：主节点失联后，谁有资格决定换主？"
+  },
+  "isError": false
+}

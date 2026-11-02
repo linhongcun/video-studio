@@ -1,0 +1,866 @@
+{
+  "meta": {
+    "title": "Redis 近似 LRU：为什么未必淘汰真正最久没用的键？",
+    "episode": 52,
+    "episodePart": "Redis系列 · 近似LRU",
+    "slug": "redis-lru",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 4313,
+    "finalVideoFrames": 4313,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "redis-series-canvas",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户明确要求制作Redis相关issue视频；本轮推进#296/#297/#302，独立检查通过后沿持续授权交付GitHub本站；不包含外部平台投稿。",
+    "palette": {
+      "bg": "#EEF1F5",
+      "text": "#182737"
+    },
+    "sampleDataLabel": "固定样本与等大格容量教学示例，非Redis随机回放或性能基准",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {},
+    "discussionQuestion": "没有进入新样本的D为什么仍能在下一轮被淘汰？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "styleContract": "episodes/_shared/redis-video/style-v1.json"
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "memory",
+      "chapterId": "memory",
+      "title": "内存满了，怎样选键",
+      "from": 0,
+      "durationInFrames": 1493,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "memory",
+          "visualType": "problem",
+          "from": 0,
+          "durationInFrames": 321,
+          "narration": "A九十秒没读，Redis却可能先删只空闲七十秒的C。内存满了，它凭什么选谁，为什么不保证删最旧的？",
+          "subtitles": [
+            {
+              "text": "A九十秒没读，Redis却可能先删只空闲七十秒的C。",
+              "from": 0,
+              "to": 175,
+              "duration": 176
+            },
+            {
+              "text": "内存满了，它凭什么选谁，为什么不保证删最旧的？",
+              "from": 176,
+              "to": 320,
+              "duration": 145
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-problem-1",
+              "wavStart": 9.0,
+              "wavEnd": 166.17,
+              "localStart": 9.0,
+              "localEnd": 166.17
+            },
+            {
+              "id": "01-problem-2",
+              "wavStart": 176.67,
+              "wavEnd": 300.08,
+              "localStart": 176.67,
+              "localEnd": 300.08
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              9,
+              176
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 9.0,
+            "wavTo": 300.08,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "八个键分布在同一条缓存行，A90红色虚线“全局最旧”，C70为候选红描边；写入I停在容量边界，C暂不消失。首帧已有主体与题名。",
+          "direction": "八个键分布在同一条缓存行，A90红色虚线“全局最旧”，C70为候选红描边；写入I停在容量边界，C暂不消失。首帧已有主体与题名。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "memory",
+          "visualType": "capacity",
+          "from": 321,
+          "durationInFrames": 353,
+          "narration": "先固定八个等大的键，示例容量已经用满，现在要写入I。所有键都没有设置到期时间，需要删键是为了腾内存，不是因为过期。",
+          "subtitles": [
+            {
+              "text": "先固定八个等大的键，示例容量已经用满，现在要写入I。",
+              "from": 0,
+              "to": 159,
+              "duration": 160
+            },
+            {
+              "text": "所有键都没有设置到期时间，需要删键是为了腾内存，不是因为过期。",
+              "from": 160,
+              "to": 352,
+              "duration": 193
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-capacity-1",
+              "wavStart": 321.08,
+              "wavEnd": 470.55,
+              "localStart": 0.07999999999998408,
+              "localEnd": 149.55
+            },
+            {
+              "id": "02-capacity-2",
+              "wavStart": 481.05,
+              "wavEnd": 653.72,
+              "localStart": 160.05,
+              "localEnd": 332.72
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              160
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 321.08,
+            "wavTo": 653.72,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "八个等大键对应八格容量；I从右侧进入前停下。“示例容量8格；真实按字节”随容量显示；TTL栏统一“未设置”，不出现倒计时。",
+          "direction": "八个等大键对应八格容量；I从右侧进入前停下。“示例容量8格；真实按字节”随容量显示；TTL栏统一“未设置”，不出现倒计时。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "memory",
+          "visualType": "exact",
+          "from": 674,
+          "durationInFrames": 423,
+          "narration": "先拿精确的最近最少使用策略作参照，按最近访问排出完整顺序。A最后一次被访问得最早，所以精确LRU会选择A。",
+          "subtitles": [
+            {
+              "text": "先拿精确的最近最少使用策略作参照，按最近访问排出完整顺序。",
+              "from": 0,
+              "to": 216,
+              "duration": 217
+            },
+            {
+              "text": "A最后一次被访问得最早，所以精确LRU会选择A。",
+              "from": 217,
+              "to": 422,
+              "duration": 206
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-exact-1",
+              "wavStart": 674.72,
+              "wavEnd": 880.78,
+              "localStart": 0.7200000000000273,
+              "localEnd": 206.77999999999997
+            },
+            {
+              "id": "03-exact-2",
+              "wavStart": 891.28,
+              "wavEnd": 1076.76,
+              "localStart": 217.27999999999997,
+              "localEnd": 402.76
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              217
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 674.72,
+            "wavTo": 1076.76,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "沿同一时间轴逐个建立 A10、B20、C30、D40、E50、F60、G70、H80，当前100；变为 H→G→F→E→D→C→B→A 的完整访问顺序。参照标签“精确LRU”在对象建立后显现，A被指明但不真正删除；下一镜明确返回同一未淘汰状态。",
+          "direction": "沿同一时间轴逐个建立 A10、B20、C30、D40、E50、F60、G70、H80，当前100；变为 H→G→F→E→D→C→B→A 的完整访问顺序。参照标签“精确LRU”在对象建立后显现，A被指明但不真正删除；下一镜明确返回同一未淘汰状态。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "memory",
+          "visualType": "approximate",
+          "from": 1097,
+          "durationInFrames": 396,
+          "narration": "持续维护完整顺序要付出成本，Redis采用近似LRU。它记录访问时钟，淘汰时随机抽一小批键，估计它们空闲了多久。",
+          "subtitles": [
+            {
+              "text": "持续维护完整顺序要付出成本，Redis采用近似LRU。",
+              "from": 0,
+              "to": 192,
+              "duration": 193
+            },
+            {
+              "text": "它记录访问时钟，淘汰时随机抽一小批键，估计它们空闲了多久。",
+              "from": 193,
+              "to": 395,
+              "duration": 203
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-approximate-1",
+              "wavStart": 1097.76,
+              "wavEnd": 1280.15,
+              "localStart": 0.7599999999999909,
+              "localEnd": 183.1500000000001
+            },
+            {
+              "id": "04-approximate-2",
+              "wavStart": 1290.65,
+              "wavEnd": 1472.38,
+              "localStart": 193.6500000000001,
+              "localEnd": 375.3800000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              193
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 1097.76,
+            "wavTo": 1472.38,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "精确参照整体收束；“回到同一组未淘汰的键”后保持 A–H，访问时钟变为空闲90/80/70/60/50/40/30/20；局部抽样框出现，未抽到的键仍清楚可见。",
+          "direction": "精确参照整体收束；“回到同一组未淘汰的键”后保持 A–H，访问时钟变为空闲90/80/70/60/50/40/30/20；局部抽样框出现，未抽到的键仍清楚可见。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "sampling",
+      "chapterId": "sampling",
+      "title": "从抽样到候选池",
+      "from": 1493,
+      "durationInFrames": 906,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "sampling",
+          "visualType": "sample",
+          "from": 1493,
+          "durationInFrames": 282,
+          "narration": "这里把每轮采样数设成三，第一轮恰好抽到C、D、E。A虽然更旧，却没进入这次比较。",
+          "subtitles": [
+            {
+              "text": "这里把每轮采样数设成三，第一轮恰好抽到C、D、E。",
+              "from": 0,
+              "to": 177,
+              "duration": 178
+            },
+            {
+              "text": "A虽然更旧，却没进入这次比较。",
+              "from": 178,
+              "to": 281,
+              "duration": 104
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-sample-1",
+              "wavStart": 1493.38,
+              "wavEnd": 1660.88,
+              "localStart": 0.38000000000010914,
+              "localEnd": 167.8800000000001
+            },
+            {
+              "id": "05-sample-2",
+              "wavStart": 1671.38,
+              "wavEnd": 1754.04,
+              "localStart": 178.3800000000001,
+              "localEnd": 261.03999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              178
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 1493.38,
+            "wavTo": 1754.04,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "在原八键上按 C、D、E 的顺序落下三个抽样标记，三条带键名的路径从原位置伸向候选池；A仍留在未抽样位置。“samples=3 · 教学固定抽样”可见。",
+          "direction": "在原八键上按 C、D、E 的顺序落下三个抽样标记，三条带键名的路径从原位置伸向候选池；A仍留在未抽样位置。“samples=3 · 教学固定抽样”可见。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "sampling",
+          "visualType": "pool",
+          "from": 1775,
+          "durationInFrames": 327,
+          "narration": "这些样本按空闲值进入候选池，较旧的候选靠近取出端。当前池里C是七十秒，比D和E更旧。",
+          "subtitles": [
+            {
+              "text": "这些样本按空闲值进入候选池，较旧的候选靠近取出端。",
+              "from": 0,
+              "to": 192,
+              "duration": 193
+            },
+            {
+              "text": "当前池里C是七十秒，比D和E更旧。",
+              "from": 193,
+              "to": 326,
+              "duration": 134
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-pool-1",
+              "wavStart": 1775.04,
+              "wavEnd": 1958.45,
+              "localStart": 0.03999999999996362,
+              "localEnd": 183.45000000000005
+            },
+            {
+              "id": "06-pool-2",
+              "wavStart": 1968.95,
+              "wavEnd": 2081.06,
+              "localStart": 193.95000000000005,
+              "localEnd": 306.05999999999995
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              193
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 1775.04,
+            "wavTo": 2081.06,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "16格池从空开始；逐个插入 C70、D60、E50，放大已占项为 E50→D60→C70，右侧明确“取出端”。实际键与池条目分开，插池不移动/删除原键。",
+          "direction": "16格池从空开始；逐个插入 C70、D60、E50，放大已占项为 E50→D60→C70，右侧明确“取出端”。实际键与池条目分开，插池不移动/删除原键。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "sampling",
+          "visualType": "evict",
+          "from": 2102,
+          "durationInFrames": 297,
+          "narration": "确认C还存在，就把C从内存删掉，为I腾出位置。A仍然保留，因为本轮只能从已经见到的候选里选。",
+          "subtitles": [
+            {
+              "text": "确认C还存在，就把C从内存删掉，为I腾出位置。",
+              "from": 0,
+              "to": 149,
+              "duration": 150
+            },
+            {
+              "text": "A仍然保留，因为本轮只能从已经见到的候选里选。",
+              "from": 150,
+              "to": 296,
+              "duration": 147
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-evict-1",
+              "wavStart": 2102.06,
+              "wavEnd": 2242.0,
+              "localStart": 0.05999999999994543,
+              "localEnd": 140.0
+            },
+            {
+              "id": "07-evict-2",
+              "wavStart": 2252.5,
+              "wavEnd": 2378.53,
+              "localStart": 150.5,
+              "localEnd": 276.5300000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              150
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 2102.06,
+            "wavTo": 2378.53,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "C候选移向“存在检查”再指向原键C，C淡出并释放一格；I进入同一空格，原键A保持。“选C70 ≠ 全局最旧A90”结果停留。池里D60/E50保持，不清空。",
+          "direction": "C候选移向“存在检查”再指向原键C，C淡出并释放一格；I进入同一空格，原键A保持。“选C70 ≠ 全局最旧A90”结果停留。池里D60/E50保持，不清空。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "retained",
+      "chapterId": "retained",
+      "title": "候选为什么跨轮保留",
+      "from": 2399,
+      "durationInFrames": 1072,
+      "shots": [
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "retained",
+          "visualType": "retained",
+          "from": 2399,
+          "durationInFrames": 353,
+          "narration": "接着写入J，又需要腾出空间，这次先补进F、G、H三个新样本。上轮剩下的D和E还在候选池里，不会每次从空池重来。",
+          "subtitles": [
+            {
+              "text": "接着写入J，又需要腾出空间，这次先补进F、G、H三个新样本。",
+              "from": 0,
+              "to": 189,
+              "duration": 190
+            },
+            {
+              "text": "上轮剩下的D和E还在候选池里，不会每次从空池重来。",
+              "from": 190,
+              "to": 352,
+              "duration": 163
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-retained-1",
+              "wavStart": 2399.53,
+              "wavEnd": 2578.57,
+              "localStart": 0.5300000000002001,
+              "localEnd": 179.57000000000016
+            },
+            {
+              "id": "08-retained-2",
+              "wavStart": 2589.07,
+              "wavEnd": 2731.47,
+              "localStart": 190.07000000000016,
+              "localEnd": 332.4699999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              190
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 2399.53,
+            "wavTo": 2731.47,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "接续上一镜的I位置，J停在写入边界；F40/G30/H20从原键落入原池的空位。保留候选D60/E50用稳定深红边线，新样本用红色短闪，只有变化项移动。提示“连续两轮示例，期间无额外读取”。",
+          "direction": "接续上一镜的I位置，J停在写入边界；F40/G30/H20从原键落入原池的空位。保留候选D60/E50用稳定深红边线，新样本用红色短闪，只有变化项移动。提示“连续两轮示例，期间无额外读取”。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "retained",
+          "visualType": "reuse",
+          "from": 2752,
+          "durationInFrames": 392,
+          "narration": "合起来比较，旧候选D的六十秒仍然最大，于是这次选D。它甚至不在本轮的新样本里，候选池让先前见过的旧键还有机会被选中。",
+          "subtitles": [
+            {
+              "text": "合起来比较，旧候选D的六十秒仍然最大，于是这次选D。",
+              "from": 0,
+              "to": 174,
+              "duration": 175
+            },
+            {
+              "text": "它甚至不在本轮的新样本里，候选池让先前见过的旧键还有机会被选中。",
+              "from": 175,
+              "to": 391,
+              "duration": 217
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-reuse-1",
+              "wavStart": 2752.47,
+              "wavEnd": 2917.24,
+              "localStart": 0.4699999999997999,
+              "localEnd": 165.23999999999978
+            },
+            {
+              "id": "09-reuse-2",
+              "wavStart": 2927.74,
+              "wavEnd": 3123.01,
+              "localStart": 175.73999999999978,
+              "localEnd": 371.0100000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              175
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 2752.47,
+            "wavTo": 3123.01,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "池从左到右 H20→G30→F40→E50→D60，D从保留区走到存在检查，删掉数据集D并插入J。新样本F/G/H位置不变，全局最旧A90仍存活。",
+          "direction": "池从左到右 H20→G30→F40→E50→D60，D从保留区走到存在检查，删掉数据集D并插入J。新样本F/G/H位置不变，全局最旧A90仍存活。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "retained",
+          "visualType": "ghost",
+          "from": 3144,
+          "durationInFrames": 327,
+          "narration": "池中保存的是候选记录，键可能已经被别的操作删掉。真正使用候选时会检查它是否还在，失效记录被跳过，再找下一项。",
+          "subtitles": [
+            {
+              "text": "池中保存的是候选记录，键可能已经被别的操作删掉。",
+              "from": 0,
+              "to": 148,
+              "duration": 149
+            },
+            {
+              "text": "真正使用候选时会检查它是否还在，失效记录被跳过，再找下一项。",
+              "from": 149,
+              "to": 326,
+              "duration": 178
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-ghost-1",
+              "wavStart": 3144.01,
+              "wavEnd": 3283.49,
+              "localStart": 0.010000000000218279,
+              "localEnd": 139.48999999999978
+            },
+            {
+              "id": "10-ghost-2",
+              "wavStart": 3293.99,
+              "wavEnd": 3450.14,
+              "localStart": 149.98999999999978,
+              "localEnd": 306.1399999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              149
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 3144.01,
+            "wavTo": 3450.14,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "明确“另一个条件：应用先删了E”分支，从已展示池快照开始；原键E先消失，池条目E50保留为虚线；到使用时查找失败，划掉这条候选并移向下一个。此处不承诺把所有旧分数重新计算，也不画已删键再次释放内存。",
+          "direction": "明确“另一个条件：应用先删了E”分支，从已展示池快照开始；原键E先消失，池条目E50保留为虚线；到使用时查找失败，划掉这条候选并移向下一个。此处不承诺把所有旧分数重新计算，也不画已删键再次释放内存。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    },
+    {
+      "id": "boundary",
+      "chapterId": "boundary",
+      "title": "近似与配置的边界",
+      "from": 3471,
+      "durationInFrames": 842,
+      "shots": [
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "boundary",
+          "visualType": "tune",
+          "from": 3471,
+          "durationInFrames": 416,
+          "narration": "增大采样数，更有机会看见较旧的键，也会增加检查样本的CPU开销。它不保证每次都选中全局最旧，更不保证任何访问模式下命中率都提高。",
+          "subtitles": [
+            {
+              "text": "增大采样数，更有机会看见较旧的键，也会增加检查样本的CPU开销。",
+              "from": 0,
+              "to": 202,
+              "duration": 203
+            },
+            {
+              "text": "它不保证每次都选中全局最旧，更不保证任何访问模式下命中率都提高。",
+              "from": 203,
+              "to": 415,
+              "duration": 213
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-tune-1",
+              "wavStart": 3471.14,
+              "wavEnd": 3663.61,
+              "localStart": 0.13999999999987267,
+              "localEnd": 192.61000000000013
+            },
+            {
+              "id": "11-tune-2",
+              "wavStart": 3674.11,
+              "wavEnd": 3866.06,
+              "localStart": 203.11000000000013,
+              "localEnd": 395.05999999999995
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              203
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 3471.14,
+            "wavTo": 3866.06,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "返回第一次淘汰前的共同输入，标明“重新比较采样设置”；3个样本C/D/E与另一组5样本A/C/D/E/H并排，同一A90完整保留。仅示例说明发现A的机会，不显示命中率、性能倍数或普遍收益。",
+          "direction": "返回第一次淘汰前的共同输入，标明“重新比较采样设置”；3个样本C/D/E与另一组5样本A/C/D/E/H并排，同一A90完整保留。仅示例说明发现A的机会，不显示命中率、性能倍数或普遍收益。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        },
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "boundary",
+          "visualType": "recap",
+          "from": 3887,
+          "durationInFrames": 426,
+          "narration": "所以，Redis的近似LRU是在抽样和保留候选中优先找旧键。它控制维护成本，但不会为每次淘汰维护一份精确的全局排名。",
+          "subtitles": [
+            {
+              "text": "所以，Redis的近似LRU是在抽样和保留候选中优先找旧键。",
+              "from": 0,
+              "to": 231,
+              "duration": 232
+            },
+            {
+              "text": "它控制维护成本，但不会为每次淘汰维护一份精确的全局排名。",
+              "from": 232,
+              "to": 425,
+              "duration": 194
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-recap-1",
+              "wavStart": 3887.06,
+              "wavEnd": 4109.17,
+              "localStart": 0.05999999999994543,
+              "localEnd": 222.17000000000007
+            },
+            {
+              "id": "12-recap-2",
+              "wavStart": 4119.67,
+              "wavEnd": 4288.98,
+              "localStart": 232.67000000000007,
+              "localEnd": 401.97999999999956
+            }
+          ],
+          "cueFrames": {
+            "labels": {},
+            "sentences": [
+              0,
+              232
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 552d4471 + words.json 5484e540 + script.md 70f6e253",
+            "wavFrom": 3887.06,
+            "wavTo": 4288.98,
+            "holdFrames": 24,
+            "holdReason": "Natural sentence pauses and planned action holds; no universal shot minimum."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "回收“访问时钟 → 随机抽样 → 保留候选 → 检查存在 → 删除腾空间”单条关系，少量状态随口播逐项出现；结尾显示“已见候选中的旧键”与A仍在的结果。品牌“IT小村 · 原创”简洁收束。随后独立5秒参考资料卡，正文字幕与人声在卡前结束。",
+          "direction": "回收“访问时钟 → 随机抽样 → 保留候选 → 检查存在 → 删除腾空间”单条关系，少量状态随口播逐项出现；结尾显示“已见候选中的旧键”与A仍在的结果。品牌“IT小村 · 原创”简洁收束。随后独立5秒参考资料卡，正文字幕与人声在卡前结束。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          }
+        }
+      ]
+    }
+  ]
+}

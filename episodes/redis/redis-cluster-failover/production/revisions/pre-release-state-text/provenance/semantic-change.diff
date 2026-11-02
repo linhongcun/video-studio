@@ -1,0 +1,23 @@
+--- frozen-base/Main.tsx
++++ Main-semantic-only.tsx
+@@ -24,7 +24,7 @@
+  if(n===7){put(0,'request');fly('vote','B','A1',late(.12),late(.61),'乙 → 甲副本：本轮授权');put(late(.61),'vote-b');}
+  if(n===8){put(0,'vote-b');fly('vote','C','A1',early(.08),early(.66),'丙 → 甲副本：本轮授权');put(early(.66),'vote-bc');}
+  if(n===9){put(0,'vote-bc');put(early(.18),'promoted');fly('announce','A1','B',late(.10),late(.42),'新主公布槽归属 · 配置轮次6');put(late(.42),'announced-b');fly('announce','A1','C',late(.19),late(.68),'新主公布槽归属 · 配置轮次6');put(late(.68),'announced-bc');}
+- if(n===10){put(0,'minority-reset');put(early(.45),'minority-request');fly('vote','B','A1',late(.09),late(.47),'乙的一票抵达，仍不足多数');put(late(.47),'minority-one');}
++ if(n===10){put(0,'minority-reset');put(early(.45),'minority-request');fly('vote','B','A1',late(.09),late(.47),'乙 → 甲副本：本轮授权');put(late(.47),'minority-one');}
+  if(n===11)put(0,'success-return');
+  if(n===12)put(0,'summary');
+  return {a,b,c,e,steps,flights,early,late};
+@@ -86,9 +86,9 @@
+  {(n===3||n===4)&&<Panel x={730}y={655}w={1060}h={206}red={v.failure==='FAIL'}><T x={765}y={704}w={990}size={30}color={C.red}>{n===3?'乙的本地视图':'故障报告阶段 · 不是授权选票'}</T><T x={765}y={763}w={990}size={36}>{v.failure==='FAIL'?'乙判断 + 丙近期报告 = 多数确认':n===3&&v.failure!=='PFAIL'?'等待甲的有效回复':'甲：疑似故障 PFAIL'}</T><T x={765}y={818}w={990}size={25}color={C.muted}>{v.failure==='FAIL'?'确认故障 FAIL 已形成，向可达节点传播':n===3&&v.failure!=='PFAIL'?'尚未形成疑似故障':'本地疑似状态不能直接触发晋升'}</T></Panel>}
+  {n===5&&<Panel x={730}y={655}w={1060}h={206}><T x={765}y={701}w={990}size={30}color={C.red}>合格副本，再安排尝试时间</T>{['旧主已FAIL且原来持有槽','复制断连时间在允许范围内','短暂等待；多个副本时，进度影响先后'].map((t,i)=><T key={t}x={765}y={748+i*40}w={990}size={26}alpha={i===0?1:i===1?ease(f,tm.early(.30),tm.early(.40)):late}>{'✓ '+t}</T>)}</Panel>}
+  {(n>=6&&n<=10)&&<Panel x={730}y={655}w={1060}h={206}red={v.authorized}>
+- <T x={765}y={703}w={990}size={29}color={C.red}>{n===9?'新主公布配置轮次6的槽归属':`选举轮次 ${v.electionEpoch} · 三个持槽主节点，需要2票`}</T>
++ <T x={765}y={703}w={990}size={29}color={C.red}>{n===9?(v.candidateRole==='master'?'新主公布配置轮次6的槽归属':'多数授权已满足，准备提升并公布槽归属'):`选举轮次 ${v.electionEpoch} · 三个持槽主节点，需要2票`}</T>
+  <T x={765}y={770}w={990}size={45}color={C.text}>{n===9?`乙的槽表：${v.views.B==='A1'?'新主':'旧主'}　丙的槽表：${v.views.C==='A1'?'新主':'旧主'}`:`已抵达的本轮授权：${v.votes.length} / 2`}</T>
+- <T x={765}y={824}w={990}size={26}color={C.muted}>{n===9?'本地已接管；公告抵达后，对方才更新槽表':v.authorized?'多数授权已满足，随后才能提升与接管':minority?'一位主节点 + 一个副本，仍只有一张主节点选票':'甲离线不改变原分母；旧轮次回复不混入本轮'}</T>
++ <T x={765}y={824}w={990}size={26}color={C.muted}>{n===9?(v.candidateRole==='master'?'本地已接管；公告抵达后，对方才更新槽表':'随后提升、接管，再发布新槽归属'):v.authorized?'多数授权已满足，随后才能提升与接管':minority?'一位主节点 + 一个副本，仍只有一张主节点选票':'甲离线不改变原分母；旧轮次回复不混入本轮'}</T>
+  </Panel>}
+  {n===11&&<>
+  <Panel x={730}y={340}w={1060}h={214}><T x={765}y={389}w={990}size={30}color={C.muted}>离线旧主的数据</T><T x={765}y={446}w={990}size={31}>已复制记录1　│　末条写入2已确认</T><T x={765}y={507}w={990}size={27}color={C.red}>写入2尚未到达副本，旧主字节仍保留</T></Panel>

@@ -1,0 +1,400 @@
+{
+  "kind": "finite-explicit-sample-teaching-model",
+  "actualRedisExecution": false,
+  "sourceVersion": "Redis8.4.0 / 60ba86f3c8b4e1ec96451171753a0a38e5c45a0c",
+  "assumptions": [
+    "single DB/allkeys-lru",
+    "no TTL",
+    "equal-size visualization cells; real maxmemory is bytes",
+    "two continuous evictions use unchanged sampled scores, no intervening reads",
+    "sample stream is supplied explicitly, not Redis RNG",
+    "16 actual pool slots; occupied entries visualized enlarged",
+    "main example has distinct sampled scores; this finite model does not claim exact C equal-score tie insertion order"
+  ],
+  "checks": [
+    "initial eight distinct keys",
+    "global oldest A90",
+    "first pool ascending sampled score",
+    "actual fixed capacity 16",
+    "first chosen C70",
+    "first selection exists",
+    "first victim differs from global A",
+    "I replaces C in equal-cell teaching model",
+    "D and E remain candidates",
+    "second pool retains both earlier entries",
+    "new sample excludes D",
+    "combined second order",
+    "retained D60 wins second round",
+    "second victim absent from fresh sample",
+    "A remains after two approximated choices",
+    "J replaces D with no duplicate keys",
+    "ghost record survives external deletion",
+    "later K fills vacancy before L needs eviction",
+    "new samples cannot outrank stale E50 in ghost vignette",
+    "missing E candidate skipped",
+    "next existing F wins ghost branch",
+    "pool uses captured score after a later read",
+    "duplicate candidates are allowed",
+    "duplicate becomes ghost after real deletion",
+    "full pool rejects worse candidate",
+    "full pool keeps better candidate within bounded capacity"
+  ],
+  "checkCount": 26,
+  "passed": true,
+  "states": [
+    {
+      "id": "initial",
+      "live": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "pool": [],
+      "idle": {
+        "A": 90,
+        "B": 80,
+        "C": 70,
+        "D": 60,
+        "E": 50,
+        "F": 40,
+        "G": 30,
+        "H": 20
+      },
+      "exactLRUVictim": "A",
+      "sampledLRUVictim": null
+    },
+    {
+      "id": "first-populated",
+      "live": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H"
+      ],
+      "pool": [
+        {
+          "key": "E",
+          "sampledIdle": 50,
+          "sampledRound": 1
+        },
+        {
+          "key": "D",
+          "sampledIdle": 60,
+          "sampledRound": 1
+        },
+        {
+          "key": "C",
+          "sampledIdle": 70,
+          "sampledRound": 1
+        }
+      ],
+      "samples": [
+        "C",
+        "D",
+        "E"
+      ],
+      "idle": {
+        "A": 90,
+        "B": 80,
+        "C": 70,
+        "D": 60,
+        "E": 50,
+        "F": 40,
+        "G": 30,
+        "H": 20
+      }
+    },
+    {
+      "id": "first-evicted",
+      "live": [
+        "A",
+        "B",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I"
+      ],
+      "pool": [
+        {
+          "key": "E",
+          "sampledIdle": 50,
+          "sampledRound": 1
+        },
+        {
+          "key": "D",
+          "sampledIdle": 60,
+          "sampledRound": 1
+        }
+      ],
+      "victim": {
+        "key": "C",
+        "sampledIdle": 70,
+        "sampledRound": 1
+      },
+      "inserted": "I",
+      "idle": {
+        "A": 90,
+        "B": 80,
+        "C": 70,
+        "D": 60,
+        "E": 50,
+        "F": 40,
+        "G": 30,
+        "H": 20,
+        "I": 0
+      }
+    },
+    {
+      "id": "second-populated",
+      "live": [
+        "A",
+        "B",
+        "D",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I"
+      ],
+      "pool": [
+        {
+          "key": "H",
+          "sampledIdle": 20,
+          "sampledRound": 2
+        },
+        {
+          "key": "G",
+          "sampledIdle": 30,
+          "sampledRound": 2
+        },
+        {
+          "key": "F",
+          "sampledIdle": 40,
+          "sampledRound": 2
+        },
+        {
+          "key": "E",
+          "sampledIdle": 50,
+          "sampledRound": 1
+        },
+        {
+          "key": "D",
+          "sampledIdle": 60,
+          "sampledRound": 1
+        }
+      ],
+      "samples": [
+        "F",
+        "G",
+        "H"
+      ],
+      "idle": {
+        "A": 90,
+        "B": 80,
+        "C": 70,
+        "D": 60,
+        "E": 50,
+        "F": 40,
+        "G": 30,
+        "H": 20,
+        "I": 0
+      }
+    },
+    {
+      "id": "second-evicted",
+      "live": [
+        "A",
+        "B",
+        "E",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J"
+      ],
+      "pool": [
+        {
+          "key": "H",
+          "sampledIdle": 20,
+          "sampledRound": 2
+        },
+        {
+          "key": "G",
+          "sampledIdle": 30,
+          "sampledRound": 2
+        },
+        {
+          "key": "F",
+          "sampledIdle": 40,
+          "sampledRound": 2
+        },
+        {
+          "key": "E",
+          "sampledIdle": 50,
+          "sampledRound": 1
+        }
+      ],
+      "victim": {
+        "key": "D",
+        "sampledIdle": 60,
+        "sampledRound": 1
+      },
+      "inserted": "J",
+      "idle": {
+        "A": 90,
+        "B": 80,
+        "C": 70,
+        "D": 60,
+        "E": 50,
+        "F": 40,
+        "G": 30,
+        "H": 20,
+        "I": 0,
+        "J": 0
+      }
+    },
+    {
+      "id": "ghost-before-check",
+      "live": [
+        "A",
+        "B",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K"
+      ],
+      "pool": [
+        {
+          "key": "I",
+          "sampledIdle": 0,
+          "sampledRound": 3
+        },
+        {
+          "key": "J",
+          "sampledIdle": 0,
+          "sampledRound": 3
+        },
+        {
+          "key": "K",
+          "sampledIdle": 0,
+          "sampledRound": 3
+        },
+        {
+          "key": "H",
+          "sampledIdle": 20,
+          "sampledRound": 2
+        },
+        {
+          "key": "G",
+          "sampledIdle": 30,
+          "sampledRound": 2
+        },
+        {
+          "key": "F",
+          "sampledIdle": 40,
+          "sampledRound": 2
+        },
+        {
+          "key": "E",
+          "sampledIdle": 50,
+          "sampledRound": 1
+        }
+      ],
+      "externallyDeleted": "E",
+      "insertedAfterDeletion": "K",
+      "pendingWrite": "L",
+      "freshSamples": [
+        "I",
+        "J",
+        "K"
+      ],
+      "idle": {
+        "A": 90,
+        "B": 80,
+        "C": 70,
+        "D": 60,
+        "E": 50,
+        "F": 40,
+        "G": 30,
+        "H": 20,
+        "I": 0,
+        "J": 0,
+        "K": 0
+      }
+    },
+    {
+      "id": "ghost-skipped",
+      "live": [
+        "A",
+        "B",
+        "F",
+        "G",
+        "H",
+        "I",
+        "J",
+        "K"
+      ],
+      "pool": [
+        {
+          "key": "I",
+          "sampledIdle": 0,
+          "sampledRound": 3
+        },
+        {
+          "key": "J",
+          "sampledIdle": 0,
+          "sampledRound": 3
+        },
+        {
+          "key": "K",
+          "sampledIdle": 0,
+          "sampledRound": 3
+        },
+        {
+          "key": "H",
+          "sampledIdle": 20,
+          "sampledRound": 2
+        },
+        {
+          "key": "G",
+          "sampledIdle": 30,
+          "sampledRound": 2
+        }
+      ],
+      "skipped": [
+        "E"
+      ],
+      "nextExisting": {
+        "key": "F",
+        "sampledIdle": 40,
+        "sampledRound": 2
+      },
+      "idle": {
+        "A": 90,
+        "B": 80,
+        "C": 70,
+        "D": 60,
+        "E": 50,
+        "F": 40,
+        "G": 30,
+        "H": 20,
+        "I": 0,
+        "J": 0,
+        "K": 0
+      }
+    }
+  ]
+}

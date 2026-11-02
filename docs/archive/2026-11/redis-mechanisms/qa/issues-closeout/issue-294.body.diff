@@ -1,0 +1,64 @@
+--- issue-294.before
++++ issue-294.final
+@@ -8,9 +8,25 @@
+ 
+ 本 issue 保留**首批 9 题的跨系列选题索引与交付历史**，不再作为独立“工程算法与分布式机制”系列。按现行分类，明确讲 Redis 的 **Sentinel #296、Cluster #297、跳表 #301、近似 LRU #302** 归入 **Redis 系列**（`redis`）。一致性哈希 #295、布隆过滤器 #300、通用滑动窗口限流 #303 归入 **其他**（沿用 `engineering-algorithms` 键）；滑动窗口的 Redis 实现资料保留，后续若确定改成 Redis 专题，再明确实现范围与归属。已取消的 Kafka 两题仅保留历史索引。
+ 
+-2026-11-02 完成分类后，用户进一步授权制作剩余 Redis 视频。首批现为 **3 项已交付、3 项制作中、1 项待安排、2 项取消**：Redis 为 1 项已交付、3 项制作中；其他为 2 项已交付、1 项待安排。三期新片为 Sentinel **EP50 / redis-sentinel**、Cluster **EP51 / redis-cluster-failover**、近似 LRU **EP52 / redis-lru**；开工主干基线 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`。现阶段为资料复核与脚本设计，未预记成片或交付完成。已完成跳表与旧 EP、slug、首发身份保持。
++2026-11-02 完成分类后，用户进一步授权制作剩余 Redis 视频。三期 **Sentinel EP50 / redis-sentinel**、**Cluster EP51 / redis-cluster-failover**、**近似 LRU EP52 / redis-lru** 已在 **v0.99.0** 完成视频、配套图文交付与线上核验，#296/#297/#302 以 completed 关闭。首批现为 **6 项已交付、1 项待安排、2 项取消**：Redis 为 **4 项已交付**（含既有跳表 #301）；其他为 **2 项已交付、1 项待安排**（#303）。开工主干基线 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2` 保留；既有跳表与旧 EP、slug、首发身份保持。本总览继续 open，待安排项未自动开拍。
+ 
+ EA 编号只保留为原首批题库的历史策划索引，不能当作 Redis 系列期号。“工程算法02 / 03”等称谓保留首发时身份；当前归属以本节与下表为准。下方交付、开工与修订段落保留当时记录，其中“当前/其余”数量与旧系列称谓指对应记录时点。
++
++## Redis EP50–EP52 已交付（v0.99.0，2026-11-02）
++
++| 本期身份 | 选题 issue | 最终媒体 | 状态 |
++|---|---|---|---|
++| Redis EP50 / Sentinel | [#296](https://github.com/linhongcun/video-studio/issues/296) | 4589帧 / 152.966667秒 | 已交付，completed 关闭 |
++| Redis EP51 / Cluster | [#297](https://github.com/linhongcun/video-studio/issues/297) | 4616帧 / 153.866667秒 | 已交付，completed 关闭 |
++| Redis EP52 / 近似 LRU | [#302](https://github.com/linhongcun/video-studio/issues/302) | 4463帧 / 148.766667秒 | 已交付，completed 关闭 |
++
++三期均含视频、配套文章、参考资料尾页和三比例封面；固定 Redis 8.4.0 文档/源码、有限教学模型与本地真实产品实验分别记录。具体机制、成片 SHA 与独立 QA 见各子 issue 的交付块，不把技术通过写成用户观看反馈。
++
++发布：[制作 PR #455](https://github.com/linhongcun/video-studio/pull/455)；合并/站点提交 `7971d833e37b145eac5ccf66901773beba5cd0a6`；[Release v0.99.0](https://github.com/linhongcun/video-studio/releases/tag/v0.99.0)（2026-11-02T09:00:16Z）；Release 后[手动 Pages 部署](https://github.com/linhongcun/video-studio/actions/runs/41417179935) completed/success（09:09:33Z）。
++
++三期原生 Chromium 验收在首轮 Pages 41416454968 成功后、手动部署完成前执行，合计 176 项检查与 56 个严格 PTS 通过；桌面/模拟移动视口与原生控件限制如实保留。上述手动部署成功后，09:09:58Z 的[26 项完整 canonical GET](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/redis-mechanisms/qa/online-full-get-after-release.json)全部通过，核对媒体/图片 SHA、Redis 六课目录及入口、RSS 与真实 Release/changelog；不把前一轮浏览器检查误记为手动部署完成后重跑。单期浏览器报告与内容链接见 [#296](https://github.com/linhongcun/video-studio/issues/296)、[#297](https://github.com/linhongcun/video-studio/issues/297)、[#302](https://github.com/linhongcun/video-studio/issues/302)。
++
++仅交付 GitHub 仓库、Release 与 Pages，无外部平台投稿。#303 仍待安排，#298/#299 的 not_planned 取消历史保持；不把技术检查写成用户观看反馈。
+ 
+ ## EA01已交付
+ 
+@@ -37,13 +53,13 @@
+ | 历史策划索引（非系列期号） | 现行归属 | 独立选题 | 观众要弄懂的问题 | 状态 |
+ |---|---|---|---|---|
+ | EA01 | 其他 | [一致性哈希 #295](https://github.com/linhongcun/video-studio/issues/295) | 扩容一台机器，为什么只需要改变部分键的归属？虚拟节点解决什么？ | 已交付，v0.70.0；GitHub站点 |
+-| EA02 | Redis | [Redis Sentinel 故障转移 #296](https://github.com/linhongcun/video-studio/issues/296) | 谁获得换主授权，又由谁挑选新主节点？ | 制作中（资料复核与脚本） |
+-| EA03 | Redis | [Redis Cluster 副本选举 #297](https://github.com/linhongcun/video-studio/issues/297) | 副本如何获得多数主节点授权并接管哈希槽？ | 制作中（资料复核与脚本） |
++| EA02 | Redis | [Redis Sentinel 故障转移 #296](https://github.com/linhongcun/video-studio/issues/296) | 谁获得换主授权，又由谁挑选新主节点？ | 已交付，EP50；v0.99.0；GitHub 站点 |
++| EA03 | Redis | [Redis Cluster 副本选举 #297](https://github.com/linhongcun/video-studio/issues/297) | 副本如何获得多数主节点授权并接管哈希槽？ | 已交付，EP51；v0.99.0；GitHub 站点 |
+ | EA04 | 已取消（历史索引） | [Kafka KRaft 控制器选举 #298](https://github.com/linhongcun/video-studio/issues/298) | 怎样在元数据 quorum 中选出 active controller？ | 已取消，not_planned关闭；保留索引供追溯 |
+ | EA05 | 已取消（历史索引） | [Kafka 分区 Leader 选择 #299](https://github.com/linhongcun/video-studio/issues/299) | 控制器根据什么候选集合，让哪个数据副本接管？ | 已取消，not_planned关闭；保留索引供追溯 |
+ | EA06 | 其他 | [布隆过滤器 #300](https://github.com/linhongcun/video-studio/issues/300) | 怎样用紧凑摘要确定排除，同时保留可能误判的边界？ | 已交付，EP39；v0.71.0（首发编号：工程算法02） |
+ | EA07 | Redis | [Redis 跳表 #301](https://github.com/linhongcun/video-studio/issues/301) | 怎样沿稀疏上层前进、下降，准确找到插入位置？ | 已交付，EP40；v0.72.0（首发编号：工程算法03） |
+-| EA08 | Redis | [Redis 近似 LRU #302](https://github.com/linhongcun/video-studio/issues/302) | 为什么抽样淘汰未必选中全局最久没用的键？ | 制作中（资料复核与脚本） |
++| EA08 | Redis | [Redis 近似 LRU #302](https://github.com/linhongcun/video-studio/issues/302) | 为什么抽样淘汰未必选中全局最久没用的键？ | 已交付，EP52；v0.99.0；GitHub 站点 |
+ | EA09 | 其他 | [滑动窗口限流 #303](https://github.com/linhongcun/video-studio/issues/303) | 怎样消除固定窗口边界效应，代价是什么？ | 已登记，待后续安排 |
+ 
+ EA 编号用于历史策划检索，不是现行系列期号或固定制作顺序。全部已建立独立 issue，并回链本首批选题索引。
+@@ -52,7 +68,7 @@
+ 
+ 已检索仓库现有 issue，并只读审查当前视频及配套文章。选题登记初核时，一致性哈希、Sentinel / Cluster选举、KRaft和分区选主尚无独立深入选题；一致性哈希现已完成首期交付。现有负载均衡主要讲分流和健康检查，缓存片讲读写及失效，消息队列片以 RabbitMQ 确认为例，主从复制片以 MySQL 异步复制为例；分库分表文章仅简述哈希取余扩容的映射变化。本批要增加算法的选择依据、状态变化、授权条件和失效边界，不能重复这些入门流程。补充四题也各有独立增量：集合摘要、可变有序集合、容量淘汰与滚动时间窗。EP.11 已讲令牌桶，因此本轮不重复登记普通令牌桶基础题。
+ 
+-建议从 EA01 入手；选举方向可先研究 EA02，再比较 EA03；EA04、EA05已取消，不再安排Kafka两题的制作顺序。布隆过滤器、跳表、近似 LRU 可独立研究；滑动窗口需要先区分固定时间窗与滚动区间，不强制先看其他题。以上为研究顺序建议；一致性哈希、布隆过滤器和跳表已实际交付，Sentinel、Cluster、近似 LRU 已按 2026-11-02 新授权进入制作；滑动窗口限流 EA09/#303 仍待安排。
++建议从 EA01 入手；选举方向可先研究 EA02，再比较 EA03；EA04、EA05已取消，不再安排Kafka两题的制作顺序。布隆过滤器、跳表、近似 LRU 可独立研究；滑动窗口需要先区分固定时间窗与滚动区间，不强制先看其他题。以上为研究顺序建议；一致性哈希、布隆过滤器和跳表已实际交付，Sentinel、Cluster、近似 LRU 已按 2026-11-02 新授权在 v0.99.0 完成交付与线上核验；滑动窗口限流 EA09/#303 仍待安排。
+ 
+ ## 资料初核与关键边界
+ 
+@@ -75,7 +91,7 @@
+ 
+ 单题只保留一条能跟随的主因果链；多个分支先总览再聚焦，异常路径、完整证明和配置变体按容量放配套图文。正式制作前重新选择并冻结产品版本、拓扑与开关，运行与当期主张相关的验证；示意、模拟和真实产品实验分别标注。选题登记阶段未做这些实验，也没有脚本、配音、动画或成片；一致性哈希和布隆过滤器随后按另行授权完成制作与验证，具体范围见各自交付记录，不能据此推定其他未制作题目已开工。
+ 
+-一致性哈希#295、布隆过滤器#300与跳表#301已在完成交付与线上核验后以completed关闭。仍保留的4项须实际制作、检查及有效授权范围内交付后，才按仓库规则以completed关闭；#298/#299按用户决定以not_planned关闭，表示取消制作。登记成功不等于制作completed。
++一致性哈希#295、布隆过滤器#300、跳表#301及本次Sentinel#296、Cluster#297、近似LRU#302均已在完成交付与线上核验后以completed关闭。仅滑动窗口限流#303仍待安排，须实际制作、检查及有效授权范围内交付后，才按仓库规则以completed关闭；#298/#299按用户决定以not_planned关闭，表示取消制作。登记成功不等于制作completed。
+ 
+ 参考：[现行规范](https://github.com/linhongcun/video-studio/blob/main/docs/RULES.md)、[制作流程](https://github.com/linhongcun/video-studio/blob/main/docs/pipeline.md)、[调研格式](https://github.com/linhongcun/video-studio/blob/main/docs/research-template.md)。
+ 

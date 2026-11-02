@@ -34,6 +34,8 @@
 
 ## 新期制作记录
 
+- [Redis Sentinel / Cluster / 近似 LRU 三期](2026-11/redis-mechanisms/README.md) — 2026-11-02 交付 EP50–52，v0.99.0；独立成片、本地及线上176动作/56严格PTS、26次完整GET通过，实际发布与issue收尾见记录。
+
 - [MQ05–MQ07实现机制短片](2026-10/mq05-07-implementation/README.md) — EP45–47已随v0.97.0交付；固定源码、121项真实运行与660声明、31完整GET、线上226动作/66严格PTS及图审通过，三issue completed，MQ现7/9。
 
 - [MQ01–MQ04实现原理重制](2026-10/mq-source-depth-remake/README.md)：四期补足源码实现因果，v0.96.1已上线；完整媒体与原生线上核验通过，#443已completed关闭。

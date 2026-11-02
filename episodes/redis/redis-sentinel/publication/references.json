@@ -1,0 +1,61 @@
+{
+  "schemaVersion": 1,
+  "presentation": "title-author",
+  "episode": "redis-sentinel",
+  "heading": "参考资料",
+  "checkedAt": "2026-11-02",
+  "sources": [
+    {
+      "id": "R1",
+      "organization": "Redis",
+      "title": "High availability with Redis Sentinel",
+      "titleEvidence": {
+        "locator": "YAML front matter title, line12",
+        "evidence": "episodes/redis/redis-sentinel/production/sources/sentinel-fixed.md"
+      },
+      "version": "Official docs commit c0f4f836b44de0041ddd63e88fdd843e5f4f0dfb; no publication date stated",
+      "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/",
+      "supports": [
+        "故障quorum与多数执行授权分开",
+        "SDOWN/ODOWN、priority0与异步复制边界"
+      ],
+      "sections": "Quorum; SDOWN and ODOWN failure state; Replica selection and priority",
+      "quotation": {
+        "text": "The difference may seem subtle but is actually quite simple to understand and use.  For example if you have 5 Sentinel instances, and the quorum is set to 2, a failover will be triggered as soon as 2 Sentinels believe that the master is not reachable, however one of the two Sentinels will be able to failover only if it gets authorization at least from 3 Sentinels.",
+        "locator": "Quorum paragraph, line1090",
+        "evidence": "episodes/redis/redis-sentinel/production/sources/sentinel-fixed.md"
+      },
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/redis/redis-sentinel/production/research.md"
+      }
+    },
+    {
+      "id": "R2",
+      "organization": "Redis",
+      "title": "sentinel.c",
+      "titleEvidence": {
+        "locator": "Actual basename in fixed raw source GET URL; fetch log sentinel-fixed.c entry",
+        "evidence": "episodes/redis/redis-sentinel/production/sources/fetch-log.json"
+      },
+      "version": "Redis8.4.0 commit60ba86f3c8b4e1ec96451171753a0a38e5c45a0c",
+      "url": "https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/sentinel.c",
+      "supports": [
+        "已知Sentinel计数与双门槛",
+        "候选过滤排序与晋升确认状态机"
+      ],
+      "sections": "sentinelVoteLeader; sentinelGetLeader; sentinelSelectSlave; sentinelFailoverSendSlaveOfNoOne",
+      "quotation": {
+        "text": "voters = dictSize(master->sentinels)+1; /* All the other sentinels and me.*/",
+        "locator": "sentinelGetLeader, line4807",
+        "evidence": "episodes/redis/redis-sentinel/production/sources/sentinel-fixed.c"
+      },
+      "verification": {
+        "status": "verified",
+        "checkedAt": "2026-11-02",
+        "evidence": "episodes/redis/redis-sentinel/production/research.md"
+      }
+    }
+  ]
+}

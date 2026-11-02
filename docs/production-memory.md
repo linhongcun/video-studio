@@ -6,6 +6,12 @@
 
 新版沿同一E01/P0/offset0区分原日志、内存读取位置与组恢复值，演示业务已提交、位点未提交的退出窗口；比较重复加分、提前提交漏做和同事务去重。三分支真实91断言、独立源稿/声音/动态/122成片帧与四JPEG通过；469输入冻结，成片5034帧167.8秒（含150帧资料）。前九镜3432/4884帧为Kafka因果，占70.27%。本地86动作/22严格PTS与63图路径实审、准确RGB参考复核通过；原默认参考颜色FAIL保留并有界归因为参考转换精度。当前等待PR、Release与线上验收，不预记新版观看认可。详见[本轮记录](archive/2026-11/mq05-consumer-replay/README.md)。
 
+## Redis 三期已交付（2026-11-02，北京时间）
+
+用户在将 Redis 选题 issue 归入对应系列后，授权制作 Sentinel #296（EP50 / redis-sentinel）、Cluster 故障转移 #297（EP51 / redis-cluster-failover）、近似 LRU #302（EP52 / redis-lru）。三期已由[PR #455](https://github.com/linhongcun/video-studio/pull/455)、附注tag/Release v0.99.0及Release后Pages41417179935交付GitHub站点。固定源码/真实进程、独立配音/动态/成片/图文、本地及线上176动作/56严格PTS通过；Release后26普通canonical完整GET确认三片/海报/VTT/七图SHA、系列6课、入口/RSS/真实更新日志。56线上解码PNG与具名当前本地PNG同字节，目录三封面解码及手机文字卡另实看；原生控件与窄屏限制、一次等待隐藏lazy图的补验工具失败保留。线上身份与issue收尾见[本批记录](archive/2026-11/redis-mechanisms/README.md)。
+
+沿 Redis 银灰/红色视觉和真实 EP，新目录与锁文件依赖基于 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`。Cluster 当前动画入口是 `production/revisions/pre-release-state-text/remotion`：原冻源/成片保留，只修正阶段文字，326项新冻结与6980包AAC保真已验；另两期257/193项冻结保持。已完成跳表 EP40、既有缓存和通用滑动窗口候选保持原范围。实际检查与用户观看认可分开，不将模拟视口、信号检查或源码模型当作全片听审/ASR/学习效果。
+
 ## MQ08与MQ15已交付（2026-11-01，北京时间）
 
 按题库剩余两题完成MQ08/#316重试与死信（EP48）和MQ15/#323多副本确认（EP49），保留稳定MQ15号。先同步8769a592实体目录重构，使用episodes/message-queue/<slug>/{production,publication}与现行锁安装，旧输入和迁移账本保持。

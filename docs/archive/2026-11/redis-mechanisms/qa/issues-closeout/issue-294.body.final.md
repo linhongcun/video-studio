@@ -1,0 +1,123 @@
+<!-- engineering-algorithms:2026-10-25:overview -->
+
+## 最初登记与交付背景（历史）
+
+用户最初要求完成有权威资料依据、有实际工程意义的算法选题调研和GitHub issue登记，供后续安排，不立即开拍。登记完成后，用户另行授权自选最有把握的一期制作；一致性哈希和布隆过滤器已分别按后续授权完成交付，跳表已按最新授权完成第三期交付，其余4项待安排；EA04/#298、EA05/#299已按2026-10-27的MQ规划收缩取消，并以not_planned关闭。
+
+## 现行系列归属（2026-11-02）
+
+本 issue 保留**首批 9 题的跨系列选题索引与交付历史**，不再作为独立“工程算法与分布式机制”系列。按现行分类，明确讲 Redis 的 **Sentinel #296、Cluster #297、跳表 #301、近似 LRU #302** 归入 **Redis 系列**（`redis`）。一致性哈希 #295、布隆过滤器 #300、通用滑动窗口限流 #303 归入 **其他**（沿用 `engineering-algorithms` 键）；滑动窗口的 Redis 实现资料保留，后续若确定改成 Redis 专题，再明确实现范围与归属。已取消的 Kafka 两题仅保留历史索引。
+
+2026-11-02 完成分类后，用户进一步授权制作剩余 Redis 视频。三期 **Sentinel EP50 / redis-sentinel**、**Cluster EP51 / redis-cluster-failover**、**近似 LRU EP52 / redis-lru** 已在 **v0.99.0** 完成视频、配套图文交付与线上核验，#296/#297/#302 以 completed 关闭。首批现为 **6 项已交付、1 项待安排、2 项取消**：Redis 为 **4 项已交付**（含既有跳表 #301）；其他为 **2 项已交付、1 项待安排**（#303）。开工主干基线 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2` 保留；既有跳表与旧 EP、slug、首发身份保持。本总览继续 open，待安排项未自动开拍。
+
+EA 编号只保留为原首批题库的历史策划索引，不能当作 Redis 系列期号。“工程算法02 / 03”等称谓保留首发时身份；当前归属以本节与下表为准。下方交付、开工与修订段落保留当时记录，其中“当前/其余”数量与旧系列称谓指对应记录时点。
+
+## Redis EP50–EP52 已交付（v0.99.0，2026-11-02）
+
+| 本期身份 | 选题 issue | 最终媒体 | 状态 |
+|---|---|---|---|
+| Redis EP50 / Sentinel | [#296](https://github.com/linhongcun/video-studio/issues/296) | 4589帧 / 152.966667秒 | 已交付，completed 关闭 |
+| Redis EP51 / Cluster | [#297](https://github.com/linhongcun/video-studio/issues/297) | 4616帧 / 153.866667秒 | 已交付，completed 关闭 |
+| Redis EP52 / 近似 LRU | [#302](https://github.com/linhongcun/video-studio/issues/302) | 4463帧 / 148.766667秒 | 已交付，completed 关闭 |
+
+三期均含视频、配套文章、参考资料尾页和三比例封面；固定 Redis 8.4.0 文档/源码、有限教学模型与本地真实产品实验分别记录。具体机制、成片 SHA 与独立 QA 见各子 issue 的交付块，不把技术通过写成用户观看反馈。
+
+发布：[制作 PR #455](https://github.com/linhongcun/video-studio/pull/455)；合并/站点提交 `7971d833e37b145eac5ccf66901773beba5cd0a6`；[Release v0.99.0](https://github.com/linhongcun/video-studio/releases/tag/v0.99.0)（2026-11-02T09:00:16Z）；Release 后[手动 Pages 部署](https://github.com/linhongcun/video-studio/actions/runs/41417179935) completed/success（09:09:33Z）。
+
+三期原生 Chromium 验收在首轮 Pages 41416454968 成功后、手动部署完成前执行，合计 176 项检查与 56 个严格 PTS 通过；桌面/模拟移动视口与原生控件限制如实保留。上述手动部署成功后，09:09:58Z 的[26 项完整 canonical GET](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/redis-mechanisms/qa/online-full-get-after-release.json)全部通过，核对媒体/图片 SHA、Redis 六课目录及入口、RSS 与真实 Release/changelog；不把前一轮浏览器检查误记为手动部署完成后重跑。单期浏览器报告与内容链接见 [#296](https://github.com/linhongcun/video-studio/issues/296)、[#297](https://github.com/linhongcun/video-studio/issues/297)、[#302](https://github.com/linhongcun/video-studio/issues/302)。
+
+仅交付 GitHub 仓库、Release 与 Pages，无外部平台投稿。#303 仍待安排，#298/#299 的 not_planned 取消历史保持；不把技术检查写成用户观看反馈。
+
+## EA01已交付
+
+以下保留一致性哈希首发v0.70.0的交付历史。首期交付时其他8项尚待安排；随后布隆过滤器作为第二期交付，当前其余7项仍待安排。首期为EP38 / consistent-hashing，14镜28句、4章；首发6031帧、约3分21秒，含5秒参考资料卡，后续资料卡修订状态见本期发布记录。
+
+- [成片与图文](https://linhongcun.github.io/video-studio/episodes/consistent-hashing/)；[制作PR #304](https://github.com/linhongcun/video-studio/pull/304)，实际合并SHA：`751def7a1baeeaa271be0b786b64684ee70e17bc`。
+- 首发[Release v0.70.0](https://github.com/linhongcun/video-studio/releases/tag/v0.70.0)；Release后[Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40206090199)成功。
+- 2026-10-25T23:21:04.266650+08:00完成普通canonical GET线上核验：10项HTTP/内容检查通过，线上完整MP4及16:9海报SHA与本地一致、VTT字节一致，页面四章、系列/学习/内容库/首页入口和实际Release更新日志齐全。实际证据：[线上核验](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/consistent-hashing/online-verification.json)、[制作与交付记录](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/consistent-hashing/release.md)。
+
+以上为EA01首发GitHub站点交付记录，无外部平台新发。EA01后续已获得动画清晰度与内容准确性的正向反馈，观看反馈与技术检查仍分别记录，具体范围见本期发布记录。
+
+## 工程算法02 · 布隆过滤器交付
+
+本片实际身份为**工程算法02 / EP39 / bloom-filter**，EA06仅保留为首批题库的旧策划索引，不表示发布第六期。13镜26句、4章，5891帧、196.3666667秒、10,312,433字节；片尾列出两项可核验的原题与原文资料。
+
+- [成片与图文](https://linhongcun.github.io/video-studio/episodes/bloom-filter/)；[制作PR #340](https://github.com/linhongcun/video-studio/pull/340)，实际合并SHA：`3d1bc452a54f8cd61bfb5abcb05bd81fe8d4fac8`。
+- 首发[Release v0.71.0](https://github.com/linhongcun/video-studio/releases/tag/v0.71.0)；Release后[Pages部署](https://github.com/linhongcun/video-studio/actions/runs/40249567063)成功。
+- 2026-10-26T08:34:56.430291+08:00完成实际普通canonical GET线上核验：10项普通canonical GET检查通过，线上完整MP4与16:9海报SHA、VTT字节均与已审版本一致，四章、首页/学习/内容库/工程算法入口及实际Release更新日志齐全。实际证据：[线上核验](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/bloom-filter/online-verification.json)、[本期发布记录](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/bloom-filter/release.md)。
+
+本次仅GitHub站点交付，不包含外部平台投稿。制作检查与用户实际观看反馈分别记录，不预记新片已经获得用户认可；其他7项候选仍待安排，不因此自动开工。
+
+## 首批九个选题
+
+| 历史策划索引（非系列期号） | 现行归属 | 独立选题 | 观众要弄懂的问题 | 状态 |
+|---|---|---|---|---|
+| EA01 | 其他 | [一致性哈希 #295](https://github.com/linhongcun/video-studio/issues/295) | 扩容一台机器，为什么只需要改变部分键的归属？虚拟节点解决什么？ | 已交付，v0.70.0；GitHub站点 |
+| EA02 | Redis | [Redis Sentinel 故障转移 #296](https://github.com/linhongcun/video-studio/issues/296) | 谁获得换主授权，又由谁挑选新主节点？ | 已交付，EP50；v0.99.0；GitHub 站点 |
+| EA03 | Redis | [Redis Cluster 副本选举 #297](https://github.com/linhongcun/video-studio/issues/297) | 副本如何获得多数主节点授权并接管哈希槽？ | 已交付，EP51；v0.99.0；GitHub 站点 |
+| EA04 | 已取消（历史索引） | [Kafka KRaft 控制器选举 #298](https://github.com/linhongcun/video-studio/issues/298) | 怎样在元数据 quorum 中选出 active controller？ | 已取消，not_planned关闭；保留索引供追溯 |
+| EA05 | 已取消（历史索引） | [Kafka 分区 Leader 选择 #299](https://github.com/linhongcun/video-studio/issues/299) | 控制器根据什么候选集合，让哪个数据副本接管？ | 已取消，not_planned关闭；保留索引供追溯 |
+| EA06 | 其他 | [布隆过滤器 #300](https://github.com/linhongcun/video-studio/issues/300) | 怎样用紧凑摘要确定排除，同时保留可能误判的边界？ | 已交付，EP39；v0.71.0（首发编号：工程算法02） |
+| EA07 | Redis | [Redis 跳表 #301](https://github.com/linhongcun/video-studio/issues/301) | 怎样沿稀疏上层前进、下降，准确找到插入位置？ | 已交付，EP40；v0.72.0（首发编号：工程算法03） |
+| EA08 | Redis | [Redis 近似 LRU #302](https://github.com/linhongcun/video-studio/issues/302) | 为什么抽样淘汰未必选中全局最久没用的键？ | 已交付，EP52；v0.99.0；GitHub 站点 |
+| EA09 | 其他 | [滑动窗口限流 #303](https://github.com/linhongcun/video-studio/issues/303) | 怎样消除固定窗口边界效应，代价是什么？ | 已登记，待后续安排 |
+
+EA 编号用于历史策划检索，不是现行系列期号或固定制作顺序。全部已建立独立 issue，并回链本首批选题索引。
+
+## 选题价值与去重
+
+已检索仓库现有 issue，并只读审查当前视频及配套文章。选题登记初核时，一致性哈希、Sentinel / Cluster选举、KRaft和分区选主尚无独立深入选题；一致性哈希现已完成首期交付。现有负载均衡主要讲分流和健康检查，缓存片讲读写及失效，消息队列片以 RabbitMQ 确认为例，主从复制片以 MySQL 异步复制为例；分库分表文章仅简述哈希取余扩容的映射变化。本批要增加算法的选择依据、状态变化、授权条件和失效边界，不能重复这些入门流程。补充四题也各有独立增量：集合摘要、可变有序集合、容量淘汰与滚动时间窗。EP.11 已讲令牌桶，因此本轮不重复登记普通令牌桶基础题。
+
+建议从 EA01 入手；选举方向可先研究 EA02，再比较 EA03；EA04、EA05已取消，不再安排Kafka两题的制作顺序。布隆过滤器、跳表、近似 LRU 可独立研究；滑动窗口需要先区分固定时间窗与滚动区间，不强制先看其他题。以上为研究顺序建议；一致性哈希、布隆过滤器和跳表已实际交付，Sentinel、Cluster、近似 LRU 已按 2026-11-02 新授权在 v0.99.0 完成交付与线上核验；滑动窗口限流 EA09/#303 仍待安排。
+
+## 资料初核与关键边界
+
+核验日期：**2026-10-25（北京时间）**。本轮已读取第一方文档及关键版本资料，各子 issue 记录具体链接、支持主张和限制。动态文档未标发布日期时如实注明；KIP 是设计依据，不能直接当作所有版本均已实现的证明。
+
+- [Apache Cassandra：Dynamo / Consistent Hashing](https://cassandra.apache.org/doc/stable/cassandra/architecture/dynamo.html)：哈希环、局部映射变化、每物理节点多个 token。Redis Cluster 使用哈希槽，不可画成采用经典一致性哈希环。
+- [Redis Sentinel](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/)：确认故障的 quorum 与执行故障转移的多数授权不是同一条件；投票对象是 Sentinel，数据副本由负责人筛选。
+- [Redis Cluster specification](https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/)：正常自动故障转移由副本请求主节点投票；与 Sentinel 分开讲。异步复制下多数授权不等于业务数据绝对零丢失。
+- [Kafka KIP-595](https://cwiki.apache.org/confluence/display/KAFKA/KIP-595%3A+A+Raft+Protocol+for+the+Metadata+Quorum)、[KIP-996 / Pre-Vote](https://cwiki.apache.org/confluence/display/KAFKA/KIP-996%3A+Pre-Vote)、[Kafka 4.0 发布说明](https://kafka.apache.org/blog/2025/03/18/apache-kafka-4.0.0-release-announcement/)（2025-03-18）：KRaft 元数据 quorum 的选举；4.0 已移除 ZooKeeper 模式，不能沿用旧 controller 选举叙事。
+- [Kafka 4.1 Eligible Leader Replicas](https://kafka.apache.org/41/operations/eligible-leader-replicas/)：分区 Leader 由 controller 选择，不是每个分区再运行一次 Raft 选举；ELR 的版本与开关影响合法候选集合，4.1 新集群默认开启，不能笼统写“只能从 ISR 选”。
+
+- [Redis Bloom filter](https://redis.io/docs/latest/develop/data-types/probabilistic/bloom-filter/)、[Redis Bloom Filter Datatype](https://redis.io/blog/bloom-filter/)（2022-07-14）：位数组、假阳性与回源确认；“无假阴性”以正确维护为前提，Redis 可扩展实现与基础固定数组分开。
+- [Redis Sorted sets](https://redis.io/docs/latest/develop/data-types/sorted-sets/)、[Memory optimization](https://redis.io/docs/latest/operate/oss_and_stack/management/optimization/memory-optimization/)：跳表访问路径与紧凑编码例外，不将所有 ZSET 都画成跳表；期望复杂度与单次比较次数分开。
+- [Redis Key eviction](https://redis.io/docs/latest/develop/reference/eviction/)：近似 LRU 的采样和候选池，LFU 的概率计数及衰减；到期与容量淘汰分开。
+- [Redis Build 5 Rate Limiters](https://redis.io/tutorials/howtos/ratelimiting/)、[redis-py rate limiter](https://redis.io/docs/latest/develop/use-cases/rate-limiter/redis-py/)：精确滑动日志与原子共享状态；滑动日志和加权近似计数分开。前一页面可见日期与提取元数据日期不同，具体记录见 EA09，不虚构确定发布日期。
+
+## 后续开拍前应达到的内容质量
+
+每题先给真实问题、条件和目标，再从约束推导机制；动画呈现键归属、消息、票数、日志新旧或候选集合的实际变化。不要只背步骤和配置名，也不为每题套同一组镜数或固定时长。
+
+单题只保留一条能跟随的主因果链；多个分支先总览再聚焦，异常路径、完整证明和配置变体按容量放配套图文。正式制作前重新选择并冻结产品版本、拓扑与开关，运行与当期主张相关的验证；示意、模拟和真实产品实验分别标注。选题登记阶段未做这些实验，也没有脚本、配音、动画或成片；一致性哈希和布隆过滤器随后按另行授权完成制作与验证，具体范围见各自交付记录，不能据此推定其他未制作题目已开工。
+
+一致性哈希#295、布隆过滤器#300、跳表#301及本次Sentinel#296、Cluster#297、近似LRU#302均已在完成交付与线上核验后以completed关闭。仅滑动窗口限流#303仍待安排，须实际制作、检查及有效授权范围内交付后，才按仓库规则以completed关闭；#298/#299按用户决定以not_planned关闭，表示取消制作。登记成功不等于制作completed。
+
+参考：[现行规范](https://github.com/linhongcun/video-studio/blob/main/docs/RULES.md)、[制作流程](https://github.com/linhongcun/video-studio/blob/main/docs/pipeline.md)、[调研格式](https://github.com/linhongcun/video-studio/blob/main/docs/research-template.md)。
+
+## EP40开工推进（2026-10-26，历史记录）
+
+布隆过滤器已按PR #343修订为v0.71.1，主线单哈希/8位数组，9镜18句、157.333秒，原URL与EP39保持；实际线上核验完成后#342已completed关闭，后续观看获得清晰度与讲解深度的正向反馈。以上首发v0.71.0数字作为历史保留，不代表当前媒体。
+
+用户据此授权继续自选下一期，本轮选择#301跳表，实际为工程算法03 / EP40 / redis-skiplist，制作中。只讲一条可跟随的查找→插入因果链，原提案中的成员查找、排名/范围和多API边界移到图文。当前总计2项完成、1项制作中、6项待安排；本次授权不自动启动其余候选。
+
+
+
+## 工程算法03 · EP40跳表已交付（v0.72.0）
+
+当前为**3项完成、6项待安排**。跳表沿同一合法两层模型查找并插入55，10镜20句、四章；正文4482帧加150帧原题/机构资料列表，共4632帧/154.4秒，完整媒体SHA-256 `1c78a906545d3eb9b25df0d6c7c104c5d8de3f248440cbb3bb9ed1467db2150e`。
+
+[成片与图文](https://linhongcun.github.io/video-studio/episodes/redis-skiplist/)；[PR #344](https://github.com/linhongcun/video-studio/pull/344)实际合并656b525f；[Release v0.72.0](https://github.com/linhongcun/video-studio/releases/tag/v0.72.0)后[Pages40299437706](https://github.com/linhongcun/video-studio/actions/runs/40299437706)成功。139冻结、独立模型/动态、49实际编码图及声轨、本地90项浏览器检查通过，946项既有发布文件随最新上游保留；[最终QA](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/redis-skiplist/qa-final.md)。
+
+2026-10-26T17:31:39.996418+08:00普通canonical10项GET核对完整媒体/海报、20条VTT、四章、入口与实际更新日志通过；[HTTP证据](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/redis-skiplist/online-verification.json)。canonical两视口实际播放、章节、全部原生字幕及精确首资料帧验证通过，见[在线浏览器](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/redis-skiplist/qa-online-browser.json)。#301在实际交付与线上核验完成后以completed关闭。
+
+首次两片的发布数字和开工记录保留历史身份。仅GitHub仓库、Release与Pages，无外部平台新发；技术检查不等于用户已观看认可或学习效果验证，其余6项不自动开拍。
+
+
+## EP40转场修订已上线（v0.72.3，历史记录）
+
+实际观看反馈进一步定位到逐个查找转为增加稀疏上层的衔接。本轮先明确原查找完成，再提出少经过节点的新目标、展开上层链接，并标明同一55重新查找；后半段插入与20句配音保持。[观看修订版](https://linhongcun.github.io/video-studio/episodes/redis-skiplist/)。
+
+[PR #350](https://github.com/linhongcun/video-studio/pull/350)合并1c36c15a，Release v0.72.3及Release后Pages40312953998成功；146冻结、实际转场与33编码图、50本地网页检查、10canonical GET与线上双视口严格帧/字幕/章节均通过，[修订issue #349](https://github.com/linhongcun/video-studio/issues/349)已completed。首发v0.72.0及首次日期保持，当前仍3项完成、6项待安排。
+
+上述修订时点曾将 Redis 独立模块记录为后续考虑方向；该分类意向现已由独立 Redis 系列及本页顶部的现行归属取代。技术通过与用户对修订版的新观看结论分开记录。

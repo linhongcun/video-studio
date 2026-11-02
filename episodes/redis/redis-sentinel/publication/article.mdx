@@ -1,0 +1,71 @@
+---
+title: 'Redis Sentinel：主节点失联后，谁有资格决定换主？'
+summary: '把故障确认、执行者选举和副本晋升拆开：五个哨兵、两份故障判断，为什么仍要三张授权票。'
+chapters:
+  - { id: failure, title: 两份报告只确认故障 }
+  - { id: authorization, title: 投票授权的是哨兵 }
+  - { id: promotion, title: 执行者再挑选副本 }
+  - { id: boundary, title: 换主授权与数据保证 }
+related: [redis-skiplist, server-cache, redis-cluster-failover]
+---
+
+## 两份报告只确认故障 {#failure}
+
+假设一个Redis主节点处理写入，两个副本异步跟随；另外五个Sentinel进程负责监控和协调。**保存数据的Redis节点**与**决定谁执行故障转移的Sentinel**是两组对象。
+
+一个Sentinel在配置的`down-after-milliseconds`内持续收不到有效回复，会从自己的视角判定主节点主观下线，即SDOWN。它再收集其他Sentinel在有效时间范围内的同类判断。达到配置的`quorum`后，主节点可被标记为客观下线，即ODOWN。
+
+本例把`quorum`设为2。S1和S2都判主节点不可达，足以满足这个故障确认门槛。但这并未授权任意副本自动成为新主，也未授权任意Sentinel随意执行换主。故障判断与执行权是不同条件。
+
+## 投票授权的是哨兵 {#authorization}
+
+某个Sentinel尝试执行故障转移时，要在一个epoch中取得授权。这里的候选是**负责执行的Sentinel**，投票者也是Sentinel；不是让Redis副本互相投票争当主节点。同一Sentinel在同一轮只投给一个执行者，轮次与候选身份一起记录。
+
+Redis8.4.0的`sentinelGetLeader`按已知其他Sentinel数量加自己计算投票集合，并要求票数同时达到多数和`quorum`。在成员视图固定的教学条件下，门槛为：
+
+`max(floor(N / 2) + 1, quorum)`
+
+这里的N是该Sentinel已知的总数，不能用当前在线数临时替换。对已知五台、`quorum=2`的例子，多数是3。若只有S1和S2可达，最多只有2票，故障确认可以通过，执行授权仍失败。官方文档直接给出同样的五台、两份判断、三票授权对照。
+
+<SourceQuote sourceId="R1" supports="官方五Sentinel/quorum2示例区分两份故障判断与至少三票换主授权。" />
+
+第三台可达也不表示授权必然瞬间成功：候选仍要在同一轮实际拿到足够票，存在分票、延迟、超时与重试。视频的成功情景明确重置条件，再展示三台都投给同一执行者。不会把“有三台在线”画成“已拿到三张票”。
+
+<Figure src="/video-studio/episodes/redis-sentinel/article/01-authorization.jpg" alt="五个已知哨兵中仅S1和S2可达；故障确认2/2通过，授权2/3未通过，R2仍为副本。" caption="教学示例：已知总数仍是五，少数可达不能把授权门槛降到两票。" seekTo={78.3} chapter="authorization" />
+
+源码的计数语句保存了这一点：
+
+<SourceQuote sourceId="R2" supports="授权的分母来自已知其他哨兵加自己，而非当前在线进程数。" />
+
+## 执行者再挑选副本 {#promotion}
+
+获得执行权后，当选Sentinel才选择合适的数据副本。**先过滤、再排序**，不能只比较复制进度。
+
+Redis8.4.0的`sentinelSelectSlave`会排除被判下线、连接不可用、近期无有效响应、`replica-priority=0`、INFO过期或与主节点断连过久的副本。允许的断连上限与`down-after-milliseconds × 10`以及当前主节点处于SDOWN的时长有关；不是把任意断连副本都放进排序。
+
+通过检查后，优先选择较小的`replica-priority`；优先级相同时选择处理复制偏移量更大的副本；两者还相同时按run ID的字典序使选择确定。更大复制偏移量只在**相同优先级且资格检查已通过**的条件下优先，不能概括为“数据最多的副本必然当选”。
+
+视频只保留一个清楚反例：R1示例进度900，却配置`replica-priority=0`；R2示例进度800，优先级100且其他检查通过。R1在过滤阶段就被排除，R2成为可用候选。数字仅用于表示先后关系，不是实际复制字节量的运行记录。
+
+执行者向候选发送晋升命令后，还要通过INFO观察角色是否变成主节点。**命令已经发送**与**角色已经确认**继续分开。随后其他可达副本被改为跟随新主，新的配置和主节点地址传播到其他Sentinel。
+
+支持Sentinel的客户端查询新的主节点地址，再连接新主节点恢复请求。Sentinel提供发现和协调，不承载转发业务命令的代理职责。
+
+<Figure src="/video-studio/episodes/redis-sentinel/article/02-promotion.jpg" alt="执行者S1收到R2已成为主节点的角色报告；R1随后改为从新主R2复制。" caption="教学示例：先确认R2角色改变，再重配复制关系；哨兵与数据节点的职责始终分开。" seekTo={123.9} chapter="promotion" />
+
+## 换主授权与数据保证 {#boundary}
+
+多数授权限制哪个Sentinel可在本轮执行故障转移，不会把异步复制变成业务数据共识。主节点已确认、但还没到达最终晋升副本的写入仍可能丢失。旧主离线不等于它的物理字节被抹除；这里说的是新主可见的数据缺口。
+
+本期解释正常自动故障转移，不把`SENTINEL FAILOVER`强制路径、Redis Cluster的副本选举或其他共识协议套进来。真实运行还涉及发现、超时、TILT、认证、配置持久化和客户端重连，不能把有限教学模型通过称为所有部署的安全性证明。
+
+## 小结
+
+两份报告回答“足够多哨兵认为主节点故障了吗”；三张授权票回答“谁有资格执行这次换主”。执行者当选后，再从合格的数据副本中选择新主节点。这三个动作连起来，才是本例的故障转移过程。
+
+## 参考资料
+
+访问日期均为2026-11-02（北京时间）。文档与源码的实读段落、原始GET、版本和许可保存在本期research与sources，视频只显示实际原题与机构。
+
+1. Redis，*High availability with Redis Sentinel*。现行文档未标发布日期；本轮固定官方文档仓库commit `c0f4f836b44de0041ddd63e88fdd843e5f4f0dfb`。[官方页面](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/)；[固定正文](https://github.com/redis/docs/blob/c0f4f836b44de0041ddd63e88fdd843e5f4f0dfb/content/operate/oss_and_stack/management/sentinel.md)。支持故障确认、授权门槛、筛选及异步复制边界。
+2. Redis，*sentinel.c*，Redis8.4.0，commit `60ba86f3c8b4e1ec96451171753a0a38e5c45a0c`。[固定源码](https://github.com/redis/redis/blob/60ba86f3c8b4e1ec96451171753a0a38e5c45a0c/src/sentinel.c)。支持投票记录、已知成员计数、资格过滤、候选排序与晋升状态机。保留源码版权及LICENSE.txt；未从维护账号推断个人作者。

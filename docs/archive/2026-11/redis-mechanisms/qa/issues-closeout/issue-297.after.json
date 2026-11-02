@@ -1,0 +1,40 @@
+{
+  "fetchedAtUTC": "2026-11-02T09:15:25.905Z",
+  "content": [
+    {
+      "type": "text",
+      "text": "Action completed."
+    }
+  ],
+  "structuredContent": {
+    "issue": {
+      "url": "https://github.com/linhongcun/video-studio/issues/297",
+      "title": "[Redis / EP51] Cluster：一个副本，怎样获得接管哈希槽的授权？",
+      "issue_number": 297,
+      "body": "<!-- engineering-algorithms:2026-10-25:ea03 -->\n\n## 状态与定位\n\n**已交付并完成线上核验：Redis 系列 / EP51 / `redis-cluster-failover`，v0.99.0。** 视频与配套图文已发布至 GitHub 站点；本 issue 以 completed 关闭。\n\n所属系列：**Redis 系列**（`redis`）。首批选题索引：[原工程算法选题总览 #294](https://github.com/linhongcun/video-studio/issues/294)。原 EA03 仅保留为历史策划检索编号，不作为 Redis 系列期号，本次制作分配 EP51 与 `redis-cluster-failover`，不按旧 EA 号重排 Redis 系列。\n\n2026-11-02 先完成系列归类，随后获授权正式制作。开工已同步最新主干 `01cd181caf24d4a8ce846c0eb8faeeab8f0054e2`，制作分支 `codex/redis-mechanisms-20261102`；工程使用 `episodes/redis/redis-cluster-failover/{production,publication}`。本期已完成资料、独立脚本/动态/成片检查及 GitHub 站点交付与线上核验。\n\n## 已交付记录（v0.99.0，2026-11-02）\n\n- 内容：沿三主三副本的固定拓扑，区分 PFAIL/FAIL、持槽主节点授权、晋升与 configEpoch 槽归属传播；少数票分支先明确重置，不把授权等同于数据零丢失。\n- 交付物：视频、配套文章、官方参考资料尾页与三比例封面；12镜24句、4章，正文4466帧加150帧资料页，共4616帧 / 153.866667秒（30fps）。成片 SHA-256：`c8c7cce8276bccfafc38c16bbc956bf06c6dbf7bda3cc550a468d6bdd8a815e6`。\n- 当前正式制作源：[production/revisions/pre-release-state-text](https://github.com/linhongcun/video-studio/tree/main/episodes/redis/redis-cluster-failover/production/revisions/pre-release-state-text)，冻结 326 项输入；本节绑定上列 `c8c7cce8…` 成片，原 production 下的 309 项输入与旧片仅作历史保留。\n- 验证范围：固定 Redis 8.4.0 的六进程本地实验验证正常接管与仅一位主节点授权时不晋升；不扩展为完整网络分区或断电保证。 [独立最终媒体 QA](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/redis-mechanisms/qa/editorial/cluster-revision-encoded-final/independent-final-decision.json)已在本地通过；技术检查不代表用户已观看认可。\n- 发布：[制作 PR #455](https://github.com/linhongcun/video-studio/pull/455)；合并/站点提交 `7971d833e37b145eac5ccf66901773beba5cd0a6`；[Release v0.99.0](https://github.com/linhongcun/video-studio/releases/tag/v0.99.0)（2026-11-02T09:00:16Z）；Release 后[手动 Pages 部署](https://github.com/linhongcun/video-studio/actions/runs/41417179935) completed/success，09:09:33Z 完成。\n- 线上交付：[成片与图文](https://linhongcun.github.io/video-studio/episodes/redis-cluster-failover/)。[原生 Chromium 报告](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/redis-mechanisms/qa/site-online/redis-cluster-failover/report.json)本期 68 项检查、20 个严格 PTS 通过；三期合计 176 项/56 PTS。此轮浏览器验收在首轮 Pages 41416454968 成功后执行，早于上述手动部署完成，不记作后者完成后的重跑。\n- 最终发布核验：[26 项完整 canonical GET 证据](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-11/redis-mechanisms/qa/online-full-get-after-release.json)于上述手动部署成功后、09:09:58Z 检查完成，全部通过：三期 MP4/海报/VTT/七张图 SHA、Redis 六课目录、首页/目录/learn、RSS 与真实 Release/changelog。\n- 验收范围：桌面与模拟移动视口、播放/章节/图文回放/引用/字幕及资料尾页；原生控件与视口限制保留在报告中。不宣称物理真机、逐字听审或用户理解反馈。\n- 仅本次 GitHub 仓库、Release 与 Pages 范围；无外部平台投稿。下方原始提案与开工前核验清单保留为研究/分类历史，实际完成范围以本节与交付凭据为准。\n\n## 一个核心问题\n\nRedis Cluster 没有 Sentinel 时，主节点故障由谁确认，副本凭什么成为新主节点并接管原来的槽？\n\n## 拟讲的因果主线\n\n1. 从 3 个持槽主节点、每主 1 个副本的简化拓扑出发，明确槽归属和复制关系。\n2. 单节点超时形成 PFAIL；通过故障报告满足条件后传播 FAIL，区分局部怀疑与集群故障判断。\n3. 合格副本根据复制进度排名等待后参选，提高 currentEpoch，向主节点请求投票。\n4. 逐票展示授权与拒绝；获得多数主节点票后晋升，接管旧主的槽，使用 configEpoch 传播新配置。\n5. 回看少数网络分区为什么不能仅靠本地“看见旧主失联”自行接管。\n\n## 可视化与图文方向\n\n固定槽区间、旧主与其副本的关系；故障报告、选举请求、授权 ACK 和槽所有权更新用不同状态表达。票来自持槽主节点，候选是故障主节点的副本，不能复制 Sentinel 的角色图。\n\n## 准确性、适用边界与内容增量\n\n- 本题限定正常自动故障转移；CLUSTER FAILOVER FORCE / TAKEOVER 等手动路径不套用同一结论。\n- 投票与多数门槛按 Cluster 规范中的主节点资格计算；不是所有进程、不含所有副本，也不是在线节点临时过半。\n- 副本复制进度影响参选延迟，较新副本有更早机会，不等于绝对保证其当选。\n- currentEpoch 与 configEpoch 负责不同的选举/配置语义，不作为两个可以混用的“版本号”。\n- Redis Cluster 以 CRC16(key) mod 16384 映射槽（含 hash tag 特例），不是经典一致性哈希环；晋升接管槽也不是扩容迁移的同一流程。\n- 异步复制与网络分区仍可能导致业务写入损失；授权安全不能代替数据复制保证。\n\n## 第一方资料初核\n\n访问日期：**2026-10-25（北京时间）**。下列为本轮选题初核，未标发布日期的动态文档如实注明；不将资料阅读等同于产品实测或成片质量通过。\n\n- [Redis Cluster specification：Failure detection / Replica election and promotion / Configuration handling](https://redis.io/docs/latest/operate/oss_and_stack/reference/cluster-spec/)，第一方规范，未标发布日期，明确面向 Redis 3.0 及以上；本轮已读。短引：“Once the replica receives ACKs from the majority of masters, it wins the election.”\n- [Redis Sentinel](https://redis.io/docs/latest/operate/oss_and_stack/management/sentinel/)，第一方文档，未标发布日期；用于区分 Sentinel 负责人选举与 Cluster 副本选举。\n\n## 后续安排制作时的专项核验\n\n- [ ] 冻结主节点投票资格、槽分布、副本复制状态及 epoch；核对正常晋升、授权不足与重复/过期投票，明确演示是否采用实际 Redis 故障注入。\n- [ ] 重新核验第一方资料，固定产品版本、配置与支持主张；按[调研格式](https://github.com/linhongcun/video-studio/blob/main/docs/research-template.md)记录短引、日期和适用边界。\n- [ ] 开拍前确认一个可跟随的核心机制及必要前置；按[现行规范](https://github.com/linhongcun/video-studio/blob/main/docs/RULES.md)完成因果动画与正式媒体检查，检查和用户观看结论分别记录。\n- [ ] 仅在后续获安排制作、完成交付及核验后，才按届时授权以 completed 关闭，并同步系列总览。\n",
+      "state": "closed",
+      "user": {
+        "login": "linhongcun",
+        "name": "linhongcun",
+        "email": null,
+        "avatar_url": "https://avatars.githubusercontent.com/u/230383104?v=4",
+        "id": 230383104
+      },
+      "assignees": null,
+      "labels": null,
+      "milestone": null,
+      "state_reason": "completed",
+      "comments": 0,
+      "created_at": "2026-10-25T13:15:08Z",
+      "updated_at": "2026-11-02T09:14:20Z",
+      "closed_at": "2026-11-02T09:14:20Z",
+      "display_url": "https://github.com/linhongcun/video-studio/issues/297",
+      "display_title": "[Redis / EP51] Cluster：一个副本，怎样获得接管哈希槽的授权？"
+    },
+    "url": "https://github.com/linhongcun/video-studio/issues/297",
+    "title": "[Redis / EP51] Cluster：一个副本，怎样获得接管哈希槽的授权？",
+    "display_url": "https://github.com/linhongcun/video-studio/issues/297",
+    "display_title": "[Redis / EP51] Cluster：一个副本，怎样获得接管哈希槽的授权？"
+  },
+  "isError": false
+}
