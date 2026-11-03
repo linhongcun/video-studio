@@ -35,6 +35,8 @@
 
 ## 现行策划
 
+[图文文章结构调研与重构方案](archive/2026-11/article-structure-research/README.md)整理业界来源、项目样本观察、分类型结构和三篇目录/开头试写，作为后续试改方案；当前写作规范仍以 `RULES.md` 为准。
+
 [AI / Agent 概念选题与资料依据](agent-development-topics.md)维护当前概念方向、研究候选和已有制作状态。候选及研究优先级不等于固定排期；具体任务状态以其中关联的 issue 和本期记录为准。
 
 ## 参考资料补齐
