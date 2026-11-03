@@ -32,6 +32,7 @@ def main():
     for path in ['/series/puzzles/','/episodes/','/rss.xml']:
         assert 'birthday-paradox' in get(path).decode()
     changelog=module.Page(get('/changelog/'));assert changelog.contains_version(a.version)
+    assert f'https://github.com/linhongcun/video-studio/releases/tag/{a.version}' in changelog.links, 'real release link missing from changelog'
     release=json.loads(subprocess.check_output(['gh','api',f'repos/linhongcun/video-studio/releases/tags/{a.version}'],text=True))
     assert release['tag_name']==a.version and not release['draft']
     result={'checkedAt':datetime.now(timezone.utc).isoformat(),'passed':True,'httpChecks':checks,'captions':22,'chapters':page.chapters,'bodyFrames':frames,'finalFrames':meta['finalVideoFrames'],'release':{k:release[k] for k in ['tag_name','html_url','published_at','target_commitish']},'scope':'Full HTTP bytes, frozen captions/chapters, source link, series/index/RSS and true release changelog. Browser playback and actual reading checked separately.'}

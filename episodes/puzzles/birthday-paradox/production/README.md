@@ -36,3 +36,7 @@ python3 episodes/puzzles/birthday-paradox/production/verify.py --final
 默认 `npm run render` 先检查来源与同一份冻结清单，生成含新声轨的正文，将 full-range BT.601 **像素转换**为 limited BT.709，调用共享混音，再自动追加同色的原题／作者资料列表，每页最多四项、五秒。最终交付 `video.mp4`，不交付 `remotion/out/body.mp4`。本地 `references-adapter.py` 只适配紫色、实际色彩转换和新片正文来源，既有附录版式与完整媒体保真引擎保持原字节。
 
 图文在编码前冻结有效 Figure 图位和 SourceQuote；成片后按既定时间生成与实看图片。修改稿件须保留冻结制作稿，另记站点派生。发布时复制最终媒体、文章、来源及附录两份回执，按 `render-result.json.publicationMetadata` 填元数据，并实际核验播放器、引用、配图与线上完整 SHA。GitHub 交付按持续授权，外部平台本轮未获新发授权。实际检查和交付结果另记本期 QA 与发布记录，不由这份入口说明预记通过。
+
+## 本期实际成片与验收
+
+本期为EP53，最终3831帧／127.7秒（含5秒参考资料），最终媒体与图文配图已生成。独立动态、正式编码、声学/来源与本地网站检查通过，真实范围及首轮失败见[成片审](qa-final.md)和[交付记录](release.md)。GitHub发布与线上核验以交付记录后续实际结果为准，不由本说明预记完成或用户认可。
