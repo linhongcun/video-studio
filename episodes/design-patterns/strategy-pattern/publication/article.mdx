@@ -9,9 +9,11 @@ chapters:
 related: []
 ---
 
-## 同一任务，做法会变 {#why}
-
 先看结算功能：页面列出原价100元的商品，并提供“会员九折”“活动八折”两个单选项。本例每次只用一种优惠；选择会员时应付90元，改选活动后重新从原价计算，显示应付80元。页面是教学示意，没有执行真实交易。
+
+具体算价变了，共同结算步骤怎样继续保留？关键是让结算按共同约定使用可替换的定价策略。先沿100元订单看职责和一次执行，再按需阅读[Java实现与计算边界](#java)。
+
+## 同一任务，做法会变 {#why}
 
 用户在界面上只是换了一项定价办法，接下来才展开页面背后的程序：两次都在完成结算，但具体算价不同，共同步骤怎样继续保留？
 
@@ -139,15 +141,15 @@ related: []
 
 阅读项目时，可以沿着三个问题追踪：哪部分组织共同流程？哪部分承担可替换的算法？当前策略由哪里选择？这些关系比某个名称或语法写法更能说明设计意图。
 
-本片要建立的关系到这里已经完整：**稳定流程保留，把变化的算价细则交给独立、可替换的策略。** 下面再用一种语言展示如何落实这种安排。
+到这里，已经能沿“谁选择、谁委托、谁计算”解释两次价格变化。再检查一个条件：如果另一个策略交回的是折扣比例而非应付金额，它就没有履行这里的共同业务约定，不能仅凭返回类型也是数字就直接替换。下面用Java把同一职责关系对应到实现。
 
-### Java实现与暂停代码卡 {#java}
+## 深入阅读：Java实现与计算边界 {#java}
 
 结构图中的结算上下文表示业务职责；这份最小Java示例的`Checkout.total`只展示核心定价委托，输入和输出由`main`演示，并未实现整套结算页面。
 
 视频末尾为5秒静默Java关键节选，标有“暂停查看”。正文先解释产品操作、模式角色和协作，代码只把同一关系落到实现，不逐行讲语法。Checkout显式持有PricingStrategy，会员与活动分别实现约定，main在外侧选择；名称与上方结构表逐一对应。
 
-卡片明确是**节选**，省略外层类、import与金额校验/舍入帮助方法，不能称为完整可复制程序。下面的完整程序与[StrategyDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo-java/StrategyDemo.java)逐字一致。
+卡片明确是**节选**，省略外层类、import与金额校验/舍入帮助方法，不能称为完整可复制程序。下面的完整程序与[StrategyDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/strategy-pattern/production/demo-java/StrategyDemo.java)逐字一致。
 
 ```java
 import java.math.BigDecimal;
@@ -197,14 +199,14 @@ public final class StrategyDemo {
 实际编译运行入口：
 
 ```sh
-python3 episodes-codex/strategy-pattern/demo-java/verify.py
+python3 episodes/design-patterns/strategy-pattern/production/demo-java/verify.py
 ```
 
-[运行结果](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo-java/verified-results.json)记录Java21真实编译命令与输出、40002个整数分参照比较，以及负数、过多小数、空金额与空策略拒绝。卡片21行节选与完整源码有逐行映射，运行验证具体实现，不代替设计思想或观看效果检查。
+[运行结果](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/strategy-pattern/production/demo-java/verified-results.json)记录Java21真实编译命令与输出、40002个整数分参照比较，以及负数、过多小数、空金额与空策略拒绝。卡片21行节选与完整源码有逐行映射，运行验证具体实现，不代替设计思想或观看效果检查。
 
 ### 进一步阅读与边界
 
-此前的[Python实现](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo/pricing.py)和[运行证据](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo/verified-results.json)保留作其他语言参考，其中七五折、新客等扩展不属于本片的会员/活动两策略主线。模式不绑定语言，本轮选择Java是为了明确展示接口、具体实现和上下文持有关系。[^java-interfaces]
+此前的[Python实现](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/strategy-pattern/production/demo/pricing.py)和[运行证据](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/strategy-pattern/production/demo/verified-results.json)保留作其他语言参考，其中七五折、新客等扩展不属于本片的会员/活动两策略主线。模式不绑定语言，本轮选择Java是为了明确展示接口、具体实现和上下文持有关系。[^java-interfaces]
 
 阅读项目时，应沿“谁选择、谁组织共同流程、谁承担可替换算法、依赖什么约定”追踪。策略与状态也应按意图区分：本例选择同一任务的不同办法，状态模式关注内部状态变化时的操作和迁移。[^state]
 
@@ -212,7 +214,7 @@ python3 episodes-codex/strategy-pattern/demo-java/verify.py
 
 ### 资料范围
 
-职责/协作依据仍为已读公开课程和辅助资料；本轮Java21接口、BigDecimal与舍入API正文由实现代理实际读取，访问日期2026-10-25（北京时间），具体范围见[Java实现说明](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/strategy-pattern/demo-java/README.md)。未把旧Python运行结果当Java语义保证。
+职责/协作依据仍为已读公开课程和辅助资料；本轮Java21接口、BigDecimal与舍入API正文由实现代理实际读取，访问日期2026-10-25（北京时间），具体范围见[Java实现说明](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/strategy-pattern/production/demo-java/README.md)。未把旧Python运行结果当Java语义保证。
 
 ## 小结
 

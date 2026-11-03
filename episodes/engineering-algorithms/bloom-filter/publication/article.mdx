@@ -9,9 +9,11 @@ chapters:
 related: ["consistent-hashing"]
 ---
 
-## 用标记判断是否加入过 {#goal}
-
 想判断一个元素有没有被加入过，最直接的办法是保存所有元素，再逐个或按索引查找。布隆过滤器换了一种取舍：**只留下很小的标记，不保存元素本身**。这样能判断到什么程度？[^redis]
+
+答案的差别来自标记共享：0可以在维护正确时排除，1却不能证明是谁留下的。先用A、B、C、D和8个位走清楚加入与查询，再看删除及多位置对照；完整复算代码放在[深入阅读](#bloom-code)。
+
+## 用标记判断是否加入过 {#goal}
 
 先用最简版本理解它：准备8个格子，每格只能保存0或1，开始全部为0。这一排格子就是**位数组**。
 
@@ -94,6 +96,10 @@ C从未加入，但它也算到3号位，恰好读到1。这个1是A和B留下�
 
 <SourceQuote sourceId="R2" supports="布隆过滤器可以通过使用更多内存提高准确性；这段原文没有给出通用的内存倍数或参数。" />
 
+## 深入阅读：用Python复算两种规则 {#bloom-code}
+
+上面的位值关系已经给出两种查询结论。需要核对哈希计算、错误清零和重建对照时，可直接运行以下程序。
+
 ### 可运行的小例子
 
 下面使用Python标准库，可直接运行。主规则是真实计算`SHA256("22:" + 元素)`，取前8字节的big-endian非负整数对8取余；第二规则只在最后的重建对照中使用前缀`0:`。输入和参数为展示碰撞而选，不代表产品内部实现或统计样本。
@@ -140,7 +146,7 @@ assert two == [0, 1, 1, 1, 0, 0, 0, 0]
 assert not all(two[position("C", seed)] for seed in (22, 0))
 ```
 
-代码中的清零段是错误操作反例；两位置段从全0重建。需要完整复算和模型核对的读者可查看[完整示例源码](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/bloom-filter/revisions/single-hash-core/bloom-filter/article-demo.py)。
+代码中的清零段是错误操作反例；两位置段从全0重建。需要完整复算和模型核对的读者可查看[完整示例源码](https://github.com/linhongcun/video-studio/blob/main/episodes/engineering-algorithms/bloom-filter/production/revisions/single-hash-core/bloom-filter/article-demo.py)。
 
 ## 小结
 

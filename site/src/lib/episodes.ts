@@ -20,9 +20,10 @@ const articleFor = (slug: string) => Object.entries(articles).find(([file]) => f
 const episodePath = (slug: string) => episodeDirectory(slug);
 
 export type Chapter = {id: string; title: string; start: number; frame: number; fmStart?: number; inArticle?: boolean};
+export type ArticleHeading = {id: string; title: string; depth: 2 | 3};
 export type Episode = {
   slug: string; ep: number; problemNumber?: number; episodePart?: string; lessonOrder?: number; firstRelease?: string; title: string; summary: string; duration: number; tags: string[];
-  createdAt: string; updatedAt: string; publishedAt?: string; date: string; poster: string; video: string; chapters: Chapter[]; Content: any; fps: number; burnedInCaptions?: boolean;
+  createdAt: string; updatedAt: string; publishedAt?: string; date: string; poster: string; video: string; chapters: Chapter[]; articleHeadings: ArticleHeading[]; Content: any; fps: number; burnedInCaptions?: boolean;
   draft: boolean; legacy: boolean; archived: boolean; replacedBy?: string[]; related: {slug: string; label?: string}[];
   learningGuide?: {slug: string; label: string}; series?: string; applicationScenario?: string; additionalSeries?: string[]; description?: string; platforms: Platform[]; readMin: number; sourcePath: string;
 };
@@ -201,7 +202,7 @@ export function getEpisodes({includeArchived = false}: {includeArchived?: boolea
       return {
         slug, ep: meta.ep ?? 0, problemNumber: meta.problemNumber, episodePart: meta.episodePart, lessonOrder: meta.lessonOrder, firstRelease: meta.firstRelease, learningGuide: meta.learningGuide, replacedBy: meta.replacedBy, title: meta.title ?? fm.title, summary: meta.summary ?? fm.summary,
         tags: meta.tags ?? [], ...dates, date: dates.publishedAt ?? dates.createdAt, poster: meta.poster, video: meta.video,
-        duration, chapters, fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, archived: !!meta.archived, related: meta.related ?? [],
+        duration, chapters, articleHeadings: mod?.getArticleHeadings?.() ?? [], fps, Content: mod?.default, draft: !!meta.draft, legacy: !!meta.legacy, archived: !!meta.archived, related: meta.related ?? [],
         series: resolveSeriesId(meta.series),
         applicationScenario: meta.applicationScenario,
         additionalSeries: Array.isArray(meta.additionalSeries) ? meta.additionalSeries.filter((id: unknown) => typeof id === 'string' && id !== meta.series) : [],

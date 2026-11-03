@@ -1,0 +1,71 @@
+{
+  "completedAt": "2026-11-03T02:57:30.475378+00:00",
+  "issue": "IntersectionObserver only marked headings entering 20%-35% viewport band; fragment navigation landing above that band could retain stale aria-current",
+  "changedFiles": [
+    "site/src/components/Toc.astro"
+  ],
+  "approach": "Remove narrow-band IO; requestAnimationFrame-throttled scroll/resize/hashchange/load updates choose the last visible article heading at or above scroll-padding plus that heading scroll-margin; original native href and no-JS operation retained; old hash never overrides manual scroll position",
+  "sourceSha256": "02cdb434ef7b91f485b7a6c218c6e60939fb303a66df8cdacab8e007bcd86cb6",
+  "compileTests": {
+    "passed": 6,
+    "failed": 0
+  },
+  "isolatedAstroBuild": {
+    "passed": true,
+    "pages": 162,
+    "log": "/workspace/work/article-structure-refactor/navigation-highlight-build.log"
+  },
+  "realBrowserRegression": {
+    "passed": 6,
+    "scope": "Final-manuscript isolated Astro output after TOC highlight fix; desktop and mobile native fragment clicks plus manual wheel scrolling. No video playback/citation testing in this focused regression.",
+    "results": [
+      {
+        "width": 1440,
+        "height": 1400,
+        "action": "native directory mouse click to bounds",
+        "current": "bounds",
+        "headingY": 191.921875,
+        "headingHeight": 37.796875,
+        "outsideOldIntersectionBand": true,
+        "hash": "bounds"
+      },
+      {
+        "width": 1440,
+        "height": 1400,
+        "action": "manual wheel scroll back to budget while hash still bounds",
+        "current": "budget",
+        "hashStayedBounds": true
+      },
+      {
+        "width": 1440,
+        "height": 1400,
+        "action": "manual wheel scroll forward to example",
+        "current": "example"
+      },
+      {
+        "width": 390,
+        "height": 1000,
+        "action": "native directory mouse click to bounds",
+        "current": "bounds",
+        "headingY": 175.734375,
+        "headingHeight": 64.78125,
+        "outsideOldIntersectionBand": false,
+        "hash": "bounds"
+      },
+      {
+        "width": 390,
+        "height": 1000,
+        "action": "manual wheel scroll back to budget while hash still bounds",
+        "current": "budget",
+        "hashStayedBounds": true
+      },
+      {
+        "width": 390,
+        "height": 1000,
+        "action": "manual wheel scroll forward to example",
+        "current": "example"
+      }
+    ]
+  },
+  "scope": "Only affected navigation highlight is retested; prior broad DOM/interaction results are not replaced. Parent performs final-dist follow-up after rebuilding."
+}

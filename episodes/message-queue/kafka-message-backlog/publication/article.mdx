@@ -1,4 +1,6 @@
-同一个通知服务从两个消费者扩到十二个，未完成订单通知仍在增加。这里先跟清楚“谁得到哪个分区”，再沿同一事件看“谁真正完成通知”；实例数与业务完成能力不是同一个数。
+同一个通知服务从两个消费者扩到十二个，未完成订单通知仍在增加，为什么扩容没有带来预期的完成能力？关键要分别看新增成员是否分到工作，以及应用是否更快做完通知。
+
+下面先算两个分区怎样分给十二名成员，再沿同一E01区分“读到了”与“做完了”，最后用改变流入的对照判断怎样才能排空。[独立运行的观察范围](#backlog-checks)放在深入阅读中。
 
 本文固定Kafka/Java4.4.0、classic消费组、显式RangeAssignor、orders主题两分区、所有成员同组同订阅，无静态成员身份或机架偏好。只讨论稳定分配后的正常客户端路径；不模拟重平衡瞬态的在途业务转交。吞吐和秒数均为下述教学应用的假设，不是Kafka或通知接口benchmark。
 
@@ -16,6 +18,8 @@ RangeAssignor先为每个成员建立空列表，再按成员顺序计算范围�
 
 ## 分配列表怎样约束真实拉取 {#processing}
 
+### 先有可读分区，再能准备请求
+
 新列表被安装到客户端的assignment集合。SubscriptionState.fetchablePartitions遍历这份集合，并检查位置有效、未暂停、未撤销等状态；AbstractFetch排除已有缓冲的分区后，构造带分区和position.offset的读取请求。本例所有正常前提满足时，C01只能从P0候选构造请求，C02从P1，空列表成员没有分区可放进这条数据Fetch路径；这些成员仍可发送心跳或其他控制通信。
 
 <SourceQuote sourceId="R2" supports="协调结果在客户端被写入本地分区状态集合。" />
@@ -27,6 +31,8 @@ RangeAssignor先为每个成员建立空列表，再按成员顺序计算范围�
 <SourceQuote sourceId="R4" supports="正常poll路径把ConsumerRecords交还应用；本文通知调用由应用另行执行。" />
 
 <Figure src="/video-studio/episodes/kafka-message-backlog/article/02-poll-is-not-done.jpg" alt="E01已从P0拉到应用，position前进，但通知仍等待业务成功。" caption="读取位置前进与业务成功是不同动作；原日志仍保留。" chapter="processing" seekTo={108.666666667} />
+
+### 取回记录之后，应用仍要完成通知
 
 应用在每个分区内串行调用通知接口，只有成功返回才记业务完成。本例不另建并行业务工作池，也不演失败重试；下面是明确标注的应用教学伪代码，不是Kafka源码：
 
@@ -62,7 +68,9 @@ for each record returned for this partition:
 
 
 
-## 真实观察的适用范围
+<span id="真实观察的适用范围"></span>
+
+## 深入阅读：真实观察验证了哪一段 {#backlog-checks}
 
 本轮另有[实际运行证据](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-10/mq05-07-implementation/runtime/runs/mq07-20261030T153232.191596Z/assertion-summary.json)。两段观察独立进行：先看两分区从2到12动态成员的稳定分配，仅2份非空，原两位本次均被新成员替换；再用独立单成员组实际poll两条记录，并以业务latch控制完成时点。latch等待时读取位置已前进、业务完成为0，释放后完成2条，再提交进度。它不是十二成员同一业务的吞吐测试，也不验证本文假设速率、通知API副作用或清空时间。
 

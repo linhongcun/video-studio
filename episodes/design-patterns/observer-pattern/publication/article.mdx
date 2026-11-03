@@ -10,9 +10,11 @@ chapters:
 related: [strategy-pattern]
 ---
 
-## 为什么需要观察者 {#why}
-
 商家在订单详情里，把十七号订单标为“已付款”。订单采用新状态，旁边的摘要显示“已付款”，变化记录追加一条事实。
+
+一次变化怎样带动两个功能，又允许其中一方退出？观察者把来源的变化通知和接收方的具体响应分开。沿订单17的两次状态变化，可以看清订阅、通知与取消各自改变了什么。
+
+## 为什么需要观察者 {#why}
 
 **一次状态变化，怎样让需要它的功能各自响应？** 这就是本期要解释的问题。页面是商家订单功能的教学重建，“标记为已付款”只改变示例状态，不执行真实付款；订单号17、状态和两个面板都是教学数据。
 
@@ -36,7 +38,7 @@ related: [strategy-pattern]
 
 ## 先订阅，再按共同约定通知 {#subscribe}
 
-看到一次联动和各自职责后，视频明确回看**这次付款之前**。来源和摘要都是“待付款”，记录为空，当前接收者名单也还是空的。这是解释同一次操作的机制，没有让订单倒退或再次付款。
+先把同一次付款发生前的状态列清：来源和摘要都是“待付款”，记录为空，当前接收者名单也还是空的。接下来从这里解释订阅怎样形成，再执行前面看到的变化；没有让订单倒退或再次付款。
 
 摘要和变化记录分别登记接收意愿，订单一侧保留当前接收者名单。这种登记关系叫作**订阅**。名单说明这次变化要告诉谁；各观察者的具体业务工作仍留在观察者内部，不是把它们搬进订单。[^observer]
 
@@ -91,6 +93,10 @@ related: [strategy-pattern]
 
 因此，多个接收方会独立变化、需要分别响应同一来源时，值得考虑这种安排。只有一个长期固定的接收方，直接调用往往更清楚；不必为使用模式而增加订阅层次。
 
+## 深入阅读：框架事件与Java原理对照 {#observer-details}
+
+已经分清了谁变化、谁还在接收、各自处理什么，再看这些职责怎样落在实际框架和一份同进程示例中。
+
 ### 实战中的简短对应
 
 实际项目通常借助已有框架的事件或监听机制；跨服务时，也常用MQ发布订阅承接通知：订单服务发布变化事件，摘要和记录通过各自业务订阅分别处理。这里延续的是“变化发生后，各方各自响应”的思想，具体结构由事件框架或消息系统提供。理解模式有助于看懂职责分工，不需要从头手写一套框架。[^pubsub]
@@ -99,7 +105,7 @@ related: [strategy-pattern]
 
 片尾单独保留5秒静默Java关键节选卡，提示暂停阅读。它对应本例的**同进程原理**：来源通过`OrderObserver`共同约定通知，摘要和变化记录各自响应。代码不逐行讲语法，也不是MQ客户端实现。
 
-完整可运行示例保留在[ObserverDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/ObserverDemo.java)，[验证入口](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/observer-pattern/demo-java/verify.py)核对编译和本例行为。里面的同步次序、名单快照、取消和异常政策是程序的具体选择，不推广成所有观察者实现的统一要求。
+完整可运行示例保留在[ObserverDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/observer-pattern/production/demo-java/ObserverDemo.java)，[验证入口](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/observer-pattern/production/demo-java/verify.py)核对编译和本例行为。里面的同步次序、名单快照、取消和异常政策是程序的具体选择，不推广成所有观察者实现的统一要求。
 
 ## 小结
 
