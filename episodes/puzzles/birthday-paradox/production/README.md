@@ -39,4 +39,4 @@ python3 episodes/puzzles/birthday-paradox/production/verify.py --final
 
 ## 本期实际成片与验收
 
-本期为EP53，最终3831帧／127.7秒（含5秒参考资料），最终媒体与图文配图已生成。独立动态、正式编码、声学/来源与本地网站检查通过，真实范围及首轮失败见[成片审](qa-final.md)和[交付记录](release.md)。GitHub发布与线上核验以交付记录后续实际结果为准，不由本说明预记完成或用户认可。
+本期为EP53，最终3831帧／127.7秒（含5秒参考资料），最终媒体与图文配图已生成。独立动态、正式编码、声学/来源与本地网站检查通过，真实范围及首轮失败见[成片审](qa-final.md)和[交付记录](release.md)。现已由PR461合并，v0.101.0及Release后Pages发布成功；完整canonical资产和线上浏览器核验通过，#211已completed关闭。详见publication.json和交付记录；尚无用户本期观看结论。
