@@ -137,9 +137,26 @@ function eggDrop() {
     + text(300, 326, '计划：14 → 27 → 39…', 27, C.coral);
 }
 
+function birthdayParadox() {
+  // Exactly 23 people, in two rows of 12 + 11. The coral pair is an
+  // illustrative collision; 50.73% describes the full ideal-model event.
+  const glyph = (x, y, color) => circle(x, y - 14, 8, color)
+    + path(`M ${x} ${y - 1} V ${y + 19} M ${x - 11} ${y + 7} H ${x + 11} M ${x} ${y + 19} L ${x - 9} ${y + 34} M ${x} ${y + 19} L ${x + 9} ${y + 34}`, color, 4);
+  return text(300, 53, '23 人 · 比较月日', 29, C.violet)
+    + Array.from({length: 23}, (_, i) => {
+      const row = i < 12 ? 0 : 1;
+      const col = row === 0 ? i : i - 12;
+      return glyph(61 + col * 43 + (row ? 21.5 : 0), 109 + row * 78,
+        i === 16 || i === 17 ? C.coral : C.violet);
+    }).join('')
+    + text(300, 285, '至少两人同生日：50.73%', 29, C.coral)
+    + text(300, 326, '365 天 · 独立均匀模型', 24, C.muted);
+}
+
 const DRAW = new Map([
   ['horse-racing', horseRacing], ['bridge-torch', bridgeTorch],
   ['water-jug', waterJug], ['monty-hall', montyHall], ['egg-drop', eggDrop],
+  ['birthday-paradox', birthdayParadox],
 ]);
 export const SUPPORTED_SLUGS = Object.freeze([...DRAW.keys()]);
 
