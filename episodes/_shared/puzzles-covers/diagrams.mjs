@@ -170,10 +170,41 @@ function pirateGold() {
     + text(300, 329, '全员投票（含提案者） · 至少半数同意', 23, C.muted);
 }
 
+function hatParity() {
+  // 1 is the first speaker at the queue tail, facing all 99 people ahead.
+  // Representatives 2, 3 and 100 plus an explicit ellipsis are NOT all 100 people.
+  // The first hat is unknown to its wearer; no spoken colour is assigned here.
+  const wearer = (cx, number, hatColor, first = false) => {
+    const ink = first ? C.coral : C.violet;
+    const hat = first ? C.surface : hatColor;
+    return circle(cx, 189, 18, C.surface, ink)
+      + path(`M ${cx + 17} 185 L ${cx + 25} 192 L ${cx + 17} 196`, ink, 2.5)
+      + path(`M ${cx} 211 V 244 M ${cx - 18} 223 H ${cx + 18} M ${cx} 244 L ${cx - 13} 265 M ${cx} 244 L ${cx + 13} 265`, ink, 4.5)
+      + rect(cx - 24, 142, 48, 29, hat, first ? C.coral : C.muted,
+        {rx: 5, 'stroke-width': 2.5, ...(first ? {'stroke-dasharray': '5 4'} : {})})
+      + line(cx - 32, 173, cx + 32, 173, first ? C.coral : C.muted, 5)
+      + (first ? text(cx, 166, '?', 24, C.coral, {'font-family': 'DejaVu Sans,sans-serif'}) : '')
+      + text(cx, 298, `${number}号`, 23, first ? C.coral : C.muted);
+  };
+  return text(300, 43, '每人只说「黑」或「白」', 28, C.violet)
+    + text(108, 93, '队尾 · 先答', 23, C.coral)
+    + text(383, 93, '前方 99 人（省略示意）', 24, C.violet)
+    + path('M 213 121 V 111 H 552 V 121', C.edge, 2.5)
+    + wearer(108, 1, null, true)
+    + wearer(248, 2, '#111018')
+    + wearer(343, 3, C.text)
+    + text(420, 208, '…', 43, C.muted)
+    + wearer(517, 100, '#111018')
+    + line(167, 192, 197, 192, C.coral, 3)
+    + path('M 188 185 L 197 192 L 188 199', C.coral, 3)
+    + text(300, 338, '只能看前方 · 能听见已答', 24, C.muted);
+}
+
 const DRAW = new Map([
   ['horse-racing', horseRacing], ['bridge-torch', bridgeTorch],
   ['water-jug', waterJug], ['monty-hall', montyHall], ['egg-drop', eggDrop],
   ['birthday-paradox', birthdayParadox],
+  ['hat-parity', hatParity],
   ['pirate-gold', pirateGold],
 ]);
 export const SUPPORTED_SLUGS = Object.freeze([...DRAW.keys()]);
