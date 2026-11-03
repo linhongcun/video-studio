@@ -1,22 +1,37 @@
-# P09 · 五个海盗分金币（制作草稿）
+# P09 · 海盗分金币
 
-本轮从最新主干 `2159b75f8eb2fc246b7ff0174c31ac8542f97de6` 开工，选择 [#213](https://github.com/linhongcun/video-studio/issues/213)，计划EP54／趣味推理P09／pirate-gold。当前仅为新期草稿，不是成片；不沿用P07的配音、时序、冻结、媒体或QA身份。
+本期从最新主干`2159b75f8eb2fc246b7ff0174c31ac8542f97de6`开工，选择[#213](https://github.com/linhongcun/video-studio/issues/213)，EP54／趣味推理P09／pirate-gold。开工后执行环境短暂不可用，先在PR463保存静态草稿；环境恢复后接着生成本期配音与动画，恢复事实见startup.json。旧草稿QA保留其当时范围，不能当作后续媒体证据。
 
-已完成两项公开来源实读、14镜28句脚本及独立静态审读。人数、金币与投票规则的精确核验已在OpenAI functions V8执行：110个小规模案例；100枚金币下1至5人、半数与严格多数两种规则逐一穷举分法。五人局每种规则各检查4,598,126个分配，主模型最高98，严格多数变体最高97，后者仅进文章。实际能力范围见model-verification.json。
+本期只复用现存共享TTS、句级装配、起音、整轨、混音、冻结与原题/机构资料列表工具；未继承P07或其他旧片的声轨、分镜、媒体、冻结或QA身份。两源实读与数学核验见research*、references.json、model-verification.json；实际V8核验和恢复后Node复跑分别保存在不同回执。主模型含提案者投票、至少半数通过、同钱反对，五人分配98／0／1／0／1。
 
-## 当前阻断
+## 制作入口
 
-本轮完成开工fetch和本地建分支后，所选云环境变为unavailable。exec_command明确返回“No usable execution environment”。控制面running/connected不代表当前命令工具可用。root已请求恢复环境；其间用GitHub连接保存可复核的文本草稿。
+从仓根执行；首次依当前锁文件为本期remotion安装`npm ci`。选定takes已保存，普通复核不重复请求非确定性TTS。
 
-配音、音频/实际分镜装配、真实无字幕小样、COPYFIT、封面、冻结、正式编码、站点与线上检查尚未运行。不能把静态审稿或V8数学核验写成上述步骤已通过；两张Figure的0秒图位仍是草稿占位，冻结前须换成真实音轨中的稳定时点。
+```bash
+node site/scripts/check-references.mjs --sources episodes/puzzles/pirate-gold/production
+python3 episodes/puzzles/pirate-gold/production/prepare.py
+python3 episodes/_shared/voice/gen.py --dir episodes/puzzles/pirate-gold/production
+python3 episodes/_shared/voice/build.py --dir episodes/puzzles/pirate-gold/production
+python3 episodes/puzzles/pirate-gold/production/assemble.py
+python3 episodes/_shared/place_v2.py --dir episodes/puzzles/pirate-gold/production --mode whole
+python3 episodes/puzzles/pirate-gold/production/verify.py
+```
 
-## 恢复后继续
+正文实测4801帧／160.033秒、14镜28句、4章。28声学句首与真实board句cue分别检查；plan未声明术语label，label_onset_strict的0项不表示完成术语逐词对齐。未执行逐字ASR或全片语义听辨，producer与独立声音检查的实际能力以各自QA为准。
 
-1. 检查本地未提交工作，fetch并快进到此制作分支；重新核对origin/main与EP/版本占用，不覆盖其他工作。
-2. 按当前保留工程的锁文件安装新期依赖，复用共享TTS、整轨、起音、冻结及附录工具；按本期人数、提案、否决后所得和选票重新设计动画。
-3. 可在Node复验数学并另存新回执（不要把V8记录改称Node已跑）：`node verify_model.mjs --out model-node-replay.json`。
-4. 完成来源预检、冰糖配音、实计时分镜与独立动态；所有金币投票前为拟分配，通过后才确认为实得。1—5号身份固定，每一假设局明确倒推，不画先真实出局再复活。
-5. 定好文章实际图位与共享紫色三比例封面，停写并冻结后渲染正文＋5秒原题/机构参考列表；实际确认烧录字幕后设置发布metadata的burnedInCaptions。
-6. 完成成片、站点、Release后部署与普通canonical完整SHA核验，再按持续授权以completed关闭#213并同步#204。当前不关闭、不发Release、不合并main。
+无字幕真实动态、COPYFIT、三比例封面与4:3安全区通过并停写后：
 
-正式依赖与命令以恢复后的当前源码为准，不伪造本期尚不存在的渲染器入口。首次公开再填写publishedAt和firstRelease，站点版本不在草稿阶段预占。当前publication/meta.json仅draft:true，省略未产出的video/poster；sourcePath暂指真实production文稿目录，建立动画后改为实际入口。
+```bash
+python3 episodes/puzzles/pirate-gold/production/freeze.py
+python3 episodes/puzzles/pirate-gold/production/freeze.py --verify
+npm --prefix episodes/puzzles/pirate-gold/production/remotion run check:types
+bash episodes/puzzles/pirate-gold/production/render-final.sh
+python3 episodes/puzzles/pirate-gold/production/verify.py --final
+```
+
+Composition为PirateGold，入口remotion/src/index.ts。唯一高清编码锁`/tmp/video-studio-render.lock`；默认入口先资料与冻结核验，再渲染本期正文，将full-range BT.601像素实际转换为limited BT.709，共享混音后自动追加同紫色原题/机构参考列表，每页最多4项、5秒。最终交付video.mp4，不能发布out/body.mp4。参考列表的原有版式及完整媒体引擎保持原字节，本期adapter只选择palette、色彩转换和真实正文来源。
+
+图文两处SourceQuote与编码前Figure图位一并冻结：第09镜3000帧／100秒，第13镜4365帧／145.5秒。成片后从同一准确帧做limited709→full601 JPEG像素转换并实看；若正文制作稿后续需要改动，另保存派生与SHA，不能改旧冻结输入追认。
+
+发布复制最终video、JPG、文章、字幕、分镜、来源与附录两份回执；metadata读取render-result.json真实字段，burnedInCaptions按实际成片设置。GitHub交付按持续授权执行；外平台本轮未获新发授权。实际独立预检、成片、站点及上线结果分别由qa与release/publication记录，不由本说明预记通过。

@@ -153,10 +153,28 @@ function birthdayParadox() {
     + text(300, 326, '365 天 · 独立均匀模型', 24, C.muted);
 }
 
+function pirateGold() {
+  // Five numbered identities and a shared, as-yet-undivided 100-coin pool.
+  // No allocation or proposed vote is shown before the explanation.
+  const pirate = (cx, number) => path(`M ${cx - 27} 102 L ${cx} 68 L ${cx + 27} 102 Z`, C.violet, 2, {fill: C.surface})
+    + path(`M ${cx - 34} 104 H ${cx + 34}`, C.violet, 4)
+    + circle(cx, 121, 17, C.violet)
+    + path(`M ${cx} 144 V 170 M ${cx - 19} 156 H ${cx + 19} M ${cx} 170 L ${cx - 14} 192 M ${cx} 170 L ${cx + 14} 192`, C.violet, 5)
+    + text(cx, 226, `${number}号`, 25, C.muted);
+  return text(300, 44, '5 个海盗 · 100 枚金币', 29, C.violet)
+    + [1,2,3,4,5].map((number, i) => pirate(100 + 100 * i, number)).join('')
+    + circle(190, 274, 13, C.coral, C.coral)
+    + circle(208, 271, 13, C.coral, C.coral)
+    + circle(199, 254, 13, C.coral, C.coral)
+    + text(331, 281, '待分：100 枚', 28, C.coral)
+    + text(300, 329, '全员投票（含提案者） · 至少半数同意', 23, C.muted);
+}
+
 const DRAW = new Map([
   ['horse-racing', horseRacing], ['bridge-torch', bridgeTorch],
   ['water-jug', waterJug], ['monty-hall', montyHall], ['egg-drop', eggDrop],
   ['birthday-paradox', birthdayParadox],
+  ['pirate-gold', pirateGold],
 ]);
 export const SUPPORTED_SLUGS = Object.freeze([...DRAW.keys()]);
 
