@@ -1,0 +1,841 @@
+{
+  "reviewType": "read_only_project_article_structure_audit",
+  "baseline": "058890d1e2c995ad5c2e2e02e34a02652886bcb6",
+  "checkedAt": "2026-11-03T02:14:57.881384+00:00",
+  "coverage": {
+    "count": 8,
+    "slugs": [
+      "http-request",
+      "dns",
+      "kafka-consumer-idempotency",
+      "adapter-pattern",
+      "binary-search",
+      "daily-temperatures",
+      "egg-drop",
+      "monty-hall"
+    ],
+    "fullSourceRead": true,
+    "unreviewedRequestedSamples": []
+  },
+  "scope": "主复核实读http-request、dns、kafka-consumer-idempotency、adapter-pattern；只读子复核实读binary-search、daily-temperatures、egg-drop、monty-hall。另检查共享正文页和图文模板的阅读结构。无数据库文章抽样；没有修改任何项目文件。",
+  "methodAndLimits": [
+    "阅读全文中的教学叙述、章节、程序、图注、引用调用、总结及参考/复现材料，观察与推断逐篇分列。机制/设计组为分析组成省略SVG绘制源码的逐字分析。",
+    "本轮没有实际查看图片像素、浏览器首屏、滚动或移动交互，没有读者访谈、学习测量、停留/完成率或A/B测试。所有结构效果为待验证的应用推断。",
+    "源码标题/组件/字符位置计数不是实际阅读负担或首屏高度。没有因原始MDX含SVG/长URL而把源文件字符数当文章篇幅。"
+  ],
+  "sharedRenderingObservations": [
+    {
+      "observation": "summary并不自动成为可见正文导读。标题页头渲染h1、版本、时间/标签、阅读方式及制作文件链接，随后播放器；正文#article直接渲染MDX Content。",
+      "evidence": "site/src/pages/episodes/[slug]/index.astro: title header and Content placement; site/src/lib/episodes.ts summary field mapping",
+      "implication": "若要读者看到阅读承诺，需要在MDX明确写出或另设计共享入口；不能只填写frontmatter summary后宣称首屏已改善。"
+    },
+    {
+      "observation": "文章目录来自e.chapters.filter(c=>c.inArticle)，与既有视频章节映射相连，并非取MDX全部标题。",
+      "evidence": "site/src/pages/episodes/[slug]/index.astro: articleHeadings; site/src/lib/episodes.ts computeChapters",
+      "implication": "新的可选阅读、小结等H2不会自动进目录。试稿可先给正文阅读路线，后续如做独立文章目录需单独核对seek和章节映射。"
+    },
+    {
+      "observation": "现有起稿模板只有问题与条件、机制、边界、小结、参考资料的通用骨架。",
+      "evidence": "episodes/_template/article.mdx",
+      "implication": "可补入口、全局路线、例子/图/代码相互解释及可选深入的决策提示，但不把每篇强制变成相同的章节数。"
+    }
+  ],
+  "crossSampleObservations": [
+    "八篇已有具体问题、固定示例或规则条件，因果/推导骨架普遍值得保留；上一轮小结已补齐，当前主要可改项是入口是否独立、主线导航与深入层级。",
+    "短篇DNS出现11个参考区前H2，其中若干仅接一小段；与长机制/推理文章相比，结构粒度差异很大。",
+    "算法与设计样本中有制作、卡片显示、静默停留、源SHA和有限核验说明靠近主体代码；它们需要保留证据身份，但与读者学习主问题属于不同阅读任务。",
+    "推理样本包含必要的一般证明、规则变体与有限程序核验，这三者不能混成“已经验证所以正确”；重排必须保留其逻辑层次。"
+  ],
+  "appliedHypotheses": [
+    "通用主线可用“具体问题与可见承诺→最小全局关系→逐步解释并用同例图/代码核对→改变条件检验→必要边界→可选深入→收束可迁移结论→来源”。这是一组可选功能，不是固定章数模板。",
+    "结构导读先让读者知道在解决什么及怎样走，不必把每个推导答案在第一屏全部说尽；查阅型结论可前置，原理/推理型仍保留发现过程。",
+    "主线中保留直接解释原因的实现深度，完整复现/制作验收资料另外标明可选；不能把“分层”变成删除真实技术细节。"
+  ],
+  "typeOutlines": [
+    {
+      "type": "短机制解释",
+      "sequence": [
+        "一个具体输入/现象与本文目标",
+        "最小关系或一行路径",
+        "同一次过程的少量主段（小步骤用H3/列表）",
+        "一次改变条件的对照",
+        "小结",
+        "参考资料"
+      ],
+      "sample": "dns",
+      "constraint": "短文不必另加长导读或术语清单；旧视频锚点原位保留或明确记录映射。"
+    },
+    {
+      "type": "长机制/实现文章",
+      "sequence": [
+        "具体反常结果与主要问题",
+        "几个状态/对象的全局地图",
+        "正常路径与故障窗口",
+        "恢复/反例的关键因果及短实现对应",
+        "主要处理方式",
+        "可选实现/复现层与适用边界",
+        "小结",
+        "来源与运行记录"
+      ],
+      "sample": "kafka-consumer-idempotency",
+      "constraint": "保留恢复值赋给position、position进入Fetch请求等原因链；完整SQL/运行回执可分层。"
+    },
+    {
+      "type": "算法推导",
+      "sequence": [
+        "题意、输入输出与具体例子",
+        "朴素工作或冲突",
+        "利用的性质、排除依据/不变量",
+        "同例过程与就近图示",
+        "完整程序与复杂度",
+        "边界反例及可选验证复现",
+        "小结",
+        "参考资料"
+      ],
+      "sample": "binary-search / daily-temperatures",
+      "constraint": "数学正确性/复杂度推导不能由有限测试代替，图内实际天数/状态不随搬位置而改称其他阶段。"
+    },
+    {
+      "type": "推理/概率",
+      "sequence": [
+        "明确规则、目标和可观察信息",
+        "一局具体尝试或直觉疑问",
+        "按条件展开构造/情景分类",
+        "解释为何成立及需要的一般下界",
+        "可选变体/精确条件计算/程序核验",
+        "小结",
+        "参考资料"
+      ],
+      "sample": "egg-drop / monty-hall",
+      "constraint": "玩法前提先于推导，构造可行、证明最优与有限核验分开，变体显式标为不同规则。"
+    },
+    {
+      "type": "设计模式",
+      "sequence": [
+        "业务需要与变化问题",
+        "职责和静态关系",
+        "一次真实的调用关系",
+        "一次变化说明收益与成本",
+        "可选实现和相邻概念辨析",
+        "结果与适用边界",
+        "小结",
+        "资料与复现"
+      ],
+      "sample": "adapter-pattern",
+      "constraint": "静态契约和实际执行模块不混同；代码不完整提示就近保留；不把未知映射为确定失败。"
+    }
+  ],
+  "migrationChecks": [
+    "只改站点publication派生稿，保留production冻结文章、旧媒体与回执。保存前后全文SHA、实际调整范围及原因。",
+    "现有{#anchor}与frontmatter/video chapter、Figure.chapter/seekTo成组检查；新阅读标题不虚造新的有时码视频章节。",
+    "SourceQuote与其支持论点邻近移动，原sourceId和真实引文/日期不改；完整程序、证明、失败记录和复现入口保留。",
+    "移动图只调整阅读位置，不改变图片状态、对象、数值、图注含义或回看时间；若要改图意，按实际需要另做核验。",
+    "本文是在调研阶段提出的具体试稿假设；试改后先做编辑/可达/阅读检查，再通过真实读者反馈决定是否批量推广。"
+  ],
+  "articles": [
+    {
+      "articleType": "机制总览（含局部深入）",
+      "observations": [
+        "开头#hook用“网址已输入、页面仍空白”的具体状态提出问题，并先给找到目标、建立连接、请求资源、处理成画面的四段主线。",
+        "沿同一个https://shop.example/products/42示例推进；#address、#tcp、#tls、#exchange、#render具有真实前后关系，结尾#recap表格再交代缓存/复用/HTTP版本变化。",
+        "#tcp兼有字段表、对序号的解释、一幅近邻关键帧以及“为什么还要第三次”，局部因果深度较完整。",
+        "正文在“视频假定”“本片不再展开”等处仍以配套视频为说话对象；引用/范围说明分散在机制解释内，但多处用于保护真实保证边界。",
+        "没有另设读者先修/阅读选择模块；开头两段已在承担导读，不宜在其前再叠一套同义引言。"
+      ],
+      "inferences": [
+        "这一篇可以作为保留现有因果结构的样本，重构重点是让读者看到全程地图并在局部深入后知道回到哪一步，而非重排全部章节。",
+        "完整技术名称与具体三报文是已有教学深度；以“吸引读者”为由删除这些细节，会违背文章当前问题与既有反馈方向。",
+        "可将非本篇主线的协议变体及进一步规范定位集中为可选深入，但TCP第三次确认和TLS/HTTP职责应留在主线。"
+      ],
+      "preserve": [
+        "同一域名、路径和教学IP身份",
+        "全部原有七个章节锚点及来源模块",
+        "三次握手的序号/确认关系、HTTP/3等边界",
+        "字段表、HTTP节选和关键帧回看"
+      ],
+      "proposedOutline": [
+        {
+          "title": "空白页背后：本文会回答什么，先看四段工作",
+          "reuseAnchor": "hook",
+          "action": "把现有首两段作为可见导读；给一行具体阅读路径，不增加第二个空泛引言"
+        },
+        {
+          "title": "找到连接目标：网址、域名、地址与端口",
+          "reuseAnchor": "address",
+          "action": "保持现有机制先后"
+        },
+        {
+          "title": "建立TCP：交换序号，并解释为何需要第三次",
+          "reuseAnchor": "tcp",
+          "action": "表、图、关键因果保持相邻"
+        },
+        {
+          "title": "用TLS保护这条连接",
+          "reuseAnchor": "tls",
+          "action": "保持职责分工及常规新建连接前提"
+        },
+        {
+          "title": "一次HTTP请求和响应",
+          "reuseAnchor": "exchange",
+          "action": "保留具体报文与其不完整边界"
+        },
+        {
+          "title": "收到资源之后怎样成为画面",
+          "reuseAnchor": "render",
+          "action": "收回同一商品页，可在章末回看四段关系"
+        },
+        {
+          "title": "换条件再判断：缓存、复用与协议版本",
+          "reuseAnchor": "recap",
+          "action": "作为变体检验而非再开新主线"
+        },
+        {
+          "title": "小结",
+          "reuseAnchor": null,
+          "action": "保留当前收束"
+        },
+        {
+          "title": "参考资料与可选进一步阅读",
+          "reuseAnchor": "sources",
+          "action": "保留全部证据与历史访问身份"
+        }
+      ],
+      "slug": "http-request",
+      "path": "episodes/request/http-request/publication/article.mdx",
+      "sha256": "bc464af8b6e90b62d62835c77167f7951595b38e9ebeef5a63e2bea1f5d7e427",
+      "metrics": {
+        "h2_before_reference": 8,
+        "h3_before_reference": 1,
+        "sourcequote_calls": 4,
+        "figure_calls": 1,
+        "native_figures": 0,
+        "code_blocks": 2
+      }
+    },
+    {
+      "articleType": "短机制解释",
+      "observations": [
+        "正文先重复摘要式说明，然后以“域名方便人记，网络连接还需要地址”进入；主线前没有实际写出所指的shop.example或示例IP，二者仅在参考规范说明中出现。此次只读源码，未对图内具体数值做视觉检查。",
+        "首个参考区前有11个二级标题，许多标题之后只有一小段；根/TLD/权威/返回被分成连续独立H2。",
+        "查询顺序本身正确且清楚：本地缓存、递归解析器、根转介、顶级域转介、权威回答、返回客户端、TTL。",
+        "一幅Figure放在权威回答附近，两处SourceQuote就近支持分层命名和迭代转介。",
+        "frontmatter只绑定hook/cache/query/ttl/recap，其中recap仍在参考资料标题，未对应新加小结。"
+      ],
+      "inferences": [
+        "短篇的主要结构问题可能是层级被切得过碎，而非解释篇幅不足；可以聚合逐级询问的一组步骤。此为编辑判断，未做读者测试。",
+        "在入口写出同一个具体域名、目标地址与“查询后才能连接”的承诺，可减少对视频画面上下文的依赖。",
+        "阅读地图应区别主段与子步；无需为了统一长文格式给这篇添加独立的长篇目录/术语表。"
+      ],
+      "preserve": [
+        "递归解析器与客户端职责分离",
+        "已有SourceQuote、Figure与其chapter=query回看",
+        "缓存/TTL和DNS不等于网页加载完成的边界",
+        "所有既有显式锚点，尤其不可未经映射把参考资料#recap挪作新总结"
+      ],
+      "proposedOutline": [
+        {
+          "title": "输入shop.example之后，本文要找到什么",
+          "reuseAnchor": "hook",
+          "action": "合并摘要式开头与问题说明，明确示例域名/IP身份"
+        },
+        {
+          "title": "先查缓存：能复用时省去什么",
+          "reuseAnchor": "cache",
+          "action": "保留原本地缓存解释"
+        },
+        {
+          "title": "没有答案时，一次完整查询如何走完",
+          "reuseAnchor": "query",
+          "action": "将根→顶级域→权威→返回组织为H3或有序步骤，避免每小步都独立H2"
+        },
+        {
+          "title": "为什么第二次可能更快：答案有有效期",
+          "reuseAnchor": "ttl",
+          "action": "合并TTL与“第二次”两小节"
+        },
+        {
+          "title": "小结：地址已找到，网页还没有自动加载",
+          "reuseAnchor": null,
+          "action": "保留现有总结的职责判断"
+        },
+        {
+          "title": "参考资料",
+          "reuseAnchor": "recap",
+          "action": "保持历史引用/回看映射，另行记录该锚点的现有语义"
+        }
+      ],
+      "slug": "dns",
+      "path": "episodes/request/dns/publication/article.mdx",
+      "sha256": "e6905f0fab9cc050f147233279d72be442951590598414247ee7dc03bbc06818",
+      "metrics": {
+        "h2_before_reference": 11,
+        "h3_before_reference": 0,
+        "sourcequote_calls": 2,
+        "figure_calls": 1,
+        "native_figures": 0,
+        "code_blocks": 0
+      }
+    },
+    {
+      "articleType": "长机制解释（固定实现路径）",
+      "observations": [
+        "开头用同一订单7042/E01@0和账户0→10→20的反常结果提问，并明确生产者只写一次。",
+        "主线清楚区分日志、客户端position、组committed与外部DB结果；#positions展示DB已提交而Kafka恢复值仍0的故障空隙，#replay把恢复值真正接到Fetch实参。",
+        "因果源码路径、10处SourceQuote和4个关键帧贴近论点，正文并非只列实现类名。",
+        "#guard同时容纳提前提交反例、业务幂等、SQL DDL、伪代码、RETURNING和唯一约束、四类保证边界；主讲与可选实现深度混在一个较大章节。",
+        "参考资料后另有“本轮实际运行”多段，记录91断言、环境/进程故障/探针/命令/失败候选和SHA。这些是复现和核验资料，不是正文主线；它们目前位于小结后参考区内。"
+      ],
+      "inferences": [
+        "可在开头给一个“同一事件、四份状态”的阅读地图，让读者先知道会追踪哪几个量，再逐步揭示重读原因。",
+        "不宜把全部源码名都移入附录：恢复值安装、position前移及Fetch0构造直接回答为什么，应保留关键赋值和短实现对应。完整SQL DDL、数据库内部实现和运行回执可作为可选深入层。",
+        "当前#guard如果拆出清楚的子目标，读者更容易区分“提前提交为何漏做”“怎样不重复生效”“这项保证到哪里”；这仍需实际读者验证，不能由编辑审阅推出提升幅度。"
+      ],
+      "preserve": [
+        "E01/P0/offset0与组points及账户身份",
+        "position与committed下一起点的语义",
+        "DB提交与Kafka位点提交的非原子窗口及提前提交反例",
+        "固定Kafka版本/关闭自动提交/仍保留记录等条件",
+        "原始源码证据、10引用与4图全部保留"
+      ],
+      "proposedOutline": [
+        {
+          "title": "只生产一次，为何会加分两次",
+          "reuseAnchor": "problem",
+          "action": "保留开头具体冲突，接一行四份状态的阅读地图"
+        },
+        {
+          "title": "先追踪第一次处理：读位置前移，业务已提交",
+          "reuseAnchor": "positions",
+          "action": "保持关键源码赋值、故障窗口和第一图相邻"
+        },
+        {
+          "title": "进程重启后，旧恢复值怎样变成Fetch0",
+          "reuseAnchor": "replay",
+          "action": "保持OffsetFetch→安装position→构造FetchRequest→原记录回来的因果"
+        },
+        {
+          "title": "两种顺序都存在空隙，业务如何避免重复生效",
+          "reuseAnchor": "guard",
+          "action": "先对照提前提交漏做，再给稳定业务键与同事务效果"
+        },
+        {
+          "title": "可选深入：SQL与可复现实例",
+          "reuseAnchor": null,
+          "action": "保留完整DDL/伪代码/RETURNING与核验入口，显式标明可跳读；不删去因果源码路径"
+        },
+        {
+          "title": "适用边界：哪些保证仍是另一回事",
+          "reuseAnchor": null,
+          "action": "集中原生产幂等/Kafka事务/外部副作用/恢复条件的边界"
+        },
+        {
+          "title": "小结",
+          "reuseAnchor": null,
+          "action": "保持现有恢复位置/业务效果两问收束"
+        },
+        {
+          "title": "参考资料与运行核验",
+          "reuseAnchor": null,
+          "action": "保留原始运行资料及所有失败候选身份，入口清楚区分复现记录与解释主线"
+        }
+      ],
+      "slug": "kafka-consumer-idempotency",
+      "path": "episodes/message-queue/kafka-consumer-idempotency/publication/article.mdx",
+      "sha256": "ea2182c4d69d75447e7dc0aebfa72101e74b1ab5c8c7bedbfd1fb47801090bea",
+      "metrics": {
+        "h2_before_reference": 5,
+        "h3_before_reference": 3,
+        "sourcequote_calls": 10,
+        "figure_calls": 4,
+        "native_figures": 0,
+        "code_blocks": 2
+      }
+    },
+    {
+      "articleType": "设计模式（意图、结构、运行与变化）",
+      "observations": [
+        "开头先给一次发货提醒和受理Q17的使用场景，接着直接提出“业务定义约定、外部细节留在边界”两件事，已有明确价值方向。",
+        "开头末段预告“接入设计→同一次提交→后来格式升级”，正文分别在#roles/#roundtrip/#boundary兑现。",
+        "两幅原生SVG把静态依赖关系与实际调用时序分开，目标契约不被画成执行中继；这是需要保留的结构优势。",
+        "#boundary下同时承担升级收益、成本、适配器/防腐层/包装辨析、Java节选/接线、完整程序与20组验证、返回/异常语义、来源阅读范围等多种任务。",
+        "正文含“静默卡提示暂停查看”“15行与卡片同源”“原验证器字节保持”“源SHA/20组验证”等制作验收提示，部分靠近核心代码。",
+        "核心异常边界——已受理不等于送达、未知不等于拒绝——在主线有简短提示，在扩展中完整说明，小结再次回收。"
+      ],
+      "inferences": [
+        "这篇已有很好的“为什么→结构→运行→一次变化”的骨架，重点是对长尾材料分层，而非额外制造故事悬念。",
+        "可以让升级对照保持在主要路线，把Java完整接线、模式相关辨析及复现证据标成可选层；读者所需的“节选不可独立运行”提示仍必须留在代码旁。",
+        "异常边界应跟随结果转换就近解释，再在末尾集中回顾，避免把不可缺的结果语义藏到可跳读附录中。"
+      ],
+      "preserve": [
+        "同一次Q17运行与后来版本升级的情景区分",
+        "业务目标约定不作为运行中继",
+        "结构图与时序图职责分离",
+        "业务含义不变时才隔离外部格式变化的前提",
+        "已有原题/资料日期、Java完整例子和实测证据"
+      ],
+      "proposedOutline": [
+        {
+          "title": "为什么接入时主动包一层：本文要隔离哪种变化",
+          "reuseAnchor": "why",
+          "action": "保留现有场景、两条价值方向及阅读路线"
+        },
+        {
+          "title": "四个角色怎样分工",
+          "reuseAnchor": "roles",
+          "action": "保持角色表与结构图，可把V2命名留到升级节以控制前置负担"
+        },
+        {
+          "title": "一次提交怎样转换并返回",
+          "reuseAnchor": "roundtrip",
+          "action": "保持时序图与同次输入输出对照；在结果处就近保留受理/未知边界"
+        },
+        {
+          "title": "一次格式升级，哪些业务代码可以保持",
+          "reuseAnchor": "boundary",
+          "action": "保留V1/V2对照及维护代价，明确此为开发变化而非第二次发消息"
+        },
+        {
+          "title": "可选深入：Java关键节选与完整示例",
+          "reuseAnchor": "java",
+          "action": "代码、完整源码链接、运行条件和不可独立运行提示一同保留"
+        },
+        {
+          "title": "可选辨析：防腐层、包装与适配器",
+          "reuseAnchor": null,
+          "action": "把相关概念比较标为拓展，不遮住主要升级结论"
+        },
+        {
+          "title": "小结",
+          "reuseAnchor": null,
+          "action": "继续用约定差异、转换委托与变化边界收束"
+        },
+        {
+          "title": "参考资料与复现范围",
+          "reuseAnchor": null,
+          "action": "集中来源访问/制作验证细节，保留原引用记录与完整证据"
+        }
+      ],
+      "slug": "adapter-pattern",
+      "path": "episodes/design-patterns/adapter-pattern/publication/article.mdx",
+      "sha256": "c751f981683f32dd1ae717b175d3d541278973240879dce49ef836aa51c1466f",
+      "metrics": {
+        "h2_before_reference": 5,
+        "h3_before_reference": 5,
+        "sourcequote_calls": 1,
+        "figure_calls": 0,
+        "native_figures": 2,
+        "code_blocks": 1
+      }
+    },
+    {
+      "slug": "binary-search",
+      "path": "episodes/leetcode/binary-search/publication/article.mdx",
+      "type": "算法推导",
+      "observations": [
+        "首节先给704题输入/输出与复杂度要求，再给八个有序数找13的具体例子；区分原下标、序号、先排序三个易错点。",
+        "主体因果是有序能排除整段→中点使最坏保留范围均衡→三轮找13→候选不变量→另起目标8的失败轨迹→闭区间边界→完整程序与复杂度。",
+        "唯一Figure是排掉原下标0..3的画面，但现位置在完整成功轨迹与不变量之后；其图意能够直接服务第一次排除解释。",
+        "程序节末混有实际核验脚本/代码显示一致性、学习效果未测和片尾5秒停留说明。后两类属于制作/验收信息。",
+        "现有小结已明确安全排除、闭区间与严格缩短，参考资料将题意与本期原创证明分开。"
+      ],
+      "proposedOutline": [
+        {
+          "heading": "要解决什么：有序数组中找原下标",
+          "anchor": "problem",
+          "change": "首段可用13在不在、若找8怎么办的具体问题建立阅读承诺；紧接完整输入条件。",
+          "oldAnchor": "problem",
+          "proposedAnchor": "problem",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "为什么可以一次排除一段",
+          "anchor": "halve",
+          "change": "保留现推导。把现有排除图移到第一次排除解释旁，三轮表与一般不变量随后。",
+          "oldAnchor": "halve",
+          "proposedAnchor": "halve",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "找不到和最后一格怎样收尾",
+          "anchor": "missing",
+          "change": "保留目标8独立从头查及两类闭区间误写。",
+          "oldAnchor": "missing",
+          "proposedAnchor": "missing",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "把规则写成完整程序",
+          "anchor": "code",
+          "change": "保留程序、变量意义、复杂度与必要边界；把显示源/停留时长等制作提示移出主阅读路径。",
+          "oldAnchor": "code",
+          "proposedAnchor": "code",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "可选：验证与复现",
+          "anchor": null,
+          "change": "现有脚本、有限验证和显示一致性证据收在独立可选块，原证据不删。",
+          "oldAnchor": null,
+          "proposedAnchor": null,
+          "mapping": "new optional un-timed section; no automatic TOC/video chapter"
+        },
+        {
+          "heading": "小结 → 参考资料",
+          "anchor": null,
+          "change": "保留现总结与全部书目。",
+          "oldAnchor": null,
+          "proposedAnchor": null,
+          "mapping": "new optional un-timed section; no automatic TOC/video chapter"
+        }
+      ],
+      "sha256": "e508493067300b91df78688003ed7d9388cb9582d049653c85850612b3e37dab",
+      "sourceMetrics": {
+        "h2": [
+          "先看清要找什么 {#problem}",
+          "为什么能排除一半 {#halve}",
+          "找不到时怎样结束 {#missing}",
+          "写成完整 Python 程序 {#code}",
+          "小结",
+          "参考资料"
+        ],
+        "h3": [
+          "从逐格查找到利用有序信息",
+          "从7小于13，到整个左半段都不可能",
+          "为什么不会错过答案",
+          "两个容易写错的边界",
+          "时间和空间",
+          "边界与验证范围"
+        ],
+        "bodyCharsBeforeReferences": 4449,
+        "sourceQuotes": 1,
+        "figures": 1,
+        "fencedBlocks": 2,
+        "charsBeforeFirstFigure": 1765
+      },
+      "preserve": [
+        "同一有序输入和原下标身份",
+        "先推导再命名二分",
+        "成功与失败重新起局",
+        "闭区间不变式与最后一格",
+        "完整Python、复杂度模型和来源边界"
+      ],
+      "inferences": [
+        "问题动机和安全排除已成完整因果，值得保留；主要重构机会是关键图靠近首次解释，以及将制作/验收信息分层。",
+        "首段可从同一输入的具体查找目标切入，使正式题意与阅读承诺更紧密；这是编辑建议，未验证读者吸引效果。"
+      ]
+    },
+    {
+      "slug": "daily-temperatures",
+      "path": "episodes/leetcode/daily-temperatures/publication/article.mdx",
+      "type": "算法推导",
+      "observations": [
+        "开头明确定义未来第一个严格更暖日，随即给8天温度/答案和第3天35等到第7天36的例子，纠正温差与天数混淆。",
+        "核心推导很完整：逐日起点重复查找→改为保留待解决日期的下标→第5天待解决温度35≥31≥30→第6天32逐个解决末尾→遇35停止→此时才引入栈/单调栈名称。",
+        "完整8日轨迹、相等温度独立例子和为什么是第一个的证明均具备；现有Figure在完整轨迹之后，对应第7天而非推导中第6天。",
+        "完整程序前写solution.py/solution.json、固定字号和5秒停留；结尾长段列21844组穷举、3000组随机、动画事件与04镜区别。它们保护制作身份，但不是理解算法的连续步骤。",
+        "小结已将单调等待、下标差、相等保留与总线性动作次数收在一起。"
+      ],
+      "proposedOutline": [
+        {
+          "heading": "35度这天为什么要等4天",
+          "anchor": "problem",
+          "change": "可先用现有第3/7天局部问题吸引阅读，随后给题意、完整例和严格更暖条件。",
+          "oldAnchor": "problem",
+          "proposedAnchor": "problem",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "别重复向后找，把等待的人留下",
+          "anchor": "derive",
+          "change": "保留现四步推导与术语后置。35≥31≥30的局部状态值得配一幅另行核验的简明示意；现有第7天截图不能冒充第6天状态。",
+          "oldAnchor": "derive",
+          "proposedAnchor": "derive",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "从第一天走完，再检验相等边界",
+          "anchor": "walk",
+          "change": "保留完整表、原有第7天Figure和相等例，完整一般论证紧邻规则。",
+          "oldAnchor": "walk",
+          "proposedAnchor": "walk",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "完整程序和总工作量",
+          "anchor": "code",
+          "change": "先解释功能，保留完整程序和均摊成本模型；将制作显示/镜号/核验数量收进可选复现块。",
+          "oldAnchor": "code",
+          "proposedAnchor": "code",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "可选：验证与复现 → 小结 → 参考资料",
+          "anchor": null,
+          "change": "验证事实与限制继续可查，避免堆在读者刚从代码返回结论的位置。",
+          "oldAnchor": null,
+          "proposedAnchor": null,
+          "mapping": "new optional un-timed section; no automatic TOC/video chapter"
+        }
+      ],
+      "sha256": "078b8a76cb956e84acd08ff9058a27ba35ce13134dd87100011117d2a17cb43e",
+      "sourceMetrics": {
+        "h2": [
+          "先看题目要什么 {#problem}",
+          "从重复查找到保留等待 {#derive}",
+          "按天走完整过程 {#walk}",
+          "写回原位与复杂度 {#code}",
+          "小结",
+          "参考资料 {#references}"
+        ],
+        "h3": [
+          "先决定保存什么",
+          "观察还在等待的日期",
+          "新来的32能解决谁",
+          "这些操作恰好对应单调栈",
+          "相等为什么必须保留",
+          "为什么得到的是第一个"
+        ],
+        "bodyCharsBeforeReferences": 4657,
+        "sourceQuotes": 2,
+        "figures": 1,
+        "fencedBlocks": 2,
+        "charsBeforeFirstFigure": 2334
+      },
+      "preserve": [
+        "按原题目标推导，不从术语开讲",
+        "同一8天气温例和日期/下标区别",
+        "单调不升允许相等",
+        "相等输入[30,30,31]",
+        "第一个更暖日的正确性与完整程序"
+      ],
+      "inferences": [
+        "从需求推导栈而非先给术语是主线优点，应当保留。",
+        "第6天的局部推导具有读者需要同时追踪的状态，值得另备准确示意；现有第7天截图不能代替。",
+        "代码前后的显示/镜号/实验数量可以移到可选复现层，完整功能代码与正确性说明仍在主文。"
+      ]
+    },
+    {
+      "slug": "egg-drop",
+      "path": "episodes/puzzles/egg-drop/publication/article.mdx",
+      "type": "受资源约束的推理题",
+      "observations": [
+        "首节规则明确：F为0..100、碎蛋消耗、不碎复用、目标准确确定F；紧接50/25失败回应普通二分，解释仅剩一蛋为何不能跳层。",
+        "固定10层晚碎19次反例→14次预算→14/27/39逐次推导→F=31完整8步示例，主线已形成清楚因果。",
+        "Figure紧邻第二步27层若碎的预算，位置与图义一致。",
+        "在具体示例之后还有一般容量C(e,m)递推、为何首测9..14均可、全阈值长表、F端点和程序107规模交叉核验。层次虽分节，未在开头明确区别可行构造、最优性证明与有限程序核验三种角色。",
+        "末尾小结已经保留答案尚未确定的前提，并区分任一局可早停与最坏14次。"
+      ],
+      "proposedOutline": [
+        {
+          "heading": "规则与悬念：二分为什么会用光鸡蛋",
+          "anchor": "rules",
+          "change": "保留现内容；增加一句阅读地图：先做出14次构造，再证明13次不足，最后可选查看枚举核验。",
+          "oldAnchor": "rules",
+          "proposedAnchor": "rules",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "固定间隔为何会在晚碎时超支",
+          "anchor": "problem",
+          "change": "保留19次反例。",
+          "oldAnchor": "problem",
+          "proposedAnchor": "problem",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "给碎后的查找预留预算",
+          "anchor": "budget",
+          "change": "保留14/27/39逐步推导和现Figure；强调条件预算，不先塞容量公式。",
+          "oldAnchor": "budget",
+          "proposedAnchor": "budget",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "用F=31走完一次",
+          "anchor": "example",
+          "change": "保留8步表与候选范围身份。",
+          "oldAnchor": "example",
+          "proposedAnchor": "example",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "为什么14是最优最坏次数",
+          "anchor": "why-fourteen",
+          "change": "保持一般论证。可先给三角数容量直观，再将e,m完整递推与首测9..14作为深入层；不能只留下枚举数字来替代证明。",
+          "oldAnchor": "why-fourteen",
+          "proposedAnchor": "why-fourteen",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "可选：全阈值、端点与复现",
+          "anchor": "bounds",
+          "change": "保留全部长表与既有核验链接，明示这是核验构造/发现实现问题，不是证明所有自适应策略下界。",
+          "oldAnchor": "bounds",
+          "proposedAnchor": "bounds",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "小结 → 参考资料",
+          "anchor": null,
+          "change": "最后重新把两种资源结果、递减间隔与最坏预算连起来。",
+          "oldAnchor": null,
+          "proposedAnchor": null,
+          "mapping": "new optional un-timed section; no automatic TOC/video chapter"
+        }
+      ],
+      "sha256": "dd99c28a320b426ea73110eeb7907cd42ab08ee11fbea3451170d7669bcd25cb",
+      "sourceMetrics": {
+        "h2": [
+          "先看规则和目标 {#rules}",
+          "固定间隔的代价 {#problem}",
+          "给碎后留足次数 {#budget}",
+          "走完一局完整示例 {#example}",
+          "为什么13次不足，而14次可以 {#why-fourteen}",
+          "全阈值与端点怎样核验 {#bounds}",
+          "小结",
+          "参考资料"
+        ],
+        "h3": [
+          "为什么不能一直二分",
+          "为什么官方示例从9层开始"
+        ],
+        "bodyCharsBeforeReferences": 5009,
+        "sourceQuotes": 1,
+        "figures": 1,
+        "fencedBlocks": 4,
+        "charsBeforeFirstFigure": 1246
+      },
+      "preserve": [
+        "普通二分失败动机",
+        "F=0/100和两枚均碎仍可成功的端点条件",
+        "固定10层方案最坏19次",
+        "预算不变量与同一完整局",
+        "构造与最优性证明区分",
+        "官方首测9层与本期14层各自身份"
+      ],
+      "inferences": [
+        "全篇宜显式标记构造可行、证明最优、程序核验三层，让读者知道每节解决的不同问题。",
+        "容量递推和全阈值数据较长，可设置深入层入口；不宜删去一般下界，只靠有限枚举声称全体策略最优。"
+      ]
+    },
+    {
+      "slug": "monty-hall",
+      "path": "episodes/puzzles/monty-hall/publication/article.mdx",
+      "type": "条件信息的概率推理",
+      "observations": [
+        "首节从三门/奖品/开空门抛出该怎样选，再列5项完整规则、固定初选1的对称性和两固定策略；开局定义准确，但正式一局在第二节才出现。",
+        "一局换中不能证明总体→回到三个等权初始奖位→初选对/错与换输/赢一一对应，主解释结构较强。",
+        "Figure给三个初始奖位的总结果，当前放在chance节末；可紧邻三行分类表，不必让表/长分情景解释/结论后才有图。",
+        "两个长附录分别展开四条不等权开门路径与盲开变体，严密区分总体始终换门和观察具体门号后的后验；最终小结要在两附录之后才出现。",
+        "附录中程序路径数、18基础签、联合权重与条件权重保护证据范围；末尾参考区又有大量来源核验历史。"
+      ],
+      "proposedOutline": [
+        {
+          "heading": "游戏规则：一扇空门为什么没有让概率各半",
+          "anchor": "rules",
+          "change": "主阅读先凸显3个决定结论的主持人条件；完整规则保留，公平选择及固定初选的精细说明可明确指向后文，不能悄悄改动模型。",
+          "oldAnchor": "rules",
+          "proposedAnchor": "rules",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "完整一局，回到做决定之前",
+          "anchor": "game",
+          "change": "保留同一局疑问与一局不代表策略的提醒。",
+          "oldAnchor": "game",
+          "proposedAnchor": "game",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "列齐三个初始奖位",
+          "anchor": "cases",
+          "change": "保留等权分类，现Figure可前移到分类表附近。",
+          "oldAnchor": "cases",
+          "proposedAnchor": "cases",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "把初选错误的2/3转成换门获胜",
+          "anchor": "chance",
+          "change": "保留策略对应与概率/频率区别；结尾增加一条可跳读导航，说明核心答案至此已成立，下两节解决具体门号和规则改变。",
+          "oldAnchor": "chance",
+          "proposedAnchor": "chance",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "深入：观察到具体门号后怎样计算",
+          "anchor": "exact-probability",
+          "change": "保留公平开门前提、1/6与1/3路径权重、归一化及核验身份。",
+          "oldAnchor": "exact-probability",
+          "proposedAnchor": "exact-probability",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "变体：主持人盲开且恰好开空",
+          "anchor": "blind-host",
+          "change": "保持独立条件模型及1/2，不回填主规则。",
+          "oldAnchor": "blind-host",
+          "proposedAnchor": "blind-host",
+          "mapping": "reuse existing exact anchor"
+        },
+        {
+          "heading": "小结 → 参考资料",
+          "anchor": null,
+          "change": "沿现规则保持最终完整收束；可选细节仍放小结之前，主文有清楚跳读入口。",
+          "oldAnchor": null,
+          "proposedAnchor": null,
+          "mapping": "new optional un-timed section; no automatic TOC/video chapter"
+        }
+      ],
+      "sha256": "5476ec4c719640c90ebcee7bd91f46f2a25e0da08c5f06591d3d355f6656a5a8",
+      "sourceMetrics": {
+        "h2": [
+          "先看清三门规则 {#rules}",
+          "完整一局，留下疑问 {#game}",
+          "穷尽三个初始奖位 {#cases}",
+          "初选错，换门就赢 {#chance}",
+          "附录：四条开门路径的精确权重 {#exact-probability}",
+          "附录：随机盲开且恰好开空，是另一套规则 {#blind-host}",
+          "小结",
+          "片尾参考资料"
+        ],
+        "h3": [
+          "已经看到主持人开3号门，再怎样算"
+        ],
+        "bodyCharsBeforeReferences": 4656,
+        "sourceQuotes": 1,
+        "figures": 1,
+        "fencedBlocks": 3,
+        "charsBeforeFirstFigure": 1813
+      },
+      "preserve": [
+        "主持人知情、必开未选空门、每局允许换的核心前提",
+        "开局奖品固定与三等权初始位置",
+        "总体策略概率与具体开门后验不同",
+        "公平开门只在具体后验演算明示需要",
+        "盲开为另一模型，不能与知情规则混用",
+        "不把一局/三行情景当抽样实验"
+      ],
+      "inferences": [
+        "核心解释已有完整一局→穷尽初始情况→策略关系的因果，不宜为了引人入胜强行换成别的故事。",
+        "读者若只问总体为什么2/3，可以在chance后获得可跳读路线；特定门号后验与盲开变体仍保持独立可查。",
+        "规则的分层须保留决定结论的主持人前提，公平开门的额外假设在具体后验计算前明确出现，不能通过删规则制造简洁。"
+      ]
+    }
+  ],
+  "childAuditMetadata": {
+    "scope": "4 current MDX articles, full source read; no external research, no project edits",
+    "limits": "Observations are editorial source-structure review, not rendered first-screen measurement or reader experiments. Source character offsets include MDX markup and are not reading time/visible word counts. Proposed outlines are hypotheses for a later trial; no comprehension or engagement effect claimed.",
+    "crossSampleFindings": [
+      "现有算法/推理因果骨架已有价值，宜优化入口、全局定位与深入层级，不宜统一成同一章数。",
+      "必要条件应在相应论证前出现；制作身份和有限核验信息应可追溯，但可从主阅读路径分层。",
+      "一般正确性/最优性证明与有限程序核验是不同层次，重排时必须保留这一区别。",
+      "现有关键帧的对象与时刻限制位置，不可为了提前配图而把第7天图片说成第6天。"
+    ],
+    "implementationNotes": [
+      "本报告只建议publication派生稿，不改production冻结稿、既有证据、媒体或SourceQuote/Figure sourceId/seekTo的含义。",
+      "所有旧显式锚点复用；如改变阅读标题仍保留原ID。新增H2不能假定自动进入TOC，当前TOC取frontmatter chapters，可在正文增加显式阅读路线；不要为阅读附录虚造视频章节与时刻。",
+      "来源与一般证明依旧就近；有限验证与制作身份可分层可查，不被说成外部原文或读者实验。"
+    ]
+  }
+}

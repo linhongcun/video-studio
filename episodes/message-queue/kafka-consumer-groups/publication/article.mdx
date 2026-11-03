@@ -9,9 +9,11 @@ chapters:
 related: [message-queue, kafka-log-replay]
 ---
 
-## 先看问题与输入 {#problem}
-
 通知和积分都需要四条订单事件，通知服务内部又有三个实例。为什么有的实例只读一半，第三个一直空闲，积分服务却仍能独立读全？关键是**分区归属表怎样计算、安装，以及读取请求是否按这张表构造**。
+
+同一份日志可以服务不同消费组；每个组内部，再按本轮分区归属安排读取。下面先算通知组的两分区归属，跟到真实Fetch请求，再看积分组为何不受影响；[分配结果的核对范围](#group-checks)单独列在深入阅读中。
+
+## 先固定分区与成员这两项输入 {#problem}
 
 本例只有主题 `orders`，P0保存E01/订单7042与E03/7044，P1保存E02/7043与E04/7045；各分区位置分别是0、1。通知组 `notify` 有三名成员，积分组 `points` 只有S1，两组从仍保留的开头位置0读取。示例数字不是性能测量。
 
@@ -24,6 +26,8 @@ N1/N2/N3是本轮成员编号 `member-01`、`member-02`、`member-03` 的教学�
 ## 分区归属表怎样算出 {#assignment}
 
 在经典组中，协调者按group.id聚合同组成员。成功入组后，本轮组内leader取得成员订阅信息，**由这个消费者客户端调用所选分配器计算**。协调者在Broker侧协调组状态，但不会按消息逐条轮流决定推给谁。
+
+### 先排序，再计算每人的范围
 
 `ConsumerCoordinator.onLeaderElected`把本组订阅与分区元数据交给分配器。Range先将分区按编号排序，将无静态身份的成员按member.id排序，并为所有成员创建空归属列表。然后逐主题计算：
 
@@ -46,7 +50,9 @@ N1/N2/N3是本轮成员编号 `member-01`、`member-02`、`member-03` 的教学�
 
 <Figure src="/video-studio/episodes/kafka-consumer-groups/article/01-assignment-table.jpg" alt="两次分配后，P0归N1、P1归N2；待分配集合为空，N3列表保持空。" caption="教学示例：两次分配后，P0归N1、P1归N2；待分配集合为空，N3列表保持空。" seekTo={86.066666667} chapter="assignment" />
 
-算完的整张表经SyncGroup交回协调者。成功处理后，协调者为每名成员存下其assignment，并在各成员响应中带回对应列表。
+### 把算出的归属送回每位成员
+
+分配还没有结束：算出的列表必须进入各消费者，才能约束之后的请求。整张表经SyncGroup交回协调者，成功处理后，协调者为每名成员存下其assignment，并在各成员响应中带回对应列表。
 
 <Figure src="/video-studio/episodes/kafka-consumer-groups/article/02-member-responses.jpg" alt="协调者为N1、N2、N3分别带回各自的分区列表。" caption="教学示例：协调者为N1、N2、N3分别带回各自的分区列表。" seekTo={97.500000000} chapter="assignment" />
 
@@ -76,11 +82,13 @@ Broker按收到的分区请求返回数据。这里解释的是正常客户端�
 
 两组有各自的读取/恢复进度。两组都从示例中仍保留的开头读取时，都能取得同样四条事件。通知组读过或提交进度不会删除日志；历史数据能否取到，仍取决于保留范围与具体起点，新组并非无条件取得全部历史。
 
-本轮保留了真实源码执行与有限教学模型的独立记录：算法调用实验检验官方Range实现的具体分配结果；图中步骤按相同输入更新候选和归属表。两者不冒充完整Kafka集群、JoinGroup/SyncGroup/Fetch端到端运行。实际执行范围和命令在本修订研究记录中分别声明。
-
 <Figure src="/video-studio/episodes/kafka-consumer-groups/article/04-two-groups.jpg" alt="通知组按成员分工，积分组独立读到四条事件；同一份日志记录仍保留。" caption="教学示例：通知组按成员分工，积分组独立读到四条事件；同一份日志记录仍保留。" seekTo={147.733333333} chapter="independent" />
 
 <span id="boundary"></span>
+
+## 深入阅读：分配结果怎样核对 {#group-checks}
+
+需要复现分配算法时，再区分源码执行与图中教学步骤。本轮保留了真实源码执行与有限教学模型的独立记录：算法调用实验检验官方Range实现的具体分配结果；图中步骤按相同输入更新候选和归属表。两者不冒充完整Kafka集群、JoinGroup/SyncGroup/Fetch端到端运行。实际执行范围和命令在本修订研究记录中分别声明。
 
 ## 小结
 

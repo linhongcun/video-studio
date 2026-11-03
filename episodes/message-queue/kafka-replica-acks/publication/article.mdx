@@ -11,7 +11,9 @@ related: []
 
 网站发送订单7042的E01，等Kafka返回成功。这个成功是只说明主副本已经追加，还是说明跟随副本也已有同一条记录？要沿着同一条E01，看清本地日志、Leader获知的复制进度，以及成功响应的返回条件。
 
-本文固定Kafka/Java4.4.0、commit `1156b2752aaa28eafc0b4c4d387e63356793268d`。P0只有三份数据副本，min.insync.replicas=2；ELR feature level0、非同步选主关闭。单producer、每分支单次单条发送，幂等显式关闭、retries=0、inflight=1。分支各自从相同空日志开始，ISR稳定、无待加入或额外近期追齐候选；复制暂停和单节点故障是选定调度，不是默认延迟或发生概率。
+核心区别在于本次确认要等什么：`acks=1`可在主副本追加后回复，`acks=all`还要核对当前同步集合的复制进度和数量条件。下面先比较这两个路径，再解释为什么最小数量二不等于固定只等两份；[错误阶段与复现条件](#replica-details)单独展开。
+
+本文固定Kafka/Java4.4.0、commit `1156b2752aaa28eafc0b4c4d387e63356793268d`。P0只有三份数据副本，min.insync.replicas=2；ELR feature level0、非同步选主关闭。每个分支从相同空日志开始，ISR稳定、无待加入或额外近期追齐候选。复制暂停和单节点故障是选定调度，不是默认延迟或发生概率；完整发送配置见深入阅读。
 
 {/* ACTUAL VOICE：依据最终接受5460帧声轨定四幅图整数帧；seekTo=frame/30。此处为编码前图位计划，实际JPEG尚待成片抽取与验收。 */}
 
@@ -35,6 +37,8 @@ ELR和非同步选主关闭时，`PartitionChangeBuilder.isValidNewLeader`将资
 
 把场景重置为同一E01、相同空日志，改为`acks=all`。正在跟进本分区的副本名单称ISR，包含Leader；它不是“全部集群机器”，也不表示名单里每份已经拥有刚到来的新记录。
 
+### 先通过数量门槛，再建立等待目标
+
 系统先检查当前名单数量与最小门槛。`Partition.appendRecordsToLeader`在调用`leaderLog.appendAsLeader`之前执行：若all请求的ISR数量小于有效minISR，直接拒绝。此时三份大于等于二，可以追加。这个准入判断不等于“等够两个副本就完成”；配置文档也明确举出RF3/ISR3时，minISR即使小于3，all仍需当前三份跟上。
 
 <SourceQuote sourceId="A3" supports="原文明确RF3且ISR3时all需要当前三份跟上，minISR可以小于三；它同时区分追加前后副本不足异常，并提醒ELR开启会改变语义。" />
@@ -42,6 +46,8 @@ ELR和非同步选主关闭时，`PartitionChangeBuilder.isValidNewLeader`将资
 E01仍写在offset0。`ReplicaManager`为这次请求保存的所需位置是`lastOffset+1`，所以目标是1。HW采用不包含末端的边界：HW为0尚未涵盖E01@0，HW为1才涵盖offset小于1的这条记录。
 
 <SourceQuote sourceId="R2" supports="所需位置被设为本次追加的lastOffset加一；本例最后offset为零，所以完成目标为一。" />
+
+### 副本写好之后，还要让Leader获知进度
 
 先让B2从自己的末尾0发起Fetch。Leader返回E01的副本，B2在同一offset0追加，自己的末尾变成1；B1原日志仍然保留。Follower处理响应时实际调用追加到自己的日志，不是把Leader日志中的记录移走。
 
@@ -54,6 +60,8 @@ E01仍写在offset0。`ReplicaManager`为这次请求保存的所需位置是`la
 现在Leader已知的位置是[B1=1,B2=1,B3=0]。在本例稳定集合、无额外追齐候选的条件下，共同进度取最小值0，HW不能跨过E01。minISR=2已经通过准入，但第三份仍在当前ISR，不能把all误解为只等两份。
 
 <Figure src="/video-studio/episodes/kafka-replica-acks/article/02-third-still-pending.jpg" alt="B1/B2实际拥有E01，Leader已知末尾为1、1、0，ISR仍三份，HW0，网站结果仍等待。" caption="已拥有两份与当前三份集合的共同进度到达目标，是两个不同条件。" chapter="replication" seekTo={109.366666667} />
+
+### 共同进度到达目标，才进入成功回应
 
 再让B3经历Fetch0、追加E01@0、下一次Fetch1报告。Leader获知三份都到1，才可推进HW到1。`checkEnoughReplicasReachOffset`检查HW是否达到所需位置，并在达到后检查minISR；本例数量仍够，完成条件成立。
 
@@ -71,13 +79,11 @@ E01仍写在offset0。`ReplicaManager`为这次请求保存的所需位置是`la
 
 再次从空日志开始，先把ISR稳定为[B1,B2]，B3不参与且不满足额外近期追齐候选。两份达到最小门槛，E01追加后还要等当前这两份都跟到1、HW到1，才能成功。它不等不在当前集合的第三份，但也不是只要“数量等于二”就忽略具体复制进度。
 
-若稳定名单只剩[B1]，all请求在前置判断看到`1<2`，就在本次追加前被拒绝。第12镜限定这一明确分支。本轮真实ISR1测试在发送前后各副本物理LEO均为0，官方日志快照无记录，返回NotEnoughReplicas；这项实际结果独立于模型空数组。
+若稳定名单只剩[B1]，all请求在前置判断看到`1<2`，就在本次追加前被拒绝。这是下面图中限定的明确分支；它与追加后再出现错误需要分别判断。
 
 <Figure src="/video-studio/episodes/kafka-replica-acks/article/04-before-append-rejected.jpg" alt="从相同空日志重置后，稳定ISR只有B1，1小于minISR2，本次all在追加前被拒绝，三日志仍为空。" caption="这是本次前置准入失败的结果，不能推广为所有发送失败均未写入。" chapter="min-isr" seekTo={165.466666667} />
 
-更一般的错误必须看阶段：本版`Partition.checkEnoughReplicasReachOffset`在已经追加、HW达到所需位置后，如果集合已不足minISR，可返回`NOT_ENOUGH_REPLICAS_AFTER_APPEND`。发送期限耗尽或响应未被处理也不能单凭错误推断没有写入。本片把ISR过渡留在这里，不用新增一套协议动画掩盖当前稳定路径。
-
-本版HW计算还考虑maximalISR和近期追齐且满足加入资格的副本；因此“当前ISR位置的最小值”只是本例的稳定条件简化，不是完整通用算法。4.4在underMinISR时直接不推进HW；acks1绕过all准入并不意味着只剩主副本也自动把HW推到本地末尾。
+数量门槛和复制完成是两项条件；错误也要结合它发生在追加前还是追加后理解。下面的成功边界先说明确认没有覆盖什么，具体错误与HW实现的补充放在深入阅读。
 
 ## 成功确认没有替代哪些工作 {#boundary}
 
@@ -86,6 +92,14 @@ E01仍写在offset0。`ReplicaManager`为这次请求保存的所需位置是`la
 <SourceQuote sourceId="A2" supports="本地追加后的flush受未刷盘消息数量与flushInterval条件控制；这条独立判断不能由acksall本身替代。" />
 
 消费者取到记录和订单通知成功，又是后续层次。这些教学分支没有启动通知接口，也没有把Producer成功标成业务完成。确认方式、当前同步名单与HW要一起看；最小数量二不是固定只等两份，更不是业务处理人数或控制器投票数量。
+
+## 深入阅读：错误阶段与复现条件 {#replica-details}
+
+本版`Partition.checkEnoughReplicasReachOffset`在已经追加、HW达到所需位置后，如果集合已不足minISR，可返回`NOT_ENOUGH_REPLICAS_AFTER_APPEND`。发送期限耗尽或响应未被处理也不能单凭错误推断没有写入。
+
+本版HW计算还考虑maximalISR和近期追齐且满足加入资格的副本；因此“当前ISR位置的最小值”只是本例的稳定条件简化，不是完整通用算法。4.4在underMinISR时直接不推进HW；acks1绕过all准入并不意味着只剩主副本也自动把HW推到本地末尾。
+
+本例发送配置为单producer、每分支单次单条发送，幂等显式关闭、retries=0、inflight=1。独立的真实ISR1测试在发送前后各副本物理LEO均为0，官方日志快照无记录，返回NotEnoughReplicas；这项实际结果独立于模型空数组。更完整的三节点观察与验证边界保留在文末来源区。
 
 ## 小结
 

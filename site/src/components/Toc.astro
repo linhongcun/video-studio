@@ -1,10 +1,18 @@
 ---
 const {headings = []} = Astro.props;
+const sections = [];
+for (const heading of headings) {
+  if (heading.depth === 3 && sections.length) sections.at(-1).children.push(heading);
+  else sections.push({...heading, children: []});
+}
 ---
-{headings.length > 0 && <details class="toc" open>
+{headings.length > 0 && <details class="toc">
   <summary><span>本文目录</span><span class="count">{headings.length} 节 <span class="chevron" aria-hidden="true">⌄</span></span></summary>
   <nav aria-label="图文目录">
-    <ol>{headings.map((h) => <li><a href={`#${h.id}`} data-toc={h.id}>{h.title}</a></li>)}</ol>
+    <ol>{sections.map((h) => <li>
+      <a href={`#${h.id}`} data-toc={h.id}>{h.title}</a>
+      {h.children.length > 0 && <ol class="subsections">{h.children.map((child) => <li><a href={`#${child.id}`} data-toc={child.id}>{child.title}</a></li>)}</ol>}
+    </li>)}</ol>
   </nav>
 </details>}
 <script>
@@ -16,16 +24,31 @@ const {headings = []} = Astro.props;
     wide.addEventListener('change', setLayout);
   }
   const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc]')];
-  if (links.length && 'IntersectionObserver' in window) {
-    const headings = [...new Set(links.map((link) => document.getElementById(link.dataset.toc!)).filter(Boolean))];
-    const io = new IntersectionObserver((entries) => entries.forEach((entry) => {
-      if (!entry.isIntersecting) return;
+  if (links.length) {
+    const headings = [...new Set(links.map((link) => document.getElementById(link.dataset.toc!)).filter((heading): heading is HTMLElement => !!heading))];
+    let frame = 0;
+    const updateCurrent = () => {
+      frame = 0;
+      const padding = parseFloat(getComputedStyle(document.documentElement).scrollPaddingTop) || 0;
+      let current: HTMLElement | undefined;
+      for (const heading of headings) {
+        // Native fragment navigation uses both scroll padding and scroll margin.
+        // Track that reading edge, including the optional sticky video height.
+        const margin = parseFloat(getComputedStyle(heading).scrollMarginTop) || 0;
+        if (heading.getBoundingClientRect().top > padding + margin + 2) break;
+        current = heading;
+      }
       links.forEach((link) => {
-        if (link.dataset.toc === entry.target.id) link.setAttribute('aria-current', 'location');
+        if (link.dataset.toc === current?.id) link.setAttribute('aria-current', 'location');
         else link.removeAttribute('aria-current');
       });
-    }), {rootMargin: '-20% 0px -65% 0px'});
-    headings.forEach((heading) => io.observe(heading!));
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(updateCurrent); };
+    window.addEventListener('scroll', schedule, {passive: true});
+    window.addEventListener('resize', schedule);
+    window.addEventListener('hashchange', schedule);
+    window.addEventListener('load', schedule, {once: true});
+    schedule();
   }
 </script>
 <style>
@@ -40,5 +63,7 @@ ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--c-border)}
 a{display:block;padding:8px 12px;color:var(--c-text-2);text-decoration:none;border-left:2px solid transparent;margin-left:-1px;line-height:1.6}
 a:hover{color:var(--c-text)}
 a[aria-current]{color:var(--c-primary);border-left-color:var(--c-primary);font-weight:600}
+.subsections{border-left:0}
+.subsections a{padding-left:24px;font-size:var(--fs-xs)}
 @media (min-width:1200px){.toc{position:sticky;top:calc(var(--header-h) + 24px);padding:var(--sp-4);max-height:calc(100vh - var(--header-h) - 48px);overflow:auto}.count{display:none}}
 </style>

@@ -9,9 +9,11 @@ chapters:
 related: []
 ---
 
-## 为什么主动包一层 {#why}
-
 商家打开十七号订单的详情，点击“发送发货提醒”。提醒发给`buyer17@shop.example`，正文是“订单17已发货”；页面得到受理编号Q17，显示“已受理·等待回执”。这些都是教学示例，不发送真实消息。
+
+业务只需要提交提醒并取得受理结果，供应方却有自己的字段和回执格式。本文用同一次提交和一次后来的格式升级，解释怎样把转换留在接入边界；Java实现与相邻模式可在[深入阅读](#adapter-details)核对。
+
+## 为什么主动包一层 {#why}
 
 接入外部服务时，我们可以主动先做两件事：
 
@@ -127,17 +129,23 @@ related: []
 
 我们在V2适配器里调整请求和返回转换，再在外部创建、接线处选用V2服务。业务方继续按自己的通知约定提交，不需要自己去拆新的回执包装。
 
-这个变化有实际程序支撑：原[AdapterDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/AdapterDemo.java)及原验证器字节保持；新[AdapterUpgradeDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/AdapterUpgradeDemo.java)复用原来的`Notifier`、`Submission`与`ShipmentReminder`，新增V2接口、适配器与接线。V1/V2各自独立运行验证，业务调用均得到`ACCEPTED/Q17`；两个版本的测试各自独立，不能理解为商家又点了一次发送。[^demo]
+这个变化有实际程序支撑：原[AdapterDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/adapter-pattern/production/demo-java/AdapterDemo.java)及原验证器字节保持；新[AdapterUpgradeDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/adapter-pattern/production/demo-java/AdapterUpgradeDemo.java)复用原来的`Notifier`、`Submission`与`ShipmentReminder`，新增V2接口、适配器与接线。V1/V2各自独立运行验证，业务调用均得到`ACCEPTED/Q17`；两个版本的测试各自独立，不能理解为商家又点了一次发送。[^demo]
 
 这里隔离的是**业务需要与结果含义不变时的外部格式变化**。新增适配器、外部依赖、创建接线和测试仍要维护。如果新服务不再满足业务需要，或者业务目标本身变了，上层也可能需要调整；不能把一次格式升级的局部修改，扩大成所有升级都零影响。
 
-### 防腐作用与适配器的区别
+### 扩展：结果与异常也属于约定
 
-这层有保护业务边界的作用：业务保持自己的规则和用法，外部模型、字段和状态表达留在接入处转换。Microsoft的防腐层说明同样强调，业务一侧保持自身的数据模型，外部调用遵守外部模型，并把保护领域模型作为核心目的。[^acl]
+目标通知约定只承诺提交并报告受理情况，不承诺送达。V1的`QUEUED`、V2的`ENQUEUED`在本例都只映射为业务`ACCEPTED`，保留同一编号，不能直接改成`DELIVERED`。RFC9110的202也区分接受处理与完成；这里用它核对边界，没有声称教学SDK实现HTTP202。[^http202]
 
-但**适配器不等于完整防腐层**。适配器是一种把已有接口转换成目标约定的设计关系；防腐层是保护业务模型的架构目的，可能包含适配器、外观或更完整的语义转换。本例主要演示通知接口的技术约定与格式隔离，没有展示一整套生产领域模型的语义治理，也没有把业务规则搬到适配器里。
+服务明确拒绝时，本例映射为拒绝；技术异常、超时或未知/无效回执用`SendFailure`表示未能确认结果，并保留原异常原因。服务可能已经受理，回包却丢失，因此不能将未知硬当作确定拒绝。本例不自动重试，也不自带去重、撤销或可靠送达能力。新旧示例都验证这些边界，具体行为以接口约定和完整代码为准。[^demo]
 
-**有一层包装，也不自动等于适配器**。还要看它是否将外部用法转换成目标使用方需要的约定。OpenJDK也存在保持原有InputStream约定的包装；这说明“持有另一个对象并委托”本身不足以判定模式。[^wrapper]
+### 检查：换个状态名可以承诺已送达吗
+
+服务把受理状态由`QUEUED`改叫`ENQUEUED`，适配器能否直接返回`DELIVERED`？不能。两种原回执都只表示受理，转换仍应保留这一边界；名字能转换，服务尚未提供的结果不能凭包装补出来。
+
+## 深入阅读：Java实现与相邻模式 {#adapter-details}
+
+先前的请求、返回和升级已经闭合了主线。下面先对应具体实现，再区分适配器与保护业务模型的更大架构边界。
 
 ### Java关键节选与完整示例 {#java}
 
@@ -161,13 +169,15 @@ AdapterDemo.Notifier v2 = new NotificationAdapterV2(new FakeVendorSdkV2());
 return new AdapterDemo.ShipmentReminder(notifier).send("buyer17@shop.example");
 ```
 
-完整升级源[AdapterUpgradeDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/AdapterUpgradeDemo.java)需要与原[AdapterDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/AdapterDemo.java)共同编译，以复用原业务约定和使用者。可读[VerifyAdapterUpgrade.java](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/VerifyAdapterUpgrade.java)、[统一运行入口](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/verify.py)和[实际验证报告](https://github.com/linhongcun/video-studio/blob/main/episodes-codex/adapter-pattern/demo-java/verified-results.json)。报告记录OpenJDK21、源SHA、卡片逐行映射及20组行为验证，原V1的12组与新增升级的8组分开列出。[^demo]
+完整升级源[AdapterUpgradeDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/adapter-pattern/production/demo-java/AdapterUpgradeDemo.java)需要与原[AdapterDemo.java](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/adapter-pattern/production/demo-java/AdapterDemo.java)共同编译，以复用原业务约定和使用者。可读[VerifyAdapterUpgrade.java](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/adapter-pattern/production/demo-java/VerifyAdapterUpgrade.java)、[统一运行入口](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/adapter-pattern/production/demo-java/verify.py)和[实际验证报告](https://github.com/linhongcun/video-studio/blob/main/episodes/design-patterns/adapter-pattern/production/demo-java/verified-results.json)。报告记录OpenJDK21、源SHA、卡片逐行映射及20组行为验证，原V1的12组与新增升级的8组分开列出。[^demo]
 
-### 扩展：结果与异常也属于约定
+### 防腐作用与适配器的区别
 
-目标通知约定只承诺提交并报告受理情况，不承诺送达。V1的`QUEUED`、V2的`ENQUEUED`在本例都只映射为业务`ACCEPTED`，保留同一编号，不能直接改成`DELIVERED`。RFC9110的202也区分接受处理与完成；这里用它核对边界，没有声称教学SDK实现HTTP202。[^http202]
+这层有保护业务边界的作用：业务保持自己的规则和用法，外部模型、字段和状态表达留在接入处转换。Microsoft的防腐层说明同样强调，业务一侧保持自身的数据模型，外部调用遵守外部模型，并把保护领域模型作为核心目的。[^acl]
 
-服务明确拒绝时，本例映射为拒绝；技术异常、超时或未知/无效回执用`SendFailure`表示未能确认结果，并保留原异常原因。服务可能已经受理，回包却丢失，因此不能将未知硬当作确定拒绝。本例不自动重试，也不自带去重、撤销或可靠送达能力。新旧示例都验证这些边界，具体行为以接口约定和完整代码为准。[^demo]
+但**适配器不等于完整防腐层**。适配器是一种把已有接口转换成目标约定的设计关系；防腐层是保护业务模型的架构目的，可能包含适配器、外观或更完整的语义转换。本例主要演示通知接口的技术约定与格式隔离，没有展示一整套生产领域模型的语义治理，也没有把业务规则搬到适配器里。
+
+**有一层包装，也不自动等于适配器**。还要看它是否将外部用法转换成目标使用方需要的约定。OpenJDK也存在保持原有InputStream约定的包装；这说明“持有另一个对象并委托”本身不足以判定模式。[^wrapper]
 
 ### 资料与阅读范围
 
@@ -184,7 +194,7 @@ return new AdapterDemo.ShipmentReminder(notifier).send("buyer17@shop.example");
 [^acl]: [Microsoft官方Anti-Corruption Layer文档源](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/anti-corruption-layer.md)，文档标日期2026-05-28，本次固定2026-10-24仓库快照。实际读完整106行，采用业务/外部两侧模型与保护领域模型的目的，保留额外维护和语义适用限制；不是宣称本例实现完整ACL。
 [^wrapper]: [OpenJDK21 FilterInputStream](https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/io/FilterInputStream.java#L28)，实际读28–75行。官方说明它包装另一输入流，目标仍是InputStream；不凭这个文件给所有包装下GoF分类，只用来说明包装结构本身不是充分判断依据。
 [^http202]: [HTTPwg官方RFC9110 XML，202 Accepted](https://github.com/httpwg/http-core/blob/bde37f634681bd5462568b73aa722af9c9a3ef5e/rfc9110.xml#L8578)，标准日期2022-06，读取快照2025-11-14。接受处理不等于完成，不证明教学SDK使用HTTP。
-[^demo]: 本项目[完整Java示例与实际20组验证](https://github.com/linhongcun/video-studio/tree/main/episodes-codex/adapter-pattern/demo-java)。所有服务、地址、消息和Q17为教学模拟，无真实外发；执行记录证明本例接口与变化范围，不是用户观看或学习效果结论。
+[^demo]: 本项目[完整Java示例与实际20组验证](https://github.com/linhongcun/video-studio/tree/main/episodes/design-patterns/adapter-pattern/production/demo-java)。所有服务、地址、消息和Q17为教学模拟，无真实外发；执行记录证明本例接口与变化范围，不是用户观看或学习效果结论。
 
 ## 片尾参考资料
 

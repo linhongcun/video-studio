@@ -2,6 +2,7 @@ import {defineConfig} from 'astro/config';
 import mdx from '@astrojs/mdx';
 import sitemap from '@astrojs/sitemap';
 import {fileURLToPath} from 'node:url';
+import {remarkHeadingId, rehypeArticleHeadings} from './src/lib/article-headings.mjs';
 
 // 编剧稿使用 `## 标题 {#id}` 写法；MDX 会把 {…} 当表达式解析，
 // 这里在编译前把它转成转义文本，再由 remark 插件变成标题 id，不改动 article.mdx 原文。
@@ -13,22 +14,6 @@ const headingIdPre = () => ({
     return code.replace(/^(#{1,6} .*?)\s*\{#([\w-]+)\}[ \t]*$/gm, '$1 \\{#$2\\}');
   },
 });
-function remarkHeadingId() {
-  return (tree) => {
-    const walk = (n) => {
-      if (n.type === 'heading') {
-        const last = n.children[n.children.length - 1];
-        const m = last && last.type === 'text' && last.value.match(/\s*\{#([\w-]+)\}\s*$/);
-        if (m) {
-          last.value = last.value.slice(0, m.index);
-          n.data = {...(n.data || {}), hProperties: {...(n.data?.hProperties || {}), id: m[1]}};
-        }
-      }
-      (n.children || []).forEach(walk);
-    };
-    walk(tree);
-  };
-}
 
 // Raw MDX SVG is rendered as native markup. Normalize React-style property
 // names on SVG JSX nodes so browsers apply the intended text and strokes.
@@ -104,7 +89,7 @@ export default defineConfig({
     '/tags/全局唯一ID/': '/video-studio/tags/分布式ID/',
     '/series/cache/': '/video-studio/series/redis/',
   },
-  integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick|\/(?:learn|series|all)\/$/.test(p)}), mdx({remarkPlugins: [remarkHeadingId, remarkSvgAttributes], rehypePlugins: [rehypeReaderHeadings, rehypeSummary], syntaxHighlight: false})],
+  integrations: [sitemap({filter: (p) => !/\/videos\/|http-request-quick|\/(?:learn|series|all)\/$/.test(p)}), mdx({remarkPlugins: [remarkHeadingId, remarkSvgAttributes], rehypePlugins: [rehypeReaderHeadings, rehypeSummary, rehypeArticleHeadings], syntaxHighlight: false})],
   vite: {
     plugins: [headingIdPre()],
     server: {fs: {allow: [fileURLToPath(new URL('..', import.meta.url))]}},
