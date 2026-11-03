@@ -123,6 +123,12 @@ class Solution:
 
 原题算法仍使用唯一完整源，以下既有验证保持适用：独立的二重循环oracle核对全部输出，包含三个官方样例、相等和递减边界、21844组小范围穷举、3000组确定随机与两组十万长度输入。算法动画中的compare/pop/resolve/push/finish状态来自对上述函数的真实执行追踪。04的保存规则示意只说明原日期如何保留，与正式算法trace分开，不运行第二份解题器，也不计算等待天数。这些检查支持相应范围内的源数据一致性，不等于学习效果实验。
 
+## 小结
+
+题目要找的是未来第一个更暖日，而不是最高温或温差。按日期向前扫描，把尚未得到答案的下标留下；等待温度从栈底到栈顶不升，所以新一天能从栈顶连续解决较凉的旧日子，连栈顶都不能解决时便可以停止。
+
+旧日期一遇到严格更暖的新日期，就写回两者的下标差；相等温度继续等待，扫描结束仍未解决的位置保持0。每个日期只入栈一次、至多出栈一次，正是这份有序的等待记录，省掉了逐日起点反复向后查找的工作。
+
 [^problem]: [LeetCode 739英文题面](https://leetcode.com/problems/daily-temperatures/description/)与[力扣739中文题面](https://leetcode.cn/problems/daily-temperatures/description/)，2026-10-25通过web工具实际读取。本文的方法动机、证明和自选例子为本期推导；没有将未读取的官方题解列作方法来源。
 
 [^stack]: [Python官方教程5.1.1：Using Lists as Stacks](https://docs.python.org/3/tutorial/datastructures.html#using-lists-as-stacks)，2026-10-25实际读取。它支持后进先出与append/pop末尾操作；本题选择温度不升及其正确性，由题目目标与本文推导说明。

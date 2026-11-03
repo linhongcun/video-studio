@@ -55,6 +55,12 @@ Seata公开Fence实现把控制状态与业务操作纳入本地事务，是处�
 
 如果还不清楚独立提交边界，可以先看[分布式事务入门](../distributed-tx-intro/)；接着看[业务已经提交后怎样补偿](../tx-saga/)，了解另一种问题范围。
 
+## 小结
+
+TCC把资源先放进“属于本单、尚待决定”的持久预留状态，再按共同结果选择确认或释放。本例先从可用4件中预留1件；确认只把这件转为售出，取消只把这件放回可用，两种结局互斥。
+
+预留能够成为后续承诺的基础，是因为其他写入也遵守资源归属，确认、取消及其重复请求都受持久状态约束。能否把这些业务动作和恢复规则设计完整，才是采用TCC的关键；仅有三个接口名称并不足以保证正确。
+
 [^user]: [Apache Seata：TCC用户文档](https://seata.apache.org/docs/user/mode/tcc/)，Overall Mechanism与Basic Usage，访问2026-10-24。
 [^dev]: [Apache Seata：TCC开发文档](https://seata.apache.org/docs/dev/mode/tcc-mode/)，自定义分支行为，访问2026-10-24。
 [^fence]: [Apache Seata：TCC Fence](https://seata.apache.org/blog/seata-tcc-fence/)，2022-06-25，持久预留、幂等、空回滚、悬挂与本地事务状态，访问2026-10-24。

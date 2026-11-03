@@ -37,6 +37,12 @@ chapters:
 
 额度控制的是进入速度，并不直接限制同时正在处理的请求数；请求耗时变长时，仍可能积压。片中的两个后台位置只帮助追踪甲乙，并非把令牌桶误当并发上限。
 
+## 小结
+
+拒绝式令牌桶先检查并扣减额度，有额度才放行，缺额就拒绝；时间到达时按规则补充额度。重试是一份新的请求，还要重新竞争可用额度，因此等待后也可能再次失败。
+
+额度控制进入后台的速度，请求被放行后仍须通过库存等业务检查。判断一次限流设计是否合适，要一起看限制范围、补充规则、请求耗时和重试方式；放行资格、处理完成和最终拿到票是不同阶段。
+
 [^envoy]: Envoy，[Local rate limit](https://www.envoyproxy.io/docs/envoy/latest/configuration/http/http_filters/local_rate_limit_filter)，访问于2026-10-24。
 [^status]: MDN，[429 Too Many Requests](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429)，访问于2026-10-24。
 [^retry]: MDN，[Retry-After](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Retry-After)，访问于2026-10-24。
