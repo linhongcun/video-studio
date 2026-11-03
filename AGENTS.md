@@ -8,7 +8,7 @@
 
 经验与反馈记录使用总结性语言：结合反馈和实际制作过程，提炼有效做法、问题原因、改进措施及验证范围，保持简洁清晰。不摘录用户原话或复制对话；提交、issue和PR中的反馈说明也遵守此约定。
 
-本仓没有 `share/RULES.md`。2026-10-16 那份团队规范里的冲突条已经写进 `docs/RULES.md` 的废止节。旧工程和旧站规划已清理，不要从 Git 历史恢复「比喻优先」和「发布含快手」。
+本仓没有 `share/RULES.md`。2026-10-16 那份团队规范里的冲突条已经写进 `docs/RULES.md` 的废止节。旧工程和旧站规划已清理，不要从 Git 历史恢复「比喻优先」和 2026-10-16 的「只发抖音、B站、快手，小红书暂停」。快手是否默认发布以现行 [docs/RULES.md](docs/RULES.md) 与 [docs/publish.md](docs/publish.md) 为准。
 
 2026-10-25用户进一步强调：参考资料附录必须从新片制作流程中默认生成，避免上线后返工补齐。开新期按[新期模板](episodes/_template/README.md)准备 `references.json`，调研、脚本、分镜、冻结和渲染同步接入；正式编码前检查来源清单，发布前检查实际附录。存量暂缓仅限已登记、视频SHA仍为基线字节且尚未接入附录的旧片；旧slug后续重制或换片也必须带齐，不得扩大豁免名单。
 
@@ -56,7 +56,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 | 编剧、分镜 | 宫崎（Hayao Miyazaki） | 调研输入、`references.json`、`script.md`、`article.mdx`、`pronunciation.md`、`storyboard.json`、`covers.json` |
 | 制作 | Knoll（John Knoll） | 配音、Remotion、渲染、封面、站点 PR、Release、deploy |
 | 质检 | Deming | 冻结后的预检，以及成片审 |
-| 运营 | Tim Cook | 抖音（头条同步）、B站、视频号发布；平台链接私信 Knoll（站点维护者）和 Nolan |
+| 运营 | Tim Cook | 抖音（头条同步）、B站、视频号、快手发布；平台链接私信 Knoll（站点维护者）和 Nolan。小红书默认不发 |
 | 村长 | — | 提出反馈；另行决定平台发布等持续授权范围外事项 |
 
 脚本和分镜在团队内定稿。配音听辨由制作和复核人员处理，实际未完成的检查如实记录，不找村长代做质量检查。GitHub 站点按持续授权发布；确需用户决定范围外事项时，一次只问一件事，并附上成片和站点 PR。
@@ -111,7 +111,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 - 比喻、无关实物设备，以及给机制图套无关应用外壳。题目本身的楼梯等场景应直接参与动作和推导；可以按用户指导用对应功能的交互界面建立使用场景，具体边界见 `docs/RULES.md` 画面节。
 - 把讲解表、图、流程图塞进浏览器壳。浏览器壳只给真网页、地址栏和 DevTools。
 - 大面积纯白页身。页身色用 `episodes/_shared/theme/pageTheme.ts` 的 `pageBg` / `pageInk`。
-- 新发快手（[STATUS](docs/RULES.md) 中逐次明确授权除外）或 X，或把平台链接发到群里。
+- 未获村长本批授权就向抖音、B站、视频号、快手上传；默认发小红书或发 X；或把平台链接发到群里。已获本批授权时默认包含快手。小红书仅 [STATUS](docs/RULES.md) 逐次明确授权时由运营代发。
 - 编造本仓没有的脚本，或在期目录另写一份配音整轨脚本。配音整轨用 `episodes/_shared/voice/`（产出 `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`）；参数改 `voice/params.json`，不要改脚本里的数。
 - 另存一份起音算法。唯一实现是 `episodes/_shared/onset_rule.py`。`episodes/_shared/label_onset_strict.py` 只 import 它。冻结分镜里的 `episodes-codex/_shared/onset_rule.py` 是旧路径。期目录不要复制；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
 - 从历史旧校验器恢复「画面不出数字 / 不出英文」规则。现行检查入口见 `docs/validate.md`。
