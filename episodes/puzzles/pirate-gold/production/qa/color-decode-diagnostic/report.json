@@ -1,0 +1,102 @@
+{
+  "rows": [
+    {
+      "name": "metadata_rgb",
+      "command": [
+        "ffmpeg",
+        "-v",
+        "error",
+        "-y",
+        "-threads",
+        "2",
+        "-filter_threads",
+        "1",
+        "-i",
+        "episodes/puzzles/pirate-gold/production/video.mp4",
+        "-vf",
+        "scale=960:540,format=rgb24",
+        "-frames:v",
+        "1",
+        "-threads",
+        "1",
+        "episodes/puzzles/pirate-gold/production/qa/color-decode-diagnostic/metadata_rgb.png"
+      ],
+      "backgroundRGB": [
+        18,
+        17,
+        32
+      ],
+      "headerBackgroundRGB": [
+        18,
+        17,
+        32
+      ]
+    },
+    {
+      "name": "explicit709_rgb",
+      "command": [
+        "ffmpeg",
+        "-v",
+        "error",
+        "-y",
+        "-threads",
+        "2",
+        "-filter_threads",
+        "1",
+        "-i",
+        "episodes/puzzles/pirate-gold/production/video.mp4",
+        "-vf",
+        "scale=960:540:in_range=tv:out_range=pc:in_color_matrix=bt709,format=rgb24",
+        "-frames:v",
+        "1",
+        "-threads",
+        "1",
+        "episodes/puzzles/pirate-gold/production/qa/color-decode-diagnostic/explicit709_rgb.png"
+      ],
+      "backgroundRGB": [
+        18,
+        17,
+        32
+      ],
+      "headerBackgroundRGB": [
+        18,
+        17,
+        32
+      ]
+    },
+    {
+      "name": "prior709to601_rgb",
+      "command": [
+        "ffmpeg",
+        "-v",
+        "error",
+        "-y",
+        "-threads",
+        "2",
+        "-filter_threads",
+        "1",
+        "-i",
+        "episodes/puzzles/pirate-gold/production/video.mp4",
+        "-vf",
+        "scale=960:540:in_range=tv:out_range=pc:in_color_matrix=bt709:out_color_matrix=bt601,format=rgb24",
+        "-frames:v",
+        "1",
+        "-threads",
+        "1",
+        "episodes/puzzles/pirate-gold/production/qa/color-decode-diagnostic/prior709to601_rgb.png"
+      ],
+      "backgroundRGB": [
+        18,
+        17,
+        32
+      ],
+      "headerBackgroundRGB": [
+        18,
+        17,
+        32
+      ]
+    }
+  ],
+  "source": "actual final video, frame0",
+  "purpose": "Diagnose QA RGB decoding paths without changing media or comparison bounds"
+}

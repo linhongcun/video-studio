@@ -1,0 +1,143 @@
+{
+  "rows": [
+    {
+      "stage": "raw-full",
+      "fullRGB": [
+        [
+          22,
+          18,
+          37
+        ],
+        [
+          22,
+          18,
+          37
+        ]
+      ],
+      "samePILGridRGB": [
+        [
+          22,
+          18,
+          37
+        ],
+        [
+          22,
+          18,
+          37
+        ]
+      ],
+      "command": [
+        "ffmpeg",
+        "-v",
+        "error",
+        "-y",
+        "-threads",
+        "2",
+        "-filter_threads",
+        "1",
+        "-i",
+        "episodes/puzzles/pirate-gold/production/remotion/out/voice.mp4",
+        "-vf",
+        "format=rgb24",
+        "-frames:v",
+        "1",
+        "-threads",
+        "1",
+        "episodes/puzzles/pirate-gold/production/qa/color-decode-diagnostic/raw-full.png"
+      ]
+    },
+    {
+      "stage": "normalized-full",
+      "fullRGB": [
+        [
+          19,
+          17,
+          33
+        ],
+        [
+          19,
+          17,
+          33
+        ]
+      ],
+      "samePILGridRGB": [
+        [
+          19,
+          17,
+          33
+        ],
+        [
+          19,
+          17,
+          33
+        ]
+      ],
+      "command": [
+        "ffmpeg",
+        "-v",
+        "error",
+        "-y",
+        "-threads",
+        "2",
+        "-filter_threads",
+        "1",
+        "-i",
+        "episodes/puzzles/pirate-gold/production/remotion/out/voice-bt709.mp4",
+        "-vf",
+        "format=rgb24",
+        "-frames:v",
+        "1",
+        "-threads",
+        "1",
+        "episodes/puzzles/pirate-gold/production/qa/color-decode-diagnostic/normalized-full.png"
+      ]
+    },
+    {
+      "stage": "zscale-full",
+      "fullRGB": [
+        [
+          21,
+          17,
+          36
+        ],
+        [
+          21,
+          17,
+          36
+        ]
+      ],
+      "samePILGridRGB": [
+        [
+          21,
+          17,
+          36
+        ],
+        [
+          21,
+          17,
+          36
+        ]
+      ],
+      "command": [
+        "ffmpeg",
+        "-v",
+        "error",
+        "-y",
+        "-threads",
+        "2",
+        "-filter_threads",
+        "1",
+        "-i",
+        "episodes/puzzles/pirate-gold/production/qa/color-decode-diagnostic/zscale-lossless-frame0.mp4",
+        "-vf",
+        "format=rgb24",
+        "-frames:v",
+        "1",
+        "-threads",
+        "1",
+        "episodes/puzzles/pirate-gold/production/qa/color-decode-diagnostic/zscale-full.png"
+      ]
+    }
+  ],
+  "purpose": "Decode RGB at full source resolution, then use exactly the same Pillow Lanczos resize as preview PNG. The earlier direct swscale-to960 path was not the same resampler."
+}
