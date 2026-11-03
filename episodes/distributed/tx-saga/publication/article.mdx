@@ -48,7 +48,13 @@ Saga将一个业务流程拆成本地事务序列。每一步完成自己的提�
 
 Saga也不提供天然全局隔离：前一步已经提交的中间结果，可能被其他操作看到。能否接受这些中间状态、哪些动作可以补偿，都要在业务规则中先确定。[^local]
 
+## 小结
+
+扣款先提交、库存后拒绝时，Saga按业务规则发起一笔新的退款，保留原扣款和新退款两份历史。它接受各步先后提交的过程，因此中间状态能否可见、哪些操作可以补偿，都要提前约定。
+
 这一集只回答：**各步先提交以后，后续失败怎样用新动作收尾。** 不能补偿的动作，不应事后假设能够自动还原。[^compensate]
+
+补偿本身也会失败。持久进度让流程记住还欠哪一步，幂等处理让恢复时不会重复退款；只有按规则完成或进入明确的异常处理，才能判断这笔业务怎样结束。
 
 [^saga]: [AWS Prescriptive Guidance：Saga patterns](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/saga-patterns.html)，本地事务序列、continuation/compensation及实现组织方式，访问2026-10-24。
 [^local]: [Azure Architecture Center：Saga distributed transactions](https://learn.microsoft.com/en-us/azure/architecture/patterns/saga)，Solution、Irreversible local database changes与Potential data anomalies；实际读取[官方GitHub正文](https://github.com/MicrosoftDocs/architecture-center/blob/main/docs/patterns/saga-content.md)，访问2026-10-24。

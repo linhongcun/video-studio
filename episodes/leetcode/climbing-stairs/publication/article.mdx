@@ -110,6 +110,12 @@ Python在执行 `prev, curr = curr, prev + curr` 时，先求出右侧的两个�
 
 它按“两阶步有几个、出现在哪些位置”计数，与程序的前两项相加实现独立；实际执行结果与适用范围见制作调研记录，不把有限输入验证代替上面的分组证明。
 
+## 小结
+
+每步只能走1或2阶。从第3阶起，到达第`k`阶的走法，按最后一步分成来自第`k-1`阶和第`k-2`阶的两类。两类不会重叠，又覆盖全部合法走法，因此可以把前两阶的方法数相加，无需把每条路径重新走一遍。
+
+只记两个数，是因为下一阶只依赖这两项计数。更新时保留旧值，整体移到“前一阶、当前阶”的新身份，便能从1、2一路算到目标。递推关系来自末步分类，空间压缩来自依赖范围；换一道题时，这两点都需要重新分析。
+
 [^problem]: LeetCode 70 官方题面：[中文](https://leetcode.cn/problems/climbing-stairs/description/)、[英文](https://leetcode.com/problems/climbing-stairs/description/)。访问：2026-10-25（北京时间）。
 [^assignment]: Python语言参考：[Assignment statements](https://docs.python.org/3/reference/simple_stmts.html#assignment-statements)，右侧表达式先求值再赋值。访问：2026-10-25（北京时间）。
 

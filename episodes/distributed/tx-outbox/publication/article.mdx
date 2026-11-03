@@ -48,6 +48,12 @@ Outbox把需要发送的事件与本地业务一起保存。本例订单表与�
 
 消息、发送和消费恢复真正工作，才有继续推进的基础。临时故障可按策略重试；缺货等永久业务拒绝要明确取消、补偿或人工处理的规则，不能靠无限重试宣称一定成功。业务补偿可继续看[Saga单集](../tx-saga/)，本片不同时展开另一套机制。
 
+## 小结
+
+Outbox先把订单和“需要发通知”放进同一笔本地事务，消除业务已保存、发送意图却丢失的空档；独立转发程序随后发送，并依据持久进度恢复。发送后尚未记下结果就中断，仍可能重发同一事件。
+
+所以，链路要接上两种保证：生产端不漏记待办，消费端把唯一事件标记和库存修改共同提交，避免重复生效。订单库、消息系统和库存库仍有各自边界；恢复和失败出口也必须实际工作，才能按业务规则推进到确认或取消。
+
 [^aws]: [AWS：Transactional outbox pattern](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)，Intent、Issues and considerations、Using an outbox table，访问2026-10-24。
 [^outbox]: [Chris Richardson：Transactional outbox](https://microservices.io/patterns/data/transactional-outbox.html)，Solution、Result context，访问2026-10-24。
 [^consumer]: [Chris Richardson：Handling duplicate messages using the Idempotent consumer pattern](https://microservices.io/post/microservices/patterns/2020/10/16/idempotent-consumer.html)，2020-10-16，Tracking message IDs，访问2026-10-24。

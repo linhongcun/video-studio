@@ -98,6 +98,12 @@ class Solution:
 
 最多保存随输入长度增长的数值和下标，额外空间为`O(n)`。这里不计输入数组本身，也没有对原数组排序或修改。
 
+## 小结
+
+固定当前值`x`之后，需要的另一个值就确定为`target-x`。把先前出现的数值和下标存起来，便能直接查这个需要值，省掉每次与所有先前位置逐一配对的工作；命中时返回的是两个原下标。
+
+先查询、未命中再记录，维护了“表中下标都早于当前位置”这一条件，所以不会把同一格用两次。两个位置上的相同数值仍可以配对；需要保证不同的是下标。哈希表解决按值查找的问题，操作的先后顺序则保证题意中的位置限制。
+
 [^problem]: LeetCode官方题面：[Two Sum](https://leetcode.com/problems/two-sum/description/)与[两数之和](https://leetcode.cn/problems/two-sum/description/)，访问日期2026-10-25（北京时间）。题面规定返回下标、不能重复使用同一元素、恰好一组答案、输出顺序不限。官方editorial未取得可核读正文，本期推导不归因于它。
 [^dict]: Python官方文档：[Mapping Types — dict](https://docs.python.org/3/builtins/stdtypes.html#mapping-types-dict)，访问日期2026-10-25（北京时间），用于字典键、成员判断与取值语义。
 [^complexity]: Python官方文档：[Time Complexity — dict / frozendict](https://docs.python.org/3/builtins/time-complexity.html#dict-frozendict)，访问日期2026-10-25（北京时间），区分平均、摊还与最坏复杂度。片中算法论证与示例为本期独立推导，实测范围见research.md。

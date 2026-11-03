@@ -29,6 +29,12 @@ chapters:
 
 幂等约束的是重复操作的业务效果，不要求每次HTTP报文逐字节相同。不同接口的保留期、处理中响应、错误重试策略各有定义；编号过期后重用可能被当成新请求，调用者身份和请求参数也应纳入校验。视频没有承诺所有网站、所有重复点击永久只扣一次。
 
+## 小结
+
+响应没有回来时，同一次支付可能已经扣款，因此重试要继续使用同一个业务编号。后台把编号认领、扣款和结果记录可靠地协调起来，才能让重复请求取得已有结果，让并发请求也只产生一次扣款效果。
+
+这项保证依赖明确的接口约定：什么算同一次操作、编号保留多久、处理中怎样响应，都要说清。真正的新支付使用新编号；理解幂等时，抓住的是重复请求下业务效果如何保持稳定。
+
 ## 参考资料
 - [AWS Builders Library — Making retries safe with idempotent APIs](https://aws.amazon.com/builders-library/making-retries-safe-with-idempotent-APIs/)，实际访问2026-10-24。
 - [Stripe API — Idempotent requests](https://docs.stripe.com/api/idempotent_requests)，实际访问2026-10-24。

@@ -29,6 +29,12 @@ chapters:
 
 结算、库存、支付的正确性仍然重要。核心校验失败不能假装成功；合适的方案可能是明确失败、只读或保留待完成状态。降级路径要更简单、经过测试并有监控，压力减轻后再逐步恢复。随意切到另一个脆弱依赖，可能使故障更严重。
 
+## 小结
+
+示例中的差价来自功能取舍：搜索阶段暂时少算红包预估，展示未计优惠的199元；结算阶段仍核验资格与规则，再展示179元供用户确认。减少前面的计算，给重要业务留下资源，同时把展示含义交代清楚。
+
+降级要先确定哪些功能可以减少、哪些条件必须保留，再准备经过测试的简化路径和恢复方式。这样保住的是符合业务规则的核心服务，库存、支付和结算正确性仍是必须满足的条件。
+
 ## 参考资料
 - [AWS Well-Architected — graceful degradation](https://docs.aws.amazon.com/wellarchitected/latest/framework/rel_mitigate_interaction_failure_graceful_degradation.html)，实际访问2026-10-24。
 - [Microsoft Well-Architected — self-healing and self-preservation](https://learn.microsoft.com/en-us/azure/well-architected/reliability/self-preservation)，实际访问2026-10-24。

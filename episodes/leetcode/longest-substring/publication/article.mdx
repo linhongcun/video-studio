@@ -126,6 +126,12 @@ class Solution:
 
 片尾完整程序静态停留5秒，供需要的观众自行暂停查看。完整实现的正确性、显示一致性与实际媒体检查按制作报告分别记录，不将机器检查当作用户观看结论。
 
+## 小结
+
+滑动窗口保留的是原串中连续、没有重复的一段。新字符发生冲突时，左边界必须连续右移，直到旧的同字符离开；这样既去掉所有不合法的起点，也保住以当前右端结束的最长合法片段，不必清空后重新检查。
+
+当前窗口会变短，历史最长却不能随之变小，所以消重、加入新字符之后，还要单独更新最大长度。逐个考察右端，再取这些合法窗口长度的最大值，才得到全串的答案；最后留下的窗口和全部不同字符的数量，都不能替代它。
+
 [^problem]: [LeetCode：3. 无重复字符的最长子串](https://leetcode.cn/problems/longest-substring-without-repeating-characters/description/)，官方题意、示例及约束，访问日期2026-10-24（北京时间）。
 [^set]: [Python 3：Set Types — set, frozenset](https://docs.python.org/3/builtins/stdtypes.html#set-types-set-frozenset)，集合无序、不记录元素位置的语义，访问日期2026-10-24（北京时间）。
 [^complexity]: [Python 3：Time Complexity — set/frozenset](https://docs.python.org/3/builtins/time-complexity.html#set-frozenset)，set成员判断、加入、删除的平均复杂度及哈希碰撞/摊还边界，访问日期2026-10-24（北京时间）。本文线性操作次数由程序独立推导，不声称Python语言保证最坏`O(n)`。

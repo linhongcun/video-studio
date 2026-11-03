@@ -66,6 +66,12 @@ for each record returned for this partition:
 
 本轮另有[实际运行证据](https://github.com/linhongcun/video-studio/blob/main/docs/archive/2026-10/mq05-07-implementation/runtime/runs/mq07-20261030T153232.191596Z/assertion-summary.json)。两段观察独立进行：先看两分区从2到12动态成员的稳定分配，仅2份非空，原两位本次均被新成员替换；再用独立单成员组实际poll两条记录，并以业务latch控制完成时点。latch等待时读取位置已前进、业务完成为0，释放后完成2条，再提交进度。它不是十二成员同一业务的吞吐测试，也不验证本文假设速率、通知API副作用或清空时间。
 
+## 小结
+
+十二个实例仍可能处理不过来，因为本例两个分区只给两名成员分配了工作，而每个分区的通知又由应用串行完成。新增进程有没有分区可读、业务调用有没有更快完成，是扩容时需要分别回答的两个问题。
+
+要让积压减少，必须让有积压的分区具备超过相应流入的完成能力，不能只看全组总量。读取位置前进表示记录已交给应用，已提交位置表示恢复进度；它们都不能直接代替业务未完成量。先找准限制完成的环节，再调整能力或流入，才能判断是否真能排空。
+
 ## 参考资料
 
 - [RangeAssignor.java（R1）](https://github.com/apache/kafka/blob/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/RangeAssignor.java)；[固定原文全文](https://raw.githubusercontent.com/apache/kafka/1156b2752aaa28eafc0b4c4d387e63356793268d/clients/src/main/java/org/apache/kafka/clients/consumer/RangeAssignor.java)。

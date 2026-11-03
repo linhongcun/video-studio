@@ -80,6 +80,12 @@ related: ["db-transaction", "idempotency", "tx-2pc", "tx-tcc", "tx-saga", "tx-ou
 
 先理解要解决的问题，再逐个看清各实现怎样执行、失败后怎样结束，以及承诺了什么。
 
+## 小结
+
+分布式事务的难点，出现在一笔业务跨越了独立提交边界：订单保存成功，不能代替库存扣减成功；一边回滚，也撤不掉另一边已提交的结果。超时又让调用方无法直接分清“没执行”与“执行了但回复丢失”。
+
+因此，方案必须安排协调、持久进度、安全重试和失败收尾。选择之前，先确定业务允许怎样的中间状态、能等待多久、失败后哪些动作可以补偿。最终要兑现的是整笔业务的约定，恢复机制则负责在明确条件下继续推进或结束流程。
+
 [^local]: [PostgreSQL：Transactions](https://www.postgresql.org/docs/current/tutorial-transactions.html)，3.4事务教程，访问日期2026-10-24。
 [^xa]: [MySQL 8.4：XA Transactions](https://dev.mysql.com/doc/refman/8.4/en/xa.html)，资源管理器与两阶段事务段落，访问日期2026-10-24。
 [^outbox]: [AWS：Transactional outbox pattern](https://docs.aws.amazon.com/prescriptive-guidance/latest/cloud-design-patterns/transactional-outbox.html)，Motivation与双写问题，访问日期2026-10-24。

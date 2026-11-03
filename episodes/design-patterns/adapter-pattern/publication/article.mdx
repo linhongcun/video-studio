@@ -173,6 +173,12 @@ return new AdapterDemo.ShipmentReminder(notifier).send("buyer17@shop.example");
 
 以下公开源实际访问于2026-10-25（北京时间）。固定commit表示本次可复查快照，不统一声称为最新发布版本。未取得GoF书籍全文；本轮未把旧Refactoring.Guru访问当作重新阅读。详细读取范围和主张见`research.md`以及仓库内的`sources/business-boundary-evidence.json`。
 
+## 小结
+
+适配器先承接业务需要的约定，再转换外部请求与返回，并把真正的处理委托给已有服务。本例业务始终提交收件人和正文、接收受理结果，供应方的字段和回执包装则留在接入处处理。
+
+这一层的价值，在于外部格式变化时让业务少受牵动，前提是服务仍能满足原来的业务含义。转换必须忠实保留结果边界：已受理仍需等待送达回执，未知也不能擅自当作拒绝。判断一层包装是否形成适配，应看它解决了什么约定差异，以及变化是否被留在合适位置。
+
 [^spring]: [Spring官方TaskExecutorAdapter](https://github.com/spring-projects/spring-framework/blob/7bdf9c86f8657029567067051b7c6bd47b4ae67e/spring-core/src/main/java/org/springframework/core/task/support/TaskExecutorAdapter.java)，2026-10-24主干快照。目标接口、持有对象、真实委托与明确转换是具体实现证据，不把任务执行的异步或错误语义当作本例统一保证。
 [^jdk]: [OpenJDK21 Enumeration.asIterator](https://github.com/openjdk/jdk21u/blob/54f2095960f01d957f2335cafa0defb956e13a2c/src/java.base/share/classes/java/util/Enumeration.java#L85)，固定jdk-21.0.8+9。注释与实现说明把产出Enumeration的代码接到消费Iterator的代码，实际委托原实例；不是只看适配类名。原始遍历与可选remove有额外约束，不借它补出服务没有的能力。
 [^acl]: [Microsoft官方Anti-Corruption Layer文档源](https://github.com/MicrosoftDocs/architecture-center/blob/b60c2b4526bab9b5e77cba2d779e695ed9d6ab9a/docs/patterns/anti-corruption-layer.md)，文档标日期2026-05-28，本次固定2026-10-24仓库快照。实际读完整106行，采用业务/外部两侧模型与保护领域模型的目的，保留额外维护和语义适用限制；不是宣称本例实现完整ACL。
