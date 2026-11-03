@@ -1,0 +1,114 @@
+import React,{useLayoutEffect,useRef} from 'react';
+import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
+import {PuzzleCanvas,PuzzleHeader} from '../../../../../_shared/puzzles-video/Frame';
+import {C,FONT,MONO} from './theme';
+import {Shot,shots} from './data';
+import {Allocation,CX,round,previous,isYes,timings,tween,election} from './model';
+declare const __HAS_VOICE_AUDIO__:boolean;
+
+const T=({x,y,children,size=30,color=C.text,anchor='start',weight=550,alpha=1,width,mono=false,...rest}:any)=><text data-text data-max-width={width} x={x} y={y} fill={color} fontFamily={mono?MONO:FONT} fontSize={size} fontWeight={weight} textAnchor={anchor} opacity={alpha} {...rest}>{children}</text>;
+const Panel=({x,y,w,h,color=C.edge,alpha=1,dashed=false,children,...rest}:any)=><g opacity={alpha} {...rest}><rect x={x} y={y} width={w} height={h} rx={18} fill={C.surface} stroke={color} strokeWidth={2} strokeDasharray={dashed?'9 7':undefined}/>{children}</g>;
+const Head=({title,sub}:any)=><PuzzleHeader number="P09" kicker="海盗分金币" title={title} sub={sub}/>;
+const Note=({children,color=C.muted,alpha=1}:any)=><T x={960} y={897} size={28} color={color} anchor="middle" width={1680} alpha={alpha}>{children}</T>;
+
+const Coin=({x,y,r=12,alpha=1,ghost=false}:any)=><g opacity={alpha} data-coin><ellipse cx={x} cy={y} rx={r} ry={r*.76} fill={ghost?C.surface:C.coral} stroke={C.coral} strokeWidth={ghost?2:1.5} strokeDasharray={ghost?'3 3':undefined}/><path d={`M${x-r*.35} ${y-r*.3}V${y+r*.3}M${x+r*.35} ${y-r*.3}V${y+r*.3}`} stroke={ghost?C.coral:C.bg} strokeWidth={1.3}/></g>;
+const CoinPool=({x=815,y=630,alpha=1}:any)=><g opacity={alpha} data-shared-coins={100}><T x={x+137} y={y-35} size={32} color={C.coral} anchor="middle">100枚共同待分</T>{Array.from({length:100},(_,i)=><Coin key={i} x={x+(i%10)*30} y={y+Math.floor(i/10)*21} r={12}/>)}</g>;
+
+/** Number, horizontal position and hat remain attached to the same person. */
+const Pirate=({id,y=395,alpha=1,proposer=false,scale=1}:any)=><g transform={`translate(${CX[id-1]} ${y}) scale(${scale})`} opacity={alpha} data-pirate-avatar={id}>
+  <path d="M-65-15L0-71L65-15Q0 2-65-15Z" fill={C.surface} stroke={proposer?C.coral:C.violet} strokeWidth={3}/><path d="M-70-13H70" stroke={proposer?C.coral:C.violet} strokeWidth={5} strokeLinecap="round"/>
+  <circle cx={0} cy={18} r={30} fill={C.surface} stroke={proposer?C.coral:C.violet} strokeWidth={3}/><path d="M-55 100V80C-55 44 55 44 55 80V100Z" fill={C.surface} stroke={proposer?C.coral:C.violet} strokeWidth={3}/>
+  <T x={0} y={27} size={29} anchor="middle" color={proposer?C.coral:C.text} mono weight={800}>{id}</T>
+  <T x={0} y={143} size={27} color={proposer?C.coral:C.violet} anchor="middle">{proposer?`${id}号 · 提案者`:`${id}号`}</T>
+</g>;
+
+const Nav=({n,y=282,large=0,alpha=1}:any)=><g opacity={alpha} data-navigation-round={n}>
+  <T x={120} y={y+8} size={24} color={C.violet}>假设倒推</T>
+  {[2,3,4,5].map((q,i)=>{const x=480+i*320,w=128+large*70,h=44+large*35;return <g key={q} data-nav-round={q}><rect x={x-w/2} y={y-h/2} width={w} height={h} rx={13} fill={q===n?C.coral:C.surface} stroke={q===n?C.coral:C.edge} strokeWidth={2}/><T x={x} y={y+9+large*5} size={26+large*9} color={q===n?C.bg:C.muted} anchor="middle" weight={750}>{q}人局</T>{i<3&&<path d={`M${x+w/2+17} ${y}H${x+320-w/2-17}m-10-7 10 7-10 7`} fill="none" stroke={C.edge} strokeWidth={3}/>}</g>;})}
+  {!large&&<T x={1790} y={y+8} size={22} anchor="end" color={C.muted}>不是实际淘汰顺序</T>}
+</g>;
+
+const Amount=({id,value,y,confirmed=false,trial=false,highlight=false,alpha=1,out=false}:any)=>{
+  const color=highlight?C.coral:confirmed?C.teal:C.violet;
+  return <g opacity={alpha} data-money-for={id}><rect x={CX[id-1]-120} y={y} width={240} height={67} rx={13} fill={confirmed?C.teal:C.violet} fillOpacity={confirmed?.09:.025} stroke={highlight?C.coral:confirmed?C.teal:C.edge} strokeWidth={highlight?3:2} strokeDasharray={confirmed?undefined:'7 6'}/>
+    <T x={CX[id-1]} y={y+47} size={out?27:value===undefined?28:37} anchor="middle" color={out?C.red:value===undefined?C.muted:color} mono={typeof value==='number'}>{out?'出局':value===undefined?'—':`${trial?'试算 ':''}${value}枚`}</T>
+    {typeof value==='number'&&value>0&&<Coin x={CX[id-1]-91} y={y+33} r={10} ghost={!confirmed}/>}
+  </g>;
+};
+
+const Ballot=({id,stance,arrival,f,intent}:any)=>{
+  const arrived=arrival!==undefined&&f>=arrival,p=arrival===undefined?0:tween(f,arrival-13,arrival),color=stance==='yes'?C.teal:C.red;
+  return <g data-vote-person={id} data-vote={arrived?stance:'pending'} data-vote-intent={intent??'none'}>
+    <rect x={CX[id-1]-115} y={813} width={230} height={47} rx={10} fill={C.bg} stroke={C.edge} strokeDasharray="5 5"/>
+    {p>0?<g transform={`translate(0 ${-19*(1-p)})`} opacity={p}><rect x={CX[id-1]-115} y={813} width={230} height={47} rx={10} fill={color} fillOpacity={.12} stroke={color} strokeWidth={2}/><T x={CX[id-1]} y={846} size={27} color={color} anchor="middle">{stance==='yes'?'✓ 赞成':'× 反对'}</T></g>:<T x={CX[id-1]} y={845} size={intent?25:23} color={intent==='yes'?C.teal:intent==='no'?C.red:C.muted} anchor="middle">{intent==='yes'?'愿意赞成':intent==='no'?'同钱，反对':'尚未投票'}</T>}
+  </g>;
+};
+
+const Compare=({id,offered,next,alpha=1}:any)=><g opacity={alpha} data-compare-person={id} data-offer={offered} data-next={next}>
+  <path d={`M${CX[id-1]} 645V654M${CX[id-1]} 697V715`} stroke={offered>next?C.teal:C.red} strokeWidth={3}/>
+  <rect x={CX[id-1]-94} y={654} width={188} height={43} rx={12} fill={C.bg}/>
+  <T x={CX[id-1]} y={687} size={32} color={offered>next?C.teal:C.red} anchor="middle" mono>{offered} {offered>next?'>':'='} {next}</T>
+</g>;
+
+type BoardProps={s:Shot;f:number;n:number;proposal?:Allocation;proposalAlpha?:number;baseline?:Allocation;baselineAlpha?:number;confirmed?:boolean;voting?:boolean;intents?:Record<string,string>;compare?:number[];compareAlpha?:number;trial?:boolean;label?:string;note?:string;noteColor?:string};
+const Board=({s,f,n,proposal,proposalAlpha=1,baseline,baselineAlpha=1,confirmed=false,voting=false,intents={},compare=[],compareAlpha=1,trial=false,label,note,noteColor=C.muted}:BoardProps)=>{
+  const r=round(n),ev=election(s,n,f),passed=confirmed||(voting&&ev.passed),yes=confirmed?r.players.filter(id=>isYes(n,id)).length:voting?ev.yes:0,proposer=r.players[0],phase=passed?'confirmed':trial?'trial':proposal?'proposal':'none';
+  return <g data-round={n} data-proposal-status={phase} data-phase={phase} data-votes-yes={yes} data-quota={r.quota} data-confirmed={passed?'true':'false'} data-proposal-sum={proposal?Object.values(proposal).reduce((a,b)=>a+b,0):'none'}>
+    <Nav n={n}/>
+    {[1,2,3,4,5].map(id=><g key={id} data-pirate={id} data-active={r.players.includes(id)?'true':'false'} data-proposal-coins={proposal?.[String(id)]??'none'} data-reject-coins={baseline?.[String(id)]??(id===proposer?'out':'none')} data-realized-coins={passed?proposal?.[String(id)]??'none':'none'}><Pirate id={id} y={370} alpha={r.players.includes(id)?1:.17} proposer={id===proposer}/></g>)}
+    <T x={120} y={543} size={25} color={passed?C.teal:C.coral} width={1100}>{passed?(n===5?'方案已通过 · 确认实得':'本假设局已通过 · 确认结果'):label??'本轮提案 · 拟分配，投票前没有支付'}</T>
+    <T x={1790} y={543} size={24} color={C.muted} anchor="end">{passed?'全部100枚整枚分完':trial?'只做比较，不扣金币':'100枚共同待分'}</T>
+    {[1,2,3,4,5].map(id=><Amount key={id} id={id} value={proposal?.[String(id)]} y={563} alpha={r.players.includes(id)?proposal?proposalAlpha:1:.17} confirmed={passed} trial={trial} highlight={compare.includes(id)}/>)}
+    <T x={120} y={705} size={25} color={C.muted}>{baseline?'若否决本轮提案，下一轮所得':'先看本人票，是否还需要争取别人'}</T>
+    {[1,2,3,4,5].map(id=><Amount key={id} id={id} value={baseline?.[String(id)]} y={724} alpha={r.players.includes(id)?baselineAlpha:.17} out={!!baseline&&id===proposer} highlight={compare.includes(id)}/>)}
+    {compare.filter(id=>proposal?.[String(id)]!==undefined&&baseline?.[String(id)]!==undefined).map(id=><Compare key={id} id={id} offered={proposal![String(id)]} next={baseline![String(id)]} alpha={compareAlpha}/>)}
+    {r.players.map(id=><Ballot key={id} id={id} f={f} stance={isYes(n,id)?'yes':'no'} arrival={confirmed?-999:voting?ev.arrivals[String(id)]:undefined} intent={intents[String(id)]}/>)}
+    <T x={120} y={846} size={23} color={C.muted} alpha={proposer>1?1:0}>{proposer>1?'局外人物仅淡化，编号未变':''}</T>
+    <Note color={passed?C.teal:noteColor}>{passed?(confirmed&&note?note:`赞成${yes}票（共${r.players.length}票） · 所需${r.quota}票 · ${n===5?'通过后才确认实得':'假设局结果可用于上一层比较'}`):voting?`赞成${yes}票（共${r.players.length}票） · 门槛${r.quota}票，计票完成后确认`:note??`需要${r.quota}票 · 提案者自己只有1票`}</Note>
+  </g>;
+};
+
+const Scene=({s,f}:{s:Shot;f:number})=>{
+  const q=parseInt(s.id,10),{a,b,c,e}=timings(s),late=tween(f,c+5,c+28);
+  if(q===1)return <><Head title="5个海盗分金币，1号为什么能留98枚？" sub="100枚必须整枚分完 · 固定1—5号，资历从高到低"/>
+    {[1,2,3,4,5].map(id=><Pirate key={id} id={id} y={390} proposer={id===1}/>)}
+    <CoinPool/><T x={450} y={686} size={64} color={C.coral} anchor="middle">98枚？</T><T x={1450} y={686} size={33} color={C.violet} anchor="middle">要怎样让投票通过？</T>
+    <Note>这100枚尚未分配，先看投票规则</Note>
+  </>;
+  if(q===2)return <><Head title="全员各1票，提案者也算在内" sub="先由当前资历最高者提案；5人局至少需要3票同意"/>
+    {[1,2,3,4,5].map(id=><g key={id}><Pirate id={id} y={370} proposer={id===1}/><g opacity={tween(f,a+15+id*7,a+35+id*7)} transform={`translate(0 ${-22*(1-tween(f,a+15+id*7,a+35+id*7))})`}><Panel x={CX[id-1]-105} y={579} w={210} h={76} color={C.violet}><T x={CX[id-1]} y={629} size={34} anchor="middle" color={C.violet}>1票</T></Panel></g></g>)}
+    <T x={960} y={748} size={41} color={C.coral} anchor="middle" alpha={late}>至少半数同意 → 通过</T>
+    <T x={960} y={817} size={31} anchor="middle" color={C.red} alpha={late}>不足半数 → 提案者出局，无法活命；其余人继续</T>
+    <Note>提案者不是额外多1票，仍然只投自己这一票</Note>
+  </>;
+  if(q===3){const p1=tween(f,a+5,a+25),p2=tween(f,a+(b-a)*.35,a+(b-a)*.35+22),p3=tween(f,a+(b-a)*.7,a+(b-a)*.7+22);return <><Head title="先活命，再比钱；一样时投反对" sub="完全理性，所有人都知道彼此使用同一套判断"/>
+    {[1,2,3,4,5].map(id=><Pirate key={id} id={id} y={330} scale={.6}/>)}
+    {[{x:170,n:'①',title:'先求活命',sub:'先比较能不能安全留下',p:p1},{x:740,n:'②',title:'再求更多金币',sub:'同样安全，比较金币多少',p:p2},{x:1310,n:'③',title:'同钱则反对',sub:'同样安全，钱也相同',p:p3}].map(v=><Panel key={v.x} x={v.x} y={534} w={440} h={230} color={C.violet} alpha={v.p}><T x={v.x+220} y={591} size={35} color={C.violet} anchor="middle">{v.n} {v.title}</T><T x={v.x+220} y={673} size={27} anchor="middle">{v.sub}</T>{v.n==='③'&&<T x={v.x+220} y={727} size={27} color={C.red} anchor="middle">→ 投反对票</T>}</Panel>)}
+    <Note alpha={late}>只比较本轮与否决后的结果 · 没有私下交易或未来承诺</Note>
+  </>;}
+  if(q===4){const focus=tween(f,c+8,c+54);return <><Head title="从否决后的下一局，倒过来推" sub="所有2→3→4→5人局，都是假设推算，不是实际淘汰顺序"/>
+    <Nav n={f<c?0:2} y={415-133*focus} large={1-focus}/>
+    <T x={960} y={620} size={38} anchor="middle" color={C.violet} alpha={1-focus}>下一局怎样分，决定这一局谁肯赞成</T>
+    <g opacity={tween(f,c+58,c+78)}>{[1,2,3,4,5].map(id=><Pirate key={id} id={id} y={370} proposer={id===4} alpha={id>=4?1:.17}/>)}<T x={960} y={744} size={38} color={C.coral} anchor="middle">先假设只剩4号和5号</T></g>
+    <Note>人物身份保持；暂不参与这个假设局的人只淡化</Note>
+  </>;}
+  if(q===5)return <><Head title="2人局：4号靠自己1票就够" sub="至少半数即可：1/2已经达到门槛 · 当前是4、5号的假设局"/><Board s={s} f={f} n={2} proposal={f>=c?round(2).allocation:undefined} proposalAlpha={late} voting={f>=c} note="需要1票 · 本人已有1票，无需再争取别人"/></>;
+  if(q===6)return <><Head title="3人局：先看否决3号会怎样" sub="当前3、4、5号 · 需要2票 · 提案者自己的1票还不够"/><Board s={s} f={f} n={3} baseline={f>=c?previous(3):undefined} baselineAlpha={late} note="若否决3号，下一轮是4号100枚、5号0枚"/></>;
+  if(q===7){const show=f>=a+12;return <><Head title="5号：提案给1枚，比下一轮0枚多" sub="把同一个人的本轮拟分配，与否决后的下一轮所得比较"/><Board s={s} f={f} n={3} baseline={previous(3)} proposal={show?round(3).allocation:undefined} proposalAlpha={tween(f,a+12,a+35)} compare={[5]} compareAlpha={tween(f,a+(b-a)*.32,a+(b-a)*.32+22)} intents={f>=a+(b-a)*.65?{'5':'yes'}:{}} voting={f>=c} note="3号本人1票，再争取5号这1票"/></>;}
+  if(q===8)return <><Head title="4人局：恰好2票，就已达到半数" sub="当前2—5号 · 先看如果否决2号，后面三个人怎样分"/><Board s={s} f={f} n={4} baseline={f>=c?previous(4):undefined} baselineAlpha={late} note="若否决2号：3号99枚、4号0枚、5号1枚"/></>;
+  if(q===9)return <><Head title="4号下一轮拿0，给1枚就能争取" sub="4人只需2票：2号本人1票，加上4号1票"/><Board s={s} f={f} n={4} baseline={previous(4)} proposal={f>=a+10?round(4).allocation:undefined} proposalAlpha={tween(f,a+10,a+32)} compare={[4]} compareAlpha={tween(f,a+(b-a)*.35,a+(b-a)*.35+22)} intents={f>=a+(b-a)*.7?{'4':'yes'}:{}} voting={f>=c} note="2号争取4号，而不是把4人局误算成需要3票"/></>;
+  if(q===10)return <><Head title="回到5个人：1号还要争取2票" sub="需要3票 · 提案者自己1票 · 还差2票"/><Board s={s} f={f} n={5} baseline={f>=c?previous(5):undefined} baselineAlpha={late} note="若否决1号：下一轮2号99、3号0、4号1、5号0枚"/></>;
+  if(q===11)return <><Head title="给4号1枚，为什么还会被反对？" sub="局部候选比较，尚未形成完整提案，更没有实际分配"/><Board s={s} f={f} n={5} baseline={previous(5)} proposal={{'4':1}} proposalAlpha={tween(f,a+6,a+26)} compare={[4]} compareAlpha={late} trial intents={f>=c+25?{'4':'no'}:{}} label="只试算4号的候选数额 · 不是已支付1枚" note="同样安全：本轮1枚 = 下一轮1枚 → 按规则反对" noteColor={C.red}/></>;
+  if(q===12){const offered=f>=c+8,intent=f>=c+(e-c)*.63;return <><Head title="找下一轮拿0的人：3号和5号" sub="已撤掉4号的1枚试算 · 当前100枚仍是共同待分金币"/><Board s={s} f={f} n={5} baseline={previous(5)} proposal={offered?round(5).allocation:undefined} proposalAlpha={tween(f,c+8,c+31)} compare={[3,5]} compareAlpha={tween(f,c+25,c+48)} intents={intent?{'3':'yes','5':'yes'}:{}} note="各拟给1枚，比拒绝后的0枚多；这还只是赞成意向"/></>;}
+  if(q===13)return <><Head title="拟分配98 / 0 / 1 / 0 / 1，再逐票确认" sub="先看完整提案，再计票；达到3/5后才确认实得"/><Board s={s} f={f} n={5} baseline={previous(5)} proposal={round(5).allocation} voting={f>=c} intents={{'3':'yes','5':'yes'}} note="当前仍为拟分配；五张票依次进入各自票位"/></>;
+  if(q===14)return <><Head title="1号留下98枚，只用2枚争取两票" sub="固定1—5号：98 / 0 / 1 / 0 / 1 · 赞成者是1、3、5号"/><Board s={s} f={f} n={5} baseline={previous(5)} proposal={round(5).allocation} confirmed note="倒着看否决后的结果，才能知道谁会接受当前分法"/></>;
+  throw Error('Unknown pirate shot '+s.id);
+};
+
+const ShotView=({s,hideSubtitles,auditLayout}:{s:Shot;hideSubtitles:boolean;auditLayout:boolean})=>{
+  const f=useCurrentFrame(),ref=useRef<SVGSVGElement>(null),caption=s.subtitles?.find(q=>f>=q.from&&f<(q.to!==undefined?q.to+1:q.from+(q.duration??0)));
+  useLayoutEffect(()=>{if(!auditLayout||!ref.current)return;ref.current.querySelectorAll<SVGTextElement>('[data-max-width]').forEach(el=>{const limit=Number(el.dataset.maxWidth);if(limit&&el.getBBox().width>limit+2)console.error('COPYFIT',s.id,f,el.textContent,el.getBBox().width,limit);});},[auditLayout,s.id,f]);
+  return <AbsoluteFill data-shot={s.id} data-local-frame={f} style={{background:C.bg,fontFamily:FONT,color:C.text,overflow:'hidden'}}><svg ref={ref} width={1920} height={1080} viewBox="0 0 1920 1080" data-audit-scene><PuzzleCanvas/><Scene s={s} f={f}/><T x={1795} y={83} size={26} color={C.muted} anchor="end">IT小村</T></svg>{!hideSubtitles&&caption&&<div data-subtitle style={{position:'absolute',left:140,right:140,top:931,minHeight:90,display:'flex',alignItems:'center',justifyContent:'center',fontSize:32,lineHeight:1.5,textAlign:'center',background:C.bg+'F5',padding:'0 15px',borderRadius:14,boxSizing:'border-box'}}>{caption.text}</div>}</AbsoluteFill>;
+};
+export type MainProps={hideSubtitles?:boolean;showSubtitles?:boolean;auditLayout?:boolean};
+export const Main=({hideSubtitles=false,showSubtitles=true,auditLayout=false}:MainProps)=><AbsoluteFill style={{background:C.bg}}>{typeof __HAS_VOICE_AUDIO__!=='undefined'&&__HAS_VOICE_AUDIO__&&<Audio src={staticFile('audio/voice.wav')}/>} {shots.map(s=><Sequence key={s.id} from={s.from} durationInFrames={s.durationInFrames}><ShotView s={s} hideSubtitles={hideSubtitles||!showSubtitles} auditLayout={auditLayout}/></Sequence>)}</AbsoluteFill>;
