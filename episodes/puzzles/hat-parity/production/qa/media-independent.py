@@ -86,7 +86,7 @@ def main():
     frozen_paths={(D/name).resolve():value for name,value in frozen.items()}
     receipts=read(D/'reference-appendix.json');result=read(D/'render-result.json');refs=read(D/'references.json')
     board=read(D/'storyboard.json');words=read(D/'words.json');frames=words['durationFrames'];fps=Fraction(board['meta']['fps'])
-    assert frames>0 and fps==30 and len(words['sentences'])==28
+    assert frames>0 and fps==30 and len(words['shots'])==14 and len(read(D/'voice/build.json')['sentences'])==28
     total=frames+150
     assert receipts['bodyFrames']==frames and receipts['finalVideoFrames']==total
     assert result['frames']==total and sha(source)==receipts['outputSHA256']==result['sha256']
