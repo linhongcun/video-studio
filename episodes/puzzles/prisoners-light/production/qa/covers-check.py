@@ -4,6 +4,7 @@ from pathlib import Path
 from datetime import datetime, timezone
 import hashlib
 import json
+import os
 
 D = Path(__file__).resolve().parent.parent
 ROOT = next(p for p in D.parents if (p / 'AGENTS.md').is_file())
@@ -23,6 +24,18 @@ def main():
             mismatches.append({'path': name, 'error': 'missing'})
         elif p.stat().st_size != expected['bytes'] or sha(p) != expected['sha256']:
             mismatches.append({'path': name, 'error': 'changed'})
+    additions = []
+    excluded = set(baseline.get('excludedDirectoryNames', []))
+    for slug in baseline['priorSlugs']:
+        for directory, dirs, names in os.walk(ROOT / 'episodes/puzzles' / slug):
+            dirs[:] = sorted(n for n in dirs if n not in excluded)
+            for name in sorted(names):
+                path = Path(directory) / name
+                if not path.is_file():
+                    continue
+                relative = str(path.relative_to(ROOT))
+                if relative not in baseline['files']:
+                    additions.append({'path': relative, 'bytes': path.stat().st_size, 'sha256': sha(path)})
     render = json.loads((D / 'cover-render-report.json').read_text())
     style = json.loads((D / 'cover-style.json').read_text())
     assert render['inputs'] == style['sourceSha256']
@@ -40,6 +53,7 @@ def main():
         'scope': baseline['scope'], 'protectedEpisodes': baseline['priorSlugs'],
         'protectedFileCount': baseline['fileCount'], 'protectedBytes': baseline['totalBytes'],
         'unchangedFiles': baseline['fileCount'] - len(mismatches), 'mismatches': mismatches,
+        'newExistingFilesAfterBaseline': additions, 'newFilesNotTreatedAsOldByteMutations': True,
         'currentSourceInputs': inputs, 'currentOutputs': outputs, 'publicationCopies': copies,
         'passed': not mismatches and all(inputs.values()) and all(outputs.values()) and all(copies.values())}
     (D / 'qa/covers-preservation.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
