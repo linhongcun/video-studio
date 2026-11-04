@@ -1,0 +1,21 @@
+function prisonersLight() {
+  // Only three representative identities are drawn; the ellipsis denotes the others.
+  // Initial known-OFF state only: no counter assignment or signaling answer is shown.
+  const prisoner = (cx, number) => tag('g', {
+    'data-person-number': number, 'data-representative': 'true',
+  }, circle(cx, 91, 10, C.violet)
+    + path(`M ${cx} 106 V 132 M ${cx - 15} 116 H ${cx + 15} M ${cx} 132 L ${cx - 12} 151 M ${cx} 132 L ${cx + 12} 151`, C.violet, 4)
+    + text(cx, 181, `${number}号`, 24, C.muted));
+  return text(300, 43, '100人 · 每次仅1人', 29, C.violet)
+    + prisoner(120, 1)
+    + prisoner(240, 2)
+    + tag('g', {'data-people-ellipsis': 'true'}, text(360, 125, '…', 43, C.muted))
+    + prisoner(480, 100)
+    + text(105, 260, '初始', 24, C.muted)
+    + tag('g', {'data-light-state': 'off'},
+      rect(190, 204, 220, 96, C.surface, C.violet, {rx: 16})
+      + text(300, 232, '共享灯', 22, C.muted)
+      + text(300, 280, '0 · 灭', 35, C.violet))
+    + text(500, 260, '状态保留', 24, C.coral)
+    + text(300, 338, '只靠开关灯 · 可保留个人记忆', 23, C.muted);
+}
