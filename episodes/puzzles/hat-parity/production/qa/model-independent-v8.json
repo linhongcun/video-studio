@@ -1,0 +1,300 @@
+{
+  "schemaVersion": 1,
+  "episode": "hat-parity",
+  "status": "passed-with-explicit-scope",
+  "checkedAt": "2026-11-04",
+  "timeZone": "Asia/Shanghai",
+  "executor": "Codex /root/next_puzzle_research",
+  "observedAfterExecutionUTC": "2026-11-03 23:14:07 UTC",
+  "executionRuntime": "functions JavaScript V8 isolate; not local Node/Python",
+  "independentProtocolAuthor": "Codex /root/next_puzzle_research/hat_protocol_check",
+  "independentAuthorRun": {
+    "observedAfterExecutionUTC": "2026-11-03 23:12:01 UTC",
+    "scope": "Author actually reran this exact formal-orientation function in functions V8 and supplied its toString() plus results. The researcher then actually executed the supplied function again; stored result below comes from this researcher's replay.",
+    "countsMatch": true
+  },
+  "program": {
+    "entryPoint": "performFormalHatVerification()",
+    "source": "function performFormalHatVerification() {\n  const parity = bits => bits.reduce((p, b) => p ^ b, 0);\n  function simulate(hats) {\n    const n = hats.length;\n    const answers = new Array(n);\n    const signal = parity(hats.slice(1));\n    answers[0] = signal;\n    const trace = [{\n      speaker: 1, role: \"parity-message\",\n      visibleHats: hats.slice(1),\n      visibleBlackCount: hats.slice(1).reduce((a,b)=>a+b,0),\n      answer: signal, actualHat: hats[0], correct: signal === hats[0]\n    }];\n    for (let i = 1; i < n; i++) {\n      const visible = hats.slice(i + 1);\n      const priorRealAnswers = answers.slice(1, i);\n      const remainingParity = signal ^ parity(priorRealAnswers);\n      const answer = signal ^ parity(visible) ^ parity(priorRealAnswers);\n      answers[i] = answer;\n      trace.push({\n        speaker: i + 1, role: \"actual-hat\",\n        visibleHats: visible,\n        visibleBlackCount: visible.reduce((a,b)=>a+b,0),\n        priorRealAnswers,\n        priorActualBlackCount: priorRealAnswers.reduce((a,b)=>a+b,0),\n        remainingParityBeforeAnswer: remainingParity,\n        answer, actualHat: hats[i], correct: answer === hats[i],\n        remainingParityAfterAnswer: remainingParity ^ answer\n      });\n    }\n    return {answers, trace};\n  }\n  const rows = [];\n  let assignments = 0;\n  let verifiedOtherSpeakerTurns = 0;\n  let firstSpeakerOwnFlipPairs = 0;\n  for (let n = 1; n <= 14; n++) {\n    let exactlyNMinus1Correct = 0;\n    let exactlyNCorrect = 0;\n    let firstSpeakerIncorrect = 0;\n    let pairs = 0;\n    for (let mask = 0; mask < 2 ** n; mask++) {\n      const hats = Array.from({length:n}, (_,i)=>(mask >> i) & 1);\n      const result = simulate(hats);\n      if (!result.answers.slice(1).every((a,i)=>a === hats[i+1])) {\n        throw Error(\"Wrong later answer: n=\" + n + \",mask=\" + mask);\n      }\n      for (let i = 1; i < n; i++) {\n        const remainingFromAnswers = result.answers[0] ^ parity(result.answers.slice(1,i));\n        const actualRemaining = parity(hats.slice(i));\n        if (remainingFromAnswers !== actualRemaining) throw Error(\"Invariant failed\");\n        verifiedOtherSpeakerTurns++;\n      }\n      const correct = result.answers.reduce((count,a,i)=>count + Number(a === hats[i]), 0);\n      if (correct === n) exactlyNCorrect++;\n      else if (correct === n-1) exactlyNMinus1Correct++;\n      else throw Error(\"Unexpected guaranteed score\");\n      if (result.answers[0] !== hats[0]) firstSpeakerIncorrect++;\n      if (hats[0] === 0) {\n        const flipped = hats.slice();\n        flipped[0] = 1;\n        if (simulate(flipped).answers[0] !== result.answers[0]) throw Error(\"Own hat leaked\");\n        pairs++;\n        firstSpeakerOwnFlipPairs++;\n      }\n      assignments++;\n    }\n    rows.push({\n      n, assignments: 2 ** n,\n      allLaterSpeakersCorrect: true,\n      exactlyNMinus1Correct, exactlyNCorrect,\n      firstSpeakerIncorrect, ownFlipPairs: pairs\n    });\n  }\n  const fixtures = [\n    {name:\"all-white\", hats:Array(100).fill(0)},\n    {name:\"all-black\", hats:Array(100).fill(1)},\n    {name:\"alternating-white-start\", hats:Array.from({length:100},(_,i)=>i % 2)},\n    {name:\"alternating-black-start\", hats:Array.from({length:100},(_,i)=>(i+1) % 2)},\n    ...Array.from({length:100},(_,j)=>({\n      name:\"single-black-\" + (j+1),\n      hats:Array.from({length:100},(_,i)=>i === j ? 1 : 0)\n    })),\n    ...Array.from({length:100},(_,j)=>({\n      name:\"single-white-\" + (j+1),\n      hats:Array.from({length:100},(_,i)=>i === j ? 0 : 1)\n    }))\n  ];\n  for (const f of fixtures) {\n    if (!simulate(f.hats).answers.slice(1).every((a,i)=>a === f.hats[i+1])) {\n      throw Error(\"100-person fixture failed: \" + f.name);\n    }\n  }\n  const formalHats = [0,1,0,1,1];\n  const formalExample = simulate(formalHats);\n  const wrongAnswers = new Array(formalHats.length);\n  wrongAnswers[0] = parity(formalHats.slice(1));\n  for (let i = 1; i < formalHats.length; i++) {\n    wrongAnswers[i] = wrongAnswers[0] ^ parity(formalHats.slice(i+1)) ^\n                      parity(wrongAnswers.slice(0,i));\n  }\n  return {\n    executionContext:\"A new actual functions V8 replay; no Node, filesystem or randomness.\",\n    numbering:\"1=rear/first speaker; n=front/last speaker; answer order1..n; sees larger IDs; black1/white0.\",\n    assignments,\n    verifiedOtherSpeakerTurns,\n    firstSpeakerOwnFlipPairs,\n    rows,\n    deterministic100PersonFixtures:{\n      count:fixtures.length,\n      construction:\"2 monochrome +2 alternating +100 single-black +100 single-white\",\n      all99LaterSpeakersCorrect:true,\n      notExhaustiveAndNotTheProof:true\n    },\n    formalExample:{hats:formalHats,...formalExample},\n    negativeControl:{\n      error:\"Counts the first parity message as an actual prior hat color\",\n      hats:formalHats,\n      wrongAnswers,\n      wrongSpeakers:wrongAnswers.map((a,i)=>a === formalHats[i] ? null : i+1).filter(x=>x !== null)\n    }\n  };\n}",
+    "sourceIdentity": "Copied verbatim from the independent protocol checker and actually executed in this V8 call."
+  },
+  "result": {
+    "executionContext": "A new actual functions V8 replay; no Node, filesystem or randomness.",
+    "numbering": "1=rear/first speaker; n=front/last speaker; answer order1..n; sees larger IDs; black1/white0.",
+    "assignments": 32766,
+    "verifiedOtherSpeakerTurns": 393220,
+    "firstSpeakerOwnFlipPairs": 16383,
+    "rows": [
+      {
+        "n": 1,
+        "assignments": 2,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 1,
+        "exactlyNCorrect": 1,
+        "firstSpeakerIncorrect": 1,
+        "ownFlipPairs": 1
+      },
+      {
+        "n": 2,
+        "assignments": 4,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 2,
+        "exactlyNCorrect": 2,
+        "firstSpeakerIncorrect": 2,
+        "ownFlipPairs": 2
+      },
+      {
+        "n": 3,
+        "assignments": 8,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 4,
+        "exactlyNCorrect": 4,
+        "firstSpeakerIncorrect": 4,
+        "ownFlipPairs": 4
+      },
+      {
+        "n": 4,
+        "assignments": 16,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 8,
+        "exactlyNCorrect": 8,
+        "firstSpeakerIncorrect": 8,
+        "ownFlipPairs": 8
+      },
+      {
+        "n": 5,
+        "assignments": 32,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 16,
+        "exactlyNCorrect": 16,
+        "firstSpeakerIncorrect": 16,
+        "ownFlipPairs": 16
+      },
+      {
+        "n": 6,
+        "assignments": 64,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 32,
+        "exactlyNCorrect": 32,
+        "firstSpeakerIncorrect": 32,
+        "ownFlipPairs": 32
+      },
+      {
+        "n": 7,
+        "assignments": 128,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 64,
+        "exactlyNCorrect": 64,
+        "firstSpeakerIncorrect": 64,
+        "ownFlipPairs": 64
+      },
+      {
+        "n": 8,
+        "assignments": 256,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 128,
+        "exactlyNCorrect": 128,
+        "firstSpeakerIncorrect": 128,
+        "ownFlipPairs": 128
+      },
+      {
+        "n": 9,
+        "assignments": 512,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 256,
+        "exactlyNCorrect": 256,
+        "firstSpeakerIncorrect": 256,
+        "ownFlipPairs": 256
+      },
+      {
+        "n": 10,
+        "assignments": 1024,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 512,
+        "exactlyNCorrect": 512,
+        "firstSpeakerIncorrect": 512,
+        "ownFlipPairs": 512
+      },
+      {
+        "n": 11,
+        "assignments": 2048,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 1024,
+        "exactlyNCorrect": 1024,
+        "firstSpeakerIncorrect": 1024,
+        "ownFlipPairs": 1024
+      },
+      {
+        "n": 12,
+        "assignments": 4096,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 2048,
+        "exactlyNCorrect": 2048,
+        "firstSpeakerIncorrect": 2048,
+        "ownFlipPairs": 2048
+      },
+      {
+        "n": 13,
+        "assignments": 8192,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 4096,
+        "exactlyNCorrect": 4096,
+        "firstSpeakerIncorrect": 4096,
+        "ownFlipPairs": 4096
+      },
+      {
+        "n": 14,
+        "assignments": 16384,
+        "allLaterSpeakersCorrect": true,
+        "exactlyNMinus1Correct": 8192,
+        "exactlyNCorrect": 8192,
+        "firstSpeakerIncorrect": 8192,
+        "ownFlipPairs": 8192
+      }
+    ],
+    "deterministic100PersonFixtures": {
+      "count": 204,
+      "construction": "2 monochrome +2 alternating +100 single-black +100 single-white",
+      "all99LaterSpeakersCorrect": true,
+      "notExhaustiveAndNotTheProof": true
+    },
+    "formalExample": {
+      "hats": [
+        0,
+        1,
+        0,
+        1,
+        1
+      ],
+      "answers": [
+        1,
+        1,
+        0,
+        1,
+        1
+      ],
+      "trace": [
+        {
+          "speaker": 1,
+          "role": "parity-message",
+          "visibleHats": [
+            1,
+            0,
+            1,
+            1
+          ],
+          "visibleBlackCount": 3,
+          "answer": 1,
+          "actualHat": 0,
+          "correct": false
+        },
+        {
+          "speaker": 2,
+          "role": "actual-hat",
+          "visibleHats": [
+            0,
+            1,
+            1
+          ],
+          "visibleBlackCount": 2,
+          "priorRealAnswers": [],
+          "priorActualBlackCount": 0,
+          "remainingParityBeforeAnswer": 1,
+          "answer": 1,
+          "actualHat": 1,
+          "correct": true,
+          "remainingParityAfterAnswer": 0
+        },
+        {
+          "speaker": 3,
+          "role": "actual-hat",
+          "visibleHats": [
+            1,
+            1
+          ],
+          "visibleBlackCount": 2,
+          "priorRealAnswers": [
+            1
+          ],
+          "priorActualBlackCount": 1,
+          "remainingParityBeforeAnswer": 0,
+          "answer": 0,
+          "actualHat": 0,
+          "correct": true,
+          "remainingParityAfterAnswer": 0
+        },
+        {
+          "speaker": 4,
+          "role": "actual-hat",
+          "visibleHats": [
+            1
+          ],
+          "visibleBlackCount": 1,
+          "priorRealAnswers": [
+            1,
+            0
+          ],
+          "priorActualBlackCount": 1,
+          "remainingParityBeforeAnswer": 0,
+          "answer": 1,
+          "actualHat": 1,
+          "correct": true,
+          "remainingParityAfterAnswer": 1
+        },
+        {
+          "speaker": 5,
+          "role": "actual-hat",
+          "visibleHats": [],
+          "visibleBlackCount": 0,
+          "priorRealAnswers": [
+            1,
+            0,
+            1
+          ],
+          "priorActualBlackCount": 2,
+          "remainingParityBeforeAnswer": 1,
+          "answer": 1,
+          "actualHat": 1,
+          "correct": true,
+          "remainingParityAfterAnswer": 0
+        }
+      ]
+    },
+    "negativeControl": {
+      "error": "Counts the first parity message as an actual prior hat color",
+      "hats": [
+        0,
+        1,
+        0,
+        1,
+        1
+      ],
+      "wrongAnswers": [
+        1,
+        0,
+        0,
+        1,
+        1
+      ],
+      "wrongSpeakers": [
+        1,
+        2
+      ]
+    }
+  },
+  "all100AssignmentsProof": {
+    "type": "Independent mathematical invariant, not a simulation",
+    "firstSignal": "P = XOR(b_2..b_n)",
+    "invariant": "R_i = P XOR XOR(a_2..a_(i-1)) = XOR(b_i..b_n), for i>=2",
+    "deduction": "a_i = R_i XOR XOR(b_(i+1)..b_n) = b_i; update R_(i+1)=R_i XOR a_i.",
+    "optimality": "Keep all hats except b_1 fixed and flip b_1. Person 1 has the same observations and therefore utters the same word in both assignments, so cannot be correct in both. Thus no legal strategy guarantees n correct; the protocol guarantees n-1.",
+    "evidence": "episodes/puzzles/hat-parity/production/research.md"
+  },
+  "limits": [
+    "n=1..14 is exhaustive; 100-person coverage is only 204 deterministic fixtures, not all 2^100 assignments.",
+    "Counts of half the enumerated assignments with first-speaker error are combinatorial counts, not an unconditional 50% probability under the arbitrary-assignment problem.",
+    "The V8 protocol run used no filesystem, Node, network simulation or random numbers. Saving this JSON is a later filesystem operation, not part of the protocol runtime.",
+    "This is mathematical/protocol validation; it does not claim production-code equivalence, TTS/ASR/listening, dynamic animation, media, source freeze, browser, deployment or user review passed."
+  ]
+}
+
