@@ -137,6 +137,26 @@ function eggDrop() {
     + text(300, 326, '计划：14 → 27 → 39…', 27, C.coral);
 }
 
+function twelveBalls() {
+  // A legal first weighing: 1,2,3,4 versus 5,6,7,8; 9,10,11,12 stay outside.
+  // All twelve balls have exactly the same appearance. No answer is revealed.
+  const ball = (cx, cy, number) => tag('g', {
+    'data-ball-number': number,
+  }, circle(cx, cy, 23, C.surface, C.violet)
+    + text(cx, cy + 8, number, 24, C.text, {'font-family': 'DejaVu Sans,sans-serif'}));
+  return text(300, 43, '第一称：4 球 对 4 球', 29, C.violet)
+    + rect(43, 72, 232, 80, C.surface, C.edge, {rx: 16})
+    + rect(325, 72, 232, 80, C.surface, C.edge, {rx: 16})
+    + [1, 2, 3, 4].map((n, i) => ball(77 + 55 * i, 112, n)).join('')
+    + [5, 6, 7, 8].map((n, i) => ball(358 + 55 * i, 112, n)).join('')
+    + text(300, 121, '对', 24, C.muted)
+    + text(300, 194, '结果？', 29, C.coral)
+    + text(300, 234, '左重 / 平衡 / 右重', 26, C.muted)
+    + text(117, 293, '盘外', 25, C.muted)
+    + [9, 10, 11, 12].map((n, i) => ball(227 + 55 * i, 285, n)).join('')
+    + text(300, 338, '恰 1 球异常 · 无外部正常球', 24, C.muted);
+}
+
 function birthdayParadox() {
   // Exactly 23 people, in two rows of 12 + 11. The coral pair is an
   // illustrative collision; 50.73% describes the full ideal-model event.
@@ -203,6 +223,7 @@ function hatParity() {
 const DRAW = new Map([
   ['horse-racing', horseRacing], ['bridge-torch', bridgeTorch],
   ['water-jug', waterJug], ['monty-hall', montyHall], ['egg-drop', eggDrop],
+  ['twelve-balls', twelveBalls],
   ['birthday-paradox', birthdayParadox],
   ['hat-parity', hatParity],
   ['pirate-gold', pirateGold],
