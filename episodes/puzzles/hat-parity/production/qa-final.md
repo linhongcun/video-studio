@@ -1,6 +1,6 @@
 # P08 / EP55 制作验收
 
-本期选择[#212](https://github.com/linhongcun/video-studio/issues/212)，从main `60f92e6f7550b1ef4a450b6ebdae67d1888733f2`新建。本地成片、独立媒体与原生网页验收已完成；GitHub Release／Pages及canonical线上复核尚待本轮发布执行，不能由本地结果代替。
+本期选择[#212](https://github.com/linhongcun/video-studio/issues/212)，从main `60f92e6f7550b1ef4a450b6ebdae67d1888733f2`新建。本期已按v0.103.0交付，Release后Pages及canonical线上终验完成；#212已以completed关闭，#204同步为8/10。实际交付身份见[publication.json](publication.json)。
 
 两份大学公开材料已实读，原题、个人署名、版本／日期及颜色映射见[研究](research.md)、[来源证据](research-evidence.json)和[来源清单](references.json)。R1支持100人规则、奇偶协议与上界，R2交叉支持五人递推；两份连续短引为16／15词，不把署名作者称作谜题发明者。
 
@@ -29,3 +29,13 @@
 第一次媒体QA因words顶层schema假设失败；环境短暂starting→ready后，第二个旧会话句柄失效、报告仅running头，未获得媒体指标。均保留原文件与失败记录，恢复后用v2完整执行；未重用不存在的通过结果或改生产输入。阅读首轮未严格证明dark的触摸位移，保留旧范围，v2分别从0到24的真实位移闭合。所有工具修正与生产文件分开。
 
 最终全差异样式审计另保留原始site-build.log的行末空白，未清洗执行日志；完整diff检查仍为FAIL，仅5份EOF文件和1份原始构建日志属于精确分类范围，其余源码与文档路径检查通过。[最终样式范围](qa/whitespace-final-review.json)保留原输出gzip及SHA。
+
+## 线上终验与完成状态
+
+核心PR467合并142a2d97b319aef46ea7f6e490849e9fbf6853e1；附注tag对象14c358e61aed606e139ee662c2c4d2ae5354dec2指向相同提交，公开Release v0.103.0于2026-11-04T00:04:38Z发布。Release后Pages41744074130实际success；本任务原先的pre-Release41743916355在部署前正常取消，以优先包含新changelog的那次构建，不作为媒体失败。
+
+该次post-Release部署上的原生60动作／38精确PTS、阅读12项、nativeRGB38次及12完整GET（10个canonical Pages文件／页面＋2个指定部署commit JSON）通过。5026帧视频全SHA、28cue／4章、海报、两Figure、实际Release与changelog一致。独立实际查看12张线上图，根另实看两种正文全屏状态。[线上结论](qa/site-online-acceptance.json)、[完整GET](qa/site-online-http-verification.json)。
+
+额外三张844横屏暂停图确认：原生控件显示时，其黑渐变会明显压暗底部烧录字幕；主要机制区与参考资料清楚。正常播放、controls仍为true且原生控件自然收起后，最长句字幕白字清楚。没有把暂停字幕写成完全无遮挡，也没有改媒体、CSS或共享播放器。全屏补验最初的paused rVFC等待和微秒分数相等断言失败保留，后续按Fullscreen前后实际currentTime相等复核，主PTS及颜色门限未放宽。
+
+#212已按实际制作／发布／线上核验完成关闭，总览#204为8/10，P06／P10仍待后续安排。本轮仅GitHub站点，无新外平台投稿；尚无用户本期观看认可或学习效果实验。[事项收尾](qa/issue-completion.json)。
