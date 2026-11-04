@@ -1,0 +1,133 @@
+#!/usr/bin/env python3
+"""Observe every scroll segment of the long R1 source panel and bibliography item."""
+from pathlib import Path
+from datetime import datetime, timezone
+import argparse, functools, hashlib, http.server, importlib.util, json, math, threading, traceback
+from playwright.sync_api import sync_playwright
+
+D = Path(__file__).resolve().parents[1]
+R = next(p for p in D.parents if (p / 'AGENTS.md').is_file())
+sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+spec = importlib.util.spec_from_file_location('p06_source_reading_tools', D / 'qa/site-independent.py')
+tools = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(tools)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--base')
+    parser.add_argument('--out', type=Path, required=True)
+    args = parser.parse_args()
+    assert not args.out.exists(), 'Preserve earlier observations'
+    args.out.mkdir(parents=True)
+    names = ['article.mdx', 'references.json', 'storyboard.json', 'video.mp4']
+    before = {n: sha(D / n) for n in names}
+    refs = {s['id']: s for s in json.loads((D / 'references.json').read_text())['sources']}
+    reference = refs['R1']
+    authors = [s.strip() for s in reference['author'].split(';')]
+    assert len(authors) == 5
+    server = None
+    if args.base:
+        base = args.base.rstrip('/')
+    else:
+        assert sha(R / 'site/dist/episodes/twelve-balls/video.mp4') == before['video.mp4']
+        server = http.server.ThreadingHTTPServer(('127.0.0.1', 0), functools.partial(tools.RangeHandler, directory=str(R / 'site/dist')))
+        threading.Thread(target=server.serve_forever, daemon=True).start()
+        base = f'http://127.0.0.1:{server.server_port}/video-studio'
+    report = {'startedAtUTC': datetime.now(timezone.utc).isoformat(), 'passed': False,
+              'base': base, 'inputSHA256': before, 'source': reference['id'],
+              'sourceTitle': reference['title'], 'sourceAuthors': authors,
+              'observations': [], 'screenshots': [], 'visualReviewed': False,
+              'scope': 'Actual programmatic scrolling at overlapping positions; complete content-range coverage is measured. This complements separate actual touch-gesture checks; it does not claim these scrolls were touch gestures.',
+              'limitations': ['Current Chromium simulated desktop/mobile viewports, not a physical phone or legacy browser.', 'Individual screenshot visual review is separate from the automatic DOM checks.']}
+
+    def snap(page, name):
+        path = args.out / (name + '.png')
+        page.screenshot(path=str(path))
+        row = {'file': path.name, 'sha256': sha(path)}
+        report['screenshots'].append(row)
+        return row
+
+    try:
+        with sync_playwright() as pw:
+            browser = pw.chromium.launch(executable_path='/usr/bin/chromium', headless=True, args=['--no-sandbox'])
+            report['browserVersion'] = browser.version
+            for width, height in [(1440, 1000), (390, 844)]:
+                context = browser.new_context(viewport={'width': width, 'height': height}, device_scale_factor=1, is_mobile=width < 600, has_touch=width < 600)
+                context.add_init_script("localStorage.setItem('vs:sticky-off','1')")
+                page = context.new_page()
+                page.goto(base + '/episodes/twelve-balls/', wait_until='domcontentloaded')
+                page.wait_for_function('Array.from(document.querySelectorAll("[data-source-quote]")).every(e=>e.dataset.sourceReady==="true")')
+                for theme in ['light', 'dark']:
+                    page.locator('.theme-trigger').click()
+                    page.locator(f'[data-theme-opt="{theme}"]').click()
+                    assert page.evaluate('document.documentElement.dataset.theme') == theme
+                    trigger = page.locator('[data-source-trigger="R1"]')
+                    trigger.scroll_into_view_if_needed()
+                    trigger.tap() if width < 600 else trigger.click()
+                    panel = page.locator('[data-source-panel="R1"]')
+                    page.wait_for_function('document.querySelector("[data-source-panel=R1]").matches(":popover-open")')
+                    assert panel.locator('cite a').inner_text() == reference['title']
+                    assert panel.locator('cite a').get_attribute('href') == reference['url']
+                    assert all(author in panel.locator('.source-identity').inner_text() for author in authors)
+                    dimensions = panel.evaluate('(e)=>({height:e.clientHeight,scrollHeight:e.scrollHeight})')
+                    maximum = dimensions['scrollHeight'] - dimensions['height']
+                    offsets = sorted(set([0, maximum] + list(range(0, maximum + 1, max(1, math.floor(dimensions['height'] * .6))))))
+                    segments = []
+                    for index, offset in enumerate(offsets):
+                        panel.evaluate('(e,y)=>e.scrollTop=y', offset)
+                        page.wait_for_timeout(100)
+                        measured = panel.evaluate('(e)=>({top:e.scrollTop,height:e.clientHeight,scrollHeight:e.scrollHeight,rect:(()=>{const r=e.getBoundingClientRect();return{x:r.x,y:r.y,right:r.right,bottom:r.bottom}})()})')
+                        assert abs(measured['top'] - offset) <= 1
+                        assert measured['rect']['x'] >= 0 and measured['rect']['right'] <= width + 1
+                        assert measured['rect']['y'] >= 0 and measured['rect']['bottom'] <= height + 1
+                        measured['screenshot'] = snap(page, f'R1-panel-{theme}-{width}-{index:02}')
+                        segments.append(measured)
+                    assert segments[0]['top'] == 0 and abs(segments[-1]['top'] - maximum) <= 1
+                    assert all(b['top'] <= a['top'] + a['height'] for a, b in zip(segments, segments[1:]))
+                    report['observations'].append({'kind': 'source-panel-complete-scroll-range', 'theme': theme, 'width': width, 'maximumScrollTop': maximum, 'segments': segments})
+                    page.keyboard.press('Escape')
+                    page.wait_for_function('!document.querySelector("[data-source-panel=R1]").matches(":popover-open")')
+                    item = page.locator('.prose ol').last.locator('li').first
+                    assert reference['title'] in item.inner_text() and all(author in item.inner_text() for author in authors)
+                    item.scroll_into_view_if_needed()
+                    item_bounds = item.evaluate('(e)=>{const r=e.getBoundingClientRect();return{top:r.top+scrollY,bottom:r.bottom+scrollY,height:r.height}}')
+                    header = page.locator('header').bounding_box()
+                    header_bottom = max(0, header['y'] + header['height'])
+                    page_maximum = page.evaluate('document.documentElement.scrollHeight-innerHeight')
+                    first = max(0, min(page_maximum, item_bounds['top'] - header_bottom - 12))
+                    last = max(first, min(page_maximum, item_bounds['bottom'] - height + 20))
+                    step = max(1, math.floor((height - header_bottom - 32) * .6))
+                    offsets = sorted(set([first, last] + [min(last, first + i * step) for i in range(1, math.ceil((last - first) / step) + 1)]))
+                    views = []
+                    for index, offset in enumerate(offsets):
+                        page.evaluate('(y)=>scrollTo({top:y,behavior:"instant"})', offset)
+                        page.wait_for_timeout(120)
+                        state = page.evaluate('()=>({scrollY,viewportHeight:innerHeight,headerBottom:Math.max(0,document.querySelector("header").getBoundingClientRect().bottom),overflow:document.documentElement.scrollWidth>innerWidth})')
+                        assert not state['overflow']
+                        state['visibleDocumentRange'] = [state['scrollY'] + state['headerBottom'], state['scrollY'] + height]
+                        state['screenshot'] = snap(page, f'R1-bibliography-{theme}-{width}-{index:02}')
+                        views.append(state)
+                    assert views[0]['visibleDocumentRange'][0] <= item_bounds['top'] + 1
+                    assert views[-1]['visibleDocumentRange'][1] >= item_bounds['bottom'] - 1
+                    assert all(b['visibleDocumentRange'][0] <= a['visibleDocumentRange'][1] for a, b in zip(views, views[1:]))
+                    report['observations'].append({'kind': 'bibliography-item-complete-visible-range', 'theme': theme, 'width': width, 'itemBounds': item_bounds, 'views': views})
+                context.close()
+            browser.close()
+        report['passed'] = True
+    except Exception as error:
+        report['failure'] = {'type': type(error).__name__, 'message': str(error), 'traceback': traceback.format_exc()}
+        raise
+    finally:
+        report['sourceInputsUnchanged'] = all(sha(D / n) == digest for n, digest in before.items())
+        report['passed'] = report['passed'] and report['sourceInputsUnchanged']
+        report['finishedAtUTC'] = datetime.now(timezone.utc).isoformat()
+        (args.out / 'report.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\n')
+        if server:
+            server.shutdown()
+            server.server_close()
+    print(json.dumps({'passed': report['passed'], 'observations': len(report['observations']), 'screenshots': len(report['screenshots'])}))
+
+
+if __name__ == '__main__':
+    main()
