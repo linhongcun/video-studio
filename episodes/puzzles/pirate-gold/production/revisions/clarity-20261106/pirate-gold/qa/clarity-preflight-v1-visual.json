@@ -1,0 +1,104 @@
+{
+  "status": "changes-required",
+  "executor": "Codex independent visual QA /root/visual_qa",
+  "createdAt": "2026-11-06T09:41:01.040546+00:00",
+  "renderReport": "qa/clarity-preflight-v1.json",
+  "sourceHashes": {
+    "storyboard.json": "1a989080fcdf409a167c8d70b4f01bc306a7867a85f834d7baf5bec36135a58b",
+    "script.md": "c4fe53eb6ae09041d1893c392fe395fafc5d9cdbb45d6fa2f881f9efabe08f46",
+    "voice.wav": "5f0c23db300fb939da9cc2d4b7ab955eb1598187785518a63a65b9a172af04ca",
+    "plan.json": "76835c31d65d2399003105a2d0684146674e61f498498d0bcc119fa0c9cceb87",
+    "episode-config.json": "4fb2a938c9cc0d86ec7fc40ea9370f53bbc30e73ab41f3e9d2818da3cd2608f9",
+    "model-data.json": "c1741d24043e641e3d9aaf80a03da39f74e71993817edb9dc6912f9b96bbc066",
+    "qa/render-clarity.mjs": "2a8d267fc3151d23b3304bfea46c5d9c6289286f57b66136c4ea4285fc4f5a22",
+    "remotion/package.json": "ed86dacbfb361ac7d22cf4e2c017595dc55ef8e6125290a7d899dfa6001dd6e5",
+    "remotion/package-lock.json": "b9fa4f2f0edf477dc95a05a31b524ee752c8acc368c311011f3badd4e9518404",
+    "remotion/remotion.config.ts": "76ad0e86aa1baf7fd24917a5e1e606562456cad163fd7268701e10cb4b2c1209",
+    "remotion/tsconfig.json": "58079f6ba7aee3a8ade0ecfc5858a8eb315ed497eaf504d46c70e72ffc44aa97",
+    "../../../../../../_shared/puzzles-video/Frame.tsx": "ff02c1fb71fd3ee139b2f50b9056b8086271d94e58a161ca68073ed69978c680",
+    "../../../../../../_shared/puzzles-video/theme.ts": "b8a5658e0e80f0a20df0b33bb6c081f65498f8f30b92a506d9d417204572ea02",
+    "../../../../../../_shared/puzzles-covers/catalog.json": "7eb72722a5476c23ab5aad1fdc61f2598701ba693d0e1e86a54077dcdece1401",
+    "remotion/src/Main.tsx": "43bcc08413bfc5223c0446eecffb1f71aa759d10853e3047e17e72bc513b168a",
+    "remotion/src/Root.tsx": "ac537d8b43f2792c705300c015e0dced1e266f7ec6d6fdf86edc65d2d88a00e4",
+    "remotion/src/data.ts": "73f38dc219222507def2178dae66105fe99fb881da7580600c67b78e83e0b115",
+    "remotion/src/index.ts": "f9bc4e836a064aca9c58a681e1dc779b62a4d82894450e8e15d5cdd05840e36e",
+    "remotion/src/model.ts": "5289d28440484af876d99d9056398b0ced19801064cc3688df6cff7a659a840b",
+    "remotion/src/theme.ts": "2ca0f4fe73e5e68581cdaffd4870efc38c786881abd6832b7e4ea08e276b02c5"
+  },
+  "scope": {
+    "renderedStills": 42,
+    "visuallyReviewedContactSheets": [
+      "clarity-preflight-v1/contact-01.jpg",
+      "clarity-preflight-v1/contact-02.jpg",
+      "clarity-preflight-v1/contact-03.jpg",
+      "clarity-preflight-v1/contact-04.jpg",
+      "clarity-preflight-v1/contact-05.jpg",
+      "clarity-preflight-v1/contact-06.jpg",
+      "clarity-preflight-v1/contact-07.jpg"
+    ],
+    "nativeSizeExtra": [
+      "clarity-preflight-v1/s10-f03240.png"
+    ],
+    "continuousPreview": {
+      "file": "qa/clarity-preflight-v1/no-subtitles-3850-3979.mp4",
+      "frames": 130,
+      "fullDecode": true,
+      "visuallyReviewedDecodedOffsets": [
+        0,
+        14,
+        28,
+        52,
+        76,
+        100,
+        128
+      ]
+    }
+  },
+  "automatedChecks": {
+    "renderedDOMBounds": "passed",
+    "copyfitLog": "none",
+    "sourceUnchanged": true,
+    "subtitleNodes": 0
+  },
+  "findings": [
+    {
+      "id": "V1-overlap-transition",
+      "frames": [
+        2226,
+        2232,
+        2908,
+        2914,
+        4320,
+        4326
+      ],
+      "observed": "Old baseline values remain faintly visible behind the rising confirmed row; the additive vote formula also appears while the amount row still occupies its space.",
+      "requiredFix": "Fade baseline out before amount-row overlap and delay additive formula until the rising row settles."
+    },
+    {
+      "id": "V1-baseline-boundary",
+      "basis": "Static source review: baselineAlpha=tween(f,0,18) in every Board instance",
+      "observed": "Known baseline disappears at each shot boundary and fades back in for 18 frames.",
+      "requiredFix": "Keep inherited baseline visible from first frame; reserve entry animation for newly introduced content."
+    },
+    {
+      "id": "V1-conclusion-note",
+      "frames": [
+        4800
+      ],
+      "observed": "Final Note and vote-counter line overlap. DOM bounds: counter y828..880 and note y863..907; native screenshot confirms visible collision.",
+      "requiredFix": "Remove duplicate q14 vote-count line or reposition final Note without crowding subtitle zone."
+    }
+  ],
+  "confirmed": [
+    "14-frame/speech timing preserved; each amount remains attached to fixed pirate identity.",
+    "Trial 4号1枚 vs next1枚 reads as equality and rejection, with no transfer to final proposal.",
+    "3号、5号 each receive one proposed coin after their zero baseline is shown.",
+    "Vote order begins with proposer then bought votes; 2/4=half and 3/5 result are mathematically correct.",
+    "All reviewed titles and visible amount labels are readable without out-of-frame clipping."
+  ],
+  "limitations": [
+    "No full realtime playback or full semantic listening.",
+    "Preview clip is rendered without subtitles and inspected as seven decoded stages; soundtrack not evaluated.",
+    "Geometry automation cannot replace the visual collision checks above."
+  ]
+}
