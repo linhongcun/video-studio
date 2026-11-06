@@ -740,11 +740,11 @@ PR461合并d48fdbd4，附注tag／Release v0.101.0与Release后Pages41593158486�
 PR463合并70706842，附注tag／Release v0.102.0与Release后Pages41648226335成功；首个同SHA成功部署的线上原生52动作／28精准帧已执行，后续Release后10次普通canonical完整GET核验通过，视频完整SHA为3b41d2bb…e0d310d。#213已completed关闭，#204为7/10；P06、P08、P10待后续安排，不自动开拍。实际执行阶段与限制见[本期交付](../episodes/puzzles/pirate-gold/production/publication.json)。无外平台新发、逐字ASR、全片语义听辨、物理手机或用户观看认可声明。
 
 
-## 趣味推理P09 · 讲解清晰度修订（2026-11-06进行中）
+## 趣味推理P09 · 讲解清晰度修订（2026-11-06已交付）
 
-用户比较视频与配套文章后，认为文章的推理更容易跟随，要求视频更清楚地呈现逻辑。本轮从主干 `4e9f846f` 建立[独立修订](../episodes/puzzles/pirate-gold/production/revisions/clarity-20261106/pirate-gold/README.md)，沿用原研究规则、14镜28句配音及4801帧正文，重点重做否决后所得、当前提案、收益比较和票数通过之间的视觉连接；保留原冻结、媒体和历史QA，不将旧技术检查扩写为本轮表达认可。
+用户比较视频与配套文章后，认为文章推理更容易跟随。本轮从`4e9f846f`建立[独立修订](../episodes/puzzles/pirate-gold/production/revisions/clarity-20261106/pirate-gold/README.md)，沿用原规则、14镜28句配音和时间线，改为基准→报价→收益比较→达到半数→确认结果；同一人的0→1、四号1=1反对、四人2/4与最终三票分别呈现，旧冻结与QA保留。
 
-人物编号及位置保持，逐步突出三号、五号的0→1、四人局2/4达到半数，以及四号同钱反对的候选试算与最终方案之间的区别。当前仅记录返工范围与制作方向；新动态、正式成片、截图、播放器及GitHub站点按实际检查和交付结果另行闭合，不预记完成或用户认可，不扩展为外部平台重发。反馈与证据边界见[本轮记录](../episodes/puzzles/pirate-gold/production/revisions/clarity-20261106/pirate-gold/feedback.md)。
+164输入冻结，独立动态／字幕及实际MP4的35点检查、完整解码／时间戳、原声PCM完全一致、网站构建及准确配图通过。PR473合并`b5375f3a`并发布v0.105.1；Pages42199525265成功，线上8次完整GET核对视频SHA`3e23ce93…9b09b`、字幕、海报、两图、页面与更新日志。重复排队的同SHA手动任务取消，未计为成功部署；实际范围与回执见[本次交付](../episodes/puzzles/pirate-gold/production/revisions/clarity-20261106/pirate-gold/publication.json)。仅GitHub站点，无外平台重发；无全片实时观看、ASR、全片语义听辨、浏览器全屏或实体手机实测，不预记用户观看认可或学习效果。
 
 ## 趣味推理P08 · 100人猜帽子（2026-11-04已交付）
 
