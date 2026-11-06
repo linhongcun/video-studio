@@ -1,0 +1,11 @@
+--- qa/revisions/clarity-preflight-v2/remotion/src/Main.tsx.txt	2026-11-06 09:41:36.582186780 +0000
++++ remotion/src/Main.tsx	2026-11-06 09:44:17.214954347 +0000
+@@ -56,7 +56,7 @@
+     {showBase&&<g opacity={baselineAlpha}><T x={120} y={523} size={27} color={C.muted}>{baselineCue}</T>{r.players.map(id=><Amount key={id} id={id} y={540} value={base[String(id)]} out={id===proposer} color={focus.includes(id)?C.text:C.muted} focus={focus.includes(id)}/>)}</g>}
+     {mode==='baseline'&&<g opacity={tween(f,c+28,c+48)}><T x={960} y={716} size={43} color={C.coral} anchor="middle">先找：谁下一轮拿得最少？</T><Note>{hint??`需要${r.quota}票，自己有1票，还需${r.quota-1}票`}</Note></g>}
+     {mode!=='baseline'&&<g opacity={currentAlpha}>
+-      <T x={120} y={663-140*settle} size={27} color={passed?C.teal:C.coral}>{passed?'通过后，确认这一局的结果':mode==='trial'?'只试算4号：给他1枚':'本轮提案 · 尚未实际分配'}</T>
++      <T x={n===2&&passed?1150:120} y={663-140*settle} size={27} color={passed?C.teal:C.coral}>{passed?'通过后，确认这一局的结果':mode==='trial'?'只试算4号：给他1枚':'本轮提案 · 尚未实际分配'}</T>
+       {r.players.map(id=>{
+         const known=proposal[String(id)]!==undefined,show=mode==='trial'?id===4:full||known;
+         return show?<Amount key={id} id={id} y={685-145*settle} value={proposal[String(id)]} color={passed?C.teal:C.coral} confirmed={passed} focus={focus.includes(id)||passed} alpha={full?1:tween(f,offerStart+targets.indexOf(id)*24+28,offerStart+targets.indexOf(id)*24+45)}/>:null;
