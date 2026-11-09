@@ -23,7 +23,7 @@
 建立新期时在 `meta.json` 记录实际 `createdAt` 与 `updatedAt`（初始相同），首次公开再写 `publishedAt`；新时间使用含时区的 ISO 8601 值。修改既有期保留创建与首发时间，实质内容修改才刷新 `updatedAt`，对外以北京时间日期区分版本，同日多版带时分秒，不累加“重制版”名字。历史时间不补造精度，纯站点调整不改视频修改时间；完整口径见 [视频时间与版本](../../docs/publish.md#视频时间与版本)。
 
 1. 实际读取核心公开资料，按 [docs/research-template.md](../../docs/research-template.md) 记录原始题名、题名证据、主张、访问日期和边界，同时建立 `presentation: title-author` 的本期 `references.json`。核对公开作者或维护机构；明确个人署名填非空 `author`，否则省略并用 `organization`。原文摘录留图文/研究，不上视频，不用概括或译文冒充原题。先确认观众需要的前置概念；术语与支线按本期范围取舍，不沿用上期的来源或已通过状态。
-2. 编写 `script.md`、`article.mdx`、`pronunciation.md` 和 `visual-direction.md`；文章同步提供片尾各项的完整标题、链接和对应知识点。完成下面的资料预检后，再开始配音和昂贵的正式渲染。同一对象、渐进揭示，让动作解释因果；先做关键连续过程的小样，再展开全片。
+2. 编写 `script.md`、`article.mdx`、`pronunciation.md` 和 `visual-direction.md`；文章先按下方「配套图文起稿与接入」定提纲，再展开正文，同步提供片尾各项的完整标题、链接和对应知识点。文稿定稿时完成结构审读，资料预检通过后再开始配音和昂贵的正式渲染。同一对象、渐进揭示，让动作解释因果；先做关键连续过程的小样，再展开全片。
 3. 生成本期 `storyboard.json`、`covers.json` 和 `knoll-props.md`。主线收束后明确安排原题与作者/机构的参考资料简表；如有完整代码卡，参考资料放在代码卡之后，每页最多4项、默认5秒。结构参照 [分镜字段](../../docs/storyboard-schema.md)，画面与封面依当前 [RULES](../../docs/RULES.md)。
    LeetCode新题封面默认沿用已认可的[共享系列模板](../_shared/leetcode-covers/README.md)：按本题元数据扩展catalog和对应题图，统一生成并检查三比例，不从旧期复制另一套封面样式。趣味推理使用[本系列共享模板](../_shared/puzzles-covers/README.md)，按同一规则扩展题图。MySQL使用[本系列共享模板](../_shared/mysql-covers/README.md)，以真实EP和本片机制扩展单集封面。设计模式使用[本系列共享模板](../_shared/design-pattern-covers/README.md)，核对D编号、EP和职责关系，沿同一布局扩展。Kafka消息队列使用[共享模板](../_shared/kafka-covers/README.md)，MQ号取规划索引，正文与封面共用不可变style-v1，参考资料走[Kafka同色入口](../_shared/kafka-video/README.md)。Redis封面使用[本系列共享模板](../_shared/redis-covers-v2/README.md)，核对真实EP与完整题名，按单集机制扩展，保留旧冻结源。高并发、高可用、高性能使用[本系列共享模板](../_shared/peak-covers/README.md)，以真实EP、完整原问题和单集机制图扩展三比例。
 4. 用共享 `episodes/_shared/voice/` 的 prep、gen、build 等真实脚本生成冰糖配音、比较候选并保留 picks。按本期组装脚本写入真实句级区间，使用共享起音与 `place_v2.py --mode whole`；public/audio/voice.wav 是实体副本。ASR或听辨未执行时如实记录，不把字符兼容包络当作逐字识别，也不伪造共享自检结果。
@@ -32,6 +32,10 @@
 7. 将检查通过的同一份媒体、来源清单和附录回执接入站点，按实际渲染结果写入发布元数据；执行 `npm --prefix site run check:references` 和 `npm --prefix site run check:articles`，实际复核引用支持关系、图片信息价值、手机/桌面阅读、回看和原图入口。新制作或重制的公开视频缺资料附录时，构建会阻止发布。文章章节、字幕及线上完整SHA仍按 [publish.md](../../docs/publish.md) 核验；平台授权范围保持原约定。
 
 ## 配套图文起稿与接入
+
+先在已有研究、制作记录或模板注释中确定目标读者、必要前提、核心问题、贯穿示例、预期判断及深入内容，无需另建必交文档。按[阅读结构](../../docs/article-style.md#阅读结构)组织问题开场、可见方向、同例推导、图文代码对照、深入分层与结尾收束；根据题材重写标题和安排层级，不套固定章数或篇幅。文章应独立读懂，关键依据与条件留主线，代码有用途和结果解释；详略与段落、列表、表格的选择见[写作说明](../../docs/article-style.md#详略与排版)。
+
+冻结前按[文稿定稿审读](../../docs/qa.md#文稿定稿审读冻结前)确认开头与小结回答同一问题、每步推导能由文内信息接上，再冻结制作稿。发布前复核实际页面的目录、手机排版、引用、图片和回看；文章独有标题不写成不存在的视频章节或时码。
 
 从 [article.mdx](article.mdx) 复制骨架，按 [图文写作说明](../../docs/article-style.md) 替换所有占位内容。调研时核对原文、位置和对应论点，文稿中放置 `SourceQuote`；编码前按已定分镜时序写好并启用 `Figure` 图位（路径、预定秒数、章节、图注和alt），随文章、已有文章独有来源和实读证据一起冻结；最终媒体生成后只生成并核验截图，不把尚未生成的图记为已验收。实际选图需改时间或文稿时，保留冻结制作稿，只做记录前后SHA及差异的站点发布派生稿；新增来源、证据和图片也记录各自SHA。至少一处核心原文与一幅有效配图，发布前运行 `npm --prefix site run check:articles` 并实际复核阅读和回看操作。文章独有来源可存 `article-sources.json`，随发布稿和 `article/` 图片、证据一起接入 `episodes/<series>/<slug>/publication/`。
 
