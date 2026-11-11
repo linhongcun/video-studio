@@ -1,0 +1,126 @@
+import React,{useLayoutEffect,useRef} from 'react';
+import {AbsoluteFill,Audio,Sequence,staticFile,useCurrentFrame} from 'remotion';
+import {PuzzleCanvas,PuzzleHeader} from '../../../../../../../../_shared/puzzles-video/Frame';
+import {C,FONT,MONO} from './theme';
+import {Shot,shots} from './data';
+import {Outcome,Node,Layout,OUTCOMES,allBalls,boardLayout,rackLayout,firstWeighingLayout,lerpLayout,safeTransition,node,model,main,mirrorExample,lightComparisonExample,word,caseBall,caseWord,casesWord,normalAfter,timings,tween,inWindow} from './model';
+declare const __HAS_VOICE_AUDIO__:boolean;
+
+const T=({x,y,children,size=28,color=C.text,anchor='start',weight=550,alpha=1,width=1680,mono=false,...rest}:any)=><text data-text data-max-width={width} x={x} y={y} fill={color} fontFamily={mono?MONO:FONT} fontSize={size} fontWeight={weight} textAnchor={anchor} opacity={alpha} {...rest}>{children}</text>;
+const Head=({title,sub}:any)=><PuzzleHeader number="P06" kicker="12个球称三次" title={title} sub={sub}/>;
+const Panel=({x,y,w,h,color=C.edge,alpha=1,children,...rest}:any)=><g opacity={alpha} {...rest}><rect x={x} y={y} width={w} height={h} rx={17} fill={C.surface} stroke={color} strokeWidth={2}/>{children}</g>;
+const Note=({children,color=C.muted,alpha=1}:any)=><T x={960} y={806} size={25} color={color} anchor="middle" alpha={alpha}>{children}</T>;
+const Line=({x1,y1,x2,y2,color=C.edge,alpha=1}:any)=><path d={`M${x1} ${y1}L${x2} ${y2}`} fill="none" stroke={color} strokeWidth={3} opacity={alpha}/>;
+const Nav=({prefix='',mode='预测',used,detail}:any)=><g data-navigation-prefix={prefix} data-mode={mode} data-actual-weighings={used??'hypothetical'}>
+  {OUTCOMES.map((o,i)=><g key={o}><rect x={130+i*560} y={264} width={540} height={58} rx={13} fill={prefix[0]===o?C.violet+'18':C.surface} stroke={prefix[0]===o?C.violet:C.edge} strokeWidth={prefix[0]===o?3:1.5}/><T x={400+i*560} y={302} size={25} anchor="middle" color={prefix[0]===o?C.violet:C.muted} width={510}>首称{word(o)} · {node('').partitions[o].length}种</T></g>)}
+  <T x={130} y={352} size={23} color={mode==='主例实际'?C.coral:C.violet} width={1150}>{mode}{detail?` · ${detail}`:prefix?` · 前提：${prefix.split('').map(o=>word(o as Outcome)).join(' → ')}`:' · 三条首称分支'}</T>
+  {used!==undefined&&<T x={1790} y={232} size={23} color={C.coral} anchor="end" width={400}>主例已用 {used} / 3 称</T>}
+</g>;
+const Ball=({id,p,candidates,normal=false,confirmed=false,confirmedCase=main.answer,large=false,alpha=1,hideLabel=false}:any)=>{
+  const own=candidates.filter((c:string)=>caseBall(c)===id),label=confirmed?`偏${confirmedCase.endsWith('H')?'重':'轻'} · 确认`:normal?'正常':own.length===2?'重？ / 轻？':own.length?caseWord(own[0],true).replace(String(id),''):'已排除';
+  return <g transform={`translate(${p.x} ${p.y})`} opacity={alpha} data-ball={id} data-candidates={own.join(',')} data-ball-normal={normal?'true':'false'} data-ball-confirmed={confirmed?'true':'false'} data-physical-identity={id}>
+    <circle r={large?38:29} fill={C.surface} stroke={confirmed||normal?C.teal:C.violet} strokeWidth={confirmed?4:2.5}/>
+    <T x={0} y={large?12:10} anchor="middle" size={large?36:29} weight={750} width={72}>{id}</T>
+    <T alpha={hideLabel?0:1} x={0} y={large?78:62} anchor="middle" size={large?25:21} color={confirmed||normal?C.teal:own.length?C.violet:C.muted} width={large?230:confirmed?128:106}>{label}</T>
+  </g>;
+};
+const Balls=({layout,candidates,normal=[],confirmed=false,large=false,hideLabels=[]}:any)=><g data-physical-ball-count={allBalls.length} data-current-candidates={candidates.join(',')} data-known-normal={normal.join(',')}>{allBalls.map(id=><Ball key={id} id={id} p={layout[id]} candidates={candidates} normal={normal.includes(id)} confirmed={confirmed&&id===caseBall(typeof confirmed==='string'?confirmed:main.answer)} hideLabel={hideLabels.includes(id)} confirmedCase={typeof confirmed==='string'?confirmed:main.answer} large={large}/>)}</g>;
+const Board=({layout,candidates,normal=[],left=[],right=[],pending=false,confirmed=false,construction=false,hideLabels=[],migrating=false}:any)=><g data-left-balls={left.join(',')} data-right-balls={right.join(',')} data-comparison-legal={left.length===right.length?'equal-count':'construction-only'} data-migrating={migrating?'true':'false'} data-construction-only={construction?'true':'false'}>
+  <rect x={130} y={378} width={550} height={296} rx={20} fill={C.surface} fillOpacity={.35} stroke={C.edge} strokeWidth={2}/>
+  <rect x={710} y={378} width={550} height={296} rx={20} fill={C.surface} fillOpacity={.35} stroke={C.edge} strokeWidth={2}/>
+  <rect x={1290} y={378} width={550} height={296} rx={20} fill={C.surface} fillOpacity={.25} stroke={C.edge} strokeWidth={2} strokeDasharray="8 7"/>
+  <T alpha={migrating?0:1} x={405} y={410} size={23} anchor="middle" color={C.muted} width={500}>{pending?'上场位置待安排':`左组 · ${left.length}球`}</T>
+  <T alpha={migrating?0:1} x={985} y={410} size={23} anchor="middle" color={C.muted} width={500}>{pending?'构造中，尚未称重':`右组 · ${right.length}球`}</T>
+  <T alpha={migrating?0:1} x={1540} y={365} size={23} anchor="middle" color={C.muted} width={470}>盘外 · 球仍在这里</T>
+  <Balls layout={layout} candidates={candidates} normal={normal} confirmed={confirmed} hideLabels={migrating?allBalls:hideLabels}/>
+</g>;
+const ResultBoxes=({n,answers=false,visible=3,active,actual=false,revealOrder=['L','R','B'],countsOnly=false,empty=false}:any)=><g data-results-for-prefix={n.prefix} data-result-kind={answers?'last-weighing-predictions':'candidate-predictions'}>
+  {(['L','R','B'] as Outcome[]).map((o,i)=>{const possible=!answers||n.partitions[o].length>0,text=empty?'最多3种':answers?(n.answers?.[o]?`${caseBall(n.answers[o])}号偏${n.answers[o].endsWith('H')?'重':'轻'}`:'此分支不可能'):countsOnly?`${n.partitions[o].length}种候选`:casesWord(n.partitions[o]);return <Panel key={o} x={130+i*560} y={700} w={540} h={74} color={active===o?C.coral:possible||empty?C.edge:C.red} alpha={revealOrder.indexOf(o)<visible?1:.16} data-outcome={o} data-possible={possible?'true':'false'}><T x={150+i*560} y={729} size={22} color={active===o?C.coral:C.muted} width={500}>{active===o&&actual?'实际':'若'}{word(o)}{!answers&&!empty?` · ${n.partitions[o].length}种`:''}</T><T x={400+i*560} y={761} size={24} color={possible||empty?C.violet:C.red} anchor="middle" width={510}>{text}</T></Panel>;})}
+</g>;
+const GlobalMap=({focus='',ending=false,alpha=1}:any)=><g opacity={alpha} data-global-map="three-first-branches" data-focus={focus}>
+  <Panel x={710} y={285} w={500} h={78} color={C.violet}><T x={960} y={335} anchor="middle" size={33} color={C.violet}>第一称 1,2,3,4 : 5,6,7,8</T></Panel>
+  {OUTCOMES.map((o,i)=>{const x=400+i*560;return <g key={o}><Line x1={960} y1={363} x2={x} y2={430} color={focus[0]===o?C.coral:C.edge}/><Panel x={x-255} y={430} w={510} h={ending?230:200} color={focus[0]===o?C.coral:C.edge}><T x={x} y={477} anchor="middle" size={32} color={focus[0]===o?C.coral:C.violet}>首称{word(o)}</T><T x={x} y={532} anchor="middle" size={43}>{node('').partitions[o].length} 种候选</T><T x={x} y={585} anchor="middle" size={25} color={C.muted} width={470}>{o==='B'?'1—8正常，查9—12':'9—12正常，查1—8'}</T>{ending&&<T x={x} y={632} anchor="middle" size={25} color={C.teal}>第二称每路≤3 → 末称确定</T>}</Panel></g>;})}
+  <T x={960} y={ending?732:720} anchor="middle" size={ending?38:29} color={ending?C.teal:C.muted}>{ending?'24种情况，都能确定编号和轻重':'先看分支还剩多少可能，再安排下一称'}</T>
+  {ending&&<T x={960} y={795} anchor="middle" size={29} color={C.coral}>本次主例：左重 → 左重 → 平衡 → 6号偏轻</T>}
+</g>;
+
+const Construction=({s,f,q}:{s:Shot;f:number;q:number})=>{
+  const {a,b,c,e}=timings(s),con=model.construction,second=node('L'),initial=node(''),offIds=con.secondOffCandidates.map(caseBall),moving=[...con.secondLeftBeforeNormal,...con.secondRightBeforeNormal].sort((a,b)=>a-b),base=boardLayout([],[],moving),final=boardLayout(second.left,second.right,[],second.left,second.right);
+  let layout=base,left:number[]=[],right:number[]=[],pending=true,detail='先给平衡路留3种';
+  if(q===5){
+    const source=boardLayout(initial.left,initial.right),p=tween(f,a+6,a+65);layout={...source};
+    const four=offIds[0],from=source[four],to=base[four];
+    layout[four]=p<.2?{x:from.x,y:from.y+(555-from.y)*(p/.2)}:p<.8?{x:from.x+(to.x-from.x)*((p-.2)/.6),y:555}:{x:to.x,y:555+(to.y-555)*((p-.8)/.2)};
+    for(const id of offIds.slice(1)){const p=tween(f,a+67,a+115);layout[id]={x:source[id].x+(base[id].x-source[id].x)*p,y:source[id].y+(base[id].y-source[id].y)*p};}
+    for(const id of moving){const p=tween(f,c+4,c+54);layout[id]={x:source[id].x+(base[id].x-source[id].x)*p,y:source[id].y+(base[id].y-source[id].y)*p};}
+  }
+  if(q===6){
+    const events=[{id:second.left[0],at:inWindow(a,b,.16),side:'left'},{id:second.left[1],at:inWindow(a,b,.34),side:'left'},{id:second.right[0],at:inWindow(a,b,.54),side:'right'},{id:second.right[1],at:inWindow(c,e,.40),side:'right'},{id:second.left[2],at:inWindow(c,e,.60),side:'left'}];
+    layout={...base};for(const v of events){const p=tween(f,v.at,v.at+22);layout[v.id]={x:base[v.id].x+(final[v.id].x-base[v.id].x)*p,y:base[v.id].y+(final[v.id].y-base[v.id].y)*p};if(p>.99)(v.side==='left'?left:right).push(v.id);}
+    pending=false;detail=f<c?'若偏重，会让自己这边重':'若偏轻，会让对面重';
+  }
+  if(q===7){left=second.left;right=f>=inWindow(a,b,.6)?second.right:con.secondRightBeforeNormal;pending=false;const before={...final,[con.normalPaddingBall]:base[con.normalPaddingBall]};layout=lerpLayout(before,final,tween(f,inWindow(a,b,.3),inWindow(a,b,.6)));detail='9号来自首称不平衡后确认的正常球';}
+  const arrived=[...left,...right],partial={...second,partitions:Object.fromEntries(OUTCOMES.map(o=>[o,o==='B'?second.partitions[o]:second.partitions[o].filter(c=>arrived.includes(caseBall(c)))]))} as Node;
+  return <><Head title={q===5?'先把3种候选，留给平衡这一路':q===6?'同样上场，轻与重的作用方向相反':'用正常的9号，把右边补到3球'} sub="构造第2称 · 候选标签是可能性，尚未提交实际结果"/><Nav prefix="L" mode="构造预测" used={1} detail={detail}/><Board layout={layout} candidates={second.candidates} normal={second.knownNormal} left={left} right={right} pending={pending} construction hideLabels={q===5&&f>a+6&&f<a+65?[offIds[0]]:[]}/>
+    {q===5?<><Panel x={130} y={700} w={1100} h={74} color={C.violet}><T x={680} y={746} anchor="middle" size={27} color={C.violet}>其余5种，需要靠上场的位置分开</T></Panel><Panel x={1250} y={700} w={540} h={74} color={C.violet}><T x={1520} y={729} anchor="middle" size={22} color={C.muted}>若第2称平衡</T><T x={1520} y={761} anchor="middle" size={25} color={C.violet}>{casesWord(con.secondOffCandidates)}</T></Panel></>:<ResultBoxes n={q===6?partial:second}/>}
+    <Note color={q===7?C.teal:C.muted}>{q===5?`盘外保留${offIds.join('、')}号；球未被移除，只有位置在盘外`:q===6?'左3球、右2球时仍是构造草稿，不能执行称重':'完整第2称：左 1,2,5　对　右 3,6,9；三路按左重 / 右重 / 平衡为3 / 2 / 3种'}</Note>
+  </>;
+};
+
+/** Hypothetical paths restore their own premise before entering the last comparison. */
+const Branch=({s,f,prefix,start,end,lead=0}:{s:Shot;f:number;prefix:string;start:number;end:number;lead?:number})=>{
+  const parent=node(prefix[0]),n=node(prefix),{c,e}=timings(s),selectAt=inWindow(start,end,.15),moveAt=selectAt+18,moveEnd=c+(e-c)*.28,selected=f>=selectAt,moving=f>=moveAt,transition=safeTransition(parent,n,f,moveAt,moveEnd),candidates=selected?n.candidates:parent.candidates,normal=selected?n.knownNormal:parent.knownNormal;
+  return <>{f>=lead+24&&<Nav prefix={selected?prefix:prefix[0]} mode="另一个结果下的安排" detail={selected?`假设：首称${word(prefix[0] as Outcome)} → 第2称${word(prefix[1] as Outcome)}；现在安排第3称`:`返回首称${word(prefix[0] as Outcome)}的第2称分叉`}/>} {f<lead+24?<GlobalMap focus={prefix}/>:<g><Board layout={transition.layout} candidates={candidates} normal={normal} left={moving?n.left:parent.left} right={moving?n.right:parent.right} migrating={transition.moving}/>{!transition.moving&&(moving?<ResultBoxes n={n} answers/>:<ResultBoxes n={parent} active={selected?prefix[1]:undefined}/>)}<Note>{transition.moving?`候选：${casesWord(n.candidates)}；逐球换到第3称位置，尚未称重`:moving?`第3称：${n.left.join(',')}号 对 ${n.right.join(',')}号；下方是结果预测，不是本次实际经历`:'先恢复这一分支的候选，再换成第三称分组'}</Note></g>}</>;
+};
+/** Restore a known first-balance premise; construct3/3/2 predictions without spending a weighing. */
+const BalancedConstruction=({s,f}:{s:Shot;f:number})=>{
+  const {a,b,c,e}=timings(s),first=node(''),next=node('B');
+  const focusAt=inWindow(a,b,.16),budgetAt=inWindow(a,b,.58),moveAt=c+6,moveEnd=inWindow(c,e,.47);
+  const reveal=[inWindow(c,e,.55),inWindow(c,e,.73),inWindow(c,e,.88)];
+  const transition=safeTransition(first,next,f,moveAt,moveEnd),placing=f>=moveAt;
+  const phase=f<focusAt?'restore-first-balance':f<budgetAt?'eight-candidates':f<moveAt?'capacity-before-choice':transition.moving?'placing-groups':f<reveal[0]?'groups-ready':f<reveal[1]?'predict-left':f<reveal[2]?'predict-right':'predict-balance';
+  const outcomes:Outcome[]=['L','R','B'];
+  return <g data-balanced-construction-phase={phase} data-current-remaining-weighings="2" data-required-post-second-capacity="3" data-proposal-status="unexecuted">
+    <Head title="首称平衡后，第二称怎样把8种分开？" sub="另一种首称结果 · 正常球来自首称平衡，没有外加参照"/>
+    {f<focusAt?<GlobalMap focus="B"/>:<>
+      <Nav prefix="B" mode="构造第2称 · 结果预测" detail="当前尚余2称；正常1、2、3号来自首称平衡"/>
+      <Board layout={transition.layout} candidates={next.candidates} normal={next.knownNormal} left={placing?next.left:first.left} right={placing?next.right:first.right} migrating={transition.moving} construction/>
+      {!transition.moving&&f<reveal[0]&&<Panel x={130} y={700} w={1660} h={74} color={C.violet} alpha={tween(f,budgetAt,budgetAt+18)} data-second-weighing-budget>
+        <T x={960} y={746} size={32} anchor="middle" color={C.violet}>第二称后余1称 → 每路至多3种</T>
+      </Panel>}
+      {!transition.moving&&outcomes.map((o,i)=>f>=reveal[i]?<Panel key={o} x={130+i*560} y={700} w={540} h={74} color={C.violet} alpha={tween(f,reveal[i],reveal[i]+12)} data-construction-prediction={o} data-predicted-cases={next.partitions[o].join(',')}>
+        <T x={150+i*560} y={729} size={22} color={C.muted}>若{word(o)} · {next.partitions[o].length}种</T>
+        <T x={400+i*560} y={761} size={24} anchor="middle" color={C.violet} width={510}>{casesWord(next.partitions[o])}</T>
+      </Panel>:null)}
+      <Note color={f>=reveal[2]+12?C.teal:C.muted}>{transition.moving?'9、10、11号对正常1、2、3号；12号留盘外，尚未执行称重':f<moveAt?'首称平衡 → 1—8正常；9—12每球轻重2种，共8种候选':f<reveal[0]?'左右各3球，正常参照已知；现在分别预测三种结果':f<reveal[1]?'右组都正常；若左重，异常只能是左组中的某个偏重球':f<reveal[2]?'若右重，左组只可能有一个偏轻；未提交任何实际结果':'若平衡，上场球正常，只剩12号轻/重2种；三路均能交给最后一称'}</Note>
+    </>}
+  </g>;
+};
+
+const Scene=({s,f}:{s:Shot;f:number})=>{
+  const q=parseInt(s.id,10),{a,b,c,e}=timings(s),first=node(''),second=node('L');
+  if(q===1)return <><Head title="12个球，怎样称3次就找出异常？" sub="恰有1球偏轻或偏重 · 其余11球同重 · 无外部正常球"/><Balls layout={rackLayout()} candidates={first.candidates} large/>{['球号固定，外观相同','等臂比较，左右同数量','可按上次结果安排下一称'].map((v,i)=><Panel key={v} x={130+i*560} y={685} w={540} h={76} color={f>=c?C.violet:C.edge}><T x={400+i*560} y={735} size={28} anchor="middle" width={510}>{v}</T></Panel>)}<Note color={C.coral}>最多3称 → 必须同时确定：编号 ＋ 轻重</Note></>;
+  if(q===2)return <><Head title="12个球 × 每球轻重2种 = 24种可能" sub="仍然只有12个实体球；重？和轻？是两种候选假设"/><Balls layout={rackLayout()} candidates={first.candidates} large/>{OUTCOMES.map((o,i)=><Panel key={o} x={130+i*560} y={685} w={540} h={85} color={C.violet} alpha={tween(f,c+i*12,c+i*12+18)}><T x={400+i*560} y={721} anchor="middle" size={27} color={C.violet}>每称可能{word(o)}</T><T x={400+i*560} y={755} anchor="middle" size={25} color={C.muted}>首称后余2称，最多3×3＝9种</T></Panel>)}<Note>安排目标：第一称的每条分支，都不能留下超过9种</Note></>;
+  if(q===3){const moveEnd=a+133,preview=f<moveEnd?undefined:f<c?'B':f<inWindow(c,e,.48)?'L':f<e-16?'R':undefined,candidates=preview?first.partitions[preview]:first.candidates;return <><Head title="先四个对四个，三条路各剩8种" sub="先预测三种结果；预览结束，返回首称待判状态"/><Nav prefix={preview??''} mode="首称预测" detail={preview?`假设${word(preview)}，还剩${candidates.length}种`:'尚未提交实际结果'}/><Board layout={firstWeighingLayout(f,a)} candidates={candidates} normal={preview?normalAfter(candidates):[]} left={first.left} right={first.right} hideLabels={f<moveEnd?allBalls:[]} migrating={f<moveEnd}/><ResultBoxes n={first} countsOnly active={preview}/><Note>4对4的三个结果都留8种，能够进入剩下两称</Note></>;}
+  if(q===4){const submitted=f>=inWindow(a,b,.21),candidates=submitted?second.candidates:first.candidates;return <><Head title="主例：第1称实际左重，缩到8种" sub="只排除不相容的假设；此时还不知道哪一个球异常"/><Nav prefix={submitted?'L':''} mode="主例实际" used={submitted?1:0} detail={submitted?'第1称已提交：左重':'第1称待判'}/><Board layout={boardLayout(first.left,first.right)} candidates={candidates} normal={submitted?second.knownNormal:[]} left={first.left} right={first.right}/><ResultBoxes n={second} empty/><Note color={f>=c?C.teal:C.muted}>{f>=c?'9—12已经正常：异常必在造成首称不平衡的1—8中':'候选：1—4可能偏重，5—8可能偏轻'}</Note></>;}
+  if(q>=5&&q<=7)return <Construction s={s} f={f} q={q}/>;
+  if(q===8){const third=node(main.path.slice(0,2)),result2=inWindow(a,b,.23),moveAt=result2+20,moveEnd=b-2,result3=inWindow(c,e,.73),submitted2=f>=result2,thirdStage=f>=moveAt,confirmed=f>=result3,candidates=confirmed?[main.answer]:submitted2?third.candidates:second.candidates,transition=safeTransition(second,third,f,moveAt,moveEnd),layout=transition.layout;return <><Head title={confirmed?'第3称实际平衡，所以6号偏轻':thirdStage?'最后称1号对2号，分开3种候选':'主例：第2称还是左重'} sub="主例始终沿同一个隐藏真值；直到第三称后才揭示答案"/><Nav prefix={confirmed?main.path:submitted2?'LL':'L'} mode="主例实际" used={confirmed?3:submitted2?2:1} detail={confirmed?'左重 → 左重 → 平衡；主例结束':submitted2?'已提交第2称左重；余1称':'第2称待判'}/><Board layout={layout} candidates={candidates} normal={confirmed?normalAfter(candidates):submitted2?third.knownNormal:second.knownNormal} left={thirdStage?third.left:second.left} right={thirdStage?third.right:second.right} confirmed={confirmed} migrating={transition.moving}/>{!transition.moving&&(thirdStage?<ResultBoxes n={third} answers revealOrder={['L','R','B']} visible={f<c?0:f<inWindow(c,e,.3)?1:f<inWindow(c,e,.52)?2:3} active={confirmed?'B':undefined} actual/>:<ResultBoxes n={second} active={submitted2?'L':undefined} actual/>)}<Note color={confirmed?C.teal:C.muted}>{confirmed?'1、2正常，盘外6号是唯一剩下的异常候选：偏轻':transition.moving?'候选1重？、2重？、6轻？；逐球换位，落定后才称第3次':'预测不是结果；实际平衡之后，才能确认盘外的6号偏轻'}</Note></>;}
+  if(q===9)return <><Head title="回到分叉：第二称若右重" sub="另一个结果下的安排 · 主例已经结束，不继续增加主例称数"/><Branch s={s} f={f} prefix="LR" start={a} end={e} lead={a}/></>;
+  if(q===10)return <><Head title="第二称若平衡，查盘外4、7、8号" sub="前提恢复为首称左重；这一路不是主例实际结果"/><Branch s={s} f={f} prefix="LB" start={a} end={e} lead={a}/></>;
+  if(q===11){
+    const other=node('R'),last=node(mirrorExample.path.slice(0,2)),focusAt=inWindow(a,b,.22),secondAt=a+60,secondEnd=c+12,lastAt=inWindow(c,e,.15),lastEnd=inWindow(c,e,.69),comparison=f>=lastAt,secondStage=f>=secondAt,mapped=f>=inWindow(c,e,.78),transition=comparison?safeTransition(other,last,f,lastAt,lastEnd):safeTransition(first,other,f,secondAt,secondEnd),layout=transition.layout,candidates=mapped?[mirrorExample.answer]:comparison?last.candidates:other.candidates;
+    return <><Head title="首称若右重：轻重与结果一起翻转" sub="另一个输入的对照 · 球号和所在侧不交换；主例6轻已结束"/>{f<focusAt?<GlobalMap focus="R"/>:<><Nav prefix={mapped?'RRB':comparison?'RR':'R'} mode="另一个首称结果" detail="候选重↔轻；后续左重↔右重；平衡不变"/><Board layout={layout} candidates={candidates} normal={mapped?normalAfter(candidates):comparison?last.knownNormal:other.knownNormal} left={comparison?last.left:secondStage?other.left:first.left} right={comparison?last.right:secondStage?other.right:first.right} confirmed={mapped?mirrorExample.answer:false} migrating={transition.moving}/>{!transition.moving&&<Panel x={130} y={700} w={1660} h={74} color={mapped?C.teal:C.violet}><T x={960} y={730} anchor="middle" size={25} color={C.muted}>同号对照：6轻　左重 → 左重 → 平衡　　↔　　6重　右重 → 右重 → 平衡</T><T x={960} y={763} anchor="middle" size={25} color={mapped?C.teal:C.violet}>{comparison?'末称都用1号对2号；两球平衡时，分别确定6轻 / 6重':'第2称都用左1,2,5 对 右3,6,9，球号和左右位置不换'}</T></Panel>}<Note>{mapped?'对照输入6重沿右重、右重、平衡结束；它不是主例改换真值':transition.moving?'逐球换到同号称法；所有编号常显，落定后再恢复候选与预测':'完整左重子树按同一规则映射；称法保留，只翻转轻重与不平衡结果'}</Note></>}</>;
+  }
+  if(q===12)return <BalancedConstruction s={s} f={f}/>;
+  if(q===13)return <><Head title="首平衡 → 次平衡：还要判12号轻重" sub="两次平衡只锁定编号；最后与正常1号比较，才能兑现轻重目标"/><Branch s={s} f={f} prefix="BB" start={a} end={e} lead={a}/></>;
+  if(q===14){const parent=node('B'),last=node(lightComparisonExample.path.slice(0,2)),selectAt=inWindow(a,b,.44),moveAt=inWindow(a,b,.56),moveEnd=c+inWindow(0,e-c,.28),chosen=f>=selectAt,moving=f>=moveAt,confirmAt=inWindow(c,e,.8),confirmed=f>=confirmAt,candidates=confirmed?[lightComparisonExample.answer]:chosen?last.candidates:parent.candidates,transition=safeTransition(parent,last,f,moveAt,moveEnd),layout=transition.layout;return <><Head title={confirmed?'另一个输入9轻：末称右重，确认9轻':'首称平衡，次称不平衡：方向也已知'} sub={confirmed?"另一个输入已确认9轻；主例6轻仍然保持已结束":"另一个例子：首称平衡 → 次称右重；主例6轻已结束"}/><Nav prefix={confirmed?'BRR':chosen?'BR':'B'} mode="另一个输入的演示" detail={chosen?'聚焦次右重：9、10、11号中有一个偏轻':'次左重留下偏重候选，次右重留下偏轻候选'}/><Board layout={layout} candidates={candidates} normal={confirmed?normalAfter(candidates):chosen?last.knownNormal:parent.knownNormal} left={moving?last.left:parent.left} right={moving?last.right:parent.right} confirmed={confirmed?lightComparisonExample.answer:false} migrating={transition.moving}/>{!transition.moving&&(f<c?<g>{(['L','R'] as Outcome[]).map((o,i)=><Panel key={o} x={130+i*840} y={700} w={820} h={74} color={chosen&&o==='R'?C.coral:C.violet}><T x={540+i*840} y={729} size={23} anchor="middle" color={C.muted}>第2称若{word(o)} · 对面1、2、3正常</T><T x={540+i*840} y={761} size={27} anchor="middle" color={C.violet}>{casesWord(parent.partitions[o])}</T></Panel>)}</g>:<ResultBoxes n={last} answers visible={f<inWindow(c,e,.22)?2:3} active={confirmed?'R':undefined} actual/>)}<Note color={confirmed?C.teal:C.muted}>{transition.moving?'候选9轻？、10轻？、11轻？；换到9号对10号，落定后才称重':f<c?'与正常右组比较，已经知道异常方向；接着用9号对10号':confirmed?'本演示确认9号偏轻；偏重时同号比较反向：左重9重、右重10重、平衡11重':'已知偏轻：左重→10轻，右重→9轻，平衡→11轻；偏重时左右判断反过来'}</Note></>;}
+  if(q===15)return <><Head title="看还剩哪些可能，再安排球的位置" sub="每次称重，都为下一次留下能够分开的候选"/><GlobalMap ending/></>;
+  throw Error('Unknown P06 shot '+s.id);
+};
+const ShotView=({s,hideSubtitles,auditLayout}:{s:Shot;hideSubtitles:boolean;auditLayout:boolean})=>{
+  const f=useCurrentFrame(),ref=useRef<SVGSVGElement>(null),caption=s.subtitles?.find(q=>f>=q.from&&f<(q.to!==undefined?q.to+1:q.from+(q.duration??0)));
+  useLayoutEffect(()=>{if(!auditLayout||!ref.current)return;ref.current.querySelectorAll<SVGTextElement>('[data-max-width]').forEach(el=>{const limit=Number(el.dataset.maxWidth);if(limit&&el.getBBox().width>limit+2)console.error('COPYFIT',s.id,f,el.textContent,el.getBBox().width,limit);});},[auditLayout,s.id,f]);
+  return <AbsoluteFill data-shot={s.id} data-local-frame={f} style={{background:C.bg,fontFamily:FONT,color:C.text,overflow:'hidden'}}><svg ref={ref} width={1920} height={1080} viewBox="0 0 1920 1080" data-audit-scene><PuzzleCanvas/><Scene s={s} f={f}/><T x={1795} y={83} size={26} color={C.muted} anchor="end">IT小村</T></svg>{!hideSubtitles&&caption&&<div data-subtitle style={{position:'absolute',left:140,right:140,top:835,minHeight:78,display:'flex',alignItems:'center',justifyContent:'center',fontSize:30,lineHeight:1.3,textAlign:'center',background:C.bg+'F5',padding:'0 18px',borderRadius:14,boxSizing:'border-box'}}>{caption.text}</div>}</AbsoluteFill>;
+};
+export type MainProps={hideSubtitles?:boolean;showSubtitles?:boolean;auditLayout?:boolean};
+export const Main=({hideSubtitles=false,showSubtitles=true,auditLayout=false}:MainProps)=><AbsoluteFill style={{background:C.bg}}>{typeof __HAS_VOICE_AUDIO__!=='undefined'&&__HAS_VOICE_AUDIO__&&<Audio src={staticFile('audio/voice.wav')}/>} {shots.map(s=><Sequence key={s.id} from={s.from} durationInFrames={s.durationInFrames}><ShotView s={s} hideSubtitles={hideSubtitles||!showSubtitles} auditLayout={auditLayout}/></Sequence>)}</AbsoluteFill>;
