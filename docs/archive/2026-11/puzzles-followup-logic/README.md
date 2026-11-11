@@ -1,6 +1,6 @@
 # 后续三期趣味推理逻辑复查
 
-2026-11-11，北京时间。状态：两期修订及本地媒体/站点接入已完成，等待GitHub发布与线上核验；追踪任务[#479](https://github.com/linhongcun/video-studio/issues/479)。
+2026-11-11，北京时间。状态：两期修订与本地／线上验收均已完成，v0.105.3已交付；追踪任务[#479](https://github.com/linhongcun/video-studio/issues/479)。
 
 本轮范围为用户截图圈出的EP55／P08《100人猜帽子》、EP56／P06《12球称重》、EP57／P10《100囚徒与一盏灯》。从最新主干`27329c38aae4e8388a9999ab1c357fa9c8783fd9`建立制作分支，先按L069／S024及配音前四问定位方法选择、信息依赖与步骤依据，再决定实际修改范围，不为批次齐改而重配已经讲清的部分。GitHub站点沿持续授权交付，外部平台不在本轮范围。
 
@@ -19,3 +19,5 @@ P06/P10确需修改时在各自`production/revisions/logic-20261111/<slug>/`生�
 本地接入见[事务暂存记录](publication-stage.json)，保留封面、SourceQuote、EP、slug、创建及首发时间；P08全部原始基线身份不变。站点构建及30／28条字幕见[构建回执](site-build-check.json)。[目录检查](layout-check.json)通过65期／11系列，先前仅移走node_modules却残留旧系列目录的失败保留为layout-check-v1.json；后续只临时隔离完整未跟踪旧缓存树再还原，没有修改校验器或跟踪文件。全仓密钥检查仍有282项未改旧MQ材料命中，[原失败与本次范围](secret-scan.json)分开记录。
 
 [本地验收](qa-final.md)记录了两期44项真实Chromium动作、12截图、配图回看及原生控件和seek状态的实际范围；正式MP4审图和网页测试分别留证。GitHub部署和线上身份会在实际完成后补入交付回执。
+
+PR480、Release v0.105.3与Pages42948989526已完成；线上16次canonical完整GET通过，P08原媒体保持，P06/P10新媒体及配套身份一致。实际时间、SHA与能力边界见[交付记录](release.md)、[机器回执](publication.json)及[线上检查](online/canonical-v1.json)。
