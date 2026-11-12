@@ -2,7 +2,7 @@
 
 ## LC347 · 前K个高频元素（2026-11-12制作）
 
-用户要求从issue选择下一期，当前LeetCode选题仅剩[#83](https://github.com/linhongcun/video-studio/issues/83)。从最新`6868fd40b`建立EP58／top-k-frequent-elements，先通过独立题意与方法选择、堆基础及文章结构审读，再生成32句冰糖配音；16镜、5章，正文5654帧含5秒完整Python，另附150帧原题／作者资料，最终5804帧193.466667秒。200输入冻结，12,500组有效k核验、真实heapq过程、无字幕小样、正式150帧及19移动窗口/代码资料页审读已通过；默认编码变暗在正式编码前用真实limitedBT709路径修复，旧候选清单和失败QA保留。成片SHA为`98d69b4704bb48ca3e259f92401b107cf748020d2901c87b0e8185a8778f8553`。本地构建通过，实际浏览器与GitHub交付由[本期QA](../episodes/leetcode/top-k-frequent-elements/production/qa/)及后续发布回执记录；本条暂不预记上线或issue已关闭。未完成逐字ASR、语义听辨、实体手机或用户观看认可；仅本次GitHub站点范围。
+用户要求从issue选择下一期，当前LeetCode选题仅剩[#83](https://github.com/linhongcun/video-studio/issues/83)。从最新`6868fd40b`建立EP58／top-k-frequent-elements，先通过独立题意与方法选择、堆基础及文章结构审读，再生成32句冰糖配音；16镜、5章，正文5654帧含5秒完整Python，另附150帧原题／作者资料，最终5804帧193.466667秒。200输入冻结，12,500组有效k核验、真实heapq过程、无字幕小样、正式150帧及19移动窗口/代码资料页审读已通过；默认编码变暗在正式编码前用真实limitedBT709路径修复，旧候选清单和失败QA保留。成片SHA为`98d69b4704bb48ca3e259f92401b107cf748020d2901c87b0e8185a8778f8553`。本地构建、96项交互／16项严格媒体与48图审读、最终整片实际静音播放通过；播放实际记2掉帧，无媒体错误。PR482合并`ed088d55`，v0.106.0与Release后Pages43132468762成功，线上8次完整GET核对媒体、海报、两张配图、32句VTT／5章、固定完整提交的源码链接与真实更新日志；#83已completed关闭，当前LeetCode选题issue为0。见[最终交付](../episodes/leetcode/top-k-frequent-elements/production/publication.json)。未完成逐字ASR、语义听辨、实体手机或用户观看认可；仅本次GitHub站点范围。
 
 ## 后续三期趣味推理复查与修复（2026-11-11已交付）
 

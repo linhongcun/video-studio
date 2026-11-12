@@ -36,3 +36,5 @@ npm run render
 实际Chromium小样发现默认pc/BT.601编码变暗，保留原预检和qa/precolor候选清单；正式正文改为Remotion的`--color-space=bt709`真实zscale limited转换，资料页通过本期私有adapter采用相同转换/标签。direct709短样实际背景(14,24,41)、surface(21,35,56)，与PNG(15,23,42)/(22,36,58)每通道差≤2；完整成片仍需逐帧颜色与网页复验。
 
 本地最终质量检查见`qa-final.json`、`qa-final.md`和`qa-site.json`。最终video SHA256：`98d69b4704bb48ca3e259f92401b107cf748020d2901c87b0e8185a8778f8553`。冻结器默认会写入新清单，只有`--verify`为只读；它不提供`--help`入口。
+
+实际首发：v0.106.0／PR #482／Pages43132468762，8项完整线上GET通过，#83已completed关闭。线上核验使用`qa/verify_online_postpublish.py --execute --version v0.106.0 --expected-commit ed088d557e59512c8b27946af4c3d39f91c48e16`：保留冻结旧检查器，修正其tree/main假设以符合站点完整构建SHA固定链接；本地Release-aware构建需NODE_USE_ENV_PROXY=1及仅环境传入GITHUB_TOKEN，实际HTTP证据见qa/online-verification.json。
