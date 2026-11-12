@@ -1,0 +1,10 @@
+import storyboard from '@storyboard';
+import trace from '../../research/trace.json';
+export type Shot={id:string;from:number;durationInFrames:number;visualType:string;chapterId:string;cueFrames?:{sentences?:number[];labels?:Record<string,number>};subtitles?:{text:string;from:number;to?:number;duration?:number}[];codeCardFrom?:number;[key:string]:any};
+export type Item=number[];
+export type HeapEvent={id:number;kind:string;before:Item[];heap:Item[];indices?:number[];chosen?:number;candidate?:number;removed?:Item;replacement?:Item};
+export const TRACE=trace;
+export const EVENTS=trace.events as HeapEvent[];
+export const shots:Shot[]=(storyboard.scenes??[]).flatMap((scene:any)=>scene.shots??[]).map((s:any)=>({...s,id:String(s.id).padStart(2,'0')}));
+export const STORYBOARD=storyboard;
+export const VIDEO={width:1920,height:1080,fps:30,durationInFrames:shots.reduce((n,s)=>n+s.durationInFrames,0)};

@@ -551,6 +551,8 @@ EP.16第一版视频SHA前缀为`3085d678`，第二版为`6aa379dd`。用户已�
 
 - **Redis缓存扩展（2026-10-28）：**EP.08/09沿用已经过实际网页验证的limitedBT709转换，将像素转换、逐帧颜色参数与同编码资料默认纳入首次冻结流程；不等上线后另补色彩。原完整声音/时序保真，正文/资料编码小样先查实际五项信号，再做正式片与网页取色；见[本轮记录](archive/2026-10/redis-cache-style/README.md)。
 
+- **LC347新片再次应用（2026-11-12）：**默认Remotion4.0.534小样的pc/BT.601在实际Chromium中把背景(15,23,42)显示为(0,9,30)，不能以PNG或媒体格式预检代替网页取色。正式编码前改用已实际检查源码会执行zscale的`--color-space=bt709`，配合本期私有资料页adapter做RGB→limitedBT709转换；不修改历史共享引擎。direct短样背景每通道差≤1、面板差≤2，正式5804帧正文/资料颜色参数一致；实际验证范围见[本期色彩记录](../episodes/leetcode/top-k-frequent-elements/production/qa/color-direct709-review.json)与[成片审读](../episodes/leetcode/top-k-frequent-elements/production/qa/encoded-review.json)。这支持本次Chromium路径，不扩写为真机或所有浏览器通过。
+
 ## L058 场景图不能跳过原题输入的解释
 
 - **案例：**2026-10-28，LC.547的观看反馈指出：开头直接讲城市关系，直到后段出现二维数组才与题目建立联系。原版已有目标、分组推导和程序检查，但输入表示的含义后置，陌生观众难以知道城市图从何而来。
