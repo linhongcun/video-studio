@@ -1,0 +1,159 @@
+--- frozen/scripts/verify_online.py
++++ derived/qa/verify_online_postpublish.py
+@@ -1,8 +1,8 @@
+ #!/usr/bin/env python3
+-"""Verify LC347's final canonical deployment; default is an offline URL plan.
++"""Verify LC347 deployment with exact build-commit source links; default is an offline plan.
+ 
+ Run after the final site build and deployment:
+-  python3 .../scripts/verify_online.py --execute --version v0.106.0
++  python3 .../qa/verify_online_postpublish.py --execute --version v0.106.0
+ 
+ Every network action is a full GET with a <=30-second total request deadline.
+ Remote media is streamed into SHA-256, never saved. This checks served bytes
+@@ -16,6 +16,7 @@
+ import json
+ import re
+ import sys
++import subprocess
+ from urllib.parse import quote
+ 
+ EP = Path(__file__).resolve().parents[1]
+@@ -26,6 +27,7 @@
+ SITE = 'https://linhongcun.github.io/video-studio/'
+ GITHUB = 'https://github.com/linhongcun/video-studio'
+ HELPER = ROOT / 'scripts/verify-online.py'
++FROZEN_VERIFIER = EP / 'scripts/verify_online.py'
+ 
+ # Reuse only the generic parser/streaming GET/check helpers. In particular,
+ # old.load_episode assumes EP01-14 identities and is never called here.
+@@ -123,7 +125,35 @@
+             'captionsEndStrictlyBeforePythonCard': True}, chapters
+ 
+ 
+-def local_expected(version):
++def expected_source_links(source, expected_commit):
++    require(re.fullmatch(r'[a-f0-9]{40}', expected_commit) is not None,
++            'expected source commit must be a complete lowercase 40-character SHA')
++    publication = PUB.relative_to(ROOT).as_posix()
++    return {
++        'sourcePath': f'{GITHUB}/tree/{expected_commit}/{source}',
++        'scriptPinnedLink': f'{GITHUB}/blob/{expected_commit}/{publication}/script.md',
++        'storyboardPinnedLink': f'{GITHUB}/blob/{expected_commit}/{publication}/storyboard.json',
++        'scriptRawPinnedLink': f'https://raw.githubusercontent.com/linhongcun/video-studio/{expected_commit}/{publication}/script.md',
++        'storyboardRawPinnedLink': f'https://raw.githubusercontent.com/linhongcun/video-studio/{expected_commit}/{publication}/storyboard.json',
++    }
++
++
++def check_source_links(page, source, expected_commit):
++    expected = expected_source_links(source, expected_commit)
++    checks = {name: value in page.links for name, value in expected.items()}
++    publication = PUB.relative_to(ROOT).as_posix()
++    selected = set()
++    for link in page.links:
++        is_source = re.fullmatch(re.escape(GITHUB) + r'/tree/[^/]+/' + re.escape(source), link)
++        is_blob = re.fullmatch(re.escape(GITHUB) + r'/blob/[^/]+/' + re.escape(publication) + r'/(?:script\.md|storyboard\.json)', link)
++        is_raw = re.fullmatch(r'https://raw\.githubusercontent\.com/linhongcun/video-studio/[^/]+/' + re.escape(publication) + r'/(?:script\.md|storyboard\.json)', link)
++        if is_source or is_blob or is_raw:
++            selected.add(link)
++    checks['allEpisodeSourceLinksUseExactExpectedCommit'] = selected == set(expected.values())
++    return checks
++
++
++def local_expected(version, expected_commit):
+     meta = read_json(PUB / 'meta.json')
+     require(meta['slug'] == SLUG and meta['ep'] == 58 and meta['problemNumber'] == 347,
+             'LC347/EP58 identity mismatch')
+@@ -134,9 +164,10 @@
+     vtt = (built / 'captions.vtt').read_bytes()
+     timing, chapter_rows = validate_timing(read_json(PUB / 'storyboard.json'), meta, vtt)
+     page = old.Page((built / 'index.html').read_bytes())
+-    source_url = f'{GITHUB}/tree/main/{source}'
++    source_url = expected_source_links(source, expected_commit)['sourcePath']
+     require(page.h1 == old.text(meta['title']), 'built episode H1 differs from title')
+-    require(source_url in page.links, 'built episode source link differs from sourcePath')
++    require(all(check_source_links(page, source, expected_commit).values()),
++            'built episode source/script/storyboard links differ from exact expected commit')
+     require(page.contains_version(version), 'built episode footer has wrong release version')
+     require(len(page.chapters) == len(chapter_rows), 'built chapter count differs from storyboard')
+     for actual, expected in zip(page.chapters, chapter_rows):
+@@ -166,7 +197,7 @@
+     return meta, page, source_url, timing, assets
+ 
+ 
+-def evaluate_asset(kind, path, exact, episode, source_url, version):
++def evaluate_asset(kind, path, exact, episode, source_url, version, expected_commit):
+     expected = {'sha256': sha(path), 'byteLength': path.stat().st_size}
+     blob = old.blob_evaluator(expected, exact)
+     def evaluate(result, body):
+@@ -176,8 +207,8 @@
+             checks['visibleReleaseVersion'] = page.contains_version(version)
+             if kind == 'episode-html':
+                 checks.update(title=page.title == episode.title, h1=page.h1 == episode.h1,
+-                              sourcePath=source_url in page.links,
+                               chapterIDsTitlesAndStarts=old.chapter_equal(page.chapters, episode.chapters))
++                checks.update(check_source_links(page, (EP / 'remotion').relative_to(ROOT).as_posix(), expected_commit))
+             elif kind == 'changelog':
+                 checks['releaseTagLink'] = f'{GITHUB}/releases/tag/{version}' in page.links
+             errors = [name + ' mismatch' for name, passed in checks.items() if not passed]
+@@ -185,13 +216,15 @@
+     return expected, evaluate
+ 
+ 
+-def plan(version):
++def plan(version, expected_commit):
+     meta = read_json(PUB / 'meta.json')
+     paths = [f'episodes/{SLUG}/video.mp4', f"episodes/{SLUG}/{meta.get('poster', 'cover-16x9.jpg')}",
+              f'episodes/{SLUG}/article/01.jpg', f'episodes/{SLUG}/captions.vtt',
+              f'episodes/{SLUG}/', '', 'changelog/']
+     return {'status': 'plan-only', 'networkExecuted': False, 'version': version,
+             'site': SITE, 'urls': [SITE + quote(path, safe='/') for path in paths],
++            'expectedBuildCommit': expected_commit,
++            'expectedSourceLinks': expected_source_links((EP / 'remotion').relative_to(ROOT).as_posix(), expected_commit),
+             'localPreflight': 'Requires final publication metadata, storyboard and final Release-aware site/dist build.',
+             'expectedFrameRelationship': 'body 5654, references 150, final 5804; load actual metadata rather than equating body and final.',
+             'reportOnExecution': str(EP / 'qa/online-verification.json')}
+@@ -203,29 +236,38 @@
+     mode.add_argument('--execute', action='store_true', help='Run local preflight, then canonical full GET verification')
+     mode.add_argument('--check-local', action='store_true', help='Final local preflight only; no network')
+     ap.add_argument('--version', default='v0.106.0', help='Final released version tag')
++    ap.add_argument('--expected-commit', help='Exact complete build/deployment commit SHA; default is git origin/main at invocation')
+     ap.add_argument('--timeout', type=float, default=30, help='Per-request total deadline, 0 < seconds <=30')
+     ap.add_argument('--attempts', type=int, choices=(1, 2, 3), default=2)
+     ap.add_argument('--out', type=Path, default=EP / 'qa/online-verification.json')
+     args = ap.parse_args()
++    expected_commit = args.expected_commit or subprocess.check_output(
++        ['git', 'rev-parse', '--verify', 'origin/main'], cwd=ROOT, text=True).strip()
++    if re.fullmatch(r'[a-f0-9]{40}', expected_commit) is None:
++        ap.error('--expected-commit must be a complete lowercase 40-character commit SHA')
+     if not re.fullmatch(r'v\d+\.\d+\.\d+', args.version):
+         ap.error('--version must be a vX.Y.Z tag')
+     if not 0 < args.timeout <= 30:
+         ap.error('--timeout must be greater than zero and at most 30 seconds')
+     if not (args.execute or args.check_local):
+-        print(json.dumps(plan(args.version), ensure_ascii=False, indent=2))
++        print(json.dumps(plan(args.version, expected_commit), ensure_ascii=False, indent=2))
+         return 0
+     report = {'episode': SLUG, 'ep': 58, 'version': args.version, 'site': SITE,
+               'startedAtUTC': datetime.now(timezone.utc).isoformat(timespec='seconds'),
+               'networkExecuted': False, 'scope': 'canonical-full-GET-bytes-and-HTML-semantics' if args.execute else 'local-only',
+               'browserPlaybackReview': False, 'semanticListeningReview': False,
+               'remoteMediaWrittenToDisk': False, 'checks': [],
+-              'scriptSHA256': sha(Path(__file__)), 'helperSHA256': sha(HELPER)}
++              'scriptSHA256': sha(Path(__file__)), 'helperSHA256': sha(HELPER),
++              'frozenVerifierSHA256': sha(FROZEN_VERIFIER),
++              'expectedBuildCommit': expected_commit,
++              'expectedCommitSource': 'explicit --expected-commit' if args.expected_commit else 'git rev-parse --verify origin/main'}
+     try:
+-        meta, page, source_url, timing, assets = local_expected(args.version)
++        meta, page, source_url, timing, assets = local_expected(args.version, expected_commit)
+         report.update(localPreflightPassed=True, timing=timing, sourceURL=source_url,
+-                      expectedChapters=page.chapters)
++                      expectedChapters=page.chapters,
++                      expectedSourceLinks=expected_source_links((EP / 'remotion').relative_to(ROOT).as_posix(), expected_commit))
+         for kind, relative, path, exact in assets:
+-            expected, evaluator = evaluate_asset(kind, path, exact, page, source_url, args.version)
++            expected, evaluator = evaluate_asset(kind, path, exact, page, source_url, args.version, expected_commit)
+             row = {'kind': kind, 'url': SITE + quote(relative, safe='/'),
+                    'expectedLocalFile': str(path.relative_to(ROOT)), 'expected': expected}
+             if args.execute:

@@ -7,3 +7,5 @@
 站点96项四上下文动作、16项严格媒体检查和48张实际截图审读通过。390竖屏小窗完整代码字小，844×390横屏模拟可读；无实体手机、逐字ASR、语义听辨或用户观看认可声明。详细范围及完整SHA见qa-final.json与各独立报告。
 
 当前仅完成本地制作与站点验收；GitHub部署及线上完整SHA以publication.json和qa/online-verification.json后续真实回执为准。
+
+最终交付已完成：v0.106.0及Release后Pages成功，8项线上完整GET通过；发布及issue关闭真实回执见publication.json。上文“本地”范围保留为当时检查身份，不将静音播放扩写为语义听辨。
