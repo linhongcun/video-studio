@@ -18,7 +18,7 @@ episodes/
 | --- | ---: |
 | [高并发、高可用、高性能](peak/) | 4 |
 | [Agent 开发](agent/) | 1 |
-| [LeetCode · 算法可视化](leetcode/) | 11 |
+| [LeetCode · 算法可视化](leetcode/) | 12 |
 | [设计模式](design-patterns/) | 3 |
 | [趣味推理](puzzles/) | 10 |
 | [其他](engineering-algorithms/) | 2 |
@@ -28,7 +28,7 @@ episodes/
 | [分布式](distributed/) | 8 |
 | [计算机网络](request/) | 7 |
 
-共 65 期。新增或调整归属后执行：
+共 66 期。新增或调整归属后执行：
 
 ```sh
 python3 scripts/check-layout.py --write-index

@@ -188,6 +188,21 @@ function reverseLinkedList() {
     + text(300, 346, '改掉连接，下一步入口还在', C.gold, 27);
 }
 
+function topKFrequentElements() {
+  // The episode's final heap for k=3: (count, number) = [(3,1),(5,5),(4,4)].
+  // Only the root is the minimum frequency; sibling order is not asserted.
+  const node = (x, y, number, count, color) => circle(x, y, 54, C.surface, color)
+    + text(x, y - 3, number, color, 38)
+    + text(x, y + 32, `${count} 次`, C.text, 24);
+  return text(300, 53, '次数最少的在顶部', C.gold, 28)
+    + line(270, 169, 218, 223, C.edge, 4)
+    + line(330, 169, 382, 223, C.edge, 4)
+    + node(300, 126, 1, 3, C.gold)
+    + node(180, 268, 5, 5, C.teal)
+    + node(420, 268, 4, 4, C.teal)
+    + text(300, 365, '保留 3 个高频数字', C.teal, 28);
+}
+
 function numberOfProvinces() {
   // Only AB, BC, DE are direct input edges. F is an isolated sixth city.
   const city = (x, y, label, color) => path(
@@ -240,7 +255,7 @@ function dailyTemperatures() {
 const DRAW = new Map([
   [1, twoSum], [3, longestSubstring], [11, containerMostWater],
   [42, trappingRainWater], [46, permutations], [70, climbingStairs],
-  [200, numberOfIslands], [206, reverseLinkedList], [547, numberOfProvinces],
+  [200, numberOfIslands], [206, reverseLinkedList], [347, topKFrequentElements], [547, numberOfProvinces],
   [704, binarySearch], [739, dailyTemperatures],
 ]);
 
