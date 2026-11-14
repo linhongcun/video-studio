@@ -10,6 +10,7 @@ import argparse
 import hashlib
 import importlib.metadata
 import json
+import os
 from pathlib import Path
 import shutil
 import subprocess
@@ -21,6 +22,8 @@ HERE = Path(__file__).resolve().parent
 REPO = repo_root()
 SIZES = {'16x9': (1920, 1080), '3x4': (1080, 1440), '4x3': (1440, 1080)}
 sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+# Compare title identity, ignoring display-only whitespace differences.
+title_key = lambda value: ''.join(value.split())
 
 def main():
     parser = argparse.ArgumentParser(__doc__)
@@ -31,16 +34,17 @@ def main():
     out, repo = args.out_dir.resolve(), args.repo.resolve()
     catalog = json.loads((HERE/'catalog.json').read_text())
     episodes = catalog['episodes']
+    catalog_slugs = {episode['slug'] for episode in episodes}
     actual = {}
     for p in (repo/'episodes').glob('*/*/publication/meta.json'):
         meta = json.loads(p.read_text())
-        if meta.get('series') == 'leetcode' and not meta.get('draft'):
+        if meta.get('series') == 'leetcode' and (not meta.get('draft') or meta.get('slug') in catalog_slugs):
             actual[meta['slug']] = meta
     if set(actual) != {e['slug'] for e in episodes}:
         raise ValueError('Catalog must cover every published LeetCode episode; update it before rendering.')
     for ep in episodes:
         m = actual[ep['slug']]
-        if m['problemNumber'] != ep['number'] or m['title'].split('：')[0] != ''.join(ep['title']) or ep['method'] not in m['tags']:
+        if m['problemNumber'] != ep['number'] or title_key(m['title'].split('：')[0]) != title_key(''.join(ep['title'])) or ep['method'] not in m['tags']:
             raise ValueError('Catalog identity/title/method mismatch: '+ep['slug'])
     inputs = {name:sha(HERE/name) for name in ['template.mjs','diagrams.mjs','catalog.json','render.py','README.md']}
     report = {'schemaVersion': 1, 'style': catalog['version'], 'checkedAt': datetime.now(timezone.utc).isoformat(), 'episodeCount': len(episodes), 'inputs':inputs, 'images': [], 'installed': False}
@@ -73,7 +77,7 @@ def main():
     out.mkdir(parents=True, exist_ok=True)
     subprocess.run(['node',str(HERE/'template.mjs'),'--out-dir',str(out)],check=True)
     with sync_playwright() as pw:
-        browser = pw.chromium.launch(executable_path='/usr/bin/chromium',headless=True,args=['--no-sandbox'])
+        browser = pw.chromium.launch(executable_path=os.environ.get('CHROMIUM_PATH', '/usr/bin/chromium'),headless=True,args=['--no-sandbox'])
         report['runtime'] = {'chromium':browser.version,'playwright':importlib.metadata.version('playwright')}
         page = browser.new_page(device_scale_factor=1)
         for ep in episodes:
@@ -109,11 +113,11 @@ def main():
                         if im.size != (w,h): raise ValueError('Wrong output size')
                 report['images'].append({'slug':ep['slug'],'number':ep['number'],'size':size,'dimensions':[w,h],'svgSha256':sha(p.with_suffix('.svg')),'pngSha256':sha(p.with_suffix('.png')),'jpgSha256':sha(p.with_suffix('.jpg')),'textBounds':bounds,'groupBounds':groups})
         browser.close()
-    sheet = Image.new('RGB',(1504,4*322+112),'#0F172A')
+    sheet = Image.new('RGB',(1504,112+((len(episodes)+2)//3)*322),'#0F172A')
     draw = ImageDraw.Draw(sheet)
     font = ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',30)
     small = ImageFont.truetype('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',19)
-    draw.text((32,24),'LeetCode · 算法可视化  /  11 期统一封面',font=font,fill='#E5E7EB')
+    draw.text((32,24),f'LeetCode · 算法可视化  /  {len(episodes)} 期统一封面',font=font,fill='#E5E7EB')
     for i,ep in enumerate(episodes):
         x,y = 32+(i%3)*496,98+(i//3)*322
         with Image.open(out/ep['slug']/'cover-16x9.jpg') as im:

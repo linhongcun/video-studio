@@ -13,7 +13,7 @@
 
 ## 生成与安装
 
-依赖：Node、Python 的 Playwright 与 Pillow、`/usr/bin/chromium`、Noto Sans CJK SC 字体。只调用本入口，不依赖已删除旧工程的 `node_modules`。Chromium 直接渲染 SVG，PNG/JPG 来自同一 DOM，JPG quality 94。
+依赖：Node、Python 的 Playwright 与 Pillow、Chromium、Noto Sans CJK SC 字体。默认浏览器为 `/usr/bin/chromium`；如需复用现有 Chrome，可通过 `CHROMIUM_PATH` 指定可执行文件。只调用本入口，不依赖已删除旧工程的 `node_modules`。Chromium 直接渲染 SVG，PNG/JPG 来自同一 DOM，JPG quality 94。
 
 仓根执行：
 
@@ -21,7 +21,9 @@
 python3 episodes/_shared/leetcode-covers/render.py --out-dir work/leetcode-covers
 ```
 
-入口先比对 `catalog.json` 与所有当前已发布 LeetCode 元数据：题号、题名、方法和完整 slug 集合一致才生成。所有三比例实际字体边界、4:3 内容安全区、输出像素尺寸检查通过后写 `render-report.json`，并输出横版总览。逐张实际查看封面，确认图义、文字层级、裁切和小尺寸辨识。
+Python 依赖可在期目录 venv 中安装，例如 `python3 -m pip install playwright==1.65.2`；无需运行 `playwright install`，可将 `CHROMIUM_PATH` 指向机器已有的 Chrome/Chromium。
+
+入口先比对 `catalog.json` 与所有当前已发布 LeetCode 元数据；显式列入 catalog 的草稿也可预生成封面。题号、题名、方法和 slug 集合一致才生成。所有三比例实际字体边界、4:3 内容安全区、输出像素尺寸检查通过后写 `render-report.json`，并输出横版总览。逐张实际查看封面，确认图义、文字层级、裁切和小尺寸辨识。
 
 确认产物后执行：
 

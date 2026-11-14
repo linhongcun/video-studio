@@ -85,6 +85,8 @@
 - **本轮回归复用：**EP.14再重制后，把旧20镜/5152帧的回归输入固定到独立[历史fixture](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md)，不让测试追随live站点内容，也不改旧golden或放宽断言。7个实体输入与来源Git blob逐字节一致；铺轨、制作说明、起音、配音synthetic/旧regression均通过，历史生成链仍为6623项/0错误、91/91，分镜和封面完整SHA不变。此方法用于保留已验证的共享工具行为，新片仍走自己的冻结与成片检查。
 - **干净工程补验：**本轮EP.01从Git暂存树导出独立归档，重新`npm ci`、TypeScript检查并生成第0帧；归档前后94项冻结输入不变，独立PNG与工作区PNG完整SHA同为`cbd047c51790508d381fdff55238571c937156dbb79620f57124ec68e8363b38`。这验证了代表工程的依赖与输入可移植，不将单期冷安装扩称为14期逐一冷安装。
 
+- **LC.56句内语义cue与built take核验：**需要与讲解同步的动作应使用共享ASR/onset得到的真实句内cue，并按实际后续语义边界确认动作何时完成，不以统一句首或镜头百分比替代。TTS原take可能带模板尾标记，验收对象应是共享build/cut后的句成品；只有按PCM样本确认尾部词可独立分隔时，才从原take派生并让共享cut处理一次，保留raw和样本边界证据。LC.56的08/09 cue与09成品经重建、静帧和built句听辨核验；偏移和分隔样本数仅属本期，不作为共享默认。见[句内对齐](../episodes/leetcode/merge-intervals/production/qa/semantic-cue-alignment-08-09.md)与[尾标记处理](../episodes/leetcode/merge-intervals/production/qa/09-leading-filler-trim.md)。
+
 - **视觉返工保留原声轨（LC.70）：**旁白、真实句时、总帧数和5秒附录完全不变时，可从明确Git基线提取并冻结原成片AAC，让新画面直接复用原声音。本轮7469个包的内容、顺序、PTS/DTS/duration及最终解码PCM全部等于原版，新成片另作响度与全解码核验；不重新合成TTS，也不把旧source目录缓存当权威。适用前提是整条声音和时间线确实保持，不推广到改词或改时长的返工。见[本轮技术证据](../episodes-codex/climbing-stairs/qa-final-scene-media.md)。
 
 - **P05按实际处理链闭合来源（2026-10-25）：**原始cut与归一化／限幅后的原声做单一增益拟合时，两句低于临时诊断线，最低0.99055；[原诊断](../episodes-codex/egg-drop/voice/qa-source-pcm-linear-fit.json)保留，未降阈值或改配音。用同一选段／参数及未修改shared build[完整复现](../episodes-codex/egg-drop/voice/qa-source-pcm.json)后，WAV、元数据和24句资产逐字节一致，按实际非线性处理链闭合来源。封面另只import不变Egg，函数及其余七份依赖精确相同，才[复用原六图](../episodes-codex/egg-drop/cover-source-reuse.json)并保留原渲染身份。两项证明只支持来源／复用范围，不代替语义听辨，也不要求后续片机械重复本例诊断。

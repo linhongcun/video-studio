@@ -112,6 +112,23 @@ function trappingRainWater() {
     + text(368, 113, '4', C.gold, 26);
 }
 
+function mergeIntervals() {
+  const x = value => 80 + (value - 2) * 110;
+  const start = x(3), touching = x(5), end = x(6);
+  return text(300, 62, '两端包含 · 端点相接', C.gold, 28)
+    + line(start, 150, touching, 150, C.teal, 10)
+    + circle(start, 150, 8, C.teal, C.bg)
+    + circle(touching, 150, 8, C.teal, C.bg)
+    + text((start + touching) / 2, 123, 'I3 [3,5]', C.teal, 24)
+    + line(touching, 245, end, 245, C.gold, 10)
+    + circle(touching, 245, 8, C.gold, C.bg)
+    + circle(end, 245, 8, C.gold, C.bg)
+    + text((touching + end) / 2, 218, 'I4 [5,6]', C.gold, 24)
+    + line(80, 315, 520, 315, C.edge, 3)
+    + [3, 5, 6].map(value => line(x(value), 305, x(value), 325, C.text, 2)
+      + text(x(value), 355, value, C.text, 25)).join('');
+}
+
 function permutations() {
   // One prefix's two complete result copies, not an alleged single swap step.
   const row = (cx, y, values, color) => values.map((value, i) => {
@@ -254,7 +271,7 @@ function dailyTemperatures() {
 
 const DRAW = new Map([
   [1, twoSum], [3, longestSubstring], [11, containerMostWater],
-  [42, trappingRainWater], [46, permutations], [70, climbingStairs],
+  [42, trappingRainWater], [46, permutations], [56, mergeIntervals], [70, climbingStairs],
   [200, numberOfIslands], [206, reverseLinkedList], [347, topKFrequentElements], [547, numberOfProvinces],
   [704, binarySearch], [739, dailyTemperatures],
 ]);
