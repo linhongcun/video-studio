@@ -2,7 +2,7 @@
 
 给 Codex、Cursor 或其他 coding agent。做一期之前先读本文件，再按下面的手册往下走。规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
 
-换机器、换工具或接手续做，先按[新环境制作与工具交接](docs/production-setup.md)检查依赖、定位当前工程并确认阶段产物；不依赖原工具的聊天记忆、机器绝对路径或缓存。工具不自动加载本文件时，应在任务开头显式读取。下方角色名表示制作职责，不要求特定代理产品；独立审读与质检仍按流程执行并记录实际执行者。
+换机器、换工具或接手续做，先按[新环境制作与工具交接](docs/production-setup.md)检查依赖、定位当前工程并确认阶段产物；不依赖原工具的聊天记忆、机器绝对路径或缓存。工具不自动加载本文件时，应在任务开头显式读取。协作按下方职责分工，不要求固定姓名、账号或代理产品；独立审读与质检仍按流程执行并记录实际执行者。
 
 文档入口见 [docs/README.md](docs/README.md)，已完成记录见[历史索引](docs/archive/README.md)。整理文档时先查[文档维护规范](docs/RULES.md#文档维护)，保护冻结输入和历史证据的字节与制作身份；获授权的实体目录迁移按账本追溯原路径。
 
@@ -50,30 +50,30 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 
 ## 系列状态
 
-2026-10-24 用户认可 EP.17 后批准本期合并及 GitHub 站点上线，并授权今后视频做好、完成检查后自主合并主干、发布 Release 和部署 Pages，无需逐期等待用户观看或 widget 批准；有反馈再修改、重新上线。资料、动画动态表达、配音时序、成片和线上完整 SHA 检查继续，能力限制须如实记录。授权范围和选题推进以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准；平台新发仍须另行明确授权。
+2026-10-24 用户认可 EP.17 后批准本期合并及 GitHub 站点上线，并授权今后视频做好、完成检查后自主合并主干、发布 Release 和部署 Pages，无需逐期等待用户观看或重复批准；有反馈再修改、重新上线。资料、动画动态表达、配音时序、成片和线上完整 SHA 检查继续，能力限制须如实记录。授权范围和选题推进以 [docs/RULES.md](docs/RULES.md) 的 STATUS 为准；平台新发仍须另行明确授权。
 
-## 角色
+## 职责分工
 
-| 角色 | 谁 | 做什么 |
-|---|---|---|
-| 导演 | Nolan | 定选题和主线；和质检一起审成片。维护 `AGENTS.md`、`docs/RULES.md`、`docs/pipeline.md`，审并合并 PR |
-| 编剧、分镜 | 宫崎（Hayao Miyazaki） | 调研输入、`references.json`、`script.md`、`article.mdx`、`pronunciation.md`、`storyboard.json`、`covers.json` |
-| 制作 | Knoll（John Knoll） | 配音、Remotion、渲染、封面、站点 PR、Release、deploy |
-| 质检 | Deming | 冻结后的预检，以及成片审 |
-| 运营 | Tim Cook | 抖音（头条同步）、B站、视频号、快手发布；平台链接私信 Knoll（站点维护者）和 Nolan。小红书默认不发 |
-| 村长 | — | 提出反馈；另行决定平台发布等持续授权范围外事项 |
+| 职责 | 工作内容 |
+|---|---|
+| 内容统筹 | 确定选题、主线与范围；组织审读和成片复核，维护现行手册，审查并合并 PR |
+| 调研、编剧与分镜 | 核验来源，编写 `references.json`、`script.md`、`article.mdx`、`pronunciation.md`、`storyboard.json`、`covers.json` |
+| 制作 | 配音、Remotion 动画、渲染、封面、媒体接入、站点 PR、Release 与部署 |
+| 独立质检 | 脚本和图文独立审读、渲染前预检、成片及发布结果复核，记录检查范围与限制 |
+| 发布与运营 | 在用户明确授权的平台投稿，保存回执、实际链接与合集归属；将核验结果写入发布记录并向用户汇报 |
+| 用户 | 提出目标与反馈，决定平台发布等持续授权范围外事项 |
 
-脚本和分镜在团队内定稿。配音听辨由制作和复核人员处理，实际未完成的检查如实记录，不找村长代做质量检查。GitHub 站点按持续授权发布；确需用户决定范围外事项时，一次只问一件事，并附上成片和站点 PR。
+按任务安排职责，同一 coding agent 可承担多个制作环节，独立审读与复核按流程另行安排并记录实际执行者。交接依据保存在仓库，不要求寻找固定角色账号或使用群聊、私信。配音听辨由制作和复核人员处理，实际未完成的检查如实记录，不让用户代做质量检查。GitHub 站点按持续授权发布；确需用户决定范围外事项时，一次只问一件事，并附上成片和站点 PR。
 
 ## 闸门
 
 按这个顺序，前一步没有产物就不要做下一步：
 
 1. 资料、配音与分镜冻结：核验核心来源，冻结 `references.json` 及附录生成输入；把配音 SHA-256 写进 `words.json` 和 `storyboard.json` 的 `meta.timingSource`。
-2. Deming 预检：来源清单、起音窗口、COPYFIT、封面 4:3 安全区。正式编码前通过 `node site/scripts/check-references.mjs --sources EPDIR`。见 [docs/validate.md](docs/validate.md)。
+2. 渲染前预检：来源清单、起音窗口、COPYFIT、封面 4:3 安全区。正式编码前通过 `node site/scripts/check-references.mjs --sources EPDIR`。见 [docs/validate.md](docs/validate.md)。
 3. 通过本期默认入口渲染正文、参考资料附录和封面，不能只交付未加附录的正文。见 [docs/render.md](docs/render.md)。
 4. 完成成片复核，检查实际资料卡、字幕边界及播放器暂停/全屏，记录执行者、检查结果与能力限制。
-5. 按 STATUS 的持续授权确认 GitHub 站点发布范围，无需逐期索取 widget 批准。
+5. 按 STATUS 的持续授权确认 GitHub 站点发布范围，无需逐期重复申请批准。
 6. 站点构建先通过参考资料检查；新片缺少资料、实际附录或一致的媒体记录时停止发布。再合并主干、发布 Release、部署站点，并核对线上完整 SHA、字幕、章节、海报及更新日志。见 [docs/publish.md](docs/publish.md)。平台仅在另行明确授权后发布。
 7. 视频制作完成、合并上线且核验通过后，将对应制作或重制 issue 以 `completed` 关闭；这是发布收尾的一部分，无需另行确认。
 
@@ -88,7 +88,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 | `share/` | 本仓没有。规范不要写回这里 |
 | `episodes/_shared/` | 合并后的唯一共享目录：页身色、水印、混音、TTS、起音、铺轨、整轨、句级装配、系列模板、冻结与渲染；固定回归样本仍保留 |
 | `episodes/_template/` | 新期说明、图文骨架与参考资料接入片段 |
-| `docs/` | 下面这些手册。制作说明模板是 `docs/knoll-props.template.md` |
+| `docs/` | 下面这些手册。制作说明模板是 `docs/production-notes.template.md` |
 | `site/` | Astro 站点。`site/package.json` 的 `version` 是三段式版本号 |
 
 用户已明确授权将原制作与发布目录实体合并、按系列分类，替代此次迁移涉及的“保持原物理路径”约束。新期直接建立 `episodes/<series>/<slug>/{production,publication}/`，在发布 `meta.json` 中填写有效系列及新 `sourcePath`。旧冻结清单、来源JSON、QA和渲染回执随目录迁移但保留原字节，旧路径通过[迁移记录与账本](docs/archive/2026-11/episode-layout/README.md)及固定基线 `28dfb2fa` 追溯，不保留旧根目录软链。路径适配后的代码须在后续编码前重新冻结实际输入，不能把迁移检查视为重新制作、审片或用户认可。
@@ -107,7 +107,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 8. [docs/publish.md](docs/publish.md)
 9. 新拆分短片的句级装配/时序/冻结/编码检查共用 [episodes/_shared/README.md](episodes/_shared/README.md)，不复制配音整轨或起音算法。
 10. [episodes/_template/README.md](episodes/_template/README.md)
-11. [docs/knoll-props.template.md](docs/knoll-props.template.md) — 制作说明模板；EP.14 全文在 [docs/examples/knoll-props.degradation.md](docs/examples/knoll-props.degradation.md)
+11. [docs/production-notes.template.md](docs/production-notes.template.md) — 制作说明模板；EP.14 全文在 [docs/examples/knoll-props.degradation.md](docs/examples/knoll-props.degradation.md)
 
 ## 禁止
 
@@ -115,7 +115,7 @@ Squash 合并生成的新提交应保留本次变更实际贡献者已有的全�
 - 比喻、无关实物设备，以及给机制图套无关应用外壳。题目本身的楼梯等场景应直接参与动作和推导；可以按用户指导用对应功能的交互界面建立使用场景，具体边界见 `docs/RULES.md` 画面节。
 - 把讲解表、图、流程图塞进浏览器壳。浏览器壳只给真网页、地址栏和 DevTools。
 - 大面积纯白页身。页身色用 `episodes/_shared/theme/pageTheme.ts` 的 `pageBg` / `pageInk`。
-- 未获村长本批授权就向抖音、B站、视频号、快手上传；默认发小红书或发 X；或把平台链接发到群里。已获本批授权时默认包含快手。小红书仅 [STATUS](docs/RULES.md) 逐次明确授权时由运营代发。
+- 未获用户本批授权就向抖音、B站、视频号、快手上传；默认发小红书或发 X。已获本批授权时默认包含快手。小红书仅 [STATUS](docs/RULES.md) 逐次明确授权时由发布与运营职责的执行者代发。
 - 编造本仓没有的脚本，或在期目录另写一份配音整轨脚本。配音整轨用 `episodes/_shared/voice/`（产出 `voice.wav`、`words.json`、`voice/cues.json`、`voice/shot_frames.json`）；参数改 `voice/params.json`，不要改脚本里的数。
 - 另存一份起音算法。唯一实现是 `episodes/_shared/onset_rule.py`。`episodes/_shared/label_onset_strict.py` 只 import 它。冻结分镜里的 `episodes-codex/_shared/onset_rule.py` 是旧路径。期目录不要复制；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
 - 从历史旧校验器恢复「画面不出数字 / 不出英文」规则。现行检查入口见 `docs/validate.md`。

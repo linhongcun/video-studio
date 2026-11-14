@@ -20,7 +20,7 @@
 | [校验](validate.md) | 校验命令、阈值与只读检查 |
 | [质检清单](qa.md) | 冻结后预检和正式成片复核 |
 | [发布](publish.md) | 站点与平台流程、版本和视频日期维护 |
-| [制作说明模板](knoll-props.template.md) | 交接记录格式；[EP.14 示例](examples/knoll-props.degradation.md) |
+| [制作说明模板](production-notes.template.md) | 交接记录格式；[EP.14 示例](examples/knoll-props.degradation.md) |
 
 开新期使用[新期模板](../episodes/_template/README.md)；共享句级装配、时序、冻结和编码入口见[制作工具说明](../episodes/_shared/README.md)。
 
@@ -55,3 +55,5 @@
 [归档与历史任务索引](archive/README.md)汇总已完成的重制、修订、站点改版、仓库清理及平台整理记录。历史记录的正文、原路径与SHA保留当次制作身份；原路径因本次实体分类迁移发生变化时，通过迁移账本定位新文件，或从固定基线查看原输入。部分任务目录仍保留原位置，保留位置不表示仍在制作。
 
 查当前单期工程时，先看 `episodes/<series>/<slug>/publication/meta.json` 的 `sourcePath`，再读对应制作目录的 README 和最新发布记录。历史报告中的帧数、SHA、版本号和检查结果只证明所列输入与当次产物；旧草案、候选构建和修前失败记录不能代替当前成片依据，技术检查也不等于用户已观看认可。
+
+现行协作只按职责说明执行。历史记录中的旧协作称呼、账号与通知方式仅用于追溯当时情况，不作为当前工具需要寻找的人员或执行前提；冻结输入及真实出处作者保持原样。

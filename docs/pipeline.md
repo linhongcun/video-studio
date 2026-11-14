@@ -34,7 +34,7 @@
 - [ ] 核心术语与对应对象/动作有明确引入；地域关系参与解释时，用地图或空间参照展示，并交代地理距离与网络调度的边界
 - [ ] `storyboard.json`、`covers.json` 冻结，并写上配音 SHA-256
 - [ ] `words.json` 的 `scriptSha256`、`audioSha256` 与文件一致
-- [ ] Deming 预检：起音窗口、无 `COPYFIT`、封面 4:3 安全区
+- [ ] 渲染前预检：起音窗口、无 `COPYFIT`、封面 4:3 安全区
 - [ ] 检查持续动态元素是否参与当前讲解：成片内不叠加与内容无关的装饰进度条；播放器原生可操作进度控件保留
 - [ ] 算法题解片尾完整代码卡：与执行源和文章同源、运行验证通过，完整程序整屏可读，默认5秒并提示暂停阅读；核对代码卡独立区间与原旁白、字幕边界
 - [ ] 技术视频实际片尾为原题与作者/机构的简洁列表，每页最多4项、默认5秒；不显示摘录/定位/年份/日期/额外提示，核对可读性、追加区间、字幕/音轨边界与本轮冻结输入
@@ -47,7 +47,7 @@
 - [ ] Release 后部署完成，线上媒体完整 SHA、字幕、章节、海报和更新日志核验
 - [ ] 将对应制作或重制 issue 以 `completed` 关闭
 - [ ] 结合本期检查与用户指导复盘：有新问题/有效做法时补教训/成功经验，并更新项目记忆中的状态与证据
-- [ ] 若另获平台发布授权，再发抖音（头条同步）、B站、微信视频号、快手；默认不发小红书，不发 X，链接不上群
+- [ ] 若另获平台发布授权，再发抖音（头条同步）、B站、微信视频号、快手；默认不发小红书，不发 X，结果与链接已记录在本期发布记录中，并在任务结果中向用户汇报
 
 ## 1. 调研
 
@@ -108,11 +108,11 @@
 
 ## 3. 分镜与封面
 
-制作目录交付 `storyboard.json`、`covers.json`、`knoll-props.md`。分镜字段见 [storyboard-schema.md](storyboard-schema.md)，实际结构与生成代码以本期工程为准；LeetCode封面默认使用已获用户认可的[共享系列模板](../episodes/_shared/leetcode-covers/README.md)，新增题扩展catalog与题图并沿同一布局渲染；趣味推理使用[对应共享模板](../episodes/_shared/puzzles-covers/README.md)，按新题扩展目录与示意；MySQL使用[MySQL系列入口](../episodes/_shared/mysql-covers/README.md)，保持真实EP与机制边界；设计模式使用[本系列入口](../episodes/_shared/design-pattern-covers/README.md)，以D编号和准确职责图扩展；Kafka消息队列使用[本系列入口](../episodes/_shared/kafka-covers/README.md)，核对稳定MQ编号和真实Kafka机制，正文沿不可变style-v1；Redis使用[本系列入口](../episodes/_shared/redis-covers-v2/README.md)，保持冷银灰/Redis红、真实EP与单集机制图，按当前sourcePath安装；高并发、高可用、高性能使用[本系列入口](../episodes/_shared/peak-covers/README.md)，保留真实EP与原题，按对应限流/幂等/熔断/降级机制扩展；其他系列封面由本期 `remotion/src/Cover.tsx` 读取。不要将历史 EP.14 的 20 镜、5152 帧或旧组件当作新期模板。
+制作目录交付 `storyboard.json`、`covers.json`、制作说明 `knoll-props.md`（保留现有工具依赖的兼容文件名，不表示专有角色）。分镜字段见 [storyboard-schema.md](storyboard-schema.md)，实际结构与生成代码以本期工程为准；LeetCode封面默认使用已获用户认可的[共享系列模板](../episodes/_shared/leetcode-covers/README.md)，新增题扩展catalog与题图并沿同一布局渲染；趣味推理使用[对应共享模板](../episodes/_shared/puzzles-covers/README.md)，按新题扩展目录与示意；MySQL使用[MySQL系列入口](../episodes/_shared/mysql-covers/README.md)，保持真实EP与机制边界；设计模式使用[本系列入口](../episodes/_shared/design-pattern-covers/README.md)，以D编号和准确职责图扩展；Kafka消息队列使用[本系列入口](../episodes/_shared/kafka-covers/README.md)，核对稳定MQ编号和真实Kafka机制，正文沿不可变style-v1；Redis使用[本系列入口](../episodes/_shared/redis-covers-v2/README.md)，保持冷银灰/Redis红、真实EP与单集机制图，按当前sourcePath安装；高并发、高可用、高性能使用[本系列入口](../episodes/_shared/peak-covers/README.md)，保留真实EP与原题，按对应限流/幂等/熔断/降级机制扩展；其他系列封面由本期 `remotion/src/Cover.tsx` 读取。不要将历史 EP.14 的 20 镜、5152 帧或旧组件当作新期模板。
 
 在脚本与制作说明中确定“正文收束 → 本期既有代码卡（如有）→ 参考资料”的顺序、原题与作者/机构的列表位置、每页最多4项和默认每页5秒停留。资料卡不覆盖代码、尾句或原字幕；无旁白资料区间由追加记录明确声明，不为此改写已核验正文的句级时序。
 
-制作说明可参考 [模板](knoll-props.template.md)，也可在制作阶段运行 `python3 episodes/_shared/make_knoll_props.py --dir EPDIR` 生成骨架，再按真实实现填写。`docs/examples/` 中旧 EP.14 全文只服务历史 fixture。新期入口见 [制作模板](../episodes/_template/README.md)。
+制作说明可参考 [模板](production-notes.template.md)，也可在制作阶段运行 `python3 episodes/_shared/make_production_notes.py --dir EPDIR` 生成骨架，再按真实实现填写。`docs/examples/` 中旧 EP.14 全文只服务历史 fixture。新期入口见 [制作模板](../episodes/_template/README.md)。
 
 ## 4. 配音
 
@@ -145,7 +145,7 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 
 图文制作稿同样在编码前冻结：按已定分镜时序写好图片路径、预定秒数、图注和alt，实际图片在成片后生成；已有的文章独有来源JSON及其原文/核验依据同时冻结。成片后若需改文稿，只做有前后SHA与差异记录的站点发布派生稿，保留冻结制作稿，详见 [图文冻结与配图时序](article-style.md#冻结与成片后配图)。
 
-## 6. Deming 预检
+## 6. 渲染前预检
 
 见 [validate.md](validate.md)。预检不过就改分镜或配音，然后回到第 5 步重新冻结。
 
@@ -161,7 +161,7 @@ LeetCode正文当前沿[独立视觉入口](../episodes/_shared/leetcode-video/R
 
 ## 8. 成片审与上线
 
-完成动态表达与实际成片复核，记录执行者、检查结果和能力限制。通过后沿用 STATUS 的持续授权，按 [publish.md](publish.md) 接入 `episodes/<series>/<slug>/publication/`、更新元数据与版本、合并站点 PR、打 tag、发 Release，再部署并核验线上文件；不再逐期等待用户 widget 批准。收到反馈后修正、重新检查和发布。平台新发需用户另行明确授权。
+完成动态表达与实际成片复核，记录执行者、检查结果和能力限制。通过后沿用 STATUS 的持续授权，按 [publish.md](publish.md) 接入 `episodes/<series>/<slug>/publication/`、更新元数据与版本、合并站点 PR、打 tag、发 Release，再部署并核验线上文件；不再逐期重复索取用户批准。收到反馈后修正、重新检查和发布。平台新发需用户另行明确授权。
 
 接入后运行 `npm --prefix site run check:references`，该项也由 `npm run build` 在复制媒体之前自动执行。新片及旧slug重制/换片必须包含完整资料清单、文章链接、实际片尾及相符的SHA/区间记录；只补文章或空标题不能通过。存量名单仅允许未接入附录且原视频SHA与固定基线相同的旧片渐进处理，不得改写名单或基线规避。机器检查之后仍须实际看成片资料卡、原生播放器暂停和手机全屏，确认文字可读、控件不遮主要信息且无原字幕残留。
 

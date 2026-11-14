@@ -1,6 +1,7 @@
-"""从 storyboard.json + covers.json 生成 knoll-props.md。
+"""从 storyboard.json + covers.json 生成制作说明，保留默认兼容文件名。
 
-无 --spec 时按 docs/knoll-props.template.md 的标题写骨架，散文处是（待填：…）。
+现行 CLI 入口是 make_production_notes.py，默认输出仍为 knoll-props.md。
+无 --spec 时按 docs/production-notes.template.md 的标题写骨架，散文处是（待填：…）。
 有 --spec 时调用该模块的 build(ctx)。通用表、叠字、同步、封面尺寸和 §5 走这里的 helper。
 """
 import argparse
@@ -201,8 +202,8 @@ def skeleton(ctx):
     o.append(ctx.strike_line() + '\n')
     o.append('## 本版相对 （待填：上一冻结 sha） 的变化（必填）')
     o.append('（待填：本版变化）\n')
-    o.append('## 相对上一期的变化——Knoll 必读（必填）')
-    o.append('（待填：Knoll 必读）')
+    o.append('## 相对上一期的变化——制作必读（必填）')
+    o.append('（待填：制作必读）')
     if meta.get('durationExceptions'):
         o.append(f"- 段长例外：{ctx.J(meta['durationExceptions'])}")
     else:
@@ -342,7 +343,7 @@ def selftest():
     txt = out.read_text(encoding='utf-8')
     headings = [
         '## 本版相对 （待填：上一冻结 sha） 的变化（必填）',
-        '## 相对上一期的变化——Knoll 必读（必填）',
+        '## 相对上一期的变化——制作必读（必填）',
         '## 0. 画面类型 `frame`（必填）',
         '## 1. 页型与状态帧（有 browser 镜则必填）',
         '## 2. 页外角标与叠字（必填）',
