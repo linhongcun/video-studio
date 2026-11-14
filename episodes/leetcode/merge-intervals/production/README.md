@@ -1,6 +1,6 @@
 # LC56 工程与环境
 
-十镜 Remotion 主体、trace 驱动的数据板、完整代码卡和共享配音/装配/freeze 薄包装已实现。独立复审报告原字节保存在 `qa/independent-rereview-df13a3e.md`；首版最终复核报告原字节保存在 `qa/independent-final-review-v1.md` 并纳入冻结。首版复核指出的04/07辨音、09尾部填充词、09分离/结束时序及finish状态问题已在当前源码与配音修订中处理。首版回执、日志和媒体字节仍保存在本地工作区 `revisions/v1-initial-review/`，旧MP4/WAV不提交；QA中的历史音频/代码卡边界数据与独立复核报告保留首版身份。新版20句音轨为4,386帧；代码卡从真实voice build推导为第4,236帧，完整150帧无旁白，不截断末句。08/09内部动作使用共享ASR/onset结果；目标句内位置及静帧状态见 `qa/semantic-cue-alignment-08-09.md`，样本级末句/代码卡边界见 `qa/audio-card-boundary.md`。这里只记录制作输入和验证入口；具体正式输出时长、SHA、资料附录及媒体检查以当前 `render-result.json` 与 publication receipt 为准。当前修订仍是草稿，未合并、未Release；静帧和机器媒体检查不替代对新版完整成片的独立审片。90帧/镜仅用于静帧布局，不代表真实配音或字幕时序。
+十镜 Remotion 主体、trace 驱动的数据板、完整代码卡和共享配音/装配/freeze 薄包装已实现。独立复审报告原字节保存在 `qa/independent-rereview-df13a3e.md`；首版最终复核报告原字节保存在 `qa/independent-final-review-v1.md` 并纳入冻结。首版复核指出的04/07辨音、09尾部填充词、09分离/结束时序及finish状态问题已在当前源码与配音修订中处理。首版回执、日志和媒体字节仍保存在本地工作区 `revisions/v1-initial-review/`；旧首版MP4/WAV不重复入库，QA中的历史音频/代码卡边界数据与独立复核报告保留各自身份。新版20句音轨为4,386帧；代码卡从真实voice build推导为第4,236帧，完整150帧无旁白，不截断末句。08/09内部动作使用共享ASR/onset结果；目标句内位置及静帧状态见 `qa/semantic-cue-alignment-08-09.md`，样本级末句/代码卡边界见 `qa/audio-card-boundary.md`。v2独立有限复核报告原件保存在 `qa/independent-final-review-v2.md`；其报告范围和限制以原件为准。当前草稿已准备为非草稿站点候选，成片最终复核已通过；文章UI仍待最后检查，尚未合并、发布Release或部署。具体正式输出时长、SHA、资料附录及媒体检查以当前 `render-result.json` 与 publication receipt 为准。90帧/镜仅用于静帧布局，不代表真实配音或字幕时序。
 
 ## 动画与时间线
 
