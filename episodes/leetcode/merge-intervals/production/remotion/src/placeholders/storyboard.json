@@ -1,0 +1,574 @@
+{
+  "meta": {
+    "title": "合并区间：端点相接也要合并？",
+    "episode": 59,
+    "episodePart": "LeetCode 56",
+    "slug": "merge-intervals",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 1050,
+    "draft": true,
+    "provisionalTiming": true,
+    "pendingAudio": true,
+    "layoutPreviewOnly": true,
+    "timingSource": "layout placeholder only; no audio timing",
+    "style": "全屏深蓝画布，沿共享 LeetCode 深蓝/暖金/青色；先映射输入，再连续排序，最后用 trace 驱动当前段、下一段与已完成段。",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "Issue #489：制作 LC.56；LC.15 与 LC.207 仅候选。独立脚本与文章审读仍在进行，本配置不授权 TTS、冻结或正式编码。",
+    "sampleDataLabel": "教学示例",
+    "covers": {},
+    "discussionQuestion": "为什么按起点排好后，只比较下一段起点与当前终点？",
+    "unvoicedEndCard": {
+      "kind": "full-python-solution",
+      "from": 900,
+      "durationInFrames": 150,
+      "codeSource": "solution.py",
+      "displaySource": "solution.json",
+      "timingStatus": "placeholder"
+    }
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "LC56 vector animation from trace; no audio timing."
+    }
+  },
+  "scenes": [
+    {
+      "id": "question",
+      "chapterId": "question",
+      "title": "输入与目标",
+      "from": 0,
+      "durationInFrames": 180,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "slug": "input",
+          "visualType": "input",
+          "chapterId": "question",
+          "chapterTitle": "输入与目标",
+          "from": 0,
+          "durationInFrames": 90,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-01-0",
+              "type": "text",
+              "text": "先看输入",
+              "cueText": "先看输入",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-01-1",
+              "type": "text",
+              "text": "题目要求",
+              "cueText": "题目要求",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "六张 nums 卡与同尺度数轴；高亮 I0=[8,10]，明确两端包含与覆盖不变。",
+          "traceEvents": []
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "slug": "touching-rule",
+          "visualType": "touching-rule",
+          "chapterId": "question",
+          "chapterTitle": "端点规则",
+          "from": 90,
+          "durationInFrames": 90,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-02-0",
+              "type": "text",
+              "text": "同一组输入",
+              "cueText": "同一组输入",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-02-1",
+              "type": "text",
+              "text": "因为两端都包含",
+              "cueText": "因为两端都包含",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "突出 I3=[3,5] 与 I4=[5,6]，端点 5 对齐且为实心；不展示合并结果。",
+          "traceEvents": []
+        }
+      ]
+    },
+    {
+      "id": "sorting",
+      "chapterId": "sorting",
+      "title": "为什么先排序",
+      "from": 180,
+      "durationInFrames": 90,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "slug": "order",
+          "visualType": "order",
+          "chapterId": "sorting",
+          "chapterTitle": "为什么先排序",
+          "from": 180,
+          "durationInFrames": 90,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-03-0",
+              "type": "text",
+              "text": "输入顺序是乱的",
+              "cueText": "输入顺序是乱的",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-03-1",
+              "type": "text",
+              "text": "先按起点排好",
+              "cueText": "先按起点排好",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "保持 ID/颜色，按 trace order 连续移动输入卡；区间在数轴上的位置不动。",
+          "traceEvents": []
+        }
+      ]
+    },
+    {
+      "id": "scan",
+      "chapterId": "scan",
+      "title": "排序后重新扫描",
+      "from": 270,
+      "durationInFrames": 540,
+      "shots": [
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "slug": "begin",
+          "visualType": "begin",
+          "chapterId": "scan",
+          "chapterTitle": "排序后重新扫描",
+          "from": 270,
+          "durationInFrames": 90,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-04-0",
+              "type": "text",
+              "text": "排序后",
+              "cueText": "排序后",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-04-1",
+              "type": "text",
+              "text": "每段都保留",
+              "cueText": "每段都保留",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "显式从排序后第一段开始，使用 trace begin.order 与 current，不接续第02镜示意。",
+          "traceEvents": [
+            {
+              "kind": "begin"
+            }
+          ]
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "slug": "nested",
+          "visualType": "nested",
+          "chapterId": "scan",
+          "chapterTitle": "逐段处理",
+          "from": 360,
+          "durationInFrames": 90,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-05-0",
+              "type": "text",
+              "text": "下一段",
+              "cueText": "下一段",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-05-1",
+              "type": "text",
+              "text": "合并后",
+              "cueText": "合并后",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "trace merge(id=2)：I2=[2,3] 嵌套，current.end 保持。",
+          "traceEvents": [
+            {
+              "kind": "merge",
+              "id": 2
+            }
+          ]
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "slug": "overlap",
+          "visualType": "overlap",
+          "chapterId": "scan",
+          "chapterTitle": "逐段处理",
+          "from": 450,
+          "durationInFrames": 90,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-06-0",
+              "type": "text",
+              "text": "三到五",
+              "cueText": "三到五",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-06-1",
+              "type": "text",
+              "text": "把终点扩展",
+              "cueText": "把终点扩展",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "trace merge(id=3)：按 before/current 动态延长终点。",
+          "traceEvents": [
+            {
+              "kind": "merge",
+              "id": 3
+            }
+          ]
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "slug": "touching",
+          "visualType": "touching",
+          "chapterId": "scan",
+          "chapterTitle": "逐段处理",
+          "from": 540,
+          "durationInFrames": 90,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-07-0",
+              "type": "text",
+              "text": "五到六",
+              "cueText": "五到六",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-07-1",
+              "type": "text",
+              "text": "端点包含",
+              "cueText": "端点包含",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "trace merge(id=4)：起点与 before.end 同为 5，动态延长。",
+          "traceEvents": [
+            {
+              "kind": "merge",
+              "id": 4
+            }
+          ]
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "slug": "separate",
+          "visualType": "separate",
+          "chapterId": "scan",
+          "chapterTitle": "逐段处理",
+          "from": 630,
+          "durationInFrames": 90,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-08-0",
+              "type": "text",
+              "text": "八到十",
+              "cueText": "八到十",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-08-1",
+              "type": "text",
+              "text": "后面的起点",
+              "cueText": "后面的起点",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "trace separate(id=0)：先比较，再写入 before 并开始 current。",
+          "traceEvents": [
+            {
+              "kind": "separate",
+              "id": 0
+            }
+          ]
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "slug": "separate-finish",
+          "visualType": "separate-finish",
+          "chapterId": "scan",
+          "chapterTitle": "逐段处理",
+          "from": 720,
+          "durationInFrames": 90,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-09-0",
+              "type": "text",
+              "text": "十二到十四",
+              "cueText": "十二到十四",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-09-1",
+              "type": "text",
+              "text": "已经没有下一段了",
+              "cueText": "已经没有下一段了",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "依次使用 separate(id=5) 与 finish；逐个显示分离，再以扫描结束 flush。",
+          "traceEvents": [
+            {
+              "kind": "separate",
+              "id": 5
+            },
+            {
+              "kind": "finish"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "close",
+      "chapterId": "close",
+      "title": "规则与结果",
+      "from": 810,
+      "durationInFrames": 240,
+      "shots": [
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "slug": "close",
+          "visualType": "close",
+          "chapterId": "close",
+          "chapterTitle": "规则与结果",
+          "from": 810,
+          "durationInFrames": 240,
+          "cueFrames": {
+            "sentences": [
+              0,
+              45
+            ]
+          },
+          "subtitles": [],
+          "voice": [],
+          "elements": [
+            {
+              "id": "cue-10-0",
+              "type": "text",
+              "text": "归纳成两条规则",
+              "cueText": "归纳成两条规则",
+              "appearFrame": 0,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            },
+            {
+              "id": "cue-10-1",
+              "type": "text",
+              "text": "本例得到三段",
+              "cueText": "本例得到三段",
+              "appearFrame": 45,
+              "x": 130,
+              "y": 165,
+              "w": 1100,
+              "h": 80,
+              "fontSize": 52
+            }
+          ],
+          "scriptVisual": "两条规则、trace.result 与诚实复杂度，不添加新输入或证明术语。",
+          "traceEvents": [
+            {
+              "kind": "finish"
+            }
+          ],
+          "codeCardFrom": 90
+        }
+      ]
+    }
+  ]
+}
