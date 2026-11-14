@@ -44,15 +44,20 @@ def run(command):
         command[-1:-1] = ['-vf', CARD_FILTER, '-pix_fmt', 'yuv420p',
                          '-color_range', 'tv', '-colorspace', 'bt709',
                          '-color_primaries', 'bt709', '-color_trc', 'bt709']
+    if command[0] == 'ffmpeg' and '-fps_mode' in command:
+        index = command.index('-fps_mode')
+        if command[index + 1] != 'passthrough':
+            raise ValueError('Unexpected frame-rate mode in the media verifier')
+        command[index:index + 2] = ['-vsync', '0']
     return engine.run(command)
 
 
 def adapted(function, **overrides):
-    return FunctionType(function.__code__,
-                        dict(vars(engine), __file__=str(GENERATOR), THEME=PALETTE,
-                             run=run, load_references=load_references,
-                             render_cards=render_cards, **overrides),
-                        function.__name__, function.__defaults__, function.__closure__)
+    scope = dict(vars(engine), __file__=str(GENERATOR), THEME=PALETTE,
+                 run=run, load_references=load_references, render_cards=render_cards)
+    scope.update(overrides)
+    return FunctionType(function.__code__, scope, function.__name__,
+                        function.__defaults__, function.__closure__)
 
 
 def dependency_files():
@@ -65,6 +70,12 @@ def dependencies():
             'leetcodePaletteAdapterSHA256': engine.sha(LIBRARY),
             'colorAdapter': str(GENERATOR.relative_to(ROOT)),
             'colorAdapterSHA256': engine.sha(GENERATOR)}
+
+
+def verify_media(*args):
+    frame_rows = adapted(engine.frame_rows, run=run)
+    verifier = adapted(engine.verify_media, run=run, frame_rows=frame_rows)
+    return verifier(*args)
 
 
 def check_color(path):
@@ -102,7 +113,7 @@ def append(args):
         previous = json.loads(path.read_text())
         if previous.get('presentation') == PRESENTATION and previous.get('dependencies') != dependencies():
             raise ValueError('Bibliography dependencies changed; preserve previous artifacts before rendering')
-    result = adapted(engine.append)(args)
+    result = adapted(engine.append, verify_media=verify_media)(args)
     receipt = json.loads(path.read_text())
     if result['status'] != 'already-current' or 'presentation' not in receipt:
         receipt.update(presentation=PRESENTATION, layout=LAYOUT,
@@ -125,9 +136,9 @@ def verify(args):
     if recorded.get('passed') is not True:
         raise ValueError('Saved full appendix media verification is absent or failed')
     with tempfile.TemporaryDirectory(prefix='lc56-bt709-verify-') as temporary:
-        def verify_media(*values):
-            return engine.verify_media(*values[:-1], Path(temporary) / 'media-check.json')
-        report = adapted(engine.verify, verify_media=verify_media)(args)
+        def verify_with_temporary_report(*values):
+            return verify_media(*values[:-1], Path(temporary) / 'media-check.json')
+        report = adapted(engine.verify, verify_media=verify_with_temporary_report)(args)
     if ({k: v for k, v in report.items() if k != 'checkedAtUTC'} !=
             {k: v for k, v in recorded.items() if k != 'checkedAtUTC'}):
         raise ValueError('Saved LC56 media verification differs from full verification')

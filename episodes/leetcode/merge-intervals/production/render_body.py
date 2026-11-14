@@ -2,6 +2,7 @@
 from pathlib import Path
 import shutil,subprocess,sys
 EP=Path(__file__).resolve().parent;ROOT = next(parent for parent in Path(__file__).resolve().parents if (parent / 'AGENTS.md').is_file() and (parent / 'site/package.json').is_file())
+subprocess.run([sys.executable,str(EP/'scripts/require_formal_inputs.py')],check=True)
 subprocess.run([sys.executable,str(EP/'freeze.py'),'--verify'],check=True)
 subprocess.run(['npm','run','render:voice'],cwd=EP/'remotion',check=True)
 subprocess.run(['npm','run','render:mix'],cwd=EP/'remotion',check=True)

@@ -10,9 +10,27 @@ export const ease = (value: number) => {
   const x = clamp(value);
   return x * x * (3 - 2 * x);
 };
-export function actionProgress(shot: Shot, frame: number, start = 0.12, end = 0.82) {
-  const cues = shot.cueFrames?.sentences ?? [];
-  const a = cues[0] ?? 0;
-  const b = cues[1] ?? shot.durationInFrames * 0.5;
-  return ease((frame - (a + (b - a) * start)) / Math.max(1, (b - a) * (end - start)));
+export function actionProgress(
+  shot: Shot,
+  frame: number,
+  actionId: string,
+  startFraction = 0,
+  endFraction = 0.92,
+) {
+  const action = shot.actionCues?.find((cue) => cue.id === actionId);
+  if (!action) return 0;
+  const cueFrame = shot.cueFrames?.labels?.[action.cue]
+    ?? shot.elements?.find((element) => element.cueText === action.cue)?.appearFrame
+    ?? shot.cueFrames?.sentences?.[action.sentence];
+  if (cueFrame === undefined) return 0;
+  const subtitles = shot.subtitles ?? [];
+  const lastSubtitle = subtitles.length > 0 ? subtitles[subtitles.length - 1] : undefined;
+  const subtitleEnd = lastSubtitle?.to ?? shot.durationInFrames - 1;
+  const safeEnd = Math.min(shot.durationInFrames - 6, subtitleEnd - 4);
+  const available = safeEnd - cueFrame;
+  if (available <= 1) return 0;
+  const start = cueFrame + available * clamp(startFraction);
+  const end = cueFrame + available * Math.max(startFraction, endFraction);
+  if (end <= start) return 0;
+  return ease((frame - start) / (end - start));
 }

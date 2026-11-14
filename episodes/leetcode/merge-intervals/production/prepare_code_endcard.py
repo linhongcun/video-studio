@@ -13,4 +13,5 @@ last['codeCardFrom']=card['from']-last['from'];s['meta']['unvoicedEndCard']=card
 assert last['from']+last['durationInFrames']==b['summary']['frames']
 if last.get('subtitles'):last['subtitles'][-1]['to']=last['codeCardFrom']-1
 (EP/'storyboard.json').write_text(json.dumps(s,ensure_ascii=False,indent=2)+'\n')
+shutil.copy2(EP/'storyboard.json',EP/'remotion/src/placeholders/storyboard.json')
 print('Code-card start derived from the real voice build.')

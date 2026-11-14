@@ -8,7 +8,7 @@ function mergeIntervals(){
  return txt(300,55,'两端包含 · 端点相接',C.gold,29)+
  line(a,153,b,153,C.teal,10)+dot(a,153,C.teal)+dot(b,153,C.teal)+txt((a+b)/2,126,'I3 [3,5]',C.teal,24)+
  line(b,244,c,244,C.gold,10)+dot(b,244,C.gold)+dot(c,244,C.gold)+txt((b+c)/2,216,'I4 [5,6]',C.gold,24)+
- line(80,310,520,310,C.edge,3)+[3,5,6].map(n=>line(x(n),300,x(n),320,C.text,2)+txt(x(n),350,String(n),C.text,25)).join('');
+ line(80,310,x(6),310,C.edge,3)+[3,5,6].map(n=>line(x(n),300,x(n),320,C.text,2)+txt(x(n),350,String(n),C.text,25)).join('');
 }
 const DRAW=new Map([[56,mergeIntervals]]);
 export const SUPPORTED_PROBLEMS=Object.freeze([...DRAW.keys()]);

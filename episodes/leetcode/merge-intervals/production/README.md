@@ -1,14 +1,14 @@
 # LC56 工程与环境
 
-十镜 Remotion 主体、trace 驱动的数据板、完整代码卡和共享配音/装配/freeze 薄包装已实现。独立审读期间不改 script/article/solution，不生成配音、不冻结输入、不进行正式编码。当前 storyboard 标记为 layout-only placeholder；90 帧/镜仅用于静帧布局，不代表配音或字幕时序。
+十镜 Remotion 主体、trace 驱动的数据板、完整代码卡和共享配音/装配/freeze 薄包装已实现。独立复审通过；复审报告原字节保存在 qa/independent-rereview-df13a3e.md。已生成20句MiMo配音并按真实句级时序装配：正文4388帧，代码卡从4238帧开始；voice.wav末个非零样本为140.6448秒，代码卡起点为141.2667秒。附加150帧资料页后的首版为4538帧、151.2667秒，机器媒体检查通过。首版仍待独立审片/听审；当前已知需合并修正：finish状态不能回退，开场映射需在第二句前完成，08结果输出与09分离动作需按对应句内语义定位。修复并复核前不再正式渲染；不擅自合并或发布Release。90帧/镜仅用于静帧布局，不代表真实配音或字幕时序。
 
 ## 动画与时间线
 
 plan.json 映射十镜和 trace 事件；05–09 从本期 trace 读取状态。Solution 即时维护 merged 的末段，trace 则在 separate 时把 before 加入 completed、finish 时再加入末 current；只是记录时机不同，结果等价。排序对象保留原 ID 和颜色，数轴使用固定 0–15 同尺度。episode-config.json 将代码卡与资料页各设为 5 秒；代码卡实际起帧由获准配音后的 voice build 推导。代码卡逐行数据由 scripts/build_code_card.py 从 solution.py 生成，采用 31px 字体、43px 行距。
 
-scripts/build_layout_placeholder.py 生成无音频占位 storyboard。静帧样本位于 remotion/out/lc56-*.png，不能作为正式动态或时序验收。
+先运行 scripts/check_plan_cues.py，验证 plan.json 中每个配音术语确实匹配对应脚本句首；scripts/build_layout_placeholder.py 也会执行此检查并生成无音频占位 storyboard。占位 storyboard 仅用于 Remotion 静帧 smoke；正式 render/freeze 必须先有实际 voice.wav、words.json 和非 provisional 的 storyboard。静帧样本位于 remotion/out/lc56-*.png，不能作为正式动态或时序验收。
 
-独立初审报告按原字节保存在 qa/independent-review-6967f6a.md；后续复审应基于本次修订提交，不覆盖初审记录。
+初审和通过的复审报告均按原字节保存在 qa/；两份报告都由 freeze.py 纳入输入清单，不覆盖初审记录。
 
 ## 依赖与静帧烟测
 
@@ -36,9 +36,9 @@ python3 -m venv "$HOME/.venv-lc56"
 
 运行共享 Python 工具或 Remotion render scripts 前，先激活该 venv；runtime 依赖按 LC347 当前 requirements-runtime.txt 的精确版本锁定。
 
-## 审读通过后的共享入口
+## 正式配音、时序、冻结与渲染
 
-以下命令是后续流水线入口，本阶段不执行；先完成独立脚本/文章审读及获准的配音、分镜数据：
+voice/params.json 将末尾停顿设为 5.6 秒：共享构建器原有 0.6 秒自然尾停，加 5 秒完整代码卡；配音不变速、不裁句。
 
 ~~~sh
 ROOT="$(git rev-parse --show-toplevel)"
@@ -52,9 +52,12 @@ python3 "$EPDIR/prepare_code_endcard.py"
 python3 episodes/_shared/place_v2.py --dir "$EPDIR" --mode whole
 python3 episodes/_shared/label_onset_strict.py --dir "$EPDIR"
 python3 episodes/_shared/check_sentence_episode.py "$EPDIR"
+python3 "$EPDIR/scripts/sync_storyboard.py"
 node site/scripts/check-references.mjs --sources "$EPDIR"
+python3 "$EPDIR/freeze.py"
+python3 "$EPDIR/render.py"
 ~~~
 
-gen.py 只有在审读通过后才可调用；密钥仅通过环境变量 MIMO_API_KEY 提供，不写入文件或 README。
+gen.py 仅在审读通过后调用；MiMo API Key 仅由进程环境变量 MIMO_API_KEY 提供，不写入文件、命令参数或日志。首句试听取成功后再生成其余句子。Remotion 使用已有 Chrome 时显式设置 CHROME_BIN；不要安装或替换浏览器。
 
-assemble.py 临时提供共享 sentence assembler 所需的画面行，不改审读中的 script.md，并将 timing source 绑定回原脚本 SHA。freeze.py 仅为后续正式冻结入口，本阶段没有运行。Remotion 入口使用共享 title-author 资料页渲染器；本阶段没有 TTS、真实时序、冻结清单或正式编码，因此现在不要运行 npm run render、render:voice 或 render:body。
+prepare_code_endcard.py 调用共享句级装配包装，不改 script.md，并将 timing source 绑定到真实 voice.wav、words.json 和原脚本 SHA；代码卡帧数来自真实音轨。正式渲染只走 render.py，默认追加共享 title-author 资料页。freeze.py 和 Remotion 的正式 render 脚本拒绝缺少真实 voice/storyboard、草稿或 layout-only placeholder 的输入；smoke:still 仅供布局检查。

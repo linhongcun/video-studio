@@ -26,6 +26,14 @@ sha=hashlib.sha256((EP/'script.md').read_bytes()).hexdigest()
 words=json.loads((EP/'words.json').read_text());words['scriptSha256']=sha;words['script']='script.md'
 (EP/'words.json').write_text(json.dumps(words,ensure_ascii=False,indent=2)+'\n')
 story=json.loads((EP/'storyboard.json').read_text())
+by_number={int(item['id']):item for item in json.loads((EP/'plan.json').read_text())}
+for scene in story['scenes']:
+ for shot in scene['shots']:
+  actions=by_number[int(shot['id'])]['actions']
+  shot['actionCues']=actions
+  labels=shot['cueFrames'].setdefault('labels',{})
+  for action in actions:
+   labels[action['cue']]=shot['cueFrames']['sentences'][action['sentence']]
 story['meta']['timingSource']='voice.wav '+hashlib.sha256((EP/'voice.wav').read_bytes()).hexdigest()+' + words.json '+hashlib.sha256((EP/'words.json').read_bytes()).hexdigest()+' + script.md '+sha
 (EP/'storyboard.json').write_text(json.dumps(story,ensure_ascii=False,indent=2)+'\n')
 print('Shared assembly complete; original reviewed script SHA retained.')

@@ -5,6 +5,8 @@ import argparse
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
+import sys
 from types import FunctionType
 
 EP = Path(__file__).resolve().parent
@@ -27,6 +29,7 @@ appender = load('lc56_local_bibliography', APPENDER)
 def verify_freeze(directory):
     # Keep every canonical required-source/output-exclusion check. Additionally
     # bind this entry and the complete actual palette/color adapter closure.
+    subprocess.run([sys.executable,str(EP/'scripts/require_formal_inputs.py')],check=True)
     shared.verify_freeze(directory)
     manifest = shared.read(directory / 'source-sha256.json')
     frozen = {shared.resolve_frozen_path(directory / 'source-sha256.json', rel): expected

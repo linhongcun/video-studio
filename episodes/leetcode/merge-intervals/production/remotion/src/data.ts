@@ -2,7 +2,7 @@ import storyboard from '@storyboard';
 import trace from '../../trace/linear-example.json';
 import plan from '../../plan.json';
 
-export type Interval = number[];
+export type Interval = readonly [number, number];
 export type TraceEvent = {
   kind: string;
   id?: number;
@@ -14,6 +14,9 @@ export type TraceEvent = {
   relation?: string;
   processedIds?: number[];
 };
+export type ActionCue = {id: string; cue: string; sentence: number};
+export type Subtitle = {text: string; from: number; to?: number; duration?: number};
+export type BoardElement = {text: string; cueText?: string; appearFrame: number};
 export type Shot = {
   id: string;
   scriptShot?: number;
@@ -22,17 +25,27 @@ export type Shot = {
   visualType: string;
   chapterId?: string;
   chapterTitle?: string;
-  cueFrames?: {sentences?: number[]};
-  subtitles?: {text: string; from: number; to?: number; duration?: number}[];
+  cueFrames?: {sentences?: number[]; labels?: Record<string, number>};
+  subtitles?: Subtitle[];
   codeCardFrom?: number;
   traceEvents?: {kind: string; id?: number}[];
-  elements?: {text: string; cueText?: string; appearFrame: number}[];
+  elements?: BoardElement[];
+  actionCues?: ActionCue[];
 };
-export const STORYBOARD = storyboard as any;
-export const TRACE = trace as {input: Interval[]; result: Interval[]; events: TraceEvent[]};
-export const PLAN = plan as {id: string; traceEvents: {kind: string; id?: number}[]}[];
+export type Storyboard = {
+  meta: {width: number; height: number; fps: number; durationInFrames: number; pendingAudio?: boolean; layoutPreviewOnly?: boolean};
+  scenes: {shots: Shot[]}[];
+};
+export type PlanItem = {
+  id: string;
+  actions: ActionCue[];
+  traceEvents: {kind: string; id?: number}[];
+};
+export const STORYBOARD = storyboard as unknown as Storyboard;
+export const TRACE = trace as unknown as {input: Interval[]; result: Interval[]; events: TraceEvent[]};
+export const PLAN = plan as unknown as PlanItem[];
 export const EVENTS = TRACE.events;
-export const shots: Shot[] = STORYBOARD.scenes.flatMap((scene: any) => scene.shots);
+export const shots: Shot[] = STORYBOARD.scenes.flatMap((scene) => scene.shots);
 export const VIDEO = {
   width: STORYBOARD.meta.width,
   height: STORYBOARD.meta.height,
