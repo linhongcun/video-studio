@@ -10,7 +10,7 @@
 python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --out /tmp/line.wav --voice 冰糖 --gap 0.28 --segments /tmp/line.json
 ```
 
-脚本按 `。？！` 分句，默认音色「冰糖」，模型 `mimo-v2.5-tts`，句间 `--gap` 默认 0.28 秒。`--segments` 写出每句的 `text`、`start`、`dur`。整期批量合成用 `episodes/_shared/voice/gen.py`（jobs 文件 `[[句id, take, 送模文本或 null, style?], …]`），它只调用 `mimo_say.py`，自己不读密钥。密钥只来自 `MIMO_API_KEY` 或 `--env` 文件，不提交。
+脚本按 `。？！` 分句，默认音色「冰糖」，模型 `mimo-v2.5-tts`，句间 `--gap` 默认 0.28 秒。`--segments` 写出每句的 `text`、`start`、`dur`。整期批量合成用 `episodes/_shared/voice/gen.py`（jobs 文件 `[[句id, take, 送模文本或 null, style?], …]`），它只调用 `mimo_say.py`，自己不读密钥。新机器优先通过环境变量 `MIMO_API_KEY` 提供密钥；单句命令也可显式指定已忽略的 `--env` 文件。`mimo_say.py` 的默认文件是旧工作区绝对路径 `/workspace/video-studio/.mimo.env`，不是跨机器配置入口；`gen.py` 没有转发 `--env` 参数，批量合成应使用环境变量。密钥不提交。
 
 ## 整轨、句时间和镜头帧
 
@@ -26,13 +26,13 @@ python3 episodes/_shared/tts/mimo_say.py --text "一句带句号的旁白。" --
 python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole
 ```
 
-`EPDIR` 为制作目录。目标不能是相对软链，Remotion bundle 后会失效，见 [render.md](render.md)。`--mode place` 只用于历史剪句回归，不用于改变当前冻结时序。已发布工程只读复核用 `--no-copy`，报告放 `/tmp`。
+`EPDIR` 为制作目录。目标必须是实体文件，Remotion bundle 后不能依赖相对软链，见 [render.md](render.md)。`--mode place` 只用于历史剪句回归，不用于改变当前冻结时序。已发布工程只读复核用 `--no-copy`，报告放 `/tmp`。
 
 分镜的 `shots[].voice` 记录 `wavStart`、`wavEnd`、`localStart`、`localEnd`，元素的 `cueOnset` 记录所用起音。`words.json` 的 shots/sentences 记录真实句边界、选定 take、音轨和脚本哈希。字段说明见 [storyboard-schema.md](storyboard-schema.md)；实际语义以本期装配实现为准。
 
 ## 冻结
 
-`audioSha256` 是实际 `voice.wav` 的完整 SHA-256。`scriptSha256` 的输入定义按本期装配代码：当前 EP.14 比较整份 `script.md`，历史回归中的旁白提取文本定义不同，不能混用。改口播、重配或重装配后，要重新核对分镜时序、起音、冻结清单及受影响媒体。
+`audioSha256` 是实际 `voice.wav` 的完整 SHA-256。`scriptSha256` 的输入定义按本期装配代码：EP.14 原正文的 `assemble.py` 比较整份 `script.md`，历史回归中的旁白提取文本定义不同，不能混用。改口播、重配或重装配后，要重新核对分镜时序、起音、冻结清单及受影响媒体。
 
 冻结与只读核对入口见 [validate.md](validate.md)。校验失败先找原因，不能用更新清单把新源码追认给旧成片。
 
@@ -70,9 +70,9 @@ Rule(samples, sample_rate).onset(st, en, prevStart=None, prevEnd=None)
 python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 ```
 
-退出码 1 表示有 FAIL、NOT FOUND 或 MISMATCH。`--exc 06,18` 把对应镜头 id 前两位的窗口越界改记为 EXCEPTION。报告默认写在当期目录的 `label-onset-strict.txt`。当前工程是否另有本期检查入口，以本期 README 为准。冻结分镜 `meta.onsetRule.checker` 里的 `/workspace/video-studio/episodes-codex/_shared/label_onset_strict.py` 就是这一份。引用方式见 [validate.md](validate.md)。
+退出码 1 表示有 FAIL、NOT FOUND 或 MISMATCH。`--exc 06,18` 把对应镜头 id 前两位的窗口越界改记为 EXCEPTION。报告默认写在当期目录的 `label-onset-strict.txt`。当前工程是否另有本期检查入口，以本期 README 为准。历史冻结分镜 `meta.onsetRule.checker` 可能保存 `/workspace/video-studio/episodes-codex/_shared/label_onset_strict.py`；这是当时的路径，当前入口是上面的仓内共享文件。引用方式见 [validate.md](validate.md)。
 
-冻结分镜 `meta.onsetRule.module` 还写着仓外路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py`。以 `episodes/_shared/onset_rule.py` 这一份为准。本仓没有按期拷贝。期目录不要再复制算法；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
+历史冻结分镜 `meta.onsetRule.module` 可能保存旧路径 `/workspace/video-studio/episodes-codex/_shared/onset_rule.py`。以 `episodes/_shared/onset_rule.py` 这一份为准。本仓没有按期拷贝。期目录不要再复制算法；需要从本期目录 import 时，symlink 到 `_shared`，或只写转发 import 的薄包装。
 
 预检时对照 `appearFrame` 与 `onsetLocal`：差值落在窗口外就退回分镜，不要渲染。
 
@@ -82,4 +82,4 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 
 ## 响度
 
-成片响度在混音时处理，不在 `mimo_say.py` 里。`episodes/_shared/music/mix_bgm.py` 默认 `--lufs -16`，`loudnorm` 的真峰值参数是 `TP=-2.0`。重制期的 `package.json` 使用 `--mode constant --below 12`。见 [render.md](render.md)。
+成片响度在混音时处理，不在 `mimo_say.py` 里。`episodes/_shared/music/mix_bgm.py` 默认 `--lufs -16`，`loudnorm` 的真峰值参数是 `TP=-2.0`。需要重新混音时，正文工程的实际参数以本期入口为准，旧 EP.14 正文示例使用 `--mode constant --below 12`；仅替换视觉且复用已验收 AAC 的系列修订按对应 README 保留原声，不重新混音。见 [render.md](render.md)。

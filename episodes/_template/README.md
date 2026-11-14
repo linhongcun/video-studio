@@ -1,6 +1,6 @@
 # 从模板开一期
 
-先读仓库根上的 [AGENTS.md](../../AGENTS.md)、[docs/RULES.md](../../docs/RULES.md) 和 [docs/pipeline.md](../../docs/pipeline.md)。本目录提供制作说明、待填写的资料清单和参考资料渲染脚本片段，没有完整的 Remotion 工程。
+先读仓库根上的 [AGENTS.md](../../AGENTS.md)、[docs/RULES.md](../../docs/RULES.md) 和 [docs/pipeline.md](../../docs/pipeline.md)，再按[制作环境与跨工具接手](../../docs/production-setup.md)准备本机依赖与交接记录。本目录提供制作说明、待填写的资料清单和参考资料渲染脚本片段，没有完整的 Remotion 工程。
 
 ## 当前授权范围
 
@@ -14,7 +14,7 @@
 
 新期的元数据与源码入口建立后，在仓根运行 `python3 scripts/check-layout.py --write-index` 更新[系列工程索引](../README.md)，再运行 `python3 scripts/check-layout.py` 检查实体目录与索引；发布前待视频、海报等交付齐全后再次检查并一同提交索引。草稿元数据按实际状态使用 `draft: true`，尚未产出的 `video`、`poster` 字段先省略，不填写不存在的媒体路径。调整系列归属时同时移动本期实体目录、更新 `meta.series` 与 `sourcePath`，并重新生成索引；部署会检查索引是否过期。
 
-参考当前制作工程 `episodes/database/db-lock/production/`、`episodes/database/db-transaction/production/`（已认可的第二版），以及本轮各期 README。共享工具与模板统一使用 `episodes/_shared/`、`episodes/_template/`。只复用配音、冻结和渲染基础设施，按本期主题重新设计动作，镜数与时长不照搬前一期。
+先按发布 `meta.json.sourcePath` 定位当前动画修订，再读该制作目录的 README。完整新期可参考 [LC347](../leetcode/top-k-frequent-elements/production/README.md)，按影响范围补录和复用可参考 [P09 倒推动机修订](../puzzles/pirate-gold/production/revisions/motivation-20261107/pirate-gold/README.md)。共享工具与模板统一使用 `episodes/_shared/`、`episodes/_template/`。只复用配音、冻结和渲染基础设施，按本期主题重新设计动作，镜数、时长、机器专属路径与已验收状态不照搬前一期；系列视觉入口仍按下方对应模板选择。
 
 现有工程已按用户授权实体迁移，旧清单、来源JSON、QA和回执保留原字节，旧路径通过[迁移记录](../../docs/archive/2026-11/episode-layout/README.md)及固定基线 `28dfb2fa` 追溯。复制的旧冻结清单不能证明已适配新路径的源码；新期或后续重渲必须冻结本期当前实际输入，不把目录整理当作重新制作验收。
 

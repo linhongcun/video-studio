@@ -1,6 +1,6 @@
 # 渲染与封面
 
-制作工程在 `episodes/<series>/<slug>/production/`，站点发布副本在 `episodes/<series>/<slug>/publication/`。按当期 README、`remotion/package.json` 和 `source-sha256.json` 执行；参考实现为 [EP.14 当前工程](../episodes/peak/degradation/production/README.md)。旧期制作工程已清理，不从站点目录重新渲染。
+制作工程在 `episodes/<series>/<slug>/production/`，站点发布副本在 `episodes/<series>/<slug>/publication/`。先按发布 `meta.json.sourcePath` 找到工程，读取当期 README 顶部的当前修订与系列共享入口，再选择实际命令及冻结清单；`remotion/package.json` 可能保留旧正文入口，不能据此覆盖当前视觉修订。参考 [EP.14 工程说明](../episodes/peak/degradation/production/README.md)的当前入口。旧期制作工程已清理，不从站点目录重新渲染。
 
 目录迁移后的源码包含路径适配，旧 `source-sha256.json` 继续证明迁移前的制作输入，不能直接作为新路径代码的编码许可。重新渲染前，在新修订中按本期冻结器记录当前实际输入；原清单与回执保留历史身份，原路径与前后SHA按[迁移记录](archive/2026-11/episode-layout/README.md)追溯。本次目录检查不代表已重新编码或审片。
 
@@ -19,20 +19,13 @@ python3 episodes/_shared/render_with_references.py EPDIR
 
 新模式每页最多4项、默认5秒，采用原题与作者/机构的简洁列表；原题和署名各自检查排版，超限报COPYFIT，不截断或改写成概括。实际检查所有资料页和首/中/末帧、字幕结束及播放器暂停/手机全屏；不叠加摘录、定位、年份/版本、核验日期、链接或提示说明。正文、代码卡和参考资料分别计时，不额外延长旁白或覆盖代码卡。新回执的 `bibliography` 绑定实际 `title` 与 `credit`，`layout` 声明单列、最多4项与只渲染题名/署名，`quotesRendered` 为false；每页5秒由 `inputs.secondsPerPage` 记录。旧原题/摘录模式及旧QA按历史范围保留，不改旧回执追认新列表。
 
-## 现行旧期正文入口参考
+## 既有工程的入口与输出
 
-以下命令使用当前 EP.14 的实际入口。运行前先完成 [校验](validate.md) 与冻结核对；换期应先读该期 README。
+EP.11–14 当前正文和资料页通过 [peak-video](../episodes/_shared/peak-video/README.md) 生成，实际入口为 `remotion/src/peak-style/index.ts`，媒体和新冻结在 `revisions/peak-style/`；不能通过旧 `npm run render` 覆盖当前发布稿。其他系列的当前入口见下方对应说明及本期 README。
 
-```sh
-cd episodes/peak/degradation/production/remotion
-npm ci
-npx tsc --noEmit
-npm run render
-```
+制作根保留的 EP.14 `remotion/package.json` 中，`render` 已调用共享 `render_with_references.py`，并非只有正文：`render:body` 执行 `render:voice` 与 `render:mix`，先生成 `out/voice.mp4`，再混音到 `out/body.mp4`，最后由 wrapper 追加参考资料得到上层 `video.mp4`。这些命令描述原正文与附录流程，不代替当前 `peak-style` 入口。编码器、CRF、并发与浏览器位置以实际执行的入口为准，不把单期参数当成全系列命令。
 
-当前 EP.14 的 `render` 先执行 `render:voice` 生成 `out/voice.mp4`，再执行 `render:mix`，通过共享混音脚本生成上层 `video.mp4`。编码器、CRF、并发、浏览器位置以各期 package.json 为准，不把单期参数当成全系列命令。
-
-共享混音从该制作目录调用 `../../../episodes/_shared/music/mix_bgm.py`，输入 `out/voice.mp4`、背景音乐 `../../../episodes/_shared/music/Wallpaper.mp3`，以 `--mode constant --below 12` 输出上层 `video.mp4`，报告写入 `out/mix-report.json`。默认响度目标 −16 LUFS、真峰值 −2.0 dBTP；实际值读混音报告，不以配置目标代替成片测量。
+需要运行本期 Remotion 工程时，先在其实际 `remotion/` 目录按锁文件执行 `npm ci` 和 `npx tsc --noEmit`。旧 EP.14 package 从该目录调用共享混音脚本的相对路径为 `../../../../_shared/music/mix_bgm.py`，背景音乐为 `../../../../_shared/music/Wallpaper.mp3`，参数为 `--mode constant --below 12`，报告为 `out/mix-report.json`。默认响度目标 −16 LUFS、真峰值 −2.0 dBTP；实际值读混音报告，不以配置目标代替成片测量。只替换视觉并保留原AAC的系列修订不重复混音。
 
 人声文件是 `remotion/public/audio/voice.wav`。渲染配置可能在它缺失时仍生成无声画面，渲染前必须确认音轨存在且与冻结输入相同。Remotion bundle 会复制 public 目录，音轨必须是实体文件，不能用相对软链代替。在 remotion 目录检查：
 
@@ -42,24 +35,25 @@ test -f public/audio/voice.wav && test ! -L public/audio/voice.wav && echo ok
 
 仓根可用 `python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole` 校验并按字节复制音轨；`EPDIR` 指制作目录。不要对已冻结工程重跑会写文件的步骤来代替只读检查。
 
-输出位置：
+通用新片入口的输出位置（系列派生输出按对应 README）：
 
 - `episodes/<series>/<slug>/production/remotion/out/voice.mp4`：混音前视频。
-- `episodes/<series>/<slug>/production/video.mp4`：待检查的成片。
+- `episodes/<series>/<slug>/production/remotion/out/body.mp4`：混音后的正文及已有代码卡。
+- `episodes/<series>/<slug>/production/video.mp4`：追加参考资料后的待检查成片。
 - `episodes/<series>/<slug>/production/remotion/out/mix-report.json`：响度及真峰值测量。
 
 最终帧数按该期分镜、`meta.finalVideoFrames`、实际片尾实现和编码检查确定。某些工程在正片后保留尾帧，算法片可能有无旁白代码附录；不能统一追加或扣除 60 帧。发布前再把检查通过的产物复制到站点目录，见 [publish.md](publish.md)。
 
 ## 静帧与动态复核
 
-当前 EP.14 支持：
+EP.14 保留的原正文脚本支持：
 
 ```sh
 cd episodes/peak/degradation/production/remotion
 npm run stills -- /tmp/degradation-stills
 ```
 
-该入口输出首帧和各镜中段采样，不是完整的溢出或动态审片。静帧、运动小样、导航检查的入口与参数以各期 scripts 和 README 为准；没有对应脚本时不要从旧期复制命令。对状态切换、变焦中间态、返回总览和跨情景衔接要看连续片段。
+该入口输出原正文首帧和各镜中段采样，不覆盖当前 `peak-style` 修订；当前系列视觉预检使用对应 README 的 `qa.mjs`。这两类采样都不是完整的动态审片。静帧、运动小样、导航检查的入口与参数以各期 scripts 和 README 为准；没有对应脚本时不要从旧期复制命令。对状态切换、变焦中间态、返回总览和跨情景衔接要看连续片段。
 
 对于实际limitedBT709成片，文章JPEG截图还须明确转换为fullBT601的JPEG像素，例如在精确选帧后加入`scale=in_range=tv:out_range=pc:in_color_matrix=bt709:out_color_matrix=bt601,format=yuvj420p`。按实际输入颜色选择参数；不要仅贴标签。将JPEG在通用解码器中的实际色块与同帧PNG/播放器比较，避免视频颜色正确而配图偏色，见L059。
 
@@ -68,7 +62,7 @@ npm run stills -- /tmp/degradation-stills
 页身使用 `episodes/_shared/theme/pageTheme.ts` 的 `PAGE`：`bg` 为 `#0F172A`、`ink` 为 `#E5E7EB`。各期 `remotion/src/theme.ts` 从共享模块引入，不能另抄一套色值：
 
 ```ts
-export {PAGE, pageBg, pageInk} from '../../../../episodes/_shared/theme/pageTheme';
+export {PAGE, pageBg, pageInk} from '../../../../../_shared/theme/pageTheme';
 ```
 
 组件从本期 theme 引用，页身用 `PAGE.bg` / `PAGE.ink`，输入框、卡片、行底用 `PAGE.field` / `PAGE.row` / `PAGE.border`。浏览器框和 DevTools 按该期主题绘制。禁止大面积纯白页身，检查方法见 [validate.md](validate.md) 的「页身色」。修改共享主题会影响冻结输入，应按实际受影响范围重新检查、冻结和渲染。
@@ -93,7 +87,7 @@ Redis正文沿[独立视觉入口](../episodes/_shared/redis-video/README.md)读
 
 高并发、高可用、高性能系列使用[独立模板](../episodes/_shared/peak-covers/README.md)，固定深青蓝底、亮青线条、暖黄强调、真实EP与限流/幂等/熔断/降级机制图。按当前meta.sourcePath定位制作根，三比例图与输入SHA独立记录；旧Cover、covers.json和冻结清单保持。后续单集沿同一catalog扩展原题与准确示例，不另起样式。
 
-其他系列封面由当期 `remotion/src/Cover.tsx` 和 `covers.json` 定义。当前 EP.14 的实际入口是：
+没有独立系列封面模板的工程，按当期 `remotion/src/Cover.tsx` 和 `covers.json` 生成。EP.14 保留的原封面脚本示例是（当前高并发系列封面使用上面的共享模板，不运行此命令覆盖）：
 
 ```sh
 cd episodes/peak/degradation/production/remotion

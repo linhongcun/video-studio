@@ -1,10 +1,22 @@
 # Knoll 制作说明模板
 
-复制本文件为当期的 `knoll-props.md`。EP.14 的完整写法见 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。
+复制本文件为当期的 `knoll-props.md`。先按[制作环境与跨工具接手](production-setup.md)准备环境；EP.14 的完整写法见 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)，其中旧片参数只供结构参考，现行规则以 [RULES.md](RULES.md) 为准。
 
 分镜 `assets.procedural.description` 可以点名这份说明。写进这里的文字、颜色、坐标和帧号必须与冻结的 `storyboard.json`、`covers.json` 逐字一致。渲染代码不写死这些值。
 
 EP.14 范例的文首写「由 `make_knoll_props.py` 从分镜生成」。脚本在 `episodes/_shared/make_knoll_props.py`。骨架：`python3 episodes/_shared/make_knoll_props.py --dir EPDIR`。有散文时加 `--spec SPEC.py`（EP.14 为 `docs/examples/knoll_props_spec.degradation.py`）。本模板仍是标题和散文的参照。
+
+## 复现与交接（必填）
+
+本节可直接链接本期 README 中的对应内容，不重复维护两份。应使另一台机器或另一个 coding agent 不靠原对话也能继续：
+
+- **工程身份：**本期系列、slug、发布 `meta.json` 及实际 `sourcePath`；开工同步后的完整基线 SHA、分支、本轮范围与当前阶段。修订列出复用与新生成的输入，不把旧冻结或旧媒体当成本轮已验收产物。
+- **依赖：**记录实际 Node/npm、Python 解释器与依赖清单/锁文件位置、FFmpeg/ffprobe、Chromium 及字体。写明安装目录、浏览器可执行路径和字体绑定/SHA；机器专属 venv、缓存与软链只记录本机用法，同时给出按锁文件重新安装的方式，不假定这些目录在下一台机器存在。密钥只记环境变量名，不写值。
+- **实际入口：**按顺序列出本期配音、装配、预检、冻结、渲染、封面及验证命令，每条注明工作目录、输入、输出/报告位置，以及是否会写文件、请求 TTS 或发布。命令从实际脚本与 `package.json` 核对，不把其他期的相对路径或参数直接粘来。
+- **冻结边界：**指出创建清单与只读验证分别使用什么入口、输入停止写入的时点及完整清单位置；正文、代码卡、资料与最终媒体分别声明帧区间。已编码后只读检查，不重建清单追认变化；需要修改时另建修订并重新冻结、检查。
+- **检查与交付：**链接各阶段实际证据、完整媒体 SHA 和发布记录，写清执行者、已检查的区间及尚未完成的事项。区分信号/时序、语义听辨、逐字 ASR、连续动态、编码帧、模拟手机视口与实体设备检查；未执行的能力不填通过，线上完整 SHA 尚未核对时保留待办。
+
+当前完整新期示例见 [LC347 制作说明](../episodes/leetcode/top-k-frequent-elements/production/README.md)；按影响范围补录并复用其余输入的示例见 [P09 倒推动机修订](../episodes/puzzles/pirate-gold/production/revisions/motivation-20261107/pirate-gold/README.md)。示例中的本机路径、镜数、时长、冻结器与能力边界均按各自版本理解。
 
 ## 文首（必填）
 
@@ -105,11 +117,11 @@ script {sha} / voice {sha} / words {sha} / cues {sha} / shot_frames {sha}，{总
 
 ## 6. 参考资料附录（必填）
 
-从调研起维护 `presentation: original-title-quote` 的本期 `references.json`，列出入选资料编号、机构/作者、文档原始题名、`titleEvidence`、年份/版本、公开链接、内部支持论点、访问日期及核验记录；只供文章拓展的资料单列，不充作片中依据。必要时另列连续实际原文 `quotation: {text, locator, evidence}`，不强迫每份资料填短引，不用自己的概括或翻译冒充原题/原文。正文稿和配套文章的编号、链接保持对应。
+从调研起维护 `presentation: title-author` 的本期 `references.json`，列出入选资料编号、机构、文档原始题名、`titleEvidence`、年份/版本、公开链接、内部支持论点、访问日期及核验记录。有明确公开个人署名时填写非空字符串 `author`，否则省略并显示 `organization`；署名依据保留于核验记录，不从维护账号或 Git 提交者推定作者。只供文章拓展的资料单列，不充作片中依据。可选连续原文 `quotation: {text, locator, evidence}` 仅供文章或研究，不上视频；不以概括或翻译冒充原题/原文。正文稿和配套文章的编号、链接保持对应。
 
-- 顺序：正文收束 → 本期代码卡（如有）→ 参考资料；写明资料起点、页数、每页帧数和最终总帧数，每页最多2项、默认5秒，可无旁白并提示暂停。
+- 顺序：正文收束 → 本期代码卡（如有）→ 参考资料；写明资料起点、页数、每页帧数和最终总帧数。采用无旁白简洁列表，每页最多4项、默认5秒。
 - 生成：写出本期默认渲染入口、独立正文输出及最终 `video.mp4` 路径，资料生成源码与清单纳入冻结；不以正文输出代替最终成片。
-- 显示：每页资料编号、文档原始题名及可选「原文摘录」与位置，保留原语言；不显示自拟 `displayTitle`/`displaySupport` 或内部 `supports`。提示与核验日期避开原生播放器底部控件；长标题/短引实际检查，不截断、拼接或改写过关。
+- 显示：只显示实际文档原题与作者或机构，保留原语言、字词与标点。摘录、定位、年份/版本、核验日期、链接、内部 `supports`、暂停提示和其他说明均不上屏，禁用 `displayTitle`/`displaySupport`。实际检查题名与署名排版，不靠截断、缩写或改写过关。
 - 核验：资料页首/中/末、与正文/代码卡交界的实际编码帧，以及播放器暂停/手机全屏结果；附录首帧无原字幕残留。记录 `reference-appendix.json` 等本轮追加记录与完整媒体SHA，未执行的检查不填通过。
 
 新片不能将本节写成「无」；资料未齐应回到调研阶段，不能留作上线后返工。

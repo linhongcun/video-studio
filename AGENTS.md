@@ -1,6 +1,8 @@
 # AGENTS.md
 
-给 Codex 或同类 coding agent。做一期之前先读本文件，再按下面的手册往下走。规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
+给 Codex、Cursor 或其他 coding agent。做一期之前先读本文件，再按下面的手册往下走。规范以 [docs/RULES.md](docs/RULES.md) 为准，步骤以 [docs/pipeline.md](docs/pipeline.md) 为准。
+
+换机器、换工具或接手续做，先按[新环境制作与工具交接](docs/production-setup.md)检查依赖、定位当前工程并确认阶段产物；不依赖原工具的聊天记忆、机器绝对路径或缓存。工具不自动加载本文件时，应在任务开头显式读取。下方角色名表示制作职责，不要求特定代理产品；独立审读与质检仍按流程执行并记录实际执行者。
 
 文档入口见 [docs/README.md](docs/README.md)，已完成记录见[历史索引](docs/archive/README.md)。整理文档时先查[文档维护规范](docs/RULES.md#文档维护)，保护冻结输入和历史证据的字节与制作身份；获授权的实体目录迁移按账本追溯原路径。
 
