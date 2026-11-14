@@ -78,7 +78,7 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 
 ## 读音表
 
-`pronunciation.md` 用表：文本、读法、出现镜号。多音字全部列出。英文缩写逐字母读；Redis、MySQL 按一个单词读。画面上的域名和数字只显示、不进读音表的口播。TTS 若把某个词读错，改送模文本，字幕和 `script.md` 的旁白保持原文。听辨由 Knoll 和 Nolan 做，不找村长。改送模文本的记录写在 `voice/substitutions.md`，选定的 take 写在 `voice/picks.json`。
+`pronunciation.md` 用表：文本、读法、出现镜号。多音字全部列出。英文缩写逐字母读；Redis、MySQL 按一个单词读。画面上的域名和数字只显示、不进读音表的口播。TTS 若把某个词读错，改送模文本，字幕和 `script.md` 的旁白保持原文。听辨由制作与独立复核人员完成，不将常规质量检查交给用户。改送模文本的记录写在 `voice/substitutions.md`，选定的 take 写在 `voice/picks.json`。
 
 ## 响度
 

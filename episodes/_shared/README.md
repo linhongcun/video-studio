@@ -4,6 +4,8 @@
 
 换机器或 coding 工具时，先按[新环境制作与工具交接](../../docs/production-setup.md)安装依赖、确认当前修订并辨清命令的写入范围；本页提供工具接口，不把历史示例的参数或检查能力自动带入新期。
 
+制作说明使用[通用模板](../../docs/production-notes.template.md)，可从仓根运行 `python3 episodes/_shared/make_production_notes.py --dir EPDIR` 生成骨架。默认产物 `knoll-props.md` 保留现有装配器、冻结器和检查器依赖的兼容文件名；正文按职责描述，不指定某个角色账号。
+
 制作与发布目录现已实体合并为 `episodes/<series>/<slug>/{production,publication}/`，共用工具都在本目录。以下命令使用新路径；历史冻结与回执的原路径通过[迁移记录](../../docs/archive/2026-11/episode-layout/README.md)追溯。路径适配后的代码须在后续重渲前单独冻结，不能把目录迁移视为旧成片重新编码或审片通过。
 
 ## 新期的固定参考资料流程

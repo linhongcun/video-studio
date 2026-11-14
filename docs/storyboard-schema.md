@@ -2,7 +2,7 @@
 
 以下字段说明适用于上一轮 EP.14 的固定历史 fixture。现行制作在 `episodes/<series>/<slug>/production/`，字段、生成和检查入口以本期装配脚本、README 及冻结分镜为准；哈希定义按本期冻结文件记录。站点目录已是当前发布数据，不能用它复现旧范例。
 
-本历史范例来自 [degradation-v0.45.0 固定输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md) 的 `storyboard.json` 与 `covers.json`（冻结稿前缀分别为 `6265993b`、`8cb7aafb`，`meta.slug` 为 `degradation-v1`）。制作说明模板见 [knoll-props.template.md](knoll-props.template.md)，历史全文见 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。旧渲染工程已清理，历史字段行为以固定输入和共享 spec 为参照；新期组件行为以对应单期工程实际源码为准，不为满足旧样例补字段。
+本历史范例来自 [degradation-v0.45.0 固定输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md) 的 `storyboard.json` 与 `covers.json`（冻结稿前缀分别为 `6265993b`、`8cb7aafb`，`meta.slug` 为 `degradation-v1`）。制作说明模板见 [production-notes.template.md](production-notes.template.md)，历史全文见 [examples/knoll-props.degradation.md](examples/knoll-props.degradation.md)。旧渲染工程已清理，历史字段行为以固定输入和共享 spec 为参照；新期组件行为以对应单期工程实际源码为准，不为满足旧样例补字段。
 
 本文件只写字段和「怎样生成」。检查项与阈值的判定在 [validate.md](validate.md)，规范原文在 [RULES.md](RULES.md)，步骤顺序在 [pipeline.md](pipeline.md)。
 
@@ -140,7 +140,7 @@ degradation 实际使用的键：
 3. `python3 -B $S/build_sb.py --spec $EX/build_spec.py --episode-dir EP [--inputs MAP.json] --layout layout.json --covers covers.json --out storyboard.json`（`build-onsets.txt` 默认写在 `--out` 同目录，`--onsets-out` 可改）。读脚本、旁白、`words.json`、`voice.wav`、`layout.json`、`covers.json`，核对 spec `SHA` 里各输入的 SHA-256 前缀；整轨按原位置铺，不插停顿；`$cue` 帧用 `onset_rule.py` 算成 `max(1, floor(onsetLocal) − 2) + d` 并写 `cueText` / `cueOnset` / `onsetLocal`；`$timer` 帧写 `timerDriven` 与 `timerLog`；`covers.json` 原样嵌进 `meta.covers`；字幕照脚本原字切。
 4. `python3 -B $S/validate.py --spec $EX/validate_spec.py --episode-dir EP [--inputs MAP.json] --storyboard storyboard.json --covers covers.json [--report validate.txt]`（有错误退出码 1；通用检查在引擎里，期特有的在 spec `checks(v)`），再跑 `python3 -B episodes/_shared/label_onset_strict.py --storyboard storyboard.json --wav voice.wav --words-json words.json`（期目录齐全时 `--dir EPDIR`）。判定条目见 [validate.md](validate.md)。
 5. 冻结一次（见下）。
-6. `knoll-props.md`：仓内用 `python3 episodes/_shared/make_knoll_props.py --dir EPDIR`（骨架）或 `--spec SPEC.py`，加 `--require-frozen` 要求冻结副本存在（EP.14 范例 `docs/examples/knoll_props_spec.degradation.py`）。只要 `storyboard.<sha8>.json` 存在，`make_knoll_props.py` 都会先断言它与 `storyboard.json` 逐字节相同。
+6. 制作说明（`knoll-props.md` 为现有工具兼容文件名）：仓内用 `python3 episodes/_shared/make_production_notes.py --dir EPDIR`（骨架）或 `--spec SPEC.py`，加 `--require-frozen` 要求冻结副本存在（EP.14 范例 `docs/examples/knoll_props_spec.degradation.py`）。只要 `storyboard.<sha8>.json` 存在，该入口都会先断言它与 `storyboard.json` 逐字节相同。
 
 改任何一处（文字、坐标、帧）都改期 spec（`layout_spec.py` / `covers_spec.py`），再从第 1 步重跑，不手改 `storyboard.json`。
 

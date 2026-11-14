@@ -6,7 +6,7 @@
 
 先读根 [AGENTS.md](../AGENTS.md)，再读 [RULES.md](RULES.md) 的现行规范与 STATUS、本页的环境准备、[制作流程](pipeline.md)和[质检清单](qa.md)。开工时同时查[教训](lessons-learned.md)、[成功经验](successful-practices.md)与[项目记忆](production-memory.md)；需要具体操作时再进入[配音](voice.md)、[渲染](render.md)、[图文](article-style.md)和[发布](publish.md)。[文档索引](README.md)区分现行手册与历史证据。
 
-`Nolan`、`宫崎`、`Knoll`、`Deming` 是导演、编剧、制作、质检的职责名称，不依赖某个工具的专有 agent 或聊天记录。按现有流程安排独立审读与复核，并记录实际执行者；工具不自动读取 `AGENTS.md` 时，在任务指令里显式要求读取。不要另复制一套会逐渐分歧的制作规范。
+协作按内容统筹、调研编剧与分镜、制作、独立质检、发布与运营分工，不要求固定人名、bot 账号或专有 agent。按现有流程安排独立审读与复核，记录实际执行者，交接依据留在仓库；工具不自动读取 `AGENTS.md` 时，在任务指令里显式要求读取。不要另复制一套会逐渐分歧的制作规范。
 
 所有下文命令除特别说明外都在仓库根执行。文中的 `EPDIR` 是本次实际制作或修订目录，使用前先替换；不能把示例期当作待重做任务。
 
@@ -133,7 +133,7 @@ python3 episodes/_shared/tests/secret_scan.py
 
 ## 留给下一个工具的信息
 
-在本期现有 README / 制作说明中维护下列信息，不要求另造日志体系；[制作说明模板](knoll-props.template.md)可直接使用。先写当前阶段与下一步，再给足复现依据：
+在本期现有 README / 制作说明中维护下列信息，不要求另造日志体系；[制作说明模板](production-notes.template.md)可直接使用。先写当前阶段与下一步，再给足复现依据：
 
 - 任务范围、slug/系列、基线完整 SHA、分支与上游同步结果。
 - 当前制作/修订目录、发布目录、`meta.sourcePath`，以及实际源码入口、依赖安装位置。

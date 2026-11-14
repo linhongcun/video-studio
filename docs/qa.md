@@ -1,4 +1,4 @@
-# Deming 质检清单
+# 质检清单
 
 规范以 [RULES.md](RULES.md) 为准，具体命令和阈值见 [validate.md](validate.md)。制作输入在 `episodes/<series>/<slug>/production/`，站点副本在 `episodes/<series>/<slug>/publication/`。按本期 README、`source-sha256.json` 和 `qa-final.md` 确认媒体身份及实际检查范围。
 
