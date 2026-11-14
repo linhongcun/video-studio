@@ -1,8 +1,8 @@
 # 做片流程
 
-从调研做到站点发版。命令只列仓库里真实存在的脚本。现行工程参考 `episodes/database/db-lock/production/`、`episodes/database/db-transaction/production/` 及各期 README；开新期的目录说明在 [../episodes/_template/README.md](../episodes/_template/README.md)。规范在 [RULES.md](RULES.md)。
+从调研做到站点发版。命令只列仓库里真实存在的脚本。换机器或工具先读[新环境制作与工具交接](production-setup.md)，完整新期参考 [LC.347](../episodes/leetcode/top-k-frequent-elements/production/README.md)及各期当前 README；开新期的目录说明在[新期模板](../episodes/_template/README.md)。规范在 [RULES.md](RULES.md)。
 
-制作目录统一使用 `episodes/<series>/<slug>/production/`，`episodes/<series>/<slug>/publication/` 只保存站点发布数据。已被替代的旧制作工程已清理；[固定历史输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md)仍用于共享工具回归，旧制作说明在 `docs/examples/`。每期实际命令、哈希定义和能力边界以当前工程 README 为准。
+制作目录统一使用 `episodes/<series>/<slug>/production/`，`episodes/<series>/<slug>/publication/` 只保存站点发布数据。已被替代的旧制作工程已清理；[固定历史输入](../episodes/_shared/tests/fixtures/degradation-v0.45.0/README.md)仍用于共享工具回归，旧制作说明在 `docs/examples/`。每期先从发布 `meta.json.sourcePath` 定位工程，再读本期 README 顶部的当前修订说明及对应系列共享入口；实际命令、哈希定义和能力边界以这些现行入口为准，旧 `package.json` 可能仅保留历史制作身份。
 
 本次实体分类迁移保留旧冻结清单与回执字节，原路径和历史输入按[迁移记录](archive/2026-11/episode-layout/README.md)追溯。已适配路径的当前代码不是旧片已编码输入；后续重制或重渲必须先对当前实际源码重新冻结，不直接拿旧清单开始渲染。
 
@@ -39,7 +39,7 @@
 - [ ] 算法题解片尾完整代码卡：与执行源和文章同源、运行验证通过，完整程序整屏可读，默认5秒并提示暂停阅读；核对代码卡独立区间与原旁白、字幕边界
 - [ ] 技术视频实际片尾为原题与作者/机构的简洁列表，每页最多4项、默认5秒；不显示摘录/定位/年份/日期/额外提示，核对可读性、追加区间、字幕/音轨边界与本轮冻结输入
 - [ ] 小修先确定影响范围，复用已验收的不变部分；优先可证实的无损剪短或局部重渲，只复核受影响区间及必要上线结果，不自动整条重渲或重复无关检查
-- [ ] `video.mp4` 与封面由当期 `package.json` 的脚本产出；复用已验收媒体作时长小修时，记录原媒体SHA、准确命令与边界核验
+- [ ] `video.mp4` 与封面由本期 README 指定的当前制作入口产出；系列共享渲染器与独立封面模板不套用旧 `package.json` 命令。复用已验收媒体作时长小修时，记录原媒体SHA、准确命令与边界核验
 - [ ] 成片复核完成，执行者和实际检查范围已记录，未执行的能力未伪称通过
 - [ ] 接入站点后通过 `npm --prefix site run check:references`；新片及旧slug换片后缺少资料、实际附录或一致媒体记录时停止发布，仅未接入附录且原视频SHA未变的登记旧片可暂缓、分批处理
 - [ ] 符合 STATUS 的 GitHub 持续发布授权范围
@@ -137,7 +137,7 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 
 ## 5. 冻结 SHA-256
 
-定稿后按本期 README 调用冻结器。当前 EP.14 用 `episodes/peak/degradation/production/freeze.py` 写快照和 `source-sha256.json`，`verify-freeze.py` 逐文件只读核对完整 SHA-256。句级导航工程的共享冻结入口见其 README；不能假定所有期都用同一冻结器。
+定稿后按本期 README 的当前修订调用冻结器。通用新片入口读取本期 `source-sha256.json`；系列视觉派生可能把独立清单放在 `revisions/<修订>/`，如 EP.11–14 当前使用 [peak-video](../episodes/_shared/peak-video/README.md) 的 `render.py <slug> --freeze / --verify`。EP.14 制作根的 `freeze.py` 与 `verify-freeze.py` 保留原正文及参考资料批次的输入身份，不是当前系列视觉修订的冻结入口。句级导航工程的共享冻结入口见其 README；不能假定所有期都用同一冻结器。
 
 `words.json` 的 `audioSha256` 对应实际音轨全文，`scriptSha256` 的输入定义按本期装配代码和 README。分镜 `meta.timingSource` 和镜头 `timing.source` 对应实际音轨与时序输入。检查不一致时先查原因，不能重写清单追认旧成片未采用的源码。详见 [validate.md](validate.md)。
 
@@ -155,15 +155,7 @@ python3 episodes/_shared/label_onset_strict.py --dir EPDIR
 
 新片使用[新期模板](../episodes/_template/README.md)的默认参考资料入口：先检查来源，再生成正文，最后自动追加资料卡；不能以只运行 `render:body` 作为最终成片交付。命令与输出说明见 [render.md](render.md)。
 
-下列为尚未迁移的现行EP.14正文入口参考，不代替新片默认流程：
-
-```sh
-cd episodes/peak/degradation/production/remotion
-npm ci
-npm run render
-```
-
-`npm run render` 先出 `out/voice.mp4`，再调用 `episodes/_shared/music/mix_bgm.py`，得到 `episodes/peak/degradation/production/video.mp4`。
+已有视频先查当前修订，再选入口。EP.11–14 当前使用 [peak-video](../episodes/_shared/peak-video/README.md) 的共享渲染器，输出在各期 `revisions/peak-style/`，不能运行旧正文命令覆盖现行成片。新片的 `render:body` 由本期工程定义，生成 `remotion/out/body.mp4`，随后由默认入口追加参考资料；各系列的颜色转换、声音复用和独立冻结按对应 README 执行。
 
 LeetCode正文当前沿[独立视觉入口](../episodes/_shared/leetcode-video/README.md)保持封面风格，完整Python页与原题参考页分层保留；封面使用[共享系列入口](../episodes/_shared/leetcode-covers/README.md)生成并安装三比例，不用旧期 `npm run covers` 覆盖当前模板。趣味推理同样通过[本系列入口](../episodes/_shared/puzzles-covers/README.md)生成三比例；MySQL也用[独立系列入口](../episodes/_shared/mysql-covers/README.md)生成三比例；Redis正文和资料页通过[独立视觉入口](../episodes/_shared/redis-video/README.md)沿封面配色，保留实际层高模型与完整音轨，新媒体另冻结；EP.08/09应用场景使用[缓存视觉入口](../episodes/_shared/redis-cache-video/README.md)在默认流程直接生成同色正文、BT.709画面与资料页；高并发、高可用、高性能通过[独立封面入口](../episodes/_shared/peak-covers/README.md)生成三比例，正文与资料页沿[独立视觉入口](../episodes/_shared/peak-video/README.md)保持深青蓝、亮青、暖黄与真实EP，原模型和历史冻结保留；其他系列运行当期 package.json 的 `npm run covers`，由本期 Cover.tsx 与 covers.json 生成；实际文件和安全区见 [render.md](render.md)。
 

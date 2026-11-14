@@ -1,12 +1,12 @@
 # 校验
 
-规范以 [RULES.md](RULES.md) 为准，逐项顺序见 [qa.md](qa.md)。当前工程在 `episodes/<series>/<slug>/production/`，先读该期 README；旧期的校验器和制作入口已随被替代工程清理。通用共享工具仍在 `episodes/_shared/`，不要复制起音、铺轨或配音算法。
+规范以 [RULES.md](RULES.md) 为准，逐项顺序见 [qa.md](qa.md)。当前工程在 `episodes/<series>/<slug>/production/`，先由发布 `meta.json.sourcePath` 定位，再读该期 README 顶部的当前修订与系列共享说明；旧期的校验器和制作入口已随被替代工程清理。通用共享工具仍在 `episodes/_shared/`，不要复制起音、铺轨或配音算法。
 
 本次目录迁移保留旧冻结清单与回执字节；路径适配后的源码不是原成片的已编码输入。旧制作身份按[迁移账本与固定基线](archive/2026-11/episode-layout/README.md)追溯，当前渲染冻结检查仍应拒绝改变后的输入；后续重渲在新修订中冻结实际源码，并保留旧清单。目录迁移检查不能写成重新编码或审片通过。
 
 ## 当前工程入口
 
-每期实际入口以 README 为准。当前 EP.14 的只读冻结核对为：
+每期实际入口以 README 的当前修订为准。EP.11–14 当前系列视觉冻结使用 [peak-video](../episodes/_shared/peak-video/README.md) 的 `render.py <slug> --verify`；它与制作根保留的原正文冻结属于不同输入身份。下列命令只读核对 EP.14 制作根的原正文与参考资料批次清单，不验证当前 `revisions/peak-style/` 清单：
 
 ```sh
 python3 episodes/peak/degradation/production/verify-freeze.py
@@ -14,7 +14,7 @@ python3 episodes/peak/degradation/production/verify-freeze.py
 
 它逐文件核对 `source-sha256.json` 的完整 SHA-256，缺文件或字节不一致会失败。不能通过重写清单把已编码媒体未采用的源码追认为通过。
 
-制作阶段，当前 EP.14 的 `check-inputs.py` 核对脚本与音轨哈希、实体公开音轨、音频样本数、镜头和字幕帧、术语停留、配音位置、封面元数据；它会写入本期 `precheck-report.json`。`freeze.py` 会写冻结快照与清单，只能在输入定稿后执行。检查已发布工程时不重跑这类写入步骤。
+EP.14 原正文制作阶段的 `check-inputs.py` 核对脚本与音轨哈希、实体公开音轨、音频样本数、镜头和字幕帧、术语停留、配音位置、封面元数据；它会写入本期 `precheck-report.json`。当前制作根的 `freeze.py` 已用于参考资料派生，保留旧正文输入并写入扩展清单；它不是重新装配正文或当前系列视觉冻结的入口，只能在对应修订输入定稿后执行。检查已发布工程时不重跑这类写入步骤。
 
 独立句级装配工程的通用入口与字段见 [episodes/_shared/README.md](../episodes/_shared/README.md)。其装配、检查、冻结、编码检查分别承担不同阶段，不将某一期的入口假定为全系列统一入口。
 
@@ -50,7 +50,7 @@ npm --prefix site run check:articles
 
 ## 冻结与媒体身份
 
-`audioSha256` 是实际 `voice.wav` 的全文 SHA-256；`scriptSha256` 的输入可能是整份脚本或旁白提取文本，必须按该期装配实现核对。当前 EP.14 的 `check-inputs.py` 比较整份 `script.md`，历史 fixture 的旁白哈希定义不同。
+`audioSha256` 是实际 `voice.wav` 的全文 SHA-256；`scriptSha256` 的输入可能是整份脚本或旁白提取文本，必须按该期装配实现核对。EP.14 原正文的 `check-inputs.py` 比较整份 `script.md`，历史 fixture 的旁白哈希定义不同。
 
 `meta.timingSource` 和镜头 `timing.source` 应对应实际音轨和时序输入。若本期保存 `storyboard.<sha8>.json`，副本应与对应分镜字节一致；以本期冻结清单和验证器判断，不把存在一个同名快照当成成功。
 

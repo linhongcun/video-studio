@@ -88,6 +88,8 @@ npm --prefix site run preview
 
 开始制作或修订前，先读 [AGENTS.md](AGENTS.md)，保护工作区并同步最新主干，再从[文档索引](docs/README.md)进入对应手册。现行规范以 [RULES.md](docs/RULES.md) 为准，完整步骤见[制作流程](docs/pipeline.md)。
 
+换机器或换 coding 工具时，先按[新环境制作与工具交接](docs/production-setup.md)准备依赖、定位当前工程并核对已有产物。流程和交接依据都保存在仓库；不自动加载 `AGENTS.md` 的工具应在任务开头显式读取它。
+
 1. **调研与定稿**：核对公开来源，建立 `references.json`，同步编写脚本、配套图文、发音说明与分镜；明确题意、讲解主线、前置概念和适用边界。
 2. **配音与动画**：使用共享配音与时序工具，沿用对应系列的封面和正文视觉体系，先验证关键连续过程，再展开完整制作。
 3. **检查与冻结**：核验资料、配音、时序、版面和动态表达，冻结实际输入并记录 SHA-256；保留旧制作身份与历史证据字节，迁移路径通过账本追溯。
@@ -96,11 +98,12 @@ npm --prefix site run preview
 
 新制作或重制的视频默认包含经核验的参考资料附录；配套文章包含原文引用与有效正文配图。新期从[模板说明](episodes/_template/README.md)进入，渲染命令、依赖和系列模板按当前工程及[渲染手册](docs/render.md)选择。
 
-视频制作还需要 FFmpeg / ffprobe、Python 依赖、浏览器与字体环境，具体版本见对应制作工具和单期工程。MiMo TTS 使用 `MIMO_API_KEY`，密钥按[配音手册](docs/voice.md)配置。
+视频制作所需的 FFmpeg / ffprobe、Python、Chromium、字体与 MiMo TTS 环境见[环境准备](docs/production-setup.md#环境与依赖)，具体锁文件和入口以当前工程为准。
 
 | 要做的事 | 入口 |
 | --- | --- |
 | 查规范、现行任务与授权范围 | [AGENTS.md](AGENTS.md) · [RULES.md](docs/RULES.md) |
+| 换机器、换 coding 工具或交接制作 | [新环境制作与工具交接](docs/production-setup.md) |
 | 开新期或重制 | [制作流程](docs/pipeline.md) · [新期模板](episodes/_template/README.md) |
 | 写图文、核对引用与配图 | [调研模板](docs/research-template.md) · [图文写作说明](docs/article-style.md) |
 | 做配音、动画、封面与资料附录 | [配音](docs/voice.md) · [渲染](docs/render.md) · [共享制作工具](episodes/_shared/README.md) |
