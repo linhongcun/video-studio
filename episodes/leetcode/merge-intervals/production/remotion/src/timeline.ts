@@ -20,14 +20,18 @@ export function actionProgress(
   const action = shot.actionCues?.find((cue) => cue.id === actionId);
   if (!action) return 0;
   const cueFrame = shot.cueFrames?.labels?.[action.cue]
-    ?? shot.elements?.find((element) => element.cueText === action.cue)?.appearFrame
-    ?? shot.cueFrames?.sentences?.[action.sentence];
+    ?? shot.elements?.find((element) => element.cueText === action.cue)?.appearFrame;
   if (cueFrame === undefined) return 0;
+  const endCueFrame = action.endCue ? shot.cueFrames?.labels?.[action.endCue] : undefined;
+  if (action.endCue && endCueFrame === undefined) return 0;
   const subtitles = shot.subtitles ?? [];
   const lastSubtitle = subtitles.length > 0 ? subtitles[subtitles.length - 1] : undefined;
   const subtitleEnd = lastSubtitle?.to ?? shot.durationInFrames - 1;
   const safeEnd = Math.min(shot.durationInFrames - 6, subtitleEnd - 4);
-  const available = safeEnd - cueFrame;
+  const endLimit = endCueFrame === undefined
+    ? safeEnd
+    : Math.min(safeEnd, endCueFrame - (action.endOffsetFrames ?? 6));
+  const available = endLimit - cueFrame;
   if (available <= 1) return 0;
   const start = cueFrame + available * clamp(startFraction);
   const end = cueFrame + available * Math.max(startFraction, endFraction);

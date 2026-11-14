@@ -204,7 +204,7 @@ function IntervalCards({
 }
 
 function IntroScene({shot, frame}: {shot: Shot; frame: number}) {
-  const mapProgress = actionProgress(shot, frame, 'map');
+  const mapProgress = actionProgress(shot, frame, 'map', 0, 1);
   const revealProgress = actionProgress(shot, frame, 'reveal');
   const sourceY = 390;
   const axisY = 500;
@@ -352,7 +352,13 @@ function Board({shot, frame}: {shot: Shot; frame: number}) {
     showIncoming: Boolean(primary.incoming),
   };
 
-  if (primary.kind === 'begin') {
+  if (shot.visualType === 'close') {
+    state = {
+      completed: TRACE.result,
+      showCurrent: false,
+      showIncoming: false,
+    };
+  } else if (primary.kind === 'begin') {
     state.showCurrent = actionProgress(shot, frame, 'begin') > 0;
     state.completed = primary.completed ?? [];
   } else if (primary.kind === 'merge') {
@@ -370,7 +376,7 @@ function Board({shot, frame}: {shot: Shot; frame: number}) {
     state.showIncoming = progress < 0.98;
     state.completed = previousEvent(primary)?.completed ?? [];
   } else if (primary.kind === 'separate') {
-    const separateEnd = shot.visualType === 'separate-finish' ? 0.4 : 0.92;
+    const separateEnd = 0.92;
     const progress = actionProgress(shot, frame, 'separate', 0, separateEnd);
     const previousCompleted = previousEvent(primary)?.completed ?? [];
     state.completed = progress >= 0.98 ? primary.completed ?? [] : previousCompleted;
@@ -381,7 +387,7 @@ function Board({shot, frame}: {shot: Shot; frame: number}) {
     state.showCurrent = true;
     state.showIncoming = progress < 0.98;
     if (shot.visualType === 'separate-finish' && events[1]) {
-      const finishProgress = actionProgress(shot, frame, 'finish', 0.52, 0.95);
+      const finishProgress = actionProgress(shot, frame, 'finish', 0, 0.9);
       const finish = events[1];
       if (finishProgress >= 0.98) {
         state.completed = finish.completed ?? [];

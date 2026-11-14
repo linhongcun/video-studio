@@ -34,9 +34,16 @@ for item in plan:
             raise ValueError(f"{shot_id}: duplicate action id {action['id']!r}")
         action_ids.add(action['id'])
         sentence = action['sentence']
-        if sentence not in (0, 1) or not sentences[sentence].startswith(action['cue']):
+        if sentence not in (0, 1) or action['cue'] not in sentences[sentence]:
             raise ValueError(
-                f"{shot_id}: action {action['id']!r} cue {action['cue']!r} does not prefix sentence {sentence}"
+                f"{shot_id}: action {action['id']!r} cue {action['cue']!r} does not occur in sentence {sentence}"
             )
+        if action.get('endCue'):
+            if not any(action['endCue'] in candidate for candidate in sentences[sentence:]):
+                raise ValueError(
+                    f"{shot_id}: action {action['id']!r} end cue {action['endCue']!r} does not occur at or after sentence {sentence}"
+                )
+            if not isinstance(action.get('endOffsetFrames'), int) or action['endOffsetFrames'] <= 0:
+                raise ValueError(f"{shot_id}: action {action['id']!r} must use a positive endOffsetFrames")
 
-print(f'Plan cue preflight passed: {len(plan)} shots, {sum(len(item["cues"]) for item in plan)} visible sentence cues ({len(visual_terms)} unique), {sum(len(item["actions"]) for item in plan)} exact sentence-bound actions.')
+print(f'Plan cue preflight passed: {len(plan)} shots, {sum(len(item["cues"]) for item in plan)} visible sentence cues ({len(visual_terms)} unique), {sum(len(item["actions"]) for item in plan)} action cues in their assigned sentences.')

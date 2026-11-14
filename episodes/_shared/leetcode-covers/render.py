@@ -22,6 +22,7 @@ HERE = Path(__file__).resolve().parent
 REPO = repo_root()
 SIZES = {'16x9': (1920, 1080), '3x4': (1080, 1440), '4x3': (1440, 1080)}
 sha = lambda p: hashlib.sha256(p.read_bytes()).hexdigest()
+# Compare title identity, ignoring display-only whitespace differences.
 title_key = lambda value: ''.join(value.split())
 
 def main():

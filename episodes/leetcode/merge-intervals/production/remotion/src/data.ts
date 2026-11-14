@@ -14,7 +14,7 @@ export type TraceEvent = {
   relation?: string;
   processedIds?: number[];
 };
-export type ActionCue = {id: string; cue: string; sentence: number};
+export type ActionCue = {id: string; cue: string; sentence: number; endCue?: string; endOffsetFrames?: number};
 export type Subtitle = {text: string; from: number; to?: number; duration?: number};
 export type BoardElement = {text: string; cueText?: string; appearFrame: number};
 export type Shot = {

@@ -1,6 +1,6 @@
 # LC56 工程与环境
 
-十镜 Remotion 主体、trace 驱动的数据板、完整代码卡和共享配音/装配/freeze 薄包装已实现。独立复审通过；复审报告原字节保存在 qa/independent-rereview-df13a3e.md。已生成20句MiMo配音并按真实句级时序装配：正文4388帧，代码卡从4238帧开始；voice.wav末个非零样本为140.6448秒，代码卡起点为141.2667秒。附加150帧资料页后的首版为4538帧、151.2667秒，机器媒体检查通过。首版仍待独立审片/听审；当前已知需合并修正：finish状态不能回退，开场映射需在第二句前完成，08结果输出与09分离动作需按对应句内语义定位。修复并复核前不再正式渲染；不擅自合并或发布Release。90帧/镜仅用于静帧布局，不代表真实配音或字幕时序。
+十镜 Remotion 主体、trace 驱动的数据板、完整代码卡和共享配音/装配/freeze 薄包装已实现。独立复审报告原字节保存在 `qa/independent-rereview-df13a3e.md`；首版最终复核报告原字节保存在 `qa/independent-final-review-v1.md` 并纳入冻结。首版复核指出的04/07辨音、09尾部填充词、09分离/结束时序及finish状态问题已在当前源码与配音修订中处理。首版回执、日志和媒体字节仍保存在本地工作区 `revisions/v1-initial-review/`，旧MP4/WAV不提交；QA中的历史音频/代码卡边界数据与独立复核报告保留首版身份。新版20句音轨为4,386帧；代码卡从真实voice build推导为第4,236帧，完整150帧无旁白，不截断末句。08/09内部动作使用共享ASR/onset结果；目标句内位置及静帧状态见 `qa/semantic-cue-alignment-08-09.md`，样本级末句/代码卡边界见 `qa/audio-card-boundary.md`。这里只记录制作输入和验证入口；具体正式输出时长、SHA、资料附录及媒体检查以当前 `render-result.json` 与 publication receipt 为准。当前修订仍是草稿，未合并、未Release；静帧和机器媒体检查不替代对新版完整成片的独立审片。90帧/镜仅用于静帧布局，不代表真实配音或字幕时序。
 
 ## 动画与时间线
 
@@ -8,7 +8,7 @@ plan.json 映射十镜和 trace 事件；05–09 从本期 trace 读取状态。
 
 先运行 scripts/check_plan_cues.py，验证 plan.json 中每个配音术语确实匹配对应脚本句首；scripts/build_layout_placeholder.py 也会执行此检查并生成无音频占位 storyboard。占位 storyboard 仅用于 Remotion 静帧 smoke；正式 render/freeze 必须先有实际 voice.wav、words.json 和非 provisional 的 storyboard。静帧样本位于 remotion/out/lc56-*.png，不能作为正式动态或时序验收。
 
-初审和通过的复审报告均按原字节保存在 qa/；两份报告都由 freeze.py 纳入输入清单，不覆盖初审记录。
+初审、通过的复审和首版最终复核报告均按原字节保存在 `qa/`；各报告身份保留，不相互覆盖。冻结报告清单由 `freeze.py` 管理。
 
 ## 依赖与静帧烟测
 
