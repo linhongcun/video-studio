@@ -90,15 +90,20 @@ function Board({run,e,frac,idx,pos=POS4,showIndeg=true}:{run:Run;e:TraceEvent;fr
 }
 function current(shot:Shot,frame:number,run:Run){
  const acts=(shot.actionCues??[]).filter(a=>a.events?.length);
+ const subs=shot.subtitles??[];
+ const shotEnd=Math.min(shot.durationInFrames-6,(subs.length?subs[subs.length-1].to:shot.durationInFrames-1)-4);
  let idx=acts.length?acts[0].events![0]:run.events.length-1;
  let frac=0;
- for(const a of acts){
-  const p=actionProgress(shot,frame,a.id,0,0.88);
-  if(p<=0)break;
+ for(let i=0;i<acts.length;i++){
+  const a=acts[i];
+  const start=shot.cueFrames?.labels?.[a.cue]??0;
+  const end=i+1<acts.length?(shot.cueFrames?.labels?.[acts[i+1].cue]??shotEnd):shotEnd;
+  if(frame<start)break;
   const list=a.events!;
+  const p=clamp((frame-start)/Math.max(1,end-start));
   idx=list[Math.min(list.length-1,Math.floor(p*list.length))];
-  frac=p>=0.999?1:(p*list.length-Math.floor(p*list.length));
-  if(p<0.999)break;
+  frac=p>=1?1:(p*list.length-Math.floor(p*list.length));
+  if(frame<end)break;
  }
  return{e:run.events[idx],frac,idx};
 }
