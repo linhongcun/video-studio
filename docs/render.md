@@ -17,6 +17,14 @@ python3 episodes/_shared/render_with_references.py EPDIR
 
 已完成生成后可用 `python3 episodes/_shared/render_with_references.py EPDIR --verify` 复核资料、冻结和最终媒体；此模式只写QA报告，不重新渲染正文或重写冻结清单。
 
+### 单次执行与完成判定
+
+完整入口内部已执行 `render:body`，正式制作只启动一次完整入口。单独正文渲染只用于明确的小样或诊断；若随后再调用完整入口，会重新编码正文，不能将其当作自动续跑。各期 `render.py` 是否包装共享入口，以本期 README 和实际代码为准。
+
+让调用方直接等待命令完成并检查退出码，例如 Python 使用 `subprocess.run(..., check=True)`；后台执行则保留启动时得到的任务句柄，通过运行器结果或同一 shell 的 `wait` 获取退出码。不要使用 `pgrep -f` 按模糊命令名循环等待，它可能匹配等待命令自身；也不要仅凭 `video.mp4` 或旧报告存在判断成功。
+
+完成条件是本次命令退出码为 0、当前冻结验证通过，且最终媒体与本次 `render-result.json` 的完整 SHA/帧数一致。丢失进程句柄时标为状态未知，先核对实际输入和产物并运行只读 `--verify`，不能直接补写成功或立即重复编码。退出码、验证结果和等待原因分别记入[阶段计时](production-notes.template.md#阶段计时与重跑记录)。
+
 新模式每页最多4项、默认5秒，采用原题与作者/机构的简洁列表；原题和署名各自检查排版，超限报COPYFIT，不截断或改写成概括。实际检查所有资料页和首/中/末帧、字幕结束及播放器暂停/手机全屏；不叠加摘录、定位、年份/版本、核验日期、链接或提示说明。正文、代码卡和参考资料分别计时，不额外延长旁白或覆盖代码卡。新回执的 `bibliography` 绑定实际 `title` 与 `credit`，`layout` 声明单列、最多4项与只渲染题名/署名，`quotesRendered` 为false；每页5秒由 `inputs.secondsPerPage` 记录。旧原题/摘录模式及旧QA按历史范围保留，不改旧回执追认新列表。
 
 ## 既有工程的入口与输出
