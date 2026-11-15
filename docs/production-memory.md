@@ -836,4 +836,4 @@ PR499合并`0735641d`，v0.109.0与Release后Pages43688172126成功。初版预�
 
 PR502合并、Release v0.110.0、Pages部署43732003434成功；线上视频SHA `ad81093011c494ab24dd8290d6394f8e78bd0ff2e6dfa34f03eb134ffa84822f` 与发布产物一致，页面/章节/文章/封面/字幕验收通过，#491以completed关闭。代码审查发现三项真实缺陷并修复：动作事件窗口拖满整镜（见[L074](lessons-learned.md#l074)）、render_body干净检出失败、LC15冻结清单因封面溯源刷新失配；修复后重冻结并重渲染，预检48帧0违规。计时与返工记录见 `episodes/leetcode/course-schedule/production/qa/production-timing.json`。
 
-注意：各期 `render_body.py` 拷贝均有同一干净检出缺陷，重制旧片时先修；封面install会刷新所有LC期 `cover-style.json`，若该文件在某期冻结清单内，install后必须对该期重新冻结（LC.15已按此处理）。浏览器验收为桌面实机播放与页面DOM核验，手机未覆盖。
+注意：各期 `render_body.py` 拷贝均有同一干净检出缺陷，重制旧片时先修；封面install会刷新所有LC期 `cover-style.json`，若该文件在某期冻结清单内，install后须对该期重新冻结，并核对清单diff只含溯源条目变化、视频输入条目未变（LC.15已按此处理，diff仅cover-style.json与共享封面源码两项）。浏览器验收为桌面实机播放与页面DOM核验，手机未覆盖。

@@ -687,5 +687,5 @@ EP.16第一版视频SHA前缀为`3085d678`，第二版为`6aa379dd`。用户已�
 - **案例：**LC.207课程表（[PR #502](https://github.com/linhongcun/video-studio/pull/502)、[v0.110.0](https://github.com/linhongcun/video-studio/releases/tag/v0.110.0)）的 `current()` 用 `actionProgress` 的默认窗口计算每个 act 的事件进度——窗口从下一句 cue 一直延伸到镜尾。四句叙述中被第二句 cue 切开的两个 act，前者把事件拖满整镜，后者的事件直到前者结束才开始，叙事里早已学完的课在画面里集中跳到最终态。
 - **改法：**改为按 `cueFrames` 直接给每个 act 分配自己的句窗（本 act 的 cue 到下一 act 的 cue，末 act 到字幕结束），事件在句窗内均布；几何预检只查布局查不出这种时序错位，渲染前抽帧要对照句界核对事件序号。
 - **关联缺陷一：**`render_body.py` 的通用壳在“有历史附录回执但没有旧成片”（干净检出）时，把刚渲出的 body 留在最终槽位，`append_references` 将其判为外部改动而拒绝。修正为无旧成片时移除占位 body；该缺陷同样潜伏在此前各期的拷贝里，重制旧片时需一并修正。
-- **关联缺陷二：**封面 install 会刷新所有 LC 期 `cover-style.json` 的溯源 SHA；LC.15 把它列进了冻结清单，本期 install 后其 `freeze.py --verify` 立即失败。改法是重新运行该期 freeze 重新记录清单（只更新确实变化的溯源条目），并在新增期的冻结清单里评估这类会被共享管线周期性刷新的派生文件是否该纳入。
+- **关联缺陷二：**封面 install 会刷新所有 LC 期 `cover-style.json` 的溯源 SHA；LC.15 把它列进了冻结清单，本期 install 后其 `freeze.py --verify` 立即失败。改法是重新运行该期 freeze 重新记录清单，随后核对清单diff只含溯源条目变化、视频输入条目原样保留（本期LC.15的diff仅cover-style.json与共享封面源码两项），不可把重跑当成对其他输入变化的追认；并在新增期的冻结清单里评估这类会被共享管线周期性刷新的派生文件是否该纳入。
 - **范围与限制：**修复后重冻结、重渲染并复核关键帧（第二句中学课与删边状态随叙述推进）；渲染轮次因此增至五轮，计时见本期 `qa/production-timing.json`。
