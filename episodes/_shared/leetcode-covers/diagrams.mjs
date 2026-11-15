@@ -299,7 +299,25 @@ function threeSum() {
     + text(300, 345, '-1 + (-1) + 2 = 0', C.teal, 34);
 }
 
+function courseSchedule() {
+  // Teaching example [[1,0],[2,0],[3,1],[3,2]]: edges 0→1, 0→2, 1→3, 2→3.
+  const pos = { 0: [110, 200], 1: [300, 105], 2: [300, 295], 3: [490, 200] };
+  const deg = { 0: 0, 1: 1, 2: 1, 3: 2 };
+  const edge = (a, b) => {
+    const [x1, y1] = pos[a], [x2, y2] = pos[b];
+    const d = Math.hypot(x2 - x1, y2 - y1), ux = (x2 - x1) / d, uy = (y2 - y1) / d;
+    return arrow(x1 + ux * 40, y1 + uy * 40, x2 - ux * 44, y2 - uy * 44, a === 0 ? C.teal : C.edge, 4);
+  };
+  return text(300, 52, '入度为零的课先学', C.gold, 27)
+    + [[0, 1], [0, 2], [1, 3], [2, 3]].map(([a, b]) => edge(a, b)).join('')
+    + Object.keys(pos).map(k => circle(pos[k][0], pos[k][1], 40, C.surface, k === '0' ? C.teal : C.edge, { 'stroke-width': k === '0' ? 4 : 2 })
+      + text(pos[k][0], pos[k][1] + 11, k, k === '0' ? C.teal : C.text, 36)
+      + text(pos[k][0] + 58, pos[k][1] - 30, deg[k], deg[k] === 0 ? C.teal : C.muted, 22)).join('')
+    + text(300, 372, '学完一门，删掉它指出的边', C.teal, 24);
+}
+
 const DRAW = new Map([
+  [207, courseSchedule],
   [15, threeSum],
   [1, twoSum], [3, longestSubstring], [11, containerMostWater], [20, validParentheses],
   [42, trappingRainWater], [46, permutations], [56, mergeIntervals], [70, climbingStairs],
