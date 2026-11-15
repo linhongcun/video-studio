@@ -828,4 +828,4 @@ PR499合并`0735641d`，v0.109.0与Release后Pages43688172126成功。初版预�
 
 最终完整视频SHA为`f8a085e7b49265e25cb39970f39e1f1fed77e071eff12493ad9dbbbad61dd5b5`；线上完整MP4、字幕、封面、SVG、文章/来源、章节与回看、首页/目录、更新日志通过，资料附录随同一完整媒体核对。证据见[阶段计时](../episodes/leetcode/three-sum/production/qa/production-timing.json)、[成片复审](../episodes/leetcode/three-sum/production/qa/final-review-v2-f8a085e7.md)、[浏览器范围](../episodes/leetcode/three-sum/production/qa/browser-acceptance-v2.md)及[线上回执](../episodes/leetcode/three-sum/production/qa/publication-verification.json)。手机仅Chromium触摸模拟，未测实体设备与iOS/Safari；部署后为HTTP核验，未再浏览器播放。自动音频交叉识别保留同音术语限制，不声称真人逐字听审；无外平台新发。
 
-用户随后观看上线成片并给予定性认可，认为讲解清楚明了；未提出修改要求。这支持本期讲法，见[S012](successful-practices.md#s012-让安全排除的依据成为算法动画主线)；不据此推断学习效果或其他题目的观看认可。
+用户随后观看上线成片并给予定性认可，认为讲解清晰易懂；未提出修改要求。这支持本期讲法，见[S012](successful-practices.md#s012-让安全排除的依据成为算法动画主线)；不据此推断学习效果或其他题目的观看认可。
