@@ -111,7 +111,7 @@ function Close({shot,frame}:{shot:Shot;frame:number}){
  <T x={1280} y={735} size={42} color={C.gold} mono>O(n)</T><T x={1280} y={790} size={27} color={C.muted}>除输出外的额外空间</T><T x={1280} y={835} size={25} color={C.muted}>有序副本与排序工作空间</T></g>
  </>;
 }
-const titles:Record<string,string>={input:'找全所有数值组合，而不重复',sort:'排序后，用大小关系排除候选',low:'和偏小，为什么可以移动左指针？',hit:'固定第一个 -1，找到第一组',next:'继续向内，找到第二组',finish:'跳过重复固定值，再检查 0',duplicate:'去重补例：跳过两端等值段',edge:'数值可以相同，位置必须不同',close:'每次移动都有排除依据'};
+const titles:Record<string,string>={input:'三数之和：找全组合，怎样不重复？',sort:'排序后，用大小关系排除候选',low:'和偏小，为什么可以移动左指针？',hit:'固定第一个 -1，找到第一组',next:'继续向内，找到第二组',finish:'跳过重复固定值，再检查 0',duplicate:'去重补例：跳过两端等值段',edge:'数值可以相同，位置必须不同',close:'每次移动都有排除依据'};
 function splitSubtitle(text:string){
  const chunks=text.match(/[^，；：。！？]+[，；：。！？]?/g)??[text];const lines:string[]=[];let line='';
  for(const c of chunks){if(line.length+c.length>44&&line){lines.push(line);line='';}line+=c;}
