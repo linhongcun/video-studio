@@ -15,5 +15,7 @@ python episodes/leetcode/three-sum/production/freeze.py
 python episodes/leetcode/three-sum/production/render.py
 ```
 正式默认入口只执行一次：render.py 自带输入验证、正文渲染、混音、资料页与最终媒体核验；不要先另跑 render:body。
+正式装配后运行 `node episodes/leetcode/three-sum/production/scripts/preflight.mjs`，以实际 Remotion DOM 检查逐镜、最长字幕、代码边界的文字边界及字幕遮挡；报告在 qa/preflight。它只证明抽样帧几何，不代替连续成片审片。第六镜内部移动起点必须从共享 voice/cues.json 读取，不估计词时间。
+封面入口是仓库 episodes/_shared/leetcode-covers/render.py；cover-inputs 是源文件快照而非单独安装入口。只安装本期三比例产物，不覆盖旧片；qa/covers-report.json 记录本期完整 SHA 与 4:3 安全边界。
 发布副本只来自完成检查的本期视频，站点数据复制到 ../publication。来源阅读、文稿复审、冻结、成片与浏览器验收绑定各自输入SHA；未做检查不可记通过。
 阶段耗时与重跑见 qa/production-timing.json；本页在冻结前定稿，后续执行记录另放 QA，避免追改冻结输入。

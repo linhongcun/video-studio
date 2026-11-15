@@ -287,7 +287,20 @@ function validParentheses() {
     + text(300, 352, '栈顶 = 最近一个未配对的左括号', C.text, 22);
 }
 
+function threeSum() {
+  const values = [-4, -1, -1, 0, 1, 2], x = i => 66 + i * 94;
+  return text(300, 62, '固定 -1，左右指针向内找', C.gold, 28)
+    + values.map((v, i) => {
+      const color = i === 1 ? C.gold : i === 2 ? C.teal : i === 5 ? '#A5B4FC' : C.edge;
+      return rect(x(i)-35, 145, 70, 76, C.surface, color, {'stroke-width': i===1||i===2||i===5?4:2})
+        + text(x(i), 197, v, color === C.edge ? C.text : color, 37)
+        + (i === 1 || i === 2 || i === 5 ? text(x(i), 270, i === 1 ? 'i' : i === 2 ? 'L' : 'R', color, 27) : '');
+    }).join('')
+    + text(300, 345, '-1 + (-1) + 2 = 0', C.teal, 34);
+}
+
 const DRAW = new Map([
+  [15, threeSum],
   [1, twoSum], [3, longestSubstring], [11, containerMostWater], [20, validParentheses],
   [42, trappingRainWater], [46, permutations], [56, mergeIntervals], [70, climbingStairs],
   [200, numberOfIslands], [206, reverseLinkedList], [347, topKFrequentElements], [547, numberOfProvinces],
