@@ -40,7 +40,7 @@
     {
       "id": "question",
       "chapterId": "question",
-      "title": "题意与有效",
+      "title": "题意与该和谁配对",
       "from": 0,
       "durationInFrames": 180,
       "shots": [
@@ -50,7 +50,7 @@
           "slug": "input",
           "visualType": "input",
           "chapterId": "question",
-          "chapterTitle": "题意与有效",
+          "chapterTitle": "题意与该和谁配对",
           "from": 0,
           "durationInFrames": 90,
           "cueFrames": {
@@ -70,7 +70,9 @@
             {
               "id": "show",
               "cue": "题目给出",
-              "sentence": 0
+              "sentence": 0,
+              "endCue": "有效要求",
+              "endOffsetFrames": 6
             },
             {
               "id": "reveal",
@@ -87,7 +89,7 @@
           "slug": "question",
           "visualType": "question",
           "chapterId": "question",
-          "chapterTitle": "该和谁配对",
+          "chapterTitle": "题意与该和谁配对",
           "from": 90,
           "durationInFrames": 90,
           "cueFrames": {
@@ -107,7 +109,9 @@
             {
               "id": "ask",
               "cue": "看这个例子",
-              "sentence": 0
+              "sentence": 0,
+              "endCue": "左方括号是最近",
+              "endOffsetFrames": 6
             },
             {
               "id": "compare",
@@ -115,7 +119,7 @@
               "sentence": 1
             }
           ],
-          "scriptVisual": "字符串 ([)] 逐格显示，停在第一个右圆括号并提问；第二句高亮最近未配对的左方括号，标出类型不同、无效。",
+          "scriptVisual": "字符串 ([)] 逐格显示，停在第一个右圆括号并提问；第二句高亮最近未配对的左方括号，标出类型不同、无效。本镜不出现栈。",
           "traceEvents": []
         }
       ]
@@ -153,7 +157,9 @@
             {
               "id": "collect",
               "cue": "规则由此清楚了",
-              "sentence": 0
+              "sentence": 0,
+              "endCue": "后放进去的先取出来",
+              "endOffsetFrames": 6
             },
             {
               "id": "name",
@@ -169,7 +175,7 @@
     {
       "id": "scan",
       "chapterId": "scan",
-      "title": "沿同一例子扫描",
+      "title": "沿一个有效例子扫描",
       "from": 270,
       "durationInFrames": 360,
       "shots": [
@@ -179,7 +185,7 @@
           "slug": "begin",
           "visualType": "trace",
           "chapterId": "scan",
-          "chapterTitle": "沿同一例子扫描",
+          "chapterTitle": "沿一个有效例子扫描",
           "from": 270,
           "durationInFrames": 90,
           "cueFrames": {
@@ -188,7 +194,7 @@
               45
             ],
             "labels": {
-              "沿同一个例子": 0,
+              "换一个有效的例子": 0,
               "此时栈顶": 45
             }
           },
@@ -198,13 +204,15 @@
           "actionCues": [
             {
               "id": "push3",
-              "cue": "沿同一个例子",
+              "cue": "换一个有效的例子",
               "sentence": 0,
               "events": [
                 0,
                 1,
                 2
-              ]
+              ],
+              "endCue": "此时栈顶",
+              "endOffsetFrames": 6
             },
             {
               "id": "top",
@@ -213,7 +221,7 @@
               "events": []
             }
           ],
-          "scriptVisual": "主例 {[()]}() 前三个左括号依次入栈；第二句高亮栈顶的左圆括号。",
+          "scriptVisual": "换到有效例子 {[()]}()，前三个左括号依次入栈；第二句高亮栈顶的左圆括号。",
           "traceEvents": []
         },
         {
@@ -222,7 +230,7 @@
           "slug": "pop",
           "visualType": "trace",
           "chapterId": "scan",
-          "chapterTitle": "沿同一例子扫描",
+          "chapterTitle": "沿一个有效例子扫描",
           "from": 360,
           "durationInFrames": 90,
           "cueFrames": {
@@ -245,7 +253,9 @@
               "sentence": 0,
               "events": [
                 3
-              ]
+              ],
+              "endCue": "弹出以后",
+              "endOffsetFrames": 6
             },
             {
               "id": "newtop",
@@ -263,7 +273,7 @@
           "slug": "unwind",
           "visualType": "trace",
           "chapterId": "scan",
-          "chapterTitle": "沿同一例子扫描",
+          "chapterTitle": "沿一个有效例子扫描",
           "from": 450,
           "durationInFrames": 90,
           "cueFrames": {
@@ -286,7 +296,9 @@
               "sentence": 0,
               "events": [
                 4
-              ]
+              ],
+              "endCue": "第六个字符",
+              "endOffsetFrames": 6
             },
             {
               "id": "pop3",
@@ -306,7 +318,7 @@
           "slug": "finish",
           "visualType": "trace",
           "chapterId": "scan",
-          "chapterTitle": "沿同一例子扫描",
+          "chapterTitle": "沿一个有效例子扫描",
           "from": 540,
           "durationInFrames": 90,
           "cueFrames": {
@@ -315,7 +327,7 @@
               45
             ],
             "labels": {
-              "后面的左圆括号": 0,
+              "第七个字符": 0,
               "字符串读完": 45
             }
           },
@@ -325,12 +337,14 @@
           "actionCues": [
             {
               "id": "pushpop",
-              "cue": "后面的左圆括号",
+              "cue": "第七个字符",
               "sentence": 0,
               "events": [
                 6,
                 7
-              ]
+              ],
+              "endCue": "字符串读完",
+              "endOffsetFrames": 6
             },
             {
               "id": "verdict",
@@ -349,7 +363,7 @@
     {
       "id": "close",
       "chapterId": "close",
-      "title": "失败情况与总结",
+      "title": "失败情况与实现",
       "from": 630,
       "durationInFrames": 330,
       "shots": [
@@ -359,7 +373,7 @@
           "slug": "fail",
           "visualType": "fail",
           "chapterId": "close",
-          "chapterTitle": "失败情况与总结",
+          "chapterTitle": "失败情况与实现",
           "from": 630,
           "durationInFrames": 90,
           "cueFrames": {
@@ -379,7 +393,9 @@
             {
               "id": "empty",
               "cue": "再看两种失败",
-              "sentence": 0
+              "sentence": 0,
+              "endCue": "如果字符串读完",
+              "endOffsetFrames": 6
             },
             {
               "id": "leftover",
@@ -396,7 +412,7 @@
           "slug": "close",
           "visualType": "close",
           "chapterId": "close",
-          "chapterTitle": "失败情况与总结",
+          "chapterTitle": "失败情况与实现",
           "from": 720,
           "durationInFrames": 240,
           "cueFrames": {
@@ -406,7 +422,7 @@
             ],
             "labels": {
               "归纳成三条": 0,
-              "程序用字典": 45
+              "用字典把右括号": 45
             }
           },
           "subtitles": [],
@@ -416,11 +432,13 @@
             {
               "id": "rules",
               "cue": "归纳成三条",
-              "sentence": 0
+              "sentence": 0,
+              "endCue": "用字典把右括号",
+              "endOffsetFrames": 6
             },
             {
               "id": "complexity",
-              "cue": "程序用字典",
+              "cue": "用字典把右括号",
               "sentence": 1
             }
           ],

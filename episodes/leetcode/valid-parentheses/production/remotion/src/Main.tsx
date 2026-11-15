@@ -23,7 +23,7 @@ const titles: Record<string, string> = {
   input: '题意：三类括号，怎样才算有效',
   question: '遇到右括号，该和谁配对？',
   method: '记住还没配对的左括号：栈',
-  trace: '沿同一例子：左括号入栈，右括号比栈顶',
+  trace: '沿一个有效例子：左括号入栈，右括号比栈顶',
   fail: '两种失败：栈空、栈不空',
   close: '三条规则与复杂度',
 };
@@ -52,6 +52,7 @@ type AnimatingEvent = {event: TraceEvent; frac: number};
 
 type BoardProps = {
   run: Run;
+  showStack?: boolean;
   done: number;
   animating?: AnimatingEvent;
   origin: Origin;
@@ -62,7 +63,7 @@ type BoardProps = {
   title?: string;
 };
 
-function Board({run, done, animating, origin, highlightTop = false, pointer, pointerText, showStackLabel = true, title}: BoardProps) {
+function Board({run, done, animating, origin, highlightTop = false, pointer, pointerText, showStackLabel = true, showStack = true, title}: BoardProps) {
   const state = replay(run, done);
   const scale = origin.scale ?? 1;
   const n = run.chars.length;
@@ -87,7 +88,7 @@ function Board({run, done, animating, origin, highlightTop = false, pointer, poi
     : showFailure && event?.kind === 'empty'
       ? '栈为空，没有左括号可配 → 无效'
       : showFailure && event?.kind === 'mismatch'
-        ? '栈顶类型不同 → 无效'
+        ? (showStack ? '栈顶类型不同 → 无效' : '最近未配对的左括号类型不同 → 无效')
         : showFailure && event?.kind === 'leftover'
           ? '读完后栈不为空 → 无效'
           : undefined;
@@ -112,7 +113,7 @@ function Board({run, done, animating, origin, highlightTop = false, pointer, poi
             {isMoving && <rect x={base.x} y={base.y} width={BOX} height={BOX} rx={14} fill="none" stroke={C.edge} strokeDasharray="8 8" strokeWidth={2} />}
             <rect x={bx} y={by} width={BOX} height={BOX} rx={14} fill={matched ? '#123B3A' : failed ? '#3A1C22' : C.surface} stroke={color} strokeWidth={isCurrent || pointer === index ? 5 : 3} />
             <SvgText x={bx + BOX / 2} y={by + 66} size={54} color={color} anchor="middle" mono weight={700}>{ch}</SvgText>
-            {!isMoving && <SvgText x={base.x + BOX / 2} y={BOX + 30} size={20} color={C.muted} anchor="middle">{index}</SvgText>}
+            {!isMoving && <SvgText x={base.x + BOX / 2} y={BOX + 30} size={20} color={C.muted} anchor="middle">第{index + 1}个</SvgText>}
             {matched && !isMoving && <SvgText x={base.x + BOX - 10} y={18} size={20} color={C.teal} anchor="end">✓</SvgText>}
             {(isCurrent || pointer === index) && (
               <path d={`M ${base.x + BOX / 2} ${-16} l -14 -22 h 28 z`} fill={C.gold} />
@@ -123,14 +124,17 @@ function Board({run, done, animating, origin, highlightTop = false, pointer, poi
       {pointer !== undefined && pointerText && (
         <SvgText x={charPos(pointer).x + BOX / 2} y={-50} size={24} color={C.gold} anchor="middle">{pointerText}</SvgText>
       )}
-      {showStackLabel && (
+      {showStack && showStackLabel && (
         <>
           <SvgText x={stackLeft + stackWidth / 2} y={stackBottom - 4 * SLOT_H - 40} size={26} color={C.gold} anchor="middle" weight={600}>栈</SvgText>
           <path d={`M ${stackLeft} ${stackBottom - 4 * SLOT_H - 10} V ${stackBottom + 12} H ${stackLeft + stackWidth} V ${stackBottom - 4 * SLOT_H - 10}`} fill="none" stroke={C.edge} strokeWidth={3} />
           <SvgText x={stackLeft + stackWidth / 2} y={stackBottom + 44} size={20} color={C.muted} anchor="middle">底</SvgText>
         </>
       )}
-      {state.stack.map((index, depth) => {
+      {!showStack && state.stack.map((index, depth) => (
+        <g key={`open-${index}`}><SvgText x={charPos(index).x + BOX / 2} y={BOX + 62} size={20} color={depth === state.stack.length - 1 && highlightTop ? C.gold : C.muted} anchor="middle">{depth === state.stack.length - 1 ? '最近未配对' : '未配对'}</SvgText></g>
+      ))}
+      {showStack && state.stack.map((index, depth) => {
         const slot = slotFor(depth);
         const ch = run.chars[index];
         const popping = movingPop && depth === state.stack.length - 1;
@@ -151,7 +155,7 @@ function Board({run, done, animating, origin, highlightTop = false, pointer, poi
           </g>
         );
       })}
-      {state.stack.length === 0 && !movingPush && (
+      {showStack && state.stack.length === 0 && !movingPush && (
         <SvgText x={stackLeft + stackWidth / 2} y={stackBottom - 30} size={24} color={finished || state.verdict === 'valid' ? C.teal : showFailure && event?.kind === 'empty' ? BAD : C.muted} anchor="middle">空</SvgText>
       )}
       {verdictText && (
@@ -241,9 +245,9 @@ function QuestionScene({shot, frame}: {shot: Shot; frame: number}) {
   const mismatch = run.events[2];
   return (
     <>
-      <Board run={run} done={2} origin={origin} pointer={2} pointerText="该和谁配对？" highlightTop={compare > 0} animating={compare > 0 ? {event: mismatch, frac: compare} : undefined} />
+      <Board run={run} done={2} origin={origin} pointer={2} pointerText="该和谁配对？" highlightTop={compare > 0} showStack={false} animating={compare > 0 ? {event: mismatch, frac: compare} : undefined} />
       <SvgText x={130} y={900} size={26} color={C.gold}>
-        {compare > 0.45 ? '最近一个还没配对的左括号是 [，它不先闭合，外层 ( 就不能闭合；类型不同 → 无效' : '前面有 ( 和 [ 两个左括号还没配对'}
+        {compare > 0.45 ? '最近一个还没配对的是 [，它必须先闭合，外层 ( 才能闭合；) 只能和 [ 比较，类型不同 → 无效' : '前面有 ( 和 [ 两个左括号还没配对'}
       </SvgText>
     </>
   );
@@ -337,11 +341,6 @@ function Scene({shot, hideSubtitles}: SceneProps) {
   const frame = useCurrentFrame();
   const code = shot.codeCardFrom !== undefined && frame >= shot.codeCardFrom;
   if (code) return <CodeCard />;
-  const activeActions = (shot.actionCues ?? []).filter((action) => {
-    const cueFrame = shot.cueFrames?.labels?.[action.cue];
-    return cueFrame !== undefined && frame >= cueFrame;
-  });
-  const activeAction = activeActions.length ? activeActions[activeActions.length - 1] : undefined;
   return (
     <AbsoluteFill style={{background: C.bg}}>
       <LeetcodeBackdrop />
@@ -349,7 +348,6 @@ function Scene({shot, hideSubtitles}: SceneProps) {
       <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{position: 'absolute', inset: 0}}>
         <SvgText x={130} y={215} size={42} weight={600}>{titles[shot.visualType] ?? shot.chapterTitle ?? ''}</SvgText>
         <SvgText x={1785} y={215} size={23} color={C.gold} anchor="end">示例</SvgText>
-        {activeAction && <SvgText x={130} y={267} size={23} color={C.gold}>{activeAction.cue}</SvgText>}
         {shot.visualType === 'input' && <InputScene shot={shot} frame={frame} />}
         {shot.visualType === 'question' && <QuestionScene shot={shot} frame={frame} />}
         {shot.visualType === 'method' && <MethodScene shot={shot} frame={frame} />}
