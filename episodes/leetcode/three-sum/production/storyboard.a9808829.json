@@ -1,0 +1,923 @@
+{
+  "meta": {
+    "title": "三数之和：怎样去重，又不漏掉答案？",
+    "episode": 61,
+    "episodePart": "LeetCode 15",
+    "slug": "three-sum",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5648,
+    "finalVideoFrames": 5648,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 27642ce43c0119ca099adc77a6ec8998e6f053a62d1c468831ed8598aa86f4ef + words.json 339ec6d84d5dde5185a301bbf6a1b4582d795cf26d57ab0a3b39518e67d67bbf + script.md 456c5a4dbfb282fac836e40181b8e3180a3e47b217a4f4eb1d55a073c6dabdde",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "共享LeetCode画布；真实trace驱动固定值与双指针、候选区间排除和去重",
+    "visualRevision": 2,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户2026-11-15 13:46授权自选下一道题制作，选Issue #490；检查后发布GitHub站点，平台不在范围内。",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "官方示例1 / 明示去重补例",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "16x9": {
+        "path": "../publication/cover-16x9.jpg",
+        "sha256": "bf3010296b127d4780774e5744792aea9ee4d85c3e95d39d923d7d19a5f91d7e",
+        "dimensions": [
+          1920,
+          1080
+        ]
+      },
+      "3x4": {
+        "path": "../publication/cover-3x4.jpg",
+        "sha256": "78b12d0c5e171714fe66a90c8f2fa6fc2b5ec6ae146585b349d34eb5a1ef3ae6",
+        "dimensions": [
+          1080,
+          1440
+        ]
+      },
+      "4x3": {
+        "path": "../publication/cover-4x3.jpg",
+        "sha256": "775e9da537af54428b836b298bb4012e42d949eb717d310a4c0656c8e241bb5b",
+        "dimensions": [
+          1440,
+          1080
+        ]
+      }
+    },
+    "discussionQuestion": "双指针为什么可以排除候选，去重为什么不漏答案？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "unvoicedEndCard": {
+      "kind": "full-python-solution",
+      "durationSeconds": 5,
+      "codeSource": "solution.py",
+      "displaySource": "solution.json",
+      "durationInFrames": 150,
+      "from": 5498
+    }
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "question",
+      "chapterId": "question",
+      "title": "题意与排序",
+      "from": 0,
+      "durationInFrames": 1105,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "question",
+          "visualType": "input",
+          "from": 0,
+          "durationInFrames": 494,
+          "narration": "给你一个整数数组，找出三个不同位置的数，让它们相加等于零，返回所有不重复的数值组合。例如这组数，虽然两个负一来自不同位置，但负一、零、一这个组合只能输出一次。",
+          "subtitles": [
+            {
+              "text": "给你一个整数数组，找出三个不同位置的数，让它们相加等于零，返回所有不重复的数值组合。",
+              "from": 0,
+              "to": 246,
+              "duration": 247
+            },
+            {
+              "text": "例如这组数，虽然两个负一来自不同位置，但负一、零、一这个组合只能输出一次。",
+              "from": 247,
+              "to": 493,
+              "duration": 247
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-input-1",
+              "wavStart": 9.0,
+              "wavEnd": 236.72,
+              "localStart": 9.0,
+              "localEnd": 236.72
+            },
+            {
+              "id": "01-input-2",
+              "wavStart": 247.22,
+              "wavEnd": 473.64,
+              "localStart": 247.22,
+              "localEnd": 473.64
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "给你一个整数数组": 9,
+              "例如这组数，虽然": 247
+            },
+            "sentences": [
+              9,
+              247
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 27642ce4 + words.json 38d534fa + script.md 7c461492",
+            "wavFrom": 9.0,
+            "wavTo": 473.64,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第01镜：官方示例与结果按数值去重",
+          "direction": "第01镜：官方示例与结果按数值去重",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "题意与排序",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "给你一个整数数组",
+              "sentence": 0,
+              "endCue": "例如这组数，虽然",
+              "endOffsetFrames": 6,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "例如这组数，虽然",
+              "sentence": 1,
+              "events": []
+            }
+          ]
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "question",
+          "visualType": "sort",
+          "from": 494,
+          "durationInFrames": 611,
+          "narration": "如果枚举任意三个位置，会检查大量组合；先把数组从小到大排序，就能利用大小关系排除不可能的配对。每轮固定一个数，再在它右边放两个指针，左指针从近端出发，右指针从最远端出发，保证三个位置不同。",
+          "subtitles": [
+            {
+              "text": "如果枚举任意三个位置，会检查大量组合；先把数组从小到大排序，就能利用大小关系排除不可能的配对。",
+              "from": 0,
+              "to": 290,
+              "duration": 291
+            },
+            {
+              "text": "每轮固定一个数，再在它右边放两个指针，左指针从近端出发，右指针从最远端出发，保证三个位置不同。",
+              "from": 291,
+              "to": 610,
+              "duration": 320
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-sort-1",
+              "wavStart": 494.64,
+              "wavEnd": 775.45,
+              "localStart": 0.6399999999999864,
+              "localEnd": 281.45000000000005
+            },
+            {
+              "id": "02-sort-2",
+              "wavStart": 785.95,
+              "wavEnd": 1084.52,
+              "localStart": 291.95000000000005,
+              "localEnd": 590.52
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "如果枚举任意三个": 0,
+              "每轮固定一个数，": 291
+            },
+            "sentences": [
+              0,
+              291
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 27642ce4 + words.json 38d534fa + script.md 7c461492",
+            "wavFrom": 494.64,
+            "wavTo": 1084.52,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第02镜：原数组连续移动至有序位置，显示 i < L < R",
+          "direction": "第02镜：原数组连续移动至有序位置，显示 i < L < R",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "题意与排序",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "如果枚举任意三个",
+              "sentence": 0,
+              "endCue": "每轮固定一个数，",
+              "endOffsetFrames": 6,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "每轮固定一个数，",
+              "sentence": 1,
+              "events": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scan",
+      "chapterId": "scan",
+      "title": "沿官方示例扫描",
+      "from": 1105,
+      "durationInFrames": 2327,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "scan",
+          "visualType": "trace",
+          "from": 1105,
+          "durationInFrames": 672,
+          "narration": "先固定负四，左右两端是负一和二，总和是负三，太小了；对这个左指针，右边已经取了最大的数，换更小的数只会更小。所以当前左指针不可能配出零，可以安全右移；继续检查，直到左右指针相遇，这一轮都没有答案。",
+          "subtitles": [
+            {
+              "text": "先固定负四，左右两端是负一和二，总和是负三，太小了；对这个左指针，右边已经取了最大的数，换更小的数只会更小。",
+              "from": 0,
+              "to": 357,
+              "duration": 358
+            },
+            {
+              "text": "所以当前左指针不可能配出零，可以安全右移；继续检查，直到左右指针相遇，这一轮都没有答案。",
+              "from": 358,
+              "to": 671,
+              "duration": 314
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-low-1",
+              "wavStart": 1105.52,
+              "wavEnd": 1452.94,
+              "localStart": 0.5199999999999818,
+              "localEnd": 347.94000000000005
+            },
+            {
+              "id": "03-low-2",
+              "wavStart": 1463.44,
+              "wavEnd": 1756.22,
+              "localStart": 358.44000000000005,
+              "localEnd": 651.22
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "先固定负四，左右": 0,
+              "所以当前左指针不": 358
+            },
+            "sentences": [
+              0,
+              358
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 27642ce4 + words.json 38d534fa + script.md 7c461492",
+            "wavFrom": 1105.52,
+            "wavTo": 1756.22,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第03镜：trace驱动指针、算式、候选区间与结果逐步更新",
+          "direction": "第03镜：trace驱动指针、算式、候选区间与结果逐步更新",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "沿官方示例扫描",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "先固定负四，左右",
+              "sentence": 0,
+              "endCue": "所以当前左指针不",
+              "endOffsetFrames": 6,
+              "events": [
+                0
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "所以当前左指针不",
+              "sentence": 1,
+              "events": [
+                1,
+                2,
+                3,
+                4,
+                5
+              ]
+            }
+          ]
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "scan",
+          "visualType": "trace",
+          "from": 1777,
+          "durationInFrames": 533,
+          "narration": "接着固定第一个负一，左边是第二个负一，右边是二，三数和等于零，记录这个组合。同一个固定值下，左边数值确定，右边数值也就唯一确定；记录后把左右两端的相同数值跳过去，继续找新的组合。",
+          "subtitles": [
+            {
+              "text": "接着固定第一个负一，左边是第二个负一，右边是二，三数和等于零，记录这个组合。",
+              "from": 0,
+              "to": 222,
+              "duration": 223
+            },
+            {
+              "text": "同一个固定值下，左边数值确定，右边数值也就唯一确定；记录后把左右两端的相同数值跳过去，继续找新的组合。",
+              "from": 223,
+              "to": 532,
+              "duration": 310
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-hit-1",
+              "wavStart": 1777.22,
+              "wavEnd": 1989.71,
+              "localStart": 0.22000000000002728,
+              "localEnd": 212.71000000000004
+            },
+            {
+              "id": "04-hit-2",
+              "wavStart": 2000.21,
+              "wavEnd": 2289.44,
+              "localStart": 223.21000000000004,
+              "localEnd": 512.44
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "接着固定第一个负": 0,
+              "同一个固定值下，": 223
+            },
+            "sentences": [
+              0,
+              223
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 27642ce4 + words.json 38d534fa + script.md 7c461492",
+            "wavFrom": 1777.22,
+            "wavTo": 2289.44,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第04镜：trace驱动指针、算式、候选区间与结果逐步更新",
+          "direction": "第04镜：trace驱动指针、算式、候选区间与结果逐步更新",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "沿官方示例扫描",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "接着固定第一个负",
+              "sentence": 0,
+              "endCue": "同一个固定值下，",
+              "endOffsetFrames": 6,
+              "events": [
+                6,
+                7
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "同一个固定值下，",
+              "sentence": 1,
+              "events": [
+                8,
+                9
+              ]
+            }
+          ]
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "scan",
+          "visualType": "trace",
+          "from": 2310,
+          "durationInFrames": 552,
+          "narration": "现在左指针是零，右指针是一，加上固定的负一，三数和为零，得到第二个答案：负一、零、一。记录后先右移左指针，它与右指针相遇，这个负一作为固定值的所有可能就找完了。",
+          "subtitles": [
+            {
+              "text": "现在左指针是零，右指针是一，加上固定的负一，三数和为零，得到第二个答案：负一、零、一。",
+              "from": 0,
+              "to": 298,
+              "duration": 299
+            },
+            {
+              "text": "记录后先右移左指针，它与右指针相遇，这个负一作为固定值的所有可能就找完了。",
+              "from": 299,
+              "to": 551,
+              "duration": 253
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-next-1",
+              "wavStart": 2310.44,
+              "wavEnd": 2598.8,
+              "localStart": 0.44000000000005457,
+              "localEnd": 288.8000000000002
+            },
+            {
+              "id": "05-next-2",
+              "wavStart": 2609.3,
+              "wavEnd": 2841.88,
+              "localStart": 299.3000000000002,
+              "localEnd": 531.8800000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "现在左指针是零，": 0,
+              "记录后先右移左指": 299
+            },
+            "sentences": [
+              0,
+              299
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 27642ce4 + words.json 38d534fa + script.md 7c461492",
+            "wavFrom": 2310.44,
+            "wavTo": 2841.88,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第05镜：trace驱动指针、算式、候选区间与结果逐步更新",
+          "direction": "第05镜：trace驱动指针、算式、候选区间与结果逐步更新",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "沿官方示例扫描",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "现在左指针是零，",
+              "sentence": 0,
+              "endCue": "记录后先右移左指",
+              "endOffsetFrames": 6,
+              "events": [
+                10
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "记录后先右移左指",
+              "sentence": 1,
+              "events": [
+                11,
+                12,
+                13
+              ]
+            }
+          ]
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "scan",
+          "visualType": "trace",
+          "from": 2862,
+          "durationInFrames": 570,
+          "narration": "下一个固定值还是负一，同样的数值组合已经找过，直接跳过；再固定零，左右是一和二，总和是三，太大了。对这个右指针，左边已经取了最小的候选，换更大的数只会更大，所以可以安全左移右指针；两端相遇，全部查找结束。",
+          "subtitles": [
+            {
+              "text": "下一个固定值还是负一，同样的数值组合已经找过，直接跳过；再固定零，左右是一和二，总和是三，太大了。",
+              "from": 0,
+              "to": 271,
+              "duration": 272
+            },
+            {
+              "text": "对这个右指针，左边已经取了最小的候选，换更大的数只会更大，所以可以安全左移右指针；两端相遇，全部查找结束。",
+              "from": 272,
+              "to": 569,
+              "duration": 298
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-finish-1",
+              "wavStart": 2862.88,
+              "wavEnd": 3123.79,
+              "localStart": 0.8800000000001091,
+              "localEnd": 261.78999999999996
+            },
+            {
+              "id": "06-finish-2",
+              "wavStart": 3134.29,
+              "wavEnd": 3411.89,
+              "localStart": 272.28999999999996,
+              "localEnd": 549.8899999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "下一个固定值还是": 0,
+              "对这个右指针，左": 272,
+              "所以可以安全左移右指针": 425.4499999999998
+            },
+            "sentences": [
+              0,
+              272
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 27642ce4 + words.json 38d534fa + script.md 7c461492",
+            "wavFrom": 2862.88,
+            "wavTo": 3411.89,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第06镜：trace驱动指针、算式、候选区间与结果逐步更新",
+          "direction": "第06镜：trace驱动指针、算式、候选区间与结果逐步更新",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "沿官方示例扫描",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "下一个固定值还是",
+              "sentence": 0,
+              "endCue": "对这个右指针，左",
+              "endOffsetFrames": 6,
+              "events": [
+                14,
+                15
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "对这个右指针，左",
+              "sentence": 1,
+              "events": []
+            },
+            {
+              "id": "move",
+              "cue": "所以可以安全左移右指针",
+              "sentence": 1,
+              "events": [
+                16,
+                17
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "dedup",
+      "chapterId": "dedup",
+      "title": "去重为什么不漏解",
+      "from": 3432,
+      "durationInFrames": 783,
+      "shots": [
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "dedup",
+          "visualType": "duplicate",
+          "from": 3432,
+          "durationInFrames": 783,
+          "narration": "再看去重补例：负二、零、零、二、二，第一次命中负二、零、二之后，左边连续两个零要跳过，再让右指针向内，直到两端相遇。对同一个固定值，同一侧重复的值只能生成同一个数值组合，跳过它们不会漏掉新的答案；固定值去重与命中后的两端去重，分别处理两层重复。",
+          "subtitles": [
+            {
+              "text": "再看去重补例：负二、零、零、二、二，第一次命中负二、零、二之后，左边连续两个零要跳过，再让右指针向内，直到两端相遇。",
+              "from": 0,
+              "to": 363,
+              "duration": 364
+            },
+            {
+              "text": "对同一个固定值，同一侧重复的值只能生成同一个数值组合，跳过它们不会漏掉新的答案；固定值去重与命中后的两端去重，分别处理两层重复。",
+              "from": 364,
+              "to": 782,
+              "duration": 419
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-duplicate-1",
+              "wavStart": 3432.89,
+              "wavEnd": 3786.32,
+              "localStart": 0.8899999999998727,
+              "localEnd": 354.32000000000016
+            },
+            {
+              "id": "07-duplicate-2",
+              "wavStart": 3796.82,
+              "wavEnd": 4194.49,
+              "localStart": 364.82000000000016,
+              "localEnd": 762.4899999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "再看去重补例：负": 0,
+              "对同一个固定值，": 364
+            },
+            "sentences": [
+              0,
+              364
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 27642ce4 + words.json 38d534fa + script.md 7c461492",
+            "wavFrom": 3432.89,
+            "wavTo": 4194.49,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第07镜：明确切换去重补例，跳过两端等值段",
+          "direction": "第07镜：明确切换去重补例，跳过两端等值段",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "去重为什么不漏解",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "再看去重补例：负",
+              "sentence": 0,
+              "endCue": "对同一个固定值，",
+              "endOffsetFrames": 6,
+              "events": [
+                0,
+                1,
+                2,
+                3,
+                4
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "对同一个固定值，",
+              "sentence": 1,
+              "events": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "close",
+      "chapterId": "close",
+      "title": "边界、实现与代价",
+      "from": 4215,
+      "durationInFrames": 1433,
+      "shots": [
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "close",
+          "visualType": "edge",
+          "from": 4215,
+          "durationInFrames": 580,
+          "narration": "去重不等于禁止相同数值：三个零来自三个不同位置，所以零、零、零是合法答案。相反，零、一、一没有任何三数和等于零，返回空列表；位置必须不同，数值可以相同，答案组合不能重复。",
+          "subtitles": [
+            {
+              "text": "去重不等于禁止相同数值：三个零来自三个不同位置，所以零、零、零是合法答案。",
+              "from": 0,
+              "to": 268,
+              "duration": 269
+            },
+            {
+              "text": "相反，零、一、一没有任何三数和等于零，返回空列表；位置必须不同，数值可以相同，答案组合不能重复。",
+              "from": 269,
+              "to": 579,
+              "duration": 311
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-edge-1",
+              "wavStart": 4215.49,
+              "wavEnd": 4474.08,
+              "localStart": 0.4899999999997817,
+              "localEnd": 259.0799999999999
+            },
+            {
+              "id": "08-edge-2",
+              "wavStart": 4484.58,
+              "wavEnd": 4774.51,
+              "localStart": 269.5799999999999,
+              "localEnd": 559.5100000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "去重不等于禁止相": 0,
+              "相反，零、一、一": 269
+            },
+            "sentences": [
+              0,
+              269
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 27642ce4 + words.json 38d534fa + script.md 7c461492",
+            "wavFrom": 4215.49,
+            "wavTo": 4774.51,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第08镜：官方全零与无解示例",
+          "direction": "第08镜：官方全零与无解示例",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "边界、实现与代价",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "去重不等于禁止相",
+              "sentence": 0,
+              "endCue": "相反，零、一、一",
+              "endOffsetFrames": 6,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "相反，零、一、一",
+              "sentence": 1,
+              "events": []
+            }
+          ]
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "close",
+          "visualType": "close",
+          "from": 4795,
+          "durationInFrames": 853,
+          "narration": "排序后固定一个数，和偏小就右移左指针，和偏大就左移右指针，命中后记录并跳过重复值。每轮两个指针只向内走，最多线性步数，外层最多遍历整个数组，总时间是平方级；这里复制排序数组，除输出外额外空间是线性级，完整代码请暂停阅读。",
+          "subtitles": [
+            {
+              "text": "排序后固定一个数，和偏小就右移左指针，和偏大就左移右指针，命中后记录并跳过重复值。",
+              "from": 0,
+              "to": 255,
+              "duration": 256
+            },
+            {
+              "text": "每轮两个指针只向内走，最多线性步数，外层最多遍历整个数组，总时间是平方级；这里复制排序数组，除输出外额外空间是线性级，完整代码请暂停阅读。",
+              "from": 256,
+              "to": 702,
+              "duration": 597
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-close-1",
+              "wavStart": 4795.51,
+              "wavEnd": 5040.77,
+              "localStart": 0.5100000000002183,
+              "localEnd": 245.77000000000044
+            },
+            {
+              "id": "09-close-2",
+              "wavStart": 5051.27,
+              "wavEnd": 5479.55,
+              "localStart": 256.27000000000044,
+              "localEnd": 684.5500000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "排序后固定一个数": 0,
+              "每轮两个指针只向": 256
+            },
+            "sentences": [
+              0,
+              256
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 27642ce4 + words.json 38d534fa + script.md 7c461492",
+            "wavFrom": 4795.51,
+            "wavTo": 5479.55,
+            "holdFrames": 168,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第09镜：回顾双指针的有序排除与复杂度，随后五秒完整代码卡",
+          "direction": "第09镜：回顾双指针的有序排除与复杂度，随后五秒完整代码卡",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "边界、实现与代价",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "排序后固定一个数",
+              "sentence": 0,
+              "endCue": "每轮两个指针只向",
+              "endOffsetFrames": 6,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "每轮两个指针只向",
+              "sentence": 1,
+              "events": []
+            }
+          ],
+          "codeCardFrom": 703
+        }
+      ]
+    }
+  ]
+}

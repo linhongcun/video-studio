@@ -70,6 +70,10 @@ try{
       output:path.join(out,`frame-${String(f).padStart(6,'0')}.png`),scale:.65,onBrowserLog,logLevel:'error'});
   }
   report.violations=report.audits.flatMap(a=>a.violations.map(v=>({frame:a.frame,...v})));
+  if(!report.audits.find(a=>a.frame===0)?.texts.some(t=>t.text.includes('三数之和')))
+    report.violations.push({frame:0,type:'opening-problem-title-missing'});
+  if(!report.audits.some(a=>a.texts.some(t=>t.text==='两端已相遇，右指针不再移动')))
+    report.violations.push({type:'second-hit-stationary-right-caption-not-observed'});
   report.status=report.errors.length||report.violations.length||report.audits.length!==frames.length?'failed':'passed';
 }catch(e){report.status='failed';report.failure=String(e);console.error(e);}
 finally{if(browser)await browser.close({silent:true});report.completedAt=new Date().toISOString();fs.writeFileSync(path.join(out,'report.json'),JSON.stringify(report,null,2)+'\n');}
