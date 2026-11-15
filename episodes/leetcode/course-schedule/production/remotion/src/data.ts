@@ -1,0 +1,11 @@
+import storyboard from '@storyboard';
+import trace from '../../trace/main-example.json';
+export type ActionCue={id:string;cue:string;sentence:number;endCue?:string;endOffsetFrames?:number;events?:number[]};
+export type Subtitle={text:string;from:number;to?:number;duration?:number};
+export type Shot={id:string;slug?:string;from:number;durationInFrames:number;visualType:string;chapterId?:string;chapterTitle?:string;codeCardFrom?:number;cueFrames?:{sentences?:number[];labels?:Record<string,number>};subtitles?:Subtitle[];elements?:{cueText?:string;appearFrame:number}[];actionCues?:ActionCue[]};
+export type TraceEvent={kind:string;from?:number;to?:number;node?:number;indegrees:number[];queue?:number[];done?:number[];remaining?:number[];entered?:boolean;value?:boolean};
+export type Run={numCourses:number;prerequisites:number[][];result:boolean;events:TraceEvent[]};
+export const TRACE=trace as unknown as {main:Run;cycle:Run;twoCycle:Run;empty:Run;isolated:Run};
+export const STORYBOARD=storyboard as unknown as {meta:{width:number;height:number;fps:number;durationInFrames:number;pendingAudio?:boolean};scenes:{shots:Shot[]}[]};
+export const shots=STORYBOARD.scenes.flatMap(s=>s.shots);
+export const VIDEO={width:STORYBOARD.meta.width,height:STORYBOARD.meta.height,fps:STORYBOARD.meta.fps,durationInFrames:STORYBOARD.meta.durationInFrames};

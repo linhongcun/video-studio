@@ -1,0 +1,922 @@
+{
+  "meta": {
+    "title": "课程表：先修关系里的环，怎样发现？",
+    "episode": 62,
+    "episodePart": "LeetCode 207",
+    "slug": "course-schedule",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 5282,
+    "finalVideoFrames": 5282,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 391e89f25f1f2c8b852ae1cfe6f9e78e242ae1290be913ccf6e03e967a3e0904 + words.json 44fdb0dd9f59c86951dd851484b2b7d58a91f4c75c60a2bd2f9d0d9ad2f7cc06 + script.md 408a5a739706679ce173bb15cbc9da1e38d644bc4b5da87de8e37d647434b795",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "共享LeetCode画布；真实trace驱动先修图、入度统计、队列推进与成环阻塞",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户2026-11-15授权自选下一道题制作，选Issue #491；检查后发布GitHub站点，平台不在范围内。",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "四门课教学示例与官方边界示例",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "16x9": {
+        "path": "../publication/cover-16x9.jpg",
+        "sha256": "38a94005d5e1f2c8769bc6f7c047b26fa777f6c91773dd66ff2d03a4915e8534",
+        "dimensions": [
+          1920,
+          1080
+        ]
+      },
+      "3x4": {
+        "path": "../publication/cover-3x4.jpg",
+        "sha256": "98b91e228990f5b74616bd3d817fb420dff03992af0cc4fc020df48c4f57d85b",
+        "dimensions": [
+          1080,
+          1440
+        ]
+      },
+      "4x3": {
+        "path": "../publication/cover-4x3.jpg",
+        "sha256": "96a8b3f9a09df82f8abb93e7de58e04e5e37ac841e7a6219e599ed0915440d77",
+        "dimensions": [
+          1440,
+          1080
+        ]
+      }
+    },
+    "discussionQuestion": "为什么入度为零就能先学，队列空了为什么就是环？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "unvoicedEndCard": {
+      "kind": "full-python-solution",
+      "durationSeconds": 5,
+      "codeSource": "solution.py",
+      "displaySource": "solution.json",
+      "durationInFrames": 150,
+      "from": 5132
+    }
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "question",
+      "chapterId": "question",
+      "title": "题意与成图",
+      "from": 0,
+      "durationInFrames": 1380,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "question",
+          "visualType": "input",
+          "from": 0,
+          "durationInFrames": 736,
+          "narration": "一共四门课，编号从零到三；先修表的每一项里，前一门是目标课程，后一门是它必须先学的先修课，问题只有一个：能不能把全部课程学完。把每一项画成一条从先修课指向目标课的箭头，这张表就变成一张课程先修图，能不能学完，就看这张图里有没有转圈等待的环。",
+          "subtitles": [
+            {
+              "text": "一共四门课，编号从零到三；先修表的每一项里，前一门是目标课程，后一门是它必须先学的先修课，问题只有一个：能不能把全部课程学完。",
+              "from": 0,
+              "to": 361,
+              "duration": 362
+            },
+            {
+              "text": "把每一项画成一条从先修课指向目标课的箭头，这张表就变成一张课程先修图，能不能学完，就看这张图里有没有转圈等待的环。",
+              "from": 362,
+              "to": 735,
+              "duration": 374
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-input-1",
+              "wavStart": 9.0,
+              "wavEnd": 351.6,
+              "localStart": 9.0,
+              "localEnd": 351.6
+            },
+            {
+              "id": "01-input-2",
+              "wavStart": 362.1,
+              "wavEnd": 715.33,
+              "localStart": 362.1,
+              "localEnd": 715.33
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "一共四门课": 9,
+              "把每一项画成一条": 362
+            },
+            "sentences": [
+              9,
+              362
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 391e89f2 + words.json 1d8c49a1 + script.md 64627747",
+            "wavFrom": 9.0,
+            "wavTo": 715.33,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第01镜：四门课与先修表逐项，[1,0]映射为0→1箭头",
+          "direction": "第01镜：四门课与先修表逐项，[1,0]映射为0→1箭头",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "题意与成图",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "一共四门课",
+              "sentence": 0,
+              "endCue": "把每一项画成一条",
+              "endOffsetFrames": 6,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "把每一项画成一条",
+              "sentence": 1,
+              "events": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "question",
+          "visualType": "graph",
+          "from": 736,
+          "durationInFrames": 644,
+          "narration": "四项先修关系全部画成箭头，零号指向一号和二号，一号和二号都指向三号，这张图的样子就固定了。如果顺着箭头能走一圈回到出发的课程，就是谁先学谁后学的死循环，谁也无法开始。",
+          "subtitles": [
+            {
+              "text": "四项先修关系全部画成箭头，零号指向一号和二号，一号和二号都指向三号，这张图的样子就固定了。",
+              "from": 0,
+              "to": 370,
+              "duration": 371
+            },
+            {
+              "text": "如果顺着箭头能走一圈回到出发的课程，就是谁先学谁后学的死循环，谁也无法开始。",
+              "from": 371,
+              "to": 643,
+              "duration": 273
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-graph-1",
+              "wavStart": 736.33,
+              "wavEnd": 1096.86,
+              "localStart": 0.3300000000000409,
+              "localEnd": 360.8599999999999
+            },
+            {
+              "id": "02-graph-2",
+              "wavStart": 1107.36,
+              "wavEnd": 1359.92,
+              "localStart": 371.3599999999999,
+              "localEnd": 623.9200000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "四项先修关系全部": 0,
+              "如果顺着箭头": 371
+            },
+            "sentences": [
+              0,
+              371
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 391e89f2 + words.json 1d8c49a1 + script.md 64627747",
+            "wavFrom": 736.33,
+            "wavTo": 1359.92,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第02镜：四项先修全部成边，标出潜在环的方向",
+          "direction": "第02镜：四项先修全部成边，标出潜在环的方向",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "题意与成图",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "四项先修关系全部",
+              "sentence": 0,
+              "endCue": "如果顺着箭头",
+              "endOffsetFrames": 6,
+              "events": [
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "如果顺着箭头",
+              "sentence": 1,
+              "events": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "indegree",
+      "chapterId": "indegree",
+      "title": "入度与队列",
+      "from": 1380,
+      "durationInFrames": 515,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "indegree",
+          "visualType": "indegree",
+          "from": 1380,
+          "durationInFrames": 515,
+          "narration": "先看哪门课现在就能学：没有剩余先修要求的课，也就是没有箭头指向它的课。给每门课数一下还有几条边指进来，这个数字叫入度，入度为零的课放进队列，就是当前能上的课。",
+          "subtitles": [
+            {
+              "text": "先看哪门课现在就能学：没有剩余先修要求的课，也就是没有箭头指向它的课。",
+              "from": 0,
+              "to": 216,
+              "duration": 217
+            },
+            {
+              "text": "给每门课数一下还有几条边指进来，这个数字叫入度，入度为零的课放进队列，就是当前能上的课。",
+              "from": 217,
+              "to": 514,
+              "duration": 298
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-indegree-1",
+              "wavStart": 1380.92,
+              "wavEnd": 1586.54,
+              "localStart": 0.9200000000000728,
+              "localEnd": 206.53999999999996
+            },
+            {
+              "id": "03-indegree-2",
+              "wavStart": 1597.04,
+              "wavEnd": 1874.57,
+              "localStart": 217.03999999999996,
+              "localEnd": 494.56999999999994
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "先看哪门课现在就能学": 0,
+              "给每门课数一下": 217
+            },
+            "sentences": [
+              0,
+              217
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 391e89f2 + words.json 1d8c49a1 + script.md 64627747",
+            "wavFrom": 1380.92,
+            "wavTo": 1874.57,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第03镜：逐课数入边得入度，入度0进队列",
+          "direction": "第03镜：逐课数入边得入度，入度0进队列",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "入度与队列",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "先看哪门课现在就能学",
+              "sentence": 0,
+              "endCue": "给每门课数一下",
+              "endOffsetFrames": 6,
+              "events": [
+                4
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "给每门课数一下",
+              "sentence": 1,
+              "events": [
+                5
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "learn",
+      "chapterId": "learn",
+      "title": "沿主例学完全部课程",
+      "from": 1895,
+      "durationInFrames": 1090,
+      "shots": [
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "learn",
+          "visualType": "learn",
+          "from": 1895,
+          "durationInFrames": 565,
+          "narration": "零号课没有任何先修要求，先进队列；学完零号，一号和二号的等待同时清零，先后进入队列。先学一号，三号的等待从二减到一；再学二号，三号的等待清零进队列，学完三号，四门课全部完成。",
+          "subtitles": [
+            {
+              "text": "零号课没有任何先修要求，先进队列；学完零号，一号和二号的等待同时清零，先后进入队列。",
+              "from": 0,
+              "to": 270,
+              "duration": 271
+            },
+            {
+              "text": "先学一号，三号的等待从二减到一；再学二号，三号的等待清零进队列，学完三号，四门课全部完成。",
+              "from": 271,
+              "to": 564,
+              "duration": 294
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-learn-1",
+              "wavStart": 1895.57,
+              "wavEnd": 2155.53,
+              "localStart": 0.5699999999999363,
+              "localEnd": 260.5300000000002
+            },
+            {
+              "id": "04-learn-2",
+              "wavStart": 2166.03,
+              "wavEnd": 2439.87,
+              "localStart": 271.0300000000002,
+              "localEnd": 544.8699999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "零号课没有任何先修要求": 0,
+              "先学一号": 271
+            },
+            "sentences": [
+              0,
+              271
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 391e89f2 + words.json 1d8c49a1 + script.md 64627747",
+            "wavFrom": 1895.57,
+            "wavTo": 2439.87,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第04镜：学零号释放一二号，再到三号全完成",
+          "direction": "第04镜：学零号释放一二号，再到三号全完成",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "沿主例学完全部课程",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "零号课没有任何先修要求",
+              "sentence": 0,
+              "events": [
+                6,
+                7,
+                8
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "先学一号",
+              "sentence": 1,
+              "events": [
+                9,
+                10,
+                11,
+                12,
+                13
+              ]
+            }
+          ]
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "learn",
+          "visualType": "why",
+          "from": 2460,
+          "durationInFrames": 525,
+          "narration": "判断依据很直接：学完一门课，就把它指出去的边删掉，后续课程的入度减一。队列里始终是当前就能学的课，队列不空，进度就一直在推进；学完的门数等于课程总数，就能学成。",
+          "subtitles": [
+            {
+              "text": "判断依据很直接：学完一门课，就把它指出去的边删掉，后续课程的入度减一。",
+              "from": 0,
+              "to": 227,
+              "duration": 228
+            },
+            {
+              "text": "队列里始终是当前就能学的课，队列不空，进度就一直在推进；学完的门数等于课程总数，就能学成。",
+              "from": 228,
+              "to": 524,
+              "duration": 297
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-why-1",
+              "wavStart": 2460.87,
+              "wavEnd": 2678.16,
+              "localStart": 0.8699999999998909,
+              "localEnd": 218.15999999999985
+            },
+            {
+              "id": "05-why-2",
+              "wavStart": 2688.66,
+              "wavEnd": 2964.56,
+              "localStart": 228.65999999999985,
+              "localEnd": 504.55999999999995
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "判断依据很直接": 0,
+              "队列里始终是": 228
+            },
+            "sentences": [
+              0,
+              228
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 391e89f2 + words.json 1d8c49a1 + script.md 64627747",
+            "wavFrom": 2460.87,
+            "wavTo": 2964.56,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第05镜：删边-入度减一-入队的因果与完成判定",
+          "direction": "第05镜：删边-入度减一-入队的因果与完成判定",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "沿主例学完全部课程",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "判断依据很直接",
+              "sentence": 0,
+              "endCue": "队列里始终是",
+              "endOffsetFrames": 6,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "队列里始终是",
+              "sentence": 1,
+              "events": [
+                14
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cycle",
+      "chapterId": "cycle",
+      "title": "换成有环的先修表",
+      "from": 2985,
+      "durationInFrames": 1032,
+      "shots": [
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "cycle",
+          "visualType": "cycle",
+          "from": 2985,
+          "durationInFrames": 500,
+          "narration": "现在把最后一项换掉，让三号反过来先修一号：一号等三号，三号等二号，二号等一号，三门课互相等。入度统计出来，还是只有零号没有先修要求；学完零号，一号的等待仍剩一门，队列空了。",
+          "subtitles": [
+            {
+              "text": "现在把最后一项换掉，让三号反过来先修一号：一号等三号，三号等二号，二号等一号，三门课互相等。",
+              "from": 0,
+              "to": 262,
+              "duration": 263
+            },
+            {
+              "text": "入度统计出来，还是只有零号没有先修要求；学完零号，一号的等待仍剩一门，队列空了。",
+              "from": 263,
+              "to": 499,
+              "duration": 237
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-cycle-1",
+              "wavStart": 2985.56,
+              "wavEnd": 3237.79,
+              "localStart": 0.5599999999999454,
+              "localEnd": 252.78999999999996
+            },
+            {
+              "id": "06-cycle-2",
+              "wavStart": 3248.29,
+              "wavEnd": 3464.08,
+              "localStart": 263.28999999999996,
+              "localEnd": 479.0799999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "现在把最后一项换掉": 0,
+              "入度统计出来": 263
+            },
+            "sentences": [
+              0,
+              263
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 391e89f2 + words.json 1d8c49a1 + script.md 64627747",
+            "wavFrom": 2985.56,
+            "wavTo": 3464.08,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第06镜：三号改先修一号，成环后队列空",
+          "direction": "第06镜：三号改先修一号，成环后队列空",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "换成有环的先修表",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "现在把最后一项换掉",
+              "sentence": 0,
+              "events": [
+                0,
+                1,
+                2,
+                3
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "入度统计出来",
+              "sentence": 1,
+              "events": [
+                4,
+                5,
+                6,
+                7,
+                8
+              ]
+            }
+          ]
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "cycle",
+          "visualType": "blocked",
+          "from": 3485,
+          "durationInFrames": 532,
+          "narration": "队列空了，说明剩下的每门课都还有没解除的先修；从任意一门沿先修边走，课程有限，迟早回到走过的课，这就是环。所以不是排课顺序选错了，而是这组先修要求根本无解，返回不能学成。",
+          "subtitles": [
+            {
+              "text": "队列空了，说明剩下的每门课都还有没解除的先修；从任意一门沿先修边走，课程有限，迟早回到走过的课，这就是环。",
+              "from": 0,
+              "to": 331,
+              "duration": 332
+            },
+            {
+              "text": "所以不是排课顺序选错了，而是这组先修要求根本无解，返回不能学成。",
+              "from": 332,
+              "to": 531,
+              "duration": 200
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-blocked-1",
+              "wavStart": 3485.08,
+              "wavEnd": 3806.93,
+              "localStart": 0.07999999999992724,
+              "localEnd": 321.92999999999984
+            },
+            {
+              "id": "07-blocked-2",
+              "wavStart": 3817.43,
+              "wavEnd": 3996.62,
+              "localStart": 332.42999999999984,
+              "localEnd": 511.6199999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "队列空了": 0,
+              "所以不是排课顺序选错了": 332
+            },
+            "sentences": [
+              0,
+              332
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 391e89f2 + words.json 1d8c49a1 + script.md 64627747",
+            "wavFrom": 3485.08,
+            "wavTo": 3996.62,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第07镜：剩余三门互相等，沿先修边走出环",
+          "direction": "第07镜：剩余三门互相等，沿先修边走出环",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "换成有环的先修表",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "队列空了",
+              "sentence": 0,
+              "events": [
+                8
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "所以不是排课顺序选错了",
+              "sentence": 1,
+              "events": [
+                9
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "edge",
+      "chapterId": "edge",
+      "title": "边界与实现",
+      "from": 4017,
+      "durationInFrames": 1265,
+      "shots": [
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "edge",
+          "visualType": "edge",
+          "from": 4017,
+          "durationInFrames": 489,
+          "narration": "再看边界：官方第二个示例只有两门课，却互相先修，同样是一个环，不能学成。先修表为空时每门课入度都是零，全部能学；不参与任何先修关系的孤立课程也一样，直接进队列。",
+          "subtitles": [
+            {
+              "text": "再看边界：官方第二个示例只有两门课，却互相先修，同样是一个环，不能学成。",
+              "from": 0,
+              "to": 227,
+              "duration": 228
+            },
+            {
+              "text": "先修表为空时每门课入度都是零，全部能学；不参与任何先修关系的孤立课程也一样，直接进队列。",
+              "from": 228,
+              "to": 488,
+              "duration": 261
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-edge-1",
+              "wavStart": 4017.62,
+              "wavEnd": 4235.3,
+              "localStart": 0.6199999999998909,
+              "localEnd": 218.30000000000018
+            },
+            {
+              "id": "08-edge-2",
+              "wavStart": 4245.8,
+              "wavEnd": 4485.36,
+              "localStart": 228.80000000000018,
+              "localEnd": 468.3599999999997
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "再看边界": 0,
+              "先修表为空时": 228
+            },
+            "sentences": [
+              0,
+              228
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 391e89f2 + words.json 1d8c49a1 + script.md 64627747",
+            "wavFrom": 4017.62,
+            "wavTo": 4485.36,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第08镜：官方双向环、空先修表、孤立课三个边界",
+          "direction": "第08镜：官方双向环、空先修表、孤立课三个边界",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "边界与实现",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "再看边界",
+              "sentence": 0,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "先修表为空时",
+              "sentence": 1,
+              "events": []
+            }
+          ]
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "edge",
+          "visualType": "close",
+          "from": 4506,
+          "durationInFrames": 776,
+          "narration": "先修关系画成边，没有先修要求的课先进队列；每学完一门就删掉它指出的边，入度减到零的课继续进队列。这套做法叫拓扑排序；每门课只进出队列一次，每条边也只删一次，时间和额外空间都是线性级，完整代码请暂停阅读。",
+          "subtitles": [
+            {
+              "text": "先修关系画成边，没有先修要求的课先进队列；每学完一门就删掉它指出的边，入度减到零的课继续进队列。",
+              "from": 0,
+              "to": 283,
+              "duration": 284
+            },
+            {
+              "text": "这套做法叫拓扑排序；每门课只进出队列一次，每条边也只删一次，时间和额外空间都是线性级，完整代码请暂停阅读。",
+              "from": 284,
+              "to": 625,
+              "duration": 492
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-close-1",
+              "wavStart": 4506.36,
+              "wavEnd": 4780.08,
+              "localStart": 0.3599999999996726,
+              "localEnd": 274.0799999999999
+            },
+            {
+              "id": "09-close-2",
+              "wavStart": 4790.58,
+              "wavEnd": 5113.69,
+              "localStart": 284.5799999999999,
+              "localEnd": 607.6899999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "先修关系画成边": 0,
+              "这套做法叫拓扑排序": 284
+            },
+            "sentences": [
+              0,
+              284
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 391e89f2 + words.json 1d8c49a1 + script.md 64627747",
+            "wavFrom": 4506.36,
+            "wavTo": 5113.69,
+            "holdFrames": 168,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第09镜：回收判定规则、复杂度与完整代码卡",
+          "direction": "第09镜：回收判定规则、复杂度与完整代码卡",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "边界与实现",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "先修关系画成边",
+              "sentence": 0,
+              "endCue": "这套做法叫拓扑排序",
+              "endOffsetFrames": 6,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "这套做法叫拓扑排序",
+              "sentence": 1,
+              "events": []
+            }
+          ],
+          "codeCardFrom": 626
+        }
+      ]
+    }
+  ]
+}
