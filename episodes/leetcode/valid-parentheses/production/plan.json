@@ -1,0 +1,241 @@
+[
+ {
+  "id": "01",
+  "slug": "input",
+  "visualType": "input",
+  "chapterId": "question",
+  "chapterTitle": "题意与该和谁配对",
+  "visual": "先展示六种括号并标出圆/方/花三类；第二句起给出合法与两种非法短例。",
+  "traceEvents": [],
+  "cues": [],
+  "actions": [
+   {
+    "id": "show",
+    "cue": "题目给出",
+    "sentence": 0,
+    "endCue": "有效要求",
+    "endOffsetFrames": 6
+   },
+   {
+    "id": "reveal",
+    "cue": "有效要求",
+    "sentence": 1
+   }
+  ]
+ },
+ {
+  "id": "02",
+  "slug": "question",
+  "visualType": "question",
+  "chapterId": "question",
+  "chapterTitle": "题意与该和谁配对",
+  "visual": "字符串 ([)] 逐格显示，停在第一个右圆括号并提问；第二句高亮最近未配对的左方括号，标出类型不同、无效。本镜不出现栈。",
+  "traceEvents": [],
+  "cues": [],
+  "actions": [
+   {
+    "id": "ask",
+    "cue": "看这个例子",
+    "sentence": 0,
+    "endCue": "左方括号是最近",
+    "endOffsetFrames": 6
+   },
+   {
+    "id": "compare",
+    "cue": "左方括号是最近",
+    "sentence": 1
+   }
+  ]
+ },
+ {
+  "id": "03",
+  "slug": "method",
+  "visualType": "method",
+  "chapterId": "method",
+  "chapterTitle": "为什么是栈",
+  "visual": "把还没配对的左括号收进一个容器，最近放入的在最上面；第二句命名栈与后进先出，给出两条操作。",
+  "traceEvents": [],
+  "cues": [],
+  "actions": [
+   {
+    "id": "collect",
+    "cue": "规则由此清楚了",
+    "sentence": 0,
+    "endCue": "后放进去的先取出来",
+    "endOffsetFrames": 6
+   },
+   {
+    "id": "name",
+    "cue": "后放进去的先取出来",
+    "sentence": 1
+   }
+  ]
+ },
+ {
+  "id": "04",
+  "slug": "begin",
+  "visualType": "trace",
+  "chapterId": "scan",
+  "chapterTitle": "沿一个有效例子扫描",
+  "visual": "换到有效例子 {[()]}()，前三个左括号依次入栈；第二句高亮栈顶的左圆括号。",
+  "traceEvents": [],
+  "cues": [],
+  "actions": [
+   {
+    "id": "push3",
+    "cue": "换一个有效的例子",
+    "sentence": 0,
+    "events": [
+     0,
+     1,
+     2
+    ],
+    "endCue": "此时栈顶",
+    "endOffsetFrames": 6
+   },
+   {
+    "id": "top",
+    "cue": "此时栈顶",
+    "sentence": 1,
+    "events": []
+   }
+  ]
+ },
+ {
+  "id": "05",
+  "slug": "pop",
+  "visualType": "trace",
+  "chapterId": "scan",
+  "chapterTitle": "沿一个有效例子扫描",
+  "visual": "右圆括号与栈顶左圆括号配对，栈顶弹出；第二句高亮新的栈顶左方括号。",
+  "traceEvents": [],
+  "cues": [],
+  "actions": [
+   {
+    "id": "pop",
+    "cue": "第四个字符",
+    "sentence": 0,
+    "events": [
+     3
+    ],
+    "endCue": "弹出以后",
+    "endOffsetFrames": 6
+   },
+   {
+    "id": "newtop",
+    "cue": "弹出以后",
+    "sentence": 1,
+    "events": []
+   }
+  ]
+ },
+ {
+  "id": "06",
+  "slug": "unwind",
+  "visualType": "trace",
+  "chapterId": "scan",
+  "chapterTitle": "沿一个有效例子扫描",
+  "visual": "右方括号配对弹出；第二句右花括号配对弹出，栈清空。",
+  "traceEvents": [],
+  "cues": [],
+  "actions": [
+   {
+    "id": "pop2",
+    "cue": "第五个字符",
+    "sentence": 0,
+    "events": [
+     4
+    ],
+    "endCue": "第六个字符",
+    "endOffsetFrames": 6
+   },
+   {
+    "id": "pop3",
+    "cue": "第六个字符",
+    "sentence": 1,
+    "events": [
+     5
+    ]
+   }
+  ]
+ },
+ {
+  "id": "07",
+  "slug": "finish",
+  "visualType": "trace",
+  "chapterId": "scan",
+  "chapterTitle": "沿一个有效例子扫描",
+  "visual": "左圆括号入栈后紧接着被右圆括号弹出；第二句读完字符串，栈为空，显示有效。",
+  "traceEvents": [],
+  "cues": [],
+  "actions": [
+   {
+    "id": "pushpop",
+    "cue": "第七个字符",
+    "sentence": 0,
+    "events": [
+     6,
+     7
+    ],
+    "endCue": "字符串读完",
+    "endOffsetFrames": 6
+   },
+   {
+    "id": "verdict",
+    "cue": "字符串读完",
+    "sentence": 1,
+    "events": [
+     8
+    ]
+   }
+  ]
+ },
+ {
+  "id": "08",
+  "slug": "fail",
+  "visualType": "fail",
+  "chapterId": "close",
+  "chapterTitle": "失败情况与实现",
+  "visual": "左侧 ()) 在第三个字符时栈空，无效；第二句右侧 (() 读完后栈内剩一个左圆括号，无效。",
+  "traceEvents": [],
+  "cues": [],
+  "actions": [
+   {
+    "id": "empty",
+    "cue": "再看两种失败",
+    "sentence": 0,
+    "endCue": "如果字符串读完",
+    "endOffsetFrames": 6
+   },
+   {
+    "id": "leftover",
+    "cue": "如果字符串读完",
+    "sentence": 1
+   }
+  ]
+ },
+ {
+  "id": "09",
+  "slug": "close",
+  "visualType": "close",
+  "chapterId": "close",
+  "chapterTitle": "失败情况与实现",
+  "visual": "主例最终状态与三条规则；第二句显示字典映射与线性时间、空间。",
+  "traceEvents": [],
+  "cues": [],
+  "actions": [
+   {
+    "id": "rules",
+    "cue": "归纳成三条",
+    "sentence": 0,
+    "endCue": "用字典把右括号",
+    "endOffsetFrames": 6
+   },
+   {
+    "id": "complexity",
+    "cue": "用字典把右括号",
+    "sentence": 1
+   }
+  ]
+ }
+]

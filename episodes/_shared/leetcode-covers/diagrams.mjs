@@ -269,8 +269,26 @@ function dailyTemperatures() {
     }).join('');
 }
 
+function validParentheses() {
+  // Script example "([)]": the current ')' meets stack top '[' and the types differ.
+  const chars = ['(', '[', ')', ']'], color = { '(': '#7DB5FF', ')': '#7DB5FF', '[': '#BEADFF', ']': '#BEADFF' };
+  const x = i => 60 + i * 92;
+  return text(300, 62, '右括号只比最近未配对的左括号', C.gold, 26)
+    + chars.map((ch, i) => rect(x(i), 110, 72, 72, C.surface, i === 2 ? C.gold : color[ch], { 'stroke-width': i === 2 ? 4 : 2, opacity: i === 3 ? 0.45 : 1 })
+      + text(x(i) + 36, 162, ch, color[ch], 44, { 'font-family': 'JetBrains Mono, Menlo, monospace' })).join('')
+    + path('M 440 150 V 335 H 540 V 150', C.edge, 3)
+    + text(490, 128, '栈', C.gold, 22)
+    + rect(454, 268, 72, 56, C.surface, color['('], { 'stroke-width': 2 })
+    + text(490, 309, '(', color['('], 36, { 'font-family': 'JetBrains Mono, Menlo, monospace' })
+    + rect(454, 204, 72, 56, '#3A1C22', '#FF9B9B', { 'stroke-width': 3 })
+    + text(490, 245, '[', '#FF9B9B', 36, { 'font-family': 'JetBrains Mono, Menlo, monospace' })
+    + path('M 280 190 C 330 260, 380 232, 450 232', '#FF9B9B', 4, { 'stroke-dasharray': '10 8' })
+    + text(300, 300, '类型不同 → 无效', '#FF9B9B', 26)
+    + text(300, 352, '栈顶 = 最近一个未配对的左括号', C.text, 22);
+}
+
 const DRAW = new Map([
-  [1, twoSum], [3, longestSubstring], [11, containerMostWater],
+  [1, twoSum], [3, longestSubstring], [11, containerMostWater], [20, validParentheses],
   [42, trappingRainWater], [46, permutations], [56, mergeIntervals], [70, climbingStairs],
   [200, numberOfIslands], [206, reverseLinkedList], [347, topKFrequentElements], [547, numberOfProvinces],
   [704, binarySearch], [739, dailyTemperatures],
