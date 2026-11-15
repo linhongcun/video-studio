@@ -19,6 +19,17 @@ const GAP = 20;
 const ROW_Y = 330;
 const SLOT_H = 72;
 const SUBTITLE_TOP = 962;
+const SUBTITLE_MAX_CHARS = 48;
+function wrapSubtitle(text: string): string[] {
+  if (text.length <= SUBTITLE_MAX_CHARS) return [text];
+  const middle = text.length / 2;
+  let best = -1;
+  for (let i = 0; i < text.length; i++) {
+    if ('，；：。' .includes(text[i]) && (best < 0 || Math.abs(i - middle) < Math.abs(best - middle))) best = i;
+  }
+  if (best < 0) best = Math.floor(middle) - 1;
+  return [text.slice(0, best + 1), text.slice(best + 1)];
+}
 const titles: Record<string, string> = {
   input: '题意：三类括号，怎样才算有效',
   question: '遇到右括号，该和谁配对？',
@@ -132,7 +143,10 @@ function Board({run, done, animating, origin, highlightTop = false, pointer, poi
         </>
       )}
       {!showStack && state.stack.map((index, depth) => (
-        <g key={`open-${index}`}><SvgText x={charPos(index).x + BOX / 2} y={BOX + 62} size={20} color={depth === state.stack.length - 1 && highlightTop ? C.gold : C.muted} anchor="middle">{depth === state.stack.length - 1 ? '最近未配对' : '未配对'}</SvgText></g>
+        <g key={`open-${index}`}>
+          {depth === state.stack.length - 1 && highlightTop && !showFailure && (
+            <rect x={charPos(index).x - 6} y={-6} width={BOX + 12} height={BOX + 12} rx={18} fill="none" stroke={C.gold} strokeWidth={3} />
+          )}<SvgText x={charPos(index).x + BOX / 2} y={BOX + 62} size={20} color={depth === state.stack.length - 1 && highlightTop ? C.gold : C.muted} anchor="middle">{depth === state.stack.length - 1 ? '最近未配对' : '未配对'}</SvgText></g>
       ))}
       {showStack && state.stack.map((index, depth) => {
         const slot = slotFor(depth);
@@ -354,16 +368,19 @@ function Scene({shot, hideSubtitles}: SceneProps) {
         {shot.visualType === 'trace' && <TraceScene shot={shot} frame={frame} />}
         {shot.visualType === 'fail' && <FailScene shot={shot} frame={frame} />}
         {shot.visualType === 'close' && <CloseScene shot={shot} frame={frame} />}
-        {!hideSubtitles && (shot.subtitles ?? []).map((subtitle, index) => (
-          frame >= subtitle.from && frame <= (subtitle.to ?? subtitle.from + (subtitle.duration ?? 90))
-            ? (
-              <g key={index}>
-                <rect x={180} y={SUBTITLE_TOP} width={1560} height={70} rx={12} fill="#0B1220" />
-                <SvgText x={960} y={1007} size={27} anchor="middle">{subtitle.text}</SvgText>
-              </g>
-            )
-            : null
-        ))}
+        {!hideSubtitles && (shot.subtitles ?? []).map((subtitle, index) => {
+          if (!(frame >= subtitle.from && frame <= (subtitle.to ?? subtitle.from + (subtitle.duration ?? 90)))) return null;
+          const lines = wrapSubtitle(subtitle.text);
+          const top = lines.length > 1 ? SUBTITLE_TOP - 38 : SUBTITLE_TOP;
+          return (
+            <g key={index}>
+              <rect x={180} y={top} width={1560} height={lines.length > 1 ? 108 : 70} rx={12} fill="#0B1220" />
+              {lines.map((line, i) => (
+                <g key={i}><SvgText x={960} y={top + 45 + i * 38} size={27} anchor="middle">{line}</SvgText></g>
+              ))}
+            </g>
+          );
+        })}
       </svg>
     </AbsoluteFill>
   );
