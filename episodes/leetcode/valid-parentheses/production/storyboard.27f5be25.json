@@ -1,0 +1,855 @@
+{
+  "meta": {
+    "title": "有效的括号：遇到右括号，该和谁配对？",
+    "episode": 60,
+    "episodePart": "LeetCode 20",
+    "slug": "valid-parentheses",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 4661,
+    "finalVideoFrames": 4661,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav 14621dc7c0fede99627de884c753b91f03d5e86c614f2468ab8814c41782c113 + words.json e348a0063317e76899cec76eb1f57a9036a7897ed5cc0277cef7eb9aa2f67822 + script.md a95c8676d2c0820f04cf376474682b687c77847f817894b3a39c34ce740cc3a4",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "全屏深蓝画布，沿共享 LeetCode 深蓝/暖金/青色；字符串逐格读取，左括号按类型色入栈，右括号与栈顶比较，由 trace 驱动每一步状态。",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "Issue #495：制作 LC.20；用户已确认选题。视频做好并通过检查后按持续授权合并、发布 Release、部署 Pages；平台发布不在范围内。",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "教学示例",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {},
+    "discussionQuestion": "遇到右括号，为什么只看最近一个还没配对的左括号？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "unvoicedEndCard": {
+      "kind": "full-python-solution",
+      "durationSeconds": 5,
+      "codeSource": "solution.py",
+      "displaySource": "solution.json",
+      "durationInFrames": 150,
+      "from": 4511
+    }
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "question",
+      "chapterId": "question",
+      "title": "题意与该和谁配对",
+      "from": 0,
+      "durationInFrames": 1135,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "question",
+          "visualType": "input",
+          "from": 0,
+          "durationInFrames": 493,
+          "narration": "题目给出一个只包含圆括号、方括号和花括号的字符串，判断它是否有效。有效要求每个左括号都被同类型的右括号闭合，每个右括号都有对应的左括号，而且闭合的顺序必须正确。",
+          "subtitles": [
+            {
+              "text": "题目给出一个只包含圆括号、方括号和花括号的字符串，判断它是否有效。",
+              "from": 0,
+              "to": 211,
+              "duration": 212
+            },
+            {
+              "text": "有效要求每个左括号都被同类型的右括号闭合，每个右括号都有对应的左括号，而且闭合的顺序必须正确。",
+              "from": 212,
+              "to": 492,
+              "duration": 281
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-input-1",
+              "wavStart": 9.0,
+              "wavEnd": 201.96,
+              "localStart": 9.0,
+              "localEnd": 201.96
+            },
+            {
+              "id": "01-input-2",
+              "wavStart": 212.46,
+              "wavEnd": 472.65,
+              "localStart": 212.46,
+              "localEnd": 472.65
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "题目给出": 9,
+              "有效要求": 212
+            },
+            "sentences": [
+              9,
+              212
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 14621dc7 + words.json e2de7698 + script.md f431b8ef",
+            "wavFrom": 9.0,
+            "wavTo": 472.65,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "先展示六种括号并标出圆/方/花三类；第二句起给出合法与两种非法短例。",
+          "direction": "先展示六种括号并标出圆/方/花三类；第二句起给出合法与两种非法短例。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "actionCues": [
+            {
+              "id": "show",
+              "cue": "题目给出",
+              "sentence": 0,
+              "endCue": "有效要求",
+              "endOffsetFrames": 6
+            },
+            {
+              "id": "reveal",
+              "cue": "有效要求",
+              "sentence": 1
+            }
+          ]
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "question",
+          "visualType": "question",
+          "from": 493,
+          "durationInFrames": 642,
+          "narration": "看这个例子：读到第一个右圆括号时，前面有左圆括号和左方括号，它该和谁配对？左方括号是最近一个还没配对的左括号，它必须先闭合，外层的左圆括号才能闭合，所以右圆括号只能和左方括号比较，类型不同，字符串无效。",
+          "subtitles": [
+            {
+              "text": "看这个例子：读到第一个右圆括号时，前面有左圆括号和左方括号，它该和谁配对？",
+              "from": 0,
+              "to": 246,
+              "duration": 247
+            },
+            {
+              "text": "左方括号是最近一个还没配对的左括号，它必须先闭合，外层的左圆括号才能闭合，所以右圆括号只能和左方括号比较，类型不同，字符串无效。",
+              "from": 247,
+              "to": 641,
+              "duration": 395
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-question-1",
+              "wavStart": 493.65,
+              "wavEnd": 730.18,
+              "localStart": 0.6499999999999773,
+              "localEnd": 237.17999999999995
+            },
+            {
+              "id": "02-question-2",
+              "wavStart": 740.68,
+              "wavEnd": 1114.0,
+              "localStart": 247.67999999999995,
+              "localEnd": 621.0
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "看这个例子": 0,
+              "左方括号是最近": 247
+            },
+            "sentences": [
+              0,
+              247
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 14621dc7 + words.json e2de7698 + script.md f431b8ef",
+            "wavFrom": 493.65,
+            "wavTo": 1114.0,
+            "holdFrames": 21,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "字符串 ([)] 逐格显示，停在第一个右圆括号并提问；第二句高亮最近未配对的左方括号，标出类型不同、无效。本镜不出现栈。",
+          "direction": "字符串 ([)] 逐格显示，停在第一个右圆括号并提问；第二句高亮最近未配对的左方括号，标出类型不同、无效。本镜不出现栈。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "actionCues": [
+            {
+              "id": "ask",
+              "cue": "看这个例子",
+              "sentence": 0,
+              "endCue": "左方括号是最近",
+              "endOffsetFrames": 6
+            },
+            {
+              "id": "compare",
+              "cue": "左方括号是最近",
+              "sentence": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "method",
+      "chapterId": "method",
+      "title": "为什么是栈",
+      "from": 1135,
+      "durationInFrames": 507,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "method",
+          "visualType": "method",
+          "from": 1135,
+          "durationInFrames": 507,
+          "narration": "规则由此清楚了：只要记住所有还没配对的左括号，每遇到右括号，就取出最近放进去的那个来比较。后放进去的先取出来，正是栈的后进先出，所以左括号入栈，右括号与栈顶比较。",
+          "subtitles": [
+            {
+              "text": "规则由此清楚了：只要记住所有还没配对的左括号，每遇到右括号，就取出最近放进去的那个来比较。",
+              "from": 0,
+              "to": 252,
+              "duration": 253
+            },
+            {
+              "text": "后放进去的先取出来，正是栈的后进先出，所以左括号入栈，右括号与栈顶比较。",
+              "from": 253,
+              "to": 506,
+              "duration": 254
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-method-1",
+              "wavStart": 1135.0,
+              "wavEnd": 1378.02,
+              "localStart": 0.0,
+              "localEnd": 243.01999999999998
+            },
+            {
+              "id": "03-method-2",
+              "wavStart": 1388.52,
+              "wavEnd": 1621.96,
+              "localStart": 253.51999999999998,
+              "localEnd": 486.96000000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "规则由此清楚了": 0,
+              "后放进去的先取出来": 253
+            },
+            "sentences": [
+              0,
+              253
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 14621dc7 + words.json e2de7698 + script.md f431b8ef",
+            "wavFrom": 1135.0,
+            "wavTo": 1621.96,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "把还没配对的左括号收进一个容器，最近放入的在最上面；第二句命名栈与后进先出，给出两条操作。",
+          "direction": "把还没配对的左括号收进一个容器，最近放入的在最上面；第二句命名栈与后进先出，给出两条操作。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "actionCues": [
+            {
+              "id": "collect",
+              "cue": "规则由此清楚了",
+              "sentence": 0,
+              "endCue": "后放进去的先取出来",
+              "endOffsetFrames": 6
+            },
+            {
+              "id": "name",
+              "cue": "后放进去的先取出来",
+              "sentence": 1
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "scan",
+      "chapterId": "scan",
+      "title": "沿一个有效例子扫描",
+      "from": 1642,
+      "durationInFrames": 1729,
+      "shots": [
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "scan",
+          "visualType": "trace",
+          "from": 1642,
+          "durationInFrames": 397,
+          "narration": "换一个有效的例子从头走一遍：前三个字符都是左括号，依次压入栈中。此时栈顶是最里层的左圆括号，它就是下一个右括号必须配对的对象。",
+          "subtitles": [
+            {
+              "text": "换一个有效的例子从头走一遍：前三个字符都是左括号，依次压入栈中。",
+              "from": 0,
+              "to": 200,
+              "duration": 201
+            },
+            {
+              "text": "此时栈顶是最里层的左圆括号，它就是下一个右括号必须配对的对象。",
+              "from": 201,
+              "to": 396,
+              "duration": 196
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-begin-1",
+              "wavStart": 1642.96,
+              "wavEnd": 1833.26,
+              "localStart": 0.9600000000000364,
+              "localEnd": 191.26
+            },
+            {
+              "id": "04-begin-2",
+              "wavStart": 1843.76,
+              "wavEnd": 2018.86,
+              "localStart": 201.76,
+              "localEnd": 376.8599999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "换一个有效的例子": 0,
+              "此时栈顶": 201
+            },
+            "sentences": [
+              0,
+              201
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 14621dc7 + words.json e2de7698 + script.md f431b8ef",
+            "wavFrom": 1642.96,
+            "wavTo": 2018.86,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "换到有效例子 {[()]}()，前三个左括号依次入栈；第二句高亮栈顶的左圆括号。",
+          "direction": "换到有效例子 {[()]}()，前三个左括号依次入栈；第二句高亮栈顶的左圆括号。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "actionCues": [
+            {
+              "id": "push3",
+              "cue": "换一个有效的例子",
+              "sentence": 0,
+              "events": [
+                0,
+                1,
+                2
+              ],
+              "endCue": "此时栈顶",
+              "endOffsetFrames": 6
+            },
+            {
+              "id": "top",
+              "cue": "此时栈顶",
+              "sentence": 1,
+              "events": []
+            }
+          ]
+        },
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "scan",
+          "visualType": "trace",
+          "from": 2039,
+          "durationInFrames": 417,
+          "narration": "第四个字符是右圆括号，栈顶正好是左圆括号，类型相同，配对成功，栈顶弹出。弹出以后，栈顶回到左方括号，说明最里层已经闭合，接下来轮到它。",
+          "subtitles": [
+            {
+              "text": "第四个字符是右圆括号，栈顶正好是左圆括号，类型相同，配对成功，栈顶弹出。",
+              "from": 0,
+              "to": 215,
+              "duration": 216
+            },
+            {
+              "text": "弹出以后，栈顶回到左方括号，说明最里层已经闭合，接下来轮到它。",
+              "from": 216,
+              "to": 416,
+              "duration": 201
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-pop-1",
+              "wavStart": 2039.86,
+              "wavEnd": 2245.48,
+              "localStart": 0.8599999999999,
+              "localEnd": 206.48000000000002
+            },
+            {
+              "id": "05-pop-2",
+              "wavStart": 2255.98,
+              "wavEnd": 2435.49,
+              "localStart": 216.98000000000002,
+              "localEnd": 396.4899999999998
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "第四个字符": 0,
+              "弹出以后": 216
+            },
+            "sentences": [
+              0,
+              216
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 14621dc7 + words.json e2de7698 + script.md f431b8ef",
+            "wavFrom": 2039.86,
+            "wavTo": 2435.49,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "右圆括号与栈顶左圆括号配对，栈顶弹出；第二句高亮新的栈顶左方括号。",
+          "direction": "右圆括号与栈顶左圆括号配对，栈顶弹出；第二句高亮新的栈顶左方括号。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "actionCues": [
+            {
+              "id": "pop",
+              "cue": "第四个字符",
+              "sentence": 0,
+              "events": [
+                3
+              ],
+              "endCue": "弹出以后",
+              "endOffsetFrames": 6
+            },
+            {
+              "id": "newtop",
+              "cue": "弹出以后",
+              "sentence": 1,
+              "events": []
+            }
+          ]
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "scan",
+          "visualType": "trace",
+          "from": 2456,
+          "durationInFrames": 486,
+          "narration": "第五个字符是右方括号，与栈顶的左方括号同类，配对后弹出。第六个字符是右花括号，与栈顶的左花括号配对弹出，三层嵌套从里到外依次闭合，栈恰好清空。",
+          "subtitles": [
+            {
+              "text": "第五个字符是右方括号，与栈顶的左方括号同类，配对后弹出。",
+              "from": 0,
+              "to": 193,
+              "duration": 194
+            },
+            {
+              "text": "第六个字符是右花括号，与栈顶的左花括号配对弹出，三层嵌套从里到外依次闭合，栈恰好清空。",
+              "from": 194,
+              "to": 485,
+              "duration": 292
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-unwind-1",
+              "wavStart": 2456.49,
+              "wavEnd": 2639.81,
+              "localStart": 0.4899999999997817,
+              "localEnd": 183.80999999999995
+            },
+            {
+              "id": "06-unwind-2",
+              "wavStart": 2650.31,
+              "wavEnd": 2921.04,
+              "localStart": 194.30999999999995,
+              "localEnd": 465.03999999999996
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "第五个字符": 0,
+              "第六个字符": 194
+            },
+            "sentences": [
+              0,
+              194
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 14621dc7 + words.json e2de7698 + script.md f431b8ef",
+            "wavFrom": 2456.49,
+            "wavTo": 2921.04,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "右方括号配对弹出；第二句右花括号配对弹出，栈清空。",
+          "direction": "右方括号配对弹出；第二句右花括号配对弹出，栈清空。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "actionCues": [
+            {
+              "id": "pop2",
+              "cue": "第五个字符",
+              "sentence": 0,
+              "events": [
+                4
+              ],
+              "endCue": "第六个字符",
+              "endOffsetFrames": 6
+            },
+            {
+              "id": "pop3",
+              "cue": "第六个字符",
+              "sentence": 1,
+              "events": [
+                5
+              ]
+            }
+          ]
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "scan",
+          "visualType": "trace",
+          "from": 2942,
+          "durationInFrames": 429,
+          "narration": "第七个字符是新的左圆括号，入栈后紧跟着的第八个字符右圆括号把它弹出。字符串读完，栈里没有剩余的左括号，所有括号都已配对，返回有效。",
+          "subtitles": [
+            {
+              "text": "第七个字符是新的左圆括号，入栈后紧跟着的第八个字符右圆括号把它弹出。",
+              "from": 0,
+              "to": 234,
+              "duration": 235
+            },
+            {
+              "text": "字符串读完，栈里没有剩余的左括号，所有括号都已配对，返回有效。",
+              "from": 235,
+              "to": 428,
+              "duration": 194
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-finish-1",
+              "wavStart": 2942.04,
+              "wavEnd": 3167.36,
+              "localStart": 0.03999999999996362,
+              "localEnd": 225.36000000000013
+            },
+            {
+              "id": "07-finish-2",
+              "wavStart": 3177.86,
+              "wavEnd": 3350.89,
+              "localStart": 235.86000000000013,
+              "localEnd": 408.8899999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "第七个字符": 0,
+              "字符串读完": 235
+            },
+            "sentences": [
+              0,
+              235
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 14621dc7 + words.json e2de7698 + script.md f431b8ef",
+            "wavFrom": 2942.04,
+            "wavTo": 3350.89,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "左圆括号入栈后紧接着被右圆括号弹出；第二句读完字符串，栈为空，显示有效。",
+          "direction": "左圆括号入栈后紧接着被右圆括号弹出；第二句读完字符串，栈为空，显示有效。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "actionCues": [
+            {
+              "id": "pushpop",
+              "cue": "第七个字符",
+              "sentence": 0,
+              "events": [
+                6,
+                7
+              ],
+              "endCue": "字符串读完",
+              "endOffsetFrames": 6
+            },
+            {
+              "id": "verdict",
+              "cue": "字符串读完",
+              "sentence": 1,
+              "events": [
+                8
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "close",
+      "chapterId": "close",
+      "title": "失败情况与实现",
+      "from": 3371,
+      "durationInFrames": 1290,
+      "shots": [
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "close",
+          "visualType": "fail",
+          "from": 3371,
+          "durationInFrames": 439,
+          "narration": "再看两种失败：如果右括号到来时栈已经是空的，说明没有左括号可以配对，直接无效。如果字符串读完栈里还剩左括号，说明它们始终没有闭合，同样无效。",
+          "subtitles": [
+            {
+              "text": "再看两种失败：如果右括号到来时栈已经是空的，说明没有左括号可以配对，直接无效。",
+              "from": 0,
+              "to": 239,
+              "duration": 240
+            },
+            {
+              "text": "如果字符串读完栈里还剩左括号，说明它们始终没有闭合，同样无效。",
+              "from": 240,
+              "to": 438,
+              "duration": 199
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-fail-1",
+              "wavStart": 3371.89,
+              "wavEnd": 3601.11,
+              "localStart": 0.8899999999998727,
+              "localEnd": 230.11000000000013
+            },
+            {
+              "id": "08-fail-2",
+              "wavStart": 3611.61,
+              "wavEnd": 3789.4,
+              "localStart": 240.61000000000013,
+              "localEnd": 418.4000000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "再看两种失败": 0,
+              "如果字符串读完": 240
+            },
+            "sentences": [
+              0,
+              240
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 14621dc7 + words.json e2de7698 + script.md f431b8ef",
+            "wavFrom": 3371.89,
+            "wavTo": 3789.4,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "左侧 ()) 在第三个字符时栈空，无效；第二句右侧 (() 读完后栈内剩一个左圆括号，无效。",
+          "direction": "左侧 ()) 在第三个字符时栈空，无效；第二句右侧 (() 读完后栈内剩一个左圆括号，无效。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "actionCues": [
+            {
+              "id": "empty",
+              "cue": "再看两种失败",
+              "sentence": 0,
+              "endCue": "如果字符串读完",
+              "endOffsetFrames": 6
+            },
+            {
+              "id": "leftover",
+              "cue": "如果字符串读完",
+              "sentence": 1
+            }
+          ]
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "close",
+          "visualType": "close",
+          "from": 3810,
+          "durationInFrames": 851,
+          "narration": "归纳成三条：左括号入栈；遇到右括号，栈为空或栈顶类型不同就无效，相同就弹出；最后栈为空才有效。用字典把右括号映射到对应的左括号，每个字符只处理一次，时间随长度线性增长，栈最多装下全部左括号，额外空间同样线性。",
+          "subtitles": [
+            {
+              "text": "归纳成三条：左括号入栈；遇到右括号，栈为空或栈顶类型不同就无效，相同就弹出；最后栈为空才有效。",
+              "from": 0,
+              "to": 336,
+              "duration": 337
+            },
+            {
+              "text": "用字典把右括号映射到对应的左括号，每个字符只处理一次，时间随长度线性增长，栈最多装下全部左括号，额外空间同样线性。",
+              "from": 337,
+              "to": 700,
+              "duration": 514
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-close-1",
+              "wavStart": 3810.4,
+              "wavEnd": 4137.48,
+              "localStart": 0.40000000000009095,
+              "localEnd": 327.47999999999956
+            },
+            {
+              "id": "09-close-2",
+              "wavStart": 4147.98,
+              "wavEnd": 4492.16,
+              "localStart": 337.97999999999956,
+              "localEnd": 682.1599999999999
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "归纳成三条": 0,
+              "用字典把右括号": 337
+            },
+            "sentences": [
+              0,
+              337
+            ]
+          },
+          "timing": {
+            "source": "voice.wav 14621dc7 + words.json e2de7698 + script.md f431b8ef",
+            "wavFrom": 3810.4,
+            "wavTo": 4492.16,
+            "holdFrames": 168,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "主例最终状态与三条规则；第二句显示字典映射与线性时间、空间。",
+          "direction": "主例最终状态与三条规则；第二句显示字典映射与线性时间、空间。",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "actionCues": [
+            {
+              "id": "rules",
+              "cue": "归纳成三条",
+              "sentence": 0,
+              "endCue": "用字典把右括号",
+              "endOffsetFrames": 6
+            },
+            {
+              "id": "complexity",
+              "cue": "用字典把右括号",
+              "sentence": 1
+            }
+          ],
+          "codeCardFrom": 701
+        }
+      ]
+    }
+  ]
+}
