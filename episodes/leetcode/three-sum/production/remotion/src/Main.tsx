@@ -59,7 +59,7 @@ function TraceBoard({run,event:e,frac}: {run:Run;event:TraceEvent;frac:number}){
  'high':['和偏大：当前左端已经最小 → 排除当前 R',RIGHT],
  'hit':['和等于零 → 记录这个数值组合',C.teal],
  'skip-left':['命中后跳过左端的当前值',C.teal],
- 'skip-right':['命中后跳过右端的当前值',RIGHT],
+ 'skip-right':[e.l>=e.r?'两端已相遇，右指针不再移动':'命中后跳过右端的当前值',RIGHT],
  'cross':['L 与 R 相遇 → 结束本轮',C.muted],
  'skip-fixed':['固定值与上一轮相同 → 跳过这一轮',C.gold],
  'stop':['固定值已大于零 → 停止',C.gold]};
