@@ -17,6 +17,17 @@ jobs:
         working-directory: site
     steps:
       - uses: actions/checkout@v4
+        with:
+          # 布局检查与站点构建不读取制作目录、文档归档中的音频、图片和视频原稿（约 12 GB），跳过后产物不变
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            /*
+            !/episodes/**/production/**/*.wav
+            !/episodes/**/production/**/*.png
+            !/episodes/**/production/**/*.jpg
+            !/episodes/**/production/**/*.mp4
+            !/docs/**/*.png
+            !/docs/**/*.jpg
       - name: Check episode directory layout
         run: python3 ../scripts/check-layout.py
       - uses: actions/setup-node@v4
