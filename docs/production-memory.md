@@ -829,3 +829,11 @@ PR499合并`0735641d`，v0.109.0与Release后Pages43688172126成功。初版预�
 最终完整视频SHA为`f8a085e7b49265e25cb39970f39e1f1fed77e071eff12493ad9dbbbad61dd5b5`；线上完整MP4、字幕、封面、SVG、文章/来源、章节与回看、首页/目录、更新日志通过，资料附录随同一完整媒体核对。证据见[阶段计时](../episodes/leetcode/three-sum/production/qa/production-timing.json)、[成片复审](../episodes/leetcode/three-sum/production/qa/final-review-v2-f8a085e7.md)、[浏览器范围](../episodes/leetcode/three-sum/production/qa/browser-acceptance-v2.md)及[线上回执](../episodes/leetcode/three-sum/production/qa/publication-verification.json)。手机仅Chromium触摸模拟，未测实体设备与iOS/Safari；部署后为HTTP核验，未再浏览器播放。自动音频交叉识别保留同音术语限制，不声称真人逐字听审；无外平台新发。
 
 用户随后观看上线成片并给予定性认可，认为讲解清晰易懂；未提出修改要求。这支持本期讲法，见[S012](successful-practices.md#s012-让安全排除的依据成为算法动画主线)；不据此推断学习效果或其他题目的观看认可。
+
+## LeetCode LC.207 · 课程表（2026-11-15已交付）
+
+从既有Issue #491选题，讲“先修关系里有没有环”的判定而非排出顺序。9镜、181.07秒、5432帧（正文5282+150帧资料附录），含5秒完整Python代码卡、真实MiMo旁白、配套文章与三比例封面。动画由 `course_schedule_trace.py` 五段轨迹驱动：主例官方示例1、成环补例、双向环、空表、孤立课；解法与DFS三色oracle在穷举小规模先修表上一致。
+
+PR502合并、Release v0.110.0、Pages部署43732003434成功；线上视频SHA `ad81093011c494ab24dd8290d6394f8e78bd0ff2e6dfa34f03eb134ffa84822f` 与发布产物一致，页面/章节/文章/封面/字幕验收通过，#491以completed关闭。代码审查发现三项真实缺陷并修复：动作事件窗口拖满整镜（见[L074](lessons-learned.md#l074)）、render_body干净检出失败、LC15冻结清单因封面溯源刷新失配；修复后重冻结并重渲染，预检48帧0违规。计时与返工记录见 `episodes/leetcode/course-schedule/production/qa/production-timing.json`。
+
+注意：各期 `render_body.py` 拷贝均有同一干净检出缺陷，重制旧片时先修；封面install会刷新所有LC期 `cover-style.json`，若该文件在某期冻结清单内，install后须对该期重新冻结，并核对清单diff只含溯源条目变化、视频输入条目未变（LC.15已按此处理，diff仅cover-style.json与共享封面源码两项）。浏览器验收为桌面实机播放与页面DOM核验，手机未覆盖。
