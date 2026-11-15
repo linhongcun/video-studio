@@ -1,0 +1,83 @@
+---
+title: '有效的括号：遇到右括号，为什么只看最近一个没配对的左括号？'
+summary: '从“该和谁配对”推导出只需记住未配对的左括号并取最近的一个，由此引出栈，沿同一示例解释入栈、配对弹出与两种失败。'
+chapters:
+  - { id: question, title: 题意与该和谁配对 }
+  - { id: method, title: 为什么是栈 }
+  - { id: scan, title: 沿同一例子扫描 }
+  - { id: close, title: 失败情况与实现 }
+related: []
+---
+
+## 题意与该和谁配对 {#question}
+
+题目给出一个只包含 <code>(</code>、<code>)</code>、<code>[</code>、<code>]</code>、<code>{</code>、<code>}</code> 的字符串，判断它是否有效。有效要同时满足三条：左括号必须用相同类型的右括号闭合；左括号必须以正确的顺序闭合；每个右括号都有一个对应的相同类型的左括号。[^problem]
+
+<SourceQuote sourceId="R1" supports="官方题面把“以正确的顺序闭合”列为有效条件之一；该原句只支持题意，不证明栈算法正确。" />
+
+几个短例可以看清三条规则：<code>()[]{}</code> 有效；<code>(]</code> 无效，因为类型不同；<code>([)]</code> 无效，因为方括号还没闭合，外层的圆括号就先闭合了，顺序错误。
+
+真正的问题出现在读到一个右括号的时候：它该和谁配对？以 <code>([)]</code> 为例，读到下标 2 的 <code>)</code> 时，前面的 <code>(</code> 和 <code>[</code> 都还没配对。如果让 <code>)</code> 去配更早的 <code>(</code>，夹在中间的 <code>[</code> 就会在没有闭合的情况下被跨过去，这正是“顺序错误”。所以右括号只能和**最近一个还没配对的左括号**比较；这里最近的是 <code>[</code>，类型不同，字符串无效。
+
+<Figure src="/video-studio/episodes/valid-parentheses/article/01.svg" alt="字符串([)]逐格显示，下标2的右圆括号指向栈顶的左方括号，标出类型不同；右侧栈自底向上为左圆括号、左方括号，栈顶是最近一个未配对的左括号。" caption="读到下标 2 的右圆括号时，栈顶 [ 是最近一个还没配对的左括号；类型不同，直接判定无效。" kind="diagram" />
+
+## 为什么是栈 {#method}
+
+把上面的判断写成规则：扫描字符串时，记住所有还没配对的左括号；每遇到一个右括号，取出其中**最近放进去**的那个来比较，相同就配对消去，不同就无效。后放进去的先取出来，这正是后进先出，所以用栈保存未配对的左括号：左括号入栈，右括号与栈顶比较。
+
+Python 的列表可以直接当栈用：<code>append()</code> 把元素放到栈顶，<code>pop()</code> 取出栈顶。[^stack]
+
+<SourceQuote sourceId="R2" supports="Python官方教程说明列表可作栈使用，最后加入的元素最先取出；此引文不证明括号匹配算法。" translation="译文：列表方法让列表很容易当作栈使用——最后加入的元素最先被取出（“后进先出”）。" />
+
+## 沿同一例子扫描 {#scan}
+
+本文和视频使用同一个教学示例（不是官方示例）：
+
+~~~text
+s = "{[()]}()"
+~~~
+
+1. 下标 0–2 的 <code>{</code>、<code>[</code>、<code>(</code> 都是左括号，依次入栈；栈自底向上为 <code>{ [ (</code>，栈顶是最里层的 <code>(</code>。
+2. 下标 3 的 <code>)</code> 与栈顶 <code>(</code> 同类，配对成功，弹出；栈顶回到 <code>[</code>，说明最里层已经闭合。
+3. 下标 4 的 <code>]</code> 与栈顶 <code>[</code> 配对弹出；下标 5 的 <code>}</code> 与栈顶 <code>{</code> 配对弹出。三层嵌套从里到外依次闭合，栈恰好清空。
+4. 下标 6 的 <code>(</code> 入栈，下标 7 的 <code>)</code> 立刻把它弹出。
+5. 字符串读完，栈为空：所有左括号都已配对，返回有效。
+
+每一步右括号只和栈顶比较，因为栈顶就是“最近一个还没配对的左括号”；更早的左括号被压在下面，必须等里层全部闭合后才轮到它们。
+
+## 两种失败与完整实现 {#close}
+
+除了类型不同，还有两种失败：
+
+- 右括号到来时栈已经为空，例如 <code>())</code> 读到下标 2 的 <code>)</code>：没有任何左括号可以配对，直接无效。
+- 字符串读完栈里还剩左括号，例如 <code>(()</code>：剩下的 <code>(</code> 始终没有闭合，同样无效。
+
+~~~python
+class Solution:
+    def isValid(self, s: str) -> bool:
+        pairs = {")": "(", "]": "[", "}": "{"}
+        stack = []
+
+        for ch in s:
+            if ch in pairs:
+                if not stack or stack[-1] != pairs[ch]:
+                    return False
+                stack.pop()
+            else:
+                stack.append(ch)
+
+        return not stack
+~~~
+
+字典 <code>pairs</code> 把每个右括号映射到对应的左括号。遇到右括号时，栈为空或栈顶与映射结果不同都直接返回 <code>False</code>；相同则弹出栈顶。循环结束后，只有栈为空才返回 <code>True</code>。
+
+每个字符至多入栈一次、出栈一次，时间 O(n)。栈最多保存全部左括号，额外空间 O(n)。题目保证字符串只含六种括号，所以不在字典里的字符一定是左括号。
+
+## 小结
+
+右括号只能与最近一个还没配对的左括号配对，否则夹在中间的左括号就会在未闭合时被跨过。于是只需记住未配对的左括号并总能取到最近的一个，这就是栈：左括号入栈，右括号与栈顶比较，栈空或类型不同即无效，读完后栈为空才有效。
+
+## 参考资料
+
+[^problem]: LeetCode, [Valid Parentheses](https://leetcode.cn/problems/valid-parentheses/description/)，题目描述与示例 3、5，访问于 2026-11-15。
+[^stack]: Python Software Foundation, [Data Structures](https://docs.python.org/3/tutorial/datastructures.html#using-lists-as-stacks)，5.1.1 Using Lists as Stacks，Python 3.15.2 文档，访问于 2026-11-15。
