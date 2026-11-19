@@ -284,7 +284,6 @@ export const fmtDate = (d: string) => {
   return `${p.year}年${Number(p.month)}月${Number(p.day)}日${d.length > 10 ? ` ${p.hour}:${p.minute}:${p.second}` : ''}`;
 };
 export const fmtDay = (d: string) => {const p = dateParts(d); return `${p.year}-${p.month}-${p.day}`;};
-export const fmtDateShort = (d: string) => {const p = dateParts(d); return `${Number(p.month)}月${Number(p.day)}日`;};
 
 /** NEW 根据首发日期计算，内容修改不会变成新一期。 */
 const BUILD_DAY = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
