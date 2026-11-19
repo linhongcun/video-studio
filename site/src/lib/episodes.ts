@@ -289,7 +289,7 @@ export const fmtDay = (d: string) => {const p = dateParts(d); return `${p.year}-
 const BUILD_DAY = new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10);
 const dayDiff = (d: string) => {const p = dateParts(d); return Math.round((Date.parse(BUILD_DAY) - Date.parse(`${p.year}-${p.month}-${p.day}`)) / 864e5);};
 /** NEW：7 天内发布，且最多标最近 NEW_MAX 期（目前日更，全站都在 7 天内，不加上限会每张卡都是 NEW） */
-export const NEW_DAYS = 7, NEW_MAX = 3;
+const NEW_DAYS = 7, NEW_MAX = 3;
 export const isNew = (d: string, slug?: string) => {
   const n = dayDiff(d); if (n < 0 || n >= NEW_DAYS) return false;
   if (!slug) return true;

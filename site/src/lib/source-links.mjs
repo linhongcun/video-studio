@@ -11,7 +11,7 @@ let snapshot;
  * published script/storyboard and the current production path in meta.json.
  * Pin that exact tree rather than a branch or a date-derived historical guess.
  * This also works with the shallow checkout used by GitHub Pages. */
-export function sourceSnapshot() {
+function sourceSnapshot() {
   if (!snapshot) {
     snapshot = execFileSync('git', ['rev-parse', '--verify', 'HEAD'], {cwd: repositoryRoot, encoding: 'utf8'}).trim();
     if (!/^[a-f0-9]{40}$/.test(snapshot)) throw new Error('无法确定制作文件的发布版本');

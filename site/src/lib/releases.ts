@@ -51,7 +51,7 @@ function cnToInt(s: string): number | null {
 }
 
 /** 解析「EP.21」「EP.2/4/5/7/14」「EP1–12」「第十一期」「第二十一期」等，返回全部期号 */
-export const parseEps = (text: string): number[] => {
+const parseEps = (text: string): number[] => {
   const out = new Set<number>();
   // 区间：EP1–12 / EP.1-12 / EP.1—12（先于单期，避免只吃到左端）
   for (const m of text.matchAll(/EP\.?\s?(\d{1,3})\s*[–—\-]\s*(\d{1,3})/gi)) {
@@ -86,7 +86,7 @@ const before = (tag: string, v: number[]) => {
   for (let i = 0; i < 3; i++) if (t[i] !== v[i]) return t[i] < v[i];
   return false;
 };
-export const renumber = (tag: string, eps: number[]): number[] => !before(tag, RENUMBERED_IN) ? eps
+const renumber = (tag: string, eps: number[]): number[] => !before(tag, RENUMBERED_IN) ? eps
   : [...new Set(eps.map((n) => (n in OLD_TO_NEW ? OLD_TO_NEW[n] : n)).filter((n): n is number => n != null))].sort((a, b) => a - b);
 
 /** 新增按首发版本关联；修正/更新优先采用显式课程链接，旧 Release 保留整数 ep 回退。 */
