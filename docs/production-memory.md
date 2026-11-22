@@ -6,7 +6,9 @@
 
 为保护既有已编码成片的冻结清单，本轮保留原 `episodes/_shared/leetcode-video/` 下全部 7 个 v1 共享文件（`Frame.tsx`、`style-v1.json`、`identities-v1.json`、`theme.ts`、`references.py`、`render.py`、`qa.mjs`）原字节不变，新增版本化入口 `FrameV2.tsx`、`header-v2.ts` 与 `style-v2.json` 供后续新期与重制默认使用。新组件支持 4 位题号（`LC.1000+`）自适应胶囊宽度、代码页 `compact` 模式自动去重拼接（`题名 · 方法`）、重复 `detail`（纯题名或 `LeetCode N · 题名`）自动抑制，以及对空标题和 `"算法可视化"` 的显式拦截。
 
-验证覆盖 8 项单元测试（[test_leetcode_header_v2.mjs](../episodes/_shared/tests/test_leetcode_header_v2.mjs)，含 7 个 v1 文件完整 SHA-256 核验、11 期 v1 回退与 30 期目录/第二批热题/4 位题号）、TypeScript 严格类型检查，以及真实 Chrome Headless 1920×1080 13 组短/长/中英混排/4 位题号/去重/紧凑代码页 DOM 安全区与截图实审（[verify-header-v2.mjs](../episodes/_shared/leetcode-video/verify-header-v2.mjs)，0 违例）。本次不修改存量 17 期已发布视频、封面模板或站点目录；如后续安排存量 17 期批量视觉修订，须按独立修订清单与发布核验流程另行追踪。
+验证覆盖 8 项单元测试（[test_leetcode_header_v2.mjs](../episodes/_shared/tests/test_leetcode_header_v2.mjs)，含 7 个 v1 文件完整 SHA-256 核验、11 期 v1 回退与 30 期目录/第二批热题/4 位题号）、TypeScript 严格类型检查，以及真实 Chrome Headless 1920×1080 13 组短/长/中英混排/4 位题号/去重/紧凑代码页 DOM 安全区与截图实审（[verify-header-v2.mjs](../episodes/_shared/leetcode-video/verify-header-v2.mjs)，0 违例）。
+
+随后按用户指示对存量全部 17 期已发布 LeetCode 视频（LC.1、3、11、15、20、42、46、56、70、200、206、207、347、547、704、739、994）执行独立视觉修订 `revisions/header-title-v2/`（[render-header-v2-patches.mjs](../episodes/_shared/leetcode-video/render-header-v2-patches.mjs) 与 [patch_header_v2.py](../episodes/_shared/leetcode-video/patch_header_v2.py)）：保留既有旧冻结清单与全部 7 个 v1 共享文件不变，从基线 `6b151887` 提取各期成片，以原生 YUV 背景色精确匹配方式仅替换正片 `[0, codeCardFrom)` 顶部栏 `x=486..1219, y=44..99` 为真实 `FrameV2.tsx` 渲染的算法题名称，完整流拷贝 150 帧参考资料与原始 AAC 音轨，并按原匹配帧重抽全部 14 张配套文章关键帧 JPG。17/17 期通过完整解码帧时间戳、150 帧资料逐帧 MD5、AAC/PCM 保真、未改区域全帧最低 PSNR（`49.72–60.44 dB`，代码卡 `60.85–65.44 dB`）、补丁接缝中位 RGB 差 `0` 以及 17 行解码顶栏总览与代表全帧实看；汇总记录见[批量视觉修订记录](archive/2026-11/leetcode-header-title-v2/batch-build-summary.json)。本次以 `v0.111.1` 更新 GitHub 站点，不涉及外部平台重发，也不覆盖封面模板或站点目录名称，尚无新版观看认可结论。
 
 ## LC994 · 腐烂的橘子（2026-11-22制作）
 
