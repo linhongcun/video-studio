@@ -316,7 +316,52 @@ function courseSchedule() {
     + text(300, 372, '学完一门，删掉它指出的边', C.teal, 24);
 }
 
+function rottingOranges() {
+  // Teaching example [[2,1,1,1],[1,0,1,0],[1,1,2,0]]: two T=0 sources at (0,0) and (2,2).
+  const grid = [
+    [2, 1, 1, 1],
+    [1, 0, 1, 0],
+    [1, 1, 2, 0],
+  ];
+  const cell = 68, gap = 14, step = cell + gap, ox = 143, oy = 72;
+  const wave1 = new Set(['0,1', '1,0', '1,2', '2,1']);
+  const cells = grid.flatMap((row, r) => row.map((v, c) => {
+    const x = ox + c * step, y = oy + r * step, cx = x + cell / 2, cy = y + cell / 2;
+    const isSrc = v === 2, isW1 = wave1.has(`${r},${c}`);
+    const stroke = isSrc ? C.gold : isW1 ? C.teal : v === 0 ? '#24344D' : C.edge;
+    const sw = isSrc || isW1 ? 3 : 2;
+    let inner = '';
+    if (v === 0) {
+      inner = text(cx, cy + 8, '0', '#64748B', 22);
+    } else if (v === 2) {
+      const tagX = r === 0 ? x + 22 : x + cell - 22;
+      const tagY = r === 0 ? y + 16 : y + cell - 7;
+      inner = circle(cx, cy + (r === 0 ? 4 : -4), 19, '#7E3454', '#BE4B72', { 'stroke-width': 2 })
+        + circle(cx - 5, cy + (r === 0 ? 1 : -7), 4.2, '#3B1429', '#3B1429', { 'stroke-width': 0 })
+        + circle(cx + 6, cy + (r === 0 ? 8 : 0), 3.5, '#3B1429', '#3B1429', { 'stroke-width': 0 })
+        + text(tagX, tagY, 'T=0', C.gold, 13);
+    } else {
+      inner = circle(cx, cy + 3, 19, '#FB923C', '#EA580C', { 'stroke-width': 2 })
+        + path(`M ${cx + 2} ${cy - 16} Q ${cx + 13} ${cy - 22} ${cx + 14} ${cy - 12} Q ${cx + 7} ${cy - 10} ${cx + 2} ${cy - 16}`, '#34D399', 2, { fill: '#34D399' });
+    }
+    return rect(x, y, cell, cell, v === 0 ? '#0B1323' : '#101B2E', stroke, {
+      rx: 12, 'stroke-width': sw, 'stroke-dasharray': v === 0 ? '6 5' : undefined,
+    }) + inner;
+  })).join('');
+  const center = (r, c) => [ox + c * step + cell / 2, oy + r * step + cell / 2];
+  const spread = (r1, c1, r2, c2) => {
+    const [x1, y1] = center(r1, c1), [x2, y2] = center(r2, c2);
+    const dr = r2 - r1, dc = c2 - c1;
+    return arrow(x1 + dc * 27, y1 + dr * 27, x2 - dc * 27, y2 - dr * 27, C.teal, 3.5);
+  };
+  return text(300, 46, '两个烂橘子第 0 分钟同时出发', C.gold, 26)
+    + cells
+    + spread(0, 0, 0, 1) + spread(0, 0, 1, 0) + spread(2, 2, 1, 2) + spread(2, 2, 2, 1)
+    + text(300, 360, '初始烂橘全部入队 · 一层 = 一分钟', C.teal, 24);
+}
+
 const DRAW = new Map([
+  [994, rottingOranges],
   [207, courseSchedule],
   [15, threeSum],
   [1, twoSum], [3, longestSubstring], [11, containerMostWater], [20, validParentheses],

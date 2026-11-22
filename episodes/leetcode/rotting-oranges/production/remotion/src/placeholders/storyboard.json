@@ -1,0 +1,1202 @@
+{
+  "meta": {
+    "title": "腐烂的橘子：为什么要先把所有烂橘子一起放进队列？",
+    "episode": 63,
+    "episodePart": "LeetCode 994",
+    "slug": "rotting-oranges",
+    "width": 1920,
+    "height": 1080,
+    "fps": 30,
+    "durationInFrames": 7842,
+    "finalVideoFrames": 7842,
+    "draft": false,
+    "provisionalTiming": false,
+    "pendingAudio": false,
+    "timingSource": "voice.wav ea7ff814160fad9f10f7ef2719b08b0d5cef2d7478681b1a1b199675e2a570b6 + words.json 09c1db7991b00d0986c51e20fb2089f895e6e66b1c564c39c08dc735eeee406b + script.md a3ee436008bfda43511b48fc395cb136d673942252f7526082b932bd09218523",
+    "onsetRule": {
+      "module": "episodes/_shared/onset_rule.py",
+      "checker": "episodes/_shared/label_onset_strict.py",
+      "window": [
+        -6,
+        2
+      ]
+    },
+    "style": "共享LeetCode深蓝/暖金/青色画布；真实trace驱动橘子箱格子、多源波纹扩散、分层队列括号、越界/空位/去重标注与不可达边界",
+    "visualRevision": 1,
+    "visualDirection": "visual-direction.md",
+    "userScope": "用户2026-11-22要求挑选LeetCode算法题issue制作视频并做得比以前更好，选Issue #515（LC.994 腐烂的橘子）；检查后按持续授权发布GitHub站点，平台新发不在范围内。",
+    "palette": {
+      "bg": "#0F172A",
+      "text": "#E5E7EB"
+    },
+    "sampleDataLabel": "3×4 双源教学网格与官方三例",
+    "boxShots": [],
+    "mapShots": [],
+    "devtoolsShots": [],
+    "covers": {
+      "style": "leetcode-v1",
+      "seriesEntry": "episodes/_shared/leetcode-covers/render.py",
+      "problemNumber": 994,
+      "slug": "rotting-oranges",
+      "sitePoster": "cover-16x9.jpg",
+      "portraitPoster": "poster.jpg",
+      "sizes": {
+        "16x9": {
+          "width": 1920,
+          "height": 1080
+        },
+        "3x4": {
+          "width": 1080,
+          "height": 1440
+        },
+        "4x3": {
+          "width": 1440,
+          "height": 1080,
+          "centerRegion": [
+            315,
+            1125
+          ],
+          "bottom15Y": 918
+        }
+      }
+    },
+    "discussionQuestion": "为什么循环条件必须同时判断队列非空和还有新鲜橘子？",
+    "audioReview": "Measured sentence boundaries and acoustic first-name cues; no automatic ASR or claim of full human listening.",
+    "unvoicedEndCard": {
+      "kind": "full-python-solution",
+      "durationSeconds": 5,
+      "codeSource": "solution.py",
+      "displaySource": "solution.json",
+      "durationInFrames": 150,
+      "from": 7692
+    }
+  },
+  "assets": {
+    "new": [],
+    "reuse": [],
+    "procedural": {
+      "description": "See knoll-props.md and remotion/src/Main.tsx."
+    }
+  },
+  "scenes": [
+    {
+      "id": "problem",
+      "chapterId": "problem",
+      "title": "题意与网格映射",
+      "from": 0,
+      "durationInFrames": 1173,
+      "shots": [
+        {
+          "id": "01",
+          "scriptShot": 1,
+          "chapterId": "problem",
+          "visualType": "input",
+          "from": 0,
+          "durationInFrames": 643,
+          "narration": "给你一个三行四列的数字网格，行和列都从零开始编号，零是空位，一是新鲜橘子，二是腐烂橘子。每分钟所有烂橘子会同时向上下左右传染相邻一格，空位会挡住扩散，斜对角也不会传染；目标是求全部烂完的最少分钟数。",
+          "subtitles": [
+            {
+              "text": "给你一个三行四列的数字网格，行和列都从零开始编号，零是空位，一是新鲜橘子，二是腐烂橘子。",
+              "from": 0,
+              "to": 302,
+              "duration": 303
+            },
+            {
+              "text": "每分钟所有烂橘子会同时向上下左右传染相邻一格，空位会挡住扩散，斜对角也不会传染；目标是求全部烂完的最少分钟数。",
+              "from": 303,
+              "to": 642,
+              "duration": 340
+            }
+          ],
+          "voice": [
+            {
+              "id": "01-input-1",
+              "wavStart": 9.0,
+              "wavEnd": 293.23,
+              "localStart": 9.0,
+              "localEnd": 293.23
+            },
+            {
+              "id": "01-input-2",
+              "wavStart": 303.73,
+              "wavEnd": 622.77,
+              "localStart": 303.73,
+              "localEnd": 622.77
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "给你一个三行四列的数字网格": 9,
+              "每分钟所有烂橘子会同时": 303
+            },
+            "sentences": [
+              9,
+              303
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 9.0,
+            "wavTo": 622.77,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第01镜：3×4数字网格标明0起始行列下标与0/1/2含义，标示所有烂橘子同时向四邻扩散、空位阻断、斜角不传染",
+          "direction": "第01镜：3×4数字网格标明0起始行列下标与0/1/2含义，标示所有烂橘子同时向四邻扩散、空位阻断、斜角不传染",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "题意与网格映射",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "给你一个三行四列的数字网格",
+              "sentence": 0,
+              "endCue": "每分钟所有烂橘子会同时",
+              "endOffsetFrames": 6,
+              "events": [
+                0
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "每分钟所有烂橘子会同时",
+              "sentence": 1,
+              "events": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "id": "02",
+          "scriptShot": 2,
+          "chapterId": "problem",
+          "visualType": "mapping",
+          "from": 643,
+          "durationInFrames": 530,
+          "narration": "把网格逐格对应成橘子箱，例如左上角零行零列是二，就是一个烂橘子，零行一列是一，就是一个新鲜橘子。只要有任何新鲜橘子永远烂不到，结果就返回负一；下面看怎样算出全部腐烂的最少分钟数。",
+          "subtitles": [
+            {
+              "text": "把网格逐格对应成橘子箱，例如左上角零行零列是二，就是一个烂橘子，零行一列是一，就是一个新鲜橘子。",
+              "from": 0,
+              "to": 280,
+              "duration": 281
+            },
+            {
+              "text": "只要有任何新鲜橘子永远烂不到，结果就返回负一；下面看怎样算出全部腐烂的最少分钟数。",
+              "from": 281,
+              "to": 529,
+              "duration": 249
+            }
+          ],
+          "voice": [
+            {
+              "id": "02-mapping-1",
+              "wavStart": 643.77,
+              "wavEnd": 914.02,
+              "localStart": 0.7699999999999818,
+              "localEnd": 271.02
+            },
+            {
+              "id": "02-mapping-2",
+              "wavStart": 924.52,
+              "wavEnd": 1152.52,
+              "localStart": 281.52,
+              "localEnd": 509.52
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "把网格逐格对应成橘子箱": 0,
+              "只要有任何新鲜橘子永远烂不到": 281
+            },
+            "sentences": [
+              0,
+              281
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 643.77,
+            "wavTo": 1152.52,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第02镜：逐格把数字矩阵对应到右侧橘子箱，高亮(0,0)烂橘子与(0,1)新鲜橘子，交代目标最少分钟数与不可达返回-1",
+          "direction": "第02镜：逐格把数字矩阵对应到右侧橘子箱，高亮(0,0)烂橘子与(0,1)新鲜橘子，交代目标最少分钟数与不可达返回-1",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "题意与网格映射",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "把网格逐格对应成橘子箱",
+              "sentence": 0,
+              "endCue": "只要有任何新鲜橘子永远烂不到",
+              "endOffsetFrames": 6,
+              "events": [
+                0
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "只要有任何新鲜橘子永远烂不到",
+              "sentence": 1,
+              "events": [
+                0
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "why-multi-source",
+      "chapterId": "why-multi-source",
+      "title": "为何初始烂橘子要一起入队",
+      "from": 1173,
+      "durationInFrames": 1281,
+      "shots": [
+        {
+          "id": "03",
+          "scriptShot": 3,
+          "chapterId": "why-multi-source",
+          "visualType": "contrast",
+          "from": 1173,
+          "durationInFrames": 643,
+          "narration": "箱子里零行零列和下方的二行二列一开始各有一个烂橘子，如果先只从零行零列一路算到底，二行一列要第三分钟才烂。这忽略了身旁的二行二列第一分钟就能传染它；要是每个烂橘子各扫一遍全图再取最小，就会反复扫描很多遍。",
+          "subtitles": [
+            {
+              "text": "箱子里零行零列和下方的二行二列一开始各有一个烂橘子，如果先只从零行零列一路算到底，二行一列要第三分钟才烂。",
+              "from": 0,
+              "to": 335,
+              "duration": 336
+            },
+            {
+              "text": "这忽略了身旁的二行二列第一分钟就能传染它；要是每个烂橘子各扫一遍全图再取最小，就会反复扫描很多遍。",
+              "from": 336,
+              "to": 642,
+              "duration": 307
+            }
+          ],
+          "voice": [
+            {
+              "id": "03-why-together-1",
+              "wavStart": 1173.52,
+              "wavEnd": 1499.35,
+              "localStart": 0.5199999999999818,
+              "localEnd": 326.3499999999999
+            },
+            {
+              "id": "03-why-together-2",
+              "wavStart": 1509.85,
+              "wavEnd": 1795.56,
+              "localStart": 336.8499999999999,
+              "localEnd": 622.56
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "箱子里零行零列和下方的二行二列": 0,
+              "这忽略了身旁的二行二列": 336
+            },
+            "sentences": [
+              0,
+              336
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 1173.52,
+            "wavTo": 1795.56,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第03镜：对比只从(0,0)算到(2,1)耗时3分钟与下方(2,2)第1分钟直达冲突，以及逐源全图重扫的重复开销",
+          "direction": "第03镜：对比只从(0,0)算到(2,1)耗时3分钟与下方(2,2)第1分钟直达冲突，以及逐源全图重扫的重复开销",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "为何初始烂橘子要一起入队",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "箱子里零行零列和下方的二行二列",
+              "sentence": 0,
+              "endCue": "这忽略了身旁的二行二列",
+              "endOffsetFrames": 6,
+              "events": [
+                0
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "这忽略了身旁的二行二列",
+              "sentence": 1,
+              "events": [
+                0
+              ]
+            }
+          ]
+        },
+        {
+          "id": "04",
+          "scriptShot": 4,
+          "chapterId": "why-multi-source",
+          "visualType": "queue-intro",
+          "from": 1816,
+          "durationInFrames": 638,
+          "narration": "既然所有初始烂橘子都在第零分钟同时出发，就先把它们一起放进先进先出的队列，同时数出新鲜橘子一共有七个。每分钟先锁定当前队列长度，只从队头取出这一批，新烂的排到队尾留给下一分钟；这就是按层扩展的多源广度优先搜索。",
+          "subtitles": [
+            {
+              "text": "既然所有初始烂橘子都在第零分钟同时出发，就先把它们一起放进先进先出的队列，同时数出新鲜橘子一共有七个。",
+              "from": 0,
+              "to": 293,
+              "duration": 294
+            },
+            {
+              "text": "每分钟先锁定当前队列长度，只从队头取出这一批，新烂的排到队尾留给下一分钟；这就是按层扩展的多源广度优先搜索。",
+              "from": 294,
+              "to": 637,
+              "duration": 344
+            }
+          ],
+          "voice": [
+            {
+              "id": "04-layer-queue-1",
+              "wavStart": 1816.56,
+              "wavEnd": 2100.0,
+              "localStart": 0.5599999999999454,
+              "localEnd": 284.0
+            },
+            {
+              "id": "04-layer-queue-2",
+              "wavStart": 2110.5,
+              "wavEnd": 2433.69,
+              "localStart": 294.5,
+              "localEnd": 617.69
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "既然所有初始烂橘子都在第零分钟同时出发": 0,
+              "每分钟先锁定当前队列长度": 294
+            },
+            "sentences": [
+              0,
+              294
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 1816.56,
+            "wavTo": 2433.69,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第04镜：双起点(0,0)与(2,2)同入FIFO队列并统计fresh=7，演示锁len(queue)从队头出、新烂排队尾，引出多源广度优先搜索",
+          "direction": "第04镜：双起点(0,0)与(2,2)同入FIFO队列并统计fresh=7，演示锁len(queue)从队头出、新烂排队尾，引出多源广度优先搜索",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "为何初始烂橘子要一起入队",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "既然所有初始烂橘子都在第零分钟同时出发",
+              "sentence": 0,
+              "endCue": "每分钟先锁定当前队列长度",
+              "endOffsetFrames": 6,
+              "events": [
+                0
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "每分钟先锁定当前队列长度",
+              "sentence": 1,
+              "events": [
+                1
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "step-by-step",
+      "chapterId": "step-by-step",
+      "title": "按分钟同步扩散与去重",
+      "from": 2454,
+      "durationInFrames": 3219,
+      "shots": [
+        {
+          "id": "05",
+          "scriptShot": 5,
+          "chapterId": "step-by-step",
+          "visualType": "trace",
+          "from": 2454,
+          "durationInFrames": 578,
+          "narration": "第一分钟先锁定当前层长度是二，从队头取出零行零列，它向上和向左都越出网格边界，直接跳过不做处理。向下的一行零列和向右的零行一列都是新鲜橘子，立刻改成二并排到队尾，新鲜橘子从七个降到五个。",
+          "subtitles": [
+            {
+              "text": "第一分钟先锁定当前层长度是二，从队头取出零行零列，它向上和向左都越出网格边界，直接跳过不做处理。",
+              "from": 0,
+              "to": 299,
+              "duration": 300
+            },
+            {
+              "text": "向下的一行零列和向右的零行一列都是新鲜橘子，立刻改成二并排到队尾，新鲜橘子从七个降到五个。",
+              "from": 300,
+              "to": 577,
+              "duration": 278
+            }
+          ],
+          "voice": [
+            {
+              "id": "05-min1-src1-1",
+              "wavStart": 2454.69,
+              "wavEnd": 2744.16,
+              "localStart": 0.6900000000000546,
+              "localEnd": 290.15999999999985
+            },
+            {
+              "id": "05-min1-src1-2",
+              "wavStart": 2754.66,
+              "wavEnd": 3011.69,
+              "localStart": 300.65999999999985,
+              "localEnd": 557.69
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "第一分钟先锁定当前层长度是二": 0,
+              "向下的一行零列和向右的零行一列": 300
+            },
+            "sentences": [
+              0,
+              300
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 2454.69,
+            "wavTo": 3011.69,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第05镜：第1分钟锁层长2，出队(0,0)显式标出上/左越界跳过，传染(1,0)与(0,1)并立刻改2入队，fresh 7→5",
+          "direction": "第05镜：第1分钟锁层长2，出队(0,0)显式标出上/左越界跳过，传染(1,0)与(0,1)并立刻改2入队，fresh 7→5",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "按分钟同步扩散与去重",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "第一分钟先锁定当前层长度是二",
+              "sentence": 0,
+              "endCue": "向下的一行零列和向右的零行一列",
+              "endOffsetFrames": 6,
+              "events": [
+                1,
+                2
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "向下的一行零列和向右的零行一列",
+              "sentence": 1,
+              "events": [
+                2
+              ]
+            }
+          ]
+        },
+        {
+          "id": "06",
+          "scriptShot": 6,
+          "chapterId": "step-by-step",
+          "visualType": "trace",
+          "from": 3032,
+          "durationInFrames": 594,
+          "narration": "接着取出这一层剩下的二行二列，向右遇到值为零的空位、向下越出边界，这两个方向同样直接跳过。向上的一行二列和向左的二行一列立刻改二入队；至此第一层全部处理完，分钟数加一记为一，新鲜橘子还剩三个。",
+          "subtitles": [
+            {
+              "text": "接着取出这一层剩下的二行二列，向右遇到值为零的空位、向下越出边界，这两个方向同样直接跳过。",
+              "from": 0,
+              "to": 271,
+              "duration": 272
+            },
+            {
+              "text": "向上的一行二列和向左的二行一列立刻改二入队；至此第一层全部处理完，分钟数加一记为一，新鲜橘子还剩三个。",
+              "from": 272,
+              "to": 593,
+              "duration": 322
+            }
+          ],
+          "voice": [
+            {
+              "id": "06-min1-src2-1",
+              "wavStart": 3032.69,
+              "wavEnd": 3293.59,
+              "localStart": 0.6900000000000546,
+              "localEnd": 261.59000000000015
+            },
+            {
+              "id": "06-min1-src2-2",
+              "wavStart": 3304.09,
+              "wavEnd": 3605.61,
+              "localStart": 272.09000000000015,
+              "localEnd": 573.6100000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "接着取出这一层剩下的二行二列": 0,
+              "向上的一行二列和向左的二行一列": 272
+            },
+            "sentences": [
+              0,
+              272
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 3032.69,
+            "wavTo": 3605.61,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第06镜：出队同层剩余的(2,2)，标出右空位/下越界跳过，传染(1,2)与(2,1)，第1层完成 minutes 0→1、fresh 5→3",
+          "direction": "第06镜：出队同层剩余的(2,2)，标出右空位/下越界跳过，传染(1,2)与(2,1)，第1层完成 minutes 0→1、fresh 5→3",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "按分钟同步扩散与去重",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "接着取出这一层剩下的二行二列",
+              "sentence": 0,
+              "endCue": "向上的一行二列和向左的二行一列",
+              "endOffsetFrames": 6,
+              "events": [
+                3
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "向上的一行二列和向左的二行一列",
+              "sentence": 1,
+              "events": [
+                3,
+                4
+              ]
+            }
+          ]
+        },
+        {
+          "id": "07",
+          "scriptShot": 7,
+          "chapterId": "step-by-step",
+          "visualType": "trace",
+          "from": 3626,
+          "durationInFrames": 619,
+          "narration": "进入第二分钟，先锁定新一层长度是四；先出队一行零列，向右被空位一行一列挡住，向下传染二行零列。再出队零行一列，向下同样被空位挡住，向右传染零行二列；这两格在入队瞬间已经立刻改成了二。",
+          "subtitles": [
+            {
+              "text": "进入第二分钟，先锁定新一层长度是四；先出队一行零列，向右被空位一行一列挡住，向下传染二行零列。",
+              "from": 0,
+              "to": 307,
+              "duration": 308
+            },
+            {
+              "text": "再出队零行一列，向下同样被空位挡住，向右传染零行二列；这两格在入队瞬间已经立刻改成了二。",
+              "from": 308,
+              "to": 618,
+              "duration": 311
+            }
+          ],
+          "voice": [
+            {
+              "id": "07-min2-spread-1",
+              "wavStart": 3626.61,
+              "wavEnd": 3924.12,
+              "localStart": 0.6100000000001273,
+              "localEnd": 298.1199999999999
+            },
+            {
+              "id": "07-min2-spread-2",
+              "wavStart": 3934.62,
+              "wavEnd": 4224.17,
+              "localStart": 308.6199999999999,
+              "localEnd": 598.1700000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "进入第二分钟": 0,
+              "再出队零行一列": 308
+            },
+            "sentences": [
+              0,
+              308
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 3626.61,
+            "wavTo": 4224.17,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第07镜：第2分钟锁层长4，(1,0)传染(2,0)、(0,1)传染(0,2)且均被空位(1,1)阻挡，入队瞬间改2",
+          "direction": "第07镜：第2分钟锁层长4，(1,0)传染(2,0)、(0,1)传染(0,2)且均被空位(1,1)阻挡，入队瞬间改2",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "按分钟同步扩散与去重",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "进入第二分钟",
+              "sentence": 0,
+              "endCue": "再出队零行一列",
+              "endOffsetFrames": 6,
+              "events": [
+                5,
+                6
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "再出队零行一列",
+              "sentence": 1,
+              "events": [
+                7
+              ]
+            }
+          ]
+        },
+        {
+          "id": "08",
+          "scriptShot": 8,
+          "chapterId": "step-by-step",
+          "visualType": "trace",
+          "from": 4245,
+          "durationInFrames": 709,
+          "narration": "随后出队一行二列和二行一列，两路波纹正好碰到刚才已改二的零行二列与二行零列，看到二就直接跳过不重复入队。入队即改二避免重复入队和重复扣减新鲜数，按层推进保证首次碰到的层数就是最早腐烂时间；第二分钟结束，新鲜橘子只剩一个。",
+          "subtitles": [
+            {
+              "text": "随后出队一行二列和二行一列，两路波纹正好碰到刚才已改二的零行二列与二行零列，看到二就直接跳过不重复入队。",
+              "from": 0,
+              "to": 324,
+              "duration": 325
+            },
+            {
+              "text": "入队即改二避免重复入队和重复扣减新鲜数，按层推进保证首次碰到的层数就是最早腐烂时间；第二分钟结束，新鲜橘子只剩一个。",
+              "from": 325,
+              "to": 708,
+              "duration": 384
+            }
+          ],
+          "voice": [
+            {
+              "id": "08-min2-collide-1",
+              "wavStart": 4245.17,
+              "wavEnd": 4559.78,
+              "localStart": 0.17000000000007276,
+              "localEnd": 314.77999999999975
+            },
+            {
+              "id": "08-min2-collide-2",
+              "wavStart": 4570.28,
+              "wavEnd": 4933.76,
+              "localStart": 325.27999999999975,
+              "localEnd": 688.7600000000002
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "随后出队一行二列和二行一列": 0,
+              "入队即改二避免重复入队": 325
+            },
+            "sentences": [
+              0,
+              325
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 4245.17,
+            "wavTo": 4933.76,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第08镜：出队(1,2)与(2,1)两路波纹相遇于已改2的(0,2)与(2,0)，跳过不重复入队，第2分钟结束 minutes 1→2、fresh 3→1",
+          "direction": "第08镜：出队(1,2)与(2,1)两路波纹相遇于已改2的(0,2)与(2,0)，跳过不重复入队，第2分钟结束 minutes 1→2、fresh 3→1",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "按分钟同步扩散与去重",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "随后出队一行二列和二行一列",
+              "sentence": 0,
+              "endCue": "入队即改二避免重复入队",
+              "endOffsetFrames": 6,
+              "events": [
+                8,
+                9
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "入队即改二避免重复入队",
+              "sentence": 1,
+              "events": [
+                9,
+                10
+              ]
+            }
+          ]
+        },
+        {
+          "id": "09",
+          "scriptShot": 9,
+          "chapterId": "step-by-step",
+          "visualType": "trace",
+          "from": 4954,
+          "durationInFrames": 719,
+          "narration": "第三分钟锁定层长是二，二行零列四周没有新鲜橘子，零行二列向右传染最后一个零行三列，新鲜数清零，分钟记到三。注意此时队列里还留着刚入队的零行三列并不为空，所以循环必须同时要求队列非空且还有新鲜橘子，在这里停下返回三。",
+          "subtitles": [
+            {
+              "text": "第三分钟锁定层长是二，二行零列四周没有新鲜橘子，零行二列向右传染最后一个零行三列，新鲜数清零，分钟记到三。",
+              "from": 0,
+              "to": 389,
+              "duration": 390
+            },
+            {
+              "text": "注意此时队列里还留着刚入队的零行三列并不为空，所以循环必须同时要求队列非空且还有新鲜橘子，在这里停下返回三。",
+              "from": 390,
+              "to": 718,
+              "duration": 329
+            }
+          ],
+          "voice": [
+            {
+              "id": "09-min3-stop-1",
+              "wavStart": 4954.76,
+              "wavEnd": 5333.68,
+              "localStart": 0.7600000000002183,
+              "localEnd": 379.6800000000003
+            },
+            {
+              "id": "09-min3-stop-2",
+              "wavStart": 5344.18,
+              "wavEnd": 5652.35,
+              "localStart": 390.1800000000003,
+              "localEnd": 698.3500000000004
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "第三分钟锁定层长是二": 0,
+              "注意此时队列里还留着": 390
+            },
+            "sentences": [
+              0,
+              390
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 4954.76,
+            "wavTo": 5652.35,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第09镜：第3分钟锁层长2，(2,0)无新染、(0,2)传染最后好橘子(0,3)使fresh清零、minutes→3；高亮点出队列仍含(0,3)非空，靠fresh>0立刻停止返回3",
+          "direction": "第09镜：第3分钟锁层长2，(2,0)无新染、(0,2)传染最后好橘子(0,3)使fresh清零、minutes→3；高亮点出队列仍含(0,3)非空，靠fresh>0立刻停止返回3",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "按分钟同步扩散与去重",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "第三分钟锁定层长是二",
+              "sentence": 0,
+              "endCue": "注意此时队列里还留着",
+              "endOffsetFrames": 6,
+              "events": [
+                11,
+                12,
+                13,
+                14
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "注意此时队列里还留着",
+              "sentence": 1,
+              "events": [
+                15
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "impossible-and-edges",
+      "chapterId": "impossible-and-edges",
+      "title": "不可达与关键边界",
+      "from": 5673,
+      "durationInFrames": 1370,
+      "shots": [
+        {
+          "id": "10",
+          "scriptShot": 10,
+          "chapterId": "impossible-and-edges",
+          "visualType": "impossible",
+          "from": 5673,
+          "durationInFrames": 698,
+          "narration": "现在重置成三行三列的官方第二个示例，左上角烂橘子逐分钟向上下左右扩散，前四分钟传染了可达的五个新鲜橘子。接着最后变烂的二行二列出队，周围没有新鲜橘子，队列彻底变空；左下角二行零列被空位斜向隔开仍新鲜，返回负一。",
+          "subtitles": [
+            {
+              "text": "现在重置成三行三列的官方第二个示例，左上角烂橘子逐分钟向上下左右扩散，前四分钟传染了可达的五个新鲜橘子。",
+              "from": 0,
+              "to": 331,
+              "duration": 332
+            },
+            {
+              "text": "接着最后变烂的二行二列出队，周围没有新鲜橘子，队列彻底变空；左下角二行零列被空位斜向隔开仍新鲜，返回负一。",
+              "from": 332,
+              "to": 697,
+              "duration": 366
+            }
+          ],
+          "voice": [
+            {
+              "id": "10-impossible-1",
+              "wavStart": 5673.35,
+              "wavEnd": 5995.31,
+              "localStart": 0.3500000000003638,
+              "localEnd": 322.3100000000004
+            },
+            {
+              "id": "10-impossible-2",
+              "wavStart": 6005.81,
+              "wavEnd": 6350.75,
+              "localStart": 332.8100000000004,
+              "localEnd": 677.75
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "现在重置成三行三列的官方第二个示例": 0,
+              "接着最后变烂的二行二列出队": 332
+            },
+            "sentences": [
+              0,
+              332
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 5673.35,
+            "wavTo": 6350.75,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第10镜：明确重置为3×3官方示例2，前4分钟传染可达的5格，随后(2,2)出队无新染使队列变空，左下角(2,0)被空位斜向隔离仍新鲜，返回-1",
+          "direction": "第10镜：明确重置为3×3官方示例2，前4分钟传染可达的5格，随后(2,2)出队无新染使队列变空，左下角(2,0)被空位斜向隔离仍新鲜，返回-1",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "不可达与关键边界",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "现在重置成三行三列的官方第二个示例",
+              "sentence": 0,
+              "endCue": "接着最后变烂的二行二列出队",
+              "endOffsetFrames": 6,
+              "events": [
+                0,
+                3,
+                6,
+                10,
+                13
+              ]
+            },
+            {
+              "id": "second",
+              "cue": "接着最后变烂的二行二列出队",
+              "sentence": 1,
+              "events": [
+                15,
+                17
+              ]
+            }
+          ]
+        },
+        {
+          "id": "11",
+          "scriptShot": 11,
+          "chapterId": "impossible-and-edges",
+          "visualType": "edge",
+          "from": 6371,
+          "durationInFrames": 672,
+          "narration": "再看三组边界：官方第三个示例初始就没有新鲜橘子，循环不执行直接返回零；没有烂橘子时队列为空但有新鲜橘子，返回负一。官方第一个示例只有一个初始烂橘子，同样按层扩散四分钟全烂；零个、一个或多个起点都由同一套循环处理。",
+          "subtitles": [
+            {
+              "text": "再看三组边界：官方第三个示例初始就没有新鲜橘子，循环不执行直接返回零；没有烂橘子时队列为空但有新鲜橘子，返回负一。",
+              "from": 0,
+              "to": 363,
+              "duration": 364
+            },
+            {
+              "text": "官方第一个示例只有一个初始烂橘子，同样按层扩散四分钟全烂；零个、一个或多个起点都由同一套循环处理。",
+              "from": 364,
+              "to": 671,
+              "duration": 308
+            }
+          ],
+          "voice": [
+            {
+              "id": "11-edge-1",
+              "wavStart": 6371.75,
+              "wavEnd": 6725.3,
+              "localStart": 0.75,
+              "localEnd": 354.3000000000002
+            },
+            {
+              "id": "11-edge-2",
+              "wavStart": 6735.8,
+              "wavEnd": 7022.17,
+              "localStart": 364.8000000000002,
+              "localEnd": 651.1700000000001
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "再看三组边界": 0,
+              "官方第一个示例只有一个初始烂橘子": 364
+            },
+            "sentences": [
+              0,
+              364
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 6371.75,
+            "wavTo": 7022.17,
+            "holdFrames": 20,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第11镜：三联边界卡：官方示例3 [[0,2]]→0；无烂橘子 [[1,0,1]]→-1；官方示例1单源4分钟全烂→4",
+          "direction": "第11镜：三联边界卡：官方示例3 [[0,2]]→0；无烂橘子 [[1,0,1]]→-1；官方示例1单源4分钟全烂→4",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "不可达与关键边界",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "再看三组边界",
+              "sentence": 0,
+              "endCue": "官方第一个示例只有一个初始烂橘子",
+              "endOffsetFrames": 6,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "官方第一个示例只有一个初始烂橘子",
+              "sentence": 1,
+              "events": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "summary",
+      "chapterId": "summary",
+      "title": "收束、复杂度与代码",
+      "from": 7043,
+      "durationInFrames": 799,
+      "shots": [
+        {
+          "id": "12",
+          "scriptShot": 12,
+          "chapterId": "summary",
+          "visualType": "close",
+          "from": 7043,
+          "durationInFrames": 799,
+          "narration": "总结起来：初始烂橘全部入队同步出发，每轮锁层长按分钟推进，入队改二去重，用还有新鲜橘子防多算，队列空仍有剩就返负一。每个格子最多进出队列一次，时间和额外空间复杂度都是行数乘列数级别；完整代码请暂停阅读。",
+          "subtitles": [
+            {
+              "text": "总结起来：初始烂橘全部入队同步出发，每轮锁层长按分钟推进，入队改二去重，用还有新鲜橘子防多算，队列空仍有剩就返负一。",
+              "from": 0,
+              "to": 381,
+              "duration": 382
+            },
+            {
+              "text": "每个格子最多进出队列一次，时间和额外空间复杂度都是行数乘列数级别；完整代码请暂停阅读。",
+              "from": 382,
+              "to": 648,
+              "duration": 417
+            }
+          ],
+          "voice": [
+            {
+              "id": "12-close-1",
+              "wavStart": 7043.17,
+              "wavEnd": 7415.37,
+              "localStart": 0.17000000000007276,
+              "localEnd": 372.3699999999999
+            },
+            {
+              "id": "12-close-2",
+              "wavStart": 7425.87,
+              "wavEnd": 7673.47,
+              "localStart": 382.8699999999999,
+              "localEnd": 630.4700000000003
+            }
+          ],
+          "cueFrames": {
+            "labels": {
+              "总结起来": 0,
+              "每个格子最多进出队列一次": 382
+            },
+            "sentences": [
+              0,
+              382
+            ]
+          },
+          "timing": {
+            "source": "voice.wav ea7ff814 + words.json 5731432f + script.md ee49583f",
+            "wavFrom": 7043.17,
+            "wavTo": 7673.47,
+            "holdFrames": 168,
+            "holdReason": "Natural sentence pauses; minimum shot 7.5s."
+          },
+          "frame": "canvas",
+          "camera": null,
+          "boxShot": false,
+          "mapShot": false,
+          "scriptVisual": "第12镜：回收核心机制与O(m·n)时间/空间复杂度，尾句结束后切入5秒完整Python代码卡",
+          "direction": "第12镜：回收核心机制与O(m·n)时间/空间复杂度，尾句结束后切入5秒完整Python代码卡",
+          "elements": [],
+          "animations": [],
+          "transition": {
+            "type": "cut",
+            "durationInFrames": 0
+          },
+          "chapterTitle": "收束、复杂度与代码",
+          "actionCues": [
+            {
+              "id": "first",
+              "cue": "总结起来",
+              "sentence": 0,
+              "endCue": "每个格子最多进出队列一次",
+              "endOffsetFrames": 6,
+              "events": []
+            },
+            {
+              "id": "second",
+              "cue": "每个格子最多进出队列一次",
+              "sentence": 1,
+              "events": []
+            }
+          ],
+          "codeCardFrom": 649
+        }
+      ]
+    }
+  ]
+}
