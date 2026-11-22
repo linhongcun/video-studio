@@ -1,5 +1,13 @@
 # 项目制作记忆
 
+## LeetCode 视频顶部栏改为显示算法题名称（2026-11-22，#527）
+
+基于 LeetCode 系列观看反馈并由 [#527](https://github.com/linhongcun/video-studio/issues/527) 追踪：当算法可视化已成为本系列固定主基调时，视频正片顶部栏在 `LC.题号` 右侧每帧重复强调「算法可视化」的信息增益有限，替换为当前算法题名称可提升任意画面与截图的题目辨识度，且不提前暴露解法名称、继续保持「先推导再引出术语」的节奏。
+
+为保护既有已编码成片的冻结清单，本轮保留原 `episodes/_shared/leetcode-video/` 下全部 7 个 v1 共享文件（`Frame.tsx`、`style-v1.json`、`identities-v1.json`、`theme.ts`、`references.py`、`render.py`、`qa.mjs`）原字节不变，新增版本化入口 `FrameV2.tsx`、`header-v2.ts` 与 `style-v2.json` 供后续新期与重制默认使用。新组件支持 4 位题号（`LC.1000+`）自适应胶囊宽度、代码页 `compact` 模式自动去重拼接（`题名 · 方法`）、重复 `detail`（纯题名或 `LeetCode N · 题名`）自动抑制，以及对空标题和 `"算法可视化"` 的显式拦截。
+
+验证覆盖 8 项单元测试（[test_leetcode_header_v2.mjs](../episodes/_shared/tests/test_leetcode_header_v2.mjs)，含 7 个 v1 文件完整 SHA-256 核验、11 期 v1 回退与 30 期目录/第二批热题/4 位题号）、TypeScript 严格类型检查，以及真实 Chrome Headless 1920×1080 13 组短/长/中英混排/4 位题号/去重/紧凑代码页 DOM 安全区与截图实审（[verify-header-v2.mjs](../episodes/_shared/leetcode-video/verify-header-v2.mjs)，0 违例）。本次不修改存量 17 期已发布视频、封面模板或站点目录；如后续安排存量 17 期批量视觉修订，须按独立修订清单与发布核验流程另行追踪。
+
 ## LC994 · 腐烂的橘子（2026-11-22制作）
 
 用户要求挑选开放 LeetCode 算法题 issue 制作一期质量高于此前作品的视频，本轮选中 [#515](https://github.com/linhongcun/video-studio/issues/515)（EP63 / `rotting-oranges`）。从最新 `86018074` 建立分支，先实读 LC.994 官方题面、Python `collections.deque` 文档与 Wikipedia BFS 导言并留存证据，编写 `solution.py`、深拷贝执行轨迹与 4,614 组独立逐源 BFS oracle 对拍（8 种 `m,n≤3` 小网格共 1,614 组穷举 + 3,000 组至 `6×6` 随机网格）。脚本与配套图文先过独立只读审读两轮（第 1 轮 `REVISE` → 扩展为 12 镜 24 句、每句 41–58 字并修正官方示例 2 队列出队收尾，第 2 轮 `PASS`），再批量合成 MiMo 冰糖配音。声学指标外逐句听辨全部 24 条入选 WAV，检出 9 句多音字/断句偏差（如「零行」误读 `líng xíng`、「层长」误读 `céng zhǎng`、「锁层长按」误断句），通过送模替换重配复听通过且原文/字幕不变。

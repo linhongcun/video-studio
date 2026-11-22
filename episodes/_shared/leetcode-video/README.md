@@ -1,5 +1,35 @@
 # LeetCode正文视觉入口
 
+## v2 顶部栏（新期与后续重制默认）
+
+2026-11-22 起（见 [#527](https://github.com/linhongcun/video-studio/issues/527)），LeetCode 新期与后续重制默认使用 `FrameV2.tsx`（导出 `LeetcodeHeaderV2` / `LeetcodeHeader` 与 `LeetcodeBackdrop`）、`header-v2.ts` 和不可变配置 `style-v2.json`：
+
+- **正片顶部栏显示具体算法题名称**：在 `LeetCode` 与金色 `LC.<number>` 胶囊右侧直接显示当前题目规范中文名（`identity.title`，如 `腐烂的橘子`、`实现 Trie（前缀树）`），不再常驻显示「算法可视化」。该槽位仅显示题名而不提前显示算法方法，继续保留「先推导再引出术语」的讲解顺序；若误传 `"算法可视化"` 或空标题将直接报错。
+- **紧凑代码页（`compact`）自动去重拼接**：结尾 5 秒完整 Python 代码页使用 `compact` 模式时，自动格式化为 `题名 · 方法`；当 `method` 省略、与 `title` 相同（如 `二分查找`）或已以 `title` 开头时不再重复拼接。
+- **排版自适应与副行去重**：四位题号（`LC.1000+`）自动放宽金色胶囊宽度并顺移题名起点；`detail` 仅用于当前章节或步骤摘要，若与题名或 `LeetCode N · 题名` 重复会自动抑制渲染。
+- **保护历史冻结输入**：原有 7 个 v1 共享文件（`Frame.tsx`、`style-v1.json`、`identities-v1.json`、`theme.ts`、`references.py`、`render.py`、`qa.mjs`）保持原字节不变，不破坏存量成片的 `source-sha256.json`。新期按实际 import 闭包冻结 `FrameV2.tsx`、`header-v2.ts`、`style-v2.json`（及依赖的 `theme.ts`、`references.py`、`identities-v1.json`）。
+
+示例用法：
+
+```tsx
+import {LeetcodeBackdrop, LeetcodeHeaderV2} from '../../../../../_shared/leetcode-video/FrameV2';
+
+<LeetcodeHeaderV2
+  slug="implement-trie"
+  identity={{number: 208, title: '实现 Trie（前缀树）', method: '字典树'}}
+  detail={shot.chapterTitle}
+/>;
+```
+
+单元测试与真实 Chrome 1920×1080 DOM 预检：
+
+```bash
+node --test episodes/_shared/tests/test_leetcode_header_v2.mjs
+node episodes/_shared/leetcode-video/verify-header-v2.mjs --out-dir /tmp/leetcode-header-v2-qa
+```
+
+## v1 视觉修订入口（历史冻结基线）
+
 用于本轮已发布11题的独立视觉修订，正文、完整Python代码页与参考资料页沿现有封面的深蓝、暖金和青色风格。`style-v1.json`与`identities-v1.json`保存不可变样式和本轮身份快照；不读取会随新增题目增长的封面catalog作为运行输入。新增题目的Header可传独立身份，不能修改已经编码的v1快照。
 
 各期新入口为`remotion/src/leetcode-style/index.ts`，新清单及产物位于`revisions/leetcode-style/`。原源码、模型、程序、分镜、字幕、声音和旧冻结保留历史字节。原分镜总帧包括最后150帧无旁白的完整Python代码；资料页在它之后另加150帧。本工具核对原`solution.py`、`solution.json`完整SHA与代码区间，不运行任何会改写分镜或配音的prepare/assemble脚本。
