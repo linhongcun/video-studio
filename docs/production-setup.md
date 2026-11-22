@@ -14,6 +14,35 @@
 
 先检查 `git status --short`，保护已有改动，再 `git fetch origin main`。新制作分支从最新 `origin/main` 建立；已有分支先检查差异再整合，不覆盖别人的工作。把实际基线完整 SHA、同步结果写进本期 README 或制作记录，同步后重读相关手册。
 
+### 减少本地磁盘占用（Partial Clone、Sparse Checkout 与缓存清理）
+
+仓库历史与既有单期制作目录包含大量媒体文件。新机器克隆或仅维护站点/单期时，建议沿用与 [deploy.yml](../.github/workflows/deploy.yml) 一致的按需检出方式，避免一次性拉取全部旧期大二进制：
+
+```sh
+# 1. 无 blob 浅检出并启用非 cone sparse-checkout
+git clone --filter=blob:none --no-checkout https://github.com/linhongcun/video-studio.git
+cd video-studio
+git sparse-checkout init --no-cone
+git sparse-checkout set '/*' \
+  '!/episodes/**/production/**/*.wav' \
+  '!/episodes/**/production/**/*.png' \
+  '!/episodes/**/production/**/*.jpg' \
+  '!/episodes/**/production/**/*.mp4' \
+  '!/docs/**/*.png' \
+  '!/docs/**/*.jpg'
+git checkout main
+
+# 2. 需要制作或修订某一期时，按需放开该期制作目录
+git sparse-checkout add '/episodes/<series>/<slug>/production/**'
+```
+
+本地构建站点时，`site/scripts/copy-assets.mjs` 会优先对同盘媒体创建硬链接（跨盘自动回退复制），避免同一份成片在 `publication/` 与 `site/public/` 占双份空间。日常可按需预览并清理已忽略的可重建缓存（`site/dist`、`site/public/episodes`、旧期 `remotion/node_modules`、`out/` 与 `__pycache__`），脚本默认只读预览，绝不删除任何 Git 追踪文件：
+
+```sh
+python3 scripts/clean-local-cache.py
+python3 scripts/clean-local-cache.py --apply --keep <当前在做的slug> --git-gc
+```
+
 新期按[新期模板](../episodes/_template/README.md)建立 `episodes/<series>/<slug>/{production,publication}/`，系列键取自 [series.json](../site/src/content/series.json)。模板提供文稿与接入片段，**没有完整 Remotion 工程**；须选择当前同系列工程复用基础设施，并按本期主题重新设计。
 
 修订已有期，先读 `publication/meta.json.sourcePath`，再读本期 README 和所指修订/系列入口。`sourcePath` 是源码位置，不一定是执行命令的目录；依赖通常装在对应 `package-lock.json` 所在的 Remotion 工程。不能仅因 `production/remotion/package.json` 存在，就认定其中旧 `render` 会生成当前发布版。

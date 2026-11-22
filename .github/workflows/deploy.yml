@@ -30,6 +30,8 @@ jobs:
             !/docs/**/*.jpg
       - name: Check episode directory layout
         run: python3 ../scripts/check-layout.py
+      - name: Check repository size gate
+        run: python3 ../scripts/check-repo-size.py
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -39,6 +41,7 @@ jobs:
       - run: npm run build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VIDEO_HOST_BASE_URL: ${{ vars.VIDEO_HOST_BASE_URL }}
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site/dist

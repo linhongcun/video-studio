@@ -199,6 +199,17 @@
 - 可迁移材料同步修复本地链接，保留旧路径到新位置的映射；历史回执中的原路径与 SHA 不改写。未被引用、可重建的临时输出放临时目录或已忽略的 `out/`，不将唯一来源、选定素材和检查证据当作临时文件清除。
 - 本次目录迁移中，当前代码可以适配新路径，前后SHA由独立账本记录；历史制作输入在固定基线中保留。目录与路径检查不代表重新编码、审片或用户认可，后续渲染须对当前实际输入单独冻结，不能让旧清单自动接受改变后的源码。已编码来源JSON中的历史证据路径通过共享解析器映射，不能为修路径改写与附录回执绑定的资料SHA。
 
+## 仓库体积与过程产物管理
+
+以下规则适用于新制作及后续重制，不改写存量已冻结的旧清单、来源 JSON 或历史回执字节：
+
+- **禁止重复提交大二进制**：`remotion/public/audio/voice.wav` 纳入 `.gitignore`，渲染前由 `episodes/_shared/voice/audio_archive.py prepare-remotion EPDIR` 从主轨硬链接或由无损 FLAC 自动还原。非发布 `.mp4`（`production/**/*.mp4`、`revisions/**/*.mp4`）严禁通过 `git add -f` 强制追踪，最终成片仅在 `publication/video.mp4` 保留唯一副本。
+- **修订记录轻量化**：新增修订不再向 `revisions/` 整目录复制历史 `.wav`、`.png` 或 `.mp4`；统一在 `revisions/<ver>.json` 记录历史 Git commit SHA、文件完整 SHA-256 与历史 QA 结论。
+- **音频分流与无损归档**：可由 `takes/` 与 `build.py` 确定性重建的 `voice/sentences/*.wav` 保持忽略；未中选的废 take 不提交入库。新期主轨旁白可使用 `episodes/_shared/voice/audio_archive.py encode` 无损压为 `voice.flac`（解码回 16-bit PCM 比特一致并校验 PCM SHA-256）。
+- **QA 证据与大 JSON 精简**：QA 视觉核验与 `docs/archive/` 过程截图默认使用 JPEG/WebP（可用 `episodes/_shared/qa_media.py compress-frames` 转换），仅提交定稿验收与关键差异帧，中间自检目录（`qa-self/`、`qa-own/`、`qa-prevoice/`）保持忽略。超过 512 KB 的 QA 采样或基线 JSON 改存 `.json.gz` 或摘要指标。
+- **禁止内嵌位图的大 SVG 与零散字体/原始帧**：封面 `.svg` 不内嵌大体积 base64 位图；共享字体走系统/环境安装，不复制 `.ttc`/`.ttf`/`.otf` 到单期目录；禁止提交 `.raw`、`.yuv`、`.zip`。
+- **体积闸门**：提交与 CI 通过 `python3 scripts/check-repo-size.py` 拦截新增强追忽略文件、禁止格式、内嵌位图大 SVG 与超过 5 MiB 的非发布单文件；`scripts/repo-size-legacy.json` 仅保留既有历史豁免且只减不增。
+
 ## 仍然有效（2026-10-16，与上一节不冲突）
 
 - 画面里有助于理解的数字可以用。没有来源的数字不放。旧规矩「画面不出数字」继续作废。

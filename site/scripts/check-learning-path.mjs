@@ -8,6 +8,7 @@ import {gunzipSync} from 'node:zlib';
 import {createHash} from 'node:crypto';
 import {transformSync} from 'esbuild';
 import {episodeDirectory, listEpisodes, REPO_ROOT} from './episode-paths.mjs';
+import {shouldCopyVideoToPublic, resolveVideoHostConfig, resolveVideoUrl, isVersionReleaseTag} from './video-host.mjs';
 
 const site = path.resolve(import.meta.dirname, '..');
 const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'));
@@ -21,6 +22,7 @@ const stripImports = (text) => text.replace(/^import .*;\r?\n/gm, '').replace(/^
 function episodeRuntime(showDrafts, metaOverrides = new Map()) {
   const source = stripImports(fs.readFileSync(path.join(site, 'src/lib/episodes.ts'), 'utf8'))
     .replace('import.meta.env.BASE_URL', "'/video-studio/'")
+    .replace('import.meta.env.DEV', 'false')
     .replace(/^const articles = .*;$/m, 'const articles = {};');
   const {code} = transformSync(source, {loader: 'ts'});
   const runtimeFs = {...fs, readFileSync(file, encoding) {
@@ -28,12 +30,12 @@ function episodeRuntime(showDrafts, metaOverrides = new Map()) {
     assert.equal(encoding, 'utf8', 'Metadata fixtures must use the real loader text read');
     return metaOverrides.get(file);
   }};
-  return vm.compileFunction(`${code}\nreturn {getEpisodes, getSeries, getRelated, seriesNav, seriesFor, epLabel, learningGuideFor, archiveReplacementsFor, compareLessons};`,
-    ['fs', 'path', 'pkg', 'tagsMeta', 'seriesMeta', 'process', 'episodeDirectory', 'listEpisodes', 'REPO_ROOT'])(runtimeFs, path,
+  return vm.compileFunction(`${code}\nreturn {getEpisodes, getSeries, getRelated, seriesNav, seriesFor, epLabel, learningGuideFor, archiveReplacementsFor, compareLessons, videoUrl};`,
+    ['fs', 'path', 'pkg', 'tagsMeta', 'seriesMeta', 'process', 'episodeDirectory', 'listEpisodes', 'REPO_ROOT', 'createHash', 'resolveVideoHostConfig', 'resolveVideoUrl'])(runtimeFs, path,
     readJson(path.join(site, 'package.json')),
     readJson(path.join(site, 'src/content/tags.json')),
     readJson(path.join(site, 'src/content/series.json')),
-    {cwd: () => site, env: {SHOW_DRAFTS: showDrafts ? '1' : '0'}}, episodeDirectory, listEpisodes, REPO_ROOT);
+    {cwd: () => site, env: {SHOW_DRAFTS: showDrafts ? '1' : '0'}}, episodeDirectory, listEpisodes, REPO_ROOT, createHash, resolveVideoHostConfig, resolveVideoUrl);
 }
 function learningRuntime(episodes) {
   const source = stripImports(fs.readFileSync(path.join(site, 'src/lib/learning.ts'), 'utf8'));
@@ -43,7 +45,7 @@ function learningRuntime(episodes) {
 }
 const releasesSource = stripImports(fs.readFileSync(path.join(site, 'src/lib/releases.ts'), 'utf8'));
 const releaseCode = transformSync(releasesSource, {loader: 'ts'}).code;
-const {episodesForRelease, parseEpisodeSlugs} = vm.compileFunction(`${releaseCode}\nreturn {episodesForRelease, parseEpisodeSlugs};`, ['fs', 'path'])(fs, path);
+const {episodesForRelease, parseEpisodeSlugs} = vm.compileFunction(`${releaseCode}\nreturn {episodesForRelease, parseEpisodeSlugs};`, ['fs', 'path', 'isVersionReleaseTag'])(fs, path, isVersionReleaseTag);
 const slugs = (rows) => Array.from(rows, (e) => e.slug);
 const introArticle = fs.readFileSync(path.join(episodeDirectory(introSlug), 'article.mdx'), 'utf8');
 assert.equal(introArticle.includes('../distributed-tx/'), false, 'Published intro article must not lead back to the compilation');
@@ -172,10 +174,15 @@ if (process.argv.includes('--built')) {
   assert.equal(archivePage.includes('第 0/'), false);
   assert.equal(archivePage.includes('class="pager"'), false);
   assert.equal((text(`episodes/${archiveSlug}/captions.vtt`).match(/-->/g) ?? []).length, 76);
-  const movie = fs.readFileSync(path.join(dist, `episodes/${archiveSlug}/video.mp4`));
-  const archiveSource = fs.readFileSync(path.join(episodeDirectory(archiveSlug), 'video.mp4'));
-  assert.equal(createHash('sha256').update(movie).digest('hex'), createHash('sha256').update(archiveSource).digest('hex'),
-    'Built archive media must match the current published source, including its reference appendix');
+  if (shouldCopyVideoToPublic({isDev: false, isDraft: false})) {
+    const movie = fs.readFileSync(path.join(dist, `episodes/${archiveSlug}/video.mp4`));
+    const archiveSource = fs.readFileSync(path.join(episodeDirectory(archiveSlug), 'video.mp4'));
+    assert.equal(createHash('sha256').update(movie).digest('hex'), createHash('sha256').update(archiveSource).digest('hex'),
+      'Built archive media must match the current published source, including its reference appendix');
+  } else {
+    const expectedUrl = resolveVideoUrl(archiveSlug, 'video.mp4', {isDev: false, isDraft: false});
+    assert.ok(archivePage.includes(expectedUrl), `Built archive page must point to external video URL ${expectedUrl}`);
+  }
   for (const rel of ['index.html', 'series/distributed/index.html', 'tags/分布式事务/index.html', 'rss.xml']) {
     assert.equal(text(rel).includes(`/episodes/${archiveSlug}/`), false, `Archive leaked into ${rel}`);
   }
@@ -366,11 +373,19 @@ if (process.argv.includes('--built')) {
       .map((cue) => cue.split(/\r?\n/).slice(1).join('\n'));
     assert.equal(narration.length, 44, 'The frozen lesson must contain all 44 narration sentences');
     assert.deepEqual(captions, narration, 'Published subtitles must match every frozen narration sentence in order');
-    for (const file of [algorithm.video, algorithm.poster]) {
+    const builtFiles = shouldCopyVideoToPublic({isDev: false, isDraft: false})
+      ? [algorithm.video, algorithm.poster]
+      : [algorithm.poster];
+    for (const file of builtFiles) {
       const source = fs.readFileSync(path.join(episodeDirectory(algorithmSlug), file));
       const built = fs.readFileSync(path.join(dist, route, file));
       assert.equal(createHash('sha256').update(built).digest('hex'), createHash('sha256').update(source).digest('hex'),
         `Built ${file} differs from the approved source`);
+    }
+    if (!shouldCopyVideoToPublic({isDev: false, isDraft: false})) {
+      const expectedVideoUrl = resolveVideoUrl(algorithmSlug, algorithm.video, {isDev: false, isDraft: false});
+      assert.ok(page.includes(expectedVideoUrl), `Built LC.11 page must reference external video URL ${expectedVideoUrl}`);
+      assert.equal(fs.existsSync(path.join(dist, route, algorithm.video)), false, 'External video mode must not bundle MP4 into dist');
     }
     console.log('Built LC.11 passed: title, independent series, four chapter anchors, 44 exact subtitles, copied video and poster.');
   }
