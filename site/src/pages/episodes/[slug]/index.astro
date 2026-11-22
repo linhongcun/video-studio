@@ -18,7 +18,7 @@ import Toc from '../../../components/Toc.astro';
 import RelatedEpisodes from '../../../components/RelatedEpisodes.astro';
 import PlatformLinks from '../../../components/PlatformLinks.astro';
 import {episodeSourceLinks} from '../../../lib/source-links.mjs';
-import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, BASE, asset, fmtTime, epLabel, tagHref, fmtDate, fmtVersion, dateIso, isNew, isoDuration, seriesNav, seriesFor, seriesHref, additionalSeriesFor, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
+import {getEpisodes, getRelated, getAllMeta, SHOW_DRAFTS, BASE, asset, videoUrl, fmtTime, epLabel, tagHref, fmtDate, fmtVersion, dateIso, isNew, isoDuration, seriesNav, seriesFor, seriesHref, additionalSeriesFor, LEGACY_LABEL, learningGuideFor, archiveReplacementsFor, epHref} from '../../../lib/episodes';
 export function getStaticPaths() {
   const eps = getEpisodes({includeArchived: true});
   const current = getEpisodes();
@@ -43,10 +43,11 @@ const learningGuide = learningGuideFor(e);
 const replacements = e.archived ? archiveReplacementsFor(e) : [];
 const pageUrl = new URL(`${BASE}episodes/${e.slug}/`, Astro.site).href;
 const abs = (u: string) => new URL(u, Astro.site).href;
+const videoSrc = videoUrl(e);
 const jsonLd = {
   '@context': 'https://schema.org', '@type': 'VideoObject', name: e.title, description: e.description ?? e.summary,
   thumbnailUrl: [abs(asset(e.slug, e.poster))], ...(e.publishedAt ? {uploadDate: dateIso(e.publishedAt)} : {}), duration: isoDuration(e.duration),
-  contentUrl: abs(asset(e.slug, e.video)), embedUrl: pageUrl, inLanguage: 'zh-CN',
+  contentUrl: abs(videoSrc), embedUrl: pageUrl, inLanguage: 'zh-CN',
   dateCreated: dateIso(e.createdAt), dateModified: dateIso(e.updatedAt),
   publisher: {'@type': 'Organization', name: 'IT小村工作室', url: abs(BASE)},
 };
@@ -87,7 +88,7 @@ const components = {h2: ChapterHeading, h3: ChapterHeading3, pre: CodeBlock, blo
       {sourceResources.map(({label, href}) => <a href={href} rel="noopener" target="_blank">{label} <small>GitHub ↗</small></a>)}
     </nav>
     <PlatformLinks platforms={e.platforms} />
-    <VideoPlayer src={asset(e.slug, e.video)} poster={asset(e.slug, e.poster)} captions={`${BASE}episodes/${e.slug}/captions.vtt`} burnedInCaptions={e.burnedInCaptions} chapters={e.chapters} title={e.title} />
+    <VideoPlayer src={videoSrc} poster={asset(e.slug, e.poster)} captions={`${BASE}episodes/${e.slug}/captions.vtt`} burnedInCaptions={e.burnedInCaptions} chapters={e.chapters} title={e.title} />
     {learningGuide && <a class="learning-guide" href={epHref(learningGuide.slug)} aria-label={`${e.learningGuide.label}：${learningGuide.title}`}>
       <span>{e.learningGuide.label}</span><strong>{learningGuide.title} →</strong>
     </a>}

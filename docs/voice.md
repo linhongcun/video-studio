@@ -28,6 +28,8 @@ python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole
 
 `EPDIR` 为制作目录。目标必须是实体文件，Remotion bundle 后不能依赖相对软链，见 [render.md](render.md)。`--mode place` 只用于历史剪句回归，不用于改变当前冻结时序。已发布工程只读复核用 `--no-copy`，报告放 `/tmp`。
 
+新期与后续重制不再将 `remotion/public/audio/voice.wav` 和可重建的 `voice/sentences/*.wav` 提交进 Git（已纳入 `.gitignore`）。渲染前通过 `python3 episodes/_shared/voice/audio_archive.py prepare-remotion EPDIR` 从主轨同盘硬链接或由无损 `voice.flac` 自动解码就位；需要压缩主轨归档时使用 `python3 episodes/_shared/voice/audio_archive.py encode EPDIR/voice.wav`，编解码均校验 16-bit PCM 完整 SHA-256 比特一致，不修改已冻结的既有共享脚本字节。
+
 分镜的 `shots[].voice` 记录 `wavStart`、`wavEnd`、`localStart`、`localEnd`，元素的 `cueOnset` 记录所用起音。`words.json` 的 shots/sentences 记录真实句边界、选定 take、音轨和脚本哈希。字段说明见 [storyboard-schema.md](storyboard-schema.md)；实际语义以本期装配实现为准。
 
 ## 冻结

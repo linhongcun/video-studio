@@ -35,6 +35,24 @@ npm run preview
 
 `dev` 和 `build` 都会先跑 `npm run copy-assets`。构建再跑 Pagefind。部署工作流是 `.github/workflows/deploy.yml`：推到 `main` 时构建 `site/` 并发布 GitHub Pages。
 
+### 外部视频托管与 Pages 容量管理
+
+GitHub Pages 静态产物有 1 GB 上限。站点已内置外部对象存储（Cloudflare R2 / 阿里云 OSS / S3 兼容存储）视频托管架构，默认保持 `site/src/content/video-host.json` 中 `mode: "local"`（构建时由 `copy-assets.mjs` 优先使用同盘硬链接将视频放入本地构建目录）。待配置好公开对象存储桶与 HTTPS 域名（需保证 `Content-Type: video/mp4` 与 `Accept-Ranges: bytes`，兼容 Safari/iOS 播放）后，可按以下三步一键切换，将 `site/dist/` 压至约 40 MB：
+
+1. 将全部已发布 `publication/video.mp4` 同步至对象存储并生成完整 SHA-256 清单（密钥仅通过环境变量提供）：
+   ```sh
+   python3 scripts/sync-videos-to-r2.py --manifest /tmp/video-manifest.json
+   R2_BUCKET=<bucket> R2_ENDPOINT=https://<account>.r2.cloudflarestorage.com \
+     R2_PUBLIC_BASE_URL=https://<media-domain> \
+     python3 scripts/sync-videos-to-r2.py --apply --manifest /tmp/video-manifest.json
+   ```
+2. 执行线上完整校验，确认全部视频返回 `206 Partial Content`、`Content-Type: video/mp4` 且完整 SHA-256 与本地发布文件逐字节一致：
+   ```sh
+   python3 scripts/verify-video-host.py --base-url https://<media-domain> --all
+   ```
+3. 将 `site/src/content/video-host.json` 改为 `mode: "external"` 与对应 `baseUrl`（或在 GitHub 仓库 Variables 中配置 `VIDEO_HOST_BASE_URL`），再触发部署。本地 `npm run dev` 及草稿预览（`SHOW_DRAFTS=1`）默认自动回退到本地视频，不影响制作预览。
+4. 基础设施归档用的非版本号 GitHub Release（如 `archive-*`）标记为 prerelease，且 `site/src/lib/releases.ts` 仅展示 `vX.Y.Z` 版本 Release，不会污染 `/changelog/` 页面。
+
 ## PR 与版本
 
 版本在 `site/package.json` 的 `version`，三段式。只改成片或文章升修订号；新一期或站点功能升次版本号。第21期常见实现独立短片与旧合集归档本次版本为 v0.47.0；EP.01–14 Codex重制与章节首帧定位版本为 v0.48.0；EP.21四片的全局流程与缩放导航修订为v0.51.0，保留至v0.50.5的协作主干；实际版本以该文件及 Release 为准。

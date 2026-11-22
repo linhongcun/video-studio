@@ -1,6 +1,7 @@
 /** 更新日志数据：构建时从 GitHub Releases 拉取；网络失败 / 限流时返回 null，页面降级为跳转 Releases 的链接，不让构建失败 */
 import fs from 'node:fs';
 import path from 'node:path';
+import {isVersionReleaseTag} from '../../scripts/video-host.mjs';
 
 export type Release = {tag: string; name: string; date: string; body: string; url: string; kind: '新增' | '修正' | '更新'; eps: number[]; episodeSlugs?: string[]};
 const API = 'https://api.github.com/repos/linhongcun/video-studio/releases?per_page=100';
@@ -107,7 +108,7 @@ async function load(): Promise<Release[] | null> {
     if (!res.ok) { console.warn(`[changelog] GitHub Releases ${res.status}，降级为外链`); return null; }
     const list = (await res.json()) as any[];
     const debutByTag = firstReleaseMap();
-    const rels: Release[] = list.filter((r) => !r.draft && !r.prerelease).map((r) => {
+    const rels: Release[] = list.filter((r) => !r.draft && !r.prerelease && isVersionReleaseTag(r.tag_name)).map((r) => {
       const body = String(r.body ?? '').trim();
       const tag = String(r.tag_name);
       const debut = debutByTag.get(tag);

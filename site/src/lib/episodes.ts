@@ -1,9 +1,11 @@
 import fs from 'node:fs';
+import {createHash} from 'node:crypto';
 import path from 'node:path';
 import pkg from '../../package.json';
 import tagsMeta from '../content/tags.json';
 import seriesMeta from '../content/series.json';
 import {episodeDirectory, listEpisodes} from '../../scripts/episode-paths.mjs';
+import {resolveVideoHostConfig, resolveVideoUrl} from '../../scripts/video-host.mjs';
 
 export const REPO = 'https://github.com/linhongcun/video-studio';
 export const VERSION = pkg.version;
@@ -245,6 +247,21 @@ export const archiveReplacementsFor = (e: Episode) => getRelated({...e, related:
 export const tagHref = (t: string) => `${BASE}tags/${encodeURIComponent(t)}/`;
 export const epHref = (slug: string) => `${BASE}episodes/${slug}/`;
 export const asset = (slug: string, f: string) => `${BASE}episodes/${slug}/${f}`;
+export const videoUrl = (e: Pick<Episode, 'slug' | 'video' | 'draft'>) => {
+  const cfg = resolveVideoHostConfig();
+  let sha8 = '';
+  if (cfg.mode === 'external' && cfg.pathTemplate.includes('{sha8}')) {
+    const file = path.join(episodePath(e.slug), e.video);
+    if (fs.existsSync(file)) sha8 = createHash('sha256').update(fs.readFileSync(file)).digest('hex').slice(0, 8);
+  }
+  return resolveVideoUrl(e.slug, e.video, {
+    base: BASE,
+    config: cfg,
+    isDev: import.meta.env.DEV,
+    isDraft: !!e.draft,
+    sha8,
+  });
+};
 
 /** 历史日期保留日精度；新时间必须明确时区，避免构建机器改变内容版本。 */
 export function dateIso(d: string): string {

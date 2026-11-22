@@ -120,6 +120,9 @@ python3 episodes/_shared/place_v2.py --dir EPDIR --mode whole --no-copy \
 ```sh
 sh episodes/_shared/tests/run_all.sh
 sh episodes/_shared/storyboard/examples/degradation/rerun.sh
+python3 scripts/check-repo-size.py
+python3 scripts/test_repo_size_and_cache.py
+python3 scripts/verify-video-host.py --self-test
 ```
 
 第一条运行共享音轨、起音、铺轨、制作说明、合成分镜测试和密钥扫描；第二条在临时目录重建历史样例，核对冻结稿逐字节一致。样例预期为 6623 项检查、91/91 起音，分镜前缀 `6265993b`、封面前缀 `8cb7aafb`。固定输入和 golden 保持原字节，不为迎合新片改写。
