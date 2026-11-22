@@ -1,0 +1,314 @@
+[
+  {
+    "id": "01",
+    "slug": "input",
+    "visualType": "input",
+    "chapterId": "problem",
+    "chapterTitle": "题意与网格映射",
+    "visual": "第01镜：3×4数字网格标明0起始行列下标与0/1/2含义，标示所有烂橘子同时向四邻扩散、空位阻断、斜角不传染",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "给你一个三行四列的数字网格",
+        "sentence": 0,
+        "endCue": "每分钟所有烂橘子会同时",
+        "endOffsetFrames": 6,
+        "events": [0]
+      },
+      {
+        "id": "second",
+        "cue": "每分钟所有烂橘子会同时",
+        "sentence": 1,
+        "events": [0]
+      }
+    ]
+  },
+  {
+    "id": "02",
+    "slug": "mapping",
+    "visualType": "mapping",
+    "chapterId": "problem",
+    "chapterTitle": "题意与网格映射",
+    "visual": "第02镜：逐格把数字矩阵对应到右侧橘子箱，高亮(0,0)烂橘子与(0,1)新鲜橘子，交代目标最少分钟数与不可达返回-1",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "把网格逐格对应成橘子箱",
+        "sentence": 0,
+        "endCue": "只要有任何新鲜橘子永远烂不到",
+        "endOffsetFrames": 6,
+        "events": [0]
+      },
+      {
+        "id": "second",
+        "cue": "只要有任何新鲜橘子永远烂不到",
+        "sentence": 1,
+        "events": [0]
+      }
+    ]
+  },
+  {
+    "id": "03",
+    "slug": "why-together",
+    "visualType": "contrast",
+    "chapterId": "why-multi-source",
+    "chapterTitle": "为何初始烂橘子要一起入队",
+    "visual": "第03镜：对比只从(0,0)算到(2,1)耗时3分钟与下方(2,2)第1分钟直达冲突，以及逐源全图重扫的重复开销",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "箱子里零行零列和下方的二行二列",
+        "sentence": 0,
+        "endCue": "这忽略了身旁的二行二列",
+        "endOffsetFrames": 6,
+        "events": [0]
+      },
+      {
+        "id": "second",
+        "cue": "这忽略了身旁的二行二列",
+        "sentence": 1,
+        "events": [0]
+      }
+    ]
+  },
+  {
+    "id": "04",
+    "slug": "layer-queue",
+    "visualType": "queue-intro",
+    "chapterId": "why-multi-source",
+    "chapterTitle": "为何初始烂橘子要一起入队",
+    "visual": "第04镜：双起点(0,0)与(2,2)同入FIFO队列并统计fresh=7，演示锁len(queue)从队头出、新烂排队尾，引出多源广度优先搜索",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "既然所有初始烂橘子都在第零分钟同时出发",
+        "sentence": 0,
+        "endCue": "每分钟先锁定当前队列长度",
+        "endOffsetFrames": 6,
+        "events": [0]
+      },
+      {
+        "id": "second",
+        "cue": "每分钟先锁定当前队列长度",
+        "sentence": 1,
+        "events": [1]
+      }
+    ]
+  },
+  {
+    "id": "05",
+    "slug": "min1-src1",
+    "visualType": "trace",
+    "chapterId": "step-by-step",
+    "chapterTitle": "按分钟同步扩散与去重",
+    "visual": "第05镜：第1分钟锁层长2，出队(0,0)显式标出上/左越界跳过，传染(1,0)与(0,1)并立刻改2入队，fresh 7→5",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "第一分钟先锁定当前层长度是二",
+        "sentence": 0,
+        "endCue": "向下的一行零列和向右的零行一列",
+        "endOffsetFrames": 6,
+        "events": [1, 2]
+      },
+      {
+        "id": "second",
+        "cue": "向下的一行零列和向右的零行一列",
+        "sentence": 1,
+        "events": [2]
+      }
+    ]
+  },
+  {
+    "id": "06",
+    "slug": "min1-src2",
+    "visualType": "trace",
+    "chapterId": "step-by-step",
+    "chapterTitle": "按分钟同步扩散与去重",
+    "visual": "第06镜：出队同层剩余的(2,2)，标出右空位/下越界跳过，传染(1,2)与(2,1)，第1层完成 minutes 0→1、fresh 5→3",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "接着取出这一层剩下的二行二列",
+        "sentence": 0,
+        "endCue": "向上的一行二列和向左的二行一列",
+        "endOffsetFrames": 6,
+        "events": [3]
+      },
+      {
+        "id": "second",
+        "cue": "向上的一行二列和向左的二行一列",
+        "sentence": 1,
+        "events": [3, 4]
+      }
+    ]
+  },
+  {
+    "id": "07",
+    "slug": "min2-spread",
+    "visualType": "trace",
+    "chapterId": "step-by-step",
+    "chapterTitle": "按分钟同步扩散与去重",
+    "visual": "第07镜：第2分钟锁层长4，(1,0)传染(2,0)、(0,1)传染(0,2)且均被空位(1,1)阻挡，入队瞬间改2",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "进入第二分钟",
+        "sentence": 0,
+        "endCue": "再出队零行一列",
+        "endOffsetFrames": 6,
+        "events": [5, 6]
+      },
+      {
+        "id": "second",
+        "cue": "再出队零行一列",
+        "sentence": 1,
+        "events": [7]
+      }
+    ]
+  },
+  {
+    "id": "08",
+    "slug": "min2-collide",
+    "visualType": "trace",
+    "chapterId": "step-by-step",
+    "chapterTitle": "按分钟同步扩散与去重",
+    "visual": "第08镜：出队(1,2)与(2,1)两路波纹相遇于已改2的(0,2)与(2,0)，跳过不重复入队，第2分钟结束 minutes 1→2、fresh 3→1",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "随后出队一行二列和二行一列",
+        "sentence": 0,
+        "endCue": "入队即改二避免重复入队",
+        "endOffsetFrames": 6,
+        "events": [8, 9]
+      },
+      {
+        "id": "second",
+        "cue": "入队即改二避免重复入队",
+        "sentence": 1,
+        "events": [9, 10]
+      }
+    ]
+  },
+  {
+    "id": "09",
+    "slug": "min3-stop",
+    "visualType": "trace",
+    "chapterId": "step-by-step",
+    "chapterTitle": "按分钟同步扩散与去重",
+    "visual": "第09镜：第3分钟锁层长2，(2,0)无新染、(0,2)传染最后好橘子(0,3)使fresh清零、minutes→3；高亮点出队列仍含(0,3)非空，靠fresh>0立刻停止返回3",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "第三分钟锁定层长是二",
+        "sentence": 0,
+        "endCue": "注意此时队列里还留着",
+        "endOffsetFrames": 6,
+        "events": [11, 12, 13, 14]
+      },
+      {
+        "id": "second",
+        "cue": "注意此时队列里还留着",
+        "sentence": 1,
+        "events": [15]
+      }
+    ]
+  },
+  {
+    "id": "10",
+    "slug": "impossible",
+    "visualType": "impossible",
+    "chapterId": "impossible-and-edges",
+    "chapterTitle": "不可达与关键边界",
+    "visual": "第10镜：明确重置为3×3官方示例2，前4分钟传染可达的5格，随后(2,2)出队无新染使队列变空，左下角(2,0)被空位斜向隔离仍新鲜，返回-1",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "现在重置成三行三列的官方第二个示例",
+        "sentence": 0,
+        "endCue": "接着最后变烂的二行二列出队",
+        "endOffsetFrames": 6,
+        "events": [0, 3, 6, 10, 13]
+      },
+      {
+        "id": "second",
+        "cue": "接着最后变烂的二行二列出队",
+        "sentence": 1,
+        "events": [15, 17]
+      }
+    ]
+  },
+  {
+    "id": "11",
+    "slug": "edge",
+    "visualType": "edge",
+    "chapterId": "impossible-and-edges",
+    "chapterTitle": "不可达与关键边界",
+    "visual": "第11镜：三联边界卡：官方示例3 [[0,2]]→0；无烂橘子 [[1,0,1]]→-1；官方示例1单源4分钟全烂→4",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "再看三组边界",
+        "sentence": 0,
+        "endCue": "官方第一个示例只有一个初始烂橘子",
+        "endOffsetFrames": 6,
+        "events": []
+      },
+      {
+        "id": "second",
+        "cue": "官方第一个示例只有一个初始烂橘子",
+        "sentence": 1,
+        "events": []
+      }
+    ]
+  },
+  {
+    "id": "12",
+    "slug": "close",
+    "visualType": "close",
+    "chapterId": "summary",
+    "chapterTitle": "收束、复杂度与代码",
+    "visual": "第12镜：回收核心机制与O(m·n)时间/空间复杂度，尾句结束后切入5秒完整Python代码卡",
+    "cues": [],
+    "traceEvents": [],
+    "actions": [
+      {
+        "id": "first",
+        "cue": "总结起来",
+        "sentence": 0,
+        "endCue": "每个格子最多进出队列一次",
+        "endOffsetFrames": 6,
+        "events": []
+      },
+      {
+        "id": "second",
+        "cue": "每个格子最多进出队列一次",
+        "sentence": 1,
+        "events": []
+      }
+    ]
+  }
+]

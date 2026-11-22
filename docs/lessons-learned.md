@@ -689,3 +689,9 @@ EP.16第一版视频SHA前缀为`3085d678`，第二版为`6aa379dd`。用户已�
 - **关联缺陷一：**`render_body.py` 的通用壳在“有历史附录回执但没有旧成片”（干净检出）时，把刚渲出的 body 留在最终槽位，`append_references` 将其判为外部改动而拒绝。修正为无旧成片时移除占位 body；该缺陷同样潜伏在此前各期的拷贝里，重制旧片时需一并修正。
 - **关联缺陷二：**封面 install 会刷新所有 LC 期 `cover-style.json` 的溯源 SHA；LC.15 把它列进了冻结清单，本期 install 后其 `freeze.py --verify` 立即失败。改法是重新运行该期 freeze 重新记录清单，随后核对清单diff只含溯源条目变化、视频输入条目原样保留（本期LC.15的diff仅cover-style.json与共享封面源码两项），不可把重跑当成对其他输入变化的追认；并在新增期的冻结清单里评估这类会被共享管线周期性刷新的派生文件是否该纳入。
 - **范围与限制：**修复后重冻结、重渲染并复核关键帧（第二句中学课与删边状态随叙述推进）；渲染轮次因此增至五轮，计时见本期 `qa/production-timing.json`。
+
+## L075 声学指标通过不代表多音字与断句准确，配音整轨前须逐句听辨
+
+- **案例：**2026-11-22，EP.63（LC.994 `rotting-oranges`）48 条 MiMo TTS 候选经时长、语速、`tailCut`、句内静音与削波峰值自动筛选后全部无声学异常；但装配前对 24 条入选 WAV 逐句音频听辨，检出 9 句发音或断句错误：全部 8 处「零行」被读作 `líng xíng`（类「菱形」），「层长」被读作 `céng zhǎng`、「新鲜数」被读作 `shǔ`、「零行三列」漏读「列」，以及「每轮锁层长按分钟推进」被误断句成「每轮锁层 / 长按分钟」。
+- **原因与改法：**声学包络检查无法识别同音错读或词界切分错误。批量合成后、运行 `build.py` 前须逐句听辨（尤其含网格坐标「零行/一行/二行」、量词/动词同形字与紧凑长词的句子）；发现偏差只改送模文本（如 `零行→零航`、`层长→层常`、`新鲜数→新鲜术`、加逗号明确断句）生成新候选复听，保持 `script.md` 与画面字幕原文不变，并将替换记入 `voice/substitutions.md`。同时，在浏览器截图验收中发现共享 `SourceQuote` 组件已自带「译文」标签，MDX 的 `translation` 属性不应再手写 `译文：` 前缀；成片后此类纯展示微调应仅在 `publication/article.mdx` 做带前后 SHA 记录的站点派生，不改动已冻结的 `production/article.mdx`。
+- **验证与边界：**9 句按 `voice/jobs_fix.json` 生成 `c`/`d` 候选并逐句复听确认全部准确、0 削波后才执行 `build.py` 与一次性 `render.py` 编码，零重渲；派生稿经 `check:articles`、站点构建与真实 Chrome 截图复核通过，冻结清单 143 项保持未变（证据见 [配音替换记录](../episodes/leetcode/rotting-oranges/production/voice/substitutions.md) 与 [最终质检](../episodes/leetcode/rotting-oranges/production/qa/qa-final.md)）。本条听辨为多模态音频直听复核，不等同于外部人类复核员听审或逐字 ASR。
